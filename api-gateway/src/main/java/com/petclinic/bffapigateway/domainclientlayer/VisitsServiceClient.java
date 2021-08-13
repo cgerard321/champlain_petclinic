@@ -2,6 +2,8 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.Visits;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -16,13 +18,37 @@ import static java.util.stream.Collectors.joining;
  */
 
 @Component
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 public class VisitsServiceClient {
 
-    // Could be changed for testing purpose
-    private String hostname = "http://visits-service/";
+//    private final WebClient.Builder webClientBuilder;
+//
+//    @Value("${app.visits-service.host}") String visitsServiceHost;
+//    @Value("${app.visits-service.port}") String visitsServicePort;
+//    private final String visitsServiceURL = "http://" + visitsServiceHost + ":" + visitsServicePort + "/";
+//    private String hostname = "http://" + visitsServiceHost + "/";
 
     private final WebClient.Builder webClientBuilder;
+    //private final String visitsServiceURL;
+    private String hostname = "http://visits-service";
+
+    @Autowired
+    public VisitsServiceClient(
+            WebClient.Builder webClientBuilder,
+            @Value("${app.visits-service.host}") String visitsServiceHost,
+            @Value("${app.visits-service.port}") String visitsServicePort
+    ) {
+        this.webClientBuilder = webClientBuilder;
+        hostname = "http://" + visitsServiceHost + ":" + visitsServicePort + "/";
+    }
+
+    //used only by test class
+    public VisitsServiceClient(WebClient.Builder webClientBuilder) {
+        this.webClientBuilder = webClientBuilder;
+        //visitsServiceURL = "http://" + "localhost" + ":" + 7000 + "/";
+        hostname = "http://visits-service";
+
+    }
 
     public Mono<Visits> getVisitsForPets(final List<Integer> petIds) {
         return webClientBuilder.build()

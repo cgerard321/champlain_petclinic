@@ -2,6 +2,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.OwnerDetails;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -14,15 +15,27 @@ import reactor.core.publisher.Mono;
  */
 
 @Component
-@RequiredArgsConstructor
 public class CustomersServiceClient {
 
     private final WebClient.Builder webClientBuilder;
+    private final String customersServiceUrl;
+
+    public CustomersServiceClient(
+            WebClient.Builder webClientBuilder,
+            @Value("${app.customers-service.host}") String customersServiceHost,
+            @Value("${app.customers-service.port}") String customersServicePort
+    ) {
+        this.webClientBuilder = webClientBuilder;
+        customersServiceUrl = "http://" + customersServiceHost + ":" + customersServicePort + "/owners";
+    }
+
 
     public Mono<OwnerDetails> getOwner(final int ownerId) {
         return webClientBuilder.build().get()
-                .uri("http://customers-service/owners/{ownerId}", ownerId)
+                .uri(customersServiceUrl + "/{ownerId}", ownerId)
                 .retrieve()
+                //.exchange()
+                //.flatMap(clientResponse -> clientResponse.bodyToMono(OwnerDetails.class));
                 .bodyToMono(OwnerDetails.class);
     }
 }
