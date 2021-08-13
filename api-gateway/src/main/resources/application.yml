@@ -1,0 +1,34 @@
+server.port: 7000
+server.error.include-message: always
+
+app:
+  visits-service:
+    host: localhost
+    port: 7001
+  vets-service:
+    host: localhost
+    port: 7002
+  customers-service:
+    host: localhost
+    port: 7003
+
+logging:
+  level:
+    root: INFO
+    com.petclinic: DEBUG
+
+---
+spring.profiles: docker
+server.port: 8080
+
+app:
+  visits-service:
+    host: visits
+    port: 8080
+  vets-service:
+    host: vets
+    port: 8080
+  customers-service:
+    host: customers
+    port: 8080
+
