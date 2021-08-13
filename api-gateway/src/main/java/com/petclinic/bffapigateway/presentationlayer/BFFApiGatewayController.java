@@ -40,6 +40,11 @@ public class BFFApiGatewayController {
 
     }
 
+    @GetMapping(value = "customer/owners")
+    public Mono<OwnerDetails[]> getOwners() {
+        return customersServiceClient.getOwners();
+    }
+
     private Function<Visits, OwnerDetails> addVisitsToOwner(OwnerDetails owner) {
         return visits -> {
             owner.getPets()

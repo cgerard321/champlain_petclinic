@@ -25,4 +25,11 @@ public class CustomersServiceClient {
                 .retrieve()
                 .bodyToMono(OwnerDetails.class);
     }
+
+    public Mono<OwnerDetails[]> getOwners() {
+        return webClientBuilder.build().get()
+                .uri("http://customers-service/owners")
+                .retrieve()
+                .bodyToMono(OwnerDetails[].class);
+    }
 }
