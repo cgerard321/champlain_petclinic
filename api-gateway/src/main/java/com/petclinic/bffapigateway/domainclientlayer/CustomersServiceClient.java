@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 /**
@@ -39,10 +40,10 @@ public class CustomersServiceClient {
                 .bodyToMono(OwnerDetails.class);
     }
 
-    public Mono<OwnerDetails[]> getOwners() {
+    public Flux<OwnerDetails> getOwners() {
         return webClientBuilder.build().get()
-                .uri("http://customers-service/owners")
+                .uri(customersServiceUrl)
                 .retrieve()
-                .bodyToMono(OwnerDetails[].class);
+                .bodyToFlux(OwnerDetails.class);
     }
 }

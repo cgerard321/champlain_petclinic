@@ -1,16 +1,21 @@
 package com.petclinic.bffapigateway.presentationlayer;
 
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
+import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
 import com.petclinic.bffapigateway.dtos.OwnerDetails;
+import com.petclinic.bffapigateway.dtos.VetDetails;
 import com.petclinic.bffapigateway.dtos.Visits;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -30,6 +35,8 @@ public class BFFApiGatewayController {
 
     private final VisitsServiceClient visitsServiceClient;
 
+    private final VetsServiceClient vetsServiceClient;
+
     @GetMapping(value = "owners/{ownerId}")
     public Mono<OwnerDetails> getOwnerDetails(final @PathVariable int ownerId) {
         return customersServiceClient.getOwner(ownerId)
@@ -41,9 +48,15 @@ public class BFFApiGatewayController {
     }
 
     @GetMapping(value = "customer/owners")
-    public Mono<OwnerDetails[]> getOwners() {
-        return customersServiceClient.getOwners();
+    public Flux<OwnerDetails> getOwners() {
+
+        return customersServiceClient.getOwners()
+                .flatMap(n ->
+                        visitsServiceClient.getVisitsForPets(n.getPetIds())
+                .map(addVisitsToOwner(n))
+                );
     }
+
 
     private Function<Visits, OwnerDetails> addVisitsToOwner(OwnerDetails owner) {
         return visits -> {
@@ -56,4 +69,11 @@ public class BFFApiGatewayController {
             return owner;
         };
     }
+
+    @GetMapping(value = "vet/vets")
+    public Flux<VetDetails> getVets() {
+
+        return vetsServiceClient.getVets();
+
+        }
 }

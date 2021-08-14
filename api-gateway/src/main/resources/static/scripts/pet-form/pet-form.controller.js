@@ -12,13 +12,13 @@ angular.module('petForm')
             var petId = $stateParams.petId || 0;
 
             if (petId) { // edit
-                $http.get("api/customer/owners/" + ownerId + "/pets/" + petId).then(function (resp) {
+                $http.get("api/gateway/customer/owners/" + ownerId + "/pets/" + petId).then(function (resp) {
                     self.pet = resp.data;
                     self.pet.birthDate = new Date(self.pet.birthDate);
                     self.petTypeId = "" + self.pet.type.id;
                 });
             } else {
-                $http.get('api/customer/owners/' + ownerId).then(function (resp) {
+                $http.get('api/gateway/customer/owners/' + ownerId).then(function (resp) {
                     self.pet = {
                         owner: resp.data.firstName + " " + resp.data.lastName
                     };
@@ -40,9 +40,9 @@ angular.module('petForm')
 
             var req;
             if (id) {
-                req = $http.put("api/customer/owners/" + ownerId + "/pets/" + id, data);
+                req = $http.put("api/gateway/customer/owners/" + ownerId + "/pets/" + id, data);
             } else {
-                req = $http.post("api/customer/owners/" + ownerId + "/pets", data);
+                req = $http.post("api/gateway/customer/owners/" + ownerId + "/pets", data);
             }
 
             req.then(function () {

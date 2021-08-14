@@ -9,7 +9,7 @@ angular.module('ownerForm')
         if (!ownerId) {
             self.owner = {};
         } else {
-            $http.get("api/customer/owners/" + ownerId).then(function (resp) {
+            $http.get("api/gateway/customer/owners/" + ownerId).then(function (resp) {
                 self.owner = resp.data;
             });
         }
@@ -18,9 +18,9 @@ angular.module('ownerForm')
             var id = self.owner.id;
             var req;
             if (id) {
-                req = $http.put("api/customer/owners/" + id, self.owner);
+                req = $http.put("api/gateway/customer/owners/" + id, self.owner);
             } else {
-                req = $http.post("api/customer/owners", self.owner);
+                req = $http.post("api/gateway/customer/owners", self.owner);
             }
 
             req.then(function () {
