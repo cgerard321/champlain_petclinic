@@ -28,7 +28,11 @@ class VisitsServiceClientIntegrationTest {
     @BeforeEach
     void setUp() {
         server = new MockWebServer();
-        visitsServiceClient = new VisitsServiceClient(WebClient.builder());
+        visitsServiceClient = new VisitsServiceClient(
+                WebClient.builder(),
+                "http://visits-service",
+                "7000"
+        );
         visitsServiceClient.setHostname(server.url("/").toString());
     }
 

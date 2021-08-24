@@ -1,7 +1,4 @@
-CREATE DATABASE IF NOT EXISTS petclinic;
-GRANT ALL PRIVILEGES ON petclinic.* TO user@localhost IDENTIFIED BY 'pwd';
-
-USE petclinic;
+USE `customers-db`;
 
 CREATE TABLE IF NOT EXISTS types (
     id INT(4) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,

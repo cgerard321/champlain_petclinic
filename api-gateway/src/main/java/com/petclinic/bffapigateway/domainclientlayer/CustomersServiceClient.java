@@ -35,8 +35,6 @@ public class CustomersServiceClient {
         return webClientBuilder.build().get()
                 .uri(customersServiceUrl + "/{ownerId}", ownerId)
                 .retrieve()
-                //.exchange()
-                //.flatMap(clientResponse -> clientResponse.bodyToMono(OwnerDetails.class));
                 .bodyToMono(OwnerDetails.class);
     }
 

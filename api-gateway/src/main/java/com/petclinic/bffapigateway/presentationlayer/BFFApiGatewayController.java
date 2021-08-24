@@ -7,6 +7,8 @@ import com.petclinic.bffapigateway.dtos.OwnerDetails;
 import com.petclinic.bffapigateway.dtos.VetDetails;
 import com.petclinic.bffapigateway.dtos.Visits;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,8 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -40,40 +40,36 @@ public class BFFApiGatewayController {
     @GetMapping(value = "owners/{ownerId}")
     public Mono<OwnerDetails> getOwnerDetails(final @PathVariable int ownerId) {
         return customersServiceClient.getOwner(ownerId)
-                .flatMap(owner ->
-                        visitsServiceClient.getVisitsForPets(owner.getPetIds())
-                                .map(addVisitsToOwner(owner))
-                );
-
+            .flatMap(owner ->
+                visitsServiceClient.getVisitsForPets(owner.getPetIds())
+                    .map(addVisitsToOwner(owner))
+            );
     }
 
     @GetMapping(value = "customer/owners")
     public Flux<OwnerDetails> getOwners() {
-
         return customersServiceClient.getOwners()
-                .flatMap(n ->
-                        visitsServiceClient.getVisitsForPets(n.getPetIds())
-                .map(addVisitsToOwner(n))
-                );
+            .flatMap(n ->
+                visitsServiceClient.getVisitsForPets(n.getPetIds())
+                    .map(addVisitsToOwner(n))
+            );
     }
 
 
     private Function<Visits, OwnerDetails> addVisitsToOwner(OwnerDetails owner) {
         return visits -> {
             owner.getPets()
-                    .forEach(pet -> pet.getVisits()
-                            .addAll(visits.getItems().stream()
-                                    .filter(v -> v.getPetId() == pet.getId())
-                                    .collect(Collectors.toList()))
-                    );
+                .forEach(pet -> pet.getVisits()
+                    .addAll(visits.getItems().stream()
+                        .filter(v -> v.getPetId() == pet.getId())
+                        .collect(Collectors.toList()))
+                );
             return owner;
         };
     }
 
-    @GetMapping(value = "vet/vets")
+    @GetMapping(value = "vets")
     public Flux<VetDetails> getVets() {
-
         return vetsServiceClient.getVets();
-
-        }
+    }
 }

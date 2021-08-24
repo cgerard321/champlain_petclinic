@@ -42,14 +42,6 @@ public class VisitsServiceClient {
         hostname = "http://" + visitsServiceHost + ":" + visitsServicePort + "/";
     }
 
-    //used only by test class
-    public VisitsServiceClient(WebClient.Builder webClientBuilder) {
-        this.webClientBuilder = webClientBuilder;
-        //visitsServiceURL = "http://" + "localhost" + ":" + 7000 + "/";
-        hostname = "http://visits-service";
-
-    }
-
     public Mono<Visits> getVisitsForPets(final List<Integer> petIds) {
         return webClientBuilder.build()
                 .get()
