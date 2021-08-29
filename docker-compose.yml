@@ -1,4 +1,4 @@
-version: '2.1'
+version: '3.9'
 
 services:
   visits:
@@ -88,8 +88,13 @@ services:
       - MYSQL_DATABASE=customers-db
       - MYSQL_USER=user
       - MYSQL_PASSWORD=pwd
+    volumes:
+      - ./data/mysql3:/var/lib/mysql3
+      - ./data/init.d:/docker-entrypoint-initdb.d
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping", "-uuser", "-ppwd", "-h", "localhost" ]
       interval: 10s
       timeout: 5s
       retries: 10
+
+
