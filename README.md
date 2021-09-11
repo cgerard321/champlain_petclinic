@@ -12,7 +12,7 @@ Once you have cloned the repo (see the setup instructions below), you need to do
 
 ### H2 Profile (for testing with H2 database outside of Docker)
 ```
-./gradlew customers-service: build
+./gradlew customers-service:build
 java –jar -Dspring.profiles.active=h2 customers-service/build/libs/*.jar &
 ```
 (repeat the above two commands for each service you want to compile)
