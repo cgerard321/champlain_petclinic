@@ -2,15 +2,15 @@
 
 Champlain Final Project 1 420-N52-LA Pet Clinic repo
 
-##Source
+## Source
 This project is based on the spring petclinic microservices (https://github.com/spring-petclinic/spring-petclinic-microservices) implementation.
 However, only the customers, visits, vets, and api-gateway services have been retained. In addition, the 
 Docker setup has been changed.
 
-##Running the project
+## Running the project
 Once you have cloned the repo (see the setup instructions below), you need to do the following:
 
-###H2 Profile (for testing with H2 database outside of Docker)
+### H2 Profile (for testing with H2 database outside of Docker)
 ```
 ./gradlew customers-service: build
 java –jar -Dspring.profiles.active=h2 customers-service/build/libs/*.jar &
@@ -28,7 +28,7 @@ localhost:7003/h2-console
 Database is: jdbc:h2:mem:customers-db
 
 
-###Docker Profile (for running with Docker or Docker-compose with a MySQL database)
+### Docker Profile (for running with Docker or Docker-compose with a MySQL database)
 ```
 ./gradlew build
 docker-compose build
