@@ -25,7 +25,7 @@ To view H2 database in browser:
 
 localhost:7003/h2-console
 
-Database is: jdbc:h2:mem:customers-db
+Database is: jdbc:h2:mem:customers-db (note this db is service specific)
 
 
 ### Docker Profile (for running with Docker or Docker-compose with a MySQL database)
@@ -70,15 +70,14 @@ curl localhost:8080/api/gateway/vet/vets | jq
   I like to break it down into 4 'folders' or types:
     - feat/
     - bug/
-    - gen/
+    - doc/
     - conf/
-- For this project, you will only need to use `feat/` and `bug/`
 - After the slash, add your TEAMTAG
-- After the TEAMTAG, add a sash and then the JIRA id (it will be something like STQA-4).
-- The full branch name would look like this `feat/TEAMA-SQTA-4_Add_Test_Scenario_New_Pet` and would be created and navigated to by executing the following command:
+- After the TEAMTAG, add a slash and then the JIRA id (it will be something like CPC-4).
+- The full branch name would look like this `feat/TEAMA-CPC-4_Add_Test_Scenario_New_Pet` and would be created and navigated to by executing the following command:
 
 ```
-git checkout -b feat/TEAMTAG-SQTA-4_Add_Test_Scenario_New_Pet
+git checkout -b feat/TEAMA-CPC-4_Add_Test_Scenario_New_Pet
 ```
 
 ### Pull Requests (PR) Naming
@@ -86,7 +85,7 @@ git checkout -b feat/TEAMTAG-SQTA-4_Add_Test_Scenario_New_Pet
 - To make it so we can easily search and find pull requests we will adhere to the following standard:
 
 ```
-feat(TEAMTAG-JIRA-TICKET-ID): short description
+feat(TEAMTAG-JiraID): short description
 ```
 
 - In that example, you would replace TEAMTAG with your team's acronym and the JIRA-TICKET-ID with the id from Jira.
@@ -98,14 +97,14 @@ feat(TEAMTAG-JIRA-TICKET-ID): short description
 - This is pretty much the exact same as the Pull Request Naming except that at the end there will be an auto-generated number in parentheses. Please don't delete it. Simply add your stuff before it.
 
 ```
-feat(TEAMTAG-JIRA-TICKET-ID): short description (#420)
+feat(TEAMTAG-JiraID): short description (#420)
 ```
 
 ## Setup
 
 - First create an account on GitHub
 - Download git https://git-scm.com/downloads
-- Go to the official/ main repo https://github.com/cgerard321/STQA-pet-clinic-F2020
+- Go to the official/ main repo https://github.com/cgerard321/champlain_petclinic
 - Click the green button 'Code', and copy the given URL
 - On your file explorer, navigate to where you want the project, right-click, and select 'git bash here'
 - In the terminal window, type 'git clone' and then paste the copied url. (Do not ctrl + v to paste in the git bash terminal, it does not use standard windows encoding and will add extra invisible chars to the command causing it to error out.) It will look like this:
@@ -121,7 +120,7 @@ git clone https://github.com/cgerard321/champlain_petclinic
 ```
 cd champlain_petclinic/
 ```
-To see that the remote orgin has been correctly set up, type:
+To see that the remote origin has been correctly set up, type:
 ```
 git remote add upstream https://github.com/cgerard321/champlain_petclinic.git
 ```
