@@ -40,6 +40,13 @@ services:
       - vets
       - visits
 
+  auth-service:
+    build: auth-service
+    deploy:
+      resources:
+        limits:
+          memory: 1024m
+
   mysql1:
     image: mysql:5.7
     mem_limit: 350m
