@@ -13,8 +13,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @ExtendWith(SpringExtension.class)
@@ -50,6 +49,13 @@ public class AuthServicePersistenceTests {
     @DisplayName("Add then remove User from database")
     void add_then_remove_user() {
 
+        User created = addDefaultUser();
+
+        assertNotNull(created);
+
+        userRepo.delete(created);
+
+        assertFalse(userRepo.findById(created.getId()).isPresent());
     }
 
     private User addDefaultUser() {
