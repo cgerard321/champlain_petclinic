@@ -104,4 +104,22 @@ services:
       timeout: 5s
       retries: 10
 
+  mysql4:
+    image: mysql:5.7
+    mem_limit: 350m
+    ports:
+      - "3310:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpwd
+      - MYSQL_DATABASE=auth-db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=pwd
+    volumes:
+      - ./data/mysql4:/var/lib/mysql4
+      - ./data/init.d:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-uuser", "-ppwd", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
