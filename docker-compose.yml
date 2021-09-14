@@ -111,7 +111,7 @@ services:
       - "3310:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=rootpwd
-      - MYSQL_DATABASE=auth-db
+      - MYSQL_DATABASE=auth
       - MYSQL_USER=user
       - MYSQL_PASSWORD=pwd
     volumes:
