@@ -2,6 +2,7 @@ package com.petclinic.auth;
 
 import com.petclinic.auth.User.User;
 import com.petclinic.auth.User.UserRepo;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,6 +24,11 @@ public class AuthServicePersistenceTests {
 
     @Autowired
     private UserRepo userRepo;
+
+    @BeforeEach
+    void cleanUp() {
+        userRepo.deleteAllInBatch();
+    }
 
     @Test
     @DisplayName("Add one User to database")
