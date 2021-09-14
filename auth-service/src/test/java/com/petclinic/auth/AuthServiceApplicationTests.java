@@ -5,6 +5,7 @@ import com.petclinic.auth.User.UserRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
@@ -48,8 +49,9 @@ class AuthServiceApplicationTests {
 
 
 	@Test
-	@DisplayName("Retrieve all Users from database")
-	void retrieve_all_users_from_database() {
+	@DisplayName("Retrieve all Users from mock database")
+	void retrieve_all_users_from_mock_database() {
 		assertEquals(mockUserRepo.findAll().size(), 10);
 	}
+
 }
