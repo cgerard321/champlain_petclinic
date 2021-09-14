@@ -45,7 +45,8 @@ services:
         limits:
           memory: 2048m
     depends_on:
-      - mysql4
+      mysql4:
+        condition: service_healthy
     environment:
       - SPRING_PROFILES_ACTIVE=docker
 
