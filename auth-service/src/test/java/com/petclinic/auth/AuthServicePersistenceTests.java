@@ -71,6 +71,8 @@ public class AuthServicePersistenceTests {
     }
 
     private User addDefaultUser() {
-        return userRepo.save(DEFAULT_USER);
+        User deepCopy = DEFAULT_USER.toBuilder()
+                .build();
+        return userRepo.save(deepCopy);
     }
 }
