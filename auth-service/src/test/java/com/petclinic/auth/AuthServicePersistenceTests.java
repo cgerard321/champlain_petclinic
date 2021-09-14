@@ -2,6 +2,7 @@ package com.petclinic.auth;
 
 import com.petclinic.auth.User.User;
 import com.petclinic.auth.User.UserRepo;
+import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -56,6 +57,17 @@ public class AuthServicePersistenceTests {
         userRepo.delete(created);
 
         assertFalse(userRepo.findById(created.getId()).isPresent());
+    }
+
+    @Test
+    @DisplayName("Add two users with the same email")
+    void add_two_users_with_same_email() {
+
+        userRepo.save(
+                new User(1, DEFAULT_USER.getUsername(), DEFAULT_USER.getPassword(), DEFAULT_USER.getEmail())
+        );
+
+        assertThrows(org.springframework.dao.DataIntegrityViolationException.class , () -> userRepo.save(new User(2, DEFAULT_USER.getUsername(), DEFAULT_USER.getPassword(), DEFAULT_USER.getEmail())));
     }
 
     private User addDefaultUser() {
