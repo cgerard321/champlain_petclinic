@@ -1,0 +1,13 @@
+jwt:
+  secret: secret
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3310/auth
+    username: user
+    password: pwd
+  flyway:
+    url: jdbc:mysql://localhost:3310
+    schemas: auth
+    user: root
+    password: rootpwd
