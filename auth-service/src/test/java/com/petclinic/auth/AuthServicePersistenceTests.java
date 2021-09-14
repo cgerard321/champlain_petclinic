@@ -25,6 +25,9 @@ public class AuthServicePersistenceTests {
     @Autowired
     private UserRepo userRepo;
 
+    private final User DEFAULT_USER =
+            new User(1, "username-1", "password-1", "email-1");
+
     @BeforeEach
     void cleanUp() {
         userRepo.deleteAllInBatch();
@@ -34,16 +37,22 @@ public class AuthServicePersistenceTests {
     @DisplayName("Add one User to database")
     void add_user_to_database() {
 
-        User create = new User(1, "username-1", "password-1", "email-1");
-
-        User created = userRepo.save(create);
+        User created = addDefaultUser();
 
         assertNotNull(created);
 
         User byId = userRepo.findById(created.getId()).get();
 
-        assertEquals(byId.getUsername(), create.getUsername());
+        assertEquals(byId.getUsername(), DEFAULT_USER.getUsername());
     }
 
+    @Test
+    @DisplayName("Add then remove User from database")
+    void add_then_remove_user() {
 
+    }
+
+    private User addDefaultUser() {
+        return userRepo.save(DEFAULT_USER);
+    }
 }
