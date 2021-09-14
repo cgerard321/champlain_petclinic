@@ -45,7 +45,11 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1024m
+          memory: 2048m
+    depends_on:
+      - mysql4
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
 
   mysql1:
     image: mysql:5.7
@@ -106,7 +110,10 @@ services:
 
   mysql4:
     image: mysql:5.7
-    mem_limit: 350m
+    deploy:
+      resources:
+        limits:
+          memory: 350m
     ports:
       - "3310:3306"
     environment:
@@ -118,7 +125,7 @@ services:
       - ./data/mysql4:/var/lib/mysql4
       - ./data/init.d:/docker-entrypoint-initdb.d
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-uuser", "-ppwd", "-h", "localhost" ]
+      test: [ "CMD", "mysqladmin", "ping", "-uroot", "-prootpwd", "-h", "localhost" ]
       interval: 10s
       timeout: 5s
       retries: 10

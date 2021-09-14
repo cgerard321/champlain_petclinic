@@ -12,6 +12,14 @@ spring:
     user: root
     password: rootpwd
 
+---
+spring.profiles: docker
+
+spring:
+  datasource:
+    url: jdbc:mysql://mysql4/auth
+  flyway:
+    url: jdbc:mysql://mysql4
 
 ---
 spring.profiles: test
