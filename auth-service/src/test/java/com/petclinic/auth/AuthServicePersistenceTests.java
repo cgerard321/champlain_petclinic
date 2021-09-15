@@ -71,11 +71,9 @@ public class AuthServicePersistenceTests {
     @DisplayName("Add two users with the same email")
     void add_two_users_with_same_email() {
 
-        userRepo.save(
-                new User(1, DEFAULT_USER.getUsername(), DEFAULT_USER.getPassword(), DEFAULT_USER.getEmail())
-        );
+        addDefaultUser();
 
-        assertThrows(org.springframework.dao.DataIntegrityViolationException.class , () -> userRepo.save(new User(2, DEFAULT_USER.getUsername(), DEFAULT_USER.getPassword(), DEFAULT_USER.getEmail())));
+        assertThrows(org.springframework.dao.DataIntegrityViolationException.class , this::addDefaultUser);
     }
 
     private User addDefaultUser() {
