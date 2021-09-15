@@ -38,7 +38,7 @@ public class AuthServicePersistenceTests {
     private RoleRepo roleRepo;
 
     private final User DEFAULT_USER =
-            new User(0, "username-1", "password-1", "email-1", Collections.EMPTY_LIST);
+            new User(0, "username-1", "password-1", "email-1", Collections.EMPTY_SET);
 
     private final Role
             ROLE_ADMIN = new Role(0, "ADMIN"),

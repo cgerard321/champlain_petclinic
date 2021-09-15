@@ -39,7 +39,7 @@ class AuthServiceApplicationTests {
 					format("username-%d", i),
 					format("password-%d", i),
 					format("email-%d", i),
-					Collections.EMPTY_LIST
+					Collections.EMPTY_SET
 			));
 		}
 		when(mockUserRepo.findAll())
