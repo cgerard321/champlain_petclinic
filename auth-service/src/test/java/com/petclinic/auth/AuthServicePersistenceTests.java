@@ -1,5 +1,7 @@
 package com.petclinic.auth;
 
+import com.petclinic.auth.Role.Role;
+import com.petclinic.auth.Role.RoleRepo;
 import com.petclinic.auth.User.User;
 import com.petclinic.auth.User.UserRepo;
 import org.hibernate.exception.ConstraintViolationException;
@@ -28,8 +30,13 @@ public class AuthServicePersistenceTests {
     @Autowired
     private UserRepo userRepo;
 
+    @Autowired
+    private RoleRepo roleRepo;
+
     private final User DEFAULT_USER =
-            new User(1, "username-1", "password-1", "email-1");
+            new User(0, "username-1", "password-1", "email-1");
+
+    private final Role ROLE_ADMIN = new Role(0);
 
     private final static Random rng;
 
@@ -75,6 +82,12 @@ public class AuthServicePersistenceTests {
         addDefaultUser();
 
         assertThrows(org.springframework.dao.DataIntegrityViolationException.class , this::addDefaultUser);
+    }
+
+    @Test
+    @DisplayName("Create a role")
+    void add_role() {
+        roleRepo.save(ROLE_ADMIN);
     }
 
     private User addDefaultUser() {
