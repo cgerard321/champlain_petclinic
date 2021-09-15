@@ -140,6 +140,27 @@ public class AuthServicePersistenceTests {
         assertTrue(updated.getRoles().contains(userRole));
     }
 
+    @Test
+    @DisplayName("Delete parent without deleting child role")
+    void delete_parent_without_deleting_child_role() {
+
+        final User user = addDefaultUser();
+
+        final Role parent = addUserRole();
+        final Role child = new Role(1, "cool_user", parent);
+        final Role created = roleRepo.save(child);
+        assertEquals(parent.getId(), created.getParent().getId());
+
+
+        user.getRoles().add(parent);
+
+        final User updated = userRepo.save(user);
+
+        assertTrue(updated.getRoles().contains(parent));
+
+        assertThrows(DataIntegrityViolationException.class, () -> roleRepo.delete(parent));
+    }
+
     private Role addRoleAsClone(Role r) {
         return roleRepo.save(r.toBuilder().id(AuthServicePersistenceTests.rng.nextInt()).build());
     }
