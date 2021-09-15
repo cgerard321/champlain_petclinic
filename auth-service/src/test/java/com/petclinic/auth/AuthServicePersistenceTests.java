@@ -91,7 +91,8 @@ public class AuthServicePersistenceTests {
     @Test
     @DisplayName("Create a role")
     void add_role() {
-        roleRepo.save(ROLE_ADMIN);
+        final Role created = roleRepo.save(ROLE_ADMIN);
+        assertNull(created.getParent());
     }
 
     @Test
