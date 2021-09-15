@@ -48,11 +48,23 @@ class AuthServiceApplicationTests {
 	void contextLoads() {
 	}
 
-
 	@Test
 	@DisplayName("Retrieve all Users from mock database")
 	void retrieve_all_users_from_mock_database() {
 		assertEquals(mockUserRepo.findAll().size(), 10);
+	}
+
+	//Signup Service Tests
+	@Test
+	@DisplayName("Given necessary data is inputted, register user.")
+	void register_user(){
+
+	}
+
+	@Test
+	@DisplayName("Validate email uniqueness in database.")
+	void validate_email_uniqueness(){
+
 	}
 
 }
