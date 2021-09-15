@@ -168,6 +168,24 @@ public class AuthServicePersistenceTests {
         assertFalse(roleRepo.findById(parent.getId()).isPresent());
     }
 
+    @Test
+    @DisplayName("Delete role referenced by user")
+    void delete_role_referenced_by_user() {
+
+        final User user = addDefaultUser();
+
+        final Role role = addUserRole();
+
+        user.getRoles().add(role);
+
+        userRepo.save(user);
+
+        assertEquals(userRepo.getOne(user.getId()).getRoles().size(), 0);
+        assertTrue(userRepo.getOne(user.getId()).getRoles().contains(role));
+
+        assertThrows(DataIntegrityViolationException.class, () -> roleRepo.delete(role));
+    }
+
     private Role addRoleAsClone(Role r) {
         return roleRepo.save(r.toBuilder().id(AuthServicePersistenceTests.rng.nextInt()).build());
     }
