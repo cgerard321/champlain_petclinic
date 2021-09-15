@@ -14,8 +14,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Random;
-
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
@@ -29,12 +27,6 @@ public class AuthServicePersistenceTests {
 
     private final User DEFAULT_USER =
             new User(1, "username-1", "password-1", "email-1");
-
-    private final static Random rng;
-
-    static {
-        rng = new Random();
-    }
 
     @BeforeEach
     void cleanUp() {
@@ -80,9 +72,7 @@ public class AuthServicePersistenceTests {
 
     private User addDefaultUser() {
         User deepCopy = DEFAULT_USER.toBuilder()
-                .id(AuthServicePersistenceTests.rng.nextInt())
                 .build();
         return userRepo.save(deepCopy);
     }
-
 }
