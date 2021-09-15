@@ -108,6 +108,21 @@ public class AuthServicePersistenceTests {
     }
 
     @Test
+    @DisplayName("Create parent with many children roles")
+    void add_parent_with_many_children_roles() {
+
+        final int CHILD_COUNT = 3;
+
+        final Role parent = addUserRole();
+
+        for (int i = 0; i < CHILD_COUNT; i++) {
+            roleRepo.save(new Role(i, format("role-%d", i), parent));
+        }
+
+        assertEquals(roleRepo.getRolesByParent(parent).size(), CHILD_COUNT);
+    }
+
+    @Test
     @DisplayName("Add two roles with the same name")
     void add_two_roles_with_same_name() {
 
@@ -185,21 +200,6 @@ public class AuthServicePersistenceTests {
         assertTrue(userRepo.getOne(user.getId()).getRoles().contains(role));
 
         assertThrows(DataIntegrityViolationException.class, () -> roleRepo.delete(role));
-    }
-
-    @Test
-    @DisplayName("Add parent with many children roles")
-    void add_parent_with_many_children_roles() {
-
-        final int CHILD_COUNT = 3;
-
-        final Role parent = addUserRole();
-
-        for (int i = 0; i < CHILD_COUNT; i++) {
-            roleRepo.save(new Role(i, format("role-%d", i), parent));
-        }
-
-        assertEquals(roleRepo.getRolesByParent(parent).size(), CHILD_COUNT);
     }
 
     private Role addRoleAsClone(Role r) {
