@@ -5,9 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Table(schema = "auth", name = "roles")
 @Entity
@@ -17,8 +15,17 @@ import javax.persistence.Table;
 @Builder(toBuilder = true)
 public class Role {
 
+    public Role(long id, String name) {
+        this.id = id;
+        this.name = name;
+        this.parent = null;
+    }
+
     @Id
     private long id;
-
     private String name;
+
+    @OneToMany
+    @JoinTable
+    private Role parent;
 }

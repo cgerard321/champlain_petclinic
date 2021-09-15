@@ -37,7 +37,9 @@ public class AuthServicePersistenceTests {
     private final User DEFAULT_USER =
             new User(0, "username-1", "password-1", "email-1");
 
-    private final Role ROLE_ADMIN = new Role(0, "ADMIN");
+    private final Role
+            ROLE_ADMIN = new Role(0, "ADMIN"),
+            ROLE_USER = new Role(0, "USER");
 
     private final static Random rng;
 
@@ -108,12 +110,29 @@ public class AuthServicePersistenceTests {
         assertThrows(DataIntegrityViolationException.class, this::addAdminRole);
     }
 
+    @Test
+    @DisplayName("Add extended role")
+    void add_extended_role() {
+
+        final Role parent = addUserRole();
+
+        final Role child = new Role(1, "cool_user", parent);
+
+        final Role created = roleRepo.save(child);
+
+        assertEquals(parent.getId(), created.getParent().getId());
+    }
+
     private Role addRoleAsClone(Role r) {
         return roleRepo.save(r.toBuilder().id(AuthServicePersistenceTests.rng.nextInt()).build());
     }
 
     private Role addAdminRole() {
         return addRoleAsClone(ROLE_ADMIN);
+    }
+
+    private Role addUserRole() {
+        return addRoleAsClone(ROLE_USER);
     }
 
     private User addDefaultUser() {
