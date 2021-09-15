@@ -78,5 +78,10 @@ class OwnerResource {
         log.info("Saving owner {}", ownerModel);
         ownerRepository.save(ownerModel);
     }
+    /*
+    @DeleteMapping(value = "/{ownerId")
+    public void deleteOwner(@PathVariable("Owne"))
+    */
+
 }
 
