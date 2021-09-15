@@ -18,6 +18,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -35,7 +38,7 @@ public class AuthServicePersistenceTests {
     private RoleRepo roleRepo;
 
     private final User DEFAULT_USER =
-            new User(0, "username-1", "password-1", "email-1");
+            new User(0, "username-1", "password-1", "email-1", Collections.EMPTY_LIST);
 
     private final Role
             ROLE_ADMIN = new Role(0, "ADMIN"),
@@ -122,6 +125,19 @@ public class AuthServicePersistenceTests {
         final Role created = roleRepo.save(child);
 
         assertEquals(parent.getId(), created.getParent().getId());
+    }
+
+    @Test
+    @DisplayName("Add role to user")
+    void add_role_to_user() {
+
+        final User user = addDefaultUser();
+        final Role userRole = addUserRole();
+        user.getRoles().add(userRole);
+
+        final User updated = userRepo.save(user);
+
+        assertTrue(updated.getRoles().contains(userRole));
     }
 
     private Role addRoleAsClone(Role r) {

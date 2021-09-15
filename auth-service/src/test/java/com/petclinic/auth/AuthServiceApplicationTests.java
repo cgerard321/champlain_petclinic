@@ -10,6 +10,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static java.lang.String.format;
@@ -37,7 +38,8 @@ class AuthServiceApplicationTests {
 					i,
 					format("username-%d", i),
 					format("password-%d", i),
-					format("email-%d", i)
+					format("email-%d", i),
+					Collections.EMPTY_LIST
 			));
 		}
 		when(mockUserRepo.findAll())
