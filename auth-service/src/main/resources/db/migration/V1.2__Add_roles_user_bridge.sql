@@ -3,10 +3,8 @@ CREATE TABLE auth.USERS_ROLES(
     user_id INT NOT NULL,
     role_id INT NOT NULL,
     FOREIGN KEY(user_id)
-        REFERENCES auth.USERS(id)
-         ON DELETE CASCADE,
+        REFERENCES auth.USERS(id),
     FOREIGN KEY(role_id)
-         REFERENCES auth.ROLES(ID)
-         ON DELETE CASCADE,
+         REFERENCES auth.ROLES(ID),
     PRIMARY KEY(id)
 );
