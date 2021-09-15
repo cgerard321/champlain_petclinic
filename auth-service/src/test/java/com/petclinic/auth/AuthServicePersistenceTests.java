@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Propagation;
@@ -94,8 +95,21 @@ public class AuthServicePersistenceTests {
     @Test
     @DisplayName("Create then delete a role")
     void create_then_delete_role() {
+
         final Role created = roleRepo.save(ROLE_ADMIN);
         roleRepo.delete(created);
+    }
+
+    @Test
+    @DisplayName("Add two roles with the same name")
+    void add_two_roles_with_same_name() {
+
+        roleRepo.save(ROLE_ADMIN);
+        assertThrows(DataIntegrityViolationException.class, () -> roleRepo.save(
+                ROLE_ADMIN.toBuilder()
+                        .id(AuthServicePersistenceTests.rng.nextInt())
+                        .build()
+        ));
     }
 
     private User addDefaultUser() {
