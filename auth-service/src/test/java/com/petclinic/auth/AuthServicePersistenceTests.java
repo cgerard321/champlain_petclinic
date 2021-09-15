@@ -36,7 +36,7 @@ public class AuthServicePersistenceTests {
     private final User DEFAULT_USER =
             new User(0, "username-1", "password-1", "email-1");
 
-    private final Role ROLE_ADMIN = new Role(0);
+    private final Role ROLE_ADMIN = new Role(0, "ADMIN");
 
     private final static Random rng;
 
@@ -47,6 +47,7 @@ public class AuthServicePersistenceTests {
     @BeforeEach
     void cleanUp() {
         userRepo.deleteAllInBatch();
+        roleRepo.deleteAllInBatch();
     }
 
     @Test

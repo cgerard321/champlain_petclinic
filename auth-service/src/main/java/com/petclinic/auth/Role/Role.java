@@ -19,4 +19,6 @@ public class Role {
 
     @Id
     private long id;
+
+    private String name;
 }
