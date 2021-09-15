@@ -25,7 +25,7 @@ public class Role {
     private long id;
     private String name;
 
-    @OneToMany
-    @JoinTable
+    @ManyToOne
+    @JoinColumn(name = "parent_id")
     private Role parent;
 }
