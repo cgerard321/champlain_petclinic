@@ -104,12 +104,16 @@ public class AuthServicePersistenceTests {
     @DisplayName("Add two roles with the same name")
     void add_two_roles_with_same_name() {
 
-        roleRepo.save(ROLE_ADMIN);
-        assertThrows(DataIntegrityViolationException.class, () -> roleRepo.save(
-                ROLE_ADMIN.toBuilder()
-                        .id(AuthServicePersistenceTests.rng.nextInt())
-                        .build()
-        ));
+        addAdminRole();
+        assertThrows(DataIntegrityViolationException.class, this::addAdminRole);
+    }
+
+    private Role addRoleAsClone(Role r) {
+        return roleRepo.save(r.toBuilder().id(AuthServicePersistenceTests.rng.nextInt()).build());
+    }
+
+    private Role addAdminRole() {
+        return addRoleAsClone(ROLE_ADMIN);
     }
 
     private User addDefaultUser() {
