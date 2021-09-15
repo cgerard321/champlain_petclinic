@@ -1,0 +1,5 @@
+CREATE TABLE auth.ROLES(
+        id INT NOT NULL AUTO_INCREMENT,
+        name VARCHAR(2048) NOT NULL,
+        PRIMARY KEY(id)
+)
