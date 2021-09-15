@@ -90,6 +90,13 @@ public class AuthServicePersistenceTests {
         roleRepo.save(ROLE_ADMIN);
     }
 
+    @Test
+    @DisplayName("Create then delete a role")
+    void create_then_delete_role() {
+        final Role created = roleRepo.save(ROLE_ADMIN);
+        roleRepo.delete(created);
+    }
+
     private User addDefaultUser() {
         User deepCopy = DEFAULT_USER.toBuilder()
                 .id(AuthServicePersistenceTests.rng.nextInt())
