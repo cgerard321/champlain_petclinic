@@ -78,10 +78,14 @@ class OwnerResource {
         log.info("Saving owner {}", ownerModel);
         ownerRepository.save(ownerModel);
     }
-    /*
+
     @DeleteMapping(value = "/{ownerId")
-    public void deleteOwner(@PathVariable("Owne"))
-    */
+    public void deleteOwner(@PathVariable("ownerId") int ownerId)
+    {
+        ownerRepository.findById(ownerId).ifPresent(o -> ownerRepository.delete(o));
+
+    }
+
 
 }
 
