@@ -1,6 +1,8 @@
 package com.petclinic.auth;
 
 import com.petclinic.auth.Role.Role;
+import com.petclinic.auth.Role.RoleIDLessDTO;
+import com.petclinic.auth.Role.RoleMapper;
 import com.petclinic.auth.Role.RoleRepo;
 import com.petclinic.auth.User.User;
 import com.petclinic.auth.User.UserRepo;
@@ -8,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
@@ -37,8 +40,12 @@ class AuthServiceApplicationTests {
 	@MockBean
 	private RoleRepo mockRoleRepo;
 
+	@Autowired
+	private RoleMapper roleMapper;
+
 	private List<User> MOCK_USERS;
 	private final int MOCK_USER_LEN = 10;
+	private final RoleIDLessDTO ID_LESS_USER_ROLE = new RoleIDLessDTO("user");
 
 	@BeforeEach
 	void setup() {
@@ -143,5 +150,12 @@ class AuthServiceApplicationTests {
 		}
 
 		assertEquals(mockRoleRepo.getRolesByParent(parent).size(), CHILD_COUNT);
+	}
+
+	@Test
+	@DisplayName("Map id less role to role")
+	void map_id_less_role_to_role() {
+
+
 	}
 }
