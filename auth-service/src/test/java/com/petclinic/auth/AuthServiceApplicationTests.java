@@ -14,6 +14,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 import static java.lang.String.format;
@@ -27,7 +28,11 @@ import static org.mockito.Mockito.when;
 @ActiveProfiles("test")
 class AuthServiceApplicationTests {
 
-	private int ID_COUNT = 1;
+	private HashMap<Long, Role> roleDB;
+
+	{
+		roleDB = new HashMap<>();
+	}
 
 	@MockBean
 	private UserRepo mockUserRepo;
@@ -57,8 +62,13 @@ class AuthServiceApplicationTests {
 
 		when(mockRoleRepo.save(any(Role.class)))
 				.thenAnswer(s -> {
+					final long id = roleDB.size() + 1;
+
 					final Role argument = s.getArgument(0, Role.class);
-					final Role clone = argument.toBuilder().id(ID_COUNT++).build();
+					final Role clone = argument.toBuilder().id(id).build();
+
+					roleDB.put(id, clone);
+
 					return clone;
 				});
 	}
@@ -81,7 +91,7 @@ class AuthServiceApplicationTests {
 		final Role testRole = mockRoleRepo.save(new Role(0, "test", null));
 
 		assertEquals(testRole.getName(), "test");
-		assertEquals(ID_COUNT - 1, testRole.getId());
+		assertEquals(roleDB.size(), testRole.getId());
 		assertNull(testRole.getParent());
 	}
 
@@ -91,12 +101,12 @@ class AuthServiceApplicationTests {
 
 		final Role parent = mockRoleRepo.save(new Role(0, "parent", null));
 		assertEquals(parent.getName(), "parent");
-		assertEquals(ID_COUNT - 1, parent.getId());
+		assertEquals(roleDB.size(), parent.getId());
 		assertNull(parent.getParent());
 
 		final Role child = mockRoleRepo.save(new Role(0, "child", parent));
 		assertEquals(child.getName(), "child");
-		assertEquals(ID_COUNT - 1, child.getId());
+		assertEquals(roleDB.size(), child.getId());
 		assertEquals(child.getParent().getId(), parent.getId());
 	}
 }
