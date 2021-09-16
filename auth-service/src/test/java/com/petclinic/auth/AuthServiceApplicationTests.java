@@ -12,10 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -62,6 +59,7 @@ class AuthServiceApplicationTests {
 
 		when(mockRoleRepo.save(any(Role.class)))
 				.thenAnswer(s -> {
+
 					final long id = roleDB.size() + 1;
 
 					final Role argument = s.getArgument(0, Role.class);
@@ -70,6 +68,21 @@ class AuthServiceApplicationTests {
 					roleDB.put(id, clone);
 
 					return clone;
+				});
+
+		when(mockRoleRepo.getRolesByParent(any(Role.class)))
+				.thenAnswer(s -> {
+
+					final Role argument = s.getArgument(0, Role.class);
+					Set<Role> toReturn = new HashSet<>();
+
+					for(Role r : roleDB.values()) {
+						if(r.getParent() == null) continue;
+						if(r.getParent().getId() == argument.getId())
+							toReturn.add(r);
+					}
+
+					return toReturn;
 				});
 	}
 
@@ -108,5 +121,27 @@ class AuthServiceApplicationTests {
 		assertEquals(child.getName(), "child");
 		assertEquals(roleDB.size(), child.getId());
 		assertEquals(child.getParent().getId(), parent.getId());
+	}
+
+	@Test
+	@DisplayName("Get children of parent role")
+	void get_all_children_of_parent_role() {
+
+		final int CHILD_COUNT = 3;
+
+		final Role parent = mockRoleRepo.save(new Role(0, "parent", null));
+		assertEquals(parent.getName(), "parent");
+		assertEquals(roleDB.size(), parent.getId());
+		assertNull(parent.getParent());
+
+		for (int i = 0; i < CHILD_COUNT; i++) {
+
+			final Role child = mockRoleRepo.save(new Role(0, "child" + i, parent));
+			assertEquals(child.getName(), "child" + i);
+			assertEquals(roleDB.size(), child.getId());
+			assertEquals(child.getParent().getId(), parent.getId());
+		}
+
+		assertEquals(mockRoleRepo.getRolesByParent(parent).size(), CHILD_COUNT);
 	}
 }
