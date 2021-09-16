@@ -167,6 +167,6 @@ class AuthServiceApplicationTests {
 	void create_roller_from_controller() {
 		final Role role = roleController.createRole(ID_LESS_USER_ROLE);
 		assertNotNull(role);
-		assertThat(role.getId(), instanceOf(Integer.TYPE));
+		assertThat(role.getId(), instanceOf(Long.TYPE));
 	}
 }
