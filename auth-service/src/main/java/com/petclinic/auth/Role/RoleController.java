@@ -2,10 +2,8 @@ package com.petclinic.auth.Role;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.Page;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/roles")
@@ -29,5 +27,10 @@ public class RoleController {
         log.info("Successfully persisted role");
 
         return saved;
+    }
+
+    @GetMapping
+    public Page<Role> getAllRoles(@RequestParam int page) {
+        return null;
     }
 }
