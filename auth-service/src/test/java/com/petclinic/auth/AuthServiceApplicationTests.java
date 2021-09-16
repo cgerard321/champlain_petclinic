@@ -139,14 +139,14 @@ class AuthServiceApplicationTests {
 
 		final Role parent = roleRepo.save(new Role(0, "parent", null));
 		assertEquals(parent.getName(), "parent");
-		assertEquals(roleDB.size(), parent.getId());
+		assertThat(parent.getId(), instanceOf(Long.TYPE));
 		assertNull(parent.getParent());
 
 		for (int i = 0; i < CHILD_COUNT; i++) {
 
 			final Role child = roleRepo.save(new Role(0, "child" + i, parent));
 			assertEquals(child.getName(), "child" + i);
-			assertEquals(roleDB.size(), child.getId());
+			assertThat(child.getId(), instanceOf(Long.TYPE));
 			assertEquals(child.getParent().getId(), parent.getId());
 		}
 
