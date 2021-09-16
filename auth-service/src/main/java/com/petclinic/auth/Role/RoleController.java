@@ -30,7 +30,7 @@ public class RoleController {
         return saved;
     }
 
-    @GetMapping()
+    @GetMapping
     public Page<Role> getAllRoles(
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "10") int size

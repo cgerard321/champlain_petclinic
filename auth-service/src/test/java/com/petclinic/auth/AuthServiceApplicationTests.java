@@ -11,10 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -135,5 +132,16 @@ class AuthServiceApplicationTests {
 		assertEquals(ROLE_COUNT / PAGE_LIM, rolePage.getTotalPages());
 	}
 
+	@Test
+	@DisplayName("Add then delete role")
+	void add_then_delete_role() {
 
+		final Role save = roleRepo.save(new Role(0, "test", null));
+		final Optional<Role> found = roleRepo.findById(save.getId());
+		assertTrue(found.isPresent());
+		assertEquals("test", found.get().getName());
+		assertNull(found.get().getParent());
+
+		roleController.deleteRole(save.getId());
+	}
 }
