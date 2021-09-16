@@ -13,6 +13,11 @@ repositories {
 	mavenCentral()
 }
 
+ext {
+	mapstructVersion = "1.4.1.Final"
+}
+
+
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
@@ -22,6 +27,13 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'io.jsonwebtoken:jjwt:0.9.1'
 	implementation 'org.flywaydb:flyway-core'
+
+	implementation group: 'org.projectlombok', name: 'lombok-mapstruct-binding', version: '0.2.0'
+
+	implementation("org.mapstruct:mapstruct:${mapstructVersion}")
+	compileOnly "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+	testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 
 	runtimeOnly 'com.h2database:h2'
 
