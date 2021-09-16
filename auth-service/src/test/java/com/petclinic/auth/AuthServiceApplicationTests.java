@@ -9,10 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.support.PagedListHolder;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.*;
@@ -22,7 +19,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
 
 
 @SpringBootTest
@@ -36,10 +32,10 @@ class AuthServiceApplicationTests {
 	}
 
 	@Autowired
-	private UserRepo mockUserRepo;
+	private UserRepo userRepo;
 
 	@Autowired
-	private RoleRepo mockRoleRepo;
+	private RoleRepo roleRepo;
 
 	@Autowired
 	private RoleMapper roleMapper;
@@ -111,14 +107,14 @@ class AuthServiceApplicationTests {
 	@Test
 	@DisplayName("Retrieve all Users from mock database")
 	void retrieve_all_users_from_mock_database() {
-		assertEquals(mockUserRepo.findAll().size(), 10);
+		assertEquals(userRepo.findAll().size(), 10);
 	}
 
 	@Test
 	@DisplayName("Add orphan role")
 	void add_orphan_role() {
 
-		final Role testRole = mockRoleRepo.save(new Role(0, "test", null));
+		final Role testRole = roleRepo.save(new Role(0, "test", null));
 
 		assertEquals(testRole.getName(), "test");
 		assertEquals(roleDB.size(), testRole.getId());
@@ -129,12 +125,12 @@ class AuthServiceApplicationTests {
 	@DisplayName("Add parented role")
 	void add_parented_role() {
 
-		final Role parent = mockRoleRepo.save(new Role(0, "parent", null));
+		final Role parent = roleRepo.save(new Role(0, "parent", null));
 		assertEquals(parent.getName(), "parent");
 		assertEquals(roleDB.size(), parent.getId());
 		assertNull(parent.getParent());
 
-		final Role child = mockRoleRepo.save(new Role(0, "child", parent));
+		final Role child = roleRepo.save(new Role(0, "child", parent));
 		assertEquals(child.getName(), "child");
 		assertEquals(roleDB.size(), child.getId());
 		assertEquals(child.getParent().getId(), parent.getId());
@@ -146,20 +142,20 @@ class AuthServiceApplicationTests {
 
 		final int CHILD_COUNT = 3;
 
-		final Role parent = mockRoleRepo.save(new Role(0, "parent", null));
+		final Role parent = roleRepo.save(new Role(0, "parent", null));
 		assertEquals(parent.getName(), "parent");
 		assertEquals(roleDB.size(), parent.getId());
 		assertNull(parent.getParent());
 
 		for (int i = 0; i < CHILD_COUNT; i++) {
 
-			final Role child = mockRoleRepo.save(new Role(0, "child" + i, parent));
+			final Role child = roleRepo.save(new Role(0, "child" + i, parent));
 			assertEquals(child.getName(), "child" + i);
 			assertEquals(roleDB.size(), child.getId());
 			assertEquals(child.getParent().getId(), parent.getId());
 		}
 
-		assertEquals(mockRoleRepo.getRolesByParent(parent).size(), CHILD_COUNT);
+		assertEquals(roleRepo.getRolesByParent(parent).size(), CHILD_COUNT);
 	}
 
 	@Test
@@ -178,7 +174,7 @@ class AuthServiceApplicationTests {
 		final Role role = roleController.createRole(ID_LESS_USER_ROLE);
 		assertNotNull(role);
 		assertThat(role.getId(), instanceOf(Long.TYPE));
-		assertTrue(mockRoleRepo.findById(role.getId()).isPresent());
+		assertTrue(roleRepo.findById(role.getId()).isPresent());
 	}
 
 	@Test
@@ -191,7 +187,7 @@ class AuthServiceApplicationTests {
 				STARTING_PAGE = 1;
 
 		for (int i = 0; i < ROLE_COUNT; i++) {
-			mockRoleRepo.save(new Role(0, "test", null));
+			roleRepo.save(new Role(0, "test", null));
 		}
 
 		Page<Role> rolePage = roleController.getAllRoles(STARTING_PAGE, PAGE_LIM);
