@@ -169,4 +169,12 @@ class AuthServiceApplicationTests {
 		assertNotNull(role);
 		assertThat(role.getId(), instanceOf(Long.TYPE));
 	}
+
+	@Test
+	@DisplayName("Get all roles from controller")
+	void get_all_roles_from_controller() {
+
+		
+	}
+
 }
