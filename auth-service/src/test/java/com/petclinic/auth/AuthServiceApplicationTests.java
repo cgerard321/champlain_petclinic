@@ -1,7 +1,6 @@
 package com.petclinic.auth;
 
 import com.petclinic.auth.Role.*;
-import com.petclinic.auth.User.User;
 import com.petclinic.auth.User.UserRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -9,19 +8,24 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.reactive.server.WebTestClient;
 
-import java.util.*;
+import java.util.Optional;
+import java.util.Random;
 
-import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.*;
 
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 class AuthServiceApplicationTests {
+
+	@Autowired
+	private WebTestClient client;
 
 	private final static Random rng;
 
@@ -153,5 +157,16 @@ class AuthServiceApplicationTests {
 			roleController.deleteRole(save.getId());
 			assertFalse(roleRepo.findById(save.getId()).isPresent());
 		}
+	}
+
+	@Test
+	@DisplayName("Get all roles as admin")
+	void get_all_roles_as_admin() {
+
+		client.get()
+				.uri("/roles")
+				.exchange()
+				.expectStatus()
+				.isOk();
 	}
 }
