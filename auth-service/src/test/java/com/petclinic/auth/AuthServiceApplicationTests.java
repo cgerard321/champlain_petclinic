@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("test")
 class AuthServiceApplicationTests {
 
-	private Random rng;
+	private final static Random rng;
 
 	static {
 		rng = new Random();
