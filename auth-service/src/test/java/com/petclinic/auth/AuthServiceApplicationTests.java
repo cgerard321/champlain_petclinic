@@ -83,14 +83,7 @@ class AuthServiceApplicationTests {
 	@Test
 	void contextLoads() {
 	}
-
-
-	@Test
-	@DisplayName("Retrieve all Users from mock database")
-	void retrieve_all_users_from_mock_database() {
-		assertEquals(userRepo.findAll().size(), 10);
-	}
-
+	
 	@Test
 	@DisplayName("Add orphan role")
 	void add_orphan_role() {
