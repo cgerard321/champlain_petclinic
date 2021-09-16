@@ -23,6 +23,12 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("test")
 class AuthServiceApplicationTests {
 
+	private Random rng;
+
+	static {
+		rng = new Random();
+	}
+
 	@Autowired
 	private UserRepo userRepo;
 
@@ -142,7 +148,10 @@ class AuthServiceApplicationTests {
 		assertEquals("test", found.get().getName());
 		assertNull(found.get().getParent());
 
-		roleController.deleteRole(save.getId());
-		assertFalse(roleRepo.findById(save.getId()).isPresent());
+		// Idempotency check
+		for (int i = 0; i < rng.nextInt(); i++) {
+			roleController.deleteRole(save.getId());
+			assertFalse(roleRepo.findById(save.getId()).isPresent());
+		}
 	}
 }
