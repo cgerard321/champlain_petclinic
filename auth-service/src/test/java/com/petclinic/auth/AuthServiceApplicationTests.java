@@ -156,6 +156,9 @@ class AuthServiceApplicationTests {
 	@DisplayName("Map id less role to role")
 	void map_id_less_role_to_role() {
 
-
+		final Role role = roleMapper.idLessDTOToModel(ID_LESS_USER_ROLE);
+		assertEquals(role.getId(), 0); // defaults to 0 as it is a primitive decimal integer
+		assertEquals(role.getName(), ID_LESS_USER_ROLE.getName());
+		assertNull(role.getParent());
 	}
 }
