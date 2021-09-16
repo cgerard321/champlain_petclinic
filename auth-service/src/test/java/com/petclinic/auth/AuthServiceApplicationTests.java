@@ -35,10 +35,10 @@ class AuthServiceApplicationTests {
 		roleDB = new HashMap<>();
 	}
 
-	@MockBean
+	@Autowired
 	private UserRepo mockUserRepo;
 
-	@MockBean
+	@Autowired
 	private RoleRepo mockRoleRepo;
 
 	@Autowired
@@ -65,42 +65,42 @@ class AuthServiceApplicationTests {
 					Collections.EMPTY_SET
 			));
 		}
-		when(mockUserRepo.findAll())
-				.thenReturn(MOCK_USERS);
-
-		when(mockRoleRepo.save(any(Role.class)))
-				.thenAnswer(s -> {
-
-					final long id = roleDB.size() + 1;
-
-					final Role argument = s.getArgument(0, Role.class);
-					final Role clone = argument.toBuilder().id(id).build();
-
-					roleDB.put(id, clone);
-
-					return clone;
-				});
-
-		when(mockRoleRepo.getRolesByParent(any(Role.class)))
-				.thenAnswer(s -> {
-
-					final Role argument = s.getArgument(0, Role.class);
-					Set<Role> toReturn = new HashSet<>();
-
-					for(Role r : roleDB.values()) {
-						if(r.getParent() == null) continue;
-						if(r.getParent().getId() == argument.getId())
-							toReturn.add(r);
-					}
-
-					return toReturn;
-				});
-
-		when(mockRoleRepo.findAll(any(Pageable.class)))
-				.thenAnswer(s -> new PageImpl<>(new ArrayList<>(roleDB.values())));
-
-		when(mockRoleRepo.findById(any(Long.TYPE)))
-				.thenAnswer(s -> Optional.of(roleDB.get(s.getArgument(0, Long.class))));
+//		when(mockUserRepo.findAll())
+//				.thenReturn(MOCK_USERS);
+//
+//		when(mockRoleRepo.save(any(Role.class)))
+//				.thenAnswer(s -> {
+//
+//					final long id = roleDB.size() + 1;
+//
+//					final Role argument = s.getArgument(0, Role.class);
+//					final Role clone = argument.toBuilder().id(id).build();
+//
+//					roleDB.put(id, clone);
+//
+//					return clone;
+//				});
+//
+//		when(mockRoleRepo.getRolesByParent(any(Role.class)))
+//				.thenAnswer(s -> {
+//
+//					final Role argument = s.getArgument(0, Role.class);
+//					Set<Role> toReturn = new HashSet<>();
+//
+//					for(Role r : roleDB.values()) {
+//						if(r.getParent() == null) continue;
+//						if(r.getParent().getId() == argument.getId())
+//							toReturn.add(r);
+//					}
+//
+//					return toReturn;
+//				});
+//
+//		when(mockRoleRepo.findAll(any(Pageable.class)))
+//				.thenAnswer(s -> new PageImpl<>(new ArrayList<>(roleDB.values())));
+//
+//		when(mockRoleRepo.findById(any(Long.TYPE)))
+//				.thenAnswer(s -> Optional.of(roleDB.get(s.getArgument(0, Long.class))));
 	}
 
 	@Test
