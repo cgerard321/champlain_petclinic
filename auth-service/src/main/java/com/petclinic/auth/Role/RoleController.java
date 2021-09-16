@@ -38,7 +38,7 @@ public class RoleController {
 
         log.info("page={}", page);
         final Page<Role> all = roleRepo.findAll(PageRequest.of(page, size));
-        log.info("Retrieved paginated result with {} entries", all.getSize());
+        log.info("Retrieved paginated result with {} entries", all.getTotalElements());
 
         return all;
     }
