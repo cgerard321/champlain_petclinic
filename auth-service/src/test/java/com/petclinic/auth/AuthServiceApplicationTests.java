@@ -37,25 +37,11 @@ class AuthServiceApplicationTests {
 
 	@Autowired
 	private RoleController roleController;
-
-	private List<User> MOCK_USERS;
-	private final int MOCK_USER_LEN = 10;
 	private final RoleIDLessDTO ID_LESS_USER_ROLE = new RoleIDLessDTO("user");
 
 	@BeforeEach
 	void setup() {
 
-		MOCK_USERS = new ArrayList<>();
-		for (int i = 1; i <= MOCK_USER_LEN; i++) {
-
-			MOCK_USERS.add(new User(
-					i,
-					format("username-%d", i),
-					format("password-%d", i),
-					format("email-%d", i),
-					Collections.EMPTY_SET
-			));
-		}
 //		when(mockUserRepo.findAll())
 //				.thenReturn(MOCK_USERS);
 //
