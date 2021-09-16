@@ -174,7 +174,7 @@ class AuthServiceApplicationTests {
 
 	@Test
 	@DisplayName("Create a role from controller")
-	void create_roller_from_controller() {
+	void create_role_from_controller() {
 		final Role role = roleController.createRole(ID_LESS_USER_ROLE);
 		assertNotNull(role);
 		assertThat(role.getId(), instanceOf(Long.TYPE));
