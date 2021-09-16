@@ -84,4 +84,19 @@ class AuthServiceApplicationTests {
 		assertEquals(ID_COUNT - 1, testRole.getId());
 		assertNull(testRole.getParent());
 	}
+
+	@Test
+	@DisplayName("Add parented role")
+	void add_parented_role() {
+
+		final Role parent = mockRoleRepo.save(new Role(0, "parent", null));
+		assertEquals(parent.getName(), "parent");
+		assertEquals(ID_COUNT - 1, parent.getId());
+		assertNull(parent.getParent());
+
+		final Role child = mockRoleRepo.save(new Role(0, "child", parent));
+		assertEquals(child.getName(), "child");
+		assertEquals(ID_COUNT - 1, child.getId());
+		assertEquals(child.getParent().getId(), parent.getId());
+	}
 }
