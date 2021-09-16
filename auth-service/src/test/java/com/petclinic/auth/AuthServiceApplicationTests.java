@@ -1,10 +1,13 @@
 package com.petclinic.auth;
 
+import com.petclinic.auth.Role.Role;
+import com.petclinic.auth.Role.RoleRepo;
 import com.petclinic.auth.User.User;
 import com.petclinic.auth.User.UserRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
@@ -15,6 +18,8 @@ import java.util.List;
 
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 
@@ -22,8 +27,13 @@ import static org.mockito.Mockito.when;
 @ActiveProfiles("test")
 class AuthServiceApplicationTests {
 
+	private int ID_COUNT = 1;
+
 	@MockBean
 	private UserRepo mockUserRepo;
+
+	@MockBean
+	private RoleRepo mockRoleRepo;
 
 	private List<User> MOCK_USERS;
 	private final int MOCK_USER_LEN = 10;
@@ -44,6 +54,13 @@ class AuthServiceApplicationTests {
 		}
 		when(mockUserRepo.findAll())
 				.thenReturn(MOCK_USERS);
+
+		when(mockRoleRepo.save(any(Role.class)))
+				.thenAnswer(s -> {
+					final Role argument = s.getArgument(0, Role.class);
+					final Role clone = argument.toBuilder().id(ID_COUNT++).build();
+					return clone;
+				});
 	}
 
 	@Test
@@ -57,4 +74,14 @@ class AuthServiceApplicationTests {
 		assertEquals(mockUserRepo.findAll().size(), 10);
 	}
 
+	@Test
+	@DisplayName("Add orphan role")
+	void add_orphan_role() {
+
+		final Role testRole = mockRoleRepo.save(new Role(0, "test", null));
+
+		assertEquals(testRole.getName(), "test");
+		assertEquals(ID_COUNT - 1, testRole.getId());
+		assertNull(testRole.getParent());
+	}
 }
