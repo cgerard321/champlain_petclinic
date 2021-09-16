@@ -98,6 +98,9 @@ class AuthServiceApplicationTests {
 
 		when(mockRoleRepo.findAll(any(Pageable.class)))
 				.thenAnswer(s -> new PageImpl<>(new ArrayList<>(roleDB.values())));
+
+		when(mockRoleRepo.findById(any(Long.TYPE)))
+				.thenAnswer(s -> Optional.of(roleDB.get(s.getArgument(0, Long.class))));
 	}
 
 	@Test
@@ -175,6 +178,7 @@ class AuthServiceApplicationTests {
 		final Role role = roleController.createRole(ID_LESS_USER_ROLE);
 		assertNotNull(role);
 		assertThat(role.getId(), instanceOf(Long.TYPE));
+		assertTrue(mockRoleRepo.findById(role.getId()).isPresent());
 	}
 
 	@Test
