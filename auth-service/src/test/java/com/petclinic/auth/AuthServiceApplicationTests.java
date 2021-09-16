@@ -133,8 +133,8 @@ class AuthServiceApplicationTests {
 	}
 
 	@Test
-	@DisplayName("Add then delete role")
-	void add_then_delete_role() {
+	@DisplayName("Add then delete role from controller")
+	void add_then_delete_role_from_controller() {
 
 		final Role save = roleRepo.save(new Role(0, "test", null));
 		final Optional<Role> found = roleRepo.findById(save.getId());
@@ -143,5 +143,6 @@ class AuthServiceApplicationTests {
 		assertNull(found.get().getParent());
 
 		roleController.deleteRole(save.getId());
+		assertFalse(roleRepo.findById(save.getId()).isPresent());
 	}
 }

@@ -42,4 +42,12 @@ public class RoleController {
 
         return all;
     }
+
+    @DeleteMapping
+    public void deleteRole(@RequestParam long id) {
+
+        log.info("id={}", id);
+        roleRepo.deleteById(id);
+        log.info("Deleted role with id {}", id);
+    }
 }
