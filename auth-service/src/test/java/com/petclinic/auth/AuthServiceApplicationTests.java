@@ -187,17 +187,13 @@ class AuthServiceApplicationTests {
 				STARTING_PAGE = 1;
 
 		for (int i = 0; i < ROLE_COUNT; i++) {
-			roleRepo.save(new Role(0, "test", null));
+			roleRepo.save(new Role(0, "test"+i, null));
 		}
 
 		Page<Role> rolePage = roleController.getAllRoles(STARTING_PAGE, PAGE_LIM);
 		assertNotNull(rolePage);
-		assertEquals(rolePage.getTotalElements(), ROLE_COUNT);
-
-		PagedListHolder<Role> holder = new PagedListHolder<>(rolePage.getContent());
-		holder.setPage(STARTING_PAGE);
-
-		assertEquals(ROLE_COUNT / PAGE_LIM, holder.getPageCount());
+		assertEquals(ROLE_COUNT, rolePage.getTotalElements());
+		assertEquals(ROLE_COUNT / PAGE_LIM, rolePage.getTotalPages());
 	}
 
 
