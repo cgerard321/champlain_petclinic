@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @ActiveProfiles("test")
 class AuthServiceApplicationTests {
-	
+
 	@Autowired
 	private UserRepo userRepo;
 
@@ -112,7 +112,7 @@ class AuthServiceApplicationTests {
 		final Role testRole = roleRepo.save(new Role(0, "test", null));
 
 		assertEquals(testRole.getName(), "test");
-		assertEquals(roleDB.size(), testRole.getId());
+		assertThat(testRole.getId(), instanceOf(Long.TYPE));
 		assertNull(testRole.getParent());
 	}
 
