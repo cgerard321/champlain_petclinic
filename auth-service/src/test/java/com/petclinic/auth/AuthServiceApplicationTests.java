@@ -1,15 +1,11 @@
 package com.petclinic.auth;
 
-import com.petclinic.auth.Role.Role;
-import com.petclinic.auth.Role.RoleIDLessDTO;
-import com.petclinic.auth.Role.RoleMapper;
-import com.petclinic.auth.Role.RoleRepo;
+import com.petclinic.auth.Role.*;
 import com.petclinic.auth.User.User;
 import com.petclinic.auth.User.UserRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -18,8 +14,9 @@ import org.springframework.test.context.ActiveProfiles;
 import java.util.*;
 
 import static java.lang.String.format;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -42,6 +39,9 @@ class AuthServiceApplicationTests {
 
 	@Autowired
 	private RoleMapper roleMapper;
+
+	@Autowired
+	private RoleController roleController;
 
 	private List<User> MOCK_USERS;
 	private final int MOCK_USER_LEN = 10;
@@ -160,5 +160,13 @@ class AuthServiceApplicationTests {
 		assertEquals(role.getId(), 0); // defaults to 0 as it is a primitive decimal integer
 		assertEquals(role.getName(), ID_LESS_USER_ROLE.getName());
 		assertNull(role.getParent());
+	}
+
+	@Test
+	@DisplayName("Create a role from controller")
+	void create_roller_from_controller() {
+		final Role role = roleController.createRole(ID_LESS_USER_ROLE);
+		assertNotNull(role);
+		assertThat(role.getId(), instanceOf(Integer.TYPE));
 	}
 }
