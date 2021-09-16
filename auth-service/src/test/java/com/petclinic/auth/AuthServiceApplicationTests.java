@@ -7,6 +7,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.support.PagedListHolder;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
@@ -183,10 +184,23 @@ class AuthServiceApplicationTests {
 	@DisplayName("Get all roles from controller")
 	void get_all_roles_from_controller() {
 
+		final int
+				ROLE_COUNT = 20,
+				PAGE_LIM = 10,
+				STARTING_PAGE = 1;
 
+		for (int i = 0; i < ROLE_COUNT; i++) {
+			mockRoleRepo.save(new Role(0, "test", null));
+		}
 
-		Page<Role> rolePage = roleController.getAllRoles(1, 10);
+		Page<Role> rolePage = roleController.getAllRoles(STARTING_PAGE, PAGE_LIM);
 		assertNotNull(rolePage);
+		assertEquals(rolePage.getTotalElements(), ROLE_COUNT);
+
+		PagedListHolder<Role> holder = new PagedListHolder<>(rolePage.getContent());
+		holder.setPage(STARTING_PAGE);
+
+		assertEquals(ROLE_COUNT / PAGE_LIM, holder.getPageCount());
 	}
 
 }
