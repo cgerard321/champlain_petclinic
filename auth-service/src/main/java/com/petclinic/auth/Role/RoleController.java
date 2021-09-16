@@ -31,10 +31,13 @@ public class RoleController {
     }
 
     @GetMapping()
-    public Page<Role> getAllRoles(@RequestParam(required = false, defaultValue = "1") int page) {
+    public Page<Role> getAllRoles(
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "10") int size
+    ) {
 
         log.info("page={}", page);
-        final Page<Role> all = roleRepo.findAll(PageRequest.of(page, 10));
+        final Page<Role> all = roleRepo.findAll(PageRequest.of(page, size));
         log.info("Retrieved paginated result with {} entries", all.getSize());
 
         return all;
