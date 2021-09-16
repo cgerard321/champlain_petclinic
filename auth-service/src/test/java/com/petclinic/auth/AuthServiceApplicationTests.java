@@ -200,5 +200,5 @@ class AuthServiceApplicationTests {
 		assertEquals(ROLE_COUNT / PAGE_LIM, holder.getPageCount());
 	}
 
-	
+
 }
