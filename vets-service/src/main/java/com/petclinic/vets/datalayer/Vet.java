@@ -35,6 +35,54 @@ public class Vet {
     @NotEmpty
     private String lastName;
 
+    @Column(name = "email")
+    @NotEmpty
+    private String email;
+
+    @Column(name = "phone_number")
+    @NotEmpty
+    private String phoneNumber;
+
+    @Column(name = "resume")
+    @NotEmpty
+    private String resume;
+
+    @Column(name = "workday")
+    private String workday;
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getResume() {
+        return resume;
+    }
+
+    public void setResume(String resume) {
+        this.resume = resume;
+    }
+
+    public String getWorkday() {
+        return workday;
+    }
+
+    public void setWorkday(String workday) {
+        this.workday = workday;
+    }
+
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "vet_specialties", joinColumns = @JoinColumn(name = "vet_id"),
             inverseJoinColumns = @JoinColumn(name = "specialty_id"))

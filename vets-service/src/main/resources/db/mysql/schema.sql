@@ -7,6 +7,10 @@ CREATE TABLE IF NOT EXISTS vets (
     id INT(4) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     first_name VARCHAR(30),
     last_name VARCHAR(30),
+    email      VARCHAR(100),
+    phone_number VARCHAR(30),
+    resume     VARCHAR(350),
+    workday    VARCHAR(250),
     INDEX(last_name)
     ) engine=InnoDB;
 
