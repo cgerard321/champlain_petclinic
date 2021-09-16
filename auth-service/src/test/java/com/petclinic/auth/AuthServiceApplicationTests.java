@@ -28,7 +28,7 @@ import static org.mockito.Mockito.when;
 @ActiveProfiles("test")
 class AuthServiceApplicationTests {
 
-	private HashMap<Long, Role> roleDB;
+	private final HashMap<Long, Role> roleDB;
 
 	{
 		roleDB = new HashMap<>();
