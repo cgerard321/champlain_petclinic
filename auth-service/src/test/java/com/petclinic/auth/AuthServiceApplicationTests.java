@@ -41,6 +41,8 @@ class AuthServiceApplicationTests {
 
 	@BeforeEach
 	void setup() {
+		roleRepo.deleteAllInBatch();
+		userRepo.deleteAllInBatch();
 	}
 
 	@Test
