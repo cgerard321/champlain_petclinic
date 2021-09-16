@@ -3,6 +3,7 @@ package com.petclinic.auth.Role;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -29,8 +30,13 @@ public class RoleController {
         return saved;
     }
 
-    @GetMapping
-    public Page<Role> getAllRoles(@RequestParam int page) {
-        return null;
+    @GetMapping()
+    public Page<Role> getAllRoles(@RequestParam(required = false, defaultValue = "1") int page) {
+
+        log.info("page={}", page);
+        final Page<Role> all = roleRepo.findAll(PageRequest.of(page, 10));
+        log.info("Retrieved paginated result with {} entries", all.getSize());
+
+        return all;
     }
 }
