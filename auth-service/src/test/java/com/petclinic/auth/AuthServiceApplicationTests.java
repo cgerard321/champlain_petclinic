@@ -193,4 +193,26 @@ class AuthServiceApplicationTests {
 				.andExpect(jsonPath("$.totalPages", is(PAGE_COUNT)))
 				.andExpect(jsonPath("$.number", is(0)));
 	}
+
+	@Test
+	@DisplayName("Get all roles as user")
+	@WithMockUser(roles = {"USER"})
+	void get_all_roles_as_user() throws Exception {
+
+		final int
+				ROLE_COUNT = rng.nextInt(50),
+				PAGE_LIM = 10;
+
+		final int PAGE_COUNT = (int)ceil(ROLE_COUNT * 1.0 / PAGE_LIM);
+
+		for (int i = 0; i < ROLE_COUNT; i++) {
+			roleRepo.save(new Role(0, "test"+i, null));
+		}
+
+		assertEquals(ROLE_COUNT, roleRepo.count());
+
+		mockMvc.perform(get("/roles"))
+				.andDo(print())
+				.andExpect(status().isForbidden());
+	}
 }
