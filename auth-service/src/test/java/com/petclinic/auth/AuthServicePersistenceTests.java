@@ -54,8 +54,8 @@ public class AuthServicePersistenceTests {
 
     @BeforeEach
     void cleanUp() {
-        userRepo.deleteAllInBatch();
-        roleRepo.deleteAllInBatch();
+        userRepo.deleteAll();
+        roleRepo.deleteAll();
     }
 
     @Test
@@ -178,7 +178,7 @@ public class AuthServicePersistenceTests {
         final Role created = roleRepo.save(child);
         assertEquals(parent.getId(), created.getParent().getId());
 
-        roleRepo.delete(child);
+        roleRepo.delete(created);
         assertFalse(roleRepo.findById(child.getId()).isPresent());
 
         roleRepo.delete(parent);
