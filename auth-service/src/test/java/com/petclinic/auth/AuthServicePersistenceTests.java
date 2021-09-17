@@ -4,6 +4,7 @@ import com.petclinic.auth.Role.Role;
 import com.petclinic.auth.Role.RoleRepo;
 import com.petclinic.auth.User.User;
 import com.petclinic.auth.User.UserRepo;
+import org.hibernate.Hibernate;
 import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -188,16 +189,16 @@ public class AuthServicePersistenceTests {
     @DisplayName("Delete role referenced by user")
     void delete_role_referenced_by_user() {
 
-        final User user = addDefaultUser();
+        User user = addDefaultUser();
 
         final Role role = addUserRole();
 
         user.getRoles().add(role);
 
-        userRepo.save(user);
+        user = userRepo.save(user);
 
-        assertEquals(userRepo.getOne(user.getId()).getRoles().size(), 0);
-        assertTrue(userRepo.getOne(user.getId()).getRoles().contains(role));
+        assertEquals(1, user.getRoles().size());
+        assertTrue(user.getRoles().contains(role));
 
         assertThrows(DataIntegrityViolationException.class, () -> roleRepo.delete(role));
     }
