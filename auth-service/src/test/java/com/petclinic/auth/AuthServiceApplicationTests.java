@@ -16,6 +16,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Optional;
 import java.util.Random;
 
+import static java.lang.Math.ceil;
+import static java.lang.Math.min;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -169,20 +171,26 @@ class AuthServiceApplicationTests {
 	@WithMockUser(roles = {"ADMIN"})
 	void get_all_roles_as_admin() throws Exception {
 
-		for (int i = 0; i < 10; i++) {
+		final int
+				ROLE_COUNT = rng.nextInt(50),
+				PAGE_LIM = 10;
+
+		final int PAGE_COUNT = (int)ceil(ROLE_COUNT * 1.0 / PAGE_LIM);
+
+		for (int i = 0; i < ROLE_COUNT; i++) {
 			roleRepo.save(new Role(0, "test"+i, null));
 		}
 
-		assertEquals(10, roleRepo.count());
+		assertEquals(ROLE_COUNT, roleRepo.count());
 
 		mockMvc.perform(get("/roles"))
 				.andDo(print())
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.empty", is(false)))
-				.andExpect(jsonPath("$.content.length()", is(10)))
+				.andExpect(jsonPath("$.content.length()", is(min(ROLE_COUNT, PAGE_LIM))))
 				.andExpect(jsonPath("$.content[0].parent", nullValue()))
-				.andExpect(jsonPath("$.totalElements", is(10)))
-				.andExpect(jsonPath("$.totalPages", is(1)))
+				.andExpect(jsonPath("$.totalElements", is(ROLE_COUNT)))
+				.andExpect(jsonPath("$.totalPages", is(PAGE_COUNT)))
 				.andExpect(jsonPath("$.number", is(0)));
 	}
 }
