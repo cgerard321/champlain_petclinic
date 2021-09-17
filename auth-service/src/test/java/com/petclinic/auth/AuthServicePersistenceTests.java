@@ -161,7 +161,7 @@ public class AuthServicePersistenceTests {
     void delete_parent_without_deleting_child_role() {
 
         final Role parent = addUserRole();
-        final Role child = new Role(1, "cool_user", parent);
+        final Role child = new Role(-1, "cool_user", parent);
         final Role created = roleRepo.save(child);
         assertEquals(parent.getId(), created.getParent().getId());
 
