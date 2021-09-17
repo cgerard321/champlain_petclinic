@@ -17,8 +17,7 @@ import java.util.Optional;
 import java.util.Random;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -179,6 +178,11 @@ class AuthServiceApplicationTests {
 		mockMvc.perform(get("/roles"))
 				.andDo(print())
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.content.length()", is(10)));
+				.andExpect(jsonPath("$.empty", is(false)))
+				.andExpect(jsonPath("$.content.length()", is(10)))
+				.andExpect(jsonPath("$.content[0].parent", nullValue()))
+				.andExpect(jsonPath("$.totalElements", is(10)))
+				.andExpect(jsonPath("$.totalPages", is(1)))
+				.andExpect(jsonPath("$.number", is(0)));
 	}
 }
