@@ -18,10 +18,11 @@ import java.util.Random;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
 @AutoConfigureMockMvc
@@ -169,8 +170,15 @@ class AuthServiceApplicationTests {
 	@WithMockUser(roles = {"ADMIN"})
 	void get_all_roles_as_admin() throws Exception {
 
+		for (int i = 0; i < 10; i++) {
+			roleRepo.save(new Role(0, "test"+i, null));
+		}
+
+		assertEquals(10, roleRepo.count());
+
 		mockMvc.perform(get("/roles"))
 				.andDo(print())
-				.andExpect(status().isOk());
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.content.length()", is(10)));
 	}
 }
