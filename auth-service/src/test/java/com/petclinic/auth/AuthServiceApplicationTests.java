@@ -158,7 +158,7 @@ class AuthServiceApplicationTests {
 		assertNull(found.get().getParent());
 
 		// Idempotency check
-		for (int i = 0; i < rng.nextInt(); i++) {
+		for (int i = 0; i < rng.nextInt(100); i++) {
 			roleController.deleteRole(save.getId());
 			assertFalse(roleRepo.findById(save.getId()).isPresent());
 		}
