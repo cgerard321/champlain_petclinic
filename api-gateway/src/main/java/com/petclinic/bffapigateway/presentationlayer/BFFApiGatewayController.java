@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -70,7 +72,7 @@ public class BFFApiGatewayController {
         return vetsServiceClient.getVets();
     }
 
-    private final HashMap<Integer, Object> roles = new HashMap<Integer, Object>() {{
+    private final HashMap<Integer, HashMap<Object, Object>> roles = new HashMap<Integer, HashMap<Object, Object>>() {{
         put(1, new HashMap<Object, Object>(){{ put("name", "test"); }});
         put(2, new HashMap<Object, Object>(){{ put("name", "test1"); }});
         put(3, new HashMap<Object, Object>(){{ put("name", "test2"); }});
@@ -78,7 +80,20 @@ public class BFFApiGatewayController {
 
     @GetMapping(value = "/admin/roles")
     public Map<String, Object> getRoles() {
-        return roles;
+        Map<String, Object> toRet = new HashMap<>();
+        List<Map<Object, Object>> content = new ArrayList<>();
+
+
+        roles.forEach((k, v) -> {
+            HashMap<Object, Object> role = new HashMap<>();
+            role.put("id", k);
+            role.put("name", v.get("name"));
+            content.add(role);
+        });
+
+        toRet.put("content", content);
+
+        return toRet;
     }
 
     @DeleteMapping(value = "/admin/roles/{id}")
