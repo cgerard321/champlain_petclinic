@@ -7,10 +7,7 @@ import com.petclinic.bffapigateway.dtos.OwnerDetails;
 import com.petclinic.bffapigateway.dtos.VetDetails;
 import com.petclinic.bffapigateway.dtos.Visits;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -84,5 +81,9 @@ public class BFFApiGatewayController {
     @GetMapping(value = "/admin/roles")
     public Map<String, Object> getRoles() {
         return roles;
+    }
+
+    @DeleteMapping(value = "/admin/roles/{id}")
+    public void deleteRole(@PathVariable int id) {
     }
 }
