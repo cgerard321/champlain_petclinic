@@ -2,6 +2,7 @@ package com.petclinic.auth.Role;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
@@ -47,7 +48,13 @@ public class RoleController {
     public void deleteRole(@RequestParam long id) {
 
         log.info("id={}", id);
-        roleRepo.deleteById(id);
+        try {
+
+            roleRepo.deleteById(id);
+        } catch (EmptyResultDataAccessException e) {
+            log.info("No role with id {}. Ignoring", id);
+            return;
+        }
         log.info("Deleted role with id {}", id);
     }
 }
