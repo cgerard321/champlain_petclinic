@@ -12,7 +12,15 @@
         <td>{{ role.id }}</td>
         <td>
             <button class="btn btn-default" ng-click="$ctrl.delete(role.id)">
-                <span class="bi bi-trash-fill text-danger" /> Delete</button>
+                <i class="bi bi-trash-fill text-danger"></i> Delete</button>
+        </td>
+    </tr>
+    <tr>
+        <td><input type="text" name="name" ng-bind="name" placeholder="Role name" /></td>
+        <td></td>
+        <td>
+            <button class="btn btn-default" ng-click="$ctrl.add()">
+                <i class="bi bi-person-plus"></i> Add Role</button>
         </td>
     </tr>
 
