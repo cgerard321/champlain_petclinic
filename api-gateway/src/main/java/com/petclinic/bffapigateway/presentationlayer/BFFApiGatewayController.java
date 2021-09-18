@@ -108,7 +108,7 @@ public class BFFApiGatewayController {
 
         return new HashMap<Object, Object>() {{
             put("id", id);
-            put("name", roles.get(id));
+            put("name", roles.get(id).get("name"));
         }};
     }
 }
