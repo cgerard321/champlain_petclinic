@@ -6,5 +6,7 @@ angular.module('rolesDetails')
             .then(res => (this.roles = console.log(res) || res.data.content))
             .catch(console.log);
 
-        this.delete = id => $http.delete(`api/gateway/admin/roles/${id}`);
+        this.delete = id =>
+            $http.delete(`api/gateway/admin/roles/${id}`) &&
+            this.roles.splice(this.roles.findIndex(n => n.id == id), 1);
     }]);
