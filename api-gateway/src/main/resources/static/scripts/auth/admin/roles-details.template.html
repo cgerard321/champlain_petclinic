@@ -10,7 +10,10 @@
     <tr ng-repeat="role in $ctrl.roles">
         <td><b>{{ role.name }}</b></td>
         <td>{{ role.id }}</td>
-        <td> <button class="btn btn-default" ng-click="$ctrl.delete(role.id)">Delete role with id {{ role.id }}</button> </td>
+        <td>
+            <button class="btn btn-default" ng-click="$ctrl.delete(role.id)">
+                <span class="bi bi-trash-fill text-danger" /> Delete</button>
+        </td>
     </tr>
 
 </table>
