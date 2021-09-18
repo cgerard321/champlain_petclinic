@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('rolesDetails')
-    .controller('RolesDetailsController', ['$http', '$stateParams', function ($http, $stateParams) {
+    .controller('RolesDetailsController', ['$http', '$scope', function ($http, $scope) {
         $http.get('api/gateway/admin/roles')
             .then(res => (this.roles = console.log(res) || res.data.content))
             .catch(console.log);
@@ -9,4 +9,10 @@ angular.module('rolesDetails')
         this.delete = id =>
             $http.delete(`api/gateway/admin/roles/${id}`) &&
             this.roles.splice(this.roles.findIndex(n => n.id == id), 1);
+
+        this.add = () => $http.post('api/gateway/admin/roles/', {
+            name: $scope.name
+        })
+            .then(res => this.roles.push(console.log(res) || res.data))
+            .catch(console.log);
     }]);
