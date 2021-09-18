@@ -3,9 +3,9 @@
 angular.module('signupForm', ['ui.router'])
     .config(['$stateProvider', function ($stateProvider) {
         $stateProvider
-            .state('signupNew', {
+            .state('signupForm', {
                 parent: 'app',
-                url: '/signup/new',
+                url: '/signup',
                 template: '<signup-form></signup-form>'
             })
     }]);

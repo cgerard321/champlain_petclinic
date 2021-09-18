@@ -7,19 +7,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class UserServiceImpl implements UserService{
 
-    public static final Logger LOG = LoggerFactory.getLogger(UserServiceImpl.class);
-
-    private final UserRepo repository;
-
-
-    public UserServiceImpl(UserRepo repository) {
-        this.repository = repository;
-    }
-
     @Override
-    public User signup(User user) {
-
-
+    public User createUser(UserIDLessDTO user) {
         return null;
     }
 }

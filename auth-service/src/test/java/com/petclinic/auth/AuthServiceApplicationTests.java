@@ -58,7 +58,6 @@ class AuthServiceApplicationTests {
 	@Test
 	@DisplayName("Given necessary data is inputted, register user.")
 	void register_user(){
-
 	}
 
 	@Test
