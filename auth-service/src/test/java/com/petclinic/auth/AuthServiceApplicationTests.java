@@ -2,6 +2,8 @@ package com.petclinic.auth;
 
 import com.petclinic.auth.User.User;
 import com.petclinic.auth.Role.*;
+import com.petclinic.auth.User.UserController;
+import com.petclinic.auth.User.UserIDLessDTO;
 import com.petclinic.auth.User.UserRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -53,6 +55,9 @@ class AuthServiceApplicationTests {
 	@Autowired
 	private RoleController roleController;
 	private final RoleIDLessDTO ID_LESS_USER_ROLE = new RoleIDLessDTO("user");
+
+	private UserController userController;
+	private final UserIDLessDTO ID_LESS_USER = new UserIDLessDTO();
 
 	@BeforeEach
 	void setup() {
@@ -236,5 +241,33 @@ class AuthServiceApplicationTests {
 		mockMvc.perform(get("/roles"))
 				.andDo(print())
 				.andExpect(status().isForbidden());
+	}
+
+	@Test
+	@DisplayName("Add User with username, password and email")
+	void add_user() throws Exception{
+
+		final User testUser = userRepo.save(new User("testUsername", "testPassword", "test@email.com"));
+
+		assertEquals(testUser.getUsername(), "testUsername");
+		assertEquals(testUser.getPassword(), "testPassword");
+		assertEquals(testUser.getEmail(), "test@email.com");
+	}
+	@Test
+	@DisplayName("Submit a completed signup form")
+	void submit_completed_signup_form() throws Exception {
+
+	}
+
+	@Test
+	@DisplayName("Submit signup form with a pre-existing email")
+	void submit_signup_with_exisiting_email() throws Exception{
+
+	}
+
+	@Test
+	@DisplayName("Check the required fields with empty data")
+	void check_empty_require_fields() throws Exception{
+
 	}
 }
