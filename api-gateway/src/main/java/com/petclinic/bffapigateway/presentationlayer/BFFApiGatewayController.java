@@ -11,10 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -99,5 +96,19 @@ public class BFFApiGatewayController {
     @DeleteMapping(value = "/admin/roles/{id}")
     public void deleteRole(@PathVariable int id) {
         roles.remove(id);
+    }
+
+    @PostMapping(value = "/admin/roles")
+    public Map<Object, Object> addRole(
+            @RequestBody Map<String, String> body
+    ) {
+        final String name = body.get("name");
+        final int id = new Random().nextInt() & Integer.MAX_VALUE;
+        roles.put(id, new HashMap<Object, Object>(){{ put("name", name); }});
+
+        return new HashMap<Object, Object>() {{
+            put("id", id);
+            put("name", roles.get(id));
+        }};
     }
 }
