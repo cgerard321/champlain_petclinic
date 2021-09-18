@@ -1,7 +1,12 @@
-FROM openjdk:12.0.2
+FROM gradle:6 as builder
+WORKDIR /usr/src/app
+COPY src ./src
+COPY build.gradle .
+RUN ["gradle", "bootJar"]
 
 EXPOSE 8080
 
-ADD ./build/libs/*.jar app.jar
-
-ENTRYPOINT ["java", "-jar", "/app.jar"]
+FROM openjdk:11
+ARG JAR_FILE=build/libs/*.jar
+COPY --from=builder /usr/src/app/${JAR_FILE} app.jar
+ENTRYPOINT ["java", "-jar","/app.jar"]
