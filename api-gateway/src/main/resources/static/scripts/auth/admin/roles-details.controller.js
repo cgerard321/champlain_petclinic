@@ -11,9 +11,10 @@ angular.module('rolesDetails')
             this.roles.splice(this.roles.findIndex(n => n.id == id), 1);
 
         this.add = () => $http.post('api/gateway/admin/roles/', {
-            name: $scope.name
+            name: $scope.newRole.name,
+            parent: $scope.newRole.parent,
         })
-            .then(res => this.roles.push(res.data) && ($scope.name = ''))
+            .then(res => this.roles.push(res.data) && ($scope.newRole.name = ''))
             .catch(console.log);
 
         this.keypress = ({ originalEvent: { key } }) => key === 'Enter' && this.add()
