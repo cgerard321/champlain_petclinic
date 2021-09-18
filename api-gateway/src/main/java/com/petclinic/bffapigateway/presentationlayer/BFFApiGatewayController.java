@@ -70,12 +70,10 @@ public class BFFApiGatewayController {
         return vetsServiceClient.getVets();
     }
 
-    private final HashMap<String, Object> roles = new HashMap<String, Object>() {{
-        put("content", new Object[]{
-                new HashMap<Object, Object>(){{ put("name", "test"); put("id", 1); }},
-                new HashMap<Object, Object>(){{ put("name", "test1"); put("id", 2); }},
-                new HashMap<Object, Object>(){{ put("name", "test2"); put("id", 3); }},
-        });
+    private final HashMap<Integer, Object> roles = new HashMap<Integer, Object>() {{
+        put(1, new HashMap<Object, Object>(){{ put("name", "test"); }});
+        put(2, new HashMap<Object, Object>(){{ put("name", "test1"); }});
+        put(3, new HashMap<Object, Object>(){{ put("name", "test2"); }});
     }};
 
     @GetMapping(value = "/admin/roles")
