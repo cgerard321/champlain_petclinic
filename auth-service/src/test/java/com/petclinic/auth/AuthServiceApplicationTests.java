@@ -172,7 +172,7 @@ class AuthServiceApplicationTests {
 	void get_all_roles_as_admin() throws Exception {
 
 		final int
-				ROLE_COUNT = rng.nextInt(50),
+				ROLE_COUNT = 1 + rng.nextInt(50),
 				PAGE_LIM = 10;
 
 		final int PAGE_COUNT = (int)ceil(ROLE_COUNT * 1.0 / PAGE_LIM);
@@ -200,7 +200,7 @@ class AuthServiceApplicationTests {
 	void get_all_roles_as_user() throws Exception {
 
 		final int
-				ROLE_COUNT = rng.nextInt(50),
+				ROLE_COUNT = 1 + rng.nextInt(50),
 				PAGE_LIM = 10;
 
 		final int PAGE_COUNT = (int)ceil(ROLE_COUNT * 1.0 / PAGE_LIM);
@@ -221,7 +221,7 @@ class AuthServiceApplicationTests {
 	void get_all_roles_unauthenticated() throws Exception {
 
 		final int
-				ROLE_COUNT = rng.nextInt(50),
+				ROLE_COUNT = 1 + rng.nextInt(50),
 				PAGE_LIM = 10;
 
 		final int PAGE_COUNT = (int)ceil(ROLE_COUNT * 1.0 / PAGE_LIM);
