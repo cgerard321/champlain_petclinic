@@ -13,6 +13,8 @@ angular.module('rolesDetails')
         this.add = () => $http.post('api/gateway/admin/roles/', {
             name: $scope.name
         })
-            .then(res => this.roles.push(console.log(res) || res.data))
+            .then(res => this.roles.push(res.data) && ($scope.name = ''))
             .catch(console.log);
+
+        this.keypress = ({ originalEvent: { key } }) => key === 'Enter' && this.add()
     }]);
