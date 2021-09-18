@@ -98,5 +98,6 @@ public class BFFApiGatewayController {
 
     @DeleteMapping(value = "/admin/roles/{id}")
     public void deleteRole(@PathVariable int id) {
+        roles.remove(id);
     }
 }

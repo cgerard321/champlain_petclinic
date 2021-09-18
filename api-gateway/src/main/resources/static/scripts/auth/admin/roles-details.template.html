@@ -1,4 +1,4 @@
 <h1>Agony</h1>
 <p ng-repeat="role in $ctrl.roles">
-    {{ role.name }}
+    {{ role.name }} - <button ng-click="$ctrl.delete(role.id)">Delete role with id {{ role.id }}</button>
 </p>
