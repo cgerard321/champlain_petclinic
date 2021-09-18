@@ -1,10 +1,7 @@
 package com.petclinic.auth;
 
-import com.petclinic.auth.User.User;
+import com.petclinic.auth.User.*;
 import com.petclinic.auth.Role.*;
-import com.petclinic.auth.User.UserController;
-import com.petclinic.auth.User.UserIDLessDTO;
-import com.petclinic.auth.User.UserRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
