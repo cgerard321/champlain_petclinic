@@ -2,3 +2,30 @@
 <p ng-repeat="role in $ctrl.roles.content">
     {{ role.name }}
 </p>
+
+<table class="table table-striped">
+    <tr>
+        <th class="col-sm-3">Name</th>
+        <td><b>{{$ctrl.owner.firstName}} {{$ctrl.owner.lastName}}</b></td>
+    </tr>
+    <tr>
+        <th>Address</th>
+        <td>{{$ctrl.owner.address}}</td>
+    </tr>
+    <tr>
+        <th>City</th>
+        <td>{{$ctrl.owner.city}}</td>
+    </tr>
+    <tr>
+        <th>Telephone</th>
+        <td>{{$ctrl.owner.telephone}}</td>
+    </tr>
+    <tr>
+        <td>
+            <a class="btn btn-default" ui-sref="ownerEdit({ownerId: $ctrl.owner.id})">Edit Owner</a>
+        </td>
+        <td>
+            <a ui-sref="petNew({ownerId: $ctrl.owner.id})" class="btn btn-default">Add New Pet</a>
+        </td>
+    </tr>
+</table>
