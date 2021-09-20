@@ -14,8 +14,13 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 
 import static java.lang.Math.ceil;
 import static java.lang.Math.min;
@@ -34,6 +39,8 @@ class AuthServiceApplicationTests {
 
 	@Autowired
 	private MockMvc mockMvc;
+
+	private Validator validator;
 
 	private final static Random rng;
 
@@ -58,6 +65,8 @@ class AuthServiceApplicationTests {
 	void setup() {
 		roleRepo.deleteAllInBatch();
 		userRepo.deleteAllInBatch();
+		ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+		validator = factory.getValidator();
 	}
 
 	@Test
@@ -236,6 +245,42 @@ class AuthServiceApplicationTests {
 		mockMvc.perform(get("/roles"))
 				.andDo(print())
 				.andExpect(status().isForbidden());
+	}
+
+	@Test
+	@DisplayName("Verify if the email is valid")
+	void verify_valid_email_success() throws Exception {
+		User user = new User();
+		user.setEmail("testemail@gmail.com");
+		Set<ConstraintViolation<User>> violations = validator.validate(user);
+		assertTrue(violations.isEmpty());
+	}
+
+	@Test
+	@DisplayName("Verify if the email is valid and fail")
+	void detect_invalid_email_missing_at() throws Exception {
+		User user = new User();
+		user.setEmail("testemailgmail.com");
+		Set<ConstraintViolation<User>> violations = validator.validate(user);
+		assertEquals(violations.size(), 1);
+
+		ConstraintViolation<User> violation = violations.iterator().next();
+		assertEquals("the email must be a valid email", violation.getMessage());
+		assertEquals("email", violation.getPropertyPath().toString());
+		assertEquals("testemailgmail.com", violation.getInvalidValue());
+	}
+
+	@Test
+	@DisplayName("Verify if the email is valid and fail because of an uppercase")
+	void detect_invalid_email_upper_case() throws Exception {
+		User user = new User();
+		user.setEmail("Testemail@gmail.com");
+		Set<ConstraintViolation<User>> violations = validator.validate(user);
+		assertEquals(violations.size(), 1);
+		ConstraintViolation<User> violation = violations.iterator().next();
+		assertEquals("the email must be a valid email", violation.getMessage());
+		assertEquals("email", violation.getPropertyPath().toString());
+		assertEquals("Testemail@gmail.com", violation.getInvalidValue());
 	}
 }
 

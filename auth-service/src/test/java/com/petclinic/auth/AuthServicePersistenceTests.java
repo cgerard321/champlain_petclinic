@@ -40,7 +40,7 @@ public class AuthServicePersistenceTests {
     private RoleRepo roleRepo;
 
     private final User DEFAULT_USER =
-            new User(0, "username-1", "password-1", "email-1", Collections.EMPTY_SET);
+            new User(0, "username-1", "password-1", "email-1@gmail.com", Collections.EMPTY_SET);
 
     private final Role
             ROLE_ADMIN = new Role(0, "ADMIN"),
@@ -211,8 +211,7 @@ public class AuthServicePersistenceTests {
 
         user = userRepo.save(user);
 
-        assertEquals("email-1", user.getEmail());
-
+        assertEquals("email-1@gmail.com", user.getEmail());
     }
 
     @Test
@@ -223,7 +222,7 @@ public class AuthServicePersistenceTests {
 
         user = userRepo.save(user);
 
-        assertNotEquals("email-4", user.getEmail());
+        assertNotEquals("email-4@gmail.com", user.getEmail());
 
     }
 

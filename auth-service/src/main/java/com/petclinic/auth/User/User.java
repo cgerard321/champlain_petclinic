@@ -7,6 +7,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import java.util.List;
 import java.util.Set;
 
@@ -24,6 +27,12 @@ public class User {
 
     private String username;
     private String password;
+
+    @NotNull
+    @Pattern(regexp="[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\."
+            +"[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@"
+            +"(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?",
+            message="the email must be a valid email")
     private String email;
 
     @ManyToMany
