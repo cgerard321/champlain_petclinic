@@ -58,11 +58,11 @@ public class Vet {
     private Integer vetId;
 
     @Column(name = "first_name")
-    @NotEmpty(message = "Please enter first name")
+    @NotEmpty
     private String firstName;
 
     @Column(name = "last_name")
-    @NotEmpty(message = "Please enter last name")
+    @NotEmpty
     private String lastName;
 
     @Column(name = "email")
