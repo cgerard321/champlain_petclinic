@@ -1,6 +1,7 @@
 package com.petclinic.auth;
 
 import com.petclinic.auth.Role.*;
+import com.petclinic.auth.User.User;
 import com.petclinic.auth.User.UserRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -237,3 +238,4 @@ class AuthServiceApplicationTests {
 				.andExpect(status().isForbidden());
 	}
 }
+

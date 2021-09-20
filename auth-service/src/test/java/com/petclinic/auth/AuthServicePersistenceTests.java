@@ -203,6 +203,30 @@ public class AuthServicePersistenceTests {
         assertThrows(DataIntegrityViolationException.class, () -> roleRepo.delete(role));
     }
 
+    @Test
+    @DisplayName("Verify if email exist inside the database")
+    void verify_same_email_uniqueness() {
+
+        User user = addDefaultUser();
+
+        user = userRepo.save(user);
+
+        assertEquals("email-1", user.getEmail());
+
+    }
+
+    @Test
+    @DisplayName("Verify if email exist inside the database")
+    void verify_different_email_uniqueness_() {
+
+        User user = addDefaultUser();
+
+        user = userRepo.save(user);
+
+        assertNotEquals("email-4", user.getEmail());
+
+    }
+
     private Role addRoleAsClone(Role r) {
         return roleRepo.save(r.toBuilder().id(AuthServicePersistenceTests.rng.nextInt()).build());
     }
