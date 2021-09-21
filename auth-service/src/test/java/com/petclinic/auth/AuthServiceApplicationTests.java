@@ -249,22 +249,12 @@ class AuthServiceApplicationTests {
 		user.setEmail("testemail@gmail.com");
 	}
 
-	User user = new User();
-		user.setUsername("testUsername");
-		user.setPassword("testPassword");
-		user.setEmail("testemail@gmail.com");
-
 	@Test
 	@DisplayName("Check the required fields with empty data")
 	void check_empty_require_fields() throws Exception{
 
-		User user = new User();
-		user.setUsername("testUsername");
-		user.setPassword("testPassword");
-		user.setEmail("testemail@gmail.com");
+		UserIDLessDTO userIDLessDTO = new UserIDLessDTO();
 
-		assertNotEquals("", user.getUsername());
-		assertNotEquals("", user.getPassword());
-		assertNotEquals("", user.getEmail());
+		assertThrows(NullPointerException.class, () -> userController.createUser(userIDLessDTO));
 	}
 }

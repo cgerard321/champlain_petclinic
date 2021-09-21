@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("/users")
 @Slf4j
@@ -17,7 +19,7 @@ public class UserController {
     private final UserMapper userMapper;
 
     @PostMapping
-    public User createUser(@RequestBody UserIDLessDTO dto) {
+    public User createUser(@RequestBody @Valid UserIDLessDTO dto) {
 
         log.info("Received user dto, trying to convert model");
         log.info("DTO info: { username={}, password={}, email={} }", dto.getUsername(), dto.getPassword(), dto.getEmail());
