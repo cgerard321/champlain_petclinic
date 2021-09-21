@@ -1,6 +1,9 @@
 package com.petclinic.visits.presentationlayer;
 
+
 import com.petclinic.visits.businesslayer.VisitsService;
+import com.petclinic.visits.businesslayer.VisitCRUD;
+import com.petclinic.visits.businesslayer.VisitCRUDImpl;
 import com.petclinic.visits.datalayer.Visit;
 import com.petclinic.visits.datalayer.VisitRepository;
 import io.micrometer.core.annotation.Timed;
@@ -9,6 +12,8 @@ import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,6 +42,8 @@ public class VisitResource {
 
     //private final VisitRepository visitRepository;
 
+
+    //To create a new visits
     @PostMapping("owners/*/pets/{petId}/visits")
     @ResponseStatus(HttpStatus.CREATED)
     public Visit create(
@@ -54,6 +61,8 @@ public class VisitResource {
         return visitsService.getVisitsForPet(petId);
     }
 
+
+    //To pull in my main
     @GetMapping("owners/*/pets/{petId}/visits")
     public List<Visit> visits(@PathVariable("petId") int petId) {
         return visitsService.getVisitsForPet(petId);
@@ -64,12 +73,23 @@ public class VisitResource {
         visitsService.deleteVisit(visitId);
     }
 
+
+    //This method will return every visits of people that have multiple pets
     @GetMapping("pets/visits")
     public Visits visitsMultiGet(@RequestParam("petId") List<Integer> petIds) {
         final List<Visit> byPetIdIn = visitsService.getVisitsForPets(petIds);
         return new Visits(byPetIdIn);
     }
 
+
+    //This method will delete the visits based on the id
+    @DeleteMapping("visits")
+    public void deleteVisit(@RequestParam("id") int visitId){
+        visitRepository.findById(visitId).ifPresent(e -> visitRepository.delete(e));
+    }
+
+
+    //This class define the object that will be returned for the client with multiples visits
     @Value
     static class Visits {
         List<Visit> items;
