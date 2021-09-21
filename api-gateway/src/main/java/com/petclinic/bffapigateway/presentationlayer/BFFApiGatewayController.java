@@ -9,10 +9,7 @@ import com.petclinic.bffapigateway.dtos.Visits;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -45,6 +42,13 @@ public class BFFApiGatewayController {
                     .map(addVisitsToOwner(owner))
             );
     }
+
+
+    @DeleteMapping(value = "visits/{visitId}")
+    public void deleteVisits(@PathVariable int visitId){
+        visitsServiceClient.deleteVisit(visitId);
+    }
+
 
     @GetMapping(value = "customer/owners")
     public Flux<OwnerDetails> getOwners() {

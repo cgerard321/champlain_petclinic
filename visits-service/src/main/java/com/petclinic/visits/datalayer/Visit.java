@@ -45,6 +45,10 @@ public class Visit {
         return id;
     }
 
+    public void setId(int Id){
+        this.id = id;
+    }
+
     public Date getDate() {
         return date;
     }

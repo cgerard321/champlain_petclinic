@@ -57,5 +57,13 @@ public class VisitsServiceClient {
     void setHostname(String hostname) {
         this.hostname = hostname;
     }
+
+
+    public void deleteVisit(int visitId) {
+        webClientBuilder.build()
+                .delete()
+                .uri(hostname + "visits?id={visitId}", visitId)
+                .retrieve();
+    }
 }
 
