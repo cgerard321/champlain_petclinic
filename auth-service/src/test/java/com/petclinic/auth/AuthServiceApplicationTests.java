@@ -241,30 +241,30 @@ class AuthServiceApplicationTests {
 	}
 
 	@Test
-	@DisplayName("Add User with username, password and email")
-	void add_user() throws Exception{
-
-		final User testUser = userRepo.save(new User("testUsername", "testPassword", "test@email.com"));
-
-		assertEquals(testUser.getUsername(), "testUsername");
-		assertEquals(testUser.getPassword(), "testPassword");
-		assertEquals(testUser.getEmail(), "test@email.com");
-	}
-	@Test
 	@DisplayName("Submit a completed signup form")
 	void submit_completed_signup_form() throws Exception {
-
+		User user = new User();
+		user.setUsername("testUsername");
+		user.setPassword("testPassword");
+		user.setEmail("testemail@gmail.com");
 	}
 
-	@Test
-	@DisplayName("Submit signup form with a pre-existing email")
-	void submit_signup_with_exisiting_email() throws Exception{
-
-	}
+	User user = new User();
+		user.setUsername("testUsername");
+		user.setPassword("testPassword");
+		user.setEmail("testemail@gmail.com");
 
 	@Test
 	@DisplayName("Check the required fields with empty data")
 	void check_empty_require_fields() throws Exception{
 
+		User user = new User();
+		user.setUsername("testUsername");
+		user.setPassword("testPassword");
+		user.setEmail("testemail@gmail.com");
+
+		assertNotEquals("", user.getUsername());
+		assertNotEquals("", user.getPassword());
+		assertNotEquals("", user.getEmail());
 	}
 }

@@ -207,6 +207,17 @@ public class AuthServicePersistenceTests {
         assertThrows(DataIntegrityViolationException.class, () -> roleRepo.delete(role));
     }
 
+    @Test
+    @DisplayName("Add User with username, password and email")
+    void add_user() throws Exception{
+
+        final User testUser = userRepo.save(new User("testUsername", "testPassword", "test@email.com"));
+
+        assertEquals(testUser.getUsername(), "testUsername");
+        assertEquals(testUser.getPassword(), "testPassword");
+        assertEquals(testUser.getEmail(), "test@email.com");
+    }
+
     private Role addRoleAsClone(Role r) {
         return roleRepo.save(r.toBuilder().id(AuthServicePersistenceTests.rng.nextInt()).build());
     }
