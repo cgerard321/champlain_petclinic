@@ -45,7 +45,7 @@ class VisitResource {
 
     @DeleteMapping("visits/{visitId}")
     public void deleteVisit(@PathVariable("visitId") int visitId){
-        visitRepository.deleteAll();
+        visitRepository.findById(visitId).ifPresent(v -> visitRepository.delete(v));
     }
 
     @GetMapping("pets/visits")
