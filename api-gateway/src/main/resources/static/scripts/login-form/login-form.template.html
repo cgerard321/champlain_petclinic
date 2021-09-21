@@ -1,0 +1,19 @@
+<h2>Login</h2>
+<form ng-submit="$ctrl.submitLoginForm()" style="max-width: 25em;">
+    <div class="form-group">
+        <label>Username</label>
+        <input class="form-control" ng-model="$ctrl.login.username" name="username" required/>
+        <span ng-show="loginForm.username.$error.required" class="help-block">Username is required.</span>
+    </div>
+
+    <div class="form-group">
+        <label>Password</label>
+        <input class="form-control" ng-model="$ctrl.login.password" name="password" required/>
+        <span ng-show="loginForm.password.$error.required" class="help-block">Password is required.</span>
+    </div>
+
+    <div class="form-group">
+        <button class="btn btn-default" type="submit">Login</button>
+        <button class="btn btn-default" type="submit">Register</button>
+    </div>
+</form>
