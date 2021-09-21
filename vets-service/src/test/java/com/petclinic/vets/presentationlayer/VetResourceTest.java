@@ -3,6 +3,8 @@ package com.petclinic.vets.presentationlayer;
 import com.petclinic.vets.datalayer.Vet;
 import com.petclinic.vets.datalayer.VetRepository;
 import com.petclinic.vets.presentationlayer.VetResource;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +37,7 @@ class VetResourceTest {
 	@MockBean
 	VetRepository vetRepository;
 
+
 	@Test
 	void shouldGetAListOfVets() throws Exception {
 
@@ -47,4 +50,13 @@ class VetResourceTest {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$[0].id").value(1));
 	}
+
+
+	@Test
+	@DisplayName("Should get all the fields for a vet and check if they are okay")
+	void shouldGetAllTheFieldsForAVet() throws Exception{
+
+
+	}
+
 }

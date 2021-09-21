@@ -5,6 +5,7 @@ DROP TABLE specialties IF EXISTS;
 CREATE TABLE vets
 (
     id         INTEGER IDENTITY PRIMARY KEY,
+    vet_id     INTEGER (6),
     first_name VARCHAR(30),
     last_name  VARCHAR(30),
     email      VARCHAR(100),

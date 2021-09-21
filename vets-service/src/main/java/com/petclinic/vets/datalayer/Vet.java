@@ -1,5 +1,6 @@
 package com.petclinic.vets.datalayer;
 
+import org.hibernate.validator.constraints.UniqueElements;
 import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PropertyComparator;
 
@@ -27,6 +28,11 @@ public class Vet {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Id
+    @NotEmpty
+    @UniqueElements
+    private Integer vetId;
+
     @Column(name = "first_name")
     @NotEmpty
     private String firstName;
@@ -49,6 +55,14 @@ public class Vet {
 
     @Column(name = "workday")
     private String workday;
+
+    public Integer getVetId() {
+        return vetId;
+    }
+
+    public void setVetId(Integer vetId) {
+        this.vetId = vetId;
+    }
 
     public String getEmail() {
         return email;
