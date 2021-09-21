@@ -2,10 +2,9 @@ plugins {
 	id 'org.springframework.boot' version '2.3.2.RELEASE'
 	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
 	id 'java'
-	id "io.freefair.lombok" version "6.0.0-m2"
 }
 
-group = 'com.petclinic.auth'
+group = 'com.petclinic.billing'
 version = '1.0.0-SNAPSHOT'
 sourceCompatibility = '1.8'
 
@@ -13,27 +12,12 @@ repositories {
 	mavenCentral()
 }
 
-ext {
-	mapstructVersion = "1.4.1.Final"
-}
-
-
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
-	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation('org.springframework.boot:spring-boot-starter-data-jpa')
 	implementation('mysql:mysql-connector-java')
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
-	implementation 'io.jsonwebtoken:jjwt:0.9.1'
-	implementation 'org.flywaydb:flyway-core'
-
-	implementation group: 'org.projectlombok', name: 'lombok-mapstruct-binding', version: '0.2.0'
-
-	implementation("org.mapstruct:mapstruct:${mapstructVersion}")
-	compileOnly "org.mapstruct:mapstruct-processor:${mapstructVersion}"
-	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
-	testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 
 	runtimeOnly 'com.h2database:h2'
 
@@ -41,10 +25,9 @@ dependencies {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
 	testImplementation 'io.projectreactor:reactor-test'
-	testImplementation 'org.springframework.security:spring-security-test'
 	testImplementation('com.h2database:h2')
-}
 
+}
 test {
 	useJUnitPlatform()
 }
