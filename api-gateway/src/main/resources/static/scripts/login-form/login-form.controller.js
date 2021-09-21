@@ -4,18 +4,18 @@ angular.module('loginForm')
     .controller('LoginFormController', ["$http", '$state', '$stateParams', function ($http, $state, $stateParams) {
         var self = this;
 
-        var loginId = $stateParams.loginId || 0;
+        var ownerId = $stateParams.ownerId || 0;
 
-        if (!loginId) {
+        if (!ownerId) {
             self.login = {};
         } else {
-            $http.get("api/gateway/login/" + loginId).then(function (resp) {
+            $http.get("api/gateway/login/" + ownerId).then(function (resp) {
                 self.login = resp.data;
             });
         }
 
         self.submitLoginForm = function () {
-            var id = self.login.id;
+            var id = self.owner.id;
             var req;
             if (id) {
                 req = $http.put("api/gateway/login/" + id, self.login);
