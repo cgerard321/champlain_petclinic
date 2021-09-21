@@ -2,6 +2,7 @@ plugins {
 	id 'org.springframework.boot' version '2.3.2.RELEASE'
 	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
 	id 'java'
+	id "io.freefair.lombok" version "6.0.0-m2"
 }
 
 group = 'com.petclinic.billing'
@@ -28,6 +29,11 @@ dependencies {
 	testImplementation('com.h2database:h2')
 
 }
+
 test {
 	useJUnitPlatform()
+	testLogging {
+		events "passed", "skipped", "failed"
+	}
 }
+
