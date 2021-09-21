@@ -56,6 +56,28 @@ class VetResourceTest {
 	@DisplayName("Should get all the fields for a vet and check if they are okay")
 	void shouldGetAllTheFieldsForAVet() throws Exception{
 
+		Vet vet = new Vet();
+		vet.setId(1);
+		vet.setVetId(874130);
+		vet.setFirstName("James");
+		vet.setLastName("Carter");
+		vet.setEmail("carter.james@email.com");
+		vet.setPhoneNumber("(514)-634-8276 #2384");
+		vet.setResume("Practicing since 3 years");
+		vet.setWorkday("Monday, Tuesday, Friday");
+
+		given(vetRepository.findAll()).willReturn(asList(vet));
+
+		mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$[0].id").value(1))
+				.andExpect(jsonPath("$[0].vetId").value(874130))
+				.andExpect(jsonPath("$[0].firstName").value("James"))
+				.andExpect(jsonPath("$[0].lastName").value("Carter"))
+				.andExpect(jsonPath("$[0].email").value("carter.james@email.com"))
+				.andExpect(jsonPath("$[0].phoneNumber").value("(514)-634-8276 #2384"))
+				.andExpect(jsonPath("$[0].resume").value("Practicing since 3 years"))
+				.andExpect(jsonPath("$[0].workday").value("Monday, Tuesday, Friday"));
 
 	}
 
