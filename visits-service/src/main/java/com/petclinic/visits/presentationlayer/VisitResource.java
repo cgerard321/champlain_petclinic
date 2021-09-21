@@ -43,6 +43,11 @@ class VisitResource {
         return visitRepository.findByPetId(petId);
     }
 
+    @DeleteMapping("visits/{visitId}")
+    public void deleteVisit(@PathVariable("visitId") int visitId){
+        visitRepository.deleteAll();
+    }
+
     @GetMapping("pets/visits")
     public Visits visitsMultiGet(@RequestParam("petId") List<Integer> petIds) {
         final List<Visit> byPetIdIn = visitRepository.findByPetIdIn(petIds);
