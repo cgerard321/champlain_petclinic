@@ -1,17 +1,23 @@
 package com.petclinic.auth.Role;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
+@RequiredArgsConstructor
 public class RoleServiceImpl implements RoleService {
 
+    private final RoleRepo roleRepo;
 
     @Override
     public Role createRole(Role role) {
-        return null;
+
+        return roleRepo.save(role);
     }
 
     @Override

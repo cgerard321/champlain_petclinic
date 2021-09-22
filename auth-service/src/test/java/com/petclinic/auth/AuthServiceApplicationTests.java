@@ -53,9 +53,6 @@ class AuthServiceApplicationTests {
 	private RoleService mockRoleService;
 
 	@Autowired
-	private RoleService roleService;
-
-	@Autowired
 	private RoleMapper roleMapper;
 
 	@Autowired
@@ -256,17 +253,5 @@ class AuthServiceApplicationTests {
 				.thenReturn(role);
 
 		assertEquals(roleController.createRole(new RoleIDLessDTO()), role);
-	}
-
-	@Test
-	@DisplayName("Create role through role service")
-	void create_role_through_role_service() {
-
-		final Role role = new Role(0, "TEST_ROLE");
-		final Role saved = roleService.createRole(role);
-
-		assertEquals(saved.getName(), role.getName());
-		assertEquals(saved.getParent(), role.getParent());
-		assertThat(saved.getId(), is(Long.TYPE));
 	}
 }
