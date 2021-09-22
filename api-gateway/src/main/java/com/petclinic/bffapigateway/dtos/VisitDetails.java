@@ -19,4 +19,6 @@ public class VisitDetails {
     private String date = null;
 
     private String description = null;
+    
+    private Integer practitionerId = null;
 }
