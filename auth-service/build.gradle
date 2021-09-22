@@ -62,6 +62,16 @@ jacocoTestReport {
 	}
 }
 
+jacocoTestCoverageVerification {
+	violationRules {
+		rule {
+			limit {
+				minimum = 0.90
+			}
+		}
+	}
+}
+
 test.finalizedBy jacocoTestReport
 check.dependsOn jacocoTestCoverageVerification
 
