@@ -41,6 +41,18 @@ public class Visit {
     @Column(name = "pet_id")
     private int petId;
 
+
+    //Constructor of the visit object
+    public Visit(int id, Date date, String description, int petId){
+        this.id = id;
+        this.date = date;
+        this.description = description;
+        this.petId = petId;
+    }
+
+    /*
+    Getter and setters for all values
+     */
     public Integer getId() {
         return id;
     }

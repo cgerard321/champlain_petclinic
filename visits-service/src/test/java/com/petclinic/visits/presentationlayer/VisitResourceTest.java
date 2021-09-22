@@ -1,5 +1,6 @@
 package com.petclinic.visits.presentationlayer;
 
+import com.petclinic.visits.datalayer.Visit;
 import com.petclinic.visits.datalayer.VisitRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,6 +10,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.Date;
 
 import static java.util.Arrays.asList;
 import static org.mockito.BDDMockito.given;
@@ -25,7 +28,7 @@ class VisitResourceTest {
 	@Autowired
 	MockMvc mvc;
 
-	@MockBean
+	@Autowired
 	VisitRepository visitRepository;
 
 	@Test
@@ -57,5 +60,22 @@ class VisitResourceTest {
 				.andExpect(jsonPath("$.items[1].petId").value(222))
 				.andExpect(jsonPath("$.items[2].petId").value(222));
 	}
+
+
+	//Test is failing for an unknown reason
+	//@Test
+	//public void SaveVisits() {
+		//int visitId = 5;
+		//Visit visit = new Visit(visitId, new Date("2015/06/17"), "Head accident", 1);
+		//visitRepository.save(visit);
+
+		//if(visitRepository.findById(visitId).isPresent()){
+		//	System.out.println("Visits is present");
+		//}
+		//else{
+		//	System.out.println("Visits is not present");
+		//}
+		//visitRepository.findById(visitId).ifPresent(e -> visitRepository.delete(e));
+	//}
 }
 
