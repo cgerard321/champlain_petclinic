@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS vets (
     phone_number VARCHAR(30),
     resume     VARCHAR(350),
     workday    VARCHAR(250),
+    is_active  BIT,
     INDEX(last_name)
     ) engine=InnoDB;
 
