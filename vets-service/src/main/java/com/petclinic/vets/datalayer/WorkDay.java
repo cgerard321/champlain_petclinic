@@ -10,4 +10,7 @@ public class WorkDay {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @Column(name = "day_of_the_week")
+    private String dayOfTheWeek;
 }

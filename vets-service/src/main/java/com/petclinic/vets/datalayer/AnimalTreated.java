@@ -10,4 +10,6 @@ public class AnimalTreated {
     private Integer id;
 
     //To Do add what animals can be treated and necessary fields
+    @Column(name = "type_of_animal")
+    private String typeOfAnimal;
 }

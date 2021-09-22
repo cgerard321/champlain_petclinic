@@ -36,12 +36,15 @@ public class Vet {
     private String lastName;
 
     //Fields added for new vet -C.D.
+    @Column(name = "enable")
+    @NotEmpty
+    private boolean enable;
+
     @Column(name = "email")
     @NotEmpty
     private String email;
 
     @Column(name = "phone_number")
-    @NotEmpty
     private String phoneNumber;
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -75,6 +78,15 @@ public class Vet {
 
 
     //Fields added for new vet -C.D.
+
+    public boolean getEnable() {
+        return this.enable;
+    }
+
+    public void setEnable(boolean enable) {
+        this.enable = enable;
+    }
+
     public String getEmail() {return this.email;}
 
     public void setEmail(String email) {this.email = email;}
@@ -83,10 +95,13 @@ public class Vet {
 
     public void setPhoneNumber(String phoneNumber) {this.phoneNumber = phoneNumber;}
 
+
     //Add a list of animals that a vet treats
+//    private Set<AnimalTreated> animals;
+//
 //    @XmlElement
 //    public List<AnimalTreated> getAnimalTypeTreated() {
-//        List<Specialty> sortedSpecs = new ArrayList<>(getAnimalTypeTreated());
+//        List<AnimalTreated> sortedSpecs = new ArrayList<>(getAnimalTypeTreated());
 //        PropertyComparator.sort(sortedSpecs, new MutableSortDefinition("animalType", true, true));
 //        return Collections.unmodifiableList(sortedSpecs);
 //    }
@@ -100,21 +115,22 @@ public class Vet {
 //        getAnimalTypeTreated().add(animalTreated);
 //    }
 //
-    //Add list of possible wor days for vets
+//    private Set<WorkDay> workDays;
+//    //Add list of possible work days for vets
 //    @XmlElement
-//    public List<WorkDays> getWorkDays() {
-//        List<WorkDays> sortedSpecs = new ArrayList<>(getWorkDays());
+//    public List<WorkDay> getWorkDays() {
+//        List<WorkDay> sortedSpecs = new ArrayList<>(getWorkDays());
 //        PropertyComparator.sort(sortedSpecs, new MutableSortDefinition("workDays", true, true));
 //        return Collections.unmodifiableList(sortedSpecs);
 //    }
-//    protected Set<WorkDays> setWorkDaysInternal() {
+//    protected Set<WorkDay> setWorkDaysInternal() {
 //        if (this.workDays == null) {
 //            this.workDays = new HashSet<>();
 //        }
 //        return this.workDays;
 //    }
-//    public void addWorkDays(WorkDays workDays) {
-//        getWorkDays().add(workDays);
+//    public void addWorkDay(WorkDay workDay) {
+//        getWorkDays().add(workDay);
 //    }
 
     protected Set<Specialty> getSpecialtiesInternal() {
