@@ -68,7 +68,9 @@ public class AuthServicePersistenceTests {
 
         User byId = userRepo.findById(created.getId()).get();
 
-        assertEquals(byId.getUsername(), DEFAULT_USER.getUsername());
+        assertEquals(DEFAULT_USER.getUsername(), byId.getUsername());
+        assertEquals(DEFAULT_USER.getEmail(), byId.getEmail());
+        assertEquals(DEFAULT_USER.getPassword(), byId.getPassword());
     }
 
     @Test
