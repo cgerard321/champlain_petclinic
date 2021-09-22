@@ -5,9 +5,11 @@ import com.petclinic.auth.User.UserRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
@@ -23,7 +25,8 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 @AutoConfigureMockMvc
@@ -45,6 +48,9 @@ class AuthServiceApplicationTests {
 
 	@Autowired
 	private RoleRepo roleRepo;
+
+	@MockBean
+	private RoleService roleService;
 
 	@Autowired
 	private RoleMapper roleMapper;
@@ -235,5 +241,17 @@ class AuthServiceApplicationTests {
 		mockMvc.perform(get("/roles"))
 				.andDo(print())
 				.andExpect(status().isForbidden());
+	}
+	
+	@Test
+	@DisplayName("Ensure role controller uses role service")
+	void ensure_role_controller_uses_role_service() {
+
+		Role role = new Role();
+
+		Mockito.when(roleService.createRole(Mockito.any(Role.class)))
+				.thenReturn(role);
+
+		assertEquals(roleController.createRole(new RoleIDLessDTO()), role);
 	}
 }
