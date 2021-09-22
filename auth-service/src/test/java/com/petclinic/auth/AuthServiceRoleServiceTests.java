@@ -9,8 +9,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 
+import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
@@ -54,5 +56,19 @@ public class AuthServiceRoleServiceTests {
         roleService.deleteById(saved.getId());
 
         assertEquals(0, roleRepo.count());
+    }
+
+    @Test
+    @DisplayName("Get all roles")
+    void get_all_roles() {
+
+        final int ROLE_COUNT = 10;
+
+        for (int i = 0; i < ROLE_COUNT; i++) {
+            roleRepo.save(new Role(0, format("test-%d", i)));
+        }
+
+        assertEquals(ROLE_COUNT, roleRepo.count());
+        assertEquals(ROLE_COUNT, roleService.findAll(PageRequest.of(0, 10)).getTotalElements());
     }
 }
