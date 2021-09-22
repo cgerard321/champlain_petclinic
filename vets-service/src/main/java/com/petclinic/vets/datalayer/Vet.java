@@ -28,7 +28,6 @@ public class Vet {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Id
     @NotEmpty
     @UniqueElements
     @Column(name = "vet_id")
