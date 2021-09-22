@@ -49,7 +49,6 @@ public class RoleController {
 
         log.info("id={}", id);
         try {
-
             roleService.deleteById(id);
         } catch (EmptyResultDataAccessException e) {
             log.info("No role with id {}. Ignoring", id);
