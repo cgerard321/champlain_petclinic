@@ -23,7 +23,8 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public Page<Role> findAll(PageRequest pageRequest) {
-        return null;
+
+        return roleRepo.findAll(pageRequest);
     }
 
     @Override
