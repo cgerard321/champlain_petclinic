@@ -12,8 +12,15 @@
         <td><span ng-repeat="specialty in vet.specialties">{{specialty.name + ' '}}</span></td>
     </tr>
     <div ng-repeat="vet in $ctrl.vetList" class="modal m{{vet.id}} modalOff">
-        <span class="modal_name">Name: {{vet.firstName}} {{vet.lastName}}</span>
-        <span class="modal_speciality">Specialization(s):</span> <br/>
-        <span class="modal_specialty_items" ng-repeat="specialty in vet.specialties">{{(specialty.name != "" || specialty.name != null)?'  -'+specialty.name + ' ': 'no specialties'}}</span>
+        <span class="modal_name"><b>Name:</b> {{vet.firstName}} {{vet.lastName}}</span>
+        <span class="modal_phone"><b>Phone:</b> {{vet.phoneNumber}}</span>
+        <div class="modal_specialty">
+            <span class="modal_specialty_title"><b>Specialization(s):</b></span>
+            <span class="modal_specialty_items" ng-repeat="specialty in vet.specialties">
+                {{(!(specialty.name).isEmpty())?'  -'+specialty.name + ' ': 'no specialties'}}
+            </span>
+        </div>
+        <span class="modal_email"><b>Email:</b> <br/> {{vet.email}}</span>
+
     </div>
 </table>
