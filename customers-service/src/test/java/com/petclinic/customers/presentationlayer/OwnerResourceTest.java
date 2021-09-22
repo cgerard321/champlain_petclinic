@@ -6,12 +6,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.swing.text.html.Option;
 import java.util.Optional;
@@ -19,11 +21,13 @@ import java.util.Optional;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.only;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.transaction.annotation.Propagation.NOT_SUPPORTED;
 
 /**
  * @author Maciej Szarlinski
@@ -31,53 +35,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 
 @ExtendWith(SpringExtension.class)
-@WebMvcTest(PetResource.class)
-@ActiveProfiles("test")
-class PetResourceTest {
+//@WebMvcTest(OwnerResource.class)
+@DataJpaTest
+@Transactional(propagation = NOT_SUPPORTED)
+class OwnerResourceTest {
 
+    /*
     @Autowired
     MockMvc mvc;
+    */
 
-    @MockBean
-    PetRepository petRepository;
 
     @Autowired
     OwnerRepository repository;
 
-
-    @Test
-    void shouldGetAPetInJSonFormat() throws Exception {
-
-        Pet pet = setupPet();
-
-        given(petRepository.findById(2)).willReturn(Optional.of(pet));
-
-
-        mvc.perform(get("/owners/2/pets/2").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json"))
-                .andExpect(jsonPath("$.id").value(2))
-                .andExpect(jsonPath("$.name").value("Basil"))
-                .andExpect(jsonPath("$.type.id").value(6));
-    }
-
-    private Pet setupPet() {
-
-        int temp_id = 1;
-        Owner owner_pet = setupOwner(1,"Marc", "Dupre", "56 John St.", "Amsterdam", "(999) 999-9999");
-
-        Pet pet = new Pet();
-
-        pet.setName("Basil");
-        pet.setId(2);
-
-        PetType petType = new PetType();
-        petType.setId(6);
-        pet.setType(petType);
-
-        owner_pet.addPet(pet);
-        return pet;
-    }
 
     /**
      * ------------------------ DELETE_REPO ------------------------
@@ -114,6 +85,21 @@ class PetResourceTest {
     @Test
     public void findById()
     {
+
+        int OwnerID = 1;
+
+        Owner newOwner = new Owner (OwnerID, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
+        repository.save(newOwner);
+
+        if (repository.findById(OwnerID).isPresent())
+        {
+            System.out.println("Yay!");
+        }
+        else
+        {
+            System.out.println("No");
+        }
+
         /*
         Owner owner = new Owner();
         owner.setId(1);
@@ -122,12 +108,6 @@ class PetResourceTest {
         assertThat(expected).isSameAs(owner);
         verify(ownerRepository).findById(owner.getId());
          */
-        int OwnerID = 1;
-
-        Owner newOwner = new Owner (OwnerID, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
-        repository.save(newOwner);
-
-        assertTrue(repository.findById(OwnerID).isPresent());
 
        /* Owner owner = repository.findByOwnerId(newOwner.getId()).get();
         assertEquals(1, repository.count());*/
@@ -158,15 +138,26 @@ class PetResourceTest {
     public void findAll()
     {
         int expectedLength = 4;
-        Owner owner1 = new Owner (1, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "(111) 111-1111");
+        Owner owner1 = new Owner (1, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
         repository.save(owner1);
-        Owner owner2 = new Owner (2, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "(111) 111-1111");
+        Owner owner2 = new Owner (2, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
         repository.save(owner2);
-        Owner owner3 = new Owner (3, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "(111) 111-1111");
+        Owner owner3 = new Owner (3, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
         repository.save(owner3);
-        Owner owner4 = new Owner (4, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "(111) 111-1111");
+        Owner owner4 = new Owner (4, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
         repository.save(owner4);
 
+        /*
+        if (repository.findAll().size() == expectedLength)
+        {
+            System.out.println("Yay");
+        }
+        else
+        {
+            System.out.println("No");
+        }
+
+         */
         assertEquals(expectedLength, repository.findAll().size());
     }
 
@@ -180,16 +171,42 @@ class PetResourceTest {
     @Test
     public void deleteOwner()
     {
-        int expectedRes = 0;
+        /*
+
         int OwnerID = 1;
         //Owner owner = setupOwner("Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "(111) 111-1111");
         Owner owner = new Owner (OwnerID, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "(111) 111-1111");
         repository.save(owner);
-        assertEquals(expectedRes, repository.findAll().size());
 
 
         repository.findById(OwnerID).ifPresent(o -> repository.delete(o));
         assertEquals(expectedRes, repository.findAll().size());
+
+         */
+
+        int OwnerID = 1;
+        int expectedRes = 0;
+
+        Owner newOwner = new Owner (OwnerID, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
+        repository.save(newOwner);
+
+        if (repository.findById(OwnerID).isPresent())
+        {
+            Optional<Owner> ownerOptional = repository.findById(OwnerID);
+            Owner owner = ownerOptional.get();
+            repository.delete(owner);
+
+
+            if (repository.findById(OwnerID).isPresent() == false)
+            {
+                System.out.println("Yay!");
+            }
+        }
+        else
+        {
+            System.out.println("No");
+        }
+
     }
 }
 
