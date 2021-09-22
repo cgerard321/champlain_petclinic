@@ -1,6 +1,7 @@
 package com.petclinic.auth;
 
 import com.petclinic.auth.Role.Role;
+import com.petclinic.auth.Role.RoleIDLessDTO;
 import com.petclinic.auth.Role.RoleRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

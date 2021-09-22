@@ -70,6 +70,12 @@ class AuthServiceApplicationTests {
 	}
 
 	@Test
+	@DisplayName("Map null to role")
+	void map_null_to_role() {
+		assertNull(roleMapper.idLessDTOToModel(null));
+	}
+
+	@Test
 	@DisplayName("User setters")
 	void user_setters() {
 
@@ -129,5 +135,54 @@ class AuthServiceApplicationTests {
 
 		role.setParent(PARENT);
 		assertEquals(PARENT, role.getParent());
+	}
+
+	@Test
+	@DisplayName("Role builder")
+	void role_builder() {
+
+		final Role role = Role.builder()
+				.id(ID)
+				.name(ROLE_NAME)
+				.parent(null)
+				.build();
+
+		assertEquals(ID, role.getId());
+		assertEquals(ROLE_NAME, role.getName());
+		assertNull(role.getParent());
+		assertEquals(
+				format("Role.RoleBuilder(id=%d, name=%s, parent=%s)", role.getId(), role.getName(), role.getParent()),
+				role.toBuilder().toString()
+		);
+	}
+
+	@Test
+	@DisplayName("Role id less DTO builder")
+	void role_id_less_dto_builder() {
+
+		final RoleIDLessDTO dto = RoleIDLessDTO.builder()
+				.name(ROLE_NAME)
+				.parent(null)
+				.build();
+
+		assertEquals(ROLE_NAME, dto.getName());
+		assertNull(role.getParent());
+		assertEquals(
+				format("RoleIDLessDTO.RoleIDLessDTOBuilder(name=%s, parent=%s)", dto.getName(), dto.getParent()),
+				dto.toBuilder().toString()
+		);
+	}
+
+	@Test
+	@DisplayName("Role id less DTO setters")
+	void role_id_less_dto_setters() {
+
+		final RoleIDLessDTO roleIDLessDTO = new RoleIDLessDTO();
+
+		roleIDLessDTO.setName(ROLE_NAME);
+		roleIDLessDTO.setParent(null);
+
+		assertEquals(ROLE_NAME, roleIDLessDTO.getName());
+		assertNull(roleIDLessDTO.getParent());
 	}
 }
