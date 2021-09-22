@@ -70,7 +70,7 @@ class AuthServiceApplicationTests {
 	}
 
 	@Test
-	@DisplayName("User setters test")
+	@DisplayName("User setters")
 	void user_setters() {
 
 		final User user = new User();
@@ -88,7 +88,7 @@ class AuthServiceApplicationTests {
 	}
 
 	@Test
-	@DisplayName("User builder test")
+	@DisplayName("User builder")
 	void user_builder() {
 		final User user = User.builder()
 				.roles(ROLES)
@@ -110,5 +110,24 @@ class AuthServiceApplicationTests {
 		assertEquals(EMAIL, user.getEmail());
 		assertEquals(ID, user.getId());
 		assertTrue(user.getRoles().stream().anyMatch(n -> n.getName().equals(ROLE_NAME)));
+	}
+
+	@Test
+	@DisplayName("Role setters")
+	void role_setters() {
+
+		final Role role = new Role();
+		role.setId(ID);
+		role.setName(ROLE_NAME);
+		role.setParent(null);
+
+		assertEquals(ID, role.getId());
+		assertEquals(ROLE_NAME, role.getName());
+		assertNull(role.getParent());
+
+		final Role PARENT = new Role();
+
+		role.setParent(PARENT);
+		assertEquals(PARENT, role.getParent());
 	}
 }
