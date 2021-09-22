@@ -8,15 +8,13 @@ import com.petclinic.bffapigateway.dtos.OwnerDetails;
 import com.petclinic.bffapigateway.dtos.VetDetails;
 import com.petclinic.bffapigateway.dtos.Visits;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -74,8 +72,19 @@ public class BFFApiGatewayController {
         return vetsServiceClient.getVets();
     }
 
-    @GetMapping(value = "login")
-    public Flux<Login> getLogin() {
-        return customersServiceClient.getLoginForm();
+    @PostMapping(value = "/login")
+    public Map<String, String> Login(@RequestBody Login login) throws Exception {
+
+        final String
+                expectedPass = "PazzW0rd",
+                expectedUser = "aribonneau";
+
+        if(login.getPassword().equals(expectedPass) && login.getUsername().equals(expectedUser)) {
+            return new HashMap<String, String>() {{
+                put("token", "some.token");
+            }};
+        }
+
+        throw new Exception();
     }
 }
