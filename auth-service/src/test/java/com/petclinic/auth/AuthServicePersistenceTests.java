@@ -154,7 +154,7 @@ public class AuthServicePersistenceTests {
 
         final User updated = userRepo.save(user);
 
-        assertTrue(updated.getRoles().contains(userRole));
+        assertTrue(updated.getRoles().stream().anyMatch(n -> n.getId() == userRole.getId()));
     }
 
     @Test
@@ -198,7 +198,7 @@ public class AuthServicePersistenceTests {
         user = userRepo.save(user);
 
         assertEquals(1, user.getRoles().size());
-        assertTrue(user.getRoles().contains(role));
+        assertTrue(user.getRoles().stream().anyMatch(n -> n.getId() == role.getId()));
 
         assertThrows(DataIntegrityViolationException.class, () -> roleRepo.delete(role));
     }
