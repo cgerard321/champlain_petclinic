@@ -31,6 +31,7 @@ public class Vet {
     @Id
     @NotEmpty
     @UniqueElements
+    @Column(name = "vet_id")
     private Integer vetId;
 
     @Column(name = "first_name")
