@@ -3,6 +3,7 @@ plugins {
 	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
 	id 'java'
 	id "io.freefair.lombok" version "6.0.0-m2"
+	id 'jacoco'
 }
 
 group = 'com.petclinic.auth'
@@ -44,6 +45,13 @@ dependencies {
 	testImplementation 'org.springframework.security:spring-security-test'
 	testImplementation('com.h2database:h2')
 }
+
+jacoco {
+	toolVersion = "0.8.5"
+}
+
+test.finalizedBy jacocoTestReport
+check.dependsOn jacocoTestCoverageVerification
 
 test {
 	useJUnitPlatform()
