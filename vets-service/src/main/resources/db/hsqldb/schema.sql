@@ -5,8 +5,14 @@ DROP TABLE specialties IF EXISTS;
 CREATE TABLE vets
 (
     id         INTEGER IDENTITY PRIMARY KEY,
+    vet_id     INTEGER (6),
     first_name VARCHAR(30),
-    last_name  VARCHAR(30)
+    last_name  VARCHAR(30),
+    email      VARCHAR(100),
+    phone_number VARCHAR(30),
+    resume     VARCHAR(350),
+    workday    VARCHAR(250),
+    is_active  BIT
 );
 CREATE INDEX vets_last_name ON vets (last_name);
 
