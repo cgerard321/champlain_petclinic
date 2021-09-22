@@ -50,6 +50,9 @@ class AuthServiceApplicationTests {
 	private RoleRepo roleRepo;
 
 	@MockBean
+	private RoleService mockRoleService;
+
+	@Autowired
 	private RoleService roleService;
 
 	@Autowired
@@ -249,9 +252,21 @@ class AuthServiceApplicationTests {
 
 		Role role = new Role();
 
-		Mockito.when(roleService.createRole(Mockito.any(Role.class)))
+		Mockito.when(mockRoleService.createRole(Mockito.any(Role.class)))
 				.thenReturn(role);
 
 		assertEquals(roleController.createRole(new RoleIDLessDTO()), role);
+	}
+
+	@Test
+	@DisplayName("Create role through role service")
+	void create_role_through_role_service() {
+
+		final Role role = new Role(0, "TEST_ROLE");
+		final Role saved = roleService.createRole(role);
+
+		assertEquals(saved.getName(), role.getName());
+		assertEquals(saved.getParent(), role.getParent());
+		assertThat(saved.getId(), is(Long.TYPE));
 	}
 }
