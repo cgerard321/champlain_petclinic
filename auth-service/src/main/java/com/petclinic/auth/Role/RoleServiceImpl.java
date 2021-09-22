@@ -17,6 +17,7 @@ public class RoleServiceImpl implements RoleService {
     @Override
     public Role createRole(Role role) {
 
+        log.info("Saving role with name {}", role.getName());
         return roleRepo.save(role);
     }
 
@@ -27,7 +28,8 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public void deleteById(long id) throws EmptyResultDataAccessException {
-
+        log.info("Deleting role with id {}", id);
+        roleRepo.deleteById(id);
     }
 
 }
