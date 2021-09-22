@@ -107,3 +107,9 @@ table td.action-column {
     -webkit-transform: rotate(360deg);
   }
 }
+
+<!-- New Css -->
+.newBtn {
+  text-decoration: none;
+  background-color: dodgerblue;
+}
