@@ -8,6 +8,14 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+
 import static org.springframework.transaction.annotation.Propagation.NOT_SUPPORTED;
 
 @ExtendWith(SpringExtension.class)
@@ -16,17 +24,30 @@ import static org.springframework.transaction.annotation.Propagation.NOT_SUPPORT
 public class PersistenceTests {
 
     @Autowired
-    VisitRepository repo;
+    private VisitRepository repo;
 
     @BeforeEach
     public void setupDb(){
         repo.deleteAll();
 
+        // add setup data here
+        Visit visit = Visit.visit()
+                .id(1)
+                .petId(1)
+                .build();
+        Visit visit1 = Visit.visit()
+                .id(2)
+                .petId(1)
+                .build();
 
+        List<Visit> list = Arrays.asList(visit, visit1);
+        repo.saveAll(list);
     }
 
     @Test
-    public void create(){
+    public void getVisitsForPet(){
+        List<Visit> repoResponse = repo.findByPetId(1);
 
+        assertThat(repoResponse, hasSize(2));
     }
 }

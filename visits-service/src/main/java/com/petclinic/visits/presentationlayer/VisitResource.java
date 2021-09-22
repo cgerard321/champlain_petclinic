@@ -48,6 +48,12 @@ public class VisitResource {
         return visitsService.addVisit(visit);
     }
 
+    @GetMapping("visits/{petId}")
+    public List<Visit> getVisitsForPet(@PathVariable("petId") int petId){
+        log.info("Getting visits for pet with petid: {}", petId );
+        return visitsService.getVisitsForPet(petId);
+    }
+
     @GetMapping("owners/*/pets/{petId}/visits")
     public List<Visit> visits(@PathVariable("petId") int petId) {
         return visitsService.getVisitsForPet(petId);

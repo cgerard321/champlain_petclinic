@@ -51,12 +51,6 @@ public class BFFApiGatewayController {
             );
     }
 
-    @DeleteMapping(value = "visits/{visitId}")
-    public void deleteVisit(final @PathVariable int visitId){
-        visitsServiceClient.deleteVisit(visitId);
-    }
-
-
     private Function<Visits, OwnerDetails> addVisitsToOwner(OwnerDetails owner) {
         return visits -> {
             owner.getPets()

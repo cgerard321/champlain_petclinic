@@ -33,15 +33,13 @@ class VisitResourceTest {
 	@MockBean
 	VisitsService visitsService;
 
-	@MockBean
-	VisitRepository visitRepository;
+
 
 	@Test
-	void shouldFetchVisitsForPet() {
-		List<Visit> visits = new ArrayList<>();
-		visits.add(new Visit(1,))
-		when(visitsService.getVisitsForPet(1))
-				.thenReturn(
+	void whenValidPetIdThenShouldReturnVisitsForPet() throws Exception {
+
+		given(visitsService.getVisitsForPet(1))
+				.willReturn(
 						asList(
 								visit()
 								.id(1)
@@ -54,12 +52,18 @@ class VisitResourceTest {
 						)
 				);
 
-		mvc.perform(get("/"))
+		mvc.perform(get("/visits/1"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$[0].id").value(1))
+				.andExpect(jsonPath("$[1].id").value(2))
+				.andExpect(jsonPath("[0].petId").value(1))
+				.andExpect(jsonPath("[1].petId").value(1));
 	}
+
 
 	@Test
 	void shouldFetchVisits() throws Exception {
-		given(visitRepository.findByPetIdIn(asList(111, 222)))
+		given(visitsService.getVisitsForPets(asList(111, 222)))
 				.willReturn(
 						asList(
 								visit()

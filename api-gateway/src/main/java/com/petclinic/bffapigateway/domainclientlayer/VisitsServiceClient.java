@@ -49,14 +49,6 @@ public class VisitsServiceClient {
                 .bodyToMono(Visits.class);
     }
 
-    public Mono<Void> deleteVisit(final int visitId){
-        return webClientBuilder.build()
-                .delete()
-                .uri(hostname + "visits/{visitId}", visitId)
-                .retrieve()
-                .bodyToMono(Void.class);
-    }
-
     private String joinIds(List<Integer> petIds) {
         return petIds.stream().map(Object::toString).collect(joining(","));
     }
