@@ -8,12 +8,12 @@
     </thead>
 
     <tr ng-repeat="vet in $ctrl.vetList">
-        <td><span ng-mouseenter="$ctrl.show()" ng-mouseleave="$ctrl.hide()" class="info">{{vet.firstName}} {{vet.lastName}}</span></td>
+        <td><span ng-mouseenter="$ctrl.show($event,vet.id)" ng-mouseleave="$ctrl.hide($event,vet.id)" class="info v{{vet.id}}">{{vet.firstName}} {{vet.lastName}}</span></td>
         <td><span ng-repeat="specialty in vet.specialties">{{specialty.name + ' '}}</span></td>
-        <div class="modalOff">
-            <h3>Name: {{vet.firstName}} {{vet.lastName}}</h3>
-            <span ng-repeat="specialty in vet.specialties">Specialtion(s): {{specialty.name + ' '}}</span>
-        </div>
-
     </tr>
+    <div ng-repeat="vet in $ctrl.vetList" class="modal m{{vet.id}} modalOff">
+        <h3>Name: {{vet.firstName}} {{vet.lastName}}</h3>
+        Specialtion(s): <br/>
+        <span ng-repeat="specialty in vet.specialties">-{{specialty.name + ' '}}</span>
+    </div>
 </table>

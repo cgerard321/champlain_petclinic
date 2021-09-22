@@ -1,11 +1,20 @@
-.modal{
- position:relative;
+.modalOn{
+    display:block !important;
+ position:absolute;
+ top:0;
+ left:100%;
  z-index:100000;
-    width:300px;
-    height:150px;
+ text-align:center;
+    width:200px !important;
+    height:200px !important;
     background: black;
     animation:700ms fadeIn forwards;
     pointer-events:none;
+    color:white;
+}
+
+.modalOff{
+    display:none !important;
 }
 
 @keyframes fadeIn{
@@ -13,7 +22,7 @@
         opacity:0;
     }
     100%{
-        top:50%;
+        top:45%;
         opacity:1;
     }
 }

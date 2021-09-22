@@ -3,15 +3,19 @@
 app = angular.module('vetList')
 .controller('VetListController', ['$http', function ($http) {
         var self = this;
-        this.show = (e) => {
+        this.show = ($event,vetID) => {
 //               let body = document.getElementsByTagName("body")[0];
-               let child = e.target.
-               child.classList.add("modalOn");
+            console.log(vetID);
+                let child = document.getElementsByClassName("m"+vetID)[0];
                child.classList.remove("modalOff");
+               child.classList.add("modalOn");
 
         }
-        this.hide = () => {
-//            document.querySelector('.modal').remove();
+        this.hide = ($event,vetID) => {
+
+                              let child = document.getElementsByClassName("m"+vetID)[0];
+                            child.classList.remove("modalOn");
+                                child.classList.add("modalOff");
         }
         this.test = console.log;
 
