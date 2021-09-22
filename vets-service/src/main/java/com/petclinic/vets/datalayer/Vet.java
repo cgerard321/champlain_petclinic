@@ -27,6 +27,11 @@ public class Vet {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @NotEmpty
+    @UniqueElements
+    @Column(name = "vet_id")
+    private Integer vetId;
+
     @Column(name = "first_name")
     @NotEmpty
     private String firstName;
@@ -45,7 +50,56 @@ public class Vet {
     private String email;
 
     @Column(name = "phone_number")
+    @NotEmpty
     private String phoneNumber;
+
+    @Column(name = "resume")
+    @NotEmpty
+    private String resume;
+
+    @Column(name = "workday")
+    private String workday;
+
+    public Integer getVetId() {
+        return vetId;
+    }
+
+    public void setVetId(Integer vetId) {
+        this.vetId = vetId;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getResume() {
+        return resume;
+    }
+
+    public void setResume(String resume) {
+        this.resume = resume;
+    }
+
+    public String getWorkday() {
+        return workday;
+    }
+
+    public void setWorkday(String workday) {
+        this.workday = workday;
+    }
+
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "vet_specialties", joinColumns = @JoinColumn(name = "vet_id"),
@@ -86,14 +140,6 @@ public class Vet {
     public void setEnable(boolean enable) {
         this.enable = enable;
     }
-
-    public String getEmail() {return this.email;}
-
-    public void setEmail(String email) {this.email = email;}
-
-    public String getPhoneNumber() {return this.phoneNumber;}
-
-    public void setPhoneNumber(String phoneNumber) {this.phoneNumber = phoneNumber;}
 
 
     //Add a list of animals that a vet treats
