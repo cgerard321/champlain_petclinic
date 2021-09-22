@@ -65,6 +65,7 @@ class VetResourceTest {
 		vet.setPhoneNumber("(514)-634-8276 #2384");
 		vet.setResume("Practicing since 3 years");
 		vet.setWorkday("Monday, Tuesday, Friday");
+		vet.setIsActive(1);
 
 		given(vetRepository.findAll()).willReturn(asList(vet));
 
@@ -77,8 +78,8 @@ class VetResourceTest {
 				.andExpect(jsonPath("$[0].email").value("carter.james@email.com"))
 				.andExpect(jsonPath("$[0].phoneNumber").value("(514)-634-8276 #2384"))
 				.andExpect(jsonPath("$[0].resume").value("Practicing since 3 years"))
-				.andExpect(jsonPath("$[0].workday").value("Monday, Tuesday, Friday"));
-
+				.andExpect(jsonPath("$[0].workday").value("Monday, Tuesday, Friday"))
+				.andExpect(jsonPath("$[0].isActive").value(1));
 	}
 
 }
