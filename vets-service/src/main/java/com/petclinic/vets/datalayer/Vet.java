@@ -56,7 +56,7 @@ public class Vet {
     @Column(name = "workday")
     private String workday;
 
-    @Column(name = "active")
+    @Column(name = "is_active")
     @NotEmpty
     private Integer isActive;
 
