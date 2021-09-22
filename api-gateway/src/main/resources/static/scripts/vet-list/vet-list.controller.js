@@ -7,6 +7,10 @@ app = angular.module('vetList')
 //               let body = document.getElementsByTagName("body")[0];
             console.log(vetID);
                 let child = document.getElementsByClassName("m"+vetID)[0];
+                let left = $event.pageX;
+                  let top = $event.pageY;
+                  child.style.left = (left + 390) + 'px';
+                  child.style.top = (top+80) + 'px';
                child.classList.remove("modalOff");
                child.classList.add("modalOn");
 

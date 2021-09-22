@@ -1,14 +1,15 @@
 .modalOn{
-    display:block !important;
- position:absolute;
- top:0;
- left:100%;
- z-index:100000;
- text-align:center;
-    width:200px !important;
-    height:200px !important;
-    background: black;
-    animation:700ms fadeIn forwards;
+     display:flex !important;
+     flex-direction:column;
+     justify-content:center;
+     align-items:center;
+     position:absolute;
+     margin:0;
+     transform:translate(-50%,-50%);
+     z-index:100000;
+     text-align:center;
+
+    animation:500ms fadeIn forwards;
     pointer-events:none;
     color:white;
 }
@@ -16,13 +17,17 @@
 .modalOff{
     display:none !important;
 }
-
+.modal{
+  width:669px !important;
+      height:150px !important;
+    background: black !important;
+  color:white !important;
+}
 @keyframes fadeIn{
     0%{
         opacity:0;
     }
     100%{
-        top:45%;
         opacity:1;
     }
 }
