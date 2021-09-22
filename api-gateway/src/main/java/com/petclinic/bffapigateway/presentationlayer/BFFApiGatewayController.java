@@ -72,16 +72,6 @@ public class BFFApiGatewayController {
         };
     }
     
-    @PostMapping(
-            value = "/visit/owners/{ownerId}/pets/{petId}/visits",
-            consumes = "application/json",
-            produces = "application/json"
-    )
-    Mono<VisitDetails> addVisit(@RequestBody VisitDetails visit, @PathVariable String ownerId, @PathVariable String petId) {
-        visit.setPetId(Integer.parseInt(petId));
-        return visitsServiceClient.createVisitForPet(visit);
-    }
-    
     @GetMapping(value = "vets")
     public Flux<VetDetails> getVets() {
         return vetsServiceClient.getVets();
