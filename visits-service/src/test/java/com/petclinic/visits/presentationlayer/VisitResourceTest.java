@@ -1,6 +1,8 @@
 package com.petclinic.visits.presentationlayer;
 
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+
 import com.petclinic.visits.businesslayer.VisitsService;
 import com.petclinic.visits.datalayer.Visit;
 import com.petclinic.visits.datalayer.VisitRepository;
@@ -14,9 +16,10 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-
 import javax.swing.plaf.ViewportUI;
+
 import java.util.*;
+import java.util.Date;
 
 import static java.util.Arrays.asList;
 import static org.mockito.ArgumentMatchers.any;
@@ -44,6 +47,8 @@ class VisitResourceTest {
 
 	@Autowired
 	ObjectMapper objectMapper;
+	VisitRepository visitRepository;
+
 
 	@Test
 	void whenValidPetIdThenShouldReturnVisitsForPet() throws Exception {
@@ -69,6 +74,8 @@ class VisitResourceTest {
 				.andExpect(jsonPath("[0].petId").value(1))
 				.andExpect(jsonPath("[1].petId").value(1));
 	}
+
+
 
 
 	@Test
@@ -156,7 +163,6 @@ class VisitResourceTest {
 				.andExpect(status().isBadRequest());
 	}
 
-  
   @Test
 	void whenInValidPetIdThenShouldReturnVisitsForPet() throws Exception {
 

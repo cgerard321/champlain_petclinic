@@ -54,13 +54,6 @@ public class BFFApiGatewayController {
             );
     }
 
-
-    @DeleteMapping(value = "visits/{visitId}")
-    public void deleteVisits(@PathVariable int visitId){
-        visitsServiceClient.deleteVisit(visitId);
-    }
-
-
     @GetMapping(value = "customer/owners")
     public Flux<OwnerDetails> getOwners() {
         return customersServiceClient.getOwners()
