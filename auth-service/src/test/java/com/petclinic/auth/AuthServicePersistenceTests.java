@@ -214,17 +214,7 @@ public class AuthServicePersistenceTests {
         assertEquals("email-1@gmail.com", user.getEmail());
     }
 
-    @Test
-    @DisplayName("Verify if email exist inside the database")
-    void verify_different_email_uniqueness_() {
 
-        User user = addDefaultUser();
-
-        user = userRepo.save(user);
-
-        assertNotEquals("email-4@gmail.com", user.getEmail());
-
-    }
 
     private Role addRoleAsClone(Role r) {
         return roleRepo.save(r.toBuilder().id(AuthServicePersistenceTests.rng.nextInt()).build());

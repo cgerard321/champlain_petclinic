@@ -248,7 +248,7 @@ class AuthServiceApplicationTests {
 	}
 
 	@Test
-	@DisplayName("Verify if the email is valid")
+	@DisplayName("Verify if the email is valid and succeed")
 	void verify_valid_email_success() throws Exception {
 		User user = new User();
 		user.setEmail("testemail@gmail.com");
@@ -257,7 +257,7 @@ class AuthServiceApplicationTests {
 	}
 
 	@Test
-	@DisplayName("Verify if the email is valid and fail")
+	@DisplayName("Verify if the email is valid and fail because missing @")
 	void detect_invalid_email_missing_at() throws Exception {
 		User user = new User();
 		user.setEmail("testemailgmail.com");
