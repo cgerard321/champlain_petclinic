@@ -66,11 +66,11 @@ public class Vet {
     private String lastName;
 
     @Column(name = "email")
-    @NotEmpty(message = "Please enter email")
+    @NotEmpty
     private String email;
 
     @Column(name = "phone_number")
-    @NotEmpty(message = "Please enter phoneNumber")
+    @NotEmpty
     private String phoneNumber;
 
     @Column(name = "resume")
