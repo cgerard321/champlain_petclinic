@@ -11,7 +11,8 @@ CREATE TABLE vets
     email      VARCHAR(100),
     phone_number VARCHAR(30),
     resume     VARCHAR(350),
-    workday    VARCHAR(250)
+    workday    VARCHAR(250),
+    is_active  BIT
 );
 CREATE INDEX vets_last_name ON vets (last_name);
 

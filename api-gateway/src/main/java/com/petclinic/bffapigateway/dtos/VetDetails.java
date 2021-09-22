@@ -24,6 +24,8 @@ public class VetDetails {
 
         private String workday;
 
+        private int isActive;
+
         private final List<Specialty> specialties = new ArrayList<>();
 
 }
