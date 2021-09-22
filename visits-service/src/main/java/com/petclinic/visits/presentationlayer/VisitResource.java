@@ -70,6 +70,13 @@ public class VisitResource {
         return new Visits(byPetIdIn);
     }
 
+    @PutMapping("owners/*/pets/{petId}/visits")
+    public Visit update(@Valid @RequestBody Visit visit, @PathVariable("petId") int petId){
+        visit.setPetId(petId);
+        log.info("Overwriting visit {}", visit);
+        return visitRepository.save(visit);
+    }
+
     @Value
     static class Visits {
         List<Visit> items;
