@@ -217,6 +217,15 @@ public class AuthServicePersistenceTests {
         assertEquals(testUser.getPassword(), "testPassword");
         assertEquals(testUser.getEmail(), "test@email.com");
     }
+    //This Test will be used when the UserServiceImpl class is fully implemented
+//    @Test
+//    @DisplayName("Add User with username only.")
+//    void add_username_only() throws Exception{
+//
+//        final User testUser = userRepo.save(new User("", "", ""));
+//
+//        assertThrows(NullPointerException.class, () -> testUser.setUsername(""));
+//    }
 
     private Role addRoleAsClone(Role r) {
         return roleRepo.save(r.toBuilder().id(AuthServicePersistenceTests.rng.nextInt()).build());

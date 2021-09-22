@@ -248,12 +248,36 @@ class AuthServiceApplicationTests {
 		user.setPassword("testPassword");
 		user.setEmail("testemail@gmail.com");
 	}
-
 	@Test
 	@DisplayName("Check the required fields with empty data")
 	void check_empty_require_fields() throws Exception{
 
 		UserIDLessDTO userIDLessDTO = new UserIDLessDTO();
+
+		assertThrows(NullPointerException.class, () -> userController.createUser(userIDLessDTO));
+	}
+
+	@Test
+	@DisplayName("Check the username field in order to refused if it is empty")
+	void check_empty_username() throws Exception{
+
+		UserIDLessDTO userIDLessDTO = new UserIDLessDTO("", "testPassword","test@test.ca");
+
+		assertThrows(NullPointerException.class, () -> userController.createUser(userIDLessDTO));
+	}
+	@Test
+	@DisplayName("Check the password field in order to refused if it is empty")
+	void check_empty_password() throws Exception{
+
+		UserIDLessDTO userIDLessDTO = new UserIDLessDTO("testUsername", "","test@test.ca");
+
+		assertThrows(NullPointerException.class, () -> userController.createUser(userIDLessDTO));
+	}
+	@Test
+	@DisplayName("Check the email field in order to refused if it is empty")
+	void check_empty_email() throws Exception{
+
+		UserIDLessDTO userIDLessDTO = new UserIDLessDTO("testUsername", "testPassword","");
 
 		assertThrows(NullPointerException.class, () -> userController.createUser(userIDLessDTO));
 	}
