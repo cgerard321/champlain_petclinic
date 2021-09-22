@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class RoleController {
 
-    private final RoleRepo roleRepo;
+    private final RoleService roleService;
     private final RoleMapper roleMapper;
 
     @PostMapping
@@ -25,7 +25,7 @@ public class RoleController {
         log.info("Successfully converted dto -> model");
 
         log.info("Trying to persist role");
-        final Role saved = roleRepo.save(role);
+        final Role saved = roleService.createRole(role);
         log.info("Successfully persisted role");
 
         return saved;
@@ -38,7 +38,7 @@ public class RoleController {
     ) {
 
         log.info("page={}", page);
-        final Page<Role> all = roleRepo.findAll(PageRequest.of(page - 1, size));
+        final Page<Role> all = roleService.findAll(PageRequest.of(page - 1, size));
         log.info("Retrieved paginated result with {} entries and {} pages", all.getTotalElements(), all.getTotalPages());
 
         return all;
@@ -49,8 +49,7 @@ public class RoleController {
 
         log.info("id={}", id);
         try {
-
-            roleRepo.deleteById(id);
+            roleService.deleteById(id);
         } catch (EmptyResultDataAccessException e) {
             log.info("No role with id {}. Ignoring", id);
             return;
