@@ -60,6 +60,18 @@ public class Vet {
     @Column(name = "workday")
     private String workday;
 
+    @Column(name = "is_active")
+    @NotEmpty
+    private Integer isActive;
+
+    public Integer getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(Integer isActive) {
+        this.isActive = isActive;
+    }
+
     public Integer getVetId() {
         return vetId;
     }
