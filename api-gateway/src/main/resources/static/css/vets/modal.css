@@ -1,0 +1,19 @@
+.modal{
+ position:relative;
+ z-index:100000;
+    width:300px;
+    height:150px;
+    background: black;
+    animation:700ms fadeIn forwards;
+    pointer-events:none;
+}
+
+@keyframes fadeIn{
+    0%{
+        opacity:0;
+    }
+    100%{
+        top:50%;
+        opacity:1;
+    }
+}
