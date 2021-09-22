@@ -1,2 +1,6 @@
-package com.petclinic.vets.businesslayer;public class VetServiceImpl {
+package com.petclinic.vets.businesslayer;
+
+public class VetServiceImpl implements VetService
+{
+
 }
