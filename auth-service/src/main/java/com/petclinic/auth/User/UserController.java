@@ -20,14 +20,17 @@ public class UserController {
 
     @PostMapping
     public User createUser(@RequestBody @Valid UserIDLessDTO dto) {
+        final User saved;
+        final User user;
 
         log.info("Received user dto, trying to convert model");
         log.info("DTO info: { username={}, password={}, email={} }", dto.getUsername(), dto.getPassword(), dto.getEmail());
-        final User user = userMapper.idLessDTOToModel(dto);
+
+        user = userMapper.idLessDTOToModel(dto);
         log.info("Successfully converted dto -> model");
 
         log.info("Trying to persist user");
-        final User saved = userRepo.save(user);
+        saved = userRepo.save(user);
         log.info("Successfully persisted user");
 
         return saved;
