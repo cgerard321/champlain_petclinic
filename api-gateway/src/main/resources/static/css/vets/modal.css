@@ -38,3 +38,14 @@
         opacity:1;
     }
 }
+
+@media screen and (max-width:960px){
+  .modal{
+    width:334.5px !important;
+    height: 360px !important;
+  }
+  .modalOn{
+    display:grid !important;
+    grid-template-columns:1fr;
+  }
+}
