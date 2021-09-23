@@ -17,13 +17,15 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import javax.swing.text.html.parser.Entity;
 import java.util.Optional;
-
+import static  org.hamcrest.MatcherAssert.assertThat;
+import static  org.hamcrest.Matcher.*;
 import static java.util.Arrays.asList;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * @author Maciej Szarlinski
@@ -57,9 +59,12 @@ class VetResourceTest {
 	void addANewVet() throws Exception {
 		//arrange
 		Vet vet = new Vet();
-		vetRepository.save(vet);
+		vet.setId(1);
+		Vet vetSaved = vetRepository.save(vet);
 		//act //assert
 		when(vetRepository.findById(vet.getId())).thenReturn(Optional.of(vet));
+
+		assertEquals(vetSaved.getId(), vet.getId());
 	}
 
 	@Test
