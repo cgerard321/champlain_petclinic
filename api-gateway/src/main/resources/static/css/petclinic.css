@@ -118,3 +118,36 @@ table td.action-column {
   background-color: black;
   color: white;
 }
+
+#owner {
+  border: 1px solid black;
+}
+
+tr {
+  background-color: white;
+  color: black;
+}
+
+h2#titleOwner {
+  color: cornflowerblue;
+  font-weight: bold;
+  font-size: xxx-large;
+}
+
+label#owner {
+  color: cornflowerblue;
+}
+
+#owner.table-striped>tbody>tr:hover{
+   background-color: lightblue;
+   color: black;
+}
+
+#owner.table>thead>tr>th {
+  background-color: cornflowerblue;
+}
+
+#bg {
+  background-image: url("../images/tracks-pattern.png");
+  z-index: 1;
+}

@@ -1,4 +1,4 @@
-<h2>Owner Information</h2>
+<h2 id="titleOwner">Owner Information</h2>
 
 <table class="table table-striped">
     <tr>
@@ -22,12 +22,12 @@
             <a class="btn btn-default" id="newBtn" ui-sref="ownerEdit({ownerId: $ctrl.owner.id})">Edit Owner</a>
         </td>
         <td>
-            <a ui-sref="petNew({ownerId: $ctrl.owner.id})" class="btn btn-default" id="newBtn">Add New Pet</a>
+            <a class="btn btn-default" id="newBtn" ui-sref="petNew({ownerId: $ctrl.owner.id})">Add New Pet</a>
         </td>
     </tr>
 </table>
 
-<h2>Pets and Visits</h2>
+<h2 id="titleOwner">Pets and Visits</h2>
 
 <table class="table table-striped">
     <tr ng-repeat="pet in $ctrl.owner.pets track by pet.id">
