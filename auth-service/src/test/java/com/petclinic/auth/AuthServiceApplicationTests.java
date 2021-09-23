@@ -41,7 +41,6 @@ class AuthServiceApplicationTests {
 
 	private Validator validator;
 
-	private final static Random rng;
 	final Set<Role> ROLES = new HashSet<Role>() {{
 		add(role);
 	}};
