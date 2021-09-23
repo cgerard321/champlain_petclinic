@@ -1,4 +1,5 @@
 HELP.md
+screenshots/
 .DS_Store
 .gradle
 build/
@@ -36,8 +37,3 @@ out/
 
 ### VS Code ###
 .vscode/
-
-### Custom Folder ###
-### Test Screenshots ###
-screenshots/*
-
