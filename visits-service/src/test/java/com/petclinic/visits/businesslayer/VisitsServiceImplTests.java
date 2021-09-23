@@ -94,3 +94,4 @@ public class VisitsServiceImplTests {
         assertThat(serviceResponse.isStatus(), equalTo(false));
     }
 }
+

@@ -1,7 +1,6 @@
 package com.petclinic.visits.presentationlayer;
 
 
-
 import com.petclinic.visits.businesslayer.VisitsService;
 import com.petclinic.visits.businesslayer.VisitsServiceImpl;
 import com.petclinic.visits.datalayer.Visit;
@@ -10,12 +9,10 @@ import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,15 +32,13 @@ import java.util.List;
 public class VisitResource {
 
     //private static final Logger LOG = LoggerFactory.getLogger(VisitResource.class);
+    //private final VisitRepository visitRepository;
 
     private final VisitsService visitsService;
 
     public VisitResource(VisitsService service){
         this.visitsService = service;
     }
-
-    //private final VisitRepository visitRepository;
-
 
     //To create a new visits
     @PostMapping("owners/*/pets/{petId}/visits")
@@ -71,7 +66,7 @@ public class VisitResource {
     }
 
     @DeleteMapping("visits/{visitId}")
-    public void deleteVisit(@PathVariable("visitId") int visitId){
+    public void deleteVisit(@PathVariable("visitId") int visitId) {
         visitsService.deleteVisit(visitId);
     }
 
@@ -84,14 +79,12 @@ public class VisitResource {
     }
 
 
-    //This method will delete the visits based on the id
-    @DeleteMapping("visits")
-    public void deleteVisit(@RequestParam("id") int visitId){
-        visitRepository.findById(visitId).ifPresent(e -> visitRepository.delete(e));
-    }
+//    @GetMapping("pets/visits")
+//    public Visits visitsMultiGet(@RequestParam("petId") List<Integer> petIds) {
+//        final List<Visit> byPetIdIn = visitsService.getVisitsForPets(petIds);
+//        return new Visits(byPetIdIn);
+//    }
 
-
-    //This class define the object that will be returned for the client with multiples visits
     @Value
     static class Visits {
         List<Visit> items;

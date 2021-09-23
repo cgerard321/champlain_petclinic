@@ -1,8 +1,8 @@
 package com.petclinic.visits.presentationlayer;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.visits.businesslayer.VisitsService;
 import com.petclinic.visits.datalayer.Visit;
 import com.petclinic.visits.datalayer.VisitRepository;
@@ -16,11 +16,13 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+<<<<<<< HEAD
 import javax.swing.plaf.ViewportUI;
 
+=======
+>>>>>>> 57064ad (Fixing bugs before the beginning of the tests)
 import java.util.*;
 import java.util.Date;
-
 import static java.util.Arrays.asList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -37,14 +39,14 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(VisitResource.class)
 @ActiveProfiles("test")
-class VisitResourceTest {
+public class VisitResourceTest {
 
 	@Autowired
 	MockMvc mvc;
 
 	@MockBean
 	VisitsService visitsService;
-
+	
 	@Autowired
 	ObjectMapper objectMapper;
 	VisitRepository visitRepository;
@@ -131,9 +133,9 @@ class VisitResourceTest {
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isCreated());
-  }
+    }
 
-	
+
 	@Test
 	void shouldCreateVisit() throws Exception {
 		Visit expectedVisit = visit().id(1).petId(1).date(new Date()).description("CREATED VISIT").practitionerId(123456).build();

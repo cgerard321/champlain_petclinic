@@ -6,6 +6,7 @@ import java.util.List;
 
 public interface VisitsService {
 
+
     public Visit addVisit(Visit visit);
 
     public List<Visit> getVisitsForPet(int petId);
@@ -13,5 +14,4 @@ public interface VisitsService {
     public void deleteVisit(int visitId);
 
     public List<Visit> getVisitsForPets(List<Integer> petIds);
-
 }
