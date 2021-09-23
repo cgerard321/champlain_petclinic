@@ -51,7 +51,6 @@ public class BFFApiGatewayController {
             );
     }
 
-
     private Function<Visits, OwnerDetails> addVisitsToOwner(OwnerDetails owner) {
         return visits -> {
             owner.getPets()

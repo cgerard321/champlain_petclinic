@@ -1,5 +1,7 @@
 package com.petclinic.auth;
 
+import com.petclinic.auth.User.User;
+import com.petclinic.auth.User.UserRepo;
 import com.petclinic.auth.Role.Role;
 import com.petclinic.auth.Role.RoleRepo;
 import com.petclinic.auth.User.User;
@@ -18,6 +20,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Random;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -206,6 +210,7 @@ public class AuthServicePersistenceTests {
     }
 
     @Test
+<<<<<<< HEAD
     @DisplayName("Verify if email exist inside the database")
     void verify_same_email_uniqueness() {
 
@@ -217,6 +222,26 @@ public class AuthServicePersistenceTests {
     }
 
 
+=======
+    @DisplayName("Add User with username, password and email")
+    void add_user() throws Exception{
+
+        final User testUser = userRepo.save(new User("testUsername", "testPassword", "test@email.com"));
+
+        assertEquals(testUser.getUsername(), "testUsername");
+        assertEquals(testUser.getPassword(), "testPassword");
+        assertEquals(testUser.getEmail(), "test@email.com");
+    }
+    //This Test will be used when the UserServiceImpl class is fully implemented
+//    @Test
+//    @DisplayName("Add User with username only.")
+//    void add_username_only() throws Exception{
+//
+//        final User testUser = userRepo.save(new User("", "", ""));
+//
+//        assertThrows(NullPointerException.class, () -> testUser.setUsername(""));
+//    }
+>>>>>>> main
 
     private Role addRoleAsClone(Role r) {
         return roleRepo.save(r.toBuilder().id(AuthServicePersistenceTests.rng.nextInt()).build());
