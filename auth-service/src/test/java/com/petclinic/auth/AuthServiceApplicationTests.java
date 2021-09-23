@@ -225,6 +225,10 @@ class AuthServiceApplicationTests {
 	@DisplayName("Verify if the email is valid and succeed")
 	void verify_valid_email_success() throws Exception {
 		User user = new User();
+		user.setUsername(USER);
+		user.setPassword(PASS);
+		user.setId(ID);
+
 		user.setEmail("testemail@gmail.com");
 		Set<ConstraintViolation<User>> violations = validator.validate(user);
 		assertTrue(violations.isEmpty());
@@ -234,6 +238,9 @@ class AuthServiceApplicationTests {
 	@DisplayName("Verify if the email is valid and fail because missing @")
 	void detect_invalid_email_missing_at() throws Exception {
 		User user = new User();
+		user.setUsername(USER);
+		user.setPassword(PASS);
+		user.setId(ID);
 		user.setEmail("testemailgmail.com");
 		Set<ConstraintViolation<User>> violations = validator.validate(user);
 		assertEquals(violations.size(), 1);
@@ -248,6 +255,9 @@ class AuthServiceApplicationTests {
 	@DisplayName("Verify if the email is valid and fail because of an uppercase")
 	void detect_invalid_email_upper_case() throws Exception {
 		User user = new User();
+		user.setUsername(USER);
+		user.setPassword(PASS);
+		user.setId(ID);
 		user.setEmail("Testemail@gmail.com");
 		Set<ConstraintViolation<User>> violations = validator.validate(user);
 		assertEquals(violations.size(), 1);
@@ -255,6 +265,9 @@ class AuthServiceApplicationTests {
 		assertEquals("the email must be a valid email", violation.getMessage());
 		assertEquals("email", violation.getPropertyPath().toString());
 		assertEquals("Testemail@gmail.com", violation.getInvalidValue());
+	}
+
+	@Test
 	@DisplayName("Submit a completed signup form")
 	void submit_completed_signup_form() throws Exception {
 		User user = new User(USER, PASS, EMAIL);

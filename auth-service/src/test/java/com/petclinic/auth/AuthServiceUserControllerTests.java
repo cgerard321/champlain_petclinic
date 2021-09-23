@@ -39,7 +39,7 @@ public class AuthServiceUserControllerTests {
     final String
             USER = "user",
             PASS = "pass",
-            EMAIL = "email";
+            EMAIL = "email@gmail.com";
 
     @BeforeEach
     void setup() {

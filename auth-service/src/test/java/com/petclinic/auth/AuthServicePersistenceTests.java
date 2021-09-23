@@ -210,7 +210,6 @@ public class AuthServicePersistenceTests {
     }
 
     @Test
-<<<<<<< HEAD
     @DisplayName("Verify if email exist inside the database")
     void verify_same_email_uniqueness() {
 
@@ -222,7 +221,6 @@ public class AuthServicePersistenceTests {
     }
 
 
-=======
     @DisplayName("Add User with username, password and email")
     void add_user() throws Exception{
 
@@ -241,7 +239,6 @@ public class AuthServicePersistenceTests {
 //
 //        assertThrows(NullPointerException.class, () -> testUser.setUsername(""));
 //    }
->>>>>>> main
 
     private Role addRoleAsClone(Role r) {
         return roleRepo.save(r.toBuilder().id(AuthServicePersistenceTests.rng.nextInt()).build());

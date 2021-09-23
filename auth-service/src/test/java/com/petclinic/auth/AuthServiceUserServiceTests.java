@@ -26,7 +26,7 @@ public class AuthServiceUserServiceTests {
     final String
             USER = "user",
             PASS = "pass",
-            EMAIL = "email";
+            EMAIL = "email@gmail.com";
 
     @Autowired
     private UserRepo userRepo;
