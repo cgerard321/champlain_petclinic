@@ -7,15 +7,11 @@ import com.petclinic.bffapigateway.dtos.OwnerDetails;
 import com.petclinic.bffapigateway.dtos.VetDetails;
 import com.petclinic.bffapigateway.dtos.Visits;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -55,7 +51,6 @@ public class BFFApiGatewayController {
             );
     }
 
-
     private Function<Visits, OwnerDetails> addVisitsToOwner(OwnerDetails owner) {
         return visits -> {
             owner.getPets()
@@ -71,5 +66,23 @@ public class BFFApiGatewayController {
     @GetMapping(value = "vets")
     public Flux<VetDetails> getVets() {
         return vetsServiceClient.getVets();
+    }
+
+    // TODO: Hook this up to auth service
+    @GetMapping(value = "/admin/roles")
+    public Object getRoles() {
+        return null;
+    }
+
+    // TODO: Hook this up to auth service
+    @DeleteMapping(value = "/admin/roles/{id}")
+    public void deleteRole(@PathVariable int id) {
+
+    }
+
+    // TODO: Hook this up to auth service
+    @PostMapping(value = "/admin/roles")
+    public Object addRole() {
+        return null;
     }
 }
