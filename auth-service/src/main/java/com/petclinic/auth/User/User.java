@@ -31,10 +31,7 @@ public class User {
     private String password;
 
     @NotNull
-    @Pattern(regexp="[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\."
-            +"[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@"
-            +"(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?",
-            message="the email must be a valid email")
+    @Email(message = "Email must be valid")
     private String email;
 
     public User(String username, String password, String email) {

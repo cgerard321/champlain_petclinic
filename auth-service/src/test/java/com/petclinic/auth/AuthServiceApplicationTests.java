@@ -246,25 +246,9 @@ class AuthServiceApplicationTests {
 		assertEquals(violations.size(), 1);
 
 		ConstraintViolation<User> violation = violations.iterator().next();
-		assertEquals("the email must be a valid email", violation.getMessage());
+		assertEquals("Email must be valid", violation.getMessage());
 		assertEquals("email", violation.getPropertyPath().toString());
 		assertEquals("testemailgmail.com", violation.getInvalidValue());
-	}
-
-	@Test
-	@DisplayName("Verify if the email is valid and fail because of an uppercase")
-	void detect_invalid_email_upper_case() throws Exception {
-		User user = new User();
-		user.setUsername(USER);
-		user.setPassword(PASS);
-		user.setId(ID);
-		user.setEmail("Testemail@gmail.com");
-		Set<ConstraintViolation<User>> violations = validator.validate(user);
-		assertEquals(violations.size(), 1);
-		ConstraintViolation<User> violation = violations.iterator().next();
-		assertEquals("the email must be a valid email", violation.getMessage());
-		assertEquals("email", violation.getPropertyPath().toString());
-		assertEquals("Testemail@gmail.com", violation.getInvalidValue());
 	}
 
 	@Test
