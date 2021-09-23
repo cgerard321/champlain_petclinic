@@ -10,6 +10,7 @@ import com.petclinic.bffapigateway.dtos.Visits;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -72,19 +73,4 @@ public class BFFApiGatewayController {
         return vetsServiceClient.getVets();
     }
 
-    @PostMapping(value = "/login")
-    public Map<String, String> Login(@RequestBody Login login) throws Exception {
-
-        final String
-                expectedPass = "PazzW0rd",
-                expectedUser = "aribonneau";
-
-        if(login.getPassword().equals(expectedPass) && login.getUsername().equals(expectedUser)) {
-            return new HashMap<String, String>() {{
-                put("token", "some.token");
-            }};
-        }
-
-        throw new Exception();
-    }
 }
