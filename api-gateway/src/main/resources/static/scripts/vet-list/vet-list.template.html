@@ -8,10 +8,10 @@
     </thead>
 
     <tr ng-repeat="vet in $ctrl.vetList">
-        <td><span ng-mouseenter="$ctrl.show($event,vet.id)" ng-mouseleave="$ctrl.hide($event,vet.id)" class="info v{{vet.id}}">{{vet.firstName}} {{vet.lastName}}</span></td>
+        <td><span ng-mouseenter="$ctrl.show($event,vet.vetId)" ng-mouseleave="$ctrl.hide($event,vet.vetId)" class="info v{{vet.vetId}}">{{vet.firstName}} {{vet.lastName}}</span></td>
         <td><span ng-repeat="specialty in vet.specialties">{{specialty.name + ' '}}</span></td>
     </tr>
-    <div ng-repeat="vet in $ctrl.vetList" class="modal m{{vet.id}} modalOff">
+    <div ng-repeat="vet in $ctrl.vetList" class="modal m{{vet.vetId}} modalOff">
         <span class="modal_name"><b>Name:</b> {{vet.firstName}} {{vet.lastName}}</span>
         <span class="modal_phone"><b>Phone:</b> {{vet.phoneNumber}}</span>
         <div class="modal_specialty">
