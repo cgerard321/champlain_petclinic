@@ -4,13 +4,13 @@ import com.petclinic.visits.datalayer.VisitRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class VisitCRUDImpl implements VisitCRUD {
+public class VisitServiceImpl implements VisitService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(VisitCRUD.class);
+    private static final Logger LOG = LoggerFactory.getLogger(VisitService.class);
 
     private final VisitRepository repository;
 
-    public VisitCRUDImpl(VisitRepository repository){
+    public VisitServiceImpl(VisitRepository repository){
         this.repository = repository;
     }
 
