@@ -1,15 +1,11 @@
 package com.petclinic.visits.presentationlayer;
 
-import com.petclinic.visits.businesslayer.VisitCRUD;
-import com.petclinic.visits.businesslayer.VisitCRUDImpl;
 import com.petclinic.visits.datalayer.Visit;
 import com.petclinic.visits.datalayer.VisitRepository;
 import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
