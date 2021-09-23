@@ -51,10 +51,12 @@ class AuthServiceApplicationTests {
 	@Autowired
 	private RoleMapper roleMapper;
 
+	@Autowired
+	private UserMapper userMapper;
+
 	private final RoleIDLessDTO ID_LESS_USER_ROLE = new RoleIDLessDTO("user");
 
-	private UserController userController;
-	private final UserIDLessDTO ID_LESS_USER = new UserIDLessDTO();
+	private final UserIDLessDTO ID_LESS_USER_USER = new UserIDLessDTO("usernameTest", "passwordTest", "emailTest");
 
 	@BeforeEach
 	void setup() {
@@ -76,9 +78,26 @@ class AuthServiceApplicationTests {
 	}
 
 	@Test
+	@DisplayName("Map id less user to user")
+	void map_id_less_user_to_user() {
+
+		final User user = userMapper.idLessDTOToModel(ID_LESS_USER_USER);
+		assertEquals(user.getId(), 0); // defaults to 0 as it is a primitive decimal integer
+		assertEquals(user.getUsername(), ID_LESS_USER_USER.getUsername());
+		assertEquals(user.getPassword(), ID_LESS_USER_USER.getPassword());
+		assertEquals(user.getEmail(), ID_LESS_USER_USER.getEmail());
+	}
+
+	@Test
 	@DisplayName("Map null to role")
 	void map_null_to_role() {
 		assertNull(roleMapper.idLessDTOToModel(null));
+	}
+
+	@Test
+	@DisplayName("Map null to user")
+	void map_null_to_user() {
+		assertNull(userMapper.idLessDTOToModel(null));
 	}
 
 	@Test
@@ -209,39 +228,6 @@ class AuthServiceApplicationTests {
 		assertEquals(EMAIL, userIDLessDTO.getEmail());
 	}
 
-	@Test
-	@DisplayName("Check the required fields with empty data")
-	void check_empty_require_fields() throws Exception{
-
-		UserIDLessDTO userIDLessDTO = new UserIDLessDTO();
-
-		assertThrows(NullPointerException.class, () -> userController.createUser(userIDLessDTO));
-	}
-
-	@Test
-	@DisplayName("Check the username field in order to refused if it is empty")
-	void check_empty_username() throws Exception{
-
-		UserIDLessDTO userIDLessDTO = new UserIDLessDTO("", PASS,EMAIL);
-
-		assertThrows(NullPointerException.class, () -> userController.createUser(userIDLessDTO));
-	}
-	@Test
-	@DisplayName("Check the password field in order to refused if it is empty")
-	void check_empty_password() throws Exception{
-
-		UserIDLessDTO userIDLessDTO = new UserIDLessDTO( USER, "",EMAIL);
-
-		assertThrows(NullPointerException.class, () -> userController.createUser(userIDLessDTO));
-	}
-	@Test
-	@DisplayName("Check the email field in order to refused if it is empty")
-	void check_empty_email() throws Exception{
-
-		UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS,"");
-
-		assertThrows(NullPointerException.class, () -> userController.createUser(userIDLessDTO));
-	}
 	@Test
 	@DisplayName("User setters")
 	void user_id_less_dto_setters() {
