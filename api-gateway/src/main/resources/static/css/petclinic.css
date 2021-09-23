@@ -134,11 +134,12 @@ h2#titleOwner {
   font-size: xxx-large;
 }
 
-label#owner {
+#owner, #petForm>div>label {
   color: cornflowerblue;
+  font-weight: bold;
 }
 
-#owner.table-striped>tbody>tr:hover{
+#owner.table>tbody>tr:hover{
    background-color: lightblue;
    color: black;
 }
