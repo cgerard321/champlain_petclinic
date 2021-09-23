@@ -16,6 +16,10 @@ import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
 import java.util.Map;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -55,7 +59,6 @@ public class BFFApiGatewayController {
             );
     }
 
-
     private Function<Visits, OwnerDetails> addVisitsToOwner(OwnerDetails owner) {
         return visits -> {
             owner.getPets()
@@ -73,4 +76,21 @@ public class BFFApiGatewayController {
         return vetsServiceClient.getVets();
     }
 
+    // TODO: Hook this up to auth service
+    @GetMapping(value = "/admin/roles")
+    public Object getRoles() {
+        return null;
+    }
+
+    // TODO: Hook this up to auth service
+    @DeleteMapping(value = "/admin/roles/{id}")
+    public void deleteRole(@PathVariable int id) {
+
+    }
+
+    // TODO: Hook this up to auth service
+    @PostMapping(value = "/admin/roles")
+    public Object addRole() {
+        return null;
+    }
 }
