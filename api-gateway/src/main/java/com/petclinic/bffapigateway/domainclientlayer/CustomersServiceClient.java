@@ -1,5 +1,6 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
+import com.petclinic.bffapigateway.dtos.Login;
 import com.petclinic.bffapigateway.dtos.OwnerDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +21,7 @@ public class CustomersServiceClient {
 
     private final WebClient.Builder webClientBuilder;
     private final String customersServiceUrl;
+    private final String loginServiceUrl;
 
     public CustomersServiceClient(
             WebClient.Builder webClientBuilder,
@@ -28,6 +30,7 @@ public class CustomersServiceClient {
     ) {
         this.webClientBuilder = webClientBuilder;
         customersServiceUrl = "http://" + customersServiceHost + ":" + customersServicePort + "/owners";
+        loginServiceUrl = "http://" + customersServiceHost + ":" + customersServicePort + "/login";
     }
 
 
@@ -44,4 +47,5 @@ public class CustomersServiceClient {
                 .retrieve()
                 .bodyToFlux(OwnerDetails.class);
     }
+
 }
