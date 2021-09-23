@@ -109,7 +109,12 @@ table td.action-column {
 }
 
 <!-- New Css -->
-.newBtn {
+#newBtn {
   text-decoration: none;
-  background-color: dodgerblue;
+  color: black;
+}
+
+#newBtn:hover{
+  background-color: black;
+  color: white;
 }
