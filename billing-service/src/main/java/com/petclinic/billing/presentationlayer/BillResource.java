@@ -36,13 +36,6 @@ public class BillResource {
         return billRepository.findById(billId);
     }
 
-    // Update Bill //
-    @PutMapping("/{billId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateBill(@PathVariable("billId") int billId){
-
-    }
-
     // Delete Bill //
     @PutMapping(value = "/{billId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
