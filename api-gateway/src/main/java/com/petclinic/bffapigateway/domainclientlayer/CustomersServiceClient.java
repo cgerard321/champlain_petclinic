@@ -21,7 +21,6 @@ public class CustomersServiceClient {
 
     private final WebClient.Builder webClientBuilder;
     private final String customersServiceUrl;
-    private final String loginServiceUrl;
 
     public CustomersServiceClient(
             WebClient.Builder webClientBuilder,
@@ -30,7 +29,6 @@ public class CustomersServiceClient {
     ) {
         this.webClientBuilder = webClientBuilder;
         customersServiceUrl = "http://" + customersServiceHost + ":" + customersServicePort + "/owners";
-        loginServiceUrl = "http://" + customersServiceHost + ":" + customersServicePort + "/login";
     }
 
 
