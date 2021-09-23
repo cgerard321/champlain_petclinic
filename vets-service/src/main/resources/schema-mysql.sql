@@ -2,8 +2,14 @@ USE `vets-db`;
 
 CREATE TABLE IF NOT EXISTS vets (
     id INT(4) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    vet_id     INTEGER (6),
     first_name VARCHAR(30),
     last_name VARCHAR(30),
+    email      VARCHAR(100),
+    phone_number VARCHAR(30),
+    resume     VARCHAR(350),
+    workday    VARCHAR(250),
+    is_active  BIT,
     INDEX(last_name)
     ) engine=InnoDB;
 
