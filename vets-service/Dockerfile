@@ -6,7 +6,7 @@ RUN ["gradle", "bootJar"]
 
 EXPOSE 8080
 
-FROM openjdk:11
+FROM openjdk:8-alpine
 ARG JAR_FILE=build/libs/*.jar
 COPY --from=builder /usr/src/app/${JAR_FILE} app.jar
 ENTRYPOINT ["java", "-jar","/app.jar"]
