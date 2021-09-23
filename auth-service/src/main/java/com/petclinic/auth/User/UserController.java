@@ -1,10 +1,7 @@
 package com.petclinic.auth.User;
 
-import com.petclinic.auth.Role.Role;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -15,7 +12,7 @@ import javax.validation.Valid;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final UserRepo userRepo;
+    private final UserService userService;
     private final UserMapper userMapper;
 
     @PostMapping
@@ -27,7 +24,7 @@ public class UserController {
         log.info("Successfully converted dto -> model");
 
         log.info("Trying to persist user");
-        final User saved = userRepo.save(user);
+        final User saved = userService.createUser(user);
         log.info("Successfully persisted user");
 
         return saved;
