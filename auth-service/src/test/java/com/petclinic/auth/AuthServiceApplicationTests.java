@@ -195,11 +195,20 @@ class AuthServiceApplicationTests {
 	@Test
 	@DisplayName("Submit a completed signup form")
 	void submit_completed_signup_form() throws Exception {
-		User user = new User();
-		user.setUsername("testUsername");
-		user.setPassword("testPassword");
-		user.setEmail("testemail@gmail.com");
+		User user = new User(USER, PASS, EMAIL);
+		assertEquals(USER, user.getUsername());
+		assertEquals(PASS, user.getPassword());
+		assertEquals(EMAIL, user.getEmail());
 	}
+	@Test
+	@DisplayName("Submit signup form through constructor of UserIDLessDTO")
+	void submit_form_with_constructor_without_id() throws Exception{
+		UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
+		assertEquals(USER, userIDLessDTO.getUsername());
+		assertEquals(PASS, userIDLessDTO.getPassword());
+		assertEquals(EMAIL, userIDLessDTO.getEmail());
+	}
+
 	@Test
 	@DisplayName("Check the required fields with empty data")
 	void check_empty_require_fields() throws Exception{
@@ -213,7 +222,7 @@ class AuthServiceApplicationTests {
 	@DisplayName("Check the username field in order to refused if it is empty")
 	void check_empty_username() throws Exception{
 
-		UserIDLessDTO userIDLessDTO = new UserIDLessDTO("", "testPassword","test@test.ca");
+		UserIDLessDTO userIDLessDTO = new UserIDLessDTO("", PASS,EMAIL);
 
 		assertThrows(NullPointerException.class, () -> userController.createUser(userIDLessDTO));
 	}
@@ -221,7 +230,7 @@ class AuthServiceApplicationTests {
 	@DisplayName("Check the password field in order to refused if it is empty")
 	void check_empty_password() throws Exception{
 
-		UserIDLessDTO userIDLessDTO = new UserIDLessDTO("testUsername", "","test@test.ca");
+		UserIDLessDTO userIDLessDTO = new UserIDLessDTO( USER, "",EMAIL);
 
 		assertThrows(NullPointerException.class, () -> userController.createUser(userIDLessDTO));
 	}
@@ -229,8 +238,41 @@ class AuthServiceApplicationTests {
 	@DisplayName("Check the email field in order to refused if it is empty")
 	void check_empty_email() throws Exception{
 
-		UserIDLessDTO userIDLessDTO = new UserIDLessDTO("testUsername", "testPassword","");
+		UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS,"");
 
 		assertThrows(NullPointerException.class, () -> userController.createUser(userIDLessDTO));
+	}
+	@Test
+	@DisplayName("User setters")
+	void user_id_less_dto_setters() {
+
+		final UserIDLessDTO userIDLessDTO = new UserIDLessDTO();
+		userIDLessDTO.setUsername(USER);
+		userIDLessDTO.setEmail(EMAIL);
+		userIDLessDTO.setPassword(PASS);
+
+		assertEquals(USER, userIDLessDTO.getUsername());
+		assertEquals(PASS, userIDLessDTO.getPassword());
+		assertEquals(EMAIL, userIDLessDTO.getEmail());
+	}
+
+	@Test
+	@DisplayName("User dto builder")
+	void user_dto_builder() {
+		final UserIDLessDTO userIDLessDTO = UserIDLessDTO.builder()
+				.email(EMAIL)
+				.password(PASS)
+				.username(USER)
+				.build();
+
+		assertEquals(
+				format(
+						"UserIDLessDTO.UserIDLessDTOBuilder(username=%s, password=%s, email=%s)",
+						userIDLessDTO.getUsername(), userIDLessDTO.getPassword(), userIDLessDTO.getEmail()),
+				userIDLessDTO.toBuilder().toString());
+
+		assertEquals(USER, userIDLessDTO.getUsername());
+		assertEquals(PASS, userIDLessDTO.getPassword());
+		assertEquals(EMAIL, userIDLessDTO.getEmail());
 	}
 }
