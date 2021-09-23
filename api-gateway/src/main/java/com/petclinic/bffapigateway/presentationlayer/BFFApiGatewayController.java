@@ -5,13 +5,13 @@ import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
 import com.petclinic.bffapigateway.dtos.OwnerDetails;
 import com.petclinic.bffapigateway.dtos.VetDetails;
+import com.petclinic.bffapigateway.dtos.VisitDetails;
 import com.petclinic.bffapigateway.dtos.Visits;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -50,7 +50,18 @@ public class BFFApiGatewayController {
                     .map(addVisitsToOwner(n))
             );
     }
+    //Testing purpose
+    @GetMapping(value = "pets/visits/All")
+    public Mono<Visits> getAllVisits(){
+        return visitsServiceClient.getAllVisits();
 
+    }
+
+    //Add new Visit
+    @PostMapping (value = "pets/visits")
+    public Mono<Visits> createVisitForPets(final @RequestBody VisitDetails visitDetails){
+        return visitsServiceClient.createVisitForPets(visitDetails);
+        }
 
     private Function<Visits, OwnerDetails> addVisitsToOwner(OwnerDetails owner) {
         return visits -> {

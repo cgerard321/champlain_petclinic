@@ -27,6 +27,27 @@ class VisitResource {
 
     private final VisitRepository visitRepository;
 
+    //Testing purposes to View all visits
+    @GetMapping(value = "pets/visits/All")
+    public List<Visit> showVisitList() {
+        return visitRepository.findAll();
+    }
+
+    @PostMapping("pets/visits")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Visit createVisit(@Valid @RequestBody Visit visit){
+
+        visit.setId(visit.getId());
+        visit.setPetId(visit.getPetId());
+        visit.setDate(visit.getDate());
+        visit.setDescription(visit.getDescription());
+
+        log.info("Saving visit {}", visit);
+        return visitRepository.save(visit);
+    }
+
+    
+
     @PostMapping("owners/*/pets/{petId}/visits")
     @ResponseStatus(HttpStatus.CREATED)
     public Visit create(
@@ -38,6 +59,7 @@ class VisitResource {
         return visitRepository.save(visit);
     }
 
+
     @GetMapping("owners/*/pets/{petId}/visits")
     public List<Visit> visits(@PathVariable("petId") int petId) {
         return visitRepository.findByPetId(petId);
@@ -48,6 +70,7 @@ class VisitResource {
         final List<Visit> byPetIdIn = visitRepository.findByPetIdIn(petIds);
         return new Visits(byPetIdIn);
     }
+
 
     @Value
     static class Visits {
