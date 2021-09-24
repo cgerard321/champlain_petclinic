@@ -1,10 +1,12 @@
 package com.petclinic.visits.datalayer;
 
+import com.petclinic.visits.businesslayer.VisitsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +20,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.springframework.transaction.annotation.Propagation.NOT_SUPPORTED;
 
 @ExtendWith(SpringExtension.class)
@@ -27,6 +30,10 @@ public class PersistenceTests {
 
     @Autowired
     private VisitRepository repo;
+    private Visit savedVisit;
+
+    @MockBean
+    private VisitsService service;
 
     @BeforeEach
     public void setupDb(){
@@ -49,9 +56,9 @@ public class PersistenceTests {
     @Test
     public void getVisitsForPet(){
         List<Visit> repoResponse = repo.findByPetId(1);
-
         assertThat(repoResponse, hasSize(2));
     }
+
 
     @Test
     public void confirmAndCancelAppointment(){
@@ -70,14 +77,19 @@ public class PersistenceTests {
         Visit visit = visit().petId(3).date(new Date()).description("").practitionerId(123456).build();
 
         repo.save(visit);
-        
+
         List<Visit> repoResponse = repo.findByPetId(3);
-        
+
         assertThat(repoResponse, hasSize(1));
     }
 
-  
-  
+    //Needs to be fixed
+    @Test
+    public void deleteVisit() {
+        repo.delete(savedVisit);
+        assertFalse(repo.existsById(savedVisit.getId()));
+    }
+
     @Test
     public void getVisitsForNonExistentPet(){
         List<Visit> repoResponse = repo.findByPetId(0);

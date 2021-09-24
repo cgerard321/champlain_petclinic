@@ -4,6 +4,7 @@ import com.petclinic.visits.datalayer.Visit;
 import com.petclinic.visits.datalayer.VisitRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -28,15 +29,9 @@ public class VisitsServiceImplTests {
     @MockBean
     VisitRepository repo;
 
-    @Autowired
+    @MockBean
     VisitsService visitsService;
 
-//    @Test
-//    public void addVisit(){
-//        when(repo.save()).thenReturn();
-//
-//        visitsService.addVisit();
-//    }
 
     @Test
     public void whenValidPetIdThenShouldReturnVisitsForPet(){
@@ -58,7 +53,7 @@ public class VisitsServiceImplTests {
         assertThat(serviceResponse, hasSize(2));
         assertThat(serviceResponse.get(1).getPetId(), equalTo(1));
     }
-  
+
     @Test
     public void whenValidPetIdThenCreateConfirmedVisitForPet(){
         Visit visit = visit().id(2).petId(1).status(true).build();
@@ -82,8 +77,9 @@ public class VisitsServiceImplTests {
         assertThat(serviceResponse.getPetId(), equalTo(1));
     }
 
+
     @Test
-    public void whenValidPetIdThenCreateCanceledVisitForPet(){
+    public void whenValidPetIdThenCreateCanceledVisitForPet() {
         Visit visit = visit().id(2).petId(1).status(false).build();
 
         when(repo.save(visit)).thenReturn(visit);
@@ -93,5 +89,10 @@ public class VisitsServiceImplTests {
         assertThat(serviceResponse.getPetId(), equalTo(1));
         assertThat(serviceResponse.isStatus(), equalTo(false));
     }
+    
+    @Test
+    public void isDeletingVisits(){
+        Visit visit = new Visit(5, new Date("2020-08-07"), "Normal appointment", 1);
+        visitsService.deleteVisit(visit.getId());
+    }
 }
-

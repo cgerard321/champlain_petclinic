@@ -34,11 +34,13 @@ public class VisitResource {
     //private static final Logger LOG = LoggerFactory.getLogger(VisitResource.class);
     //private final VisitRepository visitRepository;
 
+
     private final VisitsService visitsService;
 
     public VisitResource(VisitsService service){
         this.visitsService = service;
     }
+
 
     //To create a new visits
     @PostMapping("owners/*/pets/{petId}/visits")
@@ -50,12 +52,6 @@ public class VisitResource {
         visit.setPetId(petId);
         log.info("Saving visit {}", visit);
         return visitsService.addVisit(visit);
-    }
-
-    @GetMapping("visits/{petId}")
-    public List<Visit> getVisitsForPet(@PathVariable("petId") int petId){
-        log.info("Getting visits for pet with petid: {}", petId );
-        return visitsService.getVisitsForPet(petId);
     }
 
 
@@ -72,18 +68,29 @@ public class VisitResource {
 
 
     //This method will return every visits of people that have multiple pets
+    @GetMapping("visits/{petId}")
+    public List<Visit> getVisitsForPet(@PathVariable("petId") int petId){
+        log.info("Getting visits for pet with petid: {}", petId );
+        return visitsService.getVisitsForPet(petId);
+    }
+
     @GetMapping("pets/visits")
     public Visits visitsMultiGet(@RequestParam("petId") List<Integer> petIds) {
         final List<Visit> byPetIdIn = visitsService.getVisitsForPets(petIds);
         return new Visits(byPetIdIn);
     }
 
-
-//    @GetMapping("pets/visits")
-//    public Visits visitsMultiGet(@RequestParam("petId") List<Integer> petIds) {
-//        final List<Visit> byPetIdIn = visitsService.getVisitsForPets(petIds);
-//        return new Visits(byPetIdIn);
+    //    @PostMapping("owners/*/pets/{petId}/visits")
+//    @ResponseStatus(HttpStatus.CREATED)
+//    public Visit create(
+//           @Valid @RequestBody Visit visit,
+//           @PathVariable("petId") int petId) {
+//
+//       visit.setPetId(petId);
+//        log.info("Saving visit {}", visit);
+//        return visitsService.addVisit(visit);
 //    }
+
 
     @Value
     static class Visits {
