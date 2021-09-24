@@ -1,4 +1,4 @@
-<h2 id="titleOwner">Owners</h2>
+<h2 class="titleOwner">Owners</h2>
 
 <form onsubmit="javascript:void(0)" style="max-width: 20em; margin-top: 2em;">
     <div class="form-group">
@@ -19,7 +19,7 @@
 
     <tr ng-repeat="owner in $ctrl.owners | filter:$ctrl.query track by owner.id">
         <td>
-            <a id="newBtn" class="btn btn-default" ui-sref="ownerDetails({ ownerId: owner.id })">
+            <a class="newBtn btn btn-default" ui-sref="ownerDetails({ ownerId: owner.id })">
                 {{owner.firstName}} {{owner.lastName}}
             </a>
         </td>
