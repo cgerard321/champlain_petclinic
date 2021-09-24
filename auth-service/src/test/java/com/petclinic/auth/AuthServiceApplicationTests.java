@@ -228,7 +228,6 @@ class AuthServiceApplicationTests {
 		user.setUsername(USER);
 		user.setPassword(PASS);
 		user.setId(ID);
-
 		user.setEmail("testemail@gmail.com");
 		Set<ConstraintViolation<User>> violations = validator.validate(user);
 		assertTrue(violations.isEmpty());

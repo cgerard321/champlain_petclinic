@@ -21,11 +21,12 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Random;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
+import java.util.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Random;
 
 import static java.lang.String.format;
@@ -52,6 +53,8 @@ public class AuthServicePersistenceTests {
 
     private final static Random rng;
 
+    private Validator validator;
+
     static {
         rng = new Random();
     }
@@ -60,6 +63,8 @@ public class AuthServicePersistenceTests {
     void cleanUp() {
         userRepo.deleteAll();
         roleRepo.deleteAll();
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        validator = factory.getValidator();
     }
 
     @Test
@@ -209,18 +214,6 @@ public class AuthServicePersistenceTests {
         assertThrows(DataIntegrityViolationException.class, () -> roleRepo.delete(role));
     }
 
-    @Test
-    @DisplayName("Verify if email exist inside the database")
-    void verify_same_email_uniqueness() {
-
-        User user = addDefaultUser();
-
-        user = userRepo.save(user);
-
-        assertEquals("email-1@gmail.com", user.getEmail());
-    }
-
-
     @DisplayName("Add User with username, password and email")
     void add_user() throws Exception{
 
@@ -230,6 +223,8 @@ public class AuthServicePersistenceTests {
         assertEquals(testUser.getPassword(), "testPassword");
         assertEquals(testUser.getEmail(), "test@email.com");
     }
+
+
     //This Test will be used when the UserServiceImpl class is fully implemented
 //    @Test
 //    @DisplayName("Add User with username only.")
