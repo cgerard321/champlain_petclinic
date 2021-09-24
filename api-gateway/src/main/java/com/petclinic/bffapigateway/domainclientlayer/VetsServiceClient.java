@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 
 /**
@@ -32,6 +33,10 @@ public class VetsServiceClient {
                 .uri(vetsServiceUrl)
                 .retrieve()
                 .bodyToFlux(VetDetails.class);
+    }
+
+    public Mono<VetDetails> getVet(final int vetId){
+        return webClientBuilder.build().get().uri(vetsServiceUrl + "/{vetId}", vetId).retrieve().bodyToMono(VetDetails.class);
     }
 
 }

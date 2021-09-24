@@ -4,6 +4,10 @@ import com.petclinic.vets.datalayer.Vet;
 import com.petclinic.vets.datalayer.VetRepository;
 import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +30,7 @@ import java.util.Optional;
 @Timed("petclinic.vet")
 @RequiredArgsConstructor
 class VetResource {
+
     private final VetRepository vetRepository;
 
     VetResource(VetRepository vetRepository){this.vetRepository = vetRepository;}
@@ -43,6 +48,12 @@ class VetResource {
 
     @GetMapping(value = "/{vetId}")
     public Optional<Vet> findVetById(@PathVariable("vetId") int vetId) {
+        return vetRepository.findById(vetId);
+    }
+
+
+    @GetMapping(value = "/{vetId}")
+    public Optional<Vet> findVet(@PathVariable("vetId") int vetId) {
         return vetRepository.findById(vetId);
     }
 

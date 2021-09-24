@@ -2,6 +2,7 @@ package com.petclinic.vets.datalayer;
 
 import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PropertyComparator;
+import org.springframework.core.style.ToStringCreator;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
@@ -213,4 +214,14 @@ public class Vet {
         getSpecialtiesInternal().add(specialty);
     }
 
+    @Override
+    public String toString(){
+        return new ToStringCreator(this).append("id", this.getId())
+                .append("firstName", this.getFirstName())
+                .append("lastName", this.getLastName())
+                .append("email", this.getEmail())
+                .append("phoneNumber", this.getPhoneNumber())
+                .append("resume", this.getResume())
+                .append("workday", this.getWorkday()).toString();
+    }
 }
