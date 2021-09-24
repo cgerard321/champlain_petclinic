@@ -1,0 +1,51 @@
+.modalOn{
+    display:grid !important;
+  grid-template-columns:1fr 1fr;
+  justify-content:center;
+  align-items:center;
+  position:absolute;
+  top:0;
+ margin:0 0;
+  transform:translate(-50%,-50%);
+ z-index:100000;
+ text-align:center;
+
+    animation:500ms fadeIn forwards;
+    pointer-events:none;
+    color:white;
+}
+
+.modalOff{
+    display:none !important;
+}
+.modal{
+  width:669px !important;
+  height:150px !important;
+  background: rgb(0, 0, 0,0.75) !important;
+  color:white !important;
+}
+
+.modal_specialty{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+@keyframes fadeIn{
+    0%{
+        opacity:0;
+    }
+    100%{
+        opacity:1;
+    }
+}
+
+@media screen and (max-width:960px){
+  .modal{
+    width:334.5px !important;
+    height: 360px !important;
+  }
+  .modalOn{
+    display:grid !important;
+    grid-template-columns:1fr;
+  }
+}

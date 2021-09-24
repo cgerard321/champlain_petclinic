@@ -1,5 +1,6 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
+import com.petclinic.bffapigateway.dtos.Login;
 import com.petclinic.bffapigateway.dtos.OwnerDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,4 +45,5 @@ public class CustomersServiceClient {
                 .retrieve()
                 .bodyToFlux(OwnerDetails.class);
     }
+
 }
