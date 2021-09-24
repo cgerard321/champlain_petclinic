@@ -34,8 +34,14 @@ class PetResourceTest {
     @MockBean
     PetRepository petRepository;
 
+<<<<<<< Updated upstream
     @MockBean
     OwnerRepository ownerRepository;
+=======
+    @Autowired
+    PetRepository repository;
+
+>>>>>>> Stashed changes
 
     @Test
     void shouldGetAPetInJSonFormat() throws Exception {
@@ -54,9 +60,17 @@ class PetResourceTest {
     }
 
     private Pet setupPet() {
+<<<<<<< Updated upstream
         Owner owner = new Owner();
         owner.setFirstName("George");
         owner.setLastName("Bush");
+=======
+
+        int temp_id = 1;
+        Owner owner_pet = new Owner();
+        owner_pet.setFirstName("John");
+        owner_pet.setLastName("Wick");
+>>>>>>> Stashed changes
 
         Pet pet = new Pet();
 
@@ -70,5 +84,9 @@ class PetResourceTest {
         owner.addPet(pet);
         return pet;
     }
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 }
 

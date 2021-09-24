@@ -4,7 +4,9 @@ import com.petclinic.customers.datalayer.Owner;
 import com.petclinic.customers.datalayer.OwnerRepository;
 import io.micrometer.core.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -31,7 +33,13 @@ class OwnerResource {
 
     private final OwnerRepository ownerRepository;
 
+<<<<<<< Updated upstream
     OwnerResource(OwnerRepository ownerRepository) {
+=======
+    @Autowired
+    OwnerResource(OwnerServiceImpl ownerServiceImpl, OwnerRepository ownerRepository) {
+        this.ownerServiceImpl = ownerServiceImpl;
+>>>>>>> Stashed changes
         this.ownerRepository = ownerRepository;
     }
 
@@ -48,8 +56,14 @@ class OwnerResource {
      * Read single Owner
      */
     @GetMapping(value = "/{ownerId}")
+<<<<<<< Updated upstream
     public Optional<Owner> findOwner(@PathVariable("ownerId") int ownerId) {
         return ownerRepository.findById(ownerId);
+=======
+    public Optional<Owner> findOwner(@PathVariable("ownerId") int ownerId)
+    {
+       return ownerServiceImpl.findByOwnerId(ownerId);
+>>>>>>> Stashed changes
     }
 
     /**
@@ -78,5 +92,21 @@ class OwnerResource {
         log.info("Saving owner {}", ownerModel);
         ownerRepository.save(ownerModel);
     }
+<<<<<<< Updated upstream
+=======
+
+    /**
+     * Delete an owner by calling ownerServiceImpl.deleteOwner()
+     * @param ownerId
+     */
+    @DeleteMapping(value = "/{ownerId}")
+    public void deleteOwner(@PathVariable("ownerId") int ownerId)
+    {
+        ownerServiceImpl.deleteOwner(ownerId);
+
+    }
+
+
+>>>>>>> Stashed changes
 }
 

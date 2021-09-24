@@ -15,4 +15,19 @@ import org.springframework.data.jpa.repository.JpaRepository;
  */
 
 public interface OwnerRepository extends JpaRepository<Owner, Integer> {
+<<<<<<< Updated upstream
+=======
+
+    /*
+    @Transactional(readOnly = true)
+    Optional<Owner> findByOwnerId (int id);
+
+    Optional<Owner> findAccount(String un, String pass);
+
+    Optional<Owner> findByName(String n);
+    */
+
+
+
+>>>>>>> Stashed changes
 }
