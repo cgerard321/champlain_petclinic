@@ -50,4 +50,14 @@ public class PersistenceTests {
 
         assertThat(repoResponse, hasSize(2));
     }
+
+    @Test
+    public void getVisitsForNonExistentPet(){
+        List<Visit> repoResponse = repo.findByPetId(0);
+
+
+        assertThat(repoResponse, hasSize(0));
+
+    }
+
 }
