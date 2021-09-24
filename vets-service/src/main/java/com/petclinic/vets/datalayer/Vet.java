@@ -1,7 +1,9 @@
 package com.petclinic.vets.datalayer;
 
+import org.hibernate.validator.constraints.UniqueElements;
 import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PropertyComparator;
+import org.springframework.core.style.ToStringCreator;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
@@ -27,6 +29,11 @@ public class Vet {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @NotEmpty
+    @UniqueElements
+    @Column(name = "vet_id")
+    private Integer vetId;
+
     @Column(name = "first_name")
     @NotEmpty
     private String firstName;
@@ -34,6 +41,74 @@ public class Vet {
     @Column(name = "last_name")
     @NotEmpty
     private String lastName;
+
+    @Column(name = "email")
+    @NotEmpty
+    private String email;
+
+    @Column(name = "phone_number")
+    @NotEmpty
+    private String phoneNumber;
+
+    @Column(name = "resume")
+    @NotEmpty
+    private String resume;
+
+    @Column(name = "workday")
+    private String workday;
+
+    @Column(name = "is_active")
+    @NotEmpty
+    private Integer isActive;
+
+    public Integer getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(Integer isActive) {
+        this.isActive = isActive;
+    }
+
+    public Integer getVetId() {
+        return vetId;
+    }
+
+    public void setVetId(Integer vetId) {
+        this.vetId = vetId;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getResume() {
+        return resume;
+    }
+
+    public void setResume(String resume) {
+        this.resume = resume;
+    }
+
+    public String getWorkday() {
+        return workday;
+    }
+
+    public void setWorkday(String workday) {
+        this.workday = workday;
+    }
+
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "vet_specialties", joinColumns = @JoinColumn(name = "vet_id"),
@@ -86,4 +161,14 @@ public class Vet {
         getSpecialtiesInternal().add(specialty);
     }
 
+    @Override
+    public String toString(){
+        return new ToStringCreator(this).append("id", this.getId())
+                .append("firstName", this.getFirstName())
+                .append("lastName", this.getLastName())
+                .append("email", this.getEmail())
+                .append("phoneNumber", this.getPhoneNumber())
+                .append("resume", this.getResume())
+                .append("workday", this.getWorkday()).toString();
+    }
 }
