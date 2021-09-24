@@ -1,6 +1,7 @@
 package com.petclinic.auth;
 
 
+import com.petclinic.auth.Unique.UniqueEmailValidator;
 import com.petclinic.auth.User.*;
 import com.petclinic.auth.Role.*;
 import com.petclinic.auth.Role.Role;

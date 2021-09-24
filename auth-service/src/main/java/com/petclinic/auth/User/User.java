@@ -1,7 +1,6 @@
 package com.petclinic.auth.User;
 
 import com.petclinic.auth.Role.Role;
-import com.petclinic.auth.Unique.UniqueEmail;
 import lombok.*;
 
 import javax.persistence.*;
@@ -32,8 +31,6 @@ public class User {
 
     @NotEmpty
     @Email(message = "Email must be valid")
-    @Column(unique = true)
-    @UniqueEmail(message = "The email is already is use")
     private String email;
 
     public User(String username, String password, String email) {
