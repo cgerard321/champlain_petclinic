@@ -9,5 +9,5 @@ import java.util.Optional;
 
 public interface BillRepository extends JpaRepository<Bill, Integer> {
     @Transactional(readOnly = true)
-    List<Bill> findByBillID(int billId);
+    List<Bill> findByBillId(int billId);
 }

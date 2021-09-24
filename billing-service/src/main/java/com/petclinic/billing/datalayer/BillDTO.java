@@ -11,6 +11,7 @@ import java.util.Date;
 @Setter
 @Builder(toBuilder = true)
 public class BillDTO {
+
     private Date date;
     private String visitType;
     private double amount;
