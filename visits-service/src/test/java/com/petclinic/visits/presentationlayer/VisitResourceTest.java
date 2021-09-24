@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.*;
 
 import static java.util.Arrays.asList;
+import static org.mockito.ArgumentMatchers.doubleThat;
 import static org.mockito.BDDMockito.given;
 import static com.petclinic.visits.datalayer.Visit.visit;
 import static org.mockito.Mockito.when;
@@ -89,6 +90,15 @@ class VisitResourceTest {
 				.andExpect(jsonPath("$.items[0].petId").value(111))
 				.andExpect(jsonPath("$.items[1].petId").value(222))
 				.andExpect(jsonPath("$.items[2].petId").value(222));
+	}
+
+
+	@Test
+	void whenInValidPetIdThenShouldReturnVisitsForPet() throws Exception {
+
+		mvc.perform(get("/visits/SGAJE"))
+				.andExpect(status().isBadRequest());
+
 	}
 }
 

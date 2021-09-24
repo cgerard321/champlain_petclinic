@@ -3,10 +3,7 @@ package com.petclinic.bffapigateway.presentationlayer;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
-import com.petclinic.bffapigateway.dtos.Login;
-import com.petclinic.bffapigateway.dtos.OwnerDetails;
-import com.petclinic.bffapigateway.dtos.VetDetails;
-import com.petclinic.bffapigateway.dtos.Visits;
+import com.petclinic.bffapigateway.dtos.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
@@ -69,6 +66,11 @@ public class BFFApiGatewayController {
                 );
             return owner;
         };
+    }
+
+    @GetMapping(value = "visits/{petId}")
+    public Flux<VisitDetails> getVisitsForPet(@PathVariable int petId){
+        return visitsServiceClient.getVisitsForPet(petId);
     }
 
     @GetMapping(value = "vets")

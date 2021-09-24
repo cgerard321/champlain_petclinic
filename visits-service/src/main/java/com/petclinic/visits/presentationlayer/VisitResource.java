@@ -4,11 +4,8 @@ import com.petclinic.visits.businesslayer.VisitsService;
 import com.petclinic.visits.datalayer.Visit;
 import com.petclinic.visits.datalayer.VisitRepository;
 import io.micrometer.core.annotation.Timed;
-import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,11 +24,13 @@ import java.util.List;
 @Timed("petclinic.visit")
 public class VisitResource {
 
+    private final VisitRepository visitRepository;
     //private static final Logger LOG = LoggerFactory.getLogger(VisitResource.class);
 
     private final VisitsService visitsService;
 
-    public VisitResource(VisitsService service){
+    public VisitResource(VisitRepository visitRepository, VisitsService service){
+        this.visitRepository = visitRepository;
         this.visitsService = service;
     }
 
@@ -51,7 +50,7 @@ public class VisitResource {
     @GetMapping("visits/{petId}")
     public List<Visit> getVisitsForPet(@PathVariable("petId") int petId){
         log.info("Getting visits for pet with petid: {}", petId );
-        return visitsService.getVisitsForPet(petId);
+        return visitRepository.findByPetId(petId);
     }
 
     @GetMapping("owners/*/pets/{petId}/visits")

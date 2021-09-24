@@ -8,7 +8,7 @@ angular.module('visits')
         self.date = new Date();
         self.desc = "";
 
-        $http.get(url).then(function (resp) {
+        $http.get('api/gateway/visits/' + petId).then(function (resp) {
             self.visits = resp.data;
         });
 

@@ -1,11 +1,13 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
+import com.petclinic.bffapigateway.dtos.VisitDetails;
 import com.petclinic.bffapigateway.dtos.Visits;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -48,6 +50,13 @@ public class VisitsServiceClient {
                 .uri(hostname + "pets/visits?petId={petId}", joinIds(petIds))
                 .retrieve()
                 .bodyToMono(Visits.class);
+    }
+
+    public Flux<VisitDetails> getVisitsForPet(int petId) {
+        return webClientBuilder.build().get()
+                .uri(hostname + "visits/{petId}", petId)
+                .retrieve()
+                .bodyToFlux(VisitDetails.class);
     }
 
     private String joinIds(List<Integer> petIds) {
