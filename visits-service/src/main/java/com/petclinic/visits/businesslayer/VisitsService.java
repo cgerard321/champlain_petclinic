@@ -11,4 +11,6 @@ public interface VisitsService {
     public List<Visit> getVisitsForPets(List<Integer> petIds);
 
     public void deleteVisit(int visitId);
+
+    Visit addVisit(Visit visit);
 }

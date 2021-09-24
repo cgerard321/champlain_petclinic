@@ -44,16 +44,16 @@ public class VisitResource {
     }
 
 
-//    @PostMapping("owners/*/pets/{petId}/visits")
-//    @ResponseStatus(HttpStatus.CREATED)
-//    public Visit create(
-//           @Valid @RequestBody Visit visit,
-//           @PathVariable("petId") int petId) {
-//
-//       visit.setPetId(petId);
-//        log.info("Saving visit {}", visit);
-//        return visitsService.addVisit(visit);
-//    }
+    @PostMapping("owners/*/pets/{petId}/visits")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Visit create(
+           @Valid @RequestBody Visit visit,
+           @PathVariable("petId") int petId) {
+
+       visit.setPetId(petId);
+        log.info("Saving visit {}", visit);
+        return visitsService.addVisit(visit);
+    }
 
     @GetMapping("visits/{petId}")
     public List<Visit> getVisitsForPet(@PathVariable("petId") int petId){

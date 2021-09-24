@@ -1,6 +1,7 @@
 package com.petclinic.visits.datalayer;
 
 import com.petclinic.visits.businesslayer.VisitsService;
+import org.graalvm.compiler.lir.VirtualStackSlot;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,17 +30,14 @@ public class PersistenceTests {
 
     @Autowired
     private VisitRepository repo;
-    private Visit savedVisit;
-
-    @MockBean
-    private VisitsService service;
+    private Visit visit;
 
     @BeforeEach
     public void setupDb(){
         repo.deleteAll();
 
         // add setup data here
-        Visit visit = Visit.visit()
+        visit = Visit.visit()
                 .id(1)
                 .petId(1)
                 .build();
@@ -58,10 +56,34 @@ public class PersistenceTests {
         assertThat(repoResponse, hasSize(2));
     }
 
-    //Needs to be fixed
     @Test
-    public void deleteVisit() {
-        repo.delete(savedVisit);
-        assertFalse(repo.existsById(savedVisit.getId()));
+    public void Is_deleting_Visit() {
+        repo.delete(visit);
+        assertFalse(repo.existsById(visit.getId()));
     }
+
+    @Test
+    public void Is_Visit_Empty_Dont_Delete(){
+        Visit visit = new Visit();
+        repo.delete(visit);
+        assertFalse(repo.equals(null));
+    }
+
+    @Test
+    public void Is_Deleting_The_Wrong_Value_Date(){
+        Visit visit = new Visit();
+
+    }
+
+    @Test
+    public void Is_Deleting_The_Wrong_Value_Description(){
+
+    }
+
+    @Test
+    public void Is_Deleting_The_Wrong_Value_PetId(){
+
+    }
+
+
 }

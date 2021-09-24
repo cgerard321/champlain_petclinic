@@ -4,10 +4,11 @@ import com.petclinic.visits.datalayer.Visit;
 import com.petclinic.visits.datalayer.VisitRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-
+@Service
 public class VisitsServiceImpl implements VisitsService {
 
     private final VisitRepository visitRepository;
@@ -29,5 +30,10 @@ public class VisitsServiceImpl implements VisitsService {
     @Override
     public void deleteVisit(int visitId) {
         visitRepository.findById(visitId).ifPresent(e -> visitRepository.delete(e));
+    }
+
+    @Override
+    public Visit addVisit(Visit visit) {
+        return null;
     }
 }
