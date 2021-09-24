@@ -24,4 +24,11 @@ public class UserServiceImpl implements UserService{
         return userRepo.save(userMap);
 
     }
+
+    public User passwordReset(String passwd) {
+
+        log.info("id={}", id);
+        return userRepo.findById(id);
+
+    }
 }

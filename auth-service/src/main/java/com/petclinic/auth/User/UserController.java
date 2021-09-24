@@ -1,10 +1,8 @@
 package com.petclinic.auth.User;
 
-import com.petclinic.auth.Role.Role;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -16,6 +14,7 @@ import javax.validation.Valid;
 public class UserController {
 
     private final UserRepo userRepo;
+    private final UserServiceImpl userServ;
     private final UserMapper userMapper;
 
     @PostMapping
@@ -31,5 +30,18 @@ public class UserController {
         log.info("Successfully persisted user");
 
         return saved;
+    }
+
+    @PutMapping
+    public void passwordReset(@RequestParam long id, String pwd){
+
+        log.info("id={}", id);
+        try {
+            userServ.passwordReset(pwd);
+        } catch (EmptyResultDataAccessException e) {
+            log.info("No user with id {}. Ignoring", id);
+            return;
+        }
+        log.info("Password for User with id {}, reset", id);
     }
 }
