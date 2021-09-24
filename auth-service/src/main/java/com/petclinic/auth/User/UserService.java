@@ -2,5 +2,5 @@ package com.petclinic.auth.User;
 
 public interface UserService {
 
-    User createUser(User user);
+    User createUser(UserIDLessDTO user);
 }

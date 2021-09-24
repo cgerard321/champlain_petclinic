@@ -18,18 +18,15 @@ import javax.validation.Valid;
 public class UserController {
 
     private final UserService userService;
-    private final UserMapper userMapper;
 
     @PostMapping
     public User createUser(@RequestBody @Valid UserIDLessDTO dto) {
 
         log.info("Received user dto, trying to convert model");
         log.info("DTO info: { username={}, password={}, email={} }", dto.getUsername(), dto.getPassword(), dto.getEmail());
-        final User user = userMapper.idLessDTOToModel(dto);
-        log.info("Successfully converted dto -> model");
 
         log.info("Trying to persist user");
-        final User saved = userService.createUser(user);
+        final User saved = userService.createUser(dto);
         log.info("Successfully persisted user");
 
         return saved;

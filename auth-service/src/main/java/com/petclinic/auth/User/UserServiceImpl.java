@@ -17,9 +17,10 @@ public class UserServiceImpl implements UserService{
     private final UserMapper userMapper;
 
     @Override
-    public User createUser(@Valid User user) {
+    public User createUser(@Valid UserIDLessDTO userIDLessDTO) {
 
-        log.info("Saving user with username {}", user.getUsername());
+        log.info("Saving user with username {}", userIDLessDTO.getUsername());
+        User user = userMapper.idLessDTOToModel(userIDLessDTO);
         return userRepo.save(user);
 
     }

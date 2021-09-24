@@ -49,13 +49,13 @@ public class AuthServiceUserServiceTests {
     @Test
     @DisplayName("Create new user")
     void create_new_user() throws Exception {
-        User user = new User(USER, PASS, EMAIL);
+        UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
 
 
-        final User createdUser = userService.createUser(user);
-        assertEquals(createdUser.getUsername(), user.getUsername());
-        assertEquals(createdUser.getPassword(), user.getPassword());
-        assertEquals(createdUser.getEmail(), user.getEmail());
+        final User createdUser = userService.createUser(userIDLessDTO);
+        assertEquals(createdUser.getUsername(), userIDLessDTO.getUsername());
+        assertEquals(createdUser.getPassword(), userIDLessDTO.getPassword());
+        assertEquals(createdUser.getEmail(), userIDLessDTO.getEmail());
     }
 
 }
