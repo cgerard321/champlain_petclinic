@@ -1,5 +1,6 @@
 package com.petclinic.vets.datalayer;
 
+import org.hibernate.validator.constraints.UniqueElements;
 import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PropertyComparator;
 import org.springframework.core.style.ToStringCreator;

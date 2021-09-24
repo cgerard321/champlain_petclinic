@@ -40,6 +40,12 @@ class VetResource {
         return vetRepository.findAll();
     }
 
+    @GetMapping(value = "/{vetId}")
+    public Optional<Vet> findVet(@PathVariable("vetId") int vetId) {
+        return vetRepository.findById(vetId);
+    }
+
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Vet addVet(@Valid @RequestBody Vet vet) {
