@@ -23,7 +23,8 @@ import java.util.Optional;
 
 @RequestMapping("/vets")
 @RestController
-//@RequiredNoArgsconstructor rmvd
+@Timed("petclinic.vet")
+@RequiredArgsConstructor
 class VetResource {
     private final VetRepository vetRepository;
 

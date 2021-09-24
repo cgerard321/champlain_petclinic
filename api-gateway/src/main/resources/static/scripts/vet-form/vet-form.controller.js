@@ -14,7 +14,7 @@ angular.module('vetForm')
             });
         }
 
-        self.submitOwnerForm = function () {
+        self.submitVetForm = function () {
             var id = self.vet.id;
             var req;
             if (id) {

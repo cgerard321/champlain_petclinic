@@ -3,7 +3,7 @@
 angular.module('vetForm', ['ui.router'])
     .config(['$stateProvider', function ($stateProvider) {
         $stateProvider
-            .state('vetNew', {
+            .state('vetsNew', {
                 parent: 'app',
                 url: '/vets/new',
                 template: '<vet-form></vet-form>'

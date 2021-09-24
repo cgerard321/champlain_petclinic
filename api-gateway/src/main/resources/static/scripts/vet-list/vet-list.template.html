@@ -1,5 +1,7 @@
 <h2>Veterinarians</h2>
-<button class="add-vet-button" onclick="openForm()" disabled="true">Add A Vet</button>
+<a ui-sref="vetsNew">
+    <button class="add-vet-button" >Add A Vet</button>
+</a>
 <table class="table table-striped">
     <thead>
     <tr>
@@ -11,6 +13,5 @@
     <tr ng-repeat="vet in $ctrl.vetList">
         <td>{{vet.firstName}} {{vet.lastName}}</td>
         <td><span ng-repeat="specialty in vet.specialties">{{specialty.name + ' '}}</span></td>
-
     </tr>
 </table>
