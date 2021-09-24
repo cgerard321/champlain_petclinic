@@ -36,5 +36,19 @@ public class Bill {
     public String getVisitType(){return visitType;}
     public double getAmount(){return amount;}
 
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public void setVisitType(String visitType) {
+        this.visitType = visitType;
+    }
+
+    public void setAmount(double amount) {
+        this.amount = amount;
+    }
 }

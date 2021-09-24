@@ -10,6 +10,6 @@ public interface BillMapper {
 
     BillDTO EntityToModel(Bill bill);
 
-    @Mapping(target = "id",ignore = true)
+    @Mapping(target = "id", ignore = true)
     Bill ModelToEntity(BillDTO billDTO);
 }
