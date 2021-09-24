@@ -2,6 +2,8 @@ package com.petclinic.vets.datalayer;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
+
 /**
  * Repository class for <code>Vet</code> domain objects All method names are compliant with Spring Data naming
  * conventions so this interface can easily be extended for Spring Data See here: http://static.springsource.org/spring-data/jpa/docs/current/reference/html/jpa.repositories.html#jpa.query-methods.query-creation
@@ -14,6 +16,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * Copied from https://github.com/spring-petclinic/spring-petclinic-microservices
  */
 
-public interface VetRepository extends JpaRepository<Vet, Integer> {
+public interface VetRepository extends JpaRepository<Vet, Integer>
+{
+    Optional<Vet> findByVetId (int vetId);
 }
 

@@ -1,13 +1,15 @@
 package com.petclinic.vets.presentationlayer;
 
+import com.petclinic.vets.businesslayer.VetService;
 import com.petclinic.vets.datalayer.Vet;
 import com.petclinic.vets.datalayer.VetRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Juergen Hoeller
@@ -23,10 +25,21 @@ import java.util.List;
 @RequiredArgsConstructor
 class VetResource {
 
+
+    private final VetService vetService;
     private final VetRepository vetRepository;
 
     @GetMapping
     public List<Vet> showResourcesVetList() {
-        return vetRepository.findAll();
+        return vetService.getAllVets();//vetRepository.findAll();
     }
+
+    @GetMapping("/{vetId}")
+    public Vet findVet(@PathVariable int vetId){return vetRepository.findByVetId(vetId).get();}
+
+
+    @PutMapping( value = "/{vetId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public Vet updateVet(@PathVariable("vetId") int vetId, @Valid @RequestBody Vet vetRequest) {
+        return  vetService.updateVet(vetRequest);}
 }
