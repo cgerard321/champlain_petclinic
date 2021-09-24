@@ -1,20 +1,18 @@
 package com.petclinic.auth;
 
 
-import com.petclinic.auth.Unique.UniqueEmailValidator;
-import com.petclinic.auth.User.*;
-import com.petclinic.auth.Role.*;
 import com.petclinic.auth.Role.Role;
 import com.petclinic.auth.Role.RoleIDLessDTO;
 import com.petclinic.auth.Role.RoleMapper;
 import com.petclinic.auth.Role.RoleRepo;
 import com.petclinic.auth.User.User;
+import com.petclinic.auth.User.UserIDLessDTO;
+import com.petclinic.auth.User.UserMapper;
 import com.petclinic.auth.User.UserRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -22,8 +20,6 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
-import java.util.Optional;
-import java.util.Random;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -224,7 +220,7 @@ class AuthServiceApplicationTests {
 
 	@Test
 	@DisplayName("Verify if the email is valid and succeed")
-	void verify_valid_email_success() throws Exception {
+	void verify_valid_email_success() {
 		User user = new User();
 		user.setUsername(USER);
 		user.setPassword(PASS);
@@ -236,7 +232,7 @@ class AuthServiceApplicationTests {
 
 	@Test
 	@DisplayName("Verify if the email is valid and fail because missing @")
-	void detect_invalid_email_missing_at() throws Exception {
+	void detect_invalid_email_missing_at() {
 		User user = new User();
 		user.setUsername(USER);
 		user.setPassword(PASS);
@@ -253,7 +249,7 @@ class AuthServiceApplicationTests {
 
 	@Test
 	@DisplayName("Submit a completed signup form")
-	void submit_completed_signup_form() throws Exception {
+	void submit_completed_signup_form() {
 		User user = new User(USER, PASS, EMAIL);
 		assertEquals(USER, user.getUsername());
 		assertEquals(PASS, user.getPassword());
@@ -261,7 +257,7 @@ class AuthServiceApplicationTests {
 	}
 	@Test
 	@DisplayName("Submit signup form through constructor of UserIDLessDTO")
-	void submit_form_with_constructor_without_id() throws Exception{
+	void submit_form_with_constructor_without_id() {
 		UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
 		assertEquals(USER, userIDLessDTO.getUsername());
 		assertEquals(PASS, userIDLessDTO.getPassword());

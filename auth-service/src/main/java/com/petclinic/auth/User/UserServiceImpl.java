@@ -16,21 +16,14 @@ public class UserServiceImpl implements UserService{
     private final UserMapper userMapper;
 
     @Override
-<<<<<<< HEAD
-    public User createUser(@Valid User user) {
-=======
     public User createUser(@Valid UserIDLessDTO userIDLessDTO) {
 
-        log.info("Saving user with username {}", userIDLessDTO.getUsername());
-        User user = userMapper.idLessDTOToModel(userIDLessDTO);
-        return userRepo.save(user);
->>>>>>> origin/main
-
-        if (userRepo.findByEmail(user.getEmail()) == null){
-            throw new DuplicateKeyException("Duplicate email for " + user.getEmail());
+        if (userRepo.findByEmail(userIDLessDTO.getEmail()) != null){
+            throw new DuplicateKeyException("Duplicate email for " + userIDLessDTO.getEmail());
         }
         else {
-            log.info("Saving user with username {}", user.getUsername());
+            log.info("Saving user with username {}", userIDLessDTO.getUsername());
+            User user = userMapper.idLessDTOToModel(userIDLessDTO);
             return userRepo.save(user);
         }
     }

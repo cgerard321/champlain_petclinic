@@ -1,19 +1,14 @@
 package com.petclinic.auth;
 
-import com.petclinic.auth.User.User;
-import com.petclinic.auth.User.UserRepo;
 import com.petclinic.auth.Role.Role;
 import com.petclinic.auth.Role.RoleRepo;
 import com.petclinic.auth.User.User;
 import com.petclinic.auth.User.UserRepo;
-import org.hibernate.Hibernate;
-import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.ActiveProfiles;
@@ -21,12 +16,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import javax.validation.ValidatorFactory;
-import java.util.*;
-
+import java.util.Collections;
 import java.util.Random;
 
 import static java.lang.String.format;
@@ -53,8 +43,6 @@ public class AuthServicePersistenceTests {
 
     private final static Random rng;
 
-    private Validator validator;
-
     static {
         rng = new Random();
     }
@@ -63,8 +51,6 @@ public class AuthServicePersistenceTests {
     void cleanUp() {
         userRepo.deleteAll();
         roleRepo.deleteAll();
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        validator = factory.getValidator();
     }
 
     @Test
@@ -214,8 +200,9 @@ public class AuthServicePersistenceTests {
         assertThrows(DataIntegrityViolationException.class, () -> roleRepo.delete(role));
     }
 
+    @Test
     @DisplayName("Add User with username, password and email")
-    void add_user() throws Exception{
+    void add_user() {
 
         final User testUser = userRepo.save(new User("testUsername", "testPassword", "test@email.com"));
 
