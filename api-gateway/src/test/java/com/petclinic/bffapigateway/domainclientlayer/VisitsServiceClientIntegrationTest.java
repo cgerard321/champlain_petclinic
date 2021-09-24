@@ -65,5 +65,6 @@ class VisitsServiceClientIntegrationTest {
         consumer.accept(response);
         this.server.enqueue(response);
     }
+
 }
 

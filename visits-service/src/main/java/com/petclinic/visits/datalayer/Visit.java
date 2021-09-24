@@ -61,11 +61,4 @@ public class Visit {
         this.petId = petId;
     }
 
-    public void setDate(Date date) {
-        this.date = date;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
 }
