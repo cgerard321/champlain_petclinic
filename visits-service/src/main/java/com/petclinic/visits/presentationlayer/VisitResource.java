@@ -48,7 +48,6 @@ public class VisitResource {
     public Visit create(
             @Valid @RequestBody Visit visit,
             @PathVariable("petId") int petId) {
-
         visit.setPetId(petId);
         log.info("Saving visit {}", visit);
         return visitsService.addVisit(visit);
@@ -65,7 +64,6 @@ public class VisitResource {
     public void deleteVisit(@PathVariable("visitId") int visitId) {
         visitsService.deleteVisit(visitId);
     }
-
 
     //This method will return every visits of people that have multiple pets
     @GetMapping("visits/{petId}")

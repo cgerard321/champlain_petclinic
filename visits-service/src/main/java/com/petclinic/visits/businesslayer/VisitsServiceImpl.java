@@ -8,8 +8,10 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
+
 
 @Slf4j
 @Service
@@ -42,5 +44,4 @@ public class VisitsServiceImpl implements VisitsService {
     public List<Visit> getVisitsForPets(List<Integer> petIds){
         return visitRepository.findByPetIdIn(petIds);
     }
-
 }

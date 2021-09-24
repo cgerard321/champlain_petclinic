@@ -2,6 +2,7 @@ package com.petclinic.visits.businesslayer;
 
 import com.petclinic.visits.datalayer.Visit;
 import com.petclinic.visits.datalayer.VisitRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -15,9 +16,11 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.*;
-
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.Mockito.when;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
@@ -29,8 +32,28 @@ public class VisitsServiceImplTests {
     @MockBean
     VisitRepository repo;
 
-    @MockBean
+    @Autowired
     VisitsService visitsService;
+
+    private Visit visit;
+
+    @BeforeEach
+    public void setupDb(){
+        repo.deleteAll();
+
+        // add setup data here
+        visit = Visit.visit()
+                .id(1)
+                .petId(1)
+                .build();
+        Visit visit1 = Visit.visit()
+                .id(2)
+                .petId(1)
+                .build();
+
+        List<Visit> list = Arrays.asList(visit, visit1);
+        repo.saveAll(list);
+    }
 
 
     @Test
@@ -91,8 +114,10 @@ public class VisitsServiceImplTests {
     }
     
     @Test
-    public void isDeletingVisits(){
-        Visit visit = new Visit(5, new Date("2020-08-07"), "Normal appointment", 1);
+    public void whenValidIdDeleteVisit(){
+
         visitsService.deleteVisit(visit.getId());
+        assertFalse(repo.existsById(visit.getId()));
     }
 }
+
