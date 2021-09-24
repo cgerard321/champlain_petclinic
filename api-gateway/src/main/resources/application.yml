@@ -11,6 +11,9 @@ app:
   customers-service:
     host: localhost
     port: 7003
+  authentication-service:
+      host: localhost
+      port: 7004
 
 logging:
   level:
@@ -31,4 +34,6 @@ app:
   customers-service:
     host: customers
     port: 8080
-
+  authentication-service:
+    host: customers
+    port: 8080

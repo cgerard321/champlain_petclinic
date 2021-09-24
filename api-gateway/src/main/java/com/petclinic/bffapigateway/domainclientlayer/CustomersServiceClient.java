@@ -4,7 +4,10 @@ import com.petclinic.bffapigateway.dtos.Login;
 import com.petclinic.bffapigateway.dtos.OwnerDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -46,4 +49,16 @@ public class CustomersServiceClient {
                 .bodyToFlux(OwnerDetails.class);
     }
 
+<<<<<<< HEAD
+=======
+    public Flux<OwnerDetails> createOwner (final @RequestBody OwnerDetails model){
+        return webClientBuilder.build().post()
+                .uri(customersServiceUrl+ "/" + model)
+                .accept(MediaType.APPLICATION_JSON)
+            .retrieve().bodyToFlux(OwnerDetails.class);
+
+    }
+
+
+>>>>>>> 6fb7b7e (Added create owner, works with Postman, and added Authentication Client Service)
 }
