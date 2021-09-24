@@ -17,11 +17,11 @@ public class UserServiceImpl implements UserService{
     private final UserMapper userMapper;
 
     @Override
-    public User createUser(@Valid UserIDLessDTO user) {
+    public User createUser(@Valid UserIDLessDTO userIDLessDTO) {
 
-        log.info("Saving user with username {}", user.getUsername());
-        User userMap = userMapper.idLessDTOToModel(user);
-        return userRepo.save(userMap);
+        log.info("Saving user with username {}", userIDLessDTO.getUsername());
+        User user = userMapper.idLessDTOToModel(userIDLessDTO);
+        return userRepo.save(user);
 
     }
 }
