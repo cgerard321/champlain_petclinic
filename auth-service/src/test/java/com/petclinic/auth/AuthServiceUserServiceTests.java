@@ -50,6 +50,8 @@ public class AuthServiceUserServiceTests {
     @DisplayName("Create new user")
     void create_new_user() throws Exception {
         UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
+
+
         final User createdUser = userService.createUser(userIDLessDTO);
         assertEquals(createdUser.getUsername(), userIDLessDTO.getUsername());
         assertEquals(createdUser.getPassword(), userIDLessDTO.getPassword());
