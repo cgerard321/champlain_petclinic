@@ -5,6 +5,7 @@ import com.petclinic.customers.datalayer.OwnerRepository;
 import com.petclinic.customers.utils.exceptions.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,6 +18,7 @@ public class OwnerServiceImpl implements OwnerService {
 
     private OwnerRepository repository;
 
+    @Autowired
     public OwnerServiceImpl(OwnerRepository repository){
         this.repository = repository;
     }
@@ -27,8 +29,6 @@ public class OwnerServiceImpl implements OwnerService {
      * It is not use by the login system
      * @return
      */
-
-
     @Override
     public Optional<Owner> findByOwnerId(int Id) {
         try {

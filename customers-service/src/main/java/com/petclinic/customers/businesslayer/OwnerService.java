@@ -10,20 +10,25 @@ import java.util.Optional;
 @Service
 public interface OwnerService {
 
-        //FIND OWNER IN DATABASE
+        /**
+         * IF YOU SEE NEXT METHOD, EVERYTHING IS OK
+         */
+        //FIND OWNER
         public Optional<Owner> findByOwnerId(int Id);
 
+        //FIND ALL OWNER
         public List<Owner> findAll();
 
-        //public Optional<Owner> findOwnerLogin(String username, String password);
-
+        //UPDATE OWNER
         public void updateOwner();
 
-        //CREATE OWNER IN DATABASE
+        //CREATE OWNER
         public Owner CreateOwner(Owner owner);
 
-        //DELETE OWNER IN DATABASE
+        //DELETE OWNER
         public void deleteOwner(int Id);
+
+        //public Optional<Owner> findOwnerLogin(String username, String password);
 
 
 
