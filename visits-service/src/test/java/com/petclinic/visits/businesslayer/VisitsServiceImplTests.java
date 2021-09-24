@@ -4,6 +4,7 @@ import com.petclinic.visits.datalayer.Visit;
 import com.petclinic.visits.datalayer.VisitRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -17,6 +18,7 @@ import static org.mockito.Mockito.when;
 
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Date;
 import java.util.List;
 
 
@@ -27,15 +29,9 @@ public class VisitsServiceImplTests {
     @MockBean
     VisitRepository repo;
 
-    @Autowired
+    @MockBean
     VisitsService visitsService;
 
-//    @Test
-//    public void addVisit(){
-//        when(repo.save()).thenReturn();
-//
-//        visitsService.addVisit();
-//    }
 
     @Test
     public void whenValidPetIdThenShouldReturnVisitsForPet(){
@@ -56,6 +52,15 @@ public class VisitsServiceImplTests {
 
         assertThat(serviceResponse, hasSize(2));
         assertThat(serviceResponse.get(1).getPetId(), equalTo(1));
+    }
+
+
+    //Needs to be fixed
+    //Test if the visits is actually deleting based on the id
+    @Test
+    public void isDeletingVisits(){
+        Visit visit = new Visit(5, new Date("2020-08-07"), "Normal appointment", 1);
+        visitsService.deleteVisit(visit.getId());
     }
 
 
