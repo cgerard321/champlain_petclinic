@@ -85,8 +85,8 @@ class VetResourceTest {
 
 
 	@Test
-	@DisplayName("Should get all the fields for a vet and check if they are okay even if they're wrongly typed")
-	void shouldRegisterTheDataByFilteringOutTheTypos() throws Exception{
+	@DisplayName("Vet input submission cleanup and validation Test")
+	void VetRegisterDataFilterAndValidationTest() throws Exception{
 
 		Vet vet = new Vet();
 		vet.setId(1);
