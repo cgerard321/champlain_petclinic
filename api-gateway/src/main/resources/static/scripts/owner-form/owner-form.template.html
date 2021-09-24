@@ -1,5 +1,5 @@
-<h2 id="titleOwner">Owner</h2>
-<form ng-submit="$ctrl.submitOwnerForm()" style="max-width: 25em;">
+<h2 class="titleOwner">Owner</h2>
+<form id="ownerForm" ng-submit="$ctrl.submitOwnerForm()" style="max-width: 25em;">
     <div class="form-group">
         <label>First name</label>
         <input class="form-control" ng-model="$ctrl.owner.firstName" name="firstName" required/>
@@ -32,7 +32,7 @@
     </div>
 
     <div class="form-group">
-        <button class="btn btn-default" type="submit">Submit</button>
+        <button class="newBtn btn btn-default" type="submit">Submit</button>
     </div>
 </form>
 

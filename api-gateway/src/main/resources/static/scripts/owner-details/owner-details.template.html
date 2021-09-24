@@ -1,4 +1,4 @@
-<h2 id="titleOwner">Owner Information</h2>
+<h2 class="titleOwner">Owner Information</h2>
 
 <table class="table table-striped">
     <tr>
@@ -19,15 +19,15 @@
     </tr>
     <tr>
         <td>
-            <a class="btn btn-default" id="newBtn" ui-sref="ownerEdit({ownerId: $ctrl.owner.id})">Edit Owner</a>
+            <a class="newBtn btn btn-default" ui-sref="ownerEdit({ownerId: $ctrl.owner.id})">Edit Owner</a>
         </td>
         <td>
-            <a class="btn btn-default" id="newBtn" ui-sref="petNew({ownerId: $ctrl.owner.id})">Add New Pet</a>
+            <a class="newBtn btn btn-default" ui-sref="petNew({ownerId: $ctrl.owner.id})">Add New Pet</a>
         </td>
     </tr>
 </table>
 
-<h2 id="titleOwner">Pets and Visits</h2>
+<h2 class="titleOwner">Pets and Visits</h2>
 
 <table class="table table-striped">
     <tr ng-repeat="pet in $ctrl.owner.pets track by pet.id">
@@ -42,7 +42,7 @@
             </dl>
         </td>
         <td valign="top">
-            <table class="table-condensed">
+            <table class="noColor table-condensed">
                 <thead>
                 <tr>
                     <th>Visit Date</th>
@@ -55,10 +55,10 @@
                 </tr>
                 <tr>
                     <td>
-                        <a class="btn btn-default" id="newBtn" ui-sref="petEdit({ownerId: $ctrl.owner.id, petId: pet.id})">Edit Pet</a>
+                        <a class="newBtn btn btn-default" ui-sref="petEdit({ownerId: $ctrl.owner.id, petId: pet.id})">Edit Pet</a>
                     </td>
                     <td>
-                        <a class="btn btn-default" id="newBtn" ui-sref="visits({ownerId: $ctrl.owner.id, petId: pet.id})">Add Visit</a>
+                        <a class="newBtn btn btn-default" ui-sref="visits({ownerId: $ctrl.owner.id, petId: pet.id})">Add Visit</a>
                     </td>
                 </tr>
             </table>
