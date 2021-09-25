@@ -4,5 +4,5 @@ public interface UserService {
 
     User createUser(UserIDLessDTO user);
 
-    User passwordReset(long id, String passwd);
+    User passwordReset(long id, String passwd)throws Exception;
 }

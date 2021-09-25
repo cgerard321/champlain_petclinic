@@ -1,5 +1,6 @@
 package com.petclinic.auth.User;
 
+import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -32,13 +33,14 @@ public class UserController {
         return saved;
     }
 
-    @PutMapping
-    public void passwordReset(@RequestParam long id, String pwd){
+    @PutMapping("/{id}")
+    public void passwordReset(@PathVariable long id,  @RequestBody String pwd){
+
 
         log.info("id={}", id);
         try {
-            userServ.passwordReset(pwd);
-        } catch (EmptyResultDataAccessException e) {
+            userServ.passwordReset(id,pwd);
+        } catch (NotFoundException e) {
             log.info("No user with id {}. Ignoring", id);
             return;
         }

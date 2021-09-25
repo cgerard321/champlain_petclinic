@@ -1,5 +1,6 @@
 package com.petclinic.auth.User;
 
+import javassist.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import lombok.extern.slf4j.Slf4j;
@@ -25,10 +26,13 @@ public class UserServiceImpl implements UserService{
 
     }
 
-    public User passwordReset(String passwd) {
+    public User passwordReset(long id, String passwd) throws NotFoundException {
 
         log.info("id={}", id);
-        return userRepo.findById(id);
+        User user = userRepo.findById(id).orElseThrow(() -> new NotFoundException("No user for id:" + id));
+        user.setPassword(passwd);
+        return userRepo.save(user);
+
 
     }
 }
