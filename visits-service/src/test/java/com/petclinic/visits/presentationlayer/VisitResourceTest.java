@@ -101,7 +101,7 @@ class VisitResourceTest {
 		
 		given(visitsService.addVisit(visit)).willReturn(visit);
 		
-		mvc.perform(post("/owners/*/pets/1/visits").content(objectMapper.writeValueAsString(visit))
+		mvc.perform(post("/owners/*/pets/{petId}/visits", 1).content(objectMapper.writeValueAsString(visit))
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isCreated());
