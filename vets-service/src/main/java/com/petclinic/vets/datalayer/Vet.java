@@ -41,14 +41,6 @@ public class Vet {
     @NotEmpty
     private String lastName;
 
-<<<<<<< HEAD
-    //Fields added for new vet -C.D.
-    @Column(name = "enable")
-    @NotEmpty
-    private boolean enable;
-
-=======
->>>>>>> main
     @Column(name = "email")
     @NotEmpty
     private String email;
@@ -146,18 +138,6 @@ public class Vet {
         this.lastName = lastName;
     }
 
-<<<<<<< HEAD
-
-    //Fields added for new vet -C.D.
-
-    public boolean getEnable() {
-        return this.enable;
-    }
-
-    public void setEnable(boolean enable) {
-        this.enable = enable;
-    }
-
 
     //Add a list of animals that a vet treats
 //    private Set<AnimalTreated> animals;
@@ -196,8 +176,6 @@ public class Vet {
 //        getWorkDays().add(workDay);
 //    }
 
-=======
->>>>>>> main
     protected Set<Specialty> getSpecialtiesInternal() {
         if (this.specialties == null) {
             this.specialties = new HashSet<>();

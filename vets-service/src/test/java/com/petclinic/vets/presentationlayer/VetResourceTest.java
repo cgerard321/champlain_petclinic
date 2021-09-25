@@ -5,10 +5,7 @@ import com.petclinic.vets.datalayer.VetRepository;
 import com.petclinic.vets.presentationlayer.VetResource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-<<<<<<< HEAD
-=======
 import org.junit.jupiter.api.Assertions;
->>>>>>> main
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +57,7 @@ class VetResourceTest {
 				.andExpect(jsonPath("$[0].id").value(1));
 	}
 
-<<<<<<< HEAD
+
 
 
 //	@Test
@@ -79,17 +76,15 @@ class VetResourceTest {
 	void disableAVet() throws Exception {
 		//arrange
 		Vet vet = new Vet();
-		vet.setEnable(false);
+		vet.setIsActive(0);
 		//act
 		given(vetRepository.findAll()).willReturn(asList(vet));
 		//assert
 		mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$[0].enable").value(false));
+				.andExpect(jsonPath("$[0].isActive").value(0));
 	}
 
-=======
->>>>>>> main
 
 	@Test
 	@DisplayName("Should get all the fields for a vet and check if they are okay")
@@ -121,8 +116,6 @@ class VetResourceTest {
 				.andExpect(jsonPath("$[0].isActive").value(1));
 	}
 
-<<<<<<< HEAD
-=======
 
 //	@Test
 //	void addANewVet() throws Exception {
@@ -135,18 +128,4 @@ class VetResourceTest {
 //
 //		assertEquals(vet.getId(),vetSaved.getId());
 //	}
-
-	@Test
-	void disableAVet() throws Exception {
-		//arrange
-		Vet vet = new Vet();
-		vet.setIsActive(0);
-		//act
-		given(vetRepository.findAll()).willReturn(asList(vet));
-		//assert
-		mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$[0].isActive").value(0));
-	}
->>>>>>> main
 }
