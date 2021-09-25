@@ -1,7 +1,9 @@
 package com.petclinic.vets.datalayer;
 
+import org.hibernate.validator.constraints.UniqueElements;
 import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PropertyComparator;
+import org.springframework.core.style.ToStringCreator;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
@@ -35,17 +37,73 @@ public class Vet {
     @NotEmpty
     private String lastName;
 
-    //Fields added for new vet -C.D.
-    @Column(name = "enable")
-    @NotEmpty
-    private boolean enable;
-
     @Column(name = "email")
     @NotEmpty
     private String email;
 
     @Column(name = "phone_number")
+    @NotEmpty
     private String phoneNumber;
+
+    @Column(name = "resume")
+    @NotEmpty
+    private String resume;
+
+    @Column(name = "workday")
+    private String workday;
+
+    @Column(name = "is_active")
+    @NotEmpty
+    private Integer isActive;
+
+    public Integer getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(Integer isActive) {
+        this.isActive = isActive;
+    }
+
+    public Integer getVetId() {
+        return vetId;
+    }
+
+    public void setVetId(Integer vetId) {
+        this.vetId = vetId;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getResume() {
+        return resume;
+    }
+
+    public void setResume(String resume) {
+        this.resume = resume;
+    }
+
+    public String getWorkday() {
+        return workday;
+    }
+
+    public void setWorkday(String workday) {
+        this.workday = workday;
+    }
+
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "vet_specialties", joinColumns = @JoinColumn(name = "vet_id"),
@@ -76,63 +134,6 @@ public class Vet {
         this.lastName = lastName;
     }
 
-
-    //Fields added for new vet -C.D.
-
-    public boolean getEnable() {
-        return this.enable;
-    }
-
-    public void setEnable(boolean enable) {
-        this.enable = enable;
-    }
-
-    public String getEmail() {return this.email;}
-
-    public void setEmail(String email) {this.email = email;}
-
-    public String getPhoneNumber() {return this.phoneNumber;}
-
-    public void setPhoneNumber(String phoneNumber) {this.phoneNumber = phoneNumber;}
-
-
-    //Add a list of animals that a vet treats
-//    private Set<AnimalTreated> animals;
-//
-//    @XmlElement
-//    public List<AnimalTreated> getAnimalTypeTreated() {
-//        List<AnimalTreated> sortedSpecs = new ArrayList<>(getAnimalTypeTreated());
-//        PropertyComparator.sort(sortedSpecs, new MutableSortDefinition("animalType", true, true));
-//        return Collections.unmodifiableList(sortedSpecs);
-//    }
-//    protected Set<AnimalTreated> setAnimalTypeTreatedInternal() {
-//        if (this.animals == null) {
-//            this.animals = new HashSet<>();
-//        }
-//        return this.animals;
-//    }
-//    public void addAnimalTreated(AnimalTreated animalTreated) {
-//        getAnimalTypeTreated().add(animalTreated);
-//    }
-//
-//    private Set<WorkDay> workDays;
-//    //Add list of possible work days for vets
-//    @XmlElement
-//    public List<WorkDay> getWorkDays() {
-//        List<WorkDay> sortedSpecs = new ArrayList<>(getWorkDays());
-//        PropertyComparator.sort(sortedSpecs, new MutableSortDefinition("workDays", true, true));
-//        return Collections.unmodifiableList(sortedSpecs);
-//    }
-//    protected Set<WorkDay> setWorkDaysInternal() {
-//        if (this.workDays == null) {
-//            this.workDays = new HashSet<>();
-//        }
-//        return this.workDays;
-//    }
-//    public void addWorkDay(WorkDay workDay) {
-//        getWorkDays().add(workDay);
-//    }
-
     protected Set<Specialty> getSpecialtiesInternal() {
         if (this.specialties == null) {
             this.specialties = new HashSet<>();
@@ -155,4 +156,14 @@ public class Vet {
         getSpecialtiesInternal().add(specialty);
     }
 
+    @Override
+    public String toString(){
+        return new ToStringCreator(this).append("id", this.getId())
+                .append("firstName", this.getFirstName())
+                .append("lastName", this.getLastName())
+                .append("email", this.getEmail())
+                .append("phoneNumber", this.getPhoneNumber())
+                .append("resume", this.getResume())
+                .append("workday", this.getWorkday()).toString();
+    }
 }
