@@ -10,7 +10,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+<<<<<<< HEAD
 import org.springframework.http.MediaType;
+=======
+import org.springframework.context.annotation.Import;
+import org.springframework.http.HttpStatus;
+>>>>>>> c32cd33 (Created Custom exception for negative owner id entered)
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
@@ -24,6 +29,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @WebFluxTest(controllers = BFFApiGatewayController.class)
 class ApiGatewayControllerTest {
+
+    private static final String INVALID_URI_PUT = "/owners/badString";
+    private static final String MISSING_PATH_URI_PUT = "/owners";
+    private static final String URI_PUT_ID_NOT_FOUND = "/owners/100";
+    private static final String NEGATIVE_URI_PUT = "/owners/-1";
+
 
     @MockBean
     private CustomersServiceClient customersServiceClient;
@@ -72,6 +83,7 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.pets[0].visits[0].description").isEqualTo("First visit");
     }
 
+<<<<<<< HEAD
 
     @Test
     void createOwner(){
@@ -129,5 +141,52 @@ class ApiGatewayControllerTest {
 
     }
 
+=======
+    @Test
+    void getPutRequestNotFound(){
+        client.put()
+                .uri(URI_PUT_ID_NOT_FOUND)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.path").isEqualTo(URI_PUT_ID_NOT_FOUND)
+                .jsonPath("$.message").isEqualTo(null);
+    }
+
+    @Test
+    void getPutRequestMissingPath(){
+        client.put()
+                .uri(MISSING_PATH_URI_PUT)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.path").isEqualTo(MISSING_PATH_URI_PUT)
+                .jsonPath("$.message").isEqualTo(null);
+    }
+
+    @Test
+    void getPutRequestInvalid(){
+        client.put()
+                .uri(INVALID_URI_PUT)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.path").isEqualTo(INVALID_URI_PUT)
+                .jsonPath("$.message").isEqualTo(null);
+    }
+
+    @Test
+    void getPutRequestNegative(){
+        client.put()
+                .uri(NEGATIVE_URI_PUT)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+                .expectBody()
+                .jsonPath("$.path").isEqualTo(NEGATIVE_URI_PUT)
+                .jsonPath("$.message").isEqualTo(null);
+    }
+
+
+>>>>>>> c32cd33 (Created Custom exception for negative owner id entered)
 }
 
