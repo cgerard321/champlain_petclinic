@@ -5,13 +5,13 @@ let daysToRemove = 'Monday';
 daysOfWeek.push(daysToRemove);
 
 function removeItem(array, item) {
-  var i = array.length;
+    var i = array.length;
 
-  while (i--) {
-      if (array[i] === item) {
-          array.splice(array.indexOf(item), 1);
-      }
-  }
+    while (i--) {
+        if (array[i] === item) {
+            array.splice(array.indexOf(item), 1);
+        }
+    }
 }
 
 
@@ -27,15 +27,26 @@ const sorter = {
     "thursday": 4,
     "friday": 5,
     "saturday": 6
-  }
+}
 
 
-  daysOfWeek.sort(function sortByDay(a, b) {
+daysOfWeek.sort(function sortByDay(a, b) {
     return sorter[a] - sorter[b];
-  });
+});
 
 
 function displayDays() {
+    const targetDiv = document.getElementById("displayNone");
+    const btn = document.getElementById("toggle");
+
+    if (targetDiv.style.display === "none") {
+        targetDiv.style.display = "block";
+        btn.value = "Hide availabilities"
+    } else {
+        targetDiv.style.display = "none";
+        btn.value = "Show availabilities"
+    }
+
     console.log(daysOfWeek);
     let days = document.querySelectorAll(".square");
     let j = 0;
@@ -46,16 +57,6 @@ function displayDays() {
             j++;
         }
     }
-    const targetDiv = document.getElementById("displayNone");
-    const btn = document.getElementById("toggle");
-
-
-    if (targetDiv.style.display === "none") {
-        targetDiv.style.display = "block";
-    } else {
-        targetDiv.style.display = "none";
-    }
-
 }
 
 
