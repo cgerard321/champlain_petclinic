@@ -71,4 +71,14 @@ public class PetPersistenceTest {
 
         assertEquals(expectedLength, repository.findAll().size());
     }
+
+    // TEST FOR CREATING A PET
+    @Test
+    public void create() {
+        Pet newPet = setupPet();
+        Pet savedPet = repository.save(newPet);
+
+        assertEquals(newPet.getId(), savedPet.getId());
+        assertEquals(newPet.getName(), savedPet.getName());
+    }
 }

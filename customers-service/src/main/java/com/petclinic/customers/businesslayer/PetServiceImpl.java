@@ -45,7 +45,9 @@ public class PetServiceImpl implements PetService {
 
     @Override
     public Pet CreatePet(Pet pet) {
-        return null;
+        repository.save(pet);
+        LOG.debug("Pet CreatePet: created a pet: {}", pet.getId());
+        return pet;
     }
 
     @Override
