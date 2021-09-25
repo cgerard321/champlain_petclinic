@@ -8,10 +8,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
+import javax.swing.plaf.ViewportUI;
 import java.util.*;
 
 import static java.util.Arrays.asList;
@@ -19,6 +21,7 @@ import static org.mockito.BDDMockito.given;
 import static com.petclinic.visits.datalayer.Visit.visit;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -89,6 +92,30 @@ class VisitResourceTest {
 				.andExpect(jsonPath("$.items[0].petId").value(111))
 				.andExpect(jsonPath("$.items[1].petId").value(222))
 				.andExpect(jsonPath("$.items[2].petId").value(222));
+	}
+
+	@Test
+	void shouldCreateConfirmedVisit() throws Exception {
+		Visit visit = new Visit(1, new Date(), "Desc-1", 1, true);
+
+		given(visitsService.addVisit(visit)).willReturn(visit);
+
+		mvc.perform(post("/owners/*/pets/{petId}/visits", 1).content("{\"id\": 1, \"date\": \"2011-03-04\", \"description\": \"Desc-1\", \"petId\": 1, \"status\": \"true\"}")
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isCreated());
+	}
+
+	@Test
+	void shouldCreateCanceledVisit() throws Exception {
+		Visit visit = new Visit(1, new Date(), "Desc-1", 1, false);
+
+		given(visitsService.addVisit(visit)).willReturn(visit);
+
+		mvc.perform(post("/owners/*/pets/{petId}/visits", 1).content("{\"id\": 1, \"date\": \"2011-03-04\", \"description\": \"Desc-1\", \"petId\": 1, \"status\": \"false\"}")
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isCreated());
 	}
 }
 

@@ -50,4 +50,16 @@ public class PersistenceTests {
 
         assertThat(repoResponse, hasSize(2));
     }
+
+    @Test
+    public void confirmAndCancelAppointment(){
+        List<Visit> repoResponse = repo.findByPetId(1);
+
+        repoResponse.get(0).setStatus(true);
+        repoResponse.get(1).setStatus(false);
+
+        assertThat(repoResponse, hasSize(2));
+        assertThat(repoResponse.get(0).isStatus(), equalTo(true));
+        assertThat(repoResponse.get(1).isStatus(), equalTo(false));
+    }
 }
