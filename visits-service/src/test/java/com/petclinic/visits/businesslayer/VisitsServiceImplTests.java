@@ -17,6 +17,7 @@ import static org.mockito.Mockito.when;
 
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Date;
 import java.util.List;
 
 
@@ -57,6 +58,15 @@ public class VisitsServiceImplTests {
         assertThat(serviceResponse, hasSize(2));
         assertThat(serviceResponse.get(1).getPetId(), equalTo(1));
     }
-
-
+    
+    @Test
+    public void whenValidPetIdThenShouldCreateVisitForPet() {
+        Visit visit = visit().id(1).petId(1).date(new Date()).description("").practitionerId(123456).build();
+        
+        when(repo.save(visit)).thenReturn(visit);
+        
+        Visit serviceResponse = repo.save(visit);
+        
+        assertThat(serviceResponse.getPetId(), equalTo(1));
+    }
 }

@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -49,5 +50,15 @@ public class PersistenceTests {
         List<Visit> repoResponse = repo.findByPetId(1);
 
         assertThat(repoResponse, hasSize(2));
+    }
+    
+    @Test
+    public void createVisitForPet() {
+        Visit visit = new Visit(3, new Date(), "", 3, 123456);
+        repo.save(visit);
+        
+        List<Visit> repoResponse = repo.findByPetId(3);
+        
+        assertThat(repoResponse, hasSize(1));
     }
 }
