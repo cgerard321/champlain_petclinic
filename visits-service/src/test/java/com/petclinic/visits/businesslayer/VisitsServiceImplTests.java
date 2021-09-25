@@ -13,10 +13,12 @@ import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Date;
 import java.util.List;
 
 
@@ -56,6 +58,18 @@ public class VisitsServiceImplTests {
 
         assertThat(serviceResponse, hasSize(2));
         assertThat(serviceResponse.get(1).getPetId(), equalTo(1));
+    }
+
+    @Test
+    public void updateVisitForPet(){
+        Visit tempVisit = new Visit(1, new Date(), "Desc-1", 1);
+        Visit updatedVisit = new Visit(1, new Date(), "Desc-1 Updated", 1);
+
+        when(repo.save(any(Visit.class))).thenReturn(updatedVisit);
+
+        Visit visitFromService = visitsService.updateVisit(tempVisit);
+
+        assertThat(visitFromService.getDescription(), equalTo("Desc-1 Updated"));
     }
 
 

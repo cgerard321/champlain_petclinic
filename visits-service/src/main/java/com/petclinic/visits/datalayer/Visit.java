@@ -57,8 +57,19 @@ public class Visit {
         return petId;
     }
 
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
     public void setPetId(final int petId) {
         this.petId = petId;
     }
 
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 }

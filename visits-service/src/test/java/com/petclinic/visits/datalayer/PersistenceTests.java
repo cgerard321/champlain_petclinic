@@ -7,9 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -49,5 +51,17 @@ public class PersistenceTests {
         List<Visit> repoResponse = repo.findByPetId(1);
 
         assertThat(repoResponse, hasSize(2));
+    }
+
+    @Test
+    public void updateVisit(){
+        Visit savedVisit = new Visit(5, new Date(), "Description", 5);
+        savedVisit = repo.save(savedVisit);
+
+        savedVisit.setDescription("Updated Description");
+        repo.save(savedVisit);
+        
+        Visit foundVisit = repo.findById(savedVisit.getId()).get();
+        assertEquals("Updated Description", foundVisit.getDescription());
     }
 }

@@ -70,6 +70,15 @@ public class VisitResource {
         return new Visits(byPetIdIn);
     }
 
+    @PutMapping(value = "owners/*/pets/{petId}/visits",
+            consumes = "application/json",
+            produces = "application/json")
+    public Visit update(@Valid @RequestBody Visit visit, @PathVariable("petId") int petId){
+        visit.setPetId(petId);
+        log.info("Updating visit {}", visit);
+        return visitsService.updateVisit(visit);
+    }
+
     @Value
     static class Visits {
         List<Visit> items;
