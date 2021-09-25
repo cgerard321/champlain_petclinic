@@ -39,13 +39,13 @@ public class VisitsServiceClient {
             @Value("${app.visits-service.port}") String visitsServicePort
     ) {
         this.webClientBuilder = webClientBuilder;
-        hostname = "http://" + visitsServiceHost + ":" + visitsServicePort + "/";
+        hostname = "http://" + visitsServiceHost + ":" + visitsServicePort;
     }
 
     public Mono<Visits> getVisitsForPets(final List<Integer> petIds) {
         return webClientBuilder.build()
                 .get()
-                .uri(hostname + "pets/visits?petId={petId}", joinIds(petIds))
+                .uri(hostname + "/pets/visits?petId={petId}", joinIds(petIds))
                 .retrieve()
                 .bodyToMono(Visits.class);
     }
@@ -53,19 +53,35 @@ public class VisitsServiceClient {
     public Mono<Visits> createVisitForPets(final VisitDetails visitDetails){
         return webClientBuilder.build()
                 .post()
-                .uri(hostname + "pets/visits")
+                .uri(hostname + "/pets/visits")
                 .body(Mono.just(visitDetails), VisitDetails.class)
                 .retrieve()
                 .bodyToMono(Visits.class);
 
     }
 
+    public Mono<Visits> updateVisitForPets(final int petId){
+        return webClientBuilder.build()
+                .put()
+                .uri(hostname + "/pets/visits/{petId}", petId)
+                .body(Mono.just(petId), Visits.class)
+                .retrieve()
+                .bodyToMono(Visits.class);
+    }
+
+    public Mono<Visits> deleteVisitForPets(final int petId){
+        return webClientBuilder.build()
+                .delete()
+                .uri(hostname + "/pets/visits/{petId}", petId)
+                .retrieve()
+                .bodyToMono(Visits.class);
+    }
     //Testing purpose
 
     public Mono<Visits> getAllVisits(){
         return webClientBuilder.build()
                 .get()
-                .uri(hostname + "pets/visits/All")
+                .uri(hostname + "/pets/visits/All")
                 .retrieve()
                 .bodyToMono(Visits.class);
     }

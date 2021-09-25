@@ -4,32 +4,30 @@ plugins {
 	id 'java'
 	id "io.freefair.lombok" version "6.0.0-m2"
 }
-
 group = 'com.petclinic.visits'
 version = '1.0.0-SNAPSHOT'
 sourceCompatibility = '1.8'
-
 repositories {
 	mavenCentral()
 }
-
 dependencies {
+	implementation 'io.springfox:springfox-boot-starter:3.0.0'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	implementation('org.springframework.boot:spring-boot-starter-data-jpa')
 	implementation('mysql:mysql-connector-java')
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
-
 	runtimeOnly 'com.h2database:h2'
 
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
 	testImplementation 'io.projectreactor:reactor-test'
+	testCompile 'org.junit.jupiter:junit-jupiter:5.5.2'
 	testImplementation('com.h2database:h2')
 
-}
 
+}
 test {
 	useJUnitPlatform()
 	testLogging {

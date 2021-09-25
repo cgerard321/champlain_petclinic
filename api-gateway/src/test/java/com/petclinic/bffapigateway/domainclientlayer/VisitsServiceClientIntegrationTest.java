@@ -19,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class VisitsServiceClientIntegrationTest {
 
+
     private static final Integer PET_ID = 1;
 
     private VisitsServiceClient visitsServiceClient;
