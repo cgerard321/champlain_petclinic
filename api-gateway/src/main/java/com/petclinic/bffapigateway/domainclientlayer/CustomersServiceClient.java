@@ -50,6 +50,7 @@ public class CustomersServiceClient {
     }
 
 
+<<<<<<< HEAD
     public Flux<OwnerDetails> createOwners (){
         return webClientBuilder.build().post()
                 .uri(customersServiceUrl)
@@ -67,5 +68,7 @@ public class CustomersServiceClient {
     }
 
 
+=======
+>>>>>>> 63b848a (Updated Dockerfile with gradle:6 as builder)
 
 }
