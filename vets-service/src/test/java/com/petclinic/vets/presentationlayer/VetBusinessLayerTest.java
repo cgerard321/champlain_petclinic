@@ -3,6 +3,7 @@ package com.petclinic.vets.presentationlayer;
 import com.petclinic.vets.businesslayer.VetService;
 import com.petclinic.vets.datalayer.Vet;
 import com.petclinic.vets.datalayer.VetRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,8 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static java.util.Arrays.asList;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 
 @ExtendWith(SpringExtension.class)
@@ -31,6 +31,8 @@ public class VetBusinessLayerTest
 
     @MockBean
     VetService vetService;
+
+    
 
     @Test
     void shouldGetAListOfVets() throws Exception {
@@ -60,9 +62,9 @@ public class VetBusinessLayerTest
         vet.setWorkday("Monday, Tuesday, Friday");
         vet.setIsActive(1);
 
-        given(vetService.getVetByVetId(874130)).willReturn(vet);
+        given(vetService.getAllVets()).willReturn(asList(vet));
 
-        mvc.perform(get("/vets/874130").accept(MediaType.APPLICATION_JSON))
+        mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1))
                 .andExpect(jsonPath("$[0].vetId").value(874130))
@@ -74,4 +76,35 @@ public class VetBusinessLayerTest
                 .andExpect(jsonPath("$[0].workday").value("Monday, Tuesday, Friday"))
                 .andExpect(jsonPath("$[0].isActive").value(1));
     }
+
+    @Test
+    void shoudGetAVetInJsonFormat() throws Exception
+    {
+        Vet vet = new Vet();
+        vet.setId(2);
+        vet.setVetId(874130);
+        vet.setFirstName("James");
+        vet.setLastName("Carter");
+        vet.setEmail("carter.james@email.com");
+        vet.setPhoneNumber("(514)-634-8276 #2384");
+        vet.setResume("Practicing since 3 years");
+        vet.setWorkday("Monday, Tuesday, Friday");
+        vet.setIsActive(0);
+
+        given(vetService.getVetByVetId(874130)).willReturn(vet);
+
+        mvc.perform(get("/vets/874130").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json"))
+                .andExpect(jsonPath("$.id").value(2))
+                .andExpect(jsonPath("$.vetId").value(874130))
+                .andExpect(jsonPath("$.firstName").value("James"))
+                .andExpect(jsonPath("$.lastName").value("Carter"))
+                .andExpect(jsonPath("$.email").value("carter.james@email.com"))
+                .andExpect(jsonPath("$.phoneNumber").value("(514)-634-8276 #2384"))
+                .andExpect(jsonPath("$.resume").value("Practicing since 3 years"))
+                .andExpect(jsonPath("$.workday").value("Monday, Tuesday, Friday"))
+                .andExpect(jsonPath("$.isActive").value(0));
+    }
+
 }

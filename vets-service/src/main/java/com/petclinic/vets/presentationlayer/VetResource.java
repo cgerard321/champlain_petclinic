@@ -27,15 +27,15 @@ class VetResource {
 
 
     private final VetService vetService;
-    private final VetRepository vetRepository;
+
 
     @GetMapping
     public List<Vet> showResourcesVetList() {
-        return vetService.getAllVets();//vetRepository.findAll();
+        return vetService.getAllVets();
     }
 
     @GetMapping("/{vetId}")
-    public Vet findVet(@PathVariable int vetId){return vetRepository.findByVetId(vetId).get();}
+    public Vet findVet(@PathVariable int vetId){return vetService.getVetByVetId(vetId);}
 
 
     @PutMapping( value = "/{vetId}")

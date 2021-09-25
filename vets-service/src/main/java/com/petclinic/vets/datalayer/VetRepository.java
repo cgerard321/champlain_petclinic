@@ -1,6 +1,7 @@
 package com.petclinic.vets.datalayer;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
@@ -15,7 +16,7 @@ import java.util.Optional;
  * @author Maciej Szarlinski
  * Copied from https://github.com/spring-petclinic/spring-petclinic-microservices
  */
-
+@Repository
 public interface VetRepository extends JpaRepository<Vet, Integer>
 {
     Optional<Vet> findByVetId (int vetId);
