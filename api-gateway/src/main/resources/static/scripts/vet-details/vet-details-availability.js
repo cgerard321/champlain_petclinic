@@ -34,9 +34,8 @@ const sorter = {
     return sorter[a] - sorter[b];
   });
 
-  
 
-function myFunction() {
+function displayDays() {
     console.log(daysOfWeek);
     let days = document.querySelectorAll(".square");
     let j = 0;
@@ -47,4 +46,16 @@ function myFunction() {
             j++;
         }
     }
+    const targetDiv = document.getElementById("displayNone");
+    const btn = document.getElementById("toggle");
+
+
+    if (targetDiv.style.display === "none") {
+        targetDiv.style.display = "block";
+    } else {
+        targetDiv.style.display = "none";
+    }
+
 }
+
+
