@@ -57,21 +57,6 @@ class VetResourceTest {
 				.andExpect(jsonPath("$[0].id").value(1));
 	}
 
-
-
-
-//	@Test
-//	void addANewVet() throws Exception {
-//		//arrange
-//		Vet vet = new Vet();
-//		vet.setId(1);
-//		Vet vetSaved = vetRepository.save(vet);
-//		//act //assert
-//		when(vetRepository.findById(vet.getId())).thenReturn(Optional.of(vet));
-//
-//		assertEquals(vet.getId(),vetSaved.getId());
-//	}
-
 	@Test
 	void disableAVet() throws Exception {
 		//arrange
@@ -117,15 +102,14 @@ class VetResourceTest {
 	}
 
 
-//	@Test
-//	void addANewVet() throws Exception {
-//		//arrange
-//		Vet vet = new Vet();
-//		vet.setId(1);
-//		Vet vetSaved = vetRepository.save(vet);
-//		//act //assert
-//		when(vetRepository.findById(vet.getId())).thenReturn(Optional.of(vet));
-//
-//		assertEquals(vet.getId(),vetSaved.getId());
-//	}
+	@Test
+	void addANewVet() throws Exception {
+		//arrange
+		Vet vet = new Vet();
+		vet.setId(1);
+		//act //assert
+
+		given(vetRepository.findAll()).willReturn(asList(vet));
+		assertEquals(vet.getId(), 1);
+	}
 }
