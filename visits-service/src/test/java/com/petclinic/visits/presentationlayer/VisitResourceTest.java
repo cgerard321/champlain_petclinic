@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.*;
 
 import static java.util.Arrays.asList;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static com.petclinic.visits.datalayer.Visit.visit;
 import static org.mockito.Mockito.when;
@@ -97,14 +98,17 @@ class VisitResourceTest {
 	
 	@Test
 	void shouldCreateVisit() throws Exception {
-		Visit visit = visit().id(1).petId(1).date(new Date()).description("").practitionerId(123456).build();
+		Visit expectedVisit = visit().id(1).petId(1).date(new Date()).description("CREATED VISIT").practitionerId(123456).build();
 		
-		given(visitsService.addVisit(visit)).willReturn(visit);
+		when(visitsService.addVisit(any())).thenReturn(expectedVisit);
 		
-		mvc.perform(post("/owners/*/pets/{petId}/visits", 1).content(objectMapper.writeValueAsString(visit))
+		mvc.perform(post("/owners/*/pets/{petId}/visits", 1)
+				.content(objectMapper.writeValueAsString(expectedVisit))
 				.contentType(MediaType.APPLICATION_JSON)
+				.characterEncoding("utf-8")
 				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isCreated());
+				.andExpect(status().isCreated())
+				.andExpect(jsonPath("$.description").value(expectedVisit.getDescription()));
 	}
 }
 

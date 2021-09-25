@@ -69,4 +69,5 @@ public class VisitsServiceImplTests {
         
         assertThat(serviceResponse.getPetId(), equalTo(1));
     }
+    
 }
