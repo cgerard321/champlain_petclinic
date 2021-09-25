@@ -39,6 +39,7 @@ class VetResourceTest {
 
 
 	@Test
+	@DisplayName("Should get a list of vets")
 	void shouldGetAListOfVets() throws Exception {
 
 		Vet vet = new Vet();
@@ -67,7 +68,6 @@ class VetResourceTest {
 		vet.setWorkday("Monday, Tuesday, Friday");
 		vet.setIsActive(1);
 
-		System.out.println(vet);
 		given(vetRepository.findAll()).willReturn(asList(vet));
 
 		mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
@@ -99,7 +99,6 @@ class VetResourceTest {
 		vet.setWorkday("Monday,Tuesday,         Friday");
 		vet.setIsActive(5);
 
-		System.out.println(vet);
 		given(vetRepository.findAll()).willReturn(asList(vet));
 
 		mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
