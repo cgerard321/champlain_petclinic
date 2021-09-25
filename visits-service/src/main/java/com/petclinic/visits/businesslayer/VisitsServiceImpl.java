@@ -19,7 +19,7 @@ public class VisitsServiceImpl implements VisitsService {
 
     @Override
     public Visit addVisit(Visit visit) {
-        return null;
+        return visitRepository.save(visit);
     }
 
     @Override
