@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -43,7 +42,6 @@ class AuthServiceApplicationTests {
 	final Set<Role> ROLES = new HashSet<Role>() {{
 		add(role);
 	}};
-
 	final long ID = 1L;
 
 
@@ -250,6 +248,7 @@ class AuthServiceApplicationTests {
 	@Test
 	@DisplayName("Submit a completed signup form")
 	void submit_completed_signup_form() {
+
 		User user = new User(USER, PASS, EMAIL);
 		assertEquals(USER, user.getUsername());
 		assertEquals(PASS, user.getPassword());
@@ -258,6 +257,7 @@ class AuthServiceApplicationTests {
 	@Test
 	@DisplayName("Submit signup form through constructor of UserIDLessDTO")
 	void submit_form_with_constructor_without_id() {
+
 		UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
 		assertEquals(USER, userIDLessDTO.getUsername());
 		assertEquals(PASS, userIDLessDTO.getPassword());
@@ -296,6 +296,83 @@ class AuthServiceApplicationTests {
 		assertEquals(USER, userIDLessDTO.getUsername());
 		assertEquals(PASS, userIDLessDTO.getPassword());
 		assertEquals(EMAIL, userIDLessDTO.getEmail());
+	}
+	@Test
+	@DisplayName("Verify User password is valid")
+	void verify_valid_password(){
+		User user = new User();
+		user.setUsername(USER);
+		user.setPassword("Pas$word123");
+		user.setId(ID);
+		user.setEmail(EMAIL);
+		Set<ConstraintViolation<User>> violations = validator.validate(user);
+		assertTrue(violations.isEmpty());
+	}
+	@Test
+	@DisplayName("Verify User password is invalid due to missing special char")
+	void verify_invalid_password_missing_special(){
+		User user = new User();
+		user.setUsername(USER);
+		user.setPassword("Password123");
+		user.setId(ID);
+		user.setEmail(EMAIL);
+		Set<ConstraintViolation<User>> violations = validator.validate(user);
+		assertEquals(violations.size(), 1, "expecting special char.");
+	}
+	@Test
+	@DisplayName("Verify User password is invalid due to missing Uppercase")
+	void verify_invalid_password_missing_uppercase(){
+		User user = new User();
+		user.setUsername(USER);
+		user.setPassword("pas$word123");
+		user.setId(ID);
+		user.setEmail(EMAIL);
+		Set<ConstraintViolation<User>> violations = validator.validate(user);
+		assertEquals(violations.size(), 1, "expecting Uppercase char.");
+	}
+	@Test
+	@DisplayName("Verify User password is invalid due to missing lowercase")
+	void verify_invalid_password_missing_lowercase(){
+		User user = new User();
+		user.setUsername(USER);
+		user.setPassword("PAS$WORD123");
+		user.setId(ID);
+		user.setEmail(EMAIL);
+		Set<ConstraintViolation<User>> violations = validator.validate(user);
+		assertEquals(violations.size(), 1, "expecting Lowercase char.");
+	}
+	@Test
+	@DisplayName("Verify User password is invalid due to missing numbers")
+	void verify_invalid_password_missing_number(){
+		User user = new User();
+		user.setUsername(USER);
+		user.setPassword("Pas$word");
+		user.setId(ID);
+		user.setEmail(EMAIL);
+		Set<ConstraintViolation<User>> violations = validator.validate(user);
+		assertEquals(violations.size(), 1, "expecting numbers.");
+	}
+	@Test
+	@DisplayName("Verify User password is invalid due to missing minimum length")
+	void verify_invalid_password_missing_length(){
+		User user = new User();
+		user.setUsername(USER);
+		user.setPassword("PaS$WO2");
+		user.setId(ID);
+		user.setEmail(EMAIL);
+		Set<ConstraintViolation<User>> violations = validator.validate(user);
+		assertEquals(violations.size(), 1, "expecting minimum 8 chars");
+	}
+	@Test
+	@DisplayName("Verify User password is invalid due to white space")
+	void verify_invalid_password_white_space(){
+		User user = new User();
+		user.setUsername(USER);
+		user.setPassword("PaS$ WO2");
+		user.setId(ID);
+		user.setEmail(EMAIL);
+		Set<ConstraintViolation<User>> violations = validator.validate(user);
+		assertEquals(violations.size(), 1, "expecting no white space");
 	}
 }
 

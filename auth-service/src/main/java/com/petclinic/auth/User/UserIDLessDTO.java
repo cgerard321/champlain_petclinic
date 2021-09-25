@@ -6,6 +6,7 @@ import javax.persistence.Column;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -17,6 +18,7 @@ public class UserIDLessDTO {
     private String username;
 
     @NotEmpty
+    @PasswordStrengthCheck
     private String password;
 
     @NotEmpty
