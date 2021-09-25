@@ -18,13 +18,13 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import java.util.*;
 
 import static java.util.Arrays.asList;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static com.petclinic.visits.datalayer.Visit.visit;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(VisitResource.class)
@@ -98,15 +98,17 @@ class VisitResourceTest {
 	
 	@Test
 	void shouldCreateVisit() throws Exception {
-		Visit visit = visit().id(1).petId(1).date(new Date()).description("").build();
+		Visit expectedVisit = visit().id(1).petId(1).date(new Date()).description("CREATED VISIT").build();
 		
-		given(visitsService.addVisit(visit)).willReturn(visit);
+		when(visitsService.addVisit(any())).thenReturn(expectedVisit);
 		
-		mvc.perform(post("/owners/*/pets/{petId}/visits", 1).content(objectMapper.writeValueAsString(
-				visit().id(1).petId(1).date(new Date()).description("").build()))
+		mvc.perform(post("/owners/*/pets/{petId}/visits", 1)
+				.content(objectMapper.writeValueAsString(expectedVisit))
 				.contentType(MediaType.APPLICATION_JSON)
+				.characterEncoding("utf-8")
 				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isCreated());
+				.andExpect(status().isCreated())
+				.andExpect(jsonPath("$.description").value(expectedVisit.getDescription()));
 	}
 }
 
