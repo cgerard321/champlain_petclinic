@@ -29,9 +29,8 @@ public class Vet {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @NotEmpty
-    @UniqueElements
     @Column(name = "vet_id")
+    @NotEmpty
     private Integer vetId;
 
     @Column(name = "first_name")
@@ -42,11 +41,14 @@ public class Vet {
     @NotEmpty
     private String lastName;
 
+<<<<<<< HEAD
     //Fields added for new vet -C.D.
     @Column(name = "enable")
     @NotEmpty
     private boolean enable;
 
+=======
+>>>>>>> main
     @Column(name = "email")
     @NotEmpty
     private String email;
@@ -144,6 +146,7 @@ public class Vet {
         this.lastName = lastName;
     }
 
+<<<<<<< HEAD
 
     //Fields added for new vet -C.D.
 
@@ -193,6 +196,8 @@ public class Vet {
 //        getWorkDays().add(workDay);
 //    }
 
+=======
+>>>>>>> main
     protected Set<Specialty> getSpecialtiesInternal() {
         if (this.specialties == null) {
             this.specialties = new HashSet<>();
