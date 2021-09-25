@@ -39,7 +39,7 @@ public class AuthServiceUserControllerTests {
     final String
             USER = "user",
             PASS = "pass",
-            EMAIL = "email";
+            EMAIL = "email@gmail.com";
 
     @BeforeEach
     void setup() {
@@ -68,7 +68,7 @@ public class AuthServiceUserControllerTests {
     }
     @Test
     @DisplayName("Check the required fields with empty data")
-    void check_empty_require_fields() throws Exception{
+    void check_empty_require_fields() {
 
         UserIDLessDTO userIDLessDTO = new UserIDLessDTO();
 
@@ -77,7 +77,7 @@ public class AuthServiceUserControllerTests {
 
     @Test
     @DisplayName("Check the username field in order to refused if it is empty")
-    void check_empty_username() throws Exception{
+    void check_empty_username() {
 
         UserIDLessDTO userIDLessDTO = new UserIDLessDTO(null, PASS,EMAIL);
 
@@ -85,7 +85,7 @@ public class AuthServiceUserControllerTests {
     }
     @Test
     @DisplayName("Check the password field in order to refused if it is empty")
-    void check_empty_password() throws Exception{
+    void check_empty_password() {
 
         UserIDLessDTO userIDLessDTO = new UserIDLessDTO( USER, null,EMAIL);
 
@@ -93,7 +93,7 @@ public class AuthServiceUserControllerTests {
     }
     @Test
     @DisplayName("Check the email field in order to refused if it is empty")
-    void check_empty_email() throws Exception{
+    void check_empty_email(){
 
         UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS,null);
 
