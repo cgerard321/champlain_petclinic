@@ -68,7 +68,19 @@ public class BFFApiGatewayController {
             );
     }
 
-    private Function<Visits, OwnerDetails> addVisitsToOwner(OwnerDetails owner) {
+    @PutMapping(value = "owners/{ownerId}")
+    public Mono<OwnerDetails> updateOwnerDetails(final @PathVariable int ownerId) {
+        customersServiceClient.updateOwner(ownerId)
+                .flatMap(owner ->
+                        visitsServiceClient.getVisitsForPets(owner.getPetIds())
+                                .map(addVisitsToOwner(owner)));
+
+        return customersServiceClient.getOwner(ownerId);
+
+    }
+
+
+        private Function<Visits, OwnerDetails> addVisitsToOwner(OwnerDetails owner) {
         return visits -> {
             owner.getPets()
                 .forEach(pet -> pet.getVisits()

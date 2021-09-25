@@ -49,6 +49,13 @@ public class CustomersServiceClient {
                 .bodyToFlux(OwnerDetails.class);
     }
 
+    public Mono<OwnerDetails> updateOwner(final int ownerId){
+        return webClientBuilder.build().put()
+                .uri(customersServiceUrl + "/{ownerId}", ownerId)
+                .retrieve().bodyToMono(OwnerDetails.class);
+    }
+
+
 
 <<<<<<< HEAD
     public Flux<OwnerDetails> createOwners (){
