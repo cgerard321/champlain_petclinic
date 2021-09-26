@@ -161,6 +161,7 @@ public class BFFApiGatewayController {
     @DeleteMapping(value = "users/{userId}")
     public Mono<UserDetails> deleteUser(final @PathVariable long userId) { return authServiceClient.deleteUser(userId); }
 
+
     // TODO: Hook this up to auth service
     @GetMapping(value = "admin/roles")
     public Object getRoles() {
