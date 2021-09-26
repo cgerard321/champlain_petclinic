@@ -52,6 +52,7 @@ public class PetServiceImpl implements PetService {
 
     @Override
     public void deletePet(int Id) {
-        // TO DO
+        repository.findById(Id).ifPresent(x -> repository.delete(x));
+        LOG.debug("Pet with ID: " + Id + " has been deleted successfully.");
     }
 }
