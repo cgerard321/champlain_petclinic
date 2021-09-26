@@ -105,6 +105,28 @@ class VetResourceTest {
 				.andExpect(jsonPath("$[0].isActive").value(0));
 	}
 
+@Test
+    @DisplayName("Disable a vet Resource Test")
+    void disableAVet() throws Exception {
+        //arrange
+        Vet vet = new Vet();
+        vet.setId(1);
+        vet.setVetId(874130);
+        vet.setFirstName("James");
+        vet.setLastName("Carter");
+        vet.setEmail("carter.james@email.com");
+        vet.setPhoneNumber("2384");
+        vet.setResume("Practicing since 3 years");
+        vet.setWorkday("Monday, Tuesday, Friday");
+        vet.setIsActive(0);
+        //act
+        given(vetRepository.findAll()).willReturn(asList(vet));
+        //assert
+        mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].isActive").value(0));
+    }
+
 	@Test
 	@DisplayName("Vet input submission cleanup and validation Test")
 	void VetRegisterDataFilterAndValidationTest() throws Exception{
