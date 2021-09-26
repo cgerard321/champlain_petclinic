@@ -35,11 +35,16 @@ const renderCalendar = () => {
 
     const nextDays = 7 - lastDayIndex - 1;
 
-    const showSelectedDate = new Date("" + months[date.getMonth()] + " " + selectedDate + ", " + date.getFullYear());
-    console.log("Selected Date: " + months[date.getMonth()] + " " + selectedDate + ", " + date.getFullYear());
+    let showSelectedDate = new Date("" + months[date.getMonth()] + " " + selectedDate + ", " + date.getFullYear());
+    console.log("Selected Date: " + showSelectedDate);
 
-    const formattedDate = showSelectedDate.toDateString().substring(0, 3) + ", " + showSelectedDate.toDateString().substring(3, 10).trim() + ", " + date.getFullYear();
-    console.log(formattedDate);
+    let formattedDate = showSelectedDate.toDateString().substring(0, 3) + ", " + showSelectedDate.toDateString().substring(3, 10).trim() + ", " + date.getFullYear();
+
+    let isMonthUnavailable = false;
+    if((new Date("" + months[date.getMonth()] + " " + (parseInt(selectedDate) + 1) + ", " + date.getFullYear()) < new Date())) {
+        isMonthUnavailable = true;
+        formattedDate = date.getFullYear();
+    }
 
     //change currently selected month and date on the title UI elements
     document.querySelector(".date p").innerHTML = formattedDate;
@@ -51,40 +56,63 @@ const renderCalendar = () => {
 
     //insert the previous days from the previous month
     for(let x = firstDayIndex; x > 0; x--) {
-        days += `<a href="#" data-target="previous-page-${prevLastDay - x + 1}" class="prev-date day">${prevLastDay - x + 1}</a>`;
-    }
+        let d = prevLastDay - x + 1;
 
+        //if date is on the weekend, disable it
+        if(CheckWeekend(d, -1)) {
+            days += `<div data-target="previous-page-${d}" class="prev-date unavailable day">${d}</div>`;
+
+        } else {
+            days += `<div data-target="previous-page-${d}" class="prev-date day">${d}</div>`;
+        }
+    }
 
     //insert the actual days of the month
     for(let i = 1; i <= lastDay; i++) {
 
         //if the dates are on the weekend, disable them so that the user can't select them
-        if (CheckWeekend(i)) {
-            days += `<a href="#" data-target="${i}" class="weekend day">${i}</a>`
+        if (CheckWeekend(i, 0)) {
+            days += `<div data-target="${i}" class="unavailable day">${i}</div>`;
+        }
 
+        //if days are before current date but within the same year, make dates unavailable
+        else if((i < new Date().getDate() && date.getMonth() <= new Date().getMonth() && date.getFullYear() === new Date().getFullYear()) ||
+            (date.getMonth() < new Date().getMonth() && date.getFullYear() === new Date().getFullYear())) {
+            days += `<div data-target="${i}" class="unavailable day">${i}</div>`;
+        }
+
+        //if date is before current year, make dates unavailable
+        else if(date.getFullYear() < new Date().getFullYear()) {
+            days += `<div data-target="${i}" class="unavailable day">${i}</div>`;
+
+        }
         //if a date is selected, show the selected date to the user on the calendar
-        } else if(selectedDate === i.toString()) {
-            days += `<a href="#" data-target="${i}" class="date-selected day">${i}</a>`;
+        else if(selectedDate === i.toString()) {
+            days += `<div data-target="${i}" class="date-selected day">${i}</div>`;
         }
 
         //specify the date of today
         else if (i === new Date().getDate() && date.getMonth() === new Date().getMonth() && new Date().getFullYear() === date.getFullYear()) {
-            days += `<a href="#" data-target="${i}" class="today day">${i}</a>`;
-
+            days += `<div data-target="${i}" class="today day">${i}</div>`;
         }
 
         //insert the days
         else {
-            days += `<a href="#" data-target="${i}" class="day">${i}</a>`;
+            days += `<div data-target="${i}" class="day">${i}</div>`;
         }
     }
 
     //insert the days for the next month
     for(let j = 1; j <= nextDays; j++) {
-        days += `<a href="#" data-target="next-page-${j}" class="next-date day">${j}</a>`;
+        if(CheckWeekend(j, 1)) {
+            days += `<div data-target="next-page-${j}" class="next-date unavailable day">${j}</div>`;
+
+        } else {
+            days += `<div data-target="next-page-${j}" class="next-date day">${j}</div>`;
+        }
     }
 
-    //upload UI tags for previous month's dates and current dates to the html documnent (index.hmtl)
+    //upload UI tags for previous month's dates and current dates to the html document (index.hmtl)
     monthDays.innerHTML = days;
 
     let numberOfDays = document.getElementsByClassName("day").length;
@@ -96,14 +124,24 @@ const renderCalendar = () => {
     //if not, add 1 or two more rows to fill in the blank
     if(numberOfDays === 28) {
         for(let j = numberOfNext + 1; j <= 14 + numberOfNext; j++) {
-            days += `<a href="#" data-target="next-page-${j}" class="next-date day">${j}</a>`;
+            if(CheckWeekend(j, 1)) {
+                days += `<div data-target="next-page-${j}" class="next-date weekend day">${j}</div>`;
+
+            } else {
+                days += `<div data-target="next-page-${j}" class="next-date day">${j}</div>`;
+            }
         }
     } else if (numberOfDays === 35) {
         for (let j = numberOfNext + 1; j <= 7 + numberOfNext; j++) {
-            days += `<a href="#" data-target="next-page-${j}" class="next-date day">${j}</a>`;
+            if(CheckWeekend(j, 1)) {
+                days += `<div data-target="next-page-${j}" class="next-date weekend day">${j}</div>`;
+
+            } else {
+                days += `<div data-target="next-page-${j}" class="next-date day">${j}</div>`;
+            }
         }
     }
-    //upload UI tags for next month's dates to the html documnent (index.hmtl)
+    //upload UI tags for next month's dates to the html document (index.html)
     monthDays.innerHTML = days;
 
     console.log("Number Of days in month " + (date.getMonth()+1) + " is equal to: " + numberOfDays);
@@ -124,11 +162,11 @@ const renderCalendar = () => {
             is1AM = false;
             is2AM = false;
 
-        //if time is 11AM, make second time period (12) a PM time
+            //if time is 11AM, make second time period (12) a PM time
         } else if(i === 11) {
             is2AM = false;
 
-        //if time is 12PM, make sure that PM times are posted and that second time is 1PM and not 13PM
+            //if time is 12PM, make sure that PM times are posted and that second time is 1PM and not 13PM
         } else if(i === 12) {
             addition = -11;
             is2AM = false;
@@ -149,19 +187,27 @@ const renderCalendar = () => {
             secondTime = "PM";
         }
 
+        //Make time unavailable
+        if(isMonthUnavailable) {
+            slots += `<div data-target="${i} " class="time-slots time-unavailable">${val} ${firstTime} - ${val + addition} ${secondTime}</div>`;
+        }
+
         //if time slot is selected, show to user his selection via CSS.
-        if(i === parseInt(selectedTime)) {
-            slots += `<a href="#" data-target="${i} " class="time-slots time-selected">${val} ${firstTime} - ${val + addition} ${secondTime}</a>`;
+        else if(i === parseInt(selectedTime)) {
+            slots += `<div data-target="${i} " class="time-slots time-selected">${val} ${firstTime} - ${val + addition} ${secondTime}</div>`;
             timeIsSelected = true;
-        } else {
-            slots += `<a href="#" data-target="${i} " class="time-slots">${val} ${firstTime} - ${val + addition} ${secondTime}</a>`;
+        }
+
+        //Show user available time ranges
+        else {
+            slots += `<div data-target="${i} " class="time-slots">${val} ${firstTime} - ${val + addition} ${secondTime}</div>`;
         }
     }
 
     //make confirmation button appear if time was selected
     if(timeIsSelected) {
         slots += `<div class="confirmation-time">
-                    <a href="#" class="submitBTN">Confirm</a>
+                    <div class="submitBTN">Confirm</div>
                   </div>`;
 
         document.querySelector(".time-picker").classList.add("time-picker-selected");
@@ -174,33 +220,35 @@ const renderCalendar = () => {
 }
 
 //check if a date is on the weekend
- const CheckWeekend = (tempDate) => {
-    return (new Date("" + months[date.getMonth()] + " " + tempDate + ", " + date.getFullYear()).getDay() === 0 ||
-        new Date("" + months[date.getMonth()] + " " + tempDate + ", " + date.getFullYear()).getDay() === 6);
+const CheckWeekend = (tempDate, month) => {
+    return (new Date("" + months[date.getMonth() + month] + " " + tempDate + ", " + date.getFullYear()).getDay() === 0 ||
+        new Date("" + months[date.getMonth() + month] + " " + tempDate + ", " + date.getFullYear()).getDay() === 6);
+
 }
 
 //fix selected date if user changes month so that it can't select a weekend
 const fixDays = () => {
 
-    if(CheckWeekend(selectedDate) && selectedDate >= "15") {
+    if(CheckWeekend(selectedDate, 0) && selectedDate >= "15") {
         selectedDate = (parseInt(selectedDate) - 1).toString();
         console.log("Selection - 1 :" + selectedDate)
 
-        if(CheckWeekend(selectedDate)) {
+        if(CheckWeekend(selectedDate, 0)) {
             selectedDate = (parseInt(selectedDate) - 1).toString();
             console.log("Selection - 1 :" + selectedDate)
         }
 
-    } else if(CheckWeekend(selectedDate) && selectedDate < "15") {
+    } else if(CheckWeekend(selectedDate, 0) && selectedDate < "15") {
         selectedDate = (parseInt(selectedDate) + 1).toString();
         console.log("Selection + 1 :" + selectedDate)
 
-        if(CheckWeekend(selectedDate)) {
+        if(CheckWeekend(selectedDate, 0)) {
             selectedDate = (parseInt(selectedDate) + 1).toString();
             console.log("Selection + 1 :" + selectedDate)
         }
     }
 }
+
 
 renderCalendar();
 
@@ -223,7 +271,8 @@ document.querySelector('.next').addEventListener('click',() => {
     //go to next month
     date.setMonth(date.getMonth() + 1);
 
-    //fix selected date if user changes month so that it can't select a weekend[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[
+    //fix selected date if user changes month so that it can't select a weekend
+
     fixDays();
 
     //reset selected time because new date was selected
@@ -241,15 +290,12 @@ document.querySelector('.days').addEventListener('click',(event) => {
     if(target === undefined){
         console.log("nothing was selected");
 
-    //Previous page if user selects dates from last month
+        //Previous page if user selects dates from last month
     } else if(target.substring(0,13) === "previous-page") {
 
-        //validation of the data-target
-        if(target.length === 14) {
-            selectedDate = target.substring(14);
-        } else {
-            selectedDate = target.substring(14, 16).trim();
-        }
+        //get selected date for previous date
+        selectedDate = target.substring(14, 16).trim();
+
         date.setMonth(date.getMonth() - 1);
 
         //reset selected time because new date was selected
@@ -257,15 +303,12 @@ document.querySelector('.days').addEventListener('click',(event) => {
 
         console.log("currently selected: ", target);
 
-    //Next page if user selects dates from next month
+        //Next page if user selects dates from next month
     } else if(target.substring(0,9) === "next-page") {
 
-        //validation of the data-target
-        if(target.length === 10) {
-            selectedDate = target.substring(10);
-        } else {
-            selectedDate = target.substring(10, 12).trim();
-        }
+        //get date for selection for next month
+        selectedDate = target.substring(10, 12).trim();
+
         date.setMonth(date.getMonth() + 1);
 
         //reset selected time because new date was selected
@@ -273,7 +316,7 @@ document.querySelector('.days').addEventListener('click',(event) => {
 
         console.log("currently selected: ", target);
 
-    //select the date that was selected by the user
+        //select the date that was selected by the user
     } else {
         selectedDate = target;
         date.setDate(parseInt(target));
@@ -302,49 +345,3 @@ document.querySelector('.times').addEventListener('click',(event) => {
 
     renderCalendar();
 });
-
-
-// <<<<<<< TO BE CONTINUED >>>>>>> \\
-//select next day in time selector
-// document.querySelector('.next-day').addEventListener('click',() => {
-//
-//     if(CheckWeekend((parseInt(selectedDate) + 1).toString())) {
-//         selectedDate = (parseInt(selectedDate) + 3).toString();
-//     } else {
-//         selectedDate = (parseInt(selectedDate) + 1).toString();
-//     }
-//     console.log(selectedDate);
-//     console.log(new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate().toString());
-//     console.log(date.getMonth() + 1);
-//
-//
-//     if(selectedDate > new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate().toString() && selectedDate > 25) {
-//         selectedDate = (parseInt(selectedDate) - parseInt(new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate().toString())).toString();
-//         date.setMonth(date.getMonth() + 1);
-//     }
-//
-//     console.log(selectedDate + "after");
-//
-//     renderCalendar();
-// });
-//
-// //select previous day in time selector
-// document.querySelector('.prev-day').addEventListener('click',() => {
-//
-//     if(CheckWeekend((parseInt(selectedDate) - 1 ).toString())) {
-//         selectedDate = (parseInt(selectedDate) - 3).toString();
-//     } else {
-//         selectedDate = (parseInt(selectedDate) - 1).toString();
-//     }
-//     console.log(selectedDate);
-//     console.log(parseInt(new Date(date.getFullYear(), date.getMonth() - 1, 0).getDate().toString()));
-//     console.log(date.getMonth() - 1);
-//
-//     if(selectedDate < 1) {
-//         selectedDate = ((parseInt(selectedDate)) + parseInt(new Date(date.getFullYear(), date.getMonth() - 1, 0).getDate().toString())).toString();
-//         date.setMonth(date.getMonth() - 1);
-//     }
-//
-//     console.log(selectedDate + "after2");
-//     renderCalendar();
-// });
