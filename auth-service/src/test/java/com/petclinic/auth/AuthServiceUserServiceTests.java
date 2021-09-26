@@ -7,6 +7,7 @@ import com.petclinic.auth.Role.RoleRepo;
 import com.petclinic.auth.User.*;
 import javassist.NotFoundException;
 import lombok.SneakyThrows;
+import org.assertj.core.internal.bytebuddy.implementation.bytecode.Throw;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,8 +22,8 @@ import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -67,14 +68,24 @@ public class AuthServiceUserServiceTests {
 
         final String CHANGE = "change";
         final User u = new User(USER, PASS, EMAIL);
-        final User uu = userRepo.save(u);
+        userRepo.save(u);
 
-        userService.passwordReset(uu.getId(), CHANGE);
-        userRepo.save(uu);
+        User user = userService.passwordReset(u.getId(), CHANGE);
 
-        Optional<User> find = userRepo.findById(uu.getId());
+        Optional<User> find = userRepo.findById(user.getId());
         assertTrue(find.isPresent());
-        assertEquals(CHANGE, uu.getPassword());
+        assertEquals(CHANGE, user.getPassword());
+    }
+    @SneakyThrows
+    @Test
+    @DisplayName("Reset password, passed wrong ID")
+    void test_user_password_reset_ID() {
+
+        final String CHANGE = "change";
+        final User u = new User(USER, PASS, EMAIL);
+        userRepo.save(u);
+
+        assertThrows(NotFoundException.class, () -> userService.passwordReset(10000, ""));
     }
 
 }

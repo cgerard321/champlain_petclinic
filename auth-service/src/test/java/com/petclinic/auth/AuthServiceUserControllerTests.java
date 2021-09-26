@@ -18,14 +18,20 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import javax.validation.ConstraintViolationException;
 import java.util.Random;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -101,12 +107,14 @@ public class AuthServiceUserControllerTests {
 
         assertThrows(ConstraintViolationException.class, () -> userController.createUser(userIDLessDTO));
     }
-//    @Test
-//    @DisplayName("Check the id field refused if it is empty")
-//    void check_empty_id() throws Exception{
-//
-//        User user = new User("hehe","xd","jonathan@test.com");
-//
-//        assertThrows(ConstraintViolationException.class, () -> userController.passwordReset(user));
-//    }
+    @Test
+    @DisplayName("Check if the input ID is correct")
+    void check_empty_id() throws Exception{
+
+
+        mockMvc.perform(put("/users/1000"))
+                .andExpect(status().isOk());
+
+
+    }
 }
