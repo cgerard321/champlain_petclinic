@@ -81,6 +81,7 @@ public class BFFApiGatewayController {
         return vetsServiceClient.getVet(vetId);
     }
 
+
     // TODO: Hook this up to auth service
     @GetMapping(value = "/admin/roles")
     public Object getRoles() {

@@ -14,6 +14,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * Copied from https://github.com/spring-petclinic/spring-petclinic-microservices
  */
 
+
 public interface VetRepository extends JpaRepository<Vet, Integer> {
+
 }
 
