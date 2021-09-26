@@ -98,19 +98,5 @@ public class PersistenceTests {
         repo.delete(visit);
         assertEquals(repo.findByPetId(1).size(), 2);
     }
-    
-    @Test
-    public void Is_Deleting_The_Wrong_Value_Date(){
-        Visit visit = new Visit(1,new Date(System.currentTimeMillis()), "Cancer", 1);
-        repo.delete(visit);
-        assertFalse(repo.equals(visit.getDate()));
-    }
-
-    @Test
-    public void Is_Deleting_The_Wrong_Value_Description() {
-        Visit visit = new Visit(1, new Date(System.currentTimeMillis()), "Cancer", 1);
-        repo.delete(visit);
-        assertFalse(repo.equals(visit.getDescription()));
-    }
 }
 
