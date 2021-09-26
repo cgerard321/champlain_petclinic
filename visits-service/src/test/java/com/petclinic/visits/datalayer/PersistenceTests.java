@@ -1,7 +1,6 @@
 package com.petclinic.visits.datalayer;
 
 import com.petclinic.visits.businesslayer.VisitsService;
-import org.graalvm.compiler.lir.VirtualStackSlot;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
