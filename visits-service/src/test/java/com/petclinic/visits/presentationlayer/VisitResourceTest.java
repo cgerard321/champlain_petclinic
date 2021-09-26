@@ -13,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.*;
 
@@ -114,6 +115,7 @@ class VisitResourceTest {
 	@Test
 	void shouldFailToCreateVisitBadRequest() throws Exception {
 		Visit expectedVisit = visit().petId(1).date(new Date()).description("CREATED VISIT").practitionerId(123456).build();
+
 		when(visitsService.addVisit(any())).thenReturn(expectedVisit);
 		
 		mvc.perform(post("/owners/*/pets/{petId}/visits", 1)
