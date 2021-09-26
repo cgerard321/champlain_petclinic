@@ -50,7 +50,7 @@ public class CustomersServiceClient {
     }
 
 
-    public Flux<OwnerDetails> createOwner (){
+    public Flux<OwnerDetails> createOwners (){
         return webClientBuilder.build().post()
                 .uri(customersServiceUrl)
                 .accept(MediaType.APPLICATION_JSON)
