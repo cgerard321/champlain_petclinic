@@ -70,10 +70,11 @@ public class VisitResource {
         return new Visits(byPetIdIn);
     }
 
-    @PutMapping(value = "owners/*/pets/{petId}/visits",
+    @PutMapping(value = "owners/*/pets/{petId}/visits/{id}",
             consumes = "application/json",
             produces = "application/json")
-    public Visit update(@Valid @RequestBody Visit visit, @PathVariable("petId") int petId){
+    public Visit update(@Valid @RequestBody Visit visit, @PathVariable("petId") int petId, @PathVariable("id") int id){
+        visit.setId(id);
         visit.setPetId(petId);
         log.info("Updating visit {}", visit);
         return visitsService.updateVisit(visit);

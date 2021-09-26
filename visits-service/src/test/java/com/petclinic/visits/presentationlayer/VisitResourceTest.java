@@ -97,10 +97,10 @@ class VisitResourceTest {
 		when(visitsService.updateVisit(any(Visit.class)))
 				.thenReturn(new Visit(1, new Date(), "Desc-1", 1));
 
-		mvc.perform(put("/owners/*/pets/{petId}/visits", 1)
+		mvc.perform(put("/owners/*/pets/{petId}/visits/{id}", 1, 1)
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON)
-				.content("{\"date\": \"2011-03-04\", \"description\": \"Desc-1 Updated\", \"petId\": 1}")
+				.content("{\"date\": \"2011-03-04\", \"description\": \"Desc-1 Updated\"}")
 				.characterEncoding("utf-8"))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.petId").value(1));
@@ -108,14 +108,27 @@ class VisitResourceTest {
 	}
 
 	@Test
-	void updateVisitInvalidParameterString() throws Exception{
+	void updateVisitInvalidParameterStringPetId() throws Exception{
 		when(visitsService.updateVisit(any(Visit.class)))
 				.thenReturn(new Visit(1, new Date(), "Desc-1", 1));
 
-		mvc.perform(put("/owners/*/pets/{petId}/visits", "invalid_pet_id")
+		mvc.perform(put("/owners/*/pets/{petId}/visits/{id}", "invalid_pet_id",1)
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON)
-				.content("{\"date\": \"2011-03-04\", \"description\": \"Desc-1 Updated\", \"petId\": 1}")
+				.content("{\"date\": \"2011-03-04\", \"description\": \"Desc-1 Updated\"}")
+				.characterEncoding("utf-8"))
+				.andExpect(status().isBadRequest());
+	}
+
+	@Test
+	void updateVisitInvalidParameterStringVisitId() throws Exception{
+		when(visitsService.updateVisit(any(Visit.class)))
+				.thenReturn(new Visit(1, new Date(), "Desc-1", 1));
+
+		mvc.perform(put("/owners/*/pets/{petId}/visits/{id}", 1, "invalid_visit_id")
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON)
+				.content("{\"date\": \"2011-03-04\", \"description\": \"Desc-1 Updated\"}")
 				.characterEncoding("utf-8"))
 				.andExpect(status().isBadRequest());
 	}
