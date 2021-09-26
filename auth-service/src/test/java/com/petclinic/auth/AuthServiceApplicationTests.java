@@ -1,19 +1,25 @@
 package com.petclinic.auth;
 
+
 import com.petclinic.auth.Role.Role;
 import com.petclinic.auth.Role.RoleIDLessDTO;
 import com.petclinic.auth.Role.RoleMapper;
 import com.petclinic.auth.Role.RoleRepo;
 import com.petclinic.auth.User.User;
+import com.petclinic.auth.User.UserIDLessDTO;
+import com.petclinic.auth.User.UserMapper;
 import com.petclinic.auth.User.UserRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -32,6 +38,8 @@ class AuthServiceApplicationTests {
 			ROLE_NAME = "role";
 	final Role role = new Role(0, ROLE_NAME);
 
+	private Validator validator;
+
 	final Set<Role> ROLES = new HashSet<Role>() {{
 		add(role);
 	}};
@@ -48,12 +56,19 @@ class AuthServiceApplicationTests {
 	@Autowired
 	private RoleMapper roleMapper;
 
+	@Autowired
+	private UserMapper userMapper;
+
 	private final RoleIDLessDTO ID_LESS_USER_ROLE = new RoleIDLessDTO("user");
+
+	private final UserIDLessDTO ID_LESS_USER_USER = new UserIDLessDTO("usernameTest", "passwordTest", "emailTest");
 
 	@BeforeEach
 	void setup() {
 		roleRepo.deleteAllInBatch();
 		userRepo.deleteAllInBatch();
+		ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+		validator = factory.getValidator();
 	}
 
 	@Test
@@ -70,9 +85,26 @@ class AuthServiceApplicationTests {
 	}
 
 	@Test
+	@DisplayName("Map id less user to user")
+	void map_id_less_user_to_user() {
+
+		final User user = userMapper.idLessDTOToModel(ID_LESS_USER_USER);
+		assertEquals(user.getId(), 0); // defaults to 0 as it is a primitive decimal integer
+		assertEquals(user.getUsername(), ID_LESS_USER_USER.getUsername());
+		assertEquals(user.getPassword(), ID_LESS_USER_USER.getPassword());
+		assertEquals(user.getEmail(), ID_LESS_USER_USER.getEmail());
+	}
+
+	@Test
 	@DisplayName("Map null to role")
 	void map_null_to_role() {
 		assertNull(roleMapper.idLessDTOToModel(null));
+	}
+
+	@Test
+	@DisplayName("Map null to user")
+	void map_null_to_user() {
+		assertNull(userMapper.idLessDTOToModel(null));
 	}
 
 	@Test
@@ -185,4 +217,85 @@ class AuthServiceApplicationTests {
 		assertEquals(ROLE_NAME, roleIDLessDTO.getName());
 		assertNull(roleIDLessDTO.getParent());
 	}
+
+	@Test
+	@DisplayName("Verify if the email is valid and succeed")
+	void verify_valid_email_success() {
+		User user = new User();
+		user.setUsername(USER);
+		user.setPassword(PASS);
+		user.setId(ID);
+		user.setEmail("testemail@gmail.com");
+		Set<ConstraintViolation<User>> violations = validator.validate(user);
+		assertTrue(violations.isEmpty());
+	}
+
+	@Test
+	@DisplayName("Verify if the email is valid and fail because missing @")
+	void detect_invalid_email_missing_at() {
+		User user = new User();
+		user.setUsername(USER);
+		user.setPassword(PASS);
+		user.setId(ID);
+		user.setEmail("testemailgmail.com");
+		Set<ConstraintViolation<User>> violations = validator.validate(user);
+		assertEquals(violations.size(), 1);
+
+		ConstraintViolation<User> violation = violations.iterator().next();
+		assertEquals("Email must be valid", violation.getMessage());
+		assertEquals("email", violation.getPropertyPath().toString());
+		assertEquals("testemailgmail.com", violation.getInvalidValue());
+	}
+
+	@Test
+	@DisplayName("Submit a completed signup form")
+	void submit_completed_signup_form() {
+		User user = new User(USER, PASS, EMAIL);
+		assertEquals(USER, user.getUsername());
+		assertEquals(PASS, user.getPassword());
+		assertEquals(EMAIL, user.getEmail());
+	}
+	@Test
+	@DisplayName("Submit signup form through constructor of UserIDLessDTO")
+	void submit_form_with_constructor_without_id() {
+		UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
+		assertEquals(USER, userIDLessDTO.getUsername());
+		assertEquals(PASS, userIDLessDTO.getPassword());
+		assertEquals(EMAIL, userIDLessDTO.getEmail());
+	}
+
+	@Test
+	@DisplayName("User setters")
+	void user_id_less_dto_setters() {
+
+		final UserIDLessDTO userIDLessDTO = new UserIDLessDTO();
+		userIDLessDTO.setUsername(USER);
+		userIDLessDTO.setEmail(EMAIL);
+		userIDLessDTO.setPassword(PASS);
+
+		assertEquals(USER, userIDLessDTO.getUsername());
+		assertEquals(PASS, userIDLessDTO.getPassword());
+		assertEquals(EMAIL, userIDLessDTO.getEmail());
+	}
+
+	@Test
+	@DisplayName("User dto builder")
+	void user_dto_builder() {
+		final UserIDLessDTO userIDLessDTO = UserIDLessDTO.builder()
+				.email(EMAIL)
+				.password(PASS)
+				.username(USER)
+				.build();
+
+		assertEquals(
+				format(
+						"UserIDLessDTO.UserIDLessDTOBuilder(username=%s, password=%s, email=%s)",
+						userIDLessDTO.getUsername(), userIDLessDTO.getPassword(), userIDLessDTO.getEmail()),
+				userIDLessDTO.toBuilder().toString());
+
+		assertEquals(USER, userIDLessDTO.getUsername());
+		assertEquals(PASS, userIDLessDTO.getPassword());
+		assertEquals(EMAIL, userIDLessDTO.getEmail());
+	}
 }
+
