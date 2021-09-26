@@ -5,6 +5,8 @@ import com.petclinic.auth.Role.RoleIDLessDTO;
 import com.petclinic.auth.Role.RoleMapper;
 import com.petclinic.auth.Role.RoleRepo;
 import com.petclinic.auth.User.*;
+import javassist.NotFoundException;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,11 +15,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -54,6 +59,22 @@ public class AuthServiceUserServiceTests {
         assertEquals(createdUser.getUsername(), userIDLessDTO.getUsername());
         assertEquals(createdUser.getPassword(), userIDLessDTO.getPassword());
         assertEquals(createdUser.getEmail(), userIDLessDTO.getEmail());
+    }
+    @SneakyThrows
+    @Test
+    @DisplayName("Reset user password")
+    void test_user_password_reset() {
+
+        final String CHANGE = "change";
+        final User u = new User(USER, PASS, EMAIL);
+        final User uu = userRepo.save(u);
+
+        userService.passwordReset(uu.getId(), CHANGE);
+        userRepo.save(uu);
+
+        Optional<User> find = userRepo.findById(uu.getId());
+        assertTrue(find.isPresent());
+        assertEquals(CHANGE, uu.getPassword());
     }
 
 }

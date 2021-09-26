@@ -33,6 +33,5 @@ public class UserServiceImpl implements UserService{
         user.setPassword(passwd);
         return userRepo.save(user);
 
-
     }
 }

@@ -8,6 +8,8 @@ import com.petclinic.auth.User.User;
 import com.petclinic.auth.User.UserController;
 import com.petclinic.auth.User.UserIDLessDTO;
 import com.petclinic.auth.User.UserRepo;
+import javassist.NotFoundException;
+import org.apache.tomcat.util.http.fileupload.MultipartStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -99,4 +101,12 @@ public class AuthServiceUserControllerTests {
 
         assertThrows(ConstraintViolationException.class, () -> userController.createUser(userIDLessDTO));
     }
+//    @Test
+//    @DisplayName("Check the id field refused if it is empty")
+//    void check_empty_id() throws Exception{
+//
+//        User user = new User("hehe","xd","jonathan@test.com");
+//
+//        assertThrows(ConstraintViolationException.class, () -> userController.passwordReset(user));
+//    }
 }
