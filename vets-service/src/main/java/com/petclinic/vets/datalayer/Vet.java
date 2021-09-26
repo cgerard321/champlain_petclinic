@@ -31,7 +31,6 @@ public class Vet {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-
     @Column
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer vetId;

@@ -28,7 +28,9 @@
       <a class="btn btn-default" ui-sref="vetEdit({vetId: $ctrl.vet.id})">Edit Vet</a>
     </td>
     <td>
-      <a ui-sref="" class="btn btn-default">Deactivate Vet</a>
+        <a ng-click="$ctrl.disableVet()" class="btn btn-default">Deactivate Vet
+        <button type="submit" class="btn">Disable Vet</button>
+        </a>
     </td>
   </tr>
 </table>

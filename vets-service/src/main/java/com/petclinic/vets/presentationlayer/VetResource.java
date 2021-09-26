@@ -37,4 +37,10 @@ class VetResource {
         return vetRepository.findById(vetId);
     }
 
+    @PutMapping(value = "/{vetId}")
+    public Vet disableVet(@ModelAttribute Vet vet, @RequestBody Vet req) {
+        vet.setIsActive(req.getIsActive());
+        return vet;
+    }
+
 }
