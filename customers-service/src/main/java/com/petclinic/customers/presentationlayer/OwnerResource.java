@@ -49,6 +49,14 @@ class OwnerResource {
     }
 
     /**
+    *   Add Secondary Owner
+     */
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public Owner createCustodian(@PathVariable("custodian")String custodian){
+        return null;
+    }
+    /**
      * Read single Owner
      */
     @GetMapping(value = "/{ownerId}")

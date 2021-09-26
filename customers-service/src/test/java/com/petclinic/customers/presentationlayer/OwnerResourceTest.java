@@ -1,6 +1,7 @@
 package com.petclinic.customers.presentationlayer;
 
 import com.petclinic.customers.datalayer.*;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,6 +13,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +21,7 @@ import javax.swing.text.html.Option;
 import java.util.Optional;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.samePropertyValuesAs;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.only;
@@ -37,7 +40,7 @@ import static org.springframework.transaction.annotation.Propagation.NOT_SUPPORT
 @ExtendWith(SpringExtension.class)
 //@WebMvcTest(OwnerResource.class)
 @DataJpaTest
-@Transactional(propagation = NOT_SUPPORTED)
+// @Transactional(propagation = NOT_SUPPORTED)
 class OwnerResourceTest {
 
     /*
@@ -45,10 +48,9 @@ class OwnerResourceTest {
     MockMvc mvc;
     */
 
-
     @Autowired
     OwnerRepository repository;
-
+    private Owner ownerBean;
 
     /**
      * ------------------------ DELETE_REPO ------------------------
@@ -57,7 +59,12 @@ class OwnerResourceTest {
     @BeforeEach
     public void setUpDB()
     {
+
         repository.deleteAll();
+        Owner o = new Owner(1,"Obama","Barack","102 rue Hitchinton","Tallahassee","9999999999");
+        ownerBean = repository.save(o);
+
+        // assertThat(ownerBean, samePropertyValuesAs(o));
     }
 
     /**
@@ -67,13 +74,13 @@ class OwnerResourceTest {
     private Owner setupOwner(Integer id, String firstname, String lastname, String address, String city, String telephone)
     {
         Owner owner = new Owner(id, firstname, lastname, address, city, telephone);
-
+        /*
         owner.setFirstName(firstname);
         owner.setLastName(lastname);
         owner.setAddress(address);
         owner.setCity(city);
         owner.setTelephone(telephone);
-
+        */
         return owner;
     }
 
@@ -85,12 +92,12 @@ class OwnerResourceTest {
     @Test
     public void findById()
     {
-
+        /*
         int OwnerID = 1;
 
         Owner newOwner = new Owner (OwnerID, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
         repository.save(newOwner);
-
+        Owner foundOwner = repository.findById(OwnerID).get();
         if (repository.findById(OwnerID).isPresent())
         {
             System.out.println("Yay!");
@@ -99,6 +106,7 @@ class OwnerResourceTest {
         {
             System.out.println("No");
         }
+        */
 
         /*
         Owner owner = new Owner();
@@ -124,8 +132,20 @@ class OwnerResourceTest {
         {
             System.out.println("Yeetus sad");
         }*/
-        //assertThat(owner.getId()).isEqualTo(OwnerID);
+        // assertTrue(repository.findById(OwnerID).isPresent());
 
+        Owner newOwner = new Owner();
+        newOwner.setFirstName("John");
+        newOwner.setLastName("Smith");
+        newOwner.setTelephone("5551234");
+        newOwner.setCity("Montreal");
+        newOwner.setAddress("123Main");
+
+        Owner savedOwner = repository.save(newOwner);
+
+        Owner foundOwner = repository.findById(savedOwner.getId()).orElse(null);
+
+        assert foundOwner != null;
 
     }
 
@@ -138,13 +158,17 @@ class OwnerResourceTest {
     public void findAll()
     {
         int expectedLength = 4;
-        Owner owner1 = new Owner (1, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
+        Owner owner1 = new Owner (2, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal",
+                "1111111111");
         repository.save(owner1);
-        Owner owner2 = new Owner (2, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
+        Owner owner2 = new Owner (3, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal",
+                "1111111111");
         repository.save(owner2);
-        Owner owner3 = new Owner (3, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
+        Owner owner3 = new Owner (4, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal",
+                "1111111111");
         repository.save(owner3);
-        Owner owner4 = new Owner (4, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
+        Owner owner4 = new Owner (5, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal",
+                "1111111111");
         repository.save(owner4);
 
         /*
@@ -159,6 +183,8 @@ class OwnerResourceTest {
 
          */
         assertEquals(expectedLength, repository.findAll().size());
+
+        // repository.deleteAll();
     }
 
 
@@ -207,6 +233,38 @@ class OwnerResourceTest {
             System.out.println("No");
         }
 
+    }
+    @Test
+    public void add_owner_test()
+    {
+        final int OWNER_ID = 1;
+        Owner owner1 = new Owner (2, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal",
+                "1111111111");
+        repository.save(owner1);;
+        // repository.save(owner);
+        Owner foundSaved = repository.findById(owner1.getId()).get();
+
+        assertThat(foundSaved, samePropertyValuesAs(owner1));
+
+        assertEquals(1,repository.findAll().size());
+    }
+
+    @Test
+    public void add_custodian_test()
+    {
+        final int OWNER_ID = 1;
+        String custodianName = "Ivan Hoaquin";
+        Owner foundOwner = repository.findById(OWNER_ID).get();
+        foundOwner.setCustodian(custodianName);
+
+        assertThat(foundOwner.getCustodian(), samePropertyValuesAs(custodianName));
+    }
+
+    // Reset the database
+    @AfterEach
+    public void resetDb()
+    {
+        repository.deleteAll();
     }
 }
 

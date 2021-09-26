@@ -18,8 +18,10 @@ public interface OwnerService {
         public void updateOwner();
 
         //CREATE OWNER IN DATABASE
-        public Owner CreateOwner(Owner owner);
+        public Owner createOwner(Owner owner);
 
+        //APPEND CUSTODIAN TO EXISTING OWNER
+        public void createCustodian(Owner primary,String custoname);
         //DELETE OWNER IN DATABASE
         public void deleteOwner(int Id);
 

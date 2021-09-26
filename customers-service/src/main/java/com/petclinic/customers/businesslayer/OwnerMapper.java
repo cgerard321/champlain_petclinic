@@ -9,15 +9,18 @@ import org.mapstruct.Mappings;
 
 */
 
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+
 public interface OwnerMapper {
 
     /*
-    @Mapping()
+    @Mapping(target = "id",ignore = true)
     OwnerDetails entityToModel(Owner entity);
 
     @Mappings({
             @Mapping(target = "")
     })
-    */
+   */
 
 }
