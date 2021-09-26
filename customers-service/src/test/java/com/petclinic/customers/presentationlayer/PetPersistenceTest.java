@@ -81,4 +81,22 @@ public class PetPersistenceTest {
         assertEquals(newPet.getId(), savedPet.getId());
         assertEquals(newPet.getName(), savedPet.getName());
     }
+
+    // TEST FOR DELETING A PET
+    @Test
+    public void delete(){
+        Pet newPet = setupPet();
+        Pet savedPet = repository.save(newPet);
+
+        if(repository.findById(savedPet.getId()).isPresent()){
+            repository.delete(savedPet);
+
+            if(!repository.findById(savedPet.getId()).isPresent()){
+                System.out.println("Delete Pet worked successfully");
+            }
+            else{
+                System.out.println("Delete Pet did not work");
+            }
+        }
+    }
 }
