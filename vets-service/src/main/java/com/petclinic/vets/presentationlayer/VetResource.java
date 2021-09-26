@@ -32,18 +32,19 @@ class VetResource {
     public List<Vet> showResourcesVetList() {
         return vetRepository.findAll();
     }
-    @PutMapping(path = "/{vetId}",
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE)
-    public Optional<Vet> disableVet(@PathVariable("vetId") int vetId) {
-        var vet = findVet(vetId);
-        vet.get().setIsActive(1);
-        return vetRepository.findById(vetId);
-    }
+  
 
     @GetMapping(value = "/{vetId}")
     public Optional<Vet> findVet(@PathVariable("vetId") int vetId) {
         return vetRepository.findById(vetId);
     }
+
+@PutMapping("/{vetId}")
+public boolean disableVet(@PathVariable vetId, @RequestBody Vet vet) {
+   Vet theVet = vetRepository.findOne(vetId).isActive(1);
+   vet = (Vet) PersistenceUtils.partialUpdate(theVet, vet);
+   return vetRepository.save(vet);
+
+}
 
 }
