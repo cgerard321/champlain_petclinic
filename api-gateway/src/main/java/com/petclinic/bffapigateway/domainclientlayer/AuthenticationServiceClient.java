@@ -22,7 +22,4 @@ public class AuthenticationServiceClient {
         this.webClientBuilder = webClientBuilder;
         authenticationServiceUrl = "http://" + authenticationServiceHost + ":" + authenticationServicePort + "/user";
     }
-
-
-
 }

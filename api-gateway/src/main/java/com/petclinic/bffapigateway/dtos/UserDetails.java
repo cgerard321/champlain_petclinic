@@ -1,5 +1,8 @@
 package com.petclinic.bffapigateway.dtos;
 
+import lombok.Data;
+
+@Data
 public class UserDetails {
 
     private int id;

@@ -11,7 +11,7 @@ app:
   customers-service:
     host: localhost
     port: 7003
-  auth-service:
+  authentication-service:
       host: localhost
       port: 7004
 
@@ -34,6 +34,6 @@ app:
   customers-service:
     host: customers
     port: 8080
-  auth-service:
+  authentication-service:
     host: auth
     port: 8080
