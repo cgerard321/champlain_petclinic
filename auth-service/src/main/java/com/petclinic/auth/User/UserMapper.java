@@ -8,7 +8,8 @@ import org.mapstruct.Mappings;
 public interface UserMapper {
 
     @Mappings({
-            @Mapping(target = "id", ignore = true)
+            @Mapping(target = "id", ignore = true),
+            @Mapping(target = "roles", ignore = true)
     })
     User idLessDTOToModel(UserIDLessDTO dto);
 }
