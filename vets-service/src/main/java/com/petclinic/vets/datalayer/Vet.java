@@ -31,8 +31,6 @@ public class Vet {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @NotEmpty
-    @UniqueElements
     @Column(name = "vet_id")
     private Integer vetId;
 
@@ -53,14 +51,14 @@ public class Vet {
     private String phoneNumber;
 
     @Column(name = "resume")
-    @NotEmpty
+
     private String resume;
 
     @Column(name = "workday")
     private String workday;
 
     @Column(name = "is_active")
-    @NotEmpty
+
     private Integer isActive;
 
     public Integer getIsActive() {

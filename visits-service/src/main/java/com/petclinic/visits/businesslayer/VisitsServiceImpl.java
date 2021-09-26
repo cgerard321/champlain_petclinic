@@ -4,11 +4,15 @@ import com.petclinic.visits.datalayer.Visit;
 import com.petclinic.visits.datalayer.VisitRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Slf4j
 @Service
+@Slf4j
 public class VisitsServiceImpl implements VisitsService {
 
     private final VisitRepository visitRepository;
@@ -19,7 +23,8 @@ public class VisitsServiceImpl implements VisitsService {
 
     @Override
     public Visit addVisit(Visit visit) {
-        return null;
+        log.info("Calling visit repo to create a visit for pet with petId: {}", visit.getPetId());
+        return visitRepository.save(visit);
     }
 
     @Override
@@ -30,11 +35,13 @@ public class VisitsServiceImpl implements VisitsService {
 
     @Override
     public void deleteVisit(int visitId) {
-
+        log.debug("Visit object is deleted with this id: " + visitId);
+        visitRepository.findById(visitId).ifPresent(e -> visitRepository.delete(e));
+        log.debug("Visit deleted");
     }
 
     @Override
-    public List<Visit> getVisitsForPets(List<Integer> petIds) {
+    public List<Visit> getVisitsForPets(List<Integer> petIds){
         return visitRepository.findByPetIdIn(petIds);
     }
 }
