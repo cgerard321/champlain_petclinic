@@ -13,7 +13,7 @@ import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -61,7 +61,7 @@ public class VisitsServiceImplTests {
 
     @Test
     public void whenValidPetIdThenCreateConfirmedVisitForPet(){
-        Visit visit = new Visit(1, new Date(), "Desc-1", 1, true);
+        Visit visit = visit().petId(1).date(new Date()).description("").build();
 
         when(repo.save(visit)).thenReturn(visit);
 
@@ -70,10 +70,19 @@ public class VisitsServiceImplTests {
         assertThat(serviceResponse.getPetId(), equalTo(1));
         assertThat(serviceResponse.isStatus(), equalTo(true));
     }
+  
+    @Test
+    public void whenValidPetIdThenShouldCreateVisitForPet() {
+        Visit visit = visit().petId(1).date(new Date()).description("").build();
+        
+        visitsService.addVisit(visit);
+        
+        verify(repo, times(1)).save(visit);
+    }
 
     @Test
     public void whenValidPetIdThenCreateCanceledVisitForPet(){
-        Visit visit = new Visit(1, new Date(), "Desc-1", 1, false);
+        Visit visit = visit().id(2).petId(1).status(false).build();
 
         when(repo.save(visit)).thenReturn(visit);
 

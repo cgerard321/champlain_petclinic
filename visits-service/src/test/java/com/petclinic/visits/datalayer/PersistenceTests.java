@@ -10,8 +10,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
+import static com.petclinic.visits.datalayer.Visit.visit;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
@@ -62,4 +64,26 @@ public class PersistenceTests {
         assertThat(repoResponse.get(0).isStatus(), equalTo(true));
         assertThat(repoResponse.get(1).isStatus(), equalTo(false));
     }
+
+    @Test
+    public void createVisitForPet() {
+        Visit visit = visit().petId(3).date(new Date()).description("").build();
+        repo.save(visit);
+        
+        List<Visit> repoResponse = repo.findByPetId(3);
+        
+        assertThat(repoResponse, hasSize(1));
+    }
+
+  
+  
+    @Test
+    public void getVisitsForNonExistentPet(){
+        List<Visit> repoResponse = repo.findByPetId(0);
+
+
+        assertThat(repoResponse, hasSize(0));
+
+    }
+
 }
