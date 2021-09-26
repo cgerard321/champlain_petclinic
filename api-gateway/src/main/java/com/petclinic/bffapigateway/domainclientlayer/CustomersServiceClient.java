@@ -49,9 +49,8 @@ public class CustomersServiceClient {
                 .bodyToFlux(OwnerDetails.class);
     }
 
-<<<<<<< HEAD
-=======
-    public Flux<OwnerDetails> createOwner (final @RequestBody OwnerDetails model){
+
+    public Flux<OwnerDetails> createOwner (final OwnerDetails model){
         return webClientBuilder.build().post()
                 .uri(customersServiceUrl+ "/" + model)
                 .accept(MediaType.APPLICATION_JSON)
@@ -60,5 +59,4 @@ public class CustomersServiceClient {
     }
 
 
->>>>>>> 6fb7b7e (Added create owner, works with Postman, and added Authentication Client Service)
 }
