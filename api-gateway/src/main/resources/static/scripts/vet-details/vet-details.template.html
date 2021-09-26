@@ -2,6 +2,10 @@
 
 <table class="table table-striped">
   <tr>
+    <th class="col-sm-3">Vet ID</th>
+    <td><b>{{$ctrl.vet.vetId}}</b></td>
+  </tr>
+  <tr>
     <th class="col-sm-3">Name</th>
     <td><b>{{$ctrl.vet.firstName}} {{$ctrl.vet.lastName}}</b></td>
   </tr>
@@ -21,6 +25,10 @@
   <tr>
     <th>Work Day</th>
     <td>{{$ctrl.vet.workday}}</td>
+  </tr>
+  <tr>
+    <th>Is Active</th>
+    <td>{{$ctrl.vet.isActive}}</td>
   </tr>
 
   <tr>

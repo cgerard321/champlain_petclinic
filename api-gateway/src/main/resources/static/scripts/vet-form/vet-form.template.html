@@ -1,6 +1,11 @@
 <h2>New Vet</h2>
 <form ng-submit="$ctrl.submitVetForm()" style="max-width: 25em;">
   <div class="form-group">
+    <label><b>Vet Id</b></label>
+    <input type="number" disabled="true" placeholder="Vet Id Auto Generated" name="vetId"/>
+  </div><br>
+
+  <div class="form-group">
     <label><b>First Name</b></label>
     <input type="text" placeholder="First Name" name="fistName" required>
     <span ng-show="vetForm.firstName.$error.required" class="help-block">First name is required.</span>
@@ -39,8 +44,8 @@
     <input type="text" placeholder="Specialty" name="speciality">
   </div>
   <div class="form-group">
-    <input type="radio" name="profileEnabled" value="1" checked>Yes<br>
-    <input type="radio" name="profileEnabled" value="0">No<br>
+    <input type="radio" name="isActive" value="1" checked>Yes<br>
+    <input type="radio" name="isActive" value="0">No<br>
     </fieldset>
   </div><br><br>
   <div class="form-group">
