@@ -27,7 +27,7 @@ import static java.util.Arrays.asList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static com.petclinic.visits.datalayer.Visit.visit;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -116,6 +116,7 @@ public class VisitResourceTest {
 	public void whenValidVisitIdDeleteTheVisit() throws Exception {
 		mvc.perform(delete("/visits/1"))
 				.andExpect(status().isOk());
+		verify(visitsService, times(1)).deleteVisit(1);
 	}
 
 	@Test

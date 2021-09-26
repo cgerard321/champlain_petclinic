@@ -21,8 +21,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.transaction.annotation.Propagation.NOT_SUPPORTED;
 
 @ExtendWith(SpringExtension.class)
@@ -57,8 +56,7 @@ public class PersistenceTests {
         List<Visit> repoResponse = repo.findByPetId(1);
         assertThat(repoResponse, hasSize(2));
     }
-
-
+    
     @Test
     public void confirmAndCancelAppointment(){
         List<Visit> repoResponse = repo.findByPetId(1);
@@ -96,13 +94,12 @@ public class PersistenceTests {
     }
 
     @Test
-    public void Is_Visit_Empty_Dont_Delete () {
+    public void Is_Visit_Empty_Dont_Delete() {
         Visit visit = new Visit();
         repo.delete(visit);
-        assertFalse(repo.equals(null));
+        assertEquals(repo.findByPetId(1).size(), 2);
     }
-
-
+    
     @Test
     public void Is_Deleting_The_Wrong_Value_Date(){
         Visit visit = new Visit(1,new Date(System.currentTimeMillis()), "Cancer", 1);

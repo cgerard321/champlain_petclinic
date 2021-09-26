@@ -127,8 +127,8 @@ public class VisitsServiceImplTests {
 
     @Test
     public void whenVisitDoNotExist(){
-        Visit vise = new Visit(1, new Date(System.currentTimeMillis()), "Cancer", 1);
-        visitsService.deleteVisit(1);
+        Visit vise = new Visit(3, new Date(System.currentTimeMillis()), "Cancer", 1);
+        visitsService.deleteVisit(3);
         verify(repo, never()).delete(vise);
     }
 
