@@ -50,6 +50,16 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
 
+  billing-service:
+    build: billing-service
+    mem_limit: 350m
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      mysql5:
+        condition: service_healthy
+
+
   mysql1:
     image: mysql:5.7
     mem_limit: 350m
