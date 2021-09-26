@@ -195,29 +195,14 @@ public class VisitResourceTest {
 				.andExpect(status().isBadRequest());
 	}
 
-<<<<<<< HEAD
-  @Test
+
+    @Test
 	void whenInValidPetIdThenShouldReturnVisitsForPet() throws Exception {
 
 		mvc.perform(get("/visits/FADAW"))
 				.andExpect(status().isBadRequest());
 
 	}
-=======
-	//Test is failing for an unknown reason
-	//@Test
-	//public void SaveVisits() {
-	//int visitId = 5;
-	//Visit visit = new Visit(visitId, new Date("2015/06/17"), "Head accident", 1);
-	//visitRepository.save(visit);
-	//if(visitRepository.findById(visitId).isPresent()){
-	//	System.out.println("Visits is present");
-	//}
-	//else{
-	//	System.out.println("Visits is not present");
-	//}
-	//visitRepository.findById(visitId).ifPresent(e -> visitRepository.delete(e));
-	//}
->>>>>>> 9b66045 (Major implementation of the delete methods with working tests on each layer)
+
 }
 

@@ -22,6 +22,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.transaction.annotation.Propagation.NOT_SUPPORTED;
 
 @ExtendWith(SpringExtension.class)
@@ -58,7 +59,6 @@ public class PersistenceTests {
     }
 
 
-
     @Test
     public void confirmAndCancelAppointment(){
         List<Visit> repoResponse = repo.findByPetId(1);
@@ -71,15 +71,13 @@ public class PersistenceTests {
         assertThat(repoResponse.get(1).isStatus(), equalTo(false));
     }
 
-
+    
     @Test
     public void createVisitForPet() {
         Visit visit = visit().petId(3).date(new Date()).description("").practitionerId(123456).build();
 
         repo.save(visit);
-
         List<Visit> repoResponse = repo.findByPetId(3);
-
         assertThat(repoResponse, hasSize(1));
     }
 
@@ -92,8 +90,6 @@ public class PersistenceTests {
         assertThat(repoResponse, hasSize(0));
 
     }
-
-  
 
 
     @Test
@@ -110,14 +106,17 @@ public class PersistenceTests {
     }
 
     @Test
-    public void Is_Deleting_The_Wrong_Value_Date () {
-        Visit visit = new Visit();
+    public void Is_Deleting_The_Wrong_Value_Date(){
+        Visit visit = new Visit(1,new Date(System.currentTimeMillis()), "Cancer", 1);
+        repo.delete(visit);
+        assertFalse(repo.equals(visit.getDate()));
     }
 
     @Test
-    public void Is_Deleting_The_Wrong_Value_Description () {
-
+    public void Is_Deleting_The_Wrong_Value_Description() {
+        Visit visit = new Visit(1, new Date(System.currentTimeMillis()), "Cancer", 1);
+        repo.delete(visit);
+        assertFalse(repo.equals(visit.getDescription()));
     }
 }
-
 
