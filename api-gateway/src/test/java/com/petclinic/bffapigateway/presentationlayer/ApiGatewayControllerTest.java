@@ -1,11 +1,15 @@
 package com.petclinic.bffapigateway.presentationlayer;
 
+
 import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
+
+import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
+
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
 import com.petclinic.bffapigateway.dtos.*;
-import org.junit.jupiter.api.BeforeEach;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -59,6 +63,10 @@ class ApiGatewayControllerTest {
 
     @MockBean
     private AuthServiceClient authServiceClient;
+
+    @MockBean
+    private BillServiceClient billServiceClient;
+
 
     @Autowired
     private WebTestClient client;
