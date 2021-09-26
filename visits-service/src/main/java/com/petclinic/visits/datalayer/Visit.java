@@ -40,6 +40,12 @@ public class Visit {
 
     @Column(name = "pet_id")
     private int petId;
+    
+    @Column(name = "practitioner_id")
+    private int practitionerId;
+
+    @Column(name = "status")
+    private boolean status;
 
     public Integer getId() {
         return id;
@@ -57,8 +63,23 @@ public class Visit {
         return petId;
     }
 
+    public boolean isStatus() {
+        return status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
+    }
+
     public void setPetId(final int petId) {
         this.petId = petId;
     }
-
+    
+    public int getPractitionerId() {
+        return practitionerId;
+    }
+    
+    public void setPractitionerId(int practitionerId) {
+        this.practitionerId = practitionerId;
+    }
 }

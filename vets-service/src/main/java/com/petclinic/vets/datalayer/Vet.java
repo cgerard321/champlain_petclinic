@@ -2,6 +2,7 @@ package com.petclinic.vets.datalayer;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+
 import org.hibernate.validator.constraints.UniqueElements;
 import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PropertyComparator;
@@ -9,6 +10,7 @@ import org.springframework.core.style.ToStringCreator;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlElement;
 import java.util.*;
@@ -59,14 +61,16 @@ public class Vet {
     private String phoneNumber;
 
     @Column(name = "resume")
-    @NotEmpty(message = "Please enter resume")
+
+
     private String resume;
 
     @Column(name = "workday")
     private String workday;
 
     @Column(name = "is_active")
-    @NotNull
+
+
     private Integer isActive;
 
     public Integer getIsActive() {
