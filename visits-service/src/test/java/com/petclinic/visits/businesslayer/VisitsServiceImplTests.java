@@ -124,10 +124,17 @@ public class VisitsServiceImplTests {
     
     @Test
     public void whenValidIdDeleteVisit(){
-        repo.save(visit);
-        when(repo.findById(visit.getId())).thenReturn(Optional.of(visit));
-        visitsService.deleteVisit(visit.getId());
-        verify(repo, times(1)).delete(visit);
+        Visit vise = new Visit(1, new Date(System.currentTimeMillis()), "Cancer", 1);
+        when(repo.findById(1)).thenReturn(Optional.of(vise));
+        visitsService.deleteVisit(1);
+        verify(repo, times(1)).delete(vise);
     }
-}
 
+    @Test
+    public void whenVisitDoNotExist(){
+        Visit vise = new Visit(1, new Date(System.currentTimeMillis()), "Cancer", 1);
+        visitsService.deleteVisit(1);
+        verify(repo, never()).delete(vise);
+    }
+
+}

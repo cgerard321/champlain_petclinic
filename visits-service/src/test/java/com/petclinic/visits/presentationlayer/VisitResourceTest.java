@@ -111,22 +111,6 @@ public class VisitResourceTest {
 				.andExpect(jsonPath("$.items[2].petId").value(222));
 	}
 
-	//Do not uncomment this method
-//	@Test
-//	public void SaveVisits() {
-//	int visitId = 5;
-//	Visit visit = new Visit(visitId, new Date("2015/06/17"), "Head accident", 1);
-//	visitRepository.save(visit);
-//
-//	if(visitRepository.findById(visitId).isPresent()){
-//		System.out.println("Visits is present");
-//	}
-//	else{
-//		System.out.println("Visits is not present");
-//	}
-//	visitRepository.findById(visitId).ifPresent(e -> visitRepository.delete(e));
-//	}
-
 	@Test
 	public void whenValidVisitIdDeleteTheVisit() throws Exception {
 		mvc.perform(delete("/visits/1"))

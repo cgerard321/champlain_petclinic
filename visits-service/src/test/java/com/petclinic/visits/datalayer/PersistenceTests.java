@@ -85,13 +85,10 @@ public class PersistenceTests {
     @Test
     public void getVisitsForNonExistentPet(){
         List<Visit> repoResponse = repo.findByPetId(0);
-
-
         assertThat(repoResponse, hasSize(0));
-
     }
 
-
+  
     @Test
     public void Is_deleting_Visit () {
         repo.delete(visit);
@@ -104,6 +101,7 @@ public class PersistenceTests {
         repo.delete(visit);
         assertFalse(repo.equals(null));
     }
+
 
     @Test
     public void Is_Deleting_The_Wrong_Value_Date(){
