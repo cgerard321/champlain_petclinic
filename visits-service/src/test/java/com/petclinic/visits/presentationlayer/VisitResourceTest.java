@@ -110,5 +110,18 @@ class VisitResourceTest {
 				.andExpect(status().isCreated())
 				.andExpect(jsonPath("$.description").value(expectedVisit.getDescription()));
 	}
+	
+	@Test
+	void shouldFailToCreateVisitBadRequest() throws Exception {
+		Visit expectedVisit = visit().id(1).petId(1).date(new Date()).description("CREATED VISIT").practitionerId(123456).build();
+		when(visitsService.addVisit(any())).thenReturn(expectedVisit);
+		
+		mvc.perform(post("/owners/*/pets/{petId}/visits", 1)
+				.content("")
+				.contentType(MediaType.APPLICATION_JSON)
+				.characterEncoding("utf-8")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isBadRequest());
+	}
 }
 
