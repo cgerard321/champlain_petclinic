@@ -40,6 +40,9 @@ public class Visit {
 
     @Column(name = "pet_id")
     private int petId;
+    
+    @Column(name = "practitioner_id")
+    private int practitionerId;
 
     public Integer getId() {
         return id;
@@ -60,5 +63,12 @@ public class Visit {
     public void setPetId(final int petId) {
         this.petId = petId;
     }
-
+    
+    public int getPractitionerId() {
+        return practitionerId;
+    }
+    
+    public void setPractitionerId(int practitionerId) {
+        this.practitionerId = practitionerId;
+    }
 }
