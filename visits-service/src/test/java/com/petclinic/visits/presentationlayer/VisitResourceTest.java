@@ -55,7 +55,6 @@ public class VisitResourceTest {
 
 	@Autowired
 	ObjectMapper objectMapper;
-	VisitRepository visitRepository;
 
 
 	@Test
@@ -116,7 +115,7 @@ public class VisitResourceTest {
 				.andExpect(jsonPath("$.items[2].petId").value(222));
 	}
 
-  @Test
+        @Test
 	void shouldUpdateVisit() throws Exception{
 		when(visitsService.updateVisit(any(Visit.class)))
 				.thenReturn(new Visit(1, new Date(), "Desc-1", 1));
@@ -157,7 +156,7 @@ public class VisitResourceTest {
 				.andExpect(status().isBadRequest());
 	}
 
-  @Test
+        @Test
 	public void whenValidVisitIdDeleteTheVisit() throws Exception {
 		mvc.perform(delete("/visits/1"))
 				.andExpect(status().isOk());
@@ -194,7 +193,7 @@ public class VisitResourceTest {
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isCreated());
-    }
+        }
 
 
 	@Test
@@ -227,7 +226,7 @@ public class VisitResourceTest {
 	}
 
 
-  @Test
+        @Test
 	void whenInValidPetIdThenShouldReturnVisitsForPet() throws Exception {
 		mvc.perform(get("/visits/FADAW"))
 				.andExpect(status().isBadRequest());
