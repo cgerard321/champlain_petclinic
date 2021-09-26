@@ -16,11 +16,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-<<<<<<< HEAD
 import javax.swing.plaf.ViewportUI;
 
-=======
->>>>>>> 57064ad (Fixing bugs before the beginning of the tests)
+
 import java.util.*;
 import java.util.Date;
 import static java.util.Arrays.asList;
@@ -184,10 +182,8 @@ public class VisitResourceTest {
 
     @Test
 	void whenInValidPetIdThenShouldReturnVisitsForPet() throws Exception {
-
 		mvc.perform(get("/visits/FADAW"))
 				.andExpect(status().isBadRequest());
-
 	}
 
 }
