@@ -15,6 +15,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import javax.swing.plaf.ViewportUI;
 import java.util.*;
 
 import static java.util.Arrays.asList;
@@ -26,6 +27,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(VisitResource.class)
@@ -96,6 +100,31 @@ class VisitResourceTest {
 				.andExpect(jsonPath("$.items[1].petId").value(222))
 				.andExpect(jsonPath("$.items[2].petId").value(222));
 	}
+
+
+	@Test
+	void shouldCreateConfirmedVisit() throws Exception {
+		Visit visit = visit().id(1).petId(111).status(true).build();
+
+		given(visitsService.addVisit(visit)).willReturn(visit);
+
+		mvc.perform(post("/owners/*/pets/{petId}/visits", 1).content("{\"id\": 1, \"date\": \"2011-03-04\", \"description\": \"Desc-1\", \"petId\": 1, \"status\": \"true\"}")
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isCreated());
+	}
+
+	@Test
+	void shouldCreateCanceledVisit() throws Exception {
+		Visit visit = visit().id(1).petId(111).status(false).build();
+
+		given(visitsService.addVisit(visit)).willReturn(visit);
+
+		mvc.perform(post("/owners/*/pets/{petId}/visits", 1).content("{\"id\": 1, \"date\": \"2011-03-04\", \"description\": \"Desc-1\", \"petId\": 1, \"status\": \"false\"}")
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isCreated());
+  }
 
 	
 	@Test
