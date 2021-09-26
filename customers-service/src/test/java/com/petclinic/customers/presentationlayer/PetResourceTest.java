@@ -78,6 +78,13 @@ class PetResourceTest {
         owner.setFirstName("George");
         owner.setLastName("Bush");
 
+
+        int temp_id = 1;
+        Owner owner_pet = new Owner();
+        owner_pet.setFirstName("John");
+        owner_pet.setLastName("Wick");
+
+
         Pet pet = new Pet();
 
         pet.setName("Basil");
