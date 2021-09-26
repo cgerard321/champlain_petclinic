@@ -32,7 +32,6 @@ public class Vet {
     private Integer id;
 
     @Column(name = "vet_id")
-    @NotEmpty
     private Integer vetId;
 
     @Column(name = "first_name")
@@ -52,14 +51,14 @@ public class Vet {
     private String phoneNumber;
 
     @Column(name = "resume")
-    @NotEmpty
+
     private String resume;
 
     @Column(name = "workday")
     private String workday;
 
     @Column(name = "is_active")
-    @NotEmpty
+
     private Integer isActive;
 
     public Integer getIsActive() {
@@ -139,44 +138,6 @@ public class Vet {
     public void setLastName(String lastName) {
         this.lastName = verifyLastName(lastName);
     }
-
-
-    //Add a list of animals that a vet treats
-//    private Set<AnimalTreated> animals;
-//
-//    @XmlElement
-//    public List<AnimalTreated> getAnimalTypeTreated() {
-//        List<AnimalTreated> sortedSpecs = new ArrayList<>(getAnimalTypeTreated());
-//        PropertyComparator.sort(sortedSpecs, new MutableSortDefinition("animalType", true, true));
-//        return Collections.unmodifiableList(sortedSpecs);
-//    }
-//    protected Set<AnimalTreated> setAnimalTypeTreatedInternal() {
-//        if (this.animals == null) {
-//            this.animals = new HashSet<>();
-//        }
-//        return this.animals;
-//    }
-//    public void addAnimalTreated(AnimalTreated animalTreated) {
-//        getAnimalTypeTreated().add(animalTreated);
-//    }
-//
-//    private Set<WorkDay> workDays;
-//    //Add list of possible work days for vets
-//    @XmlElement
-//    public List<WorkDay> getWorkDays() {
-//        List<WorkDay> sortedSpecs = new ArrayList<>(getWorkDays());
-//        PropertyComparator.sort(sortedSpecs, new MutableSortDefinition("workDays", true, true));
-//        return Collections.unmodifiableList(sortedSpecs);
-//    }
-//    protected Set<WorkDay> setWorkDaysInternal() {
-//        if (this.workDays == null) {
-//            this.workDays = new HashSet<>();
-//        }
-//        return this.workDays;
-//    }
-//    public void addWorkDay(WorkDay workDay) {
-//        getWorkDays().add(workDay);
-//    }
 
     protected Set<Specialty> getSpecialtiesInternal() {
         if (this.specialties == null) {
