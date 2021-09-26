@@ -3,23 +3,25 @@ package com.petclinic.bffapigateway.presentationlayer;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
-import com.petclinic.bffapigateway.dtos.OwnerDetails;
-import com.petclinic.bffapigateway.dtos.PetDetails;
-import com.petclinic.bffapigateway.dtos.VisitDetails;
-import com.petclinic.bffapigateway.dtos.Visits;
+import com.petclinic.bffapigateway.dtos.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.test.web.servlet.MockMvc;
 import reactor.core.publisher.Mono;
 
 import java.net.ConnectException;
 import java.util.Collections;
+
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @ExtendWith(SpringExtension.class)
 @WebFluxTest(controllers = BFFApiGatewayController.class)
@@ -45,8 +47,7 @@ class ApiGatewayControllerTest {
         cat.setId(20);
         cat.setName("Garfield");
         owner.getPets().add(cat);
-        Mockito
-                .when(customersServiceClient.getOwner(1))
+        when(customersServiceClient.getOwner(1))
                 .thenReturn(Mono.just(owner));
 
         Visits visits = new Visits();
@@ -55,8 +56,7 @@ class ApiGatewayControllerTest {
         visit.setDescription("First visit");
         visit.setPetId(cat.getId());
         visits.getItems().add(visit);
-        Mockito
-                .when(visitsServiceClient.getVisitsForPets(Collections.singletonList(cat.getId())))
+        when(visitsServiceClient.getVisitsForPets(Collections.singletonList(cat.getId())))
                 .thenReturn(Mono.just(visits));
 
         client.get()
@@ -70,5 +70,6 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.pets[0].name").isEqualTo("Garfield")
                 .jsonPath("$.pets[0].visits[0].description").isEqualTo("First visit");
     }
+
 }
 

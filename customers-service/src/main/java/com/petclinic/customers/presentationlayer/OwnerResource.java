@@ -1,9 +1,11 @@
 package com.petclinic.customers.presentationlayer;
 
+import com.petclinic.customers.businesslayer.OwnerServiceImpl;
 import com.petclinic.customers.datalayer.Owner;
 import com.petclinic.customers.datalayer.OwnerRepository;
 import io.micrometer.core.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,9 +31,12 @@ class OwnerResource {
 
     //private static final Logger log = LoggerFactory.getLogger(OwnerResource.class);
 
+    private final OwnerServiceImpl ownerServiceImpl;
     private final OwnerRepository ownerRepository;
 
-    OwnerResource(OwnerRepository ownerRepository) {
+    @Autowired
+    OwnerResource(OwnerServiceImpl ownerServiceImpl, OwnerRepository ownerRepository) {
+        this.ownerServiceImpl = ownerServiceImpl;
         this.ownerRepository = ownerRepository;
     }
 
@@ -41,6 +46,7 @@ class OwnerResource {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Owner createOwner(@Valid @RequestBody Owner owner) {
+
         return ownerRepository.save(owner);
     }
 
@@ -48,8 +54,9 @@ class OwnerResource {
      * Read single Owner
      */
     @GetMapping(value = "/{ownerId}")
-    public Optional<Owner> findOwner(@PathVariable("ownerId") int ownerId) {
-        return ownerRepository.findById(ownerId);
+    public Optional<Owner> findOwner(@PathVariable("ownerId") int ownerId)
+    {
+        return ownerServiceImpl.findByOwnerId(ownerId);
     }
 
     /**
@@ -57,7 +64,9 @@ class OwnerResource {
      */
     @GetMapping
     public List<Owner> findAll() {
-        return ownerRepository.findAll();
+
+        //CALLING METHOD FIND ALL
+        return ownerServiceImpl.findAll();
     }
 
     /**
@@ -66,6 +75,8 @@ class OwnerResource {
     @PutMapping(value = "/{ownerId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateOwner(@PathVariable("ownerId") int ownerId, @Valid @RequestBody Owner ownerRequest) {
+
+        //TRANSFER THIS CODE IN OwnerServiceImpl
         final Optional<Owner> owner = ownerRepository.findById(ownerId);
 
         final Owner ownerModel = owner.orElseThrow(() -> new ResourceNotFoundException("Owner "+ownerId+" not found"));
@@ -78,5 +89,13 @@ class OwnerResource {
         log.info("Saving owner {}", ownerModel);
         ownerRepository.save(ownerModel);
     }
-}
 
+    @DeleteMapping(value = "/{ownerId}")
+    public void deleteOwner(@PathVariable("ownerId") int ownerId)
+    {
+        ownerServiceImpl.deleteOwner(ownerId);
+
+    }
+
+
+}
