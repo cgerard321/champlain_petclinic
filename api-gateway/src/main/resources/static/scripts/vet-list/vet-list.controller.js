@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('vetList')
+app = angular.module('vetList')
 .controller('VetListController', ['$http', function ($http) {
         var self = this;
         this.show = ($event,vetID) => {
