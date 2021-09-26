@@ -1,19 +1,14 @@
 package com.petclinic.auth;
 
-import com.petclinic.auth.User.User;
-import com.petclinic.auth.User.UserRepo;
 import com.petclinic.auth.Role.Role;
 import com.petclinic.auth.Role.RoleRepo;
 import com.petclinic.auth.User.User;
 import com.petclinic.auth.User.UserRepo;
-import org.hibernate.Hibernate;
-import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.ActiveProfiles;
@@ -21,11 +16,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Random;
-
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.Random;
 
 import static java.lang.String.format;
@@ -44,7 +35,7 @@ public class AuthServicePersistenceTests {
     private RoleRepo roleRepo;
 
     private final User DEFAULT_USER =
-            new User(0, "username-1", "password-1", "email-1", Collections.EMPTY_SET);
+            new User(0, "username-1", "password-1", "email-1@gmail.com", Collections.EMPTY_SET);
 
     private final Role
             ROLE_ADMIN = new Role(0, "ADMIN"),
@@ -211,7 +202,7 @@ public class AuthServicePersistenceTests {
 
     @Test
     @DisplayName("Add User with username, password and email")
-    void add_user() throws Exception{
+    void add_user() {
 
         final User testUser = userRepo.save(new User("testUsername", "testPassword", "test@email.com"));
 
@@ -219,6 +210,8 @@ public class AuthServicePersistenceTests {
         assertEquals(testUser.getPassword(), "testPassword");
         assertEquals(testUser.getEmail(), "test@email.com");
     }
+
+
     //This Test will be used when the UserServiceImpl class is fully implemented
 //    @Test
 //    @DisplayName("Add User with username only.")
