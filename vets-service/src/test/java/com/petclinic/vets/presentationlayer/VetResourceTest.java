@@ -46,6 +46,7 @@ class VetResourceTest {
 
 
 	@Test
+	@DisplayName("Should get a list of vets")
 	void shouldGetAListOfVets() throws Exception {
 
 		Vet vet = new Vet();
@@ -69,7 +70,7 @@ class VetResourceTest {
 		vet.setFirstName("James");
 		vet.setLastName("Carter");
 		vet.setEmail("carter.james@email.com");
-		vet.setPhoneNumber("(514)-634-8276 #2384");
+		vet.setPhoneNumber("2384");
 		vet.setResume("Practicing since 3 years");
 		vet.setWorkday("Monday, Tuesday, Friday");
 		vet.setIsActive(1);
@@ -90,17 +91,6 @@ class VetResourceTest {
 	}
 
 
-//	@Test
-//	void addANewVet() throws Exception {
-//		//arrange
-//		Vet vet = new Vet();
-//		vet.setId(1);
-//		Vet vetSaved = vetRepository.save(vet);
-//		//act //assert
-//		when(vetRepository.findById(vet.getId())).thenReturn(Optional.of(vet));
-//
-//		assertEquals(vet.getId(),vetSaved.getId());
-//	}
 
 	@Test
 	void disableAVet() throws Exception {
@@ -114,4 +104,35 @@ class VetResourceTest {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$[0].isActive").value(0));
 	}
+
+	@Test
+	@DisplayName("Vet input submission cleanup and validation Test")
+	void VetRegisterDataFilterAndValidationTest() throws Exception{
+
+		Vet vet = new Vet();
+		vet.setId(1);
+		vet.setVetId(87413012);
+		vet.setFirstName(" James215 ");
+		vet.setLastName(" 23Carter32 ");
+		vet.setEmail(" car ter . ja mes @ ema il . co m ");
+		vet.setPhoneNumber(" #2384 fwfkdsbajnl####");
+		vet.setResume("Practicing since 3 years");
+		vet.setWorkday("Monday,Tuesday,         Friday");
+		vet.setIsActive(5);
+
+		given(vetRepository.findAll()).willReturn(asList(vet));
+
+		mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$[0].id").value(1))
+				.andExpect(jsonPath("$[0].vetId").value(874130))
+				.andExpect(jsonPath("$[0].firstName").value("James"))
+				.andExpect(jsonPath("$[0].lastName").value("Carter"))
+				.andExpect(jsonPath("$[0].email").value("carter.james@email.com"))
+				.andExpect(jsonPath("$[0].phoneNumber").value("(514)-634-8276 #2384"))
+				.andExpect(jsonPath("$[0].resume").value("Practicing since 3 years"))
+				.andExpect(jsonPath("$[0].workday").value("Monday, Tuesday, Friday"))
+				.andExpect(jsonPath("$[0].isActive").value(1));
+	}
+
 }
