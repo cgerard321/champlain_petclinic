@@ -1,9 +1,14 @@
 package com.petclinic.bffapigateway.presentationlayer;
 
+import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
+
 import com.petclinic.bffapigateway.dtos.Login;
+
+import com.petclinic.bffapigateway.dtos.BillDetails;
+
 import com.petclinic.bffapigateway.dtos.OwnerDetails;
 import com.petclinic.bffapigateway.dtos.VetDetails;
 import com.petclinic.bffapigateway.dtos.Visits;
@@ -41,6 +46,8 @@ public class BFFApiGatewayController {
 
     private final VetsServiceClient vetsServiceClient;
 
+    private final BillServiceClient billServiceClient;
+
     @GetMapping(value = "owners/{ownerId}")
     public Mono<OwnerDetails> getOwnerDetails(final @PathVariable int ownerId) {
         return customersServiceClient.getOwner(ownerId)
@@ -49,6 +56,17 @@ public class BFFApiGatewayController {
                     .map(addVisitsToOwner(owner))
             );
     }
+//check this
+    @GetMapping(value = "owners/{billId}")
+    public Mono<BillDetails> getBillingInfo(final @PathVariable int billId) {
+        return billServiceClient.getBilling(billId);
+//                .flatMap(bill ->
+//                        billServiceClient.getBilling(bill.getBill()  )
+//                                //.map(addVisitsToOwner(bill))
+//                );
+    }
+
+
 
     @GetMapping(value = "customer/owners")
     public Flux<OwnerDetails> getOwners() {

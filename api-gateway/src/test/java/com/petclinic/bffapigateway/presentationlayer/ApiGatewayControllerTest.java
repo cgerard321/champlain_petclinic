@@ -1,5 +1,6 @@
 package com.petclinic.bffapigateway.presentationlayer;
 
+import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
@@ -35,6 +36,9 @@ class ApiGatewayControllerTest {
 
     @MockBean
     private VetsServiceClient vetsServiceClient;
+
+    @MockBean
+    private BillServiceClient billServiceClient;
 
     @Autowired
     private WebTestClient client;
