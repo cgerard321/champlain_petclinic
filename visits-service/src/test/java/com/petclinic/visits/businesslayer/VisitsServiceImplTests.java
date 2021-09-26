@@ -61,7 +61,7 @@ public class VisitsServiceImplTests {
     
     @Test
     public void whenValidPetIdThenShouldCreateVisitForPet() {
-        Visit visit = visit().id(1).petId(1).date(new Date()).description("").practitionerId(123456).build();
+        Visit visit = visit().petId(1).date(new Date()).description("").practitionerId(123456).build();
         
         when(repo.save(visit)).thenReturn(visit);
         

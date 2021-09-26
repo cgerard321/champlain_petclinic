@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 
+import static com.petclinic.visits.datalayer.Visit.visit;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
@@ -54,7 +55,7 @@ public class PersistenceTests {
     
     @Test
     public void createVisitForPet() {
-        Visit visit = new Visit(3, new Date(), "", 3, 123456);
+        Visit visit = visit().petId(3).date(new Date()).description("").practitionerId(123456).build();
         repo.save(visit);
         
         List<Visit> repoResponse = repo.findByPetId(3);

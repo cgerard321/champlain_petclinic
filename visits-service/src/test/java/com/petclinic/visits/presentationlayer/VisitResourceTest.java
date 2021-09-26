@@ -113,7 +113,7 @@ class VisitResourceTest {
 	
 	@Test
 	void shouldFailToCreateVisitBadRequest() throws Exception {
-		Visit expectedVisit = visit().id(1).petId(1).date(new Date()).description("CREATED VISIT").practitionerId(123456).build();
+		Visit expectedVisit = visit().petId(1).date(new Date()).description("CREATED VISIT").practitionerId(123456).build();
 		when(visitsService.addVisit(any())).thenReturn(expectedVisit);
 		
 		mvc.perform(post("/owners/*/pets/{petId}/visits", 1)
