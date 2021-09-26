@@ -37,12 +37,4 @@ class VetResource {
         return vetRepository.findById(vetId);
     }
 
-@PutMapping("/{vetId}")
-public boolean disableVet(@PathVariable vetId, @RequestBody Vet vet) {
-   Vet theVet = vetRepository.findOne(vetId).isActive(1);
-   vet = (Vet) PersistenceUtils.partialUpdate(theVet, vet);
-   return vetRepository.save(vet);
-
-}
-
 }
