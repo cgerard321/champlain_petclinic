@@ -111,7 +111,7 @@ public class AuthServiceUserControllerTests {
     @DisplayName("Check if the input ID is correct")
     void check_empty_id() throws Exception{
 
-        // expect 404 not found
+
         mockMvc.perform(put("/users/1000"))
                 .andExpect(status().isForbidden());
 
