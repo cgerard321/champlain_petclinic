@@ -1,9 +1,3 @@
-let strDays = "Wednesday, Monday, Friday";
-let daysOfWeek = (strDays.replace(/\s+/g, '')).split(',');
-let daysToRemove = 'Monday';
-
-daysOfWeek.push(daysToRemove);
-
 function removeItem(array, item) {
     var i = array.length;
 
@@ -14,28 +8,37 @@ function removeItem(array, item) {
     }
 }
 
-
-removeItem(daysOfWeek, daysToRemove);
-
-console.log(daysOfWeek);
-
-const sorter = {
-    "sunday": 0,
-    "monday": 1,
-    "tuesday": 2,
-    "wednesday": 3,
-    "thursday": 4,
-    "friday": 5,
-    "saturday": 6
-}
-
-
-daysOfWeek.sort(function sortByDay(a, b) {
-    return sorter[a] - sorter[b];
-});
-
-
 function displayDays() {
+    let strDays = document.getElementById("workDay").textContent;
+    console.log(strDays);
+
+
+// let strDays = vetDetails.workday;
+    let daysOfWeek = (strDays.replace(/\s+/g, '')).split(',');
+    //TEST DATA
+    let daysToRemove = 'Monday';
+
+    daysOfWeek.push(daysToRemove);
+
+    removeItem(daysOfWeek, daysToRemove);
+
+    console.log(daysOfWeek);
+
+    const sorter = {
+        "sunday": 0,
+        "monday": 1,
+        "tuesday": 2,
+        "wednesday": 3,
+        "thursday": 4,
+        "friday": 5,
+        "saturday": 6
+    }
+
+    daysOfWeek.sort(function sortByDay(a, b) {
+        return sorter[a] - sorter[b];
+    });
+
+
     const targetDiv = document.getElementById("displayNone");
     const btn = document.getElementById("toggle");
 
