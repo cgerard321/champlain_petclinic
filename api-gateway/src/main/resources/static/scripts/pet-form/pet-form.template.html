@@ -1,14 +1,14 @@
-<h2 class="titleOwner form table">Pet</h2>
+<div class="bColor"><h2 class="titleOwner form">Pet</h2></div>
 
 <form id="petForm" class="form-horizontal" ng-submit="$ctrl.submit()">
-    <div class="form-group">
+    <div class="form-group formColor">
         <label class="col-sm-2 control-label">Owner</label>
-        <div class="col-sm-6">
-            <p class="form-control-static">{{$ctrl.pet.owner}}</p>
+        <div class="pet marg col-sm-6">
+            <p class="pet form-control-static">{{$ctrl.pet.owner}}</p>
         </div>
     </div>
 
-    <div class="form-group">
+    <div class="form-group formColor">
         <label class="col-sm-2 control-label">Name </label>
         <div class="pet col-sm-6">
             <input class="form-control col-sm-4" ng-model="$ctrl.pet.name" name="name" required type="text"/>
@@ -16,7 +16,7 @@
         </div>
     </div>
 
-    <div class="form-group">
+    <div class="form-group formColor">
         <label class="col-sm-2 control-label">Birth date</label>
         <div class="pet col-sm-6">
             <input class="form-control" ng-model="$ctrl.pet.birthDate" required type="date"/>
@@ -24,7 +24,7 @@
         </div>
     </div>
 
-    <div class="form-group">
+    <div class="form-group formColor">
         <label class="col-sm-2 control-label">Type</label>
         <div class="pet col-sm-6">
             <select class="form-control" ng-model="$ctrl.petTypeId">
@@ -33,8 +33,8 @@
         </div>
     </div>
 
-    <div class="form-group">
-        <div class="pet col-sm-6 col-sm-offset-2">
+    <div class="form-group formColor">
+        <div class="pet marg col-sm-6 col-sm-offset-2">
             <button id="newBtn" class="btn btn-default" type="submit">
                 Submit
             </button>
