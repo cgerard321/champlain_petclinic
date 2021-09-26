@@ -101,4 +101,9 @@ public class BFFApiGatewayController {
     public Object addRole() {
         return null;
     }
+
+    @PostMapping(value = "/owners",
+            consumes = "application/json",
+            produces = "application/json")
+    public Flux<OwnerDetails> createOwner(@RequestBody OwnerDetails model){ return null; }
 }

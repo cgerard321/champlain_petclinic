@@ -50,13 +50,22 @@ public class CustomersServiceClient {
     }
 
 
-    public Flux<OwnerDetails> createOwner (final OwnerDetails model){
+    public Flux<OwnerDetails> createOwner (){
         return webClientBuilder.build().post()
-                .uri(customersServiceUrl+ "/" + model)
+                .uri(customersServiceUrl)
                 .accept(MediaType.APPLICATION_JSON)
             .retrieve().bodyToFlux(OwnerDetails.class);
 
     }
+
+    public Mono<OwnerDetails> createOwner (final OwnerDetails model){
+        return webClientBuilder.build().post()
+                .uri(customersServiceUrl+ model)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve().bodyToMono(OwnerDetails.class);
+
+    }
+
 
 
 }

@@ -35,5 +35,5 @@ app:
     host: customers
     port: 8080
   authentication-service:
-    host: customers
+    host: authentication
     port: 8080
