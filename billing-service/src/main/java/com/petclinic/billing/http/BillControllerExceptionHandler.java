@@ -1,7 +1,7 @@
 package com.petclinic.billing.http;
 
-import com.petclinic.billing.Exceptions.InvalidInputException;
-import com.petclinic.billing.Exceptions.NotFoundException;
+import com.petclinic.billing.exceptions.InvalidInputException;
+import com.petclinic.billing.exceptions.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;

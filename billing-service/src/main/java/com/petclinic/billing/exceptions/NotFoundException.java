@@ -1,4 +1,4 @@
-package com.petclinic.billing.Exceptions;
+package com.petclinic.billing.exceptions;
 
 public class NotFoundException extends RuntimeException{
     public NotFoundException() {
