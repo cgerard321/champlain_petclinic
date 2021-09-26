@@ -4,11 +4,9 @@ import com.petclinic.bffapigateway.domainclientlayer.AuthenticationServiceClient
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
-import com.petclinic.bffapigateway.dtos.Login;
-import com.petclinic.bffapigateway.dtos.OwnerDetails;
-import com.petclinic.bffapigateway.dtos.VetDetails;
-import com.petclinic.bffapigateway.dtos.Visits;
+import com.petclinic.bffapigateway.dtos.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -106,4 +104,23 @@ public class BFFApiGatewayController {
             consumes = "application/json",
             produces = "application/json")
     public Mono<OwnerDetails> createOwner(@RequestBody OwnerDetails model){ return customersServiceClient.getOwner(model.getId()); }
+
+
+
+    @GetMapping(value = "user/{userId}")
+    public Mono<UserDetails> getUserDetails(final @PathVariable int userId) {
+        return authenticationServiceClient.getUser(userId);
+    }
+
+    @PostMapping(value = "/user",
+            consumes = "application/json",
+            produces = "application/json")
+    public Mono<UserDetails> createUser(@RequestBody UserDetails model){ return authenticationServiceClient.getUser(model.getId()); }
+
+    @PutMapping(value = "/user/{userId}",
+            consumes = "application/json",
+            produces = "application/json")
+    public Mono<UserDetails> updateUser(@RequestBody UserDetails newUser, @PathVariable int userId){
+        return authenticationServiceClient.updateUser(userId, newUser);
+    }
 }
