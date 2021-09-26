@@ -17,7 +17,6 @@ public class UserIDLessDTO {
     @NotEmpty
     private String username;
 
-    @NotEmpty
     @PasswordStrengthCheck
     private String password;
 
