@@ -19,7 +19,8 @@ public class VisitsServiceImpl implements VisitsService {
 
     @Override
     public Visit addVisit(Visit visit) {
-        return null;
+        log.info("Calling visit repo to create a visit for pet with petId: {}", visit.getPetId());
+        return visitRepository.save(visit);
     }
 
     @Override
