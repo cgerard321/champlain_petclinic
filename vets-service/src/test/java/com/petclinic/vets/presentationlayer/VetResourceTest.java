@@ -134,14 +134,12 @@ class VetResourceTest {
 				.andExpect(jsonPath("$[0].isActive").value(1));
 	}
 
-
 	@Test
 	void addANewVet() throws Exception {
 		//arrange
 		Vet vet = new Vet();
 		vet.setId(1);
 		//act //assert
-
 		given(vetRepository.findAll()).willReturn(asList(vet));
 		assertEquals(vet.getId(), 1);
 	}
