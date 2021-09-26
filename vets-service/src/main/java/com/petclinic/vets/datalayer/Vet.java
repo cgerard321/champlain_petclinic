@@ -31,6 +31,11 @@ public class Vet {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+
+    @Column
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer vetId;
+
     @Column(name = "first_name")
     @NotEmpty
     private String firstName;
@@ -48,7 +53,6 @@ public class Vet {
     private String phoneNumber;
 
     @Column(name = "resume")
-    @NotEmpty
     private String resume;
 
     @Column(name = "workday")
