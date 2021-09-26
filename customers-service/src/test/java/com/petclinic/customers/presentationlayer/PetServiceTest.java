@@ -15,7 +15,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.ArrayList;
 import java.util.Optional;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+
 import java.util.List;
 
 @ExtendWith(SpringExtension.class)
@@ -76,5 +77,17 @@ public class PetServiceTest {
 
         //Assert
         assertThat(expectedLength).isEqualTo(returnedList.size());
+    }
+
+    // TEST FOR CREATING A PET
+    @DisplayName("petService_CreatePet")
+    @Test
+    public void test_createPet() {
+        //Arrange
+        Pet petTest = new PetPersistenceTest().setupPet();
+        service.CreatePet(petTest);
+
+        //Assert
+        verify(repository, times(1)).save(petTest);
     }
 }
