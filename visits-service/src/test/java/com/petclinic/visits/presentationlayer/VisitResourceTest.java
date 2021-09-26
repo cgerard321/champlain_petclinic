@@ -48,6 +48,7 @@ public class VisitResourceTest {
 	@MockBean
 	VisitsService visitsService;
 
+
 	@Autowired
 	ObjectMapper objectMapper;
 	VisitRepository visitRepository;

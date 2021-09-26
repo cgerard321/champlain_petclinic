@@ -17,12 +17,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-<<<<<<< HEAD
 import static org.mockito.Mockito.when;
-=======
-import static org.mockito.Mockito.*;
-
->>>>>>> 232be4a (Some debugging done on the tdd tests)
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.swing.text.html.Option;
