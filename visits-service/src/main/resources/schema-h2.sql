@@ -5,6 +5,7 @@ CREATE TABLE visits (
                         pet_id      INTEGER NOT NULL,
                         visit_date  DATE,
                         description VARCHAR(8192),
+                        practitioner_id INTEGER NOT NULL,
                         status BIT 
 );
 

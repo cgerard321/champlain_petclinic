@@ -52,7 +52,7 @@ public class VisitsServiceClient {
                 .retrieve()
                 .bodyToMono(Visits.class);
     }
-
+    
     private String joinIds(List<Integer> petIds) {
         return petIds.stream().map(Object::toString).collect(joining(","));
     }

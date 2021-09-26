@@ -58,7 +58,7 @@ public class VisitsServiceImplTests {
         assertThat(serviceResponse, hasSize(2));
         assertThat(serviceResponse.get(1).getPetId(), equalTo(1));
     }
-
+  
     @Test
     public void whenValidPetIdThenCreateConfirmedVisitForPet(){
         Visit visit = visit().id(2).petId(1).status(true).build();
@@ -73,11 +73,13 @@ public class VisitsServiceImplTests {
   
     @Test
     public void whenValidPetIdThenShouldCreateVisitForPet() {
-        Visit visit = visit().petId(1).date(new Date()).description("").build();
+        Visit visit = visit().petId(1).date(new Date()).description("").practitionerId(123456).build();
         
-        visitsService.addVisit(visit);
+        when(repo.save(visit)).thenReturn(visit);
         
-        verify(repo, times(1)).save(visit);
+        Visit serviceResponse = repo.save(visit);
+        
+        assertThat(serviceResponse.getPetId(), equalTo(1));
     }
 
     @Test

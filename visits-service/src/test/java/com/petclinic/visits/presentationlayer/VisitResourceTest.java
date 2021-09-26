@@ -27,7 +27,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(VisitResource.class)
@@ -127,7 +129,7 @@ class VisitResourceTest {
 	
 	@Test
 	void shouldCreateVisit() throws Exception {
-		Visit expectedVisit = visit().id(1).petId(1).date(new Date()).description("CREATED VISIT").build();
+		Visit expectedVisit = visit().id(1).petId(1).date(new Date()).description("CREATED VISIT").practitionerId(123456).build();
 		
 		when(visitsService.addVisit(any())).thenReturn(expectedVisit);
 		
@@ -142,7 +144,8 @@ class VisitResourceTest {
 	
 	@Test
 	void shouldFailToCreateVisitBadRequest() throws Exception {
-		Visit expectedVisit = visit().petId(1).date(new Date()).description("CREATED VISIT").build();
+		Visit expectedVisit = visit().petId(1).date(new Date()).description("CREATED VISIT").practitionerId(123456).build();
+
 		when(visitsService.addVisit(any())).thenReturn(expectedVisit);
 		
 		mvc.perform(post("/owners/*/pets/{petId}/visits", 1)

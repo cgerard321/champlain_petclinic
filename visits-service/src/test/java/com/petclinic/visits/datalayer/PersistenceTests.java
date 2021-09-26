@@ -67,7 +67,8 @@ public class PersistenceTests {
 
     @Test
     public void createVisitForPet() {
-        Visit visit = visit().petId(3).date(new Date()).description("").build();
+        Visit visit = visit().petId(3).date(new Date()).description("").practitionerId(123456).build();
+
         repo.save(visit);
         
         List<Visit> repoResponse = repo.findByPetId(3);
