@@ -95,6 +95,7 @@ class VisitResourceTest {
 				.andExpect(jsonPath("$.items[1].petId").value(222))
 				.andExpect(jsonPath("$.items[2].petId").value(222));
 	}
+
 	
 	@Test
 	void shouldCreateVisit() throws Exception {
@@ -122,6 +123,15 @@ class VisitResourceTest {
 				.characterEncoding("utf-8")
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isBadRequest());
+	}
+
+  
+  @Test
+	void whenInValidPetIdThenShouldReturnVisitsForPet() throws Exception {
+
+		mvc.perform(get("/visits/FADAW"))
+				.andExpect(status().isBadRequest());
+
 	}
 }
 
