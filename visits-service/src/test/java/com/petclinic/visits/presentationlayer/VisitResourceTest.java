@@ -1,5 +1,7 @@
 package com.petclinic.visits.presentationlayer;
 
+
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.visits.businesslayer.VisitsService;
 import com.petclinic.visits.datalayer.Visit;
@@ -14,15 +16,17 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
-
 import javax.swing.plaf.ViewportUI;
-import java.util.*;
 
+
+import java.util.*;
+import java.util.Date;
 import static java.util.Arrays.asList;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static com.petclinic.visits.datalayer.Visit.visit;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -34,7 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(VisitResource.class)
 @ActiveProfiles("test")
-class VisitResourceTest {
+public class VisitResourceTest {
 
 	@Autowired
 	MockMvc mvc;
@@ -42,8 +46,11 @@ class VisitResourceTest {
 	@MockBean
 	VisitsService visitsService;
 
+
 	@Autowired
 	ObjectMapper objectMapper;
+	VisitRepository visitRepository;
+
 
 	@Test
 	void whenValidPetIdThenShouldReturnVisitsForPet() throws Exception {
@@ -69,6 +76,8 @@ class VisitResourceTest {
 				.andExpect(jsonPath("[0].petId").value(1))
 				.andExpect(jsonPath("[1].petId").value(1));
 	}
+
+
 
 
 	@Test
@@ -101,6 +110,20 @@ class VisitResourceTest {
 				.andExpect(jsonPath("$.items[2].petId").value(222));
 	}
 
+	@Test
+	public void whenValidVisitIdDeleteTheVisit() throws Exception {
+		mvc.perform(delete("/visits/1"))
+				.andExpect(status().isOk());
+		verify(visitsService, times(1)).deleteVisit(1);
+	}
+
+	@Test
+	public void whenInvalidVisitIdDontDeleteTheVisit() throws Exception {
+		mvc.perform(delete("/visits/faso"))
+				.andExpect(status().isBadRequest());
+	}
+
+
 
 	@Test
 	void shouldCreateConfirmedVisit() throws Exception {
@@ -124,9 +147,9 @@ class VisitResourceTest {
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isCreated());
-  }
+    }
 
-	
+
 	@Test
 	void shouldCreateVisit() throws Exception {
 		Visit expectedVisit = visit().id(1).petId(1).date(new Date()).description("CREATED VISIT").practitionerId(123456).build();
@@ -156,13 +179,12 @@ class VisitResourceTest {
 				.andExpect(status().isBadRequest());
 	}
 
-  
-  @Test
-	void whenInValidPetIdThenShouldReturnVisitsForPet() throws Exception {
 
+    @Test
+	void whenInValidPetIdThenShouldReturnVisitsForPet() throws Exception {
 		mvc.perform(get("/visits/FADAW"))
 				.andExpect(status().isBadRequest());
-
 	}
+
 }
 
