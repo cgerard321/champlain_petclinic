@@ -106,5 +106,18 @@ class VisitResourceTest {
 				.andExpect(jsonPath("$.petId").value(1));
 
 	}
+
+	@Test
+	void updateVisitInvalidParameterString() throws Exception{
+		when(visitsService.updateVisit(any(Visit.class)))
+				.thenReturn(new Visit(1, new Date(), "Desc-1", 1));
+
+		mvc.perform(put("/owners/*/pets/{petId}/visits", "invalid_pet_id")
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON)
+				.content("{\"date\": \"2011-03-04\", \"description\": \"Desc-1 Updated\", \"petId\": 1}")
+				.characterEncoding("utf-8"))
+				.andExpect(status().isBadRequest());
+	}
 }
 
