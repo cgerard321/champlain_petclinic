@@ -100,7 +100,7 @@ class VisitResourceTest {
 		mvc.perform(put("/owners/*/pets/{petId}/visits", 1)
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON)
-				.content("{\"id\": 1, \"date\": \"2011-03-04\", \"description\": \"Desc-1 Updated\", \"petId\": 1}")
+				.content("{\"date\": \"2011-03-04\", \"description\": \"Desc-1 Updated\", \"petId\": 1}")
 				.characterEncoding("utf-8"))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.petId").value(1));

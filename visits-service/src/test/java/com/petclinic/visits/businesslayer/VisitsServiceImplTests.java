@@ -62,12 +62,11 @@ public class VisitsServiceImplTests {
 
     @Test
     public void updateVisitForPet(){
-        Visit tempVisit = new Visit(1, new Date(), "Desc-1", 1);
         Visit updatedVisit = new Visit(1, new Date(), "Desc-1 Updated", 1);
 
         when(repo.save(any(Visit.class))).thenReturn(updatedVisit);
 
-        Visit visitFromService = visitsService.updateVisit(tempVisit);
+        Visit visitFromService = visitsService.updateVisit(updatedVisit);
 
         assertThat(visitFromService.getDescription(), equalTo("Desc-1 Updated"));
     }
