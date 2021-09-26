@@ -101,7 +101,7 @@ class ApiGatewayControllerTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
 
-
+        assertEquals(owner.getId(),1);
     }
 
 }

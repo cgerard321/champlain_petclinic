@@ -105,5 +105,5 @@ public class BFFApiGatewayController {
     @PostMapping(value = "/owners",
             consumes = "application/json",
             produces = "application/json")
-    public Flux<OwnerDetails> createOwner(@RequestBody OwnerDetails model){ return null; }
+    public Mono<OwnerDetails> createOwner(@RequestBody OwnerDetails model){ return customersServiceClient.getOwner(model.getId()); }
 }

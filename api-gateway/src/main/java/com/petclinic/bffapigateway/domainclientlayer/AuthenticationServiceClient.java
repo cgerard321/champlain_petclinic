@@ -23,6 +23,6 @@ public class AuthenticationServiceClient {
         authenticationServiceUrl = "http://" + authenticationServiceHost + ":" + authenticationServicePort + "/user";
     }
 
-    
+
 
 }
