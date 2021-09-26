@@ -1,5 +1,7 @@
 package com.petclinic.vets.datalayer;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import org.hibernate.validator.constraints.UniqueElements;
 import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PropertyComparator;
@@ -7,6 +9,7 @@ import org.springframework.core.style.ToStringCreator;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
+import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlElement;
 import java.util.*;
 
@@ -23,42 +26,45 @@ import java.util.*;
 
 @Entity
 @Table(name = "vets")
+@NoArgsConstructor
+@AllArgsConstructor
 public class Vet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @NotEmpty
-    @UniqueElements
+
     @Column(name = "vet_id")
+    @NotNull
+    @UniqueElements(groups = Vet.class)
     private Integer vetId;
 
     @Column(name = "first_name")
-    @NotEmpty
+    @NotEmpty(message = "Please enter first name")
     private String firstName;
 
     @Column(name = "last_name")
-    @NotEmpty
+    @NotEmpty(message = "Please enter last name")
     private String lastName;
 
     @Column(name = "email")
-    @NotEmpty
+    @NotEmpty(message = "Please enter email")
     private String email;
 
     @Column(name = "phone_number")
-    @NotEmpty
+    @NotEmpty(message = "Please enter phoneNumber")
     private String phoneNumber;
 
     @Column(name = "resume")
-    @NotEmpty
+    @NotEmpty(message = "Please enter resume")
     private String resume;
 
     @Column(name = "workday")
     private String workday;
 
     @Column(name = "is_active")
-    @NotEmpty
+    @NotNull
     private Integer isActive;
 
     public Integer getIsActive() {

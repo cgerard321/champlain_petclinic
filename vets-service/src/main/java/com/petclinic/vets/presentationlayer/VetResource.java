@@ -5,11 +5,11 @@ import com.petclinic.vets.datalayer.Vet;
 import com.petclinic.vets.datalayer.VetRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * @author Juergen Hoeller
@@ -25,7 +25,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 class VetResource {
 
-
     private final VetService vetService;
 
 
@@ -40,6 +39,8 @@ class VetResource {
 
     @PutMapping( value = "/{vetId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public Vet updateVet(@PathVariable("vetId") int vetId, @Valid @RequestBody Vet vetRequest) {
-        return  vetService.updateVet(vetRequest);}
-}
+    public Vet updateVet(@PathVariable int vetId, @RequestBody Vet vetRequest)
+    {
+        return  vetService.updateVet(vetService.getVetByVetId(vetId),vetRequest);}
+    }
+

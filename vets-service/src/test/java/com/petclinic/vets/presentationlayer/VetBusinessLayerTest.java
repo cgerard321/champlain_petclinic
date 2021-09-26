@@ -4,107 +4,87 @@ import com.petclinic.vets.businesslayer.VetService;
 import com.petclinic.vets.datalayer.Vet;
 import com.petclinic.vets.datalayer.VetRepository;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.servlet.MockMvc;
 
-import static java.util.Arrays.asList;
-import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 
+@SpringBootTest(webEnvironment = RANDOM_PORT, properties = { "spring.datasource.url=jdbc:h2:mem:vets-db"})
 @ExtendWith(SpringExtension.class)
-@WebMvcTest(VetResource.class)
 @ActiveProfiles("test")
 public class VetBusinessLayerTest
 {
-    @Autowired
-    MockMvc mvc;
 
-    @MockBean
+
+    @Autowired
     VetService vetService;
 
-    
 
-    @Test
-    void shouldGetAListOfVets() throws Exception {
+    @Autowired
+    VetRepository vetRepository;
 
-        Vet vet = new Vet();
-        vet.setId(1);
-
-        given(vetService.getAllVets()).willReturn(asList(vet));
-
-        mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1));
-    }
-
-    @Test
-    @DisplayName("Should get all the fields for a vet and check if they are okay")
-    void shouldGetAllTheFieldsForAVet() throws Exception{
-
-        Vet vet = new Vet();
-        vet.setId(1);
-        vet.setVetId(874130);
-        vet.setFirstName("James");
-        vet.setLastName("Carter");
-        vet.setEmail("carter.james@email.com");
-        vet.setPhoneNumber("(514)-634-8276 #2384");
-        vet.setResume("Practicing since 3 years");
-        vet.setWorkday("Monday, Tuesday, Friday");
-        vet.setIsActive(1);
-
-        given(vetService.getAllVets()).willReturn(asList(vet));
-
-        mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].id").value(1))
-                .andExpect(jsonPath("$[0].vetId").value(874130))
-                .andExpect(jsonPath("$[0].firstName").value("James"))
-                .andExpect(jsonPath("$[0].lastName").value("Carter"))
-                .andExpect(jsonPath("$[0].email").value("carter.james@email.com"))
-                .andExpect(jsonPath("$[0].phoneNumber").value("(514)-634-8276 #2384"))
-                .andExpect(jsonPath("$[0].resume").value("Practicing since 3 years"))
-                .andExpect(jsonPath("$[0].workday").value("Monday, Tuesday, Friday"))
-                .andExpect(jsonPath("$[0].isActive").value(1));
-    }
-
-    @Test
-    void shoudGetAVetInJsonFormat() throws Exception
+    @BeforeEach
+    void setup()
     {
-        Vet vet = new Vet();
-        vet.setId(2);
-        vet.setVetId(874130);
-        vet.setFirstName("James");
-        vet.setLastName("Carter");
-        vet.setEmail("carter.james@email.com");
-        vet.setPhoneNumber("(514)-634-8276 #2384");
-        vet.setResume("Practicing since 3 years");
-        vet.setWorkday("Monday, Tuesday, Friday");
-        vet.setIsActive(0);
-
-        given(vetService.getVetByVetId(874130)).willReturn(vet);
-
-        mvc.perform(get("/vets/874130").accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType("application/json"))
-                .andExpect(jsonPath("$.id").value(2))
-                .andExpect(jsonPath("$.vetId").value(874130))
-                .andExpect(jsonPath("$.firstName").value("James"))
-                .andExpect(jsonPath("$.lastName").value("Carter"))
-                .andExpect(jsonPath("$.email").value("carter.james@email.com"))
-                .andExpect(jsonPath("$.phoneNumber").value("(514)-634-8276 #2384"))
-                .andExpect(jsonPath("$.resume").value("Practicing since 3 years"))
-                .andExpect(jsonPath("$.workday").value("Monday, Tuesday, Friday"))
-                .andExpect(jsonPath("$.isActive").value(0));
+        vetRepository.deleteAll();
+        Vet vet1 = new Vet(1, 234568, "James", "Carter", "carter.james@email.com", "(514)-634-8276 #2384", "practicing since 3 years", "Monday, Tuesday, Friday", 1, null);
+        vetRepository.save(vet1);
+        System.out.println(vetRepository.count());
+        Vet vet2 = new Vet(2, 327874, "Helen", "Leary", "leary.helen@email.com", "(514)-634-8276 #2385", "Practicing since 10 years", "Wednesday, Thursday", 1, null);
+        vetRepository.save(vet2);
     }
+
+    @Test
+    public void createNewVetTest()
+    {
+        Vet vet1 = new Vet(1, 234568, "James", "Carter", "carter.james@email.com", "(514)-634-8276 #2384", "practicing since 3 years", "Monday, Tuesday, Friday", 1, null);
+        vetService.createVet(vet1);
+        System.out.println(vetRepository.count());
+        Vet vet2 = new Vet(2, 327874, "Helen", "Leary", "leary.helen@email.com", "(514)-634-8276 #2385", "Practicing since 10 years", "Wednesday, Thursday", 1, null);
+        vetService.createVet(vet2);
+        assertThat(vetRepository.count()).isGreaterThan(0);
+    }
+
+    @Test
+    public void getAllVetsTest()
+    {
+        int expectedNumOfVets = 2;
+        assertThat(vetService.getAllVets().size()).isEqualTo(expectedNumOfVets);
+    }
+    @Test
+    public void getByVetIdTest()
+    {
+        assertEquals(vetService.getVetByVetId(234568).getFirstName(), "James");
+        assertEquals(vetService.getVetByVetId(234568).getLastName(), "Carter");
+        assertEquals(vetService.getVetByVetId(234568).getEmail(), "carter.james@email.com");
+        assertEquals(vetService.getVetByVetId(234568).getPhoneNumber(), "(514)-634-8276 #2384");
+        assertEquals(vetService.getVetByVetId(234568).getResume(), "practicing since 3 years");
+        assertEquals(vetService.getVetByVetId(234568).getWorkday(), "Monday, Tuesday, Friday");
+    }
+
+    @Test
+    public void updateVetByVetId()
+    {
+        Vet vet1 = new Vet(1, 234568, "JamesUpdate", "CarterUpdate", "carterUpdate.james@email.com", "(514)-634-8276 #2384", "practicing since 3 yearsUpdate", "Monday, Tuesday, Friday", 1, null);
+
+
+        vetService.updateVet(vetService.getVetByVetId(234568), vet1);
+
+        assertEquals(vetService.getVetByVetId(234568).getFirstName(), "JamesUpdate");
+        assertEquals(vetService.getVetByVetId(234568).getLastName(), "CarterUpdate");
+        assertEquals(vetService.getVetByVetId(234568).getEmail(), "carterUpdate.james@email.com");
+        assertEquals(vetService.getVetByVetId(234568).getResume(), "practicing since 3 yearsUpdate");
+    }
+
+
+
+
 
 }
