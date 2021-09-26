@@ -1,7 +1,6 @@
 package com.petclinic.vets.datalayer;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 /**
  * Repository class for <code>Vet</code> domain objects All method names are compliant with Spring Data naming
@@ -15,7 +14,7 @@ import org.springframework.stereotype.Repository;
  * Copied from https://github.com/spring-petclinic/spring-petclinic-microservices
  */
 
-@Repository
+
 public interface VetRepository extends JpaRepository<Vet, Integer> {
 
 }
