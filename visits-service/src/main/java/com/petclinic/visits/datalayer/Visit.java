@@ -44,6 +44,9 @@ public class Visit {
     @Column(name = "practitioner_id")
     private int practitionerId;
 
+    @Column(name = "status")
+    private boolean status;
+
     public Integer getId() {
         return id;
     }
@@ -58,6 +61,14 @@ public class Visit {
 
     public int getPetId() {
         return petId;
+    }
+
+    public boolean isStatus() {
+        return status;
+    }
+
+    public void setStatus(boolean status) {
+        this.status = status;
     }
 
     public void setPetId(final int petId) {
