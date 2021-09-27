@@ -1,25 +1,22 @@
 package com.petclinic.bffapigateway.presentationlayer;
 
+import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
 import com.petclinic.bffapigateway.dtos.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.test.web.servlet.MockMvc;
 import reactor.core.publisher.Mono;
 
-import java.net.ConnectException;
 import java.util.Collections;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
@@ -36,6 +33,8 @@ class ApiGatewayControllerTest {
     @MockBean
     private VetsServiceClient vetsServiceClient;
 
+    @MockBean
+    private AuthServiceClient authServiceClient;
     @Autowired
     private WebTestClient client;
 
@@ -71,5 +70,27 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.pets[0].visits[0].description").isEqualTo("First visit");
     }
 
+    @Test
+    void getUserDetails() {
+        UserDetails user = new UserDetails();
+        user.setId(1);
+        user.setUsername("roger675");
+        user.setPassword("secretnooneknows");
+        user.setEmail("RogerBrown@gmail.com");
+
+        when(authServiceClient.getUser(1))
+                .thenReturn(Mono.just(user));
+
+        client.get()
+                .uri("/api/gateway/users/1")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.username").isEqualTo("roger675")
+                .jsonPath("$.password").isEqualTo("secretnooneknows")
+                .jsonPath("$.email").isEqualTo("RogerBrown@gmail.com");
+
+        assertEquals(user.getId(), 1);
+    }
 }
 

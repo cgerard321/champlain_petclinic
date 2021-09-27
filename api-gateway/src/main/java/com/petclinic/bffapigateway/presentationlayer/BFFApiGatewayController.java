@@ -1,8 +1,10 @@
 package com.petclinic.bffapigateway.presentationlayer;
 
+import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
+<<<<<<< HEAD
 import com.petclinic.bffapigateway.dtos.Login;
 import com.petclinic.bffapigateway.dtos.OwnerDetails;
 import com.petclinic.bffapigateway.dtos.VetDetails;
@@ -19,15 +21,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
+=======
+import com.petclinic.bffapigateway.dtos.*;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+>>>>>>> f010f8e (Added AuthServiceClient, UserDetails dto and testing.)
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.HashMap;
-import java.util.Map;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
-import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -48,6 +49,8 @@ public class BFFApiGatewayController {
     private final VisitsServiceClient visitsServiceClient;
 
     private final VetsServiceClient vetsServiceClient;
+
+    private final AuthServiceClient authServiceClient;
 
     @GetMapping(value = "owners/{ownerId}")
     public Mono<OwnerDetails> getOwnerDetails(final @PathVariable int ownerId) {
@@ -87,6 +90,16 @@ public class BFFApiGatewayController {
     @GetMapping(value = "vets/{vetId}")
     public Mono<VetDetails> getVetDetails(final @PathVariable int vetId) {
         return vetsServiceClient.getVet(vetId);
+    }
+
+    @GetMapping(value = "users")
+    public Flux<UserDetails> getUsers() {
+        return authServiceClient.getUsers();
+    }
+
+    @GetMapping(value = "users/{userId}")
+    public Mono<UserDetails> getUserDetails(final @PathVariable long userId) {
+        return authServiceClient.getUser(userId);
     }
 
     // TODO: Hook this up to auth service

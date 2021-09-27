@@ -11,7 +11,11 @@ app:
   customers-service:
     host: localhost
     port: 7003
+<<<<<<< HEAD
   billing-service:
+=======
+  auth-service:
+>>>>>>> f010f8e (Added AuthServiceClient, UserDetails dto and testing.)
     host: localhost
     port: 7004
 
@@ -34,7 +38,13 @@ app:
   customers-service:
     host: customers
     port: 8080
+<<<<<<< HEAD
   billing-service:
     host: billing
     port: 8080
 
+=======
+  auth-service:
+    host: auth
+    port: 8080
+>>>>>>> f010f8e (Added AuthServiceClient, UserDetails dto and testing.)
