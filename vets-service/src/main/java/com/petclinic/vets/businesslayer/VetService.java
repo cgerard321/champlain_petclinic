@@ -9,5 +9,5 @@ public interface VetService
     public List<Vet> getAllVets();
     public Vet getVetByVetId(int vetId);
     public Vet updateVet(Vet vet,Vet updateVet);
-    public void createVet(Vet vet);
+    public Vet createVet(Vet vet);
 }

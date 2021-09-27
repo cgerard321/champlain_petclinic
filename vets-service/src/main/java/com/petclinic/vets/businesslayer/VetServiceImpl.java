@@ -39,21 +39,21 @@ public class VetServiceImpl implements VetService
     @Override
     public Vet updateVet(Vet vet, Vet updateVet)
     {
-        vet.setEmail(updateVet.getEmail());
-        vet.setFirstName(updateVet.getFirstName());
-        vet.setLastName(updateVet.getLastName());
-        vet.setPhoneNumber(updateVet.getPhoneNumber());
-        vet.setResume(updateVet.getResume());
-        vet.setWorkday(updateVet.getWorkday());
+        if(!updateVet.getEmail().isEmpty()) {vet.setEmail(updateVet.getEmail());}
+        if(!updateVet.getEmail().isEmpty()) {vet.setFirstName(updateVet.getFirstName());}
+        if(!updateVet.getEmail().isEmpty()) {vet.setLastName(updateVet.getLastName());}
+        if(!updateVet.getEmail().isEmpty()) {vet.setPhoneNumber(updateVet.getPhoneNumber());}
+        if(!updateVet.getEmail().isEmpty()) {vet.setResume(updateVet.getResume());}
+        if(!updateVet.getEmail().isEmpty()) {vet.setWorkday(updateVet.getWorkday());}
         vetRepository.save(vet);
 
         return vet;
     }
 
     @Override
-    public void createVet(Vet vet)
+    public Vet createVet(Vet vet)
     {
-        vetRepository.save(vet);
+        return vetRepository.save(vet);
     }
 
 }
