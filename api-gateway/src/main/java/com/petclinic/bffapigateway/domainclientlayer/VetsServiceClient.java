@@ -39,4 +39,8 @@ public class VetsServiceClient {
         return webClientBuilder.build().get().uri(vetsServiceUrl + "/{vetId}", vetId).retrieve().bodyToMono(VetDetails.class);
     }
 
+    public Mono<VetDetails> disableVet(final int vetId){
+        return webClientBuilder.build().get().uri(vetsServiceUrl + "/{vetId}/disableVet", vetId).retrieve().bodyToMono(VetDetails.class);
+    }
+
 }

@@ -14,6 +14,7 @@ import com.petclinic.bffapigateway.dtos.VisitDetails;
 import com.petclinic.bffapigateway.dtos.Visits;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -89,6 +90,12 @@ public class BFFApiGatewayController {
     public Mono<VetDetails> getVetDetails(final @PathVariable int vetId) {
         return vetsServiceClient.getVet(vetId);
     }
+
+    @PutMapping(value = "vets/{vetId}/disableVet",
+            consumes = "application/json",
+            produces = "application/json")
+    public Mono<VetDetails> disableVet(final @PathVariable int vetId){ return vetsServiceClient.disableVet(vetId);}
+
 
     // TODO: Hook this up to auth service
     @GetMapping(value = "/admin/roles")
