@@ -20,7 +20,7 @@
 
   <tr>
     <th>Work Day</th>
-    <td>{{$ctrl.vet.workday}}</td>
+    <td id="workDay">{{$ctrl.vet.workday}}</td>
   </tr>
 
   <tr>
@@ -32,4 +32,19 @@
     </td>
   </tr>
 </table>
+
+
+<button onclick="displayDays()" id="toggle">Show availabilities</button>
+
+<div id="displayNone" style="display: none">
+  <div id="section" class="day-of-week">
+    <div id="Sunday" class="square">Sunday</div>
+    <div id="Monday" class="square">Monday</div>
+    <div id="Tuesday" class="square">Tuesday</div>
+    <div id="Wednesday" class="square">Wednesday</div>
+    <div id="Thursday" class="square">Thursday</div>
+    <div id="Friday" class="square">Friday</div>
+    <div id="Saturday" class="square">Saturday</div>
+  </div>
+</div>
 
