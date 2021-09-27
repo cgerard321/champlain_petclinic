@@ -34,8 +34,19 @@ class VetResource {
 
     @GetMapping
     public List<Vet> showResourcesVetList() {
-        return vetService.getAllVets();
+        return vetService.getAllEnabledVets();
     }
+
+//    @GetMapping("/enabled")
+//    public List<Vet> showResourcesVetEnabledList() {
+//        return vetService.getAllEnabledVets();
+//    }
+
+    @GetMapping("/disabled")
+    public List<Vet> showResourcesVetDisabledList() {
+        return vetService.getAllDisabledVets();
+    }
+
 
     @GetMapping("/{vetId}")
     public Vet findVet(@PathVariable int vetId)
@@ -50,7 +61,6 @@ class VetResource {
     {
         return  vetService.updateVet(vetService.getVetByVetId(vetId),vetRequest);
     }
-
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

@@ -42,7 +42,7 @@ public class VetServiceImpl implements VetService
         if(!updateVet.getEmail().isEmpty()) {vet.setEmail(updateVet.getEmail());}
         if(!updateVet.getEmail().isEmpty()) {vet.setFirstName(updateVet.getFirstName());}
         if(!updateVet.getEmail().isEmpty()) {vet.setLastName(updateVet.getLastName());}
-        if(!updateVet.getEmail().isEmpty()) {vet.setPhoneNumber(updateVet.getPhoneNumber());}
+        if(!updateVet.getEmail().isEmpty()) {vet.setPhoneNumber(updateVet.getPostNumber());}
         if(!updateVet.getEmail().isEmpty()) {vet.setResume(updateVet.getResume());}
         if(!updateVet.getEmail().isEmpty()) {vet.setWorkday(updateVet.getWorkday());}
         vetRepository.save(vet);
@@ -55,5 +55,18 @@ public class VetServiceImpl implements VetService
     {
         return vetRepository.save(vet);
     }
+
+    @Override
+    public List<Vet> getAllDisabledVets()
+    {
+        return vetRepository.findAllDisabledVets();
+    }
+
+    @Override
+    public List<Vet> getAllEnabledVets()
+    {
+        return vetRepository.findAllEnabledVets();
+    }
+
 
 }
