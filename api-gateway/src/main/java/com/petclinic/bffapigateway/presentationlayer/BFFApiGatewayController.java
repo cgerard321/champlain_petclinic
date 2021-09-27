@@ -103,21 +103,6 @@ public class BFFApiGatewayController {
         return vetsServiceClient.getVets();
     }
 
-    @GetMapping(value = "vets/disabled")
-    public Flux<VetDetails> getDisabledVets() {
-        return vetsServiceClient.getDisabledVets();
-    }
-
-    @GetMapping(value = "vets/{vetId}")
-    public Mono<VetDetails> getVetDetails(final @PathVariable int vetId) {
-        return vetsServiceClient.getVet(vetId);
-    }
-
-    @PutMapping(value = "vets/{vetId}/disableVet",
-            consumes = "application/json",
-            produces = "application/json")
-    public Mono<VetDetails> disableVet(final @PathVariable int vetId){ return vetsServiceClient.disableVet(vetId);}
-
 
     // TODO: Hook this up to auth service
     @GetMapping(value = "/admin/roles")
