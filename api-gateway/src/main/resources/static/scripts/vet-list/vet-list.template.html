@@ -1,4 +1,7 @@
 <h2>Veterinarians</h2>
+<a ui-sref="vetsNew">
+    <button class="add-vet-button" >Add A Vet</button>
+</a>
 <table class="table table-striped">
     <thead>
     <tr>
@@ -7,9 +10,20 @@
     </tr>
     </thead>
 
-    <tr ng-repeat="vet in $ctrl.vetList">
-        <td>{{vet.firstName}} {{vet.lastName}}</td>
+    <tr ng-repeat="vet in $ctrl.vetList | filter:$ctrl.query track by vet.id">
+        <td><a ui-sref="vetDetails({ vetId: vet.id })"><span ng-mouseenter="$ctrl.show($event,vet.vetId)" ng-mouseleave="$ctrl.hide($event,vet.vetId)" class="info v{{vet.vetId}}">{{vet.firstName}} {{vet.lastName}}</span></a></td>
         <td><span ng-repeat="specialty in vet.specialties">{{specialty.name + ' '}}</span></td>
-
     </tr>
+    <div ng-repeat="vet in $ctrl.vetList" class="modal m{{vet.vetId}} modalOff">
+        <span class="modal_name"><b>Name:</b> {{vet.firstName}} {{vet.lastName}}</span>
+        <span class="modal_phone"><b>Phone:</b> {{vet.phoneNumber}}</span>
+        <div class="modal_specialty">
+            <span class="modal_specialty_title"><b>Specialization(s):</b></span>
+            <span class="modal_specialty_items" ng-repeat="specialty in vet.specialties">
+                {{(!(specialty.name).isEmpty())?'  -'+specialty.name + ' ': 'no specialties'}}
+            </span>
+        </div>
+        <span class="modal_email"><b>Email:</b> <br/> {{vet.email}}</span>
+
+    </div>
 </table>

@@ -1,0 +1,32 @@
+<h1>Roles</h1>
+
+<table class="table table-striped">
+
+    <tr>
+        <th>Name</th>
+        <th>ID</th>
+        <th>Delete</th>
+    </tr>
+    <tr ng-repeat="role in $ctrl.roles">
+        <td><b>{{ role.name }}</b></td>
+        <td>{{ role.id }}</td>
+        <td>
+            <button class="btn btn-default" ng-click="$ctrl.delete(role.id)">
+                <i class="bi bi-trash-fill text-danger"></i> Delete</button>
+        </td>
+    </tr>
+    <tr>
+        <td><input type="text" name="name" ng-model="newRole.name" placeholder="Role name" ng-keydown="$ctrl.keypress($event)" /></td>
+        <td>
+            <select class="form-select" aria-label="" ng-model="newRole.parent">
+                <option value="null">No parent</option>
+                <option ng-repeat="role in $ctrl.roles" value="{{ role.id }}">{{ role.name }}</option>
+            </select>
+        </td>
+        <td>
+            <button class="btn btn-default" ng-click="$ctrl.add()">
+                <i class="bi bi-person-plus"></i> Add Role</button>
+        </td>
+    </tr>
+
+</table>

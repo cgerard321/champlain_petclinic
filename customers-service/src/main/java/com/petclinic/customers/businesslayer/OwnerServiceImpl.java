@@ -2,12 +2,10 @@ package com.petclinic.customers.businesslayer;
 
 import com.petclinic.customers.datalayer.Owner;
 import com.petclinic.customers.datalayer.OwnerRepository;
-import com.petclinic.customers.utils.exceptions.InvalidInputException;
 import com.petclinic.customers.utils.exceptions.NotFoundException;
-import jdk.internal.net.http.common.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.dao.DuplicateKeyException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,8 +16,9 @@ public class OwnerServiceImpl implements OwnerService {
 
     private static final Logger LOG = LoggerFactory.getLogger(OwnerServiceImpl.class);
 
-    private final OwnerRepository repository;
+    private OwnerRepository repository;
 
+    @Autowired
     public OwnerServiceImpl(OwnerRepository repository){
         this.repository = repository;
     }
@@ -31,9 +30,7 @@ public class OwnerServiceImpl implements OwnerService {
      * @return
      */
     @Override
-    public Optional<Owner> findById(int Id)
-    {
-        //repository.findById(Id).orElseThrow(() -> new NotFoundException("Yeet");
+    public Optional<Owner> findByOwnerId(int Id) {
         try {
 
             //Search owner in database with the given id
@@ -89,31 +86,12 @@ public class OwnerServiceImpl implements OwnerService {
 
 
     @Override
-    public Owner createOwner(Owner owner) {
-       try{
-           Owner savedOwner = repository.save(owner);
-           LOG.debug("createOwner: owner with id {} saved",owner.getId());
-           return  savedOwner;
-       }catch(DuplicateKeyException duplicateKeyException){
-           throw new InvalidInputException("Duplicate key, ownerId: " + owner.getId());
-       }
+    public Owner CreateOwner(Owner owner) {
+        return null;
         //INSERT METHOD
     }
 
-    @Override
-    public void createCustodian(Owner primary,String custname){
 
-            int primaryOwnerId = primary.getId();
-            if(repository.findById(primaryOwnerId).isPresent()){
-                primary.setCustodian(custname);
-                LOG.debug("createCustodian: Added custodian to owner {}",
-                        primaryOwnerId);
-                //return savedSecondaryOwner;
-            }else {
-                LOG.debug("createSecondaryOwner: primary owner with id {} does not exist", primaryOwnerId);
-                throw new NotFoundException("Primary owner ID "+ primaryOwnerId +" not found");
-            }
-    }
 
     /**
      * ------------------------ DELETE ------------------------
@@ -121,7 +99,35 @@ public class OwnerServiceImpl implements OwnerService {
      */
     @Override
     public void deleteOwner(int Id) {
+
+    /*
+        if (repository.findById(Id).isPresent())
+        {
+            repository.deleteById(Id);
+        }
+        else
+        {
+            throw new NotFoundException("Tried to delete ID: " + Id + " but was not found");
+        }
+
+
+        if (repository.findById(Id).isPresent())
+        {
+            Optional<Owner> owner = repository.findById(Id);
+            repository.delete(owner.get());
+            LOG.debug("User with ID: " + Id + " has been deleted successfully.");
+        }
+        else
+        {
+            LOG.debug("ERROR WITH ID: " + Id);
+        }
+
+
+    */
         repository.findById(Id).ifPresent(o -> repository.delete(o));
         LOG.debug("User with ID: " + Id + " has been deleted successfully.");
+
+
+
     }
 }

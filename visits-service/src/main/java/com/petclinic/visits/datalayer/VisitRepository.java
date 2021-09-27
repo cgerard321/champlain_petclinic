@@ -4,6 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Repository class for <code>Visit</code> domain objects All method names are compliant with Spring Data naming conventions so this interface can easily be extended for Spring
@@ -19,7 +20,13 @@ import java.util.List;
 
 public interface VisitRepository extends JpaRepository<Visit, Integer> {
 
+    Optional<Visit> findById(int visitId);
+
     List<Visit> findByPetId(int petId);
 
     List<Visit> findByPetIdIn(Collection<Integer> petIds);
+
+    //Optional<Visit> findById(int visitId);
+
+    void findVisitById(int visitId);
 }

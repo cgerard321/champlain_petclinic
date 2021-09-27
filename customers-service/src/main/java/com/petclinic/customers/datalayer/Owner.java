@@ -25,7 +25,7 @@ import java.util.*;
 public class Owner {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Column(name = "first_name")
@@ -49,52 +49,28 @@ public class Owner {
     @Digits(fraction = 0, integer = 10)
     private String telephone;
 
-    @Column(name = "custodian")
-    private String custodian;
-
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "owner")
     private Set<Pet> pets;
 
-
-    //CONSTRUCTOR
     public Owner()
     {
 
     }
-    public Owner(@NotEmpty Integer id, @NotEmpty String firstName, @NotEmpty String lastName, @NotEmpty String address, @NotEmpty String city, @NotEmpty @Digits(fraction = 0, integer = 10) String telephone) {
+
+    public Owner(Integer id, @NotEmpty String firstName, @NotEmpty String lastName, @NotEmpty String address, @NotEmpty String city, @NotEmpty @Digits(fraction = 0, integer = 10) String telephone) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.address = address;
         this.city = city;
         this.telephone = telephone;
+        this.pets = pets;
     }
 
-    public Owner(@NotEmpty Integer id, @NotEmpty String firstName, @NotEmpty String lastName,
-                 @NotEmpty String address,
-                 @NotEmpty String city,
-                 @NotEmpty String telephone, String custodian) {
-        this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.address = address;
-        this.city = city;
-        this.telephone = telephone;
-        this.custodian = custodian;
+    public Integer setId(Integer id)
+    {
+        return id;
     }
-
-    public String getCustodian() {
-        return custodian;
-    }
-
-    public void setCustodian(String custodian) {
-        this.custodian = custodian;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
     public Integer getId() {
         return id;
     }
@@ -138,7 +114,6 @@ public class Owner {
     public void setTelephone(String telephone) {
         this.telephone = telephone;
     }
-
 
     protected Set<Pet> getPetsInternal() {
         if (this.pets == null) {

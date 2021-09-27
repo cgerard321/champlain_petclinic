@@ -5,6 +5,7 @@ import com.petclinic.customers.datalayer.Owner;
 import com.petclinic.customers.datalayer.OwnerRepository;
 import io.micrometer.core.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,6 +34,7 @@ class OwnerResource {
     private final OwnerServiceImpl ownerServiceImpl;
     private final OwnerRepository ownerRepository;
 
+    @Autowired
     OwnerResource(OwnerServiceImpl ownerServiceImpl, OwnerRepository ownerRepository) {
         this.ownerServiceImpl = ownerServiceImpl;
         this.ownerRepository = ownerRepository;
@@ -49,20 +51,12 @@ class OwnerResource {
     }
 
     /**
-    *   Add Secondary Owner
-     */
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public Owner createCustodian(@PathVariable("custodian")String custodian){
-        return null;
-    }
-    /**
      * Read single Owner
      */
     @GetMapping(value = "/{ownerId}")
     public Optional<Owner> findOwner(@PathVariable("ownerId") int ownerId)
     {
-       return ownerServiceImpl.findById(ownerId);
+        return ownerServiceImpl.findByOwnerId(ownerId);
     }
 
     /**
@@ -105,4 +99,3 @@ class OwnerResource {
 
 
 }
-
