@@ -1,9 +1,5 @@
 package com.petclinic.bffapigateway.presentationlayer;
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 645d5a9 (Resolved conflicts)
 import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
@@ -20,10 +16,6 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 import java.util.Collections;
 
-<<<<<<< HEAD
-
-=======
->>>>>>> 645d5a9 (Resolved conflicts)
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -101,15 +93,11 @@ class ApiGatewayControllerTest {
                 .expectBody();
 
         assertEquals(owner.getId(),1);
-<<<<<<< HEAD
         assertEquals(owner.getFirstName(),"John");
         assertEquals(owner.getLastName(),"Johnny");
         assertEquals(owner.getAddress(),"111 John St");
         assertEquals(owner.getCity(),"Johnston");
         assertEquals(owner.getTelephone(),"51451545144");
-
-=======
->>>>>>> 645d5a9 (Resolved conflicts)
     }
 
     @Test
@@ -130,7 +118,6 @@ class ApiGatewayControllerTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
 
-<<<<<<< HEAD
         assertEquals(user.getId(), 1);
         assertEquals(user.getUsername(), "Johnny123");
         assertEquals(user.getPassword(), "password");
@@ -151,9 +138,13 @@ class ApiGatewayControllerTest {
 
         client.post()
                 .uri("/api/gateway/users")
-                .body(Mono.just(user), UserDetails.class);
-=======
->>>>>>> 645d5a9 (Resolved conflicts)
+                .body(Mono.just(user), UserDetails.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+
         assertEquals(1, user.getId());
 
         client.delete()
