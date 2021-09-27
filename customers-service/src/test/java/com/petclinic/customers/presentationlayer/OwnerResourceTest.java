@@ -234,6 +234,7 @@ class OwnerResourceTest {
         }
 
     }
+    /*
     @Test
     public void add_owner_test()
     {
@@ -259,7 +260,7 @@ class OwnerResourceTest {
 
         assertThat(foundOwner.getCustodian(), samePropertyValuesAs(custodianName));
     }
-
+*/
     // Reset the database
     @AfterEach
     public void resetDb()
