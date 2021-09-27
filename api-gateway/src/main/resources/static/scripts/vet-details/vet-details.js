@@ -6,6 +6,6 @@ angular.module('vetDetails', ['ui.router'])
             .state('vetDetails', {
                 parent: 'app',
                 url: '/vets/details/:vetId',
-                template: '<vet-details></vet-details>',
+                template: '<vet-details></vet-details>'
             })
     }]);

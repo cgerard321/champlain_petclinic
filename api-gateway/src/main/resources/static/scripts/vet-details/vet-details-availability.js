@@ -10,8 +10,6 @@ function removeItem(array, item) {
 
 function displayDays() {
     let strDays = document.getElementById("workDay").textContent;
-    console.log(strDays);
-
 
 // let strDays = vetDetails.workday;
     let daysOfWeek = (strDays.replace(/\s+/g, '')).split(',');
@@ -21,8 +19,6 @@ function displayDays() {
     daysOfWeek.push(daysToRemove);
 
     removeItem(daysOfWeek, daysToRemove);
-
-    console.log(daysOfWeek);
 
     const sorter = {
         "sunday": 0,
@@ -56,7 +52,6 @@ function displayDays() {
     for (let i = 0; i < days.length; i++) {
         if(days[i].id == daysOfWeek[j]){
             days[i].style.backgroundColor = "#c7ffdc";
-            console.log(typeof(daysOfWeek[i]))
             j++;
         }
     }
