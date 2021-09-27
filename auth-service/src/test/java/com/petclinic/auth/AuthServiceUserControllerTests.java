@@ -46,8 +46,9 @@ public class AuthServiceUserControllerTests {
 
     final String
             USER = "user",
-            PASS = "pass",
+            PASS = "Pas$word123",
             EMAIL = "email@gmail.com";
+
 
     @BeforeEach
     void setup() {
@@ -78,6 +79,7 @@ public class AuthServiceUserControllerTests {
     @DisplayName("Check the required fields with empty data")
     void check_empty_require_fields() {
 
+
         UserIDLessDTO userIDLessDTO = new UserIDLessDTO();
 
         assertThrows(ConstraintViolationException.class, () -> userController.createUser(userIDLessDTO));
@@ -87,6 +89,7 @@ public class AuthServiceUserControllerTests {
     @DisplayName("Check the username field in order to refused if it is empty")
     void check_empty_username() {
 
+
         UserIDLessDTO userIDLessDTO = new UserIDLessDTO(null, PASS,EMAIL);
 
         assertThrows(ConstraintViolationException.class, () -> userController.createUser(userIDLessDTO));
@@ -94,6 +97,7 @@ public class AuthServiceUserControllerTests {
     @Test
     @DisplayName("Check the password field in order to refused if it is empty")
     void check_empty_password() {
+
 
         UserIDLessDTO userIDLessDTO = new UserIDLessDTO( USER, null,EMAIL);
 

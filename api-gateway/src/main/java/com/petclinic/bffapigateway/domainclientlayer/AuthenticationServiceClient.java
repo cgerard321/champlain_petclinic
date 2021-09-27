@@ -23,6 +23,7 @@ public class AuthenticationServiceClient {
         authenticationServiceUrl = "http://" + authenticationServiceHost + ":" + authenticationServicePort + "/user";
     }
 
+
     public Mono<UserDetails> getUser(final int userId) {
         return webClientBuilder.build().get()
                 .uri(authenticationServiceUrl + "/{userId}", userId)
@@ -59,4 +60,5 @@ public class AuthenticationServiceClient {
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve().bodyToMono(UserDetails.class);
     }
+
 }

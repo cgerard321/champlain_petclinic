@@ -97,6 +97,12 @@ public class Vet {
         this.email = verifyEmail(email);
     }
 
+    public String getPostNumber()
+    {
+        String postNumber = getPhoneNumber().replaceAll("\\(\\d{3}\\)-\\d{3}-\\d{4}", "");
+        return postNumber;
+    }
+
     public String getPhoneNumber() {
         return phoneNumber;
     }

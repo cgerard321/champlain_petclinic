@@ -122,6 +122,7 @@ public class BFFApiGatewayController {
 
 
 
+
     @GetMapping(value = "user/{userId}")
     public Mono<UserDetails> getUserDetails(final @PathVariable int userId) {
         return authenticationServiceClient.getUser(userId);
@@ -131,4 +132,5 @@ public class BFFApiGatewayController {
             consumes = "application/json",
             produces = "application/json")
     public Mono<UserDetails> createUser(@RequestBody UserDetails model){ return authenticationServiceClient.getUser(model.getId()); }
+
 }
