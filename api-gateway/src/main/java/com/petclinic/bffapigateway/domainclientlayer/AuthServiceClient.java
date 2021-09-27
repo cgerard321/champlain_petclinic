@@ -1,6 +1,5 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
-import com.petclinic.bffapigateway.dtos.OwnerDetails;
 import com.petclinic.bffapigateway.dtos.UserDetails;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -24,8 +23,12 @@ public class AuthServiceClient {
         authServiceUrl = "http://" + authServiceHost + ":" + authServicePort + "/users";
     }
 
-    public Mono<UserDetails> getUser(final long userId){
-        return webClientBuilder.build().get().uri(authServiceUrl + "/{userId}", userId).retrieve().bodyToMono(UserDetails.class);
+
+    public Mono<UserDetails> getUser(final long userId) {
+        return webClientBuilder.build().get()
+                .uri(authServiceUrl + "/{userId}", userId)
+                .retrieve()
+                .bodyToMono(UserDetails.class);
     }
 
     public Flux<UserDetails> getUsers() {
@@ -35,7 +38,7 @@ public class AuthServiceClient {
                 .bodyToFlux(UserDetails.class);
     }
 
-    public Mono<UserDetails> createUser (final UserDetails model){
+    public Mono<UserDetails> createUser (final UserDetails model) {
         return webClientBuilder.build().post()
                 .uri(authServiceUrl + model)
                 .accept(MediaType.APPLICATION_JSON)
@@ -55,4 +58,13 @@ public class AuthServiceClient {
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve().bodyToMono(UserDetails.class);
     }
+
+    public Mono<UserDetails> deleteUser(final long userId) {
+        return webClientBuilder.build()
+                .delete()
+                .uri(authServiceUrl + "/{userId}", userId)
+                .retrieve()
+                .bodyToMono(UserDetails.class);
+    }
 }
+
