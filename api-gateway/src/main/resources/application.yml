@@ -19,6 +19,9 @@ app:
   billing-service:
     host: localhost
     port: 7004
+  auth-service:
+    host: localhost
+    port: 7005
 
 
 logging:
@@ -47,6 +50,9 @@ app:
 
   billing-service:
     host: billing
+    port: 8080
+  auth-service:
+    host: auth
     port: 8080
 
 

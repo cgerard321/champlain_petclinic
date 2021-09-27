@@ -1,6 +1,14 @@
 package com.petclinic.bffapigateway.presentationlayer;
 
+<<<<<<< HEAD
 import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
+=======
+<<<<<<< HEAD
+import com.petclinic.bffapigateway.domainclientlayer.AuthenticationServiceClient;
+=======
+import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
+>>>>>>> 9074ad6 (Implemented the delete user method, added testing.)
+>>>>>>> 07aff82 (Implemented the delete user method, added testing.)
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
@@ -17,7 +25,11 @@ import reactor.core.publisher.Mono;
 
 import java.util.Collections;
 
+<<<<<<< HEAD
 import static org.junit.jupiter.api.Assertions.assertEquals;
+=======
+import static org.junit.Assert.assertEquals;
+>>>>>>> 9074ad6 (Implemented the delete user method, added testing.)
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
@@ -35,7 +47,15 @@ class ApiGatewayControllerTest {
     private VetsServiceClient vetsServiceClient;
 
     @MockBean
+<<<<<<< HEAD
     private AuthServiceClient authenticationServiceClient;
+=======
+<<<<<<< HEAD
+    private AuthenticationServiceClient authenticationServiceClient;
+=======
+    private AuthServiceClient authServiceClient;
+>>>>>>> 9074ad6 (Implemented the delete user method, added testing.)
+>>>>>>> 07aff82 (Implemented the delete user method, added testing.)
 
     @Autowired
     private WebTestClient client;
@@ -72,6 +92,7 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.pets[0].visits[0].description").isEqualTo("First visit");
     }
 
+<<<<<<< HEAD
 
     @Test
     void createOwner(){
@@ -89,13 +110,31 @@ class ApiGatewayControllerTest {
         client.post()
                 .uri("/api/gateway/owners")
                 .body(Mono.just(owner), OwnerDetails.class)
+=======
+    @Test
+    void deleteUser() {
+        UserDetails user = new UserDetails();
+        user.setId(1);
+        user.setUsername("johndoe");
+        user.setPassword("pass");
+        user.setEmail("johndoe2@gmail.com");
+
+        when(authServiceClient.createUser(user))
+                .thenReturn(Mono.just(user));
+
+        client.post()
+                .uri("/api/gateway/users")
+                .body(Mono.just(user), UserDetails.class)
+>>>>>>> 9074ad6 (Implemented the delete user method, added testing.)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
 
+<<<<<<< HEAD
         assertEquals(owner.getId(),1);
+<<<<<<< HEAD
         assertEquals(owner.getFirstName(),"John");
         assertEquals(owner.getLastName(),"Johnny");
         assertEquals(owner.getAddress(),"111 John St");
@@ -127,6 +166,21 @@ class ApiGatewayControllerTest {
         assertEquals(user.getPassword(), "password");
         assertEquals(user.getEmail(), "email@email.com");
 
+=======
+=======
+        assertEquals(1, user.getId());
+
+        client.delete()
+                .uri("/api/gateway/users/1")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody();
+
+        assertEquals(null, authServiceClient.getUser(user.getId()));
+>>>>>>> 9074ad6 (Implemented the delete user method, added testing.)
+>>>>>>> 07aff82 (Implemented the delete user method, added testing.)
     }
 
 }

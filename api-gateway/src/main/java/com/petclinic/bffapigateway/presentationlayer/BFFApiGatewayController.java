@@ -1,5 +1,6 @@
 package com.petclinic.bffapigateway.presentationlayer;
 
+<<<<<<< HEAD
 import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
@@ -13,6 +14,17 @@ import com.petclinic.bffapigateway.dtos.VetDetails;
 import com.petclinic.bffapigateway.dtos.VisitDetails;
 import com.petclinic.bffapigateway.dtos.Visits;
 
+=======
+<<<<<<< HEAD
+import com.petclinic.bffapigateway.domainclientlayer.AuthenticationServiceClient;
+=======
+import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
+>>>>>>> 9074ad6 (Implemented the delete user method, added testing.)
+import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
+import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
+import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
+import com.petclinic.bffapigateway.dtos.*;
+>>>>>>> 07aff82 (Implemented the delete user method, added testing.)
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
@@ -48,7 +60,15 @@ public class BFFApiGatewayController {
 
     private final VetsServiceClient vetsServiceClient;
 
+<<<<<<< HEAD
     private final AuthServiceClient authenticationServiceClient;
+=======
+<<<<<<< HEAD
+    private final AuthenticationServiceClient authenticationServiceClient;
+=======
+    private final AuthServiceClient authServiceClient;
+>>>>>>> 9074ad6 (Implemented the delete user method, added testing.)
+>>>>>>> 07aff82 (Implemented the delete user method, added testing.)
 
     @GetMapping(value = "owners/{ownerId}")
     public Mono<OwnerDetails> getOwnerDetails(final @PathVariable int ownerId) {
@@ -89,6 +109,14 @@ public class BFFApiGatewayController {
     public Mono<VetDetails> getVetDetails(final @PathVariable int vetId) {
         return vetsServiceClient.getVet(vetId);
     }
+
+    @PostMapping(value = "/users",
+            consumes = "application/json",
+            produces = "application/json")
+    public Mono<UserDetails> createUser(@RequestBody UserDetails model) { return authServiceClient.getUser(model.getId()); }
+
+    @DeleteMapping(value = "users/{userId}")
+    public Mono<UserDetails> deleteUser(final @PathVariable long userId) { return authServiceClient.deleteUser(userId); }
 
     // TODO: Hook this up to auth service
     @GetMapping(value = "/admin/roles")
