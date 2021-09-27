@@ -1,17 +1,14 @@
 package com.petclinic.bffapigateway.presentationlayer;
 
+
 import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
-
 import com.petclinic.bffapigateway.dtos.*;
-
 import com.petclinic.bffapigateway.dtos.OwnerDetails;
 import com.petclinic.bffapigateway.dtos.VetDetails;
-import com.petclinic.bffapigateway.dtos.VisitDetails;
 import com.petclinic.bffapigateway.dtos.Visits;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -44,7 +41,8 @@ public class BFFApiGatewayController {
 
     private final VetsServiceClient vetsServiceClient;
 
-    private final AuthServiceClient authenticationServiceClient;
+    private final AuthServiceClient authServiceClient;
+
 
     @GetMapping(value = "owners/{ownerId}")
     public Mono<OwnerDetails> getOwnerDetails(final @PathVariable int ownerId) {
@@ -155,6 +153,14 @@ public class BFFApiGatewayController {
     }
 
 
+    @PostMapping(value = "/users",
+            consumes = "application/json",
+            produces = "application/json")
+    public Mono<UserDetails> createUser(@RequestBody UserDetails model) { return authServiceClient.getUser(model.getId()); }
+
+    @DeleteMapping(value = "users/{userId}")
+    public Mono<UserDetails> deleteUser(final @PathVariable long userId) { return authServiceClient.deleteUser(userId); }
+
     // TODO: Hook this up to auth service
     @GetMapping(value = "admin/roles")
     public Object getRoles() {
@@ -178,17 +184,8 @@ public class BFFApiGatewayController {
             produces = "application/json")
     public Mono<OwnerDetails> createOwner(@RequestBody OwnerDetails model){ return customersServiceClient.getOwner(model.getId()); }
 
-
-
-
     @GetMapping(value = "users/{userId}")
     public Mono<UserDetails> getUserDetails(final @PathVariable int userId) {
-        return authenticationServiceClient.getUser(userId);
+        return authServiceClient.getUser(userId);
     }
-
-    @PostMapping(value = "users",
-            consumes = "application/json",
-            produces = "application/json")
-    public Mono<UserDetails> createUser(@RequestBody UserDetails model){ return authenticationServiceClient.getUser(model.getId()); }
-
 }
