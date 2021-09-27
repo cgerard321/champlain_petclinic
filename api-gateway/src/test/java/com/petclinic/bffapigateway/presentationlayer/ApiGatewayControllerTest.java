@@ -126,6 +126,28 @@ class ApiGatewayControllerTest {
 
     }
 
+    @Test
+    void updateUser(){
+        UserDetails user = new UserDetails();
+        //user.setId(1);
+        user.setUsername("Johnny123");
+        user.setPassword("password");
+        user.setEmail("email@email.com");
+        when(authenticationServiceClient.updateUser(1, user)).thenReturn(Mono.just(user));
 
+        client.put()
+                .uri("/api/gateway/users/{userId}", 1)
+                .body(Mono.just(user), UserDetails.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+
+        //assertEquals(user.getId(),1);
+        assertEquals(user.getUsername(), "Johnny123");
+        assertEquals(user.getPassword(), "password");
+        assertEquals(user.getEmail(), "email@email.com");
+    }
 }
 
