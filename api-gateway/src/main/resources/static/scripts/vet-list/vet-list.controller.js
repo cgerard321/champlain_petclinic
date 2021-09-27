@@ -3,6 +3,21 @@
 angular.module('vetList')
 .controller('VetListController', ['$http', function ($http) {
         var self = this;
+        this.buttonChangeState = (v) =>
+        {
+            if(v)
+            {
+                $http.get('api/gateway/vets').then(function (resp) {
+                    self.vetList = resp.data;
+                });
+            }
+            else
+            {
+                $http.get('api/gateway/vets/disabled').then(function (resp) {
+                    self.vetList = resp.data;
+                });
+            }
+        }
         this.show = ($event,vetID) => {
 //               let body = document.getElementsByTagName("body")[0];
             console.log(vetID);
@@ -31,4 +46,5 @@ angular.module('vetList')
         $http.get('api/gateway/vets').then(function (resp) {
             self.vetList = resp.data;
         });
+
     }]);

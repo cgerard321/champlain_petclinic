@@ -56,4 +56,23 @@ public class VetServiceImpl implements VetService
         return vetRepository.save(vet);
     }
 
+    @Override
+    public List<Vet> getAllDisabledVets()
+    {
+        return vetRepository.findAllDisabledVets();
+    }
+
+    @Override
+    public List<Vet> getAllEnabledVets()
+    {
+        return vetRepository.findAllEnabledVets();
+    }
+
+
+    public Vet disableVet(Vet vet, Vet vetFound){
+       vet.setIsActive(vetFound.getIsActive());
+       vetRepository.save(vet);
+       return vet;
+    }
+
 }

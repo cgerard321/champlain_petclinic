@@ -13,6 +13,7 @@ import com.petclinic.bffapigateway.dtos.VisitDetails;
 import com.petclinic.bffapigateway.dtos.Visits;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -110,7 +111,23 @@ public class BFFApiGatewayController {
         return visitsServiceClient.getVisitsForPet(petId);
     }
 
-    private Function<Visits, OwnerDetails> addVisitsToOwner(OwnerDetails owner) {
+    @PutMapping(value = "owners/{ownerId}",consumes = "application/json" ,produces = "application/json")
+    public Mono<OwnerDetails> updateOwnerDetails(@RequestBody OwnerDetails od, final @PathVariable int ownerId) {
+
+
+          return customersServiceClient.updateOwner(od,ownerId)
+                    .flatMap(owner ->
+                            visitsServiceClient.getVisitsForPets(owner.getPetIds())
+                                    .map(addVisitsToOwner(owner)));
+
+
+
+
+
+    }
+
+
+        private Function<Visits, OwnerDetails> addVisitsToOwner(OwnerDetails owner) {
         return visits -> {
             owner.getPets()
                     .forEach(pet -> pet.getVisits()
@@ -137,10 +154,6 @@ public class BFFApiGatewayController {
         return vetsServiceClient.getVets();
     }
 
-    @GetMapping(value = "vets/{vetId}")
-    public Mono<VetDetails> getVetDetails(final @PathVariable int vetId) {
-        return vetsServiceClient.getVet(vetId);
-    }
 
     // TODO: Hook this up to auth service
     @GetMapping(value = "admin/roles")

@@ -4,6 +4,7 @@ import com.petclinic.vets.businesslayer.VetService;
 import com.petclinic.vets.datalayer.Vet;
 import io.micrometer.core.annotation.Timed;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -34,8 +35,19 @@ class VetResource {
 
     @GetMapping
     public List<Vet> showResourcesVetList() {
-        return vetService.getAllVets();
+        return vetService.getAllEnabledVets();
     }
+
+//    @GetMapping("/enabled")
+//    public List<Vet> showResourcesVetEnabledList() {
+//        return vetService.getAllEnabledVets();
+//    }
+
+    @GetMapping("/disabled")
+    public List<Vet> showResourcesVetDisabledList() {
+        return vetService.getAllDisabledVets();
+    }
+
 
     @GetMapping("/{vetId}")
     public Vet findVet(@PathVariable int vetId)
@@ -51,6 +63,14 @@ class VetResource {
         return  vetService.updateVet(vetService.getVetByVetId(vetId),vetRequest);
     }
 
+    @PutMapping(path = "/{vetId}/disableVet",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Vet disableVet(@PathVariable("vetId") int vetId, @RequestBody Vet vetRequest) {
+        Vet vet = vetService.getVetByVetId(vetId);
+        vetService.disableVet(vet,vetRequest);
+        return vet;
+    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

@@ -14,6 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class JpaRepoTest
 {
+
     @Autowired
     private VetRepository vetRepository;
 
@@ -24,6 +25,10 @@ public class JpaRepoTest
         vetRepository.save(vet1);
         Vet vet2 = new Vet(2, 327874, "Helen", "Leary", "leary.helen@email.com", "(514)-634-8276 #2385", "Practicing since 10 years", "Wednesday, Thursday", 1, null);
         vetRepository.save(vet2);
+        Vet vet3 = new Vet(3, 147258, "James2", "Carter2", "carter2.james@email.com", "(514)-634-8276 #2384", "practicing since 32 years", "Monday, Tuesday, Friday", 0, null);
+        vetRepository.save(vet3);
+        Vet vet4 = new Vet(4, 369852, "Helen2", "Leary2", "leary2.helen@email.com", "(514)-634-8276 #2385", "Practicing since 103 years", "Wednesday, Thursday", 0, null);
+        vetRepository.save(vet4);
     }
 
     @Test
@@ -42,4 +47,15 @@ public class JpaRepoTest
         assertEquals(vet.getVetId(), 234568);
     }
 
+    @Test
+    public void getDisabledVetList()
+    {
+        assertThat(vetRepository.findAllDisabledVets().size()).isEqualTo(2);
+    }
+
+    @Test
+    public void getEnabledVetList()
+    {
+        assertThat(vetRepository.findAllEnabledVets().size()).isEqualTo(2);
+    }
 }
