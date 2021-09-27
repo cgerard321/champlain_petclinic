@@ -33,13 +33,13 @@ import java.util.Optional;
 class OwnerResource {
 
     //private static final Logger log = LoggerFactory.getLogger(OwnerResource.class);
-
-    private final OwnerService ownerService;
-    //private final OwnerRepository ownerRepository;
+    private final OwnerServiceImpl ownerServiceImpl;
+    private final OwnerRepository ownerRepository;
 
     @Autowired
-    OwnerResource(OwnerService ownerService) {
-        this.ownerService = ownerService;
+    OwnerResource(OwnerServiceImpl ownerServiceImpl, OwnerRepository ownerRepository) {
+        this.ownerServiceImpl = ownerServiceImpl;
+        this.ownerRepository = ownerRepository;
     }
 
     /**
@@ -48,9 +48,7 @@ class OwnerResource {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Owner createOwner(@Valid @RequestBody Owner owner) {
-
-        //return ownerRepository.save(owner);
-        return null;
+        return ownerRepository.save(owner);
     }
 
     /**

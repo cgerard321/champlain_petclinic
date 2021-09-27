@@ -15,9 +15,6 @@ public class OwnerServiceImpl implements OwnerService {
 
     private static final Logger LOG = LoggerFactory.getLogger(OwnerServiceImpl.class);
 
-    @Autowired
-    private OwnerRepository repository;
-
     /*
     @Autowired
     public OwnerServiceImpl(OwnerRepository repository){
@@ -28,6 +25,14 @@ public class OwnerServiceImpl implements OwnerService {
 
 
 
+    private OwnerRepository repository;
+
+    @Autowired
+    public OwnerServiceImpl(OwnerRepository repository){
+        this.repository = repository;
+    }
+
+
     /**
      * ------------------------ FIND ------------------------
      * This method will find one specific owner in the database and display its data
@@ -36,7 +41,6 @@ public class OwnerServiceImpl implements OwnerService {
      */
     @Override
     public Optional<Owner> findByOwnerId(int Id) {
-
         try {
             //Search owner in database with the given id
             Optional<Owner> owner = repository.findById(Id);
@@ -67,7 +71,9 @@ public class OwnerServiceImpl implements OwnerService {
      * This method is used to search a user in the database based on the information he entered
      * Is used by the login system
      */
-    /*`
+
+    
+    /*
     @Override
     public Optional<Owner> findOwnerLogin(String username, String password) {
         try {
