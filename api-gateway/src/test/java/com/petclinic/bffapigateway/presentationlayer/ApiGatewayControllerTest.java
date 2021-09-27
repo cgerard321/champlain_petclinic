@@ -1,15 +1,8 @@
 package com.petclinic.bffapigateway.presentationlayer;
 
-
-import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
-
-import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
-
-import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
-import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
-import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
+import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.*;
-
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -66,7 +59,6 @@ class ApiGatewayControllerTest {
 
     @MockBean
     private BillServiceClient billServiceClient;
-
 
     @Autowired
     private WebTestClient client;
@@ -125,7 +117,7 @@ class ApiGatewayControllerTest {
 
         assertEquals(user.getId(), 1);
     }
-  
+
     @Test
     void createUser(){
         UserDetails user = new UserDetails();
@@ -180,7 +172,7 @@ class ApiGatewayControllerTest {
         assertEquals(owner.getCity(),"Johnston");
         assertEquals(owner.getTelephone(),"51451545144");
     }
-  
+
     @Test
     void deleteUser() {
         UserDetails user = new UserDetails();
@@ -214,40 +206,41 @@ class ApiGatewayControllerTest {
         assertEquals(null, authServiceClient.getUser(user.getId()));
     }
 
-//    @Test
-//    void getPutRequestOk()  {
-//
-//        OwnerDetails od = new OwnerDetails();
-//        od.setId(1);
-//        od.setFirstName("John");
-//        od.setLastName("Doe");
-//        od.setAddress("1 Star Street");
-//        od.setCity("Boston");
-//        od.setTelephone("5553451125");
-//
-//        Mockito.when(customersServiceClient.updateOwner(od,1))
-//                .thenReturn(Mono.just(od));
-//
-//        client.put()
-//                .uri("api/gateway/owners/{ownerId}", 1)
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .exchange()
-//                .expectStatus().isOk()
-//                .expectBody();
-//
-//
-//        assertEquals(od.getId(), 1);
-//        assertEquals(od.getFirstName(), "John");
-//        assertEquals(od.getLastName(),"Doe");
-//        assertEquals(od.getAddress(), "1 Star Street");
-//        assertEquals(od.getCity(), "Boston");
-//        assertEquals(od.getTelephone(),"5553451125");
-//
-//
-//    }
 
 
+    public void getBillByProductId(){
+
+
+        //int expectedLength = 1;
+
+        BillDetails entity = new BillDetails();
+        entity.setBillId(1);
+
+        entity.setDate(null);
+
+        entity.setAmount(599);
+
+        entity.setVisitType("Consultation");
+
+        when(billServiceClient.getBilling(1))
+                .thenReturn(Mono.just(entity));
+
+        client.get()
+                //check the URI
+                .uri("/api/gateway/bills/" + entity.getBillId())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+//                .jsonPath("$.date").isEqualTo(entity.getDate())
+                .jsonPath("$.amount").isEqualTo(599)
+                .jsonPath("$.visitType").isEqualTo("Consultation");
+
+
+
+        assertEquals(entity.getBillId(), 1);
+
+
+    }
 
     @Test
     void getPutRequestNotFound(){

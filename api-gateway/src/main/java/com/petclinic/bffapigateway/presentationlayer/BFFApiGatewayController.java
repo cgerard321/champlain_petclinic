@@ -17,6 +17,7 @@ import com.petclinic.bffapigateway.dtos.BillDetails;
 import com.petclinic.bffapigateway.dtos.OwnerDetails;
 import com.petclinic.bffapigateway.dtos.VetDetails;
 import com.petclinic.bffapigateway.dtos.Visits;
+//import com.petclinic.billing.datalayer.Bill;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -72,14 +73,13 @@ public class BFFApiGatewayController {
                 );
     }
 //check this
+
     @GetMapping(value = "bills/{billId}")
     public Mono<BillDetails> getBillingInfo(final @PathVariable int billId) {
+
+
         return billServiceClient.getBilling(billId);
-//                .flatMap(bill ->
-//                        billServiceClient.getBilling(bill.getBill()  )
-//                                //.map(addVisitsToOwner(bill))
-//                );
-    }
+
 
 
 
