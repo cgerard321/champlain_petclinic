@@ -1,6 +1,5 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
-import com.petclinic.bffapigateway.dtos.OwnerDetails;
 import com.petclinic.bffapigateway.dtos.UserDetails;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -11,44 +10,43 @@ import reactor.core.publisher.Mono;
 
 @Component
 public class AuthServiceClient {
+
     private final WebClient.Builder webClientBuilder;
-    private final String authenticationServiceUrl;
+    private final String authServiceUrl;
 
     public AuthServiceClient(
             WebClient.Builder webClientBuilder,
-            @Value("${app.authentication-service.host}") String authenticationServiceHost,
-            @Value("${app.authentication-service.port}") String authenticationServicePort
+            @Value("${app.auth-service.host}") String authServiceHost,
+            @Value("${app.auth-service.port}") String authServicePort
     ) {
         this.webClientBuilder = webClientBuilder;
-        authenticationServiceUrl = "http://" + authenticationServiceHost + ":" + authenticationServicePort + "/users";
+        authServiceUrl = "http://" + authServiceHost + ":" + authServicePort + "/users";
     }
 
-
-    public Mono<UserDetails> getUser(final int userId) {
+    public Mono<UserDetails> getUser(final long userId) {
         return webClientBuilder.build().get()
-                .uri(authenticationServiceUrl + "/{userId}", userId)
+                .uri(authServiceUrl + "/{userId}", userId)
                 .retrieve()
                 .bodyToMono(UserDetails.class);
     }
 
     public Flux<UserDetails> getUsers() {
         return webClientBuilder.build().get()
-                .uri(authenticationServiceUrl)
+                .uri(authServiceUrl)
                 .retrieve()
                 .bodyToFlux(UserDetails.class);
     }
 
-    public Mono<UserDetails> createUser (final UserDetails model){
+    public Mono<UserDetails> createUser (final UserDetails model) {
         return webClientBuilder.build().post()
-                .uri(authenticationServiceUrl + model)
+                .uri(authServiceUrl + model)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve().bodyToMono(UserDetails.class);
-
     }
 
     public Flux<UserDetails> createUsers (){
         return webClientBuilder.build().post()
-                .uri(authenticationServiceUrl)
+                .uri(authServiceUrl)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve().bodyToFlux(UserDetails.class);
 
@@ -56,9 +54,17 @@ public class AuthServiceClient {
 
     public Mono<UserDetails> updateUser (final int userId, final UserDetails model){
         return webClientBuilder.build().put()
-                .uri(authenticationServiceUrl + userId + model)
+                .uri(authServiceUrl + userId + model)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve().bodyToMono(UserDetails.class);
     }
 
+    public Mono<UserDetails> deleteUser(final long userId) {
+        return webClientBuilder.build()
+                .delete()
+                .uri(authServiceUrl + "/{userId}", userId)
+                .retrieve()
+                .bodyToMono(UserDetails.class);
+    }
 }
+
