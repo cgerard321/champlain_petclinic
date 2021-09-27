@@ -41,6 +41,13 @@ public class VisitsServiceImpl implements VisitsService {
     }
 
     @Override
+    public Visit updateVisit(Visit visit){
+        Visit v = visitRepository.save(visit);
+        log.info("Updating visit with petId: {} and id: {}", visit.getPetId(), visit.getId());
+        return v;
+    }
+
+    @Override
     public List<Visit> getVisitsForPets(List<Integer> petIds){
         return visitRepository.findByPetIdIn(petIds);
     }

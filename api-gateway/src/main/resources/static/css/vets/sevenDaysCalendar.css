@@ -1,0 +1,20 @@
+.day-of-week,
+.date-grid {
+  display: grid;
+  width: 50%;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.square {
+  border-style: solid;
+  border-width: thin;
+  text-align: center;
+  height: 75px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 3px solid green;
+  background-color: #ebebeb;
+  margin: 2%;
+}
+

@@ -13,6 +13,8 @@ public interface VisitsService {
 
     public void deleteVisit(int visitId);
 
+    public Visit updateVisit(Visit visit);
+
     public List<Visit> getVisitsForPets(List<Integer> petIds);
 
 }
