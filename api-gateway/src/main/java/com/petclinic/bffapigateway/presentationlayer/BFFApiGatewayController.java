@@ -116,11 +116,4 @@ public class BFFApiGatewayController {
             consumes = "application/json",
             produces = "application/json")
     public Mono<UserDetails> createUser(@RequestBody UserDetails model){ return authenticationServiceClient.getUser(model.getId()); }
-
-    @PutMapping(value = "/user/{userId}",
-            consumes = "application/json",
-            produces = "application/json")
-    public Mono<UserDetails> updateUser(@RequestBody UserDetails newUser, @PathVariable int userId){
-        return authenticationServiceClient.updateUser(userId, newUser);
-    }
 }

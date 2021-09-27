@@ -58,6 +58,5 @@ public class AuthenticationServiceClient {
                 .uri(authenticationServiceUrl + userId + model)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve().bodyToMono(UserDetails.class);
-
     }
 }

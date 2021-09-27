@@ -104,5 +104,28 @@ class ApiGatewayControllerTest {
         assertEquals(owner.getId(),1);
     }
 
+    @Test
+    void createUser(){
+        UserDetails user = new UserDetails();
+        user.setId(1);
+        user.setUsername("Johnny123");
+        user.setPassword("password");
+        user.setEmail("email@email.com");
+        when(authenticationServiceClient.createUser(user)).thenReturn(Mono.just(user));
+
+        client.post()
+                .uri("/api/gateway/user")
+                .body(Mono.just(user), UserDetails.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+
+        assertEquals(user.getId(),1);
+
+    }
+
+
 }
 
