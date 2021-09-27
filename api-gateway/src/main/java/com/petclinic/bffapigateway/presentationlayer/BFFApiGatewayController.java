@@ -5,20 +5,35 @@ import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
 import com.petclinic.bffapigateway.dtos.*;
+
+import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
+import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
+import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
+import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
+
+import com.petclinic.bffapigateway.dtos.*;
+
+import com.petclinic.bffapigateway.dtos.Login;
+import com.petclinic.bffapigateway.dtos.OwnerDetails;
+import com.petclinic.bffapigateway.dtos.VetDetails;
+import com.petclinic.bffapigateway.dtos.VisitDetails;
+import com.petclinic.bffapigateway.dtos.Visits;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.HashMap;
-import java.util.Map;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
-
-import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -40,7 +55,8 @@ public class BFFApiGatewayController {
 
     private final VetsServiceClient vetsServiceClient;
 
-    private final AuthenticationServiceClient authenticationServiceClient;
+    private final AuthServiceClient authenticationServiceClient;
+
 
     @GetMapping(value = "owners/{ownerId}")
     public Mono<OwnerDetails> getOwnerDetails(final @PathVariable int ownerId) {
@@ -71,7 +87,7 @@ public class BFFApiGatewayController {
             return owner;
         };
     }
-
+    
     @GetMapping(value = "vets")
     public Flux<VetDetails> getVets() {
         return vetsServiceClient.getVets();
@@ -107,15 +123,18 @@ public class BFFApiGatewayController {
 
 
 
-    @GetMapping(value = "user/{userId}")
+
+
+    @GetMapping(value = "users/{userId}")
     public Mono<UserDetails> getUserDetails(final @PathVariable int userId) {
         return authenticationServiceClient.getUser(userId);
     }
 
-    @PostMapping(value = "/user",
+    @PostMapping(value = "/users",
             consumes = "application/json",
             produces = "application/json")
     public Mono<UserDetails> createUser(@RequestBody UserDetails model){ return authenticationServiceClient.getUser(model.getId()); }
+
 
     @PutMapping(value = "/users/{userId}",
             consumes = "application/json",

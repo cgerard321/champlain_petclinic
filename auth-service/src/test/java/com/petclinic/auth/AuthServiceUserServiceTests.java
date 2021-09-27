@@ -5,6 +5,9 @@ import com.petclinic.auth.Role.RoleIDLessDTO;
 import com.petclinic.auth.Role.RoleMapper;
 import com.petclinic.auth.Role.RoleRepo;
 import com.petclinic.auth.User.*;
+import javassist.NotFoundException;
+import lombok.SneakyThrows;
+import org.assertj.core.internal.bytebuddy.implementation.bytecode.Throw;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,12 +18,18 @@ import org.springframework.test.context.ActiveProfiles;
 
 import javax.validation.ConstraintViolationException;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
+
+import static org.hamcrest.Matchers.not;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -28,7 +37,7 @@ public class AuthServiceUserServiceTests {
 
     final String
             USER = "user",
-            PASS = "pass",
+            PASS = "pas$word123",
             EMAIL = "email@gmail.com";
 
     @Autowired
@@ -57,6 +66,32 @@ public class AuthServiceUserServiceTests {
         assertEquals(createdUser.getUsername(), userIDLessDTO.getUsername());
         assertEquals(createdUser.getPassword(), userIDLessDTO.getPassword());
         assertEquals(createdUser.getEmail(), userIDLessDTO.getEmail());
+    }
+    @SneakyThrows
+    @Test
+    @DisplayName("Reset user password")
+    void test_user_password_reset() {
+
+        final String CHANGE = "change";
+        final User u = new User(USER, PASS, EMAIL);
+        userRepo.save(u);
+
+        User user = userService.passwordReset(u.getId(), CHANGE);
+
+        Optional<User> find = userRepo.findById(user.getId());
+        assertTrue(find.isPresent());
+        assertEquals(CHANGE, user.getPassword());
+    }
+    @SneakyThrows
+    @Test
+    @DisplayName("Reset password, passed wrong ID")
+    void test_user_password_reset_ID() {
+
+        final String CHANGE = "change";
+        final User u = new User(USER, PASS, EMAIL);
+        userRepo.save(u);
+
+        assertThrows(NotFoundException.class, () -> userService.passwordReset(10000, ""));
     }
 
     @Test
