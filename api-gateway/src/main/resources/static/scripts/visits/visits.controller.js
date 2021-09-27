@@ -13,6 +13,9 @@ angular.module('visits')
         $http.get(url).then(function (resp) {
             self.visits = resp.data;
         });
+        $http.get("api/gateway/visits/"+petId).then(function (resp) {
+            self.visits = resp.data;
+        });
 
         $http.get(vetsUrl).then(function (resp) {
             self.vets = resp.data;
