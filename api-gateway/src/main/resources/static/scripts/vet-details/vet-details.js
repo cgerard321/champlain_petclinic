@@ -10,7 +10,7 @@ angular.module('vetDetails', ['ui.router'])
             })
             .state('disableVet', {
                 parent: 'app',
-                url: '/vets/:vetId/disable',
+                url: '/vets/details/:vetId',
                 template: '<vet-details></vet-details>'
             })
     }]);
