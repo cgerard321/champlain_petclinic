@@ -12,4 +12,5 @@ public interface VetService
     public Vet createVet(Vet vet);
     public List<Vet> getAllDisabledVets();
     public List<Vet> getAllEnabledVets();
+    public Vet disableVet(Vet vet, Vet vetFound);
 }

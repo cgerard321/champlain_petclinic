@@ -69,4 +69,10 @@ public class VetServiceImpl implements VetService
     }
 
 
+    public Vet disableVet(Vet vet, Vet vetFound){
+       vet.setIsActive(vetFound.getIsActive());
+       vetRepository.save(vet);
+       return vet;
+    }
+
 }
