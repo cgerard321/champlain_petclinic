@@ -41,7 +41,12 @@ public class VisitResource {
         this.visitsService = service;
     }
 
+
     /*
+
+    private final VisitRepository visitRepository;
+
+
     //Testing purposes to View all visits
     @GetMapping(value = "/pets/visits/All")
     public List<Visit> showVisitList() {
