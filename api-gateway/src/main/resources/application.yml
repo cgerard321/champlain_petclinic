@@ -16,7 +16,7 @@ app:
     port: 7004
   auth-service:
     host: localhost
-    port: 7004
+    port: 7005
 
 logging:
   level:
