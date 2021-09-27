@@ -1,0 +1,58 @@
+server.port: 7004
+
+server:
+  error:
+    include-message: always
+
+logging:
+  level:
+    root: INFO
+    com.petclinic: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+---
+spring.profiles: h2
+
+spring:
+  h2:
+    console:
+      enabled: true
+
+  datasource:
+    platform: h2
+    url: jdbc:h2:mem:billing-db;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+    initialization-mode: always
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+
+spring.datasource.hikari.initializationFailTimeout: 60000
+
+---
+spring.profiles: docker
+
+spring:
+  datasource:
+    platform: mysql
+    url: jdbc:mysql://mysql5/billing-db
+    username: user
+    password: pwd
+    initialization-mode: always
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+
+spring.datasource.hikari.initializationFailTimeout: 60000
+
+server.port: 8080
