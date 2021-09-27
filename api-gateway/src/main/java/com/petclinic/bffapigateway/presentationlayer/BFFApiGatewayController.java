@@ -83,7 +83,11 @@ public class BFFApiGatewayController {
     public Flux<VetDetails> getVets() {
         return vetsServiceClient.getVets();
     }
-    
+
+    @GetMapping(value = "vets/disabled")
+    public Flux<VetDetails> getDisabledVets() {
+        return vetsServiceClient.getDisabledVets();
+    }
 
     @GetMapping(value = "vets/{vetId}")
     public Mono<VetDetails> getVetDetails(final @PathVariable int vetId) {
