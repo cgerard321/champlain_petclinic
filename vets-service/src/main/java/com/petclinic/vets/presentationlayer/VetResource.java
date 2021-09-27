@@ -37,6 +37,11 @@ class VetResource {
         return vetService.getAllEnabledVets();
     }
 
+//    @GetMapping("/enabled")
+//    public List<Vet> showResourcesVetEnabledList() {
+//        return vetService.getAllEnabledVets();
+//    }
+
     @GetMapping("/disabled")
     public List<Vet> showResourcesVetDisabledList() {
         return vetService.getAllDisabledVets();
