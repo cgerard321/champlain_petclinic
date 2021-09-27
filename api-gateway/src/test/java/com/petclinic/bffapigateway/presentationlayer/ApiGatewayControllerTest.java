@@ -1,26 +1,20 @@
 package com.petclinic.bffapigateway.presentationlayer;
 
-import com.petclinic.bffapigateway.domainclientlayer.AuthenticationServiceClient;
+import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
 import com.petclinic.bffapigateway.dtos.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.test.web.servlet.MockMvc;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.net.ConnectException;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -41,7 +35,7 @@ class ApiGatewayControllerTest {
     private VetsServiceClient vetsServiceClient;
 
     @MockBean
-    private AuthenticationServiceClient authenticationServiceClient;
+    private AuthServiceClient authenticationServiceClient;
 
     @Autowired
     private WebTestClient client;
@@ -102,6 +96,37 @@ class ApiGatewayControllerTest {
                 .expectBody();
 
         assertEquals(owner.getId(),1);
+        assertEquals(owner.getFirstName(),"John");
+        assertEquals(owner.getLastName(),"Johnny");
+        assertEquals(owner.getAddress(),"111 John St");
+        assertEquals(owner.getCity(),"Johnston");
+        assertEquals(owner.getTelephone(),"51451545144");
+
+    }
+
+    @Test
+    void createUser(){
+        UserDetails user = new UserDetails();
+        user.setId(1);
+        user.setUsername("Johnny123");
+        user.setPassword("password");
+        user.setEmail("email@email.com");
+        when(authenticationServiceClient.createUser(user)).thenReturn(Mono.just(user));
+
+        client.post()
+                .uri("/api/gateway/users")
+                .body(Mono.just(user), UserDetails.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+
+        assertEquals(user.getId(),1);
+        assertEquals(user.getUsername(), "Johnny123");
+        assertEquals(user.getPassword(), "password");
+        assertEquals(user.getEmail(), "email@email.com");
+
     }
 
 }
