@@ -2,6 +2,7 @@ package com.petclinic.auth.User;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,6 +14,7 @@ import javax.validation.Valid;
 @RequestMapping("/users")
 @Slf4j
 @RequiredArgsConstructor
+@Validated
 public class UserController {
 
     private final UserService userService;

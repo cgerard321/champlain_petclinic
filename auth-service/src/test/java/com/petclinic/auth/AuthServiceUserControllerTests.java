@@ -38,7 +38,7 @@ public class AuthServiceUserControllerTests {
 
     final String
             USER = "user",
-            PASS = "pas$word123",
+            PASS = "Pas$word123",
             EMAIL = "email@gmail.com";
 
 

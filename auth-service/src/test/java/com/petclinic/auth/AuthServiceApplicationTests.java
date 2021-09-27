@@ -32,7 +32,7 @@ class AuthServiceApplicationTests {
 
 	final String
 			USER = "user",
-			PASS = "pass",
+			PASS = "Pas$word123",
 			EMAIL = "email",
 			ROLE_NAME = "role";
 	final Role role = new Role(0, ROLE_NAME);
@@ -297,17 +297,7 @@ class AuthServiceApplicationTests {
 		assertEquals(PASS, userIDLessDTO.getPassword());
 		assertEquals(EMAIL, userIDLessDTO.getEmail());
 	}
-	@Test
-	@DisplayName("Verify User password is valid")
-	void verify_valid_password(){
-		User user = new User();
-		user.setUsername(USER);
-		user.setPassword("Pas$word123");
-		user.setId(ID);
-		user.setEmail(EMAIL);
-		Set<ConstraintViolation<User>> violations = validator.validate(user);
-		assertTrue(violations.isEmpty());
-	}
+
 
 }
 
