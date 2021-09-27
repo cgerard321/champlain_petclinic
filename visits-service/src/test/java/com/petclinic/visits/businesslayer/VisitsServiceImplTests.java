@@ -15,15 +15,21 @@ import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
+
+import static org.mockito.ArgumentMatchers.any;
+
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+
 import static org.mockito.Mockito.when;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
 
 import javax.swing.text.html.Option;
 import java.sql.Time;
 import java.text.DateFormat;
 import java.util.Arrays;
+
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -79,6 +85,17 @@ public class VisitsServiceImplTests {
 
         assertThat(serviceResponse, hasSize(2));
         assertThat(serviceResponse.get(1).getPetId(), equalTo(1));
+    }
+
+    @Test
+    public void whenValidIdUpdateVisit(){
+        Visit updatedVisit = visit().petId(1).date(new Date()).description("Desc-1 Updated").build();
+
+        when(repo.save(any(Visit.class))).thenReturn(updatedVisit);
+
+        Visit visitFromService = visitsService.updateVisit(updatedVisit);
+
+        assertThat(visitFromService.getDescription(), equalTo("Desc-1 Updated"));
     }
 
     @Test
