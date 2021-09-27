@@ -8,6 +8,8 @@ import com.petclinic.auth.User.User;
 import com.petclinic.auth.User.UserController;
 import com.petclinic.auth.User.UserIDLessDTO;
 import com.petclinic.auth.User.UserRepo;
+import javassist.NotFoundException;
+import org.apache.tomcat.util.http.fileupload.MultipartStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,14 +18,20 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import javax.validation.ConstraintViolationException;
 import java.util.Random;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -38,8 +46,9 @@ public class AuthServiceUserControllerTests {
 
     final String
             USER = "user",
-            PASS = "pass",
+            PASS = "Pas$word123",
             EMAIL = "email@gmail.com";
+
 
     @BeforeEach
     void setup() {
@@ -70,6 +79,7 @@ public class AuthServiceUserControllerTests {
     @DisplayName("Check the required fields with empty data")
     void check_empty_require_fields() {
 
+
         UserIDLessDTO userIDLessDTO = new UserIDLessDTO();
 
         assertThrows(ConstraintViolationException.class, () -> userController.createUser(userIDLessDTO));
@@ -79,6 +89,7 @@ public class AuthServiceUserControllerTests {
     @DisplayName("Check the username field in order to refused if it is empty")
     void check_empty_username() {
 
+
         UserIDLessDTO userIDLessDTO = new UserIDLessDTO(null, PASS,EMAIL);
 
         assertThrows(ConstraintViolationException.class, () -> userController.createUser(userIDLessDTO));
@@ -86,6 +97,7 @@ public class AuthServiceUserControllerTests {
     @Test
     @DisplayName("Check the password field in order to refused if it is empty")
     void check_empty_password() {
+
 
         UserIDLessDTO userIDLessDTO = new UserIDLessDTO( USER, null,EMAIL);
 
@@ -98,5 +110,17 @@ public class AuthServiceUserControllerTests {
         UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS,null);
 
         assertThrows(ConstraintViolationException.class, () -> userController.createUser(userIDLessDTO));
+    }
+    @Test
+    @DisplayName("Check if the input ID is correct")
+    void check_empty_id() throws Exception{
+
+
+        mockMvc.perform(put("/users/1000"))
+                .andExpect(status().isForbidden());
+
+
+
+
     }
 }

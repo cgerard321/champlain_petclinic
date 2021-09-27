@@ -1,15 +1,13 @@
 package com.petclinic.vets.presentationlayer;
 
+import com.petclinic.vets.businesslayer.VetService;
 import com.petclinic.vets.datalayer.Vet;
-import com.petclinic.vets.datalayer.VetRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import io.micrometer.core.annotation.Timed;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * @author Juergen Hoeller
@@ -22,19 +20,44 @@ import java.util.Optional;
 
 @RequestMapping("/vets")
 @RestController
-@RequiredArgsConstructor
+@Timed("petclinic.vets")
+//@RequiredArgsConstructor
 class VetResource {
 
-    private final VetRepository vetRepository;
+    private final VetService vetService;
+
+
+    VetResource(VetService vetService)
+    {
+        this.vetService = vetService;
+    }
 
     @GetMapping
     public List<Vet> showResourcesVetList() {
-        return vetRepository.findAll();
+        return vetService.getAllVets();
     }
 
-    @GetMapping(value = "/{vetId}")
-    public Optional<Vet> findVet(@PathVariable("vetId") int vetId) {
-        return vetRepository.findById(vetId);
+    @GetMapping("/{vetId}")
+    public Vet findVet(@PathVariable int vetId)
+    {
+        return vetService.getVetByVetId(vetId);
     }
+
+
+    @PutMapping( value = "/{vetId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public Vet updateVet(@PathVariable int vetId, @RequestBody Vet vetRequest)
+    {
+        return  vetService.updateVet(vetService.getVetByVetId(vetId),vetRequest);
+    }
+
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public Vet addVet(@Valid @RequestBody Vet vet)
+    {
+        return vetService.createVet(vet);
+    }
+
 
 }

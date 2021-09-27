@@ -1,6 +1,11 @@
 package com.petclinic.vets.datalayer;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
 
 /**
  * Repository class for <code>Vet</code> domain objects All method names are compliant with Spring Data naming
@@ -13,7 +18,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * @author Maciej Szarlinski
  * Copied from https://github.com/spring-petclinic/spring-petclinic-microservices
  */
+@Repository
+public interface VetRepository extends JpaRepository<Vet, Integer>
+{
+    Optional<Vet> findByVetId (int vetId);
 
-public interface VetRepository extends JpaRepository<Vet, Integer> {
+//    @Query("select v from vets where v.isActive = 0")
+//    List<Vet> findDisabledVets();
 }
 
