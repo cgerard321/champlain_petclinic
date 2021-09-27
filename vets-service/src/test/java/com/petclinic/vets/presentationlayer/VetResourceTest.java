@@ -60,8 +60,8 @@ class VetResourceTest {
 		vet.setWorkday("Monday, Tuesday, Friday");
 		vet.setIsActive(1);
 
-		given(vetRepository.findAll()).willReturn(asList(vet));
-
+		given(vetRepository.findAllEnabledVets()).willReturn(asList(vet));
+		System.out.println(vet);
 		mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$[0].id").value(1));
@@ -82,7 +82,7 @@ class VetResourceTest {
 		vet.setWorkday("Monday, Tuesday, Friday");
 		vet.setIsActive(0);
 		//act
-		given(vetRepository.findAll()).willReturn(asList(vet));
+		given(vetRepository.findAllEnabledVets()).willReturn(asList(vet));
 		//assert
 		mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
@@ -105,7 +105,7 @@ class VetResourceTest {
 		vet.setWorkday("Monday, Tuesday, Friday");
 		vet.setIsActive(1);
 
-		given(vetRepository.findAll()).willReturn(asList(vet));
+		given(vetRepository.findAllEnabledVets()).willReturn(asList(vet));
 
 		mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
@@ -136,7 +136,7 @@ class VetResourceTest {
 		vet.setWorkday("Monday,Tuesday,         Friday");
 		vet.setIsActive(5);
 
-		given(vetRepository.findAll()).willReturn(asList(vet));
+		given(vetRepository.findAllEnabledVets()).willReturn(asList(vet));
 
 		mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
@@ -167,7 +167,7 @@ class VetResourceTest {
 		vet.setIsActive(1);
 		//act //assert
 
-		given(vetRepository.findAll()).willReturn(asList(vet));
+		given(vetRepository.findAllEnabledVets()).willReturn(asList(vet));
 		mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$[0].id").value(1))
