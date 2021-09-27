@@ -41,8 +41,27 @@ public class VisitResource {
         this.visitsService = service;
     }
 
+    /*
+    //Testing purposes to View all visits
+    @GetMapping(value = "pets/visits/All")
+    public List<Visit> showVisitList() {
+        return visitRepository.findAll();
+    }
 
-    //To create a new visits
+    @PostMapping("pets/visits")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Visit createVisit(@Valid @RequestBody Visit visit){
+
+        visit.setId(visit.getId());
+        visit.setPetId(visit.getPetId());
+        visit.setDate(visit.getDate());
+        visit.setDescription(visit.getDescription());
+
+        log.info("Saving visit {}", visit);
+        return visitRepository.save(visit);
+    }
+*/
+
     @PostMapping("owners/*/pets/{petId}/visits")
     @ResponseStatus(HttpStatus.CREATED)
     public Visit create(
@@ -54,7 +73,6 @@ public class VisitResource {
     }
 
 
-    //To pull in my main
     @GetMapping("owners/*/pets/{petId}/visits")
     public List<Visit> visits(@PathVariable("petId") int petId) {
         return visitsService.getVisitsForPet(petId);
@@ -78,27 +96,15 @@ public class VisitResource {
         return new Visits(byPetIdIn);
     }
 
-
     @PutMapping(value = "owners/*/pets/{petId}/visits/{id}",
             consumes = "application/json",
             produces = "application/json")
-    public Visit update(@Valid @RequestBody Visit visit, @PathVariable("petId") int petId, @PathVariable("id") int id){
+    public Visit update(@Valid @RequestBody Visit visit, @PathVariable("petId") int petId, @PathVariable("id") int id) {
         visit.setId(id);
         visit.setPetId(petId);
         log.info("Updating visit {}", visit);
         return visitsService.updateVisit(visit);
     }
-
-    //    @PostMapping("owners/*/pets/{petId}/visits")
-//    @ResponseStatus(HttpStatus.CREATED)
-//    public Visit create(
-//           @Valid @RequestBody Visit visit,
-//           @PathVariable("petId") int petId) {
-//
-//       visit.setPetId(petId);
-//        log.info("Saving visit {}", visit);
-//        return visitsService.addVisit(visit);
-//    }
 
 
     @Value

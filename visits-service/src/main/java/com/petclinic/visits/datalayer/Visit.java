@@ -112,4 +112,5 @@ public class Visit {
     public void setPractitionerId(int practitionerId) {
         this.practitionerId = practitionerId;
     }
+
 }

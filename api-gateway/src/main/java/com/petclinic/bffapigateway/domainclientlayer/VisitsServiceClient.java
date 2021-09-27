@@ -2,7 +2,6 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.VisitDetails;
 import com.petclinic.bffapigateway.dtos.Visits;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -52,7 +51,28 @@ public class VisitsServiceClient {
                 .retrieve()
                 .bodyToMono(Visits.class);
     }
-    
+
+/*
+    public Mono<Visits> createVisitForPets(final VisitDetails visitDetails){
+        return webClientBuilder.build()
+                .post()
+                .uri(hostname + "pets/visits")
+                .body(Mono.just(visitDetails), VisitDetails.class)
+                .retrieve()
+                .bodyToMono(Visits.class);
+
+    }
+*/
+    //Testing purpose
+
+    public Mono<Visits> getAllVisits(){
+        return webClientBuilder.build()
+                .get()
+                .uri(hostname + "pets/visits/All")
+                .retrieve()
+                .bodyToMono(Visits.class);
+    }
+
     private String joinIds(List<Integer> petIds) {
         return petIds.stream().map(Object::toString).collect(joining(","));
     }
