@@ -1,7 +1,9 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
+import com.petclinic.bffapigateway.dtos.OwnerDetails;
 import com.petclinic.bffapigateway.dtos.UserDetails;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
@@ -31,5 +33,26 @@ public class AuthServiceClient {
                 .uri(authServiceUrl)
                 .retrieve()
                 .bodyToFlux(UserDetails.class);
+    }
+
+    public Mono<UserDetails> createUser (final UserDetails model){
+        return webClientBuilder.build().post()
+                .uri(authServiceUrl + model)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve().bodyToMono(UserDetails.class);
+    }
+
+    public Flux<UserDetails> createUsers (){
+        return webClientBuilder.build().post()
+                .uri(authServiceUrl)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve().bodyToFlux(UserDetails.class);
+    }
+
+    public Mono<UserDetails> updateUser (final int userId, final UserDetails model){
+        return webClientBuilder.build().put()
+                .uri(authServiceUrl + userId + model)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve().bodyToMono(UserDetails.class);
     }
 }

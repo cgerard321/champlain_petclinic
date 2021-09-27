@@ -10,10 +10,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
-
 import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
@@ -35,6 +35,7 @@ class ApiGatewayControllerTest {
 
     @MockBean
     private AuthServiceClient authServiceClient;
+
     @Autowired
     private WebTestClient client;
 
@@ -91,6 +92,62 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.email").isEqualTo("RogerBrown@gmail.com");
 
         assertEquals(user.getId(), 1);
+    }
+  
+    @Test
+    void createUser(){
+        UserDetails user = new UserDetails();
+        user.setId(1);
+        user.setUsername("Johnny123");
+        user.setPassword("password");
+        user.setEmail("email@email.com");
+        when(authServiceClient.createUser(user)).thenReturn(Mono.just(user));
+
+        client.post()
+                .uri("/api/gateway/users")
+                .body(Mono.just(user), UserDetails.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+
+        assertEquals(user.getId(),1);
+        assertEquals(user.getUsername(), "Johnny123");
+        assertEquals(user.getPassword(), "password");
+        assertEquals(user.getEmail(), "email@email.com");
+
+    }
+
+    @Test
+    void createOwner(){
+        OwnerDetails owner = new OwnerDetails();
+        owner.setId(1);
+        owner.setFirstName("John");
+        owner.setLastName("Johnny");
+        owner.setAddress("111 John St");
+        owner.setCity("Johnston");
+        owner.setTelephone("51451545144");
+        when(customersServiceClient.createOwner(owner))
+                .thenReturn(Mono.just(owner));
+
+
+        client.post()
+                .uri("/api/gateway/owners")
+                .body(Mono.just(owner), OwnerDetails.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+
+        assertEquals(owner.getId(),1);
+        assertEquals(owner.getFirstName(),"John");
+        assertEquals(owner.getLastName(),"Johnny");
+        assertEquals(owner.getAddress(),"111 John St");
+        assertEquals(owner.getCity(),"Johnston");
+        assertEquals(owner.getTelephone(),"51451545144");
+
     }
 }
 

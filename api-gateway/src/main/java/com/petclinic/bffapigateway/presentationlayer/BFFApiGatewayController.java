@@ -8,6 +8,7 @@ import com.petclinic.bffapigateway.dtos.OwnerDetails;
 import com.petclinic.bffapigateway.dtos.VetDetails;
 import com.petclinic.bffapigateway.dtos.VisitDetails;
 import com.petclinic.bffapigateway.dtos.Visits;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
@@ -22,10 +23,8 @@ import org.springframework.web.bind.annotation.*;
 import com.petclinic.bffapigateway.dtos.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -116,4 +115,20 @@ public class BFFApiGatewayController {
     public Object addRole() {
         return null;
     }
+
+    @PostMapping(value = "/owners",
+            consumes = "application/json",
+            produces = "application/json")
+    public Mono<OwnerDetails> createOwner(@RequestBody OwnerDetails model){ return customersServiceClient.getOwner(model.getId()); }
+
+    @GetMapping(value = "users/{userId}")
+    public Mono<UserDetails> getUserDetails(final @PathVariable int userId) {
+        return authServiceClient.getUser(userId);
+    }
+
+    @PostMapping(value = "/users",
+            consumes = "application/json",
+            produces = "application/json")
+    public Mono<UserDetails> createUser(@RequestBody UserDetails model){ return authServiceClient.getUser(model.getId()); }
+
 }
