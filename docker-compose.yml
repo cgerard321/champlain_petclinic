@@ -52,6 +52,16 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
 
+  billing-service:
+    build: billing-service
+    mem_limit: 350m
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      mysql5:
+        condition: service_healthy
+
+
   mysql1:
     image: mysql:5.7
     mem_limit: 350m
@@ -131,3 +141,21 @@ services:
       timeout: 5s
       retries: 10
 
+  mysql5:
+    image: mysql:5.7
+    mem_limit: 350m
+    ports:
+      - "3311:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpwd
+      - MYSQL_DATABASE=billing-db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=pwd
+    volumes:
+      - ./data/mysql5:/var/lib/mysql5
+      - ./data/init.d:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-uuser", "-ppwd", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10

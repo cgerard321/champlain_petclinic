@@ -1,6 +1,8 @@
 package com.petclinic.bffapigateway.presentationlayer;
 
 import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
+
+import com.petclinic.bffapigateway.domainclientlayer.AuthenticationServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
@@ -19,6 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.servlet.MockMvc;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -47,7 +50,7 @@ class ApiGatewayControllerTest {
 
     @MockBean
     private BillServiceClient billServiceClient;
-
+    private AuthenticationServiceClient authenticationServiceClient;
     @Autowired
     private WebTestClient client;
 
@@ -95,6 +98,7 @@ class ApiGatewayControllerTest {
 
 
     @Test
+
     public void getBillByProductId(){
 
 
@@ -112,11 +116,7 @@ class ApiGatewayControllerTest {
         client.get()
                 //check the URI
                 .uri("/api/gateway/bill/" + BILL_ID_OKAY)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody();
+
 //                .jsonPath("$.length()").isEqualTo(expectedLength)
 //                .jsonPath("$[0].billId").isEqualTo(BILL_ID_OKAY);
 //                .jsonPath("$[1].billId").isEqualTo(BILL_ID_OKAY)
@@ -127,72 +127,32 @@ class ApiGatewayControllerTest {
 
     }
 
-//
-//    @Test
-//    public void getBillMissingParameter(){
-//
-//        Bill entity = new Bill(BILL_ID_OKAY,null, "Consultation", 500);
-//        repository.save(entity);
-//
-//
-//        client.get()
-//                .uri("/api/gateway/bill")
-//                .accept(APPLICATION_JSON)
-//                .exchange()
-//                .expectStatus().isBadRequest()
-//                .expectHeader().contentType(APPLICATION_JSON)
-//                .expectBody()
-//                .jsonPath("$.path").isEqualTo("/bill")
-//                .jsonPath("$.message").isEqualTo("Required int parameter 'billId' is not present");
-//
-//        assertTrue(repository.findByBillId(BILL_ID_OKAY).isPresent());
-//
-//    }
+      @Test
+      void createOwner(){
+        OwnerDetails owner = new OwnerDetails();
+        owner.setId(1);
+        owner.setFirstName("John");
+        owner.setLastName("Johnny");
+        owner.setAddress("111 John St");
+        owner.setCity("Johnston");
+        owner.setTelephone("51451545144");
+        when(customersServiceClient.createOwner(owner))
+                .thenReturn(Mono.just(owner));
 
-    @Test
-    public void getBillInvalidParameterString(){
-//        client.get()
-//                //check the uri
-//                .uri("bill/{billId}" + BILL_ID_INVALID_STRING)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .exchange()
-//                .expectStatus().isBadRequest()
-//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-//                .expectBody()
-//                .jsonPath("$.path").isEqualTo("/bill")
-//                .jsonPath("$.message").isEqualTo("Type mismatch.");
 
+        client.post()
+                .uri("/api/gateway/owners")
+                .body(Mono.just(owner), OwnerDetails.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+
+
+
+        assertEquals(owner.getId(),1);
     }
-
-    @Test
-    public void GetBillInvalidParameterNegativeValue(){
-//        client.get()
-//                .uri("bill/{billId}" + BILL_ID_NEGATIVE_VALUE)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .exchange()
-//                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
-//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-//                .expectBody()
-//                .jsonPath("$.path").isEqualTo("/bill")
-//                .jsonPath("$.message").isEqualTo("Invalid billId: "+ BILL_ID_NEGATIVE_VALUE);
-    }
-
-    @Test
-    public void getBillsNotFound(){
-
-//        int expectedLength = 0;
-//        client.get()
-//                .uri("bill/{billId}" + BILL_ID_NOT_FOUND)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .exchange()
-//                .expectStatus().isOk()
-//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-//                .expectBody()
-//                .jsonPath("$.length()").isEqualTo(expectedLength);
-//
-
-    }
-
 
 }
 

@@ -4,10 +4,14 @@ import lombok.*;
 
 import java.util.Date;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 @Builder(toBuilder = true)
 public class BillDTO {
 
-    private int billId;
     private Date date;
     private String visitType;
     private double amount;
@@ -54,4 +58,5 @@ public class BillDTO {
     public void setAmount(double amount){
         this.amount = amount;
     }
+
 }
