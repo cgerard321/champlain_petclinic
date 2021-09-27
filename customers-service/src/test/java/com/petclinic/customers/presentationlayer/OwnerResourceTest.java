@@ -237,7 +237,7 @@ class OwnerResourceTest {
     @Test
     public void add_owner_test()
     {
-        final int OWNER_ID = 1;
+        // final int OWNER_ID = 1;
         Owner owner1 = new Owner (2, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal",
                 "1111111111");
         repository.save(owner1);;
@@ -246,7 +246,7 @@ class OwnerResourceTest {
 
         assertThat(foundSaved, samePropertyValuesAs(owner1));
 
-        assertEquals(1,repository.findAll().size());
+        assertEquals(2,repository.findAll().size());
     }
 
     @Test
