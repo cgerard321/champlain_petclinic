@@ -9,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -97,6 +98,18 @@ public class PersistenceTests {
         Visit visit = new Visit();
         repo.delete(visit);
         assertEquals(repo.findByPetId(1).size(), 2);
+    }
+
+    @Test
+    public void updateVisit(){
+        Visit savedVisit = new Visit(5, new Date(), "Description", 5);
+        savedVisit = repo.save(savedVisit);
+
+        savedVisit.setDescription("Updated Description");
+        repo.save(savedVisit);
+        
+        Visit foundVisit = repo.findById(savedVisit.getId()).get();
+        assertEquals("Updated Description", foundVisit.getDescription());
     }
 }
 
