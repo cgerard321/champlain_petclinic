@@ -15,6 +15,7 @@ import com.petclinic.bffapigateway.dtos.Visits;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -102,15 +103,6 @@ public class BFFApiGatewayController {
         return vetsServiceClient.getVets();
     }
 
-    @GetMapping(value = "vets/disabled")
-    public Flux<VetDetails> getDisabledVets() {
-        return vetsServiceClient.getDisabledVets();
-    }
-
-    @GetMapping(value = "vets/{vetId}")
-    public Mono<VetDetails> getVetDetails(final @PathVariable int vetId) {
-        return vetsServiceClient.getVet(vetId);
-    }
 
     // TODO: Hook this up to auth service
     @GetMapping(value = "/admin/roles")
