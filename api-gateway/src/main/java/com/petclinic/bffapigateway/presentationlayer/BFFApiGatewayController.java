@@ -73,18 +73,33 @@ public class BFFApiGatewayController {
             );
     }
     //Testing purpose
-    @GetMapping(value = "pets/visits/All")
+    @GetMapping(value = "/pets/visits/All")
     public Mono<Visits> getAllVisits(){
         return visitsServiceClient.getAllVisits();
 
     }
 /*
     //Add new Visit
-    @PostMapping (value = "pets/visits")
+    @PostMapping (value = "/pets/visits", consumes = "application/json", produces = "application/json")
     public Mono<Visits> createVisitForPets(final @RequestBody VisitDetails visitDetails){
         return visitsServiceClient.createVisitForPets(visitDetails);
         }
+
 */
+
+
+    //Delete Visit
+    @DeleteMapping (value = "/pets/visits/{petId}")
+    public Mono<Visits> deleteVisitForPets(final @PathVariable int petId){
+        return visitsServiceClient.deleteVisitForPets(petId);
+    }
+
+    //Update Visit
+    @PostMapping(value ="/pets/visits/{petId}", consumes = "application/json", produces = "application/json")
+    public Mono<Visits> updateVisitForPets(final @PathVariable int petId){
+        return visitsServiceClient.updateVisitForPets(petId);
+    }
+
     private Function<Visits, OwnerDetails> addVisitsToOwner(OwnerDetails owner) {
         return visits -> {
             owner.getPets()

@@ -46,6 +46,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 public class VisitResourceTest {
 
+
 	@Autowired
 	MockMvc mvc;
 
@@ -232,4 +233,5 @@ public class VisitResourceTest {
 				.andExpect(status().isBadRequest());
 	}
 }
+
 

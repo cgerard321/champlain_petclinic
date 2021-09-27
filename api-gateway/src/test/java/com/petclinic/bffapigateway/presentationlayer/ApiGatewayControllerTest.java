@@ -40,7 +40,6 @@ class ApiGatewayControllerTest {
     @Autowired
     private WebTestClient client;
 
-
     @Test
     void getOwnerDetails_withAvailableVisitsService() {
         OwnerDetails owner = new OwnerDetails();

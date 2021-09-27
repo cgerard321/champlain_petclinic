@@ -1,6 +1,7 @@
 package com.petclinic.visits.datalayer;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.CrudRepository;
 
 import java.util.Collection;
 import java.util.List;
@@ -18,7 +19,7 @@ import java.util.Optional;
  * Copied from https://github.com/spring-petclinic/spring-petclinic-microservices
  */
 
-public interface VisitRepository extends JpaRepository<Visit, Integer> {
+public interface VisitRepository extends CrudRepository<Visit, Integer> {
 
     Optional<Visit> findById(int visitId);
 
