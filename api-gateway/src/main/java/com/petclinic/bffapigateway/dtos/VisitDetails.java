@@ -1,5 +1,6 @@
 package com.petclinic.bffapigateway.dtos;
 
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,6 +13,7 @@ import java.util.List;
  */
 
 @Data
+//@Builder(builderMethodName = "visitDetails")
 @NoArgsConstructor
 public class VisitDetails {
 
@@ -64,4 +66,14 @@ public class VisitDetails {
     }
 
     private List<VisitDetails> items = new ArrayList<>();
+
+    public VisitDetails(Integer id, Integer petId, String date, String description) {
+        this.id = id;
+        this.petId = petId;
+        this.date = date;
+        this.description = description;
+
+    }
+
 }
+

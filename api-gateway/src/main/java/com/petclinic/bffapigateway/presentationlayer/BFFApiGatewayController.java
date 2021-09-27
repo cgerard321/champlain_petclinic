@@ -14,6 +14,7 @@ import com.petclinic.bffapigateway.dtos.VisitDetails;
 import com.petclinic.bffapigateway.dtos.Visits;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -29,6 +30,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -89,15 +91,20 @@ public class BFFApiGatewayController {
 
 
     //Delete Visit
-    @DeleteMapping (value = "/pets/visits/{petId}")
-    public Mono<Visits> deleteVisitForPets(final @PathVariable int petId){
-        return visitsServiceClient.deleteVisitForPets(petId);
+    @DeleteMapping (value = "/pets/visits/{petId}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<Void> deleteVisitForPets(final @PathVariable int petId){
+          return visitsServiceClient.deleteVisitForPets(petId);
     }
 
     //Update Visit
     @PostMapping(value ="/pets/visits/{petId}", consumes = "application/json", produces = "application/json")
     public Mono<Visits> updateVisitForPets(final @PathVariable int petId){
         return visitsServiceClient.updateVisitForPets(petId);
+    }
+
+    @GetMapping(value = "visits/{petId}")
+    public Flux<VisitDetails> getVisitsForPet(@PathVariable int petId){
+        return visitsServiceClient.getVisitsForPet(petId);
     }
 
     private Function<Visits, OwnerDetails> addVisitsToOwner(OwnerDetails owner) {
@@ -111,7 +118,7 @@ public class BFFApiGatewayController {
             return owner;
         };
     }
-    
+
     @GetMapping(value = "vets")
     public Flux<VetDetails> getVets() {
         return vetsServiceClient.getVets();

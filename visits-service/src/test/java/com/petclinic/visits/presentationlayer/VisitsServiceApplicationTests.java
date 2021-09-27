@@ -96,21 +96,17 @@ public class VisitsServiceApplicationTests {
         assertThat(visit2.getDescription(), is("Perfectly Fine"));
 
     }
-/*
+
     @Test
     void deleteVisit() throws ParseException {
-
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         java.util.Date visitDate = sdf.parse("2022-04-12");
         //create a review entity
-
         Visit v = new Visit(VISIT_DELETED, visitDate, "Lightly hurt", VISIT_DELETED);
         //save it
         repository.save(v);
-
         //verify there are exactly 1  entity for product id 1
         assertEquals(1, repository.findByPetId(VISIT_DELETED).size());
-
         //send the DELETE request
         client.delete()
                 .uri("/pets/visits/" + VISIT_DELETED)
@@ -119,9 +115,8 @@ public class VisitsServiceApplicationTests {
                 .expectStatus()
                 .isOk()
                 .expectBody();
-
         //verify there are no entities for product id 1
         assertEquals(0, repository.findByPetId(VISIT_DELETED).size());
     }
-*/
+
 }

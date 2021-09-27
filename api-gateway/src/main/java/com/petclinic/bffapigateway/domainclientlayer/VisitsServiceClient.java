@@ -8,6 +8,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -52,6 +53,15 @@ public class VisitsServiceClient {
                 .bodyToMono(Visits.class);
     }
 
+
+
+    public Flux<VisitDetails> getVisitsForPet(final int petId){
+        return webClientBuilder.build()
+                .get()
+                .uri(hostname + "/visits/{petId}", petId)
+                .retrieve()
+                .bodyToFlux(VisitDetails.class);
+    }
 /*
     public Mono<Visits> createVisitForPets(final VisitDetails visitDetails){
         return webClientBuilder.build()
@@ -74,12 +84,12 @@ public class VisitsServiceClient {
                 .bodyToMono(Visits.class);
     }
 
-    public Mono<Visits> deleteVisitForPets(final int petId){
-        return webClientBuilder.build()
+    public Mono<Void> deleteVisitForPets(final int petId){
+         return webClientBuilder.build()
                 .delete()
                 .uri(hostname + "/pets/visits/{petId}", petId)
                 .retrieve()
-                .bodyToMono(Visits.class);
+                .bodyToMono(Void.class);
     }
 
     //Testing purpose
@@ -91,6 +101,8 @@ public class VisitsServiceClient {
                 .retrieve()
                 .bodyToMono(Visits.class);
     }
+
+
 
     private String joinIds(List<Integer> petIds) {
         return petIds.stream().map(Object::toString).collect(joining(","));

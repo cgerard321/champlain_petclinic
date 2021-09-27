@@ -84,10 +84,9 @@ public class VisitResource {
 
     @DeleteMapping (value = "/pets/visits/{petId}")
     @ResponseStatus(HttpStatus.OK)
-    public Visit deleteVisit(@PathVariable("petId") int petId, @Valid @RequestBody Visit visit){
-        log.info("Deleting visit {}", visit);
+    public void deleteVisit(@PathVariable("petId") int petId){
+        log.info("Deleting visit {}", petId);
         visitRepository.deleteAll(visitRepository.findByPetId(petId));
-        return visit;
     }
 */
 
@@ -111,6 +110,7 @@ public class VisitResource {
     public void deleteVisit(@PathVariable("visitId") int visitId) {
         visitsService.deleteVisit(visitId);
     }
+
 
     //This method will return every visits of people that have multiple pets
     @GetMapping("visits/{petId}")
