@@ -15,8 +15,6 @@ import com.petclinic.bffapigateway.dtos.Visits;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-<<<<<<< HEAD
-=======
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.slf4j.Logger;
@@ -26,7 +24,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
->>>>>>> 04401ba8558a5db3d5e68d234fdf4cbbb9d2aeed
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
