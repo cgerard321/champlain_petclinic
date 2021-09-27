@@ -8,4 +8,9 @@ angular.module('vetList', ['ui.router'])
                 url: '/vets',
                 template: '<vet-list></vet-list>'
             })
+            .state('disabled', {
+                parent: 'app',
+                url: '/vets/disabled',
+                template: '<vet-list></vet-list>'
+            })
     }]);

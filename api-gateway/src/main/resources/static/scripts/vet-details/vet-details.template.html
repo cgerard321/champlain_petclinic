@@ -2,6 +2,10 @@
 
 <table class="table table-striped">
   <tr>
+    <th class="col-sm-3">Vet ID</th>
+    <td><b>{{$ctrl.vet.vetId}}</b></td>
+  </tr>
+  <tr>
     <th class="col-sm-3">Name</th>
     <td><b>{{$ctrl.vet.firstName}} {{$ctrl.vet.lastName}}</b></td>
   </tr>
@@ -22,13 +26,18 @@
     <th>Work Day</th>
     <td id="workDay">{{$ctrl.vet.workday}}</td>
   </tr>
+  <tr>
+    <th>Is Active</th>
+    <td>{{$ctrl.vet.isActive}}</td>
+  </tr>
 
   <tr>
     <td>
       <a class="btn btn-default" ui-sref="vetEdit({vetId: $ctrl.vet.vetId})">Edit Vet</a>
     </td>
     <td>
-      <a ui-sref="" class="btn btn-default">Deactivate Vet</a>
+      <a class="btn btn-default" ui-sref="disableVet({vetId: $ctrl.vet.vetId})">Disable Vet</a>
+      <a class="btn btn-default" ui-sref="enableVet({vetId: $ctrl.vet.vetId})">Enable Vet</a>
     </td>
   </tr>
 </table>
