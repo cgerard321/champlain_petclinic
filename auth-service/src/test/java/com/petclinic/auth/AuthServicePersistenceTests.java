@@ -35,7 +35,8 @@ public class AuthServicePersistenceTests {
     private RoleRepo roleRepo;
 
     private final User DEFAULT_USER =
-            new User(0, "username-1", "password-1", "email-1@gmail.com", Collections.EMPTY_SET);
+            new User(0, "username-1", "pas$word-123", "email-1@gmail.com", Collections.EMPTY_SET);
+
 
     private final Role
             ROLE_ADMIN = new Role(0, "ADMIN"),
@@ -204,10 +205,11 @@ public class AuthServicePersistenceTests {
     @DisplayName("Add User with username, password and email")
     void add_user() {
 
-        final User testUser = userRepo.save(new User("testUsername", "testPassword", "test@email.com"));
+
+        final User testUser = userRepo.save(new User("testUsername", "testPa$sword123", "test@email.com"));
 
         assertEquals(testUser.getUsername(), "testUsername");
-        assertEquals(testUser.getPassword(), "testPassword");
+        assertEquals(testUser.getPassword(), "testPa$sword123");
         assertEquals(testUser.getEmail(), "test@email.com");
     }
 

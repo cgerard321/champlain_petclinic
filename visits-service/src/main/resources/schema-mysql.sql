@@ -6,5 +6,5 @@ CREATE TABLE IF NOT EXISTS visits (
     visit_date DATE,
     description VARCHAR(8192),
     practitioner_id INT(4) UNSIGNED NOT NULL,
-    status BIT,
+    status BIT
     ) engine=InnoDB;
