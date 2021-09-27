@@ -1,5 +1,6 @@
 package com.petclinic.bffapigateway.presentationlayer;
 
+import com.petclinic.bffapigateway.domainclientlayer.AuthenticationServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
@@ -48,6 +49,8 @@ public class BFFApiGatewayController {
     private final VisitsServiceClient visitsServiceClient;
 
     private final VetsServiceClient vetsServiceClient;
+
+    private final AuthenticationServiceClient authenticationServiceClient;
 
     @GetMapping(value = "owners/{ownerId}")
     public Mono<OwnerDetails> getOwnerDetails(final @PathVariable int ownerId) {
@@ -106,4 +109,9 @@ public class BFFApiGatewayController {
     public Object addRole() {
         return null;
     }
+
+    @PostMapping(value = "/owners",
+            consumes = "application/json",
+            produces = "application/json")
+    public Mono<OwnerDetails> createOwner(@RequestBody OwnerDetails model){ return customersServiceClient.getOwner(model.getId()); }
 }
