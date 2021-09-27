@@ -69,14 +69,18 @@ public class BFFApiGatewayController {
             );
     }
 
-    @PutMapping(value = "owners/{ownerId}")
-    public Mono<OwnerDetails> updateOwnerDetails(final @PathVariable int ownerId) {
-        customersServiceClient.updateOwner(ownerId)
-                .flatMap(owner ->
-                        visitsServiceClient.getVisitsForPets(owner.getPetIds())
-                                .map(addVisitsToOwner(owner)));
+    @PutMapping(value = "owners/{ownerId}",consumes = "application/json" ,produces = "application/json")
+    public Mono<OwnerDetails> updateOwnerDetails(@RequestBody OwnerDetails od, final @PathVariable int ownerId) {
 
-        return customersServiceClient.getOwner(ownerId);
+
+          return customersServiceClient.updateOwner(od,ownerId)
+                    .flatMap(owner ->
+                            visitsServiceClient.getVisitsForPets(owner.getPetIds())
+                                    .map(addVisitsToOwner(owner)));
+
+
+
+
 
     }
 
