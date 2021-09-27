@@ -14,6 +14,7 @@ import com.petclinic.bffapigateway.dtos.VisitDetails;
 import com.petclinic.bffapigateway.dtos.Visits;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -68,7 +69,23 @@ public class BFFApiGatewayController {
             );
     }
 
-    private Function<Visits, OwnerDetails> addVisitsToOwner(OwnerDetails owner) {
+    @PutMapping(value = "owners/{ownerId}",consumes = "application/json" ,produces = "application/json")
+    public Mono<OwnerDetails> updateOwnerDetails(@RequestBody OwnerDetails od, final @PathVariable int ownerId) {
+
+
+          return customersServiceClient.updateOwner(od,ownerId)
+                    .flatMap(owner ->
+                            visitsServiceClient.getVisitsForPets(owner.getPetIds())
+                                    .map(addVisitsToOwner(owner)));
+
+
+
+
+
+    }
+
+
+        private Function<Visits, OwnerDetails> addVisitsToOwner(OwnerDetails owner) {
         return visits -> {
             owner.getPets()
                 .forEach(pet -> pet.getVisits()
