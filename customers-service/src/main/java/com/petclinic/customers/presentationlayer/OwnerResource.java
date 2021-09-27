@@ -35,11 +35,13 @@ class OwnerResource {
     //private static final Logger log = LoggerFactory.getLogger(OwnerResource.class);
     private final OwnerServiceImpl ownerServiceImpl;
     private final OwnerRepository ownerRepository;
+    private final OwnerService ownerService;
 
     @Autowired
-    OwnerResource(OwnerServiceImpl ownerServiceImpl, OwnerRepository ownerRepository) {
+    OwnerResource(OwnerServiceImpl ownerServiceImpl, OwnerRepository ownerRepository, OwnerService ownerService) {
         this.ownerServiceImpl = ownerServiceImpl;
         this.ownerRepository = ownerRepository;
+        this.ownerService = ownerService;
     }
 
     /**
