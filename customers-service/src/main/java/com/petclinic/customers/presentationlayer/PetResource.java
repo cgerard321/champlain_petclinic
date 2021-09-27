@@ -20,13 +20,16 @@ import java.util.Optional;
 
 @RestController
 @Timed("petclinic.pet")
-@RequiredArgsConstructor
 @Slf4j
 class PetResource {
 
     private final PetRepository petRepository;
     private final OwnerRepository ownerRepository;
 
+    public PetResource(PetRepository petRepository, OwnerRepository ownerRepository) {
+        this.petRepository = petRepository;
+        this.ownerRepository = ownerRepository;
+    }
 
     @GetMapping("/petTypes")
     public List<PetType> getPetTypes() {

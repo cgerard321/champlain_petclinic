@@ -1,10 +1,13 @@
 package com.petclinic.auth.User;
 
+
+import javassist.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
 
@@ -19,8 +22,21 @@ public class UserServiceImpl implements UserService{
     @Override
     public User createUser(@Valid UserIDLessDTO userIDLessDTO) {
 
-        log.info("Saving user with username {}", userIDLessDTO.getUsername());
-        User user = userMapper.idLessDTOToModel(userIDLessDTO);
+        if (userRepo.findByEmail(userIDLessDTO.getEmail()) != null){
+            throw new DuplicateKeyException("Duplicate email for " + userIDLessDTO.getEmail());
+        }
+        else {
+            log.info("Saving user with username {}", userIDLessDTO.getUsername());
+            User user = userMapper.idLessDTOToModel(userIDLessDTO);
+            return userRepo.save(user);
+        }
+    }
+
+    public User passwordReset(long id, String passwd) throws NotFoundException {
+
+        log.info("id={}", id);
+        User user = userRepo.findById(id).orElseThrow(() -> new NotFoundException("No user for id:" + id));
+        user.setPassword(passwd);
         return userRepo.save(user);
 
     }

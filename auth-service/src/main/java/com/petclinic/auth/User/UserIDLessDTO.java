@@ -2,9 +2,10 @@ package com.petclinic.auth.User;
 
 import lombok.*;
 
-import javax.validation.constraints.NotBlank;
+import javax.persistence.Column;
+import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
+
 
 @Getter
 @Setter
@@ -14,15 +15,13 @@ import javax.validation.constraints.NotNull;
 public class UserIDLessDTO {
 
     @NotEmpty
-    @NotBlank
-    @NotNull
     private String username;
-    @NotEmpty
-    @NotBlank
-    @NotNull
+
+    @PasswordStrengthCheck
     private String password;
+
     @NotEmpty
-    @NotBlank
-    @NotNull
+    @Email(message = "Email must be valid")
+    @Column(unique = true)
     private String email;
 }

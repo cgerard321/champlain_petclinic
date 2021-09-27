@@ -4,8 +4,10 @@ import com.petclinic.auth.Role.Role;
 import lombok.*;
 
 import javax.persistence.*;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
-import java.util.List;
 import java.util.Set;
 
 @Table(schema = "auth", name = "users")
@@ -21,13 +23,15 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @NotNull
+    @NotEmpty
     private String username;
 
+    @NotEmpty
     @NotNull
     private String password;
 
-    @NotNull
+    @NotEmpty
+    @Email(message = "Email must be valid")
     private String email;
 
     public User(String username, String password, String email) {

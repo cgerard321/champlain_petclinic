@@ -1,22 +1,24 @@
 package com.petclinic.auth;
 
 
-import com.petclinic.auth.User.*;
-import com.petclinic.auth.Role.*;
 import com.petclinic.auth.Role.Role;
 import com.petclinic.auth.Role.RoleIDLessDTO;
 import com.petclinic.auth.Role.RoleMapper;
 import com.petclinic.auth.Role.RoleRepo;
 import com.petclinic.auth.User.User;
+import com.petclinic.auth.User.UserIDLessDTO;
+import com.petclinic.auth.User.UserMapper;
 import com.petclinic.auth.User.UserRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -30,15 +32,16 @@ class AuthServiceApplicationTests {
 
 	final String
 			USER = "user",
-			PASS = "pass",
+			PASS = "Pas$word123",
 			EMAIL = "email",
 			ROLE_NAME = "role";
 	final Role role = new Role(0, ROLE_NAME);
 
+	private Validator validator;
+
 	final Set<Role> ROLES = new HashSet<Role>() {{
 		add(role);
 	}};
-
 	final long ID = 1L;
 
 
@@ -62,6 +65,8 @@ class AuthServiceApplicationTests {
 	void setup() {
 		roleRepo.deleteAllInBatch();
 		userRepo.deleteAllInBatch();
+		ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+		validator = factory.getValidator();
 	}
 
 	@Test
@@ -212,8 +217,38 @@ class AuthServiceApplicationTests {
 	}
 
 	@Test
+	@DisplayName("Verify if the email is valid and succeed")
+	void verify_valid_email_success() {
+		User user = new User();
+		user.setUsername(USER);
+		user.setPassword(PASS);
+		user.setId(ID);
+		user.setEmail("testemail@gmail.com");
+		Set<ConstraintViolation<User>> violations = validator.validate(user);
+		assertTrue(violations.isEmpty());
+	}
+
+	@Test
+	@DisplayName("Verify if the email is valid and fail because missing @")
+	void detect_invalid_email_missing_at() {
+		User user = new User();
+		user.setUsername(USER);
+		user.setPassword(PASS);
+		user.setId(ID);
+		user.setEmail("testemailgmail.com");
+		Set<ConstraintViolation<User>> violations = validator.validate(user);
+		assertEquals(violations.size(), 1);
+
+		ConstraintViolation<User> violation = violations.iterator().next();
+		assertEquals("Email must be valid", violation.getMessage());
+		assertEquals("email", violation.getPropertyPath().toString());
+		assertEquals("testemailgmail.com", violation.getInvalidValue());
+	}
+
+	@Test
 	@DisplayName("Submit a completed signup form")
-	void submit_completed_signup_form() throws Exception {
+	void submit_completed_signup_form() {
+
 		User user = new User(USER, PASS, EMAIL);
 		assertEquals(USER, user.getUsername());
 		assertEquals(PASS, user.getPassword());
@@ -221,7 +256,8 @@ class AuthServiceApplicationTests {
 	}
 	@Test
 	@DisplayName("Submit signup form through constructor of UserIDLessDTO")
-	void submit_form_with_constructor_without_id() throws Exception{
+	void submit_form_with_constructor_without_id() {
+
 		UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
 		assertEquals(USER, userIDLessDTO.getUsername());
 		assertEquals(PASS, userIDLessDTO.getPassword());
@@ -261,4 +297,7 @@ class AuthServiceApplicationTests {
 		assertEquals(PASS, userIDLessDTO.getPassword());
 		assertEquals(EMAIL, userIDLessDTO.getEmail());
 	}
+
+
 }
+
