@@ -12,10 +12,11 @@
     <link rel="shortcut icon" type="image/x-icon" href="/images/favicon.png"/>
 
     <title>PetClinic :: a Spring Framework demonstration</title>
-    <link rel="stylesheet" href="/css/petclinic.css" type="text/css "/>
+    <link rel="stylesheet" href="/css/petclinic.css"/>
 
     <!--Vet service styling for modal on vet hover-->
     <link rel="stylesheet" href="/css/vets/modal.css" type="text/css"/>
+    <link rel="stylesheet" href="/css/vets/sevenDaysCalendar.css" type="text/css"/>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
@@ -53,9 +54,15 @@
     <script src="scripts/vet-list/vet-list.controller.js"></script>
     <script src="scripts/vet-list/vet-list.component.js"></script>
 
+
+    <script src="scripts/vet-form/vet-form.js"></script>
+    <script src="scripts/vet-form/vet-form.controller.js"></script>
+    <script src="scripts/vet-form/vet-form.component.js"></script>
+
     <script src="scripts/auth/login-form/login-form.js"></script>
     <script src="scripts/auth/login-form/login-form.controller.js"></script>
     <script src="scripts/auth/login-form/login-form.component.js"></script>
+
     <script src="scripts/auth/signup/signup-form.js"></script>
     <script src="scripts/auth/signup/signup-form.controller.js"></script>
     <script src="scripts/auth/signup/signup-form.component.js"></script>
@@ -63,13 +70,14 @@
     <script src="scripts/vet-details/vet-details.js"></script>
     <script src="scripts/vet-details/vet-details.controller.js"></script>
     <script src="scripts/vet-details/vet-details.component.js"></script>
+    <script src="scripts/vet-details/vet-details-availability.js"></script>
 
     <script src="scripts/auth/admin/roles-details.js"></script>
     <script src="scripts/auth/admin/roles-details.controller.js"></script>
     <script src="scripts/auth/admin/roles-details.component.js"></script>
 </head>
 
-<body id="bg">
+<body>
     <layout-nav></layout-nav>
     <div class="container-fluid">
         <div class="container xd-container">

@@ -1,4 +1,4 @@
-<div class="bColor"><h2 class="titleOwner form">Owner Information</h2></div>
+<h2>Owner Information</h2>
 
 <table class="table table-striped">
     <tr>
@@ -19,22 +19,22 @@
     </tr>
     <tr>
         <td>
-            <a class="newBtn btn btn-default" ui-sref="ownerEdit({ownerId: $ctrl.owner.id})">Edit Owner</a>
+            <a class="btn btn-default" ui-sref="ownerEdit({ownerId: $ctrl.owner.id})">Edit Owner</a>
         </td>
         <td>
-            <a class="newBtn btn btn-default" ui-sref="petNew({ownerId: $ctrl.owner.id})">Add New Pet</a>
+            <a ui-sref="petNew({ownerId: $ctrl.owner.id})" class="btn btn-default">Add New Pet</a>
         </td>
     </tr>
 </table>
 
-<div class="bColor"><h2 class="titleOwner form">Pets and Visits</h2></div>
+<h2>Pets and Visits</h2>
 
 <table class="table table-striped">
     <tr ng-repeat="pet in $ctrl.owner.pets track by pet.id">
         <td valign="top">
             <dl class="dl-horizontal">
                 <dt>Name</dt>
-                <dd>{{pet.name}}</dd>
+                <dd><a ui-sref="petEdit({ownerId: $ctrl.owner.id, petId: pet.id})">{{pet.name}}</a></dd>
                 <dt>Birth Date</dt>
                 <dd>{{pet.birthDate | date:'yyyy MMM dd'}}</dd>
                 <dt>Type</dt>
@@ -42,7 +42,7 @@
             </dl>
         </td>
         <td valign="top">
-            <table class="noColor table-condensed">
+            <table class="table-condensed">
                 <thead>
                 <tr>
                     <th>Visit Date</th>
@@ -55,10 +55,10 @@
                 </tr>
                 <tr>
                     <td>
-                        <a class="newBtn btn btn-default" ui-sref="petEdit({ownerId: $ctrl.owner.id, petId: pet.id})">Edit Pet</a>
+                        <a ui-sref="petEdit({ownerId: $ctrl.owner.id, petId: pet.id})">Edit Pet</a>
                     </td>
                     <td>
-                        <a class="newBtn btn btn-default" ui-sref="visits({ownerId: $ctrl.owner.id, petId: pet.id})">Add Visit</a>
+                        <a ui-sref="visits({ownerId: $ctrl.owner.id, petId: pet.id})">Add Visit</a>
                     </td>
                 </tr>
             </table>

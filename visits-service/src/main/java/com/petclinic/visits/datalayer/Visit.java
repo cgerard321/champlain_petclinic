@@ -47,8 +47,26 @@ public class Visit {
     @Column(name = "status")
     private boolean status;
 
+
+
+    //Constructor of the visit object
+    public Visit(int id, Date date, String description, int petId){
+        this.id = id;
+        this.date = date;
+        this.description = description;
+        this.petId = petId;
+    }
+
+    /*
+    Getter and setters for all values
+     */
+
     public Integer getId() {
         return id;
+    }
+
+    public void setId(int Id){
+        this.id = id;
     }
 
     public Date getDate() {
@@ -73,6 +91,18 @@ public class Visit {
 
     public void setPetId(final int petId) {
         this.petId = petId;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
     
     public int getPractitionerId() {

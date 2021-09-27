@@ -43,4 +43,3 @@ public class BillResource {
         billRepository.findById(billId).ifPresent(entity -> billRepository.delete(entity));
     }
 }
-
