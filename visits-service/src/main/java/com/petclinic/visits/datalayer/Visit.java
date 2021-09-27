@@ -92,6 +92,18 @@ public class Visit {
     public void setPetId(final int petId) {
         this.petId = petId;
     }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
     
     public int getPractitionerId() {
         return practitionerId;
