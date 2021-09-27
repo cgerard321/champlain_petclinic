@@ -10,17 +10,17 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Component
-public class AuthenticationServiceClient {
+public class AuthServiceClient {
     private final WebClient.Builder webClientBuilder;
     private final String authenticationServiceUrl;
 
-    public AuthenticationServiceClient(
+    public AuthServiceClient(
             WebClient.Builder webClientBuilder,
             @Value("${app.authentication-service.host}") String authenticationServiceHost,
             @Value("${app.authentication-service.port}") String authenticationServicePort
     ) {
         this.webClientBuilder = webClientBuilder;
-        authenticationServiceUrl = "http://" + authenticationServiceHost + ":" + authenticationServicePort + "/user";
+        authenticationServiceUrl = "http://" + authenticationServiceHost + ":" + authenticationServicePort + "/users";
     }
 
     public Mono<UserDetails> getUser(final int userId) {
