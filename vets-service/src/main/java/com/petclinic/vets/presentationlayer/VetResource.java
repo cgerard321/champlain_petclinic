@@ -72,6 +72,16 @@ class VetResource {
         return vet;
     }
 
+
+    @PutMapping(path = "/{vetId}/enableVet",
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public Vet enableVet(@PathVariable("vetId") int vetId, @RequestBody Vet vetRequest) {
+        Vet vet = vetService.getVetByVetId(vetId);
+        vetService.enableVet(vet,vetRequest);
+        return vet;
+    }
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Vet addVet(@Valid @RequestBody Vet vet)
