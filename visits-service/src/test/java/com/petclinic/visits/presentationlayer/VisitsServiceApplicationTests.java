@@ -23,7 +23,7 @@ import static reactor.core.publisher.Mono.just;
 @ExtendWith(SpringExtension.class)
 @AutoConfigureWebTestClient
 public class VisitsServiceApplicationTests {
-
+/*
     private static final int VISIT_CREATED = 1;
     private static final int VISIT_DELETED = 3;
     private static final int VISIT_UPDATED = 2;
@@ -118,5 +118,5 @@ public class VisitsServiceApplicationTests {
         //verify there are no entities for product id 1
         assertEquals(0, repository.findByPetId(VISIT_DELETED).size());
     }
-
+*/
 }
