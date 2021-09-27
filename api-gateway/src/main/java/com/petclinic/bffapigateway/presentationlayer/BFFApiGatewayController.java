@@ -12,6 +12,7 @@ import com.petclinic.bffapigateway.dtos.BillDetails;
 import com.petclinic.bffapigateway.dtos.OwnerDetails;
 import com.petclinic.bffapigateway.dtos.VetDetails;
 import com.petclinic.bffapigateway.dtos.Visits;
+//import com.petclinic.billing.datalayer.Bill;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.HttpClientErrorException;
@@ -48,6 +49,8 @@ public class BFFApiGatewayController {
 
     private final BillServiceClient billServiceClient;
 
+
+
     @GetMapping(value = "owners/{ownerId}")
     public Mono<OwnerDetails> getOwnerDetails(final @PathVariable int ownerId) {
         return customersServiceClient.getOwner(ownerId)
@@ -57,13 +60,10 @@ public class BFFApiGatewayController {
             );
     }
 //check this
-    @GetMapping(value = "owners/{billId}")
-    public Mono<BillDetails> getBillingInfo(final @PathVariable int billId) {
+    @GetMapping(value = "bill/{billId}")
+    public Mono<BillDetails> getBillingInfo(final @PathVariable int billId)
+    {
         return billServiceClient.getBilling(billId);
-//                .flatMap(bill ->
-//                        billServiceClient.getBilling(bill.getBill()  )
-//                                //.map(addVisitsToOwner(bill))
-//                );
     }
 
 

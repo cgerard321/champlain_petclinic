@@ -16,12 +16,5 @@ public class BillDetails {
     private Date date;
     private String visitType;
     private double amount;
-//    private final List<BillDetails> bills = new ArrayList<>();
-//
-//
-//    public List<BillDetails> getBill() {
-//        return bills.stream()
-//                .map(BillDetails::getBill)
-//                .collect(toList());
-//    }
+
 }

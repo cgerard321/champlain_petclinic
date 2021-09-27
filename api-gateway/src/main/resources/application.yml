@@ -12,11 +12,11 @@ app:
     host: localhost
     port: 7003
   billing-service:
-      host: localhost
-      port: 7005
+    host: localhost
+    port: 7004
   auth-service:
-      host: localhost
-      port: 7006
+    host: localhost
+    port: 7005
 
 
 logging:
@@ -38,4 +38,6 @@ app:
   customers-service:
     host: customers
     port: 8080
-
+  billing-service:
+    host: localhost
+    port: 8080
