@@ -13,5 +13,4 @@ angular.module('vetForm', ['ui.router'])
                 url: '/vets/:vetId/edit',
                 template: '<vet-form></vet-form>'
             })
-
     }]);

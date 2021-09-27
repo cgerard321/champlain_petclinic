@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
@@ -33,7 +32,7 @@ class AuthServiceApplicationTests {
 
 	final String
 			USER = "user",
-			PASS = "pass",
+			PASS = "Pas$word123",
 			EMAIL = "email",
 			ROLE_NAME = "role";
 	final Role role = new Role(0, ROLE_NAME);
@@ -43,7 +42,6 @@ class AuthServiceApplicationTests {
 	final Set<Role> ROLES = new HashSet<Role>() {{
 		add(role);
 	}};
-
 	final long ID = 1L;
 
 
@@ -250,6 +248,7 @@ class AuthServiceApplicationTests {
 	@Test
 	@DisplayName("Submit a completed signup form")
 	void submit_completed_signup_form() {
+
 		User user = new User(USER, PASS, EMAIL);
 		assertEquals(USER, user.getUsername());
 		assertEquals(PASS, user.getPassword());
@@ -258,6 +257,7 @@ class AuthServiceApplicationTests {
 	@Test
 	@DisplayName("Submit signup form through constructor of UserIDLessDTO")
 	void submit_form_with_constructor_without_id() {
+
 		UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
 		assertEquals(USER, userIDLessDTO.getUsername());
 		assertEquals(PASS, userIDLessDTO.getPassword());
@@ -297,5 +297,7 @@ class AuthServiceApplicationTests {
 		assertEquals(PASS, userIDLessDTO.getPassword());
 		assertEquals(EMAIL, userIDLessDTO.getEmail());
 	}
+
+
 }
 

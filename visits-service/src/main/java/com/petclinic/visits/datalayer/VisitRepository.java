@@ -20,6 +20,8 @@ import java.util.Optional;
 
 public interface VisitRepository extends JpaRepository<Visit, Integer> {
 
+    Optional<Visit> findById(int visitId);
+
     List<Visit> findByPetId(int petId);
 
     List<Visit> findByPetIdIn(Collection<Integer> petIds);
