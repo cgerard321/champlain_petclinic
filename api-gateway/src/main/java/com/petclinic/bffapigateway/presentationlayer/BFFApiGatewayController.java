@@ -121,11 +121,6 @@ public class BFFApiGatewayController {
             produces = "application/json")
     public Mono<OwnerDetails> createOwner(@RequestBody OwnerDetails model){ return customersServiceClient.getOwner(model.getId()); }
 
-    @GetMapping(value = "users/{userId}")
-    public Mono<UserDetails> getUserDetails(final @PathVariable int userId) {
-        return authServiceClient.getUser(userId);
-    }
-
     @PostMapping(value = "/users",
             consumes = "application/json",
             produces = "application/json")
