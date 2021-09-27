@@ -52,6 +52,25 @@ public class Owner {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "owner")
     private Set<Pet> pets;
 
+    public Owner()
+    {
+
+    }
+
+    public Owner(Integer id, @NotEmpty String firstName, @NotEmpty String lastName, @NotEmpty String address, @NotEmpty String city, @NotEmpty @Digits(fraction = 0, integer = 10) String telephone) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.address = address;
+        this.city = city;
+        this.telephone = telephone;
+        this.pets = pets;
+    }
+
+    public Integer setId(Integer id)
+    {
+        return id;
+    }
     public Integer getId() {
         return id;
     }

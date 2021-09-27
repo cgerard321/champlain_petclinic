@@ -34,7 +34,7 @@ public class Pet {
     @JoinColumn(name = "type_id")
     private PetType type;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "owner_id")
     @JsonIgnore
     private Owner owner;
