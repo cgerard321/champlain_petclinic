@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<local-project language="java" version="5.0.15419" xml-version="3" flavor="j2se">
+  <property name="publish-architecture-artifacts" value="true" />
+  <property name="force-classpath" value="false" />
+  <property name="project-type" value="classpath" />
+  <property name="hide-externals" value="true" />
+  <property name="parse-archive-in-archive" value="false" />
+  <property name="include-injected-dependency" value="false" />
+  <property name="relative-to" value="const(THIS_FILE)" />
+  <property name="action-set-mod" value="1" />
+  <property name="detail-mode" value="true" />
+  <property name="restructuring-system-file" value="structure101-actions.xml" />
+  <property name="hide-deprecated" value="false" />
+  <property name="resolve-name-clashes" value="true" />
+  <property name="project-excluded" />
+  <property name="show-needs-to-compile" value="false" />
+  <property name="physical-layering-system-file" value="structure101-spec.xml" />
+  <classpath>
+    <classpathentry kind="lib" path="customers-service/build/classes/java/main" module="champlain_petclinic_bkup2___customers-service___main" displaymodule="champlain_petclinic_bkup2.customers-service.main" />
+    <classpathentry kind="lib" path="vets-service/build/classes/java/main" module="champlain_petclinic_bkup2___vets-service___main" displaymodule="champlain_petclinic_bkup2.vets-service.main" />
+    <classpathentry kind="lib" path="api-gateway/build/classes/java/main" module="champlain_petclinic_bkup2___api-gateway___main" displaymodule="champlain_petclinic_bkup2.api-gateway.main" />
+    <classpathentry kind="lib" path="visits-service/build/classes/java/main" module="champlain_petclinic_bkup2___visits-service___main" displaymodule="champlain_petclinic_bkup2.visits-service.main" />
+  </classpath>
+  <pom-root-files />
+  <modules>
+    <module name="champlain_petclinic_bkup2___visits-service___main" kind="ide-project" />
+    <module name="champlain_petclinic_bkup2___visits-service" kind="ide-project" />
+    <module name="champlain_petclinic_bkup2___vets-service___main" kind="ide-project" />
+    <module name="champlain_petclinic_bkup2___vets-service" kind="ide-project" />
+    <module name="champlain_petclinic_bkup2___customers-service___main" kind="ide-project" />
+    <module name="champlain_petclinic_bkup2___customers-service" kind="ide-project" />
+    <module name="champlain_petclinic_bkup2___api-gateway___main" kind="ide-project" />
+    <module name="champlain_petclinic_bkup2___api-gateway" kind="ide-project" />
+    <module name="champlain_petclinic_bkup2" kind="ide-project" />
+    <module name="champlain_petclinic_bkup2___visits-service___test" kind="ide-project">
+      <requires name="champlain_petclinic_bkup2___visits-service___main" kind="ide-project" />
+    </module>
+    <module name="champlain_petclinic_bkup2___vets-service___test" kind="ide-project">
+      <requires name="champlain_petclinic_bkup2___vets-service___main" kind="ide-project" />
+    </module>
+    <module name="champlain_petclinic_bkup2___customers-service___test" kind="ide-project">
+      <requires name="champlain_petclinic_bkup2___customers-service___main" kind="ide-project" />
+    </module>
+    <module name="champlain_petclinic_bkup2___api-gateway___test" kind="ide-project">
+      <requires name="champlain_petclinic_bkup2___api-gateway___main" kind="ide-project" />
+    </module>
+  </modules>
+  <modules-in-scope>
+    <module name="champlain_petclinic_bkup2___visits-service___main" />
+    <module name="champlain_petclinic_bkup2___visits-service___test" />
+    <module name="champlain_petclinic_bkup2___vets-service___main" />
+    <module name="champlain_petclinic_bkup2___vets-service___test" />
+    <module name="champlain_petclinic_bkup2___customers-service___main" />
+    <module name="champlain_petclinic_bkup2___customers-service___test" />
+    <module name="champlain_petclinic_bkup2___api-gateway___main" />
+    <module name="champlain_petclinic_bkup2___api-gateway___test" />
+    <module name="champlain_petclinic_bkup2___visits-service" />
+    <module name="champlain_petclinic_bkup2___vets-service" />
+    <module name="champlain_petclinic_bkup2___customers-service" />
+    <module name="champlain_petclinic_bkup2___api-gateway" />
+    <module name="champlain_petclinic_bkup2" />
+  </modules-in-scope>
+  <excludes>
+    <exclude expression="*.*&amp;amp;*" active="true" />
+  </excludes>
+  <grid-set sep="." version="5.0.15419" />
+</local-project>

@@ -42,7 +42,7 @@ public class BillServiceImplTest {
     public void test_GetBill(){
         //arrange
         Calendar calendar = Calendar.getInstance();
-        calendar.set(2021, 9, 21);
+        calendar.set(2021, Calendar.SEPTEMBER, 21);
         Date date = calendar.getTime();
         Bill entity = new Bill(billId, date, "Checkup", 50.00);
         when(billRepository.findById(1)).thenReturn(Optional.of(entity));
@@ -57,7 +57,7 @@ public class BillServiceImplTest {
     @Test
     public void test_GetBill_NotFoundException(){
         //act & assert
-        assertThrows(NotFoundException.class, ()->{
+        assertThrows(NotFoundException.class, () -> {
             billService.GetBill(1);
         });
     }
@@ -67,7 +67,7 @@ public class BillServiceImplTest {
     public void test_CreateBill(){
         //arrange
         Calendar calendar = Calendar.getInstance();
-        calendar.set(2021, 9, 21);
+        calendar.set(2021, Calendar.SEPTEMBER, 21);
         Date date = calendar.getTime();
         BillDTO model = new BillDTO(billId, date, "Checkup", 50.00);
         Bill entity = new Bill(billId, date, "Checkup", 50.00);
@@ -85,13 +85,13 @@ public class BillServiceImplTest {
     public void test_CreateBillInvalidInputException(){
         //arrange
         Calendar calendar = Calendar.getInstance();
-        calendar.set(2021, 9, 21);
+        calendar.set(2021, Calendar.SEPTEMBER, 21);
         Date date = calendar.getTime();
         BillDTO model = new BillDTO(billId, date, "Checkup", 50.00);
         when(billRepository.save(any(Bill.class))).thenThrow(DuplicateKeyException.class);
 
         //act & assert
-        assertThrows(InvalidInputException.class, ()->{
+        assertThrows(InvalidInputException.class, () -> {
             billService.CreateBill(model);
         });
 
@@ -102,7 +102,7 @@ public class BillServiceImplTest {
     public void test_DeleteBill(){
         //arrange
         Calendar calendar = Calendar.getInstance();
-        calendar.set(2021, 9, 21);
+        calendar.set(2021, Calendar.SEPTEMBER, 21);
         Date date = calendar.getTime();
         Bill entity = new Bill(billId, date, "Checkup", 50.0);
         when(billRepository.findById(1)).thenReturn(Optional.of(entity));
@@ -118,7 +118,7 @@ public class BillServiceImplTest {
     public void test_DeleteBill_does_not_exist(){
         //arrange
         Calendar calendar = Calendar.getInstance();
-        calendar.set(2021, 9, 21);
+        calendar.set(2021, Calendar.SEPTEMBER, 21);
         Date date = calendar.getTime();
         Bill entity = new Bill(billId, date, "Checkup", 50.0);
 
@@ -132,3 +132,4 @@ public class BillServiceImplTest {
 
 
 }
+

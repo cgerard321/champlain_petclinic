@@ -11,6 +11,13 @@ app:
   customers-service:
     host: localhost
     port: 7003
+  billing-service:
+    host: localhost
+    port: 7004
+  auth-service:
+    host: localhost
+    port: 7005
+
 
 logging:
   level:
@@ -31,4 +38,11 @@ app:
   customers-service:
     host: customers
     port: 8080
+  billing-service:
+    host: billing
+    port: 8080
+  auth-service:
+    host: auth
+    port: 8080
+
 
