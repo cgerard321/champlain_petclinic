@@ -27,5 +27,5 @@ jobs:
       - name: Grant execute perm on cover.sh
         run: chmod +x cover.sh
 
-#      - name: Code coverage test
-#        run: ./cover.sh
+      - name: Code coverage test
+        run: ./cover.sh
