@@ -20,6 +20,8 @@ dependencies {
 	implementation('mysql:mysql-connector-java')
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 
+	implementation 'io.springfox:springfox-boot-starter:3.0.0'
+
 	runtimeOnly 'com.h2database:h2'
 
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
