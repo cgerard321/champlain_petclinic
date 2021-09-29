@@ -1,65 +1,85 @@
-<h2 xmlns:vetsNew xmlns:vetsNew>New Vet Sign Up</h2>
+<div class="bColor">
+  <h2 xmlns:vetsNew xmlns:vetsNew class="titleVetForm">New Vet Sign Up</h2>
+</div>
 
 <form id="vetForm" class="form-horizontal" ng-submit="$ctrl.submitVetForm()">
-  <div class="form-group">
-    <label><b>First Name</b></label>
+  <div class="form-group formColor">
+    <label class="col-sm-2 control-label">First Name</label>
+    <div class="owner col-sm-6">
     <input type="text" placeholder="First Name" name="fistName" required>
     <span ng-show="vetForm.firstName.$error.required" class="help-block">First name is required.</span>
-  </div><br>
+    </div>
+  </div>
   <div class="form-group">
-    <label><b>Last Name</b></label>
+    <label class="col-sm-2 control-label">Last Name</label>
+    <div class="owner col-sm-6">
     <input type="text" placeholder="Last Name" name="lastName" required>
     <span ng-show="vetForm.lastName.$error.required" class="help-block">Last name is required.</span>
-  </div><br>
+    </div>
+  </div>
   <div class="form-group">
-    <label><b>Email</b></label>
+    <label class="col-sm-2 control-label">Email</label>
+    <div class="owner col-sm-6">
     <input type="email" placeholder="Email" name="email" required>
     <span ng-show="vetForm.email.$error.required" class="help-block">Email is required.</span>
-  </div><br>
+    </div>
+  </div>
   <div class="form-group">
-    <label><b>Phone Number</b></label>
+    <label class="col-sm-2 control-label">Phone Number</label>
+    <div class="owner col-sm-6">
     <input type="tel" placeholder="Phone Number" name="phoneNumber" required>
     <span ng-show="vetForm.phoneNumber.$error.required" class="help-block">Phone Number is required.</span>
-  </div><br>
+    </div>
+  </div>
   <div class="form-group">
-    <label><b>Profile Picture</b></label>
+    <label class="col-sm-2 control-label">Profile Picture</label>
+    <div class="owner col-sm-6">
       <input id="max_id" type="hidden" name="MAX_FILE_SIZE" value="250000000" />
       <input onchange="upload_check()" id="profile_picture" type="file" name="profilePicture" accept="png/*" />
+    </div>
     <!-- old profile picture input field
     <input type="image" placeholder="profile picture" name="profilePicture">
     -->
-    </div><br>
+    </div>
   <div class="form-group">
-    <label><b>Career Resume</b></label>
+    <label class="col-sm-2 control-label">Career Resume</label>
+    <div class="owner col-sm-6">
     <input type="file" placeholder="Resume" name="careerResume">
-  </div><br>
+    </div>
+  </div>
   <div class="form-group">
-    <label><b>Specialty</b></label>
+    <label class="col-sm-2 control-label">Specialty</label>
+    <div class="owner col-sm-6">
     <input type="text" placeholder="Specialty" name="speciality">
-  </div><br>
+    </div>
+  </div>
   <div class="form-group">
     <fieldset>
-      <legend>What Animals Can You Treat</legend>
-      <input type="checkbox" placeholder="Animals Treated" name="animalsTreated" value="Dogs">Dogs<br>
-      <input type="checkbox" placeholder="Animals Treated" name="animalsTreated" value="Cats">Cats<br>
-      <input type="checkbox" placeholder="Animals Treated" name="animalsTreated" value="Birds">Birds<br>
-      <input type="checkbox" placeholder="Animals Treated" name="animalsTreated" value="Exotic">Exotic Animals<br>
-      <input type="checkbox" placeholder="Animals Treated" name="animalsTreated" value="Reptiles">Reptiles<br>
+      <legend class="col-sm-2 control-label">What Animals Can You Treat</legend>
+      <div class="owner col-sm-6">
+      <input type="checkbox" placeholder="Animals Treated" name="animalsTreated" value="Dogs">Dogs
+      <input type="checkbox" placeholder="Animals Treated" name="animalsTreated" value="Cats">Cats
+      <input type="checkbox" placeholder="Animals Treated" name="animalsTreated" value="Birds">Birds
+      <input type="checkbox" placeholder="Animals Treated" name="animalsTreated" value="Exotic">Exotic Animals
+      <input type="checkbox" placeholder="Animals Treated" name="animalsTreated" value="Reptiles">Reptiles
+      </div>
     </fieldset>
-  </div><br>
+  </div>
   <div class="form-group">
     <fieldset>
-      <legend>Available Work Days</legend>
-      <input type="checkbox" name="workDays" value="Monday">Monday<br>
-      <input type="checkbox" name="workDays" value="Tuesday">Tuesday<br>
-      <input type="checkbox" name="workDays" value="Wednesday">Wednesday<br>
-      <input type="checkbox" name="workDays" value="Thursday">Thursday<br>
-      <input type="checkbox" name="workDays" value="Friday">Friday<br>
+      <legend class="col-sm-2 control-label">Available Work Days</legend>
+      <div class="owner col-sm-6">
+      <input type="checkbox" name="workDays" value="Monday">Monday
+      <input type="checkbox" name="workDays" value="Tuesday">Tuesday
+      <input type="checkbox" name="workDays" value="Wednesday">Wednesday
+      <input type="checkbox" name="workDays" value="Thursday">Thursday
+      <input type="checkbox" name="workDays" value="Friday">Friday
+      </div>
     </fieldset>
-  </div><br>
+  </div>
   <!-- old work day submission
   <div class="form-group">
-    <label><b>Work Days</b></label>
+    <label>Work Days</label>
     <input type="date" placeholder="Work Days" name="workDays">
   </div>
   -->
