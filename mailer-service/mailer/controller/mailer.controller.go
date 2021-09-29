@@ -16,15 +16,17 @@ func (m MailerControllerImpl) New() {
 
 func (m MailerControllerImpl) Routes(engine *gin.Engine) error {
 
-	group := engine.Group("/mail")
+	group := engine.Group("/mail").Use(UnMarshallMail)
 	group.POST("", func(context *gin.Context) {
-		var mail mailer.Mail
 
-		if err := context.ShouldBindJSON(&mail); err != nil {
-			fmt.Println(err)
-			context.JSON(http.StatusBadRequest, err)
+		get, exists := context.Get("mail")
+		if !exists {
+			fmt.Println("E-mail not in context")
+			context.JSON(http.StatusBadRequest, "Unable to parse e-mail from body")
 			return
 		}
+
+		mail := get.(*mailer.Mail)
 		context.IndentedJSON(http.StatusOK, fmt.Sprintf("Message sent to %s", mail.To))
 	})
 	return nil
