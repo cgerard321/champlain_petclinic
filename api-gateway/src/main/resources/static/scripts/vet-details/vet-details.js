@@ -8,4 +8,14 @@ angular.module('vetDetails', ['ui.router'])
                 url: '/vets/details/:vetId',
                 template: '<vet-details></vet-details>'
             })
+            .state('disableVet', {
+                parent: 'app',
+                url: '/vets/details/:vetId/disableVet',
+                template: '<vet-details></vet-details>'
+            })
+            .state('enableVet', {
+                parent: 'app',
+                url: '/vets/details/:vetId/enableVet',
+                template: '<vet-details></vet-details>'
+            })
     }]);
