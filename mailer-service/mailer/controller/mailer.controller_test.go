@@ -1,10 +1,12 @@
 package controller
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
+	"mailer-service/mailer"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -47,11 +49,11 @@ func TestMailerControllerImpl_Unmarshalls(t *testing.T) {
 	mC := MailerControllerImpl{}
 	assert.Nil(t, mC.Routes(router))
 
-	const email = "example@test.com"
+	const email = "test@test.test"
+	marshal, _ := json.Marshal(mailer.Mail{To: email, Subject: "Subject", Message: "Message"})
+	serial := string(marshal)
 
-	bodyS := fmt.Sprintf("\"to\": \"%s\", \"message\": \"%s\", \"subject\": \"%s\"", email, "message", "subject")
-
-	req, err := http.NewRequest(http.MethodPost, "/mail", strings.NewReader(bodyS))
+	req, err := http.NewRequest(http.MethodPost, "/mail", strings.NewReader(serial))
 
 	if err != nil {
 		fmt.Println(err)
@@ -63,7 +65,7 @@ func TestMailerControllerImpl_Unmarshalls(t *testing.T) {
 		assert.Equal(t, http.StatusOK, w.Code)
 		body, err := ioutil.ReadAll(w.Result().Body)
 		assert.Nil(t, err)
-		assert.Contains(t, body, "Message sent to " + email)
+		assert.Contains(t, string(body), "Message sent to " + email)
 		return true
 	})
 }
