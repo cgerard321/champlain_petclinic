@@ -44,7 +44,6 @@ func TestMailerServiceImpl_SendMailValidMail(t *testing.T) {
 	assert.Contains(t, got, "To: " + ValidMail.To)
 	assert.Contains(t, got, "Subject: " + ValidMail.Subject)
 	assert.Contains(t, got, ValidMail.Message)
-
 }
 
 // Absolute legend https://titanwolf.org/Network/Articles/Article?AID=5749f0a3-9be8-4add-a1d3-9699e7554251#gsc.tab=0
