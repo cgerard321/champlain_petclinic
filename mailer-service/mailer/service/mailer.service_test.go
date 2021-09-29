@@ -28,10 +28,23 @@ func TestMailerService_New(t *testing.T) {
 
 func TestMailerServiceImpl_SendMailValidMail(t *testing.T) {
 	mS := MailerServiceImpl{}
-	dialer := mailer.CreateDialer("smtp.invalid.com", "a@b.c", "pass")
+	const from = "a@b.c"
+	dialer := mailer.CreateDialer("localhost", from, "pass", 2000)
 	mS.New(dialer)
 
+	get, err := startMockSMTPServer(2000)
+	assert.Nil(t, err)
+
 	assert.Nil(t, mS.SendMail(ValidMail))
+
+	got, err := get()
+	assert.Nil(t, err)
+	fmt.Println(got)
+	assert.Contains(t, got, "From: " + from)
+	assert.Contains(t, got, "To: " + ValidMail.To)
+	assert.Contains(t, got, "Subject: " + ValidMail.Subject)
+	assert.Contains(t, got, ValidMail.Message)
+
 }
 
 // Absolute legend https://titanwolf.org/Network/Articles/Article?AID=5749f0a3-9be8-4add-a1d3-9699e7554251#gsc.tab=0
