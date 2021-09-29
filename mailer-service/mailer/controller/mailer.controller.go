@@ -20,10 +20,18 @@ func (m MailerControllerImpl) handleMailPOST(context *gin.Context) {
 	if !exists || get == nil {
 		fmt.Println("E-mail not in context")
 		context.JSON(http.StatusBadRequest, "Unable to parse e-mail from body")
+		context.Abort()
 		return
 	}
 
 	mail := get.(*mailer.Mail)
+
+	if err := m.s.SendMail(mail); err != nil {
+		fmt.Println(err.Error())
+		context.JSON(http.StatusInternalServerError, err.Error())
+		context.Abort()
+		return
+	}
 
 	context.IndentedJSON(http.StatusOK, fmt.Sprintf("Message sent to %s", mail.To))
 }
