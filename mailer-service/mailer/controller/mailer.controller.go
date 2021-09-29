@@ -16,7 +16,8 @@ func (m MailerControllerImpl) New() {
 
 func (m MailerControllerImpl) Routes(engine *gin.Engine) error {
 
-	group := engine.Group("/mail").Use(UnMarshallMail)
+	group := engine.Group("/mail").Use(UnMarshallMail, ValidateEmail)
+
 	group.POST("", func(context *gin.Context) {
 
 		get, exists := context.Get("mail")
@@ -30,5 +31,6 @@ func (m MailerControllerImpl) Routes(engine *gin.Engine) error {
 
 		context.IndentedJSON(http.StatusOK, fmt.Sprintf("Message sent to %s", mail.To))
 	})
+
 	return nil
 }
