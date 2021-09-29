@@ -22,5 +22,5 @@ func UnMarshallMail(c *gin.Context) {
 }
 
 func ValidateEmail(c *gin.Context) {
-	
+
 }
