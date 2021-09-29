@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"io/ioutil"
 	"mailer-service/mailer"
+	"mailer-service/mailer/service"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -124,7 +125,6 @@ func TestHandleMailPOST_ValidMail(t *testing.T) {
 	assert.Equal(t, fmt.Sprintf("\"Message sent to %s\"", email), recorder.Body.String())
 }
 
-
 func TestHandleMailPOST_NilMail(t *testing.T) {
 
 	recorder := httptest.NewRecorder()
@@ -136,4 +136,36 @@ func TestHandleMailPOST_NilMail(t *testing.T) {
 
 	assert.Equal(t, http.StatusBadRequest, recorder.Code)
 	assert.Equal(t, "\"Unable to parse e-mail from body\"", recorder.Body.String())
+}
+
+func TestHandleMailPOST_Full(t *testing.T) {
+
+	engine := gin.Default()
+
+	mS := service.MailerServiceImpl{}
+	dialer := mailer.CreateDialer("localhost", "a@b.c", "pass", 2000)
+	mS.New(dialer)
+
+	mC := MailerControllerImpl{}
+	mC.New(&mS)
+	assert.Nil(t, mC.Routes(engine))
+
+	const email = "test@test.test"
+	const subject = "Test subject"
+	const message = "Test message"
+	marshal, _ := json.Marshal(mailer.Mail{To: email, Subject: subject, Message: message})
+	serial := string(marshal)
+
+	req, err := http.NewRequest(http.MethodPost, "/mail", strings.NewReader(serial))
+
+	if err != nil {
+		fmt.Println(err)
+		t.Fatal(err)
+	}
+
+	testHTTPResponse(t, engine, req, func(w *httptest.ResponseRecorder) bool {
+
+		assert.Equal(t, http.StatusOK, w.Code)
+		return true
+	})
 }
