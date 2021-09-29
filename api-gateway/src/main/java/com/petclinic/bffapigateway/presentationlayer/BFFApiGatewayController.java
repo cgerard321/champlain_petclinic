@@ -161,11 +161,6 @@ public class BFFApiGatewayController {
     @DeleteMapping(value = "users/{userId}")
     public Mono<UserDetails> deleteUser(final @PathVariable long userId) { return authServiceClient.deleteUser(userId); }
 
-    @GetMapping(value = "users")
-    public Flux<UserDetails> getUsers() {
-        return authServiceClient.getUsers();
-    }
-
     @GetMapping(value = "users/{userId}")
     public Mono<UserDetails> getUserDetails(final @PathVariable long userId) {
         return authServiceClient.getUser(userId);
