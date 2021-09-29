@@ -92,9 +92,6 @@ class OwnerResourceTest {
     @Test
     public void findById()
     {
-
-        // assertTrue(repository.findById(OwnerID).isPresent());
-
         Owner newOwner = new Owner();
         newOwner.setFirstName("John");
         newOwner.setLastName("Smith");
@@ -107,7 +104,6 @@ class OwnerResourceTest {
         Owner foundOwner = repository.findById(savedOwner.getId()).orElse(null);
 
         assert foundOwner != null;
-
     }
 
     /**

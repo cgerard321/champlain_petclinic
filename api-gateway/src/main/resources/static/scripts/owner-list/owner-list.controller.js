@@ -8,4 +8,5 @@ angular.module('ownerList')
             self.owners = resp.data;
             // console.log(resp)
         });
+
     }]);

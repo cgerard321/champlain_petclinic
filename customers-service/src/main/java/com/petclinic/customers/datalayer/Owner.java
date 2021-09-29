@@ -52,8 +52,10 @@ public class Owner {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "owner")
     private Set<Pet> pets;
 
+
 //    @Column(name = "custodian")
 //    private String custodian;
+
     public Owner()
     {
 
@@ -68,6 +70,7 @@ public class Owner {
         this.city = city;
         this.telephone = telephone;
     }
+
 //    public Owner(@NotEmpty Integer id, @NotEmpty String firstName, @NotEmpty String lastName,
 //                 @NotEmpty String address, @NotEmpty String city, @NotEmpty @Digits(fraction = 0,
 //            integer = 10) String telephone, String custodian) {
@@ -79,6 +82,7 @@ public class Owner {
 //        this.telephone = telephone;
 //        this.custodian = custodian;
 //    }
+
     public Integer setId(Integer id)
     {
         return id;
@@ -127,6 +131,7 @@ public class Owner {
         this.telephone = telephone;
     }
 
+
 //    public String getCustodian() {
 //        return custodian;
 //    }
@@ -134,6 +139,8 @@ public class Owner {
 //    public void setCustodian(String custodian) {
 //        this.custodian = custodian;
 //    }
+
+
 
     protected Set<Pet> getPetsInternal() {
         if (this.pets == null) {
