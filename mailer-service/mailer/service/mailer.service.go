@@ -14,6 +14,14 @@ func (m *MailerServiceImpl) New(dialer *gomail.Dialer) {
 }
 
 func (m MailerServiceImpl) SendMail(mail *mailer.Mail) error {
-	panic("implement me")
+
+	trueMail := gomail.NewMessage()
+
+	trueMail.SetHeader("From", m.dialer.Username)
+	trueMail.SetHeader("To", mail.To)
+	trueMail.SetHeader("Subject", mail.Subject)
+	trueMail.SetHeader("text/html", mail.Message)
+
+	return m.dialer.DialAndSend(trueMail)
 }
 
