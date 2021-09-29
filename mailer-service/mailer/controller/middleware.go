@@ -5,5 +5,5 @@ import (
 )
 
 func UnMarshallMail(c *gin.Context) {
-	
+
 }
