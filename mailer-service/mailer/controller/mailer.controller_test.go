@@ -133,4 +133,7 @@ func TestHandleMailPOST_NilMail(t *testing.T) {
 	context.Set("mail", nil)
 
 	handleMailPOST(context)
+
+	assert.Equal(t, http.StatusBadRequest, recorder.Code)
+	assert.Equal(t, "\"Unable to parse e-mail from body\"", recorder.Body.String())
 }
