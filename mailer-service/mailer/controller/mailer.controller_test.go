@@ -120,3 +120,14 @@ func TestHandleMailPOST_ValidMail(t *testing.T) {
 
 	handleMailPOST(context)
 }
+
+
+func TestHandleMailPOST_NilMail(t *testing.T) {
+
+	recorder := httptest.NewRecorder()
+	context, _ := gin.CreateTestContext(recorder)
+
+	context.Set("mail", nil)
+
+	handleMailPOST(context)
+}
