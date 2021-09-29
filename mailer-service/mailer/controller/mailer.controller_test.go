@@ -76,8 +76,10 @@ func TestMailerControllerImpl_ValidateInValidEmail(t *testing.T) {
 	mC := MailerControllerImpl{}
 	assert.Nil(t, mC.Routes(router))
 
-	const email = "test@test.test"
-	marshal, _ := json.Marshal(mailer.Mail{To: email, Subject: "Subject", Message: "Message"})
+	const email = ""
+	const subject = ""
+	const message = ""
+	marshal, _ := json.Marshal(mailer.Mail{To: email, Subject: subject, Message: message})
 	serial := string(marshal)
 
 	req, err := http.NewRequest(http.MethodPost, "/mail", strings.NewReader(serial))
@@ -91,12 +93,13 @@ func TestMailerControllerImpl_ValidateInValidEmail(t *testing.T) {
 
 		assert.Equal(t, http.StatusBadRequest, w.Code)
 		body, err := ioutil.ReadAll(w.Result().Body)
+
 		assert.Nil(t, err)
-		assert.Contains(t, string(body), "Message sent to " + email)
 		assert.Equal(t,
 			"\"Key: 'Mail.To' Error:Field validation for 'To' failed on the 'required' tag" +
 				"\\nKey: 'Mail.Message' Error:Field validation for 'Message' failed on the 'required' tag\"",
 			string(body))
+
 		return true
 	})
 
