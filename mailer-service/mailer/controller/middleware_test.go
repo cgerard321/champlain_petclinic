@@ -60,3 +60,14 @@ func TestUnMarshallMailValidEmptySubject(t *testing.T) {
 	assert.Equal(t, subject, mail.Subject)
 	assert.Equal(t, message, mail.Message)
 }
+
+func TestUnMarshallMailInvalidMail(t *testing.T) {
+
+	recorder := httptest.NewRecorder()
+	context, _ := gin.CreateTestContext(recorder)
+
+	context.Request, _ = http.NewRequest("test-method", "test-url", strings.NewReader("invalid-test"))
+	UnMarshallMail(context)
+
+	assert.Equal(t, http.StatusBadRequest, recorder.Code)
+}
