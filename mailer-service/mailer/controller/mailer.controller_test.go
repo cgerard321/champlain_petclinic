@@ -119,6 +119,9 @@ func TestHandleMailPOST_ValidMail(t *testing.T) {
 	context.Set("mail", &mail)
 
 	handleMailPOST(context)
+
+	assert.Equal(t, http.StatusOK, recorder.Code)
+	assert.Equal(t, fmt.Sprintf("\"Message sent to %s\"", email), recorder.Body.String())
 }
 
 
