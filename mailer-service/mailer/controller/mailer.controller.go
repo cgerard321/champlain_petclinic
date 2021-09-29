@@ -14,7 +14,7 @@ type MailerControllerImpl struct {
 func (m *MailerControllerImpl) New(service mailer.MailerService) {
 	m.s = service
 }
-func handleMailPOST(context *gin.Context) {
+func (m MailerControllerImpl) handleMailPOST(context *gin.Context) {
 
 	get, exists := context.Get("mail")
 	if !exists || get == nil {
@@ -32,7 +32,7 @@ func (m MailerControllerImpl) Routes(engine *gin.Engine) error {
 
 	group := engine.Group("/mail").Use(UnMarshallMail, ValidateEmail)
 
-	group.POST("", handleMailPOST)
+	group.POST("", m.handleMailPOST)
 
 	return nil
 }
