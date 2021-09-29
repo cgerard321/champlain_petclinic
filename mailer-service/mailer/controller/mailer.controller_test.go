@@ -36,6 +36,8 @@ func testHTTPResponse(t *testing.T, r *gin.Engine, req *http.Request, f func(w *
 func TestAnyResponseFromMailerEndpoint(t *testing.T) {
 
 	router := gin.Default()
+	mC := MailerControllerImpl{}
+	mC.Routes(router)
 
 	req, err := http.NewRequest(http.MethodPost, "/mail", strings.NewReader(""))
 
