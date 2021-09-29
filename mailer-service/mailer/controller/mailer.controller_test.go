@@ -105,3 +105,18 @@ func TestMailerControllerImpl_ValidateInValidEmail(t *testing.T) {
 
 
 }
+
+func TestHandleMailPOST_ValidMail(t *testing.T) {
+
+	recorder := httptest.NewRecorder()
+	context, _ := gin.CreateTestContext(recorder)
+
+	const email = "test@test.test"
+	const subject = "subject"
+	const message = "message"
+	mail := mailer.Mail{To: email, Subject: subject, Message: message}
+
+	context.Set("mail", &mail)
+
+	handleMailPOST(context)
+}
