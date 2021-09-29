@@ -168,72 +168,32 @@ func TestHandleMailPOST_Full(t *testing.T) {
 	get, err := startMockSMTPServer(2000)
 	assert.Nil(t, err)
 
-	engine := gin.Default()
+	fullTestEnv(t, func (engine *gin.Engine, req *http.Request, m *mailer.Mail) {
 
-	mS := service.MailerServiceImpl{}
-	dialer := mailer.CreateDialer("localhost", "a@b.c", "pass", 2000)
-	mS.New(dialer)
+		testHTTPResponse(t, engine, req, func(w *httptest.ResponseRecorder) bool {
 
-	mC := MailerControllerImpl{}
-	mC.New(&mS)
-	assert.Nil(t, mC.Routes(engine))
-
-	const email = "test@test.test"
-	const subject = "Test subject"
-	const message = "Test message"
-	marshal, _ := json.Marshal(mailer.Mail{To: email, Subject: subject, Message: message})
-	serial := string(marshal)
-
-	req, err := http.NewRequest(http.MethodPost, "/mail", strings.NewReader(serial))
-
-	if err != nil {
-		fmt.Println(err)
-		t.Fatal(err)
-	}
-
-	testHTTPResponse(t, engine, req, func(w *httptest.ResponseRecorder) bool {
-
-		assert.Equal(t, http.StatusOK, w.Code)
-		got, err := get()
-		assert.Nil(t, err)
-		assert.Contains(t, got, "To: " + email)
-		assert.Contains(t, got, "Subject: " + subject)
-		assert.Contains(t, got, message)
-		assert.Equal(t, fmt.Sprintf("\"Message sent to %s\"", email), w.Body.String())
-		return true
+				assert.Equal(t, http.StatusOK, w.Code)
+				got, err := get()
+				assert.Nil(t, err)
+				assert.Contains(t, got, "To: " + m.To)
+				assert.Contains(t, got, "Subject: " + m.Subject)
+				assert.Contains(t, got, m.Subject)
+				assert.Equal(t, fmt.Sprintf("\"Message sent to %s\"", m.To), w.Body.String())
+				return true
+		})
 	})
 }
 
 func TestHandleMailPOST_FullInValid(t *testing.T) {
 
-	engine := gin.Default()
+	fullTestEnv(t, func (engine *gin.Engine, req *http.Request, _ *mailer.Mail) {
 
-	mS := service.MailerServiceImpl{}
-	dialer := mailer.CreateDialer("localhost", "a@b.c", "pass", 2000)
-	mS.New(dialer)
+		testHTTPResponse(t, engine, req, func(w *httptest.ResponseRecorder) bool {
 
-	mC := MailerControllerImpl{}
-	mC.New(&mS)
-	assert.Nil(t, mC.Routes(engine))
-
-	const email = "test@test.test"
-	const subject = "Test subject"
-	const message = "Test message"
-	marshal, _ := json.Marshal(mailer.Mail{To: email, Subject: subject, Message: message})
-	serial := string(marshal)
-
-	req, err := http.NewRequest(http.MethodPost, "/mail", strings.NewReader(serial))
-
-	if err != nil {
-		fmt.Println(err)
-		t.Fatal(err)
-	}
-
-	testHTTPResponse(t, engine, req, func(w *httptest.ResponseRecorder) bool {
-
-		assert.Equal(t, http.StatusInternalServerError, w.Code)
-		assert.Contains(t, w.Body.String(), "connection refused")
-		return true
+			assert.Equal(t, http.StatusInternalServerError, w.Code)
+			assert.Contains(t, w.Body.String(), "connection refused")
+			return true
+		})
 	})
 }
 
@@ -327,4 +287,33 @@ func startMockSMTPServer(port int, serverResponses ...string) (receivedMailTextG
 	}
 
 	return getReceivedData, nil
+}
+
+func fullTestEnv(t *testing.T, f func(e *gin.Engine, r *http.Request, m *mailer.Mail)) {
+
+	engine := gin.Default()
+
+	mS := service.MailerServiceImpl{}
+	dialer := mailer.CreateDialer("localhost", "a@b.c", "pass", 2000)
+	mS.New(dialer)
+
+	mC := MailerControllerImpl{}
+	mC.New(&mS)
+	assert.Nil(t, mC.Routes(engine))
+
+	const email = "test@test.test"
+	const subject = "Test subject"
+	const message = "Test message"
+	mail := mailer.Mail{To: email, Subject: subject, Message: message}
+	marshal, _ := json.Marshal(mail)
+	serial := string(marshal)
+
+	req, err := http.NewRequest(http.MethodPost, "/mail", strings.NewReader(serial))
+
+	if err != nil {
+		fmt.Println(err)
+		t.Fatal(err)
+	}
+
+	f(engine, req, &mail)
 }
