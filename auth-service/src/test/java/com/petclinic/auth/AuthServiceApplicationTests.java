@@ -35,9 +35,8 @@ class AuthServiceApplicationTests {
 			PASS = "Pas$word123",
 			EMAIL = "email",
 			ROLE_NAME = "role";
-	final Role role = new Role(0, ROLE_NAME);
 
-	private Validator validator;
+	final Role role = new Role(0, ROLE_NAME);
 
 	final Set<Role> ROLES = new HashSet<Role>() {{
 		add(role);
@@ -65,8 +64,6 @@ class AuthServiceApplicationTests {
 	void setup() {
 		roleRepo.deleteAllInBatch();
 		userRepo.deleteAllInBatch();
-		ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-		validator = factory.getValidator();
 	}
 
 	@Test
@@ -216,53 +213,7 @@ class AuthServiceApplicationTests {
 		assertNull(roleIDLessDTO.getParent());
 	}
 
-	@Test
-	@DisplayName("Verify if the email is valid and succeed")
-	void verify_valid_email_success() {
-		User user = new User();
-		user.setUsername(USER);
-		user.setPassword(PASS);
-		user.setId(ID);
-		user.setEmail("testemail@gmail.com");
-		Set<ConstraintViolation<User>> violations = validator.validate(user);
-		assertTrue(violations.isEmpty());
-	}
 
-	@Test
-	@DisplayName("Verify if the email is valid and fail because missing @")
-	void detect_invalid_email_missing_at() {
-		User user = new User();
-		user.setUsername(USER);
-		user.setPassword(PASS);
-		user.setId(ID);
-		user.setEmail("testemailgmail.com");
-		Set<ConstraintViolation<User>> violations = validator.validate(user);
-		assertEquals(violations.size(), 1);
-
-		ConstraintViolation<User> violation = violations.iterator().next();
-		assertEquals("Email must be valid", violation.getMessage());
-		assertEquals("email", violation.getPropertyPath().toString());
-		assertEquals("testemailgmail.com", violation.getInvalidValue());
-	}
-
-	@Test
-	@DisplayName("Submit a completed signup form")
-	void submit_completed_signup_form() {
-
-		User user = new User(USER, PASS, EMAIL);
-		assertEquals(USER, user.getUsername());
-		assertEquals(PASS, user.getPassword());
-		assertEquals(EMAIL, user.getEmail());
-	}
-	@Test
-	@DisplayName("Submit signup form through constructor of UserIDLessDTO")
-	void submit_form_with_constructor_without_id() {
-
-		UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
-		assertEquals(USER, userIDLessDTO.getUsername());
-		assertEquals(PASS, userIDLessDTO.getPassword());
-		assertEquals(EMAIL, userIDLessDTO.getEmail());
-	}
 
 	@Test
 	@DisplayName("User setters")

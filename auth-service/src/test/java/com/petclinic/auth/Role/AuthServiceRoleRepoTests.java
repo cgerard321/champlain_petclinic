@@ -1,4 +1,4 @@
-package com.petclinic.auth;
+package com.petclinic.auth.Role;
 
 import com.petclinic.auth.Role.Role;
 import com.petclinic.auth.Role.RoleRepo;
