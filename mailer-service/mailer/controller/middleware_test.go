@@ -44,7 +44,7 @@ func TestUnMarshallMailValidEmptySubject(t *testing.T) {
 	const email = "test@test.test"
 	const subject = ""
 	const message = "message"
-	marshal, _ := json.Marshal(mailer.Mail{To: email, Subject: "", Message: message})
+	marshal, _ := json.Marshal(mailer.Mail{To: email, Subject: subject, Message: message})
 	serial := string(marshal)
 
 	context.Request, _ = http.NewRequest("test-method", "test-url", strings.NewReader(serial))

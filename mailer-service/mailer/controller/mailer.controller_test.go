@@ -71,15 +71,34 @@ func TestMailerControllerImpl_Unmarshalls(t *testing.T) {
 }
 
 func TestMailerControllerImpl_ValidateInValidEmail(t *testing.T) {
-	recorder := httptest.NewRecorder()
-	context, _ := gin.CreateTestContext(recorder)
 
-	context.Request, _ = http.NewRequest("test-method", "test-url", strings.NewReader("invalid-test"))
-	UnMarshallMail(context)
+	router := gin.Default()
+	mC := MailerControllerImpl{}
+	assert.Nil(t, mC.Routes(router))
 
-	assert.Equal(t, http.StatusBadRequest, recorder.Code)
-	assert.Equal(t,
-		"\"Key: 'Mail.To' Error:Field validation for 'To' failed on the 'required' tag" +
-		"\\nKey: 'Mail.Message' Error:Field validation for 'Message' failed on the 'required' tag\"",
-		recorder.Body.String())
+	const email = "test@test.test"
+	marshal, _ := json.Marshal(mailer.Mail{To: email, Subject: "Subject", Message: "Message"})
+	serial := string(marshal)
+
+	req, err := http.NewRequest(http.MethodPost, "/mail", strings.NewReader(serial))
+
+	if err != nil {
+		fmt.Println(err)
+		t.Fatal(err)
+	}
+
+	testHTTPResponse(t, router, req, func(w *httptest.ResponseRecorder) bool {
+
+		assert.Equal(t, http.StatusBadRequest, w.Code)
+		body, err := ioutil.ReadAll(w.Result().Body)
+		assert.Nil(t, err)
+		assert.Contains(t, string(body), "Message sent to " + email)
+		assert.Equal(t,
+			"\"Key: 'Mail.To' Error:Field validation for 'To' failed on the 'required' tag" +
+				"\\nKey: 'Mail.Message' Error:Field validation for 'Message' failed on the 'required' tag\"",
+			string(body))
+		return true
+	})
+
+
 }
