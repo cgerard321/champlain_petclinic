@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/stretchr/testify/assert"
 	"mailer-service/mailer"
 	"os"
 	"testing"
@@ -25,5 +26,5 @@ func TestMailerServiceImpl_SendMailValidMail(t *testing.T) {
 	dialer := mailer.CreateDialer("smtp.invalid.com", "a@b.c", "pass")
 	mS.New(dialer)
 
-	mS.SendMail(ValidMail)
+	assert.Nil(t, mS.SendMail(ValidMail))
 }
