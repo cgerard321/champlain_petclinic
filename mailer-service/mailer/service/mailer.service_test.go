@@ -11,5 +11,6 @@ func TestMain(m *testing.M) {
 }
 
 func TestMailerService_New(t *testing.T) {
-
+	mS := MailerServiceImpl{}
+	mS.New()
 }
