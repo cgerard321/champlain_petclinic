@@ -62,7 +62,6 @@ services:
   mailer-service:
     build: mailer-service
     environment:
-      - PASSWORD=y4QZURkbxfs3tVx
       - EMAIL=champlain.petclinic@gmail.com
 
 
