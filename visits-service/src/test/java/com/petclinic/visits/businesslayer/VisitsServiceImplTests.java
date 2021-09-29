@@ -64,7 +64,7 @@ public class VisitsServiceImplTests {
     
     
     @Test
-    public void whenValidPetIdThenShouldReturnVisitForPet(){
+    public void whenValidPetIdThenShouldReturnVisitsForPet(){
         when(repo.findByPetId(1)).thenReturn(
                 asList(
                         visit()
