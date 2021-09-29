@@ -1,5 +1,6 @@
-<h2 xmlns:vetsNew xmlns:vetsNew>New Vet</h2>
-<form ng-submit="$ctrl.submitVetForm()" style="max-width: 25em;">
+<h2 xmlns:vetsNew xmlns:vetsNew>New Vet Sign Up</h2>
+
+<form id="vetForm" class="form-horizontal" ng-submit="$ctrl.submitVetForm()">
   <div class="form-group">
     <label><b>First Name</b></label>
     <input type="text" placeholder="First Name" name="fistName" required>
@@ -17,16 +18,13 @@
   </div><br>
   <div class="form-group">
     <label><b>Phone Number</b></label>
-    <input type="number" placeholder="Phone Number" name="phoneNumber" required>
+    <input type="tel" placeholder="Phone Number" name="phoneNumber" required>
     <span ng-show="vetForm.phoneNumber.$error.required" class="help-block">Phone Number is required.</span>
   </div><br>
   <div class="form-group">
     <label><b>Profile Picture</b></label>
-    <form action="some_script" method="post">
       <input id="max_id" type="hidden" name="MAX_FILE_SIZE" value="250000000" />
       <input onchange="upload_check()" id="profile_picture" type="file" name="profilePicture" accept="png/*" />
-      <input type="submit" value="Upload"/>
-    </form>
     <!-- old profile picture input field
     <input type="image" placeholder="profile picture" name="profilePicture">
     -->
@@ -48,7 +46,7 @@
       <input type="checkbox" placeholder="Animals Treated" name="animalsTreated" value="Exotic">Exotic Animals<br>
       <input type="checkbox" placeholder="Animals Treated" name="animalsTreated" value="Reptiles">Reptiles<br>
     </fieldset>
-  </div>
+  </div><br>
   <div class="form-group">
     <fieldset>
       <legend>Available Work Days</legend>
@@ -59,7 +57,6 @@
       <input type="checkbox" name="workDays" value="Friday">Friday<br>
     </fieldset>
   </div><br>
-
   <!-- old work day submission
   <div class="form-group">
     <label><b>Work Days</b></label>
