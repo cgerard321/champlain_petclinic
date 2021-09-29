@@ -20,3 +20,7 @@ func UnMarshallMail(c *gin.Context) {
 	c.Set("mail", &mail)
 	c.Next()
 }
+
+func ValidateEmail(c *gin.Context) {
+	
+}
