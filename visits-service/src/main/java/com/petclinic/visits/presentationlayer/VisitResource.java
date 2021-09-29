@@ -102,11 +102,6 @@ public class VisitResource {
     }
 
 
-    @GetMapping("owners/*/pets/{petId}/visits")
-    public List<Visit> visits(@PathVariable("petId") int petId) {
-        return visitsService.getVisitsForPet(petId);
-    }
-
     @DeleteMapping("visits/{visitId}")
     public void deleteVisit(@PathVariable("visitId") int visitId) {
         visitsService.deleteVisit(visitId);
