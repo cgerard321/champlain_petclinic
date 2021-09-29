@@ -7,6 +7,11 @@ type MailerController interface {
 	Routes(engine *gin.Engine) error
 }
 
+type MailerService interface {
+	New()
+	SendMail(mail *Mail) error
+}
+
 type Mail struct {
 	To string `json:"to" validate:"required,email"`
 	Message string `json:"message" validate:"required"`
