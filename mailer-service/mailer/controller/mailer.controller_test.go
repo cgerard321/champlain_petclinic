@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	gomail "gopkg.in/mail.v2"
 	"io/ioutil"
 	"mailer-service/mailer"
 	"mailer-service/mailer/service"
@@ -14,6 +16,17 @@ import (
 	"strings"
 	"testing"
 )
+
+type MailerServiceMock struct {
+	mock.Mock
+}
+
+func (m MailerServiceMock) New(dialer *gomail.Dialer) {
+}
+
+func (m MailerServiceMock) SendMail(mail *mailer.Mail) error {
+	return nil
+}
 
 func TestMain(m *testing.M) {
 
@@ -47,7 +60,10 @@ func TestMailerControllerImpl_Routes(t *testing.T) {
 func TestMailerControllerImpl_Unmarshalls(t *testing.T) {
 
 	router := gin.Default()
+
+	mS := MailerServiceMock{}
 	mC := MailerControllerImpl{}
+	mC.New(mS)
 	assert.Nil(t, mC.Routes(router))
 
 	const email = "test@test.test"
@@ -111,7 +127,9 @@ func TestHandleMailPOST_ValidMail(t *testing.T) {
 
 	recorder := httptest.NewRecorder()
 	context, _ := gin.CreateTestContext(recorder)
+	mS := MailerServiceMock{}
 	mC := MailerControllerImpl{}
+	mC.New(mS)
 
 	const email = "test@test.test"
 	const subject = "subject"
