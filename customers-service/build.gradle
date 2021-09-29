@@ -59,7 +59,7 @@ jacocoTestCoverageVerification {
 	violationRules {
 		rule {
 			limit {
-				minimum = 0.00
+				minimum = 0.00 // TEMP VALUE, CHANGE THIS VALUE TO 0.90 !!
 			}
 		}
 	}
