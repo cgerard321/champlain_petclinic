@@ -3,6 +3,7 @@ package controller
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"github.com/go-playground/validator/v10"
 	"mailer-service/mailer"
 	"net/http"
 )
@@ -27,6 +28,15 @@ func (m MailerControllerImpl) Routes(engine *gin.Engine) error {
 		}
 
 		mail := get.(*mailer.Mail)
+
+		validate := validator.New()
+
+		if err := validate.Struct(mail); err != nil {
+			fmt.Println(err)
+			context.JSON(http.StatusBadRequest, err.Error())
+			return
+		}
+
 		context.IndentedJSON(http.StatusOK, fmt.Sprintf("Message sent to %s", mail.To))
 	})
 	return nil
