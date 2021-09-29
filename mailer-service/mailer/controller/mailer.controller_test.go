@@ -111,6 +111,7 @@ func TestHandleMailPOST_ValidMail(t *testing.T) {
 
 	recorder := httptest.NewRecorder()
 	context, _ := gin.CreateTestContext(recorder)
+	mC := MailerControllerImpl{}
 
 	const email = "test@test.test"
 	const subject = "subject"
@@ -119,7 +120,7 @@ func TestHandleMailPOST_ValidMail(t *testing.T) {
 
 	context.Set("mail", &mail)
 
-	handleMailPOST(context)
+	mC.handleMailPOST(context)
 
 	assert.Equal(t, http.StatusOK, recorder.Code)
 	assert.Equal(t, fmt.Sprintf("\"Message sent to %s\"", email), recorder.Body.String())
@@ -129,10 +130,11 @@ func TestHandleMailPOST_NilMail(t *testing.T) {
 
 	recorder := httptest.NewRecorder()
 	context, _ := gin.CreateTestContext(recorder)
+	mC := MailerControllerImpl{}
 
 	context.Set("mail", nil)
 
-	handleMailPOST(context)
+	mC.handleMailPOST(context)
 
 	assert.Equal(t, http.StatusBadRequest, recorder.Code)
 	assert.Equal(t, "\"Unable to parse e-mail from body\"", recorder.Body.String())
