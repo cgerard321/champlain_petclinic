@@ -220,22 +220,6 @@ public class VisitResourceTest {
 		mvc.perform(get("/visits/FADAW"))
 				.andExpect(status().isBadRequest());
 	}
-	
-	@Test
-	void whenValidPetIdThenShouldReturnVisitsForPetId() throws Exception {
-		ArrayList<Visit> visits = new ArrayList<>();
-		visits.add(visit().petId(1).date(new Date()).description("CREATED VISIT 1").practitionerId(123456).build());
-		visits.add(visit().petId(1).date(new Date()).description("CREATED VISIT 2").practitionerId(654321).build());
-		
-		given(visitsService.getVisitsForPet(1)).willReturn(visits);
-		
-		mvc.perform(get("/owners/*/pets/{petId}/visits", 1)
-				.contentType(MediaType.APPLICATION_JSON)
-				.characterEncoding("utf-8")
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.*", hasSize(2)));
-	}
 
 }
 
