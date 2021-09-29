@@ -84,7 +84,7 @@ func TestUnMarshallMailNilMail(t *testing.T) {
 }
 
 
-func TestInvalidEmailMiddleware(t *testing.T) {
+func TestValidateEmailInValidEmail(t *testing.T) {
 
 	recorder := httptest.NewRecorder()
 	context, _ := gin.CreateTestContext(recorder)
