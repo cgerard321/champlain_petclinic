@@ -195,7 +195,10 @@ func TestHandleMailPOST_Full(t *testing.T) {
 		assert.Equal(t, http.StatusOK, w.Code)
 		got, err := get()
 		assert.Nil(t, err)
-		assert.Equal(t, got, "")
+		assert.Contains(t, got, "To: " + email)
+		assert.Contains(t, got, "Subject: " + subject)
+		assert.Contains(t, got, message)
+		assert.Equal(t, fmt.Sprintf("\"Message sent to %s\"", email), w.Body.String())
 		return true
 	})
 }
