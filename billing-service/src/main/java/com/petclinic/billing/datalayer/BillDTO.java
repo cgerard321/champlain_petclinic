@@ -5,7 +5,7 @@ import lombok.*;
 import java.util.Date;
 
 
-@Builder(toBuilder = true)
+//@Builder(toBuilder = true)
 public class BillDTO {
 
 
@@ -40,12 +40,15 @@ public class BillDTO {
         return billId;
     }
     public int getCustomerId(){return customerId;}
+
     public Date getDate(){
         return date;
     }
+
     public String getVisiType(){
         return visitType;
     }
+
     public double getAmount(){
         return amount;
     }
@@ -64,7 +67,17 @@ public class BillDTO {
         this.visitType = visitType;
     }
 
-    public void getAmount(double amount){
+    public void setAmount(double amount){
         this.amount = amount;
+    }
+
+    @Override
+    public String toString() {
+        return "BillDTO{" +
+                "billId=" + billId +
+                ", date=" + date +
+                ", visitType='" + visitType + '\'' +
+                ", amount=" + amount +
+                '}';
     }
 }

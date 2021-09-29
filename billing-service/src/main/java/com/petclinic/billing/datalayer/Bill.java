@@ -40,12 +40,16 @@ public class Bill {
     }
 
     public Integer getId(){return id;}
+
     public int getBillId() {
         return billId;
     }
     public int getCustomerId(){return  customerId;}
+
     public Date getDate(){return date;}
+
     public String getVisitType(){return visitType;}
+
     public double getAmount(){return amount;}
 
     public void setId(Integer id) {
