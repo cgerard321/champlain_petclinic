@@ -5,6 +5,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 /**
  * @author Maciej Szarlinski
@@ -12,6 +14,8 @@ import org.springframework.context.ConfigurableApplicationContext;
  */
 
 @SpringBootApplication
+@ComponentScan("com.petclinic")
+@EnableJpaRepositories
 public class CustomersServiceApplication {
 
 	public static void main(String[] args) {

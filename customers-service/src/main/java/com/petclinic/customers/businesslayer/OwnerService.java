@@ -23,13 +23,13 @@ public interface OwnerService {
         public void updateOwner();
 
         //CREATE OWNER
-        public Owner CreateOwner(Owner owner);
+        public Owner createOwner(Owner owner);
 
         //DELETE OWNER
         public void deleteOwner(int Id);
 
         //public Optional<Owner> findOwnerLogin(String username, String password);
 
-
+        public void addCustodian(Owner owner,String custodian);
 
 }

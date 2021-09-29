@@ -1,6 +1,12 @@
 <h2>Veterinarians</h2>
 <a ui-sref="vetsNew">
-    <button class="add-vet-button" >Add A Vet</button>
+    <button class="add-vet-button">Add A Vet</button>
+</a>
+<a ui-sref="disabled">
+    <button class="change-vet-list-state-button" ng-click="$ctrl.buttonChangeState(false)">Disabled</button>
+</a>
+<a ui-sref="enable">
+    <button class="change-vet-list-state-button" ng-click="$ctrl.buttonChangeState(true)">Enabled</button>
 </a>
 <table class="table table-striped">
     <thead>

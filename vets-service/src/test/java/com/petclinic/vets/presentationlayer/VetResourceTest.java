@@ -3,6 +3,7 @@ package com.petclinic.vets.presentationlayer;
 import com.petclinic.vets.datalayer.Vet;
 import com.petclinic.vets.datalayer.VetRepository;
 import com.petclinic.vets.presentationlayer.VetResource;
+import org.hibernate.validator.internal.util.logging.Messages_$bundle;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Assertions;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -22,6 +24,7 @@ import java.util.Optional;
 import static  org.hamcrest.MatcherAssert.assertThat;
 import static  org.hamcrest.Matcher.*;
 import static java.util.Arrays.asList;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -46,35 +49,73 @@ class VetResourceTest {
 
 
 	@Test
-	@DisplayName("Should get a list of vets")
+	@DisplayName("Get List of Vets Resource Test")
 	void shouldGetAListOfVets() throws Exception {
 
 		Vet vet = new Vet();
 		vet.setId(1);
+		vet.setVetId(874130);
+		vet.setFirstName("James");
+		vet.setLastName("Carter");
+		vet.setEmail("carter.james@email.com");
+		vet.setPhoneNumber("2384");
+		vet.setResume("Practicing since 3 years");
+		vet.setWorkday("Monday, Tuesday, Friday");
+		vet.setIsActive(1);
 
-		given(vetRepository.findAll()).willReturn(asList(vet));
-
+		given(vetRepository.findAllEnabledVets()).willReturn(asList(vet));
 		mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$[0].id").value(1));
 	}
 
 	@Test
+	@DisplayName("Disable Vet Resource Test")
 	void disableAVet() throws Exception {
 		//arrange
 		Vet vet = new Vet();
+		vet.setId(1);
+		vet.setVetId(874130);
+		vet.setFirstName("James");
+		vet.setLastName("Carter");
+		vet.setEmail("carter.james@email.com");
+		vet.setPhoneNumber("2384");
+		vet.setResume("Practicing since 3 years");
+		vet.setWorkday("Monday, Tuesday, Friday");
 		vet.setIsActive(0);
 		//act
-		given(vetRepository.findAll()).willReturn(asList(vet));
+		given(vetRepository.findAllEnabledVets()).willReturn(asList(vet));
 		//assert
 		mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$[0].isActive").value(0));
 	}
 
+	@Test
+	@DisplayName("Enable Vet Resource Test")
+	void enableAVet() throws Exception {
+		//arrange
+		Vet vet = new Vet();
+		vet.setId(1);
+		vet.setVetId(874130);
+		vet.setFirstName("James");
+		vet.setLastName("Carter");
+		vet.setEmail("carter.james@email.com");
+		vet.setPhoneNumber("2384");
+		vet.setResume("Practicing since 3 years");
+		vet.setWorkday("Monday, Tuesday, Friday");
+		vet.setIsActive(1);
+		//act
+		given(vetRepository.findAllEnabledVets()).willReturn(asList(vet));
+		//assert
+		mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$[0].isActive").value(1));
+	}
+
 
 	@Test
-	@DisplayName("Should get all the fields for a vet and check if they are okay")
+	@DisplayName("Get All Fields Vet Resource Test")
 	void shouldGetAllTheFieldsForAVet() throws Exception{
 
 		Vet vet = new Vet();
@@ -88,7 +129,7 @@ class VetResourceTest {
 		vet.setWorkday("Monday, Tuesday, Friday");
 		vet.setIsActive(1);
 
-		given(vetRepository.findAll()).willReturn(asList(vet));
+		given(vetRepository.findAllEnabledVets()).willReturn(asList(vet));
 
 		mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
@@ -105,7 +146,7 @@ class VetResourceTest {
 
 
 	@Test
-	@DisplayName("Vet input submission cleanup and validation Test")
+	@DisplayName("Vet input submission cleanup and validation Resource Test")
 	void VetRegisterDataFilterAndValidationTest() throws Exception{
 
 		Vet vet = new Vet();
@@ -119,7 +160,7 @@ class VetResourceTest {
 		vet.setWorkday("Monday,Tuesday,         Friday");
 		vet.setIsActive(5);
 
-		given(vetRepository.findAll()).willReturn(asList(vet));
+		given(vetRepository.findAllEnabledVets()).willReturn(asList(vet));
 
 		mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
@@ -134,15 +175,4 @@ class VetResourceTest {
 				.andExpect(jsonPath("$[0].isActive").value(1));
 	}
 
-
-	@Test
-	void addANewVet() throws Exception {
-		//arrange
-		Vet vet = new Vet();
-		vet.setId(1);
-		//act //assert
-
-		given(vetRepository.findAll()).willReturn(asList(vet));
-		assertEquals(vet.getId(), 1);
-	}
 }

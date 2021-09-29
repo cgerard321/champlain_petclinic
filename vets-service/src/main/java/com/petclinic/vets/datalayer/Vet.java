@@ -1,18 +1,27 @@
 package com.petclinic.vets.datalayer;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.petclinic.vets.utils.exceptions.InvalidInputException;
+import com.petclinic.vets.utils.exceptions.NotFoundException;
+import com.petclinic.vets.utils.http.GlobalControllerExceptionHandler;
+import com.petclinic.vets.utils.http.HttpErrorInfo;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
 import org.hibernate.validator.constraints.UniqueElements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PropertyComparator;
 import org.springframework.core.style.ToStringCreator;
+import org.springframework.web.client.HttpClientErrorException;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlElement;
+import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -34,12 +43,16 @@ import java.util.regex.Pattern;
 @AllArgsConstructor
 public class Vet {
 
+    private static final Logger LOG = LoggerFactory.getLogger(Vet.class);
+    private final ObjectMapper mapper = null;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
 
     @Column(name = "vet_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @NotNull
     @UniqueElements(groups = Vet.class)
     private Integer vetId;
@@ -61,16 +74,12 @@ public class Vet {
     private String phoneNumber;
 
     @Column(name = "resume")
-
-
     private String resume;
 
     @Column(name = "workday")
     private String workday;
 
     @Column(name = "is_active")
-
-
     private Integer isActive;
 
     public Integer getIsActive() {
@@ -95,6 +104,12 @@ public class Vet {
 
     public void setEmail(String email) {
         this.email = verifyEmail(email);
+    }
+
+    public String getPostNumber()
+    {
+        String postNumber = getPhoneNumber().replaceAll("\\(\\d{3}\\)-\\d{3}-\\d{4}", "");
+        return postNumber;
     }
 
     public String getPhoneNumber() {
@@ -176,95 +191,121 @@ public class Vet {
 
 
     public String verifyFirstName(String firstName){
+        String confirmedValue = "";
+        try {
         firstName = firstName.replaceAll("( |\\d)", "");
         Pattern p = Pattern.compile("^(a-z| |,|.|-)+");
         Matcher m = p.matcher(firstName);
         boolean b = m.matches();
         if(b) {
-            String confirmedValue = firstName.trim();
-            return confirmedValue;
+            confirmedValue = firstName.trim();
         }
-        else{
-            return "Invalid First Name";
         }
+        catch (HttpClientErrorException ex){
+            throw handleHttpClientException(ex);
+        }
+        return confirmedValue;
     }
 
 
     public String verifyLastName(String lastName){
+        String confirmedValue = "";
+        try {
         lastName = lastName.replaceAll("( |\\d)", "");
         Pattern p = Pattern.compile("^(a-z| |,|.|-)+");
         Matcher m = p.matcher(lastName);
         boolean b = m.matches();
         if(b) {
-            String confirmedValue = lastName.trim();
-            return confirmedValue;
+            confirmedValue = lastName.trim();
         }
-        else{
-            return "Invalid Last Name";
         }
+        catch (HttpClientErrorException ex){
+            throw handleHttpClientException(ex);
+        }
+        return confirmedValue;
     }
 
     public String verifyPhoneNumber(String phoneNumber){
+        String confirmedValue = "";
+        try {
             phoneNumber = phoneNumber.replaceAll("( |#|\\D)", "");
             Pattern p = Pattern.compile("^(\\d){4}$");
             Matcher m = p.matcher(phoneNumber);
             boolean b = m.matches();
             if(b) {
-                String confirmedValue = phoneNumber.trim();
-                return "(514)-634-8276 #"+confirmedValue;
+                confirmedValue = phoneNumber.trim();
             }
-            else{
-            return "Invalid phone number";
         }
+        catch (HttpClientErrorException ex){
+            throw handleHttpClientException(ex);
+        }
+        return "(514)-634-8276 #"+confirmedValue;
     }
 
     public String verifyWorkday(String workday){
+        String confirmedValue = "";
+        try {
         workday = workday.replaceAll("( )", "");
         workday = workday.replaceAll("(,)", ", ");
         Pattern p = Pattern.compile("((\\bMonday\\b|\\bTuesday\\b|\\bWednesday\\b|\\bThursday\\b|\\bFriday\\b|\\bSaturday\\b|\\bSunday\\b)(,|)( |))+");
         Matcher m = p.matcher(workday);
         boolean b = m.matches();
         if(b) {
-            String confirmedValue = workday.trim();
-            return confirmedValue;
+            confirmedValue = workday.trim();
         }
-        else{
-            return "Invalid Workday Value";
         }
+        catch (HttpClientErrorException ex){
+            throw handleHttpClientException(ex);
+        }
+        return confirmedValue;
     }
 
     public String verifyEmail(String email){
+        String confirmedValue = "";
+        try {
         email = email.replaceAll("( |)", "");
         Pattern p = Pattern.compile("\\b[\\w.%-]+@[-.\\w]+\\.[A-Za-z]{2,4}\\b");
         Matcher m = p.matcher(email);
         boolean b = m.matches();
         if(b) {
-            String confirmedValue = email.trim();
-            return confirmedValue;
+            confirmedValue = email.trim();
         }
-        else{
-            return "Invalid Email";
         }
+        catch (HttpClientErrorException ex){
+            throw handleHttpClientException(ex);
+        }
+        return confirmedValue;
     }
 
     public Integer verifyVetId(int vetId){
+        int confirmedValue =0;
+        try {
         if(Math.log10(vetId) < 7) {
-            int confirmedValue = vetId;
-            return confirmedValue;
+            confirmedValue = vetId;
         }
         else{
             while (Math.log10(vetId) > 6){
                 vetId = vetId /10;
             }
-            int confirmedValue = vetId;
-            return confirmedValue;
+            confirmedValue = vetId;
         }
+        }
+        catch (HttpClientErrorException ex){
+            throw handleHttpClientException(ex);
+        }
+        return confirmedValue;
     }
 
     public Integer verifyIsActive(int isActive){
-        int confirmedValue = 1;
-        if (isActive > -1 && isActive < 2){
-            confirmedValue = isActive;
+        int confirmedValue =0;
+        try {
+            confirmedValue = 1;
+            if (isActive > -1 && isActive < 2) {
+                confirmedValue = isActive;
+            }
+        }
+        catch (HttpClientErrorException ex){
+            throw handleHttpClientException(ex);
         }
         return confirmedValue;
     }
@@ -278,5 +319,28 @@ public class Vet {
                 .append("phoneNumber", this.getPhoneNumber())
                 .append("resume", this.getResume())
                 .append("workday", this.getWorkday()).toString();
+    }
+
+    private RuntimeException handleHttpClientException(HttpClientErrorException ex){
+        switch (ex.getStatusCode()){
+            case NOT_FOUND:
+                throw new NotFoundException(getErrorMessage(ex));
+            case UNPROCESSABLE_ENTITY:
+                throw new InvalidInputException(getErrorMessage(ex));
+            default:
+                LOG.warn("Got an unexpected HTTP error: {}, will rethrow it", ex.getStatusText());
+                LOG.warn("Error body: {}", ex.getResponseBodyAsString());
+                throw ex;
+        }
+    }
+    private String getErrorMessage(HttpClientErrorException ex) {
+
+        try{
+            return mapper.readValue(ex.getResponseBodyAsString(), HttpErrorInfo.class).getMessage();
+
+        }catch(IOException ioex){
+            return ioex.getMessage();
+
+        }
     }
 }
