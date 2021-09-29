@@ -74,16 +74,12 @@ public class Vet {
     private String phoneNumber;
 
     @Column(name = "resume")
-
-
     private String resume;
 
     @Column(name = "workday")
     private String workday;
 
     @Column(name = "is_active")
-
-
     private Integer isActive;
 
     public Integer getIsActive() {
