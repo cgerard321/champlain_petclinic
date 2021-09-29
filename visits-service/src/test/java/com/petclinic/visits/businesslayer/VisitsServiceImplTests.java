@@ -2,7 +2,6 @@ package com.petclinic.visits.businesslayer;
 
 import com.petclinic.visits.datalayer.Visit;
 import com.petclinic.visits.datalayer.VisitRepository;
-import com.petclinic.visits.utils.exceptions.InvalidInputException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,16 +16,12 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-
 
 import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import static org.mockito.Mockito.when;
-
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 
@@ -36,7 +31,11 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Arrays;
 
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
@@ -67,9 +66,8 @@ public class VisitsServiceImplTests {
         List<Visit> list = Arrays.asList(visit, visit1);
         repo.saveAll(list);
     }
-    
-    
-    
+
+
     @Test
     public void whenValidPetIdThenShouldReturnVisitsForPet(){
         when(repo.findByPetId(1)).thenReturn(
@@ -84,35 +82,13 @@ public class VisitsServiceImplTests {
                                 .build()
                 )
         );
-        
+
         List<Visit> serviceResponse = visitsService.getVisitsForPet(1);
-        
+
         assertThat(serviceResponse, hasSize(2));
         assertThat(serviceResponse.get(1).getPetId(), equalTo(1));
     }
-    
-    @Test
-    public void whenValidPetIdThenShouldReturnVisitsForPetAsList(){
-        List<Visit> visitsList = asList(
-                visit()
-                        .id(1)
-                        .petId(1)
-                        .build(),
-                visit()
-                        .id(2)
-                        .petId(1)
-                        .build());
-        
-        ArrayList<Integer> petIdsToSearchFor = new ArrayList<>();
-        petIdsToSearchFor.add(1);
-        
-        when(repo.findByPetIdIn(anyList())).thenReturn(visitsList);
-        
-        List<Visit> serviceResponse = visitsService.getVisitsForPets(petIdsToSearchFor);
-        
-        assertArrayEquals(visitsList.toArray(), serviceResponse.toArray());
-    }
-    
+
     @Test
     public void whenValidIdUpdateVisit(){
         Visit updatedVisit = visit().petId(1).date(new Date()).description("Desc-1 Updated").build();
@@ -138,44 +114,13 @@ public class VisitsServiceImplTests {
   
     @Test
     public void whenValidPetIdThenShouldCreateVisitForPet() {
-        Visit createdVisit = visit().petId(1).date(new Date()).description("Description").practitionerId(123456).build();
+        Visit visit = visit().petId(1).date(new Date()).description("").practitionerId(123456).build();
         
-        when(repo.save(any(Visit.class))).thenReturn(createdVisit);
+        when(repo.save(visit)).thenReturn(visit);
         
-        Visit serviceResponse = visitsService.addVisit(createdVisit);
+        Visit serviceResponse = repo.save(visit);
         
-        assertThat(serviceResponse.getPetId(), equalTo(createdVisit.getPetId()));
-    }
-
-    @Test
-    public void whenEmptyDescriptionThenShouldThrowInvalidInputException(){
-        // arrange
-        String expectedExceptionMessage = "Visit description required.";
-        Visit createdVisit = visit().petId(1).date(new Date()).description("").practitionerId(123456).build();
-        when(repo.save(any(Visit.class))).thenReturn(createdVisit);
-
-        // act and assert
-        InvalidInputException ex = assertThrows(InvalidInputException.class, () ->{
-            visitsService.addVisit(createdVisit);
-        });
-        assertEquals(ex.getMessage(), expectedExceptionMessage);
-    }
-
-
-    @Test
-    public void whenVisitIdAlreadyExistsThenThrowInvalidInputException(){
-        // arrange
-        String expectedExceptionMessage;
-        Visit createdVisit = visit().petId(1).date(new Date()).description("Description").practitionerId(123456).build();
-        when(repo.save(any(Visit.class))).thenThrow(DuplicateKeyException.class);
-
-        // act and assert
-        InvalidInputException ex = assertThrows(InvalidInputException.class, () ->{
-            visitsService.addVisit(createdVisit);
-        });
-        expectedExceptionMessage = "Duplicate visitId: " + createdVisit.getId();
-        assertEquals(ex.getMessage(), expectedExceptionMessage);
-        assertThat(ex.getCause()).isInstanceOf(DuplicateKeyException.class);
+        assertThat(serviceResponse.getPetId(), equalTo(1));
     }
 
 
