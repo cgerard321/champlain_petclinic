@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"bufio"
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -10,8 +12,10 @@ import (
 	"io/ioutil"
 	"mailer-service/mailer"
 	"mailer-service/mailer/service"
+	"net"
 	"net/http"
 	"net/http/httptest"
+	"net/textproto"
 	"os"
 	"strings"
 	"testing"
@@ -160,6 +164,9 @@ func TestHandleMailPOST_NilMail(t *testing.T) {
 
 func TestHandleMailPOST_Full(t *testing.T) {
 
+	get, err := startMockSMTPServer(2000)
+	assert.Nil(t, err)
+
 	engine := gin.Default()
 
 	mS := service.MailerServiceImpl{}
@@ -186,6 +193,101 @@ func TestHandleMailPOST_Full(t *testing.T) {
 	testHTTPResponse(t, engine, req, func(w *httptest.ResponseRecorder) bool {
 
 		assert.Equal(t, http.StatusOK, w.Code)
+		got, err := get()
+		assert.Nil(t, err)
+		assert.Equal(t, got, "")
 		return true
 	})
+}
+
+
+// Absolute legend https://titanwolf.org/Network/Articles/Article?AID=5749f0a3-9be8-4add-a1d3-9699e7554251#gsc.tab=0
+
+type receivedMailTextGetter func() (string, error)
+func startMockSMTPServer(port int, serverResponses ...string) (receivedMailTextGetter, error) {
+	if len(serverResponses) == 0 {
+		// default server responses
+		serverResponses = []string{
+			"220 smtp.example.com Service ready",
+			"250-ELHO -> ok",
+			"250-Show Options for ESMTP",
+			"250-8BITMIME",
+			"250-SIZE",
+			"250-AUTH LOGIN PLAIN",
+			"250 HELP",
+			"235 AUTH -> ok",
+			"250 MAIL FROM -> ok",
+			"250 RCPT TO -> ok",
+			"354 DATA",
+			"250 ... -> ok",
+			"221 QUIT",
+		}
+	}
+	var errOrDone = make(chan error)
+
+	var buffer bytes.Buffer
+	bufferWriter := bufio.NewWriter(&buffer)
+
+	mockSmtpServer, err := net.Listen("tcp", fmt.Sprintf("127.0.0.1:%d", port))
+	if err != nil {
+		return nil, err
+	}
+
+	// prevent data race on writer
+	go func() {
+		defer close(errOrDone)
+		defer bufferWriter.Flush()
+		defer mockSmtpServer.Close()
+
+		conn, err := mockSmtpServer.Accept()
+		if err != nil {
+			errOrDone <- err
+			return
+		}
+		defer conn.Close()
+
+		tc := textproto.NewConn(conn)
+		defer tc.Close()
+
+	LoopServerResponse:
+		for _, res := range serverResponses {
+			if res == "" {
+				break
+			}
+
+			tc.PrintfLine("%s", res)
+
+			if len(res) >= 4 && res[3] == '-' {
+				continue LoopServerResponse
+			}
+
+			if res == "221 QUIT" {
+				return
+			}
+
+			for {
+				msg, err := tc.ReadLine()
+				if err != nil {
+					errOrDone <- err
+					return
+				}
+				bufferWriter.Write([]byte(msg + "\r\n"))
+
+				if res != "354 DATA" || msg == "." {
+					break
+				}
+			}
+		}
+	}()
+	// a function for getting received data
+	getReceivedData := func() (string, error) {
+		err, hasErr := <-errOrDone
+		// if catch error
+		if hasErr {
+			return "", err
+		}
+		return buffer.String(), nil
+	}
+
+	return getReceivedData, nil
 }
