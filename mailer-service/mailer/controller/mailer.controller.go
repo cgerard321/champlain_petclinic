@@ -8,10 +8,10 @@ import (
 )
 
 type MailerControllerImpl struct {
-	s *mailer.MailerService
+	s mailer.MailerService
 }
 
-func (m *MailerControllerImpl) New(service *mailer.MailerService) {
+func (m *MailerControllerImpl) New(service mailer.MailerService) {
 	m.s = service
 }
 func handleMailPOST(context *gin.Context) {

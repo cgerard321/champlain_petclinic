@@ -22,7 +22,7 @@ func main() {
 	mS.New(mailer.CreateDialer(SMTP_SERVER, SMTP_USER, SMTP_PASS))
 
 	mC := controller.MailerControllerImpl{}
-	mC.New(mS)
+	mC.New(&mS)
 
 	err := mC.Routes(engine)
 	if err != nil {

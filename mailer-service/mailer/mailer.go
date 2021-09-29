@@ -7,7 +7,7 @@ import (
 )
 
 type MailerController interface {
-	New(service *MailerService)
+	New(service MailerService)
 	Routes(engine *gin.Engine) error
 }
 
