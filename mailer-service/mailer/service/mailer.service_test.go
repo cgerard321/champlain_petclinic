@@ -4,12 +4,13 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"mailer-service/mailer"
 	"net"
 	"net/textproto"
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 var ValidMail = &mailer.Mail{To: "example@test.com", Subject: "Test subject", Message: "Test message"}
@@ -39,7 +40,6 @@ func TestMailerServiceImpl_SendMailValidMail(t *testing.T) {
 
 	got, err := get()
 	assert.Nil(t, err)
-	fmt.Println(got)
 	assert.Contains(t, got, "From: " + from)
 	assert.Contains(t, got, "To: " + ValidMail.To)
 	assert.Contains(t, got, "Subject: " + ValidMail.Subject)
