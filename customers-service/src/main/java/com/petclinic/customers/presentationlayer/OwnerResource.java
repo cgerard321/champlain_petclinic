@@ -101,11 +101,6 @@ class OwnerResource {
 
     }
 
-//    @PostMapping
-//    @ResponseStatus(HttpStatus.CREATED)
-//    public Owner createCustodian(@RequestBody String custodian){
-//        return null;
-//    }
 }
 
 
