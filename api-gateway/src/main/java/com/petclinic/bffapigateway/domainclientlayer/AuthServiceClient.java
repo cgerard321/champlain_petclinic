@@ -23,6 +23,7 @@ public class AuthServiceClient {
         authServiceUrl = "http://" + authServiceHost + ":" + authServicePort + "/users";
     }
 
+
     public Mono<UserDetails> getUser(final long userId) {
         return webClientBuilder.build().get()
                 .uri(authServiceUrl + "/{userId}", userId)
@@ -49,7 +50,6 @@ public class AuthServiceClient {
                 .uri(authServiceUrl)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve().bodyToFlux(UserDetails.class);
-
     }
 
     public Mono<UserDetails> updateUser (final int userId, final UserDetails model){
