@@ -108,3 +108,18 @@ func TestValidateEmailNilEmail(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, recorder.Code)
 	assert.Equal(t, "\"e-mail not found\"", recorder.Body.String())
 }
+
+func TestValidateEmailValidEmail(t *testing.T) {
+
+	recorder := httptest.NewRecorder()
+	context, _ := gin.CreateTestContext(recorder)
+
+	const email = "test@example.com"
+	const subject = ""
+	const message = "test"
+	context.Set("mail", &mailer.Mail{To: email, Subject: subject, Message: message})
+
+	ValidateEmail(context)
+
+	assert.Equal(t, http.StatusOK, recorder.Code)
+}
