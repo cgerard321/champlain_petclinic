@@ -5,10 +5,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
-	gomail "gopkg.in/mail.v2"
 	"io/ioutil"
 	"mailer-service/mailer"
 	"mailer-service/mailer/service"
@@ -19,6 +15,11 @@ import (
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/gin-gonic/gin"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
+	gomail "gopkg.in/mail.v2"
 )
 
 type MailerServiceMock struct {
@@ -199,6 +200,39 @@ func TestHandleMailPOST_Full(t *testing.T) {
 		assert.Contains(t, got, "Subject: " + subject)
 		assert.Contains(t, got, message)
 		assert.Equal(t, fmt.Sprintf("\"Message sent to %s\"", email), w.Body.String())
+		return true
+	})
+}
+
+func TestHandleMailPOST_FullInValid(t *testing.T) {
+
+	engine := gin.Default()
+
+	mS := service.MailerServiceImpl{}
+	dialer := mailer.CreateDialer("localhost", "a@b.c", "pass", 2000)
+	mS.New(dialer)
+
+	mC := MailerControllerImpl{}
+	mC.New(&mS)
+	assert.Nil(t, mC.Routes(engine))
+
+	const email = "test@test.test"
+	const subject = "Test subject"
+	const message = "Test message"
+	marshal, _ := json.Marshal(mailer.Mail{To: email, Subject: subject, Message: message})
+	serial := string(marshal)
+
+	req, err := http.NewRequest(http.MethodPost, "/mail", strings.NewReader(serial))
+
+	if err != nil {
+		fmt.Println(err)
+		t.Fatal(err)
+	}
+
+	testHTTPResponse(t, engine, req, func(w *httptest.ResponseRecorder) bool {
+
+		assert.Equal(t, http.StatusInternalServerError, w.Code)
+		assert.Contains(t, w.Body.String(), "connection refused")
 		return true
 	})
 }
