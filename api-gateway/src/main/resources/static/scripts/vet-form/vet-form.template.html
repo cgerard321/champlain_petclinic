@@ -21,17 +21,38 @@
     <span ng-show="vetForm.phoneNumber.$error.required" class="help-block">Phone Number is required.</span>
   </div>
   <div class="form-group">
+
     <label><b>Profile Picture</b></label>
+    <form action="some_script" method="post">
+      <input id="max_id" type="hidden" name="MAX_FILE_SIZE" value="250000000" />
+      <input onchange="upload_check()" id="profile_picture" type="file" name="profilePicture" accept="png/*" />
+      <input type="submit" value="Upload"/>
+    </form>
+    <!-- old profile picture input field
     <input type="image" placeholder="profile picture" name="profilePicture">
-  </div>
+    -->
+    </div>
   <div class="form-group">
     <label><b>Career Resume</b></label>
     <input type="file" placeholder="Resume" name="careerResume">
   </div>
   <div class="form-group">
+    <fieldset>
+      <legend>Available Work Days</legend>
+      <input type="checkbox" name="workDays" value="Monday">Monday<br>
+      <input type="checkbox" name="workDays" value="Tuesday">Tuesday<br>
+      <input type="checkbox" name="workDays" value="Wednesday">Wednesday<br>
+      <input type="checkbox" name="workDays" value="Thursday">Thursday<br>
+      <input type="checkbox" name="workDays" value="Friday">Friday<br>
+    </fieldset>
+  </div>
+
+  <!-- old work day submission
+  <div class="form-group">
     <label><b>Work Days</b></label>
     <input type="date" placeholder="Work Days" name="workDays">
   </div>
+  -->
   <div class="form-group">
     <label><b>Specialty</b></label>
     <input type="text" placeholder="Specialty" name="speciality">
