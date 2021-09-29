@@ -12,9 +12,12 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
+import java.util.ArrayList;
 import java.util.Date;
 import static java.util.Arrays.asList;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static com.petclinic.visits.datalayer.Visit.visit;
@@ -213,9 +216,25 @@ public class VisitResourceTest {
 
 
 	@Test
-	void whenInValidPetIdThenShouldReturnVisitsForPet() throws Exception {
+	void whenInvalidPetIdThenShouldReturnBadRequest() throws Exception {
 		mvc.perform(get("/visits/FADAW"))
 				.andExpect(status().isBadRequest());
+	}
+	
+	@Test
+	void whenValidPetIdThenShouldReturnVisitsForPetId() throws Exception {
+		ArrayList<Visit> visits = new ArrayList<>();
+		visits.add(visit().petId(1).date(new Date()).description("CREATED VISIT 1").practitionerId(123456).build());
+		visits.add(visit().petId(1).date(new Date()).description("CREATED VISIT 2").practitionerId(654321).build());
+		
+		given(visitsService.getVisitsForPet(1)).willReturn(visits);
+		
+		mvc.perform(get("/owners/*/pets/{petId}/visits", 1)
+				.contentType(MediaType.APPLICATION_JSON)
+				.characterEncoding("utf-8")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.*", hasSize(2)));
 	}
 
 }
