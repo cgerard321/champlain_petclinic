@@ -22,7 +22,7 @@ type Mail struct {
 	Subject string `json:"subject"`
 }
 
-func CreateMailer(host, email, password string, port... int) *gomail.Dialer {
+func CreateDialer(host, email, password string, port... int) *gomail.Dialer {
 
 	truePort := 587
 
