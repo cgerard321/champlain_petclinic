@@ -2,7 +2,6 @@ package com.petclinic.vets.utils.http;
 
 import com.petclinic.vets.utils.exceptions.InvalidInputException;
 import com.petclinic.vets.utils.exceptions.NotFoundException;
-import com.petclinic.vets.utils.exceptions.UnavailableServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -30,13 +29,6 @@ public class GlobalControllerExceptionHandler {
     public HttpErrorInfo handleInvalidInputException(ServerHttpRequest request, Exception ex){
         return  createHttpErrorInfo(UNPROCESSABLE_ENTITY, request, ex);
     }
-
-    @ExceptionHandler(UnavailableServiceException.class)
-    @ResponseStatus(SERVICE_UNAVAILABLE)
-    public HttpErrorInfo handleUnavailableServiceException(ServerHttpRequest request, Exception ex){
-        return createHttpErrorInfo(SERVICE_UNAVAILABLE, request, ex);
-    }
-
     private HttpErrorInfo createHttpErrorInfo(HttpStatus httpStatus, ServerHttpRequest request, Exception ex) {
 
         final String path = request.getPath().pathWithinApplication().value();
