@@ -19,13 +19,8 @@ public class RoleController {
     @PostMapping
     public Role createRole(@RequestBody RoleIDLessDTO dto) {
 
-        log.info("Received role dto, trying to convert model");
-        log.info("DTO info: { name={}, parent={} }", dto.getName(), dto.getParent());
-        final Role role = roleMapper.idLessDTOToModel(dto);
-        log.info("Successfully converted dto -> model");
-
         log.info("Trying to persist role");
-        final Role saved = roleService.createRole(role);
+        final Role saved = roleService.createRole(dto);
         log.info("Successfully persisted role");
 
         return saved;
@@ -35,7 +30,8 @@ public class RoleController {
     public Page<Role> getAllRoles(
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "10") int size
-    ) {
+    )
+    {
 
         log.info("page={}", page);
         final Page<Role> all = roleService.findAll(PageRequest.of(page - 1, size));
@@ -47,13 +43,7 @@ public class RoleController {
     @DeleteMapping
     public void deleteRole(@RequestParam long id) {
 
-        log.info("id={}", id);
-        try {
-            roleService.deleteById(id);
-        } catch (EmptyResultDataAccessException e) {
-            log.info("No role with id {}. Ignoring", id);
-            return;
-        }
+        roleService.deleteById(id);
         log.info("Deleted role with id {}", id);
     }
 }
