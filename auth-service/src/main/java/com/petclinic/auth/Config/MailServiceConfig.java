@@ -15,10 +15,10 @@ public class MailServiceConfig {
     private final String MAIL_BASE_URL;
 
     public MailServiceConfig(
-            @Value("") String mailURL,
-            @Value("") String mailPORT
+            @Value("${mailer-service.host}") String mailURL,
+            @Value("${mailer-service.port}") String mailPORT
     ) {
-        MAIL_BASE_URL = format("%s:%s", mailURL, mailPORT);
+        MAIL_BASE_URL = format("http://%s:%s", mailURL, mailPORT);
     }
 
     @Bean
