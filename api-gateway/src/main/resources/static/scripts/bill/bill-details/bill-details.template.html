@@ -1,10 +1,39 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+<script>
+    function printPage() {
+        window.print();
+    }
+</script>
 
-</body>
-</html>
+<!--<h2>Bill Details: {{bills.id}}</h2>
+
+<div>
+    <h3>Payment Info for {{bills.billId}}</h3>
+    <h3>505 Lincoln Str. Queens, New York</h3>
+    <h3>{{owners.firstName}} {{owners.lastName}}</h3>
+    <h3>Final price: {{bills.amount}}</h3>
+    <h3>Visit type: {{bills.visitType}}</h3>
+    <h3>Date generated: {{bills.date}} {{bills.time}}</h3>
+
+    <div>
+        <input type="button" value="Print this page" onclick="printPage()" />
+    </div>
+
+    <button type="submit" formaction="/bills" >Back to History...</button>
+</div>-->
+
+<h2 class="titleOwner">Bill Details: 123456789</h2>
+
+<div>
+    <h3>Payment Info for 123456789</h3>
+    <h3>505 Lincoln Str. Queens, New York</h3>
+    <h3>John Doe</h3>
+    <h3>Final price: $125.00</h3>
+    <h3>Visit type: Surgery</h3>
+    <h3>Date generated: 2021-09-28 00:00</h3>
+
+    <div>
+        <input type="button" value="Print this page" onclick="printPage()" />
+    </div>
+
+    <button type="submit" formaction="/bills" >Back to History...</button>
+</div>

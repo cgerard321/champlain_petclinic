@@ -1,0 +1,55 @@
+<h2 class="titleOwner">Bill History</h2>
+
+<form>
+    <div>
+        <input type="text" placeholder="Search Filter..." class="form-control" ng-model="$ctrl.query">
+    </div>
+</form>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <td>Bill ID</td>
+            <td>Amount</td>
+            <td>Date/Time</td>
+        </tr>
+    </thead>
+
+    <!--<tr ng-repeat="bill in $ctrl.bills | filter:$ctrl.query track by bill.id">
+        <td>
+            <a class="newBtn btn btn-default">
+                {{bill.id}}
+            </a>
+        </td>
+        <td>{{bill.amount}}</td>
+        <td>{{bill.dateTime}}</td>
+    </tr>-->
+
+    <tr>
+        <td>
+            <a class="newBtn btn btn-default">
+                123456789
+            </a>
+        </td>
+        <td>$125.00</td>
+        <td>2021-09-28 00:00</td>
+    </tr>
+    <tr>
+        <td>
+            <a class="newBtn btn btn-default">
+                234567891
+            </a>
+        </td>
+        <td>$99.00</td>
+        <td>2021-09-29 00:00</td>
+    </tr>
+    <tr>
+        <td>
+            <a class="newBtn btn btn-default">
+                345678912
+            </a>
+        </td>
+        <td>$200.00</td>
+        <td>2021-09-30 00:00</td>
+    </tr>
+</table>
