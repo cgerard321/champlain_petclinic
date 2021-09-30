@@ -57,8 +57,7 @@ class OwnerResource {
      * Read single Owner
      */
     @GetMapping(value = "/{ownerId}")
-    public Optional<Owner> findOwner(@PathVariable("ownerId") int ownerId)
-    {
+    public Optional<Owner> findOwner(@PathVariable("ownerId") int ownerId) {
         return ownerService.findByOwnerId(ownerId);
     }
 
@@ -102,11 +101,6 @@ class OwnerResource {
 
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public Owner createCustodian(@PathVariable("custodian")String custodian){
-        return null;
-    }
 }
 
 

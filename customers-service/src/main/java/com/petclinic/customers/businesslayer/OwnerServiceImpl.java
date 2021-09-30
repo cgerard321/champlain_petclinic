@@ -103,7 +103,7 @@ public class OwnerServiceImpl implements OwnerService {
         try{
             Owner savedOwner = repository.save(owner);
             LOG.debug("createOwner: owner with id {} saved",owner.getId());
-            return  savedOwner;
+            return savedOwner;
         }catch(DuplicateKeyException duplicateKeyException){
             throw new InvalidInputException("Duplicate key, ownerId: " + owner.getId());
         }
@@ -150,19 +150,21 @@ public class OwnerServiceImpl implements OwnerService {
 
     }
 
-    @Override
-    public void addCustodian(Owner primary,String custname){
 
-        int primaryOwnerId = primary.getId();
-        if(repository.findById(primaryOwnerId).isPresent()){
-            primary.setCustodian(custname);
-            LOG.debug("createCustodian: Added custodian to owner {}",
-                    primaryOwnerId);
-            //return savedSecondaryOwner;
-        }else {
-            LOG.debug("createSecondaryOwner: primary owner with id {} does not exist", primaryOwnerId);
-            throw new NotFoundException("Primary owner ID "+ primaryOwnerId +" not found");
-        }
-    }
+//    @Override
+//    public void addCustodian(Owner primary,String custname){
+//
+//        int primaryOwnerId = primary.getId();
+//        if(repository.findById(primaryOwnerId).isPresent()){
+//            primary.setCustodian(custname);
+//            LOG.debug("createCustodian: Added custodian to owner {}",
+//                    primaryOwnerId);
+//            //return savedSecondaryOwner;
+//        }else {
+//            LOG.debug("createSecondaryOwner: primary owner with id {} does not exist", primaryOwnerId);
+//            throw new NotFoundException("Primary owner ID "+ primaryOwnerId +" not found");
+//        }
+//    }
+
 
 }
