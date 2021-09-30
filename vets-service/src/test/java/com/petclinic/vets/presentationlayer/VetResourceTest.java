@@ -26,7 +26,6 @@ import static  org.hamcrest.Matcher.*;
 import static  org.hamcrest.MatcherAssert.assertThat;
 import static  org.hamcrest.Matcher.*;
 import static java.util.Arrays.asList;
-import static org.hamcrest.Matchers.hasValue;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;

@@ -12,9 +12,12 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
+import java.util.ArrayList;
 import java.util.Date;
 import static java.util.Arrays.asList;
+import static org.hamcrest.Matchers.hasSize;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static com.petclinic.visits.datalayer.Visit.visit;
@@ -213,7 +216,7 @@ public class VisitResourceTest {
 
 
 	@Test
-	void whenInValidPetIdThenShouldReturnVisitsForPet() throws Exception {
+	void whenInvalidPetIdThenShouldReturnBadRequest() throws Exception {
 		mvc.perform(get("/visits/FADAW"))
 				.andExpect(status().isBadRequest());
 	}

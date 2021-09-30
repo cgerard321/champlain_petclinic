@@ -29,7 +29,6 @@ public class GlobalControllerExceptionHandler {
     public HttpErrorInfo handleInvalidInputException(ServerHttpRequest request, Exception ex){
         return  createHttpErrorInfo(UNPROCESSABLE_ENTITY, request, ex);
     }
-
     private HttpErrorInfo createHttpErrorInfo(HttpStatus httpStatus, ServerHttpRequest request, Exception ex) {
 
         final String path = request.getPath().pathWithinApplication().value();
