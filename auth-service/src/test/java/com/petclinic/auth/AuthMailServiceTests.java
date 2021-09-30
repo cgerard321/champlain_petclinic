@@ -55,6 +55,8 @@ public class AuthMailServiceTests {
     @Test
     @DisplayName("Send invalid email")
     void send_invalid_email() {
-        assertThrows(HttpClientErrorException.class, () -> mailService.sendMail(EMAIL_INVALID));
+        HttpClientErrorException httpClientErrorException =
+                assertThrows(HttpClientErrorException.class, () -> mailService.sendMail(EMAIL_INVALID));
+        assertEquals("500 Unable to send mail", httpClientErrorException.getMessage());
     }
 }
