@@ -18,9 +18,12 @@ import org.springframework.web.client.HttpClientErrorException;
 import retrofit2.Response;
 import retrofit2.mock.Calls;
 
+import java.io.IOException;
+
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -35,13 +38,12 @@ public class AuthMailServiceTests {
 
     private final Mail
             EMAIL_VALID = new Mail("to@test.com", "test-subject", "test-message"),
-            EMAIL_EMPTY_INVALID = new Mail(),
-            EMAIL_NO_TO_INVALID = new Mail("", "test-subject", "test-message");
+            EMAIL_EMPTY_INVALID = new Mail();
     public final MediaType JSON
             = MediaType.parse("application/json; charset=utf-8");
 
     @BeforeEach
-    void setUp() {
+    void setUp(){
 
         when(mockMailCall.sendMail(EMAIL_VALID))
                 .thenReturn(Calls.response(format("Message sent to %s", EMAIL_VALID.getTo())));
@@ -65,5 +67,15 @@ public class AuthMailServiceTests {
         HttpClientErrorException httpClientErrorException =
                 assertThrows(HttpClientErrorException.class, () -> mailService.sendMail(EMAIL_EMPTY_INVALID));
         assertEquals("400 Bad Request", httpClientErrorException.getMessage());
+    }
+
+    @Test
+    @DisplayName("IOException graceful handling")
+    void io_exception_graceful_handling() {
+        when(mockMailCall.sendMail(EMAIL_EMPTY_INVALID))
+                .thenReturn(Calls.failure(new IOException()));
+        HttpClientErrorException httpClientErrorException =
+                assertThrows(HttpClientErrorException.class, () -> mailService.sendMail(EMAIL_EMPTY_INVALID));
+        assertEquals("500 Unable to send mail", httpClientErrorException.getMessage());
     }
 }
