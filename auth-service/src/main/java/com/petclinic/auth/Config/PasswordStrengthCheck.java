@@ -1,4 +1,4 @@
-package com.petclinic.auth.User;
+package com.petclinic.auth.Config;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;
