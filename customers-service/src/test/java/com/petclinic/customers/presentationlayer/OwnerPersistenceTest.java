@@ -1,6 +1,7 @@
 package com.petclinic.customers.presentationlayer;
 
-import com.petclinic.customers.datalayer.*;
+import com.petclinic.customers.datalayer.Owner;
+import com.petclinic.customers.datalayer.OwnerRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -8,7 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
 import java.util.Optional;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.samePropertyValuesAs;
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -16,7 +21,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @DataJpaTest
 @ActiveProfiles("test")
 class OwnerPersistenceTest {
-
 
     @Autowired
     OwnerRepository repository;
@@ -47,15 +51,10 @@ class OwnerPersistenceTest {
         Owner newOwner = new Owner (OwnerID, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
         repository.save(newOwner);
 
-        //If owner is found
-        if (repository.findById(OwnerID).isPresent())
-        {
-            System.out.println("Owner is found!");
-        }
-        else
-        {
-            System.out.println("No");
-        }
+        Optional<Owner> owner = repository.findById(newOwner.getId());
+        //assertEqualsProduct(savedEntity, entity.get());
+
+        assertThat(owner.get(), samePropertyValuesAs(newOwner));
 
 
 
