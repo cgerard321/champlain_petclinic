@@ -22,8 +22,8 @@ public class MailServiceImpl implements MailService {
             Response<String> execute = mailServiceCall.sendMail(mail).execute();
             if(execute.code() == 400) {
                 log.error(execute.message());
-                log.error(execute.body());
-                throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, execute.message());
+                log.error(execute.errorBody().string());
+                throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, execute.errorBody().string());
             }
             return execute.body();
         } catch (IOException e) {

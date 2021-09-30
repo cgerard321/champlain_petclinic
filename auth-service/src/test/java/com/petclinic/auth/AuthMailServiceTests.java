@@ -4,6 +4,8 @@ package com.petclinic.auth;
 import com.petclinic.auth.Mail.Mail;
 import com.petclinic.auth.Mail.MailService;
 import com.petclinic.auth.Mail.MailServiceCall;
+import okhttp3.MediaType;
+import okhttp3.ResponseBody;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,6 +15,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.HttpClientErrorException;
+import retrofit2.Response;
 import retrofit2.mock.Calls;
 
 import static java.lang.String.format;
@@ -32,15 +35,19 @@ public class AuthMailServiceTests {
 
     private final Mail
             EMAIL_VALID = new Mail("to@test.com", "test-subject", "test-message"),
-            EMAIL_INVALID = new Mail();
+            EMAIL_EMPTY_INVALID = new Mail(),
+            EMAIL_NO_TO_INVALID = new Mail("", "test-subject", "test-message");
+    public final MediaType JSON
+            = MediaType.parse("application/json; charset=utf-8");
 
     @BeforeEach
     void setUp() {
+
         when(mockMailCall.sendMail(EMAIL_VALID))
                 .thenReturn(Calls.response(format("Message sent to %s", EMAIL_VALID.getTo())));
 
-        when(mockMailCall.sendMail(EMAIL_INVALID))
-                .thenThrow(new HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to send mail"));
+        when(mockMailCall.sendMail(EMAIL_EMPTY_INVALID))
+                .thenReturn(Calls.response(Response.error(400, ResponseBody.create(JSON, "Bad request"))));
     }
 
     @Test
@@ -53,10 +60,10 @@ public class AuthMailServiceTests {
     }
 
     @Test
-    @DisplayName("Send invalid email")
-    void send_invalid_email() {
+    @DisplayName("Send invalid empty email")
+    void send_invalid_empty_email() {
         HttpClientErrorException httpClientErrorException =
-                assertThrows(HttpClientErrorException.class, () -> mailService.sendMail(EMAIL_INVALID));
-        assertEquals("500 Unable to send mail", httpClientErrorException.getMessage());
+                assertThrows(HttpClientErrorException.class, () -> mailService.sendMail(EMAIL_EMPTY_INVALID));
+        assertEquals("400 Bad Request", httpClientErrorException.getMessage());
     }
 }
