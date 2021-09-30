@@ -23,14 +23,15 @@ import javax.swing.text.html.parser.Entity;
 import java.util.Optional;
 import static  org.hamcrest.MatcherAssert.assertThat;
 import static  org.hamcrest.Matcher.*;
+import static  org.hamcrest.MatcherAssert.assertThat;
+import static  org.hamcrest.Matcher.*;
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * @author Maciej Szarlinski
@@ -46,7 +47,6 @@ class VetResourceTest {
 
 	@MockBean
 	VetRepository vetRepository;
-
 
 	@Test
 	@DisplayName("Get List of Vets Resource Test")
