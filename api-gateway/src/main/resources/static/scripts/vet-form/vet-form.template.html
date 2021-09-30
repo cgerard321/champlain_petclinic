@@ -1,5 +1,5 @@
 <div class="bColor">
-  <h2 xmlns:vetsNew xmlns:vetsNew class="titleVetForm">New Vet Sign Up</h2>
+  <h2 xmlns:vetsNew class="titleVetForm">New Vet Sign Up</h2>
 </div>
 
 <form id="vetForm" class="form-horizontal" ng-submit="$ctrl.submitVetForm()">
@@ -10,6 +10,7 @@
     <span ng-show="vetForm.firstName.$error.required" class="help-block">First name is required.</span>
     </div>
   </div>
+
   <div class="form-group">
     <label class="col-sm-2 control-label">Last Name</label>
     <div class="owner col-sm-6">
@@ -17,6 +18,7 @@
     <span ng-show="vetForm.lastName.$error.required" class="help-block">Last name is required.</span>
     </div>
   </div>
+
   <div class="form-group">
     <label class="col-sm-2 control-label">Email</label>
     <div class="owner col-sm-6">
@@ -24,6 +26,7 @@
     <span ng-show="vetForm.email.$error.required" class="help-block">Email is required.</span>
     </div>
   </div>
+
   <div class="form-group">
     <label class="col-sm-2 control-label">Phone Number</label>
     <div class="owner col-sm-6">
@@ -31,6 +34,7 @@
     <span ng-show="vetForm.phoneNumber.$error.required" class="help-block">Phone Number is required.</span>
     </div>
   </div>
+
   <div class="form-group">
     <label class="col-sm-2 control-label">Profile Picture</label>
     <div class="owner col-sm-6">
@@ -41,39 +45,42 @@
     <input class="form-control col-sm-4"type="image" placeholder="profile picture" name="profilePicture">
     -->
     </div>
+
   <div class="form-group">
     <label class="col-sm-2 control-label">Career Resume</label>
     <div class="owner col-sm-6">
     <input class="form-control col-sm-4"type="file" placeholder="Resume" name="careerResume">
     </div>
   </div>
+
   <div class="form-group">
     <label class="col-sm-2 control-label">Specialty</label>
     <div class="owner col-sm-6">
     <input class="form-control col-sm-4"type="text" placeholder="Specialty" name="speciality">
     </div>
   </div>
+
   <div class="form-group">
     <fieldset>
-      <legend class="col-sm-2 control-label">What Animals Can You Treat</legend>
-      <div class="owner col-sm-6">
-      <input class="form-control col-sm-4"type="checkbox" placeholder="Animals Treated" name="animalsTreated" value="Dogs">Dogs
-      <input class="form-control col-sm-4"type="checkbox" placeholder="Animals Treated" name="animalsTreated" value="Cats">Cats
-      <input class="form-control col-sm-4"type="checkbox" placeholder="Animals Treated" name="animalsTreated" value="Birds">Birds
-      <input class="form-control col-sm-4"type="checkbox" placeholder="Animals Treated" name="animalsTreated" value="Exotic">Exotic Animals
-      <input class="form-control col-sm-4"type="checkbox" placeholder="Animals Treated" name="animalsTreated" value="Reptiles">Reptiles
+      <legend>What Animals Can You Treat</legend>
+      <div>
+      <input type="checkbox" placeholder="Animals Treated" name="animalsTreated" value="Dogs">Dogs
+      <input type="checkbox" placeholder="Animals Treated" name="animalsTreated" value="Cats">Cats
+      <input type="checkbox" placeholder="Animals Treated" name="animalsTreated" value="Birds">Birds
+      <input type="checkbox" placeholder="Animals Treated" name="animalsTreated" value="Exotic">Exotic Animals
+      <input type="checkbox" placeholder="Animals Treated" name="animalsTreated" value="Reptiles">Reptiles
       </div>
     </fieldset>
   </div>
   <div class="form-group">
     <fieldset>
-      <legend class="col-sm-2 control-label">Available Work Days</legend>
-      <div class="owner col-sm-6">
-      <input class="form-control col-sm-4"type="checkbox" name="workDays" value="Monday">Monday
-      <input class="form-control col-sm-4"type="checkbox" name="workDays" value="Tuesday">Tuesday
-      <input class="form-control col-sm-4"type="checkbox" name="workDays" value="Wednesday">Wednesday
-      <input class="form-control col-sm-4"type="checkbox" name="workDays" value="Thursday">Thursday
-      <input class="form-control col-sm-4"type="checkbox" name="workDays" value="Friday">Friday
+      <legend >Available Work Days</legend>
+      <div>
+      <input type="checkbox" name="workDays" value="Monday">Monday
+      <input type="checkbox" name="workDays" value="Tuesday">Tuesday
+      <input type="checkbox" name="workDays" value="Wednesday">Wednesday
+      <input type="checkbox" name="workDays" value="Thursday">Thursday
+      <input type="checkbox" name="workDays" value="Friday">Friday
       </div>
     </fieldset>
   </div>
@@ -83,9 +90,20 @@
     <input type="date" placeholder="Work Days" name="workDays">
   </div>
   -->
+  <div class="form-group">
+    <fieldset>
+      <legend>Active Vet</legend>
+      <div>
+        <input type="radio" name="isActive" value="1">Yes
+        <input type="radio" name="isActive" value="0">No
+      </div>
+    </fieldset>
+  </div>
+
   <div class="form-group formColor">
     <div class="owner marg col-sm-6">
     <button type="submit" class="btn btn-default">Submit</button>
     </div>
   </div>
+
 </form>
