@@ -49,6 +49,8 @@ dependencies {
 	testImplementation 'io.projectreactor:reactor-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testImplementation('com.h2database:h2')
+	// https://mvnrepository.com/artifact/com.squareup.retrofit2/retrofit-mock
+	testImplementation 'com.squareup.retrofit2:retrofit-mock:2.9.0'
 }
 
 jacoco {
