@@ -23,6 +23,5 @@ public class UserIDLessDTO {
 
     @NotEmpty
     @Email(message = "Email must be valid")
-    @Column(unique = true)
     private String email;
 }
