@@ -2,6 +2,8 @@ package com.petclinic.auth.Role;
 
 import lombok.*;
 
+import javax.validation.constraints.NotEmpty;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -14,6 +16,8 @@ public class RoleIDLessDTO {
         this.parent = null;
     }
 
+    @NotEmpty
     private String name;
+
     private Role parent;
 }

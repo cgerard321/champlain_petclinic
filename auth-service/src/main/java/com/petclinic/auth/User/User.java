@@ -5,9 +5,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.util.Set;
 
 @Table(schema = "auth", name = "users")
@@ -27,7 +25,6 @@ public class User {
     private String username;
 
     @NotEmpty
-    @NotNull
     private String password;
 
     @NotEmpty
