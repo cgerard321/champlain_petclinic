@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import retrofit2.Retrofit;
+import retrofit2.converter.jackson.JacksonConverterFactory;
 
 import static java.lang.String.format;
 
@@ -24,6 +25,7 @@ public class MailServiceConfig {
     public MailServiceCall getMailerServiceCall() {
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(MAIL_BASE_URL)
+                .addConverterFactory(JacksonConverterFactory.create())
                 .build();
         return retrofit.create(MailServiceCall.class);
     }
