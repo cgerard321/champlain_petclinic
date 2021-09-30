@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import retrofit2.HttpException;
+import org.springframework.web.client.HttpClientErrorException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -36,6 +36,6 @@ public class AuthMailServiceTests {
     @Test
     @DisplayName("Send invalid email")
     void send_invalid_email() {
-        assertThrows(HttpException.class, () -> mailService.sendMail(EMAIL_INVALID));
+        assertThrows(HttpClientErrorException.class, () -> mailService.sendMail(EMAIL_INVALID));
     }
 }
