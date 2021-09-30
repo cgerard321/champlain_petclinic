@@ -30,6 +30,7 @@ public interface OwnerService {
 
         //public Optional<Owner> findOwnerLogin(String username, String password);
 
-        public void addCustodian(Owner owner,String custodian);
+
+
 
 }

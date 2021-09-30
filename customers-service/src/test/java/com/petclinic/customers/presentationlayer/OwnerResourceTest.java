@@ -92,48 +92,6 @@ class OwnerResourceTest {
     @Test
     public void findById()
     {
-        /*
-        int OwnerID = 1;
-
-        Owner newOwner = new Owner (OwnerID, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
-        repository.save(newOwner);
-        Owner foundOwner = repository.findById(OwnerID).get();
-        if (repository.findById(OwnerID).isPresent())
-        {
-            System.out.println("Yay!");
-        }
-        else
-        {
-            System.out.println("No");
-        }
-        */
-
-        /*
-        Owner owner = new Owner();
-        owner.setId(1);
-        when(ownerRepository.findById(owner.getId())).thenReturn(Optional.of(owner));
-        Owner expected = detailUserService.listUser(owner.getId());
-        assertThat(expected).isSameAs(owner);
-        verify(ownerRepository).findById(owner.getId());
-         */
-
-       /* Owner owner = repository.findByOwnerId(newOwner.getId()).get();
-        assertEquals(1, repository.count());*/
-
-        /*int OwnerID = 1;
-        Owner owner = new Owner (OwnerID, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
-        repository.save(owner);
-*/
-        /*if (repository.findById(OwnerID).isPresent())
-        {
-            System.out.println("Yeetus happy");
-        }
-        else
-        {
-            System.out.println("Yeetus sad");
-        }*/
-        // assertTrue(repository.findById(OwnerID).isPresent());
-
         Owner newOwner = new Owner();
         newOwner.setFirstName("John");
         newOwner.setLastName("Smith");
@@ -146,7 +104,6 @@ class OwnerResourceTest {
         Owner foundOwner = repository.findById(savedOwner.getId()).orElse(null);
 
         assert foundOwner != null;
-
     }
 
     /**
@@ -250,16 +207,7 @@ class OwnerResourceTest {
         assertEquals(2,repository.findAll().size());
     }
 
-    @Test
-    public void add_custodian_test()
-    {
-        final int OWNER_ID = 1;
-        String custodianName = "Ivan Hoaquin";
-        Owner foundOwner = repository.findById(OWNER_ID).get();
-        foundOwner.setCustodian(custodianName);
 
-        assertThat(foundOwner.getCustodian(), samePropertyValuesAs(custodianName));
-    }
 */
     // Reset the database
     @AfterEach
