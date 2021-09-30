@@ -51,10 +51,15 @@ class OwnerPersistenceTest {
         Owner newOwner = new Owner (OwnerID, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
         repository.save(newOwner);
 
-        Optional<Owner> owner = repository.findById(newOwner.getId());
+        //Optional<Owner> owner = repository.findById(newOwner.getId());
         //assertEqualsProduct(savedEntity, entity.get());
 
-        assertThat(owner.get(), samePropertyValuesAs(newOwner));
+        Owner foundOwner = repository.findById(newOwner.getId()).orElse(null);
+
+        assert foundOwner != null;
+       //assertThat(foundOwner, samePropertyValuesAs(newOwner));
+
+        assertThat(foundOwner, samePropertyValuesAs(newOwner));
 
 
 
