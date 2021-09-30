@@ -30,6 +30,8 @@ dependencies {
 	implementation 'org.flywaydb:flyway-core'
 	// https://mvnrepository.com/artifact/com.squareup.retrofit2/retrofit
 	implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+	// https://mvnrepository.com/artifact/com.squareup.retrofit2/converter-jackson
+	implementation 'com.squareup.retrofit2:converter-jackson:2.9.0'
 	implementation 'io.springfox:springfox-boot-starter:3.0.0'
 
 	implementation group: 'org.projectlombok', name: 'lombok-mapstruct-binding', version: '0.2.0'
