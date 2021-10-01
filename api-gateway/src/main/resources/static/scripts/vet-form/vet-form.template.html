@@ -1,52 +1,67 @@
-<h2>New Vet</h2>
+<h2 xmlns:vetsNew xmlns:vetsNew>New Vet</h2>
 <form ng-submit="$ctrl.submitVetForm()" style="max-width: 25em;">
   <div class="form-group">
     <label><b>First Name</b></label>
     <input type="text" placeholder="First Name" name="fistName" required>
     <span ng-show="vetForm.firstName.$error.required" class="help-block">First name is required.</span>
-  </div>
+  </div><br>
   <div class="form-group">
     <label><b>Last Name</b></label>
     <input type="text" placeholder="Last Name" name="lastName" required>
     <span ng-show="vetForm.lastName.$error.required" class="help-block">Last name is required.</span>
-  </div>
+  </div><br>
   <div class="form-group">
     <label><b>Email</b></label>
     <input type="email" placeholder="Email" name="email" required>
     <span ng-show="vetForm.email.$error.required" class="help-block">Email is required.</span>
-  </div>
+  </div><br>
   <div class="form-group">
     <label><b>Phone Number</b></label>
-    <input type="number" placeholder="Phone Number" name="phoneNumber" required>
+    <input type="tel" placeholder="Phone Number" name="phoneNumber" required>
     <span ng-show="vetForm.phoneNumber.$error.required" class="help-block">Phone Number is required.</span>
-  </div>
+  </div><br>
+
+  <!-- To find out how to add file and profile picture to DB -->
   <div class="form-group">
     <label><b>Profile Picture</b></label>
-    <input type="image" placeholder="profile picture" name="profilePicture">
-  </div>
+    <input type="file" disabled="true" placeholder="profile picture" name="profilePicture">
+  </div><br>
   <div class="form-group">
     <label><b>Career Resume</b></label>
-    <input type="file" placeholder="Resume" name="careerResume">
-  </div>
+    <textarea placeholder="Resume" name="careerResume">
+
+    </textarea>
+  </div><br>
+
   <div class="form-group">
     <label><b>Work Days</b></label>
-    <input type="date" placeholder="Work Days" name="workDays">
-  </div>
+    <input type="text" placeholder="ex:Monday, Tuesday" name="workDays">
+  </div><br>
+
+  <div class="form-group">
+    <fieldset>
+      <legend>Active Vet Profile</legend>
+      <input type="radio" name="profileEnabled" value="1" checked>Yes<br>
+      <input type="radio" name="profileEnabled" value="0">No<br>
+    </fieldset>
+  </div><br><br>
+
   <div class="form-group">
     <label><b>Specialty</b></label>
     <input type="text" placeholder="Specialty" name="speciality">
-  </div>
+  </div><br>
   <div class="form-group">
     <fieldset>
       <legend>What Animals Can You Treat</legend>
-      <input type="checkbox" placeholder="Animals Treated" name="animalsTreated" value="Dogs">Dogs<br>
-      <input type="checkbox" placeholder="Animals Treated" name="animalsTreated" value="Cats">Cats<br>
-      <input type="checkbox" placeholder="Animals Treated" name="animalsTreated" value="Birds">Birds<br>
-      <input type="checkbox" placeholder="Animals Treated" name="animalsTreated" value="Exotic">Exotic Animals<br>
-      <input type="checkbox" placeholder="Animals Treated" name="animalsTreated" value="Reptiles">Reptiles<br>
+      <input type="checkbox" placeholder="Animals Treated" name="animalsTreated" value="Dogs"> Dogs<br>
+      <input type="checkbox" placeholder="Animals Treated" name="animalsTreated" value="Cats"> Cats<br>
+      <input type="checkbox" placeholder="Animals Treated" name="animalsTreated" value="Birds"> Birds<br>
+      <input type="checkbox" placeholder="Animals Treated" name="animalsTreated" value="Exotic"> Exotic Animals<br>
+      <input type="checkbox" placeholder="Animals Treated" name="animalsTreated" value="Reptiles"> Reptiles<br>
     </fieldset>
-  </div>
+  </div><br><br>
   <div class="form-group">
-    <button type="submit" class="btn">Submit</button>
+    <!--ui sref aqddee ui-sref="vetsNew()" for submission, currently pointing to #!/vets/new -->
+    <button type="submit" style="border:2px #34302D" class="btn">Submit</button>
   </div>
 </form>

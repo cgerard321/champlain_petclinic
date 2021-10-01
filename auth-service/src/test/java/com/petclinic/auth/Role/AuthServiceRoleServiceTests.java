@@ -1,6 +1,7 @@
-package com.petclinic.auth;
+package com.petclinic.auth.Role;
 
 import com.petclinic.auth.Role.Role;
+import com.petclinic.auth.Role.RoleIDLessDTO;
 import com.petclinic.auth.Role.RoleRepo;
 import com.petclinic.auth.Role.RoleService;
 import org.junit.jupiter.api.BeforeEach;
@@ -35,11 +36,11 @@ public class AuthServiceRoleServiceTests {
     @DisplayName("Create role")
     void create_role() {
 
-        final Role role = new Role(0, "TEST_ROLE");
-        final Role saved = roleService.createRole(role);
+        final RoleIDLessDTO roleIDLessDTO = new RoleIDLessDTO("TEST_ROLE");
+        final Role saved = roleService.createRole(roleIDLessDTO);
 
-        assertEquals(saved.getName(), role.getName());
-        assertEquals(saved.getParent(), role.getParent());
+        assertEquals(saved.getName(), roleIDLessDTO.getName());
+        assertEquals(saved.getParent(), roleIDLessDTO.getParent());
         assertThat(saved.getId(), instanceOf(Long.TYPE));
     }
 
@@ -47,8 +48,8 @@ public class AuthServiceRoleServiceTests {
     @DisplayName("Delete role by id")
     void delete_role_by_id() {
 
-        final Role role = new Role(0, "TEST_ROLE");
-        final Role saved = roleService.createRole(role);
+        final RoleIDLessDTO roleIDLessDTO = new RoleIDLessDTO("TEST_ROLE");
+        final Role saved = roleService.createRole(roleIDLessDTO);
 
         roleService.deleteById(saved.getId());
 

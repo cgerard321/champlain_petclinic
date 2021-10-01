@@ -6,6 +6,7 @@ angular.module('ownerList')
 
         $http.get('api/gateway/customer/owners').then(function (resp) {
             self.owners = resp.data;
+            // console.log(resp)
         });
 
     }]);

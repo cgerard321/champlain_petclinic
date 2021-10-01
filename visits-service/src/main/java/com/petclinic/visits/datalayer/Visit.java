@@ -65,7 +65,7 @@ public class Visit {
         return id;
     }
 
-    public void setId(int Id){
+    public void setId(int id){
         this.id = id;
     }
 
@@ -91,10 +91,6 @@ public class Visit {
 
     public void setPetId(final int petId) {
         this.petId = petId;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 
     public void setDate(Date date) {
