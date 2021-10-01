@@ -1,5 +1,6 @@
 package com.petclinic.auth.User;
 
+import com.petclinic.auth.Config.PasswordStrengthCheck;
 import lombok.*;
 
 import javax.persistence.Column;
@@ -22,6 +23,5 @@ public class UserIDLessDTO {
 
     @NotEmpty
     @Email(message = "Email must be valid")
-    @Column(unique = true)
     private String email;
 }

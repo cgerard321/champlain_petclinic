@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 public class RoleController {
 
     private final RoleService roleService;
-    private final RoleMapper roleMapper;
 
     @PostMapping
     public Role createRole(@RequestBody RoleIDLessDTO dto) {
