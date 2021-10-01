@@ -71,6 +71,7 @@ public class Owner {
         this.telephone = telephone;
     }
 
+
 //    public Owner(@NotEmpty Integer id, @NotEmpty String firstName, @NotEmpty String lastName,
 //                 @NotEmpty String address, @NotEmpty String city, @NotEmpty @Digits(fraction = 0,
 //            integer = 10) String telephone, String custodian) {

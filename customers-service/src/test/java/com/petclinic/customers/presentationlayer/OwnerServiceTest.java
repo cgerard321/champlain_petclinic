@@ -3,6 +3,7 @@ package com.petclinic.customers.presentationlayer;
 import com.petclinic.customers.businesslayer.OwnerService;
 import com.petclinic.customers.datalayer.Owner;
 import com.petclinic.customers.datalayer.OwnerRepository;
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,7 +15,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.ArrayList;
 import java.util.Optional;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.mockito.Mockito.when;
+import static org.hamcrest.Matchers.samePropertyValuesAs;
+import static org.mockito.Mockito.*;
+
 import java.util.List;
 
 @ExtendWith(SpringExtension.class)
@@ -40,7 +43,6 @@ public class OwnerServiceTest {
         Owner ownerTest = new Owner(1, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
         when(ownerRepository.findById(1)).thenReturn(Optional.of(ownerTest));
 
-
         //Act
         Optional<Owner> returnedOwnerOpt = ownerService.findByOwnerId(1);
         Owner returnedOwner = returnedOwnerOpt.get();
@@ -51,7 +53,7 @@ public class OwnerServiceTest {
 
     /**
      * ------------------------ TEST_FIND_ALL ------------------------
-     * Testing the method findByOwnerId()
+     * Testing the method findAll()
      */
     @DisplayName("ownerService_FindAll")
     @Test
@@ -66,16 +68,13 @@ public class OwnerServiceTest {
         ownerList.add(new Owner(4, "firstname4", "lastname4", "address4","city4","4444444444"));
         when(ownerRepository.findAll()).thenReturn(ownerList);
 
-
         //Act
         List<Owner> returnedList = ownerService.findAll();
 
         //Assert
         assertThat(expectedLength).isEqualTo(returnedList.size());
+
     }
-
-
-
 
     /**
      * ------------------------ TEST_DELETE ------------------------
@@ -95,47 +94,31 @@ public class OwnerServiceTest {
         ownerService.deleteOwner(OwnerId);
 
         //Assert
-        //Mockito.when(ownerService.deleteOwner(OwnerId)).thenReturn("Success");
+        verify(ownerRepository, times(1)).delete(ownerTest);
 
-        /*
-            ownerService.setOwnerRepository(ownerRepository);
-            Owner person = new Owner(1, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
-            Owner person2 = new Owner(1L);
-
-            when(personRepository.returnPerson(1L)).thenReturn(person2); //expect a fetch, return a "fetched" person;
-
-            personService.deleteFromPerson(person);
-
-            verify(personRepository, times(1)).delete(person2); //pretty sure it is verify after call
-         */
-
-        /*
-        Owner ownerTest = new Owner(1, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
-        ownerService.deleteOwner(ownerTest.getId());
-        Mockito.verify(ownerRepository).deleteById(ownerTest.getId());
-        */
-
-
-        /*
-        if (Mockito.verify(ownerRepository).findById(ownerTest.getId()).isPresent())
-        {
-            ownerRepository.deleteById(1);
-            System.out.println("Test Worked!");
-        }
-        */
-
-        /*
-            //Arrange
-            Owner ownerTest = new Owner(1, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
-            ownerRepository.save(ownerTest);
-
-            //Act
-            ownerService.deleteOwner(1);
-
-            //Assert
-            assertThat(ownerRepository.findById(1).isPresent() == false);
-        */
     }
+    /**
+     * ------------------------ TEST_CREATE ------------------------
+     * Testing the method createOwner()
+     */
+    @DisplayName("ownerService_CreateOwner")
+    @Test
+    public void test_CreateOwner()
+    {
+        //Arrange
+        int OwnerId = 1;
+        Owner ownerTest = new Owner(OwnerId, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
+        when(ownerRepository.findById(OwnerId)).thenReturn(Optional.of(ownerTest));
+
+        //Act
+        ownerService.createOwner(ownerTest);
+        Optional<Owner> retrievedOwner = ownerRepository.findById(OwnerId);
+
+        //Assert
+        MatcherAssert.assertThat(retrievedOwner.get(), samePropertyValuesAs(ownerTest));
+    }
+
+
 
 
 }

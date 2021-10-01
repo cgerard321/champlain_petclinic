@@ -1,5 +1,6 @@
 package com.petclinic.customers.presentationlayer;
 
+import com.petclinic.customers.businesslayer.OwnerService;
 import com.petclinic.customers.datalayer.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -33,6 +34,9 @@ class OwnerAPITest {
     @Autowired
     OwnerRepository repository;
 
+    @Autowired
+    OwnerService ownerService;
+
 
     //SIMPLE OWNER OBJECT CREATION METHOD
     //*** Used for testing only ***
@@ -61,25 +65,26 @@ class OwnerAPITest {
      * ------------------------ FIND_BY_ID_OWNER_API_TEST ------------------------
      * Test an HTTP Get Request
      */
-    /*
+
+
     @Test
     void findByOwnerId_API_TEST() throws Exception {
 
         Owner owner = setupOwner();
-        given(repository.findById(5)).willReturn(Optional.of(owner));
+        given(ownerService.findByOwnerId(5)).willReturn(Optional.of(owner));
 
 
         mvc.perform(get("/owners/5").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"))
-                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.id").value(5))
                 .andExpect(jsonPath("$.first.name").value("John"))
                 .andExpect(jsonPath("$.last.name").value("Wick"))
                 .andExpect(jsonPath("$.address").value("56 John St."))
                 .andExpect(jsonPath("$.city").value("Amsterdam"))
                 .andExpect(jsonPath("$.telephone").value("9999999999"));
     }
-    */
+
     /**
      * ------------------------ DELETE_OWNER_API_TEST ------------------------
      * Test an HTTP Delete Request
@@ -101,19 +106,6 @@ class OwnerAPITest {
      * ------------------------ SETUP_OWNER ------------------------
      * Simple method to create an owner
      */
-    /*
-    private Owner setupOwner(Integer id, String firstname, String lastname, String address, String city, String telephone)
-    {
-        Owner owner = new Owner(id, firstname, lastname, address, city, telephone);
-
-        owner.setFirstName(firstname);
-        owner.setLastName(lastname);
-        owner.setAddress(address);
-        owner.setCity(city);
-        owner.setTelephone(telephone);
-
-        return owner;
-    }
 
     /**
      * ------------------------ TEST_FIND ------------------------
