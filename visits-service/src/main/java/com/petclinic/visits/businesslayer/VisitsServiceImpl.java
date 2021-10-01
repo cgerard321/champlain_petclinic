@@ -2,13 +2,10 @@ package com.petclinic.visits.businesslayer;
 
 import com.petclinic.visits.datalayer.Visit;
 import com.petclinic.visits.datalayer.VisitRepository;
+import com.petclinic.visits.utils.exceptions.InvalidInputException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
-import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service
@@ -23,8 +20,21 @@ public class VisitsServiceImpl implements VisitsService {
 
     @Override
     public Visit addVisit(Visit visit) {
-        log.info("Calling visit repo to create a visit for pet with petId: {}", visit.getPetId());
-        return visitRepository.save(visit);
+
+        if(visit.getDescription().isEmpty()){
+            throw new InvalidInputException("Visit description required.");
+        }
+
+        try{
+            log.info("Calling visit repo to create a visit for pet with petId: {}", visit.getPetId());
+            Visit v = visitRepository.save(visit);
+            return v;
+        }
+        catch(DuplicateKeyException dke){
+            throw new InvalidInputException("Duplicate visitId: " + visit.getId(), dke);
+        }
+
+
     }
 
     @Override

@@ -3,6 +3,10 @@ package com.petclinic.visits.presentationlayer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.visits.businesslayer.VisitsService;
 import com.petclinic.visits.datalayer.Visit;
+import com.petclinic.visits.utils.exceptions.InvalidInputException;
+import com.petclinic.visits.utils.exceptions.NotFoundException;
+import com.petclinic.visits.utils.http.ControllerExceptionHandler;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,11 +17,14 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.util.ArrayList;
 import java.util.Date;
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static com.petclinic.visits.datalayer.Visit.visit;
@@ -43,6 +50,9 @@ public class VisitResourceTest {
 
 	@MockBean
 	VisitsService visitsService;
+
+	@Autowired
+	ControllerExceptionHandler exceptionHandler;
 
 
 	@Autowired
@@ -221,6 +231,71 @@ public class VisitResourceTest {
 				.andExpect(status().isBadRequest());
 	}
 
+	@Test
+	void test_EmptyInvalidInputException(){
+		InvalidInputException ex = assertThrows(InvalidInputException.class, ()->{
+			throw new InvalidInputException();
+		});
+		assertEquals(ex.getMessage(), null);
+	}
+
+	@Test
+	void test_ThrowableOnlyInvalidInputException(){
+		InvalidInputException ex = assertThrows(InvalidInputException.class, ()->{
+			throw new InvalidInputException(new Throwable());
+		});
+		assertEquals(ex.getCause().getMessage(), null);
+	}
+
+
+	@Test
+	void whenEmptyDescriptionThenShouldThrowInvalidInputException() throws Exception{
+		Visit expectedVisit = visit().id(1).petId(1).date(new Date()).description("").practitionerId(123456).build();
+
+		when(visitsService.addVisit(any())).thenThrow(new InvalidInputException("Visit description required."));
+
+		mvc.perform(post("/owners/1/pets/{petId}/visits", 1)
+				.content(objectMapper.writeValueAsString(expectedVisit))
+				.contentType(MediaType.APPLICATION_JSON)
+				.characterEncoding("utf-8")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isUnprocessableEntity());
+
+	}
+
+	@Test
+	void test_EmptyNotFoundException(){
+		NotFoundException ex = assertThrows(NotFoundException.class, ()->{
+			throw new NotFoundException();
+		});
+		assertEquals(ex.getMessage(), null);
+		assertEquals(ex.getCause(), null);
+	}
+
+	@Test
+	void test_ThrowableOnlyNotFoundException(){
+		NotFoundException ex = assertThrows(NotFoundException.class, ()->{
+			throw new NotFoundException(new Throwable("message"));
+		});
+		assertEquals(ex.getCause().getMessage(), "message");
+	}
+
+	@Test
+	void test_MessageOnlyNotFoundException(){
+		NotFoundException ex = assertThrows(NotFoundException.class, ()->{
+			throw new NotFoundException("message");
+		});
+		assertEquals(ex.getMessage(), "message");
+	}
+
+	@Test
+	void test_ThrowableMessageNotFoundException(){
+		NotFoundException ex = assertThrows(NotFoundException.class, ()->{
+			throw new NotFoundException("message", new Throwable("message"));
+		});
+		assertEquals(ex.getCause().getMessage(), "message");
+		assertEquals(ex.getMessage(), "message");
+	}
 }
 
 
