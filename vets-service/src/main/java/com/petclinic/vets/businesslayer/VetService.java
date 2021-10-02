@@ -14,4 +14,5 @@ public interface VetService
     public List<Vet> getAllEnabledVets();
     public Vet disableVet(Vet vet, Vet vetFound);
     public Vet enableVet(Vet vet, Vet vetFound);
+    public String deleteVet(int vetId);
 }
