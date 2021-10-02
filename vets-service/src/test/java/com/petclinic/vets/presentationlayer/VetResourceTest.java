@@ -1,5 +1,6 @@
 package com.petclinic.vets.presentationlayer;
 
+import com.petclinic.vets.datalayer.Specialty;
 import com.petclinic.vets.datalayer.Vet;
 import com.petclinic.vets.datalayer.VetRepository;
 import com.petclinic.vets.presentationlayer.VetResource;
@@ -114,6 +115,13 @@ class VetResourceTest {
 				.andExpect(jsonPath("$[0].isActive").value(1));
 	}
 
+	@Test
+	@DisplayName("Get Specialty")
+	void shouldGetAllExistingSpecialties() throws Exception{
+		Specialty specialty = new Specialty();
+		specialty.setId(1);
+		specialty.setName("Vet Surgeon");
+	}
 
 	@Test
 	@DisplayName("Get All Fields Vet Resource Test")
@@ -132,6 +140,7 @@ class VetResourceTest {
 
 		given(vetRepository.findAllEnabledVets()).willReturn(asList(vet));
 
+		System.out.println(vetRepository.findAllEnabledVets());
 		mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$[0].id").value(1))

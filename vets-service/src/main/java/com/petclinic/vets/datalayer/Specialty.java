@@ -1,6 +1,11 @@
 package com.petclinic.vets.datalayer;
 
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.UniqueElements;
+
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
 /**
  * Models a {@link Vet Vet's} specialty (for example, dentistry).
@@ -9,12 +14,20 @@ import javax.persistence.*;
  * Copied from https://github.com/spring-petclinic/spring-petclinic-microservices
  */
 
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "specialties")
 public class Specialty {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @Column(name = "specialty_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @NotNull
+    @UniqueElements(groups = Specialty.class)
+    private Integer specialtyId;
 
     @Column(name = "name")
     private String name;
