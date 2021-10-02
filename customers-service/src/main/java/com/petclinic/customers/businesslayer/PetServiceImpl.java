@@ -79,27 +79,13 @@ public class PetServiceImpl implements PetService {
         return petRepository.save(pet);
     }
 
-    /**
-     * ------------------------ DELETE ALL ------------------------
-     * This method will delete a pet and remove it from its owner list of pet
-     */
     @Override
     public void deletePet(int petId, int ownerId) {
-        //Search pet owner
-        Optional<Owner> optionalOwner = ownerRepository.findById(ownerId);
-        Owner owner = optionalOwner.orElseThrow(() -> new NotFoundException("Owner "+ ownerId +" not found"));
 
-        //Search the pet
-        Optional<Pet> optionalPet = petRepository.findById(petId);
-        Pet pet = optionalPet.orElseThrow(()-> new NotFoundException("Pet with ID: " + petId + " has not been found"));
+        //To be implemented
 
-        //Remove pet from owner list of pet
-        owner.removePet(pet);
-
-        //Delete pet
-        petRepository.delete(pet);
-        LOG.debug("Pet with ID: " + petId + " has been deleted successfully.");
     }
+
 
     /**
      * ------------------------ FIND ALL PET TYPES ------------------------

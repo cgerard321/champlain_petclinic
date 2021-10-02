@@ -54,16 +54,7 @@ class PetResource {
         return new PetDetails(findPetById(petId).get());
     }
 
-    @DeleteMapping(value = "/{petId}")
-    public void DeletePet(@PathVariable("petId") int petId, @PathVariable("ownerId") int ownerId) {
 
-        //Call external method deletePet() from petService
-        petService.deletePet(petId, ownerId);
-    }
-
-    /**
-     * Delete Pet
-     */
     private Optional<Pet> findPetById(int petId) {
 
         //Call petService to search repo using petId
