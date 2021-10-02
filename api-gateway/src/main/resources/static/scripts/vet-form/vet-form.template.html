@@ -1,8 +1,9 @@
 <div class="bColor">
-  <h2 xmlns:vetsNew class="titleVetForm">New Vet Sign Up</h2>
+  <!--unknown usage in h2 tag ???? -> xmlns:vetsNew -->
+  <h2  class="titleVetForm">New Vet Sign Up</h2>
 </div>
 
-<form id="vetForm" class="form-horizontal" ng-submit="$ctrl.submitVetForm()">
+<form id="vetForm" class="form-horizontal" enctype="multipart/form-data" ng-submit="$ctrl.submitVetForm()">
   <div class="form-group formColor">
     <label class="col-sm-2 control-label">First Name</label>
     <div class="owner col-sm-6">
@@ -38,9 +39,9 @@
   <div class="form-group">
     <label class="col-sm-2 control-label">Profile Picture</label>
     <div class="owner col-sm-6">
-      <input id="profile_picture" type="file" name="profilePicture" accept="image/*" />
+      <input class="form-control col-sm-4" id="profile_picture" type="file" name="profilePicture" accept="image/*" xsize="100000"/>
     </div>
-    <button type="button" ng-click="uploadPicture()">Upload</button>
+    <button type="button" ng-click="uploadFile()">Upload</button>
     <!-- old profile picture input field
     <input class="form-control col-sm-4"type="image" placeholder="profile picture" name="profilePicture">
     -->
@@ -49,7 +50,7 @@
   <div class="form-group">
     <label class="col-sm-2 control-label">Career Resume</label>
     <div class="owner col-sm-6">
-    <input class="form-control col-sm-4"type="file" placeholder="Resume" name="careerResume">
+    <input class="form-control col-sm-4" id="resume" type="file" placeholder="Resume" name="careerResume">
     </div>
     <button type="button" ng-click="uploadResume()">Upload</button>
 
@@ -103,8 +104,9 @@
   </div>
 
   <div class="form-group formColor">
-    <div class="owner marg col-sm-6">
-    <button type="submit" class="btn btn-default">Submit</button>
+    <div class="owner marg col-sm-2">
+      <!-- ensure ng-click is needed bellow and not in <form> tag-->
+    <button type="submit" class="btn btn-default" ng-click="submitVetForm()">Submit</button>
     </div>
   </div>
 
