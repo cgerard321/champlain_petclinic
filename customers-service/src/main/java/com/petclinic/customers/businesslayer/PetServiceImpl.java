@@ -2,7 +2,7 @@ package com.petclinic.customers.businesslayer;
 
 import com.petclinic.customers.datalayer.Pet;
 import com.petclinic.customers.datalayer.PetRepository;
-import com.petclinic.customers.utils.exceptions.NotFoundException;
+import com.petclinic.customers.customerExceptions.exceptions.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

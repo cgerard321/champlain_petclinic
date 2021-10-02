@@ -59,6 +59,12 @@ services:
       mysql5:
         condition: service_healthy
 
+  mailer-service:
+    build: mailer-service
+    environment:
+      - PASSWORD=y4QZURkbxfs3tVx
+      - EMAIL=champlain.petclinic@gmail.com
+
 
   mysql1:
     image: mysql:5.7

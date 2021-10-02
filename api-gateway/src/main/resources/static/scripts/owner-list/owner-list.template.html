@@ -14,6 +14,7 @@
         <th>City</th>
         <th>Telephone</th>
         <th class="hidden-xs">Pets</th>
+        <th>Custodian</th>
     </tr>
     </thead>
 
@@ -27,5 +28,6 @@
         <td>{{owner.city}}</td>
         <td>{{owner.telephone}}</td>
         <td class="hidden-xs"><span ng-repeat="pet in owner.pets track by pet.id">{{pet.name + ' '}}</span></td>
+        <!--<td>{{owner.custodian}}</td> -->
     </tr>
 </table>

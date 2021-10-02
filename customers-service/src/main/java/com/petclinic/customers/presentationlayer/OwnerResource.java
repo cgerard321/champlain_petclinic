@@ -8,8 +8,6 @@ import io.micrometer.core.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
@@ -57,8 +55,7 @@ class OwnerResource {
      * Read single Owner
      */
     @GetMapping(value = "/{ownerId}")
-    public Optional<Owner> findOwner(@PathVariable("ownerId") int ownerId)
-    {
+    public Optional<Owner> findOwner(@PathVariable("ownerId") int ownerId) {
         return ownerService.findByOwnerId(ownerId);
     }
 
@@ -102,11 +99,6 @@ class OwnerResource {
 
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public Owner createCustodian(@PathVariable("custodian")String custodian){
-        return null;
-    }
 }
 
 

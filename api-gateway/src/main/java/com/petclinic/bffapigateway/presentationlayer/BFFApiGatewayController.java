@@ -5,7 +5,7 @@ import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
-import com.petclinic.bffapigateway.dtos.*;
+import com.petclinic.bffapigateway.dtos.Login;
 import com.petclinic.bffapigateway.dtos.OwnerDetails;
 import com.petclinic.bffapigateway.dtos.VetDetails;
 import com.petclinic.bffapigateway.dtos.Visits;
@@ -17,9 +17,18 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.petclinic.bffapigateway.dtos.*;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.HashMap;
+import java.util.Map;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -42,7 +51,6 @@ public class BFFApiGatewayController {
     private final VetsServiceClient vetsServiceClient;
 
     private final AuthServiceClient authServiceClient;
-
 
     @GetMapping(value = "owners/{ownerId}")
     public Mono<OwnerDetails> getOwnerDetails(final @PathVariable int ownerId) {
@@ -153,13 +161,19 @@ public class BFFApiGatewayController {
     }
 
 
-    @PostMapping(value = "/users",
+    @PostMapping(value = "users",
             consumes = "application/json",
             produces = "application/json")
     public Mono<UserDetails> createUser(@RequestBody UserDetails model) { return authServiceClient.getUser(model.getId()); }
 
     @DeleteMapping(value = "users/{userId}")
     public Mono<UserDetails> deleteUser(final @PathVariable long userId) { return authServiceClient.deleteUser(userId); }
+
+    @GetMapping(value = "users/{userId}")
+    public Mono<UserDetails> getUserDetails(final @PathVariable long userId) {
+        return authServiceClient.getUser(userId);
+    }
+
 
     // TODO: Hook this up to auth service
     @GetMapping(value = "admin/roles")
@@ -184,8 +198,4 @@ public class BFFApiGatewayController {
             produces = "application/json")
     public Mono<OwnerDetails> createOwner(@RequestBody OwnerDetails model){ return customersServiceClient.getOwner(model.getId()); }
 
-    @GetMapping(value = "users/{userId}")
-    public Mono<UserDetails> getUserDetails(final @PathVariable int userId) {
-        return authServiceClient.getUser(userId);
-    }
 }

@@ -1,7 +1,6 @@
-package com.petclinic.customers.utils.http;
+package com.petclinic.vets.utils.http;
 
 import org.springframework.http.HttpStatus;
-
 import java.time.ZonedDateTime;
 
 public class HttpErrorInfo {
@@ -11,33 +10,33 @@ public class HttpErrorInfo {
     private final HttpStatus httpStatus;
     private final String message;
 
-    public HttpErrorInfo(HttpStatus httpStatus, String path, String message){
-        timestamp = ZonedDateTime.now();
-        this.httpStatus = httpStatus;
+    public HttpErrorInfo( HttpStatus httpStatus,String path, String message) {
+        this.timestamp = ZonedDateTime.now();
         this.path = path;
+        this.httpStatus = httpStatus;
         this.message = message;
     }
 
     public HttpErrorInfo() {
         timestamp = null;
-        this.httpStatus = null;
-        this.path = null;
-        this.message = null;
+        path = null;
+        httpStatus = null;
+        message = null;
     }
 
     public ZonedDateTime getTimestamp() {
-        return this.timestamp;
+        return timestamp;
     }
 
     public String getPath() {
-        return this.path;
+        return path;
     }
 
     public HttpStatus getHttpStatus() {
-        return this.httpStatus;
+        return httpStatus;
     }
 
     public String getMessage() {
-        return this.message;
+        return message;
     }
 }

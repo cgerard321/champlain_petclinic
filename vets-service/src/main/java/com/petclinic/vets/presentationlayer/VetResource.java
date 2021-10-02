@@ -2,13 +2,31 @@ package com.petclinic.vets.presentationlayer;
 
 import com.petclinic.vets.businesslayer.VetService;
 import com.petclinic.vets.datalayer.Vet;
+import com.petclinic.vets.utils.exceptions.InvalidInputException;
 import io.micrometer.core.annotation.Timed;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.*;
+import com.petclinic.vets.datalayer.VetRepository;
+import io.micrometer.core.annotation.Timed;
+import lombok.RequiredArgsConstructor;
+import lombok.var;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author Juergen Hoeller
@@ -26,6 +44,7 @@ import java.util.List;
 class VetResource {
 
     private final VetService vetService;
+    private static final Logger LOG = LoggerFactory.getLogger(VetResource.class);
 
 
     VetResource(VetService vetService)
@@ -52,6 +71,9 @@ class VetResource {
     @GetMapping("/{vetId}")
     public Vet findVet(@PathVariable int vetId)
     {
+        LOG.debug("/vet MS return the found product for vetId: " + vetId);
+
+        if(vetId < 1) throw new InvalidInputException("Invalid vetId: " + vetId);
         return vetService.getVetByVetId(vetId);
     }
 

@@ -1,6 +1,7 @@
-package com.petclinic.auth;
+package com.petclinic.auth.Role;
 
 import com.petclinic.auth.Role.*;
+import com.petclinic.auth.User.UserIDLessDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import javax.validation.ConstraintViolationException;
 import java.util.Optional;
 import java.util.Random;
 

@@ -21,7 +21,6 @@
     <th>Resume</th>
     <td>{{$ctrl.vet.resume}}</td>
   </tr>
-
   <tr>
     <th>Work Day</th>
     <td id="workDay">{{$ctrl.vet.workday}}</td>
@@ -30,10 +29,11 @@
     <th>Is Active</th>
     <td>{{$ctrl.vet.isActive}}</td>
   </tr>
-
   <tr>
     <td>
-      <a class="btn btn-default" ui-sref="vetEdit({vetId: $ctrl.vet.vetId})">Edit Vet</a>
+      <button>
+      <a class="btn btn-default" ui-sref="vetEdit({vetId: $ctrl.vet.id})">Edit Vet</a>
+      </button>
     </td>
     <td>
       <a class="btn btn-default" ui-sref="disableVet({vetId: $ctrl.vet.vetId})">Disable Vet</a>

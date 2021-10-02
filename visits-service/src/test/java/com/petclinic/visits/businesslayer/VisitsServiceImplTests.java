@@ -16,10 +16,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 
 import static org.mockito.Mockito.*;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import static org.mockito.Mockito.when;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -28,11 +28,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import javax.swing.text.html.Option;
 import java.sql.Time;
 import java.text.DateFormat;
-import java.util.Arrays;
-
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 
 @SpringBootTest
@@ -64,8 +60,9 @@ public class VisitsServiceImplTests {
         List<Visit> list = Arrays.asList(visit, visit1);
         repo.saveAll(list);
     }
-
-
+    
+    
+    
     @Test
     public void whenValidPetIdThenShouldReturnVisitsForPet(){
         when(repo.findByPetId(1)).thenReturn(
@@ -80,13 +77,35 @@ public class VisitsServiceImplTests {
                                 .build()
                 )
         );
-
+        
         List<Visit> serviceResponse = visitsService.getVisitsForPet(1);
-
+        
         assertThat(serviceResponse, hasSize(2));
         assertThat(serviceResponse.get(1).getPetId(), equalTo(1));
     }
-
+    
+    @Test
+    public void whenValidPetIdThenShouldReturnVisitsForPetAsList(){
+        List<Visit> visitsList = asList(
+                visit()
+                        .id(1)
+                        .petId(1)
+                        .build(),
+                visit()
+                        .id(2)
+                        .petId(1)
+                        .build());
+        
+        ArrayList<Integer> petIdsToSearchFor = new ArrayList<>();
+        petIdsToSearchFor.add(1);
+        
+        when(repo.findByPetIdIn(anyList())).thenReturn(visitsList);
+        
+        List<Visit> serviceResponse = visitsService.getVisitsForPets(petIdsToSearchFor);
+        
+        assertArrayEquals(visitsList.toArray(), serviceResponse.toArray());
+    }
+    
     @Test
     public void whenValidIdUpdateVisit(){
         Visit updatedVisit = visit().petId(1).date(new Date()).description("Desc-1 Updated").build();
@@ -112,13 +131,13 @@ public class VisitsServiceImplTests {
   
     @Test
     public void whenValidPetIdThenShouldCreateVisitForPet() {
-        Visit visit = visit().petId(1).date(new Date()).description("").practitionerId(123456).build();
+        Visit createdVisit = visit().petId(1).date(new Date()).description("").practitionerId(123456).build();
         
-        when(repo.save(visit)).thenReturn(visit);
+        when(repo.save(any(Visit.class))).thenReturn(createdVisit);
         
-        Visit serviceResponse = repo.save(visit);
+        Visit serviceResponse = visitsService.addVisit(createdVisit);
         
-        assertThat(serviceResponse.getPetId(), equalTo(1));
+        assertThat(serviceResponse.getPetId(), equalTo(createdVisit.getPetId()));
     }
 
 

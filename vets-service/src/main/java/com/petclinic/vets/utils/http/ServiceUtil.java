@@ -1,4 +1,4 @@
-package com.petclinic.customers.utils.http;
+package com.petclinic.vets.utils.http;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,23 +14,22 @@ public class ServiceUtil {
     private static final Logger LOG = LoggerFactory.getLogger(ServiceUtil.class);
 
     private final String port;
-
     private String serviceAddress = null;
 
     public ServiceUtil(
-            @Value("${server.port") String port) {
+            @Value("${server.port}") String port){
         this.port = port;
     }
 
     public String getServiceAddress(){
         if (serviceAddress == null){
-            serviceAddress = findMyHostName() + "/" + findMyIpAddress() + ":" + port;
+            serviceAddress = findMyHostName() + "/" + findMyIPAddress() + ":" + port;
         }
         return serviceAddress;
     }
 
-    private String findMyIpAddress(){
-        try{
+    private String findMyIPAddress() {
+        try {
             return InetAddress.getLocalHost().getHostAddress();
         }
         catch (UnknownHostException e){
@@ -38,11 +37,11 @@ public class ServiceUtil {
         }
     }
 
-    private String findMyHostName(){
-        try{
+    private String findMyHostName() {
+        try {
             return InetAddress.getLocalHost().getHostName();
         }
-        catch(UnknownHostException e){
+        catch (UnknownHostException e){
             return "unknown host name";
         }
     }
