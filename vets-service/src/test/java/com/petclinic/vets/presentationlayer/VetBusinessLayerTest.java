@@ -3,7 +3,9 @@ package com.petclinic.vets.presentationlayer;
 import com.petclinic.vets.businesslayer.VetService;
 import com.petclinic.vets.datalayer.Vet;
 import com.petclinic.vets.datalayer.VetRepository;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,10 +14,17 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-
+/**
+ * Simple JavaBean domain object representing a veterinarian.
+ *
+ *
+ * @author Tymofiy Bun
+ * @author Christian Chitanu: Added enable and disable tests for jcoco
+ */
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = { "spring.datasource.url=jdbc:h2:mem:vets-db"})
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
@@ -97,6 +106,31 @@ public class VetBusinessLayerTest
     {
         assertEquals(vetService.getAllEnabledVets().size(),2);
 
+    }
+
+    @Test
+    @DisplayName("Enable Vet Service Test")
+    public void enableVetTest(){
+        Vet activeVet = new Vet();
+        activeVet.setIsActive(1);
+        Vet searchedVet = vetService.getVetByVetId(147258);
+        assertEquals(searchedVet.getFirstName(),"James2");
+        assertEquals(searchedVet.getIsActive(),0);
+        Vet resultVet = vetService.enableVet(searchedVet,activeVet);
+        assertEquals(resultVet.getFirstName(),"James2");
+        assertEquals(resultVet.getIsActive(),1);
+    }
+    @Test
+    @DisplayName("Disable Vet Service Test")
+    public void disableVetTest(){
+        Vet activeVet = new Vet();
+        activeVet.setIsActive(0);
+        Vet searchedVet = vetService.getVetByVetId(234568);
+        assertEquals(searchedVet.getFirstName(),"James");
+        assertEquals(searchedVet.getIsActive(),1);
+        Vet resultVet = vetService.disableVet(searchedVet,activeVet);
+        assertEquals(resultVet.getFirstName(),"James");
+        assertEquals(resultVet.getIsActive(),0);
     }
 
 
