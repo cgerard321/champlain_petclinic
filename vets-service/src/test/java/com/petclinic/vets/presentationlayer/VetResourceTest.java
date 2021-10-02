@@ -3,36 +3,22 @@ package com.petclinic.vets.presentationlayer;
 import com.petclinic.vets.datalayer.Specialty;
 import com.petclinic.vets.datalayer.Vet;
 import com.petclinic.vets.datalayer.VetRepository;
-import com.petclinic.vets.presentationlayer.VetResource;
-import org.hibernate.validator.internal.util.logging.Messages_$bundle;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
-import javax.swing.text.html.parser.Entity;
-import java.util.Optional;
 import static  org.hamcrest.MatcherAssert.assertThat;
-import static  org.hamcrest.Matcher.*;
-import static  org.hamcrest.MatcherAssert.assertThat;
-import static  org.hamcrest.Matcher.*;
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.hasValue;
-import static org.hamcrest.Matchers.instanceOf;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
@@ -116,15 +102,6 @@ class VetResourceTest {
 	}
 
 	@Test
-	@DisplayName("Get Specialty")
-	void shouldGetAllExistingSpecialties() throws Exception{
-		Specialty specialty = new Specialty();
-		specialty.setId(1);
-		specialty.setSpecialtyId(123002);
-		specialty.setName("Surgeon");
-	}
-
-	@Test
 	@DisplayName("Get All Fields Vet Resource Test")
 	void shouldGetAllTheFieldsForAVet() throws Exception{
 
@@ -140,8 +117,6 @@ class VetResourceTest {
 		vet.setIsActive(1);
 
 		given(vetRepository.findAllEnabledVets()).willReturn(asList(vet));
-
-		System.out.println(vetRepository.findAllEnabledVets());
 		mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$[0].id").value(1))
