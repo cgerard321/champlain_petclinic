@@ -1,9 +1,6 @@
 package com.petclinic.customers.businesslayer;
 
-import com.petclinic.customers.datalayer.Owner;
-import com.petclinic.customers.datalayer.OwnerRepository;
-import com.petclinic.customers.datalayer.Pet;
-import com.petclinic.customers.datalayer.PetRepository;
+import com.petclinic.customers.datalayer.*;
 import com.petclinic.customers.customerExceptions.exceptions.NotFoundException;
 import com.petclinic.customers.presentationlayer.PetRequest;
 import com.petclinic.customers.presentationlayer.ResourceNotFoundException;
@@ -19,18 +16,24 @@ public class PetServiceImpl implements PetService {
 
     private static final Logger LOG = LoggerFactory.getLogger(PetServiceImpl.class);
 
-    private final PetRepository repository;
+    private final PetRepository petRepository;
     private final OwnerRepository ownerRepository;
 
-    public PetServiceImpl(OwnerRepository ownerRepository, PetRepository repository) {
+    public PetServiceImpl(OwnerRepository ownerRepository, PetRepository petRepository) {
         this.ownerRepository = ownerRepository;
-        this.repository = repository; }
+        this.petRepository = petRepository; }
 
+
+    /**
+     * ------------------------ FIND ------------------------
+     * This method will find one specific pet in the database and display its data
+     * It is not use by the login system
+     */
     @Override
     public Optional<Pet> findByPetId(int petId) {
         try {
             //Search pet in database with the given id
-            Optional<Pet> pet = repository.findById(petId);
+            Optional<Pet> pet = petRepository.findById(petId);
             if (!pet.isPresent()) {
                 throw new ResourceNotFoundException("Pet "+ petId +" not found");
             }
@@ -44,38 +47,67 @@ public class PetServiceImpl implements PetService {
         }
     }
 
+    /**
+     * ------------------------ FIND ALL ------------------------
+     * This method will find all pet in the database
+     */
     @Override
     public List<Pet> findAll() {
 
-        return repository.findAll();
+        return petRepository.findAll();
     }
 
-    @Override
-    public void updatePet() {
-        // TO DO
-    }
 
+    /**
+     * ------------------------ CREATE ALL ------------------------
+     * This method will create a new pet, assign it to an owner and save its data in repository
+     */
     @Override
     public Pet CreatePet(PetRequest petRequest, int ownerId)
     {
         Pet pet = new Pet();
         Optional<Owner> optionalOwner = ownerRepository.findById(ownerId);
-        Owner owner = optionalOwner.orElseThrow(() -> new ResourceNotFoundException("Owner "+ ownerId +" not found"));
+        Owner owner = optionalOwner.orElseThrow(() -> new NotFoundException("Owner "+ ownerId +" not found"));
         owner.addPet(pet);
 
         pet.setName(petRequest.getName());
         pet.setBirthDate(petRequest.getBirthDate());
-        repository.findPetTypeById(petRequest.getTypeId())
+        petRepository.findPetTypeById(petRequest.getTypeId())
                 .ifPresent(pet::setType);
 
         LOG.info("Saving pet {}", pet);
-        return repository.save(pet);
+        return petRepository.save(pet);
     }
 
+    /**
+     * ------------------------ DELETE ALL ------------------------
+     * This method will delete a pet and remove it from its owner list of pet
+     */
     @Override
-    public void deletePet(int Id) {
-        repository.findById(Id).ifPresent(x -> repository.delete(x));
-        LOG.debug("Pet with ID: " + Id + " has been deleted successfully.");
+    public void deletePet(int petId, int ownerId) {
+        //Search pet owner
+        Optional<Owner> optionalOwner = ownerRepository.findById(ownerId);
+        Owner owner = optionalOwner.orElseThrow(() -> new NotFoundException("Owner "+ ownerId +" not found"));
+
+        //Search the pet
+        Optional<Pet> optionalPet = petRepository.findById(petId);
+        Pet pet = optionalPet.orElseThrow(()-> new NotFoundException("Pet with ID: " + petId + " has not been found"));
+
+        //Remove pet from owner list of pet
+        owner.removePet(pet);
+
+        //Delete pet
+        petRepository.delete(pet);
+        LOG.debug("Pet with ID: " + petId + " has been deleted successfully.");
+    }
+
+    /**
+     * ------------------------ FIND ALL PET TYPES ------------------------
+     * This method will return all pet types from the database
+     */
+    @Override
+    public List<PetType> getAllPetTypes() {
+        return petRepository.findPetTypes();
     }
 
 

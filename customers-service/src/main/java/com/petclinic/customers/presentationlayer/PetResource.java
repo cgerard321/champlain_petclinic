@@ -6,8 +6,6 @@ import io.micrometer.core.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -34,48 +32,38 @@ class PetResource {
         this.petService = petService;
     }
 
-    @GetMapping("/petTypes")
-    public List<PetType> getPetTypes() {
-
-        return petRepository.findPetTypes();
-    }
-
+    /**
+     * Create Pet
+     */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Pet createNewPet(@RequestBody PetRequest petRequest, @PathVariable("ownerId") int ownerId) {
 
+        //Call external method createPet() from petService
         Pet pet = petService.CreatePet(petRequest, ownerId);
         return pet;
     }
 
-    @PutMapping("/{petId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updatePet(@RequestBody PetRequest petRequest, @PathVariable("petId") String petId) {
-        int petIdNum = petRequest.getId();
-        Pet pet = findPetById(petIdNum).get();
-        save(pet, petRequest);
-    }
-
-    private Pet save(final Pet pet, final PetRequest petRequest) {
-
-        pet.setName(petRequest.getName());
-        pet.setBirthDate(petRequest.getBirthDate());
-
-        petRepository.findPetTypeById(petRequest.getTypeId())
-                .ifPresent(pet::setType);
-
-        log.info("Saving pet {}", pet);
-        return petRepository.save(pet);
-    }
-
+    /**
+     * Find Pet
+     */
     @GetMapping("/{petId}")
     public PetDetails findPet(@PathVariable("petId") int petId) {
 
-        //Call external method to get pet from petService
+        //Call external method findPet() pet from petService
         return new PetDetails(findPetById(petId).get());
     }
 
+    @DeleteMapping(value = "/{petId}")
+    public void DeletePet(@PathVariable("petId") int petId, @PathVariable("ownerId") int ownerId) {
 
+        //Call external method deletePet() from petService
+        petService.deletePet(petId, ownerId);
+    }
+
+    /**
+     * Delete Pet
+     */
     private Optional<Pet> findPetById(int petId) {
 
         //Call petService to search repo using petId
