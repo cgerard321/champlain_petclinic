@@ -82,18 +82,18 @@ public class VetServiceImpl implements VetService
     }
 
     @Override
+    public Vet enableVet(Vet vet, Vet vetFound) {
+        vet.setIsActive(1);
+        vetRepository.save(vet);
+        return vet;
+    }
+
+    @Override
     public void deleteVet(int vetId) {
         Vet foundVet = vetRepository.findByVetId(vetId)
                 .orElseThrow(() -> new NotFoundException(String.format("No vet found for vetId: {vetId} ", vetId)));
         vetRepository.delete(foundVet);
 //        return String.format("Vet with id: {vetId} has been successfully deleted.", vetId);
-    }
-
-    @Override
-    public Vet enableVet(Vet vet, Vet vetFound) {
-        vet.setIsActive(1);
-        vetRepository.save(vet);
-        return vet;
     }
 
 }

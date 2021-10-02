@@ -176,4 +176,26 @@ class VetResourceTest {
 				.andExpect(jsonPath("$[0].isActive").value(1));
 	}
 
+	@Test
+	@DisplayName("Delete Vet Test Valid VetId")
+	void deleteVetValidId() throws Exception {
+
+		Vet vet = new Vet();
+		vet.setId(1);
+		vet.setVetId(874130);
+		vet.setFirstName("James");
+		vet.setLastName("Carter");
+		vet.setEmail("carter.james@email.com");
+		vet.setPhoneNumber("2384");
+		vet.setResume("Practicing since 3 years");
+		vet.setWorkday("Monday, Tuesday, Friday");
+		vet.setIsActive(1);
+		//act
+
+		//given(vetRepository.deleteByVetId(vet.getVetId())).willReturn(vet);
+		//assert
+		mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$[0].isActive").value(1));
+	}
 }
