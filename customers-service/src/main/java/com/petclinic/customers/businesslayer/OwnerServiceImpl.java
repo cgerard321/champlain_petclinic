@@ -2,8 +2,8 @@ package com.petclinic.customers.businesslayer;
 
 import com.petclinic.customers.datalayer.Owner;
 import com.petclinic.customers.datalayer.OwnerRepository;
-import com.petclinic.customers.utils.exceptions.InvalidInputException;
-import com.petclinic.customers.utils.exceptions.NotFoundException;
+import com.petclinic.customers.customerExceptions.exceptions.InvalidInputException;
+import com.petclinic.customers.customerExceptions.exceptions.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

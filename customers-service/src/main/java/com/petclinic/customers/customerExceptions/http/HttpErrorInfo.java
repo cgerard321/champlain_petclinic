@@ -1,4 +1,4 @@
-package com.petclinic.customers.utils.http;
+package com.petclinic.customers.customerExceptions.http;
 
 import org.springframework.http.HttpStatus;
 

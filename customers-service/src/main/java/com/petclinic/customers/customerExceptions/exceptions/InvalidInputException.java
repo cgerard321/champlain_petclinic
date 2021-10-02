@@ -1,4 +1,4 @@
-package com.petclinic.customers.utils.exceptions;
+package com.petclinic.customers.customerExceptions.exceptions;
 
 public class InvalidInputException extends RuntimeException {
 
