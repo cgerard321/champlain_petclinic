@@ -21,20 +21,20 @@ public class JpaRepoTest
     @BeforeEach
     public void setUpDB()
     {
-        Vet vet1 = new Vet(1, 234568, "James", "Carter", "carter.james@email.com", "(514)-634-8276 #2384", "practicing since 3 years", "Monday, Tuesday, Friday", 1, null);
+        Vet vet1 = new Vet(1, 234568, "James", "Carter", "carter.james@email.com", "(514)-634-8276 #2384","picture1.png", "practicing since 3 years", "Monday, Tuesday, Friday", 1, null);
         vetRepository.save(vet1);
-        Vet vet2 = new Vet(2, 327874, "Helen", "Leary", "leary.helen@email.com", "(514)-634-8276 #2385", "Practicing since 10 years", "Wednesday, Thursday", 1, null);
+        Vet vet2 = new Vet(2, 327874, "Helen", "Leary", "leary.helen@email.com", "(514)-634-8276 #2385","picture2.png", "Practicing since 10 years", "Wednesday, Thursday", 1, null);
         vetRepository.save(vet2);
-        Vet vet3 = new Vet(3, 147258, "James2", "Carter2", "carter2.james@email.com", "(514)-634-8276 #2384", "practicing since 32 years", "Monday, Tuesday, Friday", 0, null);
+        Vet vet3 = new Vet(3, 147258, "James2", "Carter2", "carter2.james@email.com", "(514)-634-8276 #2384","picture3.png", "practicing since 32 years", "Monday, Tuesday, Friday", 0, null);
         vetRepository.save(vet3);
-        Vet vet4 = new Vet(4, 369852, "Helen2", "Leary2", "leary2.helen@email.com", "(514)-634-8276 #2385", "Practicing since 103 years", "Wednesday, Thursday", 0, null);
+        Vet vet4 = new Vet(4, 369852, "Helen2", "Leary2", "leary2.helen@email.com", "(514)-634-8276 #2385","picture4.png", "Practicing since 103 years", "Wednesday, Thursday", 0, null);
         vetRepository.save(vet4);
     }
 
     @Test
     public void saveVetTest()
     {
-        Vet vet1 = new Vet(1, 234568, "James", "Carter", "carter.james@email.com", "(514)-634-8276 #2384", "practicing since 3 years", "Monday, Tuesday, Friday", 1, null);
+        Vet vet1 = new Vet(1, 234568, "James", "Carter", "carter.james@email.com", "(514)-634-8276 #2384","picture1.png", "practicing since 3 years", "Monday, Tuesday, Friday", 1, null);
 
         vetRepository.save(vet1);
         assertThat(vetRepository.count()).isGreaterThan(0);
