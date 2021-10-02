@@ -19,9 +19,9 @@ public class HttpErrorInfo {
     }
 
     public HttpErrorInfo() {
+        this.httpStatus = null;
         this.timeStamp = null;
         this.path = null;
-        this.httpStatus = null;
         this.message = null;
     }
 

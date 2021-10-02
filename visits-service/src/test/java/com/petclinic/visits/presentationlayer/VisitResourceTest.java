@@ -1,30 +1,37 @@
 package com.petclinic.visits.presentationlayer;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.visits.businesslayer.VisitsService;
 import com.petclinic.visits.datalayer.Visit;
 import com.petclinic.visits.utils.exceptions.InvalidInputException;
 import com.petclinic.visits.utils.exceptions.NotFoundException;
 import com.petclinic.visits.utils.http.ControllerExceptionHandler;
+import com.petclinic.visits.utils.http.HttpErrorInfo;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
+import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.hasSize;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static com.petclinic.visits.datalayer.Visit.visit;
@@ -48,11 +55,13 @@ public class VisitResourceTest {
 	@Autowired
 	MockMvc mvc;
 
+	@Autowired
+	ControllerExceptionHandler exceptionHandler;
+
 	@MockBean
 	VisitsService visitsService;
 
-	@Autowired
-	ControllerExceptionHandler exceptionHandler;
+
 
 
 	@Autowired
@@ -259,8 +268,64 @@ public class VisitResourceTest {
 				.contentType(MediaType.APPLICATION_JSON)
 				.characterEncoding("utf-8")
 				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isUnprocessableEntity());
+				.andExpect(status().isUnprocessableEntity())
+				.andExpect(result -> assertTrue(result.getResolvedException() instanceof InvalidInputException))
+				.andExpect(result -> assertEquals("Visit description required.", result.getResolvedException().getMessage()));
 
+
+	}
+
+	@Test
+	void testHandlerForInvalidInputException() throws JsonProcessingException {
+		Visit expectedVisit = visit().id(1).petId(1).date(new Date()).description("").practitionerId(123456).build();
+
+		HttpErrorInfo httpErrorInfo = exceptionHandler.handleInvalidInputException(MockServerHttpRequest.post("/owners/1/pets/{petId}/visits", 1)
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON)
+				.body(objectMapper.writeValueAsString(expectedVisit)), new InvalidInputException("Visit description required"));
+
+		assertEquals(httpErrorInfo.getHttpStatus(), HttpStatus.UNPROCESSABLE_ENTITY);
+		assertEquals(httpErrorInfo.getPath(), "/owners/1/pets/1/visits");
+		assertEquals(httpErrorInfo.getTimeStamp().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss")), ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss")));
+	}
+
+	@Test
+	void testHttpErrorInfoNullConstructor() throws JsonProcessingException {
+		HttpErrorInfo httpErrorInfo = new HttpErrorInfo();
+
+		assertEquals(httpErrorInfo.getHttpStatus(), null);
+		assertEquals(httpErrorInfo.getPath(), null);
+		assertEquals(httpErrorInfo.getTimeStamp(), null);
+		assertEquals(httpErrorInfo.getMessage(), null);
+	}
+
+	@Test
+	void testHandlerForNotFoundException() throws JsonProcessingException {
+		Visit expectedVisit = visit().id(1).petId(65).date(new Date()).description("description").practitionerId(123456).build();
+
+		HttpErrorInfo httpErrorInfo = exceptionHandler.handleNotFoundException(MockServerHttpRequest.post("/owners/1/pets/{petId}/visits", 1)
+				.contentType(MediaType.APPLICATION_JSON)
+				.accept(MediaType.APPLICATION_JSON)
+				.body(objectMapper.writeValueAsString(expectedVisit)), new NotFoundException("Pet does not exist."));
+
+		assertEquals(httpErrorInfo.getHttpStatus(), HttpStatus.NOT_FOUND);
+		assertEquals(httpErrorInfo.getMessage(), "Pet does not exist.");
+	}
+
+	@Test
+	void testHandleNotFoundException() throws Exception {
+		Visit expectedVisit = visit().id(1).petId(65).date(new Date()).description("description").practitionerId(123456).build();
+
+		when(visitsService.addVisit(any())).thenThrow(new NotFoundException("Pet does not exist."));
+
+		mvc.perform(post("/owners/1/pets/{petId}/visits", 65)
+				.content(objectMapper.writeValueAsString(expectedVisit))
+				.contentType(MediaType.APPLICATION_JSON)
+				.characterEncoding("utf-8")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isNotFound())
+				.andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+				.andExpect(result -> assertEquals("Pet does not exist.", result.getResolvedException().getMessage()));
 	}
 
 	@Test
