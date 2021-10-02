@@ -120,7 +120,8 @@ class VetResourceTest {
 	void shouldGetAllExistingSpecialties() throws Exception{
 		Specialty specialty = new Specialty();
 		specialty.setId(1);
-		specialty.setName("Vet Surgeon");
+		specialty.setSpecialtyId(123002);
+		specialty.setName("Surgeon");
 	}
 
 	@Test

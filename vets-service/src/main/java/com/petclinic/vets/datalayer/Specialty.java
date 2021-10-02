@@ -2,6 +2,7 @@ package com.petclinic.vets.datalayer;
 
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.UniqueElements;
 
 import javax.persistence.*;
@@ -12,6 +13,7 @@ import javax.validation.constraints.NotNull;
  *
  * @author Juergen Hoeller
  * Copied from https://github.com/spring-petclinic/spring-petclinic-microservices
+ * @Contributor Christian Chitanu
  */
 
 @AllArgsConstructor
@@ -27,10 +29,19 @@ public class Specialty {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @NotNull
     @UniqueElements(groups = Specialty.class)
+    @Length(min = 0,max = 6)
     private Integer specialtyId;
 
     @Column(name = "name")
     private String name;
+
+    public Integer getSpecialtyId() {
+        return specialtyId;
+    }
+
+    public void setSpecialtyId(Integer specialtyId) {
+        this.specialtyId = specialtyId;
+    }
 
     public Integer getId() {
         return id;
