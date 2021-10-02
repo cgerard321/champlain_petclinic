@@ -2,7 +2,7 @@
 <form ng-submit="$ctrl.submitVetForm()" style="max-width: 25em;">
   <div class="form-group">
     <label><b>First Name</b></label>
-    <input type="text" placeholder="First Name" required maxlength="30" minlength="3" title="Minimum of 3 characters and maximum of 30 characters."><br/>
+    <input type="text" placeholder="First Name" pattern="^(a-z| |,|.|-)+" required maxlength="30" minlength="3" title="Minimum of 3 characters and maximum of 30 characters."><br/>
   </div><br>
   <div class="form-group">
     <label><b>Last Name</b></label>
