@@ -180,7 +180,7 @@ class OwnerResourceTest {
             repository.delete(owner);
 
 
-            if (repository.findById(OwnerID).isPresent() == false)
+            if (!repository.findById(OwnerID).isPresent())
             {
                 System.out.println("Yay!");
             }
@@ -191,15 +191,17 @@ class OwnerResourceTest {
         }
 
     }
-    /*
+
     @Test
     public void add_owner_test()
     {
         // final int OWNER_ID = 1;
+        // Arrange
         Owner owner1 = new Owner (2, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal",
                 "1111111111");
         repository.save(owner1);;
         // repository.save(owner);
+
         Owner foundSaved = repository.findById(owner1.getId()).get();
 
         assertThat(foundSaved, samePropertyValuesAs(owner1));
@@ -207,8 +209,6 @@ class OwnerResourceTest {
         assertEquals(2,repository.findAll().size());
     }
 
-
-*/
     // Reset the database
     @AfterEach
     public void resetDb()
