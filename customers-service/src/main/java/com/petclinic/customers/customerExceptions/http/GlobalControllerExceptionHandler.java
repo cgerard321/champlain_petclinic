@@ -1,7 +1,7 @@
-package com.petclinic.customers.utils.http;
+package com.petclinic.customers.customerExceptions.http;
 
-import com.petclinic.customers.utils.exceptions.InvalidInputException;
-import com.petclinic.customers.utils.exceptions.NotFoundException;
+import com.petclinic.customers.customerExceptions.exceptions.InvalidInputException;
+import com.petclinic.customers.customerExceptions.exceptions.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
