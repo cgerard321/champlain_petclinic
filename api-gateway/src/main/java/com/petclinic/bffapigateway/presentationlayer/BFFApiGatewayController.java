@@ -12,6 +12,7 @@ import com.petclinic.bffapigateway.dtos.Visits;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,6 +32,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
 
 /**
  * @author Maciej Szarlinski
@@ -158,6 +160,18 @@ public class BFFApiGatewayController {
     @GetMapping(value = "vets")
     public Flux<VetDetails> getVets() {
         return vetsServiceClient.getVets();
+    }
+
+    @GetMapping(value = "vets/{vetId}")
+    public Flux<VetDetails> getVet(final @PathVariable int vetId){
+        return vetsServiceClient.getVet(vetId);
+    }
+
+
+    @PostMapping(value = "vets", consumes = "application/json", produces = "application/json")
+    public Flux<VetDetails> createVets(@RequestBody VetDetails vets, final @PathVariable int id) {
+        vets.setId(id);
+        return vetsServiceClient.getVet(id);
     }
 
 
