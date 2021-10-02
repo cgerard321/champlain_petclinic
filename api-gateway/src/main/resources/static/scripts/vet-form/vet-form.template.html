@@ -7,7 +7,7 @@
   </div><br>
   <div class="form-group">
     <label><b>Last Name</b></label>
-    <input type="text" placeholder="Last Name" name="lastName" ng-maxlength="30" required>
+    <input type="text" placeholder="Last Name" name="lastName" ng-minlength="5" ng-maxlength="30" required>
     <span ng-show="vetForm.lastName.$error.required" class="help-block">Last name is required (Maximum of 30 characters).</span>
   </div><br>
   <div class="form-group">
