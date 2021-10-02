@@ -61,12 +61,11 @@ public class VisitResourceTest {
 	@MockBean
 	VisitsService visitsService;
 
-
-
-
 	@Autowired
 	ObjectMapper objectMapper;
 
+
+	// REST CONTROLLER TESTING
 	@Test
 	void whenValidPetIdThenShouldReturnVisitsForPet() throws Exception {
 
@@ -241,24 +240,7 @@ public class VisitResourceTest {
 	}
 
 	@Test
-	void test_EmptyInvalidInputException(){
-		InvalidInputException ex = assertThrows(InvalidInputException.class, ()->{
-			throw new InvalidInputException();
-		});
-		assertEquals(ex.getMessage(), null);
-	}
-
-	@Test
-	void test_ThrowableOnlyInvalidInputException(){
-		InvalidInputException ex = assertThrows(InvalidInputException.class, ()->{
-			throw new InvalidInputException(new Throwable());
-		});
-		assertEquals(ex.getCause().getMessage(), null);
-	}
-
-
-	@Test
-	void whenEmptyDescriptionThenShouldThrowInvalidInputException() throws Exception{
+	void whenEmptyDescriptionThenShouldHandleInvalidInputException() throws Exception{
 		Visit expectedVisit = visit().id(1).petId(1).date(new Date()).description("").practitionerId(123456).build();
 
 		when(visitsService.addVisit(any())).thenThrow(new InvalidInputException("Visit description required."));
@@ -273,6 +255,39 @@ public class VisitResourceTest {
 				.andExpect(result -> assertEquals("Visit description required.", result.getResolvedException().getMessage()));
 
 
+	}
+
+	@Test
+	void whenPetDoesNotExistThenShouldHandleNotFoundException() throws Exception {
+		Visit expectedVisit = visit().id(1).petId(65).date(new Date()).description("description").practitionerId(123456).build();
+
+		when(visitsService.addVisit(any())).thenThrow(new NotFoundException("Pet does not exist."));
+
+		mvc.perform(post("/owners/1/pets/{petId}/visits", 65)
+				.content(objectMapper.writeValueAsString(expectedVisit))
+				.contentType(MediaType.APPLICATION_JSON)
+				.characterEncoding("utf-8")
+				.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isNotFound())
+				.andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+				.andExpect(result -> assertEquals("Pet does not exist.", result.getResolvedException().getMessage()));
+	}
+
+	// UTILS PACKAGE TESTING
+	@Test
+	void test_EmptyInvalidInputException(){
+		InvalidInputException ex = assertThrows(InvalidInputException.class, ()->{
+			throw new InvalidInputException();
+		});
+		assertEquals(ex.getMessage(), null);
+	}
+
+	@Test
+	void test_ThrowableOnlyInvalidInputException(){
+		InvalidInputException ex = assertThrows(InvalidInputException.class, ()->{
+			throw new InvalidInputException(new Throwable());
+		});
+		assertEquals(ex.getCause().getMessage(), null);
 	}
 
 	@Test
@@ -310,22 +325,6 @@ public class VisitResourceTest {
 
 		assertEquals(httpErrorInfo.getHttpStatus(), HttpStatus.NOT_FOUND);
 		assertEquals(httpErrorInfo.getMessage(), "Pet does not exist.");
-	}
-
-	@Test
-	void testHandleNotFoundException() throws Exception {
-		Visit expectedVisit = visit().id(1).petId(65).date(new Date()).description("description").practitionerId(123456).build();
-
-		when(visitsService.addVisit(any())).thenThrow(new NotFoundException("Pet does not exist."));
-
-		mvc.perform(post("/owners/1/pets/{petId}/visits", 65)
-				.content(objectMapper.writeValueAsString(expectedVisit))
-				.contentType(MediaType.APPLICATION_JSON)
-				.characterEncoding("utf-8")
-				.accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isNotFound())
-				.andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
-				.andExpect(result -> assertEquals("Pet does not exist.", result.getResolvedException().getMessage()));
 	}
 
 	@Test
