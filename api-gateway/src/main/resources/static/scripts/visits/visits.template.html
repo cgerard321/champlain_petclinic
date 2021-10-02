@@ -395,8 +395,7 @@
     <div class="form-group">
         <label>Practitioner</label>
         <select ng-model="$ctrl.practitionerId">
-            <option value="69">TEST</option>
-            <option ng-repeat="p in $ctrl.vets" value="{{p.firstName}}">{{p.firstName}}</option>
+            <option ng-repeat="p in $ctrl.vets" value="{{p.vetId}}">{{p.firstName}} {{p.lastName}} {{p.phoneNumber}}</option>
         </select>
     </div>
 
