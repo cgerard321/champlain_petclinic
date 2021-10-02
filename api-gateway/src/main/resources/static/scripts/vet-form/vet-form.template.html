@@ -3,22 +3,22 @@
   <div class="form-group">
     <label><b>First Name</b></label>
     <input type="text" placeholder="First Name" name="fistName" ng-minlength="5" ng-maxlength="30" required>
-    <span ng-show="vetInputForm.firstName.$error.required" class="help-block">First name is required (Minimum of 5 characters and maximum of 30 characters).</span>
+    <span ng-show="vetInputForm.firstName.$error.required || " class="help-block">First name is required (Minimum of 5 characters and maximum of 30 characters).</span>
   </div><br>
   <div class="form-group">
     <label><b>Last Name</b></label>
     <input type="text" placeholder="Last Name" name="lastName" ng-minlength="5" ng-maxlength="30" required>
-    <span ng-show="vetInputForm.lastName.$error.required" class="help-block">Last name is required (Minimum of 5 characters and maximum of 30 characters).</span>
+    <span ng-show="vetForm.lastName.$error.required" class="help-block">Last name is required (Minimum of 5 characters and maximum of 30 characters).</span>
   </div><br>
   <div class="form-group">
     <label><b>Email</b></label>
     <input type="email" placeholder="Email" name="email" ng-minlength="5" ng-maxlength="100" required>
-    <span ng-show="vetInputForm.email.$error.required" class="help-block">Email is required (Minimum of 5 characters and maximum of 100 characters).</span>
+    <span ng-show="vetForm.email.$error.required" class="help-block">Email is required (Minimum of 5 characters and maximum of 100 characters).</span>
   </div><br>
   <div class="form-group">
     <label><b>Phone Number</b></label>
     <input type="number" placeholder="Phone Number" name="phoneNumber" ng-minlength="4" ng-maxlength="30" required>
-    <span ng-show="vetInputForm.phoneNumber.$error.required" class="help-block">Phone Number is required (Minimum of 4 characters and maximum of 30 characters. Accepts only numbers.).</span>
+    <span ng-show="vetForm.phoneNumber.$error.required" class="help-block">Phone Number is required (Minimum of 4 characters and maximum of 30 characters. Accepts only numbers.).</span>
   </div><br>
 
   <!-- To find out how to add file and profile picture to DB -->
@@ -30,13 +30,13 @@
     <label><b>Career Resume</b></label>
     <textarea placeholder="Resume" name="careerResume" ng-maxlength="350">
     </textarea>
-    <span ng-show="vetInputForm.careerResume.$dirty">Maximum of 350 characters.</span>
+    <span ng-show="vetForm.careerResume.$dirty">Maximum of 350 characters.</span>
   </div><br>
 
   <div class="form-group">
     <label><b>Work Days</b></label>
     <input type="text" placeholder="ex:Monday, Tuesday" name="workDays" ng-maxlength="250">
-    <span ng-show="vetInputForm.workDays.$dirty">Maximum of 250 characters.</span>
+    <span ng-show="vetForm.workDays.$dirty">Maximum of 250 characters.</span>
   </div><br>
 
   <div class="form-group">
@@ -50,7 +50,7 @@
   <div class="form-group">
     <label><b>Specialty</b></label>
     <input type="text" placeholder="Specialty" name="speciality"  ng-maxlength="80">
-    <span ng-show="vetInputForm.speciality.$dirty">Maximum of 80 characters.</span>
+    <span ng-show="vetForm.speciality.$dirty">Maximum of 80 characters.</span>
   </div><br>
   <div class="form-group">
     <fieldset>
@@ -64,6 +64,6 @@
   </div><br><br>
   <div class="form-group">
     <!--ui sref aqddee ui-sref="vetsNew()" for submission, currently pointing to #!/vets/new -->
-    <button type="submit" ng-disabled="vetInputForm.firstName.$invalid && vetInputForm.lastName.$invalid && vetInputForm.email.$invalid && vetInputForm.phoneNumber.$invalid" style="border:2px #34302D" class="btn">Submit</button>
+    <button type="submit" ng-disabled="vetForm.firstName.$invalid && vetForm.lastName.$invalid && vetForm.email.$invalid && vetForm.phoneNumber.$invalid" style="border:2px #34302D" class="btn">Submit</button>
   </div>
 </form>
