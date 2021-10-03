@@ -7,6 +7,9 @@ import org.slf4j.LoggerFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
@@ -18,6 +21,29 @@ public class UserServiceImpl implements UserService{
 
     private final UserRepo userRepo;
     private final UserMapper userMapper;
+
+    @Override
+    public User getUserById(long id) throws NotFoundException {
+        User entity = userRepo.findById(id)
+                .orElseThrow(() -> new NotFoundException("No user was found for userId: " + id));
+        log.info("User getUserById: found userId: {}", entity.getId());
+        return entity;
+    }
+
+    @Override
+    public Page<User> findAll(PageRequest of) {
+        return userRepo.findAll(of);
+    }
+
+    @Override
+    public void deleteUser(long id) {
+        try {
+            log.info("Deleting user with id {}", id);
+            userRepo.deleteById(id);
+        } catch (EmptyResultDataAccessException e) {
+            log.info("No user with id {}. Ignoring", id);
+        }
+    }
 
     @Override
     public User createUser(@Valid UserIDLessDTO userIDLessDTO) {

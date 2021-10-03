@@ -1,9 +1,12 @@
 package com.petclinic.auth.User;
 
 
-import javassist.NotFoundException;  
+import com.petclinic.auth.Role.Role;
+import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,6 +29,24 @@ public class UserController {
     private final UserService userService;
 
 
+    @GetMapping("/{id}")
+    public User getUser(@PathVariable long id) throws NotFoundException {
+        log.info("Getting user with id: {}" , id);
+        return userService.getUserById(id);
+    }
+
+    @GetMapping
+    public Page<User> getAllUsers(
+            @RequestParam(required = false, defaultValue = "1") int page,
+            @RequestParam(required = false, defaultValue = "10") int size
+    ) {
+
+        log.info("page={}", page);
+        final Page<User> all = userService.findAll(PageRequest.of(page - 1, size));
+        log.info("Retrieved paginated result with {} entries and {} pages", all.getTotalElements(), all.getTotalPages());
+        return all;
+    }
+
     @PostMapping
     public User createUser(@RequestBody @Valid UserIDLessDTO dto) {
 
@@ -41,5 +62,11 @@ public class UserController {
 
         userServ.passwordReset(id,pwd);
         log.info("Password for User with id {} with new password {}", id, pwd);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteUser(@PathVariable long id){
+        userService.deleteUser(id);
+        log.info("Deleted role with id {}", id);
     }
 }

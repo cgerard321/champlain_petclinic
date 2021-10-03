@@ -12,4 +12,5 @@ public interface UserMapper {
             @Mapping(target = "roles", ignore = true)
     })
     User idLessDTOToModel(UserIDLessDTO dto);
+
 }
