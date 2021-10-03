@@ -20,11 +20,21 @@
  */
 package com.petclinic.auth.User;
 
+
+import com.petclinic.auth.Role.Role;
+import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.web.bind.annotation.*;
+
 
 import javax.validation.Valid;
 
@@ -34,12 +44,15 @@ import javax.validation.Valid;
 @RequiredArgsConstructor
 public class UserController {
 
+
+    private final UserServiceImpl userServ;
     private final UserService userService;
 
-    @GetMapping("/{userId}")
-    public User getUser(@PathVariable long userId) {
-        log.info("Getting user with id: {}" , userId);
-        return userService.findUserById(userId);
+
+    @GetMapping("/{id}")
+    public User getUser(@PathVariable long id) throws NotFoundException {
+        log.info("Getting user with id: {}" , id);
+        return userService.getUserById(id);
     }
 
     @GetMapping
@@ -64,16 +77,16 @@ public class UserController {
         return saved;
     }
 
-    @PutMapping("/{userId}")
-    public void passwordReset(@PathVariable long userId,  @RequestBody String newPassword) {
+    @PutMapping("/{id}")
+    public void passwordReset(@PathVariable long id,  @RequestBody String pwd) throws NotFoundException {
 
-        userService.passwordReset(userId, newPassword);
-        log.info("Password for User with id {} with new password {}", userId, newPassword);
+        userServ.passwordReset(id,pwd);
+        log.info("Password for User with id {} with new password {}", id, pwd);
     }
 
-    @DeleteMapping("/{userId}")
-    public void deleteUser(@PathVariable long userId){
-        userService.deleteUser(userId);
-        log.info("Deleted role with id {}", userId);
+    @DeleteMapping("/{id}")
+    public void deleteUser(@PathVariable long id){
+        userService.deleteUser(id);
+        log.info("Deleted role with id {}", id);
     }
 }

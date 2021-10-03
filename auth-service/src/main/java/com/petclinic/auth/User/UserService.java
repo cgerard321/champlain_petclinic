@@ -20,16 +20,14 @@ import javassist.NotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
-import java.util.Optional;
-
 public interface UserService {
 
 
     User createUser(UserIDLessDTO user);
 
-    User passwordReset(long id, String passwd);
+    User passwordReset(long id, String passwd)throws Exception;
 
-    User findUserById(long id);
+    User getUserById(long id) throws NotFoundException;
 
     Page<User> findAll(PageRequest of);
 
