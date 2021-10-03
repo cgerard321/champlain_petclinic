@@ -16,18 +16,22 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import javax.validation.ConstraintViolationException;
+import java.util.Optional;
 import java.util.Random;
 
+import static java.lang.Math.min;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -118,9 +122,80 @@ public class AuthServiceUserControllerTests {
 
         mockMvc.perform(put("/users/1000"))
                 .andExpect(status().isForbidden());
+    }
 
+    @Test
+    @DisplayName("Get all users from controller")
+    void get_all_users_from_controller() {
 
+        final int
+                USER_COUNT = 20,
+                PAGE_LIM = 10,
+                STARTING_PAGE = 1;
 
+        for (int i = 0; i < USER_COUNT; i++) {
+            userRepo.save(new User("Username-1", "password"+i, "email@gmail.com"+i));
+        }
+
+        assertEquals(USER_COUNT, userRepo.count());
+
+        Page<User> userPage = userController.getAllUsers(STARTING_PAGE, PAGE_LIM);
+        assertNotNull(userPage);
+        assertEquals(USER_COUNT, userPage.getTotalElements());
+        assertEquals(USER_COUNT / PAGE_LIM, userPage.getTotalPages());
+    }
+
+    @Test
+    @DisplayName("Add then delete role from controller")
+    void add_then_delete_user_from_controller() {
+
+        final User save = userRepo.save(new User("Username", "password", "email@gmail.com"));
+        final Optional<User> found = userRepo.findById(save.getId());
+        assertTrue(found.isPresent());
+        assertEquals("Username", found.get().getUsername());
+        assertEquals("password", found.get().getPassword());
+        assertEquals("email@gmail.com", found.get().getEmail());
+
+        // Idempotency check
+        for (int i = 0; i < rng.nextInt(100); i++) {
+            userController.deleteUser(save.getId());
+            assertFalse(userRepo.findById(save.getId()).isPresent());
+        }
+    }
+
+    @Test
+    public void  get_user() throws Exception {
+
+        User entity = new User("Username", "password", "email@gmail.com");
+        userRepo.save(entity);
+
+        assertTrue(userRepo.findById(entity.getId()).isPresent());
+        User found = userController.getUser(entity.getId());
+        assertEquals("Username", found.getUsername());
+        assertEquals("password", found.getPassword());
+        assertEquals("email@gmail.com", found.getEmail());
+
+        mockMvc.perform(get("/users/" + entity.getId()))
+                .andDo(print())
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void  reset_password() throws Exception {
+
+        User entity = new User("Username", "password", "email@gmail.com");
+        String newPass = "newPassword";
+        User saved = userRepo.save(entity);
+
+        assertTrue(userRepo.findById(saved.getId()).isPresent());
+        userController.passwordReset(saved.getId(), newPass);
+
+        User found = userRepo.findById(saved.getId()).get();
+        assertEquals(newPass, found.getPassword());
+
+        mockMvc.perform(get("/users/" + entity.getId()))
+                .andDo(print())
+                .andExpect(status().isForbidden());
 
     }
 }

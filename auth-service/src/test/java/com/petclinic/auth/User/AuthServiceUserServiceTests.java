@@ -14,6 +14,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 
 import javax.validation.ConstraintViolationException;
@@ -22,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 
@@ -99,4 +102,54 @@ public class AuthServiceUserServiceTests {
         userRepo.save(userMap);
         assertThrows(DuplicateKeyException.class, () -> userService.createUser(userIDLessDTO));
     }
+
+    @Test
+    @DisplayName("get user by id and succeed")
+    void get_user_by_id() throws NotFoundException {
+        User user = new User(USER, PASS, EMAIL);
+        User saved = userRepo.save(user);
+        User found = userService.getUserById(saved.getId());
+        assertEquals(saved.getId(), found.getId());
+    }
+
+    @Test
+    @DisplayName("get user by id and fail")
+    void get_user_by_id_and_fail(){
+        long id = 1;
+        assertFalse(userRepo.findById(id).isPresent());
+        assertThrows(NotFoundException.class, () -> userService.getUserById(id));
+    }
+
+    @Test
+    @DisplayName("Get all users")
+    void get_all_roles() {
+
+        final int USER_COUNT = 10;
+
+        for (int i = 0; i < USER_COUNT; i++) {
+            userRepo.save(new User(USER, PASS, EMAIL + i));
+        }
+
+        assertEquals(USER_COUNT, userRepo.count());
+        assertEquals(USER_COUNT, userService.findAll(PageRequest.of(0, 10)).getTotalElements());
+    }
+
+    @Test
+    @DisplayName("Delete user by id")
+    void delete_role_by_id() {
+
+        final UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
+        final User saved = userService.createUser(userIDLessDTO);
+
+        userService.deleteUser(saved.getId());
+
+        assertEquals(0, userRepo.count());
+    }
+
+    @Test
+    @DisplayName("Delete user by id and fail")
+    void delete_role_by_id_and_fail() {
+        assertEquals(Optional.empty(), userRepo.findById(1l));
+    }
+
 }

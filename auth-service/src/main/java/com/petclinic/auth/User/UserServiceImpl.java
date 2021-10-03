@@ -37,12 +37,7 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public void deleteUser(long id) {
-        try {
-            log.info("Deleting user with id {}", id);
-            userRepo.deleteById(id);
-        } catch (EmptyResultDataAccessException e) {
-            log.info("No user with id {}. Ignoring", id);
-        }
+        userRepo.findById(id).ifPresent(userRepo::delete);
     }
 
     @Override
