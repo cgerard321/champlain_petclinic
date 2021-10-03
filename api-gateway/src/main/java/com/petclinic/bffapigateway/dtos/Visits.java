@@ -13,7 +13,7 @@ import java.util.List;
 @Value
 public class Visits {
 
-    public List<VisitDetails> items = new ArrayList<>();
+    private List<VisitDetails> items = new ArrayList<>();
 
 }
 
