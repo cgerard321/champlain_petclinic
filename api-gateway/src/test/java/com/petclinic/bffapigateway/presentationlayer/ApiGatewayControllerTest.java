@@ -1,10 +1,12 @@
 package com.petclinic.bffapigateway.presentationlayer;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
 import com.petclinic.bffapigateway.dtos.*;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,8 +14,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.internal.matchers.NotNull;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
@@ -31,10 +35,19 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import java.util.Collections;
 
-import static org.junit.Assert.assertEquals;
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import static oracle.jrockit.jfr.events.Bits.intValue;
+import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -263,6 +276,216 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$.path").isEqualTo("/owners")
                 .jsonPath("$.message").isEqualTo(null);
+    }
+
+    @Test
+    void getVisit()  {
+        VisitDetails visit = new VisitDetails();
+        visit.setId(1);
+        visit.setPetId(1);
+        visit.setDate("2021-12-12");
+        visit.setDescription("Charle's Richard cat has a paw infection.");
+        when(visitsServiceClient.getVisitsForPet(visit.getPetId()))
+                .thenReturn(Flux.just(visit));
+
+        client.get()
+                .uri("/api/gateway/visits/{petId}", visit.getPetId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+
+        Assertions.assertNotNull(visitsServiceClient.getVisitsForPet(visit.getId()));
+        assertEquals(intValue(visit.getId()), 1);
+        assertEquals(intValue(visit.getPetId()), 1);
+        assertEquals(visit.getDate(), "2021-12-12");
+        assertEquals(visit.getDescription(), "Charle's Richard cat has a paw infection.");
+
+    }
+
+    @Test
+    void createVisitWithOwnerInfo(){
+        OwnerDetails owner = new OwnerDetails();
+        VisitDetails visit = new VisitDetails();
+        owner.setId(1);
+        visit.setId(1);
+        visit.setPetId(1);
+        visit.setDate("2021-12-12");
+        visit.setDescription("Charle's Richard cat has a paw infection.");
+        when(visitsServiceClient.createVisitForPet(visit))
+                .thenReturn(Mono.just(visit));
+
+
+        client.post()
+                .uri("/api/gateway/visit/owners/{ownerId}/pets/{petId}/visits", owner.getId(), visit.getPetId())
+                .body(Mono.just(visit), VisitDetails.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+
+        assertEquals(owner.getId(), 1);
+        assertEquals(intValue(visit.getId()), 1);
+        assertEquals(intValue(visit.getPetId()), 1);
+        assertEquals(visit.getDate(), "2021-12-12");
+        assertEquals(visit.getDescription(), "Charle's Richard cat has a paw infection.");
+
+    }
+    @Test
+    void deleteVisit() {
+        VisitDetails visit = new VisitDetails();
+        OwnerDetails owner = new OwnerDetails();
+        owner.setId(1);
+        visit.setId(1);
+        visit.setPetId(1);
+        visit.setDate("2021-12-12");
+        visit.setDescription("Charle's Richard cat has a paw infection.");
+
+        when(visitsServiceClient.createVisitForPet(visit))
+                .thenReturn(Mono.just(visit));
+
+        client.post()
+                .uri("/api/gateway/visit/owners/{ownerId}/pets/{petId}/visits", owner.getId(), visit.getPetId())
+                .body(Mono.just(visit), VisitDetails.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+
+        assertEquals(Integer.valueOf(1), visit.getId());
+
+        client.delete()
+                .uri("/api/gateway/pets/visits/{petId}", visit.getPetId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody();
+
+        assertEquals(null, visitsServiceClient.getVisitsForPet(visit.getId()));
+    }
+
+@Test
+void deleteVisitsById() {
+    VisitDetails visit = new VisitDetails();
+    OwnerDetails owner = new OwnerDetails();
+    owner.setId(1);
+    visit.setId(1);
+    visit.setPetId(1);
+    visit.setDate("2021-12-12");
+    visit.setDescription("Charle's Richard cat has a paw infection.");
+
+    when(visitsServiceClient.createVisitForPet(visit))
+            .thenReturn(Mono.just(visit));
+
+    client.post()
+            .uri("/api/gateway/visit/owners/{ownerId}/pets/{petId}/visits", owner.getId(), visit.getPetId())
+            .body(Mono.just(visit), VisitDetails.class)
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus().isOk()
+            .expectHeader().contentType(MediaType.APPLICATION_JSON)
+            .expectBody();
+
+    assertEquals(Integer.valueOf(1), visit.getId());
+
+    client.delete()
+            .uri("/api/gateway/visits/{visitId}", visit.getId())
+            .accept(MediaType.APPLICATION_JSON)
+            .exchange()
+            .expectStatus()
+            .isOk()
+            .expectBody();
+
+    assertEquals(null, visitsServiceClient.getVisitsForPet(visit.getId()));
+}
+
+    @Test
+    void deleteVisitsByPetId() {
+        VisitDetails visit = new VisitDetails();
+        OwnerDetails owner = new OwnerDetails();
+        owner.setId(1);
+        visit.setId(1);
+        visit.setPetId(1);
+        visit.setDate("2021-12-12");
+        visit.setDescription("Charle's Richard cat has a paw infection.");
+
+        when(visitsServiceClient.createVisitForPet(visit))
+                .thenReturn(Mono.just(visit));
+
+        client.post()
+                .uri("/api/gateway/visit/owners/{ownerId}/pets/{petId}/visits", owner.getId(), visit.getPetId())
+                .body(Mono.just(visit), VisitDetails.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+
+        assertEquals(Integer.valueOf(1), visit.getId());
+
+        client.delete()
+                .uri("/api/gateway/pets/visits/{petId}", visit.getPetId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody();
+
+        assertEquals(null, visitsServiceClient.getVisitsForPet(visit.getId()));
+    }
+
+    @Test
+    void updateVisitsById() {
+        VisitDetails visit = new VisitDetails();
+        OwnerDetails owner = new OwnerDetails();
+        owner.setId(1);
+        visit.setId(1);
+        visit.setPetId(1);
+        visit.setDate("2021-12-12");
+        visit.setDescription("Charle's Richard cat has a paw infection.");
+
+        VisitDetails visit2 = new VisitDetails();
+        OwnerDetails owner2 = new OwnerDetails();
+
+        owner2.setId(2);
+        visit2.setId(2);
+        visit2.setPetId(2);
+        visit2.setDate("2034-12-12");
+        visit2.setDescription("Charle's Richard dog has a paw infection.");
+
+
+        when(visitsServiceClient.createVisitForPet(visit))
+                .thenReturn(Mono.just(visit));
+
+        client.post()
+                .uri("/api/gateway/visit/owners/{ownerId}/pets/{petId}/visits", owner.getId(), visit.getPetId())
+                .body(Mono.just(visit), VisitDetails.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+
+
+        client.put()
+                .uri("/api/gateway/pets/visits/{petId}",visit.getPetId())
+                .body(Mono.just(visit2), VisitDetails.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+
+
+        assertEquals(owner2.getId(), 2);
+        assertEquals(intValue(visit2.getId()), 2);
+        assertEquals(intValue(visit2.getPetId()), 2);
+        assertEquals(visit2.getDate(), "2034-12-12");
+        assertEquals(visit2.getDescription(), "Charle's Richard dog has a paw infection.");
     }
 }
 

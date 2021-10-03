@@ -94,24 +94,24 @@ public class BFFApiGatewayController {
         visit.setId(id);
         return visitsServiceClient.updateVisitForPet(visit);
     }
-
+    //Delete Visit By ID ---TESTED IN BFFApiGatewayApplicationTests
     @DeleteMapping (value = "visits/{visitId}")
     public void deleteVisitsById(final @PathVariable int visitId){
         visitsServiceClient.deleteVisitsById(visitId);
     }
 
-    //Delete Visit
-    @DeleteMapping (value = "pets/visits/{petId}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    //Delete Visit --TESTED in BFFApiGatewayApplicationTests
+    @DeleteMapping (value = "pets/visits/{petId}")
     public Mono<Void> deleteVisitForPets(final @PathVariable int petId){
         return visitsServiceClient.deleteVisitForPets(petId);
     }
 
-    //Update Visit
-    @PostMapping(value ="pets/visits/{petId}", consumes = "application/json", produces = "application/json")
+    //Update Visit --TESTED in BFFApiGatewayApplicationTests
+    @PutMapping(value ="pets/visits/{petId}", consumes = "application/json", produces = "application/json")
     public Mono<Visits> updateVisitForPets(final @PathVariable int petId){
         return visitsServiceClient.updateVisitForPets(petId);
     }
-
+    //Get Visits for Pet ---TESTED IN BFFApiGatewayApplicationTests
     @GetMapping(value = "visits/{petId}")
     public Flux<VisitDetails> getVisitsForPet(@PathVariable int petId){
         return visitsServiceClient.getVisitsForPet(petId);
@@ -145,6 +145,7 @@ public class BFFApiGatewayController {
         };
     }
 
+    //Add visit --TESTED in BFFApiGatewayApplicationTests
     @PostMapping(
             value = "visit/owners/{ownerId}/pets/{petId}/visits",
             consumes = "application/json",

@@ -114,7 +114,7 @@ public class VisitsServiceClient {
     }
 
     public Mono<VisitDetails> createVisitForPet(VisitDetails visit) {
-        String url = hostname + "/owners/*/pets/" + visit.getPetId() + "/visits";
+        String url = hostname + "/visit/owners/*/pets/" + visit.getPetId() + "/visits";
         return webClientBuilder.build()
                 .post()
                 .uri(url)
