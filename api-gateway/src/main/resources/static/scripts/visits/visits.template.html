@@ -1,5 +1,5 @@
 <!-- Style for visits calender UI-->
-<link rel="stylesheet" href="/css/visitsCalendarStyle.css" />
+<link rel="stylesheet" href="/css/visitsCalendarStyle.css" xmlns="http://www.w3.org/1999/html"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap">
 <!-- calender UI END -->
@@ -386,6 +386,18 @@
 
         renderCalendar();
     });
+
+    function selectChanged() {
+
+        var select = document.getElementById('selectedVet');
+        var vetsArray = select.options[select.selectedIndex].text;
+        console.log(vetsArray);
+
+
+
+            vetsArray = vetsArray.split(",");
+              console.log(vetsArray);
+    }
 </script>
 
 <h2>Visits</h2>
@@ -394,11 +406,13 @@
 
     <div class="form-group">
         <label>Practitioner</label>
-        <select ng-model="$ctrl.practitionerId">
-            <option value="69">TEST</option>
-            <option ng-repeat="p in $ctrl.vets" value="{{p.firstName}}">{{p.firstName}}</option>
+        <select id="selectedVet" onchange=selectChanged() ng-model="$ctrl.practitionerId">
+
+          <!--  <option ng-repeat="p in $ctrl.vets" value="{{p.firstName}}, {{p.lastName}}, {{p.workday}}"> {{p.firstName}} {{p.lastName}} on: {{p.workday}}</option> -->
+            <option ng-repeat="p in $ctrl.vets" value=" {{p.workday}}">  {{p.workday}}</option>
         </select>
     </div>
+
 
     <div class="form-group">
         <label>Date</label>
