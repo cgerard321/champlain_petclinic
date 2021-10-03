@@ -3,7 +3,6 @@ package com.petclinic.auth.User;
 import com.petclinic.auth.Config.PasswordStrengthCheck;
 import lombok.*;
 
-import javax.persistence.Column;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 
