@@ -37,6 +37,22 @@ public class DataValidation {
         return confirmedValue;
     }
 
+    public static String verifySpeciality(String speciality){
+        String confirmedValue = "";
+        try {
+            speciality = speciality.replaceAll("( |\\d)", "");
+            Pattern p = Pattern.compile("^(a-z| |,|.|-)+");
+            Matcher m = p.matcher(speciality);
+            boolean b = m.matches();
+            if(b) {
+                confirmedValue = speciality.trim();
+            }
+        }
+        catch (HttpClientErrorException ex){
+            throw handleHttpClientException(ex);
+        }
+        return confirmedValue;
+    }
 
     public static String verifyLastName(String lastName){
         String confirmedValue = "";
