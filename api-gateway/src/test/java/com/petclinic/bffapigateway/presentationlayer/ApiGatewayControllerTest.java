@@ -335,6 +335,26 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.path", "/api/gateway/vets");
     }
 
+    @Test
+    void createVetsMissingImportantArgs(){
+        VetDetails vetDetails = new VetDetails();
+        vetDetails.setVetId(5);
+        vetDetails.setEmail("randomemail@gmail.com");
+
+
+        when(vetsServiceClient.createVets(vetDetails))
+                .thenReturn(Flux.just(vetDetails));
+
+        client.post()
+                .uri("/api/gateway/vets")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.path", "/api/gateway/vets");
+    }
+
 }
 
 
