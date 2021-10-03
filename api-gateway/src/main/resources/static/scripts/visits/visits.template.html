@@ -406,11 +406,23 @@
 
     <div class="form-group">
         <label>Practitioner</label>
-        <select id="selectedVet" onchange=selectChanged() ng-model="$ctrl.practitionerId">
-
-          <!--  <option ng-repeat="p in $ctrl.vets" value="{{p.firstName}}, {{p.lastName}}, {{p.workday}}"> {{p.firstName}} {{p.lastName}} on: {{p.workday}}</option> -->
-            <option ng-repeat="p in $ctrl.vets" value=" {{p.workday}}">  {{p.workday}}</option>
+        <select id="selectedVet" ng-model="$ctrl.practitionerId" ng-change="$ctrl.loadVetInfo()">
+            <option ng-repeat="p in $ctrl.vets" value="{{p.vetId}}">{{p.firstName}} {{p.lastName}}</option>
         </select>
+
+        <br>
+
+        <label for="vetPhoneNumber" style="margin-top: 10px">Phone Number:</label>
+        <input id="vetPhoneNumber" disabled="disabled" style="background-color: #dbd9ce;"/>
+
+        <label for="vetEmailAddress">Email Address:</label>
+        <input id="vetEmailAddress" disabled="disabled" style="background-color: #dbd9ce;"/>
+
+        <label for="vetSpecialties">Specialties:</label>
+        <input id="vetSpecialties" disabled="disabled" style="background-color: #dbd9ce;"/>
+
+        <label for="vetWorkdays">Workdays:</label>
+        <input id="vetWorkdays" disabled="disabled" style="background-color: #dbd9ce;"/>
     </div>
 
 
