@@ -82,10 +82,9 @@ class VetResource {
             produces = MediaType.APPLICATION_JSON_VALUE
     )
     @ResponseStatus(HttpStatus.CREATED)
-    public Vet addVet(@RequestBody Vet vet)
+    public Vet addVet(@Valid @RequestBody Vet vet)
     {
-        Vet vetReturn = vetService.createVet(vet);
-        return vetReturn;
+        return vetService.createVet(vet);
     }
 
     @PutMapping( value = "/{vetId}")
