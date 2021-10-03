@@ -103,6 +103,49 @@ class VetResourceTest {
 	}
 
 	@Test
+	@DisplayName("Update Vet Resource Test")
+	void updateVet() throws Exception {
+		//arrange
+		Vet vet = new Vet();
+		vet.setId(1);
+		vet.setVetId(874130);
+		vet.setFirstName("James");
+		vet.setLastName("Carter");
+		vet.setEmail("carter.james@email.com");
+		vet.setPhoneNumber("2384");
+		vet.setResume("Practicing since 3 years");
+		vet.setWorkday("Monday, Tuesday, Friday");
+		vet.setIsActive(1);
+		//act
+		given(vetRepository.findByVetId(vet.getVetId())).willReturn(Optional.of(vet));
+		//assert
+		mvc.perform(put("/vets/{vetId}",vet.getVetId())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("{ \"id\": 1," +
+								"\"vetId\": 874130," +
+								"\"firstName\": \"Jamess\"," +
+								"\"lastName\": \"Carterr\"," +
+								"\"email\": \"carter.james2@email.com\"," +
+								"\"phoneNumber\": 2383," +
+								"\"resume\": \"Practicing since 4 years\"," +
+								"\"workday\": \"Monday, Friday\"," +
+								"\"isActive\": 1}"))
+
+				// Validate the response code and content type
+				.andExpect(status().isNoContent())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$.id").value(1))
+				.andExpect(jsonPath("$.vetId").value(874130))
+				.andExpect(jsonPath("$.firstName").value("Jamess"))
+				.andExpect(jsonPath("$.lastName").value("Carterr"))
+				.andExpect(jsonPath("$.email").value("carter.james2@email.com"))
+				.andExpect(jsonPath("$.phoneNumber").value("(514)-634-8276 #2383"))
+				.andExpect(jsonPath("$.resume").value("Practicing since 4 years"))
+				.andExpect(jsonPath("$.workday").value("Monday, Friday"))
+				.andExpect(jsonPath("$.isActive").value(1));;
+	}
+
+	@Test
 	@DisplayName("Disable Vet Resource Test")
 	void disableAVet() throws Exception {
 		//arrange
@@ -158,13 +201,34 @@ class VetResourceTest {
 		vet.setPhoneNumber("2384");
 		vet.setResume("Practicing since 3 years");
 		vet.setWorkday("Monday, Tuesday, Friday");
-		vet.setIsActive(1);
+		vet.setIsActive(0);
 		//act
-		given(vetRepository.findAllEnabledVets()).willReturn(asList(vet));
+		given(vetRepository.findByVetId(vet.getVetId())).willReturn(Optional.of(vet));
 		//assert
-		mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
+		mvc.perform(put("/vets/{vetId}/enableVet",vet.getVetId())
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("{ \"id\": 1," +
+								"\"vetId\": 874130," +
+								"\"firstName\": \"James\"," +
+								"\"lastName\": \"Carter\"," +
+								"\"email\": \"carter.james@email.com\"," +
+								"\"phoneNumber\": 2384," +
+								"\"resume\": \"Practicing since 3 years\"," +
+								"\"workday\": \"Monday, Tuesday, Friday\"," +
+								"\"isActive\": 1}"))
+
+				// Validate the response code and content type
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$[0].isActive").value(1));
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$.id").value(1))
+				.andExpect(jsonPath("$.vetId").value(874130))
+				.andExpect(jsonPath("$.firstName").value("James"))
+				.andExpect(jsonPath("$.lastName").value("Carter"))
+				.andExpect(jsonPath("$.email").value("carter.james@email.com"))
+				.andExpect(jsonPath("$.phoneNumber").value("(514)-634-8276 #2384"))
+				.andExpect(jsonPath("$.resume").value("Practicing since 3 years"))
+				.andExpect(jsonPath("$.workday").value("Monday, Tuesday, Friday"))
+				.andExpect(jsonPath("$.isActive").value(1));;
 	}
 
 	@Test
