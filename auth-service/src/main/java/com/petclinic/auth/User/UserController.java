@@ -24,10 +24,7 @@ import javax.validation.Valid;
 @RequiredArgsConstructor
 public class UserController {
 
-
-    private final UserServiceImpl userServ;
     private final UserService userService;
-
 
     @GetMapping("/{id}")
     public User getUser(@PathVariable long id) throws NotFoundException {
@@ -58,9 +55,9 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public void passwordReset(@PathVariable long id,  @RequestBody String pwd) throws NotFoundException {
+    public void passwordReset(@PathVariable long id,  @RequestBody String pwd) throws Exception {
 
-        userServ.passwordReset(id,pwd);
+        userService.passwordReset(id,pwd);
         log.info("Password for User with id {} with new password {}", id, pwd);
     }
 

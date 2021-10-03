@@ -9,7 +9,7 @@ public interface UserService {
 
     User createUser(UserIDLessDTO user);
 
-    User passwordReset(long id, String passwd)throws Exception;
+    User passwordReset(long id, String passwd) throws NotFoundException;
 
     User getUserById(long id) throws NotFoundException;
 
