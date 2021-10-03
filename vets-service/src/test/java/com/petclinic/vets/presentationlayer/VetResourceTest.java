@@ -14,15 +14,19 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Optional;
+
 import static  org.hamcrest.MatcherAssert.assertThat;
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.hasValue;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
  * @author Maciej Szarlinski
+ * @author Christian Chitanu
  */
 
 @ExtendWith(SpringExtension.class)
@@ -35,6 +39,26 @@ class VetResourceTest {
 
 	@MockBean
 	VetRepository vetRepository;
+
+	@Test
+	@DisplayName("Get Vet By vetId Resource Test")
+	void getVetByVetId() throws Exception{
+		Vet vet = new Vet();
+		vet.setId(1);
+		vet.setVetId(874130);
+		vet.setFirstName("James");
+		vet.setLastName("Carter");
+		vet.setEmail("carter.james@email.com");
+		vet.setPhoneNumber("2384");
+		vet.setResume("Practicing since 3 years");
+		vet.setWorkday("Monday, Tuesday, Friday");
+		vet.setIsActive(1);
+
+		given(vetRepository.findByVetId(874130)).willReturn(Optional.of(vet));
+		mvc.perform(get("/vets/"+vet.getVetId()).accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.vetId").value(874130));
+	}
 
 	@Test
 	@DisplayName("Get List of Vets Resource Test")
@@ -54,7 +78,28 @@ class VetResourceTest {
 		given(vetRepository.findAllEnabledVets()).willReturn(asList(vet));
 		mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$[0].id").value(1));
+				.andExpect(jsonPath("$[0].vetId").value(874130));
+	}
+
+	@Test
+	@DisplayName("Get List of Disabled Vets Resource Test")
+	void shouldGetAListOfDisabledVets() throws Exception {
+
+		Vet vet = new Vet();
+		vet.setId(1);
+		vet.setVetId(874130);
+		vet.setFirstName("James");
+		vet.setLastName("Carter");
+		vet.setEmail("carter.james@email.com");
+		vet.setPhoneNumber("2384");
+		vet.setResume("Practicing since 3 years");
+		vet.setWorkday("Monday, Tuesday, Friday");
+		vet.setIsActive(0);
+
+		given(vetRepository.findAllDisabledVets()).willReturn(asList(vet));
+		mvc.perform(get("/vets/disabled").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$[0].vetId").value(874130));
 	}
 
 	@Test
@@ -72,11 +117,32 @@ class VetResourceTest {
 		vet.setWorkday("Monday, Tuesday, Friday");
 		vet.setIsActive(0);
 		//act
-		given(vetRepository.findAllEnabledVets()).willReturn(asList(vet));
+		given(vetRepository.findByVetId(vet.getVetId())).willReturn(Optional.of(vet));
 		//assert
-		mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$[0].isActive").value(0));
+		mvc.perform(put("/vets/{vetId}/disableVet",vet.getVetId())
+								.contentType(MediaType.APPLICATION_JSON)
+								.content("{ \"id\": 1," +
+										"\"vetId\": 874130," +
+										"\"firstName\": \"James\"," +
+										"\"lastName\": \"Carter\"," +
+										"\"email\": \"carter.james@email.com\"," +
+										"\"phoneNumber\": 2384," +
+										"\"resume\": \"Practicing since 3 years\"," +
+										"\"workday\": \"Monday, Tuesday, Friday\"," +
+										"\"isActive\": 0}"))
+
+						// Validate the response code and content type
+						.andExpect(status().isOk())
+						.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$.id").value(1))
+				.andExpect(jsonPath("$.vetId").value(874130))
+				.andExpect(jsonPath("$.firstName").value("James"))
+				.andExpect(jsonPath("$.lastName").value("Carter"))
+				.andExpect(jsonPath("$.email").value("carter.james@email.com"))
+				.andExpect(jsonPath("$.phoneNumber").value("(514)-634-8276 #2384"))
+				.andExpect(jsonPath("$.resume").value("Practicing since 3 years"))
+				.andExpect(jsonPath("$.workday").value("Monday, Tuesday, Friday"))
+				.andExpect(jsonPath("$.isActive").value(0));;
 	}
 
 	@Test

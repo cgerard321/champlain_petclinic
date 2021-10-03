@@ -10,12 +10,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.NoSuchElementException;
+
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 /**
@@ -23,7 +26,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
  *
  *
  * @author Tymofiy Bun
- * @author Christian Chitanu: Added enable and disable tests for jcoco
+ * @author Christian Chitanu: Added enable and disable tests for jcoco + added create vet test
  */
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = { "spring.datasource.url=jdbc:h2:mem:vets-db"})
 @ExtendWith(SpringExtension.class)
@@ -57,14 +60,15 @@ public class VetBusinessLayerTest
     @Test
     public void createNewVetTest()
     {
-        Vet vet1 = new Vet(1, 234568, "James", "Carter", "carter.james@email.com", "(514)-634-8276 #2384", "practicing since 3 years", "Monday, Tuesday, Friday", 1, null);
-        vetService.createVet(vet1);
-        System.out.println(vetRepository.count());
-        Vet vet2 = new Vet(2, 327874, "Helen", "Leary", "leary.helen@email.com", "(514)-634-8276 #2385", "Practicing since 10 years", "Wednesday, Thursday", 1, null);
-        vetService.createVet(vet2);
-        assertThat(vetRepository.count()).isGreaterThan(0);
+        Vet vet1 = new Vet(5, 234567, "James3", "Carter", "carter.james@email.com", "(514)-634-8276 #2384", "practicing since 3 years", "Monday, Tuesday, Friday", 1, null);
+        assertThrows(NoSuchElementException.class,()->{
+            vetRepository.findByVetId(234567).get();
+        });
+        Vet result = vetService.createVet(vet1);
+        Vet repo = vetRepository.findByVetId(234567).get();
+        assertEquals(repo.getVetId(),result.getVetId());
+        assertEquals(repo.getFirstName(),result.getFirstName());
     }
-
     @Test
     public void getAllVetsTest()
     {
