@@ -32,6 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author Maciej Szarlinski
  * @author Christian Chitanu
+ * @changes Christian Chitanu: added and modified test methods in order to fit Jcoco standards
  */
 
 @ExtendWith(SpringExtension.class)
