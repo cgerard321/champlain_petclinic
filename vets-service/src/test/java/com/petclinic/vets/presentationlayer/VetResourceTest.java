@@ -7,19 +7,24 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.util.Optional;
 
 import static  org.hamcrest.MatcherAssert.assertThat;
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.hasValue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -100,6 +105,36 @@ class VetResourceTest {
 		mvc.perform(get("/vets/disabled").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$[0].vetId").value(874130));
+	}
+
+	@Test
+	@DisplayName("Create Vet Resource Test")
+	void createVet() throws Exception {
+		//assert
+		Vet vet2 = new Vet();
+		vet2.setId(1);
+		vet2.setVetId(874130);
+		vet2.setFirstName("James");
+		vet2.setLastName("Carter");
+		vet2.setEmail("carter.james@email.com");
+		vet2.setPhoneNumber("2384");
+		vet2.setResume("Practicing since 3 years");
+		vet2.setWorkday("Monday, Tuesday, Friday");
+		vet2.setIsActive(1);
+		when(vetRepository.save(any(Vet.class))).thenReturn(vet2);
+		mvc.perform(post("/vets")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content("{\"firstName\": \"James\"," +
+								"\"lastName\": \"Carter\"," +
+								"\"email\": \"carter.james@email.com\"," +
+								"\"phoneNumber\": 2384," +
+								"\"resume\": \"Practicing since 3 years\"," +
+								"\"workday\": \"Monday, Tuesday, Friday\"," +
+								"\"isActive\": 1}"))
+
+				// Validate the response code and content type
+				.andExpect(status().isCreated())
+				.andExpect(MockMvcResultMatchers.jsonPath("$.vetId").exists());
 	}
 
 	@Test

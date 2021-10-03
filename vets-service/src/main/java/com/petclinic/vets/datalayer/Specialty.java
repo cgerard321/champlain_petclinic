@@ -29,7 +29,7 @@ public class Specialty {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @NotNull
     @UniqueElements(groups = Specialty.class)
-    @Length(min = 0,max = 6)
+    @Length(min = 6,max = 6)
     private Integer specialtyId;
 
     @Column(name = "name")
