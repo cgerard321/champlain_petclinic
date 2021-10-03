@@ -13,6 +13,7 @@ angular.module('visits')
         $http.get(url).then(function (resp) {
             self.visits = resp.data;
         });
+
         $http.get("api/gateway/visits/"+petId).then(function (resp) {
             self.visits = resp.data;
         });
@@ -63,6 +64,25 @@ angular.module('visits')
                 $("#vetWorkdays").val("");
             }
         }
+
+        self.getPractitionerName = function (id){
+            var practitionerName = "";
+            $.each(self.vets, function (i, vet){
+               if (vet.vetId == id){
+                   practitionerName = vet.firstName + " " + vet.lastName;
+                   return false;
+               }
+            });
+            return practitionerName;
+        };
+
+        self.fillForm = function (practitionerId, date, description){
+            $("#selectedVet option[value='"+practitionerId+"']");
+            $('#date_input').text(date);
+            $('#description_textarea').text(description);
+            $('#submit_button').text("Update Visit");
+            $('#cancel_button').css("visibility", "visible");
+        };
 
         self.submit = function () {
             var data = {
