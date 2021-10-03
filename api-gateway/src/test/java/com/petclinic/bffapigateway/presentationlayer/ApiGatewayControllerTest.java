@@ -49,6 +49,8 @@ class ApiGatewayControllerTest {
     @Autowired
     private WebTestClient client;
 
+    Integer Id = Integer.parseInt("1");
+    Integer Id2 = Integer.parseInt("2");
 
     @Test
     void getOwnerDetails_withAvailableVisitsService() {
@@ -261,7 +263,7 @@ class ApiGatewayControllerTest {
         when(visitsServiceClient.getVisitsForPet(visit.getPetId()))
                 .thenReturn(Flux.just(visit));
 
-        Integer Id = Integer.parseInt("1");
+
         client.get()
                 .uri("/api/gateway/visits/{petId}", visit.getPetId())
                 .accept(MediaType.APPLICATION_JSON)
@@ -301,8 +303,8 @@ class ApiGatewayControllerTest {
                 .expectBody();
 
         assertEquals(owner.getId(), 1);
-        assertEquals(intValue(visit.getId()), 1);
-        assertEquals(intValue(visit.getPetId()), 1);
+        assertEquals(visit.getId(), Id);
+        assertEquals(visit.getPetId(), Id);
         assertEquals(visit.getDate(), "2021-12-12");
         assertEquals(visit.getDescription(), "Charle's Richard cat has a paw infection.");
 
@@ -456,8 +458,8 @@ void deleteVisitsById() {
 
 
         assertEquals(owner2.getId(), 2);
-        assertEquals(intValue(visit2.getId()), 2);
-        assertEquals(intValue(visit2.getPetId()), 2);
+        assertEquals(visit2.getId(), Id2);
+        assertEquals(visit2.getPetId(), Id2);
         assertEquals(visit2.getDate(), "2034-12-12");
         assertEquals(visit2.getDescription(), "Charle's Richard dog has a paw infection.");
     }
