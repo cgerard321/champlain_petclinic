@@ -21,6 +21,44 @@ angular.module('visits')
             self.vets = resp.data;
         });
 
+        self.loadVetInfo = function() {
+            let selectedVetsId = $("#selectedVet").val();
+
+            let foundVet = false;
+            let vetPhoneNumber = "";
+            let vetEmailAddress = "";
+            let vetSpecialtiesObject = null;
+
+            $.each(self.vets, function(i, vet) {
+                if(selectedVetsId == vet.vetId) {
+                    foundVet = true;
+                    vetPhoneNumber = vet.phoneNumber;
+                    vetEmailAddress = vet.email;
+                    vetSpecialtiesObject = vet.specialties;
+                    return false;
+                }
+            });
+
+            let vetSpecialties = "";
+            $.each(vetSpecialtiesObject, function(i, specialty) {
+                if(i < vetSpecialtiesObject.length - 1) {
+                    vetSpecialties += specialty.name + ", ";
+                } else {
+                    vetSpecialties += specialty.name;
+                }
+            });
+
+            if(foundVet) {
+                $("#vetPhoneNumber").val(vetPhoneNumber);
+                $("#vetEmailAddress").val(vetEmailAddress);
+                $("#vetSpecialties").val(vetSpecialties);
+            } else {
+                $("#vetPhoneNumber").val("");
+                $("#vetEmailAddress").val("");
+                $("#vetSpecialties").val("");
+            }
+        }
+
         self.submit = function () {
             var data = {
                 date: $filter('date')(self.date, "yyyy-MM-dd"),
