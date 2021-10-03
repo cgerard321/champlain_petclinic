@@ -14,6 +14,13 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 
+/*
+ * This class helps VisitResource handle thrown exceptions by creating and returning an instance of HttpErrorInfo
+ * to the client. More Exception hhandlers can be added at will when new custome exceptions are created.
+ *
+ * Contributors:
+ *   70963776+cjayneb@users.noreply.github.com
+ */
 
 @Slf4j
 @RestControllerAdvice

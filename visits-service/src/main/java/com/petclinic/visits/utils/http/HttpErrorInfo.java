@@ -4,6 +4,14 @@ import org.springframework.http.HttpStatus;
 
 import java.time.ZonedDateTime;
 
+/*
+ * This class defines the object that our controller will send back to the client when an error occurs. It contains all
+ * the necessary information for the error to be clear for the client.
+ *
+ * Contributors:
+ *   70963776+cjayneb@users.noreply.github.com
+ */
+
 public class HttpErrorInfo {
 
     private final ZonedDateTime timeStamp;

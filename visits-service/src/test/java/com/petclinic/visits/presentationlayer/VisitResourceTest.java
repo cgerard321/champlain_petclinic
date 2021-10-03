@@ -46,6 +46,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/*
+ * This class tests the methods of the VisitResource class, as well as the methods in the utils package.
+ *
+ * Contributors:
+ *   70963776+cjayneb@users.noreply.github.com
+ */
+
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(VisitResource.class)
 @ActiveProfiles("test")

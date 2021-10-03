@@ -8,6 +8,14 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
+/*
+ * This class implements the necessary methods to make our service work. It is currently responsible for the logic
+ * of basic CRUD operations.
+ *
+ * Contributors:
+ *   70963776+cjayneb@users.noreply.github.com
+ */
+
 @Service
 @Slf4j
 public class VisitsServiceImpl implements VisitsService {

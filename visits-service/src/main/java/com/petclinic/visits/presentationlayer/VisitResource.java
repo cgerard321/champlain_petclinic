@@ -11,7 +11,12 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-
+/*
+ * This class is a REST Controller that handles all the requests coming from the API Gateway.
+ *
+ * Contributors:
+ *   70963776+cjayneb@users.noreply.github.com
+ */
 /**
  * @author Juergen Hoeller
  * @author Ken Krebs
@@ -23,10 +28,6 @@ import java.util.List;
 @Slf4j
 @Timed("petclinic.visit")
 public class VisitResource {
-
-    //private static final Logger LOG = LoggerFactory.getLogger(VisitResource.class);
-    //private final VisitRepository visitRepository;
-
 
     private final VisitsService visitsService;
 
