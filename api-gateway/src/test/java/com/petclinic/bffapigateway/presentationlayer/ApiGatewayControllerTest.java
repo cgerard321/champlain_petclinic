@@ -1,57 +1,30 @@
 package com.petclinic.bffapigateway.presentationlayer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
 import com.petclinic.bffapigateway.dtos.*;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import org.junit.runner.RunWith;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
-import org.mockito.internal.matchers.NotNull;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import org.mockito.stubbing.Answer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import org.springframework.http.MediaType;
 
-import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpStatus;
-
-import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.web.bind.annotation.GetMapping;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.io.IOException;
-import java.net.URLDecoder;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 
-import static oracle.jrockit.jfr.events.Bits.intValue;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-
 
 
 @ExtendWith(SpringExtension.class)
@@ -288,6 +261,7 @@ class ApiGatewayControllerTest {
         when(visitsServiceClient.getVisitsForPet(visit.getPetId()))
                 .thenReturn(Flux.just(visit));
 
+        Integer Id = Integer.parseInt("1");
         client.get()
                 .uri("/api/gateway/visits/{petId}", visit.getPetId())
                 .accept(MediaType.APPLICATION_JSON)
@@ -297,8 +271,8 @@ class ApiGatewayControllerTest {
                 .expectBody();
 
         Assertions.assertNotNull(visitsServiceClient.getVisitsForPet(visit.getId()));
-        assertEquals(intValue(visit.getId()), 1);
-        assertEquals(intValue(visit.getPetId()), 1);
+        assertEquals(visit.getId(), Id);
+        assertEquals(visit.getPetId(), Id);
         assertEquals(visit.getDate(), "2021-12-12");
         assertEquals(visit.getDescription(), "Charle's Richard cat has a paw infection.");
 
