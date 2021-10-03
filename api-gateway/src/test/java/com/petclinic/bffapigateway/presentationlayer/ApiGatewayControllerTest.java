@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -36,6 +37,7 @@ import reactor.core.publisher.Mono;
 import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -306,6 +308,32 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.message").isEqualTo(null);
     }
 
+    @Test
+    void createVetsTooManyArguments(){
+        client.post()
+                .uri("/api/gateway/vets/{vetId}", 2)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.METHOD_NOT_ALLOWED)
+                .expectBody()
+                .jsonPath("$.path", "api/gateway/vets/{vetId}");
+
+    }
+
+    @Test
+    void createVetsMissingBody(){
+        VetDetails vetDetails = new VetDetails();
+        when(vetsServiceClient.createVets(vetDetails))
+                .thenReturn(Flux.just(vetDetails));
+        client.post()
+                .uri("/api/gateway/vets")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.path", "/api/gateway/vets");
+    }
 
 }
 
