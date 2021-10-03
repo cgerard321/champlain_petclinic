@@ -45,7 +45,7 @@ public class VetsServiceClient {
 
     public Flux<VetDetails> createVets(final VetDetails vets){
         return webClientBuilder.build().post()
-                .uri(vetsServiceUrl)
+                .uri(vetsServiceUrl + vets)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToFlux(VetDetails.class);

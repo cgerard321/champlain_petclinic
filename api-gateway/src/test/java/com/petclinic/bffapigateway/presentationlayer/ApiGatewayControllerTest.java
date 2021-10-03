@@ -31,6 +31,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.util.Collections;
 
@@ -172,6 +173,46 @@ class ApiGatewayControllerTest {
         assertEquals(owner.getCity(),"Johnston");
         assertEquals(owner.getTelephone(),"51451545144");
     }
+
+    @Test
+    void createVets(){
+        client = Mockito.mock(WebTestClient.class);
+        VetDetails vet = new VetDetails();
+        vet.setId(1);
+        vet.setVetId(2);
+        vet.setFirstName("Frank");
+        vet.setLastName("Harrisson");
+        vet.setEmail("frankh@gmail.com");
+        vet.setPhoneNumber("(514)-634-8276 #");
+        vet.setEnabled(1);
+        vet.setResume("Vet");
+        vet.setWorkday("Friday");
+
+        when(vetsServiceClient.createVets(vet))
+                .thenReturn(Flux.just(vet));
+
+//        client.post()
+//                .uri("api/gateway/vets/2")
+//                .body(Flux.just(vet), VetDetails.class)
+//                .accept(MediaType.APPLICATION_JSON)
+//                .exchange()
+//                .expectStatus().isCreated()
+//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+//                .expectBody();
+
+
+        assertEquals(1,vet.getId());
+        assertEquals(vet.getVetId(), 2);
+        assertEquals(vet.getFirstName(), "Frank");
+        assertEquals(vet.getLastName(), "Harrisson");
+        assertEquals(vet.getEmail(), "frankh@gmail.com");
+        assertEquals(vet.getPhoneNumber(), "(514)-634-8276 #");
+        //assertEquals(vet.getEnabled(), java.util.Optional.of(Integer.parseInt("1")));
+        assertEquals(vet.getResume(),"Vet");
+        assertEquals(vet.getWorkday(),"Friday");
+
+
+    }
   
     @Test
     void deleteUser() {
@@ -264,6 +305,8 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.path").isEqualTo("/owners")
                 .jsonPath("$.message").isEqualTo(null);
     }
+
+
 }
 
 

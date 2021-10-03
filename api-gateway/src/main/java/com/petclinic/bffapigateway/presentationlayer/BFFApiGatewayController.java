@@ -169,9 +169,8 @@ public class BFFApiGatewayController {
 
 
     @PostMapping(value = "vets", consumes = "application/json", produces = "application/json")
-    public Flux<VetDetails> createVets(@RequestBody VetDetails vets, final @PathVariable int id) {
-        vets.setId(id);
-        return vetsServiceClient.getVet(id);
+    public Flux<VetDetails> createVets(@RequestBody VetDetails vets) {
+        return vetsServiceClient.getVet(vets.getId());
     }
 
 
