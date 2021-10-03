@@ -27,6 +27,7 @@ angular.module('visits')
             let foundVet = false;
             let vetPhoneNumber = "";
             let vetEmailAddress = "";
+            let vetWorkdays = "";
             let vetSpecialtiesObject = null;
 
             $.each(self.vets, function(i, vet) {
@@ -35,6 +36,8 @@ angular.module('visits')
                     vetPhoneNumber = vet.phoneNumber;
                     vetEmailAddress = vet.email;
                     vetSpecialtiesObject = vet.specialties;
+                    vetWorkdays = vet.workday;
+
                     return false;
                 }
             });
@@ -52,10 +55,12 @@ angular.module('visits')
                 $("#vetPhoneNumber").val(vetPhoneNumber);
                 $("#vetEmailAddress").val(vetEmailAddress);
                 $("#vetSpecialties").val(vetSpecialties);
+                $("#vetWorkdays").val(vetWorkdays);
             } else {
                 $("#vetPhoneNumber").val("");
                 $("#vetEmailAddress").val("");
                 $("#vetSpecialties").val("");
+                $("#vetWorkdays").val("");
             }
         }
 
