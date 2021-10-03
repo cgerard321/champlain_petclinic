@@ -69,4 +69,9 @@ public class VisitsServiceImpl implements VisitsService {
     public List<Visit> getVisitsForPets(List<Integer> petIds){
         return visitRepository.findByPetIdIn(petIds);
     }
+
+    @Override
+    public List<Visit> getVisitsForPet(int petId, boolean scheduled) {
+        return null;
+    }
 }
