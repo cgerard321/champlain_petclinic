@@ -108,7 +108,7 @@ public class DataValidation {
                 confirmedValue = email.trim();
             }
             else {
-                throw new InvalidInputException();
+                throw new InvalidInputException("Invalid input for email");
             }
         return confirmedValue;
     }
