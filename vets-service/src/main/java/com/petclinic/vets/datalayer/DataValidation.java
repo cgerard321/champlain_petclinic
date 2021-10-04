@@ -25,7 +25,7 @@ public class DataValidation {
     public static String verifyFirstName(String firstName){
         String confirmedValue = "";
             firstName = firstName.replaceAll("( |\\d)", "");
-            Pattern p = Pattern.compile("\"^([A-Z]|[a-z]|\\\\.| |,|-)+\"");
+            Pattern p = Pattern.compile("^([A-Z]|[a-z]|\\\\.| |,|-)+");
             Matcher m = p.matcher(firstName);
             boolean b = m.matches();
             if(b) {
@@ -40,7 +40,7 @@ public class DataValidation {
     public static String verifySpeciality(String speciality){
         String confirmedValue = "";
             speciality = speciality.replaceAll("( |\\d)", "");
-            Pattern p = Pattern.compile("\"^([A-Z]|[a-z]|\\\\.| |,|-)+\"");
+            Pattern p = Pattern.compile("^([A-Z]|[a-z]|\\\\.| |,|-)+");
             Matcher m = p.matcher(speciality);
             boolean b = m.matches();
             if(b) {
@@ -54,18 +54,16 @@ public class DataValidation {
 
     public static String verifyLastName(String lastName){
         String confirmedValue = "";
-        try {
             lastName = lastName.replaceAll("( |\\d)", "");
-            Pattern p = Pattern.compile("^(a-z| |,|.|-)+");
+            Pattern p = Pattern.compile("^([A-Z]|[a-z]|\\\\.| |,|-)+");
             Matcher m = p.matcher(lastName);
             boolean b = m.matches();
             if(b) {
                 confirmedValue = lastName.trim();
             }
-        }
-        catch (HttpClientErrorException ex){
-            throw handleHttpClientException(ex);
-        }
+            else {
+                throw new InvalidInputException();
+            }
         return confirmedValue;
     }
 
