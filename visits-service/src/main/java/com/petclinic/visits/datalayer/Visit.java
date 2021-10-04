@@ -17,6 +17,12 @@ import java.util.Date;
  * Copied from https://github.com/spring-petclinic/spring-petclinic-microservices
  */
 
+/*
+ * This class defines the visit entity which matches the entity stored in the database.
+ *
+ * Contributors:
+ */
+
 @Entity
 @Table(name = "visits")
 @Builder(builderMethodName = "visit")
