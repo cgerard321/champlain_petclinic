@@ -84,7 +84,6 @@ public class DataValidation {
 
     public static String verifyWorkday(String workday){
         String confirmedValue = "";
-        try {
             workday = workday.replaceAll("( )", "");
             workday = workday.replaceAll("(,)", ", ");
             Pattern p = Pattern.compile("((\\bMonday\\b|\\bTuesday\\b|\\bWednesday\\b|\\bThursday\\b|\\bFriday\\b|\\bSaturday\\b|\\bSunday\\b)(,|)( |))+");
@@ -93,10 +92,9 @@ public class DataValidation {
             if(b) {
                 confirmedValue = workday.trim();
             }
-        }
-        catch (HttpClientErrorException ex){
-            throw handleHttpClientException(ex);
-        }
+            else {
+                throw new InvalidInputException();
+            }
         return confirmedValue;
     }
 
