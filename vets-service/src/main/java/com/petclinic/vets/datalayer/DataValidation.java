@@ -106,6 +106,7 @@ public class DataValidation {
     public static String verifyEmail(String email){
         String confirmedValue = "";
             email = email.replaceAll("( |)", "");
+            email.substring(0, Math.min(email.length(), 100));
             Pattern p = Pattern.compile("\\b[\\w.%-]+@[-.\\w]+\\.[A-Za-z]{2,4}\\b");
             Matcher m = p.matcher(email);
             boolean b = m.matches();
