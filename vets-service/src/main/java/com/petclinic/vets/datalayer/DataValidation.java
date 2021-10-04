@@ -41,7 +41,7 @@ public class DataValidation {
     public static String verifySpeciality(String speciality){
         String confirmedValue = "";
             speciality = speciality.replaceAll("( |\\d)", "");
-            speciality.substring(0, Math.min(speciality.length(), 80));
+            speciality = speciality.substring(0, Math.min(speciality.length(), 80));
             Pattern p = Pattern.compile("^([A-Z]|[a-z]|\\\\.| |,|-)+");
             Matcher m = p.matcher(speciality);
             boolean b = m.matches();
