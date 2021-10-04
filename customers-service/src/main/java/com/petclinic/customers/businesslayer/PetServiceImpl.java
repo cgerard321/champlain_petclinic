@@ -56,27 +56,42 @@ public class PetServiceImpl implements PetService {
         return petRepository.findAll();
     }
 
-    @Override
-    public void updatePet() {
-
-    }
-
-    @Override
-    public void deletePet(int Id) {
-
-    }
-
 
     /**
      * ------------------------ CREATE ALL ------------------------
      * This method will create a new pet, assign it to an owner and save its data in repository
      */
     @Override
-    public Pet CreatePet(Pet pet)
+    public Pet CreatePet(PetRequest petRequest, int ownerId)
     {
-        return null;
+        Pet pet = new Pet();
+        Optional<Owner> optionalOwner = ownerRepository.findById(ownerId);
+        Owner owner = optionalOwner.orElseThrow(() -> new NotFoundException("Owner "+ ownerId +" not found"));
+        owner.addPet(pet);
+
+        pet.setName(petRequest.getName());
+        pet.setBirthDate(petRequest.getBirthDate());
+        petRepository.findPetTypeById(petRequest.getTypeId())
+                .ifPresent(pet::setType);
+
+        LOG.info("Saving pet {}", pet);
+        return petRepository.save(pet);
     }
 
+    @Override
+    public void deletePet(int petId, int ownerId) {
 
+        //To be implemented
 
+    }
+
+    /**
+     * ------------------------ FIND ALL PET TYPES ------------------------
+     * This method will return all pet types from the database
+     */
+    @Override
+    public List<PetType> getAllPetTypes() {
+        return petRepository.findPetTypes();
+    }
+  
 }
