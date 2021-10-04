@@ -159,7 +159,7 @@ class VetResourceTest {
 		vet.setPhoneNumber(" #2384 fwfkdsbajnl####");
 		vet.setResume("Practicing since 3 years");
 		vet.setWorkday("Monday,Tuesday,         Friday");
-		vet.setIsActive(5);
+		vet.setIsActive(1);
 
 		given(vetRepository.findAllEnabledVets()).willReturn(asList(vet));
 
