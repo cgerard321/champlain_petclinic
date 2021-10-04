@@ -3,16 +3,24 @@ package main
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
+	ginSwagger "github.com/swaggo/gin-swagger"
+	"github.com/swaggo/gin-swagger/swaggerFiles"
+	_ "mailer-service/docs"
 	"mailer-service/mailer"
 	"mailer-service/mailer/controller"
 	"mailer-service/mailer/service"
 	"os"
 )
 
+// @title Mailer API documentation
+// @version 1.0.0
+// @BasePath /mail
 func main() {
 
 	engine := gin.Default()
 	defer engine.Run()
+
+	engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	SMTP_SERVER := os.Getenv("SMTP_SERVER")
 	SMTP_USER := os.Getenv("SMTP_USER")
