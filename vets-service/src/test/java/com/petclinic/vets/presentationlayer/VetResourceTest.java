@@ -1,5 +1,6 @@
 package com.petclinic.vets.presentationlayer;
 
+import com.petclinic.vets.businesslayer.VetService;
 import com.petclinic.vets.datalayer.Specialty;
 import com.petclinic.vets.datalayer.Vet;
 import com.petclinic.vets.datalayer.VetRepository;
@@ -26,6 +27,7 @@ import java.util.Optional;
 import static  org.hamcrest.MatcherAssert.assertThat;
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.hasValue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -48,7 +50,8 @@ class VetResourceTest {
 
 	@Autowired
 	MockMvc mvc;
-
+	@Autowired
+	VetService vetService;
 	@MockBean
 	VetRepository vetRepository;
 
@@ -70,6 +73,14 @@ class VetResourceTest {
 		mvc.perform(get("/vets/"+vet.getVetId()).accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.vetId").value(874130));
+	}
+	@Test
+	@DisplayName("Get Vet By vetId Invalid Input Ressource Test")
+	void getVetByVetIdInvalidInput() throws Exception{
+			assertThrows(NotFoundException.class,()->{
+				vetService.getVetByVetId(-10);
+			}
+		);
 	}
 
 	@Test
@@ -316,7 +327,7 @@ class VetResourceTest {
 		vet.setPhoneNumber(" #2384 fwfkdsbajnl####");
 		vet.setResume("Practicing since 3 years");
 		vet.setWorkday("Monday,Tuesday,         Friday");
-		vet.setIsActive(5);
+		vet.setIsActive(1);
 
 		given(vetRepository.findAllEnabledVets()).willReturn(asList(vet));
 

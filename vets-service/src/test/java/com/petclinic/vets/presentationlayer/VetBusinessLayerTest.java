@@ -98,6 +98,16 @@ public class VetBusinessLayerTest
         assertEquals(vetService.getVetByVetId(234568).getLastName(), "CarterUpdate");
         assertEquals(vetService.getVetByVetId(234568).getEmail(), "carterUpdate.james@email.com");
         assertEquals(vetService.getVetByVetId(234568).getResume(), "practicing since 3 yearsUpdate");
+
+        Vet vet2 = new Vet(1, 234568, "", "", "", "", "", "", 1, null);
+
+
+        vetService.updateVet(vetService.getVetByVetId(234568), vet2);
+
+        assertEquals(vetService.getVetByVetId(234568).getFirstName(), "JamesUpdate");
+        assertEquals(vetService.getVetByVetId(234568).getLastName(), "CarterUpdate");
+        assertEquals(vetService.getVetByVetId(234568).getEmail(), "carterUpdate.james@email.com");
+        assertEquals(vetService.getVetByVetId(234568).getResume(), "practicing since 3 yearsUpdate");
     }
 
     @Test
