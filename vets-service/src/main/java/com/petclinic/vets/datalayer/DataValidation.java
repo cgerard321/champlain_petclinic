@@ -69,19 +69,17 @@ public class DataValidation {
 
     public static String verifyPhoneNumber(String phoneNumber){
         String confirmedValue = "";
-        try {
             phoneNumber = phoneNumber.replaceAll("( |#|\\D)", "");
             Pattern p = Pattern.compile("^(\\d){4}$");
             Matcher m = p.matcher(phoneNumber);
             boolean b = m.matches();
             if(b) {
-                confirmedValue = phoneNumber.trim();
+                confirmedValue = "(514)-634-8276 #"+phoneNumber.trim();
             }
+            else {
+            throw new InvalidInputException();
         }
-        catch (HttpClientErrorException ex){
-            throw handleHttpClientException(ex);
-        }
-        return "(514)-634-8276 #"+confirmedValue;
+        return confirmedValue;
     }
 
     public static String verifyWorkday(String workday){
