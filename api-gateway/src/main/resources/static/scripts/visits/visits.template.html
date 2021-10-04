@@ -63,12 +63,12 @@
     let selectedTime;
     let availableDays = [];
     let vetAvailabilityStr;
+    let nameOnCalenderStr;
 
     const renderCalendar = () => {
         console.log("------------------------------------------");
 
         date.setDate(1);
-
 
         const monthDays = document.querySelector('.days');
 
@@ -95,6 +95,7 @@
 
         availableDays = [];
         let vetWorkDays = [];
+        let days = "";
 
         let vetsArray;
         if (vetAvailabilityStr !== undefined && vetAvailabilityStr !== null) {
@@ -130,31 +131,27 @@
             selectedDate = null;
         }
 
+        if(nameOnCalenderStr === undefined) {
+            nameOnCalenderStr = date.getFullYear().toString();
+        }
+
         //change currently selected month and date on the title UI elements
         document.querySelector(".date p").innerHTML = formattedDate;
-        document.querySelector(".time-date h1").innerHTML = formattedDate;
+        document.querySelector(".time-date h1").innerHTML = nameOnCalenderStr;
         document.querySelector(".date h1").innerHTML = months[date.getMonth()];
 
-        //create div elements to input into the html index page
-        let days = "";
-
-        //insert the previous days from the previous month
         for(let x = firstDayIndex; x > 0; x--) {
             let d = prevLastDay - x + 1;
 
-            //if date is on the weekend, disable it
             if(CheckWeekend(d, -1)) {
                 days += `<div data-target="previous-page-${d}" class="prev-date unavailable day">${d}</div>`;
-
             } else {
                 days += `<div data-target="previous-page-${d}" class="prev-date day">${d}</div>`;
             }
         }
 
-        //insert the actual days of the month
+        //get the week days that the vet works
         for(let i = 1; i <= lastDay; i++) {
-
-            //get the week days that the vet works
             let workDay = false;
             for(let w of vetWorkDays) {
                 if(getWeekDay(i, 0) === w) {
@@ -162,12 +159,12 @@
                 }
             }
 
-            //if today's date is on the weekend, highlight it but make it non-clickable
+            //check if day is weekend
             if(CheckWeekend(i, 0) && i === new Date().getDate() && date.getMonth() === new Date().getMonth() && new Date().getFullYear() === date.getFullYear() && vetAvailabilityStr !== null) {
                 days += `<div data-target="${i}" class="today_weekend day">${i}</div>`;
             }
 
-            //if days are before current date but within the same year or the date is a weekend date or the year is a past year, make dates unavailable
+            //check if day unavailable
             else if((CheckWeekend(i, 0) ||
                     vetAvailabilityStr === null) ||
                 (i < new Date().getDate() &&
@@ -180,7 +177,7 @@
                 days += `<div data-target="${i}" class="unavailable day">${i}</div>`;
             }
 
-            //if the vet doesn't work on a certain week day, make that week day unavailable
+            //check for vet availabilities
             else if(workDay === false) {
                 if((i === new Date().getDate() && date.getMonth() === new Date().getMonth() && new Date().getFullYear() === date.getFullYear())) {
                     days += `<div data-target="${i}" class="today_holiday day">${i}</div>`;
@@ -189,7 +186,7 @@
                 }
             }
 
-            //if a date is selected, show the selected date to the user on the calendar
+            //check for date selected by user
             else if(selectedDate === i.toString()) {
                 days += `<div data-target="${i}" class="date-selected day">${i}</div>`;
                 availableDays.push(i);
@@ -200,7 +197,7 @@
                 days += `<div data-target="${i}" class="today day">${i}</div>`;
             }
 
-            //insert the days
+            //regular days
             else {
                 days += `<div data-target="${i}" class="day">${i}</div>`;
                 availableDays.push(i);
@@ -209,47 +206,36 @@
 
         //insert the days for the next month
         for(let j = 1; j <= nextDays; j++) {
-            //if date on the weekend, make it unavailable
             if(CheckWeekend(j, 1)) {
                 days += `<div data-target="next-page-${j}" class="next-date unavailable day">${j}</div>`;
-
-                //if date is during the week, make it clickable for the user to go to next month
             } else {
                 days += `<div data-target="next-page-${j}" class="next-date day">${j}</div>`;
             }
         }
 
-        //upload UI tags for previous month's dates and current dates to the html document (index.hmtl)
         monthDays.innerHTML = days;
 
         //get number of days to insert after current month's date
         let numberOfDays = document.getElementsByClassName("day").length;
         let numberOfNext = document.getElementsByClassName("next-date").length;
+        let numberOfRows;
 
-        console.log("number of days from next month: " + numberOfNext);
-
-        //check if all the rows in the calendar are filled (42 fields)
-        //if not, add 1 or two more rows to fill in the blank
         if(numberOfDays === 28) {
-            for(let j = numberOfNext + 1; j <= 14 + numberOfNext; j++) {
-                if(CheckWeekend(j, 1)) {
-                    days += `<div data-target="next-page-${j}" class="next-date weekend day">${j}</div>`;
-
-                } else {
-                    days += `<div data-target="next-page-${j}" class="next-date day">${j}</div>`;
-                }
-            }
+            numberOfRows = 14;
         } else if (numberOfDays === 35) {
-            for (let j = numberOfNext + 1; j <= 7 + numberOfNext; j++) {
-                if(CheckWeekend(j, 1)) {
-                    days += `<div data-target="next-page-${j}" class="next-date weekend day">${j}</div>`;
+            numberOfRows = 7;
+        } else {
+            numberOfRows = 0;
+        }
 
-                } else {
-                    days += `<div data-target="next-page-${j}" class="next-date day">${j}</div>`;
-                }
+        for(let j = numberOfNext + 1; j <= (numberOfRows * 7) + numberOfNext; j++) {
+            if(CheckWeekend(j, 1)) {
+                days += `<div data-target="next-page-${j}" class="next-date weekend day">${j}</div>`;
+            } else {
+                days += `<div data-target="next-page-${j}" class="next-date day">${j}</div>`;
             }
         }
-        //upload UI tags for next month's dates to the html document (index.html)
+
         monthDays.innerHTML = days;
 
         console.log("Number Of days in month " + (date.getMonth()+1) + " is equal to: " + numberOfDays);
@@ -261,8 +247,6 @@
         for(let i = 9; i < 17; i++) {
             let addition = 1;
             let val = i;
-
-            //defining AM and PM boolean to ensure that the user can understand the time right
             let is1AM = true, is2AM = true;
             let firstTime, secondTime;
 
@@ -283,26 +267,15 @@
                 is1AM = false;
             }
 
-            //change from AM to PM for the first value
-            if(is1AM) {
-                firstTime = "AM";
-            } else {
-                firstTime = "PM";
-            }
-
-            //change from AM to PM for the second value
-            if(is2AM) {
-                secondTime = "AM";
-            } else {
-                secondTime = "PM";
-            }
+            firstTime = getAMorPM(is1AM);
+            secondTime = getAMorPM(is2AM);
 
             //Make time unavailable
             if(isMonthUnavailable || formattedDate === date.getFullYear().toString() || (new Date().getDate() === parseInt(selectedDate)) && new Date().getMonth() === date.getMonth() && new Date().getFullYear() === date.getFullYear()) {
                 slots += `<div data-target="${i} " class="time-slots time-unavailable">${val} ${firstTime} - ${val + addition} ${secondTime}</div>`;
             }
 
-            //if time slot is selected, show to user his selection via CSS.
+            //check time selected
             else if(i === parseInt(selectedTime)) {
                 slots += `<div data-target="${i} " class="time-slots time-selected">${val} ${firstTime} - ${val + addition} ${secondTime}</div>`;
                 timeIsSelected = true;
@@ -325,7 +298,6 @@
             document.querySelector(".time-picker").classList.remove("time-picker-selected");
         }
 
-        //upload UI tags to the html document (index.html)
         timeSlots.innerHTML = slots;
 
         //fixes bug where window wouldn't load
@@ -380,11 +352,24 @@
         }
     }
 
-    function selectChanged() {
+    //check selection change for vets availability
+    const selectChanged = () => {
         vetAvailabilityStr = $('#vetWorkdays').val();
+        nameOnCalenderStr = $("#selectedVet :selected").attr("data-target");
+
+        console.log(nameOnCalenderStr);
 
         renderCalendar();
 
+    }
+
+    //get value either for PM or AM for the time slots
+    const getAMorPM = (isAM) => {
+        if(isAM) {
+            return "AM";
+        } else {
+            return "PM";
+        }
     }
 
     renderCalendar();
@@ -494,7 +479,7 @@
     <div class="form-group">
         <label>Practitioner</label>
         <select id="selectedVet" ng-model="$ctrl.practitionerId" ng-change="$ctrl.loadVetInfo()">
-            <option ng-repeat="p in $ctrl.vets" value="{{p.vetId}}">{{p.firstName}} {{p.lastName}}</option>
+            <option ng-repeat="p in $ctrl.vets" data-target="{{p.firstName}} {{p.lastName}}" value="{{p.vetId}}">{{p.firstName}} {{p.lastName}}</option>
         </select>
 
         <br>
@@ -512,7 +497,6 @@
         <input id="vetWorkdays" disabled="disabled" style="background-color: #dbd9ce;" onchange=selectChanged() />
     </div>
 
-
     <div class="form-group">
         <label>Date</label>
         <input type="date" class="form-control" ng-model='$ctrl.date'/>
@@ -526,7 +510,6 @@
     <div class="form-group">
         <button class="btn btn-default" type="submit">Add New Visit</button>
     </div>
-
 </form>
 
 <h3>Previous Visits</h3>
