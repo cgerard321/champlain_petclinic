@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
+
 public class DataValidation {
 
 
@@ -24,15 +26,15 @@ public class DataValidation {
         String confirmedValue = "";
         try {
             firstName = firstName.replaceAll("( |\\d)", "");
-            Pattern p = Pattern.compile("^(a-z| |,|.|-)+");
+            Pattern p = Pattern.compile("^(a-z| |,|\\.|-)+");
             Matcher m = p.matcher(firstName);
             boolean b = m.matches();
-            if(b) {
+            if (b) {
                 confirmedValue = firstName.trim();
             }
         }
-        catch (HttpClientErrorException ex){
-            throw handleHttpClientException(ex);
+            catch (HttpClientErrorException ex){
+                throw handleHttpClientException(ex);
         }
         return confirmedValue;
     }
@@ -155,27 +157,5 @@ public class DataValidation {
         }
         return confirmedValue;
     }
-
-    private static RuntimeException handleHttpClientException(HttpClientErrorException ex){
-        switch (ex.getStatusCode()){
-            case NOT_FOUND:
-                throw new NotFoundException(getErrorMessage(ex));
-            case UNPROCESSABLE_ENTITY:
-                throw new InvalidInputException(getErrorMessage(ex));
-            default:
-                LOG.warn("Got an unexpected HTTP error: {}, will rethrow it", ex.getStatusText());
-                LOG.warn("Error body: {}", ex.getResponseBodyAsString());
-                throw ex;
-        }
-    }
-    private static String getErrorMessage(HttpClientErrorException ex) {
-        final ObjectMapper mapper = null;
-        try{
-            return mapper.readValue(ex.getResponseBodyAsString(), HttpErrorInfo.class).getMessage();
-
-        }catch(IOException ioex){
-            return ioex.getMessage();
-
-        }
     }
 }
