@@ -8,21 +8,30 @@ import (
 )
 
 type MailerControllerImpl struct {
-	
+	s mailer.MailerService
 }
 
-func (m MailerControllerImpl) New() {
+func (m *MailerControllerImpl) New(service mailer.MailerService) {
+	m.s = service
 }
-func handleMailPOST(context *gin.Context) {
+func (m MailerControllerImpl) handleMailPOST(context *gin.Context) {
 
 	get, exists := context.Get("mail")
 	if !exists || get == nil {
 		fmt.Println("E-mail not in context")
 		context.JSON(http.StatusBadRequest, "Unable to parse e-mail from body")
+		context.Abort()
 		return
 	}
 
 	mail := get.(*mailer.Mail)
+
+	if err := m.s.SendMail(mail); err != nil {
+		fmt.Println(err.Error())
+		context.JSON(http.StatusInternalServerError, err.Error())
+		context.Abort()
+		return
+	}
 
 	context.IndentedJSON(http.StatusOK, fmt.Sprintf("Message sent to %s", mail.To))
 }
@@ -31,7 +40,7 @@ func (m MailerControllerImpl) Routes(engine *gin.Engine) error {
 
 	group := engine.Group("/mail").Use(UnMarshallMail, ValidateEmail)
 
-	group.POST("", handleMailPOST)
+	group.POST("", m.handleMailPOST)
 
 	return nil
 }
