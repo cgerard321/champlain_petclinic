@@ -90,7 +90,7 @@ public class DataValidation {
         String confirmedValue = "";
             workday = workday.replaceAll("( )", "");
             workday = workday.replaceAll("(,)", ", ");
-            workday.substring(0, Math.min(workday.length(), 250));
+            workday = workday.substring(0, Math.min(workday.length(), 250));
             Pattern p = Pattern.compile("((\\bMonday\\b|\\bTuesday\\b|\\bWednesday\\b|\\bThursday\\b|\\bFriday\\b|\\bSaturday\\b|\\bSunday\\b)(,|)( |))+");
             Matcher m = p.matcher(workday);
             boolean b = m.matches();
