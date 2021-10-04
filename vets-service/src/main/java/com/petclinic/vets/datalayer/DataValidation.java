@@ -77,7 +77,7 @@ public class DataValidation {
                 confirmedValue = "(514)-634-8276 #"+phoneNumber.trim();
             }
             else {
-            throw new InvalidInputException();
+            throw new InvalidInputException("Invalid input for phone number");
         }
         return confirmedValue;
     }
