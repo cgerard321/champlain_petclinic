@@ -47,7 +47,7 @@ public class DataValidation {
                 confirmedValue = speciality.trim();
             }
             else {
-            throw new InvalidInputException();
+            throw new InvalidInputException("Invalid input for speciality");
         }
         return confirmedValue;
     }
