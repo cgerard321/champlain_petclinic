@@ -100,7 +100,6 @@ public class DataValidation {
 
     public static String verifyEmail(String email){
         String confirmedValue = "";
-        try {
             email = email.replaceAll("( |)", "");
             Pattern p = Pattern.compile("\\b[\\w.%-]+@[-.\\w]+\\.[A-Za-z]{2,4}\\b");
             Matcher m = p.matcher(email);
@@ -108,10 +107,9 @@ public class DataValidation {
             if(b) {
                 confirmedValue = email.trim();
             }
-        }
-        catch (HttpClientErrorException ex){
-            throw handleHttpClientException(ex);
-        }
+            else {
+                throw new InvalidInputException();
+            }
         return confirmedValue;
     }
 
