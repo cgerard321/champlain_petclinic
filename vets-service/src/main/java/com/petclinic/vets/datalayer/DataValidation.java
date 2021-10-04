@@ -128,7 +128,7 @@ public class DataValidation {
                 confirmedValue = vetId;
         }
         else {
-                throw new InvalidInputException();
+                throw new InvalidInputException("Invalid input for vetId");
         }
         return confirmedValue;
     }
