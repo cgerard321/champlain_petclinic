@@ -2,8 +2,8 @@ package com.petclinic.customers.businesslayer;
 
 import com.petclinic.customers.datalayer.Owner;
 import com.petclinic.customers.datalayer.OwnerRepository;
-import com.petclinic.customers.utils.exceptions.InvalidInputException;
-import com.petclinic.customers.utils.exceptions.NotFoundException;
+import com.petclinic.customers.customerExceptions.exceptions.InvalidInputException;
+import com.petclinic.customers.customerExceptions.exceptions.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -103,7 +103,7 @@ public class OwnerServiceImpl implements OwnerService {
         try{
             Owner savedOwner = repository.save(owner);
             LOG.debug("createOwner: owner with id {} saved",owner.getId());
-            return  savedOwner;
+            return savedOwner;
         }catch(DuplicateKeyException duplicateKeyException){
             throw new InvalidInputException("Duplicate key, ownerId: " + owner.getId());
         }
@@ -150,19 +150,21 @@ public class OwnerServiceImpl implements OwnerService {
 
     }
 
-    @Override
-    public void addCustodian(Owner primary,String custname){
 
-        int primaryOwnerId = primary.getId();
-        if(repository.findById(primaryOwnerId).isPresent()){
-            primary.setCustodian(custname);
-            LOG.debug("createCustodian: Added custodian to owner {}",
-                    primaryOwnerId);
-            //return savedSecondaryOwner;
-        }else {
-            LOG.debug("createSecondaryOwner: primary owner with id {} does not exist", primaryOwnerId);
-            throw new NotFoundException("Primary owner ID "+ primaryOwnerId +" not found");
-        }
-    }
+//    @Override
+//    public void addCustodian(Owner primary,String custname){
+//
+//        int primaryOwnerId = primary.getId();
+//        if(repository.findById(primaryOwnerId).isPresent()){
+//            primary.setCustodian(custname);
+//            LOG.debug("createCustodian: Added custodian to owner {}",
+//                    primaryOwnerId);
+//            //return savedSecondaryOwner;
+//        }else {
+//            LOG.debug("createSecondaryOwner: primary owner with id {} does not exist", primaryOwnerId);
+//            throw new NotFoundException("Primary owner ID "+ primaryOwnerId +" not found");
+//        }
+//    }
+
 
 }

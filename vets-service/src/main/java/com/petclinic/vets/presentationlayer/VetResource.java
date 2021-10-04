@@ -77,6 +77,15 @@ class VetResource {
         return vetService.getVetByVetId(vetId);
     }
 
+    @PostMapping(
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    @ResponseStatus(HttpStatus.CREATED)
+    public Vet addVet(@Valid @RequestBody Vet vet)
+    {
+        return vetService.createVet(vet);
+    }
 
     @PutMapping( value = "/{vetId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -104,12 +113,6 @@ class VetResource {
         return vet;
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public Vet addVet(@Valid @RequestBody Vet vet)
-    {
-        return vetService.createVet(vet);
-    }
 
 
 }

@@ -1,4 +1,9 @@
 <h2>Veterinarians</h2>
+<form onsubmit="javascript:void(0)" style="max-width: 20em; margin-top: 2em;">
+    <div class="form-group">
+        <input type="text" class="form-control" placeholder="Search" ng-model="$ctrl.query" />
+    </div>
+</form>
 <a ui-sref="vetsNew">
     <button class="add-vet-button">Add A Vet</button>
 </a>

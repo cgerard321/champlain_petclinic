@@ -2,9 +2,10 @@ package com.petclinic.vets.businesslayer;
 
 import com.petclinic.vets.datalayer.Vet;
 import com.petclinic.vets.datalayer.VetRepository;
+import com.petclinic.vets.utils.exceptions.InvalidInputException;
+import com.petclinic.vets.utils.exceptions.NotFoundException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
-
-import javax.ws.rs.NotFoundException;
 import java.util.List;
 import java.util.Optional;
 
