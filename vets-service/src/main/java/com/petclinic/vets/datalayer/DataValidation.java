@@ -62,7 +62,7 @@ public class DataValidation {
                 confirmedValue = lastName.trim();
             }
             else {
-                throw new InvalidInputException();
+                throw new InvalidInputException("Invalid input for last name");
             }
         return confirmedValue;
     }
