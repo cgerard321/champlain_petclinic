@@ -12,7 +12,7 @@ import java.util.Date;
  */
 
 @Data
-class PetRequest {
+public class PetRequest {
     private int id;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
