@@ -24,18 +24,16 @@ public class DataValidation {
 
     public static String verifyFirstName(String firstName){
         String confirmedValue = "";
-        try {
             firstName = firstName.replaceAll("( |\\d)", "");
-            Pattern p = Pattern.compile("^(a-z| |,|\\.|-)+");
+            Pattern p = Pattern.compile("\"^([A-Z]|[a-z]|\\\\.| |,|-)+\"");
             Matcher m = p.matcher(firstName);
             boolean b = m.matches();
-            if (b) {
+            if(b) {
                 confirmedValue = firstName.trim();
             }
-        }
-            catch (HttpClientErrorException ex){
-                throw handleHttpClientException(ex);
-        }
+            else {
+                throw new InvalidInputException();
+            }
         return confirmedValue;
     }
 
