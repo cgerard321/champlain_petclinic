@@ -25,7 +25,7 @@ public class DataValidation {
     public static String verifyFirstName(String firstName){
         String confirmedValue = "";
             firstName = firstName.replaceAll("( |\\d)", "");
-            firstName.substring(0, Math.min(firstName.length(), 30));
+            firstName = firstName.substring(0, Math.min(firstName.length(), 30));
             Pattern p = Pattern.compile("^([A-Z]|[a-z]|\\\\.| |,|-)+");
             Matcher m = p.matcher(firstName);
             boolean b = m.matches();
