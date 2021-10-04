@@ -120,4 +120,15 @@ angular.module('visits')
                 }).join("\r\n"));
             });
         }
+
+        self.deleteVisit = function (visitId){
+            $http.delete("api/gateway/visits/" + visitId).then(function () {
+                self.visits.splice(visitId, 1);
+            }, function (response) {
+                var error = response.data;
+                alert(error.error + "\r\n" + error.errors.map(function (e) {
+                    return e.field + ": " + e.defaultMessage;
+                }).join("\r\n"));
+            });
+        };
     }]);
