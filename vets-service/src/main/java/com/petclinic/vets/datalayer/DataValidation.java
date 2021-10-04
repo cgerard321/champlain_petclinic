@@ -93,7 +93,7 @@ public class DataValidation {
                 confirmedValue = workday.trim();
             }
             else {
-                throw new InvalidInputException();
+                throw new InvalidInputException("Invalid input for work days");
             }
         return confirmedValue;
     }
