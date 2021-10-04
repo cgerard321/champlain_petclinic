@@ -21,6 +21,9 @@ jobs:
       - name: Build
         run: cd mailer-service && go build -v -o app; cd -
 
+      - name: Swagger
+        run: swag init
+
       - name: Test
         run: cd mailer-service && go test -v ./...; cd -
 
