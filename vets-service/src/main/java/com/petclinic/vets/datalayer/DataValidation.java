@@ -32,7 +32,7 @@ public class DataValidation {
                 confirmedValue = firstName.trim();
             }
             else {
-                throw new InvalidInputException();
+                throw new InvalidInputException("Invalid input for first name");
             }
         return confirmedValue;
     }
