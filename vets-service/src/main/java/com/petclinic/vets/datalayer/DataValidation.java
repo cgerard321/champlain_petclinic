@@ -149,4 +149,11 @@ public class DataValidation {
             }
         return confirmedValue;
     }
+
+    public static String verifyResume (String resume){
+        String confirmedValue = "";
+        resume.substring(0, Math.min(resume.length(), 350));
+        confirmedValue = resume;
+        return confirmedValue;
+    }
 }
