@@ -135,16 +135,12 @@ public class DataValidation {
 
     public static Integer verifyIsActive(int isActive){
         int confirmedValue =0;
-        try {
-            confirmedValue = 1;
             if (isActive > -1 && isActive < 2) {
                 confirmedValue = isActive;
             }
-        }
-        catch (HttpClientErrorException ex){
-            throw handleHttpClientException(ex);
-        }
+            else {
+                throw new InvalidInputException();
+            }
         return confirmedValue;
-    }
     }
 }
