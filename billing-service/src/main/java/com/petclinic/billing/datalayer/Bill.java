@@ -30,7 +30,7 @@ public class Bill {
 
     public Bill(){}
 
-    //int customerId ---> Add this to constructor maybe?
+
     public Bill(int billId,int customerId, Date date, String visitType, double amount){
         this.customerId = customerId;
         this.billId = billId;

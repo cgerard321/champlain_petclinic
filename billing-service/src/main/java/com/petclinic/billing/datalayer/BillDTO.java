@@ -25,7 +25,7 @@ public class BillDTO {
 
     }
 
-    //Add int customerId to constructor ----> Maybe?
+
     public BillDTO(int billId,int customerId, Date date, String visitType, double amount){
         this.billId = billId;
         this.customerId = customerId;
@@ -35,7 +35,7 @@ public class BillDTO {
     }
 
 
-    //Add getCustomerId? returning customerId
+
     public int getBillId(){
         return billId;
     }

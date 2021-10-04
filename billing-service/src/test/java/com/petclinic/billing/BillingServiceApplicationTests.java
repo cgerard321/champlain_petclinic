@@ -56,7 +56,7 @@ class BillingServiceApplicationTests {
 
 		assertEquals(expectedLength, billRepository.findByBillId(BILL_ID).size());
 
-		// Todo: Complete the Billing Service Application tests //
+
 	}
 
 	@Test

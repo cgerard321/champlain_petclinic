@@ -26,7 +26,7 @@ public class BillServicePersistenceTests {
     private Bill savedBill;
 
 
-    //add cutsomer id field
+
     @BeforeEach
     public void setupDb(){
         repository.deleteAll();
