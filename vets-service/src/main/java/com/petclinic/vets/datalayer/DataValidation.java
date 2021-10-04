@@ -115,19 +115,20 @@ public class DataValidation {
 
     public static Integer verifyVetId(int vetId){
         int confirmedValue =0;
-        try {
-            if(Math.log10(vetId) < 7) {
+        if(vetId < 1){
+            throw new InvalidInputException("Vet Id number has an invalid format"+vetId);
+        }
+        else if(Math.log10(vetId) < 7) {
                 confirmedValue = vetId;
-            }
-            else{
+        }
+        else if (Math.log10(vetId) > 6){
                 while (Math.log10(vetId) > 6){
                     vetId = vetId /10;
                 }
                 confirmedValue = vetId;
-            }
         }
-        catch (HttpClientErrorException ex){
-            throw handleHttpClientException(ex);
+        else {
+                throw new InvalidInputException();
         }
         return confirmedValue;
     }
