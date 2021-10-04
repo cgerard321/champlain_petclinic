@@ -54,15 +54,4 @@ public class UtilsHttpTest {
         assertEquals(hei.getHttpStatus(),UNPROCESSABLE_ENTITY);
         assertThat(hei.getTimestamp()).isNotNull();
     }
-//    @Test
-//    @DisplayName("Global Controller Exception Handler Test")
-//    void globalControllerExceptionHandlerTest(){
-//        ServerHttpRequest request = mock(ServerHttpRequest.class);
-//
-//        GlobalControllerExceptionHandler h = new GlobalControllerExceptionHandler();
-//
-//        h.handleNotFoundException(request, new NotFoundException());
-//        when(h.handleNotFoundException(request,new NotFoundException()))
-//                .thenReturn(new HttpErrorInfo(NOT_FOUND, "/", "Item not found"));
-//    }
 }
