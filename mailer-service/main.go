@@ -14,6 +14,7 @@ import (
 
 // @title Mailer API documentation
 // @version 1.0.0
+// @host localhost:8080
 // @BasePath /mail
 func main() {
 
