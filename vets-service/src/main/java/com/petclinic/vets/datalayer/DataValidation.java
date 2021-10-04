@@ -139,7 +139,7 @@ public class DataValidation {
                 confirmedValue = isActive;
             }
             else {
-                throw new InvalidInputException();
+                throw new InvalidInputException("Invalid input for isActive");
             }
         return confirmedValue;
     }
