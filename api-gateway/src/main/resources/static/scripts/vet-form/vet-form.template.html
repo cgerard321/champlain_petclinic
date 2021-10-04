@@ -51,7 +51,7 @@
         let uploadPicture = function(event) {
           let preview = document.getElementById('preview');
           let checkmark = document.getElementById('checkmarkPic');
-          if((document.getElementById('profilePicture') != null){
+          if(document.getElementById('profilePicture') != null){
             checkmark.style.display = "inline";
           }
           preview.src = URL.createObjectURL(event.target.files[0]);
