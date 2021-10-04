@@ -221,9 +221,9 @@
         let numberOfRows;
 
         if(numberOfDays === 28) {
-            numberOfRows = 14;
+            numberOfRows = 2;
         } else if (numberOfDays === 35) {
-            numberOfRows = 7;
+            numberOfRows = 1;
         } else {
             numberOfRows = 0;
         }
@@ -376,15 +376,11 @@
 
     //previous page selector
     document.querySelector('.prev').addEventListener('click',() => {
-        //go to previous month
         date.setMonth(date.getMonth() - 1);
 
         renderCalendar();
-
-        //fix selected date if user changes month so that it can't select a weekend
         fixDays();
 
-        //reset selected time because new date was selected
         selectedTime = "";
 
         renderCalendar();
@@ -392,15 +388,11 @@
 
     //next page selector
     document.querySelector('.next').addEventListener('click',() => {
-        //go to next month
         date.setMonth(date.getMonth() + 1);
 
         renderCalendar();
-
-        //fix selected date if user changes month so that it can't select a weekend
         fixDays();
 
-        //reset selected time because new date was selected
         selectedTime = "";
 
         renderCalendar();
@@ -415,53 +407,41 @@
         if(target === undefined){
             console.log("nothing was selected");
 
-            //Previous page if user selects dates from last month
         } else if(target.substring(0,13) === "previous-page") {
 
-            //get selected date for previous date
             selectedDate = target.substring(14, 16).trim();
 
             date.setMonth(date.getMonth() - 1);
 
-            //reset selected time because new date was selected
             selectedTime = "";
 
             console.log("currently selected: ", target);
 
-            //Next page if user selects dates from next month
         } else if(target.substring(0,9) === "next-page") {
 
-            //get date for selection for next month
             selectedDate = target.substring(10, 12).trim();
 
             date.setMonth(date.getMonth() + 1);
 
-            //reset selected time because new date was selected
             selectedTime = "";
 
             console.log("currently selected: ", target);
 
-            //select the date that was selected by the user
         } else {
             selectedDate = target;
             date.setDate(parseInt(target));
 
-            //reset selected time because new date was selected
             selectedTime = "";
 
             console.log("currently selected: ", target);
         }
-
         renderCalendar();
     });
 
-    //select times for the different available dates
     document.querySelector('.times').addEventListener('click',(event) => {
 
         let selected = event.target.dataset.target;
 
-        // check to be sure that something is selected
-        // if nothing is selected, select none or keep previous selection
         if(selected !== undefined) {
             selectedTime = selected;
         }
