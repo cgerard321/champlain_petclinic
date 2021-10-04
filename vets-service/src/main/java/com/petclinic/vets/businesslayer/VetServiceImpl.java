@@ -62,7 +62,6 @@ public class VetServiceImpl implements VetService
     @Override
     public Vet createVet(VetDTO vet)
     {
-
             Vet vetSave = vetMapper.VetDtoToVet(vet);
             return vetRepository.save(vetSave);
     }
