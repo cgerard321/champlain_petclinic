@@ -2,23 +2,21 @@ package com.petclinic.visits.presentationlayer;
 
 
 import com.petclinic.visits.businesslayer.VisitsService;
-import com.petclinic.visits.businesslayer.VisitsServiceImpl;
 import com.petclinic.visits.datalayer.Visit;
-import com.petclinic.visits.datalayer.VisitRepository;
 import io.micrometer.core.annotation.Timed;
-import lombok.RequiredArgsConstructor;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
-
+/*
+ * This class is a REST Controller that handles all the requests coming from the API Gateway.
+ *
+ * Contributors:
+ *   70963776+cjayneb@users.noreply.github.com
+ */
 /**
  * @author Juergen Hoeller
  * @author Ken Krebs
@@ -30,10 +28,6 @@ import java.util.List;
 @Slf4j
 @Timed("petclinic.visit")
 public class VisitResource {
-
-    //private static final Logger LOG = LoggerFactory.getLogger(VisitResource.class);
-    //private final VisitRepository visitRepository;
-
 
     private final VisitsService visitsService;
 
@@ -96,9 +90,11 @@ public class VisitResource {
     public Visit create(
             @Valid @RequestBody Visit visit,
             @PathVariable("petId") int petId) {
+
         visit.setPetId(petId);
-        log.info("Saving visit {}", visit);
-        return visitsService.addVisit(visit);
+        Visit savedVisit = visitsService.addVisit(visit);
+        log.debug("Saving visit {}", savedVisit);
+        return savedVisit;
     }
 
 
