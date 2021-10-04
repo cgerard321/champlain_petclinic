@@ -1,7 +1,0 @@
-basePath: /mail
-info:
-  contact: {}
-  title: Mailer API documentation
-  version: 1.0.0
-paths: {}
-swagger: "2.0"
