@@ -73,7 +73,7 @@ public class DataValidation {
     public static String verifyPhoneNumber(String phoneNumber){
         String confirmedValue = "";
             phoneNumber = phoneNumber.replaceAll("( |#|\\D)", "");
-            phoneNumber.substring(0, Math.min(phoneNumber.length(), 30));
+            phoneNumber = phoneNumber.substring(0, Math.min(phoneNumber.length(), 30));
             Pattern p = Pattern.compile("^(\\d){4}$");
             Matcher m = p.matcher(phoneNumber);
             boolean b = m.matches();
