@@ -3,6 +3,7 @@ plugins {
 	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
 	id 'java'
 	id "io.freefair.lombok" version "6.0.0-m2"
+	id 'jacoco'
 }
 
 group = 'com.petclinic.vets'
@@ -31,6 +32,35 @@ dependencies {
 
 
 }
+jacoco {
+	toolVersion = "0.8.6"
+}
+
+jacocoTestReport {
+	dependsOn test
+
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: [
+					"com/petclinic/**/AuthServiceApplication.class",
+			])
+		}))
+	}
+}
+
+jacocoTestCoverageVerification {
+	violationRules {
+		rule {
+			limit {
+				minimum = 0.90
+			}
+		}
+	}
+}
+
+test.finalizedBy jacocoTestReport
+check.dependsOn jacocoTestCoverageVerification
+
 
 test {
 	useJUnitPlatform()
