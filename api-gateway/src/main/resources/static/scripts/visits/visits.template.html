@@ -39,6 +39,7 @@
     </div>
 </div>
 <script>
+
     const date = new Date();
 
     //specify which months goes with which numbers
@@ -60,9 +61,14 @@
 
     let selectedDate = date.getDate();
     let selectedTime;
+    let availableDays = [];
+    let vetAvailabilityStr;
 
     const renderCalendar = () => {
+        console.log("------------------------------------------");
+
         date.setDate(1);
+
 
         const monthDays = document.querySelector('.days');
 
@@ -84,7 +90,44 @@
         let isMonthUnavailable = false;
         if((new Date("" + months[date.getMonth()] + " " + (parseInt(selectedDate) + 1) + ", " + date.getFullYear()) < new Date())) {
             isMonthUnavailable = true;
-            formattedDate = date.getFullYear();
+            formattedDate = date.getFullYear().toString();
+        }
+
+        availableDays = [];
+        let vetWorkDays = [];
+
+        let vetsArray;
+        if (vetAvailabilityStr !== undefined && vetAvailabilityStr !== null) {
+            vetsArray = vetAvailabilityStr.split(",");
+        } else {
+            vetsArray = null;
+        }
+
+        if(vetsArray !== null) {
+            for (const d of vetsArray) {
+                switch (d.toLowerCase().trim()) {
+                    case "monday":
+                        vetWorkDays.push(1);
+                        break;
+                    case "tuesday":
+                        vetWorkDays.push(2);
+                        break;
+                    case "wednesday":
+                        vetWorkDays.push(3);
+                        break;
+                    case "thursday":
+                        vetWorkDays.push(4);
+                        break;
+                    case "friday":
+                        vetWorkDays.push(5);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        } else {
+            formattedDate = date.getFullYear().toString();
+            selectedDate = null;
         }
 
         //change currently selected month and date on the title UI elements
@@ -111,25 +154,45 @@
         //insert the actual days of the month
         for(let i = 1; i <= lastDay; i++) {
 
-            //if the dates are on the weekend, disable them so that the user can't select them
-            if (CheckWeekend(i, 0)) {
+            //get the week days that the vet works
+            let workDay = false;
+            for(let w of vetWorkDays) {
+                if(getWeekDay(i, 0) === w) {
+                    workDay = true;
+                }
+            }
+
+            //if today's date is on the weekend, highlight it but make it non-clickable
+            if(CheckWeekend(i, 0) && i === new Date().getDate() && date.getMonth() === new Date().getMonth() && new Date().getFullYear() === date.getFullYear() && vetAvailabilityStr !== null) {
+                days += `<div data-target="${i}" class="today_weekend day">${i}</div>`;
+            }
+
+            //if days are before current date but within the same year or the date is a weekend date or the year is a past year, make dates unavailable
+            else if((CheckWeekend(i, 0) ||
+                    vetAvailabilityStr === null) ||
+                (i < new Date().getDate() &&
+                    date.getMonth() <= new Date().getMonth() &&
+                    date.getFullYear() === new Date().getFullYear()) ||
+                (date.getMonth() < new Date().getMonth() &&
+                    date.getFullYear() === new Date().getFullYear()) ||
+                date.getFullYear() < new Date().getFullYear()) {
+
                 days += `<div data-target="${i}" class="unavailable day">${i}</div>`;
             }
 
-            //if days are before current date but within the same year, make dates unavailable
-            else if((i < new Date().getDate() && date.getMonth() <= new Date().getMonth() && date.getFullYear() === new Date().getFullYear()) ||
-                (date.getMonth() < new Date().getMonth() && date.getFullYear() === new Date().getFullYear())) {
-                days += `<div data-target="${i}" class="unavailable day">${i}</div>`;
+            //if the vet doesn't work on a certain week day, make that week day unavailable
+            else if(workDay === false) {
+                if((i === new Date().getDate() && date.getMonth() === new Date().getMonth() && new Date().getFullYear() === date.getFullYear())) {
+                    days += `<div data-target="${i}" class="today_holiday day">${i}</div>`;
+                } else {
+                    days += `<div data-target="${i}" class="holiday day">${i}</div>`;
+                }
             }
 
-            //if date is before current year, make dates unavailable
-            else if(date.getFullYear() < new Date().getFullYear()) {
-                days += `<div data-target="${i}" class="unavailable day">${i}</div>`;
-
-            }
             //if a date is selected, show the selected date to the user on the calendar
             else if(selectedDate === i.toString()) {
                 days += `<div data-target="${i}" class="date-selected day">${i}</div>`;
+                availableDays.push(i);
             }
 
             //specify the date of today
@@ -140,14 +203,17 @@
             //insert the days
             else {
                 days += `<div data-target="${i}" class="day">${i}</div>`;
+                availableDays.push(i);
             }
         }
 
         //insert the days for the next month
         for(let j = 1; j <= nextDays; j++) {
+            //if date on the weekend, make it unavailable
             if(CheckWeekend(j, 1)) {
                 days += `<div data-target="next-page-${j}" class="next-date unavailable day">${j}</div>`;
 
+                //if date is during the week, make it clickable for the user to go to next month
             } else {
                 days += `<div data-target="next-page-${j}" class="next-date day">${j}</div>`;
             }
@@ -156,6 +222,7 @@
         //upload UI tags for previous month's dates and current dates to the html document (index.hmtl)
         monthDays.innerHTML = days;
 
+        //get number of days to insert after current month's date
         let numberOfDays = document.getElementsByClassName("day").length;
         let numberOfNext = document.getElementsByClassName("next-date").length;
 
@@ -194,6 +261,8 @@
         for(let i = 9; i < 17; i++) {
             let addition = 1;
             let val = i;
+
+            //defining AM and PM boolean to ensure that the user can understand the time right
             let is1AM = true, is2AM = true;
             let firstTime, secondTime;
 
@@ -229,7 +298,7 @@
             }
 
             //Make time unavailable
-            if(isMonthUnavailable) {
+            if(isMonthUnavailable || formattedDate === date.getFullYear().toString() || (new Date().getDate() === parseInt(selectedDate)) && new Date().getMonth() === date.getMonth() && new Date().getFullYear() === date.getFullYear()) {
                 slots += `<div data-target="${i} " class="time-slots time-unavailable">${val} ${firstTime} - ${val + addition} ${secondTime}</div>`;
             }
 
@@ -256,8 +325,13 @@
             document.querySelector(".time-picker").classList.remove("time-picker-selected");
         }
 
-        //upload UI tags to the html document (index.hmtl)
+        //upload UI tags to the html document (index.html)
         timeSlots.innerHTML = slots;
+
+        //fixes bug where window wouldn't load
+        if(monthDays.innerHTML === null) {
+            location.reload();
+        }
     }
 
     //check if a date is on the weekend
@@ -267,29 +341,51 @@
 
     }
 
+    //check if date selected is a day of the week (monday to friday)
+    const getWeekDay = (day, month) => {
+        return new Date("" + months[date.getMonth() + month] + " " + day + ", " + date.getFullYear()).getDay();
+    }
+
     //fix selected date if user changes month so that it can't select a weekend
-    const fixDays = () => {
+    const fixDays = (isPrevOrNext) => {
+        let valMin = 0;
+        let valMax = 0;
+        let wasMaxReached = false;
 
-        if(CheckWeekend(selectedDate, 0) && selectedDate >= "15") {
-            selectedDate = (parseInt(selectedDate) - 1).toString();
-            console.log("Selection - 1 :" + selectedDate)
-
-            if(CheckWeekend(selectedDate, 0)) {
-                selectedDate = (parseInt(selectedDate) - 1).toString();
-                console.log("Selection - 1 :" + selectedDate)
+        for(let a of availableDays) {
+            console.log(a);
+            if(a > selectedDate && wasMaxReached === false) {
+                valMax = a;
+                wasMaxReached = true;
             }
 
-        } else if(CheckWeekend(selectedDate, 0) && selectedDate < "15") {
-            selectedDate = (parseInt(selectedDate) + 1).toString();
-            console.log("Selection + 1 :" + selectedDate)
+            if(a < selectedDate) {
+                valMin = a;
+            }
+        }
 
-            if(CheckWeekend(selectedDate, 0)) {
-                selectedDate = (parseInt(selectedDate) + 1).toString();
-                console.log("Selection + 1 :" + selectedDate)
+        if(valMin === 0 || isPrevOrNext === 1) {
+            selectedDate = valMax.toString();
+
+        } else if(valMax === 0 || isPrevOrNext === 2) {
+            selectedDate = valMin.toString();
+
+        } else {
+            if((valMax - parseInt(selectedDate) <= (parseInt(selectedDate) - valMin))) {
+                selectedDate = valMax.toString();
+            }
+            else {
+                selectedDate = valMin.toString();
             }
         }
     }
 
+    function selectChanged() {
+        vetAvailabilityStr = $('#vetWorkdays').val();
+
+        renderCalendar();
+
+    }
 
     renderCalendar();
 
@@ -297,6 +393,8 @@
     document.querySelector('.prev').addEventListener('click',() => {
         //go to previous month
         date.setMonth(date.getMonth() - 1);
+
+        renderCalendar();
 
         //fix selected date if user changes month so that it can't select a weekend
         fixDays();
@@ -312,8 +410,9 @@
         //go to next month
         date.setMonth(date.getMonth() + 1);
 
-        //fix selected date if user changes month so that it can't select a weekend
+        renderCalendar();
 
+        //fix selected date if user changes month so that it can't select a weekend
         fixDays();
 
         //reset selected time because new date was selected
@@ -386,18 +485,6 @@
 
         renderCalendar();
     });
-
-    function selectChanged() {
-
-        var select = document.getElementById('selectedVet');
-        var vetsArray = select.options[select.selectedIndex].text;
-        console.log(vetsArray);
-
-
-
-            vetsArray = vetsArray.split(",");
-              console.log(vetsArray);
-    }
 </script>
 
 <h2>Visits</h2>
@@ -422,7 +509,7 @@
         <input id="vetSpecialties" disabled="disabled" style="background-color: #dbd9ce;"/>
 
         <label for="vetWorkdays">Workdays:</label>
-        <input id="vetWorkdays" disabled="disabled" style="background-color: #dbd9ce;"/>
+        <input id="vetWorkdays" disabled="disabled" style="background-color: #dbd9ce;" onchange=selectChanged() />
     </div>
 
 
