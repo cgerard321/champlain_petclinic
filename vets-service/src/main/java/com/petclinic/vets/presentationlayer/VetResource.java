@@ -2,6 +2,7 @@ package com.petclinic.vets.presentationlayer;
 
 import com.petclinic.vets.businesslayer.VetService;
 import com.petclinic.vets.datalayer.Vet;
+import com.petclinic.vets.datalayer.VetDTO;
 import com.petclinic.vets.utils.exceptions.InvalidInputException;
 import io.micrometer.core.annotation.Timed;
 import org.slf4j.Logger;
@@ -53,8 +54,8 @@ class VetResource {
     }
 
     @GetMapping
-    public List<Vet> showResourcesVetList() {
-        return vetService.getAllEnabledVets();
+    public List<VetDTO> showResourcesVetList() {
+        return vetService.getAllEnabledVetDTOs();
     }
 
 //    @GetMapping("/enabled")
@@ -63,26 +64,26 @@ class VetResource {
 //    }
 
     @GetMapping("/disabled")
-    public List<Vet> showResourcesVetDisabledList() {
-        return vetService.getAllDisabledVets();
+    public List<VetDTO> showResourcesVetDisabledList() {
+        return vetService.getAllDisabledVetDTOs();
     }
 
 
     @GetMapping("/{vetId}")
-    public Vet findVet(@PathVariable int vetId)
+    public VetDTO findVet(@PathVariable int vetId)
     {
         LOG.debug("/vet MS return the found product for vetId: " + vetId);
 
         if(vetId < 1) throw new InvalidInputException("Invalid vetId: " + vetId);
-        return vetService.getVetByVetId(vetId);
+        return vetService.getVetDTOByVetId(vetId);
     }
 
 
     @PutMapping( value = "/{vetId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public Vet updateVet(@PathVariable int vetId, @RequestBody Vet vetRequest)
+    public VetDTO updateVet(@PathVariable int vetId, @RequestBody VetDTO vetDTORequest)
     {
-        return  vetService.updateVet(vetService.getVetByVetId(vetId),vetRequest);
+        return vetService.updateVet(vetId,vetDTORequest);
     }
 
     @PutMapping(path = "/{vetId}/disableVet",
@@ -106,7 +107,7 @@ class VetResource {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Vet addVet(@Valid @RequestBody Vet vet)
+    public Vet addVet(@Valid @RequestBody VetDTO vet)
     {
         return vetService.createVet(vet);
     }

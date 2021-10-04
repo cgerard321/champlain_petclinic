@@ -21,7 +21,7 @@
     </tr>
     </thead>
 
-    <tr ng-repeat="vet in $ctrl.vetList | filter:$ctrl.query track by vet.id">
+    <tr ng-repeat="vet in $ctrl.vetList | filter:$ctrl.query track by vet.vetId">
         <td><a ui-sref="vetDetails({ vetId: vet.vetId })"><span ng-mouseenter="$ctrl.show($event,vet.vetId)" ng-mouseleave="$ctrl.hide($event,vet.vetId)" class="info v{{vet.vetId}}">{{vet.firstName}} {{vet.lastName}}</span></a></td>
         <td><span ng-repeat="specialty in vet.specialties">{{specialty.name + ' '}}</span></td>
     </tr>

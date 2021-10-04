@@ -67,7 +67,7 @@ class VetResourceTest {
 		given(vetRepository.findAllEnabledVets()).willReturn(asList(vet));
 		mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$[0].id").value(1));
+				.andExpect(jsonPath("$[0].vetId").value(874130));
 	}
 
 	@Test
@@ -120,7 +120,7 @@ class VetResourceTest {
 	void shouldGetAllTheFieldsForAVet() throws Exception{
 
 		Vet vet = new Vet();
-		vet.setId(1);
+//		vet.setId(1);
 		vet.setVetId(874130);
 		vet.setFirstName("James");
 		vet.setLastName("Carter");
@@ -134,7 +134,7 @@ class VetResourceTest {
 
 		mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$[0].id").value(1))
+//				.andExpect(jsonPath("$[0].id").value(1))
 				.andExpect(jsonPath("$[0].vetId").value(874130))
 				.andExpect(jsonPath("$[0].firstName").value("James"))
 				.andExpect(jsonPath("$[0].lastName").value("Carter"))
@@ -165,7 +165,7 @@ class VetResourceTest {
 
 		mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$[0].id").value(1))
+//				.andExpect(jsonPath("$[0].id").value(1))
 				.andExpect(jsonPath("$[0].vetId").value(874130))
 				.andExpect(jsonPath("$[0].firstName").value("James"))
 				.andExpect(jsonPath("$[0].lastName").value("Carter"))

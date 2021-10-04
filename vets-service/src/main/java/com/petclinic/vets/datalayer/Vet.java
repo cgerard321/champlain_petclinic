@@ -8,6 +8,7 @@ import com.petclinic.vets.utils.http.HttpErrorInfo;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
+import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.UniqueElements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +51,7 @@ public class Vet {
 
     @Column(name = "vet_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @NotNull
+    @Length(min = 6, max = 6,groups = Vet.class)
     @UniqueElements(groups = Vet.class)
     private Integer vetId;
 
