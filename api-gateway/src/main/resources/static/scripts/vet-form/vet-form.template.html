@@ -2,23 +2,19 @@
 <form ng-submit="$ctrl.submitVetForm()" style="max-width: 25em;">
   <div class="form-group">
     <label><b>First Name</b></label>
-    <input type="text" placeholder="First Name" name="fistName" required>
-    <span ng-show="vetForm.firstName.$error.required" class="help-block">First name is required.</span>
+    <input type="text" placeholder="First Name" pattern="^([A-Z]|[a-z]|\\.| |,|-)+" required maxlength="30" minlength="3" title="Minimum of 3 characters and maximum of 30 characters. Only letters and punctuation mark."><br/>
   </div><br>
   <div class="form-group">
     <label><b>Last Name</b></label>
-    <input type="text" placeholder="Last Name" name="lastName" required>
-    <span ng-show="vetForm.lastName.$error.required" class="help-block">Last name is required.</span>
+    <input type="text" placeholder="Last Name" pattern="^([A-Z]|[a-z]|\\.| |,|-)+" required maxlength="30" minlength="3" title="Minimum of 3 characters and maximum of 30 characters. Only letters and punctuation mark.">
   </div><br>
   <div class="form-group">
     <label><b>Email</b></label>
-    <input type="email" placeholder="Email" name="email" required>
-    <span ng-show="vetForm.email.$error.required" class="help-block">Email is required.</span>
+    <input type="email" placeholder="Email" pattern="\b[\w.%-]+@[-.\w]+\.[A-Za-z]{2,5}\b" required maxlength="100" minlength="5" title="Minimum of 5 characters and maximum of 100 characters. Top level domain should have 2 to 5 characters.">
   </div><br>
   <div class="form-group">
     <label><b>Phone Number</b></label>
-    <input type="tel" placeholder="Phone Number" name="phoneNumber" required>
-    <span ng-show="vetForm.phoneNumber.$error.required" class="help-block">Phone Number is required.</span>
+    <input type="number" placeholder="Phone Number" pattern="^(\d)" required maxlength="30" minlength="4" title="Accepts only numbers for a minimum of 4 characters and maximum of 30 characters.">
   </div><br>
 
   <!-- To find out how to add file and profile picture to DB -->
@@ -28,27 +24,27 @@
   </div><br>
   <div class="form-group">
     <label><b>Career Resume</b></label>
-    <textarea placeholder="Resume" name="careerResume">
-
+    <textarea placeholder="Resume" pattern="^(.*)" maxlength="350" title="Maximum of 350 characters.">
     </textarea>
   </div><br>
 
   <div class="form-group">
     <label><b>Work Days</b></label>
-    <input type="text" placeholder="ex:Monday, Tuesday" name="workDays">
+    <input type="text" placeholder="ex:Monday, Tuesday" pattern="((\bMonday\b|\bTuesday\b|\bWednesday\b|\bThursday\b|\bFriday\b|\bSaturday\b|\bSunday\b)(,|)( |))+" maxlength="250" title="Maximum of 250 characters. Accepts only days of the week seperated by commas.">
   </div><br>
 
   <div class="form-group">
     <fieldset>
       <legend>Active Vet Profile</legend>
-      <input type="radio" name="profileEnabled" value="1" checked>Yes<br>
-      <input type="radio" name="profileEnabled" value="0">No<br>
+      <input type="radio" value="1" checked>Yes<br>
+      <input type="radio" value="0">No<br>
     </fieldset>
   </div><br><br>
 
   <div class="form-group">
     <label><b>Specialty</b></label>
-    <input type="text" placeholder="Specialty" name="speciality">
+    <input type="text" placeholder="Specialty" pattern="^([A-Z]|[a-z]|\\.| |,|-)+" maxlength="80" title="Maximum of 80 characters. No numbers.">
+    <span>Maximum of 80 characters.</span>
   </div><br>
   <div class="form-group">
     <fieldset>
