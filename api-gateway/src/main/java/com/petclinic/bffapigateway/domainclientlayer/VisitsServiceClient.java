@@ -76,13 +76,13 @@ public class VisitsServiceClient {
 
 */
 
-    public Mono<Visits> updateVisitForPets(final int petId){
+    public Mono<VisitDetails> updateVisitForPets(final int petId){
         return webClientBuilder.build()
                 .put()
                 .uri(hostname + "/pets/visits/{petId}", petId)
                 .body(Mono.just(petId), Visits.class)
                 .retrieve()
-                .bodyToMono(Visits.class);
+                .bodyToMono(VisitDetails.class);
     }
 
     public Mono<Void> deleteVisitForPets(final int petId){

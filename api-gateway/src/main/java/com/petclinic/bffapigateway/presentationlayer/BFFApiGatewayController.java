@@ -108,7 +108,7 @@ public class BFFApiGatewayController {
 
     //Update Visit --TESTED in BFFApiGatewayApplicationTests
     @PutMapping(value ="pets/visits/{petId}", consumes = "application/json", produces = "application/json")
-    public Mono<Visits> updateVisitForPets(final @PathVariable int petId){
+    public Mono<VisitDetails> updateVisitForPets(final @PathVariable int petId){
         return visitsServiceClient.updateVisitForPets(petId);
     }
     //Get Visits for Pet ---TESTED IN BFFApiGatewayApplicationTests
