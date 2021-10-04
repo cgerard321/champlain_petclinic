@@ -228,11 +228,13 @@
             numberOfRows = 0;
         }
 
-        for(let j = numberOfNext + 1; j <= (numberOfRows * 7) + numberOfNext; j++) {
-            if(CheckWeekend(j, 1)) {
-                days += `<div data-target="next-page-${j}" class="next-date weekend day">${j}</div>`;
-            } else {
-                days += `<div data-target="next-page-${j}" class="next-date day">${j}</div>`;
+        if(numberOfRows !== 0) {
+            for(let j = numberOfNext + 1; j <= (numberOfRows * 7) + numberOfNext; j++) {
+                if(CheckWeekend(j, 1)) {
+                    days += `<div data-target="next-page-${j}" class="next-date weekend day">${j}</div>`;
+                } else {
+                    days += `<div data-target="next-page-${j}" class="next-date day">${j}</div>`;
+                }
             }
         }
 
@@ -357,10 +359,7 @@
         vetAvailabilityStr = $('#vetWorkdays').val();
         nameOnCalenderStr = $("#selectedVet :selected").attr("data-target");
 
-        console.log(nameOnCalenderStr);
-
         renderCalendar();
-
     }
 
     //get value either for PM or AM for the time slots
