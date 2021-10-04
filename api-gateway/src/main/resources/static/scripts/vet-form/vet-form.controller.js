@@ -13,7 +13,6 @@ angular.module('vetForm')
                 self.vet = resp.data;
             });
         }
-
         self.submitVetForm = function () {
             var id = self.vet.vetId;
             var req;
