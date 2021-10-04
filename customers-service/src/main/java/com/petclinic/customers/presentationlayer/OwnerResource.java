@@ -94,7 +94,6 @@ class OwnerResource {
         ownerService.deleteOwner(ownerId);
 
     }
-
 }
 
 
