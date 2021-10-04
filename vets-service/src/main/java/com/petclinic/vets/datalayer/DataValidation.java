@@ -41,7 +41,7 @@ public class DataValidation {
     public static String verifySpeciality(String speciality){
         String confirmedValue = "";
             speciality = speciality.replaceAll("( |\\d)", "");
-            speciality.substring(0, Math.min(speciality.length(), 30));
+            speciality.substring(0, Math.min(speciality.length(), 80));
             Pattern p = Pattern.compile("^([A-Z]|[a-z]|\\\\.| |,|-)+");
             Matcher m = p.matcher(speciality);
             boolean b = m.matches();
@@ -73,6 +73,7 @@ public class DataValidation {
     public static String verifyPhoneNumber(String phoneNumber){
         String confirmedValue = "";
             phoneNumber = phoneNumber.replaceAll("( |#|\\D)", "");
+            phoneNumber.substring(0, Math.min(phoneNumber.length(), 30));
             Pattern p = Pattern.compile("^(\\d){4}$");
             Matcher m = p.matcher(phoneNumber);
             boolean b = m.matches();
