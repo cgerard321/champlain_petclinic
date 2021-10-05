@@ -1,3 +1,15 @@
+/**
+ * Created by IntelliJ IDEA.
+ *
+ * User: @Fube
+ * Date: 21/09/21
+ * Ticket: feat(AUTH-CPC-59)
+ *
+ * User: @JordanAlbayrak
+ * Date: 24/09/21
+ * Ticket: feat(AUTH-CPC-102)
+ * 
+ */
 plugins {
 	id 'org.springframework.boot' version '2.3.2.RELEASE'
 	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
