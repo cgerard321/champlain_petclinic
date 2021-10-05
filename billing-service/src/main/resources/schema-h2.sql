@@ -6,4 +6,3 @@ CREATE TABLE billings (
                           visitType VARCHAR(80),
                           amount DOUBLE
 );
-CREATE INDEX billings_visit_type ON billings (visit_type);
