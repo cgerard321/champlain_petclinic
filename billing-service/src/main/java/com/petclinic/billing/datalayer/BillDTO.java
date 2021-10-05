@@ -1,11 +1,7 @@
 package com.petclinic.billing.datalayer;
 
-import lombok.*;
-
 import java.util.Date;
 
-
-//@Builder(toBuilder = true)
 public class BillDTO {
     private int billId;
     private int customerId;
@@ -65,14 +61,4 @@ public class BillDTO {
     public void setAmount(double amount){
         this.amount = amount;
     }
-
-    /*@Override
-    public String toString() {
-        return "BillDTO{" +
-                "billId=" + billId +
-                ", date=" + date +
-                ", visitType='" + visitType + '\'' +
-                ", amount=" + amount +
-                '}';
-    }*/
 }
