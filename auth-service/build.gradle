@@ -40,6 +40,10 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'io.jsonwebtoken:jjwt:0.9.1'
 	implementation 'org.flywaydb:flyway-core'
+	// https://mvnrepository.com/artifact/com.squareup.retrofit2/retrofit
+	implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+	// https://mvnrepository.com/artifact/com.squareup.retrofit2/converter-jackson
+	implementation 'com.squareup.retrofit2:converter-jackson:2.9.0'
 	implementation 'io.springfox:springfox-boot-starter:3.0.0'
 
 	implementation group: 'org.projectlombok', name: 'lombok-mapstruct-binding', version: '0.2.0'
@@ -57,6 +61,8 @@ dependencies {
 	testImplementation 'io.projectreactor:reactor-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testImplementation('com.h2database:h2')
+	// https://mvnrepository.com/artifact/com.squareup.retrofit2/retrofit-mock
+	testImplementation 'com.squareup.retrofit2:retrofit-mock:2.9.0'
 }
 
 jacoco {
