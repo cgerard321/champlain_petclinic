@@ -120,9 +120,5 @@ public class PersistenceTests {
         Visit foundVisit = repo.findById(savedVisit.getId()).get();
         assertEquals("Updated Description", foundVisit.getDescription());
     }
-
-
-
-
 }
 

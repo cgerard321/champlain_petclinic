@@ -33,9 +33,4 @@ public interface VisitRepository extends JpaRepository<Visit, Integer> {
 
     void findVisitById(int visitId);
 
-//    @Query("select v from Visit v where v.date < :dateTime")
-//    List<Visit> findAllWithDateBefore(@Param("dateTime") Date dateTime);
-//
-//    @Query("select v from Visit v where v.date >= :dateTime")
-//    List<Visit> findAllWithDateAfter(@Param("dateTime") Date dateTime);
 }
