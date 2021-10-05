@@ -7,9 +7,6 @@ import java.util.Date;
 
 //@Builder(toBuilder = true)
 public class BillDTO {
-
-
-
     private int billId;
     private int customerId;
     private Date date;
@@ -25,8 +22,7 @@ public class BillDTO {
 
     }
 
-
-    public BillDTO(int billId,int customerId, Date date, String visitType, double amount){
+    public BillDTO(int billId, int customerId, Date date, String visitType, double amount){
         this.billId = billId;
         this.customerId = customerId;
         this.date = date;
@@ -34,11 +30,10 @@ public class BillDTO {
         this.amount = amount;
     }
 
-
-
     public int getBillId(){
         return billId;
     }
+
     public int getCustomerId(){return customerId;}
 
     public Date getDate(){
@@ -71,7 +66,7 @@ public class BillDTO {
         this.amount = amount;
     }
 
-    @Override
+    /*@Override
     public String toString() {
         return "BillDTO{" +
                 "billId=" + billId +
@@ -79,5 +74,5 @@ public class BillDTO {
                 ", visitType='" + visitType + '\'' +
                 ", amount=" + amount +
                 '}';
-    }
+    }*/
 }

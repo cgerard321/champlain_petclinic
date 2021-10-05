@@ -28,8 +28,9 @@ public class Bill {
     @Column(name = "amount")
     private double amount;
 
-    public Bill(){}
+    public Bill(){
 
+    }
 
     public Bill(int billId,int customerId, Date date, String visitType, double amount){
         this.customerId = customerId;
@@ -44,6 +45,7 @@ public class Bill {
     public int getBillId() {
         return billId;
     }
+
     public int getCustomerId(){return  customerId;}
 
     public Date getDate(){return date;}
