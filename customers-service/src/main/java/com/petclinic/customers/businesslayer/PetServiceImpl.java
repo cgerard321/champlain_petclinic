@@ -1,8 +1,9 @@
 package com.petclinic.customers.businesslayer;
 
-import com.petclinic.customers.datalayer.Pet;
-import com.petclinic.customers.datalayer.PetRepository;
-import com.petclinic.customers.utils.exceptions.NotFoundException;
+import com.petclinic.customers.datalayer.*;
+import com.petclinic.customers.customerExceptions.exceptions.NotFoundException;
+import com.petclinic.customers.presentationlayer.PetRequest;
+import com.petclinic.customers.presentationlayer.ResourceNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -12,18 +13,31 @@ import java.util.Optional;
 
 @Service
 public class PetServiceImpl implements PetService {
+
     private static final Logger LOG = LoggerFactory.getLogger(PetServiceImpl.class);
 
-    private final PetRepository repository;
+    private final PetRepository petRepository;
+    private final OwnerRepository ownerRepository;
 
-    public PetServiceImpl(PetRepository repository) { this.repository = repository; }
+    public PetServiceImpl(OwnerRepository ownerRepository, PetRepository petRepository) {
+        this.ownerRepository = ownerRepository;
+        this.petRepository = petRepository; }
 
+
+    /**
+     * ------------------------ FIND ------------------------
+     * This method will find one specific pet in the database and display its data
+     * It is not use by the login system
+     */
     @Override
-    public Optional<Pet> findByPetId(int Id) {
+    public Optional<Pet> findByPetId(int petId) {
         try {
             //Search pet in database with the given id
-            Optional<Pet> pet = repository.findById(Id);
-            LOG.debug("Pet with ID: " + Id + " has been found");
+            Optional<Pet> pet = petRepository.findById(petId);
+            if (!pet.isPresent()) {
+                throw new ResourceNotFoundException("Pet "+ petId +" not found");
+            }
+            LOG.debug("Pet with ID: " + petId + " has been found");
             return pet;
         }
         catch (Exception e)
@@ -33,26 +47,54 @@ public class PetServiceImpl implements PetService {
         }
     }
 
+    /**
+     * ------------------------ FIND ALL ------------------------
+     * This method will find all pet in the database
+     */
     @Override
     public List<Pet> findAll() {
-        return repository.findAll();
+
+        return petRepository.findAll();
+    }
+
+
+    /**
+     * ------------------------ CREATE ALL ------------------------
+     * This method will create a new pet, assign it to an owner and save its data in repository
+     */
+    @Override
+    public Pet CreatePet(PetRequest petRequest, int ownerId)
+    {
+        Pet pet = new Pet();
+        Optional<Owner> optionalOwner = ownerRepository.findById(ownerId);
+        Owner owner = optionalOwner.orElseThrow(() -> new NotFoundException("Owner "+ ownerId +" not found"));
+        owner.addPet(pet);
+
+        pet.setName(petRequest.getName());
+        pet.setBirthDate(petRequest.getBirthDate());
+        petRepository.findPetTypeById(petRequest.getTypeId())
+                .ifPresent(pet::setType);
+
+        LOG.info("Saving pet {}", pet);
+        return petRepository.save(pet);
     }
 
     @Override
-    public void updatePet() {
-        // TO DO
+    public void deletePet(int petId, int ownerId) {
+
+        //To be implemented
+
     }
 
+
+    /**
+     * ------------------------ FIND ALL PET TYPES ------------------------
+     * This method will return all pet types from the database
+     */
     @Override
-    public Pet CreatePet(Pet pet) {
-        repository.save(pet);
-        LOG.debug("Pet CreatePet: created a pet: {}", pet.getId());
-        return pet;
+    public List<PetType> getAllPetTypes() {
+        return petRepository.findPetTypes();
     }
 
-    @Override
-    public void deletePet(int Id) {
-        repository.findById(Id).ifPresent(x -> repository.delete(x));
-        LOG.debug("Pet with ID: " + Id + " has been deleted successfully.");
-    }
+
 }

@@ -55,8 +55,6 @@ public class CustomersServiceClient {
             return webClientBuilder.build().put()
                     .uri(customersServiceUrl + "/{ownerId}", ownerId)
                     .retrieve().bodyToMono(OwnerDetails.class);
-
-
     }
 
 
