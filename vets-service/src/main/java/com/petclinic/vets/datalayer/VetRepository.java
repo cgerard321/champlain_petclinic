@@ -1,6 +1,7 @@
 package com.petclinic.vets.datalayer;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.querydsl.QuerydslPredicateExecutor;
@@ -32,6 +33,8 @@ public interface VetRepository extends JpaRepository<Vet, Integer>
     @Query(value = "SELECT v FROM Vet v WHERE v.isActive = 1")
     List<Vet> findAllEnabledVets();
 
-    Optional<Vet> deleteByVetId(int vetId);
+
+    @Query(value = "DELETE FROM Vet v WHERE v.vetId = ?1")
+    void deleteByVetId(int vetId);
 }
 

@@ -30,6 +30,7 @@ import static org.hamcrest.Matchers.hasValue;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -198,4 +199,6 @@ class VetResourceTest {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$[0].isActive").value(1));
 	}
+
+
 }
