@@ -89,7 +89,7 @@ class VetResourceTest {
 		vet.setWorkday("Monday, Tuesday, Friday");
 		vet.setIsActive(0);
 		//act
-		given(vetRepository.findAllDisabledVets()).willReturn(asList(vet));
+		given(vetRepository.findAllEnabledVets()).willReturn(asList(vet));
 		//assert
 		mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
