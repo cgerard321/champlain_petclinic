@@ -269,9 +269,11 @@ public class VisitsServiceImplTests {
 
     @Test
     public void shouldThrowInvalidInputExceptionWhenFetchingWithNegativePetId(){
-        assertThrows(InvalidInputException.class, () ->{
+        InvalidInputException ex = assertThrows(InvalidInputException.class, () ->{
             visitsService.getVisitsForPet(-1, true);
         });
+
+        assertEquals("PetId can't be negative.", ex.getMessage());
     }
 
 

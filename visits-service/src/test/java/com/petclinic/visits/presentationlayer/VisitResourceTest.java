@@ -318,7 +318,17 @@ public class VisitResourceTest {
 
 	}
 
-	// UTILS PACKAGE TESTING
+	@Test
+	void whenFetchingWithNegativePetIdShouldHandleInvalidInputException() throws Exception {
+		when(visitsService.getVisitsForPet(-1)).thenThrow(new InvalidInputException("PetId can't be negative."));
+
+		mvc.perform(get("/visits/{petId}", -1))
+				.andExpect(status().isUnprocessableEntity())
+				.andExpect(result -> assertTrue(result.getResolvedException() instanceof InvalidInputException))
+				.andExpect(result -> assertEquals("PetId can't be negative.", result.getResolvedException().getMessage()));
+	}
+
+	// UTILS PACKAGE UNIT TESTING
 	@Test
 	void test_EmptyInvalidInputException(){
 		InvalidInputException ex = assertThrows(InvalidInputException.class, ()->{

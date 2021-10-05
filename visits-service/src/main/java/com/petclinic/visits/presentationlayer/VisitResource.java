@@ -78,13 +78,13 @@ public class VisitResource {
 
     @GetMapping("visits/previous/{petId}")
     public List<Visit> getPreviousVisitsForPet(@PathVariable("petId") int petId){
-        log.debug("Calling VisitsService:getVisitsForPet:previous");
+        log.debug("Calling VisitsService:getVisitsForPet:previous:petId={}", petId);
         return visitsService.getVisitsForPet(petId, false);
     }
 
     @GetMapping("visits/scheduled/{petId}")
     public List<Visit> getScheduledVisitsForPet(@PathVariable("petId") int petId){
-        log.debug("Calling VisitsService:getVisitsForPet:scheduled");
+        log.debug("Calling VisitsService:getVisitsForPet:scheduled:petId={}", petId);
         return visitsService.getVisitsForPet(petId, true);
     }
 
