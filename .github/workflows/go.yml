@@ -21,11 +21,11 @@ jobs:
       - name: Install Go Swagger CLI
         run: go install github.com/swaggo/swag/cmd/swag@latest
 
-      - name: Build
-        run: cd mailer-service && go build -v -o app; cd -
-
       - name: Swagger
         run: swag init
+
+      - name: Build
+        run: cd mailer-service && go build -v -o app; cd -
 
       - name: Test
         run: cd mailer-service && go test -v ./...; cd -
