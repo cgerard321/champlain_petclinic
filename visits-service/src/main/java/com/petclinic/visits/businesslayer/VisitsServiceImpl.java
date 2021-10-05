@@ -80,12 +80,15 @@ public class VisitsServiceImpl implements VisitsService {
     @Override
     public List<Visit> getVisitsForPet(int petId, boolean scheduled) {
         Date now = new Date(System.currentTimeMillis());
+        log.debug("Fetching the visits for pet with petId: {}", petId);
         List<Visit> visits = getVisitsForPet(petId);
 
         if(scheduled){
+            log.debug("Filtering out visits before {}", now);
             visits = visits.stream().filter(v -> v.getDate().after(now)).collect(Collectors.toList());
         }
         else{
+            log.debug("Filtering out visits after {}", now);
             visits = visits.stream().filter(v -> v.getDate().before(now)).collect(Collectors.toList());
         }
         return visits;

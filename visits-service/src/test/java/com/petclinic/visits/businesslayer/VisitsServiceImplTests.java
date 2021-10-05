@@ -268,6 +268,62 @@ public class VisitsServiceImplTests {
     }
 
     @Test
+    public void shouldReturnEmptyListWhenNoScheduledVisits(){
+        Date beforeNow = new Date(System.currentTimeMillis() - 100000);
+
+        List<Visit> visitsList = asList(
+                visit()
+                        .id(1)
+                        .petId(1)
+                        .date(beforeNow)
+                        .build(),
+                visit()
+                        .id(3)
+                        .petId(1)
+                        .date(beforeNow)
+                        .build(),
+                visit()
+                        .id(2)
+                        .petId(1)
+                        .date(beforeNow)
+                        .build());
+
+        when(repo.findByPetId(1)).thenReturn(visitsList);
+
+        List<Visit> returnedVisits = visitsService.getVisitsForPet(1, true);
+
+        assertEquals(0, returnedVisits.size());
+    }
+
+    @Test
+    public void shouldReturnEmptyListWhenNoPreviousVisits(){
+        Date afterNow = new Date(System.currentTimeMillis() + 100000);
+
+        List<Visit> visitsList = asList(
+                visit()
+                        .id(1)
+                        .petId(1)
+                        .date(afterNow)
+                        .build(),
+                visit()
+                        .id(3)
+                        .petId(1)
+                        .date(afterNow)
+                        .build(),
+                visit()
+                        .id(2)
+                        .petId(1)
+                        .date(afterNow)
+                        .build());
+
+        when(repo.findByPetId(1)).thenReturn(visitsList);
+
+        List<Visit> returnedVisits = visitsService.getVisitsForPet(1, false);
+
+        assertEquals(0, returnedVisits.size());
+    }
+
+    @Test
     public void shouldThrowInvalidInputExceptionWhenFetchingWithNegativePetId(){
         InvalidInputException ex = assertThrows(InvalidInputException.class, () ->{
             visitsService.getVisitsForPet(-1, true);
