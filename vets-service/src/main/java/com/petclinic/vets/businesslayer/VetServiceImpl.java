@@ -89,7 +89,7 @@ public class VetServiceImpl implements VetService
     }
 
     @Override
-    public void deleteVet(int vetId) {
+    public void deleteVetByVetId(int vetId) {
         Vet foundVet = vetRepository.findByVetId(vetId)
                 .orElseThrow(() -> new NotFoundException(String.format("No vet found for vetId: {vetId} ", vetId)));
         vetRepository.delete(foundVet);

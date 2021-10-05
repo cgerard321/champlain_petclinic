@@ -1,5 +1,6 @@
 package com.petclinic.vets.presentationlayer;
 
+import com.petclinic.vets.businesslayer.VetService;
 import com.petclinic.vets.datalayer.Vet;
 import com.petclinic.vets.datalayer.VetRepository;
 import com.petclinic.vets.presentationlayer.VetResource;
@@ -9,12 +10,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Service;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -86,7 +89,7 @@ class VetResourceTest {
 		vet.setWorkday("Monday, Tuesday, Friday");
 		vet.setIsActive(0);
 		//act
-		given(vetRepository.findAllEnabledVets()).willReturn(asList(vet));
+		given(vetRepository.findAllDisabledVets()).willReturn(asList(vet));
 		//assert
 		mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
@@ -191,13 +194,15 @@ class VetResourceTest {
 		vet.setResume("Practicing since 3 years");
 		vet.setWorkday("Monday, Tuesday, Friday");
 		vet.setIsActive(1);
-		//act
 
-		//given(vetRepository.deleteByVetId(vet.getVetId())).willReturn(vet);
-		//assert
-		mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$[0].isActive").value(1));
+		when(vetRepository.findByVetId(vet.getVetId())).thenReturn(Optional.of(vet));
+		vetRepository.deleteByVetId(vet.getVetId());
+		verify(vetRepository).deleteByVetId(vet.getVetId());
+
+//		mvc.perform(get("/vets/details/874130").contentType(MediaType.APPLICATION_JSON))
+//				.andExpect(status().isNotFound());
+
+
 	}
 
 

@@ -100,9 +100,9 @@ public class VetBusinessLayerTest
     }
 
     @Test
-    public  void deleteVetByVetId(){
+    public void deleteVetByVetId(){
         assertEquals(vetService.getAllVets().size(),4);
-        vetService.deleteVet(234568);
+        vetService.deleteVetByVetId(234568);
         assertEquals(vetService.getAllVets().size(),3);
     }
 

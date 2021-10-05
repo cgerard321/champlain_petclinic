@@ -113,7 +113,7 @@ class VetResource {
 
     @DeleteMapping("/{vetId}/deleteVet")
     public String deleteByVetId(@PathVariable("vetId") int vetId){
-        vetService.deleteVet(vetId);
+        vetService.deleteVetByVetId(vetId);
         return "Delete by vetId";
     }
 
