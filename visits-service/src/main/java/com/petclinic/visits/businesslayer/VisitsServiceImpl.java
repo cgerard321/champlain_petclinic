@@ -6,7 +6,10 @@ import com.petclinic.visits.utils.exceptions.InvalidInputException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /*
  * This class implements the necessary methods to make our service work. It is currently responsible for the logic
@@ -47,6 +50,10 @@ public class VisitsServiceImpl implements VisitsService {
 
     @Override
     public List<Visit> getVisitsForPet(int petId) {
+
+        if(petId < 0)
+            throw new InvalidInputException("PetId can't be negative.");
+
         log.info("Calling visit repo to get visits for pet with petId: {}", petId);
         return visitRepository.findByPetId(petId);
     }
@@ -72,6 +79,15 @@ public class VisitsServiceImpl implements VisitsService {
 
     @Override
     public List<Visit> getVisitsForPet(int petId, boolean scheduled) {
-        return null;
+        Date now = new Date(System.currentTimeMillis());
+        List<Visit> visits = getVisitsForPet(petId);
+
+        if(scheduled){
+            visits = visits.stream().filter(v -> v.getDate().after(now)).collect(Collectors.toList());
+        }
+        else{
+            visits = visits.stream().filter(v -> v.getDate().before(now)).collect(Collectors.toList());
+        }
+        return visits;
     }
 }

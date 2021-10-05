@@ -33,6 +33,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import javax.swing.text.html.Option;
 import java.sql.Time;
 import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 
@@ -203,5 +205,75 @@ public class VisitsServiceImplTests {
         visitsService.deleteVisit(3);
         verify(repo, never()).delete(vise);
     }
+
+    // TESTS FOR FETCHING VISITS BASED ON DATE
+    @Test
+    public void shouldReturnVisitsAfterNow() throws ParseException {
+        Date afterNow = new Date(System.currentTimeMillis() + 100000);
+        Date beforeNow = new Date(System.currentTimeMillis() - 100000);
+
+        List<Visit> visitsList = asList(
+                visit()
+                        .id(1)
+                        .petId(1)
+                        .date(afterNow)
+                        .build(),
+                visit()
+                        .id(3)
+                        .petId(1)
+                        .date(afterNow)
+                        .build(),
+                visit()
+                        .id(2)
+                        .petId(1)
+                        .date(beforeNow)
+                        .build());
+
+        when(repo.findByPetId(1)).thenReturn(visitsList);
+
+        List<Visit> returnedVisits = visitsService.getVisitsForPet(1, true);
+
+        assertEquals(2, returnedVisits.size());
+
+    }
+
+    @Test
+    public void shouldReturnVisitsBeforeNow() throws ParseException {
+        Date afterNow = new Date(System.currentTimeMillis() + 100000);
+        Date beforeNow = new Date(System.currentTimeMillis() - 100000);
+
+        List<Visit> visitsList = asList(
+                visit()
+                        .id(1)
+                        .petId(1)
+                        .date(afterNow)
+                        .build(),
+                visit()
+                        .id(3)
+                        .petId(1)
+                        .date(afterNow)
+                        .build(),
+                visit()
+                        .id(2)
+                        .petId(1)
+                        .date(beforeNow)
+                        .build());
+
+        when(repo.findByPetId(1)).thenReturn(visitsList);
+
+        List<Visit> returnedVisits = visitsService.getVisitsForPet(1, false);
+
+        assertEquals(1, returnedVisits.size());
+
+    }
+
+    @Test
+    public void shouldThrowInvalidInputExceptionWhenFetchingWithNegativePetId(){
+        assertThrows(InvalidInputException.class, () ->{
+            visitsService.getVisitsForPet(-1, true);
+        });
+    }
+
+
 
 }

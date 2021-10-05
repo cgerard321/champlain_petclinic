@@ -29,6 +29,8 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.*;
@@ -278,6 +280,42 @@ public class VisitResourceTest {
 				.andExpect(status().isNotFound())
 				.andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
 				.andExpect(result -> assertEquals("Pet does not exist.", result.getResolvedException().getMessage()));
+	}
+
+	@Test
+	void shouldReturnPreviousVisits() throws Exception {
+		Date beforeNow = new Date(System.currentTimeMillis() - 100000);
+		List<Visit> previousVisits = asList(
+				visit()
+						.id(1)
+						.petId(1)
+						.date(beforeNow)
+						.build());
+
+		when(visitsService.getVisitsForPet(1, false)).thenReturn(previousVisits);
+
+		mvc.perform(get("/visits/previous/{petId}", 1))
+				.andExpect(status().isOk());
+
+		verify(visitsService, times(1)).getVisitsForPet(1, false);
+	}
+
+	@Test
+	void shouldReturnScheduledVisits() throws Exception {
+		Date afterNow = new Date(System.currentTimeMillis() + 100000);
+		List<Visit> scheduledVisits = asList(
+				visit()
+						.id(1)
+						.petId(1)
+						.date(afterNow)
+						.build());
+
+		when(visitsService.getVisitsForPet(1, true)).thenReturn(scheduledVisits);
+
+		mvc.perform(get("/visits/scheduled/{petId}", 1))
+				.andExpect(status().isOk());
+		verify(visitsService, times(1)).getVisitsForPet(1, true);
+
 	}
 
 	// UTILS PACKAGE TESTING

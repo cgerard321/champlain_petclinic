@@ -54,7 +54,13 @@ public class PersistenceTests {
     @Test
     public void getVisitsForPet() {
         List<Visit> repoResponse = repo.findByPetId(1);
-        assertThat(repoResponse, hasSize(2));
+        assertThat(repoResponse, hasSize(1));
+    }
+
+    @Test
+    public void shouldReturnEmptyListWhenPetDoesNotExist(){
+        List<Visit> repoResponse = repo.findByPetId(2);
+        assertThat(repoResponse, hasSize(0));
     }
     
     @Test
@@ -115,28 +121,8 @@ public class PersistenceTests {
         assertEquals("Updated Description", foundVisit.getDescription());
     }
 
-    // TESTS FOR FETCHING VISITS BASED ON DATE
-    @Test
-    public void whenFetchingVisitBeforeNowThenShouldReturn2Visits() throws ParseException {
-        Visit v2 = new Visit.VisitBuilder().petId(1).date(new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-04"))
-                    .build();
-        Visit v3 = new Visit.VisitBuilder().petId(1).date(new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01"))
-                    .build();
-        Visit v4 = new Visit.VisitBuilder().petId(1).date(new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-03"))
-                    .build();
 
-        repo.save(v2);
-        repo.save(v3);
-        repo.save(v4);
 
-        List<Visit> result = repo.findAllWithDateBefore(
-                new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-03"));
-
-        assertEquals(3, result.size());
-        assertTrue(result.stream()
-        .map(Visit::getId)
-        .allMatch(id -> Arrays.asList(1, 3, 4).contains(id)));
-    }
 
 }
 
