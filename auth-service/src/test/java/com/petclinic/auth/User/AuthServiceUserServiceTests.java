@@ -1,37 +1,21 @@
 package com.petclinic.auth.User;
 
-import com.petclinic.auth.Role.Role;
-import com.petclinic.auth.Role.RoleIDLessDTO;
-import com.petclinic.auth.Role.RoleMapper;
-import com.petclinic.auth.Role.RoleRepo;
-import com.petclinic.auth.User.*;
-import javassist.NotFoundException;
 import lombok.SneakyThrows;
-import org.assertj.core.internal.bytebuddy.implementation.bytecode.Throw;
+import org.aspectj.weaver.ast.Not;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
+import com.petclinic.auth.Exceptions.NotFoundException;
 
-import javax.validation.ConstraintViolationException;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
-import static java.lang.String.format;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.instanceOf;
-
-import static org.hamcrest.Matchers.not;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -100,7 +84,7 @@ public class AuthServiceUserServiceTests {
         UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
         User userMap = userMapper.idLessDTOToModel(userIDLessDTO);
         userRepo.save(userMap);
-        assertThrows(DuplicateKeyException.class, () -> userService.createUser(userIDLessDTO));
+        assertThrows(DataIntegrityViolationException.class, () -> userService.createUser(userIDLessDTO));
     }
 
     @Test
@@ -108,7 +92,7 @@ public class AuthServiceUserServiceTests {
     void get_user_by_id() throws NotFoundException {
         User user = new User(USER, PASS, EMAIL);
         User saved = userRepo.save(user);
-        User found = userService.getUserById(saved.getId());
+        User found = userService.findUserById(saved.getId());
         assertEquals(saved.getId(), found.getId());
     }
 
@@ -117,7 +101,7 @@ public class AuthServiceUserServiceTests {
     void get_user_by_id_and_fail(){
         long id = 1;
         assertFalse(userRepo.findById(id).isPresent());
-        assertThrows(NotFoundException.class, () -> userService.getUserById(id));
+        assertThrows(NotFoundException.class, () -> userService.findUserById(id));
     }
 
     @Test

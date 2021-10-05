@@ -1,13 +1,11 @@
 package com.petclinic.auth.User;
-
-
-import javassist.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import com.petclinic.auth.Exceptions.NotFoundException;
 
 import javax.validation.Valid;
 
@@ -17,12 +15,13 @@ import javax.validation.Valid;
 public class UserServiceImpl implements UserService{
 
     private final UserRepo userRepo;
+
     private final UserMapper userMapper;
 
     @Override
-    public User getUserById(long id) throws NotFoundException {
-        User entity = userRepo.findById(id)
-                .orElseThrow(() -> new NotFoundException("No user was found for userId: " + id));
+    public User findUserById(long id) {
+        User entity  = userRepo.findById(id)
+                .orElseThrow(() -> new NotFoundException("No user found for userID" + id));
         log.info("User getUserById: found userId: {}", entity.getId());
         return entity;
     }
@@ -33,29 +32,32 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public void deleteUser(long id) {
-        userRepo.findById(id).ifPresent(userRepo::delete);
-    }
-
-    @Override
     public User createUser(@Valid UserIDLessDTO userIDLessDTO) {
 
-        if (userRepo.findByEmail(userIDLessDTO.getEmail()) != null){
-            throw new DuplicateKeyException("Duplicate email for " + userIDLessDTO.getEmail());
-        }
-        else {
-            log.info("Saving user with username {}", userIDLessDTO.getUsername());
+        try {
+            log.info("Saving user with email {}", userIDLessDTO.getEmail());
             User user = userMapper.idLessDTOToModel(userIDLessDTO);
             return userRepo.save(user);
         }
+        catch (DuplicateKeyException e){
+            throw new DuplicateKeyException("Duplicate email for userEmail " + userIDLessDTO.getEmail());
+        }
+
     }
 
-    public User passwordReset(long id, String passwd) throws NotFoundException {
+    @Override
+    public User passwordReset(long userId, @Valid String newPassword) {
 
-        log.info("id={}", id);
-        User user = userRepo.findById(id).orElseThrow(() -> new NotFoundException("No user for id:" + id));
-        user.setPassword(passwd);
+        log.info("id={}", userId);
+        User user = userRepo.findById(userId).orElseThrow(() -> new NotFoundException("No user for id:" + userId));
+        user.setPassword(newPassword);
         return userRepo.save(user);
 
+    }
+
+    @Override
+    public void deleteUser(long userId) {
+        log.info("deleteUser: trying to delete entity with userId: {}", userId);
+        userRepo.findById(userId).ifPresent(userRepo::delete);
     }
 }
