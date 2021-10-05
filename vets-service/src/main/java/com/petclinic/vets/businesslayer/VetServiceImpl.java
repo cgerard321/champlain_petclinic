@@ -6,6 +6,8 @@ import com.petclinic.vets.utils.exceptions.InvalidInputException;
 import com.petclinic.vets.utils.exceptions.NotFoundException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ResponseBody;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -93,7 +95,6 @@ public class VetServiceImpl implements VetService
         Vet foundVet = vetRepository.findByVetId(vetId)
                 .orElseThrow(() -> new NotFoundException(String.format("No vet found for vetId: {vetId} ", vetId)));
         vetRepository.delete(foundVet);
-//        return String.format("Vet with id: {vetId} has been successfully deleted.", vetId);
     }
 
 }

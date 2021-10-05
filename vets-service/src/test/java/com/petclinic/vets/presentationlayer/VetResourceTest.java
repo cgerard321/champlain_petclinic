@@ -4,6 +4,7 @@ import com.petclinic.vets.businesslayer.VetService;
 import com.petclinic.vets.datalayer.Vet;
 import com.petclinic.vets.datalayer.VetRepository;
 import com.petclinic.vets.presentationlayer.VetResource;
+import com.petclinic.vets.utils.exceptions.NotFoundException;
 import org.hibernate.validator.internal.util.logging.Messages_$bundle;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
