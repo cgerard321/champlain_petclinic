@@ -2,11 +2,11 @@
 <form ng-submit="$ctrl.submitVetForm()" style="max-width: 25em;">
   <div class="form-group">
     <label><b>First Name</b></label>
-    <input type="text" placeholder="First Name" pattern="^(a-z| |,|.|-)+" required maxlength="30" minlength="3" title="Minimum of 3 characters and maximum of 30 characters. Only letters and punctuation mark."><br/>
+    <input type="text" placeholder="First Name" pattern="^([A-Z]|[a-z]|\\.| |,|-)+" required maxlength="30" minlength="3" title="Minimum of 3 characters and maximum of 30 characters. Only letters and punctuation mark."><br/>
   </div><br>
   <div class="form-group">
     <label><b>Last Name</b></label>
-    <input type="text" placeholder="Last Name" pattern="^(a-z| |,|.|-)+" required maxlength="30" minlength="3" title="Minimum of 3 characters and maximum of 30 characters. Only letters and punctuation mark.">
+    <input type="text" placeholder="Last Name" pattern="^([A-Z]|[a-z]|\\.| |,|-)+" required maxlength="30" minlength="3" title="Minimum of 3 characters and maximum of 30 characters. Only letters and punctuation mark.">
   </div><br>
   <div class="form-group">
     <label><b>Email</b></label>
@@ -43,7 +43,7 @@
 
   <div class="form-group">
     <label><b>Specialty</b></label>
-    <input type="text" placeholder="Specialty" pattern="^(a-z| |,|.|-)+" maxlength="80" title="Maximum of 80 characters. No numbers.">
+    <input type="text" placeholder="Specialty" pattern="^([A-Z]|[a-z]|\\.| |,|-)+" maxlength="80" title="Maximum of 80 characters. No numbers.">
     <span>Maximum of 80 characters.</span>
   </div><br>
   <div class="form-group">

@@ -160,6 +160,11 @@ public class Owner {
         pet.setOwner(this);
     }
 
+    public void removePet(Pet pet)
+    {
+        getPetsInternal().remove(pet);
+    }
+
     @Override
     public String toString() {
         return new ToStringCreator(this)

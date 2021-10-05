@@ -25,13 +25,15 @@ public class BillServicePersistenceTests {
 
     private Bill savedBill;
 
+
+
     @BeforeEach
     public void setupDb(){
         repository.deleteAll();
         Calendar calendar = Calendar.getInstance();
         calendar.set(2021, 9, 21);
         Date date = calendar.getTime();
-        Bill bill = new Bill(1,date,"General",199.99);
+        Bill bill = new Bill(1,1,date,"General",199.99);
         savedBill = repository.save(bill);
 
         assertThat(savedBill, samePropertyValuesAs(bill));
@@ -43,7 +45,7 @@ public class BillServicePersistenceTests {
         Calendar calendar = Calendar.getInstance();
         calendar.set(2021, 9, 21);
         Date date = calendar.getTime();
-        Bill bill = new Bill(1,date,"General",199.99);
+        Bill bill = new Bill(1,1,date,"General",199.99);
 
         repository.save(bill);
         Bill foundBill = repository.findById(bill.getId()).get();

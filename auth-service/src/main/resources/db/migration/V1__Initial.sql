@@ -1,3 +1,11 @@
+/**
+ * Created by IntelliJ IDEA.
+ *
+ * User: @Fube
+ * Date: 21/09/21
+ * Ticket: feat(AUTH-CPC-59)
+ *
+ */
 CREATE SCHEMA IF NOT EXISTS auth;
 
 CREATE TABLE auth.USERS(
