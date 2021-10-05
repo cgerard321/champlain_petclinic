@@ -52,6 +52,8 @@ jacocoTestReport {
 		classDirectories.setFrom(files(classDirectories.files.collect {
 			fileTree(dir: it, exclude: [
 					"com/petclinic/**/BillingServiceApplication.class",
+					"**/http/*",
+					"**/presentationlayer/*"
 			])
 		}))
 	}
