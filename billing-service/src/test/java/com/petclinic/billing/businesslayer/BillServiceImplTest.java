@@ -36,96 +36,87 @@ public class BillServiceImplTest {
     BillService billService;
 
     private final int billId = 1;
+    private final int customerId = 1;
 
-    //Tests for GetBill
     @Test
     public void test_GetBill(){
-        //arrange
         Calendar calendar = Calendar.getInstance();
         calendar.set(2021, Calendar.SEPTEMBER, 21);
+
         Date date = calendar.getTime();
-        Bill entity = new Bill(billId, date, "Checkup", 50.00);
+        Bill entity = new Bill(billId,customerId, date, "Checkup", 50.00);
         when(billRepository.findById(1)).thenReturn(Optional.of(entity));
 
-        //act
         BillDTO returnedBill = billService.GetBill(1);
 
-        //assert
         assertThat(returnedBill.getBillId()).isEqualTo(1);
     }
 
     @Test
     public void test_GetBill_NotFoundException(){
-        //act & assert
         assertThrows(NotFoundException.class, () -> {
             billService.GetBill(1);
         });
     }
 
-    //Tests for CreateBill
     @Test
     public void test_CreateBill(){
-        //arrange
         Calendar calendar = Calendar.getInstance();
         calendar.set(2021, Calendar.SEPTEMBER, 21);
         Date date = calendar.getTime();
-        BillDTO model = new BillDTO(billId, date, "Checkup", 50.00);
-        Bill entity = new Bill(billId, date, "Checkup", 50.00);
+        BillDTO model = new BillDTO(billId,customerId, date, "Checkup", 50.00);
+        Bill entity = new Bill(billId,customerId, date, "Checkup", 50.00);
         when(billRepository.save(any(Bill.class))).thenReturn(entity);
 
-        //act
         BillDTO returnedBill = billService.CreateBill(model);
 
-        //assert
         assertThat(returnedBill.getBillId()).isEqualTo(entity.getBillId());
 
     }
 
     @Test
     public void test_CreateBillInvalidInputException(){
-        //arrange
         Calendar calendar = Calendar.getInstance();
         calendar.set(2021, Calendar.SEPTEMBER, 21);
         Date date = calendar.getTime();
-        BillDTO model = new BillDTO(billId, date, "Checkup", 50.00);
+        BillDTO model = new BillDTO(billId,customerId, date, "Checkup", 50.00);
         when(billRepository.save(any(Bill.class))).thenThrow(DuplicateKeyException.class);
 
-        //act & assert
+
         assertThrows(InvalidInputException.class, () -> {
             billService.CreateBill(model);
         });
 
     }
 
-    //Tests for DeleteBill
+
     @Test
     public void test_DeleteBill(){
-        //arrange
         Calendar calendar = Calendar.getInstance();
         calendar.set(2021, Calendar.SEPTEMBER, 21);
         Date date = calendar.getTime();
-        Bill entity = new Bill(billId, date, "Checkup", 50.0);
+        Bill entity = new Bill(billId,customerId, date, "Checkup", 50.0);
         when(billRepository.findById(1)).thenReturn(Optional.of(entity));
 
-        //act
+
         billService.DeleteBill(1);
 
-        //assert
+
         verify(billRepository, times(1)).delete(entity);
     }
 
     @Test
     public void test_DeleteBill_does_not_exist(){
-        //arrange
+
         Calendar calendar = Calendar.getInstance();
         calendar.set(2021, Calendar.SEPTEMBER, 21);
         Date date = calendar.getTime();
-        Bill entity = new Bill(billId, date, "Checkup", 50.0);
+        Bill entity = new Bill(billId,customerId, date, "Checkup", 50.0);
 
-        //act
+
         billService.DeleteBill(1);
 
-        //assert
+
         verify(billRepository, never()).delete(entity);
     }
 
