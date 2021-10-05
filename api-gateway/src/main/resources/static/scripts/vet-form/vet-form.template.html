@@ -1,8 +1,6 @@
 <div class="bColor">
-  <!--unknown usage in h2 tag ???? -> xmlns:vetsNew -->
   <h2  class="titleVetForm">New Vet Sign Up</h2>
 </div>
-<!-- is ctrl.submitVetForm()  is there a need for ctrl?-->
 <form id="vetForm" class="form-horizontal" enctype="multipart/form-data" ng-submit="submitVetForm()">
   <div class="form-group formColor">
     <label class="col-sm-2 control-label">First Name</label>
@@ -62,9 +60,6 @@
       </script>
       <span ng-show="vetForm.profilePicture.$error.required" class="help-block">Only .png, .pdf, .jpeg and .gif accepted</span>
     </div>
-    <!-- old profile picture input field
-    <input class="form-control col-sm-4"type="image" placeholder="profile picture" name="profilePicture">
-    -->
     </div>
 
   <div class="form-group">
@@ -119,12 +114,6 @@
       </div>
     </fieldset>
   </div>
-  <!-- old work day submission
-  <div class="form-group">
-    <label>Work Days</label>
-    <input type="date" placeholder="Work Days" name="workDays">
-  </div>
-  -->
   <div class="form-group">
     <fieldset>
       <legend>Active Vet</legend>
@@ -137,7 +126,6 @@
 
   <div class="form-group formColor">
     <div class="owner marg col-sm-2">
-      <!-- ensure ng-click is needed bellow and not in <form> tag-->
     <button type="submit" class="btn btn-default" ng-click="submitVetForm()">Submit</button>
     </div>
   </div>
