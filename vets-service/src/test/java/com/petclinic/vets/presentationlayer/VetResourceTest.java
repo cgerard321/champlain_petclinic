@@ -198,11 +198,6 @@ class VetResourceTest {
 		when(vetRepository.findByVetId(vet.getVetId())).thenReturn(Optional.of(vet));
 		vetRepository.deleteByVetId(vet.getVetId());
 		verify(vetRepository).deleteByVetId(vet.getVetId());
-
-//		mvc.perform(get("/vets/details/874130").contentType(MediaType.APPLICATION_JSON))
-//				.andExpect(status().isNotFound());
-
-
 	}
 
 
