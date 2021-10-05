@@ -22,7 +22,7 @@ jobs:
         run: go install github.com/swaggo/swag/cmd/swag@latest
 
       - name: Swagger
-        run: swag init
+        run: cd mailer-service && swag init; cd -
 
       - name: Build
         run: cd mailer-service && go build -v -o app; cd -
