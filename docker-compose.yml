@@ -62,8 +62,9 @@ services:
   mailer-service:
     build: mailer-service
     environment:
-      - PASSWORD=y4QZURkbxfs3tVx
-      - EMAIL=champlain.petclinic@gmail.com
+      - SMTP_USER=champlain.petclinic@gmail.com
+      - SMTP_SERVER=smtp.gmail.com
+      - SMTP_PASS=nicetryguy
 
 
   mysql1:

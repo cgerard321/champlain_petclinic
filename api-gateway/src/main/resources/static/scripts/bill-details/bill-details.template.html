@@ -1,0 +1,22 @@
+<script>
+    function printPage() {
+        window.print();
+    }
+</script>
+
+<h2 class="titleOwner">Bill Details: 123456789</h2>
+
+<div>
+    <h3>Payment Info for 123456789</h3>
+    <h3>505 Lincoln Str. Queens, New York</h3>
+    <h3>John Doe</h3>
+    <h3>Final price: $125.00</h3>
+    <h3>Visit type: Surgery</h3>
+    <h3>Date generated: 2021-09-28 00:00</h3>
+
+    <div>
+        <input type="button" value="Print this page" onclick="printPage()" />
+    </div>
+
+    <button type="submit" formaction="/bills" >Back to History...</button>
+</div>

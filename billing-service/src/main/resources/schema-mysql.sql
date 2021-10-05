@@ -5,6 +5,5 @@ CREATE TABLE IF NOT EXISTS billings (
     customerId INT,
     visitType VARCHAR(80),
     date DATE,
-    amount DOUBLE,
-    INDEX(visit_type)
+    amount DOUBLE
     ) engine=InnoDB;

@@ -55,7 +55,7 @@ angular.module('visits')
                 $("#vetPhoneNumber").val(vetPhoneNumber);
                 $("#vetEmailAddress").val(vetEmailAddress);
                 $("#vetSpecialties").val(vetSpecialties);
-                $("#vetWorkdays").val(vetWorkdays);
+                $("#vetWorkdays").val(vetWorkdays).trigger("change");
             } else {
                 $("#vetPhoneNumber").val("");
                 $("#vetEmailAddress").val("");
