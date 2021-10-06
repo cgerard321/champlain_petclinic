@@ -142,6 +142,7 @@ class VetResourceTest {
 		vet2.setIsActive(1);
 		when(vetRepository.save(any(Vet.class))).thenReturn(vet2);
 		mvc.perform(post("/vets")
+						.accept(MediaType.APPLICATION_JSON)
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("{\"firstName\": \"James\"," +
 								"\"lastName\": \"Carter\"," +
