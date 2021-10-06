@@ -79,13 +79,27 @@ public class PetServiceImpl implements PetService {
         return petRepository.save(pet);
     }
 
+    /**
+     * ------------------------ Delete Pet ------------------------
+     * This method will delete a pet
+     */
     @Override
     public void deletePet(int petId, int ownerId) {
+        //Search pet owner
+        Optional<Owner> optionalOwner = ownerRepository.findById(ownerId);
+        Owner owner = optionalOwner.orElseThrow(() -> new NotFoundException("Owner "+ ownerId +" not found"));
 
-        //To be implemented
+        //Search the pet
+        Optional<Pet> optionalPet = petRepository.findById(petId);
+        Pet pet = optionalPet.orElseThrow(()-> new NotFoundException("Pet with ID: " + petId + " has not been found"));
 
+        //Remove pet from owner list of pet
+        owner.removePet(pet);
+
+        //Delete pet
+        petRepository.delete(pet);
+        LOG.debug("Pet with ID: " + petId + " has been deleted successfully.");
     }
-
 
     /**
      * ------------------------ FIND ALL PET TYPES ------------------------
