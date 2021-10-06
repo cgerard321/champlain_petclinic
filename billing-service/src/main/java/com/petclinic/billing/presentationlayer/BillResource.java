@@ -1,7 +1,9 @@
 package com.petclinic.billing.presentationlayer;
 
 import com.petclinic.billing.businesslayer.BillMapper;
+import com.petclinic.billing.businesslayer.BillService;
 import com.petclinic.billing.datalayer.Bill;
+import com.petclinic.billing.datalayer.BillDTO;
 import com.petclinic.billing.datalayer.BillRepository;
 import io.micrometer.core.annotation.Timed;
 import lombok.RequiredArgsConstructor;
@@ -13,33 +15,32 @@ import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
-@RequestMapping("/bills")
 @RestController
 @Slf4j
 public class BillResource {
-    private final BillRepository billRepository;
+    private final BillService SERVICE;
 
-    BillResource(BillRepository billRepository){
-        this.billRepository = billRepository;
+    BillResource(BillService service){
+        this.SERVICE = service;
     }
 
     // Create Bill //
-    @PostMapping()
+    @PostMapping("/bills")
     @ResponseStatus(HttpStatus.CREATED)
-    public Bill createBill(@Valid @RequestBody Bill bill){
-        return billRepository.save(bill);
+    public BillDTO createBill(@Valid @RequestBody BillDTO billDTO){
+        return SERVICE.CreateBill(billDTO);
     }
 
     // Read Bill //
     @GetMapping(value = "/{billId}")
-    public Optional<Bill> findBill(@PathVariable("billId") int billId){
-        return billRepository.findById(billId);
+    public BillDTO findBill(@PathVariable("billId") int billId){
+        return SERVICE.GetBill(billId);
     }
 
     // Delete Bill //
     @PutMapping(value = "/{billId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteBill(@PathVariable("billId") int billId){
-        billRepository.findById(billId).ifPresent(entity -> billRepository.delete(entity));
+        SERVICE.DeleteBill(billId);
     }
 }
