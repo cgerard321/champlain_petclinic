@@ -28,7 +28,7 @@ public class Bill {
     @Column(name = "amount")
     private double amount;
 
-    public Bill(){
+    public Bill() {
 
     }
 
