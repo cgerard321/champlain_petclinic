@@ -15,5 +15,6 @@ INSERT INTO visits VALUES (13, 5, '2023-03-04', 'rabies shot', 234568, 0);
 INSERT INTO visits VALUES (14, 5, '2011-03-04', 'rabies shot', 784233, 1);
 INSERT INTO visits VALUES (15, 6, '2029-06-04', 'neutered', 327874, 1);
 INSERT INTO visits VALUES (16, 6, '2008-09-04', 'spayed', 238372, 1);
-INSERT INTO visits VALUES (17, 7, '2022-10-01', 'medication', 238372, 1);
+INSERT INTO visits VALUES (17, 7, '2022-10-01', 'neutered', 238372, 1);
 INSERT INTO visits VALUES (18, 7, '2022-10-21', 'checkup', 784233, 1);
+INSERT INTO visits VALUES (19, 7, '2021-10-11', 'stomach medication', 784233, 1);

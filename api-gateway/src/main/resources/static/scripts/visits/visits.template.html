@@ -487,8 +487,8 @@
     </div>
 
     <div class="form-group">
-        <button id="submit_button" class="btn btn-default" type="submit">Add New Visit</button>
-        <button id="cancel_button" onClick="window.location.reload()" class="btn btn-default" style="visibility: hidden">Cancel</button>
+        <button id="submit_button" class="btn btn-default" type="submit" style="border: 1px solid black; border-radius: 2px">Add New Visit</button>
+        <button id="cancel_button" onClick="window.location.reload()" class="btn btn-default" style="visibility: hidden; border: 1px solid black; border-radius: 2px">Cancel</button>
     </div>
 </form>
 
@@ -498,6 +498,8 @@
         <tr>
             <th> <button class="btn btn-default" id="sortByDateButton" ng-click="$ctrl.SortTableByDate()" style="color: white">Sort by date</button> </th>
             <th> <button class="btn btn-default" id="sortByDescButton" ng-click="$ctrl.SortTableByDesc()" style="color: white">Sort by description</button> </th>
+            <th> <button class="btn btn-default" id="sortByVetButton" ng-click="$ctrl.SortTableByVet()" style="color: white">Sort by veterinarian</button> </th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
