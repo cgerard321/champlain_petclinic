@@ -152,6 +152,7 @@ angular.module('visits')
             }
         }
 
+
         let sortVetAscending = false;
         self.SortTableByVet = function() {
             ResetSortButtonArrows();
