@@ -40,7 +40,6 @@ public class BillServiceImplTest {
 
     private final int billId = 1;
     private final int customerId = 1;
-    private final int NULL_BILL_ID = 0;
 
     @Test
     public void test_GetBill(){
