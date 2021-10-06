@@ -104,6 +104,53 @@ angular.module('visits')
             };
         };
 
+        let ResetSortButtonArrows = function() {
+            $('#sortByDateButton').text("Sort by date");
+            $('#sortByDescButton').text("Sort by description");
+        }
+
+        let sortTableDateAscending = false;
+        self.SortTableByDate = function() {
+            ResetSortButtonArrows();
+
+            sortTableDateAscending = !sortTableDateAscending;
+            if(sortTableDateAscending) {
+                self.visits.sort(function(a, b) {
+                    return Date.parse(b.date) - Date.parse(a.date);
+                });
+                $('#sortByDateButton').text("Sort by date ▼")
+            } else {
+                self.visits.sort(function(a, b) {
+                    return Date.parse(b.date) + Date.parse(a.date);
+                });
+                $('#sortByDateButton').text("Sort by date ▲")
+            }
+        }
+
+        let sortDescriptionAscending = false;
+        self.SortTableByDesc = function() {
+            ResetSortButtonArrows();
+
+            sortDescriptionAscending = !sortDescriptionAscending;
+            if(sortDescriptionAscending) {
+                self.visits.sort(function(a, b) {
+                    a = a.description.toLowerCase();
+                    b = b.description.toLowerCase();
+
+                    return a < b ? - 1 : a > b ? 1 : 0
+                });
+                $('#sortByDescButton').text("Sort by description ▼")
+            } else {
+                self.visits.sort(function(a, b) {
+                    a = a.description.toLowerCase();
+                    b = b.description.toLowerCase();
+
+                    return a > b ? - 1 : a < b ? 1 : 0
+                });
+                $('#sortByDescButton').text("Sort by description ▲")
+            }
+        }
+
         self.submit = function () {
             var data = {
                 date: $filter('date')(self.date, "yyyy-MM-dd"),
