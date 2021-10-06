@@ -29,6 +29,8 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.*;
@@ -280,7 +282,53 @@ public class VisitResourceTest {
 				.andExpect(result -> assertEquals("Pet does not exist.", result.getResolvedException().getMessage()));
 	}
 
-	// UTILS PACKAGE TESTING
+	@Test
+	void shouldReturnPreviousVisits() throws Exception {
+		Date beforeNow = new Date(System.currentTimeMillis() - 100000);
+		List<Visit> previousVisits = asList(
+				visit()
+						.id(1)
+						.petId(1)
+						.date(beforeNow)
+						.build());
+
+		when(visitsService.getVisitsForPet(1, false)).thenReturn(previousVisits);
+
+		mvc.perform(get("/visits/previous/{petId}", 1))
+				.andExpect(status().isOk());
+
+		verify(visitsService, times(1)).getVisitsForPet(1, false);
+	}
+
+	@Test
+	void shouldReturnScheduledVisits() throws Exception {
+		Date afterNow = new Date(System.currentTimeMillis() + 100000);
+		List<Visit> scheduledVisits = asList(
+				visit()
+						.id(1)
+						.petId(1)
+						.date(afterNow)
+						.build());
+
+		when(visitsService.getVisitsForPet(1, true)).thenReturn(scheduledVisits);
+
+		mvc.perform(get("/visits/scheduled/{petId}", 1))
+				.andExpect(status().isOk());
+		verify(visitsService, times(1)).getVisitsForPet(1, true);
+
+	}
+
+	@Test
+	void whenFetchingWithNegativePetIdShouldHandleInvalidInputException() throws Exception {
+		when(visitsService.getVisitsForPet(-1)).thenThrow(new InvalidInputException("PetId can't be negative."));
+
+		mvc.perform(get("/visits/{petId}", -1))
+				.andExpect(status().isUnprocessableEntity())
+				.andExpect(result -> assertTrue(result.getResolvedException() instanceof InvalidInputException))
+				.andExpect(result -> assertEquals("PetId can't be negative.", result.getResolvedException().getMessage()));
+	}
+
+	// UTILS PACKAGE UNIT TESTING
 	@Test
 	void test_EmptyInvalidInputException(){
 		InvalidInputException ex = assertThrows(InvalidInputException.class, ()->{

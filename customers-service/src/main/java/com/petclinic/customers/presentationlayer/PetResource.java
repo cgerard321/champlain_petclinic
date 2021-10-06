@@ -38,14 +38,17 @@ class PetResource {
         return pet;
     }
 
-    /**
-     * Find Pet
-     */
+    //Find Pet
     @GetMapping("/{petId}")
     public PetDetails findPet(@PathVariable("petId") int petId) {
         return new PetDetails(findPetById(petId).get());
     }
 
+    @DeleteMapping(value = "/{petId}")
+    public void DeletePet(@PathVariable("petId") int petId, @PathVariable("ownerId") int ownerId) {
+        //Call external method deletePet() from petService
+        petService.deletePet(petId, ownerId);
+    }
 
     private Optional<Pet> findPetById(int petId) {
         return petService.findByPetId(petId);
