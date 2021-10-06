@@ -20,18 +20,15 @@
  */
 package com.petclinic.auth.User;
 
-import lombok.SneakyThrows;
-import org.aspectj.weaver.ast.Not;
+import com.petclinic.auth.Exceptions.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
-import com.petclinic.auth.Exceptions.NotFoundException;
 
 import java.util.Optional;
 
@@ -45,7 +42,10 @@ public class AuthServiceUserServiceTests {
     final String
             USER = "user",
             PASS = "pas$word123",
-            EMAIL = "email@gmail.com";
+            EMAIL = "email@gmail.com",
+            NEWPASSWORD = "change";
+
+
 
     @Autowired
     private UserRepo userRepo;
@@ -72,22 +72,21 @@ public class AuthServiceUserServiceTests {
         assertEquals(createdUser.getPassword(), userIDLessDTO.getPassword());
         assertEquals(createdUser.getEmail(), userIDLessDTO.getEmail());
     }
-    @SneakyThrows
+
     @Test
     @DisplayName("Reset user password")
     void test_user_password_reset() {
 
-        final String CHANGE = "change";
         final User u = new User(USER, PASS, EMAIL);
         userRepo.save(u);
 
-        User user = userService.passwordReset(u.getId(), CHANGE);
+        User user = userService.passwordReset(u.getId(), NEWPASSWORD);
 
         Optional<User> find = userRepo.findById(user.getId());
         assertTrue(find.isPresent());
-        assertEquals(CHANGE, user.getPassword());
+        assertEquals(NEWPASSWORD, user.getPassword());
     }
-    @SneakyThrows
+
     @Test
     @DisplayName("Reset password, passed wrong ID")
     void test_user_password_reset_ID() {
