@@ -88,7 +88,7 @@ public class PetServiceImpl implements PetService {
     @Override
     public void deletePet(int petId, int ownerId) {
         //Search pet owner
-        Optional<Owner> optionalOwner = ownerRepository.findById(ownerId);
+        Optional<Owner> optionalOwner = ownerService.findById(ownerId);
         Owner owner = optionalOwner.orElseThrow(() -> new NotFoundException("Owner "+ ownerId +" not found"));
 
         //Search the pet
