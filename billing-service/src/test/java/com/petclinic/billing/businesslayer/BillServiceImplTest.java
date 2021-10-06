@@ -35,8 +35,12 @@ public class BillServiceImplTest {
     @Autowired
     BillService billService;
 
+    @Autowired
+    BillMapper MAPPER;
+
     private final int billId = 1;
     private final int customerId = 1;
+    private final int NULL_BILL_ID = 0;
 
     @Test
     public void test_GetBill(){
@@ -120,7 +124,19 @@ public class BillServiceImplTest {
         verify(billRepository, never()).delete(entity);
     }
 
+    @Test
+    public void NullMappingEntityToModelTest() {
+        BillDTO emptyDTO = MAPPER.EntityToModel(null);
 
+        assertThat(emptyDTO).isEqualTo(null);
+    }
+
+    @Test
+    public void NullMappingModelToEntityTest() {
+        Bill emptyBill = MAPPER.ModelToEntity(null);
+
+        assertThat(emptyBill).isEqualTo(null);
+    }
 
 }
 
