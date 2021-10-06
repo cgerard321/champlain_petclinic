@@ -16,11 +16,20 @@
  */
 package com.petclinic.auth.User;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+
 public interface UserService {
 
 
     User createUser(UserIDLessDTO user);
 
-    User passwordReset(long id, String passwd)throws Exception;
+    User passwordReset(long id, String passwd);
+
+    User findUserById(long id);
+
+    Page<User> findAll(PageRequest of);
+
+    void deleteUser(long id);
 
 }

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -24,7 +25,6 @@ public class AuthServiceUserServiceTests {
             PASS = "pas$word123",
             EMAIL = "email@gmail.com",
             NEWPASSWORD = "change";
-
 
 
     @Autowired
@@ -45,7 +45,6 @@ public class AuthServiceUserServiceTests {
     @DisplayName("Create new user")
     void create_new_user() {
         UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
-
 
         final User createdUser = userService.createUser(userIDLessDTO);
         assertEquals(createdUser.getUsername(), userIDLessDTO.getUsername());
@@ -97,7 +96,7 @@ public class AuthServiceUserServiceTests {
 
     @Test
     @DisplayName("get user by id and fail")
-    void get_user_by_id_and_fail(){
+    void get_user_by_id_and_fail() {
         long id = 1;
         assertFalse(userRepo.findById(id).isPresent());
         assertThrows(NotFoundException.class, () -> userService.findUserById(id));
@@ -134,3 +133,4 @@ public class AuthServiceUserServiceTests {
     void delete_role_by_id_and_fail() {
         assertEquals(Optional.empty(), userRepo.findById(1l));
     }
+}
