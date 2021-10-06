@@ -22,13 +22,9 @@ import java.util.Optional;
 @Slf4j
 class PetResource {
 
-    private final PetRepository petRepository;
-    private final OwnerRepository ownerRepository;
     private final PetService petService;
 
-    public PetResource(PetRepository petRepository, OwnerRepository ownerRepository, PetService petService) {
-        this.petRepository = petRepository;
-        this.ownerRepository = ownerRepository;
+    public PetResource(PetService petService) {
         this.petService = petService;
     }
 
@@ -38,8 +34,6 @@ class PetResource {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Pet createNewPet(@RequestBody PetRequest petRequest, @PathVariable("ownerId") int ownerId) {
-
-        //Call external method createPet() from petService
         Pet pet = petService.CreatePet(petRequest, ownerId);
         return pet;
     }
@@ -49,15 +43,11 @@ class PetResource {
      */
     @GetMapping("/{petId}")
     public PetDetails findPet(@PathVariable("petId") int petId) {
-
-        //Call external method findPet() pet from petService
         return new PetDetails(findPetById(petId).get());
     }
 
 
     private Optional<Pet> findPetById(int petId) {
-
-        //Call petService to search repo using petId
         return petService.findByPetId(petId);
 
     }
