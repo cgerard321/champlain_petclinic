@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-//created this class in domainclientlayer folder
+
 @Component
 public class BillServiceClient {
 
@@ -22,7 +22,7 @@ public class BillServiceClient {
             @Value("${app.billing-service.port}") String billingServicePort
     ) {
         this.webClientBuilder = webClientBuilder;
-        billServiceUrl = "http://" + billingServiceHost + ":" + billingServicePort + "/bill";
+        billServiceUrl = "http://" + billingServiceHost + ":" + billingServicePort + "/bills";
     }
 
     public Mono<BillDetails> getBilling(final int billId) {

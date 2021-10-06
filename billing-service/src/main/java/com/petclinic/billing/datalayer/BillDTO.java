@@ -63,7 +63,7 @@ public class BillDTO {
         this.visitType = visitType;
     }
 
-    public void setAmount(double amount){
+    public void getAmount(double amount){
         this.amount = amount;
     }
 }

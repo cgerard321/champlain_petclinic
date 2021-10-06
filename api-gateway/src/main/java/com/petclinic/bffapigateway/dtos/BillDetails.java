@@ -9,7 +9,7 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
-//created this class in dtos folder
+
 @Data
 public class BillDetails {
     private int billId;

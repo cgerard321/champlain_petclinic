@@ -1,6 +1,15 @@
 package com.petclinic.bffapigateway.presentationlayer;
 
+
 import com.petclinic.bffapigateway.domainclientlayer.*;
+
+import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
+
+import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
+import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
+import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
+import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
+
 import com.petclinic.bffapigateway.dtos.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -60,6 +69,10 @@ class ApiGatewayControllerTest {
     @MockBean
     private BillServiceClient billServiceClient;
 
+
+    @MockBean
+    private AuthServiceClient authenticationServiceClient;
+
     @Autowired
     private WebTestClient client;
 
@@ -107,6 +120,7 @@ class ApiGatewayControllerTest {
                 .thenReturn(Mono.just(user));
 
         client.get()
+
                 .uri("/api/gateway/users/1")
                 .exchange()
                 .expectStatus().isOk()
@@ -117,6 +131,8 @@ class ApiGatewayControllerTest {
 
         assertEquals(user.getId(), 1);
     }
+
+
 
     @Test
     void createUser(){
