@@ -14,6 +14,9 @@ public class Bill {
 
     private int billId;
 
+    @Column(name="customerId")
+    private int customerId;
+
     @Column(name = "visit_date")
     @Temporal(TemporalType.TIMESTAMP)
     @JsonFormat(pattern = "yyyy-MM-dd")
@@ -27,7 +30,9 @@ public class Bill {
 
     public Bill(){}
 
-    public Bill(int billId, Date date, String visitType, double amount){
+
+    public Bill(int billId,int customerId, Date date, String visitType, double amount){
+        this.customerId = customerId;
         this.billId = billId;
         this.date = date;
         this.visitType = visitType;
@@ -38,6 +43,7 @@ public class Bill {
     public int getBillId() {
         return billId;
     }
+    public int getCustomerId(){return  customerId;}
     public Date getDate(){return date;}
     public String getVisitType(){return visitType;}
     public double getAmount(){return amount;}
@@ -49,6 +55,8 @@ public class Bill {
     public void setBillId(int billId) {
         this.billId = billId;
     }
+
+    public void setCustomerId(int customerId){this.customerId = customerId;}
 
     public void setDate(Date date) {
         this.date = date;

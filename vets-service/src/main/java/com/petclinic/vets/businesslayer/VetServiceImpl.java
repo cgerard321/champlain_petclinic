@@ -54,12 +54,7 @@ public class VetServiceImpl implements VetService
     @Override
     public Vet createVet(Vet vet)
     {
-        try{
-            return vetRepository.save(vet);
-        }
-        catch (DuplicateKeyException dke){
-            throw new InvalidInputException("Duplicate key for vetId: " + vet.getId());
-        }
+        return vetRepository.save(vet);
     }
 
     @Override

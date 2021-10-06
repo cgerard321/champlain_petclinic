@@ -1,8 +1,11 @@
 package com.petclinic.visits.datalayer;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,4 +32,5 @@ public interface VisitRepository extends JpaRepository<Visit, Integer> {
     //Optional<Visit> findById(int visitId);
 
     void findVisitById(int visitId);
+
 }
