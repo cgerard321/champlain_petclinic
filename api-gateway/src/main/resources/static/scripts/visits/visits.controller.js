@@ -6,6 +6,7 @@ angular.module('visits')
         var petId = $stateParams.petId || 0;
         var url = "api/gateway/visit/owners/" + ($stateParams.ownerId || 0) + "/pets/" + petId + "/visits";
         var vetsUrl = "api/gateway/vets";
+        var visitId = 0;
         self.practitionerId = 0;
         self.date = new Date();
         self.desc = "";
@@ -76,12 +77,31 @@ angular.module('visits')
             return practitionerName;
         };
 
-        self.fillForm = function (practitionerId, date, description){
-            $("#selectedVet option[value='"+practitionerId+"']");
-            $('#date_input').text(date);
-            $('#description_textarea').text(description);
+        self.switchToUpdateForm = function (practitionerId, date, description, id){
+            visitId = id;
+            $("#selectedVet option[value='"+practitionerId+"']").prop("selected", true);
+            $('#date_input').val(date);
+            $('#description_textarea').val(description);
             $('#submit_button').text("Update Visit");
             $('#cancel_button').css("visibility", "visible");
+            self.loadVetInfo();
+            self.submit = function () {
+                var data = {
+                    date: $filter('date')(self.date, "yyyy-MM-dd"),
+                    description: $('#description_textarea').val(),
+                    practitionerId: $("#selectedVet").val()
+                };
+
+                url = "api/gateway/owners/*/pets/" + petId + "/visits/" + visitId;
+                $http.put(url, data).then(function () {
+                    window.location.reload();
+                }, function (response) {
+                    var error = response.data;
+                    alert(error.error + "\r\n" + error.errors.map(function (e) {
+                        return e.field + ": " + e.defaultMessage;
+                    }).join("\r\n"));
+                });
+            };
         };
 
         self.submit = function () {
@@ -92,12 +112,12 @@ angular.module('visits')
             };
 
             $http.post(url, data).then(function () {
-                $state.go("owners", { ownerId: $stateParams.ownerId });
+                $state.go("owners", {ownerId: $stateParams.ownerId});
             }, function (response) {
                 var error = response.data;
                 alert(error.error + "\r\n" + error.errors.map(function (e) {
-                        return e.field + ": " + e.defaultMessage;
-                    }).join("\r\n"));
+                    return e.field + ": " + e.defaultMessage;
+                }).join("\r\n"));
             });
-        };
+        }
     }]);

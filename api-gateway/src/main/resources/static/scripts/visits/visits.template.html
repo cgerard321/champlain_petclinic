@@ -402,14 +402,14 @@
 
 <h2>Visits</h2>
 
-<form ng-submit="$ctrl.submit()">
+<form id="visitForm" ng-submit="$ctrl.submit()">
 
     <div class="form-group">
         <label>Practitioner</label>
         <select id="selectedVet" ng-model="$ctrl.practitionerId" ng-change="$ctrl.loadVetInfo()">
             <option ng-repeat="p in $ctrl.vets" value="{{p.vetId}}">{{p.firstName}} {{p.lastName}}</option>
         </select>
-        
+
         <br>
 
         <label for="vetPhoneNumber" style="margin-top: 10px">Phone Number:</label>
@@ -438,7 +438,7 @@
 
     <div class="form-group">
         <button id="submit_button" class="btn btn-default" type="submit">Add New Visit</button>
-        <button id="cancel_button" class="btn btn-default" style="visibility: hidden">Cancel</button>
+        <button id="cancel_button" onClick="window.location.reload()" class="btn btn-default" style="visibility: hidden">Cancel</button>
     </div>
 
 </form>
@@ -449,6 +449,6 @@
         <td class="col-sm-2">{{v.date}}</td>
         <td style="white-space: pre-line">{{v.description}}</td>
         <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>
-        <td><button class="btn btn-default" ng-click="$ctrl.fillForm(v.practitionerId, v.date, v.description)">Edit Visit</button></td>
+        <td><button class="btn btn-default" ng-click="$ctrl.switchToUpdateForm(v.practitionerId, v.date, v.description, v.id)">Edit Visit</button></td>
     </tr>
 </table>
