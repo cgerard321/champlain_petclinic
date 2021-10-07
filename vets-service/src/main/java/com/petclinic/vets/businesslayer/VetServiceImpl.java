@@ -25,11 +25,6 @@ public class VetServiceImpl implements VetService {
         return vetRepository.findAll();
     }
 
-//    @Override
-//    public Optional getVetByVetId(int vetId) {
-//        return vetRepository.findById(vetId);
-//    }
-
     @Override
     public Vet getVetByVetId(int vetId) {
         Vet foundVet = vetRepository.findByVetId(vetId)
