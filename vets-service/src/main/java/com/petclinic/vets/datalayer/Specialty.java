@@ -56,6 +56,6 @@ public class Specialty {
     }
 
     public void setName(final String name) {
-        this.name = name;
+        this.name = DataValidation.verifySpeciality(name);
     }
 }

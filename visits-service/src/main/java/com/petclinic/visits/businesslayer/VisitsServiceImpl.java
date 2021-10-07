@@ -2,14 +2,22 @@ package com.petclinic.visits.businesslayer;
 
 import com.petclinic.visits.datalayer.Visit;
 import com.petclinic.visits.datalayer.VisitRepository;
+import com.petclinic.visits.utils.exceptions.InvalidInputException;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
+
+/*
+ * This class implements the necessary methods to make our service work. It is currently responsible for the logic
+ * of basic CRUD operations.
+ *
+ * Contributors:
+ *   70963776+cjayneb@users.noreply.github.com
+ */
 
 @Service
 @Slf4j
@@ -23,12 +31,29 @@ public class VisitsServiceImpl implements VisitsService {
 
     @Override
     public Visit addVisit(Visit visit) {
-        log.info("Calling visit repo to create a visit for pet with petId: {}", visit.getPetId());
-        return visitRepository.save(visit);
+
+        if(visit.getDescription().isEmpty()){
+            throw new InvalidInputException("Visit description required.");
+        }
+
+        try{
+            log.info("Calling visit repo to create a visit for pet with petId: {}", visit.getPetId());
+            Visit v = visitRepository.save(visit);
+            return v;
+        }
+        catch(DuplicateKeyException dke){
+            throw new InvalidInputException("Duplicate visitId: " + visit.getId(), dke);
+        }
+
+
     }
 
     @Override
     public List<Visit> getVisitsForPet(int petId) {
+
+        if(petId < 0)
+            throw new InvalidInputException("PetId can't be negative.");
+
         log.info("Calling visit repo to get visits for pet with petId: {}", petId);
         return visitRepository.findByPetId(petId);
     }
@@ -50,5 +75,22 @@ public class VisitsServiceImpl implements VisitsService {
     @Override
     public List<Visit> getVisitsForPets(List<Integer> petIds){
         return visitRepository.findByPetIdIn(petIds);
+    }
+
+    @Override
+    public List<Visit> getVisitsForPet(int petId, boolean scheduled) {
+        Date now = new Date(System.currentTimeMillis());
+        log.debug("Fetching the visits for pet with petId: {}", petId);
+        List<Visit> visits = getVisitsForPet(petId);
+
+        if(scheduled){
+            log.debug("Filtering out visits before {}", now);
+            visits = visits.stream().filter(v -> v.getDate().after(now)).collect(Collectors.toList());
+        }
+        else{
+            log.debug("Filtering out visits after {}", now);
+            visits = visits.stream().filter(v -> v.getDate().before(now)).collect(Collectors.toList());
+        }
+        return visits;
     }
 }

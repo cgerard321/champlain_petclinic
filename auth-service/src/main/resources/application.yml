@@ -11,6 +11,9 @@ spring:
     schemas: auth
     user: root
     password: rootpwd
+mailer-service:
+  host: localhost
+  port: 8080
 
 ---
 spring.profiles: docker

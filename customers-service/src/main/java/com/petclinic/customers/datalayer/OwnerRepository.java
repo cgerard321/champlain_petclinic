@@ -14,7 +14,6 @@ import org.springframework.stereotype.Repository;
  * @author Maciej Szarlinski
  */
 
-@Repository
 public interface OwnerRepository extends JpaRepository<Owner, Integer> {
 
     /*

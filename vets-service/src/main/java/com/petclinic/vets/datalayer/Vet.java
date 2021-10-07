@@ -123,7 +123,7 @@ public class Vet {
     }
 
     public void setResume(String resume) {
-        this.resume = resume;
+        this.resume = DataValidation.verifyResume(resume);
     }
 
     public String getWorkday() {

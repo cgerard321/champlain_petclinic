@@ -4,8 +4,14 @@ import com.petclinic.visits.datalayer.Visit;
 
 import java.util.List;
 
-public interface VisitsService {
+/*
+ * This interface defines all the methods that our service must implement.
+ *
+ * Contributors:
+ *   70963776+cjayneb@users.noreply.github.com
+ */
 
+public interface VisitsService {
 
     public Visit addVisit(Visit visit);
 
@@ -17,4 +23,5 @@ public interface VisitsService {
 
     public List<Visit> getVisitsForPets(List<Integer> petIds);
 
+    List<Visit> getVisitsForPet(int petId, boolean scheduled);
 }
