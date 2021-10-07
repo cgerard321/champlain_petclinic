@@ -43,6 +43,8 @@ import java.util.regex.Pattern;
  * @autor Christian Chitanu
  * @ImplementationDate October 7th, 2021
  * @Implementation Added Blob field for image file in
+ * @Source https://medium.com/@rameez.s.shaikh/upload-and-retrieve-images-using-spring-boot-angular-8-mysql-18c166f7bc98
+ *
  */
 
 @Entity
@@ -79,7 +81,8 @@ public class Vet {
 
     @Column(name = "image")
     @Lob
-    private Blob image;
+    @Basic(fetch = FetchType.LAZY)
+    private byte[] image;
 
     @Column(name = "resume")
     private String resume;
@@ -89,6 +92,19 @@ public class Vet {
 
     @Column(name = "is_active")
     private Integer isActive;
+
+
+    public byte[] getImage() {
+        return image;
+    }
+
+    public void setImage(byte[] image) {
+        this.image = image;
+    }
+
+    public void setSpecialties(Set<Specialty> specialties) {
+        this.specialties = specialties;
+    }
 
     public Integer getIsActive() {
         return isActive;
