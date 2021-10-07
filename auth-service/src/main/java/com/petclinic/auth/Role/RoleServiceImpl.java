@@ -13,16 +13,11 @@ import org.springframework.stereotype.Service;
 public class RoleServiceImpl implements RoleService {
 
     private final RoleRepo roleRepo;
-    private final RoleMapper roleMapper;
 
     @Override
-    public Role createRole(RoleIDLessDTO roleIDLessDTO) {
+    public Role createRole(Role role) {
 
-        log.info("Received role dto, trying to convert model");
-        log.info("DTO info: { name={}, parent={} }", roleIDLessDTO.getName(), roleIDLessDTO.getParent());
-        final Role role = roleMapper.idLessDTOToModel(roleIDLessDTO);
-        log.info("Successfully converted dto -> model");
-        log.info("Saving role with name {}", roleIDLessDTO.getName());
+        log.info("Saving role with name {}", role.getName());
         return roleRepo.save(role);
     }
 
@@ -34,12 +29,8 @@ public class RoleServiceImpl implements RoleService {
 
     @Override
     public void deleteById(long id) throws EmptyResultDataAccessException {
-        try {
-            log.info("Deleting role with id {}", id);
-            roleRepo.deleteById(id);
-        } catch (EmptyResultDataAccessException e) {
-            log.info("No role with id {}. Ignoring", id);
-        }
+        log.info("Deleting role with id {}", id);
+        roleRepo.deleteById(id);
     }
 
 }

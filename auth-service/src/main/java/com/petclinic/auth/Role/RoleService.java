@@ -6,7 +6,7 @@ import org.springframework.data.domain.PageRequest;
 
 public interface RoleService {
 
-    Role createRole(RoleIDLessDTO roleIDLessDTO);
+    Role createRole(Role role);
     Page<Role> findAll(PageRequest pageRequest);
     void deleteById(long id) throws EmptyResultDataAccessException;
 }
