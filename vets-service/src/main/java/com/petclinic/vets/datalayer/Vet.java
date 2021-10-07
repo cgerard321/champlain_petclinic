@@ -122,7 +122,7 @@ public class Vet {
     }
 
     public String getProfilePicture() {
-        return resume;
+        return profilePicture;
     }
 
     public void setProfilePicture(String profilePicture) {

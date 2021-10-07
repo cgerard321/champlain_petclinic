@@ -64,7 +64,7 @@ public class VetBusinessLayerTest
         Vet vet2 = new Vet(2, 327874, "Helen", "Leary", "leary.helen@email.com", "(514)-634-8276 #2385", "picture2.png","Practicing since 10 years", "Wednesday, Thursday", 1, null);
         vetService.createVet(vet2);
         assertThat(vetRepository.count()).isGreaterThan(0);
-        Vet vet1 = new Vet(5, 234567, "James3", "Carter", "carter.james@email.com", "(514)-634-8276 #2384", "practicing since 3 years", "Monday, Tuesday, Friday", 1, null);
+        Vet vet1 = new Vet(5, 234567, "James3", "Carter", "carter.james@email.com", "(514)-634-8276 #2384", "picture2.png", "practicing since 3 years", "Monday, Tuesday, Friday", 1, null);
         vetService.createVet(vet1);
         assertThrows(NoSuchElementException.class,()->{
             vetRepository.findByVetId(234567).get();
@@ -104,7 +104,7 @@ public class VetBusinessLayerTest
         assertEquals(vetService.getVetByVetId(234568).getEmail(), "carterUpdate.james@email.com");
         assertEquals(vetService.getVetByVetId(234568).getResume(), "practicing since 3 yearsUpdate");
 
-        Vet vet2 = new Vet(1, 234568, "", "", "", "", "", "", 1, null);
+        Vet vet2 = new Vet(1, 234568, "", "", "","", "", "", "", 1, null);
 
 
         vetService.updateVet(vetService.getVetByVetId(234568), vet2);
