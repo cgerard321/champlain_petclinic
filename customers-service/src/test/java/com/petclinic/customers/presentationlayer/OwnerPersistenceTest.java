@@ -39,6 +39,7 @@ class OwnerPersistenceTest {
         repository.deleteAll();
     }
 
+
     /**
      * ------------------------ TEST_FIND ------------------------
      * Testing the find by id method
@@ -61,6 +62,8 @@ class OwnerPersistenceTest {
         assert foundOwner != null;
         assertThat(foundOwner, samePropertyValuesAs(savedOwner));
     }
+
+
     /**
      * ------------------------ TEST_FIND_ALL ------------------------
      * Testing the find_all() method
@@ -104,6 +107,8 @@ class OwnerPersistenceTest {
         //Assert
         assertEquals(expectedLength, ownerList.size());
     }
+
+
     /**
      * ------------------------ TEST_DELETE ------------------------
      * Testing the delete owner method
