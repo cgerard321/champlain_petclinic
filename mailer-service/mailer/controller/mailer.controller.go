@@ -14,6 +14,17 @@ type MailerControllerImpl struct {
 func (m *MailerControllerImpl) New(service mailer.MailerService) {
 	m.s = service
 }
+
+// SendMail ... Send Mail
+// @Summary Sends e-mail
+// @Description accepts an e-mail, in the request body, to send
+// @Tags Mail
+// @Accept json
+// @Param mail body mailer.Mail true "Mail"
+// @Success 200 {array} mailer.Mail
+// @Failure 400 {object} object
+// @Failure 500 {object} object
+// @Router / [post]
 func (m MailerControllerImpl) handleMailPOST(context *gin.Context) {
 
 	get, exists := context.Get("mail")

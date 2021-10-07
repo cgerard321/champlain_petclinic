@@ -6,6 +6,8 @@ import io.micrometer.core.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -16,7 +18,7 @@ import java.util.Optional;
  * Copied from https://github.com/spring-petclinic/spring-petclinic-microservices
  */
 
-@RequestMapping("/owners/*/pets")
+@RequestMapping("/owners/{ownerId}/pets")
 @RestController
 @Timed("petclinic.pet")
 @Slf4j
@@ -36,6 +38,12 @@ class PetResource {
     public Pet createNewPet(@RequestBody PetRequest petRequest, @PathVariable("ownerId") int ownerId) {
         Pet pet = petService.CreatePet(petRequest, ownerId);
         return pet;
+    }
+
+    @GetMapping
+    public List<Pet> findAll()
+    {
+        return petService.findAll();
     }
 
     //Find Pet
