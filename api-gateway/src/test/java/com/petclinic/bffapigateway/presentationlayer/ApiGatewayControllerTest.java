@@ -221,7 +221,7 @@ class ApiGatewayControllerTest {
     }
 
 
-
+    @Test
     public void getBillByProductId(){
 
 
@@ -233,6 +233,8 @@ class ApiGatewayControllerTest {
         entity.setDate(null);
 
         entity.setAmount(599);
+
+        entity.setCustomerId(2);
 
         entity.setVisitType("Consultation");
 
@@ -246,8 +248,9 @@ class ApiGatewayControllerTest {
                 .expectStatus().isOk()
                 .expectBody()
 //                .jsonPath("$.date").isEqualTo(entity.getDate())
-                .jsonPath("$.amount").isEqualTo(599)
-                .jsonPath("$.visitType").isEqualTo("Consultation");
+                .jsonPath("$.amount").isEqualTo(entity.getAmount())
+                .jsonPath("$.customerId").isEqualTo(entity.getCustomerId())
+                .jsonPath("$.visitType").isEqualTo(entity.getVisitType());
 
 
 

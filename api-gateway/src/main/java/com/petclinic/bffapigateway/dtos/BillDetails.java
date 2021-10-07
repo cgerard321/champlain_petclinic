@@ -14,6 +14,7 @@ import static java.util.stream.Collectors.toList;
 public class BillDetails {
     private int billId;
     private Date date;
+    private int customerId;
     private String visitType;
     private double amount;
 
