@@ -33,7 +33,6 @@ public class VetEntityTest {
                         ,"Carter"
                         ,"carter.james@email.com"
                         ,"2384"
-                        ,"profilepic1.png"
                         ,"Practicing since 3 years"
                         ,"Monday, Tuesday, Friday"
                         ,1
@@ -47,7 +46,6 @@ public class VetEntityTest {
         assertEquals(vet.getLastName(),"Carter");
         assertEquals(vet.getEmail(), "carter.james@email.com");
         assertEquals(vet.getPhoneNumber(),"2384");
-        assertEquals(vet.getProfilePicture(),"profilepic1.png");
         assertEquals(vet.getResume(),"Practicing since 3 years");
         assertEquals(vet.getWorkday(),"Monday, Tuesday, Friday");
         assertEquals(vet.getIsActive(),1);
@@ -65,7 +63,6 @@ public class VetEntityTest {
         assertEquals(vet.getLastName(),null);
         assertEquals(vet.getEmail(), null);
         assertEquals(vet.getPhoneNumber(),null);
-        assertEquals(vet.getProfilePicture(), null);
         assertEquals(vet.getResume(),null);
         assertEquals(vet.getWorkday(),null);
         assertEquals(vet.getIsActive(),null);
@@ -80,7 +77,6 @@ public class VetEntityTest {
         vet.setLastName("Carter");
         vet.setEmail("carter.james@email.com");
         vet.setPhoneNumber("2384");
-        vet.setProfilePicture("profilepic1.png");
         vet.setResume("Practicing since 3 years");
         vet.setWorkday("Monday, Tuesday, Friday");
         vet.setIsActive(1);
@@ -91,7 +87,6 @@ public class VetEntityTest {
         assertEquals(vet.getLastName(),"Carter");
         assertEquals(vet.getEmail(), "carter.james@email.com");
         assertEquals(vet.getPhoneNumber(),"(514)-634-8276 #2384");
-        assertEquals(vet.getProfilePicture(),"profilepic1.png");
         assertEquals(vet.getResume(),"Practicing since 3 years");
         assertEquals(vet.getWorkday(),"Monday, Tuesday, Friday");
         assertEquals(vet.getIsActive(),1);
@@ -109,7 +104,6 @@ public class VetEntityTest {
                         ,"Carter"
                         ,"carter.james@email.com"
                         ,"2384"
-                        ,"profilepic1.png"
                         ,"Practicing since 3 years"
                         ,"Monday, Tuesday, Friday"
                         ,1
@@ -117,6 +111,6 @@ public class VetEntityTest {
                     add(new Specialty(1,111111,"Surgeon"));
                 }}
                 );
-        assertEquals(vet.toString(),"["+ "Vet@"+Integer.toHexString(System.identityHashCode(vet))+" id = 1, firstName = 'James', lastName = 'Carter', email = 'carter.james@email.com', phoneNumber = '2384', profilePicture = 'profilepic1.png', resume = 'Practicing since 3 years', workday = 'Monday, Tuesday, Friday']");
+        assertEquals(vet.toString(),"["+ "Vet@"+Integer.toHexString(System.identityHashCode(vet))+" id = 1, firstName = 'James', lastName = 'Carter', email = 'carter.james@email.com', phoneNumber = '2384', resume = 'Practicing since 3 years', workday = 'Monday, Tuesday, Friday']");
     }
 }

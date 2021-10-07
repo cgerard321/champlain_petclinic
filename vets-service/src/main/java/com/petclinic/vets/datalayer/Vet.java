@@ -70,9 +70,6 @@ public class Vet {
     @NotEmpty
     private String phoneNumber;
 
-    @Column(name = "profile_picture")
-    private String profilePicture;
-
     @Column(name = "resume")
     private String resume;
 
@@ -119,14 +116,6 @@ public class Vet {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = DataValidation.verifyPhoneNumber(phoneNumber);
-    }
-
-    public String getProfilePicture() {
-        return profilePicture;
-    }
-
-    public void setProfilePicture(String profilePicture) {
-        this.profilePicture = profilePicture;
     }
 
     public String getResume() {
@@ -204,7 +193,6 @@ public class Vet {
                 .append("lastName", this.getLastName())
                 .append("email", this.getEmail())
                 .append("phoneNumber", this.getPhoneNumber())
-                .append("profilePicture", this.getProfilePicture())
                 .append("resume", this.getResume())
                 .append("workday", this.getWorkday()).toString();
     }
