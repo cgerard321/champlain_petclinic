@@ -45,8 +45,6 @@ public class VisitsServiceImpl implements VisitsService {
         catch(DuplicateKeyException dke){
             throw new InvalidInputException("Duplicate visitId: " + visit.getId(), dke);
         }
-
-
     }
 
     @Override

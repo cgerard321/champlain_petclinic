@@ -51,6 +51,7 @@ public class VisitResource {
 
     @DeleteMapping("visits/{visitId}")
     public void deleteVisit(@PathVariable("visitId") int visitId) {
+        log.info("Deleting visits with visitId: {}", visitId );
         visitsService.deleteVisit(visitId);
     }
 
