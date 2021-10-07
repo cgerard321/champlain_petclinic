@@ -4,7 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.billing.businesslayer.BillService;
 import com.petclinic.billing.datalayer.Bill;
 import com.petclinic.billing.datalayer.BillDTO;
+import com.petclinic.billing.exceptions.InvalidInputException;
 import com.petclinic.billing.exceptions.NotFoundException;
+import com.petclinic.billing.http.HttpErrorInfo;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +56,22 @@ class BillResourceTest {
     }
 
     @Test
+    void createBillInvalidInput() throws Exception {
+        BillDTO newDTO = new BillDTO(-1, 1, new Date(), "type1", 1.0);
+
+        when(service.CreateBill(any())).thenThrow(new InvalidInputException("That bill id does not exist"));
+
+        mvc.perform(post("/bills", 1)
+                        .content(objectMapper.writeValueAsString(newDTO))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .characterEncoding("utf-8")
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(result -> assertTrue(result.getResolvedException() instanceof InvalidInputException))
+                .andExpect(result -> assertEquals("That bill id does not exist", result.getResolvedException().getMessage()));
+    }
+
+    @Test
     void findBill() {
 
     }
@@ -61,5 +79,15 @@ class BillResourceTest {
     @Test
     void deleteBill() {
 
+    }
+
+    @Test
+    void testEmptyHttpErrorInfo() {
+        HttpErrorInfo httpErrorInfo = new HttpErrorInfo();
+
+        assertEquals(httpErrorInfo.getHttpStatus(), null);
+        assertEquals(httpErrorInfo.getPath(), null);
+        assertEquals(httpErrorInfo.getTimestamp(), null);
+        assertEquals(httpErrorInfo.getMessage(), null);
     }
 }
