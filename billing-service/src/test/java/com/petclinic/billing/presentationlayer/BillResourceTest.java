@@ -39,7 +39,7 @@ class BillResourceTest {
 
     @Test
     void createBillNotFound() throws Exception {
-        BillDTO newDTO = new BillDTO();
+        BillDTO newDTO = new BillDTO(1, 1, new Date(), "type1", 1.0);
 
         when(service.CreateBill(any())).thenThrow(new NotFoundException("Bill not found"));
 

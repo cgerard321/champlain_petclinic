@@ -38,7 +38,7 @@ public class BillResource {
     }
 
     // Delete Bill //
-    @PutMapping(value = "/{billId}")
+    @DeleteMapping(value = "/{billId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteBill(@PathVariable("billId") int billId){
         SERVICE.DeleteBill(billId);
