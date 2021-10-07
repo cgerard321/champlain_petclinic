@@ -128,7 +128,8 @@ public class VetBusinessLayerTest
         vetService.deleteVetByVetId(234568);
         assertEquals(vetService.getAllVets().size(),3);
     }
-  
+
+    @Test
     @DisplayName("Enable Vet Service Test")
     public void enableVetTest(){
         Vet activeVet = new Vet();
