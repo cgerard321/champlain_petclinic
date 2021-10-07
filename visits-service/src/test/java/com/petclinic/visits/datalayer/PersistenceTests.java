@@ -14,10 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static com.petclinic.visits.datalayer.Visit.visit;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -119,6 +116,24 @@ public class PersistenceTests {
         
         Visit foundVisit = repo.findById(savedVisit.getId()).get();
         assertEquals("Updated Description", foundVisit.getDescription());
+    }
+
+    @Test
+    public void getVisitsByPractitionerIdAndMonth() throws ParseException {
+        Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01");
+        Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-31");
+
+        Visit visitDuring = new Visit(2, new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-10"), "Description", 2);
+        repo.save(visitDuring);
+
+        Visit visitAfter = new Visit(3, new SimpleDateFormat("yyyy-MM-dd").parse("2021-11-16"), "Description", 3);
+        repo.save(visitAfter);
+
+        Visit visitBefore = new Visit(4, new SimpleDateFormat("yyyy-MM-dd").parse("2021-07-26"), "Description", 4);
+        repo.save(visitBefore);
+
+        List<Visit> repoResponse = repo.findAllByDateBetween(startDate, endDate);
+        assertThat(repoResponse, hasSize(2));
     }
 }
 

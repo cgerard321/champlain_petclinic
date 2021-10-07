@@ -25,11 +25,10 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.hasSize;
@@ -261,7 +260,7 @@ public class VisitResourceTest {
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isUnprocessableEntity())
 				.andExpect(result -> assertTrue(result.getResolvedException() instanceof InvalidInputException))
-				.andExpect(result -> assertEquals("Visit description required.", result.getResolvedException().getMessage()));
+				.andExpect(result -> assertEquals("Visit description required.", Objects.requireNonNull(result.getResolvedException()).getMessage()));
 
 
 	}
@@ -279,13 +278,13 @@ public class VisitResourceTest {
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isNotFound())
 				.andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
-				.andExpect(result -> assertEquals("Pet does not exist.", result.getResolvedException().getMessage()));
+				.andExpect(result -> assertEquals("Pet does not exist.", Objects.requireNonNull(result.getResolvedException()).getMessage()));
 	}
 
 	@Test
 	void shouldReturnPreviousVisits() throws Exception {
 		Date beforeNow = new Date(System.currentTimeMillis() - 100000);
-		List<Visit> previousVisits = asList(
+		List<Visit> previousVisits = Collections.singletonList(
 				visit()
 						.id(1)
 						.petId(1)
@@ -303,7 +302,7 @@ public class VisitResourceTest {
 	@Test
 	void shouldReturnScheduledVisits() throws Exception {
 		Date afterNow = new Date(System.currentTimeMillis() + 100000);
-		List<Visit> scheduledVisits = asList(
+		List<Visit> scheduledVisits = Collections.singletonList(
 				visit()
 						.id(1)
 						.petId(1)
@@ -325,7 +324,58 @@ public class VisitResourceTest {
 		mvc.perform(get("/visits/{petId}", -1))
 				.andExpect(status().isUnprocessableEntity())
 				.andExpect(result -> assertTrue(result.getResolvedException() instanceof InvalidInputException))
-				.andExpect(result -> assertEquals("PetId can't be negative.", result.getResolvedException().getMessage()));
+				.andExpect(result -> assertEquals("PetId can't be negative.", Objects.requireNonNull(result.getResolvedException()).getMessage()));
+	}
+
+	@Test
+	void shouldReturnAllVisitsForSpecifiedPractitionerIdAndMonth() throws Exception {
+		Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01");
+		Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-31");
+
+		ArrayList<Date> dates = new ArrayList<>();
+		dates.add(startDate);
+		dates.add(endDate);
+
+		given(visitsService.getVisitsByPractitionerIdAndMonth(1, startDate, endDate))
+				.willReturn(
+						Collections.singletonList(
+								visit()
+										.id(1)
+										.petId(1)
+										.date(new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-15"))
+										.practitionerId(1)
+										.build())
+						);
+
+		mvc.perform(get("/visits/{practitionnerId}", 1)
+						.content(objectMapper.writeValueAsString(dates))
+						.contentType(MediaType.APPLICATION_JSON)
+						.characterEncoding("utf-8")
+						.accept(MediaType.APPLICATION_JSON))
+						.andExpect(status().isOk());
+
+		verify(visitsService, times(1)).getVisitsByPractitionerIdAndMonth(1, startDate, endDate);
+	}
+
+	@Test
+	void whenFetchingWithNegativePractitionerIdShouldHandleInvalidInputException() throws Exception {
+		Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01");
+		Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-31");
+
+		ArrayList<Date> dates = new ArrayList<Date>();
+		dates.add(startDate);
+		dates.add(endDate);
+
+		when(visitsService.getVisitsByPractitionerIdAndMonth(-1, startDate, endDate)).thenThrow(new InvalidInputException("PractitionerId can't be negative."));
+
+		mvc.perform(get("/visits/{practitionnerId}", -1)
+						.content(objectMapper.writeValueAsString(dates))
+						.contentType(MediaType.APPLICATION_JSON)
+						.characterEncoding("utf-8")
+						.accept(MediaType.APPLICATION_JSON))
+						.andExpect(status().isUnprocessableEntity())
+						.andExpect(result -> assertTrue(result.getResolvedException() instanceof InvalidInputException))
+						.andExpect(result -> assertEquals("PractitionerId can't be negative.", Objects.requireNonNull(result.getResolvedException()).getMessage()));
 	}
 
 	// UTILS PACKAGE UNIT TESTING
@@ -334,7 +384,7 @@ public class VisitResourceTest {
 		InvalidInputException ex = assertThrows(InvalidInputException.class, ()->{
 			throw new InvalidInputException();
 		});
-		assertEquals(ex.getMessage(), null);
+		assertNull(ex.getMessage());
 	}
 
 	@Test
@@ -342,7 +392,7 @@ public class VisitResourceTest {
 		InvalidInputException ex = assertThrows(InvalidInputException.class, ()->{
 			throw new InvalidInputException(new Throwable());
 		});
-		assertEquals(ex.getCause().getMessage(), null);
+		assertNull(ex.getCause().getMessage());
 	}
 
 	@Test
@@ -360,13 +410,13 @@ public class VisitResourceTest {
 	}
 
 	@Test
-	void testHttpErrorInfoNullConstructor() throws JsonProcessingException {
+	void testHttpErrorInfoNullConstructor() {
 		HttpErrorInfo httpErrorInfo = new HttpErrorInfo();
 
-		assertEquals(httpErrorInfo.getHttpStatus(), null);
-		assertEquals(httpErrorInfo.getPath(), null);
-		assertEquals(httpErrorInfo.getTimeStamp(), null);
-		assertEquals(httpErrorInfo.getMessage(), null);
+		assertNull(httpErrorInfo.getHttpStatus());
+		assertNull(httpErrorInfo.getPath());
+		assertNull(httpErrorInfo.getTimeStamp());
+		assertNull(httpErrorInfo.getMessage());
 	}
 
 	@Test
@@ -387,8 +437,8 @@ public class VisitResourceTest {
 		NotFoundException ex = assertThrows(NotFoundException.class, ()->{
 			throw new NotFoundException();
 		});
-		assertEquals(ex.getMessage(), null);
-		assertEquals(ex.getCause(), null);
+		assertNull(ex.getMessage());
+		assertNull(ex.getCause());
 	}
 
 	@Test

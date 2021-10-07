@@ -5,6 +5,7 @@ import com.petclinic.visits.datalayer.VisitRepository;
 import com.petclinic.visits.utils.exceptions.InvalidInputException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -91,6 +92,15 @@ public class VisitsServiceImpl implements VisitsService {
             log.debug("Filtering out visits after {}", now);
             visits = visits.stream().filter(v -> v.getDate().before(now)).collect(Collectors.toList());
         }
+        return visits;
+    }
+
+    @Override
+    public List<Visit> getVisitsByPractitionerIdAndMonth(int practitionerId, Date startDate, Date endDate) {
+        List<Visit> visits = visitRepository.findAllByDateBetween(startDate, endDate);
+
+        visits = visits.stream().filter(v -> v.getPractitionerId() == practitionerId).collect(Collectors.toList());
+
         return visits;
     }
 }
