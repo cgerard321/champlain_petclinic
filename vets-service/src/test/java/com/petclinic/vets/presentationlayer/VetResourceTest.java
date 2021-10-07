@@ -356,7 +356,7 @@ class VetResourceTest {
 
 	@Test
 	@DisplayName("Delete Vet Test Valid VetId")
-	void deleteVetValidVetId() throws Exception {
+	void deleteVetValidVetIdShouldDeleteVetFromRepo() throws Exception {
 
 		Vet vet = new Vet();
 		vet.setId(1);
@@ -369,10 +369,11 @@ class VetResourceTest {
 		vet.setWorkday("Monday, Tuesday, Friday");
 		vet.setIsActive(1);
 
-		when(vetRepository.findByVetId(vet.getVetId())).thenReturn(Optional.of(vet));
 		vetRepository.deleteByVetId(vet.getVetId());
-		verify(vetRepository).deleteByVetId(vet.getVetId());
+		mvc.perform(get("/vets/details/874130"))
+				.andExpect(status().isNotFound());
 	}
+
 	@Test
 	@DisplayName("Delete Vet Test Valid VetId Routing and ui response")
 	void deleteVetValidVetIdRoutingAndUiResponse() throws Exception {
@@ -388,12 +389,8 @@ class VetResourceTest {
 		vet.setWorkday("Monday, Tuesday, Friday");
 		vet.setIsActive(1);
 
-		given(vetRepository.findAllEnabledVets()).willReturn(asList(vet));
-
-		vetRepository.deleteByVetId(874130);
-		mvc.perform(get("/vets/details/874130/deleteVet"))
+		mvc.perform(get("/vets/details/874130"))
 				.andExpect(status().isNotFound());
 	}
-
 
 }
