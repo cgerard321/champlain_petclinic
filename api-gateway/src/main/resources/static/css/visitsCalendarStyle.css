@@ -7,7 +7,7 @@
     box-sizing: border-box;
     font-family: "Quicksand", sans-serif;
 
-    /*overflow: auto;*/
+    overflow: auto;
     width: 100%;
     height: auto;
     background-color: #ffffff;
@@ -15,14 +15,13 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    /*padding: 8vh 0 40vh 0;*/
     padding-bottom: 25vh;
 }
 
 .calendar {
     width: 22.5rem;
-    height: 26rem;
-    min-height: 26rem;
+    height: 28rem;
+    min-height: 28rem;
     background-color: #efefef;
 }
 
@@ -47,6 +46,7 @@
     font-weight: 400;
     text-transform: uppercase;
     letter-spacing: 0.2rem;
+    margin-top: 1.2rem;
     margin-bottom: 0.5rem;
 }
 
@@ -67,7 +67,7 @@
     font-size: .75rem;
     font-weight: 600;
     letter-spacing: 0.05rem;
-    width: calc(44.2rem / 7 /2);
+    width: calc(44.2rem / 14);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -87,7 +87,7 @@
     text-decoration: unset;
     margin: 0.15rem;
     padding-top: 0.3rem;
-    width: calc(40.4rem / 7 / 2);
+    width: calc(40.4rem / 14);
     height: 2.5rem;
     display: flex;
     justify-content: center;
@@ -121,6 +121,22 @@
     background-color: #1E9C04 !important;
 }
 
+.today_weekend{
+    background-color: #1E9C04 !important;
+    opacity: 1 !important;
+    pointer-events: none;
+    cursor: default;
+    font-weight: 400 !important;
+}
+
+.today_holiday {
+    background-color: #1E9C04 !important;
+    opacity: 1 !important;
+    pointer-events: none;
+    cursor: default;
+    border-color: rgba(0,0,0,0) !important;
+}
+
 .date-selected {
     background-color: #d3d3d3;
     border: 1px solid #5a5a5a;
@@ -134,6 +150,14 @@
     pointer-events: none;
     cursor: default;
     border-color: rgba(0,0,0,0) !important;
+}
+
+.holiday {
+    font-weight: 400 !important;
+    opacity: 1 !important;
+    pointer-events: none;
+    cursor: default;
+    border-color: #d10e0c !important;
 }
 
 .time-picker {
@@ -170,6 +194,7 @@
     font-weight: 400;
     font-size: 1rem;
     letter-spacing: 0.1rem;
+    margin: 0;
 }
 
 .time-date i {
@@ -192,7 +217,7 @@
     font-size: 0.7rem;
     color: #000;
     margin: 0.25rem;
-    width: calc(40rem / 4 / 2);
+    width: calc(5rem);
     height: 2.5rem;
     display: flex;
     justify-content: center;

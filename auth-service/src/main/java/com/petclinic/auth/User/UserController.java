@@ -1,3 +1,23 @@
+/**
+ * Created by IntelliJ IDEA.
+ *
+ * User: @MaxGrabs
+ * Date: 26/09/21
+ * Ticket: feat(AUTH-CPC-13)
+ *
+ * User: @Trilikin21
+ * Date: 24/09/21
+ * Ticket: feat(AUTH-CPC-64)
+ *
+ * User: @JordanAlbayrak
+ * Date: 24/09/21
+ * Ticket: feat(AUTH-CPC-102)
+ *
+ * User: @Zellyk
+ * Date: 26/09/21
+ * Ticket: feat(AUTH-CPC-104)
+ *
+ */
 package com.petclinic.auth.User;
 
 
@@ -19,21 +39,16 @@ import javax.validation.Valid;
 @RequestMapping("/users")
 @Slf4j
 @RequiredArgsConstructor
-@Validated
 public class UserController {
 
 
-    private final UserRepo userRepo;
     private final UserServiceImpl userServ;
-    private final UserMapper userMapper;
     private final UserService userService;
 
 
     @PostMapping
     public User createUser(@RequestBody @Valid UserIDLessDTO dto) {
 
-        log.info("Received user dto, trying to convert model");
-        log.info("DTO info: { username={}, password={}, email={} }", dto.getUsername(), dto.getPassword(), dto.getEmail());
         log.info("Trying to persist user");
         final User saved = userService.createUser(dto);
         log.info("Successfully persisted user");
@@ -42,16 +57,9 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public void passwordReset(@PathVariable long id,  @RequestBody String pwd){
+    public void passwordReset(@PathVariable long id,  @RequestBody String pwd) throws NotFoundException {
 
-
-        log.info("id={}", id);
-        try {
-            userServ.passwordReset(id,pwd);
-        } catch (NotFoundException e) {
-            log.info("No user with id {}. Ignoring", id);
-            return;
-        }
-        log.info("Password for User with id {}, reset", id);
+        userServ.passwordReset(id,pwd);
+        log.info("Password for User with id {} with new password {}", id, pwd);
     }
 }

@@ -5,8 +5,8 @@ USE petclinic;
 
 CREATE TABLE IF NOT EXISTS billings (
     id INT(4) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    customerId INT,
     visitType VARCHAR(80),
     date DATE,
-    amount DOUBLE,
-    INDEX(visit_type)
+    amount DOUBLE
     ) engine=InnoDB;

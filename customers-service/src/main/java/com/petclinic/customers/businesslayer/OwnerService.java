@@ -7,7 +7,6 @@ import javax.swing.text.html.Option;
 import java.util.List;
 import java.util.Optional;
 
-@Service
 public interface OwnerService {
 
         /**
@@ -28,8 +27,8 @@ public interface OwnerService {
         //DELETE OWNER
         public void deleteOwner(int Id);
 
-        //public Optional<Owner> findOwnerLogin(String username, String password);
 
-        public void addCustodian(Owner owner,String custodian);
+
+
 
 }

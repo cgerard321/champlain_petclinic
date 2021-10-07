@@ -52,8 +52,10 @@ public class Owner {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "owner")
     private Set<Pet> pets;
 
-    @Column(name = "custodian")
-    private String custodian;
+
+//    @Column(name = "custodian")
+//    private String custodian;
+
     public Owner()
     {
 
@@ -68,20 +70,22 @@ public class Owner {
         this.city = city;
         this.telephone = telephone;
     }
-    public Owner(@NotEmpty Integer id, @NotEmpty String firstName, @NotEmpty String lastName,
-                 @NotEmpty String address, @NotEmpty String city, @NotEmpty @Digits(fraction = 0,
-            integer = 10) String telephone, String custodian) {
+
+//    public Owner(@NotEmpty Integer id, @NotEmpty String firstName, @NotEmpty String lastName,
+//                 @NotEmpty String address, @NotEmpty String city, @NotEmpty @Digits(fraction = 0,
+//            integer = 10) String telephone, String custodian) {
+//        this.id = id;
+//        this.firstName = firstName;
+//        this.lastName = lastName;
+//        this.address = address;
+//        this.city = city;
+//        this.telephone = telephone;
+//        this.custodian = custodian;
+//    }
+
+
+    public void setId(Integer id) {
         this.id = id;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.address = address;
-        this.city = city;
-        this.telephone = telephone;
-        this.custodian = custodian;
-    }
-    public Integer setId(Integer id)
-    {
-        return id;
     }
     public Integer getId() {
         return id;
@@ -127,13 +131,16 @@ public class Owner {
         this.telephone = telephone;
     }
 
-    public String getCustodian() {
-        return custodian;
-    }
 
-    public void setCustodian(String custodian) {
-        this.custodian = custodian;
-    }
+//    public String getCustodian() {
+//        return custodian;
+//    }
+//
+//    public void setCustodian(String custodian) {
+//        this.custodian = custodian;
+//    }
+
+
 
     protected Set<Pet> getPetsInternal() {
         if (this.pets == null) {
@@ -151,6 +158,11 @@ public class Owner {
     public void addPet(Pet pet) {
         getPetsInternal().add(pet);
         pet.setOwner(this);
+    }
+
+    public void removePet(Pet pet)
+    {
+        getPetsInternal().remove(pet);
     }
 
     @Override

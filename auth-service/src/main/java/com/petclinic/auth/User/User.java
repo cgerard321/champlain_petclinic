@@ -1,3 +1,23 @@
+/**
+ * Created by IntelliJ IDEA.
+ *
+ * User: @Fube
+ * Date: 21/09/21
+ * Ticket: feat(AUTH-CPC-95)
+ *
+ * User: @MaxGrabs
+ * Date: 26/09/21
+ * Ticket: feat(AUTH-CPC-13)
+ *
+ * User: @Trilikin21
+ * Date: 24/09/21
+ * Ticket: feat(AUTH-CPC-64)
+ *
+ * User: @JordanAlbayrak
+ * Date: 24/09/21
+ * Ticket: feat(AUTH-CPC-102)
+ *
+ */
 package com.petclinic.auth.User;
 
 import com.petclinic.auth.Role.Role;
@@ -27,7 +47,6 @@ public class User {
     private String username;
 
     @NotEmpty
-    @NotNull
     private String password;
 
     @NotEmpty

@@ -8,8 +8,6 @@ import io.micrometer.core.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
@@ -29,18 +27,10 @@ import java.util.Optional;
 @RestController
 @Timed("petclinic.owner")
 @Slf4j
-//@Component
 class OwnerResource {
-
-    //private static final Logger log = LoggerFactory.getLogger(OwnerResource.class);
-    private final OwnerServiceImpl ownerServiceImpl;
-    private final OwnerRepository ownerRepository;
     private final OwnerService ownerService;
 
-    @Autowired
-    OwnerResource(OwnerServiceImpl ownerServiceImpl, OwnerRepository ownerRepository, OwnerService ownerService) {
-        this.ownerServiceImpl = ownerServiceImpl;
-        this.ownerRepository = ownerRepository;
+    OwnerResource(OwnerService ownerService) {
         this.ownerService = ownerService;
     }
 
@@ -50,15 +40,14 @@ class OwnerResource {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Owner createOwner(@Valid @RequestBody Owner owner) {
-        return ownerRepository.save(owner);
+        return ownerService.createOwner(owner);
     }
 
     /**
-     * Read single Owner
+     * Read Single Owner
      */
     @GetMapping(value = "/{ownerId}")
-    public Optional<Owner> findOwner(@PathVariable("ownerId") int ownerId)
-    {
+    public Optional<Owner> findOwner(@PathVariable("ownerId") int ownerId) {
         return ownerService.findByOwnerId(ownerId);
     }
 
@@ -67,8 +56,6 @@ class OwnerResource {
      */
     @GetMapping
     public List<Owner> findAll() {
-
-        //CALLING METHOD FIND ALL
         return ownerService.findAll();
     }
 
@@ -99,14 +86,8 @@ class OwnerResource {
     public void deleteOwner(@PathVariable("ownerId") int ownerId)
     {
         ownerService.deleteOwner(ownerId);
-
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public Owner createCustodian(@PathVariable("custodian")String custodian){
-        return null;
-    }
 }
 
 
