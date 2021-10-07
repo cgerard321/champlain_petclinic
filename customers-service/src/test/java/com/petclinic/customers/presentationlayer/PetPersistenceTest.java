@@ -10,7 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import static org.junit.jupiter.api.Assertions.*;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
@@ -19,25 +21,25 @@ public class PetPersistenceTest {
     @Autowired
     private PetRepository repository;
 //
-//    public Pet setupPet() {
-//        Owner owner = new Owner();
-//        owner.setFirstName("John");
-//        owner.setLastName("Wick");
-//        owner.setTelephone("5144041234");
-//        owner.setCity("Montreal");
-//        owner.setAddress("420 Avenue");
-//
-//        Pet pet = new Pet();
-//        pet.setName("Daisy");
-//        pet.setId(2);
-//
-//        PetType petType = new PetType();
-//        petType.setId(6);
-//        pet.setType(petType);
-//
-//        owner.addPet(pet);
-//        return pet;
-//    }
+    public Pet setupPet() {
+        Owner owner = new Owner();
+        owner.setFirstName("John");
+        owner.setLastName("Wick");
+        owner.setTelephone("5144041234");
+        owner.setCity("Montreal");
+        owner.setAddress("420 Avenue");
+
+        Pet pet = new Pet();
+        pet.setName("Daisy");
+        pet.setId(2);
+
+        PetType petType = new PetType();
+        petType.setId(6);
+        pet.setType(petType);
+
+        owner.addPet(pet);
+        return pet;
+    }
 //
 //    // TEST FOR FINDING PET BY ID
 //    @Test
@@ -82,21 +84,16 @@ public class PetPersistenceTest {
 //        assertEquals(newPet.getName(), savedPet.getName());
 //    }
 //
-//    // TEST FOR DELETING A PET
-//    @Test
-//    public void delete(){
-//        Pet newPet = setupPet();
-//        Pet savedPet = repository.save(newPet);
-//
-//        if(repository.findById(savedPet.getId()).isPresent()){
-//            repository.delete(savedPet);
-//
-//            if(!repository.findById(savedPet.getId()).isPresent()){
-//                System.out.println("Delete Pet worked successfully");
-//            }
-//            else{
-//                System.out.println("Delete Pet did not work");
-//            }
-//        }
-//    }
+
+    @Test
+    public void shouldDeletePet(){
+        Pet newPet = setupPet();
+        Pet savedPet = repository.save(newPet);
+
+        assertThat(repository.findById(savedPet.getId()).isPresent());
+        repository.delete(savedPet);
+
+        Pet foundPet = repository.findById(savedPet.getId()).orElse(null);
+        assertNull(foundPet);
+    }
 }

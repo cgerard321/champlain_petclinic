@@ -2,6 +2,7 @@ package com.petclinic.visits.businesslayer;
 
 import com.petclinic.visits.datalayer.Visit;
 import com.petclinic.visits.datalayer.VisitRepository;
+import com.petclinic.visits.utils.exceptions.InvalidInputException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,16 +19,22 @@ import static org.hamcrest.Matchers.hasSize;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+
 
 import static org.mockito.Mockito.*;
 
 import static org.mockito.Mockito.when;
+
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 
 import javax.swing.text.html.Option;
 import java.sql.Time;
 import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 
@@ -131,13 +138,44 @@ public class VisitsServiceImplTests {
   
     @Test
     public void whenValidPetIdThenShouldCreateVisitForPet() {
-        Visit createdVisit = visit().petId(1).date(new Date()).description("").practitionerId(123456).build();
+        Visit createdVisit = visit().petId(1).date(new Date()).description("Description").practitionerId(123456).build();
         
         when(repo.save(any(Visit.class))).thenReturn(createdVisit);
         
         Visit serviceResponse = visitsService.addVisit(createdVisit);
         
         assertThat(serviceResponse.getPetId(), equalTo(createdVisit.getPetId()));
+    }
+
+    @Test
+    public void whenEmptyDescriptionThenShouldThrowInvalidInputException(){
+        // arrange
+        String expectedExceptionMessage = "Visit description required.";
+        Visit createdVisit = visit().petId(1).date(new Date()).description("").practitionerId(123456).build();
+        when(repo.save(any(Visit.class))).thenReturn(createdVisit);
+
+        // act and assert
+        InvalidInputException ex = assertThrows(InvalidInputException.class, () ->{
+            visitsService.addVisit(createdVisit);
+        });
+        assertEquals(ex.getMessage(), expectedExceptionMessage);
+    }
+
+
+    @Test
+    public void whenVisitIdAlreadyExistsThenThrowInvalidInputException(){
+        // arrange
+        String expectedExceptionMessage;
+        Visit createdVisit = visit().petId(1).date(new Date()).description("Description").practitionerId(123456).build();
+        when(repo.save(any(Visit.class))).thenThrow(DuplicateKeyException.class);
+
+        // act and assert
+        InvalidInputException ex = assertThrows(InvalidInputException.class, () ->{
+            visitsService.addVisit(createdVisit);
+        });
+        expectedExceptionMessage = "Duplicate visitId: " + createdVisit.getId();
+        assertEquals(ex.getMessage(), expectedExceptionMessage);
+        assertThat(ex.getCause()).isInstanceOf(DuplicateKeyException.class);
     }
 
 
@@ -167,5 +205,133 @@ public class VisitsServiceImplTests {
         visitsService.deleteVisit(3);
         verify(repo, never()).delete(vise);
     }
+
+    // TESTS FOR FETCHING VISITS BASED ON DATE
+    @Test
+    public void shouldReturnVisitsAfterNow() throws ParseException {
+        Date afterNow = new Date(System.currentTimeMillis() + 100000);
+        Date beforeNow = new Date(System.currentTimeMillis() - 100000);
+
+        List<Visit> visitsList = asList(
+                visit()
+                        .id(1)
+                        .petId(1)
+                        .date(afterNow)
+                        .build(),
+                visit()
+                        .id(3)
+                        .petId(1)
+                        .date(afterNow)
+                        .build(),
+                visit()
+                        .id(2)
+                        .petId(1)
+                        .date(beforeNow)
+                        .build());
+
+        when(repo.findByPetId(1)).thenReturn(visitsList);
+
+        List<Visit> returnedVisits = visitsService.getVisitsForPet(1, true);
+
+        assertEquals(2, returnedVisits.size());
+
+    }
+
+    @Test
+    public void shouldReturnVisitsBeforeNow() throws ParseException {
+        Date afterNow = new Date(System.currentTimeMillis() + 100000);
+        Date beforeNow = new Date(System.currentTimeMillis() - 100000);
+
+        List<Visit> visitsList = asList(
+                visit()
+                        .id(1)
+                        .petId(1)
+                        .date(afterNow)
+                        .build(),
+                visit()
+                        .id(3)
+                        .petId(1)
+                        .date(afterNow)
+                        .build(),
+                visit()
+                        .id(2)
+                        .petId(1)
+                        .date(beforeNow)
+                        .build());
+
+        when(repo.findByPetId(1)).thenReturn(visitsList);
+
+        List<Visit> returnedVisits = visitsService.getVisitsForPet(1, false);
+
+        assertEquals(1, returnedVisits.size());
+
+    }
+
+    @Test
+    public void shouldReturnEmptyListWhenNoScheduledVisits(){
+        Date beforeNow = new Date(System.currentTimeMillis() - 100000);
+
+        List<Visit> visitsList = asList(
+                visit()
+                        .id(1)
+                        .petId(1)
+                        .date(beforeNow)
+                        .build(),
+                visit()
+                        .id(3)
+                        .petId(1)
+                        .date(beforeNow)
+                        .build(),
+                visit()
+                        .id(2)
+                        .petId(1)
+                        .date(beforeNow)
+                        .build());
+
+        when(repo.findByPetId(1)).thenReturn(visitsList);
+
+        List<Visit> returnedVisits = visitsService.getVisitsForPet(1, true);
+
+        assertEquals(0, returnedVisits.size());
+    }
+
+    @Test
+    public void shouldReturnEmptyListWhenNoPreviousVisits(){
+        Date afterNow = new Date(System.currentTimeMillis() + 100000);
+
+        List<Visit> visitsList = asList(
+                visit()
+                        .id(1)
+                        .petId(1)
+                        .date(afterNow)
+                        .build(),
+                visit()
+                        .id(3)
+                        .petId(1)
+                        .date(afterNow)
+                        .build(),
+                visit()
+                        .id(2)
+                        .petId(1)
+                        .date(afterNow)
+                        .build());
+
+        when(repo.findByPetId(1)).thenReturn(visitsList);
+
+        List<Visit> returnedVisits = visitsService.getVisitsForPet(1, false);
+
+        assertEquals(0, returnedVisits.size());
+    }
+
+    @Test
+    public void shouldThrowInvalidInputExceptionWhenFetchingWithNegativePetId(){
+        InvalidInputException ex = assertThrows(InvalidInputException.class, () ->{
+            visitsService.getVisitsForPet(-1, true);
+        });
+
+        assertEquals("PetId can't be negative.", ex.getMessage());
+    }
+
+
 
 }
