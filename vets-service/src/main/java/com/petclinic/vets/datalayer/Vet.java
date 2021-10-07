@@ -23,6 +23,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlElement;
 import java.io.IOException;
+import java.sql.Blob;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -36,6 +37,12 @@ import java.util.regex.Pattern;
  * @author Arjen Poutsma
  * @author Maciej Szarlinski
  * Copied from https://github.com/spring-petclinic/spring-petclinic-microservices
+ */
+
+/**
+ * @autor Christian Chitanu
+ * @ImplementationDate October 7th, 2021
+ * @Implementation Added Blob field for image file in
  */
 
 @Entity
@@ -69,6 +76,10 @@ public class Vet {
     @Column(name = "phone_number")
     @NotEmpty
     private String phoneNumber;
+
+    @Column(name = "image")
+    @Lob
+    private Blob image;
 
     @Column(name = "resume")
     private String resume;
