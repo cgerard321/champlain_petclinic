@@ -20,16 +20,6 @@ public class OwnerServiceImpl implements OwnerService {
 
     private final OwnerRepository repository;
 
-    /*
-    @Autowired
-    public OwnerServiceImpl(OwnerRepository repository){
-
-        this.repository = repository;
-    }
-    */
-
-
-    @Autowired
     public OwnerServiceImpl(OwnerRepository repository){
         this.repository = repository;
     }
@@ -74,22 +64,6 @@ public class OwnerServiceImpl implements OwnerService {
      * Is used by the login system
      */
 
-    
-    /*
-    @Override
-    public Optional<Owner> findOwnerLogin(String username, String password) {
-        try {
-            Optional<Owner> account = repository.findAccount(username, password);
-            LOG.debug("User has been found. Logging in now.");
-            return account;
-        }
-        catch (Exception e)
-        {
-            throw new NotFoundException("Error has occurred. The information entered is incorrect. Please try again");
-        }
-    }
-    */
-
 
     @Override
     public void updateOwner() {
@@ -119,30 +93,6 @@ public class OwnerServiceImpl implements OwnerService {
     @Override
     public void deleteOwner(int Id) {
 
-    /*
-        if (repository.findById(Id).isPresent())
-        {
-            repository.deleteById(Id);
-        }
-        else
-        {
-            throw new NotFoundException("Tried to delete ID: " + Id + " but was not found");
-        }
-
-
-        if (repository.findById(Id).isPresent())
-        {
-            Optional<Owner> owner = repository.findById(Id);
-            repository.delete(owner.get());
-            LOG.debug("User with ID: " + Id + " has been deleted successfully.");
-        }
-        else
-        {
-            LOG.debug("ERROR WITH ID: " + Id);
-        }
-
-
-    */
         repository.findById(Id).ifPresent(o -> repository.delete(o));
         LOG.debug("User with ID: " + Id + " has been deleted successfully.");
 
