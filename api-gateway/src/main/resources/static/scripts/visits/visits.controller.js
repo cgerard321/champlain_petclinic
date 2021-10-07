@@ -124,6 +124,7 @@ angular.module('visits')
         self.deleteVisit = function (visitId){
             $http.delete("api/gateway/visits/" + visitId).then(function () {
                 self.visits.splice(visitId, 1);
+                window.location.reload();
             }, function (response) {
                 var error = response.data;
                 alert(error.error + "\r\n" + error.errors.map(function (e) {
