@@ -70,9 +70,6 @@ class ApiGatewayControllerTest {
     private BillServiceClient billServiceClient;
 
 
-    @MockBean
-    private AuthServiceClient authenticationServiceClient;
-
     @Autowired
     private WebTestClient client;
 
@@ -95,6 +92,7 @@ class ApiGatewayControllerTest {
         visits.getItems().add(visit);
         when(visitsServiceClient.getVisitsForPets(Collections.singletonList(cat.getId())))
                 .thenReturn(Mono.just(visits));
+        // java.lang.IllegalStateException at Assert.java:97
 
         client.get()
                 .uri("/api/gateway/owners/1")
