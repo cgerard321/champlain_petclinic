@@ -33,6 +33,13 @@ public class BillDTO {
         this.amount = amount;
     }
 
+    public BillDTO(int billId,int customerId, Date date, String visitType){
+        this.billId = billId;
+        this.customerId = customerId;
+        this.date = date;
+        this.visitType = visitType;
+    }
+
 
 
     public int getBillId(){
@@ -42,7 +49,7 @@ public class BillDTO {
     public Date getDate(){
         return date;
     }
-    public String getVisiType(){
+    public String getVisitType(){
         return visitType;
     }
     public double getAmount(){
