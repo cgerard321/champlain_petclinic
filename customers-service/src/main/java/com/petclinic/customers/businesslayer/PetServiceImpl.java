@@ -17,11 +17,13 @@ public class PetServiceImpl implements PetService {
     private static final Logger LOG = LoggerFactory.getLogger(PetServiceImpl.class);
 
     private final PetRepository petRepository;
-    private final OwnerRepository ownerRepository;
 
-    public PetServiceImpl(OwnerRepository ownerRepository, PetRepository petRepository) {
-        this.ownerRepository = ownerRepository;
-        this.petRepository = petRepository; }
+    private final OwnerService ownerService;
+
+    public PetServiceImpl(PetRepository petRepository, OwnerService ownerService) {
+        this.petRepository = petRepository;
+        this.ownerService = ownerService;
+    }
 
 
     /**
@@ -66,7 +68,7 @@ public class PetServiceImpl implements PetService {
     public Pet CreatePet(PetRequest petRequest, int ownerId)
     {
         Pet pet = new Pet();
-        Optional<Owner> optionalOwner = ownerRepository.findById(ownerId);
+        Optional<Owner> optionalOwner = ownerService.findByOwnerId(ownerId);
         Owner owner = optionalOwner.orElseThrow(() -> new NotFoundException("Owner "+ ownerId +" not found"));
         owner.addPet(pet);
 
@@ -86,7 +88,7 @@ public class PetServiceImpl implements PetService {
     @Override
     public void deletePet(int petId, int ownerId) {
         //Search pet owner
-        Optional<Owner> optionalOwner = ownerRepository.findById(ownerId);
+        Optional<Owner> optionalOwner = ownerService.findByOwnerId(ownerId);
         Owner owner = optionalOwner.orElseThrow(() -> new NotFoundException("Owner "+ ownerId +" not found"));
 
         //Search the pet
