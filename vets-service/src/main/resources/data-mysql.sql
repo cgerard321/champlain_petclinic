@@ -5,9 +5,9 @@ INSERT IGNORE INTO vets VALUES (4, 823097, 'Rafael', 'Ortega', 'ortega.rafael@em
 INSERT IGNORE INTO vets VALUES (5, 842370, 'Henry', 'Stevens', 'stevens.henry@email.com', '(514)-634-8276 #2389',NULL, 'Practicing since 1 years', 'Monday, Tuesday, Wednesday, Thursday', 0);
 INSERT IGNORE INTO vets VALUES (6, 784233, 'Sharon', 'Jenkins', 'jenkins.sharon@email.com', '(514)-634-8276 #2383',NULL, 'Practicing since 6 years', 'Monday, Tuesday, Friday', 0);
 
-INSERT IGNORE INTO specialties VALUES (1, 'radiology');
-INSERT IGNORE INTO specialties VALUES (2, 'surgery');
-INSERT IGNORE INTO specialties VALUES (3, 'dentistry');
+INSERT IGNORE INTO specialties VALUES (1,100001, 'radiology');
+INSERT IGNORE INTO specialties VALUES (2,100002, 'surgery');
+INSERT IGNORE INTO specialties VALUES (3,100003, 'dentistry');
 
 INSERT IGNORE INTO vet_specialties VALUES (2, 1);
 INSERT IGNORE INTO vet_specialties VALUES (3, 2);

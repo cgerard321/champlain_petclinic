@@ -10,7 +10,7 @@ CREATE TABLE vets
     last_name  VARCHAR(30),
     email      VARCHAR(100),
     phone_number VARCHAR(30),
-    image       VARBINARY(max),
+    image       LONGBLOB,
     resume     VARCHAR(350),
     workday    VARCHAR(250),
     is_active  BIT
@@ -20,6 +20,7 @@ CREATE INDEX vets_last_name ON vets (last_name);
 CREATE TABLE specialties
 (
     id   INTEGER IDENTITY PRIMARY KEY,
+    specialty_id INTEGER (6),
     name VARCHAR(80)
 );
 CREATE INDEX specialties_name ON specialties (name);
