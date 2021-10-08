@@ -1,1 +1,0 @@
-ALTER TABLE auth.USERS_ROLES RENAME TO auth.users_roles
