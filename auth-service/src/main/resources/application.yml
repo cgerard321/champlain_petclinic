@@ -6,6 +6,7 @@ spring:
     url: jdbc:mysql://localhost:3310/auth
     username: user
     password: pwd
+
   flyway:
     url: jdbc:mysql://localhost:3310
     schemas: auth
@@ -36,14 +37,14 @@ spring:
       enabled: true
 
   flyway:
-    url: jdbc:h2:mem:auth;DB_CLOSE_DELAY=-1
+    url: jdbc:h2:mem:auth;DATABASE_TO_UPPER=false;CASE_INSENSITIVE_IDENTIFIERS=TRUE;DB_CLOSE_DELAY=-1
     baseline-on-migrate: true
     user: sa
     password:
 
   datasource:
     platform: h2
-    url: jdbc:h2:mem:auth;DB_CLOSE_DELAY=-1
+    url: jdbc:h2:mem:auth;DATABASE_TO_UPPER=false;CASE_INSENSITIVE_IDENTIFIERS=TRUE;DB_CLOSE_DELAY=-1
     driver-class-name: org.h2.Driver
     username: sa
     password:
