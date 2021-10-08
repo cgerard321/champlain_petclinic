@@ -31,8 +31,9 @@ public interface VetRepository extends JpaRepository<Vet, Integer>
     @Query(value = "SELECT v FROM Vet v WHERE v.isActive = 1")
     List<Vet> findAllEnabledVets();
 
+
     @Modifying
-    @Query(value = "DELETE FROM Vet v WHERE v.vetId=:vetId")
+    @Query(value = "DELETE FROM Vet v WHERE v.vetId=?1")
     void deleteByVetId(@Param("vetId") int vetId);
 }
 

@@ -3,6 +3,8 @@ package com.petclinic.vets.presentationlayer;
 import com.petclinic.vets.businesslayer.VetService;
 import com.petclinic.vets.datalayer.Vet;
 import com.petclinic.vets.datalayer.VetRepository;
+import com.petclinic.vets.utils.exceptions.InvalidInputException;
+import com.petclinic.vets.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -123,13 +125,6 @@ public class VetBusinessLayerTest
     }
 
     @Test
-    public void deleteVetByVetId(){
-        assertEquals(vetService.getAllVets().size(),4);
-        vetService.deleteVetByVetId(234568);
-        assertEquals(vetService.getAllVets().size(),3);
-    }
-
-    @Test
     @DisplayName("Enable Vet Service Test")
     public void enableVetTest(){
         Vet activeVet = new Vet();
@@ -153,4 +148,13 @@ public class VetBusinessLayerTest
         assertEquals(resultVet.getFirstName(),"James");
         assertEquals(resultVet.getIsActive(),0);
     }
+
+    @Test
+    @DisplayName("Delete Vet Service Test")
+    public void deleteVetByVetId(){
+        assertEquals(vetService.getAllVets().size(),4);
+        vetService.deleteVetByVetId(234568);
+        assertEquals(vetService.getAllVets().size(),3);
+    }
+
 }

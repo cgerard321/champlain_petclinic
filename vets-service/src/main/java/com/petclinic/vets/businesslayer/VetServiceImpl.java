@@ -91,5 +91,6 @@ public class VetServiceImpl implements VetService {
         Vet foundVet = vetRepository.findByVetId(vetId)
                 .orElseThrow(() -> new NotFoundException(String.format("No vet found for vetId: {vetId} ", vetId)));
         vetRepository.delete(foundVet);
+        //return "redirect:/vets"; <-- redirect to list after ??
     }
 }

@@ -16,6 +16,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -35,8 +37,7 @@ import java.util.Optional;
 import static  org.hamcrest.MatcherAssert.assertThat;
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.hasValue;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -355,8 +356,8 @@ class VetResourceTest {
 	}
 
 	@Test
-	@DisplayName("Delete Vet Test Valid VetId")
-	void deleteVetValidVetIdShouldDeleteVetFromRepo() throws Exception {
+	@DisplayName("Delete Vet Test Valid VetId Routing and ui response")
+	void deleteVetValidVetIdRoutingAndUiResponse1() throws Exception {
 
 		Vet vet = new Vet();
 		vet.setId(1);
@@ -375,8 +376,8 @@ class VetResourceTest {
 	}
 
 	@Test
-	@DisplayName("Delete Vet Test Valid VetId Routing and ui response")
-	void deleteVetValidVetIdRoutingAndUiResponse() throws Exception {
+	@DisplayName("Delete Vet Test Valid VetId")
+	void deleteVetValidVetIdShouldDeleteVetFromRepo() throws Exception {
 
 		Vet vet = new Vet();
 		vet.setId(1);
@@ -389,8 +390,10 @@ class VetResourceTest {
 		vet.setWorkday("Monday, Tuesday, Friday");
 		vet.setIsActive(1);
 
-		mvc.perform(get("/vets/details/874130"))
-				.andExpect(status().isNotFound());
-	}
+		given(vetRepository.findByVetId(vet.getVetId())).willReturn(Optional.of(vet));
 
+		mvc.perform(delete("/vets/"+vet.getVetId()).accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+
+	}
 }
