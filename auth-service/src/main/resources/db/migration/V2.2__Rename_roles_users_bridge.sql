@@ -1,0 +1,1 @@
+RENAME TABLE auth.USERS_ROLES TO auth.users_roles
