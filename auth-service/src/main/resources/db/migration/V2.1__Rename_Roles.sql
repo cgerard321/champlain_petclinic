@@ -1,1 +1,1 @@
-RENAME TABLE auth.ROLES TO auth.roles;
+ALTER TABLE auth.ROLES RENAME TO auth.roles;

@@ -1,1 +1,1 @@
-RENAME TABLE auth.USERS TO auth.users;
+ALTER TABLE auth.USERS RENAME TO auth.users;
