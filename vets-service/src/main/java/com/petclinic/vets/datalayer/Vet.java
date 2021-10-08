@@ -40,10 +40,10 @@ import java.util.regex.Pattern;
  */
 
 /**
- * @autor Christian Chitanu
- * @ImplementationDate October 7th, 2021
- * @Implementation Added Blob field for image file in
- * @Source https://medium.com/@rameez.s.shaikh/upload-and-retrieve-images-using-spring-boot-angular-8-mysql-18c166f7bc98
+ * @author Christian Chitanu
+ * Date: October 7th, 2021
+ * Implementation: Added Blob field for image file in
+ * {@link} https://medium.com/@rameez.s.shaikh/upload-and-retrieve-images-using-spring-boot-angular-8-mysql-18c166f7bc98
  *
  */
 

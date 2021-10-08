@@ -25,8 +25,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.zip.DataFormatException;
+import java.util.zip.Deflater;
+import java.util.zip.Inflater;
 
 /**
  * @author Juergen Hoeller
@@ -54,7 +60,11 @@ class VetResource {
 
     @GetMapping
     public List<Vet> showResourcesVetList() {
-        return vetService.getAllEnabledVets();
+        List<Vet> vetList = vetService.getAllDisabledVets();
+        for(Vet vet: vetList){                              //decompress all images returned in order for them
+            vet.setImage(decompressBytes(vet.getImage()));  //to be in right format for front-end
+        }
+        return vetList;
     }
 
 //    @GetMapping("/enabled")
@@ -74,7 +84,10 @@ class VetResource {
         LOG.debug("/vet MS return the found product for vetId: " + vetId);
 
         if(vetId < 1) throw new InvalidInputException("Invalid vetId: " + vetId);
-        return vetService.getVetByVetId(vetId);
+
+        Vet vet = vetService.getVetByVetId(vetId);
+        vet.setImage(decompressBytes(vet.getImage()));
+        return vet;
     }
 
     @PostMapping(
@@ -113,6 +126,43 @@ class VetResource {
         return vet;
     }
 
+        //This method is used to compress the vet Image before storing it in the database
+        public static byte[] compressBytes(byte[] data){
+                Deflater deflater = new Deflater();
+                deflater.setInput(data);
+                deflater.finish();
 
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream(data.length);
+                byte[] buffer = new byte[1024];
+                while(!deflater.finished()) {
+                    int count = deflater.deflate(buffer);
+                    outputStream.write(buffer, 0, count);
+                }
+                try {
+                    outputStream.close();
+                }catch (IOException e) {
+                }
+                return outputStream.toByteArray();
+            }
 
+        public static byte[] decompressBytes(byte[] data) {
+            Inflater inflater = new Inflater();
+            inflater.setInput(data);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream(data.length);
+            byte[] buffer = new byte[1024];
+            try {
+                while (!inflater.finished()) {
+                    int count = inflater.inflate(buffer);
+                    outputStream.write(buffer, 0, count);
+                }
+                outputStream.close();
+            } catch (IOException ioe) {
+            } catch (DataFormatException e) {
+            }
+            return outputStream.toByteArray();
+        }
 }
+
+
+
+
