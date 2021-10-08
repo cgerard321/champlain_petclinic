@@ -20,7 +20,7 @@ public class UserServiceImpl implements UserService{
     private final UserMapper userMapper;
 
     @Override
-    public User findUserById(long id) {
+    public User getUserById(long id) {
         User entity  = userRepo.findById(id)
                 .orElseThrow(() -> new NotFoundException("No user found for userID" + id));
         log.info("User getUserById: found userId: {}", entity.getId());

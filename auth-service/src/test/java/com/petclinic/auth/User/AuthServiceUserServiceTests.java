@@ -64,6 +64,7 @@ public class AuthServiceUserServiceTests {
         Optional<User> find = userRepo.findById(user.getId());
         assertTrue(find.isPresent());
         assertEquals(NEWPASSWORD, user.getPassword());
+        assertEquals(NEWPASSWORD, find.get().getPassword());
     }
 
     @Test
@@ -90,7 +91,7 @@ public class AuthServiceUserServiceTests {
     void get_user_by_id() throws NotFoundException {
         User user = new User(USER, PASS, EMAIL);
         User saved = userRepo.save(user);
-        User found = userService.findUserById(saved.getId());
+        User found = userService.getUserById(saved.getId());
         assertEquals(saved.getId(), found.getId());
     }
 
@@ -99,7 +100,7 @@ public class AuthServiceUserServiceTests {
     void get_user_by_id_and_fail() {
         long id = 1;
         assertFalse(userRepo.findById(id).isPresent());
-        assertThrows(NotFoundException.class, () -> userService.findUserById(id));
+        assertThrows(NotFoundException.class, () -> userService.getUserById(id));
     }
 
     @Test

@@ -24,9 +24,9 @@ public interface UserService {
 
     User createUser(UserIDLessDTO user);
 
-    User passwordReset(long id, String passwd);
+    User passwordReset(long id, String newPassword);
 
-    User findUserById(long id);
+    User getUserById(long id);
 
     Page<User> findAll(PageRequest of);
 
