@@ -163,6 +163,4 @@ public class VetBusinessLayerTest
         assertEquals(vetService.getAllVets().size(),4);
         assertThrows(NotFoundException.class, () -> vetService.deleteVetByVetId(1));
     }
-
-
 }
