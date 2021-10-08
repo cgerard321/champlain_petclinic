@@ -150,11 +150,19 @@ public class VetBusinessLayerTest
     }
 
     @Test
-    @DisplayName("Delete Vet Service Test")
+    @DisplayName("Delete Vet Service Test Valid Id")
     public void deleteVetByVetId(){
         assertEquals(vetService.getAllVets().size(),4);
         vetService.deleteVetByVetId(234568);
         assertEquals(vetService.getAllVets().size(),3);
     }
+    @Test
+    @DisplayName("Delete Vet Service Test Invalid VetId")
+    public void deleteVetByVetIdInvlaidId(){
+        assertEquals(vetService.getVetByVetId(234568).getFirstName(), "James");
+        assertEquals(vetService.getAllVets().size(),4);
+        assertThrows(NotFoundException.class, () -> vetService.deleteVetByVetId(1));
+    }
+
 
 }
