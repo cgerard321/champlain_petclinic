@@ -61,9 +61,6 @@ class VetResource {
     @GetMapping
     public List<Vet> showResourcesVetList() {
         List<Vet> vetList = vetService.getAllEnabledVets();
-        for(Vet vet: vetList){                              //decompress all images returned in order for them
-            vet.setImage(decompressBytes(vet.getImage()));  //to be in right format for front-end
-        }
         return vetList;
     }
 
@@ -75,9 +72,6 @@ class VetResource {
     @GetMapping("/disabled")
     public List<Vet> showResourcesVetDisabledList() {
         List<Vet> vetList = vetService.getAllDisabledVets();
-        for(Vet vet: vetList){                              //decompress all images returned in order for them
-            vet.setImage(decompressBytes(vet.getImage()));  //to be in right format for front-end
-        }
         return vetList;
     }
 
@@ -90,7 +84,6 @@ class VetResource {
         if(vetId < 1) throw new InvalidInputException("Invalid vetId: " + vetId);
 
         Vet vet = vetService.getVetByVetId(vetId);
-        vet.setImage(decompressBytes(vet.getImage()));
         return vet;
     }
 
@@ -131,40 +124,40 @@ class VetResource {
     }
 
         //This method is used to compress the vet Image before storing it in the database
-        public static byte[] compressBytes(byte[] data){
-                Deflater deflater = new Deflater();
-                deflater.setInput(data);
-                deflater.finish();
-
-                ByteArrayOutputStream outputStream = new ByteArrayOutputStream(data.length);
-                byte[] buffer = new byte[1024];
-                while(!deflater.finished()) {
-                    int count = deflater.deflate(buffer);
-                    outputStream.write(buffer, 0, count);
-                }
-                try {
-                    outputStream.close();
-                }catch (IOException e) {
-                }
-                return outputStream.toByteArray();
-            }
-
-        public static byte[] decompressBytes(byte[] data) {
-            Inflater inflater = new Inflater();
-            inflater.setInput(data);
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream(data.length);
-            byte[] buffer = new byte[1024];
-            try {
-                while (!inflater.finished()) {
-                    int count = inflater.inflate(buffer);
-                    outputStream.write(buffer, 0, count);
-                }
-                outputStream.close();
-            } catch (IOException ioe) {
-            } catch (DataFormatException e) {
-            }
-            return outputStream.toByteArray();
-        }
+//        public static byte[] compressBytes(byte[] data){
+//                Deflater deflater = new Deflater();
+//                deflater.setInput(data);
+//                deflater.finish();
+//
+//                ByteArrayOutputStream outputStream = new ByteArrayOutputStream(data.length);
+//                byte[] buffer = new byte[1024];
+//                while(!deflater.finished()) {
+//                    int count = deflater.deflate(buffer);
+//                    outputStream.write(buffer, 0, count);
+//                }
+//                try {
+//                    outputStream.close();
+//                }catch (IOException e) {
+//                }
+//                return outputStream.toByteArray();
+//            }
+//
+//        public static byte[] decompressBytes(byte[] data) {
+//            Inflater inflater = new Inflater();
+//            inflater.setInput(data);
+//            ByteArrayOutputStream outputStream = new ByteArrayOutputStream(data.length);
+//            byte[] buffer = new byte[1024];
+//            try {
+//                while (!inflater.finished()) {
+//                    int count = inflater.inflate(buffer);
+//                    outputStream.write(buffer, 0, count);
+//                }
+//                outputStream.close();
+//            } catch (IOException ioe) {
+//            } catch (DataFormatException e) {
+//            }
+//            return outputStream.toByteArray();
+//        }
 }
 
 
