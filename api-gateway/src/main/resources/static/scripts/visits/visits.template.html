@@ -499,5 +499,6 @@
         <td style="white-space: pre-line">{{v.description}}</td>
         <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>
         <td><button class="btn btn-default" ng-click="$ctrl.switchToUpdateForm(v.practitionerId, v.date, v.description, v.id)">Edit Visit</button></td>
+        <td><button class="btn btn-danger" ng-click="$ctrl.deleteVisit(v.id)">Delete visit</button></td>
     </tr>
 </table>
