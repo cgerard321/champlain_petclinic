@@ -60,7 +60,7 @@ class VetResource {
 
     @GetMapping
     public List<Vet> showResourcesVetList() {
-        List<Vet> vetList = vetService.getAllDisabledVets();
+        List<Vet> vetList = vetService.getAllEnabledVets();
         for(Vet vet: vetList){                              //decompress all images returned in order for them
             vet.setImage(decompressBytes(vet.getImage()));  //to be in right format for front-end
         }
@@ -74,7 +74,11 @@ class VetResource {
 
     @GetMapping("/disabled")
     public List<Vet> showResourcesVetDisabledList() {
-        return vetService.getAllDisabledVets();
+        List<Vet> vetList = vetService.getAllDisabledVets();
+        for(Vet vet: vetList){                              //decompress all images returned in order for them
+            vet.setImage(decompressBytes(vet.getImage()));  //to be in right format for front-end
+        }
+        return vetList;
     }
 
 

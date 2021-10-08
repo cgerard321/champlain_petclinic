@@ -42,7 +42,7 @@ import java.util.regex.Pattern;
 /**
  * @author Christian Chitanu
  * Date: October 7th, 2021
- * Implementation: Added Blob field for image file in
+ * Implementation: Added Blob field for image file
  * {@link} https://medium.com/@rameez.s.shaikh/upload-and-retrieve-images-using-spring-boot-angular-8-mysql-18c166f7bc98
  *
  */
