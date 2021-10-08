@@ -1,0 +1,1 @@
+RENAME TABLE auth.USERS TO auth.users;
