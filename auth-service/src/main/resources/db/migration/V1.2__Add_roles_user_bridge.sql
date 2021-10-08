@@ -6,13 +6,13 @@
  * Ticket: feat(AUTH-CPC-59)
  *
  */
-CREATE TABLE auth.USERS_ROLES(
+CREATE TABLE auth.users_roles(
     id INT NOT NULL AUTO_INCREMENT,
     user_id INT NOT NULL,
     role_id INT NOT NULL,
     FOREIGN KEY(user_id)
-        REFERENCES auth.USERS(id),
+        REFERENCES auth.users(id),
     FOREIGN KEY(role_id)
-         REFERENCES auth.ROLES(ID),
+         REFERENCES auth.roles(id),
     PRIMARY KEY(id)
 );
