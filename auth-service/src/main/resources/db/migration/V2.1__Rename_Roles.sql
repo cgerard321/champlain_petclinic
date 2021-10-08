@@ -1,0 +1,1 @@
+RENAME TABLE auth.ROLES TO auth.roles;
