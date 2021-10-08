@@ -2,18 +2,21 @@ package com.petclinic.customers.presentationlayer;
 
 import com.petclinic.customers.businesslayer.OwnerService;
 import com.petclinic.customers.businesslayer.PetService;
-import com.petclinic.customers.datalayer.Owner;
+import com.petclinic.customers.datalayer.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import java.util.List;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Optional;
 
 import static java.util.Arrays.asList;
@@ -30,8 +33,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 
 @ExtendWith(SpringExtension.class)
-@WebMvcTest(OwnerResource.class)
-class OwnerAPITest {
+@WebMvcTest(PetResource.class)
+@ActiveProfiles("test")
+class PetAPITest {
 
     @Autowired
     MockMvc mvc;
@@ -43,53 +47,61 @@ class OwnerAPITest {
     PetService petService;
 
 
-    //SIMPLE OWNER OBJECT CREATION METHOD
-    //*** Used for testing only ***
-    private Owner setupOwner() {
-
+    public Owner setupOwner()
+    {
         Owner owner = new Owner();
-        owner.setId(5);
+        owner.setId(1);
         owner.setFirstName("John");
         owner.setLastName("Wick");
-        owner.setAddress("56 John St.");
-        owner.setCity("Amsterdam");
-        owner.setTelephone("9999999999");
+        owner.setTelephone("5144041234");
+        owner.setCity("Montreal");
+        owner.setAddress("420 Avenue");
 
         return owner;
     }
 
+    public Pet setupPet() {
 
+        Owner owner = setupOwner();
+
+        Pet pet = new Pet();
+        pet.setName("Daisy");
+        pet.setId(2);
+
+        PetType petType = new PetType();
+        petType.setId(6);
+        pet.setType(petType);
+
+        owner.addPet(pet);
+        return pet;
+    }
 
     /**
-     * ------------------------ FIND_BY_ID_OWNER_API_TEST ------------------------
+     * ------------------------ FIND_BY_PET_ID_API_TEST ------------------------
      * Test an HTTP Get Request
      */
     @Test
-    void findByOwnerId_API_TEST() throws Exception {
+    void findByPetId_API_TEST() throws Exception {
 
-        Owner owner = setupOwner();
-        given(ownerService.findByOwnerId(5)).willReturn(Optional.of(owner));
-        mvc.perform(get("/owners/5").accept(MediaType.APPLICATION_JSON))
+        Pet pet = setupPet();
+        given(petService.findByPetId(2)).willReturn(Optional.of(pet));
+        mvc.perform(get("/owners/*/pets/2").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"))
-                .andExpect(jsonPath("$.id").value(5))
-                .andExpect(jsonPath("$.firstName").value("John"))
-                .andExpect(jsonPath("$.lastName").value("Wick"))
-                .andExpect(jsonPath("$.address").value("56 John St."))
-                .andExpect(jsonPath("$.city").value("Amsterdam"))
-                .andExpect(jsonPath("$.telephone").value("9999999999"));
+                .andExpect(jsonPath("$.id").value(2))
+                .andExpect(jsonPath("$.name").value("Daisy"));
     }
 
 
     /**
-     * ------------------------ DELETE_OWNER_API_TEST ------------------------
+     * ------------------------ DELETE_PET_API_TEST ------------------------
      * Test an HTTP Delete Request
      */
     @Test
-    void deleteOwner_API_TEST() throws Exception {
-        mvc.perform(delete("/owners/5").accept(MediaType.APPLICATION_JSON))
+    void deletePet_API_TEST() throws Exception {
+        mvc.perform(delete("/owners/1/pets/2").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
-        verify(ownerService, times(1)).deleteOwner(5);
+        verify(petService, times(1)).deletePet(2, 1);
     }
 
     /**
@@ -100,32 +112,20 @@ class OwnerAPITest {
     void findAll_API_TEST() throws Exception {
 
         //TEST DATA
-        Owner owner_1 = new Owner();
-        owner_1.setId(1);
-        owner_1.setFirstName("John");
-        owner_1.setLastName("Wick");
-        owner_1.setAddress("56 John St.");
-        owner_1.setCity("Amsterdam");
-        owner_1.setTelephone("9999999999");
+        Pet pet_1 = new Pet();
+        pet_1.setId(1);
+        pet_1.setName("John");
 
-        Owner owner_2 = new Owner();
-        owner_2.setId(2);
-        owner_2.setFirstName("Sean");
-        owner_2.setLastName("Bean");
-        owner_2.setAddress("678 Rue Tremblay");
-        owner_2.setCity("Montreal");
-        owner_2.setTelephone("0123456789");
+        Pet pet_2 = new Pet();
+        pet_2.setId(2);
+        pet_2.setName("John");
 
-        Owner owner_3 = new Owner();
-        owner_3.setId(3);
-        owner_3.setFirstName("Jean-Michel");
-        owner_3.setLastName("Test");
-        owner_3.setAddress("111 Test St.");
-        owner_3.setCity("Testopolis");
-        owner_3.setTelephone("9876543210");
+        Pet pet_3 = new Pet();
+        pet_3.setId(3);
+        pet_3.setName("John");
 
-        given(ownerService.findAll()).willReturn(asList(owner_1, owner_2, owner_3));
-        mvc.perform(get("/owners").accept(MediaType.APPLICATION_JSON))
+        given(petService.findAll()).willReturn(asList(pet_1, pet_2, pet_3));
+        mvc.perform(get("/owners/*/pets").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1))
                 .andExpect(jsonPath("$[1].id").value(2))
@@ -137,18 +137,27 @@ class OwnerAPITest {
      * ------------------------ CREATE_OWNER ------------------------
      * Test an HTTP POST request
      */
+
+    /*
     @Test
     void createOwner_API_TEST() throws Exception {
         Owner owner = setupOwner();
-        when(ownerService.createOwner(any(Owner.class))).thenReturn(owner);
-        mvc.perform(post("/owners")
+        when(ownerService.findByOwnerId(owner.getId())).thenReturn(Optional.of(owner));
+
+
+        Pet pet = setupPet();
+        when(petService.CreatePet(any(PetRequest.class), owner.getId())).thenReturn(pet);
+        mvc.perform(post("/owners/1/pets")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"firstName\": \"John\"," + "\"lastName\": \"Wick\"," + "\"address\": \"56 John St.\"," + "\"city\": \"Amsterdam\"," + "\"telephone\": \"9999999999\"}"))
+                .content("{\"name\": \"John\"," + "\"birthDate\": \"2000-09-09\"," + "\"typeId\": 4}"))
                 .andExpect(status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").exists());
     }
+    */
+
 
 }
+
 
 
 
