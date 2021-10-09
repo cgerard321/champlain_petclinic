@@ -83,9 +83,9 @@ public class Owner {
 //        this.custodian = custodian;
 //    }
 
-    public Integer setId(Integer id)
-    {
-        return id;
+
+    public void setId(Integer id) {
+        this.id = id;
     }
     public Integer getId() {
         return id;

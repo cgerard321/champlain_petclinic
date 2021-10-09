@@ -1,19 +1,26 @@
 package com.petclinic.customers.presentationlayer;
 
-import com.petclinic.customers.datalayer.*;
-import org.junit.jupiter.api.BeforeEach;
+import com.petclinic.customers.businesslayer.OwnerService;
+import com.petclinic.customers.businesslayer.PetService;
+import com.petclinic.customers.datalayer.Owner;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+
+import java.util.List;
 import java.util.Optional;
+
+import static java.util.Arrays.asList;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
@@ -24,14 +31,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @ExtendWith(SpringExtension.class)
 @WebMvcTest(OwnerResource.class)
-@ActiveProfiles("test")
 class OwnerAPITest {
 
     @Autowired
     MockMvc mvc;
 
-    @Autowired
-    OwnerRepository repository;
+    @MockBean
+    OwnerService ownerService;
+
+    @MockBean
+    PetService petService;
 
 
     //SIMPLE OWNER OBJECT CREATION METHOD
@@ -49,170 +58,96 @@ class OwnerAPITest {
         return owner;
     }
 
-    //DELETE REPO BEFORE EACH TEST
-    @BeforeEach
-    public void setUpDB()
-    {
-        repository.deleteAll();
-    }
 
 
     /**
      * ------------------------ FIND_BY_ID_OWNER_API_TEST ------------------------
      * Test an HTTP Get Request
      */
-    /*
     @Test
     void findByOwnerId_API_TEST() throws Exception {
 
         Owner owner = setupOwner();
-        given(repository.findById(5)).willReturn(Optional.of(owner));
-
-
+        given(ownerService.findByOwnerId(5)).willReturn(Optional.of(owner));
         mvc.perform(get("/owners/5").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"))
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.first.name").value("John"))
-                .andExpect(jsonPath("$.last.name").value("Wick"))
+                .andExpect(jsonPath("$.id").value(5))
+                .andExpect(jsonPath("$.firstName").value("John"))
+                .andExpect(jsonPath("$.lastName").value("Wick"))
                 .andExpect(jsonPath("$.address").value("56 John St."))
                 .andExpect(jsonPath("$.city").value("Amsterdam"))
                 .andExpect(jsonPath("$.telephone").value("9999999999"));
     }
-    */
+
+
     /**
      * ------------------------ DELETE_OWNER_API_TEST ------------------------
      * Test an HTTP Delete Request
      */
-    /*
     @Test
     void deleteOwner_API_TEST() throws Exception {
-
-        Owner owner = setupOwner();
-        given(repository.findById(5)).willReturn(Optional.of(owner));
-
-
         mvc.perform(delete("/owners/5").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
-
+        verify(ownerService, times(1)).deleteOwner(5);
     }
 
     /**
      * ------------------------ SETUP_OWNER ------------------------
-     * Simple method to create an owner
+     * Test an HTTP Get Request, but to get all owners
      */
-    /*
-    private Owner setupOwner(Integer id, String firstname, String lastname, String address, String city, String telephone)
-    {
-        Owner owner = new Owner(id, firstname, lastname, address, city, telephone);
-
-        owner.setFirstName(firstname);
-        owner.setLastName(lastname);
-        owner.setAddress(address);
-        owner.setCity(city);
-        owner.setTelephone(telephone);
-
-        return owner;
-    }
-
-    /**
-     * ------------------------ TEST_FIND ------------------------
-     * Testing the find by id method
-     * ___NOT WORKING
-     */
-/*
     @Test
-    public void findById()
-    {
-        /*
-        Owner owner = new Owner();
-        owner.setId(1);
-        when(ownerRepository.findById(owner.getId())).thenReturn(Optional.of(owner));
-        Owner expected = detailUserService.listUser(owner.getId());
-        assertThat(expected).isSameAs(owner);
-        verify(ownerRepository).findById(owner.getId());
-         */
-/*
-        int OwnerID = 1;
+    void findAll_API_TEST() throws Exception {
 
-        Owner newOwner = new Owner (OwnerID, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
-        repository.save(newOwner);
+        //TEST DATA
+        Owner owner_1 = new Owner();
+        owner_1.setId(1);
+        owner_1.setFirstName("John");
+        owner_1.setLastName("Wick");
+        owner_1.setAddress("56 John St.");
+        owner_1.setCity("Amsterdam");
+        owner_1.setTelephone("9999999999");
 
-        assertTrue(repository.findById(OwnerID).isPresent());
+        Owner owner_2 = new Owner();
+        owner_2.setId(2);
+        owner_2.setFirstName("Sean");
+        owner_2.setLastName("Bean");
+        owner_2.setAddress("678 Rue Tremblay");
+        owner_2.setCity("Montreal");
+        owner_2.setTelephone("0123456789");
 
-       /*
+        Owner owner_3 = new Owner();
+        owner_3.setId(3);
+        owner_3.setFirstName("Jean-Michel");
+        owner_3.setLastName("Test");
+        owner_3.setAddress("111 Test St.");
+        owner_3.setCity("Testopolis");
+        owner_3.setTelephone("9876543210");
 
-       Owner owner = repository.findByOwnerId(newOwner.getId()).get();
-        assertEquals(1, repository.count());
-
-
-
-            int OwnerID = 1;
-            Owner owner = new Owner (OwnerID, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
-            repository.save(owner);
-
-
-        if (repository.findById(OwnerID).isPresent())
-        {
-            System.out.println("Yeetus happy");
-        }
-        else
-        {
-            System.out.println("Yeetus sad");
-        }
-
-
-
-        //assertThat(owner.getId()).isEqualTo(OwnerID);
-
+        given(ownerService.findAll()).willReturn(asList(owner_1, owner_2, owner_3));
+        mvc.perform(get("/owners").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[1].id").value(2))
+                .andExpect(jsonPath("$[2].id").value(3));
 
     }
 
     /**
-     * ------------------------ TEST_FIND_ALL ------------------------
-     * Testing the find_all() method
-     * ___NOT WORKING
+     * ------------------------ CREATE_OWNER ------------------------
+     * Test an HTTP POST request
      */
-/*
     @Test
-    public void findAll()
-    {
-        int expectedLength = 4;
-        Owner owner1 = new Owner (1, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "(111) 111-1111");
-        repository.save(owner1);
-        Owner owner2 = new Owner (2, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "(111) 111-1111");
-        repository.save(owner2);
-        Owner owner3 = new Owner (3, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "(111) 111-1111");
-        repository.save(owner3);
-        Owner owner4 = new Owner (4, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "(111) 111-1111");
-        repository.save(owner4);
-
-        assertEquals(expectedLength, repository.findAll().size());
+    void createOwner_API_TEST() throws Exception {
+        Owner owner = setupOwner();
+        when(ownerService.createOwner(any(Owner.class))).thenReturn(owner);
+        mvc.perform(post("/owners")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"firstName\": \"John\"," + "\"lastName\": \"Wick\"," + "\"address\": \"56 John St.\"," + "\"city\": \"Amsterdam\"," + "\"telephone\": \"9999999999\"}"))
+                .andExpect(status().isCreated())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").exists());
     }
 
-
-
-    /**
-     * ------------------------ TEST_DELETE ------------------------
-     * Testing the delete owner method
-     * ___NOT WORKING
-     */
-/*
-    @Test
-    public void deleteOwner()
-    {
-        int expectedRes = 0;
-        int OwnerID = 1;
-        //Owner owner = setupOwner("Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "(111) 111-1111");
-        Owner owner = new Owner (OwnerID, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "(111) 111-1111");
-        repository.save(owner);
-        assertEquals(expectedRes, repository.findAll().size());
-
-
-        repository.findById(OwnerID).ifPresent(o -> repository.delete(o));
-        assertEquals(expectedRes, repository.findAll().size());
-    }
-    */
 }
 
 

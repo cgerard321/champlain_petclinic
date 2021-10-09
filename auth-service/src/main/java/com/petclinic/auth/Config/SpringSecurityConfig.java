@@ -1,3 +1,11 @@
+/**
+ * Created by IntelliJ IDEA.
+ *
+ * User: @Fube
+ * Date: 21/09/21
+ * Ticket: feat(AUTH-CPC-95)
+ *
+ */
 package com.petclinic.auth.Config;
 
 import org.springframework.context.annotation.Configuration;
