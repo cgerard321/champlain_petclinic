@@ -20,6 +20,7 @@
  */
 package com.petclinic.auth.User;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.auth.Role.Role;
 import com.petclinic.auth.Role.RoleController;
 import com.petclinic.auth.Role.RoleIDLessDTO;
@@ -52,6 +53,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -62,6 +64,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class AuthServiceUserControllerTests {
 
     private final static Random rng;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     static {
         rng = new Random();
@@ -221,10 +226,14 @@ public class AuthServiceUserControllerTests {
     @Test
     @DisplayName("When POST on users endpoint with valid data, allow any")
     void allowAnyOnUsers() throws Exception {
-        mockMvc.perform(post("/users", new UserIDLessDTO(USER, PASS, EMAIL)))
+
+        final UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
+        final String asString = objectMapper.writeValueAsString(userIDLessDTO);
+
+        mockMvc.perform(post("/users").contentType(APPLICATION_JSON).content(asString))
                 .andDo(print())
                 .andExpect(status().is2xxSuccessful())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.password").doesNotExist());
     }
 }
