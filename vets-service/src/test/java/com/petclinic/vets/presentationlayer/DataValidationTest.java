@@ -121,7 +121,6 @@ public class DataValidationTest {
     void verifyIsActiveTest(){
         assertThat(DataValidation.verifyIsActive(1)).isEqualTo(1);
         assertThat(DataValidation.verifyIsActive(0)).isEqualTo(0);
-        assertThat(DataValidation.verifyIsActive(12312)).isEqualTo(1);
     }
     @Test
     @DisplayName("Verify isActive InvalidInputException Test")
