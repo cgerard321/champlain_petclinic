@@ -30,7 +30,6 @@ public interface UserMapper {
     User idLessDTOToModel(UserIDLessDTO dto);
 
     @Mappings({
-            @Mapping(target = "id", ignore = true),
     })
     UserPasswordLessDTO modelToIDLessPasswordLessDTO(User model);
 }
