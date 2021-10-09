@@ -98,7 +98,7 @@ public class AuthServiceUserControllerTests {
     @Test
     @DisplayName("Create a user from controller")
     void create_user_from_controller() {
-        final User user = userController.createUser(ID_LESS_USER);
+        final UserIDLessPasswordLessDTO user = userController.createUser(ID_LESS_USER);
         assertNotNull(user);
         assertThat(user.getId(), instanceOf(Long.TYPE));
         assertTrue(userRepo.findById(user.getId()).isPresent());

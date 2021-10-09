@@ -42,7 +42,7 @@ public class UserController {
         final User saved = userService.createUser(dto);
         log.info("Successfully persisted user");
 
-        return saved;
+        return userMapper.modelToIDLessPasswordLessDTO(saved);
     }
 
     @PutMapping("/{userId}")
