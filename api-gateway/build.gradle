@@ -4,6 +4,7 @@ plugins {
 	id 'java'
 	id "io.freefair.lombok" version "6.0.0-m2"
 	id "com.bertramlabs.plugins.asset-pipeline" version "2.4.2"
+	id 'jacoco'
 }
 
 group = 'com.petclinic.bffapigateway'
@@ -56,6 +57,35 @@ dependencies {
 
 
 }
+
+jacoco {
+	toolVersion = "0.8.6"
+}
+
+jacocoTestReport {
+	dependsOn test
+
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: [
+					"com/petclinic/**/VisitsServiceApplication.class"
+			])
+		}))
+	}
+}
+
+jacocoTestCoverageVerification {
+	violationRules {
+		rule {
+			limit {
+				minimum = 0.90
+			}
+		}
+	}
+}
+
+test.finalizedBy jacocoTestReport
+
 
 
 test {
