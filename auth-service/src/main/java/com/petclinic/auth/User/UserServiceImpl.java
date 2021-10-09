@@ -36,14 +36,9 @@ public class UserServiceImpl implements UserService{
     @Override
     public User createUser(@Valid UserIDLessDTO userIDLessDTO) {
 
-        try {
-            log.info("Saving user with email {}", userIDLessDTO.getEmail());
-            User user = userMapper.idLessDTOToModel(userIDLessDTO);
-            return userRepo.save(user);
-        }
-        catch (DataIntegrityViolationException e){
-            throw new DataIntegrityViolationException("Duplicate email for userEmail " + userIDLessDTO.getEmail());
-        }
+        log.info("Saving user with email {}", userIDLessDTO.getEmail());
+        User user = userMapper.idLessDTOToModel(userIDLessDTO);
+        return userRepo.save(user);
 
     }
 
