@@ -71,6 +71,7 @@ public class VetBusinessLayerTest
         assertEquals(repo.getVetId(),result.getVetId());
         assertEquals(repo.getFirstName(),result.getFirstName());
     }
+
     @Test
     public void getAllVetsTest()
     {

@@ -1,3 +1,4 @@
+
 INSERT INTO vets VALUES (1, 234568, 'James', 'Carter', 'carter.james@email.com', '(514)-634-8276 #2384',NULL, 'Practicing since 3 years', 'Monday, Tuesday, Friday', 1);
 INSERT INTO vets VALUES (2, 327874, 'Helen', 'Leary', 'leary.helen@email.com', '(514)-634-8276 #2385',NULL, 'Practicing since 10 years', 'Wednesday, Thursday', 1);
 INSERT INTO vets VALUES (3, 238372, 'Linda', 'Douglas', 'douglas.linda@email.com', '(514)-634-8276 #2386',NULL, 'Practicing since 5 years', 'Monday, Wednesday, Thursday', 1);

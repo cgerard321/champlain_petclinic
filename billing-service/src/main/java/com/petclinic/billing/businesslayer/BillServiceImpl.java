@@ -33,6 +33,10 @@ public class BillServiceImpl implements BillService{
 
     @Override
     public BillDTO CreateBill(BillDTO model) {
+        if(model.getBillId() <= 0) {
+            throw new InvalidInputException("That bill id does not exist");
+        }
+
         try{
             Bill entity = billMapper.ModelToEntity(model);
             Bill newEntity = billRepository.save(entity);
