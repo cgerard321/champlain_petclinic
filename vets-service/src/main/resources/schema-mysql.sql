@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS vets (
     last_name VARCHAR(30),
     email      VARCHAR(100),
     phone_number VARCHAR(30),
-    profile_picture VARCHAR(30),
+    image       LONGBLOB,
     resume     VARCHAR(350),
     workday    VARCHAR(250),
     is_active  BIT,
@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS vets (
 
 CREATE TABLE IF NOT EXISTS specialties (
     id INT(4) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    specialty_id INT(6),
     name VARCHAR(80),
     INDEX(name)
     ) engine=InnoDB;

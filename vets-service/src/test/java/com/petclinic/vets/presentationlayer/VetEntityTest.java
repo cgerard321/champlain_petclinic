@@ -33,6 +33,7 @@ public class VetEntityTest {
                         ,"Carter"
                         ,"carter.james@email.com"
                         ,"2384"
+                        ,null
                         ,"Practicing since 3 years"
                         ,"Monday, Tuesday, Friday"
                         ,1
@@ -104,6 +105,7 @@ public class VetEntityTest {
                         ,"Carter"
                         ,"carter.james@email.com"
                         ,"2384"
+                        ,null
                         ,"Practicing since 3 years"
                         ,"Monday, Tuesday, Friday"
                         ,1
