@@ -225,7 +225,7 @@ public class AuthServiceUserControllerTests {
 
     @Test
     @DisplayName("When POST on users endpoint with valid data, allow any")
-    void allowAnyOnUsers() throws Exception {
+    void allow_any_on_users() throws Exception {
 
         final UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
         final String asString = objectMapper.writeValueAsString(userIDLessDTO);
