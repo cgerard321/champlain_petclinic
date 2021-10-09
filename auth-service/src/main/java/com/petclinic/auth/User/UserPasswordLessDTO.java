@@ -6,6 +6,7 @@
  * Ticket: feat(AUTH-CPC-310)
  */
 package com.petclinic.auth.User;
+import com.petclinic.auth.Role.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,6 +14,7 @@ import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
@@ -28,4 +30,6 @@ public class UserPasswordLessDTO {
     @NotEmpty
     @Email(message = "Email must be valid")
     private String email;
+
+    private Set<Role> roles;
 }
