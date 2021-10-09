@@ -5,6 +5,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.petclinic.auth.Exceptions.NotFoundException;
 
@@ -16,8 +17,8 @@ import javax.validation.Valid;
 public class UserServiceImpl implements UserService{
 
     private final UserRepo userRepo;
-
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public User getUserById(long id) {
