@@ -1,5 +1,14 @@
 package com.petclinic.auth.User;
 
+/**
+ * Created by IntelliJ IDEA.
+ *
+ * User: @Fube
+ * Date: 24/10/21
+ * Ticket: feat(AUTH-CPC-310)
+ *
+ */
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
