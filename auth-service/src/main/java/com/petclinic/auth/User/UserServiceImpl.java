@@ -38,8 +38,8 @@ public class UserServiceImpl implements UserService{
 
         log.info("Saving user with email {}", userIDLessDTO.getEmail());
         User user = userMapper.idLessDTOToModel(userIDLessDTO);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepo.save(user);
-
     }
 
     @Override
