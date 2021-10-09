@@ -85,7 +85,7 @@ jacocoTestCoverageVerification {
 }
 
 test.finalizedBy jacocoTestReport
-check.dependsOn jacocoTestCoverageVerification
+
 
 
 test {
