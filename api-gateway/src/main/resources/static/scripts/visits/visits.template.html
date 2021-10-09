@@ -476,7 +476,7 @@
         <input id="vetWorkdays" disabled="disabled" style="background-color: #dbd9ce;" onchange=selectChanged() />
     </div>
 
-    <div class="form-group">
+    <div class="form-group" style="margin-top: 6px">
         <label for="date_input">Date</label>
         <input id="date_input" type="date" class="form-control" ng-model='$ctrl.date'/>
     </div>
@@ -486,19 +486,30 @@
         <textarea id="description_textarea" class="form-control" ng-model="$ctrl.desc" style="resize:vertical;" required></textarea>
     </div>
 
-    <div class="form-group">
-        <button id="submit_button" class="btn btn-default" type="submit">Add New Visit</button>
-        <button id="cancel_button" onClick="window.location.reload()" class="btn btn-default" style="visibility: hidden">Cancel</button>
+    <div class="form-group" style="margin-top: 6px; margin-bottom: 6px">
+        <button id="submit_button" class="btn btn-default" type="submit" style="border: 1px solid gray; border-radius: 4px">Add New Visit</button>
+        <button id="cancel_button" onClick="window.location.reload()" class="btn btn-default" style="visibility: hidden; border: 1px solid gray; border-radius: 4px">Cancel</button>
     </div>
 </form>
 
-<h3>Previous Visits</h3>
+<h3 style="margin-top: 6px">Previous Visits</h3>
 <table class="table">
-    <tr ng-repeat="v in $ctrl.visits">
-        <td class="col-sm-2">{{v.date}}</td>
-        <td style="white-space: pre-line">{{v.description}}</td>
-        <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>
-        <td><button class="btn btn-default" ng-click="$ctrl.switchToUpdateForm(v.practitionerId, v.date, v.description, v.id)">Edit Visit</button></td>
-        <td><button class="btn btn-danger" ng-click="$ctrl.deleteVisit(v.id)">Delete visit</button></td>
-    </tr>
+    <thead>
+        <tr>
+            <th> <button class="btn btn-default" id="sortByDateButton" ng-click="$ctrl.SortTableByDate()" style="color: white">Sort by date ⇅</button> </th>
+            <th> <button class="btn btn-default" id="sortByDescButton" ng-click="$ctrl.SortTableByDesc()" style="color: white">Sort by description ⇅</button> </th>
+            <th> <button class="btn btn-default" id="sortByVetButton" ng-click="$ctrl.SortTableByVet()" style="color: white">Sort by veterinarian ⇅</button> </th>
+            <th style="text-align:center; vertical-align:middle"> <label>Edit</label> </th>
+            <th style="text-align:center; vertical-align:middle"> <label>Delete</label> </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr ng-repeat="v in $ctrl.visits">
+            <td class="col-sm-2">{{v.date}}</td>
+            <td style="white-space: pre-line">{{v.description}}</td>
+            <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>
+            <td style="text-align:center; vertical-align:middle"><button class="btn btn-default" ng-click="$ctrl.switchToUpdateForm(v.practitionerId, v.date, v.description, v.id)">Edit Visit</button></td>
+            <td style="text-align:center; vertical-align:middle"><button class="btn btn-danger" ng-click="$ctrl.deleteVisit(v.id)">Delete visit</button></td>
+        </tr>
+    </tbody>
 </table>
