@@ -44,7 +44,7 @@
                           class="help-block">Phone Number is required.</span>
                 </div>
 
-              <hr class="my-4"/>
+                <hr class="my-4"/>
 
                 <div class="col-sm-12">
                     <label class="form-label">Profile Picture</label>
@@ -96,180 +96,224 @@
                 </script>
 
 
+            </div>
 
 
-              <div class="form-group">
-                <fieldset>
-                  <legend>What Animals Can You Treat</legend>
-                  <div>
-                    <input type="checkbox" name="animalsTreated" value="Dogs">Dogs
-                    <input type="checkbox" name="animalsTreated" value="Cats">Cats
-                    <input type="checkbox" name="animalsTreated" value="Birds">Birds
-                    <input type="checkbox" name="animalsTreated" value="Exotic">Exotic Animals
-                    <input type="checkbox" name="animalsTreated" value="Reptiles">Reptiles
-                  </div>
-                </fieldset>
-              </div>
+            <label class="form-label">What Animals Can You Treat</label>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="animalsTreated" value="Dogs">
+                <label class="form-check-label">Dogs</label>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="animalsTreated" value="Cats">Cats
+                <label class="form-check-label">Cats</label>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="animalsTreated" value="Birds">Birds
+                <label class="form-check-label">Birds</label>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="animalsTreated" value="Exotic">Exotic Animals
+                <label class="form-check-label">Exotic Animals</label>
+            </div>
+
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="workDays" value="Monday">Monday
+                <label class="form-check-label">Monday</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="workDays" value="Tuesday">Tuesday
+                <label class="form-check-label">Tuesday</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="workDays" value="Wednesday">Wednesday
+                <label class="form-check-label">Wednesday</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="workDays" value="Thursday">Thursday
+                <label class="form-check-label">Thursday</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="workDays" value="Friday">Friday
+                <label class="form-check-label">Friday</label>
+            </div>
+
+            <h4 class="mb-3">Active Vet</h4>
+
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="isActive" value="1">Yes
+                <label class="form-check-label">Yes</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="isActive" value="0">No
+                <label class="form-check-label">No</label>
+            </div>
 
 
-              <div class="owner col-sm-6">
+            <div class=" col-sm-6">
                 <label class="form-label">Specialty</label>
                 <input class="form-control" type="text" name="speciality">
-              </div>
-
-
-
-
-
             </div>
+
+            <hr class="my-4"/>
+            <button type="submit" class="w-100 btn btn-primary btn-lg" ng-click="submitVetForm()">Submit</button>
         </form>
-
-    </div>
-
-
-
-
-
-
-
-
-
-
-
-    <div class="bg-light">
-        <h2 class="titleVetForm">New Vet Sign Up</h2>
-    </div>
-    <form id="vetForm" class="form-horizontal" enctype="multipart/form-data" ng-submit="submitVetForm()">
-        <div class="form-group formColor">
-            <label class="col-sm-2 control-label">First Name</label>
-            <div class="owner col-sm-6">
-                <input type="text" placeholder="First Name" name="fistName" required>
-                <span ng-show="vetForm.firstName.$error.required" class="help-block">First name is required.</span>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label class="col-sm-2 control-label">Last Name</label>
-            <div class="owner col-sm-6">
-                <input type="text" placeholder="Last Name" name="lastName" required>
-                <span ng-show="vetForm.lastName.$error.required" class="help-block">Last name is required.</span>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label class="col-sm-2 control-label">Email</label>
-            <div class="owner col-sm-6">
-                <input class="form-control col-sm-4" type="email" placeholder="Email" name="email" required>
-                <span ng-show="vetForm.email.$error.required" class="help-block">Email is required.</span>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label class="col-sm-2 control-label">Phone Number</label>
-            <div class="owner col-sm-6">
-                <input class="form-control col-sm-4" type="tel" placeholder="Phone Number" name="phoneNumber" required>
-                <span ng-show="vetForm.phoneNumber.$error.required" class="help-block">Phone Number is required.</span>
-            </div>
-        </div>
-
-        <!--        <div class="form-group">-->
-        <!--            <label class="col-sm-2 control-label">Profile Picture</label><span id="checkmarkPic" style="display: none">&#10003;</span>-->
-        <!--            <div class="owner col-sm-6">-->
-        <!--                <input class="form-control col-sm-4"-->
-        <!--                       id="profilePicture"-->
-        <!--                       type="file"-->
-        <!--                       name="profilePicture"-->
-        <!--                       accept="image/*"-->
-        <!--                       onchange="uploadPicture(event)"/>-->
-        <!--                <img alt="Profile picture preview" id="preview" height="130px" width="130px"/>-->
-
-        <script>
-            let uploadPicture = function (event) {
-                let preview = document.getElementById('preview');
-                let checkmark = document.getElementById('checkmarkPic');
-                if (document.getElementById('profilePicture') != null) {
-                    checkmark.style.display = "inline";
-                }
-                preview.src = URL.createObjectURL(event.target.files[0]);
-                preview.onload = function () {
-                    URL.revokeObjectURL(preview.src)
-                }
-            };
-        </script>
-        <span ng-show="vetForm.profilePicture.$error.required" class="help-block">Only .png, .pdf, .jpeg and .gif accepted</span>
-</div>
-</div>
-
-<div class="form-group">
-<!--    <label class="col-sm-2 control-label">Career Resume</label><span id="checkmarkRes"-->
-<!--                                                                     style="display: none">&#10003;</span>-->
-<!--    <div class="owner col-sm-6">-->
-<!--        <input class="form-control col-sm-4"-->
-<!--               id="resume"-->
-<!--               type="file"-->
-<!--               name="careerResume"-->
-<!--               accept="application/pdf"-->
-<!--               onchange="uploadResume(event)">-->
-        <script>
-            let uploadResume = function () {
-                let checkmark = document.getElementById('checkmarkRes');
-                if (document.getElementById('resume') != null) {
-                    checkmark.style.display = "inline";
-                }
-            }
-        </script>
-        <span ng-show="vetForm.careerResume.$error.required" class="help-block">Only .pdf accepted</span>
     </div>
 </div>
-
-<div class="form-group">
-    <label class="col-sm-2 control-label">Specialty</label>
-    <div class="owner col-sm-6">
-        <input class="form-control col-sm-4" type="text" name="speciality">
-    </div>
-</div>
-
-<div class="form-group">
-    <fieldset>
-        <legend>What Animals Can You Treat</legend>
-        <div>
-            <input type="checkbox" name="animalsTreated" value="Dogs">Dogs
-            <input type="checkbox" name="animalsTreated" value="Cats">Cats
-            <input type="checkbox" name="animalsTreated" value="Birds">Birds
-            <input type="checkbox" name="animalsTreated" value="Exotic">Exotic Animals
-            <input type="checkbox" name="animalsTreated" value="Reptiles">Reptiles
-        </div>
-    </fieldset>
-</div>
-<div class="form-group">
-    <fieldset>
-        <legend>Available Work Days</legend>
-        <div>
-            <input type="checkbox" name="workDays" value="Monday">Monday
-            <input type="checkbox" name="workDays" value="Tuesday">Tuesday
-            <input type="checkbox" name="workDays" value="Wednesday">Wednesday
-            <input type="checkbox" name="workDays" value="Thursday">Thursday
-            <input type="checkbox" name="workDays" value="Friday">Friday
-        </div>
-    </fieldset>
-</div>
-<br><br>
-<div class="form-group">
-    <fieldset>
-        <legend>Active Vet</legend>
-        <div>
-            <input type="radio" name="isActive" value="1">Yes
-            <input type="radio" name="isActive" value="0">No
-        </div>
-    </fieldset>
-</div>
-
-<div class="form-group formColor">
-    <div class="owner marg col-sm-2">
-        <button type="submit" class="btn btn-default" ng-click="submitVetForm()">Submit</button>
-    </div>
-</div>
-
-</form>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!--    <form id="vetForm" class="form-horizontal" enctype="multipart/form-data" ng-submit="submitVetForm()">-->
+<!--        <div class="form-group formColor">-->
+<!--            <label class="col-sm-2 control-label">First Name</label>-->
+<!--            <div class="owner col-sm-6">-->
+<!--                <input type="text" placeholder="First Name" name="fistName" required>-->
+<!--                <span ng-show="vetForm.firstName.$error.required" class="help-block">First name is required.</span>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        <div class="form-group">-->
+<!--            <label class="col-sm-2 control-label">Last Name</label>-->
+<!--            <div class="owner col-sm-6">-->
+<!--                <input type="text" placeholder="Last Name" name="lastName" required>-->
+<!--                <span ng-show="vetForm.lastName.$error.required" class="help-block">Last name is required.</span>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        <div class="form-group">-->
+<!--            <label class="col-sm-2 control-label">Email</label>-->
+<!--            <div class="owner col-sm-6">-->
+<!--                <input class="form-control col-sm-4" type="email" placeholder="Email" name="email" required>-->
+<!--                <span ng-show="vetForm.email.$error.required" class="help-block">Email is required.</span>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        <div class="form-group">-->
+<!--            <label class="col-sm-2 control-label">Phone Number</label>-->
+<!--            <div class="owner col-sm-6">-->
+<!--                <input class="form-control col-sm-4" type="tel" placeholder="Phone Number" name="phoneNumber" required>-->
+<!--                <span ng-show="vetForm.phoneNumber.$error.required" class="help-block">Phone Number is required.</span>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash;        <div class="form-group">&ndash;&gt;-->
+<!--        &lt;!&ndash;            <label class="col-sm-2 control-label">Profile Picture</label><span id="checkmarkPic" style="display: none">&#10003;</span>&ndash;&gt;-->
+<!--        &lt;!&ndash;            <div class="owner col-sm-6">&ndash;&gt;-->
+<!--        &lt;!&ndash;                <input class="form-control col-sm-4"&ndash;&gt;-->
+<!--        &lt;!&ndash;                       id="profilePicture"&ndash;&gt;-->
+<!--        &lt;!&ndash;                       type="file"&ndash;&gt;-->
+<!--        &lt;!&ndash;                       name="profilePicture"&ndash;&gt;-->
+<!--        &lt;!&ndash;                       accept="image/*"&ndash;&gt;-->
+<!--        &lt;!&ndash;                       onchange="uploadPicture(event)"/>&ndash;&gt;-->
+<!--        &lt;!&ndash;                <img alt="Profile picture preview" id="preview" height="130px" width="130px"/>&ndash;&gt;-->
+
+<!--        <script>-->
+<!--            let uploadPicture = function (event) {-->
+<!--                let preview = document.getElementById('preview');-->
+<!--                let checkmark = document.getElementById('checkmarkPic');-->
+<!--                if (document.getElementById('profilePicture') != null) {-->
+<!--                    checkmark.style.display = "inline";-->
+<!--                }-->
+<!--                preview.src = URL.createObjectURL(event.target.files[0]);-->
+<!--                preview.onload = function () {-->
+<!--                    URL.revokeObjectURL(preview.src)-->
+<!--                }-->
+<!--            };-->
+<!--        </script>-->
+<!--        <span ng-show="vetForm.profilePicture.$error.required" class="help-block">Only .png, .pdf, .jpeg and .gif accepted</span>-->
+
+<!--    </form>-->
+<!--  <div class="bg-light">-->
+<!--    <h2 class="titleVetForm">New Vet Sign Up</h2>-->
+<!--  </div>-->
+<!--</div>-->
+
+<!--<div class="form-group">-->
+<!--    &lt;!&ndash;    <label class="col-sm-2 control-label">Career Resume</label><span id="checkmarkRes"&ndash;&gt;-->
+<!--    &lt;!&ndash;                                                                     style="display: none">&#10003;</span>&ndash;&gt;-->
+<!--    &lt;!&ndash;    <div class="owner col-sm-6">&ndash;&gt;-->
+<!--    &lt;!&ndash;        <input class="form-control col-sm-4"&ndash;&gt;-->
+<!--    &lt;!&ndash;               id="resume"&ndash;&gt;-->
+<!--    &lt;!&ndash;               type="file"&ndash;&gt;-->
+<!--    &lt;!&ndash;               name="careerResume"&ndash;&gt;-->
+<!--    &lt;!&ndash;               accept="application/pdf"&ndash;&gt;-->
+<!--    &lt;!&ndash;               onchange="uploadResume(event)">&ndash;&gt;-->
+<!--    <script>-->
+<!--        let uploadResume = function () {-->
+<!--            let checkmark = document.getElementById('checkmarkRes');-->
+<!--            if (document.getElementById('resume') != null) {-->
+<!--                checkmark.style.display = "inline";-->
+<!--            }-->
+<!--        }-->
+<!--    </script>-->
+<!--    <span ng-show="vetForm.careerResume.$error.required" class="help-block">Only .pdf accepted</span>-->
+<!--</div>-->
+<!--</div>-->
+
+<!--<div class="form-group">-->
+<!--    <label class="col-sm-2 control-label">Specialty</label>-->
+<!--    <div class="owner col-sm-6">-->
+<!--        <input class="form-control col-sm-4" type="text" name="speciality">-->
+<!--    </div>-->
+<!--</div>-->
+
+<!--<div class="form-group">-->
+<!--    <fieldset>-->
+<!--        <legend>What Animals Can You Treat</legend>-->
+<!--        <div>-->
+<!--            <input type="checkbox" name="animalsTreated" value="Dogs">Dogs-->
+<!--            <input type="checkbox" name="animalsTreated" value="Cats">Cats-->
+<!--            <input type="checkbox" name="animalsTreated" value="Birds">Birds-->
+<!--            <input type="checkbox" name="animalsTreated" value="Exotic">Exotic Animals-->
+<!--            <input type="checkbox" name="animalsTreated" value="Reptiles">Reptiles-->
+<!--        </div>-->
+<!--    </fieldset>-->
+<!--</div>-->
+<!--<div class="form-group">-->
+<!--    <fieldset>-->
+<!--        <legend>Available Work Days</legend>-->
+<!--        <div>-->
+<!--            <input type="checkbox" name="workDays" value="Monday">Monday-->
+<!--            <input type="checkbox" name="workDays" value="Tuesday">Tuesday-->
+<!--            <input type="checkbox" name="workDays" value="Wednesday">Wednesday-->
+<!--            <input type="checkbox" name="workDays" value="Thursday">Thursday-->
+<!--            <input type="checkbox" name="workDays" value="Friday">Friday-->
+<!--        </div>-->
+<!--    </fieldset>-->
+<!--</div>-->
+<!--<br><br>-->
+<!--<div class="form-group">-->
+<!--    <fieldset>-->
+<!--        <legend>Active Vet</legend>-->
+<!--        <div>-->
+<!--            <input type="radio" name="isActive" value="1">Yes-->
+<!--            <input type="radio" name="isActive" value="0">No-->
+<!--        </div>-->
+<!--    </fieldset>-->
+<!--</div>-->
+
+<!--<div class="form-group formColor">-->
+<!--    <div class="owner marg col-sm-2">-->
+<!--        <button type="submit" class="btn btn-default" ng-click="submitVetForm()">Submit</button>-->
+<!--    </div>-->
+<!--</div>-->
+
+<!--</form>-->
+<!--</body>-->
+<!--</html>-->
