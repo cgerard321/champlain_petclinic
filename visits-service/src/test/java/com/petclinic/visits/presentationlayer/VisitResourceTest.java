@@ -21,6 +21,7 @@ import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -268,11 +269,11 @@ public class VisitResourceTest {
 
 	@Test
 	void whenPetDoesNotExistThenShouldHandleNotFoundException() throws Exception {
-		Visit expectedVisit = visit().id(1).petId(65).date(new Date()).description("description").practitionerId(123456).build();
+		Visit expectedVisit = visit().id(1).petId(234).date(new Date()).description("description").practitionerId(123456).build();
 
 		when(visitsService.addVisit(any())).thenThrow(new NotFoundException("Pet does not exist."));
 
-		mvc.perform(post("/owners/1/pets/{petId}/visits", 65)
+		mvc.perform(post("/owners/1/pets/{petId}/visits", 234)
 				.content(objectMapper.writeValueAsString(expectedVisit))
 				.contentType(MediaType.APPLICATION_JSON)
 				.characterEncoding("utf-8")
@@ -326,6 +327,38 @@ public class VisitResourceTest {
 				.andExpect(status().isUnprocessableEntity())
 				.andExpect(result -> assertTrue(result.getResolvedException() instanceof InvalidInputException))
 				.andExpect(result -> assertEquals("PetId can't be negative.", result.getResolvedException().getMessage()));
+	}
+
+	@Test
+	void whenFetchingWithNegativeVisitIdShouldHandleInvalidInputException() throws Exception {
+		when(visitsService.getPractitionerIdForVisit(anyInt())).thenThrow(new InvalidInputException("VisitId can't be negative."));
+
+		mvc.perform(get("/visits/vet/{visitId}", -1))
+				.andExpect(status().isUnprocessableEntity())
+				.andExpect(result -> assertTrue(result.getResolvedException() instanceof InvalidInputException))
+				.andExpect(result -> assertEquals("VisitId can't be negative.", result.getResolvedException().getMessage()));
+	}
+
+	@Test
+	void whenFetchingPractitionerIdForNonExistentVisitShouldHandleNotFoundException() throws Exception {
+		when(visitsService.getPractitionerIdForVisit(anyInt())).thenThrow(new NotFoundException("No visit found with visitId: " + 234));
+
+		mvc.perform(get("/visits/vet/{visitId}", 234))
+				.andExpect(status().isNotFound())
+				.andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+				.andExpect(result -> assertEquals("No visit found with visitId: 234", result.getResolvedException().getMessage()));
+	}
+
+	@Test
+	void shouldReturnPractitionerIdWhenFetchingWithValidVisitId() throws Exception{
+		when(visitsService.getPractitionerIdForVisit(anyInt())).thenReturn(12345);
+
+		MvcResult result = mvc.perform(get("/visits/vet/{visitId}", 1))
+				.andExpect(status().isOk())
+				.andReturn();
+
+		String practitionerId = (result.getResponse().getContentAsString());
+		assertEquals("12345", practitionerId);
 	}
 
 	// UTILS PACKAGE UNIT TESTING
