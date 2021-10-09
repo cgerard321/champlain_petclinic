@@ -15,7 +15,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
 @ComponentScan("com.petclinic")
-@EnableJpaRepositories
 public class CustomersServiceApplication {
 
 	public static void main(String[] args) {

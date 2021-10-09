@@ -83,9 +83,9 @@ public class Owner {
 //        this.custodian = custodian;
 //    }
 
-    public Integer setId(Integer id)
-    {
-        return id;
+
+    public void setId(Integer id) {
+        this.id = id;
     }
     public Integer getId() {
         return id;
@@ -158,6 +158,11 @@ public class Owner {
     public void addPet(Pet pet) {
         getPetsInternal().add(pet);
         pet.setOwner(this);
+    }
+
+    public void removePet(Pet pet)
+    {
+        getPetsInternal().remove(pet);
     }
 
     @Override

@@ -1,3 +1,11 @@
+/**
+ * Created by IntelliJ IDEA.
+ *
+ * User: @MaxGrabs
+ * Date: 26/09/21
+ * Ticket: feat(AUTH-CPC-13)
+ *
+ */
 package com.petclinic.auth.Config;
 
 import javax.validation.Constraint;

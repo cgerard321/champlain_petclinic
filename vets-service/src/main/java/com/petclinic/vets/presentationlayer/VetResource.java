@@ -25,8 +25,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.zip.DataFormatException;
+import java.util.zip.Deflater;
+import java.util.zip.Inflater;
 
 /**
  * @author Juergen Hoeller
@@ -54,17 +60,14 @@ class VetResource {
 
     @GetMapping
     public List<Vet> showResourcesVetList() {
-        return vetService.getAllEnabledVets();
+        List<Vet> vetList = vetService.getAllEnabledVets();
+        return vetList;
     }
-
-//    @GetMapping("/enabled")
-//    public List<Vet> showResourcesVetEnabledList() {
-//        return vetService.getAllEnabledVets();
-//    }
 
     @GetMapping("/disabled")
     public List<Vet> showResourcesVetDisabledList() {
-        return vetService.getAllDisabledVets();
+        List<Vet> vetList = vetService.getAllDisabledVets();
+        return vetList;
     }
 
 
@@ -74,9 +77,20 @@ class VetResource {
         LOG.debug("/vet MS return the found product for vetId: " + vetId);
 
         if(vetId < 1) throw new InvalidInputException("Invalid vetId: " + vetId);
-        return vetService.getVetByVetId(vetId);
+
+        Vet vet = vetService.getVetByVetId(vetId);
+        return vet;
     }
 
+    @PostMapping(
+            consumes = MediaType.APPLICATION_JSON_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    @ResponseStatus(HttpStatus.CREATED)
+    public Vet addVet(@Valid @RequestBody Vet vet)
+    {
+        return vetService.createVet(vet);
+    }
 
     @PutMapping( value = "/{vetId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
@@ -104,12 +118,8 @@ class VetResource {
         return vet;
     }
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public Vet addVet(@Valid @RequestBody Vet vet)
-    {
-        return vetService.createVet(vet);
+    @DeleteMapping(path ="/{vetId}")
+    public void deleteByVetId(@PathVariable("vetId") int vetId ){
+        vetService.deleteVetByVetId(vetId);
     }
-
-
 }

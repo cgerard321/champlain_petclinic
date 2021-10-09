@@ -12,7 +12,7 @@ import java.util.Date;
  */
 
 @Data
-class PetRequest {
+public class PetRequest {
     private int id;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
@@ -22,5 +22,11 @@ class PetRequest {
     private String name;
 
     private int typeId;
+
+
+    public PetRequest(String name, Date birthDate) {
+        this.name = name;
+        this.birthDate = birthDate;
+    }
 }
 

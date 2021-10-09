@@ -8,6 +8,7 @@ import com.petclinic.vets.utils.http.HttpErrorInfo;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 
+import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.UniqueElements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlElement;
 import java.io.IOException;
+import java.sql.Blob;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -37,6 +39,14 @@ import java.util.regex.Pattern;
  * Copied from https://github.com/spring-petclinic/spring-petclinic-microservices
  */
 
+/**
+ * @author Christian Chitanu
+ * Date: October 7th, 2021
+ * Implementation: Added field for image file
+ * Jira Story: CPC-237
+ *
+ */
+
 @Entity
 @Table(name = "vets")
 @NoArgsConstructor
@@ -50,7 +60,6 @@ public class Vet {
 
     @Column(name = "vet_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @NotNull
     @UniqueElements(groups = Vet.class)
     private Integer vetId;
 
@@ -70,6 +79,11 @@ public class Vet {
     @NotEmpty
     private String phoneNumber;
 
+    @Column(name = "image")
+    @Lob
+    @Basic(fetch = FetchType.LAZY)
+    private byte[] image;
+
     @Column(name = "resume")
     private String resume;
 
@@ -78,6 +92,19 @@ public class Vet {
 
     @Column(name = "is_active")
     private Integer isActive;
+
+
+    public byte[] getImage() {
+        return image;
+    }
+
+    public void setImage(byte[] image) {
+        this.image = image;
+    }
+
+    public void setSpecialties(Set<Specialty> specialties) {
+        this.specialties = specialties;
+    }
 
     public Integer getIsActive() {
         return isActive;
@@ -123,7 +150,7 @@ public class Vet {
     }
 
     public void setResume(String resume) {
-        this.resume = resume;
+        this.resume = DataValidation.verifyResume(resume);
     }
 
     public String getWorkday() {
