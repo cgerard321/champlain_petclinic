@@ -1,0 +1,11 @@
+@media screen and (max-width:768px){
+  .vet_phone{
+    display:none;
+  }
+}
+
+@media screen and (max-width:550px){
+  .vet_email{
+    display:none;
+  }
+}
