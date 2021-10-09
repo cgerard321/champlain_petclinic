@@ -21,16 +21,6 @@
 package com.petclinic.auth.User;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.auth.Role.Role;
-import com.petclinic.auth.Role.RoleController;
-import com.petclinic.auth.Role.RoleIDLessDTO;
-import com.petclinic.auth.Role.RoleRepo;
-import com.petclinic.auth.User.User;
-import com.petclinic.auth.User.UserController;
-import com.petclinic.auth.User.UserIDLessDTO;
-import com.petclinic.auth.User.UserRepo;
-import javassist.NotFoundException;
-import org.apache.tomcat.util.http.fileupload.MultipartStream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -38,11 +28,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
-import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import javax.validation.ConstraintViolationException;
 import java.util.Optional;
@@ -98,7 +85,7 @@ public class AuthServiceUserControllerTests {
     @Test
     @DisplayName("Create a user from controller")
     void create_user_from_controller() {
-        final UserIDLessPasswordLessDTO user = userController.createUser(ID_LESS_USER);
+        final UserPasswordLessDTO user = userController.createUser(ID_LESS_USER);
         assertNotNull(user);
         assertThat(user.getId(), instanceOf(Long.TYPE));
         assertTrue(userRepo.findById(user.getId()).isPresent());

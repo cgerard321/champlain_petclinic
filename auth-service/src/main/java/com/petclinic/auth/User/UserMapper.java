@@ -32,5 +32,5 @@ public interface UserMapper {
     @Mappings({
             @Mapping(target = "id", ignore = true),
     })
-    UserIDLessPasswordLessDTO modelToIDLessPasswordLessDTO(User model);
+    UserPasswordLessDTO modelToIDLessPasswordLessDTO(User model);
 }

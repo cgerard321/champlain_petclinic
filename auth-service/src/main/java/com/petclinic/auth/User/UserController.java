@@ -36,7 +36,7 @@ public class UserController {
     }
 
     @PostMapping
-    public UserIDLessPasswordLessDTO createUser(@RequestBody @Valid UserIDLessDTO dto) {
+    public UserPasswordLessDTO createUser(@RequestBody @Valid UserIDLessDTO dto) {
 
         log.info("Trying to persist user");
         final User saved = userService.createUser(dto);
