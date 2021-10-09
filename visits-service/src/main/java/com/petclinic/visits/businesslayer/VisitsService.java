@@ -24,4 +24,6 @@ public interface VisitsService {
     public List<Visit> getVisitsForPets(List<Integer> petIds);
 
     List<Visit> getVisitsForPet(int petId, boolean scheduled);
+
+    int getPractitionerIdForVisit(int visitId);
 }

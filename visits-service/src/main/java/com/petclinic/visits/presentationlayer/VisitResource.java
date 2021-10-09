@@ -89,6 +89,12 @@ public class VisitResource {
         return visitsService.getVisitsForPet(petId, true);
     }
 
+    @GetMapping("visits/vet/{visitId}")
+    public int getPractitionerIdForVisit(@PathVariable("visitId") int visitId){
+        log.debug("Calling VisitsService:getPractitionerIdForVisit:visitId={}", visitId);
+        return visitsService.getPractitionerIdForVisit(visitId);
+    }
+
 
     @Value
     static class Visits {

@@ -91,4 +91,9 @@ public class VisitsServiceImpl implements VisitsService {
         }
         return visits;
     }
+
+    @Override
+    public int getPractitionerIdForVisit(int visitId) {
+        return 0;
+    }
 }
