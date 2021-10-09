@@ -58,4 +58,12 @@ public class JpaRepoTest
     {
         assertThat(vetRepository.findAllEnabledVets().size()).isEqualTo(2);
     }
+
+    @Test
+    public void deleteVetByVetId()
+    {
+        assertThat(vetRepository.findAll().size()).isEqualTo(4);
+        vetRepository.deleteByVetId(234568);
+        assertThat(vetRepository.findAll().size()).isEqualTo(3);
+    }
 }

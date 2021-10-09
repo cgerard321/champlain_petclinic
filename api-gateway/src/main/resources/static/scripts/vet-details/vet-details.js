@@ -18,4 +18,9 @@ angular.module('vetDetails', ['ui.router'])
                 url: '/vets/details/:vetId/enableVet',
                 template: '<vet-details></vet-details>'
             })
+            .state('deleteVet', {
+                parent: 'app',
+                url: '/vets/details/:vetId/deleteVet',
+                template: '<vet-details></vet-details>'
+            })
     }]);
