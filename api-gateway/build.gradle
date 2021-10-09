@@ -43,6 +43,9 @@ dependencies {
 	// https://mvnrepository.com/artifact/org.jolokia/jolokia-core
 	implementation 'org.jolokia:jolokia-core:1.7.0'
 
+	implementation 'io.springfox:springfox-boot-starter:3.0.0'
+
+
 
 
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
