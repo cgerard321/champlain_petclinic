@@ -1,5 +1,11 @@
+/**
+ * Created by IntelliJ IDEA.
+ *
+ * User: @Fube
+ * Date: 09/10/21
+ * Ticket: feat(AUTH-CPC-310)
+ */
 package com.petclinic.auth.User;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

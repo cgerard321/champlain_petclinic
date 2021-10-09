@@ -1,6 +1,5 @@
 package com.petclinic.auth.User;
 
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -16,6 +15,7 @@ import javax.validation.Valid;
 public class UserController {
 
     private final UserService userService;
+    private final UserMapper userMapper;
 
     @GetMapping("/{userId}")
     public User getUser(@PathVariable long userId) {
@@ -36,7 +36,7 @@ public class UserController {
     }
 
     @PostMapping
-    public User createUser(@RequestBody @Valid UserIDLessDTO dto) {
+    public UserIDLessPasswordLessDTO createUser(@RequestBody @Valid UserIDLessDTO dto) {
 
         log.info("Trying to persist user");
         final User saved = userService.createUser(dto);
