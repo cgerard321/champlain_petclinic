@@ -48,7 +48,7 @@ public class AuthServiceUserServiceTests {
 
         final User createdUser = userService.createUser(userIDLessDTO);
         assertEquals(createdUser.getUsername(), userIDLessDTO.getUsername());
-        assertEquals(createdUser.getPassword(), userIDLessDTO.getPassword());
+        assertNotEquals(createdUser.getPassword(), userIDLessDTO.getPassword());
         assertEquals(createdUser.getEmail(), userIDLessDTO.getEmail());
     }
 
