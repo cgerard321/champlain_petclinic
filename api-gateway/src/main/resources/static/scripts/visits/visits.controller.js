@@ -164,8 +164,8 @@ angular.module('visits')
                 $('#sortByVetButton').text("Sort by veterinarian ↓")
             } else {
                 self.visits.sort(function(a, b) {
-                    a = a.description.toLowerCase();
-                    b = b.description.toLowerCase();
+                    a = self.getPractitionerName(a.practitionerId).toLowerCase();
+                    b = self.getPractitionerName(b.practitionerId).toLowerCase();
 
                     return a > b ? - 1 : a < b ? 1 : 0;
                 });
