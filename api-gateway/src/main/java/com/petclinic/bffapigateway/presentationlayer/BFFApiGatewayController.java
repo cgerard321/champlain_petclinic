@@ -96,8 +96,8 @@ public class BFFApiGatewayController {
     }
 
     @DeleteMapping (value = "visits/{visitId}")
-    public void deleteVisitsById(final @PathVariable int visitId){
-        visitsServiceClient.deleteVisitsById(visitId);
+    public Mono<Void> deleteVisitsById(final @PathVariable int visitId){
+        return visitsServiceClient.deleteVisitsById(visitId);
     }
 
     //Delete Visit

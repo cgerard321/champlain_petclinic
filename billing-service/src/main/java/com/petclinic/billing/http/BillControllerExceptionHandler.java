@@ -2,16 +2,20 @@ package com.petclinic.billing.http;
 
 import com.petclinic.billing.exceptions.InvalidInputException;
 import com.petclinic.billing.exceptions.NotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 
+@Slf4j
+@RestControllerAdvice
 public class BillControllerExceptionHandler {
     private static final Logger LOG = LoggerFactory.getLogger(BillControllerExceptionHandler.class);
 

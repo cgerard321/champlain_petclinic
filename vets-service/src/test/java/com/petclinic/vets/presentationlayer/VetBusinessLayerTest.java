@@ -3,6 +3,8 @@ package com.petclinic.vets.presentationlayer;
 import com.petclinic.vets.businesslayer.VetService;
 import com.petclinic.vets.datalayer.Vet;
 import com.petclinic.vets.datalayer.VetRepository;
+import com.petclinic.vets.utils.exceptions.InvalidInputException;
+import com.petclinic.vets.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -47,20 +49,22 @@ public class VetBusinessLayerTest
     {
         vetRepository.deleteAll();
 
-        Vet vet1 = new Vet(1, 234568, "James", "Carter", "carter.james@email.com", "(514)-634-8276 #2384", "practicing since 3 years", "Monday, Tuesday, Friday", 1, null);
+        Vet vet1 = new Vet(1, 234568, "James", "Carter", "carter.james@email.com", "(514)-634-8276 #2384",null, "practicing since 3 years","Monday, Tuesday, Friday", 1, null);
         vetRepository.save(vet1);
-        Vet vet2 = new Vet(2, 327874, "Helen", "Leary", "leary.helen@email.com", "(514)-634-8276 #2385", "Practicing since 10 years", "Wednesday, Thursday", 1, null);
+        Vet vet2 = new Vet(2, 327874, "Helen", "Leary", "leary.helen@email.com", "(514)-634-8276 #2385",null, "Practicing since 10 years", "Wednesday, Thursday", 1, null);
         vetRepository.save(vet2);
-        Vet vet3 = new Vet(3, 147258, "James2", "Carter2", "carter2.james@email.com", "(514)-634-8276 #2384", "practicing since 32 years", "Monday, Tuesday, Friday", 0, null);
+        Vet vet3 = new Vet(3, 147258, "James2", "Carter2", "carter2.james@email.com", "(514)-634-8276 #2384",null, "practicing since 32 years", "Monday, Tuesday, Friday", 0, null);
         vetRepository.save(vet3);
-        Vet vet4 = new Vet(4, 369852, "Helen2", "Leary2", "leary2.helen@email.com", "(514)-634-8276 #2385", "Practicing since 103 years", "Wednesday, Thursday", 0, null);
+        Vet vet4 = new Vet(4, 369852, "Helen2", "Leary2", "leary2.helen@email.com", "(514)-634-8276 #2385",null, "Practicing since 103 years", "Wednesday, Thursday", 0, null);
         vetRepository.save(vet4);
     }
 
     @Test
     public void createNewVetTest()
     {
-        Vet vet1 = new Vet(5, 234567, "James3", "Carter", "carter.james@email.com", "(514)-634-8276 #2384", "practicing since 3 years", "Monday, Tuesday, Friday", 1, null);
+        Vet vet1 = new Vet(5, 234567, "James3", "Carter",
+                "carter.james@email.com", "(514)-634-8276 #2384",null,
+                "practicing since 3 years", "Monday, Tuesday, Friday", 1, null);
         assertThrows(NoSuchElementException.class,()->{
             vetRepository.findByVetId(234567).get();
         });
@@ -69,6 +73,7 @@ public class VetBusinessLayerTest
         assertEquals(repo.getVetId(),result.getVetId());
         assertEquals(repo.getFirstName(),result.getFirstName());
     }
+
     @Test
     public void getAllVetsTest()
     {
@@ -89,7 +94,8 @@ public class VetBusinessLayerTest
     @Test
     public void updateVetByVetId()
     {
-        Vet vet1 = new Vet(1, 234568, "JamesUpdate", "CarterUpdate", "carterUpdate.james@email.com", "(514)-634-8276 #2384", "practicing since 3 yearsUpdate", "Monday, Tuesday, Friday", 1, null);
+        Vet vet1 = new Vet(1, 234568, "JamesUpdate", "CarterUpdate", "carterUpdate.james@email.com", "(514)-634-8276 #2384",null,
+                "practicing since 3 yearsUpdate", "Monday, Tuesday, Friday", 1, null);
 
 
         vetService.updateVet(vetService.getVetByVetId(234568), vet1);
@@ -99,7 +105,7 @@ public class VetBusinessLayerTest
         assertEquals(vetService.getVetByVetId(234568).getEmail(), "carterUpdate.james@email.com");
         assertEquals(vetService.getVetByVetId(234568).getResume(), "practicing since 3 yearsUpdate");
 
-        Vet vet2 = new Vet(1, 234568, "", "", "", "", "", "", 1, null);
+        Vet vet2 = new Vet(1, 234568, "", "", "", "",null, "", "", 1, null);
 
 
         vetService.updateVet(vetService.getVetByVetId(234568), vet2);
@@ -147,6 +153,18 @@ public class VetBusinessLayerTest
         assertEquals(resultVet.getIsActive(),0);
     }
 
-
-
+    @Test
+    @DisplayName("Delete Vet Service Test Valid Id")
+    public void deleteVetByVetId(){
+        assertEquals(vetService.getAllVets().size(),4);
+        vetService.deleteVetByVetId(234568);
+        assertEquals(vetService.getAllVets().size(),3);
+    }
+    @Test
+    @DisplayName("Delete Vet Service Test Invalid VetId")
+    public void deleteVetByVetIdInvlaidId(){
+        assertEquals(vetService.getVetByVetId(234568).getFirstName(), "James");
+        assertEquals(vetService.getAllVets().size(),4);
+        assertThrows(NotFoundException.class, () -> vetService.deleteVetByVetId(1));
+    }
 }

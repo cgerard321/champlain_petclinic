@@ -23,6 +23,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlElement;
 import java.io.IOException;
+import java.sql.Blob;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -36,6 +37,14 @@ import java.util.regex.Pattern;
  * @author Arjen Poutsma
  * @author Maciej Szarlinski
  * Copied from https://github.com/spring-petclinic/spring-petclinic-microservices
+ */
+
+/**
+ * @author Christian Chitanu
+ * Date: October 7th, 2021
+ * Implementation: Added field for image file
+ * Jira Story: CPC-237
+ *
  */
 
 @Entity
@@ -70,6 +79,11 @@ public class Vet {
     @NotEmpty
     private String phoneNumber;
 
+    @Column(name = "image")
+    @Lob
+    @Basic(fetch = FetchType.LAZY)
+    private byte[] image;
+
     @Column(name = "resume")
     private String resume;
 
@@ -78,6 +92,19 @@ public class Vet {
 
     @Column(name = "is_active")
     private Integer isActive;
+
+
+    public byte[] getImage() {
+        return image;
+    }
+
+    public void setImage(byte[] image) {
+        this.image = image;
+    }
+
+    public void setSpecialties(Set<Specialty> specialties) {
+        this.specialties = specialties;
+    }
 
     public Integer getIsActive() {
         return isActive;
