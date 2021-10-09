@@ -105,6 +105,7 @@ class VetResourceTest {
 		vet.setLastName("Carter");
 		vet.setEmail("carter.james@email.com");
 		vet.setPhoneNumber("2384");
+		vet.setImage(null);
 		vet.setResume("Practicing since 3 years");
 		vet.setWorkday("Monday, Tuesday, Friday");
 		vet.setIsActive(1);
@@ -126,6 +127,7 @@ class VetResourceTest {
 		vet.setLastName("Carter");
 		vet.setEmail("carter.james@email.com");
 		vet.setPhoneNumber("2384");
+		vet.setImage(null);
 		vet.setResume("Practicing since 3 years");
 		vet.setWorkday("Monday, Tuesday, Friday");
 		vet.setIsActive(0);
