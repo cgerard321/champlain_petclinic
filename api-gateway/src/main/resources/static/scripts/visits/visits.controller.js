@@ -105,9 +105,9 @@ angular.module('visits')
         };
 
         let ResetSortButtonArrows = function() {
-            $('#sortByDateButton').text("Sort by date");
-            $('#sortByDescButton').text("Sort by description");
-            $('#sortByVetButton').text("Sort by veterinarian")
+            $('#sortByDateButton').text("Sort by date ⇅");
+            $('#sortByDescButton').text("Sort by description ⇅");
+            $('#sortByVetButton').text("Sort by veterinarian ⇅")
         }
 
         let sortTableDateAscending = false;
@@ -119,12 +119,12 @@ angular.module('visits')
                 self.visits.sort(function(a, b) {
                     return Date.parse(b.date) - Date.parse(a.date);
                 });
-                $('#sortByDateButton').text("Sort by date ▼")
+                $('#sortByDateButton').text("Sort by date ↓")
             } else {
                 self.visits.sort(function(a, b) {
                     return Date.parse(b.date) + Date.parse(a.date);
                 });
-                $('#sortByDateButton').text("Sort by date ▲")
+                $('#sortByDateButton').text("Sort by date ↑")
             }
         }
 
@@ -140,7 +140,7 @@ angular.module('visits')
 
                     return a < b ? - 1 : a > b ? 1 : 0;
                 });
-                $('#sortByDescButton').text("Sort by description ▼")
+                $('#sortByDescButton').text("Sort by description ↓")
             } else {
                 self.visits.sort(function(a, b) {
                     a = a.description.toLowerCase();
@@ -148,7 +148,7 @@ angular.module('visits')
 
                     return a > b ? - 1 : a < b ? 1 : 0;
                 });
-                $('#sortByDescButton').text("Sort by description ▲")
+                $('#sortByDescButton').text("Sort by description ↑")
             }
         }
 
@@ -165,7 +165,7 @@ angular.module('visits')
 
                     return a < b ? - 1 : a > b ? 1 : 0;
                 });
-                $('#sortByVetButton').text("Sort by veterinarian ▼")
+                $('#sortByVetButton').text("Sort by veterinarian ↓")
             } else {
                 self.visits.sort(function(a, b) {
                     a = a.description.toLowerCase();
@@ -173,7 +173,7 @@ angular.module('visits')
 
                     return a > b ? - 1 : a < b ? 1 : 0;
                 });
-                $('#sortByVetButton').text("Sort by veterinarian ▲")
+                $('#sortByVetButton').text("Sort by veterinarian ↑")
             }
         }
 
