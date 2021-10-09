@@ -134,4 +134,16 @@ public class AuthServiceUserServiceTests {
     void delete_role_by_id_and_fail() {
         assertEquals(Optional.empty(), userRepo.findById(1l));
     }
+
+    @Test
+    @DisplayName("When creating user, encrypt password")
+    void encrypt_password_before_persistence() {
+
+        final UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
+        final User saved = userService.createUser(userIDLessDTO);
+
+        assertNotNull(saved.getPassword());
+        assertFalse(saved.getPassword().isEmpty());
+        assertNotEquals(saved.getPassword(), userIDLessDTO.getPassword());
+    }
 }
