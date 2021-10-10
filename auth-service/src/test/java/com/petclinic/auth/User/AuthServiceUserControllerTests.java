@@ -17,19 +17,14 @@
  * Date: 26/09/21
  * Ticket: feat(AUTH-CPC-104)
  *
+ * User: @Fube
+ * Date: 09/10/21
+ * Ticket: feat(AUTH-CPC-310)
+ *
  */
 package com.petclinic.auth.User;
 
-import com.petclinic.auth.Role.Role;
-import com.petclinic.auth.Role.RoleController;
-import com.petclinic.auth.Role.RoleIDLessDTO;
-import com.petclinic.auth.Role.RoleRepo;
-import com.petclinic.auth.User.User;
-import com.petclinic.auth.User.UserController;
-import com.petclinic.auth.User.UserIDLessDTO;
-import com.petclinic.auth.User.UserRepo;
-import javassist.NotFoundException;
-import org.apache.tomcat.util.http.fileupload.MultipartStream;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -37,10 +32,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import javax.validation.*;
 import java.util.Optional;
@@ -52,11 +45,10 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -64,6 +56,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class AuthServiceUserControllerTests {
 
     private final static Random rng;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     static {
         rng = new Random();
@@ -99,7 +94,7 @@ public class AuthServiceUserControllerTests {
     @Test
     @DisplayName("Create a user from controller")
     void create_user_from_controller() {
-        final User user = userController.createUser(ID_LESS_USER);
+        final UserPasswordLessDTO user = userController.createUser(ID_LESS_USER);
         assertNotNull(user);
         assertThat(user.getId(), instanceOf(Long.TYPE));
         assertTrue(userRepo.findById(user.getId()).isPresent());
@@ -262,5 +257,19 @@ public class AuthServiceUserControllerTests {
                 .andDo(print())
                 .andExpect(status().isForbidden());
 
+    }
+
+    @Test
+    @DisplayName("When POST on users endpoint with valid data, allow any")
+    void allow_any_on_users() throws Exception {
+
+        final UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
+        final String asString = objectMapper.writeValueAsString(userIDLessDTO);
+
+        mockMvc.perform(post("/users").contentType(APPLICATION_JSON).content(asString))
+                .andDo(print())
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(jsonPath("$.password").doesNotExist());
     }
 }
