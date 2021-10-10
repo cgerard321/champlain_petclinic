@@ -4,6 +4,7 @@ plugins {
 	id 'java'
 	id "io.freefair.lombok" version "6.0.0-m2"
 	id "com.bertramlabs.plugins.asset-pipeline" version "2.4.2"
+	id 'jacoco'
 }
 
 group = 'com.petclinic.bffapigateway'
@@ -42,6 +43,9 @@ dependencies {
 	// https://mvnrepository.com/artifact/org.jolokia/jolokia-core
 	implementation 'org.jolokia:jolokia-core:1.7.0'
 
+	implementation 'io.springfox:springfox-boot-starter:3.0.0'
+
+
 
 
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
@@ -56,6 +60,35 @@ dependencies {
 
 
 }
+
+jacoco {
+	toolVersion = "0.8.6"
+}
+
+jacocoTestReport {
+	dependsOn test
+
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: [
+					"com/petclinic/**/VisitsServiceApplication.class"
+			])
+		}))
+	}
+}
+
+jacocoTestCoverageVerification {
+	violationRules {
+		rule {
+			limit {
+				minimum = 0.90
+			}
+		}
+	}
+}
+
+test.finalizedBy jacocoTestReport
+
 
 
 test {
