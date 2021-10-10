@@ -360,5 +360,4 @@ public class VisitsServiceImplTests {
 
         assertEquals("No visit found with visitId: 234", ex.getMessage());
     }
-
 }

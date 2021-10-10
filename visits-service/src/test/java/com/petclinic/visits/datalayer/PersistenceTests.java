@@ -1,6 +1,7 @@
 package com.petclinic.visits.datalayer;
 
 import com.petclinic.visits.businesslayer.VisitsService;
+import com.petclinic.visits.utils.exceptions.InvalidInputException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,6 +46,7 @@ public class PersistenceTests {
         visit = Visit.visit()
                 .id(1)
                 .petId(1)
+                .practitionerId(200200)
                 .date(new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-02"))
                 .status(true)
                 .build();
@@ -122,10 +124,17 @@ public class PersistenceTests {
     }
 
     @Test
-    public void findByIdNonExistentVisit(){
+    public void findVisitByIdNonExistentVisit(){
         Optional<Visit> v = repo.findById(234);
 
         assertEquals(Optional.empty(), v);
+    }
+
+    @Test
+    public void findVisitByIdValid(){
+        Optional<Visit> v = repo.findById(1);
+
+        assertEquals(200200, v.get().getPractitionerId());
     }
 }
 
