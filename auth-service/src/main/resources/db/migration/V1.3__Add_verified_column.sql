@@ -1,0 +1,1 @@
+ALTER TABLE auth.users ADD verified BOOLEAN;
