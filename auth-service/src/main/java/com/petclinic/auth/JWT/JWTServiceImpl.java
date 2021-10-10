@@ -1,16 +1,18 @@
 package com.petclinic.auth.JWT;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.petclinic.auth.Role.Role;
 import com.petclinic.auth.User.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.lang.reflect.Field;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Created by IntelliJ IDEA.
@@ -34,8 +36,11 @@ public class JWTServiceImpl implements JWTService {
     @Override
     public String encrypt(User user) {
         Map<String, Object> claimsMap = new HashMap<>();
+        claimsMap.put("roles", user.getRoles());
+
         return Jwts.builder()
                 .setSubject(user.getEmail())
+                .addClaims(claimsMap)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(key)
@@ -50,9 +55,15 @@ public class JWTServiceImpl implements JWTService {
                     .build()
                     .parseClaimsJws(token);
 
-            claimsJws.getBody().
-            return new User();
+            final Claims body = claimsJws.getBody();
+            return User.builder()
+                    .username(body.get("username", String.class))
+                    .roles(new HashSet<Role>(body.get("roles", List.class)))
+                    .email(body.getSubject())
+                    .build();
+
         } catch (JwtException ex) {
+            ex.printStackTrace();
             //TODO: Add handling
             throw new RuntimeException("Something wrong with the JWT boss");
         }

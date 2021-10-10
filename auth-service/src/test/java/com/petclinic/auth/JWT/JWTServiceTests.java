@@ -30,17 +30,17 @@ public class JWTServiceTests {
     @Autowired
     private JWTService jwtService;
 
+    private final Set<Role> ROLES = new HashSet<Role>(){{
+        add(new Role(1, "TEST"));
+    }};
+
     private final User USER = new User(
             1,
             "uname",
             "pwd",
             "a@b.c",
             false,
-            null);
-
-    private final Set<Role> ROLES = new HashSet<Role>(){{
-        add(new Role(1, "TEST"));
-    }};
+            ROLES);
 
     @Test
     void setup(){}
@@ -57,6 +57,8 @@ public class JWTServiceTests {
     void get_user_from_jwt() {
         final String token = jwtService.encrypt(USER);
         final User decrypt = jwtService.decrypt(token);
+
         assertEquals(USER.getEmail(), decrypt.getEmail());
+        assertEquals(USER.getRoles(), decrypt.getRoles());
     }
 }
