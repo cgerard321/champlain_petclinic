@@ -187,6 +187,8 @@ public class AuthServiceUserServiceTests {
 
         final Mail mail = userService.generateVerificationMail(saved);
 
+        System.out.println(mail);
+
         assertTrue(mail.getMessage().contains("Your verification link: "));
     }
 }

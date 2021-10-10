@@ -1,3 +1,9 @@
+/**
+ * Created by IntelliJ IDEA.
+ * User: @Fube
+ * Date: 2021-10-10
+ * Ticket: feat(AUTH-CPC-357)
+ */
 package com.petclinic.auth.JWT;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,13 +21,6 @@ import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.*;
 import java.util.stream.Collectors;
-
-/**
- * Created by IntelliJ IDEA.
- * User: @Fube
- * Date: 2021-10-10
- * Ticket: feat(AUTH-CPC-357)
- */
 
 @Service
 public class JWTServiceImpl implements JWTService {

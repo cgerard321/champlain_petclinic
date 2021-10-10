@@ -80,8 +80,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Mail generateVerificationMail(User user) {
-        final String base64Token = Arrays.toString
-                (Base64.getEncoder().encode(jwtService.encrypt(user).getBytes(StandardCharsets.UTF_8)));
+        final String base64Token = Base64.getEncoder()
+                .withoutPadding()
+                .encodeToString(jwtService.encrypt(user).getBytes(StandardCharsets.UTF_8));
         return Mail.builder()
                 .message(format("Your verification link: %s/verification/%s", gatewayOrigin, base64Token))
                 .subject("PetClinic e-mail verification")

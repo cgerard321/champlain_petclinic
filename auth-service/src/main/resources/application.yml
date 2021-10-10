@@ -4,6 +4,8 @@ jwt:
 
 gateway:
   origin: setProductionUrlHere
+  protocol: http
+  subdomain: www
 
 spring:
   datasource:
@@ -36,6 +38,8 @@ spring.profiles: test
 
 gateway:
   origin: localhost:8080/users
+  protocol: http
+  subdomain:
 
 #for h2
 spring:
