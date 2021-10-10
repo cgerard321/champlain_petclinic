@@ -34,9 +34,8 @@ public class JWTServiceImpl implements JWTService {
     @Override
     public String encrypt(User user) {
         Map<String, Object> claimsMap = new HashMap<>();
-        claimsMap.put("email", user.getEmail());
         return Jwts.builder()
-                .setClaims(claimsMap)
+                .setSubject(user.getEmail())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(key)
@@ -50,6 +49,8 @@ public class JWTServiceImpl implements JWTService {
                     .setSigningKey(key)
                     .build()
                     .parseClaimsJws(token);
+
+            claimsJws.getBody().
             return new User();
         } catch (JwtException ex) {
             //TODO: Add handling
