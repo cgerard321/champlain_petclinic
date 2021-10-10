@@ -12,9 +12,10 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -59,6 +60,9 @@ public class JWTServiceTests {
         final User decrypt = jwtService.decrypt(token);
 
         assertEquals(USER.getEmail(), decrypt.getEmail());
-        assertEquals(USER.getRoles(), decrypt.getRoles());
+
+        final Set<String> userRolesNameOnly = USER.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
+        final Set<String> decryptRolesNameOnly = decrypt.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
+        assertEquals(userRolesNameOnly, decryptRolesNameOnly);
     }
 }

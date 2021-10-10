@@ -65,7 +65,6 @@ public class JWTServiceImpl implements JWTService {
                     .stream()
                     .map(n -> objectMapper.convertValue(n, Role.class))
                     .collect(Collectors.toSet());
-            System.out.println(roles);
 
             return User.builder()
                     .username(body.get("username", String.class))
