@@ -23,7 +23,7 @@
   position:absolute;
   top:0;
   margin:0 0;
-  tranform:translate(-50%,-50%) !important;
+  transform:translate(-50%,-50%);
    z-index:100000;
    text-align:center;
   grid-template-columns:0.55fr 1fr;

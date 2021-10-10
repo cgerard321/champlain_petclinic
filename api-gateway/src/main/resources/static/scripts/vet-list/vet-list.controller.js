@@ -25,7 +25,7 @@ angular.module('vetList')
                 let left = $event.pageX;
                   let top = $event.pageY;
                   if(document.documentElement.clientWidth > 960){
-                    child.style.left = (left + 221) + 'px';
+                    child.style.left = (left + 390) + 'px';
                   }
                   else{
                     child.style.left = (left + 200) + 'px';
