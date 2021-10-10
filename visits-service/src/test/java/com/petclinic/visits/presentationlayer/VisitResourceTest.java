@@ -361,6 +361,12 @@ public class VisitResourceTest {
 		assertEquals("12345", practitionerId);
 	}
 
+	@Test
+	void shouldReturnBadRequestWhenFetchingWithInvalidVisitId() throws Exception {
+		mvc.perform(get("/visits/vet/{visitId}", "invalid"))
+				.andExpect(status().isBadRequest());
+	}
+
 	// UTILS PACKAGE UNIT TESTING
 	@Test
 	void test_EmptyInvalidInputException(){

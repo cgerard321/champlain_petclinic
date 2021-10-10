@@ -334,7 +334,7 @@ public class VisitsServiceImplTests {
     }
 
     @Test
-    public void shouldReturnPractitionerIdWhenFetchingWithValidVistitId(){
+    public void shouldReturnPractitionerIdWhenFetchingWithValidVisitId(){
         Visit returnedVisit = visit().id(230).petId(3).practitionerId(123456).build();
 
         when(repo.findById(anyInt())).thenReturn(Optional.ofNullable(returnedVisit));

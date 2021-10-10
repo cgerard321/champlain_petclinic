@@ -3,12 +3,14 @@ package com.petclinic.visits.businesslayer;
 import com.petclinic.visits.datalayer.Visit;
 import com.petclinic.visits.datalayer.VisitRepository;
 import com.petclinic.visits.utils.exceptions.InvalidInputException;
+import com.petclinic.visits.utils.exceptions.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 /*
@@ -94,6 +96,12 @@ public class VisitsServiceImpl implements VisitsService {
 
     @Override
     public int getPractitionerIdForVisit(int visitId) {
-        return 0;
+        Optional<Visit> returnedVisit = visitRepository.findById(visitId);
+        if(visitId < 0)
+            throw new InvalidInputException("VisitId can't be negative.");
+        if(!returnedVisit.isPresent())
+            throw new NotFoundException("No visit found with visitId: " + visitId);
+        int practitionerId = returnedVisit.get().getPractitionerId();
+        return practitionerId;
     }
 }
