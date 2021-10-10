@@ -1,8 +1,11 @@
 package com.petclinic.auth.User;
+import com.petclinic.auth.JWT.JWTService;
 import com.petclinic.auth.Mail.Mail;
 import com.petclinic.auth.Mail.MailService;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Page;
@@ -13,6 +16,13 @@ import com.petclinic.auth.Exceptions.NotFoundException;
 
 import javax.validation.Valid;
 
+import java.net.InetAddress;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Base64;
+
+import static java.lang.String.format;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -22,6 +32,10 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final MailService mailService;
+    private final JWTService jwtService;
+
+    @Value("${gateway.origin}")
+    private String gatewayOrigin;
 
     @Override
     public User getUserById(long id) {
@@ -66,6 +80,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Mail generateVerificationMail(User user) {
-        throw new RuntimeException("Not implemented");
+        final String base64Token = Arrays.toString
+                (Base64.getEncoder().encode(jwtService.encrypt(user).getBytes(StandardCharsets.UTF_8)));
+        return Mail.builder()
+                .message(format("Your verification link: %s/verification/%s", gatewayOrigin, base64Token))
+                .subject("PetClinic e-mail verification")
+                .to(user.getEmail())
+                .build();
     }
 }

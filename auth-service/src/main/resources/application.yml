@@ -2,6 +2,9 @@ jwt:
   expiration: 900000 # 15 minutes
   secret: thisismyverycoolsecretthatisatleast256byteslong # Must at least be 256 bytes long
 
+gateway:
+  origin: setProductionUrlHere
+
 spring:
   datasource:
     url: jdbc:mysql://localhost:3310/auth
@@ -30,6 +33,9 @@ spring:
 spring.profiles: test
 # recommend setting this to "none" in a production environment
 #spring.jpa.hibernate.ddl-auto: none
+
+gateway:
+  origin: localhost:8080/users
 
 #for h2
 spring:
