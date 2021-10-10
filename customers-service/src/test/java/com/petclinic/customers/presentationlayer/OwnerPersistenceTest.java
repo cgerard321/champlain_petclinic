@@ -1,14 +1,21 @@
 package com.petclinic.customers.presentationlayer;
 
-import com.petclinic.customers.datalayer.*;
+import com.petclinic.customers.datalayer.Owner;
+import com.petclinic.customers.datalayer.OwnerRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import java.util.List;
 import java.util.Optional;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.samePropertyValuesAs;
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -17,9 +24,8 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("test")
 class OwnerPersistenceTest {
 
-
     @Autowired
-    OwnerRepository repository;
+    private OwnerRepository repository;
 
 
     /**
@@ -33,98 +39,116 @@ class OwnerPersistenceTest {
         repository.deleteAll();
     }
 
+
     /**
      * ------------------------ TEST_FIND ------------------------
      * Testing the find by id method
      */
-//    @Test
-//    public void findById()
-//    {
-//        //Set ID
-//        int OwnerID = 789;
-//
-//        //Create new owner
-//        Owner newOwner = new Owner (OwnerID, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
-//        repository.save(newOwner);
-//
-//        //If owner is found
-//        if (repository.findById(OwnerID).isPresent())
-//        {
-//            System.out.println("Yay!");
-//        }
-//        else
-//        {
-//            System.out.println("No");
-//        }
-//
-//
-//
-//
-//    }
+    @DisplayName("ownerPersistence_FindOwner")
+    @Test
+    public void findById() {
+
+        //Set ID
+        int OwnerID = 1;
+
+        //Arrange
+        Owner newOwner = new Owner(OwnerID, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
+        Owner savedOwner = repository.save(newOwner);
+
+        //Act
+        Owner foundOwner = repository.findById(savedOwner.getId()).orElse(null);
+
+        //Assert
+        assert foundOwner != null;
+        assertThat(foundOwner, samePropertyValuesAs(savedOwner));
+    }
+
 
     /**
      * ------------------------ TEST_FIND_ALL ------------------------
      * Testing the find_all() method
      */
-//    @Test
-//    public void findAll()
-//    {
-//        //Creates 4 new owner object
-//        int expectedLength = 4;
-//        Owner owner1 = new Owner (1, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
-//        repository.save(owner1);
-//        Owner owner2 = new Owner (2, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
-//        repository.save(owner2);
-//        Owner owner3 = new Owner (3, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
-//        repository.save(owner3);
-//        Owner owner4 = new Owner (4, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
-//        repository.save(owner4);
-//
-//
-//
-//        //Make sure that 4 owners has been inserted in repo
-//        assertEquals(expectedLength, repository.findAll().size());
-//    }
+    @DisplayName("ownerPersistence_FindAllOwner")
+    @Test
+    public void findAll()
+    {
+        //Expect 4 entities
+        int expectedLength = 4;
 
+        //Arrange
+        Owner owner1 = new Owner (1, "Brian1", "Smith1", "940 Rue des Oiseaux", "Montreal", "1111111111");
+        Owner savedOwner1 = repository.save(owner1);
+        Owner foundOwner1 = repository.findById(savedOwner1.getId()).orElse(null);
+        assert foundOwner1 != null;
+        assertThat(foundOwner1, samePropertyValuesAs(savedOwner1));
+
+        Owner owner2 = new Owner (2, "Brian2", "Smith2", "940 Rue des Oiseaux", "Montreal", "1111111111");
+        Owner savedOwner2 = repository.save(owner2);
+        Owner foundOwner2 = repository.findById(savedOwner2.getId()).orElse(null);
+        assert foundOwner2 != null;
+        assertThat(foundOwner2, samePropertyValuesAs(savedOwner2));
+
+
+        Owner owner3 = new Owner (3, "Brian3", "Smith3", "940 Rue des Oiseaux", "Montreal", "1111111111");
+        Owner savedOwner3 = repository.save(owner3);
+        Owner foundOwner3 = repository.findById(savedOwner3.getId()).orElse(null);
+        assert foundOwner3 != null;
+        assertThat(foundOwner3, samePropertyValuesAs(savedOwner3));
+
+        Owner owner4 = new Owner (4, "Brian4", "Smith4", "940 Rue des Oiseaux", "Montreal", "1111111111");
+        Owner savedOwner4 = repository.save(owner4);
+        Owner foundOwner4 = repository.findById(savedOwner4.getId()).orElse(null);
+        assert foundOwner4 != null;
+        assertThat(foundOwner4, samePropertyValuesAs(savedOwner4));
+
+        //Act
+        List<Owner> ownerList = repository.findAll();
+
+        //Assert
+        assertEquals(expectedLength, ownerList.size());
+    }
 
 
     /**
      * ------------------------ TEST_DELETE ------------------------
      * Testing the delete owner method
      */
-//    @Test
-//    public void deleteOwner()
-//    {
-//
-//
-//        //Set ID
-//        int OwnerID = 1;
-//
-//        //Create new owner
-//        Owner newOwner = new Owner (OwnerID, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
-//        repository.save(newOwner);
-//
-//
-//        //Is the owner exist?
-//        if (repository.findById(OwnerID).isPresent())
-//        {
-//            //if yes, delete owner
-//            Optional<Owner> ownerOptional = repository.findById(OwnerID);
-//            Owner owner = ownerOptional.get();
-//            repository.delete(owner);
-//
-//            //Check if owner has been deleted
-//            if (repository.findById(OwnerID).isPresent() == false)
-//            {
-//                System.out.println("Owner has been successfully deleted!");
-//            }
-//        }
-//        else
-//        {
-//            //Error
-//            System.out.println("No");
-//        }
-//
-//    }
-}
+    @DisplayName("ownerPersistence_DeleteOwner")
+    @Test
+    public void deleteOwner()
+    {
+        //Arrange
+        int OwnerID = 1;
+        Owner newOwner = new Owner (OwnerID, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
+        Owner savedOwner = repository.save(newOwner);
 
+        //Act
+        repository.deleteById(savedOwner.getId());
+
+        //Assert
+        assertFalse(repository.existsById(savedOwner.getId()));
+
+    }
+
+    /**
+     * ------------------------ TEST_CREATE ------------------------
+     * Testing the delete owner method
+     */
+    @DisplayName("ownerPersistence_CreateOwner")
+    @Test
+    public void create_owner_test()
+    {
+        //Arrange
+        int OwnerId = 1;
+        Owner newOwner = new Owner (OwnerId, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
+        Owner savedOwner = repository.save(newOwner);;
+
+        //Act
+        Owner foundSaved = repository.findById(savedOwner.getId()).orElse(null);
+
+        //Assert
+        assert foundSaved != null;
+        assertThat(foundSaved, samePropertyValuesAs(savedOwner));
+        assertEquals(1,repository.findAll().size());
+    }
+}

@@ -22,5 +22,11 @@ public class PetRequest {
     private String name;
 
     private int typeId;
+
+
+    public PetRequest(String name, Date birthDate) {
+        this.name = name;
+        this.birthDate = birthDate;
+    }
 }
 
