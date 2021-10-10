@@ -3,6 +3,7 @@ package com.petclinic.visits.businesslayer;
 import com.petclinic.visits.datalayer.Visit;
 import com.petclinic.visits.datalayer.VisitRepository;
 import com.petclinic.visits.utils.exceptions.InvalidInputException;
+import com.petclinic.visits.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -332,6 +333,32 @@ public class VisitsServiceImplTests {
         assertEquals("PetId can't be negative.", ex.getMessage());
     }
 
+    @Test
+    public void shouldReturnPractitionerIdWhenFetchingWithValidVistitId(){
+        Visit returnedVisit = visit().id(230).petId(3).practitionerId(123456).build();
 
+        when(repo.findById(anyInt())).thenReturn(Optional.ofNullable(returnedVisit));
+
+        assertEquals(123456, visitsService.getPractitionerIdForVisit(230));
+    }
+
+    @Test
+    public void shouldThrowInvalidInputExceptionWhenFetchingWithNegativeVisitId(){
+        InvalidInputException ex = assertThrows(InvalidInputException.class, ()->{
+           visitsService.getPractitionerIdForVisit(-1);
+        });
+
+        assertEquals("VisitId can't be negative.", ex.getMessage());
+    }
+
+    @Test
+    public void shouldThrowNotFoundExceptionWhenFetchingNonExistentVisit(){
+        when(repo.findById(234)).thenReturn(Optional.empty());
+        NotFoundException ex = assertThrows(NotFoundException.class, ()->{
+           visitsService.getPractitionerIdForVisit(234);
+        });
+
+        assertEquals("No visit found with visitId: 234", ex.getMessage());
+    }
 
 }

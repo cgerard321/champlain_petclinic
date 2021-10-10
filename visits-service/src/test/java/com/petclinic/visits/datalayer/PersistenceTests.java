@@ -10,14 +10,14 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.swing.text.html.Option;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static com.petclinic.visits.datalayer.Visit.visit;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -119,6 +119,13 @@ public class PersistenceTests {
         
         Visit foundVisit = repo.findById(savedVisit.getId()).get();
         assertEquals("Updated Description", foundVisit.getDescription());
+    }
+
+    @Test
+    public void findByIdNonExistentVisit(){
+        Optional<Visit> v = repo.findById(234);
+
+        assertEquals(Optional.empty(), v);
     }
 }
 
