@@ -1,6 +1,12 @@
 package com.petclinic.vets.presentationlayer;
 
 import com.petclinic.vets.businesslayer.VetService;
+import com.petclinic.vets.datalayer.Vet;
+import com.petclinic.vets.datalayer.VetRepository;
+import com.petclinic.vets.presentationlayer.VetResource;
+import com.petclinic.vets.utils.exceptions.NotFoundException;
+import org.hibernate.validator.internal.util.logging.Messages_$bundle;
+import org.junit.jupiter.api.BeforeEach;
 import com.petclinic.vets.datalayer.Specialty;
 import com.petclinic.vets.datalayer.Vet;
 import com.petclinic.vets.datalayer.VetRepository;
@@ -9,15 +15,19 @@ import com.petclinic.vets.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Service;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -27,10 +37,11 @@ import java.util.Optional;
 import static  org.hamcrest.MatcherAssert.assertThat;
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.hasValue;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -94,6 +105,7 @@ class VetResourceTest {
 		vet.setLastName("Carter");
 		vet.setEmail("carter.james@email.com");
 		vet.setPhoneNumber("2384");
+		vet.setImage(null);
 		vet.setResume("Practicing since 3 years");
 		vet.setWorkday("Monday, Tuesday, Friday");
 		vet.setIsActive(1);
@@ -115,6 +127,7 @@ class VetResourceTest {
 		vet.setLastName("Carter");
 		vet.setEmail("carter.james@email.com");
 		vet.setPhoneNumber("2384");
+		vet.setImage(null);
 		vet.setResume("Practicing since 3 years");
 		vet.setWorkday("Monday, Tuesday, Friday");
 		vet.setIsActive(0);
@@ -344,4 +357,45 @@ class VetResourceTest {
 				.andExpect(jsonPath("$[0].isActive").value(1));
 	}
 
+	@Test
+	@DisplayName("Delete Vet Test Valid VetId Routing and ui response")
+	void deleteVetValidVetIdRoutingAndUiResponse1() throws Exception {
+
+		Vet vet = new Vet();
+		vet.setId(1);
+		vet.setVetId(874130);
+		vet.setFirstName("James");
+		vet.setLastName("Carter");
+		vet.setEmail("carter.james@email.com");
+		vet.setPhoneNumber("2384");
+		vet.setResume("Practicing since 3 years");
+		vet.setWorkday("Monday, Tuesday, Friday");
+		vet.setIsActive(1);
+
+		vetRepository.deleteByVetId(vet.getVetId());
+		mvc.perform(get("/vets/details/874130"))
+				.andExpect(status().isNotFound());
+	}
+
+	@Test
+	@DisplayName("Delete Vet Test Valid VetId")
+	void deleteVetValidVetIdShouldDeleteVetFromRepo() throws Exception {
+
+		Vet vet = new Vet();
+		vet.setId(1);
+		vet.setVetId(874130);
+		vet.setFirstName("James");
+		vet.setLastName("Carter");
+		vet.setEmail("carter.james@email.com");
+		vet.setPhoneNumber("2384");
+		vet.setResume("Practicing since 3 years");
+		vet.setWorkday("Monday, Tuesday, Friday");
+		vet.setIsActive(1);
+
+		given(vetRepository.findByVetId(vet.getVetId())).willReturn(Optional.of(vet));
+
+		mvc.perform(delete("/vets/"+vet.getVetId()).accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk());
+
+	}
 }
