@@ -65,4 +65,18 @@ public class JWTServiceTests {
         final Set<String> decryptRolesNameOnly = decrypt.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
         assertEquals(userRolesNameOnly, decryptRolesNameOnly);
     }
+
+    @Test
+    @DisplayName("Given token for suer with no roles, decrypted user has empty roles Set")
+    void get_user_with_no_roles_from_jwt() {
+        final User build = USER.toBuilder().roles(null).build();
+        final String token = jwtService.encrypt(build);
+        final User decrypt = jwtService.decrypt(token);
+
+        assertEquals(build.getEmail(), decrypt.getEmail());
+
+        final Set<String> userRolesNameOnly = build.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
+        final Set<String> decryptRolesNameOnly = decrypt.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
+        assertEquals(userRolesNameOnly, decryptRolesNameOnly);
+    }
 }
