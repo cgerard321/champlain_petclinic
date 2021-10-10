@@ -1,6 +1,7 @@
 package com.petclinic.auth.JWT;
 
 import com.petclinic.auth.User.User;
+import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -21,9 +22,11 @@ import java.util.Date;
 public class JWTServiceImpl implements JWTService {
 
     private final int expiration;
+    private final Key key;
 
     public JWTServiceImpl(@Value("${jwt.expiration}") int expiration) {
         this.expiration = expiration;
+        key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
     }
 
     @Override
@@ -32,7 +35,7 @@ public class JWTServiceImpl implements JWTService {
                 .setSubject(user.getEmail())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
-                .signWith(Keys.secretKeyFor(SignatureAlgorithm.HS256))
+                .signWith(key)
                 .compact();
     }
 
