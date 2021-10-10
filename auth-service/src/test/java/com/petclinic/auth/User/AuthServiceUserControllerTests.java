@@ -35,9 +35,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
-import javax.validation.ConstraintViolationException;
+import javax.validation.*;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 
 import static java.lang.Math.min;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -69,9 +70,13 @@ public class AuthServiceUserControllerTests {
             EMAIL = "email@gmail.com";
 
 
+    private Validator validator;
+
     @BeforeEach
     void setup() {
         userRepo.deleteAllInBatch();
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        validator = factory.getValidator();
     }
 
     @Autowired
@@ -113,6 +118,7 @@ public class AuthServiceUserControllerTests {
 
         assertThrows(ConstraintViolationException.class, () -> userController.createUser(userIDLessDTO));
     }
+
     @Test
     @DisplayName("Check the password field in order to refused if it is empty")
     void check_empty_password() {
@@ -121,6 +127,45 @@ public class AuthServiceUserControllerTests {
         UserIDLessDTO userIDLessDTO = new UserIDLessDTO( USER, null,EMAIL);
 
         assertThrows(ConstraintViolationException.class, () -> userController.createUser(userIDLessDTO));
+    }
+    @Test
+    @DisplayName("Check the password field in order to refused if no special character")
+    void check_missing_specialchar_password() {
+
+
+        UserIDLessDTO userIDLessDTO = new UserIDLessDTO( USER, "Password123",EMAIL);
+        Set<ConstraintViolation<UserIDLessDTO>> violations = validator.validate(userIDLessDTO);
+        assertFalse(violations.isEmpty());
+    }
+    @Test
+    @DisplayName("Check the password field in order to refused if no number")
+    void check_missing_number_password() {
+
+
+        UserIDLessDTO userIDLessDTO = new UserIDLessDTO( USER, "Pas$word",EMAIL);
+
+        Set<ConstraintViolation<UserIDLessDTO>> violations = validator.validate(userIDLessDTO);
+        assertFalse(violations.isEmpty());
+    }
+    @Test
+    @DisplayName("Check the password field in order to refused if no uppercase character")
+    void check_missing_uppercase_password() {
+
+
+        UserIDLessDTO userIDLessDTO = new UserIDLessDTO( USER, "pas$word123",EMAIL);
+
+        Set<ConstraintViolation<UserIDLessDTO>> violations = validator.validate(userIDLessDTO);
+        assertFalse(violations.isEmpty());
+    }
+    @Test
+    @DisplayName("Check the password field in order to refused if no lowercase character")
+    void check_missing_lowercase_password() {
+
+
+        UserIDLessDTO userIDLessDTO = new UserIDLessDTO( USER, "PAS$WORD123",EMAIL);
+
+        Set<ConstraintViolation<UserIDLessDTO>> violations = validator.validate(userIDLessDTO);
+        assertFalse(violations.isEmpty());
     }
     @Test
     @DisplayName("Check the email field in order to refused if it is empty")
