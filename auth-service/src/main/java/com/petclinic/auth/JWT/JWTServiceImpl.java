@@ -1,17 +1,16 @@
 package com.petclinic.auth.JWT;
 
 import com.petclinic.auth.User.User;
-import io.jsonwebtoken.JwtParser;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.KeyGenerator;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by IntelliJ IDEA.
@@ -34,8 +33,10 @@ public class JWTServiceImpl implements JWTService {
 
     @Override
     public String encrypt(User user) {
+        Map<String, Object> claimsMap = new HashMap<>();
+        claimsMap.put("email", user.getEmail());
         return Jwts.builder()
-                .setSubject(user.getEmail())
+                .setClaims(claimsMap)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(key)
@@ -44,6 +45,15 @@ public class JWTServiceImpl implements JWTService {
 
     @Override
     public User decrypt(String token) {
-        return null;
+        try {
+            final Jws<Claims> claimsJws = Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token);
+            return new User();
+        } catch (JwtException ex) {
+            //TODO: Add handling
+            throw new RuntimeException("Something wrong with the JWT boss");
+        }
     }
 }

@@ -1,5 +1,6 @@
 jwt:
   expiration: 900000 # 15 minutes
+  secret: thisismyverycoolsecretthatisatleast256byteslong # Must at least be 256 bytes long
 
 spring:
   datasource:
