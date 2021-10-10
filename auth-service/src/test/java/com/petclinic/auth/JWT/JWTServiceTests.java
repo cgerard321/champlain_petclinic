@@ -2,14 +2,18 @@ package com.petclinic.auth.JWT;
 
 import com.petclinic.auth.Role.Role;
 import com.petclinic.auth.User.User;
+import io.jsonwebtoken.Jwts;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestComponent;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.HashSet;
 import java.util.Set;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 /**
@@ -19,7 +23,8 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
  * Ticket: feat(AUTH-CPC-357)
  */
 
-@TestComponent
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
 public class JWTServiceTests {
 
     @Autowired
@@ -43,7 +48,15 @@ public class JWTServiceTests {
     @Test
     @DisplayName("Given user, get JWT")
     void get_jwt_from_user() {
+        final String token = jwtService.encrypt(USER);
+        assertNotNull(token);
+    }
 
-        assertNotNull(jwtService.encrypt(USER));
+    @Test
+    @DisplayName("Given token, get user")
+    void get_user_from_jwt() {
+        final String token = jwtService.encrypt(USER);
+        final User decrypt = jwtService.decrypt(token);
+        assertEquals(USER.getEmail(), decrypt.getEmail());
     }
 }

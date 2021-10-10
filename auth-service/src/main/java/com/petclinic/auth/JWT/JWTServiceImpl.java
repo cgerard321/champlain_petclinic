@@ -22,7 +22,7 @@ public class JWTServiceImpl implements JWTService {
 
     private final int expiration;
 
-    public JWTServiceImpl(@Value("{jwt.expiration}") int expiration) {
+    public JWTServiceImpl(@Value("${jwt.expiration}") int expiration) {
         this.expiration = expiration;
     }
 
