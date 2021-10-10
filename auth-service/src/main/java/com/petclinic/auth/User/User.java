@@ -17,6 +17,9 @@
  * Date: 24/09/21
  * Ticket: feat(AUTH-CPC-102)
  *
+ * User: @Fube
+ * Date: 10/10/21
+ * Ticket: feat(AUTH-CPC-357)
  */
 package com.petclinic.auth.User;
 
@@ -57,6 +60,13 @@ public class User {
         this.username = username;
         this.password = password;
         this.email = email;
+    }
+
+    public User(String username, String password, String email, Set<Role> roles) {
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.roles = roles;
     }
 
     @ManyToMany

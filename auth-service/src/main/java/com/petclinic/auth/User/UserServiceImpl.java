@@ -1,4 +1,6 @@
 package com.petclinic.auth.User;
+import com.petclinic.auth.Mail.Mail;
+import com.petclinic.auth.Mail.MailService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -14,11 +16,12 @@ import javax.validation.Valid;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService{
+public class UserServiceImpl implements UserService {
 
     private final UserRepo userRepo;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final MailService mailService;
 
     @Override
     public User getUserById(long id) {
@@ -39,6 +42,9 @@ public class UserServiceImpl implements UserService{
         log.info("Saving user with email {}", userIDLessDTO.getEmail());
         User user = userMapper.idLessDTOToModel(userIDLessDTO);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+        mailService.sendMail(generateVerificationMail(user));
+
         return userRepo.save(user);
     }
 
@@ -56,5 +62,10 @@ public class UserServiceImpl implements UserService{
     public void deleteUser(long userId) {
         log.info("deleteUser: trying to delete entity with userId: {}", userId);
         userRepo.findById(userId).ifPresent(userRepo::delete);
+    }
+
+    @Override
+    public Mail generateVerificationMail(User user) {
+        throw new RuntimeException("Not implemented");
     }
 }

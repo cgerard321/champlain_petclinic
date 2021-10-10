@@ -47,10 +47,6 @@ public class AuthServiceUserServiceTests {
 
     @BeforeEach
     void setup() {
-        when(mailService.sendMail(any())).then(args -> {
-            final Mail mail = args.getArgument(0, Mail.class);
-            return "Email sent to " + mail.getMessage();
-        });
         userRepo.deleteAllInBatch();
     }
 
@@ -180,5 +176,17 @@ public class AuthServiceUserServiceTests {
 
         assertEquals(1, callCount.get());
         assertTrue(mailRef.get().getMessage().contains("Your verification link: "));
+    }
+
+    @Test
+    @DisplayName("Given user, generate verification email")
+    void generate_verification_email() {
+
+        final UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
+        final User saved = userService.createUser(userIDLessDTO);
+
+        final Mail mail = userService.generateVerificationMail(saved);
+
+        assertTrue(mail.getMessage().contains("Your verification link: "));
     }
 }

@@ -13,9 +13,13 @@
  * Date: 26/09/21
  * Ticket: feat(AUTH-CPC-104)
  *
+ * User: @Fube
+ * Date: 10/10/21
+ * Ticket: feat(AUTH-CPC-357)
  */
 package com.petclinic.auth.User;
 
+import com.petclinic.auth.Mail.Mail;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
@@ -32,4 +36,5 @@ public interface UserService {
 
     void deleteUser(long id);
 
+    Mail generateVerificationMail(User user);
 }
