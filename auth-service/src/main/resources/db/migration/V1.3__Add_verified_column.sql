@@ -1,1 +1,1 @@
-ALTER TABLE auth.users ADD verified BOOLEAN;
+ALTER TABLE auth.users ADD verified BOOLEAN NOT NULL DEFAULT FALSE;

@@ -51,6 +51,8 @@ public class User {
     @Email(message = "Email must be valid")
     private String email;
 
+    private boolean verified;
+
     public User(String username, String password, String email) {
         this.username = username;
         this.password = password;
