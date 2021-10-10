@@ -37,20 +37,23 @@ public class VetServiceImpl implements VetService {
         if (!updateVet.getEmail().isEmpty()) {
             vet.setEmail(updateVet.getEmail());
         }
-        if (!updateVet.getEmail().isEmpty()) {
+        if (!updateVet.getFirstName().isEmpty()) {
             vet.setFirstName(updateVet.getFirstName());
         }
-        if (!updateVet.getEmail().isEmpty()) {
+        if (!updateVet.getLastName().isEmpty()) {
             vet.setLastName(updateVet.getLastName());
         }
-        if (!updateVet.getEmail().isEmpty()) {
+        if (!updateVet.getPhoneNumber().isEmpty()) {
             vet.setPhoneNumber(updateVet.getPostNumber());
         }
-        if (!updateVet.getEmail().isEmpty()) {
+        if (!updateVet.getResume().isEmpty()) {
             vet.setResume(updateVet.getResume());
         }
-        if (!updateVet.getEmail().isEmpty()) {
+        if (!updateVet.getWorkday().isEmpty()) {
             vet.setWorkday(updateVet.getWorkday());
+        }
+        if(updateVet.getImage() != null){
+            vet.setImage(updateVet.getImage());
         }
         vetRepository.save(vet);
 
