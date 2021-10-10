@@ -8,6 +8,8 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.KeyGenerator;
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
@@ -24,9 +26,10 @@ public class JWTServiceImpl implements JWTService {
     private final int expiration;
     private final Key key;
 
-    public JWTServiceImpl(@Value("${jwt.expiration}") int expiration) {
+    public JWTServiceImpl(@Value("${jwt.expiration}") int expiration,
+                          @Value("${jwt.secret}") String secret) {
         this.expiration = expiration;
-        key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+        key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
     @Override
