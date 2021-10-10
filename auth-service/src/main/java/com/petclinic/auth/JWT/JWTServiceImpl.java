@@ -61,10 +61,17 @@ public class JWTServiceImpl implements JWTService {
                     .parseClaimsJws(token);
 
             final Claims body = claimsJws.getBody();
-            final Set<Role> roles = (Set<Role>) body.get("roles", List.class)
-                    .stream()
-                    .map(n -> objectMapper.convertValue(n, Role.class))
-                    .collect(Collectors.toSet());
+            Set<Role> roles;
+
+            final List<Role> rolesList = body.get("roles", List.class);
+            if(rolesList == null || rolesList.size() <= 0) {
+                roles = Collections.emptySet();
+            } else {
+                roles = rolesList
+                        .parallelStream()
+                        .map(n -> objectMapper.convertValue(n, Role.class))
+                        .collect(Collectors.toSet());
+            }
 
             return User.builder()
                     .username(body.get("username", String.class))

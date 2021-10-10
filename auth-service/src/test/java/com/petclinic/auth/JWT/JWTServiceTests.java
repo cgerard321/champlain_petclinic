@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -67,9 +68,9 @@ public class JWTServiceTests {
     }
 
     @Test
-    @DisplayName("Given token for suer with no roles, decrypted user has empty roles Set")
+    @DisplayName("Given token for user with no roles, decrypted user has empty roles Set")
     void get_user_with_no_roles_from_jwt() {
-        final User build = USER.toBuilder().roles(null).build();
+        final User build = USER.toBuilder().roles(Collections.emptySet()).build();
         final String token = jwtService.encrypt(build);
         final User decrypt = jwtService.decrypt(token);
 
