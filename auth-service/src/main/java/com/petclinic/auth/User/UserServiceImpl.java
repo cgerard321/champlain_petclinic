@@ -36,6 +36,10 @@ public class UserServiceImpl implements UserService {
 
     @Value("${gateway.origin}")
     private String gatewayOrigin;
+    @Value("${gateway.subdomain}")
+    private String gatewaySubdomain;
+    @Value("${gateway.protocol}")
+    private String gatewayProtocol;
 
     @Override
     public User getUserById(long id) {
@@ -83,8 +87,13 @@ public class UserServiceImpl implements UserService {
         final String base64Token = Base64.getEncoder()
                 .withoutPadding()
                 .encodeToString(jwtService.encrypt(user).getBytes(StandardCharsets.UTF_8));
+
+        // Remove dangling . in case of empty sub
+        String niceSub = gatewaySubdomain.length() > 0 ? gatewaySubdomain + "." : "";
+
         return Mail.builder()
-                .message(format("Your verification link: %s/verification/%s", gatewayOrigin, base64Token))
+                .message(format("Your verification link: %s://%s%s/verification/%s",
+                        gatewayProtocol, niceSub, gatewayOrigin, base64Token))
                 .subject("PetClinic e-mail verification")
                 .to(user.getEmail())
                 .build();
