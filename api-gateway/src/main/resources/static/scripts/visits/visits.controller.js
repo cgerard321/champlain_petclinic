@@ -21,14 +21,15 @@ angular.module('visits')
             var dd = String(dateObj.getDate()).padStart(2, '0');
             var mm = String(dateObj.getMonth() + 1).padStart(2, '0');
             var yyyy = dateObj.getFullYear();
-            let currentDate = Date.parse(yyyy + '/' + mm + '/' + dd);
+            let currentDate = Date.parse(yyyy + '-' + mm + '-' + dd);
 
             self.upcomingVisits = [];
             self.previousVisits = [];
 
             $.each(self.visits, function(i, visit) {
                 let selectedVisitDate = Date.parse(visit.date);
-                if(selectedVisitDate > currentDate) {
+
+                if(selectedVisitDate >= currentDate) {
                     self.upcomingVisits.push(visit);
                 } else {
                     self.previousVisits.push(visit);
