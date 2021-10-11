@@ -1,5 +1,3 @@
-
-
 body {
     background: #C5E1A5;
 }
@@ -78,3 +76,11 @@ button:hover {
     background: #8BC34A;
     color: #ffffff;
 }
+
+.vet-label-input{
+    display: inline;
+    position: relative;
+    margin: 2em;
+    text-align: left;
+}
+
