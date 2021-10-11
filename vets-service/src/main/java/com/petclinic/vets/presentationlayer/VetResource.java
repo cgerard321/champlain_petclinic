@@ -82,7 +82,7 @@ class VetResource {
         VetDTO vet = vetService.getVetDTOByVetId(vetId);
         return vet;
     }
-    git commit -m "Implemented more vetService methods. Changed most of methods to use a dto in VetResource"
+
 
     @PostMapping(
             consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -104,20 +104,16 @@ class VetResource {
     @PutMapping(path = "/{vetId}/disableVet",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Vet disableVet(@PathVariable("vetId") int vetId, @RequestBody Vet vetRequest) {
-        Vet vet = vetService.getVetByVetId(vetId);
-        vetService.disableVet(vet,vetRequest);
-        return vet;
+    public VetDTO disableVet(@PathVariable("vetId") int vetId, @RequestBody VetDTO vetRequest) {
+        return vetService.disableVetFromDTO(vetId, vetRequest);
     }
 
 
     @PutMapping(path = "/{vetId}/enableVet",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Vet enableVet(@PathVariable("vetId") int vetId, @RequestBody Vet vetRequest) {
-        Vet vet = vetService.getVetByVetId(vetId);
-        vetService.enableVet(vet,vetRequest);
-        return vet;
+    public VetDTO enableVet(@PathVariable("vetId") int vetId, @RequestBody VetDTO vetRequest) {
+        return vetService.enableVetFromDTO(vetId, vetRequest);
     }
 
     @DeleteMapping(path ="/{vetId}")

@@ -23,8 +23,8 @@ public interface VetService
     public VetDTO createVetFromDTO(VetDTO vetDTO);
     public List<VetDTO> getAllDisabledVetDTOs();
     public List<VetDTO> getAllEnabledVetDTOs();
-    public VetDTO disableVetFromDTO(Vet vet, Vet vetFound);
-    public VetDTO enableVetFromDTO(Vet vet, Vet vetFound);
+    public VetDTO disableVetFromDTO(int vetId, VetDTO vetFound);
+    public VetDTO enableVetFromDTO(int vetId, VetDTO vetFound);
     public void deleteVetByVetIdFromVetDTO(int vetId);
 
 

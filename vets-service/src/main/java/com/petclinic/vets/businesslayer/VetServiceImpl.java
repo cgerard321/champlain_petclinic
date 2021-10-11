@@ -154,17 +154,19 @@ public class VetServiceImpl implements VetService {
     }
 
     @Override
-    public VetDTO disableVetFromDTO(Vet vet, Vet vetFound) {
+    public VetDTO disableVetFromDTO(int vetId, VetDTO vetDTOFound) {
+        Vet fromVetId = getVetByVetId(vetId);
+        Vet vetFound = vetMapper.vetDTOToVet(vetDTOFound);
         return null;
     }
 
     @Override
-    public VetDTO enableVetFromDTO(Vet vet, Vet vetFound) {
+    public VetDTO enableVetFromDTO(int vetId, VetDTO vetFound) {
         return null;
     }
 
     @Override
     public void deleteVetByVetIdFromVetDTO(int vetId) {
-
+        deleteVetByVetId(vetId);
     }
 }
