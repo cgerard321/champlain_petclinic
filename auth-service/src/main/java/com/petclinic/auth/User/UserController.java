@@ -20,6 +20,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Base64;
 
 @RestController
 @RequestMapping("/users")
@@ -73,7 +74,7 @@ public class UserController {
     }
 
     @GetMapping("/verification/{base64EncodedToken}")
-    public void verifyEmail(@PathVariable String base64EncodedToken) {
-
+    public UserPasswordLessDTO verifyEmail(@PathVariable String base64EncodedToken) {
+        return userService.verifyEmailFromToken(new String(Base64.getDecoder().decode(base64EncodedToken)));
     }
 }

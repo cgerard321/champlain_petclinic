@@ -98,4 +98,9 @@ public class UserServiceImpl implements UserService {
                 .to(user.getEmail())
                 .build();
     }
+
+    @Override
+    public UserPasswordLessDTO verifyEmailFromToken(String token) {
+        return null;
+    }
 }

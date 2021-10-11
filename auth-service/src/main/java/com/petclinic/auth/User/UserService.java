@@ -37,4 +37,6 @@ public interface UserService {
     void deleteUser(long id);
 
     Mail generateVerificationMail(User user);
+
+    UserPasswordLessDTO verifyEmailFromToken(String token);
 }
