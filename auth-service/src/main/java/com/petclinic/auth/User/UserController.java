@@ -68,4 +68,9 @@ public class UserController {
         userService.deleteUser(userId);
         log.info("Deleted role with id {}", userId);
     }
+
+    @GetMapping("/verification/{base64EncodedToken}")
+    public void verifyEmail(@PathVariable String base64EncodedToken) {
+
+    }
 }
