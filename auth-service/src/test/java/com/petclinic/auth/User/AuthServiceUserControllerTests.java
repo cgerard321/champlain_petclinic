@@ -37,6 +37,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.data.domain.Page;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -48,7 +50,6 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 
-import static java.lang.Math.min;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -57,6 +58,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.mockito.Mockito.when;
 
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -291,8 +293,24 @@ public class AuthServiceUserControllerTests {
     @DisplayName("When GET on verification endpoint, allow any")
     void allow_any_on_verification() throws Exception {
 
+        final User user = User.builder()
+                        .username("test")
+                        .email("fake@email.com")
+                        .password("fakePassword")
+                        .build();
+        userRepo.save(user);
+
+        assertEquals(1, userRepo.count());
+        assertNotNull(userRepo.findByEmail(user.getEmail()));
+
+        final String fakeToken = "a.fake.token";
         final String base64Token =
-                Base64.getEncoder().withoutPadding().encodeToString("a.fake.token".getBytes(StandardCharsets.UTF_8));
+                Base64.getEncoder().withoutPadding().encodeToString(fakeToken.getBytes(StandardCharsets.UTF_8));
+
+
+        when(jwtService.decrypt(fakeToken))
+                .thenReturn(user.toBuilder().build()); // Clone
+
         mockMvc.perform(get("/users/verification/" + base64Token))
                 .andDo(print())
                 .andExpect(status().is2xxSuccessful());
