@@ -76,13 +76,3 @@ button:hover {
     background: #8BC34A;
     color: #ffffff;
 }
-
-.vet-label-input{
-    display: inline;
-    position: relative;
-    text-align: left;
-}
-.check-align{
-    text-align: left;
-}
-
