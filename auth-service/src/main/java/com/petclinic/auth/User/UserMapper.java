@@ -9,6 +9,10 @@
  * Date: 24/09/21
  * Ticket: feat(AUTH-CPC-102)
  *
+ * User: @Fube
+ * Date: 09/10/21
+ * Ticket: feat(AUTH-CPC-310)
+ *
  */
 package com.petclinic.auth.User;
 
@@ -24,4 +28,8 @@ public interface UserMapper {
             @Mapping(target = "roles", ignore = true)
     })
     User idLessDTOToModel(UserIDLessDTO dto);
+
+    @Mappings({
+    })
+    UserPasswordLessDTO modelToIDLessPasswordLessDTO(User model);
 }
