@@ -62,7 +62,7 @@ public class JWTServiceImpl implements JWTService {
             final Claims body = claimsJws.getBody();
             Set<Role> roles;
 
-            final List<Role> rolesList = body.get("roles", List.class);
+            final List<LinkedHashMap<String, String>> rolesList = body.get("roles", List.class);
             if(rolesList == null || rolesList.size() <= 0) {
                 roles = Collections.emptySet();
             } else {
