@@ -332,7 +332,7 @@ public class VisitResourceTest {
 
 	@Test
 	void whenFetchingStringDatesWithNegativePractitionerIdThenShouldHandleInvalidInputException() throws Exception {
-		when(visitsService.getVisitsPractitioner(-1)).thenThrow(new InvalidInputException("PractitionerId can't be negative."));
+		when(visitsService.getVisitsForPractitioner(-1)).thenThrow(new InvalidInputException("PractitionerId can't be negative."));
 
 		mvc.perform(get("/visits/vets/{practitionerId}",-1))
 				.andExpect(status().isUnprocessableEntity())
@@ -442,7 +442,7 @@ public class VisitResourceTest {
 						.practitionerId(200200)
 						.build());
 
-		given(visitsService.getVisitsPractitioner(200200)).willReturn(returnedVisits);
+		given(visitsService.getVisitsForPractitioner(200200)).willReturn(returnedVisits);
 
 		mvc.perform(get("/visits/vets/{practitionerId}",200200))
 				.andExpect(status().isOk())
