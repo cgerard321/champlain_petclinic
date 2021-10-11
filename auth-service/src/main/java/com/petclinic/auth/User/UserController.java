@@ -67,6 +67,13 @@ public class UserController {
         log.info("Password for User with id {} with new password {}", userId, newPassword);
     }
 
+    @PutMapping("/{userId}")
+    public void changeUserEmail(@RequestBody @Valid UserIDLessDTO userIDLessDTO, @RequestBody String newEmail) {
+
+        userService.changeUserEmail(userIDLessDTO, newEmail);
+        log.info("Email for User with id {} with new email {}", userIDLessDTO, newEmail);
+    }
+
     @DeleteMapping("/{userId}")
     public void deleteUser(@PathVariable long userId) {
         userService.deleteUser(userId);

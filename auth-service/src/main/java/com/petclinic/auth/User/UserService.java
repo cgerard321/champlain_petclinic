@@ -32,6 +32,8 @@ public interface UserService {
 
     User getUserById(long id);
 
+    User changeUserEmail(UserIDLessDTO userIDLessDTO, String newEmail);
+
     Page<User> findAll(PageRequest of);
 
     void deleteUser(long id);

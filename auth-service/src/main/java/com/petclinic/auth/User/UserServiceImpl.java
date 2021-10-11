@@ -50,6 +50,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public User changeUserEmail(UserIDLessDTO userIDLessDTO, String newEmail) {
+        log.info("id={}", userIDLessDTO);
+        User user = userMapper.idLessDTOToModel(userIDLessDTO);
+        user.setEmail(newEmail);
+        return userRepo.save(user);
+    }
+
+    @Override
     public Page<User> findAll(PageRequest of) {
         return userRepo.findAll(of);
     }
@@ -75,7 +83,6 @@ public class UserServiceImpl implements UserService {
         User user = userRepo.findById(userId).orElseThrow(() -> new NotFoundException("No user for id:" + userId));
         user.setPassword(newPassword);
         return userRepo.save(user);
-
     }
 
     @Override
