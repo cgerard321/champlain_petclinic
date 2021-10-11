@@ -96,9 +96,9 @@ class VetResource {
 
     @PutMapping( value = "/{vetId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public Vet updateVet(@PathVariable int vetId, @RequestBody Vet vetRequest)
+    public VetDTO updateVet(@PathVariable int vetId, @RequestBody VetDTO vetRequest)
     {
-        return  vetService.updateVet(vetService.getVetByVetId(vetId),vetRequest);
+        return  vetService.updateVetWithDTO(vetId,vetRequest);
     }
 
     @PutMapping(path = "/{vetId}/disableVet",
@@ -118,6 +118,6 @@ class VetResource {
 
     @DeleteMapping(path ="/{vetId}")
     public void deleteByVetId(@PathVariable("vetId") int vetId ){
-        vetService.deleteVetByVetId(vetId);
+        vetService.deleteVetByVetIdFromVetDTO(vetId);
     }
 }

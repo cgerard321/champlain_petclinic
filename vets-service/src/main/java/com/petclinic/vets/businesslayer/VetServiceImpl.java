@@ -57,6 +57,11 @@ public class VetServiceImpl implements VetService {
         if(updateVet.getImage() != null){
             vet.setImage(updateVet.getImage());
         }
+        if(!updateVet.getSpecialties().isEmpty()){
+            Set<Specialty> specialties = new HashSet<>();
+            specialties.addAll(updateVet.getSpecialties());
+            vet.setSpecialties(specialties);
+        }
         vetRepository.save(vet);
 
         return vet;
@@ -119,12 +124,23 @@ public class VetServiceImpl implements VetService {
 
     @Override
     public VetDTO updateVetWithDTO(int vetId, VetDTO vetDTO) {
-        return null;
+        Vet vet = getVetByVetId(vetId);
+        Vet vetUpdate = vetMapper.vetDTOToVet(vetDTO);
+        Set<Specialty> specialties = new HashSet<>();
+        specialties.addAll(vetDTO.getSpecialties());
+        vetUpdate.setSpecialties(specialties);
+        updateVet(vet,vetUpdate);
+        return getVetDTOByVetId(vetId);
     }
 
     @Override
     public VetDTO createVetFromDTO(VetDTO vetDTO) {
-        return null;
+        Vet vet = vetMapper.vetDTOToVet(vetDTO);
+        Set<Specialty> specialties = new HashSet<>();
+        specialties.addAll(vetDTO.getSpecialties());
+        vet.setSpecialties(specialties);
+        createVet(vet);
+        return vetDTO;
     }
 
     @Override
@@ -157,12 +173,16 @@ public class VetServiceImpl implements VetService {
     public VetDTO disableVetFromDTO(int vetId, VetDTO vetDTOFound) {
         Vet fromVetId = getVetByVetId(vetId);
         Vet vetFound = vetMapper.vetDTOToVet(vetDTOFound);
-        return null;
+        VetDTO vetDTO = vetMapper.vetToVetDTO(disableVet(fromVetId,vetFound));
+        return vetDTO;
     }
 
     @Override
-    public VetDTO enableVetFromDTO(int vetId, VetDTO vetFound) {
-        return null;
+    public VetDTO enableVetFromDTO(int vetId, VetDTO vetDTOFound) {
+        Vet fromVetId = getVetByVetId(vetId);
+        Vet vetFound = vetMapper.vetDTOToVet(vetDTOFound);
+        VetDTO vetDTO = vetMapper.vetToVetDTO(enableVet(fromVetId,vetFound));
+        return vetDTO;
     }
 
     @Override

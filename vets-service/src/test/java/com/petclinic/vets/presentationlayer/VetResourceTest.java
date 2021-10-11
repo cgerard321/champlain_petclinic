@@ -187,8 +187,8 @@ class VetResourceTest {
 		//assert
 		mvc.perform(put("/vets/{vetId}",vet.getVetId())
 						.contentType(MediaType.APPLICATION_JSON)
-						.content("{ \"id\": 1," +
-								"\"vetId\": 874130," +
+				// Removed due to change of entity: \"id\": 1,"
+						.content("{\"vetId\": 874130," +
 								"\"firstName\": \"Jamess\"," +
 								"\"lastName\": \"Carterr\"," +
 								"\"email\": \"carter.james2@email.com\"," +
@@ -200,7 +200,7 @@ class VetResourceTest {
 				// Validate the response code and content type
 				.andExpect(status().isNoContent())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-				.andExpect(jsonPath("$.id").value(1))
+//				.andExpect(jsonPath("$.id").value(1))
 				.andExpect(jsonPath("$.vetId").value(874130))
 				.andExpect(jsonPath("$.firstName").value("Jamess"))
 				.andExpect(jsonPath("$.lastName").value("Carterr"))
@@ -230,8 +230,8 @@ class VetResourceTest {
 		//assert
 		mvc.perform(put("/vets/{vetId}/disableVet",vet.getVetId())
 								.contentType(MediaType.APPLICATION_JSON)
-								.content("{ \"id\": 1," +
-										"\"vetId\": 874130," +
+								// Removed due to change of entity: \"id\": 1,"
+								.content("{ \"vetId\": 874130," +
 										"\"firstName\": \"James\"," +
 										"\"lastName\": \"Carter\"," +
 										"\"email\": \"carter.james@email.com\"," +
@@ -243,7 +243,7 @@ class VetResourceTest {
 						// Validate the response code and content type
 						.andExpect(status().isOk())
 						.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-				.andExpect(jsonPath("$.id").value(1))
+//				.andExpect(jsonPath("$.id").value(1))
 				.andExpect(jsonPath("$.vetId").value(874130))
 				.andExpect(jsonPath("$.firstName").value("James"))
 				.andExpect(jsonPath("$.lastName").value("Carter"))
@@ -273,8 +273,8 @@ class VetResourceTest {
 		//assert
 		mvc.perform(put("/vets/{vetId}/enableVet",vet.getVetId())
 						.contentType(MediaType.APPLICATION_JSON)
-						.content("{ \"id\": 1," +
-								"\"vetId\": 874130," +
+				// Removed due to change of entity: \"id\": 1,"
+						.content("{ \"vetId\": 874130," +
 								"\"firstName\": \"James\"," +
 								"\"lastName\": \"Carter\"," +
 								"\"email\": \"carter.james@email.com\"," +
@@ -286,7 +286,7 @@ class VetResourceTest {
 				// Validate the response code and content type
 				.andExpect(status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-				.andExpect(jsonPath("$.id").value(1))
+//				.andExpect(jsonPath("$.id").value(1))
 				.andExpect(jsonPath("$.vetId").value(874130))
 				.andExpect(jsonPath("$.firstName").value("James"))
 				.andExpect(jsonPath("$.lastName").value("Carter"))
