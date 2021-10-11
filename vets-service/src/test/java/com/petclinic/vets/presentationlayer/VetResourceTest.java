@@ -208,7 +208,7 @@ class VetResourceTest {
 				.andExpect(jsonPath("$.phoneNumber").value("(514)-634-8276 #2383"))
 				.andExpect(jsonPath("$.resume").value("Practicing since 4 years"))
 				.andExpect(jsonPath("$.workday").value("Monday, Friday"))
-				.andExpect(jsonPath("$.isActive").value(1));;
+				.andExpect(jsonPath("$.isActive").value(1));
 	}
 
 	@Test

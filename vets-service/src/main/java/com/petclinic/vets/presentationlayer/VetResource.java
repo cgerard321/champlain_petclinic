@@ -98,7 +98,7 @@ class VetResource {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public VetDTO updateVet(@PathVariable int vetId, @RequestBody VetDTO vetRequest)
     {
-        return  vetService.updateVetWithDTO(vetId,vetRequest);
+        return vetService.updateVetWithDTO(vetId,vetRequest);
     }
 
     @PutMapping(path = "/{vetId}/disableVet",

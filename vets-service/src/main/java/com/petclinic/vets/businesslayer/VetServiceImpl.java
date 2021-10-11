@@ -36,28 +36,28 @@ public class VetServiceImpl implements VetService {
 
     @Override
     public Vet updateVet(Vet vet, Vet updateVet) {
-        if (!updateVet.getEmail().isEmpty()) {
+        if (!updateVet.getEmail().isEmpty() && updateVet.getEmail() != null) {
             vet.setEmail(updateVet.getEmail());
         }
-        if (!updateVet.getFirstName().isEmpty()) {
+        if (!updateVet.getFirstName().isEmpty() && updateVet.getFirstName() != null) {
             vet.setFirstName(updateVet.getFirstName());
         }
-        if (!updateVet.getLastName().isEmpty()) {
+        if (!updateVet.getLastName().isEmpty() && updateVet.getLastName() != null) {
             vet.setLastName(updateVet.getLastName());
         }
-        if (!updateVet.getPhoneNumber().isEmpty()) {
+        if (!updateVet.getPhoneNumber().isEmpty() && updateVet.getPhoneNumber() != null) {
             vet.setPhoneNumber(updateVet.getPostNumber());
         }
-        if (!updateVet.getResume().isEmpty()) {
+        if (!updateVet.getResume().isEmpty() && updateVet.getResume() != null) {
             vet.setResume(updateVet.getResume());
         }
-        if (!updateVet.getWorkday().isEmpty()) {
+        if (!updateVet.getWorkday().isEmpty() && updateVet.getWorkday() != null) {
             vet.setWorkday(updateVet.getWorkday());
         }
         if(updateVet.getImage() != null){
             vet.setImage(updateVet.getImage());
         }
-        if(!updateVet.getSpecialties().isEmpty()){
+        if(!updateVet.getSpecialties().isEmpty() && updateVet.getSpecialties() != null){
             Set<Specialty> specialties = new HashSet<>();
             specialties.addAll(updateVet.getSpecialties());
             vet.setSpecialties(specialties);
@@ -126,9 +126,11 @@ public class VetServiceImpl implements VetService {
     public VetDTO updateVetWithDTO(int vetId, VetDTO vetDTO) {
         Vet vet = getVetByVetId(vetId);
         Vet vetUpdate = vetMapper.vetDTOToVet(vetDTO);
-        Set<Specialty> specialties = new HashSet<>();
-        specialties.addAll(vetDTO.getSpecialties());
-        vetUpdate.setSpecialties(specialties);
+        if(vetDTO.getSpecialties() != null && !vetDTO.getSpecialties().isEmpty()) {
+            Set<Specialty> specialties = new HashSet<>();
+            specialties.addAll(vetDTO.getSpecialties());
+            vetUpdate.setSpecialties(specialties);
+        }
         updateVet(vet,vetUpdate);
         return getVetDTOByVetId(vetId);
     }
