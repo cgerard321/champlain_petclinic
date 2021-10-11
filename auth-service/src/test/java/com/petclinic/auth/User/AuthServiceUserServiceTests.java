@@ -165,7 +165,7 @@ public class AuthServiceUserServiceTests {
         AtomicReference<Mail> mailRef = new AtomicReference<>();
 
         when(mailService.sendMail(any())).then(args -> {
-            callCount.intValue();
+            callCount.incrementAndGet();
             final Mail mail = args.getArgument(0, Mail.class);
             mailRef.set(mail);
             return "Email sent to " + mail.getMessage();
