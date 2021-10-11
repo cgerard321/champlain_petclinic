@@ -334,23 +334,10 @@ public class VisitResourceTest {
 	void whenFetchingStringDatesWithNegativePractitionerIdThenShouldHandleInvalidInputException() throws Exception {
 		when(visitsService.getVisitDatesForPractitioner(-1)).thenThrow(new InvalidInputException("PractitionerId can't be negative."));
 
-		mvc.perform(get("/visits/vets/dates/{practitionerId}",-1))
+		mvc.perform(get("/visits/vets/{practitionerId}",-1))
 				.andExpect(status().isUnprocessableEntity())
 				.andExpect(result -> assertTrue(result.getResolvedException() instanceof InvalidInputException))
 				.andExpect(result -> assertEquals("PractitionerId can't be negative.", result.getResolvedException().getMessage()));
-	}
-
-	@Test
-	void whenFetchingStringDatesWithValidPractitionerIdThenShouldReturnListOfDates() throws Exception {
-		List<String> returnedStringDates = Arrays.asList("2020-03-02", "2021-04-09","2022-12-12");
-
-		given(visitsService.getVisitDatesForPractitioner(200200)).willReturn(returnedStringDates);
-
-		MvcResult result = mvc.perform(get("/visits/vets/dates/{practitionerId}",200200))
-				.andExpect(status().isOk())
-				.andReturn();
-
-		assertEquals("[\"2020-03-02\",\"2021-04-09\",\"2022-12-12\"]", result.getResponse().getContentAsString());
 	}
 
 	// UTILS PACKAGE UNIT TESTING

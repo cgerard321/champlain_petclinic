@@ -333,36 +333,6 @@ public class VisitsServiceImplTests {
     }
 
     @Test
-    public void shouldReturnListOfVisitDatesWhenFetchingWithValidPractitionerId() throws ParseException {
-        List<Visit> visitsList = asList(
-                visit()
-                        .id(1)
-                        .petId(1)
-                        .date(new SimpleDateFormat("yyyy-MM-dd").parse("2020-03-04"))
-                        .practitionerId(200200)
-                        .build(),
-                visit()
-                        .id(3)
-                        .petId(1)
-                        .date(new SimpleDateFormat("yyyy-MM-dd").parse("2021-03-04"))
-                        .practitionerId(200200)
-                        .build(),
-                visit()
-                        .id(2)
-                        .petId(1)
-                        .date(new SimpleDateFormat("yyyy-MM-dd").parse("2022-03-04"))
-                        .practitionerId(200200)
-                        .build());
-
-        when(repo.findVisitsByPractitionerId(anyInt())).thenReturn(visitsList);
-
-        List<String> returnedStringDates = visitsService.getVisitDatesForPractitioner(200200);
-
-        assertEquals(3, returnedStringDates.size());
-        assertEquals(new SimpleDateFormat("yyyy-MM-dd").parse("2021-03-04").toString(), returnedStringDates.get(1));
-    }
-
-    @Test
     public void shouldThrowInvalidInputExceptionWhenFetchingDatesWithNegativePractitionerId(){
         InvalidInputException ex = assertThrows(InvalidInputException.class, ()->{
            visitsService.getVisitDatesForPractitioner(-1);
@@ -376,7 +346,7 @@ public class VisitsServiceImplTests {
         List<Visit> repoResponse = new ArrayList<Visit>();
         when(repo.findVisitsByPractitionerId(anyInt())).thenReturn(repoResponse);
 
-        List<String> returnedStringDates = visitsService.getVisitDatesForPractitioner(234);
+        List<Visit> returnedStringDates = visitsService.getVisitDatesForPractitioner(234);
 
         assertEquals(0, returnedStringDates.size());
     }
