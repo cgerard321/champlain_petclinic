@@ -61,7 +61,9 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.idLessDTOToModel(userIDLessDTO);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        mailService.sendMail(generateVerificationMail(user));
+        log.info("Sending email to {}...", userIDLessDTO.getEmail());
+        log.info(mailService.sendMail(generateVerificationMail(user)));
+        log.info("Email sent to {}", userIDLessDTO.getEmail());
 
         return userRepo.save(user);
     }

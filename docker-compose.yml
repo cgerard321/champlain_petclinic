@@ -61,6 +61,8 @@ services:
 
   mailer-service:
     build: mailer-service
+    ports:
+      - "8888:8080"
     environment:
       - SMTP_USER=champlain.petclinic@gmail.com
       - SMTP_SERVER=smtp.gmail.com
