@@ -90,9 +90,9 @@ public class VisitResource {
     }
 
     @GetMapping("visits/vets/{practitionerId}")
-    public List<Visit> getVisitDatesForPractitioner(@PathVariable("practitionerId") int practitionerId){
+    public List<Visit> getVisitsPractitioner(@PathVariable("practitionerId") int practitionerId){
         log.debug("Calling VisitsService:getVisitDatesForPractitioner:practitionerId={}", practitionerId);
-        return visitsService.getVisitDatesForPractitioner(practitionerId);
+        return visitsService.getVisitsPractitioner(practitionerId);
     }
 
     @Value

@@ -93,7 +93,7 @@ public class VisitsServiceImpl implements VisitsService {
     }
 
     @Override
-    public List<Visit> getVisitDatesForPractitioner(int practitionerId) {
+    public List<Visit> getVisitsPractitioner(int practitionerId) {
         if(practitionerId < 0)
             throw new InvalidInputException("PractitionerId can't be negative.");
         List<Visit> visits = visitRepository.findVisitsByPractitionerId(practitionerId);
