@@ -277,4 +277,12 @@ public class AuthServiceUserControllerTests {
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.password").doesNotExist());
     }
+
+    @Test
+    @DisplayName("When GET on verification endpoint, allow any")
+    void allow_any_on_verification() throws Exception {
+        mockMvc.perform(get("/users/verification"))
+                .andDo(print())
+                .andExpect(status().is2xxSuccessful());
+    }
 }
