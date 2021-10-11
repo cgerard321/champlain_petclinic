@@ -313,6 +313,12 @@ public class AuthServiceUserControllerTests {
 
         mockMvc.perform(get("/users/verification/" + base64Token))
                 .andDo(print())
-                .andExpect(status().is2xxSuccessful());
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(jsonPath("$.password").doesNotExist())
+                .andExpect(jsonPath("$.id").value(user.getId()))
+                .andExpect(jsonPath("$.email").value(user.getEmail()))
+                .andExpect(jsonPath("$.roles").isArray());
+
+        assertTrue(userRepo.findByEmail(user.getEmail()).isVerified());
     }
 }
