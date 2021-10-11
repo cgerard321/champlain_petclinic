@@ -346,9 +346,9 @@ public class VisitsServiceImplTests {
         List<Visit> repoResponse = new ArrayList<Visit>();
         when(repo.findVisitsByPractitionerId(anyInt())).thenReturn(repoResponse);
 
-        List<Visit> returnedStringDates = visitsService.getVisitsPractitioner(234);
+        List<Visit> returnedVisits = visitsService.getVisitsPractitioner(234);
 
-        assertEquals(0, returnedStringDates.size());
+        assertEquals(0, returnedVisits.size());
     }
 
     @Test
