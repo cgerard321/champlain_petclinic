@@ -281,7 +281,7 @@ public class AuthServiceUserControllerTests {
     @Test
     @DisplayName("When GET on verification endpoint, allow any")
     void allow_any_on_verification() throws Exception {
-        mockMvc.perform(get("/users/verification"))
+        mockMvc.perform(get("/users/verification/c29tZVRva2Vu"))
                 .andDo(print())
                 .andExpect(status().is2xxSuccessful());
     }
