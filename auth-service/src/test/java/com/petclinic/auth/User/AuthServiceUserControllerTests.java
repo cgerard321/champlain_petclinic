@@ -51,6 +51,7 @@ import java.util.Set;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -107,6 +108,8 @@ public class AuthServiceUserControllerTests {
     @Test
     @DisplayName("Create a user from controller")
     void create_user_from_controller() {
+        when(jwtService.encrypt(any()))
+                .thenReturn("a.fake.token");
         final UserPasswordLessDTO user = userController.createUser(ID_LESS_USER);
         assertNotNull(user);
         assertThat(user.getId(), instanceOf(Long.TYPE));
@@ -278,6 +281,9 @@ public class AuthServiceUserControllerTests {
 
         final UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
         final String asString = objectMapper.writeValueAsString(userIDLessDTO);
+
+        when(jwtService.encrypt(any()))
+                .thenReturn("a.fake.token");
 
         mockMvc.perform(post("/users").contentType(APPLICATION_JSON).content(asString))
                 .andDo(print())
