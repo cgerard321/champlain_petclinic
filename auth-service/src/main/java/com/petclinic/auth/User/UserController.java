@@ -7,6 +7,9 @@ package com.petclinic.auth.User;
  * Date: 24/10/21
  * Ticket: feat(AUTH-CPC-310)
  *
+ * User: @Fube
+ * Date: 2021-10-10
+ * Ticket: feat(AUTH-CPC-357)
  */
 
 import lombok.RequiredArgsConstructor;
@@ -17,6 +20,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Base64;
 
 @RestController
 @RequestMapping("/users")
@@ -67,5 +71,10 @@ public class UserController {
     public void deleteUser(@PathVariable long userId) {
         userService.deleteUser(userId);
         log.info("Deleted role with id {}", userId);
+    }
+
+    @GetMapping("/verification/{base64EncodedToken}")
+    public UserPasswordLessDTO verifyEmail(@PathVariable String base64EncodedToken) {
+        return userService.verifyEmailFromToken(new String(Base64.getDecoder().decode(base64EncodedToken)));
     }
 }

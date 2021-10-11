@@ -20,7 +20,7 @@ func (m MailerServiceImpl) SendMail(mail *mailer.Mail) error {
 	trueMail.SetHeader("From", m.dialer.Username)
 	trueMail.SetHeader("To", mail.To)
 	trueMail.SetHeader("Subject", mail.Subject)
-	trueMail.SetHeader("text/html", mail.Message)
+	trueMail.SetBody("text/html", mail.Message)
 
 	return m.dialer.DialAndSend(trueMail)
 }

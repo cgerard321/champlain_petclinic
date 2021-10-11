@@ -89,6 +89,11 @@ public class VisitResource {
         return visitsService.getVisitsForPet(petId, true);
     }
 
+    @GetMapping("visits/vets/dates/{practitionerId}")
+    public List<String> getVisitDatesForPractitioner(@PathVariable("practitionerId") int practitionerId){
+        log.debug("Calling VisitsService:getVisitDatesForPractitioner:practitionerId={}", practitionerId);
+        return visitsService.getVisitDatesForPractitioner(practitionerId);
+    }
 
     @Value
     static class Visits {

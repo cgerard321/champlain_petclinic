@@ -45,6 +45,7 @@ public class PersistenceTests {
         visit = Visit.visit()
                 .id(1)
                 .petId(1)
+                .practitionerId(200200)
                 .date(new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-02"))
                 .status(true)
                 .build();
@@ -119,6 +120,18 @@ public class PersistenceTests {
         
         Visit foundVisit = repo.findById(savedVisit.getId()).get();
         assertEquals("Updated Description", foundVisit.getDescription());
+    }
+
+    @Test
+    public void findByPractitionerId(){
+        List<Visit> returnedVisits = repo.findVisitsByPractitionerId(200200);
+        assertEquals(1, returnedVisits.size());
+    }
+
+    @Test
+    public void findByNonExistentPractitionerId(){
+        List<Visit> returnedVisits = repo.findVisitsByPractitionerId(234234);
+        assertEquals(0, returnedVisits.size());
     }
 }
 
