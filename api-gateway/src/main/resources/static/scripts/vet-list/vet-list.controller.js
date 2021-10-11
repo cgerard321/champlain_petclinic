@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('vetList')
-.controller('VetListController', ['$http', function ($http) {
+    .controller('VetListController', ['$http', function ($http) {
         var self = this;
         this.buttonChangeState = (v) =>
         {
@@ -25,7 +25,7 @@ angular.module('vetList')
                 let left = $event.pageX;
                   let top = $event.pageY;
                   if(document.documentElement.clientWidth > 960){
-                    child.style.left = (left + 390) + 'px';
+                    child.style.left = (left + 221) + 'px';
                   }
                   else{
                     child.style.left = (left + 200) + 'px';
@@ -37,9 +37,9 @@ angular.module('vetList')
         }
         this.hide = ($event,vetID) => {
 
-                              let child = document.getElementsByClassName("m"+vetID)[0];
-                            child.classList.remove("modalOn");
-                                child.classList.add("modalOff");
+            let child = document.getElementsByClassName("m"+vetID)[0];
+            child.classList.remove("modalOn");
+            child.classList.add("modalOff");
         }
         this.test = console.log;
 
