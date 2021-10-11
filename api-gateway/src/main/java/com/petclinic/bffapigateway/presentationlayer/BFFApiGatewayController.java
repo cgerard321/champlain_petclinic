@@ -1,14 +1,23 @@
 package com.petclinic.bffapigateway.presentationlayer;
 
 
-import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
+
+import com.petclinic.bffapigateway.domainclientlayer.*;
+
+import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
+
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
+
 import com.petclinic.bffapigateway.dtos.Login;
+
+import com.petclinic.bffapigateway.dtos.BillDetails;
+
 import com.petclinic.bffapigateway.dtos.OwnerDetails;
 import com.petclinic.bffapigateway.dtos.VetDetails;
 import com.petclinic.bffapigateway.dtos.Visits;
+//import com.petclinic.billing.datalayer.Bill;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -50,7 +59,12 @@ public class BFFApiGatewayController {
 
     private final VetsServiceClient vetsServiceClient;
 
+
     private final AuthServiceClient authServiceClient;
+
+    private final BillServiceClient billServiceClient;
+
+
 
     @GetMapping(value = "owners/{ownerId}")
     public Mono<OwnerDetails> getOwnerDetails(final @PathVariable int ownerId) {
@@ -60,6 +74,14 @@ public class BFFApiGatewayController {
                                 .map(addVisitsToOwner(owner))
                 );
     }
+//check this
+    @GetMapping(value = "bills/{billId}")
+    public Mono<BillDetails> getBillingInfo(final @PathVariable int billId)
+    {
+        return billServiceClient.getBilling(billId);
+    }
+
+
 
     @GetMapping(value = "customer/owners")
     public Flux<OwnerDetails> getOwners() {
@@ -75,13 +97,14 @@ public class BFFApiGatewayController {
         return visitsServiceClient.getAllVisits();
 
     }
+
+
 /*
     //Add new Visit
     @PostMapping (value = "/pets/visits", consumes = "application/json", produces = "application/json")
     public Mono<Visits> createVisitForPets(final @RequestBody VisitDetails visitDetails){
         return visitsServiceClient.createVisitForPets(visitDetails);
         }
-
 */
 
     @PutMapping(
@@ -121,10 +144,10 @@ public class BFFApiGatewayController {
     public Mono<OwnerDetails> updateOwnerDetails(@RequestBody OwnerDetails od, final @PathVariable int ownerId) {
 
 
-          return customersServiceClient.updateOwner(od,ownerId)
-                    .flatMap(owner ->
-                            visitsServiceClient.getVisitsForPets(owner.getPetIds())
-                                    .map(addVisitsToOwner(owner)));
+        return customersServiceClient.updateOwner(od,ownerId)
+                .flatMap(owner ->
+                        visitsServiceClient.getVisitsForPets(owner.getPetIds())
+                                .map(addVisitsToOwner(owner)));
 
 
 
@@ -133,7 +156,7 @@ public class BFFApiGatewayController {
     }
 
 
-        private Function<Visits, OwnerDetails> addVisitsToOwner(OwnerDetails owner) {
+    private Function<Visits, OwnerDetails> addVisitsToOwner(OwnerDetails owner) {
         return visits -> {
             owner.getPets()
                     .forEach(pet -> pet.getVisits()
