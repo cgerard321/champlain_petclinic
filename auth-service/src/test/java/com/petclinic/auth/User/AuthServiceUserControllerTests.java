@@ -21,30 +21,38 @@
  * Date: 09/10/21
  * Ticket: feat(AUTH-CPC-310)
  *
+ * User: @Fube
+ * Date: 2021-10-10
+ * Ticket: feat(AUTH-CPC-357)
  */
 package com.petclinic.auth.User;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.petclinic.auth.JWT.JWTService;
+import com.petclinic.auth.Mail.MailService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import javax.validation.*;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 
-import static java.lang.Math.min;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -89,11 +97,19 @@ public class AuthServiceUserControllerTests {
     @Autowired
     private UserController userController;
 
+    @MockBean
+    private MailService mailService;
+
+    @MockBean
+    private JWTService jwtService;
+
     private final UserIDLessDTO ID_LESS_USER = new UserIDLessDTO(USER, PASS, EMAIL);
 
     @Test
     @DisplayName("Create a user from controller")
     void create_user_from_controller() {
+        when(jwtService.encrypt(any()))
+                .thenReturn("a.fake.token");
         final UserPasswordLessDTO user = userController.createUser(ID_LESS_USER);
         assertNotNull(user);
         assertThat(user.getId(), instanceOf(Long.TYPE));
@@ -266,10 +282,47 @@ public class AuthServiceUserControllerTests {
         final UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
         final String asString = objectMapper.writeValueAsString(userIDLessDTO);
 
+        when(jwtService.encrypt(any()))
+                .thenReturn("a.fake.token");
+
         mockMvc.perform(post("/users").contentType(APPLICATION_JSON).content(asString))
                 .andDo(print())
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.password").doesNotExist());
+    }
+
+    @Test
+    @DisplayName("When GET on verification endpoint, allow any")
+    void allow_any_on_verification() throws Exception {
+
+        final User user = User.builder()
+                        .username("test")
+                        .email("fake@email.com")
+                        .password("fakePassword")
+                        .build();
+        userRepo.save(user);
+
+        assertEquals(1, userRepo.count());
+        assertNotNull(userRepo.findByEmail(user.getEmail()));
+        assertFalse(userRepo.findByEmail(user.getEmail()).isVerified());
+
+        final String fakeToken = "a.fake.token";
+        final String base64Token =
+                Base64.getEncoder().withoutPadding().encodeToString(fakeToken.getBytes(StandardCharsets.UTF_8));
+
+
+        when(jwtService.decrypt(fakeToken))
+                .thenReturn(user.toBuilder().build()); // Clone
+
+        mockMvc.perform(get("/users/verification/" + base64Token))
+                .andDo(print())
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(jsonPath("$.password").doesNotExist())
+                .andExpect(jsonPath("$.id").value(user.getId()))
+                .andExpect(jsonPath("$.email").value(user.getEmail()))
+                .andExpect(jsonPath("$.roles").isArray());
+
+        assertTrue(userRepo.findByEmail(user.getEmail()).isVerified());
     }
 }
