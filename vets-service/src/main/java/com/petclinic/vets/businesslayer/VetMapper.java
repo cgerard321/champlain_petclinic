@@ -6,6 +6,8 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface VetMapper
 {
@@ -16,4 +18,7 @@ public interface VetMapper
             }
     )
     Vet vetDTOToVet(VetDTO vetDTO);
+
+    List<Vet> vetDTOListToVetList(List<VetDTO> vetDTOList);
+    List<VetDTO> vetListToVetDTOList(List<Vet> vetList);
 }

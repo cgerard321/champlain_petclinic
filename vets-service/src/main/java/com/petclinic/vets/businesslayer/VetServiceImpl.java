@@ -1,6 +1,7 @@
 package com.petclinic.vets.businesslayer;
 
 import com.gargoylesoftware.htmlunit.javascript.host.Console;
+import com.petclinic.vets.datalayer.Specialty;
 import com.petclinic.vets.datalayer.Vet;
 import com.petclinic.vets.datalayer.VetDTO;
 import com.petclinic.vets.datalayer.VetRepository;
@@ -10,14 +11,17 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class VetServiceImpl implements VetService {
     private final VetRepository vetRepository;
-
-    public VetServiceImpl(VetRepository vetRepository) {
+    private final VetMapper vetMapper;
+    public VetServiceImpl(VetRepository vetRepository,VetMapper vetMapper) {
+        this.vetMapper = vetMapper;
         this.vetRepository = vetRepository;
     }
 
@@ -100,11 +104,20 @@ public class VetServiceImpl implements VetService {
 
     @Override
     public List<VetDTO> getAllVetDTOs() {
-        return null;
+        List<Vet> vetList = getAllVets();
+        List<VetDTO> vetDTOList = vetMapper.vetListToVetDTOList(vetList);
+        for(int i = 0; i < vetDTOList.size(); i++)
+        {
+            Set<Specialty> specialties = new HashSet<>();
+            specialties.addAll(vetList.get(i).getSpecialties());
+            vetDTOList.get(i).setSpecialties(specialties);
+        }
+        return vetDTOList;
     }
 
     @Override
     public VetDTO getVetDTOByVetId(int vetId) {
+
         return null;
     }
 
