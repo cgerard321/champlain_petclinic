@@ -1,9 +1,11 @@
 package com.petclinic.customers.businesslayer;
 
-import com.petclinic.customers.datalayer.*;
 import com.petclinic.customers.customerExceptions.exceptions.NotFoundException;
+import com.petclinic.customers.datalayer.Owner;
+import com.petclinic.customers.datalayer.Pet;
+import com.petclinic.customers.datalayer.PetRepository;
+import com.petclinic.customers.datalayer.PetType;
 import com.petclinic.customers.presentationlayer.PetRequest;
-import com.petclinic.customers.presentationlayer.ResourceNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -37,7 +39,7 @@ public class PetServiceImpl implements PetService {
             //Search pet in database with the given id
             Optional<Pet> pet = petRepository.findById(petId);
             if (!pet.isPresent()) {
-                throw new ResourceNotFoundException("Pet "+ petId +" not found");
+                throw new NotFoundException("Pet "+ petId +" not found");
             }
             LOG.debug("Pet with ID: " + petId + " has been found");
             return pet;
