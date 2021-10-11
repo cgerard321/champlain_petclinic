@@ -69,12 +69,6 @@ public class AuthServiceUserEntityTests {
                 .username(USER)
                 .build();
 
-        assertEquals(
-                format(
-                        "User.UserBuilder(id=%d, username=%s, password=%s, email=%s, roles=%s)",
-                        user.getId(), user.getUsername(), user.getPassword(), user.getEmail(),
-                        user.getRoles().toString()),
-                user.toBuilder().toString());
 
         assertEquals(USER, user.getUsername());
         assertEquals(PASS, user.getPassword());
