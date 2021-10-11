@@ -1,17 +1,21 @@
 package com.petclinic.bffapigateway.presentationlayer;
 
 
+
 import com.petclinic.bffapigateway.domainclientlayer.*;
 
 import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
 
 import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
+
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
 
 import com.petclinic.bffapigateway.dtos.*;
+
 import org.junit.jupiter.api.BeforeEach;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -40,13 +44,22 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
 import java.util.Calendar;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.net.ConnectException;
+
 import java.util.Collections;
 import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
+
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+//
+//import com.petclinic.billing.datalayer.BillDTO;
 
 
 
@@ -72,9 +85,18 @@ class ApiGatewayControllerTest {
     @MockBean
     private BillServiceClient billServiceClient;
 
-
     @Autowired
     private WebTestClient client;
+
+
+
+
+    private static final int BILL_ID_OKAY = 1;
+    private static final int BILL_ID_NOT_FOUND = 213;
+    private static final String BILL_ID_INVALID_STRING = "not-integer";
+    private static final int BILL_ID_NEGATIVE_VALUE = -1;
+
+    private static final int BILL_ID = 1;
 
 
     @Test
@@ -160,8 +182,10 @@ class ApiGatewayControllerTest {
 
     }
 
-    @Test
-    void createOwner(){
+
+
+      @Test
+      void createOwner(){
         OwnerDetails owner = new OwnerDetails();
         owner.setId(1);
         owner.setFirstName("John");
@@ -181,6 +205,8 @@ class ApiGatewayControllerTest {
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
+
+
 
         assertEquals(owner.getId(),1);
         assertEquals(owner.getFirstName(),"John");

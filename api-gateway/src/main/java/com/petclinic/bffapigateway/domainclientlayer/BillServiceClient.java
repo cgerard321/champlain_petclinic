@@ -22,7 +22,9 @@ public class BillServiceClient {
             @Value("${app.billing-service.port}") String billingServicePort
     ) {
         this.webClientBuilder = webClientBuilder;
+
         billServiceUrl = "http://" + billingServiceHost + ":" + billingServicePort + "/bills";
+
     }
 
     public Mono<BillDetails> getBilling(final int billId) {
