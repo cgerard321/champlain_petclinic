@@ -30,6 +30,10 @@ spring:
     url: jdbc:mysql://mysql4/auth
   flyway:
     url: jdbc:mysql://mysql4
+gateway:
+  origin: localhost:8080
+  protocol: http
+  subdomain:
 
 ---
 spring.profiles: test
