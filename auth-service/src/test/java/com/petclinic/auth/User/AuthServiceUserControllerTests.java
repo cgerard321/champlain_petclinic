@@ -28,6 +28,7 @@
 package com.petclinic.auth.User;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.petclinic.auth.JWT.JWTService;
 import com.petclinic.auth.Mail.MailService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -41,6 +42,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import javax.validation.*;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
@@ -96,6 +99,9 @@ public class AuthServiceUserControllerTests {
 
     @MockBean
     private MailService mailService;
+
+    @MockBean
+    private JWTService jwtService;
 
     private final UserIDLessDTO ID_LESS_USER = new UserIDLessDTO(USER, PASS, EMAIL);
 
@@ -284,7 +290,10 @@ public class AuthServiceUserControllerTests {
     @Test
     @DisplayName("When GET on verification endpoint, allow any")
     void allow_any_on_verification() throws Exception {
-        mockMvc.perform(get("/users/verification/c29tZVRva2Vu"))
+
+        final String base64Token =
+                Base64.getEncoder().withoutPadding().encodeToString("a.fake.token".getBytes(StandardCharsets.UTF_8));
+        mockMvc.perform(get("/users/verification/" + base64Token))
                 .andDo(print())
                 .andExpect(status().is2xxSuccessful());
     }

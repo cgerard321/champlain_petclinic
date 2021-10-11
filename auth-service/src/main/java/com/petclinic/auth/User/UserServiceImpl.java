@@ -101,6 +101,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserPasswordLessDTO verifyEmailFromToken(String token) {
-        return null;
+        final User decrypt = jwtService.decrypt(token);
+        log.info("Decrypted user with email {} from token", decrypt.getEmail());
+
+        final User byEmail = userRepo.findByEmail(decrypt.getEmail());
+        byEmail.setVerified(true);
+        final User save = userRepo.save(byEmail);
+        log.info("Updated user with email {} to verified=true", decrypt.getEmail());
+
+        return userMapper.modelToIDLessPasswordLessDTO(save);
     }
 }
