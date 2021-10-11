@@ -7,6 +7,9 @@ package com.petclinic.auth.User;
  * Date: 24/10/21
  * Ticket: feat(AUTH-CPC-310)
  *
+ * User: @Fube
+ * Date: 2021-10-10
+ * Ticket: feat(AUTH-CPC-357)
  */
 
 import lombok.RequiredArgsConstructor;
