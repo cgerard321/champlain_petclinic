@@ -22,7 +22,7 @@ dependencies {
 
 	// https://mvnrepository.com/artifact/org.webjars/bootstrap
 	implementation 'org.webjars:bootstrap:5.1.0'
-    // https://mvnrepository.com/artifact/org.webjars/jquery
+	// https://mvnrepository.com/artifact/org.webjars/jquery
 	implementation 'org.webjars:jquery:3.6.0'
 // https://mvnrepository.com/artifact/org.webjars/angularjs
 	implementation 'org.webjars:angularjs:2.0.0-alpha.22'
@@ -57,8 +57,6 @@ dependencies {
 		exclude group: 'com.squareup.okhttp3', module: 'okhttp'
 	}
 	testImplementation("com.squareup.okhttp3:okhttp:4.9.0")
-
-
 
 
 }

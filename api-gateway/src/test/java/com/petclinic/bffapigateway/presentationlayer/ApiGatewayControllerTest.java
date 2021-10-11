@@ -91,12 +91,6 @@ class ApiGatewayControllerTest {
 
 
 
-    private static final int BILL_ID_OKAY = 1;
-    private static final int BILL_ID_NOT_FOUND = 213;
-    private static final String BILL_ID_INVALID_STRING = "not-integer";
-    private static final int BILL_ID_NEGATIVE_VALUE = -1;
-
-    private static final int BILL_ID = 1;
 
 
     @Test
@@ -250,21 +244,17 @@ class ApiGatewayControllerTest {
     }
 
 
-    @Test
-    public void getBillByProductId(){
 
+    //private static final int BILL_ID = 1;
+
+    @Test
+    public void getBillById(){
 
         //int expectedLength = 1;
 
         BillDetails entity = new BillDetails();
 
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(2021, Calendar.SEPTEMBER, 21);
-        Date date = calendar.getTime();
-
         entity.setBillId(1);
-
-//        entity.setDate(date);
 
         entity.setAmount(599);
 
@@ -277,14 +267,15 @@ class ApiGatewayControllerTest {
 
         client.get()
                 //check the URI
-                .uri("/api/gateway/bills/" + 1)
+                .uri("/api/gateway/bills/1")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-//                .jsonPath("$.date").isEqualTo(entity.getDate())
-                .jsonPath("$.amount").isEqualTo(entity.getAmount())
+                .jsonPath("$.billId").isEqualTo(1)
                 .jsonPath("$.customerId").isEqualTo(entity.getCustomerId())
-                .jsonPath("$.visitType").isEqualTo(entity.getVisitType());
+                .jsonPath("$.visitType").isEqualTo(entity.getVisitType())
+                .jsonPath("$.amount").isEqualTo(entity.getAmount());
+
 
 
 
@@ -292,6 +283,36 @@ class ApiGatewayControllerTest {
 
 
     }
+
+
+    @Test
+    void getBillingByRequestMissingPath(){
+        client.get()
+                .uri("/bills")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.path").isEqualTo("/bills")
+                .jsonPath("$.message").isEqualTo(null);
+    }
+
+    @Test
+     void getBillNotFound(){
+        client.get()
+                .uri("/bills/{billId}", 100)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectHeader().contentType(APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.path").isEqualTo("/bills/100")
+                .jsonPath("$.message").isEqualTo(null);
+
+    }
+
+
+
 
     @Test
     void getPutRequestNotFound(){
