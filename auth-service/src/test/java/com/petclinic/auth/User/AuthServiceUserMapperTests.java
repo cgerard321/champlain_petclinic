@@ -14,8 +14,7 @@ import org.springframework.test.context.ActiveProfiles;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -25,6 +24,12 @@ public class AuthServiceUserMapperTests {
     private UserMapper userMapper;
 
     private final UserIDLessDTO ID_LESS_USER_USER = new UserIDLessDTO("usernameTest", "passwordTest", "emailTest");
+    private final Set<Role> ROLES;
+
+    {
+        ROLES = new HashSet<>();
+        ROLES.add(new Role(-1, "ROLE"));
+    }
 
     @Test
     @DisplayName("Map id less user to user")
@@ -41,5 +46,20 @@ public class AuthServiceUserMapperTests {
     @DisplayName("Map null to user")
     void map_null_to_user() {
         assertNull(userMapper.idLessDTOToModel(null));
+    }
+
+    @Test
+    @DisplayName("When modelToIDLessPasswordLessDTO is called with null, return null")
+    void modelToIDLessPasswordLessDTO_null() {
+        assertNull(userMapper.modelToIDLessPasswordLessDTO(null));
+    }
+
+    @Test
+    @DisplayName("When modelToIDLessPasswordLessDTO is called with not null roles, return new roles Set")
+    void modelToIDLessPasswordLessDTO_with_roles() {
+        final User user = new User();
+        user.setRoles(ROLES);
+        assertNotNull(userMapper.modelToIDLessPasswordLessDTO(user));
+        assertEquals(ROLES, user.getRoles());
     }
 }

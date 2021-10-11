@@ -1,5 +1,11 @@
 jwt:
-  secret: secret
+  expiration: 900000 # 15 minutes
+  secret: thisismyverycoolsecretthatisatleast256byteslong # Must at least be 256 bytes long
+
+gateway:
+  origin: setProductionUrlHere
+  protocol: http
+  subdomain: www
 
 spring:
   datasource:
@@ -14,7 +20,7 @@ spring:
     password: rootpwd
 mailer-service:
   host: localhost
-  port: 8080
+  port: 8888
 
 ---
 spring.profiles: docker
@@ -24,11 +30,20 @@ spring:
     url: jdbc:mysql://mysql4/auth
   flyway:
     url: jdbc:mysql://mysql4
+gateway:
+  origin: localhost:8080
+  protocol: http
+  subdomain:
 
 ---
 spring.profiles: test
 # recommend setting this to "none" in a production environment
 #spring.jpa.hibernate.ddl-auto: none
+
+gateway:
+  origin: localhost:8080/users
+  protocol: http
+  subdomain:
 
 #for h2
 spring:

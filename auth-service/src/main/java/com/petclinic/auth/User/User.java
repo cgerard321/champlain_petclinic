@@ -17,6 +17,9 @@
  * Date: 24/09/21
  * Ticket: feat(AUTH-CPC-102)
  *
+ * User: @Fube
+ * Date: 10/10/21
+ * Ticket: feat(AUTH-CPC-357)
  */
 package com.petclinic.auth.User;
 
@@ -25,9 +28,7 @@ import lombok.*;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.util.Set;
 
 @Table(schema = "auth", name = "users")
@@ -53,10 +54,19 @@ public class User {
     @Email(message = "Email must be valid")
     private String email;
 
+    private boolean verified;
+
     public User(String username, String password, String email) {
         this.username = username;
         this.password = password;
         this.email = email;
+    }
+
+    public User(String username, String password, String email, Set<Role> roles) {
+        this.username = username;
+        this.password = password;
+        this.email = email;
+        this.roles = roles;
     }
 
     @ManyToMany

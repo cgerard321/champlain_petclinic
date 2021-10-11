@@ -25,6 +25,7 @@ public class MailServiceImpl implements MailService {
                 log.error(execute.errorBody().string());
                 throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, execute.errorBody().string());
             }
+            log.info("Mail service returned {} status code", execute.code());
             return execute.body();
         } catch (IOException e) {
             log.error(e.toString());

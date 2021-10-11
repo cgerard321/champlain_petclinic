@@ -1,21 +1,36 @@
 package com.petclinic.auth.User;
 
+/**
+ * Created by IntelliJ IDEA.
+ *
+ * User: @Fube
+ * Date: 24/10/21
+ * Ticket: feat(AUTH-CPC-310)
+ *
+ * User: @Fube
+ * Date: 2021-10-10
+ * Ticket: feat(AUTH-CPC-357)
+ */
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Base64;
 
 @RestController
 @RequestMapping("/users")
 @Slf4j
 @RequiredArgsConstructor
+@Validated
 public class UserController {
 
     private final UserService userService;
+    private final UserMapper userMapper;
 
     @GetMapping("/{userId}")
     public User getUser(@PathVariable long userId) {
@@ -36,13 +51,13 @@ public class UserController {
     }
 
     @PostMapping
-    public User createUser(@RequestBody @Valid UserIDLessDTO dto) {
+    public UserPasswordLessDTO createUser(@RequestBody @Valid UserIDLessDTO dto) {
 
         log.info("Trying to persist user");
         final User saved = userService.createUser(dto);
         log.info("Successfully persisted user");
 
-        return saved;
+        return userMapper.modelToIDLessPasswordLessDTO(saved);
     }
 
     @PutMapping("/{userId}")
@@ -56,5 +71,10 @@ public class UserController {
     public void deleteUser(@PathVariable long userId) {
         userService.deleteUser(userId);
         log.info("Deleted role with id {}", userId);
+    }
+
+    @GetMapping("/verification/{base64EncodedToken}")
+    public UserPasswordLessDTO verifyEmail(@PathVariable String base64EncodedToken) {
+        return userService.verifyEmailFromToken(new String(Base64.getDecoder().decode(base64EncodedToken)));
     }
 }
