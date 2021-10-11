@@ -38,7 +38,10 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
+
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
@@ -228,9 +231,14 @@ class ApiGatewayControllerTest {
         //int expectedLength = 1;
 
         BillDetails entity = new BillDetails();
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(2021, Calendar.SEPTEMBER, 21);
+        Date date = calendar.getTime();
+
         entity.setBillId(1);
 
-        entity.setDate(null);
+//        entity.setDate(date);
 
         entity.setAmount(599);
 
@@ -243,7 +251,7 @@ class ApiGatewayControllerTest {
 
         client.get()
                 //check the URI
-                .uri("/api/gateway/bills/" + entity.getBillId())
+                .uri("/api/gateway/bills/" + 1)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
