@@ -1,6 +1,7 @@
 package com.petclinic.customers.presentationlayer;
 
 import com.petclinic.customers.customerExceptions.exceptions.InvalidInputException;
+import com.petclinic.customers.customerExceptions.exceptions.NotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.ActiveProfiles;
@@ -23,8 +24,24 @@ public class ExceptionsTests {
     @Test
     void InvalidInputExceptionWithMessageTest(){
         InvalidInputException invalidInputException = assertThrows(InvalidInputException.class, ()->{
-            throw new InvalidInputException("Appropriate exception message");
+            throw new InvalidInputException("Appropriate InvalidInputException message");
         });
         assertNotNull(invalidInputException.getMessage());
+    }
+
+    @Test
+    void NotFoundExceptionWithEmptyConstructorTest(){
+        NotFoundException notFoundException = assertThrows(NotFoundException.class, ()->{
+            throw new NotFoundException();
+        });
+        assertEquals(notFoundException.getMessage(), null);
+    }
+
+    @Test
+    void NotFoundExceptionWithMessageTest(){
+        NotFoundException notFoundException = assertThrows(NotFoundException.class, ()->{
+            throw new NotFoundException("Appropriate NotFoundException message");
+        });
+        assertNotNull(notFoundException.getMessage());
     }
 }
