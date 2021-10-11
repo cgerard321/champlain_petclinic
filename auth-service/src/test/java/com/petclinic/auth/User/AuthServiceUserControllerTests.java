@@ -302,6 +302,7 @@ public class AuthServiceUserControllerTests {
 
         assertEquals(1, userRepo.count());
         assertNotNull(userRepo.findByEmail(user.getEmail()));
+        assertFalse(userRepo.findByEmail(user.getEmail()).isVerified());
 
         final String fakeToken = "a.fake.token";
         final String base64Token =
