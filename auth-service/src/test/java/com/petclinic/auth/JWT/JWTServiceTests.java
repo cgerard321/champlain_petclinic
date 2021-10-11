@@ -2,6 +2,7 @@ package com.petclinic.auth.JWT;
 
 import com.petclinic.auth.Role.Role;
 import com.petclinic.auth.User.User;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -79,5 +80,12 @@ public class JWTServiceTests {
         final Set<String> userRolesNameOnly = build.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
         final Set<String> decryptRolesNameOnly = decrypt.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
         assertEquals(userRolesNameOnly, decryptRolesNameOnly);
+    }
+
+    @Test
+    @DisplayName("Given bad token, throw JwtException")
+    void jwt_exception_flow() {
+        final RuntimeException ex = assertThrows(RuntimeException.class, () -> jwtService.decrypt("this.is.bad"));
+        assertEquals("Something wrong with the JWT boss", ex.getMessage());
     }
 }
