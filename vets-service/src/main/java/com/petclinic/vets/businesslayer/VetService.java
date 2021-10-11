@@ -1,6 +1,7 @@
 package com.petclinic.vets.businesslayer;
 
 import com.petclinic.vets.datalayer.Vet;
+import com.petclinic.vets.datalayer.VetDTO;
 
 import java.util.List;
 
@@ -15,4 +16,16 @@ public interface VetService
     public Vet disableVet(Vet vet, Vet vetFound);
     public Vet enableVet(Vet vet, Vet vetFound);
     public void deleteVetByVetId(int vetId);
+
+    public List<VetDTO> getAllVetDTOs();
+    public VetDTO getVetDTOByVetId(int vetId);
+    public VetDTO updateVetWithDTO(int vetId, VetDTO vetDTO);
+    public VetDTO createVetFromDTO(VetDTO vetDTO);
+    public List<VetDTO> getAllDisabledVetDTOs();
+    public List<VetDTO> getAllEnabledVetDTOs();
+    public VetDTO disableVetFromDTO(Vet vet, Vet vetFound);
+    public VetDTO enableVetFromDTO(Vet vet, Vet vetFound);
+    public void deleteVetByVetIdFromVetDTO(int vetId);
+
+
 }

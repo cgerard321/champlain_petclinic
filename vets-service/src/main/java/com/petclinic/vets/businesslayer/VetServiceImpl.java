@@ -2,6 +2,7 @@ package com.petclinic.vets.businesslayer;
 
 import com.gargoylesoftware.htmlunit.javascript.host.Console;
 import com.petclinic.vets.datalayer.Vet;
+import com.petclinic.vets.datalayer.VetDTO;
 import com.petclinic.vets.datalayer.VetRepository;
 import com.petclinic.vets.utils.exceptions.InvalidInputException;
 import com.petclinic.vets.utils.exceptions.NotFoundException;
@@ -95,5 +96,50 @@ public class VetServiceImpl implements VetService {
                 .orElseThrow(() -> new NotFoundException(String.format("No vet found for vetId: {vetId} ", vetId)));
         vetRepository.delete(foundVet);
         //return "redirect:/vets"; <-- redirect to list after ??
+    }
+
+    @Override
+    public List<VetDTO> getAllVetDTOs() {
+        return null;
+    }
+
+    @Override
+    public VetDTO getVetDTOByVetId(int vetId) {
+        return null;
+    }
+
+    @Override
+    public VetDTO updateVetWithDTO(int vetId, VetDTO vetDTO) {
+        return null;
+    }
+
+    @Override
+    public VetDTO createVetFromDTO(VetDTO vetDTO) {
+        return null;
+    }
+
+    @Override
+    public List<VetDTO> getAllDisabledVetDTOs() {
+        return null;
+    }
+
+    @Override
+    public List<VetDTO> getAllEnabledVetDTOs() {
+        return null;
+    }
+
+    @Override
+    public VetDTO disableVetFromDTO(Vet vet, Vet vetFound) {
+        return null;
+    }
+
+    @Override
+    public VetDTO enableVetFromDTO(Vet vet, Vet vetFound) {
+        return null;
+    }
+
+    @Override
+    public void deleteVetByVetIdFromVetDTO(int vetId) {
+
     }
 }
