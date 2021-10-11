@@ -5,6 +5,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.petclinic.auth.Exceptions.NotFoundException;
 
@@ -16,8 +17,8 @@ import javax.validation.Valid;
 public class UserServiceImpl implements UserService{
 
     private final UserRepo userRepo;
-
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public User getUserById(long id) {
@@ -35,15 +36,10 @@ public class UserServiceImpl implements UserService{
     @Override
     public User createUser(@Valid UserIDLessDTO userIDLessDTO) {
 
-        try {
-            log.info("Saving user with email {}", userIDLessDTO.getEmail());
-            User user = userMapper.idLessDTOToModel(userIDLessDTO);
-            return userRepo.save(user);
-        }
-        catch (DataIntegrityViolationException e){
-            throw new DataIntegrityViolationException("Duplicate email for userEmail " + userIDLessDTO.getEmail());
-        }
-
+        log.info("Saving user with email {}", userIDLessDTO.getEmail());
+        User user = userMapper.idLessDTOToModel(userIDLessDTO);
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        return userRepo.save(user);
     }
 
     @Override

@@ -48,7 +48,7 @@ public class AuthServiceUserServiceTests {
 
         final User createdUser = userService.createUser(userIDLessDTO);
         assertEquals(createdUser.getUsername(), userIDLessDTO.getUsername());
-        assertEquals(createdUser.getPassword(), userIDLessDTO.getPassword());
+        assertNotEquals(createdUser.getPassword(), userIDLessDTO.getPassword());
         assertEquals(createdUser.getEmail(), userIDLessDTO.getEmail());
     }
 
@@ -133,5 +133,17 @@ public class AuthServiceUserServiceTests {
     @DisplayName("Delete user by id and fail")
     void delete_role_by_id_and_fail() {
         assertEquals(Optional.empty(), userRepo.findById(1l));
+    }
+
+    @Test
+    @DisplayName("When creating user, encrypt password")
+    void encrypt_password_before_persistence() {
+
+        final UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
+        final User saved = userService.createUser(userIDLessDTO);
+
+        assertNotNull(saved.getPassword());
+        assertFalse(saved.getPassword().isEmpty());
+        assertNotEquals(saved.getPassword(), userIDLessDTO.getPassword());
     }
 }
