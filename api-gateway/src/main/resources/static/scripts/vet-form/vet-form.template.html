@@ -20,7 +20,6 @@
         <form class="needs-validation was-validated" novalidate>
 
 
-
             <div class="row g-3">
                 <div class="col-sm-6">
                     <input class="form-control" type="text" placeholder="First Name" name="fistName">
@@ -53,7 +52,7 @@
                 <hr class="my-4"/>
 
                 <div class="col-sm-12">
-                    <label class="form-label">Profile Picture</label>
+                    <h5 class="form-label">Profile Picture</h5>
                     <span id="checkmarkPic" style="display: none">&#10003;</span>
                     <input class="form-control"
                            id="profilePicture"
@@ -82,7 +81,7 @@
 
 
                 <div class="col-sm-12">
-                    <label class="form-label">Career Resume</label>
+                    <h5 class="form-label">Career Resume</h5>
                     <span id="checkmarkRes" style="display: none">&#10003;</span>
                     <input class="form-control"
                            id="resume"
@@ -103,7 +102,21 @@
                 </script>
             </div>
 
-                <h4 class="mb-3"> What Animals Can You Treat?</h4>
+            <hr class="my-4"/>
+
+            <div class="row gy-3">
+                <div class="col-md-12">
+                    <h5 class="mb-3">Specialty</h5>
+                    <input class="form-control" type="text" name="speciality">
+                </div>
+            </div>
+
+
+            <hr class="my-4"/>
+            <div class="row g-3">
+            <div class="col-sm-6">
+            <div class="my-3 check-align">
+                <h5 class="mb-3"> What Animals Can You Treat?</h5>
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" name="animalsTreated" value="Dogs">
                     <label class="form-check-label vet-label-input">Dogs</label>
@@ -123,12 +136,13 @@
                     <input class="form-check-input" type="checkbox" name="animalsTreated" value="Exotic"><label
                         class="form-check-label vet-label-input">Exotic Animals</label>
                 </div>
+            </div>
+            </div>
 
 
-
-
-
-                <h4 class="mb-3">Available Work Days</h4>
+            <div class="col-sm-6">
+            <div class="my-3 check-align">
+                <h5 class="mb-3">Available Work Days</h5>
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" name="workDays" value="Monday">
                     <label class="form-check-label vet-label-input">Monday</label>
@@ -149,9 +163,13 @@
                     <input class="form-check-input" type="checkbox" name="workDays" value="Friday">
                     <label class="form-check-label vet-label-input">Friday</label>
                 </div>
+            </div>
+            </div>
+            </div>
 
-            <div class="my-3">
-                <h4 class="mb-3">Active Vet</h4>
+
+            <div class="my-3 check-align">
+                <h5 class="mb-3">Active Vet</h5>
 
                 <div class="form-check">
                     <input class="form-check-input" type="radio" name="isActive" value="1">
@@ -161,20 +179,9 @@
                     <input class="form-check-input" type="radio" name="isActive" value="0">
                     <label class="form-check-label vet-label-input">No</label>
                 </div>
-
-
-                <div class="row gy-3">
-                    <div class="col-md-6">
-                        <label class="form-label">Specialty</label>
-                        <input class="form-control" type="text" name="speciality">
-                    </div>
-                </div>
-
-
-                <hr class="my-4"/>
-                <button type="submit" class="w-100 btn btn-primary btn-lg" ng-click="submitVetForm()">Submit</button>
             </div>
-
+            <hr class="my-4"/>
+            <button type="submit" class="w-100 btn btn-primary btn-lg" ng-click="submitVetForm()">Submit</button>
         </form>
     </div>
 </div>

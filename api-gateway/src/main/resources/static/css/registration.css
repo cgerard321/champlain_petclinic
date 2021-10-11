@@ -80,7 +80,9 @@ button:hover {
 .vet-label-input{
     display: inline;
     position: relative;
-    margin: 2em;
+    text-align: left;
+}
+.check-align{
     text-align: left;
 }
 
