@@ -18,6 +18,7 @@ public interface VetMapper
             }
     )
     Vet vetDTOToVet(VetDTO vetDTO);
+    VetDTO vetToVetDTO(Vet vet);
 
     List<Vet> vetDTOListToVetList(List<VetDTO> vetDTOList);
     List<VetDTO> vetListToVetDTOList(List<Vet> vetList);

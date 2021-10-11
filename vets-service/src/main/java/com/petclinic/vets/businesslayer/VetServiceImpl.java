@@ -1,29 +1,26 @@
 package com.petclinic.vets.businesslayer;
 
-import com.gargoylesoftware.htmlunit.javascript.host.Console;
 import com.petclinic.vets.datalayer.Specialty;
 import com.petclinic.vets.datalayer.Vet;
 import com.petclinic.vets.datalayer.VetDTO;
 import com.petclinic.vets.datalayer.VetRepository;
-import com.petclinic.vets.utils.exceptions.InvalidInputException;
 import com.petclinic.vets.utils.exceptions.NotFoundException;
-import org.springframework.dao.DuplicateKeyException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 @Service
+@RequiredArgsConstructor
 public class VetServiceImpl implements VetService {
     private final VetRepository vetRepository;
     private final VetMapper vetMapper;
-    public VetServiceImpl(VetRepository vetRepository,VetMapper vetMapper) {
-        this.vetMapper = vetMapper;
-        this.vetRepository = vetRepository;
-    }
+//    public VetServiceImpl(VetRepository vetRepository,VetMapper vetMapper) {
+//        this.vetMapper = vetMapper;
+//        this.vetRepository = vetRepository;
+//    }
 
     @Override
     public List<Vet> getAllVets() {
@@ -117,8 +114,7 @@ public class VetServiceImpl implements VetService {
 
     @Override
     public VetDTO getVetDTOByVetId(int vetId) {
-
-        return null;
+        return vetMapper.vetToVetDTO(getVetByVetId(vetId));
     }
 
     @Override
@@ -133,12 +129,28 @@ public class VetServiceImpl implements VetService {
 
     @Override
     public List<VetDTO> getAllDisabledVetDTOs() {
-        return null;
+        List<Vet> vetList = getAllDisabledVets();
+        List<VetDTO> vetDTOList = vetMapper.vetListToVetDTOList(vetList);
+        for(int i = 0; i < vetDTOList.size(); i++)
+        {
+            Set<Specialty> specialties = new HashSet<>();
+            specialties.addAll(vetList.get(i).getSpecialties());
+            vetDTOList.get(i).setSpecialties(specialties);
+        }
+        return vetDTOList;
     }
 
     @Override
     public List<VetDTO> getAllEnabledVetDTOs() {
-        return null;
+        List<Vet> vetList = getAllEnabledVets();
+        List<VetDTO> vetDTOList = vetMapper.vetListToVetDTOList(vetList);
+        for(int i = 0; i < vetDTOList.size(); i++)
+        {
+            Set<Specialty> specialties = new HashSet<>();
+            specialties.addAll(vetList.get(i).getSpecialties());
+            vetDTOList.get(i).setSpecialties(specialties);
+        }
+        return vetDTOList;
     }
 
     @Override

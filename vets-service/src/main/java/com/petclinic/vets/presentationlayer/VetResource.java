@@ -2,6 +2,7 @@ package com.petclinic.vets.presentationlayer;
 
 import com.petclinic.vets.businesslayer.VetService;
 import com.petclinic.vets.datalayer.Vet;
+import com.petclinic.vets.datalayer.VetDTO;
 import com.petclinic.vets.utils.exceptions.InvalidInputException;
 import io.micrometer.core.annotation.Timed;
 import org.slf4j.Logger;
@@ -59,28 +60,29 @@ class VetResource {
     }
 
     @GetMapping
-    public List<Vet> showResourcesVetList() {
-        List<Vet> vetList = vetService.getAllEnabledVets();
+    public List<VetDTO> showResourcesVetList() {
+        List<VetDTO> vetList = vetService.getAllEnabledVetDTOs();
         return vetList;
     }
 
     @GetMapping("/disabled")
-    public List<Vet> showResourcesVetDisabledList() {
-        List<Vet> vetList = vetService.getAllDisabledVets();
+    public List<VetDTO> showResourcesVetDisabledList() {
+        List<VetDTO> vetList = vetService.getAllDisabledVetDTOs();
         return vetList;
     }
 
 
     @GetMapping("/{vetId}")
-    public Vet findVet(@PathVariable int vetId)
+    public VetDTO findVet(@PathVariable int vetId)
     {
         LOG.debug("/vet MS return the found product for vetId: " + vetId);
 
         if(vetId < 1) throw new InvalidInputException("Invalid vetId: " + vetId);
 
-        Vet vet = vetService.getVetByVetId(vetId);
+        VetDTO vet = vetService.getVetDTOByVetId(vetId);
         return vet;
     }
+    git commit -m "Implemented more vetService methods. Changed most of methods to use a dto in VetResource"
 
     @PostMapping(
             consumes = MediaType.APPLICATION_JSON_VALUE,
