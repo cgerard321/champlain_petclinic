@@ -90,6 +90,7 @@ public class VisitResource {
         return visitsService.getVisitsForPet(petId, true);
     }
 
+<<<<<<< HEAD
     @GetMapping(value = "visits/{practitionerId}",
             consumes = "application/json",
             produces = "application/json")
@@ -101,6 +102,12 @@ public class VisitResource {
 
         log.debug("Calling VisitsService:getVisitsByPractitionerIdAndMonth:practitionerId={}:startDate={},endDate={}", practitionerId, startDate, endDate);
         return visitsService.getVisitsByPractitionerIdAndMonth(practitionerId, startDate, endDate);
+=======
+    @GetMapping("visits/vets/dates/{practitionerId}")
+    public List<String> getVisitDatesForPractitioner(@PathVariable("practitionerId") int practitionerId){
+        log.debug("Calling VisitsService:getVisitDatesForPractitioner:practitionerId={}", practitionerId);
+        return visitsService.getVisitDatesForPractitioner(practitionerId);
+>>>>>>> 5159b3a4 (Added methods in each layer for getting list of string dates for a practitioner (#158))
     }
 
     @Value

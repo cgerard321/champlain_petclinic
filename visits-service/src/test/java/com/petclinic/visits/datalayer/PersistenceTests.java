@@ -42,6 +42,7 @@ public class PersistenceTests {
         visit = Visit.visit()
                 .id(1)
                 .petId(1)
+                .practitionerId(200200)
                 .date(new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-02"))
                 .status(true)
                 .build();
@@ -119,6 +120,7 @@ public class PersistenceTests {
     }
 
     @Test
+<<<<<<< HEAD
     public void getVisitsByPractitionerIdAndMonth() throws ParseException {
         Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01");
         Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-31");
@@ -134,6 +136,17 @@ public class PersistenceTests {
 
         List<Visit> repoResponse = repo.findAllByDateBetween(startDate, endDate);
         assertThat(repoResponse, hasSize(2));
+=======
+    public void findByPractitionerId(){
+        List<Visit> returnedVisits = repo.findVisitsByPractitionerId(200200);
+        assertEquals(1, returnedVisits.size());
+    }
+
+    @Test
+    public void findByNonExistentPractitionerId(){
+        List<Visit> returnedVisits = repo.findVisitsByPractitionerId(234234);
+        assertEquals(0, returnedVisits.size());
+>>>>>>> 5159b3a4 (Added methods in each layer for getting list of string dates for a practitioner (#158))
     }
 }
 

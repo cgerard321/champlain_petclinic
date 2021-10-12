@@ -333,9 +333,60 @@ public class VisitsServiceImplTests {
     }
 
     @Test
+<<<<<<< HEAD
     public void shouldReturnAllVisitsForPractitionerId() throws ParseException {
         Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01");
         Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-31");
+=======
+    public void shouldReturnListOfVisitDatesWhenFetchingWithValidPractitionerId() throws ParseException {
+        List<Visit> visitsList = asList(
+                visit()
+                        .id(1)
+                        .petId(1)
+                        .date(new SimpleDateFormat("yyyy-MM-dd").parse("2020-03-04"))
+                        .practitionerId(200200)
+                        .build(),
+                visit()
+                        .id(3)
+                        .petId(1)
+                        .date(new SimpleDateFormat("yyyy-MM-dd").parse("2021-03-04"))
+                        .practitionerId(200200)
+                        .build(),
+                visit()
+                        .id(2)
+                        .petId(1)
+                        .date(new SimpleDateFormat("yyyy-MM-dd").parse("2022-03-04"))
+                        .practitionerId(200200)
+                        .build());
+
+        when(repo.findVisitsByPractitionerId(anyInt())).thenReturn(visitsList);
+
+        List<String> returnedStringDates = visitsService.getVisitDatesForPractitioner(200200);
+
+        assertEquals(3, returnedStringDates.size());
+        assertEquals(new SimpleDateFormat("yyyy-MM-dd").parse("2021-03-04").toString(), returnedStringDates.get(1));
+    }
+
+    @Test
+    public void shouldThrowInvalidInputExceptionWhenFetchingDatesWithNegativePractitionerId(){
+        InvalidInputException ex = assertThrows(InvalidInputException.class, ()->{
+           visitsService.getVisitDatesForPractitioner(-1);
+        });
+
+        assertEquals("PractitionerId can't be negative.", ex.getMessage());
+    }
+
+    @Test
+    public void shouldReturnEmptyListWhenFetchingDatesForPractitionerWithNoVisits(){
+        List<Visit> repoResponse = new ArrayList<Visit>();
+        when(repo.findVisitsByPractitionerId(anyInt())).thenReturn(repoResponse);
+
+        List<String> returnedStringDates = visitsService.getVisitDatesForPractitioner(234);
+
+        assertEquals(0, returnedStringDates.size());
+    }
+
+>>>>>>> 5159b3a4 (Added methods in each layer for getting list of string dates for a practitioner (#158))
 
         List<Visit> visitsList = asList(
                 visit()
