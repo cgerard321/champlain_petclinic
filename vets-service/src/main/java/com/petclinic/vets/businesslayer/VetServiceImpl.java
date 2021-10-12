@@ -63,7 +63,6 @@ public class VetServiceImpl implements VetService {
             vet.setSpecialties(specialties);
         }
         vetRepository.save(vet);
-
         return vet;
     }
 
@@ -118,8 +117,13 @@ public class VetServiceImpl implements VetService {
     }
 
     @Override
-    public VetDTO getVetDTOByVetId(int vetId) {
-        return vetMapper.vetToVetDTO(getVetByVetId(vetId));
+    public VetDTO getVetDTOByVetId(int vetId)
+    {   Vet vet = getVetByVetId(vetId);
+        VetDTO vetDTO= vetMapper.vetToVetDTO(vet);
+        Set<Specialty> specialties = new HashSet<>();
+        specialties.addAll(vet.getSpecialties());
+        vetDTO.setSpecialties(specialties);
+        return vetDTO;
     }
 
     @Override
@@ -138,9 +142,11 @@ public class VetServiceImpl implements VetService {
     @Override
     public VetDTO createVetFromDTO(VetDTO vetDTO) {
         Vet vet = vetMapper.vetDTOToVet(vetDTO);
-        Set<Specialty> specialties = new HashSet<>();
-        specialties.addAll(vetDTO.getSpecialties());
-        vet.setSpecialties(specialties);
+        if(vetDTO.getSpecialties() != null && !vetDTO.getSpecialties().isEmpty()) {
+            Set<Specialty> specialties = new HashSet<>();
+            specialties.addAll(vetDTO.getSpecialties());
+            vet.setSpecialties(specialties);
+        }
         createVet(vet);
         return vetDTO;
     }
