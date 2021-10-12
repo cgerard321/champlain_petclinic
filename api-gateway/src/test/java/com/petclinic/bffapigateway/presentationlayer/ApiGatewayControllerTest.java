@@ -1,11 +1,21 @@
 package com.petclinic.bffapigateway.presentationlayer;
 
+
+
+import com.petclinic.bffapigateway.domainclientlayer.*;
+
+import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
+
 import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
+
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
+
 import com.petclinic.bffapigateway.dtos.*;
+
 import org.junit.jupiter.api.BeforeEach;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -32,12 +42,24 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
+
+import java.util.Calendar;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.net.ConnectException;
+
 import java.util.Collections;
+import java.util.Date;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
+
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+//
+//import com.petclinic.billing.datalayer.BillDTO;
 
 
 
@@ -60,8 +82,15 @@ class ApiGatewayControllerTest {
     @MockBean
     private AuthServiceClient authServiceClient;
 
+    @MockBean
+    private BillServiceClient billServiceClient;
+
     @Autowired
     private WebTestClient client;
+
+
+
+
 
 
     @Test
@@ -82,6 +111,7 @@ class ApiGatewayControllerTest {
         visits.getItems().add(visit);
         when(visitsServiceClient.getVisitsForPets(Collections.singletonList(cat.getId())))
                 .thenReturn(Mono.just(visits));
+        // java.lang.IllegalStateException at Assert.java:97
 
         client.get()
                 .uri("/api/gateway/owners/1")
@@ -107,6 +137,7 @@ class ApiGatewayControllerTest {
                 .thenReturn(Mono.just(user));
 
         client.get()
+
                 .uri("/api/gateway/users/1")
                 .exchange()
                 .expectStatus().isOk()
@@ -117,7 +148,9 @@ class ApiGatewayControllerTest {
 
         assertEquals(user.getId(), 1);
     }
-  
+
+
+
     @Test
     void createUser(){
         UserDetails user = new UserDetails();
@@ -143,8 +176,10 @@ class ApiGatewayControllerTest {
 
     }
 
-    @Test
-    void createOwner(){
+
+
+      @Test
+      void createOwner(){
         OwnerDetails owner = new OwnerDetails();
         owner.setId(1);
         owner.setFirstName("John");
@@ -165,6 +200,8 @@ class ApiGatewayControllerTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
 
+
+
         assertEquals(owner.getId(),1);
         assertEquals(owner.getFirstName(),"John");
         assertEquals(owner.getLastName(),"Johnny");
@@ -172,7 +209,7 @@ class ApiGatewayControllerTest {
         assertEquals(owner.getCity(),"Johnston");
         assertEquals(owner.getTelephone(),"51451545144");
     }
-  
+
     @Test
     void deleteUser() {
         UserDetails user = new UserDetails();
@@ -206,38 +243,74 @@ class ApiGatewayControllerTest {
         assertEquals(null, authServiceClient.getUser(user.getId()));
     }
 
-//    @Test
-//    void getPutRequestOk()  {
-//
-//        OwnerDetails od = new OwnerDetails();
-//        od.setId(1);
-//        od.setFirstName("John");
-//        od.setLastName("Doe");
-//        od.setAddress("1 Star Street");
-//        od.setCity("Boston");
-//        od.setTelephone("5553451125");
-//
-//        Mockito.when(customersServiceClient.updateOwner(od,1))
-//                .thenReturn(Mono.just(od));
-//
-//        client.put()
-//                .uri("api/gateway/owners/{ownerId}", 1)
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .exchange()
-//                .expectStatus().isOk()
-//                .expectBody();
-//
-//
-//        assertEquals(od.getId(), 1);
-//        assertEquals(od.getFirstName(), "John");
-//        assertEquals(od.getLastName(),"Doe");
-//        assertEquals(od.getAddress(), "1 Star Street");
-//        assertEquals(od.getCity(), "Boston");
-//        assertEquals(od.getTelephone(),"5553451125");
-//
-//
-//    }
+
+
+    //private static final int BILL_ID = 1;
+
+    @Test
+    public void getBillById(){
+
+        //int expectedLength = 1;
+
+        BillDetails entity = new BillDetails();
+
+        entity.setBillId(1);
+
+        entity.setAmount(599);
+
+        entity.setCustomerId(2);
+
+        entity.setVisitType("Consultation");
+
+        when(billServiceClient.getBilling(1))
+                .thenReturn(Mono.just(entity));
+
+        client.get()
+                //check the URI
+                .uri("/api/gateway/bills/1")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.billId").isEqualTo(1)
+                .jsonPath("$.customerId").isEqualTo(entity.getCustomerId())
+                .jsonPath("$.visitType").isEqualTo(entity.getVisitType())
+                .jsonPath("$.amount").isEqualTo(entity.getAmount());
+
+
+
+
+        assertEquals(entity.getBillId(), 1);
+
+
+    }
+
+
+    @Test
+    void getBillingByRequestMissingPath(){
+        client.get()
+                .uri("/bills")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.path").isEqualTo("/bills")
+                .jsonPath("$.message").isEqualTo(null);
+    }
+
+    @Test
+     void getBillNotFound(){
+        client.get()
+                .uri("/bills/{billId}", 100)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectHeader().contentType(APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.path").isEqualTo("/bills/100")
+                .jsonPath("$.message").isEqualTo(null);
+
+    }
+
 
 
 

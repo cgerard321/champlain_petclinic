@@ -26,12 +26,10 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.hasSize;
@@ -332,25 +330,51 @@ public class VisitResourceTest {
 
 	@Test
 	void whenFetchingStringDatesWithNegativePractitionerIdThenShouldHandleInvalidInputException() throws Exception {
-		when(visitsService.getVisitDatesForPractitioner(-1)).thenThrow(new InvalidInputException("PractitionerId can't be negative."));
+		when(visitsService.getVisitsForPractitioner(-1)).thenThrow(new InvalidInputException("PractitionerId can't be negative."));
 
-		mvc.perform(get("/visits/vets/dates/{practitionerId}",-1))
+		mvc.perform(get("/visits/vets/{practitionerId}",-1))
 				.andExpect(status().isUnprocessableEntity())
 				.andExpect(result -> assertTrue(result.getResolvedException() instanceof InvalidInputException))
 				.andExpect(result -> assertEquals("PractitionerId can't be negative.", result.getResolvedException().getMessage()));
 	}
 
 	@Test
-	void whenFetchingStringDatesWithValidPractitionerIdThenShouldReturnListOfDates() throws Exception {
-		List<String> returnedStringDates = Arrays.asList("2020-03-02", "2021-04-09","2022-12-12");
+	void shouldReturnAllVisitsForSpecifiedPractitionerIdAndMonth() throws Exception {
+		Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01");
+		Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-31");
 
-		given(visitsService.getVisitDatesForPractitioner(200200)).willReturn(returnedStringDates);
+		given(visitsService.getVisitsByPractitionerIdAndMonth(1, startDate, endDate))
+				.willReturn(
+						Collections.singletonList(
+								visit()
+										.id(1)
+										.petId(1)
+										.date(new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-15"))
+										.practitionerId(1)
+										.build())
+				);
 
-		MvcResult result = mvc.perform(get("/visits/vets/dates/{practitionerId}",200200))
-				.andExpect(status().isOk())
-				.andReturn();
+		mvc.perform(get("/visits/calendar/{practitionnerId}?dates={startDate},{endDate}", 1, "2021-10-01", "2021-10-31"))
+				.andExpect(status().isOk());
 
-		assertEquals("[\"2020-03-02\",\"2021-04-09\",\"2022-12-12\"]", result.getResponse().getContentAsString());
+		verify(visitsService, times(1)).getVisitsByPractitionerIdAndMonth(1, startDate, endDate);
+	}
+
+	@Test
+	void whenFetchingWithNegativePractitionerIdShouldHandleInvalidInputException() throws Exception {
+		Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01");
+		Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-31");
+
+		ArrayList<Date> dates = new ArrayList<Date>();
+		dates.add(startDate);
+		dates.add(endDate);
+
+		when(visitsService.getVisitsByPractitionerIdAndMonth(-1, startDate, endDate)).thenThrow(new InvalidInputException("PractitionerId can't be negative."));
+
+		mvc.perform(get("/visits/calendar/{practitionnerId}?dates={startDate},{endDate}", -1, "2021-10-01", "2021-10-31"))
+				.andExpect(status().isUnprocessableEntity())
+				.andExpect(result -> assertTrue(result.getResolvedException() instanceof InvalidInputException))
+				.andExpect(result -> assertEquals("PractitionerId can't be negative.", Objects.requireNonNull(result.getResolvedException()).getMessage()));
 	}
 
 	// UTILS PACKAGE UNIT TESTING
@@ -439,6 +463,28 @@ public class VisitResourceTest {
 		});
 		assertEquals(ex.getCause().getMessage(), "message");
 		assertEquals(ex.getMessage(), "message");
+	}
+
+	@Test
+	void whenFetchingVisitsWithValidPractitionerIdThenShouldReturnListOfVisits() throws Exception {
+		List<Visit> returnedVisits =asList(
+				visit()
+						.id(1)
+						.petId(1)
+						.practitionerId(200200)
+						.build(),
+				visit()
+						.id(2)
+						.petId(1)
+						.practitionerId(200200)
+						.build());
+
+		given(visitsService.getVisitsForPractitioner(200200)).willReturn(returnedVisits);
+
+		mvc.perform(get("/visits/vets/{practitionerId}",200200))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$[0].practitionerId").value(200200))
+				.andExpect(jsonPath("$[1].practitionerId").value(200200));
 	}
 }
 

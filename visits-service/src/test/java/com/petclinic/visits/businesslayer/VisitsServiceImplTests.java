@@ -333,7 +333,26 @@ public class VisitsServiceImplTests {
     }
 
     @Test
-    public void shouldReturnListOfVisitDatesWhenFetchingWithValidPractitionerId() throws ParseException {
+    public void shouldThrowInvalidInputExceptionWhenFetchingDatesWithNegativePractitionerId(){
+        InvalidInputException ex = assertThrows(InvalidInputException.class, ()->{
+           visitsService.getVisitsForPractitioner(-1);
+        });
+
+        assertEquals("PractitionerId can't be negative.", ex.getMessage());
+    }
+
+    @Test
+    public void shouldReturnEmptyListWhenFetchingDatesForPractitionerWithNoVisits(){
+        List<Visit> repoResponse = new ArrayList<Visit>();
+        when(repo.findVisitsByPractitionerId(anyInt())).thenReturn(repoResponse);
+
+        List<Visit> returnedVisits = visitsService.getVisitsForPractitioner(234);
+
+        assertEquals(0, returnedVisits.size());
+    }
+
+    @Test
+    public void shouldReturnListOfVisitsWhenFetchingWithValidPractitionerId() throws ParseException {
         List<Visit> visitsList = asList(
                 visit()
                         .id(1)
@@ -356,31 +375,63 @@ public class VisitsServiceImplTests {
 
         when(repo.findVisitsByPractitionerId(anyInt())).thenReturn(visitsList);
 
-        List<String> returnedStringDates = visitsService.getVisitDatesForPractitioner(200200);
+        List<Visit> returnedVisits = visitsService.getVisitsForPractitioner(200200);
 
-        assertEquals(3, returnedStringDates.size());
-        assertEquals(new SimpleDateFormat("yyyy-MM-dd").parse("2021-03-04").toString(), returnedStringDates.get(1));
+        assertEquals(3, returnedVisits.size());
+        assertEquals(new SimpleDateFormat("yyyy-MM-dd").parse("2021-03-04"), returnedVisits.get(1).getDate());
     }
 
     @Test
-    public void shouldThrowInvalidInputExceptionWhenFetchingDatesWithNegativePractitionerId(){
-        InvalidInputException ex = assertThrows(InvalidInputException.class, ()->{
-           visitsService.getVisitDatesForPractitioner(-1);
+    public void shouldReturnAllVisitsForPractitionerId() throws ParseException {
+        Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01");
+        Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-31");
+
+        List<Visit> visitsList = asList(
+                visit()
+                        .id(1)
+                        .petId(1)
+                        .date(new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01"))
+                        .practitionerId(1)
+                        .build(),
+                visit()
+                        .id(1)
+                        .petId(1)
+                        .date(new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-06"))
+                        .practitionerId(1)
+                        .build(),
+                visit()
+                        .id(3)
+                        .petId(1)
+                        .date(new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-25"))
+                        .practitionerId(2)
+                        .build(),
+                visit()
+                        .id(2)
+                        .petId(1)
+                        .date(new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-25"))
+                        .practitionerId(3)
+                        .build());
+
+
+        when(repo.findAllByDateBetween(startDate, endDate)).thenReturn(visitsList);
+
+        List<Visit> returnedVisits = visitsService.getVisitsByPractitionerIdAndMonth(1, startDate, endDate);
+
+        assertEquals(2, returnedVisits.size());
+        assertEquals(new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01"), returnedVisits.get(0).getDate());
+        assertEquals(1, returnedVisits.get(1).getPractitionerId());
+    }
+
+    @Test
+    public void shouldThrowInvalidInputExceptionWhenFetchingWithNegativePractitionerId() throws ParseException {
+        Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01");
+        Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-31");
+
+        InvalidInputException ex = assertThrows(InvalidInputException.class, () ->{
+            visitsService.getVisitsByPractitionerIdAndMonth(-1, startDate, endDate);
         });
 
         assertEquals("PractitionerId can't be negative.", ex.getMessage());
     }
-
-    @Test
-    public void shouldReturnEmptyListWhenFetchingDatesForPractitionerWithNoVisits(){
-        List<Visit> repoResponse = new ArrayList<Visit>();
-        when(repo.findVisitsByPractitionerId(anyInt())).thenReturn(repoResponse);
-
-        List<String> returnedStringDates = visitsService.getVisitDatesForPractitioner(234);
-
-        assertEquals(0, returnedStringDates.size());
-    }
-
-
 
 }

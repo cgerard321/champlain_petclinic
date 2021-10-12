@@ -133,5 +133,27 @@ public class PersistenceTests {
         List<Visit> returnedVisits = repo.findVisitsByPractitionerId(234234);
         assertEquals(0, returnedVisits.size());
     }
+
+    @Test
+    public void getVisitsByPractitionerIdAndMonth() throws ParseException {
+        Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01");
+        Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-31");
+
+        Visit visitDuring1 = new Visit(123, new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01"), "Description", 2);
+        repo.save(visitDuring1);
+
+        Visit visitDuring2 = new Visit(122, new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-31"), "Description", 2);
+        repo.save(visitDuring2);
+
+        Visit visitAfter = new Visit(121, new SimpleDateFormat("yyyy-MM-dd").parse("2021-11-01"), "Description", 2);
+        repo.save(visitAfter);
+
+        Visit visitBefore = new Visit(120, new SimpleDateFormat("yyyy-MM-dd").parse("2021-09-30"), "Description", 2);
+        repo.save(visitBefore);
+
+        List<Visit> repoResponse = repo.findAllByDateBetween(startDate, endDate);
+
+        assertEquals(3, repoResponse.size());
+    }
 }
 
