@@ -79,7 +79,7 @@ public class UserController {
         return userService.verifyEmailFromToken(new String(Base64.getDecoder().decode(base64EncodedToken)));
     }
 
-    @GetMapping
+    @PostMapping("/login")
     public Boolean verifyUser (@RequestBody UserIDLessUsernameLessDTO loginUser) throws NotFoundException {
         final User user = userService.getUserByEmail(loginUser.getEmail());
         return userService.verifyPassword(user, loginUser);
