@@ -258,7 +258,7 @@ public class AuthServiceUserControllerTests {
 
         mockMvc.perform(get("/users/" + entity.getId()))
                 .andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -276,7 +276,7 @@ public class AuthServiceUserControllerTests {
 
         mockMvc.perform(get("/users/" + entity.getId()))
                 .andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isOk());
 
     }
 

@@ -343,10 +343,6 @@ public class VisitResourceTest {
 		Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01");
 		Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-31");
 
-		ArrayList<Date> dates = new ArrayList<>();
-		dates.add(startDate);
-		dates.add(endDate);
-
 		given(visitsService.getVisitsByPractitionerIdAndMonth(1, startDate, endDate))
 				.willReturn(
 						Collections.singletonList(
@@ -358,11 +354,7 @@ public class VisitResourceTest {
 										.build())
 				);
 
-		mvc.perform(get("/visits/{practitionnerId}", 1)
-						.content(objectMapper.writeValueAsString(dates))
-						.contentType(MediaType.APPLICATION_JSON)
-						.characterEncoding("utf-8")
-						.accept(MediaType.APPLICATION_JSON))
+		mvc.perform(get("/visits/calendar/{practitionnerId}?dates={startDate},{endDate}", 1, "2021-10-01", "2021-10-31"))
 				.andExpect(status().isOk());
 
 		verify(visitsService, times(1)).getVisitsByPractitionerIdAndMonth(1, startDate, endDate);
@@ -379,11 +371,7 @@ public class VisitResourceTest {
 
 		when(visitsService.getVisitsByPractitionerIdAndMonth(-1, startDate, endDate)).thenThrow(new InvalidInputException("PractitionerId can't be negative."));
 
-		mvc.perform(get("/visits/{practitionnerId}", -1)
-						.content(objectMapper.writeValueAsString(dates))
-						.contentType(MediaType.APPLICATION_JSON)
-						.characterEncoding("utf-8")
-						.accept(MediaType.APPLICATION_JSON))
+		mvc.perform(get("/visits/calendar/{practitionnerId}?dates={startDate},{endDate}", -1, "2021-10-01", "2021-10-31"))
 				.andExpect(status().isUnprocessableEntity())
 				.andExpect(result -> assertTrue(result.getResolvedException() instanceof InvalidInputException))
 				.andExpect(result -> assertEquals("PractitionerId can't be negative.", Objects.requireNonNull(result.getResolvedException()).getMessage()));

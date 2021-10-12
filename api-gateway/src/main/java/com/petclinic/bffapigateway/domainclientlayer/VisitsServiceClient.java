@@ -64,7 +64,7 @@ public class VisitsServiceClient {
                 .bodyToFlux(VisitDetails.class);
     }
 
-    public Flux<VisitDetails> getVisitDatesForPractitioner(final int practitionerId){
+    public Flux<VisitDetails> getVisitForPractitioner(final int practitionerId){
         return webClientBuilder.build()
                 .get()
                 .uri(hostname + "visits/vets/{practitionerId}", practitionerId)
@@ -110,6 +110,7 @@ public class VisitsServiceClient {
                 .retrieve()
                 .bodyToMono(Visits.class);
     }
+
     public Mono<VisitDetails> updateVisitForPet(VisitDetails visit) {
         String url = hostname + "/owners/*/pets/" + visit.getPetId() + "/visits/" + visit.getId();
         return webClientBuilder.build()

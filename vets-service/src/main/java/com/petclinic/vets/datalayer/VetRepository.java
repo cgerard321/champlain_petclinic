@@ -35,5 +35,8 @@ public interface VetRepository extends JpaRepository<Vet, Integer>
     @Modifying
     @Query(value = "DELETE FROM Vet v WHERE v.vetId=?1")
     void deleteByVetId(@Param("vetId") int vetId);
+
+    @Query(value = "select v from Vet v order by v.id desc")
+    List<Vet> findAllOrderByIdDesc();
 }
 
