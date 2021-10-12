@@ -96,7 +96,7 @@ public class BillServiceImplTest {
         Calendar calendar = Calendar.getInstance();
         calendar.set(2021, Calendar.SEPTEMBER, 21);
         Date date = calendar.getTime();
-        BillDTO model = new BillDTO(billId,customerId, date, "Checkup");
+        BillDTO model = new BillDTO(billId,customerId, date, "Consultations");
         when(billRepository.save(any(Bill.class))).thenThrow(DuplicateKeyException.class);
 
 
