@@ -1,0 +1,25 @@
+plugins {
+    id 'java'
+}
+
+version 'unspecified'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile group: 'io.github.bonigarcia', name: 'selenium-jupiter', version: '3.3.5'
+    testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.7.0'
+    testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: '5.7.0'
+    testCompile group: 'org.mockito', name: 'mockito-junit-jupiter', version: '3.5.13'
+    testCompile group: 'org.mockito', name: 'mockito-core', version: '3.5.13'
+    testCompile group: 'org.hamcrest', name: 'hamcrest-junit', version: '2.0.0.0'
+}
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
