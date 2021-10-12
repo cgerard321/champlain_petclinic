@@ -2,6 +2,7 @@ package com.petclinic.customers.presentationlayer;
 
 import com.petclinic.customers.datalayer.Owner;
 import com.petclinic.customers.datalayer.OwnerRepository;
+import com.sun.org.apache.xpath.internal.operations.String;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -132,7 +133,7 @@ class OwnerPersistenceTest {
 
     /**
      * ------------------------ TEST_CREATE ------------------------
-     * Testing the delete owner method
+     * Testing the create owner method
      */
     @DisplayName("ownerPersistence_CreateOwner")
     @Test
@@ -151,4 +152,36 @@ class OwnerPersistenceTest {
         assertThat(foundSaved, samePropertyValuesAs(savedOwner));
         assertEquals(1,repository.findAll().size());
     }
+
+    /**
+     * ------------------------ TEST_UPDATE ------------------------
+     * Testing the update owner method
+     */
+    @DisplayName("ownerPersistence_UpdateOwner")
+    @Test
+    public void update_owner_test()
+    {
+        // Arrange
+        int ownerid = 11;
+
+        Owner newOwner = new Owner (ownerid, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal",
+                "1111111111");
+        Owner savedOwner = repository.save(newOwner);;
+
+        Owner foundSaved = repository.findById(savedOwner.getId()).orElse(null);
+        assert foundSaved != null;
+        assertThat(foundSaved, samePropertyValuesAs(newOwner));
+
+        // Act
+        foundSaved.setFirstName("Kevin");
+        foundSaved.setLastName("Laplace");
+        foundSaved.setAddress("670 Fort Kerton");
+        foundSaved.setCity("Montreal");
+        foundSaved.setTelephone("2222222222");
+
+        Owner savedUpdate = repository.save(foundSaved);
+        // Assert
+       assertEquals(savedUpdate, foundSaved);
+    }
+
 }
