@@ -24,7 +24,6 @@ function displayDays() {
     let visitsDatesNode = document.querySelectorAll(".visitsDates");
     let visitsDatesArray = [];
     visitsDatesArray = convetNodeListIdToArray(visitsDatesArray,visitsDatesNode);
-    console.log(visitsDatesArray);
 
 
 
@@ -36,9 +35,7 @@ function displayDays() {
     let daysOfWeek = (strDays.replace(/\s+/g, '')).split(',');
     // let daysToRemove = new Date('2021-10-11 00:00:00.0');
     let d = visitsDatesArray[4].toString() + ' 00:00:00.0';
-    console.log("Q: " + visitsDatesArray[4].toString())
     let daysToRemove = new Date(d);
-    console.log("T: " + daysToRemove);
 
     let daysToRemoveYear= daysToRemove.getFullYear();
     let currentYear = date.getFullYear();
