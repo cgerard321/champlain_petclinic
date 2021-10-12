@@ -3,6 +3,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 import com.petclinic.bffapigateway.dtos.OwnerDetails;
 import com.petclinic.bffapigateway.dtos.VetDetails;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -43,10 +44,13 @@ public class VetsServiceClient {
                 .bodyToFlux(VetDetails.class);
     }
 
-    public Flux<VetDetails> createVets(final VetDetails vets){
+    public Flux<VetDetails> createVets(VetDetails vets){
         return webClientBuilder.build().post()
-                .uri(vetsServiceUrl + vets)
+                .uri(vetsServiceUrl + "/new")
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Flux.just(vets), VetDetails.class)
                 .retrieve()
                 .bodyToFlux(VetDetails.class);
     }

@@ -326,7 +326,7 @@ class ApiGatewayControllerTest {
         when(vetsServiceClient.createVets(vetDetails))
                 .thenReturn(Flux.just(vetDetails));
         client.post()
-                .uri("/api/gateway/vets")
+                .uri("/api/gateway/vets/new")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
@@ -346,7 +346,7 @@ class ApiGatewayControllerTest {
                 .thenReturn(Flux.just(vetDetails));
 
         client.post()
-                .uri("/api/gateway/vets")
+                .uri("/api/gateway/vets/new")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.UNSUPPORTED_MEDIA_TYPE)

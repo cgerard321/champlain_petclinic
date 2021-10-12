@@ -168,9 +168,11 @@ public class BFFApiGatewayController {
     }
 
 
-    @PostMapping(value = "vets", consumes = "application/json", produces = "application/json")
-    public Flux<VetDetails> createVets(@RequestBody VetDetails vets) {
-        return vetsServiceClient.getVet(vets.getId());
+    @PostMapping(value = "vets/new", consumes = "application/json", produces = "application/json")
+    public Flux<VetDetails> createVets(@RequestBody VetDetails vets)
+    {
+        return vetsServiceClient.createVets(vets);
+
     }
 
 
