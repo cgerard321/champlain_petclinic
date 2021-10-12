@@ -1,4 +1,5 @@
 package com.petclinic.vets.datalayer;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.vets.utils.exceptions.InvalidInputException;
 import com.petclinic.vets.utils.exceptions.NotFoundException;
@@ -7,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.web.client.HttpClientErrorException;
+
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -16,7 +18,9 @@ import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 public class DataValidation {
 
 
-    @@ -24,133 +22,160 @@
+    private static final Logger LOG = LoggerFactory.getLogger(Vet.class);
+
+
 
     public static String verifyFirstName(String firstName){
         String confirmedValue = "";
