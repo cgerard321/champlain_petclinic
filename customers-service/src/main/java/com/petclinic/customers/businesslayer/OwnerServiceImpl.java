@@ -32,11 +32,11 @@ public class OwnerServiceImpl implements OwnerService {
      * @return
      */
     @Override
-    public Optional<Owner> findByOwnerId(int Id) {
+    public Optional<Owner> findByOwnerId(int id) {
         try {
             //Search owner in database with the given id
-            Optional<Owner> owner = repository.findById(Id);
-            LOG.debug("Owner with ID: " + Id + " has been found");
+            Optional<Owner> owner = repository.findById(id);
+            LOG.debug("Owner with ID: " + id + " has been found");
             return owner;
         }
         catch (Exception e)
@@ -66,9 +66,19 @@ public class OwnerServiceImpl implements OwnerService {
 
 
     @Override
-    public void updateOwner() {
-
-        //INSERT METHOD
+    public void updateOwner(int id, Owner newOwner) {
+       Optional<Owner> optionalOwner = repository.findById(id);
+       if(optionalOwner.isPresent()){
+           Owner foundOwner = optionalOwner.get();
+           foundOwner.setFirstName(newOwner.getFirstName());
+           foundOwner.setLastName(newOwner.getLastName());
+           foundOwner.setAddress(newOwner.getAddress());
+           foundOwner.setCity(newOwner.getCity());
+           foundOwner.setTelephone(newOwner.getTelephone());
+           LOG.debug("updateOwner: owner with id {} updated",id);
+       }else{
+           throw new NotFoundException("updateOwner failed, owner with id: " + id + " not found.");
+       }
     }
 
 
@@ -99,22 +109,4 @@ public class OwnerServiceImpl implements OwnerService {
 
 
     }
-
-
-//    @Override
-//    public void addCustodian(Owner primary,String custname){
-//
-//        int primaryOwnerId = primary.getId();
-//        if(repository.findById(primaryOwnerId).isPresent()){
-//            primary.setCustodian(custname);
-//            LOG.debug("createCustodian: Added custodian to owner {}",
-//                    primaryOwnerId);
-//            //return savedSecondaryOwner;
-//        }else {
-//            LOG.debug("createSecondaryOwner: primary owner with id {} does not exist", primaryOwnerId);
-//            throw new NotFoundException("Primary owner ID "+ primaryOwnerId +" not found");
-//        }
-//    }
-
-
 }
