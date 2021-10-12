@@ -312,36 +312,8 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.path").isEqualTo("/owners")
                 .jsonPath("$.message").isEqualTo(null);
     }
-    /*
-        @Test
-        void getVisit()  {
-            VisitDetails visit = new VisitDetails();
-            visit.setId(1);
-            visit.setPetId(1);
-            visit.setDate("2021-12-12");
-            visit.setDescription("Charle's Richard cat has a paw infection.");
-            visit.setStatus(false);
-            visit.setPractitionerId(1);
 
 
-            when(visitsServiceClient.getVisitsForPet(visit.getPetId()))
-                    .thenReturn(Flux.just(visit));
-
-
-            client.get()
-                    .uri("/api/gateway/visits/{petId}", visit.getPetId())
-                    .exchange()
-                    .expectStatus().isOk()
-                    .expectBody()
-                    .jsonPath("$.id").isEqualTo(1)
-                    .jsonPath("$.petId").isEqualTo(1)
-                    .jsonPath("$.date").isEqualTo("2021-12-12")
-                    .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
-                    .jsonPath("$.practitionerId").isEqualTo(1);
-
-
-        }
-    */
     @Test
     void createVisitWithOwnerInfo(){
         OwnerDetails owner = new OwnerDetails();
