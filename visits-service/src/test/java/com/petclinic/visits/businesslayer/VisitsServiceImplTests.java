@@ -6,7 +6,6 @@ import com.petclinic.visits.utils.exceptions.InvalidInputException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -21,7 +20,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-
 import static org.mockito.Mockito.*;
 
 import static org.mockito.Mockito.when;
@@ -29,10 +27,6 @@ import static org.mockito.Mockito.when;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-
-import javax.swing.text.html.Option;
-import java.sql.Time;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -333,11 +327,12 @@ public class VisitsServiceImplTests {
     }
 
     @Test
-<<<<<<< HEAD
     public void shouldReturnAllVisitsForPractitionerId() throws ParseException {
         Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01");
         Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-31");
-=======
+    }
+
+    @Test
     public void shouldReturnListOfVisitDatesWhenFetchingWithValidPractitionerId() throws ParseException {
         List<Visit> visitsList = asList(
                 visit()
@@ -386,7 +381,10 @@ public class VisitsServiceImplTests {
         assertEquals(0, returnedStringDates.size());
     }
 
->>>>>>> 5159b3a4 (Added methods in each layer for getting list of string dates for a practitioner (#158))
+    @Test
+    public void shouldReturnAllVisitsWithInBetweenSetDateWhenFetchingWithValidPractitionerId() throws ParseException {
+        Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01");
+        Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-31");
 
         List<Visit> visitsList = asList(
                 visit()
@@ -435,5 +433,4 @@ public class VisitsServiceImplTests {
 
         assertEquals("PractitionerId can't be negative.", ex.getMessage());
     }
-
 }

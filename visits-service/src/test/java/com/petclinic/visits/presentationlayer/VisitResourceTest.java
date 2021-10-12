@@ -8,7 +8,6 @@ import com.petclinic.visits.utils.exceptions.InvalidInputException;
 import com.petclinic.visits.utils.exceptions.NotFoundException;
 import com.petclinic.visits.utils.http.ControllerExceptionHandler;
 import com.petclinic.visits.utils.http.HttpErrorInfo;
-import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,30 +15,22 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-<<<<<<< HEAD
 import java.util.*;
-=======
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
->>>>>>> 5159b3a4 (Added methods in each layer for getting list of string dates for a practitioner (#158))
 
 import static java.util.Arrays.asList;
-import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -370,7 +361,7 @@ public class VisitResourceTest {
 		Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01");
 		Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-31");
 
-		ArrayList<Date> dates = new ArrayList<Date>();
+		ArrayList<Date> dates = new ArrayList<>();
 		dates.add(startDate);
 		dates.add(endDate);
 
@@ -393,7 +384,7 @@ public class VisitResourceTest {
 		mvc.perform(get("/visits/vets/dates/{practitionerId}",-1))
 				.andExpect(status().isUnprocessableEntity())
 				.andExpect(result -> assertTrue(result.getResolvedException() instanceof InvalidInputException))
-				.andExpect(result -> assertEquals("PractitionerId can't be negative.", result.getResolvedException().getMessage()));
+				.andExpect(result -> assertEquals("PractitionerId can't be negative.", Objects.requireNonNull(result.getResolvedException()).getMessage()));
 	}
 
 	@Test

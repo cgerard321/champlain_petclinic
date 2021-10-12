@@ -29,18 +29,9 @@ public interface VisitRepository extends JpaRepository<Visit, Integer> {
 
     List<Visit> findByPetIdIn(Collection<Integer> petIds);
 
-<<<<<<< HEAD
-<<<<<<< HEAD
     List<Visit> findAllByDateBetween(Date startingDate, Date EndDate);
 
-    //Optional<Visit> findById(int visitId);
-
-=======
->>>>>>> bcfb440f (feat/(VISE-CPC-213) Make UI for delete visit (#143))
-=======
-    List<Visit> findVisitsByPractitionerId(int practitionerId);
-
->>>>>>> 5159b3a4 (Added methods in each layer for getting list of string dates for a practitioner (#158))
     void findVisitById(int visitId);
 
+    List<Visit> findVisitsByPractitionerId(int practitionerId);
 }
