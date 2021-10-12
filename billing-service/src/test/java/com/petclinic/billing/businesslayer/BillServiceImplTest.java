@@ -15,7 +15,9 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+
 import java.util.*;;
+
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -177,6 +179,31 @@ public class BillServiceImplTest {
         Bill emptyBill = MAPPER.ModelToEntity(null);
 
         assertThat(emptyBill).isEqualTo(null);
+    }
+
+    @Test
+    public void test_GetBillByCustomerId(){
+
+        int expectedSize = 2;
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(2021, Calendar.SEPTEMBER, 21);
+
+        Date date = calendar.getTime();
+        Bill entity1 = new Bill(billId,customerId, date, "Checkup", 50.00);
+        Bill entity2 = new Bill(billId,customerId, date, "Vaccine", 100.00);
+        when(billRepository.findByCustomerId(1)).thenReturn("Ok");
+
+        List<BillDTO> returnedBills = billService.GetBillByCustomerId(customerId);
+
+        assertEquals(expectedSize, returnedBills.size());
+    }
+
+    @Test
+    public void test_GetBillByCustomerId_NotFoundException(){
+        assertThrows(NotFoundException.class, () -> {
+            billService.GetBillByCustomerId(customerId);
+        });
     }
 
 }
