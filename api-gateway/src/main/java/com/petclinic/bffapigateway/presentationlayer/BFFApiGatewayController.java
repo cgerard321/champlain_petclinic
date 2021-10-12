@@ -141,8 +141,8 @@ public class BFFApiGatewayController {
     }
 
     @GetMapping(value = "visits/vets/{practitionerId}")
-    public Flux<VisitDetails> getVisitDatesForPractitioner(@PathVariable int practitionerId){
-        return visitsServiceClient.getVisitDatesForPractitioner(practitionerId);
+    public Flux<VisitDetails> getVisitForPractitioner(@PathVariable int practitionerId){
+        return visitsServiceClient.getVisitForPractitioner(practitionerId);
     }
 
     @PutMapping(value = "owners/{ownerId}",consumes = "application/json" ,produces = "application/json")

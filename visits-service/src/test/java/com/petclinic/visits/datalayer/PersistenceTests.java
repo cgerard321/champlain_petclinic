@@ -139,17 +139,21 @@ public class PersistenceTests {
         Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01");
         Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-31");
 
-        Visit visitDuring = new Visit(2, new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-10"), "Description", 2);
-        repo.save(visitDuring);
+        Visit visitDuring1 = new Visit(123, new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01"), "Description", 2);
+        repo.save(visitDuring1);
 
-        Visit visitAfter = new Visit(3, new SimpleDateFormat("yyyy-MM-dd").parse("2021-11-16"), "Description", 3);
+        Visit visitDuring2 = new Visit(122, new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-31"), "Description", 2);
+        repo.save(visitDuring2);
+
+        Visit visitAfter = new Visit(121, new SimpleDateFormat("yyyy-MM-dd").parse("2021-11-01"), "Description", 2);
         repo.save(visitAfter);
 
-        Visit visitBefore = new Visit(4, new SimpleDateFormat("yyyy-MM-dd").parse("2021-07-26"), "Description", 4);
+        Visit visitBefore = new Visit(120, new SimpleDateFormat("yyyy-MM-dd").parse("2021-09-30"), "Description", 2);
         repo.save(visitBefore);
 
         List<Visit> repoResponse = repo.findAllByDateBetween(startDate, endDate);
-        assertThat(repoResponse, hasSize(2));
+
+        assertEquals(3, repoResponse.size());
     }
 }
 

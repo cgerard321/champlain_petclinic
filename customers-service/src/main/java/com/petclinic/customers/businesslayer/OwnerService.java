@@ -19,13 +19,13 @@ public interface OwnerService {
         public List<Owner> findAll();
 
         //UPDATE OWNER
-        public void updateOwner();
+        public void updateOwner(int id, Owner owner);
 
         //CREATE OWNER
         public Owner createOwner(Owner owner);
 
         //DELETE OWNER
-        public void deleteOwner(int Id);
+        public void deleteOwner(int id);
 
 
 

@@ -64,7 +64,7 @@ public class VisitsServiceClient {
                 .bodyToFlux(VisitDetails.class);
     }
 
-    public Flux<VisitDetails> getVisitDatesForPractitioner(final int practitionerId){
+    public Flux<VisitDetails> getVisitForPractitioner(final int practitionerId){
         return webClientBuilder.build()
                 .get()
                 .uri(hostname + "visits/vets/{practitionerId}", practitionerId)
