@@ -2,6 +2,7 @@ package com.petclinic.vets.presentationlayer;
 
 import com.petclinic.vets.businesslayer.VetService;
 import com.petclinic.vets.datalayer.Vet;
+import com.petclinic.vets.datalayer.VetDTO;
 import com.petclinic.vets.utils.exceptions.InvalidInputException;
 import io.micrometer.core.annotation.Timed;
 import org.slf4j.Logger;
@@ -59,28 +60,29 @@ class VetResource {
     }
 
     @GetMapping
-    public List<Vet> showResourcesVetList() {
-        List<Vet> vetList = vetService.getAllEnabledVets();
+    public List<VetDTO> showResourcesVetList() {
+        List<VetDTO> vetList = vetService.getAllEnabledVetDTOs();
         return vetList;
     }
 
     @GetMapping("/disabled")
-    public List<Vet> showResourcesVetDisabledList() {
-        List<Vet> vetList = vetService.getAllDisabledVets();
+    public List<VetDTO> showResourcesVetDisabledList() {
+        List<VetDTO> vetList = vetService.getAllDisabledVetDTOs();
         return vetList;
     }
 
 
     @GetMapping("/{vetId}")
-    public Vet findVet(@PathVariable int vetId)
+    public VetDTO findVet(@PathVariable int vetId)
     {
         LOG.debug("/vet MS return the found product for vetId: " + vetId);
 
         if(vetId < 1) throw new InvalidInputException("Invalid vetId: " + vetId);
 
-        Vet vet = vetService.getVetByVetId(vetId);
+        VetDTO vet = vetService.getVetDTOByVetId(vetId);
         return vet;
     }
+
 
     @PostMapping(
             consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -94,32 +96,28 @@ class VetResource {
 
     @PutMapping( value = "/{vetId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public Vet updateVet(@PathVariable int vetId, @RequestBody Vet vetRequest)
+    public VetDTO updateVet(@PathVariable int vetId, @RequestBody VetDTO vetRequest)
     {
-        return  vetService.updateVet(vetService.getVetByVetId(vetId),vetRequest);
+        return vetService.updateVetWithDTO(vetId,vetRequest);
     }
 
     @PutMapping(path = "/{vetId}/disableVet",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Vet disableVet(@PathVariable("vetId") int vetId, @RequestBody Vet vetRequest) {
-        Vet vet = vetService.getVetByVetId(vetId);
-        vetService.disableVet(vet,vetRequest);
-        return vet;
+    public VetDTO disableVet(@PathVariable("vetId") int vetId, @RequestBody VetDTO vetRequest) {
+        return vetService.disableVetFromDTO(vetId, vetRequest);
     }
 
 
     @PutMapping(path = "/{vetId}/enableVet",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public Vet enableVet(@PathVariable("vetId") int vetId, @RequestBody Vet vetRequest) {
-        Vet vet = vetService.getVetByVetId(vetId);
-        vetService.enableVet(vet,vetRequest);
-        return vet;
+    public VetDTO enableVet(@PathVariable("vetId") int vetId, @RequestBody VetDTO vetRequest) {
+        return vetService.enableVetFromDTO(vetId, vetRequest);
     }
 
     @DeleteMapping(path ="/{vetId}")
     public void deleteByVetId(@PathVariable("vetId") int vetId ){
-        vetService.deleteVetByVetId(vetId);
+        vetService.deleteVetByVetIdFromVetDTO(vetId);
     }
 }
