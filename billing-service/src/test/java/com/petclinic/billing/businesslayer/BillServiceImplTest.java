@@ -95,7 +95,7 @@ public class BillServiceImplTest {
 
     }
 
-/**
+
     @Test
     public void test_CreateBillInvalidVisitType(){
         Calendar calendar = Calendar.getInstance();
@@ -109,7 +109,7 @@ public class BillServiceImplTest {
         });
 
     }
-**/
+
     @Test
     public void test_CreateBillInvalidInputException(){
         Calendar calendar = Calendar.getInstance();
