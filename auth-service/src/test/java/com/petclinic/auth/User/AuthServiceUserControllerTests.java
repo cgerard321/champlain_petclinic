@@ -17,45 +17,46 @@
  * Date: 26/09/21
  * Ticket: feat(AUTH-CPC-104)
  *
+ * User: @Fube
+ * Date: 09/10/21
+ * Ticket: feat(AUTH-CPC-310)
+ *
+ * User: @Fube
+ * Date: 2021-10-10
+ * Ticket: feat(AUTH-CPC-357)
  */
 package com.petclinic.auth.User;
 
-import com.petclinic.auth.Role.Role;
-import com.petclinic.auth.Role.RoleController;
-import com.petclinic.auth.Role.RoleIDLessDTO;
-import com.petclinic.auth.Role.RoleRepo;
-import com.petclinic.auth.User.User;
-import com.petclinic.auth.User.UserController;
-import com.petclinic.auth.User.UserIDLessDTO;
-import com.petclinic.auth.User.UserRepo;
-import javassist.NotFoundException;
-import org.apache.tomcat.util.http.fileupload.MultipartStream;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.petclinic.auth.JWT.JWTService;
+import com.petclinic.auth.Mail.MailService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
-import javax.validation.ConstraintViolationException;
+import javax.validation.*;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Optional;
 import java.util.Random;
+import java.util.Set;
 
-import static java.lang.Math.min;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -63,6 +64,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class AuthServiceUserControllerTests {
 
     private final static Random rng;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     static {
         rng = new Random();
@@ -74,9 +78,13 @@ public class AuthServiceUserControllerTests {
             EMAIL = "email@gmail.com";
 
 
+    private Validator validator;
+
     @BeforeEach
     void setup() {
         userRepo.deleteAllInBatch();
+        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+        validator = factory.getValidator();
     }
 
     @Autowired
@@ -89,12 +97,20 @@ public class AuthServiceUserControllerTests {
     @Autowired
     private UserController userController;
 
+    @MockBean
+    private MailService mailService;
+
+    @MockBean
+    private JWTService jwtService;
+
     private final UserIDLessDTO ID_LESS_USER = new UserIDLessDTO(USER, PASS, EMAIL);
 
     @Test
     @DisplayName("Create a user from controller")
     void create_user_from_controller() {
-        final User user = userController.createUser(ID_LESS_USER);
+        when(jwtService.encrypt(any()))
+                .thenReturn("a.fake.token");
+        final UserPasswordLessDTO user = userController.createUser(ID_LESS_USER);
         assertNotNull(user);
         assertThat(user.getId(), instanceOf(Long.TYPE));
         assertTrue(userRepo.findById(user.getId()).isPresent());
@@ -118,6 +134,7 @@ public class AuthServiceUserControllerTests {
 
         assertThrows(ConstraintViolationException.class, () -> userController.createUser(userIDLessDTO));
     }
+
     @Test
     @DisplayName("Check the password field in order to refused if it is empty")
     void check_empty_password() {
@@ -126,6 +143,45 @@ public class AuthServiceUserControllerTests {
         UserIDLessDTO userIDLessDTO = new UserIDLessDTO( USER, null,EMAIL);
 
         assertThrows(ConstraintViolationException.class, () -> userController.createUser(userIDLessDTO));
+    }
+    @Test
+    @DisplayName("Check the password field in order to refused if no special character")
+    void check_missing_specialchar_password() {
+
+
+        UserIDLessDTO userIDLessDTO = new UserIDLessDTO( USER, "Password123",EMAIL);
+        Set<ConstraintViolation<UserIDLessDTO>> violations = validator.validate(userIDLessDTO);
+        assertFalse(violations.isEmpty());
+    }
+    @Test
+    @DisplayName("Check the password field in order to refused if no number")
+    void check_missing_number_password() {
+
+
+        UserIDLessDTO userIDLessDTO = new UserIDLessDTO( USER, "Pas$word",EMAIL);
+
+        Set<ConstraintViolation<UserIDLessDTO>> violations = validator.validate(userIDLessDTO);
+        assertFalse(violations.isEmpty());
+    }
+    @Test
+    @DisplayName("Check the password field in order to refused if no uppercase character")
+    void check_missing_uppercase_password() {
+
+
+        UserIDLessDTO userIDLessDTO = new UserIDLessDTO( USER, "pas$word123",EMAIL);
+
+        Set<ConstraintViolation<UserIDLessDTO>> violations = validator.validate(userIDLessDTO);
+        assertFalse(violations.isEmpty());
+    }
+    @Test
+    @DisplayName("Check the password field in order to refused if no lowercase character")
+    void check_missing_lowercase_password() {
+
+
+        UserIDLessDTO userIDLessDTO = new UserIDLessDTO( USER, "PAS$WORD123",EMAIL);
+
+        Set<ConstraintViolation<UserIDLessDTO>> violations = validator.validate(userIDLessDTO);
+        assertFalse(violations.isEmpty());
     }
     @Test
     @DisplayName("Check the email field in order to refused if it is empty")
@@ -197,7 +253,7 @@ public class AuthServiceUserControllerTests {
 
         mockMvc.perform(get("/users/" + entity.getId()))
                 .andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -215,7 +271,58 @@ public class AuthServiceUserControllerTests {
 
         mockMvc.perform(get("/users/" + entity.getId()))
                 .andDo(print())
-                .andExpect(status().isForbidden());
+                .andExpect(status().isOk());
 
+    }
+
+    @Test
+    @DisplayName("When POST on users endpoint with valid data, allow any")
+    void allow_any_on_users() throws Exception {
+
+        final UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
+        final String asString = objectMapper.writeValueAsString(userIDLessDTO);
+
+        when(jwtService.encrypt(any()))
+                .thenReturn("a.fake.token");
+
+        mockMvc.perform(post("/users").contentType(APPLICATION_JSON).content(asString))
+                .andDo(print())
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(jsonPath("$.password").doesNotExist());
+    }
+
+    @Test
+    @DisplayName("When GET on verification endpoint, allow any")
+    void allow_any_on_verification() throws Exception {
+
+        final User user = User.builder()
+                        .username("test")
+                        .email("fake@email.com")
+                        .password("fakePassword")
+                        .build();
+        userRepo.save(user);
+
+        assertEquals(1, userRepo.count());
+        assertNotNull(userRepo.findByEmail(user.getEmail()));
+        assertFalse(userRepo.findByEmail(user.getEmail()).isVerified());
+
+        final String fakeToken = "a.fake.token";
+        final String base64Token =
+                Base64.getEncoder().withoutPadding().encodeToString(fakeToken.getBytes(StandardCharsets.UTF_8));
+
+
+        when(jwtService.decrypt(fakeToken))
+                .thenReturn(user.toBuilder().build()); // Clone
+
+        mockMvc.perform(get("/users/verification/" + base64Token))
+                .andDo(print())
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(jsonPath("$.password").doesNotExist())
+                .andExpect(jsonPath("$.id").value(user.getId()))
+                .andExpect(jsonPath("$.email").value(user.getEmail()))
+                .andExpect(jsonPath("$.roles").isArray());
+
+        assertTrue(userRepo.findByEmail(user.getEmail()).isVerified());
     }
 }

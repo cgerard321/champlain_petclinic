@@ -1,19 +1,25 @@
 package com.petclinic.auth.User;
 
 import com.petclinic.auth.Exceptions.NotFoundException;
+import com.petclinic.auth.Mail.Mail;
+import com.petclinic.auth.Mail.MailService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -36,6 +42,9 @@ public class AuthServiceUserServiceTests {
     @Autowired
     private UserService userService;
 
+    @MockBean
+    private MailService mailService;
+
     @BeforeEach
     void setup() {
         userRepo.deleteAllInBatch();
@@ -48,8 +57,9 @@ public class AuthServiceUserServiceTests {
 
         final User createdUser = userService.createUser(userIDLessDTO);
         assertEquals(createdUser.getUsername(), userIDLessDTO.getUsername());
-        assertEquals(createdUser.getPassword(), userIDLessDTO.getPassword());
+        assertNotEquals(createdUser.getPassword(), userIDLessDTO.getPassword());
         assertEquals(createdUser.getEmail(), userIDLessDTO.getEmail());
+        assertFalse(createdUser.isVerified());
     }
 
     @Test
@@ -133,5 +143,52 @@ public class AuthServiceUserServiceTests {
     @DisplayName("Delete user by id and fail")
     void delete_role_by_id_and_fail() {
         assertEquals(Optional.empty(), userRepo.findById(1l));
+    }
+
+    @Test
+    @DisplayName("When creating user, encrypt password")
+    void encrypt_password_before_persistence() {
+
+        final UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
+        final User saved = userService.createUser(userIDLessDTO);
+
+        assertNotNull(saved.getPassword());
+        assertFalse(saved.getPassword().isEmpty());
+        assertNotEquals(saved.getPassword(), userIDLessDTO.getPassword());
+    }
+
+    @Test
+    @DisplayName("When creating user, send verification email")
+    void send_email_on_register() {
+
+        AtomicInteger callCount = new AtomicInteger();
+        AtomicReference<Mail> mailRef = new AtomicReference<>();
+
+        when(mailService.sendMail(any())).then(args -> {
+            callCount.incrementAndGet();
+            final Mail mail = args.getArgument(0, Mail.class);
+            mailRef.set(mail);
+            return "Email sent to " + mail.getMessage();
+        });
+
+        final UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
+        final User saved = userService.createUser(userIDLessDTO);
+
+        assertEquals(1, callCount.get());
+        assertTrue(mailRef.get().getMessage().contains("Your verification link: "));
+    }
+
+    @Test
+    @DisplayName("Given user, generate verification email")
+    void generate_verification_email() {
+
+        final UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
+        final User saved = userService.createUser(userIDLessDTO);
+
+        final Mail mail = userService.generateVerificationMail(saved);
+
+        System.out.println(mail);
+
+        assertTrue(mail.getMessage().contains("Your verification link: "));
     }
 }

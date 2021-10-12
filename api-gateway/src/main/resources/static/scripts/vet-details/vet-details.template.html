@@ -1,62 +1,94 @@
-<h2>Vet Information</h2>
-
-<table class="table table-striped">
-  <tr>
-    <th class="col-sm-3">Vet ID</th>
-    <td><b>{{$ctrl.vet.vetId}}</b></td>
-  </tr>
-  <tr>
-    <th class="col-sm-3">Name</th>
-    <td><b>{{$ctrl.vet.firstName}} {{$ctrl.vet.lastName}}</b></td>
-  </tr>
-  <tr>
-    <th>Email</th>
-    <td>{{$ctrl.vet.email}}</td>
-  </tr>
-  <tr>
-    <th>Phone Number</th>
-    <td>{{$ctrl.vet.phoneNumber}}</td>
-  </tr>
-  <tr>
-    <th>Resume</th>
-    <td>{{$ctrl.vet.resume}}</td>
-  </tr>
-  <tr>
-    <th>Work Day</th>
-    <td id="workDay">{{$ctrl.vet.workday}}</td>
-  </tr>
-  <tr>
-    <th>Is Active</th>
-    <td>{{$ctrl.vet.isActive}}</td>
-  </tr>
-  <tr>
-    <td>
-      <button>
-      <a class="btn btn-default" ui-sref="vetEdit({vetId: $ctrl.vet.id})">Edit Vet</a>
-      </button>
-    </td>
-    <td>
-      <a class="btn btn-default" ui-sref="disableVet({vetId: $ctrl.vet.vetId})">Disable Vet</a>
-      <a class="btn btn-default" ui-sref="enableVet({vetId: $ctrl.vet.vetId})">Enable Vet</a>
-    </td>
-    <td>
-      <a class="btn btn-default" ng-confirm-click="Are you sure to delete this vet ?" confirmed-click="deleteVet({vetId: $ctrl.vet.vetId})">Delete Vet</a>
-    </td>
-  </tr>
-</table>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet"
+      integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+<link rel="stylesheet" href="form.css" type="text/css"/>
 
 
-<button onclick="displayDays()" id="toggle">Show availabilities</button>
+<div class="bg-light">
+  <div class="container">
+    <div class="py-5 text-center"/>
+    <h2 class="titleVetForm">Vet Information</h2>
+  </div>
+  <div class="row g-5">
+    <div class="col-md-7 col-lg-12">
 
-<div id="displayNone" style="display: none">
-  <div id="section" class="day-of-week">
-    <div id="Sunday" class="square">Sunday</div>
-    <div id="Monday" class="square">Monday</div>
-    <div id="Tuesday" class="square">Tuesday</div>
-    <div id="Wednesday" class="square">Wednesday</div>
-    <div id="Thursday" class="square">Thursday</div>
-    <div id="Friday" class="square">Friday</div>
-    <div id="Saturday" class="square">Saturday</div>
+      <div class="row g-3">
+        <div class="col-sm-6">
+                        <span class="modal_image"><img ng-if="vet.image != null" src="data:image/png;base64,{{vet.image}}"/>
+                            <img ng-if="vet.image == null" src="images/vet_default.jpg" alt="Profile picture preview" id="preview"/>
+                        </span>
+        </div>
+        <div class="col-sm-6">
+
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-sm-12">
+          {{$ctrl.vet.firstName}} {{$ctrl.vet.lastName}}
+        </div>
+
+        <div class="col-6">
+          {{$ctrl.vet.email}}
+        </div>
+
+        <div class="col-sm-6">
+          {{$ctrl.vet.phoneNumber}}
+        </div>
+
+        <!-- remove script and place in required file -->
+
+        <hr class="my-4"/>
+
+        <div class="col-sm-12">
+          <h5 class="form-label">Career Resume</h5>
+          <div>
+            {{$ctrl.vet.resume}}
+          </div>
+        </div>
+
+
+        <hr class="my-4"/>
+
+        <div class="row gy-3">
+          <div class="col-md-12">
+            <h5 class="mb-3">Work Day</h5>
+            <div>
+              {{$ctrl.vet.workday}}
+            </div>
+          </div>
+        </div>
+
+
+        <hr class="my-4"/>
+        <div class="row gy-3">
+          <div class="col-md-12">
+
+            <button class="add-vet-button btn btn-primary" onclick="displayDays()" id="toggle">Show availabilities</button>
+          </div>
+
+          <div class="col-md-12" id="displayNone" style="display: none">
+              <div id="section" class="day-of-week">
+                <div id="Sunday" class="square">Sunday</div>
+                <div id="Monday" class="square">Monday</div>
+                <div id="Tuesday" class="square">Tuesday</div>
+                <div id="Wednesday" class="square">Wednesday</div>
+                <div id="Thursday" class="square">Thursday</div>
+                <div id="Friday" class="square">Friday</div>
+                <div id="Saturday" class="square">Saturday</div>
+              </div>
+          </div>
+
+        </div>
+        <hr class="my-4"/>
+
+        <div class="row g-3">
+          <div class="col-sm-12">
+              <a class="add-vet-button btn btn-success" ui-sref="vetEdit({vetId: $ctrl.vet.id})">Edit Vet</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
   </div>
 </div>
-
