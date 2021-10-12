@@ -124,13 +124,13 @@ public class BFFApiGatewayController {
     }
 
     //Delete Visit
-    @DeleteMapping (value = "pets/visits/{petId}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping (value = "pets/visits/{petId}")
     public Mono<Void> deleteVisitForPets(final @PathVariable int petId){
         return visitsServiceClient.deleteVisitForPets(petId);
     }
 
     //Update Visit
-    @PostMapping(value ="pets/visits/{petId}", consumes = "application/json", produces = "application/json")
+    @PutMapping(value ="pets/visits/{petId}", consumes = "application/json", produces = "application/json")
     public Mono<Visits> updateVisitForPets(final @PathVariable int petId){
         return visitsServiceClient.updateVisitForPets(petId);
     }
