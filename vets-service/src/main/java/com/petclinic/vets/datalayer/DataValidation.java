@@ -1,5 +1,4 @@
 package com.petclinic.vets.datalayer;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.vets.utils.exceptions.InvalidInputException;
 import com.petclinic.vets.utils.exceptions.NotFoundException;
@@ -8,174 +7,146 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.style.ToStringCreator;
 import org.springframework.web.client.HttpClientErrorException;
-
 import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
+
 public class DataValidation {
 
 
-    private static final Logger LOG = LoggerFactory.getLogger(Vet.class);
-
-
+    @@ -24,133 +22,160 @@
 
     public static String verifyFirstName(String firstName){
         String confirmedValue = "";
-        try {
-            firstName = firstName.replaceAll("( |\\d)", "");
-            Pattern p = Pattern.compile("^(a-z| |,|.|-)+");
-            Matcher m = p.matcher(firstName);
-            boolean b = m.matches();
-            if(b) {
-                confirmedValue = firstName.trim();
-            }
+        firstName = firstName.replaceAll("( |\\d)", "");
+        firstName = firstName.substring(0, Math.min(firstName.length(), 30));
+        Pattern p = Pattern.compile("^([A-Z]|[a-z]|\\\\.| |,|-)+");
+        Matcher m = p.matcher(firstName);
+        boolean b = m.matches();
+        if(b) {
+            confirmedValue = firstName.trim();
         }
-        catch (HttpClientErrorException ex){
-            throw handleHttpClientException(ex);
+        else {
+            throw new InvalidInputException("Invalid input for first name");
         }
         return confirmedValue;
     }
 
     public static String verifySpeciality(String speciality){
         String confirmedValue = "";
-        try {
-            speciality = speciality.replaceAll("( |\\d)", "");
-            Pattern p = Pattern.compile("^(a-z| |,|.|-)+");
-            Matcher m = p.matcher(speciality);
-            boolean b = m.matches();
-            if(b) {
-                confirmedValue = speciality.trim();
-            }
+        speciality = speciality.replaceAll("( |\\d)", "");
+        speciality = speciality.substring(0, Math.min(speciality.length(), 80));
+        Pattern p = Pattern.compile("^([A-Z]|[a-z]|\\\\.| |,|-)+");
+        Matcher m = p.matcher(speciality);
+        boolean b = m.matches();
+        if(b) {
+            confirmedValue = speciality.trim();
         }
-        catch (HttpClientErrorException ex){
-            throw handleHttpClientException(ex);
+        else {
+            throw new InvalidInputException("Invalid input for speciality");
         }
         return confirmedValue;
     }
 
     public static String verifyLastName(String lastName){
         String confirmedValue = "";
-        try {
-            lastName = lastName.replaceAll("( |\\d)", "");
-            Pattern p = Pattern.compile("^(a-z| |,|.|-)+");
-            Matcher m = p.matcher(lastName);
-            boolean b = m.matches();
-            if(b) {
-                confirmedValue = lastName.trim();
-            }
+        lastName = lastName.replaceAll("( |\\d)", "");
+        lastName = lastName.substring(0, Math.min(lastName.length(), 30));
+        Pattern p = Pattern.compile("^([A-Z]|[a-z]|\\\\.| |,|-)+");
+        Matcher m = p.matcher(lastName);
+        boolean b = m.matches();
+        if(b) {
+            confirmedValue = lastName.trim();
         }
-        catch (HttpClientErrorException ex){
-            throw handleHttpClientException(ex);
+        else {
+            throw new InvalidInputException("Invalid input for last name");
         }
         return confirmedValue;
     }
 
     public static String verifyPhoneNumber(String phoneNumber){
         String confirmedValue = "";
-        try {
-            phoneNumber = phoneNumber.replaceAll("( |#|\\D)", "");
-            Pattern p = Pattern.compile("^(\\d){4}$");
-            Matcher m = p.matcher(phoneNumber);
-            boolean b = m.matches();
-            if(b) {
-                confirmedValue = phoneNumber.trim();
-            }
+        phoneNumber = phoneNumber.replaceAll("( |#|\\D)", "");
+        phoneNumber = phoneNumber.substring(0, Math.min(phoneNumber.length(), 30));
+        Pattern p = Pattern.compile("^(\\d){4}$");
+        Matcher m = p.matcher(phoneNumber);
+        boolean b = m.matches();
+        if(b) {
+            confirmedValue = "(514)-634-8276 #"+phoneNumber.trim();
         }
-        catch (HttpClientErrorException ex){
-            throw handleHttpClientException(ex);
+        else {
+            throw new InvalidInputException("Invalid input for phone number");
         }
-        return "(514)-634-8276 #"+confirmedValue;
+        return confirmedValue;
     }
 
     public static String verifyWorkday(String workday){
         String confirmedValue = "";
-        try {
-            workday = workday.replaceAll("( )", "");
-            workday = workday.replaceAll("(,)", ", ");
-            Pattern p = Pattern.compile("((\\bMonday\\b|\\bTuesday\\b|\\bWednesday\\b|\\bThursday\\b|\\bFriday\\b|\\bSaturday\\b|\\bSunday\\b)(,|)( |))+");
-            Matcher m = p.matcher(workday);
-            boolean b = m.matches();
-            if(b) {
-                confirmedValue = workday.trim();
-            }
+        workday = workday.replaceAll("( )", "");
+        workday = workday.replaceAll("(,)", ", ");
+        workday = workday.substring(0, Math.min(workday.length(), 250));
+        Pattern p = Pattern.compile("((\\bMonday\\b|\\bTuesday\\b|\\bWednesday\\b|\\bThursday\\b|\\bFriday\\b|\\bSaturday\\b|\\bSunday\\b)(,|)( |))+");
+        Matcher m = p.matcher(workday);
+        boolean b = m.matches();
+        if(b) {
+            confirmedValue = workday.trim();
         }
-        catch (HttpClientErrorException ex){
-            throw handleHttpClientException(ex);
+        else {
+            throw new InvalidInputException("Invalid input for work days");
         }
         return confirmedValue;
     }
 
     public static String verifyEmail(String email){
         String confirmedValue = "";
-        try {
-            email = email.replaceAll("( |)", "");
-            Pattern p = Pattern.compile("\\b[\\w.%-]+@[-.\\w]+\\.[A-Za-z]{2,4}\\b");
-            Matcher m = p.matcher(email);
-            boolean b = m.matches();
-            if(b) {
-                confirmedValue = email.trim();
-            }
+        email = email.replaceAll("( |)", "");
+        email = email.substring(0, Math.min(email.length(), 100));
+        Pattern p = Pattern.compile("\\b[\\w.%-]+@[-.\\w]+\\.[A-Za-z]{2,4}\\b");
+        Matcher m = p.matcher(email);
+        boolean b = m.matches();
+        if(b) {
+            confirmedValue = email.trim();
         }
-        catch (HttpClientErrorException ex){
-            throw handleHttpClientException(ex);
+        else {
+            throw new InvalidInputException("Invalid input for email");
         }
         return confirmedValue;
     }
 
     public static Integer verifyVetId(int vetId){
         int confirmedValue =0;
-        try {
-            if(Math.log10(vetId) < 7) {
-                confirmedValue = vetId;
-            }
-            else{
-                while (Math.log10(vetId) > 6){
-                    vetId = vetId /10;
-                }
-                confirmedValue = vetId;
-            }
+        if(vetId < 1){
+            throw new InvalidInputException("Vet Id number has an invalid format"+vetId);
         }
-        catch (HttpClientErrorException ex){
-            throw handleHttpClientException(ex);
+        else if(Math.log10(vetId) < 7) {
+            confirmedValue = vetId;
+        }
+        else if (Math.log10(vetId) > 6){
+            while (Math.log10(vetId) > 6){
+                vetId = vetId /10;
+            }
+            confirmedValue = vetId;
         }
         return confirmedValue;
     }
 
     public static Integer verifyIsActive(int isActive){
         int confirmedValue =0;
-        try {
-            confirmedValue = 1;
-            if (isActive > -1 && isActive < 2) {
-                confirmedValue = isActive;
-            }
+        if (isActive > -1 && isActive < 2) {
+            confirmedValue = isActive;
         }
-        catch (HttpClientErrorException ex){
-            throw handleHttpClientException(ex);
+        else {
+            throw new InvalidInputException("Invalid input for isActive");
         }
         return confirmedValue;
     }
 
-    private static RuntimeException handleHttpClientException(HttpClientErrorException ex){
-        switch (ex.getStatusCode()){
-            case NOT_FOUND:
-                throw new NotFoundException(getErrorMessage(ex));
-            case UNPROCESSABLE_ENTITY:
-                throw new InvalidInputException(getErrorMessage(ex));
-            default:
-                LOG.warn("Got an unexpected HTTP error: {}, will rethrow it", ex.getStatusText());
-                LOG.warn("Error body: {}", ex.getResponseBodyAsString());
-                throw ex;
-        }
-    }
-    private static String getErrorMessage(HttpClientErrorException ex) {
-        final ObjectMapper mapper = null;
-        try{
-            return mapper.readValue(ex.getResponseBodyAsString(), HttpErrorInfo.class).getMessage();
-
-        }catch(IOException ioex){
-            return ioex.getMessage();
-
-        }
+    public static String verifyResume (String resume){
+        String confirmedValue = "";
+        resume = resume.substring(0, Math.min(resume.length(), 350));
+        confirmedValue = resume;
+        return confirmedValue;
     }
 }
