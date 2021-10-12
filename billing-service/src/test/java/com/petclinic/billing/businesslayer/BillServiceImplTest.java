@@ -5,10 +5,8 @@ import com.petclinic.billing.datalayer.BillDTO;
 import com.petclinic.billing.datalayer.BillRepository;
 import com.petclinic.billing.exceptions.InvalidInputException;
 import com.petclinic.billing.exceptions.NotFoundException;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -19,11 +17,9 @@ import java.util.Calendar;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.time.Instant;
 import java.util.Date;
 
 @SpringBootTest
@@ -95,27 +91,12 @@ public class BillServiceImplTest {
 
     }
 
-
-    @Test
-    public void test_CreateBillInvalidVisitType(){
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(2021, Calendar.SEPTEMBER, 21);
-        Date date = calendar.getTime();
-
-        BillDTO receivedDTO = new BillDTO(billId,customerId, date, "Checkup");
-        when(billRepository.save(any(Bill.class))).thenThrow(InvalidInputException.class);
-        assertThrows(InvalidInputException.class, () -> {
-            billService.CreateBill(receivedDTO);
-        });
-
-    }
-
     @Test
     public void test_CreateBillInvalidInputException(){
         Calendar calendar = Calendar.getInstance();
         calendar.set(2021, Calendar.SEPTEMBER, 21);
         Date date = calendar.getTime();
-        BillDTO model = new BillDTO(billId,customerId, date, "Checkup", 50.00);
+        BillDTO model = new BillDTO(billId,customerId, date, "Checkup");
         when(billRepository.save(any(Bill.class))).thenThrow(DuplicateKeyException.class);
 
 
