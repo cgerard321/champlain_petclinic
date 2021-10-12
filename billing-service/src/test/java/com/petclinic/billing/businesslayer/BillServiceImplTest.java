@@ -78,8 +78,8 @@ public class BillServiceImplTest {
 
         HashMap<String, Double> list = setUpVisitList();
         BillDTO receivedDTO = new BillDTO(billId,customerId, date, "Consultations");
-        Bill entity = new Bill(billId,customerId, date, "Consultations", list.get(receivedDTO.getVisitType()));
-
+        Bill entity = new Bill(billId,customerId, date, "Consultations", 39.99);
+        receivedDTO.setAmount(list.get(receivedDTO.getVisitType()));
         when(billRepository.save(any(Bill.class))).thenReturn(entity);
 
         BillDTO returnedBill = billService.CreateBill(receivedDTO);
