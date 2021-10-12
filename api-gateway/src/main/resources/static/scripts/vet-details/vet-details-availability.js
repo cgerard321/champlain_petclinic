@@ -14,40 +14,39 @@ function dayOfWeekAsString(dayIndex) {
 }
 
 function getWeekNumber(d){
-    // d = new Date();
     let onejan = new Date(d.getFullYear(), 0, 1);
     let week = Math.ceil((((d.getTime() - onejan.getTime()) / 86400000) + onejan.getDay() + 1) / 7);
 
-    console.log(week);
     return week;
 }
 
 function displayDays() {
+    let visitsDatesNode = document.querySelectorAll(".visitsDates");
+    let visitsDatesArray = [];
+    visitsDatesArray = convetNodeListIdToArray(visitsDatesArray,visitsDatesNode);
+
+
+
     let date = new Date();
     let onejan = new Date(date.getFullYear(), 0, 1);
     let currentWeek = Math.ceil((((date.getTime() - onejan.getTime()) / 86400000) + onejan.getDay() + 1) / 7);
 
-    let strDays = "Wednesday, Monday, Friday";
+    let strDays = "Thursday, Monday, Friday";
     let daysOfWeek = (strDays.replace(/\s+/g, '')).split(',');
-    let daysToRemove = new Date('2021-10-11 00:00:00.0');
-
+    // let daysToRemove = new Date('2021-10-11 00:00:00.0');
+    let d = visitsDatesArray[4].toString() + ' 00:00:00.0';
+    let daysToRemove = new Date(d);
 
     let daysToRemoveYear= daysToRemove.getFullYear();
     let currentYear = date.getFullYear();
-    console.log("year: " + daysToRemoveYear);
 
     let nbDayWeekToRemove = daysToRemove.getDay();
-
-    console.log(nbDayWeekToRemove);
-
 
     let DayWeekToRemove = dayOfWeekAsString(nbDayWeekToRemove);
 
     getWeekNumber(daysToRemove);
-    console.log("current week: " + currentWeek)
     if(currentYear == daysToRemoveYear){
         if(currentWeek == getWeekNumber(daysToRemove)){
-            console.log("Works")
             removeItem(daysOfWeek, DayWeekToRemove);
         }
     }
@@ -64,11 +63,10 @@ function displayDays() {
         btn.innerText = "Show availabilities"
     }
 
-    console.log(daysOfWeek);
     let days = document.querySelectorAll(".square");
+
     let daysArray = [];
     daysArray = convetNodeListIdToArray(daysArray, days);
-    console.log(daysArray);
     for (let i = 0; i < daysArray.length; i++) {
         for(let x = 0; x < daysOfWeek.length; x++){
             if(daysArray[i] == daysOfWeek[x]){
