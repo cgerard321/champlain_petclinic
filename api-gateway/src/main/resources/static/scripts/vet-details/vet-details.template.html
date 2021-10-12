@@ -60,6 +60,13 @@
         </div>
 
 
+        <table style="display: none">
+          <tr style="display: none" ng-repeat="v in $ctrl.visitsList">
+            <td style="display: none" id="{{v.date}}" class="visitsDates">{{v.date}}}</td>
+          </tr>
+        </table>
+
+
         <hr class="my-4"/>
         <div class="row gy-3">
           <div class="col-md-12">

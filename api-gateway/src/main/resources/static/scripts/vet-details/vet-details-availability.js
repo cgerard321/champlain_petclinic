@@ -32,12 +32,13 @@ function displayDays() {
     let onejan = new Date(date.getFullYear(), 0, 1);
     let currentWeek = Math.ceil((((date.getTime() - onejan.getTime()) / 86400000) + onejan.getDay() + 1) / 7);
 
-    let strDays = "Tuesday, Monday, Friday";
+    let strDays = "Thursday, Monday, Friday";
     let daysOfWeek = (strDays.replace(/\s+/g, '')).split(',');
     // let daysToRemove = new Date('2021-10-11 00:00:00.0');
-    let d = visitsDatesArray[4].toString() + '00:00:00.0';
+    let d = visitsDatesArray[4].toString() + ' 00:00:00.0';
     console.log("Q: " + visitsDatesArray[4].toString())
     let daysToRemove = new Date(d);
+    console.log("T: " + daysToRemove);
 
     let daysToRemoveYear= daysToRemove.getFullYear();
     let currentYear = date.getFullYear();
