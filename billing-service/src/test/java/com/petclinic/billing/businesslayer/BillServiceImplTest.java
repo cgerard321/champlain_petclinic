@@ -212,7 +212,7 @@ public class BillServiceImplTest {
         Date date = calendar.getTime();
         Bill entity1 = new Bill(billId,customerId, date, "Checkup", 50.00);
         Bill entity2 = new Bill(billId,customerId, date, "Vaccine", 100.00);
-        when(billRepository.findByCustomerId(1)).thenReturn("Ok");
+        when(billRepository.findByCustomerId(customerId)).thenReturn("Ok");
 
         List<BillDTO> returnedBills = billService.GetBillByCustomerId(customerId);
 
