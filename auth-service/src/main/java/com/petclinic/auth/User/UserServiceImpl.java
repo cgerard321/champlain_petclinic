@@ -5,6 +5,8 @@ import com.petclinic.auth.Mail.MailService;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
@@ -28,6 +30,7 @@ import static java.lang.String.format;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
+    private final Logger LOG = LoggerFactory.getLogger(UserServiceImpl.class);
     private final UserRepo userRepo;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
@@ -112,5 +115,22 @@ public class UserServiceImpl implements UserService {
         log.info("Updated user with email {} to verified=true", decrypt.getEmail());
 
         return userMapper.modelToIDLessPasswordLessDTO(save);
+    }
+
+    @Override
+    public User getUserByEmail(String email) throws NotFoundException {
+        if (userRepo.findByEmail(email) == null){
+            throw new NotFoundException("No account found for email: " + email);
+        }
+        else {
+            User user = userRepo.findByEmail(email);
+            LOG.debug("find user by email: " + user.getEmail());
+            return user;
+        }
+    }
+
+    @Override
+    public boolean verifyPassword(User user, UserIDLessUsernameLessDTO loginUser) {
+        return user.getPassword().equals(loginUser.getPassword());
     }
 }

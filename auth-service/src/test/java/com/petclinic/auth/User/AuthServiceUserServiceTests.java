@@ -30,7 +30,9 @@ public class AuthServiceUserServiceTests {
             USER = "user",
             PASS = "pas$word123",
             EMAIL = "email@gmail.com",
-            NEWPASSWORD = "change";
+            NEWPASSWORD = "change",
+            BADPASS = "123",
+            BADEMAIL = null;
 
 
     @Autowired
@@ -190,5 +192,31 @@ public class AuthServiceUserServiceTests {
         System.out.println(mail);
 
         assertTrue(mail.getMessage().contains("Your verification link: "));
+    }
+
+    @Test
+    @DisplayName("Verify user's wrong password")
+    void test_verify_user_password_failure(){
+        UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
+        User userMap = userMapper.idLessDTOToModel(userIDLessDTO);
+        UserIDLessUsernameLessDTO loginUser = new UserIDLessUsernameLessDTO(EMAIL, BADPASS);
+        assertFalse(userService.verifyPassword(userMap, loginUser));
+    }
+
+    @Test
+    @DisplayName("Verify user's password")
+    void test_verify_user_password_success(){
+        UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
+        User userMap = userMapper.idLessDTOToModel(userIDLessDTO);
+        UserIDLessUsernameLessDTO loginUser = new UserIDLessUsernameLessDTO(EMAIL, PASS);
+        assertTrue(userService.verifyPassword(userMap, loginUser));
+    }
+
+    @Test
+    @DisplayName("Verify email that does not exist")
+    void verify_email_failure() {
+        UserIDLessDTO userIDLessDTO = new UserIDLessDTO (USER, PASS, EMAIL);
+        User user = userMapper.idLessDTOToModel(userIDLessDTO);
+        assertThrows(NotFoundException.class, () -> userService.getUserByEmail(BADEMAIL));
     }
 }
