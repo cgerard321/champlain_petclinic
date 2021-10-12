@@ -22,7 +22,5 @@ public class VisitDetails {
 
     private String description = null;
 
-    private Integer practitionerId = null;
-
     private Boolean status = null;
 }
