@@ -16,6 +16,8 @@ public class VisitDetails {
 
     private Integer petId = null;
 
+    private Integer practitionerId = null;
+
     private String date = null;
 
     private String description = null;

@@ -140,6 +140,11 @@ public class BFFApiGatewayController {
         return visitsServiceClient.getVisitsForPet(petId);
     }
 
+    @GetMapping(value = "visits/vets/{practitionerId}")
+    public Flux<VisitDetails> getVisitDatesForPractitioner(@PathVariable int practitionerId){
+        return visitsServiceClient.getVisitDatesForPractitioner(practitionerId);
+    }
+
     @PutMapping(value = "owners/{ownerId}",consumes = "application/json" ,produces = "application/json")
     public Mono<OwnerDetails> updateOwnerDetails(@RequestBody OwnerDetails od, final @PathVariable int ownerId) {
 

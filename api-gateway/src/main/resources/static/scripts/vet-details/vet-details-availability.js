@@ -8,31 +8,49 @@ function removeItem(array, item) {
     }
 }
 
+
+function dayOfWeekAsString(dayIndex) {
+    return ["Sunday", "Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][dayIndex] || '';
+}
+
+function getWeekNumber(d){
+    // d = new Date();
+    let onejan = new Date(d.getFullYear(), 0, 1);
+    let week = Math.ceil((((d.getTime() - onejan.getTime()) / 86400000) + onejan.getDay() + 1) / 7);
+
+    console.log(week);
+    return week;
+}
+
 function displayDays() {
-    let strDays = document.getElementById("workDay").textContent;
+    let date = new Date();
+    let onejan = new Date(date.getFullYear(), 0, 1);
+    let currentWeek = Math.ceil((((date.getTime() - onejan.getTime()) / 86400000) + onejan.getDay() + 1) / 7);
 
-// let strDays = vetDetails.workday;
+    let strDays = "Wednesday, Monday, Friday";
     let daysOfWeek = (strDays.replace(/\s+/g, '')).split(',');
-    //TEST DATA
-    let daysToRemove = 'Monday';
+    let daysToRemove = new Date('2021-10-11 00:00:00.0');
 
-    daysOfWeek.push(daysToRemove);
 
-    removeItem(daysOfWeek, daysToRemove);
+    let daysToRemoveYear= daysToRemove.getFullYear();
+    let currentYear = date.getFullYear();
+    console.log("year: " + daysToRemoveYear);
 
-    const sorter = {
-        "sunday": 0,
-        "monday": 1,
-        "tuesday": 2,
-        "wednesday": 3,
-        "thursday": 4,
-        "friday": 5,
-        "saturday": 6
+    let nbDayWeekToRemove = daysToRemove.getDay();
+
+    console.log(nbDayWeekToRemove);
+
+
+    let DayWeekToRemove = dayOfWeekAsString(nbDayWeekToRemove);
+
+    getWeekNumber(daysToRemove);
+    console.log("current week: " + currentWeek)
+    if(currentYear == daysToRemoveYear){
+        if(currentWeek == getWeekNumber(daysToRemove)){
+            console.log("Works")
+            removeItem(daysOfWeek, DayWeekToRemove);
+        }
     }
-
-    daysOfWeek.sort(function sortByDay(a, b) {
-        return sorter[a] - sorter[b];
-    });
 
 
     const targetDiv = document.getElementById("displayNone");
@@ -40,21 +58,29 @@ function displayDays() {
 
     if (targetDiv.style.display === "none") {
         targetDiv.style.display = "block";
-        btn.value = "Hide availabilities"
+        btn.innerText = "Hide availabilities"
     } else {
         targetDiv.style.display = "none";
-        btn.value = "Show availabilities"
+        btn.innerText = "Show availabilities"
     }
 
     console.log(daysOfWeek);
     let days = document.querySelectorAll(".square");
-    let j = 0;
-    for (let i = 0; i < days.length; i++) {
-        if(days[i].id == daysOfWeek[j]){
-            days[i].style.backgroundColor = "#c7ffdc";
-            j++;
+    let daysArray = [];
+    daysArray = convetNodeListIdToArray(daysArray, days);
+    console.log(daysArray);
+    for (let i = 0; i < daysArray.length; i++) {
+        for(let x = 0; x < daysOfWeek.length; x++){
+            if(daysArray[i] == daysOfWeek[x]){
+                days[i].style.backgroundColor = "#c7ffdc";
+            }
         }
     }
 }
 
-
+function convetNodeListIdToArray(array, nodeList){
+    for(let i = 0; i < nodeList.length; i++){
+        array.push(nodeList[i].id);
+    }
+    return array;
+}

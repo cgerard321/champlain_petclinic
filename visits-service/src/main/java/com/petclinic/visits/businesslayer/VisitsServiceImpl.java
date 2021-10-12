@@ -93,10 +93,10 @@ public class VisitsServiceImpl implements VisitsService {
     }
 
     @Override
-    public List<String> getVisitDatesForPractitioner(int practitionerId) {
+    public List<Visit> getVisitsForPractitioner(int practitionerId) {
         if(practitionerId < 0)
             throw new InvalidInputException("PractitionerId can't be negative.");
         List<Visit> visits = visitRepository.findVisitsByPractitionerId(practitionerId);
-        return visits.stream().map(v -> v.getDate().toString()).collect(Collectors.toList());
+        return visits;
     }
 }
