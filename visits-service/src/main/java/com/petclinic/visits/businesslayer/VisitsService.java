@@ -2,6 +2,7 @@ package com.petclinic.visits.businesslayer;
 
 import com.petclinic.visits.datalayer.Visit;
 
+import java.util.Date;
 import java.util.List;
 
 /*
@@ -26,4 +27,7 @@ public interface VisitsService {
     List<Visit> getVisitsForPet(int petId, boolean scheduled);
 
     List<Visit> getVisitsForPractitioner(int practitionerId);
+
+    List<Visit> getVisitsByPractitionerIdAndMonth(int practitionerId, Date startDate, Date EndDate);
+
 }
