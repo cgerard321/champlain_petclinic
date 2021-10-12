@@ -136,7 +136,7 @@ public class BFFApiGatewayController {
     }
 
     @GetMapping(value = "visits/{petId}")
-    public Flux<VisitDetails> getVisitsForPet(@PathVariable int petId){
+    public Flux<VisitDetails> getVisitsForPet(final @PathVariable int petId){
         return visitsServiceClient.getVisitsForPet(petId);
     }
 
@@ -144,7 +144,7 @@ public class BFFApiGatewayController {
     public Flux<VisitDetails> getVisitDatesForPractitioner(@PathVariable int practitionerId){
         return visitsServiceClient.getVisitDatesForPractitioner(practitionerId);
     }
-
+    
     @PutMapping(value = "owners/{ownerId}",consumes = "application/json" ,produces = "application/json")
     public Mono<OwnerDetails> updateOwnerDetails(@RequestBody OwnerDetails od, final @PathVariable int ownerId) {
 

@@ -315,7 +315,7 @@ class ApiGatewayControllerTest {
 
 
     @Test
-    void createVisitWithOwnerInfo(){
+    void shouldCreateAVisitWithOwnerInfo(){
         OwnerDetails owner = new OwnerDetails();
         VisitDetails visit = new VisitDetails();
         owner.setId(1);
@@ -350,7 +350,7 @@ class ApiGatewayControllerTest {
         assertEquals(id, visit.getId());
     }
     @Test
-    void deleteVisit() {
+    void shouldDeleteAVisit() {
         VisitDetails visit = new VisitDetails();
         OwnerDetails owner = new OwnerDetails();
         owner.setId(1);
@@ -394,7 +394,7 @@ class ApiGatewayControllerTest {
     }
 
     @Test
-    void deleteVisitsById() {
+    void shouldDeleteVisitsById() {
         VisitDetails visit = new VisitDetails();
         OwnerDetails owner = new OwnerDetails();
         owner.setId(1);
@@ -437,7 +437,7 @@ class ApiGatewayControllerTest {
     }
 
     @Test
-    void deleteVisitsByPetId() {
+    void shouldDeleteVisitsByPetId() {
         VisitDetails visit = new VisitDetails();
         OwnerDetails owner = new OwnerDetails();
         owner.setId(1);
@@ -480,7 +480,7 @@ class ApiGatewayControllerTest {
     }
 
     @Test
-    void updateVisitsById() {
+    void shouldUpdateAVisitsById() {
         VisitDetails visit = new VisitDetails();
         OwnerDetails owner = new OwnerDetails();
         owner.setId(1);
@@ -540,6 +540,33 @@ class ApiGatewayControllerTest {
 
 
     }
+
+    @Test
+    void shouldGetAVisit() {
+        VisitDetails visit = new VisitDetails();
+        visit.setId(1);
+        visit.setPetId(1);
+        visit.setDate("2021-12-12");
+        visit.setDescription("Charle's Richard cat has a paw infection.");
+        visit.setStatus(false);
+        visit.setPractitionerId(1);
+
+        when(visitsServiceClient.getVisitsForPet(visit.getPetId()))
+                .thenReturn(Flux.just(visit));
+
+        client.get()
+                .uri("/api/gateway/visits/{petId}", visit.getPetId())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$[0].id").isEqualTo(1)
+                .jsonPath("$[0].petId").isEqualTo(1)
+                .jsonPath("$[0].date").isEqualTo("2021-12-12")
+                .jsonPath("$[0].description").isEqualTo("Charle's Richard cat has a paw infection.")
+                .jsonPath("$[0].practitionerId").isEqualTo(1);
+    }
+
+
 }
 
 
