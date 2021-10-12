@@ -381,4 +381,57 @@ public class VisitsServiceImplTests {
         assertEquals(new SimpleDateFormat("yyyy-MM-dd").parse("2021-03-04"), returnedVisits.get(1).getDate());
     }
 
+    @Test
+    public void shouldReturnAllVisitsForPractitionerId() throws ParseException {
+        Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01");
+        Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-31");
+
+        List<Visit> visitsList = asList(
+                visit()
+                        .id(1)
+                        .petId(1)
+                        .date(new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01"))
+                        .practitionerId(1)
+                        .build(),
+                visit()
+                        .id(1)
+                        .petId(1)
+                        .date(new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-06"))
+                        .practitionerId(1)
+                        .build(),
+                visit()
+                        .id(3)
+                        .petId(1)
+                        .date(new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-25"))
+                        .practitionerId(2)
+                        .build(),
+                visit()
+                        .id(2)
+                        .petId(1)
+                        .date(new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-25"))
+                        .practitionerId(3)
+                        .build());
+
+
+        when(repo.findAllByDateBetween(startDate, endDate)).thenReturn(visitsList);
+
+        List<Visit> returnedVisits = visitsService.getVisitsByPractitionerIdAndMonth(1, startDate, endDate);
+
+        assertEquals(2, returnedVisits.size());
+        assertEquals(new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01"), returnedVisits.get(0).getDate());
+        assertEquals(1, returnedVisits.get(1).getPractitionerId());
+    }
+
+    @Test
+    public void shouldThrowInvalidInputExceptionWhenFetchingWithNegativePractitionerId() throws ParseException {
+        Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01");
+        Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-31");
+
+        InvalidInputException ex = assertThrows(InvalidInputException.class, () ->{
+            visitsService.getVisitsByPractitionerIdAndMonth(-1, startDate, endDate);
+        });
+
+        assertEquals("PractitionerId can't be negative.", ex.getMessage());
+    }
+
 }
