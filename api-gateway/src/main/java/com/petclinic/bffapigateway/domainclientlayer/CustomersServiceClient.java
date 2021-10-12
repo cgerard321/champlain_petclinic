@@ -50,10 +50,11 @@ public class CustomersServiceClient {
                 .bodyToFlux(OwnerDetails.class);
     }
 
-    public Mono<OwnerDetails> updateOwner(OwnerDetails od,final int ownerId){
+    public Mono<OwnerDetails> updateOwner(final int ownerId){
 
             return webClientBuilder.build().put()
                     .uri(customersServiceUrl + "/{ownerId}", ownerId)
+                    .body(Mono.just(ownerId), OwnerDetails.class)
                     .retrieve().bodyToMono(OwnerDetails.class);
     }
 
