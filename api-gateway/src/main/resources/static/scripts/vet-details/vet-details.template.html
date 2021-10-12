@@ -43,7 +43,12 @@
       <a class="btn btn-default" ng-confirm-click="Are you sure to delete this vet ?" confirmed-click="deleteVet({vetId: $ctrl.vet.vetId})">Delete Vet</a>
     </td>
   </tr>
+  <tr ng-repeat="v in $ctrl.visits">
+    <td>test</td>
+    <td>{{v.date}}}</td>
+  </tr>
 </table>
+
 
 
 <button onclick="displayDays()" id="toggle">Show availabilities</button>
