@@ -1,7 +1,9 @@
 package com.petclinic.vets.presentationlayer;
 
 import com.petclinic.vets.businesslayer.VetService;
+import com.petclinic.vets.datalayer.Specialty;
 import com.petclinic.vets.datalayer.Vet;
+import com.petclinic.vets.datalayer.VetDTO;
 import com.petclinic.vets.datalayer.VetRepository;
 import com.petclinic.vets.utils.exceptions.InvalidInputException;
 import com.petclinic.vets.utils.exceptions.NotFoundException;
@@ -16,7 +18,9 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.HashSet;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
@@ -73,12 +77,50 @@ public class VetBusinessLayerTest
         assertEquals(repo.getVetId(),result.getVetId());
         assertEquals(repo.getFirstName(),result.getFirstName());
     }
+    @Test
+    public void createNewVetFromDTOWithoutSpecialtiesTest()
+    {
+        VetDTO vetDTO = new VetDTO(456791, "JamesFive", "Carter",
+                "carter.james@email.com", "2384",null,
+                "practicing since 999 years", "Monday, Tuesday, Friday", 1, null);
+        assertThrows(NoSuchElementException.class,()->{
+            vetRepository.findByVetId(456791).get();
+        });
+        VetDTO result = vetService.createVetFromDTO(vetDTO);
+        VetDTO repo = vetService.getVetDTOByVetId(456791);
+        assertEquals(repo.getVetId(),result.getVetId());
+        assertEquals(repo.getFirstName(),result.getFirstName());
+    }
+//    @Test
+//    public void createNewVetFromDTOWithSpecialtiesTest()
+//    {
+//        Specialty specialty = new Specialty();
+//        specialty.setName("tester");
+//        Set<Specialty> specialties= new HashSet<>();
+//        specialties.add(specialty);
+//        VetDTO vetDTO = new VetDTO(456791, "JamesFive", "Carter",
+//                "carter.james@email.com", "2384",null,
+//                "practicing since 999 years", "Monday, Tuesday, Friday", 1, specialties);
+//        assertThrows(NoSuchElementException.class,()->{
+//            vetRepository.findByVetId(456791).get();
+//        });
+//        VetDTO result = vetService.createVetFromDTO(vetDTO);
+//        VetDTO repo = vetService.getVetDTOByVetId(456791);
+//        assertEquals(repo.getVetId(),result.getVetId());
+//        assertEquals(repo.getFirstName(),result.getFirstName());
+//    }
 
     @Test
     public void getAllVetsTest()
     {
         int expectedNumOfVets = 4;
         assertThat(vetService.getAllVets().size()).isEqualTo(expectedNumOfVets);
+    }
+    @Test
+    public void getAllVetsDTOTest()
+    {
+        int expectedNumOfVets = 4;
+        assertThat(vetService.getAllVetDTOs().size()).isEqualTo(expectedNumOfVets);
     }
     @Test
     public void getByVetIdTest()

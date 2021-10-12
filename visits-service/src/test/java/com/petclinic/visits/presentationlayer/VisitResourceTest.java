@@ -26,12 +26,10 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 import static org.hamcrest.Matchers.hasSize;
@@ -338,6 +336,45 @@ public class VisitResourceTest {
 				.andExpect(status().isUnprocessableEntity())
 				.andExpect(result -> assertTrue(result.getResolvedException() instanceof InvalidInputException))
 				.andExpect(result -> assertEquals("PractitionerId can't be negative.", result.getResolvedException().getMessage()));
+	}
+
+	@Test
+	void shouldReturnAllVisitsForSpecifiedPractitionerIdAndMonth() throws Exception {
+		Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01");
+		Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-31");
+
+		given(visitsService.getVisitsByPractitionerIdAndMonth(1, startDate, endDate))
+				.willReturn(
+						Collections.singletonList(
+								visit()
+										.id(1)
+										.petId(1)
+										.date(new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-15"))
+										.practitionerId(1)
+										.build())
+				);
+
+		mvc.perform(get("/visits/calendar/{practitionnerId}?dates={startDate},{endDate}", 1, "2021-10-01", "2021-10-31"))
+				.andExpect(status().isOk());
+
+		verify(visitsService, times(1)).getVisitsByPractitionerIdAndMonth(1, startDate, endDate);
+	}
+
+	@Test
+	void whenFetchingWithNegativePractitionerIdShouldHandleInvalidInputException() throws Exception {
+		Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01");
+		Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-31");
+
+		ArrayList<Date> dates = new ArrayList<Date>();
+		dates.add(startDate);
+		dates.add(endDate);
+
+		when(visitsService.getVisitsByPractitionerIdAndMonth(-1, startDate, endDate)).thenThrow(new InvalidInputException("PractitionerId can't be negative."));
+
+		mvc.perform(get("/visits/calendar/{practitionnerId}?dates={startDate},{endDate}", -1, "2021-10-01", "2021-10-31"))
+				.andExpect(status().isUnprocessableEntity())
+				.andExpect(result -> assertTrue(result.getResolvedException() instanceof InvalidInputException))
+				.andExpect(result -> assertEquals("PractitionerId can't be negative.", Objects.requireNonNull(result.getResolvedException()).getMessage()));
 	}
 
 	// UTILS PACKAGE UNIT TESTING

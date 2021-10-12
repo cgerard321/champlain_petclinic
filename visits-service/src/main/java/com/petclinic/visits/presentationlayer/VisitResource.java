@@ -10,6 +10,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 /*
  * This class is a REST Controller that handles all the requests coming from the API Gateway.
@@ -93,6 +96,18 @@ public class VisitResource {
     public List<Visit> getVisitsForPractitioner(@PathVariable("practitionerId") int practitionerId){
         log.debug("Calling VisitsService:getVisitDatesForPractitioner:practitionerId={}", practitionerId);
         return visitsService.getVisitsForPractitioner(practitionerId);
+    }
+
+    @GetMapping("visits/calendar/{practitionerId}")
+    public List<Visit> getVisitsByPractitionerIdAndMonth(@PathVariable("practitionerId") int practitionerId,
+                                                         @RequestParam("dates") List<String> dates)
+                                                         throws ParseException {
+
+        Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse(dates.get(0));
+        Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse(dates.get(1));
+
+        log.debug("Calling VisitsService:getVisitsByPractitionerIdAndMonth:practitionerId={}:startDate={},endDate={}", practitionerId, startDate, endDate);
+        return visitsService.getVisitsByPractitionerIdAndMonth(practitionerId, startDate, endDate);
     }
 
     @Value
