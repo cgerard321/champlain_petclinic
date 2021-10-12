@@ -132,6 +132,7 @@ public class BFFApiGatewayController {
         return visitsServiceClient.getVisitForPractitioner(practitionerId);
     }
 
+<<<<<<< HEAD
     @GetMapping(value = "visits/calendar/{practitionerId}")
     public Flux<VisitDetails> getVisitsByPractitionerIdAndMonth(@PathVariable("practitionerId") int practitionerId,
                                                                 @RequestParam("dates") List<String> dates) {
@@ -146,6 +147,14 @@ public class BFFApiGatewayController {
         od.setId(ownerId);
         return customersServiceClient.updateOwner(od,ownerId);
 
+=======
+    @PutMapping(value = "owners/{ownerId}",consumes = "application/json" ,produces = "application/json")
+    public Mono<OwnerDetails> updateOwnerDetails(final @PathVariable int ownerId) {
+        return customersServiceClient.updateOwner(ownerId)
+                .flatMap(owner ->
+                        visitsServiceClient.getVisitsForPets(owner.getPetIds())
+                                .map(addVisitsToOwner(owner)));
+>>>>>>> bdc51edc (Modifications in updateOwners)
 
 
 
