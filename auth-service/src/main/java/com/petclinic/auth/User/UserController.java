@@ -12,6 +12,7 @@ package com.petclinic.auth.User;
  * Ticket: feat(AUTH-CPC-357)
  */
 
+import io.jsonwebtoken.lang.Maps;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -21,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.Base64;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
@@ -76,5 +78,10 @@ public class UserController {
     @GetMapping("/verification/{base64EncodedToken}")
     public UserPasswordLessDTO verifyEmail(@PathVariable String base64EncodedToken) {
         return userService.verifyEmailFromToken(new String(Base64.getDecoder().decode(base64EncodedToken)));
+    }
+
+    @PostMapping("/login")
+    public Map<String, String> login(@RequestBody UserIDLessDTO user) {
+        return Maps.of("token", userService.login(user)).build();
     }
 }

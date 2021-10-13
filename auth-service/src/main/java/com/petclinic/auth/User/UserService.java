@@ -39,4 +39,6 @@ public interface UserService {
     Mail generateVerificationMail(User user);
 
     UserPasswordLessDTO verifyEmailFromToken(String token);
+
+    String login(UserIDLessDTO user);
 }

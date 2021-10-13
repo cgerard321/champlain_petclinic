@@ -113,4 +113,9 @@ public class UserServiceImpl implements UserService {
 
         return userMapper.modelToIDLessPasswordLessDTO(save);
     }
+
+    @Override
+    public String login(UserIDLessDTO user) {
+        throw new RuntimeException("Not implemented");
+    }
 }
