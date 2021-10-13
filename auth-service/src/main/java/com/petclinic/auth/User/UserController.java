@@ -67,7 +67,7 @@ public class UserController {
         log.info("Password for User with id {} with new password {}", userId, newPassword);
     }
 
-    @PutMapping("/{userId}")
+    @PutMapping
     public void changeUserEmail(@RequestBody @Valid UserIDLessDTO userIDLessDTO, @RequestBody String newEmail) {
 
         userService.changeUserEmail(userIDLessDTO, newEmail);
