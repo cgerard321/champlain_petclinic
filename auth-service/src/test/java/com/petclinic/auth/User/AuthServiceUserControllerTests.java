@@ -329,7 +329,7 @@ public class AuthServiceUserControllerTests {
     @Test
     @DisplayName("When POST on login, allow any")
     void allow_any_on_login() throws Exception {
-        mockMvc.perform(post("/login"))
+        mockMvc.perform(post("/users/login"))
                 .andExpect(status().is(400)); // Bad request means that it passed spring security & it found the controller action
     }
 }
