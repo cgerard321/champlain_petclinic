@@ -1,6 +1,7 @@
 package com.petclinic.auth.User;
 
 import com.petclinic.auth.Exceptions.NotFoundException;
+import com.petclinic.auth.JWT.JWTService;
 import com.petclinic.auth.Mail.Mail;
 import com.petclinic.auth.Mail.MailService;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,6 +33,8 @@ public class AuthServiceUserServiceTests {
             EMAIL = "email@gmail.com",
             NEWPASSWORD = "change";
 
+    private String VALID_TOKEN = "a.fake.token";
+
 
     @Autowired
     private UserRepo userRepo;
@@ -44,6 +47,9 @@ public class AuthServiceUserServiceTests {
 
     @MockBean
     private MailService mailService;
+
+    @MockBean
+    private JWTService jwtService;
 
     @BeforeEach
     void setup() {
@@ -190,5 +196,23 @@ public class AuthServiceUserServiceTests {
         System.out.println(mail);
 
         assertTrue(mail.getMessage().contains("Your verification link: "));
+    }
+
+    @Test
+    @DisplayName("Given user exists in database and email + password match & e-mail is verified, return JWT")
+    void successful_login() {
+
+        final UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
+        final User saved = userService.createUser(userIDLessDTO);
+
+        when(jwtService.encrypt(saved))
+                .thenReturn(VALID_TOKEN);
+
+        assertEquals(VALID_TOKEN, userService.login(UserIDLessDTO.builder()
+                .username(USER)
+                .password(PASS)
+                .email(EMAIL)
+                .build())
+        );
     }
 }
