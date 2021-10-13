@@ -126,25 +126,25 @@ public class BFFApiGatewayController {
     }
 
     //Delete Visit
-    @DeleteMapping (value = "pets/visits/{petId}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping (value = "pets/visits/{petId}")
     public Mono<Void> deleteVisitForPets(final @PathVariable int petId){
         return visitsServiceClient.deleteVisitForPets(petId);
     }
 
     //Update Visit
-    @PostMapping(value ="pets/visits/{petId}", consumes = "application/json", produces = "application/json")
+    @PutMapping(value ="pets/visits/{petId}", consumes = "application/json", produces = "application/json")
     public Mono<Visits> updateVisitForPets(final @PathVariable int petId){
         return visitsServiceClient.updateVisitForPets(petId);
     }
 
     @GetMapping(value = "visits/{petId}")
-    public Flux<VisitDetails> getVisitsForPet(@PathVariable int petId){
+    public Flux<VisitDetails> getVisitsForPet(final @PathVariable int petId){
         return visitsServiceClient.getVisitsForPet(petId);
     }
 
     @GetMapping(value = "visits/vets/{practitionerId}")
-    public Flux<VisitDetails> getVisitDatesForPractitioner(@PathVariable int practitionerId){
-        return visitsServiceClient.getVisitDatesForPractitioner(practitionerId);
+    public Flux<VisitDetails> getVisitForPractitioner(@PathVariable int practitionerId){
+        return visitsServiceClient.getVisitForPractitioner(practitionerId);
     }
 
     @PutMapping(value = "owners/{ownerId}",consumes = "application/json" ,produces = "application/json")
