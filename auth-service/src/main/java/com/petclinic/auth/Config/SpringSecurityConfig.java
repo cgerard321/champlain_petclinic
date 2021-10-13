@@ -49,7 +49,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.GET,"/users/*").permitAll()
                 .antMatchers(HttpMethod.DELETE,"/users/*").permitAll()
                 .antMatchers(HttpMethod.GET,"/users/verification/*").permitAll()
-                .antMatchers(HttpMethod.GET,"/users/login").permitAll()
+                .antMatchers(HttpMethod.POST,"/users/login").permitAll()
                 .antMatchers(AUTH_WHITELIST).permitAll()
                 .anyRequest().authenticated();
     }
