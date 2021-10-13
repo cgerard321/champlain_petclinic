@@ -325,4 +325,11 @@ public class AuthServiceUserControllerTests {
 
         assertTrue(userRepo.findByEmail(user.getEmail()).isVerified());
     }
+
+    @Test
+    @DisplayName("When POST on login, allow any")
+    void allow_any_on_login() throws Exception {
+        mockMvc.perform(post("/login"))
+                .andExpect(status().is(400)); // Bad request means that it passed spring security
+    }
 }
