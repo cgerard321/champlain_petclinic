@@ -27,7 +27,9 @@
  */
 package com.petclinic.auth.User;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.petclinic.auth.Exceptions.IncorrectPasswordException;
 import com.petclinic.auth.JWT.JWTService;
 import com.petclinic.auth.Mail.MailService;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,6 +49,7 @@ import javax.validation.*;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.instanceOf;
@@ -362,5 +365,23 @@ public class AuthServiceUserControllerTests {
         mockMvc.perform(post("/users/login").contentType(APPLICATION_JSON).content(asString))
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(jsonPath("$.token").value(VALID_TOKEN));
+    }
+
+    @Test
+    @DisplayName("When bad password, throw IncorrectPasswordException")
+    void bad_login_throw_incorrect_password_exception() throws Exception {
+
+        final String EXCEPTION_MESSAGE = format("Password not valid for email %s", EMAIL);
+
+        final UserIDLessDTO build = UserIDLessDTO.builder().email(EMAIL).password(PASS).build();
+        final String asString = objectMapper.writeValueAsString(build);
+
+        when(userService.login(
+                argThat( n -> n.getEmail().equals(EMAIL) && !n.getPassword().equals(PASS) )))
+                .thenThrow(new IncorrectPasswordException(EXCEPTION_MESSAGE));
+
+        mockMvc.perform(post("/users/login").contentType(APPLICATION_JSON).content(asString))
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.message").value(EXCEPTION_MESSAGE));
     }
 }
