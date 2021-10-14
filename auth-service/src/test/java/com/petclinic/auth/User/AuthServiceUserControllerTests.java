@@ -381,6 +381,7 @@ public class AuthServiceUserControllerTests {
                 .thenThrow(new IncorrectPasswordException(EXCEPTION_MESSAGE));
 
         mockMvc.perform(post("/users/login").contentType(APPLICATION_JSON).content(asString))
+                .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andExpect(jsonPath("$.message").value(EXCEPTION_MESSAGE));
     }

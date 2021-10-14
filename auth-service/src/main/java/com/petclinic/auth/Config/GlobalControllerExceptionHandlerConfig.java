@@ -15,6 +15,6 @@ public class GlobalControllerExceptionHandlerConfig {
     @ResponseStatus(value = UNAUTHORIZED)
     public HTTPErrorMessage resourceNotFoundException(IncorrectPasswordException ex, WebRequest request) {
 
-        return new HTTPErrorMessage(UNAUTHORIZED, ex.getMessage());
+        return new HTTPErrorMessage(401, ex.getMessage());
     }
 }
