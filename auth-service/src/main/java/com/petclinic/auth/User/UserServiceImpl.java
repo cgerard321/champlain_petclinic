@@ -1,4 +1,5 @@
 package com.petclinic.auth.User;
+import com.petclinic.auth.Exceptions.IncorrectPasswordException;
 import com.petclinic.auth.JWT.JWTService;
 import com.petclinic.auth.Mail.Mail;
 import com.petclinic.auth.Mail.MailService;
