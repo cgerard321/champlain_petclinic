@@ -45,10 +45,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import javax.validation.*;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.Optional;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.anyOf;
@@ -319,20 +316,21 @@ public class AuthServiceUserControllerTests {
                         .username("test")
                         .email("fake@email.com")
                         .password("fakePassword")
+                        .id(12345)
                         .build();
-        userRepo.save(user);
-
-        assertEquals(1, userRepo.count());
-        assertNotNull(userRepo.findByEmail(user.getEmail()));
-        assertFalse(userRepo.findByEmail(user.getEmail()).isVerified());
 
         final String fakeToken = "a.fake.token";
         final String base64Token =
                 Base64.getEncoder().withoutPadding().encodeToString(fakeToken.getBytes(StandardCharsets.UTF_8));
 
+        when(userService.verifyEmailFromToken(fakeToken))
+                .thenReturn(UserPasswordLessDTO.builder()
+                        .username(user.getUsername())
+                        .email(user.getEmail())
+                        .roles(Collections.EMPTY_SET)
+                        .id(user.getId())
+                        .build());
 
-        when(jwtService.decrypt(fakeToken))
-                .thenReturn(user.toBuilder().build()); // Clone
 
         mockMvc.perform(get("/users/verification/" + base64Token))
                 .andDo(print())
@@ -341,8 +339,6 @@ public class AuthServiceUserControllerTests {
                 .andExpect(jsonPath("$.id").value(user.getId()))
                 .andExpect(jsonPath("$.email").value(user.getEmail()))
                 .andExpect(jsonPath("$.roles").isArray());
-
-        assertTrue(userRepo.findByEmail(user.getEmail()).isVerified());
     }
 
     @Test
