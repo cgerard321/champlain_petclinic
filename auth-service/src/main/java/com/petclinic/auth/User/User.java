@@ -36,6 +36,8 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
+import static java.lang.String.format;
+
 @Table(schema = "auth", name = "users")
 @Entity
 @Getter
@@ -91,7 +93,7 @@ public class User implements UserDetails {
         for (Role role : roles) {
             Role parent = role.getParent();
             while(parent != null) {
-                grantedAuthorities.add(new SimpleGrantedAuthority(parent.getName()));
+                grantedAuthorities.add(new SimpleGrantedAuthority(format("ROLE_%s", parent.getName())));
                 parent = parent.getParent();
             }
         }
