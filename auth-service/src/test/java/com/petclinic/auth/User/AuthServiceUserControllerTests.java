@@ -96,6 +96,8 @@ public class AuthServiceUserControllerTests {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private UserMapper userMapper;
 
     @Autowired
     private UserRepo userRepo;
@@ -117,12 +119,17 @@ public class AuthServiceUserControllerTests {
     @Test
     @DisplayName("Create a user from controller")
     void create_user_from_controller() {
+
+        final User hypothetical = userMapper.idLessDTOToModel(ID_LESS_USER);
+
         when(jwtService.encrypt(any()))
                 .thenReturn("a.fake.token");
+        when(userService.createUser(ID_LESS_USER))
+                .thenReturn(hypothetical);
+
         final UserPasswordLessDTO user = userController.createUser(ID_LESS_USER);
         assertNotNull(user);
         assertThat(user.getId(), instanceOf(Long.TYPE));
-        assertTrue(userRepo.findById(user.getId()).isPresent());
     }
     @Test
     @DisplayName("Check the required fields with empty data")
