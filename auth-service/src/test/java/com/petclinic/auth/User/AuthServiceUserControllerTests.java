@@ -49,9 +49,10 @@ import java.util.Random;
 import java.util.Set;
 
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -104,6 +105,9 @@ public class AuthServiceUserControllerTests {
 
     @MockBean
     private JWTService jwtService;
+
+    @MockBean
+    private UserService userService;
 
     private final UserIDLessDTO ID_LESS_USER = new UserIDLessDTO(USER, PASS, EMAIL);
 
@@ -339,11 +343,12 @@ public class AuthServiceUserControllerTests {
     @DisplayName("When login successful, get JWT")
     void login_get_jwt() throws Exception {
 
-        when(jwtService.encrypt(any()))
-                .thenReturn(VALID_TOKEN);
-
         final UserIDLessDTO build = UserIDLessDTO.builder().email(EMAIL).password(PASS).build();
         final String asString = objectMapper.writeValueAsString(build);
+
+        when(userService.login(
+                argThat( n -> n.getEmail().equals(EMAIL) && n.getPassword().equals(PASS) )))
+                .thenReturn(VALID_TOKEN);
 
         mockMvc.perform(post("/users/login").contentType(APPLICATION_JSON).content(asString))
                 .andExpect(status().is2xxSuccessful())
