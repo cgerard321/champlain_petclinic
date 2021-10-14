@@ -23,6 +23,7 @@
  */
 package com.petclinic.auth.User;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.petclinic.auth.Role.Role;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -35,7 +36,6 @@ import javax.validation.constraints.NotEmpty;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.Stack;
 
 import static java.lang.String.format;
 
@@ -87,6 +87,7 @@ public class User implements UserDetails {
     private Set<Role> roles;
 
     @Override
+    @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
 
         final HashSet<GrantedAuthority> grantedAuthorities = new HashSet<>();
