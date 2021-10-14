@@ -38,6 +38,8 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -53,6 +55,7 @@ import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -218,6 +221,10 @@ public class AuthServiceUserControllerTests {
         for (int i = 0; i < USER_COUNT; i++) {
             userRepo.save(new User("Username-1", "password"+i, "email@gmail.com"+i));
         }
+
+        final Page<User> all = userRepo.findAll(PageRequest.of(STARTING_PAGE - 1, PAGE_LIM));
+        when(userService.findAll(PageRequest.of(STARTING_PAGE - 1, PAGE_LIM)))
+                .thenReturn(all);
 
         assertEquals(USER_COUNT, userRepo.count());
 
