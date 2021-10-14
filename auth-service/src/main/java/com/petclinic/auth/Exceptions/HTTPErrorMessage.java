@@ -1,4 +1,4 @@
-package com.petclinic.auth.Config;
+package com.petclinic.auth.Exceptions;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;

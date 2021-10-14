@@ -1,5 +1,6 @@
 package com.petclinic.auth.Config;
 
+import com.petclinic.auth.Exceptions.HTTPErrorMessage;
 import com.petclinic.auth.Exceptions.IncorrectPasswordException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
