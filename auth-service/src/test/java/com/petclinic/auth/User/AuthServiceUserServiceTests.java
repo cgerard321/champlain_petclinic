@@ -110,10 +110,6 @@ public class AuthServiceUserServiceTests {
         User userMap = userMapper.idLessDTOToModel(userIDLessDTO);
         userRepo.save(userMap);
 
-        when(jwtService.encrypt(any()))
-                .thenReturn(VALID_TOKEN);
-        when(mailService.sendMail(any()))
-                .thenReturn("E-mail was hypothetically sent");
 
         assertThrows(DataIntegrityViolationException.class, () -> userService.createUser(userIDLessDTO));
     }
@@ -155,8 +151,6 @@ public class AuthServiceUserServiceTests {
 
         final UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
 
-        when(jwtService.encrypt(any()))
-                .thenReturn(VALID_TOKEN);
 
         final User saved = userService.createUser(userIDLessDTO);
 
@@ -175,10 +169,6 @@ public class AuthServiceUserServiceTests {
 
         final UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
 
-        when(jwtService.encrypt(any()))
-                .thenReturn(VALID_TOKEN);
-        when(mailService.sendMail(any()))
-                .thenReturn("E-mail was hypothetically sent");
 
         final User saved = userService.createUser(userIDLessDTO);
 
@@ -203,8 +193,6 @@ public class AuthServiceUserServiceTests {
 
         final UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
 
-        when(jwtService.encrypt(any()))
-                .thenReturn(VALID_TOKEN);
 
         final User saved = userService.createUser(userIDLessDTO);
 
@@ -218,8 +206,6 @@ public class AuthServiceUserServiceTests {
 
         final UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
 
-        when(jwtService.encrypt(any()))
-                .thenReturn(VALID_TOKEN);
 
         final User saved = userService.createUser(userIDLessDTO);
 
@@ -235,10 +221,6 @@ public class AuthServiceUserServiceTests {
     @DisplayName("Given user exists in database and email + password match & e-mail is verified, return JWT")
     void successful_login() throws IncorrectPasswordException {
 
-        when(jwtService.encrypt(any()))
-                .thenReturn(VALID_TOKEN);
-        when(mailService.sendMail(any()))
-                .thenReturn("E-mail was hypothetically sent");
 
         final UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
         final User saved = userService.createUser(userIDLessDTO);
@@ -255,10 +237,6 @@ public class AuthServiceUserServiceTests {
     @DisplayName("Given user exists in database but password is incorrect, throw IncorrectPasswordException")
     void bad_password_exception() {
 
-        when(jwtService.encrypt(any()))
-                .thenReturn(VALID_TOKEN);
-        when(mailService.sendMail(any()))
-                .thenReturn("E-mail was hypothetically sent");
 
         final UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
         final User saved = userService.createUser(userIDLessDTO);
