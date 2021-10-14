@@ -72,6 +72,7 @@ public class AuthServiceE2ETests {
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.password").doesNotExist())
+                .andExpect(jsonPath("$.verified").doesNotExist())
                 .andExpect(jsonPath("$.id").isNumber())
                 .andExpect(jsonPath("$.email").value(USER.getEmail()))
                 .andExpect(jsonPath("$.username").value(USER.getUsername()))
