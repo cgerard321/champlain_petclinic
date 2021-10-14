@@ -276,10 +276,15 @@ public class AuthServiceUserControllerTests {
         String newPass = "newPassword";
         User saved = userRepo.save(entity);
 
+        when(userService.passwordReset(saved.getId(), newPass))
+                .thenReturn(saved.toBuilder().password(newPass).build());
+        when(userService.getUserById(saved.getId()))
+                .thenReturn(saved.toBuilder().password(newPass).build());
+
         assertTrue(userRepo.findById(saved.getId()).isPresent());
         userController.passwordReset(saved.getId(), newPass);
 
-        User found = userRepo.findById(saved.getId()).get();
+        User found = userController.getUser(saved.getId());
         assertEquals(newPass, found.getPassword());
 
         mockMvc.perform(get("/users/" + entity.getId()))
