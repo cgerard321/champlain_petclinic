@@ -253,16 +253,12 @@ public class AuthServiceUserControllerTests {
     @Test
     public void  get_user() throws Exception {
 
-        User entity = new User("Username", "password", "email@gmail.com");
-        userRepo.save(entity);
+        final long ID = 123;
 
-        assertTrue(userRepo.findById(entity.getId()).isPresent());
-        User found = userController.getUser(entity.getId());
-        assertEquals("Username", found.getUsername());
-        assertEquals("password", found.getPassword());
-        assertEquals("email@gmail.com", found.getEmail());
+        when(userService.getUserById(ID))
+                .thenReturn(new User());
 
-        mockMvc.perform(get("/users/" + entity.getId()))
+        mockMvc.perform(get("/users/" + ID))
                 .andDo(print())
                 .andExpect(status().isOk());
     }
