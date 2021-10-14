@@ -19,6 +19,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -217,5 +218,27 @@ public class AuthServiceUserServiceTests {
                 .email(EMAIL)
                 .build())
         );
+    }
+
+    @Test
+    @DisplayName("Given user exists in database but password is incorrect, throw IncorrectPasswordException")
+    void bad_password_exception() {
+
+        when(jwtService.encrypt(any()))
+                .thenReturn(VALID_TOKEN);
+        when(mailService.sendMail(any()))
+                .thenReturn("E-mail was hypothetically sent");
+
+        final UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
+        final User saved = userService.createUser(userIDLessDTO);
+
+        IncorrectPasswordException incorrectPasswordException = assertThrows(IncorrectPasswordException.class, () -> userService.login(UserIDLessDTO.builder()
+                .username(USER)
+                .password(PASS + "bad")
+                .email(EMAIL)
+                .build())
+        );
+
+        assertEquals(format("Password incorrect for email %s", EMAIL), incorrectPasswordException.getMessage());
     }
 }
