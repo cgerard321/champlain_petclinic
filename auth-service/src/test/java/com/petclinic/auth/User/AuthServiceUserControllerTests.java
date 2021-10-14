@@ -373,7 +373,7 @@ public class AuthServiceUserControllerTests {
 
         final String EXCEPTION_MESSAGE = format("Password not valid for email %s", EMAIL);
 
-        final UserIDLessDTO build = UserIDLessDTO.builder().email(EMAIL).password(PASS).build();
+        final UserIDLessDTO build = UserIDLessDTO.builder().email(EMAIL).password(PASS + "bad").build();
         final String asString = objectMapper.writeValueAsString(build);
 
         when(userService.login(
