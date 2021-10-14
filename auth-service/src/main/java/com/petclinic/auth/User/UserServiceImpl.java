@@ -119,7 +119,7 @@ public class UserServiceImpl implements UserService {
         final User byEmail = userRepo.findByEmail(user.getEmail());
 
         if(!isSamePassword(user.getPassword(), byEmail.getPassword())) {
-            throw new IncorrectPasswordException(format("Password not valid for email %s"), user.getEmail());
+            throw new IncorrectPasswordException(format("Password not valid for email %s", user.getEmail()));
         }
 
         return jwtService.encrypt(byEmail);
