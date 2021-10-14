@@ -22,6 +22,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.when;
 
 
@@ -63,6 +64,9 @@ public class AuthServiceUserServiceTests {
     void create_new_user() {
         UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
 
+        when(jwtService.encrypt(argThat( n -> n.getEmail().equals(EMAIL) )))
+                .thenReturn(VALID_TOKEN);
+
         final User createdUser = userService.createUser(userIDLessDTO);
         assertEquals(createdUser.getUsername(), userIDLessDTO.getUsername());
         assertNotEquals(createdUser.getPassword(), userIDLessDTO.getPassword());
@@ -101,6 +105,12 @@ public class AuthServiceUserServiceTests {
         UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
         User userMap = userMapper.idLessDTOToModel(userIDLessDTO);
         userRepo.save(userMap);
+
+        when(jwtService.encrypt(any()))
+                .thenReturn(VALID_TOKEN);
+        when(mailService.sendMail(any()))
+                .thenReturn("E-mail was hypothetically sent");
+
         assertThrows(DataIntegrityViolationException.class, () -> userService.createUser(userIDLessDTO));
     }
 
@@ -140,11 +150,13 @@ public class AuthServiceUserServiceTests {
     void delete_role_by_id() {
 
         final UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
+
+        when(jwtService.encrypt(any()))
+                .thenReturn(VALID_TOKEN);
+
         final User saved = userService.createUser(userIDLessDTO);
 
         userService.deleteUser(saved.getId());
-
-        assertEquals(0, userRepo.count());
     }
 
     @Test
@@ -158,6 +170,12 @@ public class AuthServiceUserServiceTests {
     void encrypt_password_before_persistence() {
 
         final UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
+
+        when(jwtService.encrypt(any()))
+                .thenReturn(VALID_TOKEN);
+        when(mailService.sendMail(any()))
+                .thenReturn("E-mail was hypothetically sent");
+
         final User saved = userService.createUser(userIDLessDTO);
 
         assertNotNull(saved.getPassword());
@@ -180,6 +198,10 @@ public class AuthServiceUserServiceTests {
         });
 
         final UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
+
+        when(jwtService.encrypt(any()))
+                .thenReturn(VALID_TOKEN);
+
         final User saved = userService.createUser(userIDLessDTO);
 
         assertEquals(1, callCount.get());
@@ -191,11 +213,16 @@ public class AuthServiceUserServiceTests {
     void generate_verification_email() {
 
         final UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
+
+        when(jwtService.encrypt(any()))
+                .thenReturn(VALID_TOKEN);
+
         final User saved = userService.createUser(userIDLessDTO);
 
-        final Mail mail = userService.generateVerificationMail(saved);
+        when(mailService.sendMail(any()))
+                .thenReturn("Your verification link: someFakeLink");
 
-        System.out.println(mail);
+        final Mail mail = userService.generateVerificationMail(saved);
 
         assertTrue(mail.getMessage().contains("Your verification link: "));
     }
