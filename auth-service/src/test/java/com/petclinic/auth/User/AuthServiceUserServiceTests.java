@@ -1,5 +1,6 @@
 package com.petclinic.auth.User;
 
+import com.petclinic.auth.Exceptions.IncorrectPasswordException;
 import com.petclinic.auth.Exceptions.NotFoundException;
 import com.petclinic.auth.JWT.JWTService;
 import com.petclinic.auth.Mail.Mail;
@@ -200,7 +201,7 @@ public class AuthServiceUserServiceTests {
 
     @Test
     @DisplayName("Given user exists in database and email + password match & e-mail is verified, return JWT")
-    void successful_login() {
+    void successful_login() throws IncorrectPasswordException {
 
         when(jwtService.encrypt(any()))
                 .thenReturn(VALID_TOKEN);

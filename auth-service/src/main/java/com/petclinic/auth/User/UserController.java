@@ -12,6 +12,7 @@ package com.petclinic.auth.User;
  * Ticket: feat(AUTH-CPC-357)
  */
 
+import com.petclinic.auth.Exceptions.IncorrectPasswordException;
 import io.jsonwebtoken.lang.Maps;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -81,7 +82,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public Map<String, String> login(@RequestBody UserIDLessDTO user) {
+    public Map<String, String> login(@RequestBody UserIDLessDTO user) throws IncorrectPasswordException {
         return Maps.of("token", userService.login(user)).build();
     }
 }
