@@ -2,6 +2,6 @@
 
 angular.module('billHistory')
     .component('billHistory', {
-        templateUrl: 'scripts/bill/bill-history.template.html',
+        templateUrl: 'scripts/bill-history/bill-history.template.html',
         controller: 'BillHistoryController'
     });
