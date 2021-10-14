@@ -202,11 +202,13 @@ public class AuthServiceUserServiceTests {
     @DisplayName("Given user exists in database and email + password match & e-mail is verified, return JWT")
     void successful_login() {
 
+        when(jwtService.encrypt(any()))
+                .thenReturn(VALID_TOKEN);
+        when(mailService.sendMail(any()))
+                .thenReturn("E-mail was hypothetically sent");
+
         final UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
         final User saved = userService.createUser(userIDLessDTO);
-
-        when(jwtService.encrypt(saved))
-                .thenReturn(VALID_TOKEN);
 
         assertEquals(VALID_TOKEN, userService.login(UserIDLessDTO.builder()
                 .username(USER)

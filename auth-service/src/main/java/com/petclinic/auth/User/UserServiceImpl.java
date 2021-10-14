@@ -116,6 +116,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String login(UserIDLessDTO user) {
-        throw new RuntimeException("Not implemented");
+        final User byEmail = userRepo.findByEmail(user.getEmail());
+        return jwtService.encrypt(byEmail);
     }
 }
