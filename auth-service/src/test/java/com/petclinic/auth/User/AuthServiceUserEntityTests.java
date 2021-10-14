@@ -12,8 +12,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import static java.lang.String.format;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -75,5 +74,40 @@ public class AuthServiceUserEntityTests {
         assertEquals(EMAIL, user.getEmail());
         assertEquals(ID, user.getId());
         assertTrue(user.getRoles().stream().anyMatch(n -> n.getName().equals(ROLE_NAME)));
+    }
+
+    @Test
+    @DisplayName("Given user with roles, get authorities")
+    void getAuthorities() {
+    }
+
+    @Test
+    @DisplayName("Given any user, account is not expired")
+    void isAccountNonExpired() {
+        assertTrue(new User().isAccountNonExpired());
+    }
+
+    @Test
+    @DisplayName("Given any user, account is not locked")
+    void isAccountNonLocked() {
+        assertTrue(new User().isAccountNonLocked());
+    }
+
+    @Test
+    @DisplayName("Given any user, credentials is non expired")
+    void isCredentialsNonExpired() {
+        assertTrue(new User().isAccountNonExpired());
+    }
+
+    @Test
+    @DisplayName("Given verified user, account is enabled")
+    void isEnabled() {
+        assertTrue(User.builder().verified(true).build().isEnabled());
+    }
+
+    @Test
+    @DisplayName("Given unverified user, account is enabled")
+    void isNotEnabled() {
+        assertFalse(new User().isEnabled());
     }
 }
