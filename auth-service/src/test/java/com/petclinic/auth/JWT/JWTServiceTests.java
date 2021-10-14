@@ -81,7 +81,7 @@ public class JWTServiceTests {
         final Set<String> userRolesNameOnly = verifiedUser.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
         final Set<String> decryptRolesNameOnly = decrypt.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
         assertEquals(userRolesNameOnly, decryptRolesNameOnly);
-        assertEquals(verifiedUser.isVerified(), decrypt.isVerified());
+        assertEquals(true, decrypt.isVerified());
     }
 
     @Test

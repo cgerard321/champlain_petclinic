@@ -41,6 +41,7 @@ public class JWTServiceImpl implements JWTService {
     public String encrypt(User user) {
         Map<String, Object> claimsMap = new HashMap<>();
         claimsMap.put("roles", user.getRoles());
+        claimsMap.put("verified", user.isVerified());
 
         return Jwts.builder()
                 .setSubject(user.getEmail())
@@ -62,6 +63,8 @@ public class JWTServiceImpl implements JWTService {
             final Claims body = claimsJws.getBody();
             Set<Role> roles;
 
+            final User mappedUser = objectMapper.convertValue(body, User.class);
+
             final List<LinkedHashMap<String, String>> rolesList = body.get("roles", List.class);
             if(rolesList == null || rolesList.size() <= 0) {
                 roles = Collections.emptySet();
@@ -72,8 +75,7 @@ public class JWTServiceImpl implements JWTService {
                         .collect(Collectors.toSet());
             }
 
-            return User.builder()
-                    .username(body.get("username", String.class))
+            return mappedUser.toBuilder()
                     .roles(roles)
                     .email(body.getSubject())
                     .build();
