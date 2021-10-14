@@ -95,6 +95,8 @@ public class AuthServiceUserEntityTests {
         final Set<String> roleNames = basedRoles.parallelStream().map(Role::getName).collect(Collectors.toSet());
         roleNames.add("parent"); // Manually add parent because we are not crawling up the hierarchy
 
+        assertEquals(roleNames.size(), build.getAuthorities().size());
+
         for (GrantedAuthority authority : build.getAuthorities()) {
             assertTrue(roleNames.contains(authority.getAuthority()));
         }
