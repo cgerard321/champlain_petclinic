@@ -117,6 +117,15 @@ public class UserServiceImpl implements UserService {
     @Override
     public String login(UserIDLessDTO user) {
         final User byEmail = userRepo.findByEmail(user.getEmail());
+
+        if(!isSamePassword(user.getPassword(), byEmail.getPassword())) {
+            throw new IncorrectPasswordException(format("Password not valid for email %s"), user.getEmail());
+        }
+
         return jwtService.encrypt(byEmail);
+    }
+
+    private boolean isSamePassword(String raw, String encoded) {
+        return passwordEncoder.encode(raw).equals(encoded);
     }
 }
