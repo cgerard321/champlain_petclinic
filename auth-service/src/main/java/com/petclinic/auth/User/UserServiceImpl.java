@@ -119,14 +119,11 @@ public class UserServiceImpl implements UserService {
     public String login(UserIDLessDTO user) throws IncorrectPasswordException {
         final User byEmail = userRepo.findByEmail(user.getEmail());
 
-        if(!isSamePassword(user.getPassword(), byEmail.getPassword())) {
+        if(!passwordEncoder.matches(user.getPassword(), byEmail.getPassword())) {
             throw new IncorrectPasswordException(format("Password not valid for email %s", user.getEmail()));
         }
 
         return jwtService.encrypt(byEmail);
     }
 
-    private boolean isSamePassword(String raw, String encoded) {
-        return passwordEncoder.encode(raw).equals(encoded);
-    }
 }
