@@ -54,7 +54,7 @@ public class UserController {
     }
 
     @PostMapping
-    public UserPasswordLessDTO createUser(@RequestBody @Valid UserIDLessDTO dto) {
+    public UserPasswordLessDTO createUser(@RequestBody @Valid UserIDLessRoleLessDTO dto) {
 
         log.info("Trying to persist user");
         final User saved = userService.createUser(dto);
@@ -82,7 +82,7 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public Map<String, String> login(@RequestBody UserIDLessDTO user) throws IncorrectPasswordException {
+    public Map<String, String> login(@RequestBody UserIDLessRoleLessDTO user) throws IncorrectPasswordException {
         return Maps.of("token", userService.login(user)).build();
     }
 }

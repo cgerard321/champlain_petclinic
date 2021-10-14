@@ -114,13 +114,13 @@ public class AuthServiceUserControllerTests {
     @MockBean
     private UserService userService;
 
-    private final UserIDLessDTO ID_LESS_USER = new UserIDLessDTO(USER, PASS, EMAIL);
+    private final UserIDLessRoleLessDTO ID_LESS_USER = new UserIDLessRoleLessDTO(USER, PASS, EMAIL);
 
     @Test
     @DisplayName("Create a user from controller")
     void create_user_from_controller() {
 
-        final User hypothetical = userMapper.idLessDTOToModel(ID_LESS_USER);
+        final User hypothetical = userMapper.idLessRoleLessDTOToModel(ID_LESS_USER);
 
         when(jwtService.encrypt(any()))
                 .thenReturn("a.fake.token");
@@ -136,7 +136,7 @@ public class AuthServiceUserControllerTests {
     void check_empty_require_fields() {
 
 
-        UserIDLessDTO userIDLessDTO = new UserIDLessDTO();
+        UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO();
 
         assertThrows(ConstraintViolationException.class, () -> userController.createUser(userIDLessDTO));
     }
@@ -146,7 +146,7 @@ public class AuthServiceUserControllerTests {
     void check_empty_username() {
 
 
-        UserIDLessDTO userIDLessDTO = new UserIDLessDTO(null, PASS,EMAIL);
+        UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(null, PASS,EMAIL);
 
         assertThrows(ConstraintViolationException.class, () -> userController.createUser(userIDLessDTO));
     }
@@ -156,7 +156,7 @@ public class AuthServiceUserControllerTests {
     void check_empty_password() {
 
 
-        UserIDLessDTO userIDLessDTO = new UserIDLessDTO( USER, null,EMAIL);
+        UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO( USER, null,EMAIL);
 
         assertThrows(ConstraintViolationException.class, () -> userController.createUser(userIDLessDTO));
     }
@@ -165,8 +165,8 @@ public class AuthServiceUserControllerTests {
     void check_missing_specialchar_password() {
 
 
-        UserIDLessDTO userIDLessDTO = new UserIDLessDTO( USER, "Password123",EMAIL);
-        Set<ConstraintViolation<UserIDLessDTO>> violations = validator.validate(userIDLessDTO);
+        UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO( USER, "Password123",EMAIL);
+        Set<ConstraintViolation<UserIDLessRoleLessDTO>> violations = validator.validate(userIDLessDTO);
         assertFalse(violations.isEmpty());
     }
     @Test
@@ -174,9 +174,9 @@ public class AuthServiceUserControllerTests {
     void check_missing_number_password() {
 
 
-        UserIDLessDTO userIDLessDTO = new UserIDLessDTO( USER, "Pas$word",EMAIL);
+        UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO( USER, "Pas$word",EMAIL);
 
-        Set<ConstraintViolation<UserIDLessDTO>> violations = validator.validate(userIDLessDTO);
+        Set<ConstraintViolation<UserIDLessRoleLessDTO>> violations = validator.validate(userIDLessDTO);
         assertFalse(violations.isEmpty());
     }
     @Test
@@ -184,9 +184,9 @@ public class AuthServiceUserControllerTests {
     void check_missing_uppercase_password() {
 
 
-        UserIDLessDTO userIDLessDTO = new UserIDLessDTO( USER, "pas$word123",EMAIL);
+        UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO( USER, "pas$word123",EMAIL);
 
-        Set<ConstraintViolation<UserIDLessDTO>> violations = validator.validate(userIDLessDTO);
+        Set<ConstraintViolation<UserIDLessRoleLessDTO>> violations = validator.validate(userIDLessDTO);
         assertFalse(violations.isEmpty());
     }
     @Test
@@ -194,16 +194,16 @@ public class AuthServiceUserControllerTests {
     void check_missing_lowercase_password() {
 
 
-        UserIDLessDTO userIDLessDTO = new UserIDLessDTO( USER, "PAS$WORD123",EMAIL);
+        UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO( USER, "PAS$WORD123",EMAIL);
 
-        Set<ConstraintViolation<UserIDLessDTO>> violations = validator.validate(userIDLessDTO);
+        Set<ConstraintViolation<UserIDLessRoleLessDTO>> violations = validator.validate(userIDLessDTO);
         assertFalse(violations.isEmpty());
     }
     @Test
     @DisplayName("Check the email field in order to refused if it is empty")
     void check_empty_email(){
 
-        UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS,null);
+        UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(USER, PASS,null);
 
         assertThrows(ConstraintViolationException.class, () -> userController.createUser(userIDLessDTO));
     }
@@ -291,7 +291,7 @@ public class AuthServiceUserControllerTests {
     @DisplayName("When POST on users endpoint with valid data, allow any")
     void allow_any_on_users() throws Exception {
 
-        final UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
+        final UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(USER, PASS, EMAIL);
         final String asString = objectMapper.writeValueAsString(userIDLessDTO);
 
         when(jwtService.encrypt(any()))
@@ -355,7 +355,7 @@ public class AuthServiceUserControllerTests {
     @DisplayName("When login successful, get JWT")
     void login_get_jwt() throws Exception {
 
-        final UserIDLessDTO build = UserIDLessDTO.builder().email(EMAIL).password(PASS).build();
+        final UserIDLessRoleLessDTO build = UserIDLessRoleLessDTO.builder().email(EMAIL).password(PASS).build();
         final String asString = objectMapper.writeValueAsString(build);
 
         when(userService.login(
@@ -373,7 +373,7 @@ public class AuthServiceUserControllerTests {
 
         final String EXCEPTION_MESSAGE = format("Password not valid for email %s", EMAIL);
 
-        final UserIDLessDTO build = UserIDLessDTO.builder().email(EMAIL).password(PASS + "bad").build();
+        final UserIDLessRoleLessDTO build = UserIDLessRoleLessDTO.builder().email(EMAIL).password(PASS + "bad").build();
         final String asString = objectMapper.writeValueAsString(build);
 
         when(userService.login(

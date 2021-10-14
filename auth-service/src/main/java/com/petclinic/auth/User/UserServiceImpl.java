@@ -4,11 +4,8 @@ import com.petclinic.auth.JWT.JWTService;
 import com.petclinic.auth.Mail.Mail;
 import com.petclinic.auth.Mail.MailService;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,9 +14,7 @@ import com.petclinic.auth.Exceptions.NotFoundException;
 
 import javax.validation.Valid;
 
-import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Base64;
 
 import static java.lang.String.format;
@@ -56,10 +51,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User createUser(@Valid UserIDLessDTO userIDLessDTO) {
+    public User createUser(@Valid UserIDLessRoleLessDTO userIDLessDTO) {
 
         log.info("Saving user with email {}", userIDLessDTO.getEmail());
-        User user = userMapper.idLessDTOToModel(userIDLessDTO);
+        User user = userMapper.idLessRoleLessDTOToModel(userIDLessDTO);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         log.info("Sending email to {}...", userIDLessDTO.getEmail());
@@ -116,7 +111,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String login(UserIDLessDTO user) throws IncorrectPasswordException {
+    public String login(UserIDLessRoleLessDTO user) throws IncorrectPasswordException {
         final User byEmail = userRepo.findByEmail(user.getEmail());
 
         if(!passwordEncoder.matches(user.getPassword(), byEmail.getPassword())) {

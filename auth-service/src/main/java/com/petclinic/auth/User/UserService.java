@@ -27,7 +27,7 @@ import org.springframework.data.domain.PageRequest;
 public interface UserService {
 
 
-    User createUser(UserIDLessDTO user);
+    User createUser(UserIDLessRoleLessDTO user);
 
     User passwordReset(long id, String newPassword);
 
@@ -41,5 +41,5 @@ public interface UserService {
 
     UserPasswordLessDTO verifyEmailFromToken(String token);
 
-    String login(UserIDLessDTO user) throws IncorrectPasswordException;
+    String login(UserIDLessRoleLessDTO user) throws IncorrectPasswordException;
 }

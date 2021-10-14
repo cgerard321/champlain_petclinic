@@ -11,8 +11,7 @@ package com.petclinic.auth.e2e.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.auth.Mail.MailService;
 import com.petclinic.auth.User.User;
-import com.petclinic.auth.User.UserIDLessDTO;
-import com.petclinic.auth.User.UserMapper;
+import com.petclinic.auth.User.UserIDLessRoleLessDTO;
 import com.petclinic.auth.User.UserRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -21,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -54,11 +52,11 @@ public class AuthServiceE2ETests {
             .username("my cool username")
             .build();
 
-    private UserIDLessDTO ID_LESS_USER;
+    private UserIDLessRoleLessDTO ID_LESS_USER;
 
     @BeforeEach
     void setup() {
-        ID_LESS_USER = objectMapper.convertValue(USER, UserIDLessDTO.class);
+        ID_LESS_USER = objectMapper.convertValue(USER, UserIDLessRoleLessDTO.class);
         userRepo.deleteAllInBatch();
         when(mailService.sendMail(any()))
                 .thenReturn("Your verification link: someFakeLink");

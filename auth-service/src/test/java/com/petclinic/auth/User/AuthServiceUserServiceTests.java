@@ -66,7 +66,7 @@ public class AuthServiceUserServiceTests {
     @Test
     @DisplayName("Create new user")
     void create_new_user() {
-        UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
+        UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(USER, PASS, EMAIL);
 
         when(jwtService.encrypt(argThat( n -> n.getEmail().equals(EMAIL) )))
                 .thenReturn(VALID_TOKEN);
@@ -106,8 +106,8 @@ public class AuthServiceUserServiceTests {
     @Test
     @DisplayName("Create new user with email already in use")
     void create_new_user_with_same_email() {
-        UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
-        User userMap = userMapper.idLessDTOToModel(userIDLessDTO);
+        UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(USER, PASS, EMAIL);
+        User userMap = userMapper.idLessRoleLessDTOToModel(userIDLessDTO);
         userRepo.save(userMap);
 
 
@@ -149,7 +149,7 @@ public class AuthServiceUserServiceTests {
     @DisplayName("Delete user by id")
     void delete_role_by_id() {
 
-        final UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
+        final UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(USER, PASS, EMAIL);
 
 
         final User saved = userService.createUser(userIDLessDTO);
@@ -167,7 +167,7 @@ public class AuthServiceUserServiceTests {
     @DisplayName("When creating user, encrypt password")
     void encrypt_password_before_persistence() {
 
-        final UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
+        final UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(USER, PASS, EMAIL);
 
 
         final User saved = userService.createUser(userIDLessDTO);
@@ -191,7 +191,7 @@ public class AuthServiceUserServiceTests {
             return "Email sent to " + mail.getMessage();
         });
 
-        final UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
+        final UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(USER, PASS, EMAIL);
 
 
         final User saved = userService.createUser(userIDLessDTO);
@@ -204,7 +204,7 @@ public class AuthServiceUserServiceTests {
     @DisplayName("Given user, generate verification email")
     void generate_verification_email() {
 
-        final UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
+        final UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(USER, PASS, EMAIL);
 
 
         final User saved = userService.createUser(userIDLessDTO);
@@ -222,10 +222,10 @@ public class AuthServiceUserServiceTests {
     void successful_login() throws IncorrectPasswordException {
 
 
-        final UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
+        final UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(USER, PASS, EMAIL);
         final User saved = userService.createUser(userIDLessDTO);
 
-        assertEquals(VALID_TOKEN, userService.login(UserIDLessDTO.builder()
+        assertEquals(VALID_TOKEN, userService.login(UserIDLessRoleLessDTO.builder()
                 .username(USER)
                 .password(PASS)
                 .email(EMAIL)
@@ -238,10 +238,10 @@ public class AuthServiceUserServiceTests {
     void bad_password_exception() {
 
 
-        final UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
+        final UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(USER, PASS, EMAIL);
         final User saved = userService.createUser(userIDLessDTO);
 
-        IncorrectPasswordException incorrectPasswordException = assertThrows(IncorrectPasswordException.class, () -> userService.login(UserIDLessDTO.builder()
+        IncorrectPasswordException incorrectPasswordException = assertThrows(IncorrectPasswordException.class, () -> userService.login(UserIDLessRoleLessDTO.builder()
                 .username(USER)
                 .password(PASS + "bad")
                 .email(EMAIL)

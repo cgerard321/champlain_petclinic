@@ -28,7 +28,7 @@ import javax.validation.constraints.NotEmpty;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class UserIDLessDTO {
+public class UserIDLessRoleLessDTO {
 
     @NotEmpty
     private String username;

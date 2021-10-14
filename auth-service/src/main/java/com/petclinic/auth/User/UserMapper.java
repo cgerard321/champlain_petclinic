@@ -27,7 +27,7 @@ public interface UserMapper {
             @Mapping(target = "id", ignore = true),
             @Mapping(target = "roles", expression = "java(new HashSet())")
     })
-    User idLessDTOToModel(UserIDLessDTO dto);
+    User idLessRoleLessDTOToModel(UserIDLessRoleLessDTO dto);
 
     @Mappings({
     })
