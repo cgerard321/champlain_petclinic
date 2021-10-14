@@ -116,7 +116,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String login(UserIDLessDTO user) {
+    public String login(UserIDLessDTO user) throws IncorrectPasswordException {
         final User byEmail = userRepo.findByEmail(user.getEmail());
 
         if(!isSamePassword(user.getPassword(), byEmail.getPassword())) {
