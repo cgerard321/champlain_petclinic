@@ -96,6 +96,7 @@ public class User implements UserDetails {
                 grantedAuthorities.add(new SimpleGrantedAuthority(format("ROLE_%s", parent.getName())));
                 parent = parent.getParent();
             }
+            grantedAuthorities.add(new SimpleGrantedAuthority(format("ROLE_%s", role.getName())));
         }
 
         return grantedAuthorities;
