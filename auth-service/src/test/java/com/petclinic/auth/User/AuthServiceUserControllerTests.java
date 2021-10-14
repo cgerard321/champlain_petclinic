@@ -77,6 +77,8 @@ public class AuthServiceUserControllerTests {
             PASS = "Pas$word123",
             EMAIL = "email@gmail.com";
 
+    private final String VALID_TOKEN = "a.fake.token";
+
 
     private Validator validator;
 
@@ -331,5 +333,20 @@ public class AuthServiceUserControllerTests {
     void allow_any_on_login() throws Exception {
         mockMvc.perform(post("/users/login"))
                 .andExpect(status().is(400)); // Bad request means that it passed spring security & it found the controller action
+    }
+
+    @Test
+    @DisplayName("When login successful, get JWT")
+    void login_get_jwt() throws Exception {
+
+        when(jwtService.encrypt(any()))
+                .thenReturn(VALID_TOKEN);
+
+        final UserIDLessDTO build = UserIDLessDTO.builder().email(EMAIL).password(PASS).build();
+        final String asString = objectMapper.writeValueAsString(build);
+
+        mockMvc.perform(post("/users/login").contentType(APPLICATION_JSON).content(asString))
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(jsonPath("$.token").value(VALID_TOKEN));
     }
 }

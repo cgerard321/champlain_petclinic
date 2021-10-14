@@ -239,6 +239,6 @@ public class AuthServiceUserServiceTests {
                 .build())
         );
 
-        assertEquals(format("Password incorrect for email %s", EMAIL), incorrectPasswordException.getMessage());
+        assertEquals(format("Password not valid for email %s", EMAIL), incorrectPasswordException.getMessage());
     }
 }
