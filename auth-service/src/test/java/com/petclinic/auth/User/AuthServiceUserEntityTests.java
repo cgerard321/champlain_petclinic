@@ -83,7 +83,7 @@ public class AuthServiceUserEntityTests {
     void getAuthorities() {
 
         final Role parent = new Role(-1, "parent"),
-                kid = new Role(-1, "parent", parent);
+                kid = new Role(-1, "kid", parent);
 
         HashSet<Role> basedRoles = new HashSet<>(ROLES);
         basedRoles.add(kid);
@@ -93,8 +93,10 @@ public class AuthServiceUserEntityTests {
                 .build();
 
         final Set<String> roleNames = basedRoles.parallelStream().map(Role::getName).collect(Collectors.toSet());
+        roleNames.add("parent"); // Manually add parent because we are not crawling up the hierarchy
+
         for (GrantedAuthority authority : build.getAuthorities()) {
-            assertTrue(roleNames.contains(format("ROLE_%s", authority.getAuthority())));
+            assertTrue(roleNames.contains(authority.getAuthority()));
         }
     }
 
