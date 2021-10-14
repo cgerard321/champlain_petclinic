@@ -81,11 +81,18 @@ public class AuthServiceUserEntityTests {
     @Test
     @DisplayName("Given user with roles, get authorities")
     void getAuthorities() {
+
+        final Role parent = new Role(-1, "parent"),
+                kid = new Role(-1, "parent", parent);
+
+        HashSet<Role> basedRoles = new HashSet<>(ROLES);
+        basedRoles.add(kid);
+
         final User build = User.builder()
-                .roles(ROLES)
+                .roles(basedRoles)
                 .build();
 
-        final Set<String> roleNames = ROLES.parallelStream().map(Role::getName).collect(Collectors.toSet());
+        final Set<String> roleNames = basedRoles.parallelStream().map(Role::getName).collect(Collectors.toSet());
         for (GrantedAuthority authority : build.getAuthorities()) {
             assertTrue(roleNames.contains(format("ROLE_%s", authority.getAuthority())));
         }
