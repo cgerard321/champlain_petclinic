@@ -6,10 +6,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.*;
@@ -79,6 +81,14 @@ public class AuthServiceUserEntityTests {
     @Test
     @DisplayName("Given user with roles, get authorities")
     void getAuthorities() {
+        final User build = User.builder()
+                .roles(ROLES)
+                .build();
+
+        final Set<String> roleNames = ROLES.parallelStream().map(Role::getName).collect(Collectors.toSet());
+        for (GrantedAuthority authority : build.getAuthorities()) {
+            assertTrue(roleNames.contains(format("ROLE_%s", authority.getAuthority())));
+        }
     }
 
     @Test

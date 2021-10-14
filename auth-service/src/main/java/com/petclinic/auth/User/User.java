@@ -26,12 +26,14 @@ package com.petclinic.auth.User;
 import com.petclinic.auth.Role.Role;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotEmpty;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 @Table(schema = "auth", name = "users")
@@ -83,7 +85,18 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+
+        final HashSet<GrantedAuthority> grantedAuthorities = new HashSet<>();
+
+        for (Role role : roles) {
+            Role parent = role.getParent();
+            while(parent != null) {
+                grantedAuthorities.add(new SimpleGrantedAuthority(parent.getName()));
+                parent = parent.getParent();
+            }
+        }
+
+        return grantedAuthorities;
     }
 
     @Override
