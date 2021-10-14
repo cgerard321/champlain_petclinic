@@ -297,6 +297,13 @@ public class AuthServiceUserControllerTests {
         when(jwtService.encrypt(any()))
                 .thenReturn("a.fake.token");
 
+        when(userService.createUser(
+                argThat( n -> n.getUsername().equals(USER) && n.getPassword().equals(PASS) && n.getEmail().equals(EMAIL) )) )
+                .thenReturn(User.builder()
+                    .username(USER)
+                    .email(EMAIL).build()
+                );
+
         mockMvc.perform(post("/users").contentType(APPLICATION_JSON).content(asString))
                 .andDo(print())
                 .andExpect(status().is2xxSuccessful())
