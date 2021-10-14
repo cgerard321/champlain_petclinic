@@ -56,8 +56,8 @@ public class JWTServiceTests {
     }
 
     @Test
-    @DisplayName("Given token, get user")
-    void get_user_from_jwt() {
+    @DisplayName("Given token for unverified, get user")
+    void get_unverified_user_from_jwt() {
         final String token = jwtService.encrypt(USER);
         final User decrypt = jwtService.decrypt(token);
 
@@ -67,6 +67,21 @@ public class JWTServiceTests {
         final Set<String> decryptRolesNameOnly = decrypt.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
         assertEquals(userRolesNameOnly, decryptRolesNameOnly);
         assertEquals(USER.isVerified(), decrypt.isVerified());
+    }
+
+    @Test
+    @DisplayName("Given token for verified, get user")
+    void get_verified_user_from_jwt() {
+        final User verifiedUser = USER.toBuilder().verified(true).build();
+        final String token = jwtService.encrypt(verifiedUser);
+        final User decrypt = jwtService.decrypt(token);
+
+        assertEquals(verifiedUser.getEmail(), decrypt.getEmail());
+
+        final Set<String> userRolesNameOnly = verifiedUser.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
+        final Set<String> decryptRolesNameOnly = decrypt.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
+        assertEquals(userRolesNameOnly, decryptRolesNameOnly);
+        assertEquals(verifiedUser.isVerified(), decrypt.isVerified());
     }
 
     @Test
