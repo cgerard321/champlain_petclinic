@@ -92,8 +92,10 @@ public class AuthServiceUserEntityTests {
                 .roles(basedRoles)
                 .build();
 
-        final Set<String> roleNames = basedRoles.parallelStream().map(Role::getName).collect(Collectors.toSet());
-        roleNames.add("parent"); // Manually add parent because we are not crawling up the hierarchy
+        final Set<String> roleNames = basedRoles.parallelStream()
+                .map(n -> format("ROLE_%s", n.getName()))
+                .collect(Collectors.toSet());
+        roleNames.add(format("ROLE_%s", parent.getName())); // Manually add parent because we are not crawling up the hierarchy
 
         assertEquals(roleNames.size(), build.getAuthorities().size());
 
