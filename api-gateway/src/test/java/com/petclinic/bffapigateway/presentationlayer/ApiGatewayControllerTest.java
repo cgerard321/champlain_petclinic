@@ -63,9 +63,47 @@ class ApiGatewayControllerTest {
     @Autowired
     private WebTestClient client;
 
+
     Integer id = new Integer(1);
     Integer id2 = new Integer(2);
 
+    @Test
+    void createAndDeleteVet() {
+
+        final int vetId = 1234567;
+        VetDetails vet = new VetDetails();
+        vet.setVetId(vetId);
+        vet.setFirstName("Kevin");
+        vet.setLastName("Tremblay");
+        vet.setEmail("hello@test.com");
+        vet.setPhoneNumber("1-800-GOT-JUNK");
+        vet.setResume("Working since I started working.");
+        vet.setWorkday("Monday");
+
+        when(vetsServiceClient.createVet(vet))
+                .thenReturn(Mono.just(vet));
+
+        client.post()
+                .uri("/api/gateway/vets")
+                .body(Mono.just(vet), VetDetails.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+
+        assertEquals(vetId, vet.getVetId());
+
+        client.delete()
+                .uri("/api/gateway/vets/" + vetId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody();
+
+        assertEquals(null, vetsServiceClient.getVet(vetId));
+    }
 
 
 
@@ -312,7 +350,6 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.path").isEqualTo("/owners")
                 .jsonPath("$.message").isEqualTo(null);
     }
-
 
     @Test
     void shouldCreateAVisitWithOwnerInfo(){
@@ -565,8 +602,6 @@ class ApiGatewayControllerTest {
                 .jsonPath("$[0].description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$[0].practitionerId").isEqualTo(1);
     }
-
-
 }
 
 
