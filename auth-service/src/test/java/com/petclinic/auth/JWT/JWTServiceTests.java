@@ -3,19 +3,16 @@ package com.petclinic.auth.JWT;
 import com.petclinic.auth.Role.Role;
 import com.petclinic.auth.User.User;
 import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestComponent;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -101,7 +98,6 @@ public class JWTServiceTests {
     @Test
     @DisplayName("Given bad token, throw JwtException")
     void jwt_exception_flow() {
-        final RuntimeException ex = assertThrows(RuntimeException.class, () -> jwtService.decrypt("this.is.bad"));
-        assertEquals("Something wrong with the JWT boss", ex.getMessage());
+        assertThrows(JwtException.class, () -> jwtService.decrypt("this.is.bad"));
     }
 }

@@ -11,7 +11,6 @@ import com.petclinic.auth.Role.Role;
 import com.petclinic.auth.User.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -54,36 +53,30 @@ public class JWTServiceImpl implements JWTService {
 
     @Override
     public User decrypt(String token) {
-        try {
-            final Jws<Claims> claimsJws = Jwts.parserBuilder()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(token);
+        final Jws<Claims> claimsJws = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token);
 
-            final Claims body = claimsJws.getBody();
-            Set<Role> roles;
+        final Claims body = claimsJws.getBody();
+        Set<Role> roles;
 
-            final User mappedUser = objectMapper.convertValue(body, User.class);
+        final User mappedUser = objectMapper.convertValue(body, User.class);
 
-            final List<LinkedHashMap<String, String>> rolesList = body.get("roles", List.class);
-            if(rolesList == null || rolesList.size() <= 0) {
-                roles = Collections.emptySet();
-            } else {
-                roles = rolesList
-                        .parallelStream()
-                        .map(n -> objectMapper.convertValue(n, Role.class))
-                        .collect(Collectors.toSet());
-            }
-
-            return mappedUser.toBuilder()
-                    .roles(roles)
-                    .email(body.getSubject())
-                    .build();
-
-        } catch (JwtException ex) {
-            ex.printStackTrace();
-            //TODO: Add handling
-            throw new RuntimeException("Something wrong with the JWT boss");
+        final List<LinkedHashMap<String, String>> rolesList = body.get("roles", List.class);
+        if(rolesList == null || rolesList.size() <= 0) {
+            roles = Collections.emptySet();
+        } else {
+            roles = rolesList
+                    .parallelStream()
+                    .map(n -> objectMapper.convertValue(n, Role.class))
+                    .collect(Collectors.toSet());
         }
+
+        return mappedUser.toBuilder()
+                .roles(roles)
+                .email(body.getSubject())
+                .build();
+
     }
 }
