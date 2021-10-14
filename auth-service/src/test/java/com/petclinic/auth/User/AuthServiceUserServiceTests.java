@@ -57,6 +57,10 @@ public class AuthServiceUserServiceTests {
     @BeforeEach
     void setup() {
         userRepo.deleteAllInBatch();
+        when(jwtService.encrypt(any()))
+                .thenReturn(VALID_TOKEN);
+        when(mailService.sendMail(any()))
+                .thenReturn("Your verification link: someFakeLink");
     }
 
     @Test
