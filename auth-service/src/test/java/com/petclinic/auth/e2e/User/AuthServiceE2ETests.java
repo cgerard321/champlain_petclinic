@@ -11,6 +11,8 @@ package com.petclinic.auth.e2e.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.auth.Mail.Mail;
 import com.petclinic.auth.Mail.MailService;
+import com.petclinic.auth.Role.Role;
+import com.petclinic.auth.Role.RoleRepo;
 import com.petclinic.auth.User.User;
 import com.petclinic.auth.User.UserIDLessRoleLessDTO;
 import com.petclinic.auth.User.UserRepo;
@@ -53,6 +55,9 @@ public class AuthServiceE2ETests {
     private UserRepo userRepo;
 
     @Autowired
+    private RoleRepo roleRepo;
+
+    @Autowired
     private MockMvc mockMvc;
 
     @Autowired
@@ -69,7 +74,10 @@ public class AuthServiceE2ETests {
     @BeforeEach
     void setup() {
         ID_LESS_USER = objectMapper.convertValue(USER, UserIDLessRoleLessDTO.class);
+
         userRepo.deleteAllInBatch();
+        roleRepo.deleteAllInBatch();
+
         when(mailService.sendMail(any()))
                 .thenReturn("Your verification link: someFakeLink");
     }
@@ -110,6 +118,27 @@ public class AuthServiceE2ETests {
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.token").isString());
+    }
+
+    @Test
+    @DisplayName("Given verified admin user, access protected roles endpoint")
+    void admin_access_protected_route() throws Exception {
+
+        registerUser();
+
+        // Manual addition of ADMIN role & verification
+        final Role admin = roleRepo.save(Role.builder().name("ADMIN").build());
+        final User byEmail = userRepo.findByEmail(USER.getEmail());
+
+        byEmail.setVerified(true);
+        byEmail.getRoles().add(admin);
+
+        userRepo.save(byEmail);
+
+        final User afterAdmin = userRepo.findByEmail(USER.getEmail());
+
+        assertTrue(afterAdmin.isVerified());
+        assertTrue(afterAdmin.getRoles().contains(admin));
     }
 
     private void registerUser() throws Exception {
