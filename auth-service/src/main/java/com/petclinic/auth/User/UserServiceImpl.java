@@ -22,7 +22,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 import static java.lang.String.format;
-import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.ResponseEntity.ok;
 
 @Service
@@ -118,7 +117,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public String login(UserIDLessRoleLessDTO user) throws IncorrectPasswordException {
+    public UserTokenPair login(UserIDLessRoleLessDTO user) throws IncorrectPasswordException {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword())
@@ -126,7 +125,10 @@ public class UserServiceImpl implements UserService {
 
             User principal = (User) authentication.getPrincipal();
 
-            return jwtService.encrypt(principal);
+            return UserTokenPair.builder()
+                    .token(jwtService.encrypt(principal))
+                    .user(principal)
+                    .build();
         } catch (BadCredentialsException ex) {
             throw new IncorrectPasswordException(format("Password not valid for email %s", user.getEmail()));
         }

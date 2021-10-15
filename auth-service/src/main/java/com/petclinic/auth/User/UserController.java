@@ -91,8 +91,9 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<UserPasswordLessDTO> login(@RequestBody UserIDLessRoleLessDTO user) throws IncorrectPasswordException {
+        final UserTokenPair login = userService.login(user);
         return ok()
-                .header(AUTHORIZATION, userService.login(user))
-                .body(userMapper.modelToPasswordLessDTO(principal));
+                .header(AUTHORIZATION, login.getToken())
+                .body(userMapper.modelToPasswordLessDTO(login.getUser()));
     }
 }

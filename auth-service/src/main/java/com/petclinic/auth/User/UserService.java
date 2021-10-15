@@ -41,5 +41,5 @@ public interface UserService {
 
     UserPasswordLessDTO verifyEmailFromToken(String token);
 
-    String login(UserIDLessRoleLessDTO user) throws IncorrectPasswordException;
+    UserTokenPair login(UserIDLessRoleLessDTO user) throws IncorrectPasswordException;
 }

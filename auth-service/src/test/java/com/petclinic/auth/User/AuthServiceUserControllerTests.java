@@ -360,7 +360,10 @@ public class AuthServiceUserControllerTests {
 
         when(userService.login(
                 argThat( n -> n.getEmail().equals(EMAIL) && n.getPassword().equals(PASS) )))
-                .thenReturn(VALID_TOKEN);
+                .thenReturn(UserTokenPair.builder()
+                        .token(VALID_TOKEN)
+                        .user(User.builder().username(USER).email(EMAIL).build())
+                        .build());
 
         mockMvc.perform(post("/users/login").contentType(APPLICATION_JSON).content(asString))
                 .andExpect(status().is2xxSuccessful())
