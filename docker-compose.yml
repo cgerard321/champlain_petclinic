@@ -42,10 +42,6 @@ services:
 
   auth-service:
     build: auth-service
-    deploy:
-      resources:
-        limits:
-          memory: 2048m
     ports:
       - "7005:8080"
     depends_on:
