@@ -44,8 +44,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import javax.validation.*;
 import java.nio.charset.StandardCharsets;
@@ -61,6 +63,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -366,12 +369,19 @@ public class AuthServiceUserControllerTests {
                 argThat( n -> n.getEmail().equals(EMAIL) && n.getPassword().equals(PASS) )))
                 .thenReturn(UserTokenPair.builder()
                         .token(VALID_TOKEN)
-                        .user(User.builder().username(USER).email(EMAIL).build())
+                        .user(User.builder().username(USER).email(EMAIL).roles(Collections.emptySet()).build())
                         .build());
 
-        mockMvc.perform(post("/users/login").contentType(APPLICATION_JSON).content(asString))
+        final MvcResult mvcResult = mockMvc.perform(post("/users/login").contentType(APPLICATION_JSON).content(asString))
                 .andExpect(status().is2xxSuccessful())
-                .andExpect(jsonPath("$.token").value(VALID_TOKEN));
+                .andExpect(jsonPath("$.password").doesNotExist())
+                .andExpect(jsonPath("$.id").isNumber())
+                .andExpect(jsonPath("$.roles").isArray())
+                .andExpect(jsonPath("$.email").value(EMAIL))
+                .andExpect(jsonPath("$.username").value(USER))
+                .andReturn();
+
+        assertEquals(VALID_TOKEN, mvcResult.getResponse().getHeader(AUTHORIZATION));
     }
 
     @Test
