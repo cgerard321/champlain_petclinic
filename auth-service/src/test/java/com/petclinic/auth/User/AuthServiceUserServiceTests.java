@@ -225,13 +225,18 @@ public class AuthServiceUserServiceTests {
 
 
         final UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(USER, PASS, EMAIL);
-        final User saved = userService.createUser(userIDLessDTO);
+        userService.createUser(userIDLessDTO);
+
+        final User byEmail = userRepo.findByEmail(EMAIL).get();
+        byEmail.setVerified(true);
+        userRepo.save(byEmail);
 
         assertEquals(VALID_TOKEN, userService.login(UserIDLessRoleLessDTO.builder()
                 .username(USER)
                 .password(PASS)
                 .email(EMAIL)
                 .build())
+                .getToken()
         );
     }
 
@@ -241,7 +246,11 @@ public class AuthServiceUserServiceTests {
 
 
         final UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(USER, PASS, EMAIL);
-        final User saved = userService.createUser(userIDLessDTO);
+        userService.createUser(userIDLessDTO);
+
+        final User user = userRepo.findByEmail(EMAIL).get();
+        user.setVerified(true);
+        userRepo.save(user);
 
         IncorrectPasswordException incorrectPasswordException = assertThrows(IncorrectPasswordException.class, () -> userService.login(UserIDLessRoleLessDTO.builder()
                 .username(USER)
