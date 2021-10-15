@@ -25,8 +25,11 @@ public class VisitsServiceImpl implements VisitsService {
 
     private final VisitRepository visitRepository;
 
-    public VisitsServiceImpl(VisitRepository repo){
+    private final VisitMapper mapper;
+
+    public VisitsServiceImpl(VisitRepository repo, VisitMapper mapper){
         this.visitRepository = repo;
+        this.mapper = mapper;
     }
 
     @Override

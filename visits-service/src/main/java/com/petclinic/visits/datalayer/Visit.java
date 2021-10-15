@@ -4,10 +4,12 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Indexed;
 
 import javax.persistence.*;
 import javax.validation.constraints.Size;
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * Simple JavaBean domain object representing a visit.
@@ -33,6 +35,10 @@ public class Visit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @Column(name = "visit_id")
+    @GeneratedValue
+    private UUID visitId;
 
     @Builder.Default
     @Column(name = "visit_date")
