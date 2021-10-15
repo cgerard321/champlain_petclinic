@@ -1,26 +1,38 @@
+/**
+ * Created by IntelliJ IDEA.
+ *
+ * User: @Fube
+ * Date: 2021-10-14
+ * Ticket: feat(AUTH-CPC-388)
+ */
+
 package com.petclinic.auth.User;
+
+import com.petclinic.auth.Exceptions.IncorrectPasswordException;
+import com.petclinic.auth.Exceptions.NotFoundException;
 import com.petclinic.auth.JWT.JWTService;
 import com.petclinic.auth.Mail.Mail;
 import com.petclinic.auth.Mail.MailService;
+import com.petclinic.auth.User.data.User;
+import com.petclinic.auth.User.data.UserIDLessRoleLessDTO;
+import com.petclinic.auth.User.data.UserPasswordLessDTO;
+import com.petclinic.auth.User.data.UserTokenPair;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import com.petclinic.auth.Exceptions.NotFoundException;
 
 import javax.validation.Valid;
-
-import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Base64;
 
 import static java.lang.String.format;
@@ -36,6 +48,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final MailService mailService;
     private final JWTService jwtService;
+    private final AuthenticationManager authenticationManager;
 
     @Value("${gateway.origin}")
     private String gatewayOrigin;
@@ -58,10 +71,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User createUser(@Valid UserIDLessDTO userIDLessDTO) {
+    public User createUser(@Valid UserIDLessRoleLessDTO userIDLessDTO) {
 
         log.info("Saving user with email {}", userIDLessDTO.getEmail());
-        User user = userMapper.idLessDTOToModel(userIDLessDTO);
+        User user = userMapper.idLessRoleLessDTOToModel(userIDLessDTO);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         log.info("Sending email to {}...", userIDLessDTO.getEmail());
@@ -109,28 +122,36 @@ public class UserServiceImpl implements UserService {
         final User decrypt = jwtService.decrypt(token);
         log.info("Decrypted user with email {} from token", decrypt.getEmail());
 
-        final User byEmail = userRepo.findByEmail(decrypt.getEmail());
+        final User byEmail = userRepo.findByEmail(decrypt.getEmail()).get();
         byEmail.setVerified(true);
         final User save = userRepo.save(byEmail);
         log.info("Updated user with email {} to verified=true", decrypt.getEmail());
 
-        return userMapper.modelToIDLessPasswordLessDTO(save);
+        return userMapper.modelToPasswordLessDTO(save);
+    }
+
+    @Override
+    public UserTokenPair login(UserIDLessRoleLessDTO user) throws IncorrectPasswordException {
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword())
+            );
+
+            User principal = (User) authentication.getPrincipal();
+
+            return UserTokenPair.builder()
+                    .token(jwtService.encrypt(principal))
+                    .user(principal)
+                    .build();
+        } catch (BadCredentialsException ex) {
+            throw new IncorrectPasswordException(format("Password not valid for email %s", user.getEmail()));
+        }
     }
 
     @Override
     public User getUserByEmail(String email) throws NotFoundException {
-        if (userRepo.findByEmail(email) == null){
-            throw new NotFoundException("No account found for email: " + email);
-        }
-        else {
-            User user = userRepo.findByEmail(email);
-            LOG.debug("find user by email: " + user.getEmail());
-            return user;
-        }
-    }
 
-    @Override
-    public boolean verifyPassword(User user, UserIDLessUsernameLessDTO loginUser) {
-        return user.getPassword().equals(loginUser.getPassword());
+        return userRepo.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("No account found for email: " + email));
     }
 }

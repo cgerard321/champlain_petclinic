@@ -8,6 +8,8 @@
  */
 package com.petclinic.auth.Role;
 
+import com.petclinic.auth.Role.data.Role;
+import com.petclinic.auth.Role.data.RoleIDLessDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;

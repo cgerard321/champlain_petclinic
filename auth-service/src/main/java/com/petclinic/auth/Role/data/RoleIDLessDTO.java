@@ -6,7 +6,7 @@
  * Ticket: feat(AUTH-CPC-95)
  *
  */
-package com.petclinic.auth.Role;
+package com.petclinic.auth.Role.data;
 
 import lombok.*;
 

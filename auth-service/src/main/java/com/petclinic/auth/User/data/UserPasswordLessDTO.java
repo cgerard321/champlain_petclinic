@@ -5,8 +5,8 @@
  * Date: 09/10/21
  * Ticket: feat(AUTH-CPC-310)
  */
-package com.petclinic.auth.User;
-import com.petclinic.auth.Role.Role;
+package com.petclinic.auth.User.data;
+import com.petclinic.auth.Role.data.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

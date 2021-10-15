@@ -12,6 +12,9 @@ spring:
     url: jdbc:mysql://localhost:3310/auth
     username: user
     password: pwd
+  security:
+    filter:
+      order: 10
 
   flyway:
     url: jdbc:mysql://localhost:3310

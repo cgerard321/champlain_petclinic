@@ -1,5 +1,6 @@
 package com.petclinic.auth.Role;
 
+import com.petclinic.auth.Role.data.Role;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

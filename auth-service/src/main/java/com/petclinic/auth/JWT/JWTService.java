@@ -1,6 +1,6 @@
 package com.petclinic.auth.JWT;
 
-import com.petclinic.auth.User.User;
+import com.petclinic.auth.User.data.User;
 
 /**
  * Created by IntelliJ IDEA.
