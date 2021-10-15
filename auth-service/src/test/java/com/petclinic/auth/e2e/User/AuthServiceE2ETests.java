@@ -25,6 +25,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -34,11 +35,11 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static java.lang.Math.ceil;
 import static java.lang.String.format;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -119,10 +120,20 @@ public class AuthServiceE2ETests {
 
         verifyUser(stringAtomicReference.get());
 
-        mockMvc.perform(post("/users/login").contentType(APPLICATION_JSON).content(asString))
+        final MvcResult result = mockMvc.perform(post("/users/login").contentType(APPLICATION_JSON).content(asString))
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$.token").isString());
+                .andExpect(jsonPath("$.password").doesNotExist())
+                .andExpect(jsonPath("$.id").isNumber())
+                .andExpect(jsonPath("$.roles").isArray())
+                .andExpect(jsonPath("$.email").value(USER.getEmail()))
+                .andExpect(jsonPath("$.username").value(USER.getUsername()))
+                .andReturn();
+
+        final String token = result.getResponse().getHeader(AUTHORIZATION);
+
+        assertNotNull(token);
+        assertNotEquals(0, token.length());
     }
 
     @Test
@@ -163,7 +174,7 @@ public class AuthServiceE2ETests {
                 .andExpect(jsonPath("$.username").value(USER.getUsername()))
                 .andReturn();
 
-        final String token = result.getResponse().getHeader("authorization");
+        final String token = result.getResponse().getHeader(AUTHORIZATION);
 
         assertNotNull(token);
 

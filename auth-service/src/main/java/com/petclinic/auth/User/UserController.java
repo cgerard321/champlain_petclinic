@@ -103,7 +103,6 @@ public class UserController {
             User principal = (User) authentication.getPrincipal();
 
             final String token = jwtService.encrypt(principal);
-            final Map<String, String> body = Maps.of("token", token).build();
 
             return ok()
                     .header(AUTHORIZATION, token)
