@@ -33,6 +33,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static java.lang.Math.ceil;
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -42,6 +43,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @AutoConfigureMockMvc
@@ -166,12 +168,13 @@ public class AuthServiceE2ETests {
         mockMvc.perform(get("/roles")
                 .contentType(APPLICATION_JSON)
                 .header("Authorization", format("Bearer %s", token)))
+                .andDo(print())
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.number").value(0))
                 .andExpect(jsonPath("$.totalElements").value(userRepo.count()))
-                .andExpect(jsonPath("$.totalPages").value(userRepo.count() / 10));
+                .andExpect(jsonPath("$.totalPages").value(ceil(userRepo.count() / 10.0)));
     }
 
     private void registerUser() throws Exception {
