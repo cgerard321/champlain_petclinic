@@ -1,8 +1,12 @@
 package com.petclinic.bffapigateway.dtos;
 
+import lombok.Builder;
 import lombok.Data;
 
+import java.util.Set;
+
 @Data
+@Builder(toBuilder = true)
 public class UserDetails {
 
     private long id;

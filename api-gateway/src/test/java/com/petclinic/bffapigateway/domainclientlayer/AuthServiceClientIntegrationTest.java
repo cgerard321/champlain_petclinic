@@ -40,8 +40,8 @@ public class AuthServiceClientIntegrationTest {
         server = new MockWebServer();
         authServiceClient = new AuthServiceClient(
                 WebClient.builder(),
-                "http://auth-service",
-                "1234"
+                server.getHostName(),
+                String.valueOf(server.getPort())
         );
         objectMapper = new ObjectMapper();
     }
@@ -68,6 +68,6 @@ public class AuthServiceClientIntegrationTest {
         assertEquals(USER_REGISTER.getEmail(), block.getEmail());
         assertEquals(USER_REGISTER.getUsername(), block.getUsername());
         assertNotNull(block.getId());
-        assertEquals(0, block.getRoles());
+        assertEquals(0, block.getRoles().size());
     }
 }
