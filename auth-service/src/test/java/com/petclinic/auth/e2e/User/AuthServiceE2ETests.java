@@ -9,7 +9,6 @@
 package com.petclinic.auth.e2e.User;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.jayway.jsonpath.JsonPath;
 import com.petclinic.auth.Mail.Mail;
 import com.petclinic.auth.Mail.MailService;
 import com.petclinic.auth.Role.Role;
@@ -157,10 +156,14 @@ public class AuthServiceE2ETests {
         final MvcResult result = mockMvc.perform(post("/users/login").contentType(APPLICATION_JSON).content(asString))
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$.token").isString())
+                .andExpect(jsonPath("$.password").doesNotExist())
+                .andExpect(jsonPath("$.id").isNumber())
+                .andExpect(jsonPath("$.roles").isArray())
+                .andExpect(jsonPath("$.email").value(USER.getEmail()))
+                .andExpect(jsonPath("$.username").value(USER.getUsername()))
                 .andReturn();
 
-        final String token = JsonPath.read(result.getResponse().getContentAsString(), "$.token");
+        final String token = result.getResponse().getHeader("authorization");
 
         assertNotNull(token);
 
