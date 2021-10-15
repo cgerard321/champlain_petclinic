@@ -60,6 +60,7 @@ public class AuthServiceClientIntegrationTest {
                         .toBuilder()
                         .id(1)
                         .roles(Collections.emptySet())
+                        .password(null)
                         .build()
         );
 
@@ -74,6 +75,7 @@ public class AuthServiceClientIntegrationTest {
 
         assertEquals(USER_REGISTER.getEmail(), block.getEmail());
         assertEquals(USER_REGISTER.getUsername(), block.getUsername());
+        assertNull(block.getPassword());
         assertNotNull(block.getId());
         assertEquals(0, block.getRoles().size());
     }
