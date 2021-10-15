@@ -25,6 +25,7 @@
 package com.petclinic.auth.User;
 
 import com.petclinic.auth.Exceptions.IncorrectPasswordException;
+import com.petclinic.auth.Exceptions.NotFoundException;
 import com.petclinic.auth.Mail.Mail;
 import com.petclinic.auth.User.data.User;
 import com.petclinic.auth.User.data.UserIDLessRoleLessDTO;
@@ -51,4 +52,7 @@ public interface UserService {
     UserPasswordLessDTO verifyEmailFromToken(String token);
 
     UserTokenPair login(UserIDLessRoleLessDTO user) throws IncorrectPasswordException;
+    User getUserByEmail(String email) throws NotFoundException;
+
+    boolean verifyPassword(User user, UserIDLessUsernameLessDTO loginUser);
 }

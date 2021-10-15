@@ -34,6 +34,7 @@ package com.petclinic.auth.User;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.auth.Exceptions.IncorrectPasswordException;
+import com.petclinic.auth.Exceptions.NotFoundException;
 import com.petclinic.auth.JWT.JWTService;
 import com.petclinic.auth.Mail.MailService;
 import com.petclinic.auth.User.data.User;
@@ -91,7 +92,8 @@ public class AuthServiceUserControllerTests {
     final String
             USER = "user",
             PASS = "Pas$word123",
-            EMAIL = "email@gmail.com";
+            EMAIL = "email@gmail.com",
+            BADEMAIL = "blabla";
 
     private final String VALID_TOKEN = "a.fake.token";
 
@@ -113,6 +115,9 @@ public class AuthServiceUserControllerTests {
 
     @Autowired
     private UserRepo userRepo;
+
+    @Autowired
+    private UserMapper userMap;
 
     @Autowired
     private UserController userController;
@@ -406,5 +411,19 @@ public class AuthServiceUserControllerTests {
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andExpect(jsonPath("$.message").value(EXCEPTION_MESSAGE));
+    }
+
+    @Test
+    @DisplayName("Check that user exists")
+    void verifyUser_true () throws NotFoundException {
+        UserIDLessUsernameLessDTO loginUser = new UserIDLessUsernameLessDTO(EMAIL, PASS);
+        userRepo.save(userMap.idLessUsernameLessToModel(loginUser).toBuilder().username("username").build());
+        assertTrue(userController.verifyUser(loginUser));
+    }
+    @Test
+    @DisplayName("Check user that does not exist")
+    void verifyUser_false (){
+        UserIDLessUsernameLessDTO loginUser = new UserIDLessUsernameLessDTO(BADEMAIL, PASS);
+        assertThrows(NotFoundException.class, () -> userController.verifyUser(loginUser));
     }
 }

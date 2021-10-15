@@ -19,6 +19,8 @@ import com.petclinic.auth.User.data.UserPasswordLessDTO;
 import com.petclinic.auth.User.data.UserTokenPair;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -40,6 +42,7 @@ import static java.lang.String.format;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
+    private final Logger LOG = LoggerFactory.getLogger(UserServiceImpl.class);
     private final UserRepo userRepo;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
@@ -143,5 +146,17 @@ public class UserServiceImpl implements UserService {
         } catch (BadCredentialsException ex) {
             throw new IncorrectPasswordException(format("Password not valid for email %s", user.getEmail()));
         }
+    }
+
+    @Override
+    public User getUserByEmail(String email) throws NotFoundException {
+
+        return userRepo.findByEmail(email)
+                .orElseThrow(() -> new NotFoundException("No account found for email: " + email));
+    }
+
+    @Override
+    public boolean verifyPassword(User user, UserIDLessUsernameLessDTO loginUser) {
+        return user.getPassword().equals(loginUser.getPassword());
     }
 }

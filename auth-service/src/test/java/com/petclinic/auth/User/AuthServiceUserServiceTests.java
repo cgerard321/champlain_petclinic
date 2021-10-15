@@ -23,6 +23,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Optional;
@@ -44,7 +45,9 @@ public class AuthServiceUserServiceTests {
             USER = "user",
             PASS = "pas$word123",
             EMAIL = "email@gmail.com",
-            NEWPASSWORD = "change";
+            NEWPASSWORD = "change",
+            BADPASS = "123",
+            BADEMAIL = null;
 
     private String VALID_TOKEN = "a.fake.token";
 
@@ -268,5 +271,30 @@ public class AuthServiceUserServiceTests {
         );
 
         assertEquals(format("Password not valid for email %s", EMAIL), incorrectPasswordException.getMessage());
+    }
+    
+    @DisplayName("Verify user's wrong password")
+    void test_verify_user_password_failure(){
+        UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
+        User userMap = userMapper.idLessDTOToModel(userIDLessDTO);
+        UserIDLessUsernameLessDTO loginUser = new UserIDLessUsernameLessDTO(EMAIL, BADPASS);
+        assertFalse(userService.verifyPassword(userMap, loginUser));
+    }
+
+    @Test
+    @DisplayName("Verify user's password")
+    void test_verify_user_password_success(){
+        UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
+        User userMap = userMapper.idLessDTOToModel(userIDLessDTO);
+        UserIDLessUsernameLessDTO loginUser = new UserIDLessUsernameLessDTO(EMAIL, PASS);
+        assertTrue(userService.verifyPassword(userMap, loginUser));
+    }
+
+    @Test
+    @DisplayName("Verify email that does not exist")
+    void verify_email_failure() {
+        UserIDLessDTO userIDLessDTO = new UserIDLessDTO (USER, PASS, EMAIL);
+        User user = userMapper.idLessDTOToModel(userIDLessDTO);
+        assertThrows(NotFoundException.class, () -> userService.getUserByEmail(BADEMAIL));
     }
 }

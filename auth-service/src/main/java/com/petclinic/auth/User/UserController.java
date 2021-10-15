@@ -22,6 +22,7 @@ import com.petclinic.auth.User.data.User;
 import com.petclinic.auth.User.data.UserIDLessRoleLessDTO;
 import com.petclinic.auth.User.data.UserPasswordLessDTO;
 import com.petclinic.auth.User.data.UserTokenPair;
+import com.petclinic.auth.Exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -100,5 +101,10 @@ public class UserController {
         return ok()
                 .header(AUTHORIZATION, login.getToken())
                 .body(userMapper.modelToPasswordLessDTO(login.getUser()));
+    }
+    
+    public Boolean verifyUser (@RequestBody UserIDLessUsernameLessDTO loginUser) throws NotFoundException {
+        final User user = userService.getUserByEmail(loginUser.getEmail());
+        return userService.verifyPassword(user, loginUser);
     }
 }
