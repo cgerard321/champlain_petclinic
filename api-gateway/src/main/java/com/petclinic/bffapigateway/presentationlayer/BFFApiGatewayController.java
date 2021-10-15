@@ -200,7 +200,9 @@ public class BFFApiGatewayController {
     @PostMapping(value = "users",
             consumes = "application/json",
             produces = "application/json")
-    public Mono<UserDetails> createUser(@RequestBody UserDetails model) { return authServiceClient.getUser(model.getId()); }
+    public Mono<UserDetails> createUser(@RequestBody Register model) {
+        return authServiceClient.createUser(model);
+    }
 
     @DeleteMapping(value = "users/{userId}")
     public Mono<UserDetails> deleteUser(final @PathVariable long userId) { return authServiceClient.deleteUser(userId); }
