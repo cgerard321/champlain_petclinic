@@ -132,14 +132,14 @@ public class AuthServiceE2ETests {
 
         // Manual addition of ADMIN role & verification
         final Role admin = roleRepo.save(Role.builder().name("ADMIN").build());
-        final User byEmail = userRepo.findByEmail(USER.getEmail());
+        final User byEmail = userRepo.findByEmail(USER.getEmail()).get();
 
         byEmail.setVerified(true);
         byEmail.getRoles().add(admin);
 
         userRepo.save(byEmail);
 
-        final User afterAdmin = userRepo.findByEmail(USER.getEmail());
+        final User afterAdmin = userRepo.findByEmail(USER.getEmail()).get();
 
         assertTrue(afterAdmin.isVerified());
         assertTrue(afterAdmin.getRoles().parallelStream()
@@ -199,7 +199,7 @@ public class AuthServiceE2ETests {
                 .andExpect(jsonPath("$.username").value(USER.getUsername()))
                 .andExpect(jsonPath("$.roles.length()").value(0));
 
-        assertTrue(userRepo.findByEmail(USER.getEmail()).isVerified());
+        assertTrue(userRepo.findByEmail(USER.getEmail()).get().isVerified());
     }
 
     private AtomicReference<String> captureJWT() {

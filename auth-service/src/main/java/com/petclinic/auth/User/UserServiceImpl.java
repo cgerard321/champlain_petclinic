@@ -19,6 +19,7 @@ import javax.validation.Valid;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
+import java.util.Optional;
 
 import static java.lang.String.format;
 
@@ -105,7 +106,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         final User decrypt = jwtService.decrypt(token);
         log.info("Decrypted user with email {} from token", decrypt.getEmail());
 
-        final User byEmail = userRepo.findByEmail(decrypt.getEmail());
+        final User byEmail = userRepo.findByEmail(decrypt.getEmail()).get();
         byEmail.setVerified(true);
         final User save = userRepo.save(byEmail);
         log.info("Updated user with email {} to verified=true", decrypt.getEmail());
@@ -115,7 +116,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public String login(UserIDLessRoleLessDTO user) throws IncorrectPasswordException {
-        final User byEmail = userRepo.findByEmail(user.getEmail());
+        final User byEmail = userRepo.findByEmail(user.getEmail()).get();
 
         if(!passwordEncoder.matches(user.getPassword(), byEmail.getPassword())) {
             throw new IncorrectPasswordException(format("Password not valid for email %s", user.getEmail()));
@@ -126,7 +127,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        final User byEmail = userRepo.findByEmail(username);
-        return byEmail;
+        return userRepo.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User with email " + username + "not found"));
     }
 }
