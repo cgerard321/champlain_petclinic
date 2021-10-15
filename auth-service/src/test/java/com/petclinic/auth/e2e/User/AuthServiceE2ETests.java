@@ -84,18 +84,11 @@ public class AuthServiceE2ETests {
     @DisplayName("When given verification URL, verify email")
     void login_user() throws Exception {
 
-        AtomicReference<String> verificationJWT = new AtomicReference<>();
-
-
-        doAnswer(n -> {
-            final Mail mail = (Mail) n.callRealMethod();
-            verificationJWT.set(mail.getMessage().split("/verification/")[1]);
-            return mail;
-        }).when(userService).generateVerificationMail(any());
+        final AtomicReference<String> stringAtomicReference = captureJWT();
 
         registerUser();
 
-        verifyUser(verificationJWT.get());
+        verifyUser(stringAtomicReference.get());
     }
 
     @Test
@@ -107,17 +100,11 @@ public class AuthServiceE2ETests {
             put("password", USER.getPassword());
         }});
 
-        AtomicReference<String> verificationJWT = new AtomicReference<>();
-
-        doAnswer(n -> {
-            final Mail mail = (Mail) n.callRealMethod();
-            verificationJWT.set(mail.getMessage().split("/verification/")[1]);
-            return mail;
-        }).when(userService).generateVerificationMail(any());
+        final AtomicReference<String> stringAtomicReference = captureJWT();
 
         registerUser();
 
-        verifyUser(verificationJWT.get());
+        verifyUser(stringAtomicReference.get());
 
         mockMvc.perform(post("/users/login").contentType(APPLICATION_JSON).content(asString))
                 .andExpect(status().is2xxSuccessful())
@@ -151,5 +138,17 @@ public class AuthServiceE2ETests {
                 .andExpect(jsonPath("$.roles.length()").value(0));
 
         assertTrue(userRepo.findByEmail(USER.getEmail()).isVerified());
+    }
+
+    private AtomicReference<String> captureJWT() {
+        AtomicReference<String> verificationJWT = new AtomicReference<>();
+
+        doAnswer(n -> {
+            final Mail mail = (Mail) n.callRealMethod();
+            verificationJWT.set(mail.getMessage().split("/verification/")[1]);
+            return mail;
+        }).when(userService).generateVerificationMail(any());
+
+        return verificationJWT;
     }
 }
