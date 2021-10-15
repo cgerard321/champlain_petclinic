@@ -16,7 +16,12 @@
  * User: @Fube
  * Date: 10/10/21
  * Ticket: feat(AUTH-CPC-357)
+ *
+ * User: @Fube
+ * Date: 2021-10-14
+ * Ticket: feat(AUTH-CPC-388)
  */
+
 package com.petclinic.auth.User;
 
 import com.petclinic.auth.Exceptions.IncorrectPasswordException;

@@ -12,6 +12,10 @@
  * User: @Fube
  * Date: 2021-10-10
  * Ticket: feat(AUTH-CPC-357)
+ *
+ * User: @Fube
+ * Date: 2021-10-14
+ * Ticket: feat(AUTH-CPC-388)
  */
 
 package com.petclinic.auth.Config;

@@ -1,5 +1,15 @@
+/**
+ * Created by IntelliJ IDEA.
+ *
+ * User: @Fube
+ * Date: 2021-10-14
+ * Ticket: feat(AUTH-CPC-388)
+ */
+
 package com.petclinic.auth.User;
+
 import com.petclinic.auth.Exceptions.IncorrectPasswordException;
+import com.petclinic.auth.Exceptions.NotFoundException;
 import com.petclinic.auth.JWT.JWTService;
 import com.petclinic.auth.Mail.Mail;
 import com.petclinic.auth.Mail.MailService;
@@ -18,15 +28,12 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import com.petclinic.auth.Exceptions.NotFoundException;
 
 import javax.validation.Valid;
-
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 import static java.lang.String.format;
-import static org.springframework.http.ResponseEntity.ok;
 
 @Service
 @Slf4j

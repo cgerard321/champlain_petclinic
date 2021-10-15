@@ -1,3 +1,15 @@
+/**
+ * Created by IntelliJ IDEA.
+ *
+ * User: @Fube
+ * Date: 2021-10-10
+ * Ticket: feat(AUTH-CPC-357)
+ *
+ * User: @Fube
+ * Date: 2021-10-14
+ * Ticket: feat(AUTH-CPC-388)
+ */
+
 package com.petclinic.auth.JWT;
 
 import com.petclinic.auth.Role.data.Role;
@@ -15,13 +27,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
-
-/**
- * Created by IntelliJ IDEA.
- * User: @Fube
- * Date: 2021-10-10
- * Ticket: feat(AUTH-CPC-357)
- */
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")

@@ -1,3 +1,11 @@
+/**
+ * Created by IntelliJ IDEA.
+ *
+ * User: @Fube
+ * Date: 2021-10-14
+ * Ticket: feat(AUTH-CPC-388)
+ */
+
 package com.petclinic.auth.User;
 
 import com.petclinic.auth.Role.data.Role;

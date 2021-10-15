@@ -23,7 +23,7 @@ import static org.springframework.util.StringUtils.isEmpty;
 /**
  * Created by IntelliJ IDEA.
  *
- * User: @nariman
+ * User: @Fube
  * Date: 2021-10-14
  * Ticket: feat(AUTH-CPC-388)
  */
