@@ -1,5 +1,7 @@
 package com.petclinic.auth.Config;
 
+import com.petclinic.auth.JWT.JWTService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -15,7 +17,12 @@ import java.io.IOException;
  * Date: 2021-10-14
  * Ticket: feat(AUTH-CPC-388)
  */
+
+@RequiredArgsConstructor
 public class JWTFilter extends OncePerRequestFilter {
+
+    private final JWTService jwtService;
+
     @Override
     protected void doFilterInternal(
             HttpServletRequest request,
