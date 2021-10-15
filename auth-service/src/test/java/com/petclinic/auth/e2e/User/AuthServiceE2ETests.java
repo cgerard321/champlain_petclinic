@@ -33,6 +33,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -160,6 +161,17 @@ public class AuthServiceE2ETests {
         final String token = JsonPath.read(result.getResponse().getContentAsString(), "$.token");
 
         assertNotNull(token);
+
+        // Access protected route
+        mockMvc.perform(get("/roles")
+                .contentType(APPLICATION_JSON)
+                .header("Authorization", format("Bearer %s", token)))
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(jsonPath("$.content").isArray())
+                .andExpect(jsonPath("$.number").value(0))
+                .andExpect(jsonPath("$.totalElements").value(userRepo.count()))
+                .andExpect(jsonPath("$.totalPages").value(userRepo.count() / 10));
     }
 
     private void registerUser() throws Exception {
