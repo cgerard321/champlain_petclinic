@@ -20,9 +20,9 @@
  */
 package com.petclinic.auth;
 
-import com.petclinic.auth.Role.Role;
+import com.petclinic.auth.Role.data.Role;
 import com.petclinic.auth.Role.RoleRepo;
-import com.petclinic.auth.User.User;
+import com.petclinic.auth.User.data.User;
 import com.petclinic.auth.User.UserIDLessUsernameLessDTO;
 import com.petclinic.auth.User.UserRepo;
 import org.junit.jupiter.api.BeforeEach;

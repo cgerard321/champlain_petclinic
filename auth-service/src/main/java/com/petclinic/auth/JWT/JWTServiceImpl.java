@@ -3,15 +3,19 @@
  * User: @Fube
  * Date: 2021-10-10
  * Ticket: feat(AUTH-CPC-357)
+ *
+ * User: @Fube
+ * Date: 2021-10-14
+ * Ticket: feat(AUTH-CPC-388)
  */
+
 package com.petclinic.auth.JWT;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.auth.Role.Role;
-import com.petclinic.auth.User.User;
+import com.petclinic.auth.Role.data.Role;
+import com.petclinic.auth.User.data.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,6 +45,7 @@ public class JWTServiceImpl implements JWTService {
     public String encrypt(User user) {
         Map<String, Object> claimsMap = new HashMap<>();
         claimsMap.put("roles", user.getRoles());
+        claimsMap.put("verified", user.isVerified());
 
         return Jwts.builder()
                 .setSubject(user.getEmail())
@@ -53,35 +58,30 @@ public class JWTServiceImpl implements JWTService {
 
     @Override
     public User decrypt(String token) {
-        try {
-            final Jws<Claims> claimsJws = Jwts.parserBuilder()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(token);
+        final Jws<Claims> claimsJws = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token);
 
-            final Claims body = claimsJws.getBody();
-            Set<Role> roles;
+        final Claims body = claimsJws.getBody();
+        Set<Role> roles;
 
-            final List<LinkedHashMap<String, String>> rolesList = body.get("roles", List.class);
-            if(rolesList == null || rolesList.size() <= 0) {
-                roles = Collections.emptySet();
-            } else {
-                roles = rolesList
-                        .parallelStream()
-                        .map(n -> objectMapper.convertValue(n, Role.class))
-                        .collect(Collectors.toSet());
-            }
+        final User mappedUser = objectMapper.convertValue(body, User.class);
 
-            return User.builder()
-                    .username(body.get("username", String.class))
-                    .roles(roles)
-                    .email(body.getSubject())
-                    .build();
-
-        } catch (JwtException ex) {
-            ex.printStackTrace();
-            //TODO: Add handling
-            throw new RuntimeException("Something wrong with the JWT boss");
+        final List<LinkedHashMap<String, String>> rolesList = body.get("roles", List.class);
+        if(rolesList == null || rolesList.size() <= 0) {
+            roles = Collections.emptySet();
+        } else {
+            roles = rolesList
+                    .parallelStream()
+                    .map(n -> objectMapper.convertValue(n, Role.class))
+                    .collect(Collectors.toSet());
         }
+
+        return mappedUser.toBuilder()
+                .roles(roles)
+                .email(body.getSubject())
+                .build();
+
     }
 }

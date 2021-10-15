@@ -24,13 +24,23 @@
  * User: @Fube
  * Date: 2021-10-10
  * Ticket: feat(AUTH-CPC-357)
+ *
+ * User: @Fube
+ * Date: 2021-10-14
+ * Ticket: feat(AUTH-CPC-388)
  */
+
 package com.petclinic.auth.User;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.petclinic.auth.Exceptions.IncorrectPasswordException;
 import com.petclinic.auth.Exceptions.NotFoundException;
 import com.petclinic.auth.JWT.JWTService;
 import com.petclinic.auth.Mail.MailService;
+import com.petclinic.auth.User.data.User;
+import com.petclinic.auth.User.data.UserIDLessRoleLessDTO;
+import com.petclinic.auth.User.data.UserPasswordLessDTO;
+import com.petclinic.auth.User.data.UserTokenPair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -39,21 +49,27 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import javax.validation.*;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.Optional;
+import java.util.Collections;
 import java.util.Random;
 import java.util.Set;
 
+import static java.lang.String.format;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -79,6 +95,8 @@ public class AuthServiceUserControllerTests {
             EMAIL = "email@gmail.com",
             BADEMAIL = "blabla";
 
+    private final String VALID_TOKEN = "a.fake.token";
+
 
     private Validator validator;
 
@@ -92,6 +110,8 @@ public class AuthServiceUserControllerTests {
     @Autowired
     private MockMvc mockMvc;
 
+    @Autowired
+    private UserMapper userMapper;
 
     @Autowired
     private UserRepo userRepo;
@@ -108,24 +128,32 @@ public class AuthServiceUserControllerTests {
     @MockBean
     private JWTService jwtService;
 
-    private final UserIDLessDTO ID_LESS_USER = new UserIDLessDTO(USER, PASS, EMAIL);
+    @MockBean
+    private UserService userService;
+
+    private final UserIDLessRoleLessDTO ID_LESS_USER = new UserIDLessRoleLessDTO(USER, PASS, EMAIL);
 
     @Test
     @DisplayName("Create a user from controller")
     void create_user_from_controller() {
+
+        final User hypothetical = userMapper.idLessRoleLessDTOToModel(ID_LESS_USER);
+
         when(jwtService.encrypt(any()))
                 .thenReturn("a.fake.token");
+        when(userService.createUser(ID_LESS_USER))
+                .thenReturn(hypothetical);
+
         final UserPasswordLessDTO user = userController.createUser(ID_LESS_USER);
         assertNotNull(user);
         assertThat(user.getId(), instanceOf(Long.TYPE));
-        assertTrue(userRepo.findById(user.getId()).isPresent());
     }
     @Test
     @DisplayName("Check the required fields with empty data")
     void check_empty_require_fields() {
 
 
-        UserIDLessDTO userIDLessDTO = new UserIDLessDTO();
+        UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO();
 
         assertThrows(ConstraintViolationException.class, () -> userController.createUser(userIDLessDTO));
     }
@@ -135,7 +163,7 @@ public class AuthServiceUserControllerTests {
     void check_empty_username() {
 
 
-        UserIDLessDTO userIDLessDTO = new UserIDLessDTO(null, PASS,EMAIL);
+        UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(null, PASS,EMAIL);
 
         assertThrows(ConstraintViolationException.class, () -> userController.createUser(userIDLessDTO));
     }
@@ -145,7 +173,7 @@ public class AuthServiceUserControllerTests {
     void check_empty_password() {
 
 
-        UserIDLessDTO userIDLessDTO = new UserIDLessDTO( USER, null,EMAIL);
+        UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO( USER, null,EMAIL);
 
         assertThrows(ConstraintViolationException.class, () -> userController.createUser(userIDLessDTO));
     }
@@ -154,8 +182,8 @@ public class AuthServiceUserControllerTests {
     void check_missing_specialchar_password() {
 
 
-        UserIDLessDTO userIDLessDTO = new UserIDLessDTO( USER, "Password123",EMAIL);
-        Set<ConstraintViolation<UserIDLessDTO>> violations = validator.validate(userIDLessDTO);
+        UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO( USER, "Password123",EMAIL);
+        Set<ConstraintViolation<UserIDLessRoleLessDTO>> violations = validator.validate(userIDLessDTO);
         assertFalse(violations.isEmpty());
     }
     @Test
@@ -163,9 +191,9 @@ public class AuthServiceUserControllerTests {
     void check_missing_number_password() {
 
 
-        UserIDLessDTO userIDLessDTO = new UserIDLessDTO( USER, "Pas$word",EMAIL);
+        UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO( USER, "Pas$word",EMAIL);
 
-        Set<ConstraintViolation<UserIDLessDTO>> violations = validator.validate(userIDLessDTO);
+        Set<ConstraintViolation<UserIDLessRoleLessDTO>> violations = validator.validate(userIDLessDTO);
         assertFalse(violations.isEmpty());
     }
     @Test
@@ -173,9 +201,9 @@ public class AuthServiceUserControllerTests {
     void check_missing_uppercase_password() {
 
 
-        UserIDLessDTO userIDLessDTO = new UserIDLessDTO( USER, "pas$word123",EMAIL);
+        UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO( USER, "pas$word123",EMAIL);
 
-        Set<ConstraintViolation<UserIDLessDTO>> violations = validator.validate(userIDLessDTO);
+        Set<ConstraintViolation<UserIDLessRoleLessDTO>> violations = validator.validate(userIDLessDTO);
         assertFalse(violations.isEmpty());
     }
     @Test
@@ -183,16 +211,16 @@ public class AuthServiceUserControllerTests {
     void check_missing_lowercase_password() {
 
 
-        UserIDLessDTO userIDLessDTO = new UserIDLessDTO( USER, "PAS$WORD123",EMAIL);
+        UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO( USER, "PAS$WORD123",EMAIL);
 
-        Set<ConstraintViolation<UserIDLessDTO>> violations = validator.validate(userIDLessDTO);
+        Set<ConstraintViolation<UserIDLessRoleLessDTO>> violations = validator.validate(userIDLessDTO);
         assertFalse(violations.isEmpty());
     }
     @Test
     @DisplayName("Check the email field in order to refused if it is empty")
     void check_empty_email(){
 
-        UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS,null);
+        UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(USER, PASS,null);
 
         assertThrows(ConstraintViolationException.class, () -> userController.createUser(userIDLessDTO));
     }
@@ -218,6 +246,10 @@ public class AuthServiceUserControllerTests {
             userRepo.save(new User("Username-1", "password"+i, "email@gmail.com"+i));
         }
 
+        final Page<User> all = userRepo.findAll(PageRequest.of(STARTING_PAGE - 1, PAGE_LIM));
+        when(userService.findAll(PageRequest.of(STARTING_PAGE - 1, PAGE_LIM)))
+                .thenReturn(all);
+
         assertEquals(USER_COUNT, userRepo.count());
 
         Page<User> userPage = userController.getAllUsers(STARTING_PAGE, PAGE_LIM);
@@ -229,34 +261,21 @@ public class AuthServiceUserControllerTests {
     @Test
     @DisplayName("Add then delete role from controller")
     void add_then_delete_user_from_controller() {
-
-        final User save = userRepo.save(new User("Username", "password", "email@gmail.com"));
-        final Optional<User> found = userRepo.findById(save.getId());
-        assertTrue(found.isPresent());
-        assertEquals("Username", found.get().getUsername());
-        assertEquals("password", found.get().getPassword());
-        assertEquals("email@gmail.com", found.get().getEmail());
-
         // Idempotency check
         for (int i = 0; i < rng.nextInt(100); i++) {
-            userController.deleteUser(save.getId());
-            assertFalse(userRepo.findById(save.getId()).isPresent());
+            userController.deleteUser(1);
         }
     }
 
     @Test
     public void  get_user() throws Exception {
 
-        User entity = new User("Username", "password", "email@gmail.com");
-        userRepo.save(entity);
+        final long ID = 123;
 
-        assertTrue(userRepo.findById(entity.getId()).isPresent());
-        User found = userController.getUser(entity.getId());
-        assertEquals("Username", found.getUsername());
-        assertEquals("password", found.getPassword());
-        assertEquals("email@gmail.com", found.getEmail());
+        when(userService.getUserById(ID))
+                .thenReturn(new User());
 
-        mockMvc.perform(get("/users/" + entity.getId()))
+        mockMvc.perform(get("/users/" + ID))
                 .andDo(print())
                 .andExpect(status().isOk());
     }
@@ -268,10 +287,15 @@ public class AuthServiceUserControllerTests {
         String newPass = "newPassword";
         User saved = userRepo.save(entity);
 
+        when(userService.passwordReset(saved.getId(), newPass))
+                .thenReturn(saved.toBuilder().password(newPass).build());
+        when(userService.getUserById(saved.getId()))
+                .thenReturn(saved.toBuilder().password(newPass).build());
+
         assertTrue(userRepo.findById(saved.getId()).isPresent());
         userController.passwordReset(saved.getId(), newPass);
 
-        User found = userRepo.findById(saved.getId()).get();
+        User found = userController.getUser(saved.getId());
         assertEquals(newPass, found.getPassword());
 
         mockMvc.perform(get("/users/" + entity.getId()))
@@ -284,11 +308,18 @@ public class AuthServiceUserControllerTests {
     @DisplayName("When POST on users endpoint with valid data, allow any")
     void allow_any_on_users() throws Exception {
 
-        final UserIDLessDTO userIDLessDTO = new UserIDLessDTO(USER, PASS, EMAIL);
+        final UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(USER, PASS, EMAIL);
         final String asString = objectMapper.writeValueAsString(userIDLessDTO);
 
         when(jwtService.encrypt(any()))
                 .thenReturn("a.fake.token");
+
+        when(userService.createUser(
+                argThat( n -> n.getUsername().equals(USER) && n.getPassword().equals(PASS) && n.getEmail().equals(EMAIL) )) )
+                .thenReturn(User.builder()
+                    .username(USER)
+                    .email(EMAIL).build()
+                );
 
         mockMvc.perform(post("/users").contentType(APPLICATION_JSON).content(asString))
                 .andDo(print())
@@ -305,20 +336,21 @@ public class AuthServiceUserControllerTests {
                         .username("test")
                         .email("fake@email.com")
                         .password("fakePassword")
+                        .id(12345)
                         .build();
-        userRepo.save(user);
-
-        assertEquals(1, userRepo.count());
-        assertNotNull(userRepo.findByEmail(user.getEmail()));
-        assertFalse(userRepo.findByEmail(user.getEmail()).isVerified());
 
         final String fakeToken = "a.fake.token";
         final String base64Token =
                 Base64.getEncoder().withoutPadding().encodeToString(fakeToken.getBytes(StandardCharsets.UTF_8));
 
+        when(userService.verifyEmailFromToken(fakeToken))
+                .thenReturn(UserPasswordLessDTO.builder()
+                        .username(user.getUsername())
+                        .email(user.getEmail())
+                        .roles(Collections.EMPTY_SET)
+                        .id(user.getId())
+                        .build());
 
-        when(jwtService.decrypt(fakeToken))
-                .thenReturn(user.toBuilder().build()); // Clone
 
         mockMvc.perform(get("/users/verification/" + base64Token))
                 .andDo(print())
@@ -327,21 +359,57 @@ public class AuthServiceUserControllerTests {
                 .andExpect(jsonPath("$.id").value(user.getId()))
                 .andExpect(jsonPath("$.email").value(user.getEmail()))
                 .andExpect(jsonPath("$.roles").isArray());
-
-        assertTrue(userRepo.findByEmail(user.getEmail()).isVerified());
     }
 
     @Test
-    @DisplayName("Check that user exists")
-    void verifyUser_true () throws NotFoundException {
-        UserIDLessUsernameLessDTO loginUser = new UserIDLessUsernameLessDTO(EMAIL, PASS);
-        userRepo.save(userMap.idLessUsernameLessToModel(loginUser).toBuilder().username("username").build());
-        assertTrue(userController.verifyUser(loginUser));
+    @DisplayName("When POST on login, allow any")
+    void allow_any_on_login() throws Exception {
+        mockMvc.perform(post("/users/login"))
+                .andExpect(status().is(400)); // Bad request means that it passed spring security & it found the controller action
     }
+
     @Test
-    @DisplayName("Check user that does not exist")
-    void verifyUser_false (){
-        UserIDLessUsernameLessDTO loginUser = new UserIDLessUsernameLessDTO(BADEMAIL, PASS);
-        assertThrows(NotFoundException.class, () -> userController.verifyUser(loginUser));
+    @DisplayName("When login successful, get JWT")
+    void login_get_jwt() throws Exception {
+
+        final UserIDLessRoleLessDTO build = UserIDLessRoleLessDTO.builder().email(EMAIL).password(PASS).build();
+        final String asString = objectMapper.writeValueAsString(build);
+
+        when(userService.login(
+                argThat( n -> n.getEmail().equals(EMAIL) && n.getPassword().equals(PASS) )))
+                .thenReturn(UserTokenPair.builder()
+                        .token(VALID_TOKEN)
+                        .user(User.builder().username(USER).email(EMAIL).roles(Collections.emptySet()).build())
+                        .build());
+
+        final MvcResult mvcResult = mockMvc.perform(post("/users/login").contentType(APPLICATION_JSON).content(asString))
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(jsonPath("$.password").doesNotExist())
+                .andExpect(jsonPath("$.id").isNumber())
+                .andExpect(jsonPath("$.roles").isArray())
+                .andExpect(jsonPath("$.email").value(EMAIL))
+                .andExpect(jsonPath("$.username").value(USER))
+                .andReturn();
+
+        assertEquals(VALID_TOKEN, mvcResult.getResponse().getHeader(AUTHORIZATION));
+    }
+
+    @Test
+    @DisplayName("When bad password, throw IncorrectPasswordException")
+    void bad_login_throw_incorrect_password_exception() throws Exception {
+
+        final String EXCEPTION_MESSAGE = format("Password not valid for email %s", EMAIL);
+
+        final UserIDLessRoleLessDTO build = UserIDLessRoleLessDTO.builder().email(EMAIL).password(PASS + "bad").build();
+        final String asString = objectMapper.writeValueAsString(build);
+
+        when(userService.login(
+                argThat( n -> n.getEmail().equals(EMAIL) && !n.getPassword().equals(PASS) )))
+                .thenThrow(new IncorrectPasswordException(EXCEPTION_MESSAGE));
+
+        mockMvc.perform(post("/users/login").contentType(APPLICATION_JSON).content(asString))
+                .andDo(print())
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.message").value(EXCEPTION_MESSAGE));
     }
 }

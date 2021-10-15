@@ -8,6 +8,8 @@
  */
 package com.petclinic.auth.Role;
 
+import com.petclinic.auth.Role.data.Role;
+import com.petclinic.auth.Role.data.RoleIDLessDTO;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
