@@ -14,13 +14,11 @@ package com.petclinic.auth.User;
 
 import com.petclinic.auth.Exceptions.IncorrectPasswordException;
 import com.petclinic.auth.JWT.JWTService;
-import io.jsonwebtoken.lang.Maps;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -29,7 +27,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.Base64;
-import java.util.Map;
 
 import static java.lang.String.format;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
@@ -44,7 +41,6 @@ public class UserController {
 
     private final UserService userService;
     private final UserMapper userMapper;
-    private final AuthenticationManager authenticationManager;
     private final JWTService jwtService;
 
     @GetMapping("/{userId}")
@@ -95,20 +91,8 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<UserPasswordLessDTO> login(@RequestBody UserIDLessRoleLessDTO user) throws IncorrectPasswordException {
-        try {
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword())
-            );
-
-            User principal = (User) authentication.getPrincipal();
-
-            final String token = jwtService.encrypt(principal);
-
-            return ok()
-                    .header(AUTHORIZATION, token)
-                    .body(userMapper.modelToPasswordLessDTO(principal));
-        } catch (BadCredentialsException ex) {
-            throw new IncorrectPasswordException(format("Password not valid for email %s", user.getEmail()));
-        }
+        return ok()
+                .header(AUTHORIZATION, userService.login(user))
+                .body(userMapper.modelToPasswordLessDTO(principal));
     }
 }

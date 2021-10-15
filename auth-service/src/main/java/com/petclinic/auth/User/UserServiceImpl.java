@@ -8,6 +8,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.petclinic.auth.Exceptions.NotFoundException;
@@ -18,6 +22,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 import static java.lang.String.format;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.http.ResponseEntity.ok;
 
 @Service
 @Slf4j
@@ -29,6 +35,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final MailService mailService;
     private final JWTService jwtService;
+    private final AuthenticationManager authenticationManager;
 
     @Value("${gateway.origin}")
     private String gatewayOrigin;
@@ -112,12 +119,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String login(UserIDLessRoleLessDTO user) throws IncorrectPasswordException {
-        final User byEmail = userRepo.findByEmail(user.getEmail()).get();
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword())
+            );
 
-        if(!passwordEncoder.matches(user.getPassword(), byEmail.getPassword())) {
+            User principal = (User) authentication.getPrincipal();
+
+            return jwtService.encrypt(principal);
+        } catch (BadCredentialsException ex) {
             throw new IncorrectPasswordException(format("Password not valid for email %s", user.getEmail()));
         }
-
-        return jwtService.encrypt(byEmail);
     }
 }
