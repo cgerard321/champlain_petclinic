@@ -103,13 +103,6 @@ public class AuthServiceE2ETests {
             return mail;
         }).when(userService).generateVerificationMail(any());
 
-//        when(spy.generateVerificationMail(
-//                argThat( n -> n.getEmail().equals(ID_LESS_USER.getEmail() ))
-//        )).thenAnswer(n -> {
-//            final Mail mail = (Mail) n.callRealMethod();
-//            verificationJWT.set(mail.getMessage().split("/verification/")[1]);
-//            return mail;
-//        });
 
 
         mockMvc.perform(post("/users").contentType(APPLICATION_JSON).content(asString))
