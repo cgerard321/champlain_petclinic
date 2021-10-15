@@ -37,6 +37,9 @@ gateway:
   origin: localhost:8080
   protocol: http
   subdomain:
+mailer-service:
+  host: localhost
+  port: 8080
 
 ---
 spring.profiles: test
