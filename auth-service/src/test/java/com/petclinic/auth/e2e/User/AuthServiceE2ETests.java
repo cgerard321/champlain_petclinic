@@ -29,6 +29,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -124,5 +125,7 @@ public class AuthServiceE2ETests {
                 .andExpect(jsonPath("$.email").value(USER.getEmail()))
                 .andExpect(jsonPath("$.username").value(USER.getUsername()))
                 .andExpect(jsonPath("$.roles.length()").value(0));
+
+        assertTrue(userRepo.findByEmail(USER.getEmail()).isVerified());
     }
 }
