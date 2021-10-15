@@ -29,8 +29,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -98,13 +97,19 @@ public class AuthServiceE2ETests {
         final UserService spy = spy(userService);
 
 
-        when(spy.generateVerificationMail(
-                argThat( n -> n.getEmail().equals(ID_LESS_USER.getEmail() ))
-        )).thenAnswer(n -> {
+        doAnswer(n -> {
             final Mail mail = (Mail) n.callRealMethod();
             verificationJWT.set(mail.getMessage().split("/verification/")[1]);
             return mail;
-        });
+        }).when(spy).generateVerificationMail(any());
+
+//        when(spy.generateVerificationMail(
+//                argThat( n -> n.getEmail().equals(ID_LESS_USER.getEmail() ))
+//        )).thenAnswer(n -> {
+//            final Mail mail = (Mail) n.callRealMethod();
+//            verificationJWT.set(mail.getMessage().split("/verification/")[1]);
+//            return mail;
+//        });
 
 
         mockMvc.perform(post("/users").contentType(APPLICATION_JSON).content(asString))
@@ -118,7 +123,7 @@ public class AuthServiceE2ETests {
                 .andExpect(jsonPath("$.roles.length()").value(0));
 
 
-        mockMvc.perform(get("/users/verification" + verificationJWT))
+        mockMvc.perform(get("/users/verification/" + verificationJWT))
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.password").doesNotExist())
