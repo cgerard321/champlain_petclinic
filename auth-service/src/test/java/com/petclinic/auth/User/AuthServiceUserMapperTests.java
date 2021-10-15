@@ -47,7 +47,7 @@ public class AuthServiceUserMapperTests {
     @Test
     @DisplayName("When modelToIDLessPasswordLessDTO is called with null, return null")
     void modelToIDLessPasswordLessDTO_null() {
-        assertNull(userMapper.modelToIDLessPasswordLessDTO(null));
+        assertNull(userMapper.modelToPasswordLessDTO(null));
     }
 
     @Test
@@ -55,7 +55,7 @@ public class AuthServiceUserMapperTests {
     void modelToIDLessPasswordLessDTO_with_roles() {
         final User user = new User();
         user.setRoles(ROLES);
-        assertNotNull(userMapper.modelToIDLessPasswordLessDTO(user));
+        assertNotNull(userMapper.modelToPasswordLessDTO(user));
         assertEquals(ROLES, user.getRoles());
     }
 }

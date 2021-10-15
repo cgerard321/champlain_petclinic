@@ -72,7 +72,7 @@ public class UserController {
         final User saved = userService.createUser(dto);
         log.info("Successfully persisted user");
 
-        return userMapper.modelToIDLessPasswordLessDTO(saved);
+        return userMapper.modelToPasswordLessDTO(saved);
     }
 
     @PutMapping("/{userId}")
@@ -107,7 +107,7 @@ public class UserController {
 
             return ok()
                     .header(AUTHORIZATION, token)
-                    .body(userMapper.modelToIDLessPasswordLessDTO(principal));
+                    .body(userMapper.modelToPasswordLessDTO(principal));
         } catch (BadCredentialsException ex) {
             throw new IncorrectPasswordException(format("Password not valid for email %s", user.getEmail()));
         }

@@ -8,9 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.petclinic.auth.Exceptions.NotFoundException;
@@ -19,7 +16,6 @@ import javax.validation.Valid;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.Optional;
 
 import static java.lang.String.format;
 
@@ -111,7 +107,7 @@ public class UserServiceImpl implements UserService {
         final User save = userRepo.save(byEmail);
         log.info("Updated user with email {} to verified=true", decrypt.getEmail());
 
-        return userMapper.modelToIDLessPasswordLessDTO(save);
+        return userMapper.modelToPasswordLessDTO(save);
     }
 
     @Override
