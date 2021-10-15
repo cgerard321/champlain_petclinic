@@ -1,7 +1,6 @@
 package com.petclinic.bffapigateway.dtos;
 
 import lombok.Data;
-
 import java.util.ArrayList;
 import java.util.List;
 

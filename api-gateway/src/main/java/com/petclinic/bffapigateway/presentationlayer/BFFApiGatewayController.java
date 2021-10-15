@@ -183,11 +183,49 @@ public class BFFApiGatewayController {
         return visitsServiceClient.createVisitForPet(visit);
     }
 
+    /**
+     * Retrieve all vets from DB
+     */
     @GetMapping(value = "vets")
     public Flux<VetDetails> getVets() {
         return vetsServiceClient.getVets();
     }
 
+    /**
+     * Get a single vet given its vetID
+     */
+    @GetMapping(value = "vets/{vetId}")
+    public Mono<VetDetails> getVet(final @PathVariable long vetId) {
+        return vetsServiceClient.getVet(vetId);
+    }
+
+    /**
+     * Create Vet
+     */
+    @PostMapping(value = "vets",
+            consumes = "application/json",
+            produces = "application/json")
+    public Mono<VetDetails> createVet(@RequestBody VetDetails model) { return vetsServiceClient.getVet(model.getVetId()); }
+
+    /**
+     * Delete vet from DB given the vetID
+     */
+    @DeleteMapping(value = "vets/{vetId}")
+    public Mono<VetDetails> deleteVet(final @PathVariable long vetId) {
+        return vetsServiceClient.deleteVet(vetId);
+    }
+
+    /**
+     * Update vet details
+     */
+    @PutMapping(
+            value = "vets/{vetId}",
+            consumes = "application/json",
+            produces = "application/json"
+    )
+    Mono<VetDetails> updateVet(@RequestBody VetDetails vet, @PathVariable int vetId) {
+        return vetsServiceClient.updateVet(vetId, vet);
+    }
 
     @PostMapping(value = "users",
             consumes = "application/json",
