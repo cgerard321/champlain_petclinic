@@ -1,5 +1,6 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
+import com.petclinic.bffapigateway.dtos.Register;
 import com.petclinic.bffapigateway.dtos.UserDetails;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -20,7 +21,7 @@ public class AuthServiceClient {
             @Value("${app.auth-service.port}") String authServicePort
     ) {
         this.webClientBuilder = webClientBuilder;
-        authServiceUrl = "http://" + authServiceHost + ":" + authServicePort + "/users";
+        authServiceUrl = "http://" + authServiceHost + ":" + authServicePort;
     }
 
 
@@ -38,9 +39,9 @@ public class AuthServiceClient {
                 .bodyToFlux(UserDetails.class);
     }
 
-    public Mono<UserDetails> createUser (final UserDetails model) {
+    public Mono<UserDetails> createUser (final Register model) {
         return webClientBuilder.build().post()
-                .uri(authServiceUrl + model)
+                .uri(authServiceUrl + "/users")
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve().bodyToMono(UserDetails.class);
     }
