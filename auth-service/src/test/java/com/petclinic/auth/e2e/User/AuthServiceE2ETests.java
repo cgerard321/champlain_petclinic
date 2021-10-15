@@ -9,6 +9,7 @@
 package com.petclinic.auth.e2e.User;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
 import com.petclinic.auth.Mail.Mail;
 import com.petclinic.auth.Mail.MailService;
 import com.petclinic.auth.Role.Role;
@@ -27,10 +28,12 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
@@ -141,6 +144,22 @@ public class AuthServiceE2ETests {
         assertTrue(afterAdmin.getRoles().parallelStream()
                 .anyMatch(n -> n.getName().equals(admin.getName()))
         );
+
+        // Get JWT
+        final String asString = objectMapper.writeValueAsString(new HashMap<String, String>(){{
+            put("email", USER.getEmail());
+            put("password", USER.getPassword());
+        }});
+
+        final MvcResult result = mockMvc.perform(post("/users/login").contentType(APPLICATION_JSON).content(asString))
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(jsonPath("$.token").isString())
+                .andReturn();
+
+        final String token = JsonPath.read(result.getResponse().getContentAsString(), "$.token");
+
+        assertNotNull(token);
     }
 
     private void registerUser() throws Exception {
