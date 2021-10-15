@@ -1,9 +1,12 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.IOException;
@@ -19,6 +22,7 @@ public class AuthServiceClientIntegrationTest {
 
     private AuthServiceClient authServiceClient;
     private MockWebServer server;
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     void setup() {
@@ -29,10 +33,19 @@ public class AuthServiceClientIntegrationTest {
                 "http://auth-service",
                 "1234"
         );
+        objectMapper = new ObjectMapper();
     }
 
     @AfterEach
     void shutdown() throws IOException {
         server.shutdown();
+    }
+
+    @Test
+    @DisplayName("Given valid register information, register user")
+    void valid_register() {
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse.setHeader("Content-Type", "application/json");
+        server.enqueue(mockResponse);
     }
 }
