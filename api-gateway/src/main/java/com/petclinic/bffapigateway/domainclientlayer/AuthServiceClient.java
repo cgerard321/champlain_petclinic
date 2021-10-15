@@ -27,14 +27,14 @@ public class AuthServiceClient {
 
     public Mono<UserDetails> getUser(final long userId) {
         return webClientBuilder.build().get()
-                .uri(authServiceUrl + "/{userId}", userId)
+                .uri(authServiceUrl + "/users/{userId}", userId)
                 .retrieve()
                 .bodyToMono(UserDetails.class);
     }
 
     public Flux<UserDetails> getUsers() {
         return webClientBuilder.build().get()
-                .uri(authServiceUrl)
+                .uri(authServiceUrl + "/users")
                 .retrieve()
                 .bodyToFlux(UserDetails.class);
     }
@@ -48,7 +48,7 @@ public class AuthServiceClient {
 
     public Flux<UserDetails> createUsers (){
         return webClientBuilder.build().post()
-                .uri(authServiceUrl)
+                .uri(authServiceUrl + "/users")
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve().bodyToFlux(UserDetails.class);
     }
@@ -63,7 +63,7 @@ public class AuthServiceClient {
     public Mono<UserDetails> deleteUser(final long userId) {
         return webClientBuilder.build()
                 .delete()
-                .uri(authServiceUrl + "/{userId}", userId)
+                .uri(authServiceUrl + "/users/{userId}", userId)
                 .retrieve()
                 .bodyToMono(UserDetails.class);
     }
