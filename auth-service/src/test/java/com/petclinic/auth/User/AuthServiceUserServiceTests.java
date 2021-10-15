@@ -5,6 +5,8 @@ import com.petclinic.auth.Exceptions.NotFoundException;
 import com.petclinic.auth.JWT.JWTService;
 import com.petclinic.auth.Mail.Mail;
 import com.petclinic.auth.Mail.MailService;
+import com.petclinic.auth.User.data.User;
+import com.petclinic.auth.User.data.UserIDLessRoleLessDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

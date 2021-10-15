@@ -21,7 +21,7 @@
  * Date: 10/10/21
  * Ticket: feat(AUTH-CPC-357)
  */
-package com.petclinic.auth.User;
+package com.petclinic.auth.User.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.petclinic.auth.Role.Role;

@@ -13,8 +13,8 @@ import com.petclinic.auth.Mail.Mail;
 import com.petclinic.auth.Mail.MailService;
 import com.petclinic.auth.Role.Role;
 import com.petclinic.auth.Role.RoleRepo;
-import com.petclinic.auth.User.User;
-import com.petclinic.auth.User.UserIDLessRoleLessDTO;
+import com.petclinic.auth.User.data.User;
+import com.petclinic.auth.User.data.UserIDLessRoleLessDTO;
 import com.petclinic.auth.User.UserRepo;
 import com.petclinic.auth.User.UserService;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,7 +25,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;

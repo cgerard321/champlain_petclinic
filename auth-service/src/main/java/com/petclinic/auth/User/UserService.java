@@ -21,6 +21,10 @@ package com.petclinic.auth.User;
 
 import com.petclinic.auth.Exceptions.IncorrectPasswordException;
 import com.petclinic.auth.Mail.Mail;
+import com.petclinic.auth.User.data.User;
+import com.petclinic.auth.User.data.UserIDLessRoleLessDTO;
+import com.petclinic.auth.User.data.UserPasswordLessDTO;
+import com.petclinic.auth.User.data.UserTokenPair;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 

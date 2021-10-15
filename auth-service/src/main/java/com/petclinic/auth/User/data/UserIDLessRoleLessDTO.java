@@ -14,7 +14,7 @@
  * Ticket: feat(AUTH-CPC-102)
  *
  */
-package com.petclinic.auth.User;
+package com.petclinic.auth.User.data;
 
 import com.petclinic.auth.Config.PasswordStrengthCheck;
 import lombok.*;

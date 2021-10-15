@@ -1,7 +1,6 @@
 package com.petclinic.auth.Config;
 
 import com.petclinic.auth.JWT.JWTService;
-import com.petclinic.auth.User.User;
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

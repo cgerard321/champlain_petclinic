@@ -1,6 +1,8 @@
 package com.petclinic.auth.User;
 
 import com.petclinic.auth.Role.Role;
+import com.petclinic.auth.User.data.User;
+import com.petclinic.auth.User.data.UserIDLessRoleLessDTO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

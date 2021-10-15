@@ -16,6 +16,9 @@
  */
 package com.petclinic.auth.User;
 
+import com.petclinic.auth.User.data.User;
+import com.petclinic.auth.User.data.UserIDLessRoleLessDTO;
+import com.petclinic.auth.User.data.UserPasswordLessDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;

@@ -1,4 +1,4 @@
-package com.petclinic.auth.User;
+package com.petclinic.auth.User.data;
 
 import lombok.Builder;
 import lombok.Data;

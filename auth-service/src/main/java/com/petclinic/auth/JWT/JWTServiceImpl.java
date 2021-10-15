@@ -8,7 +8,7 @@ package com.petclinic.auth.JWT;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.auth.Role.Role;
-import com.petclinic.auth.User.User;
+import com.petclinic.auth.User.data.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;

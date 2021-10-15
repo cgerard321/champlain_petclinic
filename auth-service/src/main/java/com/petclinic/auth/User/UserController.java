@@ -14,14 +14,15 @@ package com.petclinic.auth.User;
 
 import com.petclinic.auth.Exceptions.IncorrectPasswordException;
 import com.petclinic.auth.JWT.JWTService;
+import com.petclinic.auth.User.data.User;
+import com.petclinic.auth.User.data.UserIDLessRoleLessDTO;
+import com.petclinic.auth.User.data.UserPasswordLessDTO;
+import com.petclinic.auth.User.data.UserTokenPair;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
