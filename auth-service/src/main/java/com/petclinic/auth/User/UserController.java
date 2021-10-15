@@ -22,7 +22,6 @@ import com.petclinic.auth.User.data.User;
 import com.petclinic.auth.User.data.UserIDLessRoleLessDTO;
 import com.petclinic.auth.User.data.UserPasswordLessDTO;
 import com.petclinic.auth.User.data.UserTokenPair;
-import com.petclinic.auth.Exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -34,7 +33,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.Base64;
 
-import static java.lang.String.format;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.ResponseEntity.ok;
 
@@ -47,7 +45,6 @@ public class UserController {
 
     private final UserService userService;
     private final UserMapper userMapper;
-    private final JWTService jwtService;
 
     @GetMapping("/{userId}")
     public User getUser(@PathVariable long userId) {
