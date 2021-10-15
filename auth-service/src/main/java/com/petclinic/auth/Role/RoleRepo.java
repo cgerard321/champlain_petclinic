@@ -8,6 +8,7 @@
  */
 package com.petclinic.auth.Role;
 
+import com.petclinic.auth.Role.data.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
