@@ -46,6 +46,8 @@ services:
       resources:
         limits:
           memory: 2048m
+    ports:
+      - "7005:8080"
     depends_on:
       mysql4:
         condition: service_healthy
