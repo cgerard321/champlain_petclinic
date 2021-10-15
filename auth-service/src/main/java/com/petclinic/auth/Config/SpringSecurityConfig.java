@@ -41,6 +41,8 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final UserDetailsService userService;
 
+    private final JWTFilter jwtFilter;
+
     private static final String[] AUTH_WHITELIST = {
             // -- Swagger UI v2
             "/v2/api-docs",
