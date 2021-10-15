@@ -18,17 +18,18 @@ import com.petclinic.auth.User.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -43,7 +44,7 @@ public class AuthServiceE2ETests {
     @MockBean
     private MailService mailService;
 
-    @Autowired
+    @SpyBean
     private UserService userService;
 
     @Autowired
@@ -94,14 +95,13 @@ public class AuthServiceE2ETests {
 
         final String asString = objectMapper.writeValueAsString(ID_LESS_USER);
         AtomicReference<String> verificationJWT = new AtomicReference<>();
-        final UserService spy = spy(userService);
 
 
         doAnswer(n -> {
             final Mail mail = (Mail) n.callRealMethod();
             verificationJWT.set(mail.getMessage().split("/verification/")[1]);
             return mail;
-        }).when(spy).generateVerificationMail(any());
+        }).when(userService).generateVerificationMail(any());
 
 //        when(spy.generateVerificationMail(
 //                argThat( n -> n.getEmail().equals(ID_LESS_USER.getEmail() ))
