@@ -1,5 +1,6 @@
 package com.petclinic.bffapigateway.dtos;
 
+import lombok.Builder;
 import lombok.Data;
 
 /**
@@ -11,6 +12,7 @@ import lombok.Data;
  */
 
 @Data
+@Builder(toBuilder = true)
 public class Register {
 
     private String email;

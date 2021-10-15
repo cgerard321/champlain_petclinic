@@ -1,6 +1,9 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.petclinic.bffapigateway.dtos.Register;
+import com.petclinic.bffapigateway.dtos.UserDetails;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterEach;
@@ -10,6 +13,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.IOException;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Created by IntelliJ IDEA.
@@ -23,6 +28,11 @@ public class AuthServiceClientIntegrationTest {
     private AuthServiceClient authServiceClient;
     private MockWebServer server;
     private ObjectMapper objectMapper;
+    private final Register USER_REGISTER = Register.builder()
+            .username("username")
+            .password("password")
+            .email("email")
+            .build();
 
     @BeforeEach
     void setup() {
@@ -43,9 +53,21 @@ public class AuthServiceClientIntegrationTest {
 
     @Test
     @DisplayName("Given valid register information, register user")
-    void valid_register() {
+    void valid_register() throws JsonProcessingException {
+        final String asString = objectMapper.writeValueAsString(new UserDetails());
+
         final MockResponse mockResponse = new MockResponse();
-        mockResponse.setHeader("Content-Type", "application/json");
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setBody(asString);
+
         server.enqueue(mockResponse);
+
+        final UserDetails block = authServiceClient.createUser(USER_REGISTER).block();
+
+        assertEquals(USER_REGISTER.getEmail(), block.getEmail());
+        assertEquals(USER_REGISTER.getUsername(), block.getUsername());
+        assertNotNull(block.getId());
+        assertEquals(0, block.getRoles());
     }
 }
