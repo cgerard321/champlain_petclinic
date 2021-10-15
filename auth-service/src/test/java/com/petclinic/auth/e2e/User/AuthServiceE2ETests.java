@@ -26,6 +26,7 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -107,6 +108,43 @@ public class AuthServiceE2ETests {
                 .andExpect(jsonPath("$.roles.length()").value(0));
 
         assertTrue(userRepo.findByEmail(USER.getEmail()).isVerified());
+    }
+
+    @Test
+    @DisplayName("Given verified user, login and get JWT")
+    void verified_user_login() throws Exception {
+
+        final String asString = objectMapper.writeValueAsString(new HashMap<String, String>(){{
+            put("email", USER.getEmail());
+            put("password", USER.getPassword());
+        }});
+
+        AtomicReference<String> verificationJWT = new AtomicReference<>();
+
+        doAnswer(n -> {
+            final Mail mail = (Mail) n.callRealMethod();
+            verificationJWT.set(mail.getMessage().split("/verification/")[1]);
+            return mail;
+        }).when(userService).generateVerificationMail(any());
+
+
+        registerUser();
+
+        mockMvc.perform(get("/users/verification/" + verificationJWT))
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(jsonPath("$.password").doesNotExist())
+                .andExpect(jsonPath("$.verified").doesNotExist())
+                .andExpect(jsonPath("$.email").value(USER.getEmail()))
+                .andExpect(jsonPath("$.username").value(USER.getUsername()))
+                .andExpect(jsonPath("$.roles.length()").value(0));
+
+        assertTrue(userRepo.findByEmail(USER.getEmail()).isVerified());
+
+        mockMvc.perform(post("/users/login").contentType(APPLICATION_JSON).content(asString))
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(jsonPath("$.token").isString());
     }
 
     private void registerUser() throws Exception {
