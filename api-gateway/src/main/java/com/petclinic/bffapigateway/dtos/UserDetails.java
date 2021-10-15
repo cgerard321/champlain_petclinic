@@ -13,5 +13,6 @@ public class UserDetails {
 
     private String email;
 
+    private Set<Role> roles;
 }
 
