@@ -12,6 +12,7 @@ package com.petclinic.auth.User;
  * Ticket: feat(AUTH-CPC-357)
  */
 
+import com.petclinic.auth.Exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -76,5 +77,11 @@ public class UserController {
     @GetMapping("/verification/{base64EncodedToken}")
     public UserPasswordLessDTO verifyEmail(@PathVariable String base64EncodedToken) {
         return userService.verifyEmailFromToken(new String(Base64.getDecoder().decode(base64EncodedToken)));
+    }
+
+    @PostMapping("/login")
+    public Boolean verifyUser (@RequestBody UserIDLessUsernameLessDTO loginUser) throws NotFoundException {
+        final User user = userService.getUserByEmail(loginUser.getEmail());
+        return userService.verifyPassword(user, loginUser);
     }
 }
