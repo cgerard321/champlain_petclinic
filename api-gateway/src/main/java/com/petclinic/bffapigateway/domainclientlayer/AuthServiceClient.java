@@ -9,6 +9,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import static reactor.core.publisher.Mono.just;
+
 @Component
 public class AuthServiceClient {
 
@@ -42,6 +44,7 @@ public class AuthServiceClient {
     public Mono<UserDetails> createUser (final Register model) {
         return webClientBuilder.build().post()
                 .uri(authServiceUrl + "/users")
+                .body(just(model), Register.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve().bodyToMono(UserDetails.class);
     }
