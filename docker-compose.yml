@@ -68,7 +68,8 @@ services:
     environment:
       - SMTP_USER=champlain.petclinic@gmail.com
       - SMTP_SERVER=smtp.gmail.com
-      - SMTP_PASS=nicetryguy
+    env_file:
+      - mailer.env
 
 
   mysql1:
