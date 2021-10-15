@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.IOException;
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -54,7 +55,13 @@ public class AuthServiceClientIntegrationTest {
     @Test
     @DisplayName("Given valid register information, register user")
     void valid_register() throws JsonProcessingException {
-        final String asString = objectMapper.writeValueAsString(new UserDetails());
+        final String asString = objectMapper.writeValueAsString(
+                objectMapper.convertValue(USER_REGISTER, UserDetails.class)
+                        .toBuilder()
+                        .id(1)
+                        .roles(Collections.emptySet())
+                        .build()
+        );
 
         final MockResponse mockResponse = new MockResponse();
         mockResponse
