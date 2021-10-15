@@ -28,6 +28,7 @@
 package com.petclinic.auth.User;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.petclinic.auth.Exceptions.NotFoundException;
 import com.petclinic.auth.JWT.JWTService;
 import com.petclinic.auth.Mail.MailService;
 import org.junit.jupiter.api.BeforeEach;
@@ -75,7 +76,8 @@ public class AuthServiceUserControllerTests {
     final String
             USER = "user",
             PASS = "Pas$word123",
-            EMAIL = "email@gmail.com";
+            EMAIL = "email@gmail.com",
+            BADEMAIL = "blabla";
 
 
     private Validator validator;
@@ -93,6 +95,9 @@ public class AuthServiceUserControllerTests {
 
     @Autowired
     private UserRepo userRepo;
+
+    @Autowired
+    private UserMapper userMap;
 
     @Autowired
     private UserController userController;
@@ -324,5 +329,19 @@ public class AuthServiceUserControllerTests {
                 .andExpect(jsonPath("$.roles").isArray());
 
         assertTrue(userRepo.findByEmail(user.getEmail()).isVerified());
+    }
+
+    @Test
+    @DisplayName("Check that user exists")
+    void verifyUser_true () throws NotFoundException {
+        UserIDLessUsernameLessDTO loginUser = new UserIDLessUsernameLessDTO(EMAIL, PASS);
+        userRepo.save(userMap.idLessUsernameLessToModel(loginUser).toBuilder().username("username").build());
+        assertTrue(userController.verifyUser(loginUser));
+    }
+    @Test
+    @DisplayName("Check user that does not exist")
+    void verifyUser_false (){
+        UserIDLessUsernameLessDTO loginUser = new UserIDLessUsernameLessDTO(BADEMAIL, PASS);
+        assertThrows(NotFoundException.class, () -> userController.verifyUser(loginUser));
     }
 }

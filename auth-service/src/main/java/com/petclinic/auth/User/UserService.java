@@ -19,6 +19,7 @@
  */
 package com.petclinic.auth.User;
 
+import com.petclinic.auth.Exceptions.NotFoundException;
 import com.petclinic.auth.Mail.Mail;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -39,4 +40,8 @@ public interface UserService {
     Mail generateVerificationMail(User user);
 
     UserPasswordLessDTO verifyEmailFromToken(String token);
+
+    User getUserByEmail(String email) throws NotFoundException;
+
+    boolean verifyPassword(User user, UserIDLessUsernameLessDTO loginUser);
 }
