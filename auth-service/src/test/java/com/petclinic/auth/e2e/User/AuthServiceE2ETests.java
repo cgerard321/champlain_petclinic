@@ -8,6 +8,7 @@
 
 package com.petclinic.auth.e2e.User;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.auth.Mail.Mail;
 import com.petclinic.auth.Mail.MailService;
@@ -76,25 +77,13 @@ public class AuthServiceE2ETests {
     @Test
     @DisplayName("When valid user info, register")
     void register_user() throws Exception {
-
-        final String asString = objectMapper.writeValueAsString(ID_LESS_USER);
-
-        mockMvc.perform(post("/users").contentType(APPLICATION_JSON).content(asString))
-                .andExpect(status().is2xxSuccessful())
-                .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$.password").doesNotExist())
-                .andExpect(jsonPath("$.verified").doesNotExist())
-                .andExpect(jsonPath("$.id").isNumber())
-                .andExpect(jsonPath("$.email").value(USER.getEmail()))
-                .andExpect(jsonPath("$.username").value(USER.getUsername()))
-                .andExpect(jsonPath("$.roles.length()").value(0));
+        registerUser();
     }
 
     @Test
     @DisplayName("When given verification URL, verify email")
     void login_user() throws Exception {
 
-        final String asString = objectMapper.writeValueAsString(ID_LESS_USER);
         AtomicReference<String> verificationJWT = new AtomicReference<>();
 
 
@@ -106,15 +95,7 @@ public class AuthServiceE2ETests {
 
 
 
-        mockMvc.perform(post("/users").contentType(APPLICATION_JSON).content(asString))
-                .andExpect(status().is2xxSuccessful())
-                .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$.password").doesNotExist())
-                .andExpect(jsonPath("$.verified").doesNotExist())
-                .andExpect(jsonPath("$.id").isNumber())
-                .andExpect(jsonPath("$.email").value(USER.getEmail()))
-                .andExpect(jsonPath("$.username").value(USER.getUsername()))
-                .andExpect(jsonPath("$.roles.length()").value(0));
+        registerUser();
 
 
         mockMvc.perform(get("/users/verification/" + verificationJWT))
@@ -127,5 +108,19 @@ public class AuthServiceE2ETests {
                 .andExpect(jsonPath("$.roles.length()").value(0));
 
         assertTrue(userRepo.findByEmail(USER.getEmail()).isVerified());
+    }
+
+    private void registerUser() throws Exception {
+
+        final String asString = objectMapper.writeValueAsString(ID_LESS_USER);
+        mockMvc.perform(post("/users").contentType(APPLICATION_JSON).content(asString))
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(jsonPath("$.password").doesNotExist())
+                .andExpect(jsonPath("$.verified").doesNotExist())
+                .andExpect(jsonPath("$.id").isNumber())
+                .andExpect(jsonPath("$.email").value(USER.getEmail()))
+                .andExpect(jsonPath("$.username").value(USER.getUsername()))
+                .andExpect(jsonPath("$.roles.length()").value(0));
     }
 }
