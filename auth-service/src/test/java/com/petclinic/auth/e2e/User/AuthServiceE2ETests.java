@@ -93,21 +93,9 @@ public class AuthServiceE2ETests {
             return mail;
         }).when(userService).generateVerificationMail(any());
 
-
-
         registerUser();
 
-
-        mockMvc.perform(get("/users/verification/" + verificationJWT))
-                .andExpect(status().is2xxSuccessful())
-                .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$.password").doesNotExist())
-                .andExpect(jsonPath("$.verified").doesNotExist())
-                .andExpect(jsonPath("$.email").value(USER.getEmail()))
-                .andExpect(jsonPath("$.username").value(USER.getUsername()))
-                .andExpect(jsonPath("$.roles.length()").value(0));
-
-        assertTrue(userRepo.findByEmail(USER.getEmail()).isVerified());
+        verifyUser(verificationJWT.get());
     }
 
     @Test
@@ -127,19 +115,9 @@ public class AuthServiceE2ETests {
             return mail;
         }).when(userService).generateVerificationMail(any());
 
-
         registerUser();
 
-        mockMvc.perform(get("/users/verification/" + verificationJWT))
-                .andExpect(status().is2xxSuccessful())
-                .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$.password").doesNotExist())
-                .andExpect(jsonPath("$.verified").doesNotExist())
-                .andExpect(jsonPath("$.email").value(USER.getEmail()))
-                .andExpect(jsonPath("$.username").value(USER.getUsername()))
-                .andExpect(jsonPath("$.roles.length()").value(0));
-
-        assertTrue(userRepo.findByEmail(USER.getEmail()).isVerified());
+        verifyUser(verificationJWT.get());
 
         mockMvc.perform(post("/users/login").contentType(APPLICATION_JSON).content(asString))
                 .andExpect(status().is2xxSuccessful())
@@ -159,5 +137,19 @@ public class AuthServiceE2ETests {
                 .andExpect(jsonPath("$.email").value(USER.getEmail()))
                 .andExpect(jsonPath("$.username").value(USER.getUsername()))
                 .andExpect(jsonPath("$.roles.length()").value(0));
+    }
+
+    private void verifyUser(String jwt) throws Exception {
+
+        mockMvc.perform(get("/users/verification/" + jwt))
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(jsonPath("$.password").doesNotExist())
+                .andExpect(jsonPath("$.verified").doesNotExist())
+                .andExpect(jsonPath("$.email").value(USER.getEmail()))
+                .andExpect(jsonPath("$.username").value(USER.getUsername()))
+                .andExpect(jsonPath("$.roles.length()").value(0));
+
+        assertTrue(userRepo.findByEmail(USER.getEmail()).isVerified());
     }
 }
