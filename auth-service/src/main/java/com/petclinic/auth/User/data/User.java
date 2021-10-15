@@ -24,7 +24,7 @@
 package com.petclinic.auth.User.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.petclinic.auth.Role.Role;
+import com.petclinic.auth.Role.data.Role;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
