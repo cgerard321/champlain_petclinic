@@ -412,18 +412,4 @@ public class AuthServiceUserControllerTests {
                 .andExpect(status().is4xxClientError())
                 .andExpect(jsonPath("$.message").value(EXCEPTION_MESSAGE));
     }
-
-    @Test
-    @DisplayName("Check that user exists")
-    void verifyUser_true () throws NotFoundException {
-        UserIDLessUsernameLessDTO loginUser = new UserIDLessUsernameLessDTO(EMAIL, PASS);
-        userRepo.save(userMap.idLessUsernameLessToModel(loginUser).toBuilder().username("username").build());
-        assertTrue(userController.verifyUser(loginUser));
-    }
-    @Test
-    @DisplayName("Check user that does not exist")
-    void verifyUser_false (){
-        UserIDLessUsernameLessDTO loginUser = new UserIDLessUsernameLessDTO(BADEMAIL, PASS);
-        assertThrows(NotFoundException.class, () -> userController.verifyUser(loginUser));
-    }
 }
