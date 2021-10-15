@@ -46,7 +46,9 @@ services:
       - "7005:8080"
     depends_on:
       mysql4:
-        condition: service_healthy
+          condition: service_healthy
+      mailer-service:
+        condition: service_started
     environment:
       - SPRING_PROFILES_ACTIVE=docker
 
