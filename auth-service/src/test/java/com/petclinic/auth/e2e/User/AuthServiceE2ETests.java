@@ -138,7 +138,9 @@ public class AuthServiceE2ETests {
         final User afterAdmin = userRepo.findByEmail(USER.getEmail());
 
         assertTrue(afterAdmin.isVerified());
-        assertTrue(afterAdmin.getRoles().contains(admin));
+        assertTrue(afterAdmin.getRoles().parallelStream()
+                .anyMatch(n -> n.getName().equals(admin.getName()))
+        );
     }
 
     private void registerUser() throws Exception {

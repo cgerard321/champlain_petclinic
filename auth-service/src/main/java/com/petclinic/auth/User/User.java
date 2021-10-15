@@ -77,7 +77,7 @@ public class User implements UserDetails {
         this.roles = roles;
     }
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             schema = "auth",
             name = "users_roles",
