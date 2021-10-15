@@ -26,7 +26,7 @@ import static java.lang.String.format;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService, UserDetailsService {
+public class UserServiceImpl implements UserService {
 
     private final UserRepo userRepo;
     private final UserMapper userMapper;
@@ -123,11 +123,5 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         }
 
         return jwtService.encrypt(byEmail);
-    }
-
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepo.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User with email " + username + "not found"));
     }
 }
