@@ -53,6 +53,4 @@ public interface UserService {
 
     UserTokenPair login(UserIDLessRoleLessDTO user) throws IncorrectPasswordException;
     User getUserByEmail(String email) throws NotFoundException;
-
-    boolean verifyPassword(User user, UserIDLessUsernameLessDTO loginUser);
 }

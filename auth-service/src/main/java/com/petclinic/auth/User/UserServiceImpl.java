@@ -154,9 +154,4 @@ public class UserServiceImpl implements UserService {
         return userRepo.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("No account found for email: " + email));
     }
-
-    @Override
-    public boolean verifyPassword(User user, UserIDLessUsernameLessDTO loginUser) {
-        return user.getPassword().equals(loginUser.getPassword());
-    }
 }
