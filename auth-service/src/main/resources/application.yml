@@ -15,8 +15,6 @@ spring:
   security:
     filter:
       order: 10
-    user:
-      password: CoolAdminPassword
 
   flyway:
     url: jdbc:mysql://localhost:3310
