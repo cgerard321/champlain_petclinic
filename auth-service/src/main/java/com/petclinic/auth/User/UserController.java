@@ -102,9 +102,4 @@ public class UserController {
                 .header(AUTHORIZATION, login.getToken())
                 .body(userMapper.modelToPasswordLessDTO(login.getUser()));
     }
-    
-    public Boolean verifyUser (@RequestBody UserIDLessUsernameLessDTO loginUser) throws NotFoundException {
-        final User user = userService.getUserByEmail(loginUser.getEmail());
-        return userService.verifyPassword(user, loginUser);
-    }
 }
