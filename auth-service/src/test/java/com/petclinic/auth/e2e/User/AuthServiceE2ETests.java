@@ -82,7 +82,7 @@ public class AuthServiceE2ETests {
 
     @Test
     @DisplayName("When given verification URL, verify email")
-    void login_user() throws Exception {
+    void verify_user() throws Exception {
 
         final AtomicReference<String> stringAtomicReference = captureJWT();
 
