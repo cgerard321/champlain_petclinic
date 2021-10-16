@@ -512,7 +512,7 @@ public class AuthServiceUserControllerTests {
                 .andExpect(status().is4xxClientError())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.timestamp").exists())
-                .andExpect(jsonPath("$.status").value(BAD_REQUEST.value()))
+                .andExpect(jsonPath("$.statusCode").value(BAD_REQUEST.value()))
                 .andExpect(jsonPath("$.message").value("Invalid Password, must be atleast 8 characters, have 1 digit, lower and upper case letters and a special character."));
     }
 }
