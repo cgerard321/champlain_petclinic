@@ -19,6 +19,7 @@ import com.petclinic.bffapigateway.dtos.VetDetails;
 import com.petclinic.bffapigateway.dtos.Visits;
 //import com.petclinic.billing.datalayer.Bill;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -149,7 +150,7 @@ public class BFFApiGatewayController {
 
     @GetMapping(value = "visits/calendar/{practitionerId}")
     public Flux<VisitDetails> getVisitsByPractitionerIdAndMonth(@PathVariable("practitionerId") int practitionerId,
-                                                                @RequestParam("dates") List<String> dates) {
+                                                                @NotNull @RequestParam("dates") List<String> dates) {
         String startDate = dates.get(0);
         String endDate = dates.get(1);
 
