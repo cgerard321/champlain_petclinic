@@ -34,6 +34,7 @@ package com.petclinic.auth.User;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.auth.Config.JWTFilter;
+import com.petclinic.auth.Config.PasswordStrengthCheck;
 import com.petclinic.auth.Exceptions.IncorrectPasswordException;
 import com.petclinic.auth.Exceptions.NotFoundException;
 import com.petclinic.auth.JWT.JWTService;
@@ -498,5 +499,20 @@ public class AuthServiceUserControllerTests {
         // Harsher assert than using instanceof
         assertEquals(RuntimeException.class, nestedServletException.getCause().getClass());
         assertEquals(unregistered_exception, nestedServletException.getCause().getMessage());
+    }
+
+    @Test
+    @DisplayName("Given unsatisfactory password, return sensical message and 400 status code")
+    void bad_password_response() throws Exception {
+
+        final UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(USER, "a", EMAIL);
+        final String asString = objectMapper.writeValueAsString(userIDLessDTO);
+        mockMvc.perform(post("/users").contentType(APPLICATION_JSON).content(asString))
+                .andDo(print())
+                .andExpect(status().is4xxClientError())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.status").value(BAD_REQUEST.value()))
+                .andExpect(jsonPath("$.message").value("Invalid Password, must be atleast 8 characters, have 1 digit, lower and upper case letters and a special character."));
     }
 }
