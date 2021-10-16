@@ -2,6 +2,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.Register;
 import com.petclinic.bffapigateway.dtos.UserDetails;
+import com.petclinic.bffapigateway.exceptions.GenericHttpException;
 import com.petclinic.bffapigateway.utils.Rethrower;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -13,6 +14,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static reactor.core.publisher.Mono.just;
 
 @Component
@@ -56,7 +58,7 @@ public class AuthServiceClient {
                 .retrieve()
                 .onStatus(HttpStatus::is4xxClientError,
                         n -> rethrower.rethrow(n,
-                                x -> new IllegalArgumentException(x.get("message").toString()))
+                                x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
                         )
                 .bodyToMono(UserDetails.class);
     }
