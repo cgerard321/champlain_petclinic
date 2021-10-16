@@ -28,6 +28,7 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicReference;
@@ -195,13 +196,15 @@ public class AuthServiceE2ETests {
     void duplicate_email_register() throws Exception {
 
         registerUser();
-        registerUser();
+
+        registerUser()
+                .andExpect(status().is4xxClientError());
     }
 
-    private void registerUser() throws Exception {
+    private ResultActions registerUser() throws Exception {
 
         final String asString = objectMapper.writeValueAsString(ID_LESS_USER);
-        mockMvc.perform(post("/users").contentType(APPLICATION_JSON).content(asString))
+        return mockMvc.perform(post("/users").contentType(APPLICATION_JSON).content(asString))
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.password").doesNotExist())
