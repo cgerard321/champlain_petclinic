@@ -47,8 +47,8 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     private final UserRepo userRepo;
-
     private final JWTFilter jwtFilter;
+    private final FilterExceptionHandler filterExceptionHandler;
 
     private static final String[] AUTH_WHITELIST = {
             // -- Swagger UI v2
@@ -85,6 +85,10 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .addFilterBefore(
                         jwtFilter,
                         UsernamePasswordAuthenticationFilter.class
+                )
+                .addFilterBefore(
+                        filterExceptionHandler,
+                        JWTFilter.class
                 );
     }
 

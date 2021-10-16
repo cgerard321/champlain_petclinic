@@ -2,6 +2,7 @@ package com.petclinic.auth.Config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.auth.Exceptions.HTTPErrorMessage;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -47,9 +48,9 @@ public class FilterExceptionHandler extends OncePerRequestFilter {
 
             // Very low level & cursed implementation, but I could not find a better solution
             // Do NOT touch this code unless you understand Java servlets and the middleware design pattern
-            if(ex instanceof SQLIntegrityConstraintViolationException) {
-
-                final String message = ex.getMessage();
+            final SQLIntegrityConstraintViolationException sqlIntegrityConstraintViolationException = crawl(ex, new SQLIntegrityConstraintViolationException());
+            if(sqlIntegrityConstraintViolationException != null) {
+                final String message = sqlIntegrityConstraintViolationException.getMessage();
 
                 if(message.contains("Duplicate")) {
                     final ArrayList<String> strings = new ArrayList<>();
@@ -60,15 +61,29 @@ public class FilterExceptionHandler extends OncePerRequestFilter {
 
                     final HTTPErrorMessage httpErrorMessage =
                             new HTTPErrorMessage(BAD_REQUEST.value(),
-                                    format("%s \"%s\" is already in use", strings.get(0), strings.get(1)));
+                                    format("%s %s is already in use",  strings.get(1), strings.get(0)));
                     response.setStatus(BAD_REQUEST.value());
                     response.getWriter().write(
                             objectMapper.writeValueAsString(httpErrorMessage));
+                    return;
                 }
             }
 
             // Do not handle
             throw ex;
         }
+    }
+
+    private <T extends Exception> T crawl(Exception e, T lookFor) {
+
+        Throwable cause = e.getCause();
+        while(cause != null) {
+            if(cause.getClass().isAssignableFrom(lookFor.getClass())) {
+                return (T)cause;
+            }
+            cause = cause.getCause();
+        }
+
+        return null;
     }
 }
