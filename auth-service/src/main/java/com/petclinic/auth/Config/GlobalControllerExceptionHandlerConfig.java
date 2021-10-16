@@ -1,5 +1,6 @@
 package com.petclinic.auth.Config;
 
+import com.petclinic.auth.Exceptions.EmailAlreadyExistsException;
 import com.petclinic.auth.Exceptions.HTTPErrorMessage;
 import com.petclinic.auth.Exceptions.IncorrectPasswordException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -36,5 +37,12 @@ public class GlobalControllerExceptionHandlerConfig {
                 BAD_REQUEST.value(),
                 collect.stream()
                         .reduce("", (a, b) -> a.concat(" ").concat(b)));
+    }
+
+    @ExceptionHandler(value = EmailAlreadyExistsException.class)
+    @ResponseStatus(value = BAD_REQUEST)
+    public HTTPErrorMessage emailAlreadyExistsException(EmailAlreadyExistsException ex, WebRequest request) {
+
+        return new HTTPErrorMessage(BAD_REQUEST.value(), ex.getMessage());
     }
 }
