@@ -34,10 +34,12 @@ import com.petclinic.auth.User.data.UserTokenPair;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
+import java.sql.SQLIntegrityConstraintViolationException;
+
 public interface UserService {
 
 
-    User createUser(UserIDLessRoleLessDTO user);
+    User createUser(UserIDLessRoleLessDTO user) throws SQLIntegrityConstraintViolationException;
 
     User passwordReset(long id, String newPassword);
 

@@ -95,8 +95,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
             return new HTTPErrorMessage(BAD_REQUEST.value(), exMessage);
         };
         filterExceptionHandler
-                .registerHandler(SQLIntegrityConstraintViolationException.class, duplicateEmailHandler)
-                .registerHandler(DataIntegrityViolationException.class, duplicateEmailHandler);
+                .registerHandler(SQLIntegrityConstraintViolationException.class, duplicateEmailHandler);
 
         http    .cors()
                 .and()

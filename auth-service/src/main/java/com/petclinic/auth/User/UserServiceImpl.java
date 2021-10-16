@@ -33,7 +33,9 @@ import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
 import java.nio.charset.StandardCharsets;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Base64;
+import java.util.Optional;
 
 import static java.lang.String.format;
 
@@ -71,7 +73,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User createUser(@Valid UserIDLessRoleLessDTO userIDLessDTO) {
+    public User createUser(@Valid UserIDLessRoleLessDTO userIDLessDTO) throws SQLIntegrityConstraintViolationException {
+
+        final Optional<User> byEmail = userRepo.findByEmail(userIDLessDTO.getEmail());
+
+        if(byEmail.isPresent()) {
+            throw new SQLIntegrityConstraintViolationException(
+                    format("User with e-mail %s already exists", userIDLessDTO.getEmail()));
+        }
 
         log.info("Saving user with email {}", userIDLessDTO.getEmail());
         User user = userMapper.idLessRoleLessDTOToModel(userIDLessDTO);

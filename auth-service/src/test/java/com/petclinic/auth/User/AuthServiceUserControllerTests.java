@@ -62,6 +62,7 @@ import org.springframework.web.util.NestedServletException;
 
 import javax.validation.*;
 import java.nio.charset.StandardCharsets;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Random;
@@ -141,7 +142,7 @@ public class AuthServiceUserControllerTests {
 
     @Test
     @DisplayName("Create a user from controller")
-    void create_user_from_controller() {
+    void create_user_from_controller() throws SQLIntegrityConstraintViolationException {
 
         final User hypothetical = userMapper.idLessRoleLessDTOToModel(ID_LESS_USER);
 

@@ -32,6 +32,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Base64;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
@@ -68,7 +69,7 @@ public class UserController {
     @PostMapping
     public UserPasswordLessDTO createUser(
             @RequestBody @Valid UserIDLessRoleLessDTO dto,
-            BindingResult bindingResult) {
+            BindingResult bindingResult) throws SQLIntegrityConstraintViolationException {
 
         log.info("Trying to persist user");
         final User saved = userService.createUser(dto);

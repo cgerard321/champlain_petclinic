@@ -25,6 +25,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -77,7 +78,7 @@ public class AuthServiceUserServiceTests {
 
     @Test
     @DisplayName("Create new user")
-    void create_new_user() {
+    void create_new_user() throws SQLIntegrityConstraintViolationException {
         UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(USER, PASS, EMAIL);
 
         when(jwtService.encrypt(argThat( n -> n.getEmail().equals(EMAIL) )))
@@ -159,7 +160,7 @@ public class AuthServiceUserServiceTests {
 
     @Test
     @DisplayName("Delete user by id")
-    void delete_role_by_id() {
+    void delete_role_by_id() throws SQLIntegrityConstraintViolationException {
 
         final UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(USER, PASS, EMAIL);
 
@@ -177,7 +178,7 @@ public class AuthServiceUserServiceTests {
 
     @Test
     @DisplayName("When creating user, encrypt password")
-    void encrypt_password_before_persistence() {
+    void encrypt_password_before_persistence() throws SQLIntegrityConstraintViolationException {
 
         final UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(USER, PASS, EMAIL);
 
@@ -191,7 +192,7 @@ public class AuthServiceUserServiceTests {
 
     @Test
     @DisplayName("When creating user, send verification email")
-    void send_email_on_register() {
+    void send_email_on_register() throws SQLIntegrityConstraintViolationException {
 
         AtomicInteger callCount = new AtomicInteger();
         AtomicReference<Mail> mailRef = new AtomicReference<>();
@@ -214,7 +215,7 @@ public class AuthServiceUserServiceTests {
 
     @Test
     @DisplayName("Given user, generate verification email")
-    void generate_verification_email() {
+    void generate_verification_email() throws SQLIntegrityConstraintViolationException {
 
         final UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(USER, PASS, EMAIL);
 
@@ -231,7 +232,7 @@ public class AuthServiceUserServiceTests {
 
     @Test
     @DisplayName("Given user exists in database and email + password match & e-mail is verified, return JWT")
-    void successful_login() throws IncorrectPasswordException {
+    void successful_login() throws IncorrectPasswordException, SQLIntegrityConstraintViolationException {
 
 
         final UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(USER, PASS, EMAIL);
@@ -252,7 +253,7 @@ public class AuthServiceUserServiceTests {
 
     @Test
     @DisplayName("Given user exists in database but password is incorrect, throw IncorrectPasswordException")
-    void bad_password_exception() {
+    void bad_password_exception() throws SQLIntegrityConstraintViolationException {
 
 
         final UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(USER, PASS, EMAIL);
