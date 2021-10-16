@@ -197,8 +197,13 @@ public class AuthServiceE2ETests {
 
         registerUser();
 
-        registerUser()
-                .andExpect(status().is4xxClientError());
+        final String asString = objectMapper.writeValueAsString(ID_LESS_USER);
+        mockMvc.perform(post("/users").contentType(APPLICATION_JSON).content(asString))
+                .andExpect(status().is4xxClientError())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").exists())
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.statusCode").exists());
     }
 
     private ResultActions registerUser() throws Exception {

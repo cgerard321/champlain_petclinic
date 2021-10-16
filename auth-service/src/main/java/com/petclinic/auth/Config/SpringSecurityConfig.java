@@ -25,6 +25,7 @@ import com.petclinic.auth.User.UserRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -36,6 +37,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -76,25 +78,25 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
-        filterExceptionHandler.registerHandler(
-                SQLIntegrityConstraintViolationException.class,
-                ex -> {
-                    final String message = ex.getMessage();
+        final Function<Exception, HTTPErrorMessage> duplicateEmailHandler = ex -> {
+            final String message = ex.getMessage();
+            String exMessage = message;
 
-                    if(message.contains("Duplicate")) {
-                        final ArrayList<String> strings = new ArrayList<>();
-                        final Matcher matcher = EXTRACT_FROM_SINGLE_QUOTES.matcher(message);
-                        while (matcher.find()) {
-                            strings.add(matcher.group());
-                        }
-
-                        return new HTTPErrorMessage(BAD_REQUEST.value(),
-                                        format("%s %s is already in use",  strings.get(1), strings.get(0)));
-                    }
-
-                    return null; // Do not handle
+            if (message.contains("Duplicate")) {
+                final ArrayList<String> strings = new ArrayList<>();
+                final Matcher matcher = EXTRACT_FROM_SINGLE_QUOTES.matcher(message);
+                while (matcher.find()) {
+                    strings.add(matcher.group());
                 }
-        );
+
+                exMessage = format("%s %s is already in use", strings.get(1), strings.get(0));
+            }
+
+            return new HTTPErrorMessage(BAD_REQUEST.value(), exMessage);
+        };
+        filterExceptionHandler
+                .registerHandler(SQLIntegrityConstraintViolationException.class, duplicateEmailHandler)
+                .registerHandler(DataIntegrityViolationException.class, duplicateEmailHandler);
 
         http    .cors()
                 .and()
