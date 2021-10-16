@@ -91,6 +91,7 @@ public class AuthServiceClientIntegrationTest {
                         .password(null)
                         .build()
         );
+        final String token = "some.valid.token";
 
         final MockResponse mockResponse = new MockResponse();
         mockResponse
