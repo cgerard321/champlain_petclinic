@@ -20,6 +20,7 @@
 
 package com.petclinic.auth.Config;
 
+import com.petclinic.auth.Exceptions.HTTPErrorMessage;
 import com.petclinic.auth.User.UserRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -35,11 +36,20 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static java.lang.String.format;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Configuration
 @RequiredArgsConstructor
 public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
+
+    private final static Pattern EXTRACT_FROM_SINGLE_QUOTES = Pattern.compile("(?<=')(?!\\s)[^']+(?<!\\s)(?=')");
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -67,6 +77,27 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+
+        filterExceptionHandler.registerHandler(
+                SQLIntegrityConstraintViolationException.class,
+                ex -> {
+                    final String message = ex.getMessage();
+
+                    if(message.contains("Duplicate")) {
+                        final ArrayList<String> strings = new ArrayList<>();
+                        final Matcher matcher = EXTRACT_FROM_SINGLE_QUOTES.matcher(message);
+                        while (matcher.find()) {
+                            strings.add(matcher.group());
+                        }
+
+                        return new HTTPErrorMessage(BAD_REQUEST.value(),
+                                        format("%s %s is already in use",  strings.get(1), strings.get(0)));
+                    }
+
+                    return null; // Do not handle
+                }
+        );
+
         http    .cors()
                 .and()
                 .csrf().disable()

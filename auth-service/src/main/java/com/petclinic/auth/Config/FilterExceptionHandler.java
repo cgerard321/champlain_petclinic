@@ -2,6 +2,7 @@ package com.petclinic.auth.Config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.auth.Exceptions.HTTPErrorMessage;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -12,6 +13,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,12 +33,14 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 @Component
 public class FilterExceptionHandler extends OncePerRequestFilter {
 
-    private final static Pattern EXTRACT_FROM_SINGLE_QUOTES = Pattern.compile("(?<=')(?!\\s)[^']+(?<!\\s)(?=')");
+
 
     private final ObjectMapper objectMapper;
+    private final Map<Class<?>, Function<Throwable, HTTPErrorMessage>> handlers;
 
     public FilterExceptionHandler(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
+        handlers = new HashMap<>();
     }
 
     // NOTE: if this gets to like 10 else...ifs, change to a simple Map<? extends Class, Function>
@@ -47,25 +54,19 @@ public class FilterExceptionHandler extends OncePerRequestFilter {
 
             // Very low level & cursed implementation, but I could not find a better solution
             // Do NOT touch this code unless you understand Java servlets and the middleware design pattern
-            final SQLIntegrityConstraintViolationException sqlIntegrityConstraintViolationException = crawl(ex, new SQLIntegrityConstraintViolationException());
-            if(sqlIntegrityConstraintViolationException != null) {
-                final String message = sqlIntegrityConstraintViolationException.getMessage();
-
-                if(message.contains("Duplicate")) {
-                    final ArrayList<String> strings = new ArrayList<>();
-                    final Matcher matcher = EXTRACT_FROM_SINGLE_QUOTES.matcher(message);
-                    while (matcher.find()) {
-                        strings.add(matcher.group());
+            Throwable cause = ex.getCause();
+            while(cause != null) {
+                final Function<Throwable, HTTPErrorMessage> handler = handlers.get(cause.getClass());
+                if(handler != null) {
+                    final HTTPErrorMessage handled = handler.apply(cause);
+                    if(handled != null) {
+                        response.setStatus(BAD_REQUEST.value());
+                        response.getWriter().write(
+                                objectMapper.writeValueAsString(handled));
+                        return;
                     }
-
-                    final HTTPErrorMessage httpErrorMessage =
-                            new HTTPErrorMessage(BAD_REQUEST.value(),
-                                    format("%s %s is already in use",  strings.get(1), strings.get(0)));
-                    response.setStatus(BAD_REQUEST.value());
-                    response.getWriter().write(
-                            objectMapper.writeValueAsString(httpErrorMessage));
-                    return;
                 }
+                cause = cause.getCause();
             }
 
             // Do not handle
@@ -73,16 +74,8 @@ public class FilterExceptionHandler extends OncePerRequestFilter {
         }
     }
 
-    private <T extends Exception> T crawl(Exception e, T lookFor) {
-
-        Throwable cause = e.getCause();
-        while(cause != null) {
-            if(cause.getClass().isAssignableFrom(lookFor.getClass())) {
-                return (T)cause;
-            }
-            cause = cause.getCause();
-        }
-
-        return null;
+    public <T> FilterExceptionHandler registerHandler(Class<T> key, Function<? super T, HTTPErrorMessage> handler) {
+        handlers.put(key, o -> handler.apply(key.cast(o)));
+        return this;
     }
 }
