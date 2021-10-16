@@ -8,6 +8,7 @@
 
 package com.petclinic.auth.User;
 
+import com.petclinic.auth.Exceptions.EmailAlreadyExistsException;
 import com.petclinic.auth.Exceptions.IncorrectPasswordException;
 import com.petclinic.auth.Exceptions.NotFoundException;
 import com.petclinic.auth.JWT.JWTService;
@@ -73,12 +74,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User createUser(@Valid UserIDLessRoleLessDTO userIDLessDTO) throws SQLIntegrityConstraintViolationException {
+    public User createUser(@Valid UserIDLessRoleLessDTO userIDLessDTO) {
 
         final Optional<User> byEmail = userRepo.findByEmail(userIDLessDTO.getEmail());
 
         if(byEmail.isPresent()) {
-            throw new SQLIntegrityConstraintViolationException(
+            throw new EmailAlreadyExistsException(
                     format("User with e-mail %s already exists", userIDLessDTO.getEmail()));
         }
 
