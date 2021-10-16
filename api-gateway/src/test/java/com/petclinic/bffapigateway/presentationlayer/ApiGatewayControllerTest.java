@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.Date;
 
 import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.when;
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -171,7 +172,9 @@ class ApiGatewayControllerTest {
         user.setUsername("Johnny123");
         user.setPassword("password");
         user.setEmail("email@email.com");
-        when(authServiceClient.createUser(user)).thenReturn(Mono.just(user));
+        when(authServiceClient.createUser(argThat(
+                n -> user.getEmail().equals(n.getEmail())
+        ))).thenReturn(Mono.just(user));
 
         client.post()
                 .uri("/api/gateway/users")
@@ -231,7 +234,9 @@ class ApiGatewayControllerTest {
         user.setPassword("pass");
         user.setEmail("johndoe2@gmail.com");
 
-        when(authServiceClient.createUser(user))
+        when(authServiceClient.createUser(argThat(
+                n -> user.getEmail().equals(n.getEmail())
+        )))
                 .thenReturn(Mono.just(user));
 
         client.post()
