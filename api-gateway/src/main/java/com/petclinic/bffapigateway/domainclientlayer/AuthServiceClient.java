@@ -1,7 +1,5 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Register;
 import com.petclinic.bffapigateway.dtos.UserDetails;
 import com.petclinic.bffapigateway.utils.Rethrower;
@@ -10,11 +8,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.Map;
 
 import static reactor.core.publisher.Mono.just;
 
@@ -59,7 +56,7 @@ public class AuthServiceClient {
                 .retrieve()
                 .onStatus(HttpStatus::is4xxClientError,
                         n -> rethrower.rethrow(n,
-                                x -> new RuntimeException(x.get("message").toString()))
+                                x -> new IllegalArgumentException(x.get("message").toString()))
                         )
                 .bodyToMono(UserDetails.class);
     }
