@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2021-10-16T13:24:01-0400",
+    date = "2021-10-16T15:59:58-0400",
     comments = "version: 1.4.1.Final, compiler: javac, environment: Java 13 (Oracle Corporation)"
 )
 @Component
@@ -28,8 +28,6 @@ public class VisitMapperImpl implements VisitMapper {
         visit.petId( model.getPetId() );
         visit.practitionerId( model.getPractitionerId() );
         visit.status( model.isStatus() );
-
-        visit.visitId( UUID.fromString(model.getVisitId()) );
 
         return visit.build();
     }

@@ -18,4 +18,12 @@ public class VisitDTO {
     private int petId;
     private int practitionerId;
     private boolean status;
+
+    public VisitDTO(Date date, String description, int petId, int practitionerId, boolean status){
+        this.date = date;
+        this.description = description;
+        this.petId = petId;
+        this.practitionerId = practitionerId;
+        this.status = status;
+    }
 }

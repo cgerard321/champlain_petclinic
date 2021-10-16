@@ -12,7 +12,7 @@ import java.util.UUID;
 public interface VisitMapper {
     @Mappings({
             @Mapping(target = "id", ignore = true),
-            @Mapping(target = "visitId", expression = "java(UUID.fromString(model.getVisitId()))")
+            @Mapping(target = "visitId", ignore = true)
     })
     Visit modelToEntity(VisitDTO model);
 

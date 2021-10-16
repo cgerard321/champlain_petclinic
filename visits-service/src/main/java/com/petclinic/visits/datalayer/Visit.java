@@ -43,7 +43,7 @@ public class Visit {
     @GeneratedValue(generator = "uuid2")
     @GenericGenerator(name = "uuid2", strategy = "uuid2")
     @Type(type = "uuid-char")
-    @Column(name = "visit_id")
+    @Column(name = "visit_id",unique = true, nullable = false)
     @Builder.Default
     private UUID visitId = UUID.randomUUID();
 

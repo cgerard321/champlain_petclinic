@@ -142,25 +142,38 @@ public class VisitsServiceImplTests {
   
     @Test
     public void whenValidPetIdThenShouldCreateVisitForPet() {
-        Visit createdVisit = visit().petId(1).date(new Date()).description("Description").practitionerId(123456).build();
+        VisitDTO visitDTO = new VisitDTO();
+        visitDTO.setPetId(1);
+        visitDTO.setDate(new Date());
+        visitDTO.setDescription("Description");
+        visitDTO.setPractitionerId(123456);
+
+        Visit createdVisit = visit().petId(1).visitId(UUID.randomUUID())
+                .date(new Date())
+                .description("Description")
+                .practitionerId(123456).build();
         
         when(repo.save(any(Visit.class))).thenReturn(createdVisit);
         
-        Visit serviceResponse = visitsService.addVisit(createdVisit);
+        VisitDTO serviceResponse = visitsService.addVisit(visitDTO);
         
         assertThat(serviceResponse.getPetId(), equalTo(createdVisit.getPetId()));
+        assertEquals(serviceResponse.getVisitId(), createdVisit.getVisitId().toString());
     }
 
     @Test
     public void whenEmptyDescriptionThenShouldThrowInvalidInputException(){
         // arrange
         String expectedExceptionMessage = "Visit description required.";
-        Visit createdVisit = visit().petId(1).date(new Date()).description("").practitionerId(123456).build();
-        when(repo.save(any(Visit.class))).thenReturn(createdVisit);
+        VisitDTO visitDTO = new VisitDTO();
+        visitDTO.setPetId(1);
+        visitDTO.setDate(new Date());
+        visitDTO.setDescription("");
+        visitDTO.setPractitionerId(123456);
 
         // act and assert
         InvalidInputException ex = assertThrows(InvalidInputException.class, () ->{
-            visitsService.addVisit(createdVisit);
+            visitsService.addVisit(visitDTO);
         });
         assertEquals(ex.getMessage(), expectedExceptionMessage);
     }
@@ -170,14 +183,19 @@ public class VisitsServiceImplTests {
     public void whenVisitIdAlreadyExistsThenThrowInvalidInputException(){
         // arrange
         String expectedExceptionMessage;
-        Visit createdVisit = visit().petId(1).date(new Date()).description("Description").practitionerId(123456).build();
+        VisitDTO visitDTO = new VisitDTO();
+        visitDTO.setVisitId(UUID.randomUUID().toString());
+        visitDTO.setPetId(1);
+        visitDTO.setDate(new Date());
+        visitDTO.setDescription("Description");
+        visitDTO.setPractitionerId(123456);
         when(repo.save(any(Visit.class))).thenThrow(DuplicateKeyException.class);
 
         // act and assert
         InvalidInputException ex = assertThrows(InvalidInputException.class, () ->{
-            visitsService.addVisit(createdVisit);
+            visitsService.addVisit(visitDTO);
         });
-        expectedExceptionMessage = "Duplicate visitId: " + createdVisit.getId();
+        expectedExceptionMessage = "Duplicate visitId: " + visitDTO.getVisitId();
         assertEquals(ex.getMessage(), expectedExceptionMessage);
         assertThat(ex.getCause()).isInstanceOf(DuplicateKeyException.class);
     }
@@ -463,7 +481,7 @@ public class VisitsServiceImplTests {
     @Test
     public void shouldConvertToEntity() throws ParseException {
         Date date = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-12");
-        VisitDTO model = new VisitDTO(UUID.randomUUID().toString(), date, "hello", 200, 123456, true);
+        VisitDTO model = new VisitDTO(date, "hello", 200, 123456, true);
 
         Visit entity = mapper.modelToEntity(model);
 
@@ -472,7 +490,6 @@ public class VisitsServiceImplTests {
         assertEquals(model.getDescription(),entity.getDescription());
         assertEquals(model.isStatus(), entity.isStatus());
         assertEquals(model.getPetId(), entity.getPetId());
-        assertEquals(model.getVisitId(), entity.getVisitId().toString());
     }
 
     @Test

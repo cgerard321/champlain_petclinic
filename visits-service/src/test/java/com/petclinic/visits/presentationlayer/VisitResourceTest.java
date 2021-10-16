@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.visits.businesslayer.VisitsService;
 import com.petclinic.visits.datalayer.Visit;
+import com.petclinic.visits.datalayer.VisitDTO;
 import com.petclinic.visits.utils.exceptions.InvalidInputException;
 import com.petclinic.visits.utils.exceptions.NotFoundException;
 import com.petclinic.visits.utils.http.ControllerExceptionHandler;
@@ -189,11 +190,12 @@ public class VisitResourceTest {
 
 	@Test
 	void shouldCreateConfirmedVisit() throws Exception {
-		Visit visit = visit().id(1).petId(111).status(true).build();
+		VisitDTO visitDTO = new VisitDTO();
+		visitDTO.setStatus(true);
 
-		given(visitsService.addVisit(visit)).willReturn(visit);
+		given(visitsService.addVisit(any())).willReturn(visitDTO);
 
-		mvc.perform(post("/owners/*/pets/{petId}/visits", 1).content("{\"id\": 1, \"date\": \"2011-03-04\", \"description\": \"Desc-1\", \"petId\": 1, \"status\": \"true\"}")
+		mvc.perform(post("/owners/*/pets/{petId}/visits", 1).content(objectMapper.writeValueAsString(visitDTO))
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isCreated());
@@ -201,11 +203,12 @@ public class VisitResourceTest {
 
 	@Test
 	void shouldCreateCanceledVisit() throws Exception {
-		Visit visit = visit().id(1).petId(111).status(false).build();
+		VisitDTO visitDTO = new VisitDTO();
+		visitDTO.setStatus(false);
 
-		given(visitsService.addVisit(visit)).willReturn(visit);
+		given(visitsService.addVisit(any())).willReturn(visitDTO);
 
-		mvc.perform(post("/owners/*/pets/{petId}/visits", 1).content("{\"id\": 1, \"date\": \"2011-03-04\", \"description\": \"Desc-1\", \"petId\": 1, \"status\": \"false\"}")
+		mvc.perform(post("/owners/*/pets/{petId}/visits", 1).content(objectMapper.writeValueAsString(visitDTO))
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isCreated());
@@ -214,24 +217,28 @@ public class VisitResourceTest {
 
 	@Test
 	void shouldCreateVisit() throws Exception {
-		Visit expectedVisit = visit().id(1).petId(1).date(new Date()).description("CREATED VISIT").practitionerId(123456).build();
+		VisitDTO visitDTO = new VisitDTO();
+		visitDTO.setVisitId("9161747b-886e-4d7c-9616-188de90c1306");
+		visitDTO.setDescription("Description");
 
-		when(visitsService.addVisit(any())).thenReturn(expectedVisit);
+		when(visitsService.addVisit(any())).thenReturn(visitDTO);
 
 		mvc.perform(post("/owners/*/pets/{petId}/visits", 1)
-				.content(objectMapper.writeValueAsString(expectedVisit))
+				.content(objectMapper.writeValueAsString(visitDTO))
 				.contentType(MediaType.APPLICATION_JSON)
 				.characterEncoding("utf-8")
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isCreated())
-				.andExpect(jsonPath("$.description").value(expectedVisit.getDescription()));
+				.andExpect(jsonPath("$.description").value(visitDTO.getDescription()));
 	}
 
 	@Test
 	void shouldFailToCreateVisitBadRequest() throws Exception {
-		Visit expectedVisit = visit().petId(1).date(new Date()).description("CREATED VISIT").practitionerId(123456).build();
+		VisitDTO visitDTO = new VisitDTO();
+		visitDTO.setVisitId("9161747b-886e-4d7c-9616-188de90c1306");
+		visitDTO.setDescription("Description");
 
-		when(visitsService.addVisit(any())).thenReturn(expectedVisit);
+		when(visitsService.addVisit(any())).thenReturn(visitDTO);
 
 		mvc.perform(post("/owners/*/pets/{petId}/visits", 1)
 				.content("")

@@ -14,10 +14,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static com.petclinic.visits.datalayer.Visit.visit;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -112,7 +109,7 @@ public class PersistenceTests {
 
     @Test
     public void updateVisit(){
-        Visit savedVisit = new Visit(5, new Date(), "Description", 5);
+        Visit savedVisit = new Visit(5, UUID.randomUUID(), new Date(), "Description", 5, 123456, true);
         savedVisit = repo.save(savedVisit);
 
         savedVisit.setDescription("Updated Description");
@@ -139,16 +136,16 @@ public class PersistenceTests {
         Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01");
         Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-31");
 
-        Visit visitDuring1 = new Visit(123, new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01"), "Description", 2);
+        Visit visitDuring1 = new Visit(123, UUID.randomUUID(), new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01"), "Description", 2, 123456, true);
         repo.save(visitDuring1);
 
-        Visit visitDuring2 = new Visit(122, new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-31"), "Description", 2);
+        Visit visitDuring2 = new Visit(122, UUID.randomUUID(), new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-31"), "Description", 2, 123456, true);
         repo.save(visitDuring2);
 
-        Visit visitAfter = new Visit(121, new SimpleDateFormat("yyyy-MM-dd").parse("2021-11-01"), "Description", 2);
+        Visit visitAfter = new Visit(121, UUID.randomUUID(), new SimpleDateFormat("yyyy-MM-dd").parse("2021-11-01"), "Description", 2, 123456, true);
         repo.save(visitAfter);
 
-        Visit visitBefore = new Visit(120, new SimpleDateFormat("yyyy-MM-dd").parse("2021-09-30"), "Description", 2);
+        Visit visitBefore = new Visit(120, UUID.randomUUID(), new SimpleDateFormat("yyyy-MM-dd").parse("2021-09-30"), "Description", 2, 123456, true);
         repo.save(visitBefore);
 
         List<Visit> repoResponse = repo.findAllByDateBetween(startDate, endDate);
