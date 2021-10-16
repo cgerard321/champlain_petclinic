@@ -3,12 +3,17 @@ package com.petclinic.auth.Config;
 import com.petclinic.auth.Exceptions.HTTPErrorMessage;
 import com.petclinic.auth.Exceptions.IncorrectPasswordException;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
+import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
@@ -27,6 +32,12 @@ public class GlobalControllerExceptionHandlerConfig {
     @ResponseStatus(value = BAD_REQUEST)
     public HTTPErrorMessage constraintViolationException(ConstraintViolationException ex, WebRequest request) {
 
-        return new HTTPErrorMessage(BAD_REQUEST.value(), ex.getMessage().split(": ?")[1]);
+        final List<String> collect = ex.getConstraintViolations().stream()
+                .map(ConstraintViolation::getMessage)
+                .collect(Collectors.toList());
+        return new HTTPErrorMessage(
+                BAD_REQUEST.value(),
+                collect.stream()
+                        .reduce("", (a, b) -> a.concat(" ").concat(b)));
     }
 }
