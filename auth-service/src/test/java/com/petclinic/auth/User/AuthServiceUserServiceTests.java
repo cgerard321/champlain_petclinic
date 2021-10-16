@@ -78,7 +78,7 @@ public class AuthServiceUserServiceTests {
 
     @Test
     @DisplayName("Create new user")
-    void create_new_user() throws SQLIntegrityConstraintViolationException {
+    void create_new_user() {
         UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(USER, PASS, EMAIL);
 
         when(jwtService.encrypt(argThat( n -> n.getEmail().equals(EMAIL) )))
@@ -160,7 +160,7 @@ public class AuthServiceUserServiceTests {
 
     @Test
     @DisplayName("Delete user by id")
-    void delete_role_by_id() throws SQLIntegrityConstraintViolationException {
+    void delete_role_by_id() {
 
         final UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(USER, PASS, EMAIL);
 
@@ -178,7 +178,7 @@ public class AuthServiceUserServiceTests {
 
     @Test
     @DisplayName("When creating user, encrypt password")
-    void encrypt_password_before_persistence() throws SQLIntegrityConstraintViolationException {
+    void encrypt_password_before_persistence() {
 
         final UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(USER, PASS, EMAIL);
 
@@ -192,7 +192,7 @@ public class AuthServiceUserServiceTests {
 
     @Test
     @DisplayName("When creating user, send verification email")
-    void send_email_on_register() throws SQLIntegrityConstraintViolationException {
+    void send_email_on_register() {
 
         AtomicInteger callCount = new AtomicInteger();
         AtomicReference<Mail> mailRef = new AtomicReference<>();
@@ -215,7 +215,7 @@ public class AuthServiceUserServiceTests {
 
     @Test
     @DisplayName("Given user, generate verification email")
-    void generate_verification_email() throws SQLIntegrityConstraintViolationException {
+    void generate_verification_email() {
 
         final UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(USER, PASS, EMAIL);
 
@@ -253,7 +253,7 @@ public class AuthServiceUserServiceTests {
 
     @Test
     @DisplayName("Given user exists in database but password is incorrect, throw IncorrectPasswordException")
-    void bad_password_exception() throws SQLIntegrityConstraintViolationException {
+    void bad_password_exception() {
 
 
         final UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(USER, PASS, EMAIL);

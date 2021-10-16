@@ -39,7 +39,7 @@ import java.sql.SQLIntegrityConstraintViolationException;
 public interface UserService {
 
 
-    User createUser(UserIDLessRoleLessDTO user) throws SQLIntegrityConstraintViolationException;
+    User createUser(UserIDLessRoleLessDTO user);
 
     User passwordReset(long id, String newPassword);
 

@@ -142,7 +142,7 @@ public class AuthServiceUserControllerTests {
 
     @Test
     @DisplayName("Create a user from controller")
-    void create_user_from_controller() throws SQLIntegrityConstraintViolationException {
+    void create_user_from_controller() {
 
         final User hypothetical = userMapper.idLessRoleLessDTOToModel(ID_LESS_USER);
 

@@ -69,7 +69,7 @@ public class UserController {
     @PostMapping
     public UserPasswordLessDTO createUser(
             @RequestBody @Valid UserIDLessRoleLessDTO dto,
-            BindingResult bindingResult) throws SQLIntegrityConstraintViolationException {
+            BindingResult bindingResult) {
 
         log.info("Trying to persist user");
         final User saved = userService.createUser(dto);
