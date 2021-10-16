@@ -57,6 +57,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import retrofit2.http.Body;
 
 import javax.validation.*;
 import java.nio.charset.StandardCharsets;
@@ -432,9 +433,12 @@ public class AuthServiceUserControllerTests {
     void get_user_with_invalid_id() throws Exception {
 
         long id = -1;
-        given(userService.getUserById(id)).willThrow(InvalidInputException.class);
+        InvalidInputException invalidInputException = new InvalidInputException("Id cannot be a negative number for " + id);
+        given(userService.getUserById(id)).willThrow(invalidInputException);
         mockMvc.perform(get("/users/" + id).accept(APPLICATION_JSON))
-                .andExpect(status().isUnprocessableEntity());
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.statusCode").value(422))
+                .andExpect(jsonPath("$.message").value("Id cannot be a negative number for " + id));
     }
 
     @Test
@@ -442,8 +446,13 @@ public class AuthServiceUserControllerTests {
     void get_user_with_id_not_found() throws Exception {
 
         long id = 23212;
-        given(userService.getUserById(id)).willThrow(NotFoundException.class);
+        NotFoundException notFoundException = new NotFoundException("No user found for userID " + id);
+        given(userService.getUserById(id)).willThrow(notFoundException);
         mockMvc.perform(get("/users/" + id))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.statusCode").value(404))
+                .andExpect(jsonPath("$.message").value("No user found for userID " + id));
+
+
     }
 }
