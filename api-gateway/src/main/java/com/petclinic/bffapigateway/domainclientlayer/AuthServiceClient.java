@@ -1,13 +1,19 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Register;
 import com.petclinic.bffapigateway.dtos.UserDetails;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Map;
 
 import static reactor.core.publisher.Mono.just;
 
@@ -16,6 +22,9 @@ public class AuthServiceClient {
 
     private final WebClient.Builder webClientBuilder;
     private final String authServiceUrl;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     public AuthServiceClient(
             WebClient.Builder webClientBuilder,
@@ -46,7 +55,23 @@ public class AuthServiceClient {
                 .uri(authServiceUrl + "/users")
                 .body(just(model), Register.class)
                 .accept(MediaType.APPLICATION_JSON)
-                .retrieve().bodyToMono(UserDetails.class);
+                .retrieve()
+                .onStatus(HttpStatus::is4xxClientError, clientResponse ->
+                        clientResponse.createException().flatMap(n ->
+                                {
+                                    try {
+                                        final Map<String, String> map =
+                                                objectMapper.readValue(n.getResponseBodyAsString(), Map.class);
+                                        return Mono.error(new RuntimeException(
+                                                map.get("message")
+                                        ));
+                                    } catch (JsonProcessingException e) {
+                                        e.printStackTrace();
+                                        return Mono.error(e);
+                                    }
+                                })
+                )
+                .bodyToMono(UserDetails.class);
     }
 
     public Flux<UserDetails> createUsers (){
