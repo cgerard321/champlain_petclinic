@@ -13,7 +13,10 @@ angular.module('signupForm')
             email: $scope.signup.email,
         })
             .then(() => $location.path("/login"))
-            .catch(console.log);
+            .catch(n => {
+                $scope.errorMessage = n.data.message;
+                console.log(n);
+            });
 
         this.keypress = ({ originalEvent: { key } }) => key === 'Enter' && this.add()
     }]);
