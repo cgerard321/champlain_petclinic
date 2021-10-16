@@ -38,7 +38,7 @@ gateway:
   protocol: http
   subdomain:
 mailer-service:
-  host: localhost
+  host: mailer-service
   port: 8080
 
 ---
