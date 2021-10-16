@@ -40,6 +40,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -204,6 +206,29 @@ public class AuthServiceE2ETests {
                 .andExpect(jsonPath("$.message").exists())
                 .andExpect(jsonPath("$.timestamp").exists())
                 .andExpect(jsonPath("$.statusCode").exists());
+    }
+
+    @Test
+    @DisplayName("Given non-registered user login, return 401")
+    void non_registered_user() throws Exception {
+
+        final String asString = objectMapper.writeValueAsString(new HashMap<String, String>(){{
+            put("email", USER.getEmail());
+            put("password", USER.getPassword());
+        }});
+
+        final MvcResult result = mockMvc.perform(post("/users/login").contentType(APPLICATION_JSON).content(asString))
+                .andExpect(status().is4xxClientError())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(jsonPath("$.password").doesNotExist())
+                .andExpect(jsonPath("$.statusCode").value(UNAUTHORIZED.value()))
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.message").value(format("Password not valid for email %s", USER.getEmail())))
+                .andReturn();
+
+        final String token = result.getResponse().getHeader(AUTHORIZATION);
+
+        assertNull(token);
     }
 
     private ResultActions registerUser() throws Exception {
