@@ -4,11 +4,18 @@ import com.petclinic.visits.datalayer.Visit;
 import com.petclinic.visits.datalayer.VisitDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.Mappings;
 
-@Mapper(componentModel = "spring")
+import java.util.UUID;
+
+@Mapper(componentModel = "spring", imports = {UUID.class})
 public interface VisitMapper {
-    @Mapping(target = "id", ignore = true)
+    @Mappings({
+            @Mapping(target = "id", ignore = true),
+            @Mapping(target = "visitId", expression = "java(UUID.fromString(model.getVisitId()))")
+    })
     Visit modelToEntity(VisitDTO model);
 
+    @Mapping(target = "visitId", expression = "java(entity.getVisitId().toString())")
     VisitDTO entityToModel(Visit entity);
 }

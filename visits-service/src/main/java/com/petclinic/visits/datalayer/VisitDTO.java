@@ -12,7 +12,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class VisitDTO {
-    private UUID visitId;
+    private String visitId;
     private Date date;
     private String description;
     private int petId;

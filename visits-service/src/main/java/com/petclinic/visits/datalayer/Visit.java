@@ -3,7 +3,10 @@ package com.petclinic.visits.datalayer;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
 import org.springframework.stereotype.Indexed;
 
 import javax.persistence.*;
@@ -25,6 +28,7 @@ import java.util.UUID;
  * Contributors:
  */
 
+@Data
 @Entity
 @Table(name = "visits")
 @Builder(builderMethodName = "visit")
@@ -36,9 +40,12 @@ public class Visit {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @GeneratedValue(generator = "uuid2")
+    @GenericGenerator(name = "uuid2", strategy = "uuid2")
+    @Type(type = "uuid-char")
     @Column(name = "visit_id")
-    @GeneratedValue
-    private UUID visitId;
+    @Builder.Default
+    private UUID visitId = UUID.randomUUID();
 
     @Builder.Default
     @Column(name = "visit_date")

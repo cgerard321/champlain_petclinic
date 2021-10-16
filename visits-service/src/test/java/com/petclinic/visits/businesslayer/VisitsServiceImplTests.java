@@ -1,6 +1,7 @@
 package com.petclinic.visits.businesslayer;
 
 import com.petclinic.visits.datalayer.Visit;
+import com.petclinic.visits.datalayer.VisitDTO;
 import com.petclinic.visits.datalayer.VisitRepository;
 import com.petclinic.visits.utils.exceptions.InvalidInputException;
 import org.junit.jupiter.api.BeforeEach;
@@ -47,6 +48,9 @@ public class VisitsServiceImplTests {
 
     @Autowired
     VisitsService visitsService;
+
+    @Autowired
+    VisitMapper mapper;
 
     private Visit visit;
 
@@ -434,4 +438,46 @@ public class VisitsServiceImplTests {
         assertEquals("PractitionerId can't be negative.", ex.getMessage());
     }
 
+    // VisitMapper tests
+    @Test
+    public void shouldConvertToModel() throws ParseException {
+        Date date = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-12");
+        Visit entity = visit()
+                .petId(200)
+                .date(date)
+                .description("hello")
+                .status(true)
+                .practitionerId(123456)
+                .build();
+
+        VisitDTO model = mapper.entityToModel(entity);
+
+        assertEquals(entity.getPractitionerId(), model.getPractitionerId());
+        assertEquals(entity.getDate(), model.getDate());
+        assertEquals(entity.getDescription(), model.getDescription());
+        assertEquals(entity.isStatus(), model.isStatus());
+        assertEquals(entity.getPetId(), model.getPetId());
+        assertEquals(entity.getVisitId().toString(), model.getVisitId());
+    }
+
+    @Test
+    public void shouldConvertToEntity() throws ParseException {
+        Date date = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-12");
+        VisitDTO model = new VisitDTO(UUID.randomUUID().toString(), date, "hello", 200, 123456, true);
+
+        Visit entity = mapper.modelToEntity(model);
+
+        assertEquals(model.getPractitionerId(), entity.getPractitionerId());
+        assertEquals(model.getDate(), entity.getDate());
+        assertEquals(model.getDescription(),entity.getDescription());
+        assertEquals(model.isStatus(), entity.isStatus());
+        assertEquals(model.getPetId(), entity.getPetId());
+        assertEquals(model.getVisitId(), entity.getVisitId().toString());
+    }
+
+    @Test
+    public void shouldReturnNullWhenGivenNull(){
+        assertNull(mapper.entityToModel(null));
+        assertNull(mapper.modelToEntity(null));
+    }
 }
