@@ -233,7 +233,7 @@ public class AuthServiceUserControllerTests {
 
 
         mockMvc.perform(put("/users/1000"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isBadRequest());
     }
 
     @Test
