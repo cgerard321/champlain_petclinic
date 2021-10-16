@@ -43,9 +43,6 @@ public class FilterExceptionHandler extends OncePerRequestFilter {
         handlers = new HashMap<>();
     }
 
-    // NOTE: if this gets to like 10 else...ifs, change to a simple Map<? extends Class, Function>
-    // I am not implementing it now because it would be too complex
-    // If you do not understand this note you are NOT ready to touch this code
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {
