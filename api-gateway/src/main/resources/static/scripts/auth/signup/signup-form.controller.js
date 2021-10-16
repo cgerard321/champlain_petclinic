@@ -5,7 +5,7 @@
 'use strict';
 
 angular.module('signupForm')
-    .controller('SignupFormController', ['$http', '$scope', function ($http, $scope) {
+    .controller('SignupFormController', ['$http', '$scope', "$location", function ($http, $scope, $location) {
 
         this.add = () => $http.post('/api/gateway/users/', {
             username: $scope.signup.username,
