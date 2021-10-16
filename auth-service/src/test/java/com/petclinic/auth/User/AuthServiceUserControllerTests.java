@@ -150,7 +150,7 @@ public class AuthServiceUserControllerTests {
         when(userService.createUser(ID_LESS_USER))
                 .thenReturn(hypothetical);
 
-        final UserPasswordLessDTO user = userController.createUser(ID_LESS_USER);
+        final UserPasswordLessDTO user = userController.createUser(ID_LESS_USER, null);
         assertNotNull(user);
         assertThat(user.getId(), instanceOf(Long.TYPE));
     }
@@ -161,7 +161,7 @@ public class AuthServiceUserControllerTests {
 
         UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO();
 
-        assertThrows(ConstraintViolationException.class, () -> userController.createUser(userIDLessDTO));
+        assertThrows(ConstraintViolationException.class, () -> userController.createUser(userIDLessDTO, null));
     }
 
     @Test
@@ -171,7 +171,7 @@ public class AuthServiceUserControllerTests {
 
         UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(null, PASS,EMAIL);
 
-        assertThrows(ConstraintViolationException.class, () -> userController.createUser(userIDLessDTO));
+        assertThrows(ConstraintViolationException.class, () -> userController.createUser(userIDLessDTO, null));
     }
 
     @Test
@@ -181,7 +181,7 @@ public class AuthServiceUserControllerTests {
 
         UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO( USER, null,EMAIL);
 
-        assertThrows(ConstraintViolationException.class, () -> userController.createUser(userIDLessDTO));
+        assertThrows(ConstraintViolationException.class, () -> userController.createUser(userIDLessDTO, null));
     }
     @Test
     @DisplayName("Check the password field in order to refused if no special character")
@@ -228,7 +228,7 @@ public class AuthServiceUserControllerTests {
 
         UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(USER, PASS,null);
 
-        assertThrows(ConstraintViolationException.class, () -> userController.createUser(userIDLessDTO));
+        assertThrows(ConstraintViolationException.class, () -> userController.createUser(userIDLessDTO, null));
     }
     @Test
     @DisplayName("Check if the input ID is correct")

@@ -27,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -65,7 +66,9 @@ public class UserController {
     }
 
     @PostMapping
-    public UserPasswordLessDTO createUser(@RequestBody @Valid UserIDLessRoleLessDTO dto) {
+    public UserPasswordLessDTO createUser(
+            @RequestBody @Valid UserIDLessRoleLessDTO dto,
+            BindingResult bindingResult) {
 
         log.info("Trying to persist user");
         final User saved = userService.createUser(dto);
