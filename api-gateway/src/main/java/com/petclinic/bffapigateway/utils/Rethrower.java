@@ -7,36 +7,36 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import reactor.core.publisher.Mono;
 
+import java.security.Provider;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * Created by IntelliJ IDEA.
  *
- * User: @Feat
+ * User: @Fube
  * Date: 2021-10-15
  * Ticket: feat(AUTH-CPC-354)
  */
 @RequiredArgsConstructor
 @Component
-public class Rethrower implements Function<ClientResponse, Mono<? extends Throwable>> {
+public class Rethrower {
 
     private final ObjectMapper objectMapper;
 
-    @Override
-    public Mono<? extends Throwable> apply(ClientResponse clientResponse) {
+    public Mono<? extends Throwable> rethrow(ClientResponse clientResponse, Function<Map, ? extends Throwable> exceptionProvider) {
         return clientResponse.createException().flatMap(n ->
         {
             try {
                 final Map map =
                         objectMapper.readValue(n.getResponseBodyAsString(), Map.class);
-                return Mono.error(new RuntimeException(
-                        map.get("message").toString()
-                ));
+                return Mono.error(exceptionProvider.apply(map));
             } catch (JsonProcessingException e) {
                 e.printStackTrace();
                 return Mono.error(e);
             }
         });
     }
+
 }

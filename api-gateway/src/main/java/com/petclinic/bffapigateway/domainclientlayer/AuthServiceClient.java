@@ -57,7 +57,10 @@ public class AuthServiceClient {
                 .body(just(model), Register.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .onStatus(HttpStatus::is4xxClientError, rethrower)
+                .onStatus(HttpStatus::is4xxClientError,
+                        n -> rethrower.rethrow(n,
+                                x -> new RuntimeException(x.get("message").toString()))
+                        )
                 .bodyToMono(UserDetails.class);
     }
 
