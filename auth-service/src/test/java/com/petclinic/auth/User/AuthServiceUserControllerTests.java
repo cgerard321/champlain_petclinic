@@ -48,6 +48,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
@@ -70,6 +71,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -411,5 +413,29 @@ public class AuthServiceUserControllerTests {
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andExpect(jsonPath("$.message").value(EXCEPTION_MESSAGE));
+    }
+
+    @Test
+    @DisplayName("Given email integrity violation, return sensical HTTP error message and 401 status code")
+    void duplicate_email_response() throws Exception {
+
+        final UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(USER, PASS, EMAIL);
+        final String asString = objectMapper.writeValueAsString(userIDLessDTO);
+
+        when(jwtService.encrypt(any()))
+                .thenReturn("a.fake.token");
+
+        when(userService.createUser(any()) )
+                .thenThrow(new DataIntegrityViolationException(
+                        format("Duplicate entry '%s' for key '%s'", EMAIL, "email")
+                ));
+
+        mockMvc.perform(post("/users").contentType(APPLICATION_JSON).content(asString))
+                .andDo(print())
+                .andExpect(status().is4xxClientError())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(jsonPath("$.statusCode").value(BAD_REQUEST.value()))
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.message").value(format("email %s is already in use", EMAIL)));
     }
 }
