@@ -35,8 +35,7 @@ public class GlobalControllerExceptionHandlerConfig {
                 .collect(Collectors.toList());
         return new HTTPErrorMessage(
                 BAD_REQUEST.value(),
-                collect.stream()
-                        .reduce("", (a, b) -> a.concat(" ").concat(b)));
+                String.join(" ", collect));
     }
 
     @ExceptionHandler(value = EmailAlreadyExistsException.class)
