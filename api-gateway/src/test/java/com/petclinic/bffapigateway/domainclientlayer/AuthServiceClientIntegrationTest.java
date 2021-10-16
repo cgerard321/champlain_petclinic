@@ -79,4 +79,32 @@ public class AuthServiceClientIntegrationTest {
         assertNotNull(block.getId());
         assertEquals(0, block.getRoles().size());
     }
+
+    @Test
+    @DisplayName("Given valid JWT, verify user")
+    void valid_verification() throws JsonProcessingException {
+        final String asString = objectMapper.writeValueAsString(
+                objectMapper.convertValue(USER_REGISTER, UserDetails.class)
+                        .toBuilder()
+                        .id(1)
+                        .roles(Collections.emptySet())
+                        .password(null)
+                        .build()
+        );
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setBody(asString);
+
+        server.enqueue(mockResponse);
+
+        final UserDetails block = authServiceClient.verifyUser(token).block();
+
+        assertEquals(USER_REGISTER.getEmail(), block.getEmail());
+        assertEquals(USER_REGISTER.getUsername(), block.getUsername());
+        assertNull(block.getPassword());
+        assertNotNull(block.getId());
+        assertEquals(0, block.getRoles().size());
+    }
 }
