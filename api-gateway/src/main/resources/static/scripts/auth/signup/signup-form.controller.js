@@ -12,7 +12,7 @@ angular.module('signupForm')
             password: $scope.signup.password,
             email: $scope.signup.email,
         })
-            .then(console.log)
+            .then(() => $location.path("/login"))
             .catch(console.log);
 
         this.keypress = ({ originalEvent: { key } }) => key === 'Enter' && this.add()
