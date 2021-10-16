@@ -27,6 +27,6 @@ public class GlobalControllerExceptionHandlerConfig {
     @ResponseStatus(value = BAD_REQUEST)
     public HTTPErrorMessage constraintViolationException(ConstraintViolationException ex, WebRequest request) {
 
-        return new HTTPErrorMessage(BAD_REQUEST.value(), ex.getMessage().split(":")[1]);
+        return new HTTPErrorMessage(BAD_REQUEST.value(), ex.getMessage().split(": ?")[1]);
     }
 }
