@@ -4,7 +4,7 @@ angular.module('billHistory')
     .controller('BillHistoryController', ['$http', function ($http) {
         var self = this;
 
-        $http.get('api/gateway/bill/history').then(function (resp) {
+        $http.get('api/gateway/bills').then(function (resp) {
             self.bills = resp.data;
         });
 
