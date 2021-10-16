@@ -190,6 +190,14 @@ public class AuthServiceE2ETests {
                 .andExpect(jsonPath("$.totalPages").value(ceil(userRepo.count() / 10.0)));
     }
 
+    @Test
+    @DisplayName("Given duplicate email, expect bad request exception with sensical message")
+    void duplicate_email_register() throws Exception {
+
+        registerUser();
+        registerUser();
+    }
+
     private void registerUser() throws Exception {
 
         final String asString = objectMapper.writeValueAsString(ID_LESS_USER);
