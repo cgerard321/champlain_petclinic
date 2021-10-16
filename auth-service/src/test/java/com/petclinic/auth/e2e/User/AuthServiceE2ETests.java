@@ -232,7 +232,7 @@ public class AuthServiceE2ETests {
     }
 
     @Test
-    @DisplayName("Given verified admin user, access protected roles endpoint")
+    @DisplayName("Given non-admin user, access protected roles endpoint")
     void unauthorized_access_protected_route() throws Exception {
 
         mockMvc.perform(get("/roles")
