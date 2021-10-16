@@ -33,6 +33,7 @@
 package com.petclinic.auth.User;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.petclinic.auth.Config.JWTFilter;
 import com.petclinic.auth.Exceptions.IncorrectPasswordException;
 import com.petclinic.auth.Exceptions.NotFoundException;
 import com.petclinic.auth.JWT.JWTService;
@@ -48,6 +49,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -55,6 +57,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.web.util.NestedServletException;
 
 import javax.validation.*;
 import java.nio.charset.StandardCharsets;
@@ -462,5 +465,38 @@ public class AuthServiceUserControllerTests {
                 .andExpect(jsonPath("$.statusCode").value(BAD_REQUEST.value()))
                 .andExpect(jsonPath("$.timestamp").exists())
                 .andExpect(jsonPath("$.message").value(format("email %s is already in use", EMAIL)));
+    }
+
+    @Test
+    @DisplayName("Given non-registered exception, then rethrow")
+    void duplicate_email_climb_non_registered() throws Exception {
+
+        final UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(USER, PASS, EMAIL);
+        final String asString = objectMapper.writeValueAsString(userIDLessDTO);
+        final String unregistered_exception = "unregistered exception";
+
+
+        when(jwtService.encrypt(any()))
+                .thenReturn("a.fake.token");
+
+        when(userService.createUser(any()) )
+                .thenThrow(new RuntimeException(unregistered_exception));
+
+        // Is this scuffed? Yes. Do I care? No
+        final NestedServletException nestedServletException = assertThrows(
+                NestedServletException.class,
+                () ->
+                        mockMvc.perform(post("/users").contentType(APPLICATION_JSON).content(asString))
+                                .andDo(print())
+                                .andExpect(status().is4xxClientError())
+                                .andExpect(content().contentType(APPLICATION_JSON))
+                                .andExpect(jsonPath("$.statusCode").value(BAD_REQUEST.value()))
+                                .andExpect(jsonPath("$.timestamp").exists())
+                                .andExpect(jsonPath("$.message").value(format("email %s is already in use", EMAIL)))
+        );
+
+        // Harsher assert than using instanceof
+        assertEquals(RuntimeException.class, nestedServletException.getCause().getClass());
+        assertEquals(unregistered_exception, nestedServletException.getCause().getMessage());
     }
 }
