@@ -20,12 +20,10 @@
 
 package com.petclinic.auth.Config;
 
-import com.petclinic.auth.Exceptions.HTTPErrorMessage;
 import com.petclinic.auth.User.UserRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -35,21 +33,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import java.sql.SQLIntegrityConstraintViolationException;
-import java.util.ArrayList;
-import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static java.lang.String.format;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
 @Configuration
 @RequiredArgsConstructor
 public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
-
-    private final static Pattern EXTRACT_FROM_SINGLE_QUOTES = Pattern.compile("(?<=')(?!\\s)[^']+(?<!\\s)(?=')");
 
     @Bean
     public BCryptPasswordEncoder bCryptPasswordEncoder() {
@@ -58,7 +46,6 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final UserRepo userRepo;
     private final JWTFilter jwtFilter;
-    private final FilterExceptionHandler filterExceptionHandler;
 
     private static final String[] AUTH_WHITELIST = {
             // -- Swagger UI v2
@@ -78,25 +65,6 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
-        final Function<Exception, HTTPErrorMessage> duplicateEmailHandler = ex -> {
-            final String message = ex.getMessage();
-            String exMessage = message;
-
-            if (message.contains("Duplicate")) {
-                final ArrayList<String> strings = new ArrayList<>();
-                final Matcher matcher = EXTRACT_FROM_SINGLE_QUOTES.matcher(message);
-                while (matcher.find()) {
-                    strings.add(matcher.group());
-                }
-
-                exMessage = format("%s %s is already in use", strings.get(1), strings.get(0));
-            }
-
-            return new HTTPErrorMessage(BAD_REQUEST.value(), exMessage);
-        };
-        filterExceptionHandler
-                .registerHandler(SQLIntegrityConstraintViolationException.class, duplicateEmailHandler);
-
         http    .cors()
                 .and()
                 .csrf().disable()
@@ -115,10 +83,6 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .addFilterBefore(
                         jwtFilter,
                         UsernamePasswordAuthenticationFilter.class
-                )
-                .addFilterBefore(
-                        filterExceptionHandler,
-                        JWTFilter.class
                 );
     }
 

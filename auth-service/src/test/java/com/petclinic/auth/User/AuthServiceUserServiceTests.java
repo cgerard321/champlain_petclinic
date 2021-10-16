@@ -8,6 +8,7 @@
 
 package com.petclinic.auth.User;
 
+import com.petclinic.auth.Exceptions.EmailAlreadyExistsException;
 import com.petclinic.auth.Exceptions.IncorrectPasswordException;
 import com.petclinic.auth.Exceptions.NotFoundException;
 import com.petclinic.auth.JWT.JWTService;
@@ -124,7 +125,7 @@ public class AuthServiceUserServiceTests {
         userRepo.save(userMap);
 
 
-        assertThrows(DataIntegrityViolationException.class, () -> userService.createUser(userIDLessDTO));
+        assertThrows(EmailAlreadyExistsException.class, () -> userService.createUser(userIDLessDTO));
     }
 
     @Test

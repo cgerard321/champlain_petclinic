@@ -421,55 +421,6 @@ public class AuthServiceUserControllerTests {
     }
 
     @Test
-    @DisplayName("Given email integrity violation, return sensical HTTP error message and 401 status code")
-    void duplicate_email_response() throws Exception {
-
-        final UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(USER, PASS, EMAIL);
-        final String asString = objectMapper.writeValueAsString(userIDLessDTO);
-
-        when(jwtService.encrypt(any()))
-                .thenReturn("a.fake.token");
-
-        when(userService.createUser(any()) )
-                .thenThrow(new DataIntegrityViolationException(
-                        format("Duplicate entry '%s' for key '%s'", EMAIL, "email")
-                ));
-
-        mockMvc.perform(post("/users").contentType(APPLICATION_JSON).content(asString))
-                .andDo(print())
-                .andExpect(status().is4xxClientError())
-                .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$.statusCode").value(BAD_REQUEST.value()))
-                .andExpect(jsonPath("$.timestamp").exists())
-                .andExpect(jsonPath("$.message").value(format("email %s is already in use", EMAIL)));
-    }
-
-    @Test
-    @DisplayName("Given specialization of DataIntegrityViolationException, climb hierarchy and handle as DataIntegrityViolationException")
-    void duplicate_email_climb() throws Exception {
-
-        final UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(USER, PASS, EMAIL);
-        final String asString = objectMapper.writeValueAsString(userIDLessDTO);
-
-
-        when(jwtService.encrypt(any()))
-                .thenReturn("a.fake.token");
-
-        when(userService.createUser(any()) )
-                .thenThrow(new RuntimeException("Container to cause", new DataIntegrityViolationException(
-                        format("Duplicate entry '%s' for key '%s'", EMAIL, "email")
-                )));
-
-        mockMvc.perform(post("/users").contentType(APPLICATION_JSON).content(asString))
-                .andDo(print())
-                .andExpect(status().is4xxClientError())
-                .andExpect(content().contentType(APPLICATION_JSON))
-                .andExpect(jsonPath("$.statusCode").value(BAD_REQUEST.value()))
-                .andExpect(jsonPath("$.timestamp").exists())
-                .andExpect(jsonPath("$.message").value(format("email %s is already in use", EMAIL)));
-    }
-
-    @Test
     @DisplayName("Given non-registered exception, then rethrow")
     void duplicate_email_climb_non_registered() throws Exception {
 
