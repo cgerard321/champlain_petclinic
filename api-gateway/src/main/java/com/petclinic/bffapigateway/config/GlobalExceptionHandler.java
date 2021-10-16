@@ -21,7 +21,6 @@ import static org.springframework.http.HttpStatus.BAD_REQUEST;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = GenericHttpException.class)
-    //@ResponseStatus(value = BAD_REQUEST)
     public ResponseEntity<HttpErrorInfo> resourceNotFoundException(GenericHttpException ex) {
 
         return ResponseEntity.status(ex.getHttpStatus())
