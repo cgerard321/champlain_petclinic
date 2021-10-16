@@ -29,8 +29,6 @@ public class GlobalControllerExceptionHandlerConfig {
         return new HTTPErrorMessage(404, ex.getMessage());
     }
 
-
-
     @ExceptionHandler(value = InvalidInputException.class)
     @ResponseStatus(value = UNPROCESSABLE_ENTITY)
     public HTTPErrorMessage resourceNotFoundException(InvalidInputException ex, WebRequest request) {

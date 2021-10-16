@@ -61,12 +61,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserById(long id) {
-        if (id < 0){
+        if (id <= 0){
             throw new InvalidInputException("Id cannot be a negative number for " + id);
         }
         else {
             User entity  = userRepo.findById(id)
-                    .orElseThrow(() -> new NotFoundException("No user found for userID" + id));
+                    .orElseThrow(() -> new NotFoundException("No user found for userID " + id));
             log.info("User getUserById: found userId: {}", entity.getId());
             return entity;
         }
