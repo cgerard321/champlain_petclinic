@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Register;
 import com.petclinic.bffapigateway.dtos.UserDetails;
+import com.petclinic.bffapigateway.utils.Rethrower;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -24,7 +25,7 @@ public class AuthServiceClient {
     private final String authServiceUrl;
 
     @Autowired
-    private ObjectMapper objectMapper;
+    private Rethrower rethrower;
 
     public AuthServiceClient(
             WebClient.Builder webClientBuilder,
@@ -56,21 +57,7 @@ public class AuthServiceClient {
                 .body(just(model), Register.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .onStatus(HttpStatus::is4xxClientError, clientResponse ->
-                        clientResponse.createException().flatMap(n ->
-                                {
-                                    try {
-                                        final Map<String, String> map =
-                                                objectMapper.readValue(n.getResponseBodyAsString(), Map.class);
-                                        return Mono.error(new RuntimeException(
-                                                map.get("message")
-                                        ));
-                                    } catch (JsonProcessingException e) {
-                                        e.printStackTrace();
-                                        return Mono.error(e);
-                                    }
-                                })
-                )
+                .onStatus(HttpStatus::is4xxClientError, rethrower)
                 .bodyToMono(UserDetails.class);
     }
 
