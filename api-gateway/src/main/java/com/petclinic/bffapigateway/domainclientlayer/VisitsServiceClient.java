@@ -74,7 +74,7 @@ public class VisitsServiceClient {
     public Flux<VisitDetails> getVisitsByPractitionerIdAndMonth(final int practitionerId, final String startDate, final String endDate) {
         return webClientBuilder.build()
                 .get()
-                .uri(hostname + "/visits/calendar/{practitionerId}?dates={startDate},{StartDate}", practitionerId, startDate, endDate)
+                .uri(hostname + "/visits/calendar/{practitionerId}?dates={startDate},{endDate}", practitionerId, startDate, endDate)
                 .retrieve()
                 .bodyToFlux(VisitDetails.class);
     }
