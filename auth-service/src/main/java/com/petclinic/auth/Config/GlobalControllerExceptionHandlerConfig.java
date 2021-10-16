@@ -20,11 +20,4 @@ public class GlobalControllerExceptionHandlerConfig {
 
         return new HTTPErrorMessage(UNAUTHORIZED.value(), ex.getMessage());
     }
-
-    @ExceptionHandler(value = DuplicateKeyException.class)
-    @ResponseStatus(value = BAD_REQUEST)
-    public HTTPErrorMessage duplicateKeyException(DuplicateKeyException ex) {
-
-        return new HTTPErrorMessage(BAD_REQUEST.value(), ex.getMessage());
-    }
 }
