@@ -2,6 +2,7 @@ package com.petclinic.auth.Config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.auth.Exceptions.HTTPErrorMessage;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -50,7 +51,8 @@ public class FilterExceptionHandler extends OncePerRequestFilter {
                 if(handler != null) {
                     final HTTPErrorMessage handled = handler.apply(cause);
                     if(handled != null) {
-                        response.setStatus(BAD_REQUEST.value());
+                        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                        response.setStatus(handled.getStatusCode());
                         response.getWriter().write(
                                 objectMapper.writeValueAsString(handled));
                         return;
