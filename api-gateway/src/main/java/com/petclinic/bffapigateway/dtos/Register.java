@@ -5,22 +5,21 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Set;
+/**
+ * Created by IntelliJ IDEA.
+ *
+ * User: @Fube
+ * Date: 2021-10-15
+ * Ticket: feat(APIG-CPC-354)
+ */
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder(toBuilder = true)
-public class UserDetails {
-
-    private long id;
-
-    private String username;
-
-    private String password;
+public class Register {
 
     private String email;
-
-    private Set<Role> roles;
+    private String username;
+    private String password;
 }
-

@@ -42,13 +42,13 @@ services:
 
   auth-service:
     build: auth-service
-    deploy:
-      resources:
-        limits:
-          memory: 2048m
+    ports:
+      - "7005:8080"
     depends_on:
       mysql4:
-        condition: service_healthy
+          condition: service_healthy
+      mailer-service:
+        condition: service_started
     environment:
       - SPRING_PROFILES_ACTIVE=docker
 
@@ -68,7 +68,8 @@ services:
     environment:
       - SMTP_USER=champlain.petclinic@gmail.com
       - SMTP_SERVER=smtp.gmail.com
-      - SMTP_PASS=nicetryguy
+    env_file:
+      - mailer.env
 
 
   mysql1:

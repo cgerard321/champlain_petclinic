@@ -75,3 +75,7 @@ app
 
 # Ignore swagger docs for mailer
 mailer-service/docs
+
+# Ignore environment files
+*.env
+.env
