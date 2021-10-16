@@ -231,6 +231,17 @@ public class AuthServiceE2ETests {
         assertNull(token);
     }
 
+    @Test
+    @DisplayName("Given verified admin user, access protected roles endpoint")
+    void unauthorized_access_protected_route() throws Exception {
+
+        mockMvc.perform(get("/roles")
+                        .contentType(APPLICATION_JSON)
+                        .header("Authorization", format("Bearer %s", "tis a fake token good sir")))
+                .andDo(print())
+                .andExpect(status().is4xxClientError());
+    }
+
     private ResultActions registerUser() throws Exception {
 
         final String asString = objectMapper.writeValueAsString(ID_LESS_USER);
