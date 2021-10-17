@@ -26,13 +26,13 @@ public class GlobalControllerExceptionHandlerConfig {
     @ResponseStatus(value = NOT_FOUND)
     public HTTPErrorMessage NotFoundException(NotFoundException ex, WebRequest request) {
 
-        return new HTTPErrorMessage(404, ex.getMessage());
+        return new HTTPErrorMessage(NOT_FOUND.value(), ex.getMessage());
     }
 
     @ExceptionHandler(value = InvalidInputException.class)
     @ResponseStatus(value = UNPROCESSABLE_ENTITY)
     public HTTPErrorMessage resourceNotFoundException(InvalidInputException ex, WebRequest request) {
 
-        return new HTTPErrorMessage(422, ex.getMessage());
+        return new HTTPErrorMessage(UNPROCESSABLE_ENTITY.value(), ex.getMessage());
     }
 }

@@ -103,8 +103,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(long userId) {
-        log.info("deleteUser: trying to delete entity with userId: {}", userId);
-        userRepo.findById(userId).ifPresent(userRepo::delete);
+        if (userId <= 0){
+            throw new InvalidInputException("Id cannot be a negative number for " + userId);
+        }
+        else {
+            log.info("deleteUser: trying to delete entity with userId: {}", userId);
+            User entity = userRepo.findById(userId).orElseThrow(() -> new NotFoundException("No user found for userID " + userId));
+            userRepo.delete(entity);
+        }
     }
 
     @Override
