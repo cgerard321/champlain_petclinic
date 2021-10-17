@@ -10,6 +10,7 @@ package com.petclinic.auth.User;
 
 import com.petclinic.auth.Exceptions.EmailAlreadyExistsException;
 import com.petclinic.auth.Exceptions.IncorrectPasswordException;
+import com.petclinic.auth.Exceptions.InvalidInputException;
 import com.petclinic.auth.Exceptions.NotFoundException;
 import com.petclinic.auth.JWT.JWTService;
 import com.petclinic.auth.Mail.Mail;
@@ -29,6 +30,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.parameters.P;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -62,10 +64,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserById(long id) {
-        User entity  = userRepo.findById(id)
-                .orElseThrow(() -> new NotFoundException("No user found for userID" + id));
-        log.info("User getUserById: found userId: {}", entity.getId());
-        return entity;
+        if (id <= 0){
+            throw new InvalidInputException("Id cannot be a negative number for " + id);
+        }
+        else {
+            User entity  = userRepo.findById(id)
+                    .orElseThrow(() -> new NotFoundException("No user found for userID " + id));
+            log.info("User getUserById: found userId: {}", entity.getId());
+            return entity;
+        }
     }
 
     @Override

@@ -36,6 +36,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.auth.Config.JWTFilter;
 import com.petclinic.auth.Config.PasswordStrengthCheck;
 import com.petclinic.auth.Exceptions.IncorrectPasswordException;
+import com.petclinic.auth.Exceptions.InvalidInputException;
 import com.petclinic.auth.Exceptions.NotFoundException;
 import com.petclinic.auth.JWT.JWTService;
 import com.petclinic.auth.Mail.MailService;
@@ -53,27 +54,28 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.web.util.NestedServletException;
-
 import javax.validation.*;
-import java.nio.charset.StandardCharsets;
 import java.sql.SQLIntegrityConstraintViolationException;
-import java.util.Base64;
-import java.util.Collections;
-import java.util.Random;
-import java.util.Set;
+import retrofit2.http.Body;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -237,7 +239,7 @@ public class AuthServiceUserControllerTests {
 
 
         mockMvc.perform(put("/users/1000"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -466,5 +468,42 @@ public class AuthServiceUserControllerTests {
                 .andExpect(jsonPath("$.timestamp").exists())
                 .andExpect(jsonPath("$.statusCode").value(BAD_REQUEST.value()))
                 .andExpect(jsonPath("$.message").value("Invalid Password, must be atleast 8 characters, have 1 digit, lower and upper case letters and a special character."));
+    }
+  
+    @DisplayName("given a user with a valid id exist, then return User object with that ID")
+    void get_user_with_valid_id() throws Exception {
+
+        User user = new User(USER, PASS, EMAIL);
+        long id = user.getId();
+        given(userService.getUserById(id)).willReturn(user);
+        mockMvc.perform(get("/users/" + id).accept(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(id));
+    }
+
+    @Test
+    @DisplayName("given a user with a invalid id exist, then throw Unprocessable Entity")
+    void get_user_with_invalid_id() throws Exception {
+
+        long id = -1;
+        InvalidInputException invalidInputException = new InvalidInputException("Id cannot be a negative number for " + id);
+        given(userService.getUserById(id)).willThrow(invalidInputException);
+        mockMvc.perform(get("/users/" + id).accept(APPLICATION_JSON))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.statusCode").value(422))
+                .andExpect(jsonPath("$.message").value("Id cannot be a negative number for " + id));
+    }
+
+    @Test
+    @DisplayName("given a user with an id not found exist, then throw Not Found")
+    void get_user_with_id_not_found() throws Exception {
+
+        long id = 23212;
+        NotFoundException notFoundException = new NotFoundException("No user found for userID " + id);
+        given(userService.getUserById(id)).willThrow(notFoundException);
+        mockMvc.perform(get("/users/" + id))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.statusCode").value(404))
+                .andExpect(jsonPath("$.message").value("No user found for userID " + id));
     }
 }
