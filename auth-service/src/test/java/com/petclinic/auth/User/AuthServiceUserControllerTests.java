@@ -33,6 +33,8 @@
 package com.petclinic.auth.User;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.petclinic.auth.Config.JWTFilter;
+import com.petclinic.auth.Config.PasswordStrengthCheck;
 import com.petclinic.auth.Exceptions.IncorrectPasswordException;
 import com.petclinic.auth.Exceptions.InvalidInputException;
 import com.petclinic.auth.Exceptions.NotFoundException;
@@ -49,6 +51,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -57,9 +61,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import retrofit2.http.Body;
-
+import org.springframework.web.util.NestedServletException;
 import javax.validation.*;
+import java.sql.SQLIntegrityConstraintViolationException;
+import retrofit2.http.Body;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -73,6 +78,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -147,7 +153,7 @@ public class AuthServiceUserControllerTests {
         when(userService.createUser(ID_LESS_USER))
                 .thenReturn(hypothetical);
 
-        final UserPasswordLessDTO user = userController.createUser(ID_LESS_USER);
+        final UserPasswordLessDTO user = userController.createUser(ID_LESS_USER, null);
         assertNotNull(user);
         assertThat(user.getId(), instanceOf(Long.TYPE));
     }
@@ -158,7 +164,7 @@ public class AuthServiceUserControllerTests {
 
         UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO();
 
-        assertThrows(ConstraintViolationException.class, () -> userController.createUser(userIDLessDTO));
+        assertThrows(ConstraintViolationException.class, () -> userController.createUser(userIDLessDTO, null));
     }
 
     @Test
@@ -168,7 +174,7 @@ public class AuthServiceUserControllerTests {
 
         UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(null, PASS,EMAIL);
 
-        assertThrows(ConstraintViolationException.class, () -> userController.createUser(userIDLessDTO));
+        assertThrows(ConstraintViolationException.class, () -> userController.createUser(userIDLessDTO, null));
     }
 
     @Test
@@ -178,7 +184,7 @@ public class AuthServiceUserControllerTests {
 
         UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO( USER, null,EMAIL);
 
-        assertThrows(ConstraintViolationException.class, () -> userController.createUser(userIDLessDTO));
+        assertThrows(ConstraintViolationException.class, () -> userController.createUser(userIDLessDTO, null));
     }
     @Test
     @DisplayName("Check the password field in order to refused if no special character")
@@ -225,7 +231,7 @@ public class AuthServiceUserControllerTests {
 
         UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(USER, PASS,null);
 
-        assertThrows(ConstraintViolationException.class, () -> userController.createUser(userIDLessDTO));
+        assertThrows(ConstraintViolationException.class, () -> userController.createUser(userIDLessDTO, null));
     }
     @Test
     @DisplayName("Check if the input ID is correct")
@@ -417,6 +423,53 @@ public class AuthServiceUserControllerTests {
     }
 
     @Test
+    @DisplayName("Given non-registered exception, then rethrow")
+    void duplicate_email_climb_non_registered() throws Exception {
+
+        final UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(USER, PASS, EMAIL);
+        final String asString = objectMapper.writeValueAsString(userIDLessDTO);
+        final String unregistered_exception = "unregistered exception";
+
+
+        when(jwtService.encrypt(any()))
+                .thenReturn("a.fake.token");
+
+        when(userService.createUser(any()) )
+                .thenThrow(new RuntimeException(unregistered_exception));
+
+        // Is this scuffed? Yes. Do I care? No
+        final NestedServletException nestedServletException = assertThrows(
+                NestedServletException.class,
+                () ->
+                        mockMvc.perform(post("/users").contentType(APPLICATION_JSON).content(asString))
+                                .andDo(print())
+                                .andExpect(status().is4xxClientError())
+                                .andExpect(content().contentType(APPLICATION_JSON))
+                                .andExpect(jsonPath("$.statusCode").value(BAD_REQUEST.value()))
+                                .andExpect(jsonPath("$.timestamp").exists())
+                                .andExpect(jsonPath("$.message").value(format("email %s is already in use", EMAIL)))
+        );
+
+        // Harsher assert than using instanceof
+        assertEquals(RuntimeException.class, nestedServletException.getCause().getClass());
+        assertEquals(unregistered_exception, nestedServletException.getCause().getMessage());
+    }
+
+    @Test
+    @DisplayName("Given unsatisfactory password, return sensical message and 400 status code")
+    void bad_password_response() throws Exception {
+
+        final UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(USER, "a", EMAIL);
+        final String asString = objectMapper.writeValueAsString(userIDLessDTO);
+        mockMvc.perform(post("/users").contentType(APPLICATION_JSON).content(asString))
+                .andDo(print())
+                .andExpect(status().is4xxClientError())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.statusCode").value(BAD_REQUEST.value()))
+                .andExpect(jsonPath("$.message").value("Invalid Password, must be atleast 8 characters, have 1 digit, lower and upper case letters and a special character."));
+    }
+  
     @DisplayName("given a user with a valid id exist, then return User object with that ID")
     void get_user_with_valid_id() throws Exception {
 
@@ -452,7 +505,5 @@ public class AuthServiceUserControllerTests {
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.statusCode").value(404))
                 .andExpect(jsonPath("$.message").value("No user found for userID " + id));
-
-
     }
 }
