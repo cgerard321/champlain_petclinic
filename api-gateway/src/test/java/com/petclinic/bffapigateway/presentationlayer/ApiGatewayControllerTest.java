@@ -1,14 +1,10 @@
 package com.petclinic.bffapigateway.presentationlayer;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.domainclientlayer.*;
-import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
-import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
-import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
-import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
-import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
 import com.petclinic.bffapigateway.dtos.*;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,20 +16,14 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import java.util.Calendar;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import java.net.ConnectException;
 
 import java.util.Collections;
-import java.util.Date;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
-
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 //
 //import com.petclinic.billing.datalayer.BillDTO;
 
@@ -44,7 +34,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureWebTestClient
 class ApiGatewayControllerTest {
 
-
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @MockBean
     private CustomersServiceClient customersServiceClient;
@@ -606,6 +597,30 @@ class ApiGatewayControllerTest {
                 .jsonPath("$[0].date").isEqualTo("2021-12-12")
                 .jsonPath("$[0].description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$[0].practitionerId").isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("Given valid JWT, verify user")
+    void verify_user() throws JsonProcessingException {
+
+        final String validToken = "some.valid.token";
+        final UserDetails user = UserDetails.builder()
+                .id(1)
+                .password(null)
+                .email("e@mail.com")
+                .username("user")
+                .roles(Collections.emptySet())
+                .build();
+
+        when(authServiceClient.verifyUser(validToken))
+                .thenReturn(Mono.just(user));
+
+        client.get()
+                .uri("/api/gateway/verification/{token}", validToken)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .json(objectMapper.writeValueAsString(user));
     }
 }
 
