@@ -34,6 +34,8 @@ import com.petclinic.auth.User.data.UserTokenPair;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
+import java.sql.SQLIntegrityConstraintViolationException;
+
 public interface UserService {
 
 
