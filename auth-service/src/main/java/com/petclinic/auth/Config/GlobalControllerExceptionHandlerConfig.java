@@ -1,5 +1,6 @@
 package com.petclinic.auth.Config;
 
+import com.petclinic.auth.Exceptions.EmailAlreadyExistsException;
 import com.petclinic.auth.Exceptions.HTTPErrorMessage;
 import com.petclinic.auth.Exceptions.IncorrectPasswordException;
 import com.petclinic.auth.Exceptions.InvalidInputException;
@@ -9,6 +10,10 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import java.util.List;
+import java.util.stream.Collectors;
 import static org.springframework.http.HttpStatus.*;
 
 @RestControllerAdvice
@@ -17,9 +22,28 @@ public class GlobalControllerExceptionHandlerConfig {
 
     @ExceptionHandler(value = IncorrectPasswordException.class)
     @ResponseStatus(value = UNAUTHORIZED)
-    public HTTPErrorMessage resourceNotFoundException(IncorrectPasswordException ex, WebRequest request) {
+    public HTTPErrorMessage incorrectPasswordException(IncorrectPasswordException ex, WebRequest request) {
 
-        return new HTTPErrorMessage(401, ex.getMessage());
+        return new HTTPErrorMessage(UNAUTHORIZED.value(), ex.getMessage());
+    }
+
+    @ExceptionHandler(value = ConstraintViolationException.class)
+    @ResponseStatus(value = BAD_REQUEST)
+    public HTTPErrorMessage constraintViolationException(ConstraintViolationException ex, WebRequest request) {
+
+        final List<String> collect = ex.getConstraintViolations().stream()
+                .map(ConstraintViolation::getMessage)
+                .collect(Collectors.toList());
+        return new HTTPErrorMessage(
+                BAD_REQUEST.value(),
+                String.join("\n", collect));
+    }
+
+    @ExceptionHandler(value = EmailAlreadyExistsException.class)
+    @ResponseStatus(value = BAD_REQUEST)
+    public HTTPErrorMessage emailAlreadyExistsException(EmailAlreadyExistsException ex, WebRequest request) {
+
+        return new HTTPErrorMessage(BAD_REQUEST.value(), ex.getMessage());
     }
 
     @ExceptionHandler(value = NotFoundException.class)
