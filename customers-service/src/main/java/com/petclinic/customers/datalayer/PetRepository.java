@@ -26,11 +26,11 @@ public interface PetRepository extends JpaRepository<Pet, Integer> {
      * @return a Collection of {@link PetType}s.
      */
 
-    @Query("FROM pets WHERE owner_id = :ownerId AND pet_id = :petId")
-    Optional<Pet> findPetByOwner(@Param("ownerId") int ownerId, @Param("petId") int petId);
+    @Query("FROM Pet cPet WHERE cPet.owner = :owner AND cPet.id = :petId")
+    Optional<Pet> findPetByOwner(@Param("owner") Owner owner, @Param("petId") int petId);
 
-    @Query("FROM pets WHERE owner_id = :ownerId")
-    List<Pet> findAllPetByOwner(@Param("ownerId") int ownerId);
+    @Query("FROM Pet cPet WHERE cPet.owner = :owner")
+    List<Pet> findAllPetByOwner(@Param("owner") Owner owner);
 
     @Query("SELECT ptype FROM PetType ptype ORDER BY ptype.name")
     List<PetType> findPetTypes();

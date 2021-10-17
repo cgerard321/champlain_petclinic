@@ -36,8 +36,10 @@ public class PetServiceImpl implements PetService {
     @Override
     public Optional<Pet> findByPetId(int ownerId, int petId) {
         try {
+            Optional<Owner> optionalOwner = ownerService.findByOwnerId(ownerId);
+            Owner owner = optionalOwner.orElseThrow(() -> new NotFoundException("Owner "+ ownerId +" not found"));
             //Search pet in database with the given id
-            Optional<Pet> pet = petRepository.findPetByOwner(ownerId, petId);
+            Optional<Pet> pet = petRepository.findPetByOwner(owner, petId);
             if (!pet.isPresent()) {
                 throw new NotFoundException("Pet "+ petId +" not found");
             }
@@ -58,7 +60,9 @@ public class PetServiceImpl implements PetService {
     @Override
     public List<Pet> findAll(int ownerId) {
 
-        return petRepository.findAllPetByOwner(ownerId);
+        Optional<Owner> optionalOwner = ownerService.findByOwnerId(ownerId);
+        Owner owner = optionalOwner.orElseThrow(() -> new NotFoundException("Owner "+ ownerId +" not found"));
+        return petRepository.findAllPetByOwner(owner);
     }
 
 

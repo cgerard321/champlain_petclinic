@@ -32,52 +32,26 @@ class OwnerResource {
         this.ownerService = ownerService;
     }
 
-    /**
-     * Create Owner
-     */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Owner createOwner(@Valid @RequestBody Owner owner) {
         return ownerService.createOwner(owner);
     }
 
-    /**
-     * Read Single Owner
-     */
     @GetMapping(value = "/{ownerId}")
     public Optional<Owner> findOwner(@PathVariable("ownerId") int ownerId) {
         return ownerService.findByOwnerId(ownerId);
     }
 
-    /**
-     * Read List of Owners
-     */
     @GetMapping
     public List<Owner> findAll() {
         return ownerService.findAll();
     }
 
-    /**
-     * Update Owner
-     */
     @PutMapping(value = "/{ownerId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateOwner(@PathVariable("ownerId") int ownerId, @Valid @RequestBody Owner ownerRequest) {
-        /*
-        //TRANSFER THIS CODE IN OwnerServiceImpl
-        final Optional<Owner> owner = ownerRepository.findById(ownerId);
-
-        final Owner ownerModel = owner.orElseThrow(() -> new NotFoundException("Owner "+ownerId+" not found"));
-        // This is done by hand for simplicity purpose. In a real life use-case we should consider using MapStruct.
-        ownerModel.setFirstName(ownerRequest.getFirstName());
-        ownerModel.setLastName(ownerRequest.getLastName());
-        ownerModel.setCity(ownerRequest.getCity());
-        ownerModel.setAddress(ownerRequest.getAddress());
-        ownerModel.setTelephone(ownerRequest.getTelephone());
-        log.info("Saving owner {}", ownerModel);
-        ownerRepository.save(ownerModel);
-        */
-
+      ownerService.updateOwner(ownerId, ownerRequest);
     }
 
     @DeleteMapping(value = "/{ownerId}")

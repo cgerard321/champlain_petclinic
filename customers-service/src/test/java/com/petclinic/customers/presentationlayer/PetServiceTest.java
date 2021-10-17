@@ -75,7 +75,7 @@ public class PetServiceTest {
         //Arrange
         Owner ownerTest = setupOwner();
         Pet petTest = setupPet();
-        when(repository.findPetByOwner(ownerTest.getId(), petTest.getId())).thenReturn(Optional.of(petTest));
+        when(repository.findPetByOwner(ownerTest, petTest.getId())).thenReturn(Optional.of(petTest));
 
         //Act
         Optional<Pet> returnedPetOpt = service.findByPetId(1, 2);
@@ -112,7 +112,7 @@ public class PetServiceTest {
         newPet.setName("Jojo");
         petList.add(newPet);
 
-        when(repository.findAllPetByOwner(owner.getId())).thenReturn(petList);
+        when(repository.findAllPetByOwner(owner)).thenReturn(petList);
 
         //Act
         List<Pet> returnedList = service.findAll(owner.getId());
@@ -121,11 +121,8 @@ public class PetServiceTest {
         assertThat(expectedLength).isEqualTo(returnedList.size());
     }
 
-    /**
-     * ------------------------ TEST_DELETE ------------------------
-     * Testing the method deleteOwner()
-     */
-    @DisplayName("ownerService_DeleteOwner")
+
+    @DisplayName("PetService_DeletePet")
     @Test
     public void test_deletePet()
     {
@@ -146,16 +143,11 @@ public class PetServiceTest {
     }
 
 
-
-    /**
-     * ------------------------ TEST_CREATE ------------------------
-     * Testing the method createOwner()
-     */
     /*
 
     --WORK IN PROGRESS--
 
-    @DisplayName("ownerService_CreateOwner")
+    @DisplayName("PetService_PetOwner")
     @Test
     public void test_CreatePet() throws ParseException {
         //Arrange

@@ -76,10 +76,6 @@ class PetAPITest {
         return pet;
     }
 
-    /**
-     * ------------------------ FIND_BY_PET_ID_API_TEST ------------------------
-     * Test an HTTP Get Request
-     */
     @Test
     void findByPetId_API_TEST() throws Exception {
 
@@ -94,10 +90,6 @@ class PetAPITest {
     }
 
 
-    /**
-     * ------------------------ DELETE_PET_API_TEST ------------------------
-     * Test an HTTP Delete Request
-     */
     @Test
     void deletePet_API_TEST() throws Exception {
         mvc.perform(delete("/owners/1/pets/2").accept(MediaType.APPLICATION_JSON))
@@ -105,10 +97,6 @@ class PetAPITest {
         verify(petService, times(1)).deletePet(2, 1);
     }
 
-    /**
-     * ------------------------ SETUP_OWNER ------------------------
-     * Test an HTTP Get Request, but to get all owners
-     */
     @Test
     void findAll_API_TEST() throws Exception {
 
@@ -136,10 +124,7 @@ class PetAPITest {
 
     }
 
-    /**
-     * ------------------------ CREATE_OWNER ------------------------
-     * Test an HTTP POST request
-     */
+
 
     /*
     @Test
