@@ -102,27 +102,59 @@
           </div>
         </div>
 
+
+        <hr class="my-4"/>
+        <div class="row g-3">
+          <div class="col-sm-6">
+            <div class="my-3 check-align">
+              <h5 class="mb-3"> What Animals Can You Treat?</h5>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="animalsTreated" value="Dogs">
+                <label class="form-check-label vet-label-input">Dogs</label>
+              </div>
+
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="animalsTreated"
+                       value="Cats"><label
+                      class="form-check-label vet-label-input">Cats</label>
+              </div>
+
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="animalsTreated"
+                       value="Birds"><label
+                      class="form-check-label vet-label-input">Birds</label>
+              </div>
+
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="animalsTreated"
+                       value="Exotic"><label
+                      class="form-check-label vet-label-input">Exotic Animals</label>
+              </div>
+            </div>
+          </div>
+
+
           <div class="col-sm-6">
             <div class="my-3 check-align">
               <h5 class="mb-3">Available Work Days</h5>
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="workDays" value="Monday" ng-model="vet.workDays">
+                <input class="form-check-input" type="checkbox" name="workDays" value="Monday">
                 <label class="form-check-label vet-label-input">Monday</label>
               </div>
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="workDays" value="Tuesday" ng-model="vet.workDays">
+                <input class="form-check-input" type="checkbox" name="workDays" value="Tuesday">
                 <label class="form-check-label vet-label-input">Tuesday</label>
               </div>
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="workDays" value="Wednesday" ng-model="vet.workDays">
+                <input class="form-check-input" type="checkbox" name="workDays" value="Wednesday">
                 <label class="form-check-label vet-label-input">Wednesday</label>
               </div>
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="workDays" value="Thursday" ng-model="vet.workDays">
+                <input class="form-check-input" type="checkbox" name="workDays" value="Thursday">
                 <label class="form-check-label vet-label-input">Thursday</label>
               </div>
               <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="workDays" value="Friday" ng-model="vet.workDays">
+                <input class="form-check-input" type="checkbox" name="workDays" value="Friday">
                 <label class="form-check-label vet-label-input">Friday</label>
               </div>
             </div>
@@ -134,12 +166,12 @@
           <h5 class="mb-3">Active Vet</h5>
 
           <div class="form-check">
-            <input class="form-check-input" type="radio" name="isActive" value="1" ng-model="vet.isActive">
-            <label class="form-check-label vet-label-input">Yes</label>
+            <input class="form-check-input" type="radio" name="isActive" value="1">
+            <label class="form-check-label vet-label-input" ng-model="vet.isActive" >Yes</label>
           </div>
           <div class="form-check">
-            <input class="form-check-input" type="radio" name="isActive" value="0" ng-model="vet.isActive">
-            <label class="form-check-label vet-label-input">No</label>
+            <input class="form-check-input" type="radio" name="isActive" value="0">
+            <label class="form-check-label vet-label-input" ng-model="vet.isActive">No</label>
           </div>
         </div>
         <hr class="my-4"/>
@@ -148,4 +180,3 @@
     </div>
   </div>
 </div>
-
