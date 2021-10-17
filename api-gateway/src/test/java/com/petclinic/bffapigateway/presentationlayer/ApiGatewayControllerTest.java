@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.*;
+import com.petclinic.bffapigateway.exceptions.GenericHttpException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -21,8 +22,8 @@ import java.util.Collections;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 //
 //import com.petclinic.billing.datalayer.BillDTO;
@@ -621,6 +622,26 @@ class ApiGatewayControllerTest {
                 .expectStatus().isOk()
                 .expectBody()
                 .json(objectMapper.writeValueAsString(user));
+    }
+
+    @Test
+    @DisplayName("Given invalid JWT, expect 400")
+    void verify_user_bad_token() {
+
+        final String errorMessage = "some error message";
+        final String invalidToken = "some.invlaid.token";
+
+        when(authServiceClient.verifyUser(invalidToken))
+                .thenThrow(new GenericHttpException(errorMessage, BAD_REQUEST));
+
+        client.get()
+                .uri("/api/gateway/verification/{token}", invalidToken)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.statusCode").isEqualTo(BAD_REQUEST.value())
+                .jsonPath("$.timestamp").exists()
+                .jsonPath("$.message").isEqualTo(errorMessage);
     }
 }
 
