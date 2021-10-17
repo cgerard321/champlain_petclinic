@@ -629,7 +629,7 @@ class ApiGatewayControllerTest {
     void verify_user_bad_token() {
 
         final String errorMessage = "some error message";
-        final String invalidToken = "some.invlaid.token";
+        final String invalidToken = "some.invalid.token";
 
         when(authServiceClient.verifyUser(invalidToken))
                 .thenThrow(new GenericHttpException(errorMessage, BAD_REQUEST));
