@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+
 @Service
 public class BillServiceImpl implements BillService{
     private static final Logger LOG = LoggerFactory.getLogger(BillServiceImpl.class);
@@ -19,6 +21,17 @@ public class BillServiceImpl implements BillService{
     public BillServiceImpl(BillRepository billRepository, BillMapper billMapper) {
         this.billRepository = billRepository;
         this.billMapper = billMapper;
+    }
+
+    private HashMap<String, Double> setUpVisitList(){
+        HashMap<String, Double> visitTypesPrices = new HashMap<String, Double>();
+        visitTypesPrices.put("Examinations", 59.99);
+        visitTypesPrices.put("Injury", 229.99);
+        visitTypesPrices.put("Medical", 109.99);
+        visitTypesPrices.put("Chronic", 89.99);
+        visitTypesPrices.put("Consultations", 39.99);
+        visitTypesPrices.put("Operations", 399.99);
+        return visitTypesPrices;
     }
 
     @Override
@@ -39,6 +52,8 @@ public class BillServiceImpl implements BillService{
 
         try{
             Bill entity = billMapper.ModelToEntity(model);
+            HashMap<String, Double> list = setUpVisitList();
+            entity.setAmount(list.get(entity.getVisitType()));
             Bill newEntity = billRepository.save(entity);
 
             LOG.debug("Entity created for bill ID: {}", newEntity.getId());
