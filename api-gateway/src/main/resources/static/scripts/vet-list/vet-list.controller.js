@@ -26,10 +26,22 @@ angular.module('vetList')
             child.classList.remove("modalOn");
             child.classList.add("modalOff");
         }
-        this.test = console.log;
 
-        $http.get('api/gateway/vets').then(function (resp) {
-            self.vetList = resp.data;
-        });
-
+            $http.get('api/gateway/vets').then(function (resp) {
+                self.vetList = resp.data;
+                let arr = Object.keys(self.vetList);
+                console.log(typeof self.vetList)
+                console.log(Array.isArray(arr))
+                let optionSelection = document.getElementById("filterOption").value;
+                if(optionSelection === "All"){
+                    self.vetList = resp.data;
+                }else if(optionSelection === "Available"){
+                    self.vetList = self.vetList.filter(v => v.isActive === 1);
+                }else if(optionSelection === "Unavailable"){
+                    self.vetList = self.vetList.filter(v => v.isActive === 0);
+                }
+                console.log(self.vetList);
+            });
     }]);
+
+
