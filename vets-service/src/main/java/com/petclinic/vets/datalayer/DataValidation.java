@@ -10,6 +10,8 @@ import org.springframework.core.style.ToStringCreator;
 import org.springframework.web.client.HttpClientErrorException;
 
 import java.io.IOException;
+import java.math.BigInteger;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -121,7 +123,11 @@ public class DataValidation {
 
     public static Integer verifyVetId(int vetId){
         int confirmedValue =0;
-        if(vetId < 1){
+        if (vetId == 0){
+            String lUUID = String.format("%06d", new BigInteger(UUID.randomUUID().toString().replace("-", ""), 16));
+            confirmedValue = Integer.parseInt(lUUID);
+        }
+        else if(vetId < 1){
             throw new InvalidInputException("Vet Id number has an invalid format"+vetId);
         }
         else if(Math.log10(vetId) < 7) {
