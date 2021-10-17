@@ -294,4 +294,17 @@ angular.module('visits')
                 }).join("\r\n"));
             });
         };
+
+        self.getStatus = function (status) {
+            var statusText = "";
+
+            if(status == false){
+                statusText = "Canceled"
+            }
+            else{
+                statusText = "Not Canceled"
+            }
+
+            return statusText;
+        };
     }]);
