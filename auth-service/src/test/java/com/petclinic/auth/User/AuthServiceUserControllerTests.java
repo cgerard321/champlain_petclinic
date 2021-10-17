@@ -446,7 +446,8 @@ public class AuthServiceUserControllerTests {
                 .andExpect(jsonPath("$.statusCode").value(BAD_REQUEST.value()))
                 .andExpect(jsonPath("$.message").value(errorMessage));
     }
-  
+
+    @Test
     @DisplayName("Given non-registered exception, then rethrow")
     void duplicate_email_climb_non_registered() throws Exception {
 
@@ -458,8 +459,9 @@ public class AuthServiceUserControllerTests {
         when(jwtService.encrypt(any()))
                 .thenReturn("a.fake.token");
 
-        when(userService.createUser(any()) )
-                .thenThrow(new RuntimeException(unregistered_exception));
+        doThrow(new RuntimeException(unregistered_exception))
+                .when(userService)
+                        .createUser(any());
 
         // Is this scuffed? Yes. Do I care? No
         final NestedServletException nestedServletException = assertThrows(
@@ -511,7 +513,11 @@ public class AuthServiceUserControllerTests {
 
         long id = -1;
         InvalidInputException invalidInputException = new InvalidInputException("Id cannot be a negative number for " + id);
-        given(userService.getUserById(id)).willThrow(invalidInputException);
+
+        doThrow(invalidInputException)
+                .when(userService)
+                        .getUserById(id);
+
         mockMvc.perform(get("/users/" + id).accept(APPLICATION_JSON))
                 .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.statusCode").value(422))
@@ -524,7 +530,9 @@ public class AuthServiceUserControllerTests {
 
         long id = 23212;
         NotFoundException notFoundException = new NotFoundException("No user found for userID " + id);
-        given(userService.getUserById(id)).willThrow(notFoundException);
+        doThrow(notFoundException)
+                .when(userService)
+                        .getUserById(id);
         mockMvc.perform(get("/users/" + id))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.statusCode").value(404))
