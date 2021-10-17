@@ -23,9 +23,7 @@ ext {
 }
 
 dependencies {
-	compile group: 'io.springfox', name: 'springfox-swagger2', version: '2.7.0'
-	compile group: 'io.springfox', name: 'springfox-swagger-ui', version: '2.7.0'
-    compile('org.springframework.boot:spring-boot-starter-web')
+	implementation 'io.springfox:springfox-boot-starter:3.0.0' //swagger documentation
 	implementation group: 'io.github.bonigarcia', name: 'selenium-jupiter', version: '3.3.5'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
