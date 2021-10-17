@@ -44,6 +44,7 @@ import com.petclinic.auth.User.data.User;
 import com.petclinic.auth.User.data.UserIDLessRoleLessDTO;
 import com.petclinic.auth.User.data.UserPasswordLessDTO;
 import com.petclinic.auth.User.data.UserTokenPair;
+import io.jsonwebtoken.JwtException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -75,8 +76,8 @@ import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -137,7 +138,7 @@ public class AuthServiceUserControllerTests {
     @MockBean
     private JWTService jwtService;
 
-    @MockBean
+    @SpyBean
     private UserService userService;
 
     private final UserIDLessRoleLessDTO ID_LESS_USER = new UserIDLessRoleLessDTO(USER, PASS, EMAIL);
@@ -150,8 +151,9 @@ public class AuthServiceUserControllerTests {
 
         when(jwtService.encrypt(any()))
                 .thenReturn("a.fake.token");
-        when(userService.createUser(ID_LESS_USER))
-                .thenReturn(hypothetical);
+
+        doReturn(hypothetical)
+                .when(userService).createUser(ID_LESS_USER);
 
         final UserPasswordLessDTO user = userController.createUser(ID_LESS_USER, null);
         assertNotNull(user);
@@ -281,8 +283,9 @@ public class AuthServiceUserControllerTests {
 
         final long ID = 123;
 
-        when(userService.getUserById(ID))
-                .thenReturn(new User());
+        doReturn(new User())
+                .when(userService)
+                        .getUserById(ID);
 
         mockMvc.perform(get("/users/" + ID))
                 .andDo(print())
@@ -323,12 +326,14 @@ public class AuthServiceUserControllerTests {
         when(jwtService.encrypt(any()))
                 .thenReturn("a.fake.token");
 
-        when(userService.createUser(
-                argThat( n -> n.getUsername().equals(USER) && n.getPassword().equals(PASS) && n.getEmail().equals(EMAIL) )) )
-                .thenReturn(User.builder()
-                    .username(USER)
-                    .email(EMAIL).build()
-                );
+        doReturn(User.builder()
+                .username(USER)
+                .email(EMAIL).build())
+                .when(userService)
+                .createUser(
+                        argThat( n -> n.getUsername().equals(USER)
+                                && n.getPassword().equals(PASS)
+                                && n.getEmail().equals(EMAIL)));
 
         mockMvc.perform(post("/users").contentType(APPLICATION_JSON).content(asString))
                 .andDo(print())
@@ -352,13 +357,14 @@ public class AuthServiceUserControllerTests {
         final String base64Token =
                 Base64.getEncoder().withoutPadding().encodeToString(fakeToken.getBytes(StandardCharsets.UTF_8));
 
-        when(userService.verifyEmailFromToken(fakeToken))
-                .thenReturn(UserPasswordLessDTO.builder()
-                        .username(user.getUsername())
-                        .email(user.getEmail())
-                        .roles(Collections.EMPTY_SET)
-                        .id(user.getId())
-                        .build());
+        doReturn(UserPasswordLessDTO.builder()
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .roles(Collections.EMPTY_SET)
+                .id(user.getId())
+                .build())
+                .when(userService)
+                        .verifyEmailFromToken(fakeToken);
 
 
         mockMvc.perform(get("/users/verification/" + base64Token))
@@ -384,12 +390,12 @@ public class AuthServiceUserControllerTests {
         final UserIDLessRoleLessDTO build = UserIDLessRoleLessDTO.builder().email(EMAIL).password(PASS).build();
         final String asString = objectMapper.writeValueAsString(build);
 
-        when(userService.login(
-                argThat( n -> n.getEmail().equals(EMAIL) && n.getPassword().equals(PASS) )))
-                .thenReturn(UserTokenPair.builder()
-                        .token(VALID_TOKEN)
-                        .user(User.builder().username(USER).email(EMAIL).roles(Collections.emptySet()).build())
-                        .build());
+        doReturn(UserTokenPair.builder()
+                .token(VALID_TOKEN)
+                .user(User.builder().username(USER).email(EMAIL).roles(Collections.emptySet()).build())
+                .build())
+                .when(userService)
+                    .login(argThat( n -> n.getEmail().equals(EMAIL) && n.getPassword().equals(PASS) ));
 
         final MvcResult mvcResult = mockMvc.perform(post("/users/login").contentType(APPLICATION_JSON).content(asString))
                 .andExpect(status().is2xxSuccessful())
@@ -412,14 +418,33 @@ public class AuthServiceUserControllerTests {
         final UserIDLessRoleLessDTO build = UserIDLessRoleLessDTO.builder().email(EMAIL).password(PASS + "bad").build();
         final String asString = objectMapper.writeValueAsString(build);
 
-        when(userService.login(
-                argThat( n -> n.getEmail().equals(EMAIL) && !n.getPassword().equals(PASS) )))
-                .thenThrow(new IncorrectPasswordException(EXCEPTION_MESSAGE));
+        doThrow(new IncorrectPasswordException(EXCEPTION_MESSAGE))
+                .when(userService)
+                .login(argThat(n -> n.getEmail().equals(EMAIL) && !n.getPassword().equals(PASS) ));
 
         mockMvc.perform(post("/users/login").contentType(APPLICATION_JSON).content(asString))
                 .andDo(print())
                 .andExpect(status().is4xxClientError())
                 .andExpect(jsonPath("$.message").value(EXCEPTION_MESSAGE));
+    }
+
+    @Test
+    @DisplayName("Given invalid JWT on verification, return 400")
+    void bad_jwt() throws Exception {
+
+        final String badToken = "a.bad.token";
+        final String asBased = Base64.getEncoder().encodeToString(badToken.getBytes(StandardCharsets.UTF_8));
+        final String errorMessage = "that was a bad token >:(";
+
+        when(jwtService.decrypt(badToken))
+                .thenThrow(new JwtException(errorMessage));
+
+        mockMvc.perform(get("/users/verification/" + asBased))
+                .andDo(print())
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.statusCode").value(BAD_REQUEST.value()))
+                .andExpect(jsonPath("$.message").value(errorMessage));
     }
 
     @Test
@@ -434,8 +459,9 @@ public class AuthServiceUserControllerTests {
         when(jwtService.encrypt(any()))
                 .thenReturn("a.fake.token");
 
-        when(userService.createUser(any()) )
-                .thenThrow(new RuntimeException(unregistered_exception));
+        doThrow(new RuntimeException(unregistered_exception))
+                .when(userService)
+                        .createUser(any());
 
         // Is this scuffed? Yes. Do I care? No
         final NestedServletException nestedServletException = assertThrows(
@@ -487,7 +513,11 @@ public class AuthServiceUserControllerTests {
 
         long id = -1;
         InvalidInputException invalidInputException = new InvalidInputException("Id cannot be a negative number for " + id);
-        given(userService.getUserById(id)).willThrow(invalidInputException);
+
+        doThrow(invalidInputException)
+                .when(userService)
+                        .getUserById(id);
+
         mockMvc.perform(get("/users/" + id).accept(APPLICATION_JSON))
                 .andExpect(status().isUnprocessableEntity())
                 .andExpect(jsonPath("$.statusCode").value(422))
@@ -500,7 +530,9 @@ public class AuthServiceUserControllerTests {
 
         long id = 23212;
         NotFoundException notFoundException = new NotFoundException("No user found for userID " + id);
-        given(userService.getUserById(id)).willThrow(notFoundException);
+        doThrow(notFoundException)
+                .when(userService)
+                        .getUserById(id);
         mockMvc.perform(get("/users/" + id))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.statusCode").value(404))

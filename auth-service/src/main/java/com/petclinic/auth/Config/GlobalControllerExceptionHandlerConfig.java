@@ -3,6 +3,7 @@ package com.petclinic.auth.Config;
 import com.petclinic.auth.Exceptions.EmailAlreadyExistsException;
 import com.petclinic.auth.Exceptions.HTTPErrorMessage;
 import com.petclinic.auth.Exceptions.IncorrectPasswordException;
+import io.jsonwebtoken.JwtException;
 import com.petclinic.auth.Exceptions.InvalidInputException;
 import com.petclinic.auth.Exceptions.NotFoundException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -10,6 +11,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import java.util.List;
@@ -58,5 +61,12 @@ public class GlobalControllerExceptionHandlerConfig {
     public HTTPErrorMessage resourceNotFoundException(InvalidInputException ex, WebRequest request) {
 
         return new HTTPErrorMessage(422, ex.getMessage());
+    }
+
+    @ExceptionHandler(value = JwtException.class)
+    @ResponseStatus(value = BAD_REQUEST)
+    public HTTPErrorMessage jwtException(JwtException ex) {
+
+        return new HTTPErrorMessage(BAD_REQUEST.value(), ex.getMessage());
     }
 }

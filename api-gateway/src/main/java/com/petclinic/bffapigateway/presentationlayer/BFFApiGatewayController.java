@@ -239,4 +239,8 @@ public class BFFApiGatewayController {
             produces = "application/json")
     public Mono<OwnerDetails> createOwner(@RequestBody OwnerDetails model){ return customersServiceClient.getOwner(model.getId()); }
 
+    @GetMapping("/verification/{token}")
+    public Mono<UserDetails> verifyUser(@PathVariable final String token) {
+        return authServiceClient.verifyUser(token);
+    }
 }
