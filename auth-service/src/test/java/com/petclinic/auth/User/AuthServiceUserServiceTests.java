@@ -8,6 +8,7 @@
 
 package com.petclinic.auth.User;
 
+import com.petclinic.auth.Exceptions.EmailAlreadyExistsException;
 import com.petclinic.auth.Exceptions.IncorrectPasswordException;
 import com.petclinic.auth.Exceptions.NotFoundException;
 import com.petclinic.auth.JWT.JWTService;
@@ -25,6 +26,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -123,7 +125,7 @@ public class AuthServiceUserServiceTests {
         userRepo.save(userMap);
 
 
-        assertThrows(DataIntegrityViolationException.class, () -> userService.createUser(userIDLessDTO));
+        assertThrows(EmailAlreadyExistsException.class, () -> userService.createUser(userIDLessDTO));
     }
 
     @Test
@@ -231,7 +233,7 @@ public class AuthServiceUserServiceTests {
 
     @Test
     @DisplayName("Given user exists in database and email + password match & e-mail is verified, return JWT")
-    void successful_login() throws IncorrectPasswordException {
+    void successful_login() throws IncorrectPasswordException, SQLIntegrityConstraintViolationException {
 
 
         final UserIDLessRoleLessDTO userIDLessDTO = new UserIDLessRoleLessDTO(USER, PASS, EMAIL);

@@ -68,4 +68,16 @@ public class AuthServiceUserMapperTests {
         assertNotNull(userMapper.modelToPasswordLessDTO(user));
         assertEquals(ROLES, user.getRoles());
     }
+
+    @Test
+    @DisplayName("When null idLessUsernameLessToModel, map to null User")
+    void idLessUsernameLessToModel_as_null() {
+        assertNull(userMapper.idLessUsernameLessToModel(null));
+    }
+
+    @Test
+    @DisplayName("When null User, map to null modelToIDLessPasswordLessDTO")
+    void modelToIDLessPasswordLessDTO_as_null() {
+        assertNull(userMapper.modelToIDLessPasswordLessDTO(null));
+    }
 }

@@ -14,7 +14,7 @@ angular.module('signupForm')
         })
             .then(() => $location.path("/login"))
             .catch(n => {
-                $scope.errorMessage = n.data.message;
+                $scope.errorMessages = n.data.message.split`\n`;
                 console.log(n);
             });
 
