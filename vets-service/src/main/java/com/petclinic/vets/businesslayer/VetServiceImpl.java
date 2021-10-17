@@ -6,6 +6,7 @@ import com.petclinic.vets.datalayer.VetDTO;
 import com.petclinic.vets.datalayer.VetRepository;
 import com.petclinic.vets.utils.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -14,13 +15,10 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class VetServiceImpl implements VetService {
     private final VetRepository vetRepository;
     private final VetMapper vetMapper;
-//    public VetServiceImpl(VetRepository vetRepository,VetMapper vetMapper) {
-//        this.vetMapper = vetMapper;
-//        this.vetRepository = vetRepository;
-//    }
 
     @Override
     public List<Vet> getAllVets() {
@@ -29,14 +27,12 @@ public class VetServiceImpl implements VetService {
 
     @Override
     public Vet getVetByVetId(int vetId) {
-        Vet foundVet = vetRepository.findByVetId(vetId)
-                .orElseThrow(() -> new NotFoundException("No vet found for vetId: " + vetId));
-        return foundVet;
+        return vetRepository.findByVetId(vetId).orElseThrow(() -> new NotFoundException("No vet found for vetId: " + vetId));
     }
 
     @Override
     public Vet updateVet(Vet vet, Vet updateVet) {
-        if (!updateVet.getEmail().isEmpty() && updateVet.getEmail() != null) {
+        if (updateVet.getEmail() != null && !updateVet.getEmail().isEmpty()) {
             vet.setEmail(updateVet.getEmail());
         }
         if (!updateVet.getFirstName().isEmpty() && updateVet.getFirstName() != null) {
@@ -62,8 +58,7 @@ public class VetServiceImpl implements VetService {
             specialties.addAll(updateVet.getSpecialties());
             vet.setSpecialties(specialties);
         }
-        vetRepository.save(vet);
-        return vet;
+        return  vetRepository.save(vet);
     }
 
     @Override
@@ -107,12 +102,6 @@ public class VetServiceImpl implements VetService {
     public List<VetDTO> getAllVetDTOs() {
         List<Vet> vetList = getAllVets();
         List<VetDTO> vetDTOList = vetMapper.vetListToVetDTOList(vetList);
-        for(int i = 0; i < vetDTOList.size(); i++)
-        {
-            Set<Specialty> specialties = new HashSet<>();
-            specialties.addAll(vetList.get(i).getSpecialties());
-            vetDTOList.get(i).setSpecialties(specialties);
-        }
         return vetDTOList;
     }
 
@@ -120,47 +109,28 @@ public class VetServiceImpl implements VetService {
     public VetDTO getVetDTOByVetId(int vetId)
     {   Vet vet = getVetByVetId(vetId);
         VetDTO vetDTO= vetMapper.vetToVetDTO(vet);
-        Set<Specialty> specialties = new HashSet<>();
-        specialties.addAll(vet.getSpecialties());
-        vetDTO.setSpecialties(specialties);
         return vetDTO;
     }
 
     @Override
     public VetDTO updateVetWithDTO(int vetId, VetDTO vetDTO) {
+        vetDTO.setVetId(vetId);
         Vet vet = getVetByVetId(vetId);
         Vet vetUpdate = vetMapper.vetDTOToVet(vetDTO);
-        if(vetDTO.getSpecialties() != null && !vetDTO.getSpecialties().isEmpty()) {
-            Set<Specialty> specialties = new HashSet<>();
-            specialties.addAll(vetDTO.getSpecialties());
-            vetUpdate.setSpecialties(specialties);
-        }
         updateVet(vet,vetUpdate);
-        return getVetDTOByVetId(vetId);
+        return vetMapper.vetToVetDTO(updateVet(vet,vetUpdate));
     }
 
     @Override
     public VetDTO createVetFromDTO(VetDTO vetDTO) {
         Vet vet = vetMapper.vetDTOToVet(vetDTO);
-        if(vetDTO.getSpecialties() != null && !vetDTO.getSpecialties().isEmpty()) {
-            Set<Specialty> specialties = new HashSet<>();
-            specialties.addAll(vetDTO.getSpecialties());
-            vet.setSpecialties(specialties);
-        }
-        createVet(vet);
-        return vetDTO;
+        return vetMapper.vetToVetDTO(createVet(vet));
     }
 
     @Override
     public List<VetDTO> getAllDisabledVetDTOs() {
         List<Vet> vetList = getAllDisabledVets();
         List<VetDTO> vetDTOList = vetMapper.vetListToVetDTOList(vetList);
-        for(int i = 0; i < vetDTOList.size(); i++)
-        {
-            Set<Specialty> specialties = new HashSet<>();
-            specialties.addAll(vetList.get(i).getSpecialties());
-            vetDTOList.get(i).setSpecialties(specialties);
-        }
         return vetDTOList;
     }
 
@@ -168,12 +138,6 @@ public class VetServiceImpl implements VetService {
     public List<VetDTO> getAllEnabledVetDTOs() {
         List<Vet> vetList = getAllEnabledVets();
         List<VetDTO> vetDTOList = vetMapper.vetListToVetDTOList(vetList);
-        for(int i = 0; i < vetDTOList.size(); i++)
-        {
-            Set<Specialty> specialties = new HashSet<>();
-            specialties.addAll(vetList.get(i).getSpecialties());
-            vetDTOList.get(i).setSpecialties(specialties);
-        }
         return vetDTOList;
     }
 

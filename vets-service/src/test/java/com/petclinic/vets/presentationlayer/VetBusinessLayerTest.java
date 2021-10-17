@@ -91,24 +91,26 @@ public class VetBusinessLayerTest
         assertEquals(repo.getVetId(),result.getVetId());
         assertEquals(repo.getFirstName(),result.getFirstName());
     }
-//    @Test
-//    public void createNewVetFromDTOWithSpecialtiesTest()
-//    {
-//        Specialty specialty = new Specialty();
-//        specialty.setName("tester");
-//        Set<Specialty> specialties= new HashSet<>();
-//        specialties.add(specialty);
-//        VetDTO vetDTO = new VetDTO(456791, "JamesFive", "Carter",
-//                "carter.james@email.com", "2384",null,
-//                "practicing since 999 years", "Monday, Tuesday, Friday", 1, specialties);
-//        assertThrows(NoSuchElementException.class,()->{
-//            vetRepository.findByVetId(456791).get();
-//        });
-//        VetDTO result = vetService.createVetFromDTO(vetDTO);
-//        VetDTO repo = vetService.getVetDTOByVetId(456791);
-//        assertEquals(repo.getVetId(),result.getVetId());
-//        assertEquals(repo.getFirstName(),result.getFirstName());
-//    }
+    @Test
+    public void createNewVetFromDTOWithSpecialtiesTest()
+    {
+        Specialty specialty = new Specialty();
+        specialty.setName("ksm");
+        specialty.setSpecialtyId(123456);
+        Set<Specialty> specialties= new HashSet<>();
+        specialties.add(specialty);
+        specialties.add(specialty);
+        VetDTO vetDTO = new VetDTO(456791, "JamesFive", "Carter",
+                "carter.james@email.com", "2384",null,
+                "practicing since 999 years", "Monday, Tuesday, Friday", 1, specialties);
+        assertThrows(NoSuchElementException.class,()->{
+            vetRepository.findByVetId(456791).get();
+        });
+        VetDTO result = vetService.createVetFromDTO(vetDTO);
+        VetDTO repo = vetService.getVetDTOByVetId(456791);
+        assertEquals(repo.getVetId(),result.getVetId());
+        assertEquals(repo.getFirstName(),result.getFirstName());
+    }
 
     @Test
     public void getAllVetsTest()

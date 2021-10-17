@@ -148,6 +148,9 @@ class VetResourceTest {
 	@DisplayName("Create Vet Resource Test")
 	void createVet() throws Exception {
 		//assert
+		Specialty specialty = new Specialty(1,123456,"tester");
+		Set<Specialty> specialties= new HashSet<>();
+		specialties.add(specialty);
 		Vet vet2 = new Vet();
 		vet2.setId(1);
 		vet2.setVetId(874130);
@@ -158,6 +161,7 @@ class VetResourceTest {
 		vet2.setResume("Practicing since 3 years");
 		vet2.setWorkday("Monday, Tuesday, Friday");
 		vet2.setIsActive(1);
+		vet2.setSpecialties(specialties);
 		when(vetRepository.save(any(Vet.class))).thenReturn(vet2);
 		mvc.perform(post("/vets")
 						.contentType(MediaType.APPLICATION_JSON)
@@ -167,6 +171,7 @@ class VetResourceTest {
 								"\"phoneNumber\": 2384," +
 								"\"resume\": \"Practicing since 3 years\"," +
 								"\"workday\": \"Monday, Tuesday, Friday\"," +
+								"\"specialties\":[{\"id\":2, \"specialtyId\":234567, \"name\":\"tester2\"}]," +
 								"\"isActive\": 1}"))
 
 				// Validate the response code and content type
@@ -198,7 +203,8 @@ class VetResourceTest {
 		vet.setSpecialties(specialties);
 		vet.setImage(image);
 		//act
-		given(vetRepository.findByVetId(vet.getVetId())).willReturn(Optional.of(vet));
+		when(vetRepository.findByVetId(anyInt())).thenReturn(Optional.of(vet));
+		when(vetRepository.save(any())).thenAnswer(i -> i.getArgument(0, Vet.class));
 		//assert
 
 
@@ -213,7 +219,7 @@ class VetResourceTest {
 								"\"resume\": \"Practicing since 4 years\"," +
 								"\"workday\": \"Monday, Friday\"," +
 								"\"image\": \"NULL\"," +
-//								"\"specialties\":[{\"id\":2, \"specialtyId\":234567, \"name\":\"tester2\"}]," +
+								"\"specialties\":[{\"id\":2, \"specialtyId\":234567, \"name\":\"testerA\"}]," +
 								"\"isActive\": 1}"))
 
 				// Validate the response code and content type
@@ -228,7 +234,7 @@ class VetResourceTest {
 				.andExpect(jsonPath("$.resume").value("Practicing since 4 years"))
 				.andExpect(jsonPath("$.workday").value("Monday, Friday"))
 				.andExpect(jsonPath("$.image").value("NULL"))
-//				.andExpect(jsonPath("$.specialties").value("{id=2, specialtyId=234567, name=tester}"))
+				.andExpect(jsonPath("$.specialties[0].name").value("testerA"))
 				.andExpect(jsonPath("$.isActive").value(1));
 	}
 

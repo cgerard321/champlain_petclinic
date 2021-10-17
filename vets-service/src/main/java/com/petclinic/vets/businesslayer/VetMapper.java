@@ -14,12 +14,12 @@ public interface VetMapper
     @Mappings(
             {
                     @Mapping(target = "id", ignore = true),
-                    @Mapping(target = "specialties", ignore = true)
+//                    @Mapping(target = "specialties", expression = "java(new HashSet())")
             }
     )
     Vet vetDTOToVet(VetDTO vetDTO);
     VetDTO vetToVetDTO(Vet vet);
 
-    List<Vet> vetDTOListToVetList(List<VetDTO> vetDTOList);
+//    List<Vet> vetDTOListToVetList(List<VetDTO> vetDTOList);
     List<VetDTO> vetListToVetDTOList(List<Vet> vetList);
 }
