@@ -5,6 +5,7 @@ angular.module('verification', ['ui.router'])
         $stateProvider
             .state('verification', {
                 parent: 'app',
-                url: '/atuh/verification/:token'
+                url: '/auth/verification/:token',
+                template: '<verification></verification>'
             })
     }]);

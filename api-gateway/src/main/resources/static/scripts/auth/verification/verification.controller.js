@@ -1,12 +1,13 @@
-angular.module('verification')
-    .controller('VerificationController', ['$http', '$scope', '$routeParams', "$location", function ($http, $scope, $routeParams, $location) {
+'use strict';
 
-        this.add = () => $http.get('/api/gateway/users/verification/' + $routeParams.token)
+angular.module('verification')
+    .controller('VerificationController', ['$http', '$scope', "$location", "$stateParams", function ($http, $scope, $location, $stateParams) {
+
+        this.test = () => $http.get('/api/gateway/users/verification/' + $stateParams.token)
             .then(() => $location.path("/login"))
             .catch(n => {
                 $scope.errorMessage = n.data.message;
                 console.log(n);
+                console.log("I am in agony")
             });
-
-        this.keypress = ({ originalEvent: { key } }) => key === 'Enter' && this.add()
     }]);
