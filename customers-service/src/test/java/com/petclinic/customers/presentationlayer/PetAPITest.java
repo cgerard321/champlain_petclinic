@@ -83,9 +83,10 @@ class PetAPITest {
     @Test
     void findByPetId_API_TEST() throws Exception {
 
+        Owner owner = setupOwner();
         Pet pet = setupPet();
-        given(petService.findByPetId(2)).willReturn(Optional.of(pet));
-        mvc.perform(get("/owners/*/pets/2").accept(MediaType.APPLICATION_JSON))
+        given(petService.findByPetId(owner.getId(), pet.getId())).willReturn(Optional.of(pet));
+        mvc.perform(get("/owners/1/pets/2").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"))
                 .andExpect(jsonPath("$.id").value(2))
@@ -112,6 +113,8 @@ class PetAPITest {
     void findAll_API_TEST() throws Exception {
 
         //TEST DATA
+
+        Owner owner = setupOwner();
         Pet pet_1 = new Pet();
         pet_1.setId(1);
         pet_1.setName("John");
@@ -124,8 +127,8 @@ class PetAPITest {
         pet_3.setId(3);
         pet_3.setName("John");
 
-        given(petService.findAll()).willReturn(asList(pet_1, pet_2, pet_3));
-        mvc.perform(get("/owners/*/pets").accept(MediaType.APPLICATION_JSON))
+        given(petService.findAll(owner.getId())).willReturn(asList(pet_1, pet_2, pet_3));
+        mvc.perform(get("/owners/1/pets").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1))
                 .andExpect(jsonPath("$[1].id").value(2))

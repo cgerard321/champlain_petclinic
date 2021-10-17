@@ -16,13 +16,4 @@ import org.springframework.stereotype.Repository;
 
 public interface OwnerRepository extends JpaRepository<Owner, Integer> {
 
-    /*
-    @Transactional(readOnly = true)
-    Optional<Owner> findByOwnerId (int id);
-
-    Optional<Owner> findAccount(String un, String pass);
-
-    Optional<Owner> findByName(String n);
-    */
-
 }

@@ -6,7 +6,6 @@ import com.petclinic.customers.customerExceptions.exceptions.InvalidInputExcepti
 import com.petclinic.customers.customerExceptions.exceptions.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import java.util.List;

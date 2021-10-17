@@ -162,9 +162,9 @@ class OwnerPersistenceTest {
     public void update_owner_test()
     {
         // Arrange
-        int ownerid = 11;
+        int ownerId = 11;
 
-        Owner newOwner = new Owner (ownerid, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal",
+        Owner newOwner = new Owner (ownerId, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal",
                 "1111111111");
         Owner savedOwner = repository.save(newOwner);;
 

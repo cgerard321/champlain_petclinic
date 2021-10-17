@@ -73,11 +73,12 @@ public class PetServiceTest {
     @Test
     public void test_findByPetId() {
         //Arrange
+        Owner ownerTest = setupOwner();
         Pet petTest = setupPet();
-        when(repository.findById(2)).thenReturn(Optional.of(petTest));
+        when(repository.findPetByOwner(ownerTest.getId(), petTest.getId())).thenReturn(Optional.of(petTest));
 
         //Act
-        Optional<Pet> returnedPetOpt = service.findByPetId(2);
+        Optional<Pet> returnedPetOpt = service.findByPetId(1, 2);
         Pet returnedPet = returnedPetOpt.get();
 
         //Assert
@@ -90,6 +91,7 @@ public class PetServiceTest {
     @Test
     public void test_findAll() {
         //Arrange
+        Owner owner = setupOwner();
         int expectedLength = 4;
         List<Pet> petList = new ArrayList<>();
         Pet newPet = setupPet();
@@ -110,10 +112,10 @@ public class PetServiceTest {
         newPet.setName("Jojo");
         petList.add(newPet);
 
-        when(repository.findAll()).thenReturn(petList);
+        when(repository.findAllPetByOwner(owner.getId())).thenReturn(petList);
 
         //Act
-        List<Pet> returnedList = service.findAll();
+        List<Pet> returnedList = service.findAll(owner.getId());
 
         //Assert
         assertThat(expectedLength).isEqualTo(returnedList.size());

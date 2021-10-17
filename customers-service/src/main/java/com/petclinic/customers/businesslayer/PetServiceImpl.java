@@ -34,10 +34,10 @@ public class PetServiceImpl implements PetService {
      * It is not use by the login system
      */
     @Override
-    public Optional<Pet> findByPetId(int petId) {
+    public Optional<Pet> findByPetId(int ownerId, int petId) {
         try {
             //Search pet in database with the given id
-            Optional<Pet> pet = petRepository.findById(petId);
+            Optional<Pet> pet = petRepository.findPetByOwner(ownerId, petId);
             if (!pet.isPresent()) {
                 throw new NotFoundException("Pet "+ petId +" not found");
             }
@@ -56,9 +56,9 @@ public class PetServiceImpl implements PetService {
      * This method will find all pet in the database
      */
     @Override
-    public List<Pet> findAll() {
+    public List<Pet> findAll(int ownerId) {
 
-        return petRepository.findAll();
+        return petRepository.findAllPetByOwner(ownerId);
     }
 
 

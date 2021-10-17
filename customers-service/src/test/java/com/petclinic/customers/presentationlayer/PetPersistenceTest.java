@@ -34,14 +34,22 @@ public class PetPersistenceTest {
         repository.deleteAll();
     }
 
-
-    public Pet setupPet() {
+    public Owner setupOwner()
+    {
         Owner owner = new Owner();
+        owner.setId(1);
         owner.setFirstName("John");
         owner.setLastName("Wick");
         owner.setTelephone("5144041234");
         owner.setCity("Montreal");
         owner.setAddress("420 Avenue");
+
+        return owner;
+    }
+
+    public Pet setupPet() {
+
+        Owner owner = setupOwner();
 
         Pet pet = new Pet();
         pet.setName("Daisy");
@@ -64,11 +72,12 @@ public class PetPersistenceTest {
     public void findPetById() {
 
         //Arrange
+        Owner owner = setupOwner();
         Pet newPet = setupPet();
         Pet savedPet = repository.save(newPet);
 
         //Act
-        Pet foundPet = repository.findById(savedPet.getId()).orElse(null);
+        Pet foundPet = repository.findPetByOwner(owner.getId(), savedPet.getId()).orElse(null);
 
         //Assert
         assert foundPet != null;
