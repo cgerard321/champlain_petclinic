@@ -3,11 +3,9 @@
 angular.module('vetForm')
     .controller('VetFormController', ["$http", '$state', '$stateParams', function ($http, $state, $stateParams) {
         var self = this;
-
         var vetId = $stateParams.vetId || 0;
-
-        if (!vetId) {
-            self.vet = {};
+        if (!vetId || vetId === 0) {
+            self.vet = {"firstName": vetForm.vet.firstName,"resume":vetForm.vet.resume,"workday":vetForm.vet.workday,"specialities":vetForm.vet.specialities, "lastName": vetForm.vet.lastName, "phoneNumber": vetForm.vet.phoneNumber, "email": vetForm.vet.email, "isActive": vetForm.vet.isActive};
         } else {
             $http.get("api/gateway/vets/" + vetId).then(function (resp) {
                 self.vet = resp.data;
