@@ -20,9 +20,10 @@
  */
 package com.petclinic.auth;
 
-import com.petclinic.auth.Role.Role;
+import com.petclinic.auth.Role.data.Role;
 import com.petclinic.auth.Role.RoleRepo;
-import com.petclinic.auth.User.User;
+import com.petclinic.auth.User.data.User;
+import com.petclinic.auth.User.UserIDLessUsernameLessDTO;
 import com.petclinic.auth.User.UserRepo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -55,7 +56,7 @@ public class AuthServicePersistenceTests {
     private RoleRepo roleRepo;
 
     private final User DEFAULT_USER =
-            new User(0, "username-1", "pas$word-123", "email-1@gmail.com", Collections.EMPTY_SET);
+            new User("username-1", "pas$word-123", "email-1@gmail.com", Collections.EMPTY_SET);
 
 
     private final Role

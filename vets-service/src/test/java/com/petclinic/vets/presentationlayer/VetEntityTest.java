@@ -3,6 +3,7 @@ package com.petclinic.vets.presentationlayer;
 import com.google.common.hash.HashCode;
 import com.petclinic.vets.datalayer.Specialty;
 import com.petclinic.vets.datalayer.Vet;
+import com.petclinic.vets.datalayer.VetDTO;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -114,5 +115,35 @@ public class VetEntityTest {
                 }}
                 );
         assertEquals(vet.toString(),"["+ "Vet@"+Integer.toHexString(System.identityHashCode(vet))+" id = 1, firstName = 'James', lastName = 'Carter', email = 'carter.james@email.com', phoneNumber = '2384', resume = 'Practicing since 3 years', workday = 'Monday, Tuesday, Friday']");
+    }
+    @Test
+    @DisplayName("Vet AllArgsConstructor Test")
+    void allArgsConstructorDTOTest() {
+        VetDTO vet =
+                new VetDTO(
+                        874130
+                        , "James"
+                        , "Carter"
+                        , "carter.james@email.com"
+                        , "2384"
+                        , null
+                        , "Practicing since 3 years"
+                        , "Monday, Tuesday, Friday"
+                        , 1
+                        , new HashSet<Specialty>() {{
+                    add(new Specialty(1, 111111, "Surgeon"));
+                }}
+                );
+
+        assertEquals(vet.getVetId(), 874130);
+        assertEquals(vet.getFirstName(), "James");
+        assertEquals(vet.getLastName(), "Carter");
+        assertEquals(vet.getEmail(), "carter.james@email.com");
+        assertEquals(vet.getPhoneNumber(), "2384");
+        assertEquals(vet.getResume(), "Practicing since 3 years");
+        assertEquals(vet.getWorkday(), "Monday, Tuesday, Friday");
+        assertEquals(vet.getIsActive(), 1);
+        assertEquals(vet.getSpecialties().size(), 1);
+        assertEquals(vet.getSpecialties().iterator().next().getName(), "Surgeon");
     }
 }

@@ -91,4 +91,24 @@ public class VisitsServiceImpl implements VisitsService {
         }
         return visits;
     }
+
+    @Override
+    public List<Visit> getVisitsForPractitioner(int practitionerId) {
+        if(practitionerId < 0)
+            throw new InvalidInputException("PractitionerId can't be negative.");
+        List<Visit> visits = visitRepository.findVisitsByPractitionerId(practitionerId);
+        return visits;
+    }
+
+    @Override
+    public List<Visit> getVisitsByPractitionerIdAndMonth(int practitionerId, Date startDate, Date endDate) {
+        List<Visit> visits = visitRepository.findAllByDateBetween(startDate, endDate);
+
+        if(practitionerId < 0)
+            throw new InvalidInputException("PractitionerId can't be negative.");
+
+        visits = visits.stream().filter(v -> v.getPractitionerId() == practitionerId).collect(Collectors.toList());
+
+        return visits;
+    }
 }

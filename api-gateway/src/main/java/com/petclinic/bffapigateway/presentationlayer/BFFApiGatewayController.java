@@ -1,34 +1,13 @@
 package com.petclinic.bffapigateway.presentationlayer;
 
 
-import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
-import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
-import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
-import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
-import com.petclinic.bffapigateway.dtos.Login;
-import com.petclinic.bffapigateway.dtos.OwnerDetails;
-import com.petclinic.bffapigateway.dtos.VetDetails;
-import com.petclinic.bffapigateway.dtos.Visits;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.HashMap;
-import java.util.Map;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -50,7 +29,12 @@ public class BFFApiGatewayController {
 
     private final VetsServiceClient vetsServiceClient;
 
+
     private final AuthServiceClient authServiceClient;
+
+    private final BillServiceClient billServiceClient;
+
+
 
     @GetMapping(value = "owners/{ownerId}")
     public Mono<OwnerDetails> getOwnerDetails(final @PathVariable int ownerId) {
@@ -60,6 +44,14 @@ public class BFFApiGatewayController {
                                 .map(addVisitsToOwner(owner))
                 );
     }
+//check this
+    @GetMapping(value = "bills/{billId}")
+    public Mono<BillDetails> getBillingInfo(final @PathVariable int billId)
+    {
+        return billServiceClient.getBilling(billId);
+    }
+
+
 
     @GetMapping(value = "customer/owners")
     public Flux<OwnerDetails> getOwners() {
@@ -75,13 +67,14 @@ public class BFFApiGatewayController {
         return visitsServiceClient.getAllVisits();
 
     }
+
+
 /*
     //Add new Visit
     @PostMapping (value = "/pets/visits", consumes = "application/json", produces = "application/json")
     public Mono<Visits> createVisitForPets(final @RequestBody VisitDetails visitDetails){
         return visitsServiceClient.createVisitForPets(visitDetails);
         }
-
 */
 
     @PutMapping(
@@ -101,30 +94,35 @@ public class BFFApiGatewayController {
     }
 
     //Delete Visit
-    @DeleteMapping (value = "pets/visits/{petId}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping (value = "pets/visits/{petId}")
     public Mono<Void> deleteVisitForPets(final @PathVariable int petId){
         return visitsServiceClient.deleteVisitForPets(petId);
     }
 
     //Update Visit
-    @PostMapping(value ="pets/visits/{petId}", consumes = "application/json", produces = "application/json")
+    @PutMapping(value ="pets/visits/{petId}", consumes = "application/json", produces = "application/json")
     public Mono<Visits> updateVisitForPets(final @PathVariable int petId){
         return visitsServiceClient.updateVisitForPets(petId);
     }
 
     @GetMapping(value = "visits/{petId}")
-    public Flux<VisitDetails> getVisitsForPet(@PathVariable int petId){
+    public Flux<VisitDetails> getVisitsForPet(final @PathVariable int petId){
         return visitsServiceClient.getVisitsForPet(petId);
+    }
+
+    @GetMapping(value = "visits/vets/{practitionerId}")
+    public Flux<VisitDetails> getVisitForPractitioner(@PathVariable int practitionerId){
+        return visitsServiceClient.getVisitForPractitioner(practitionerId);
     }
 
     @PutMapping(value = "owners/{ownerId}",consumes = "application/json" ,produces = "application/json")
     public Mono<OwnerDetails> updateOwnerDetails(@RequestBody OwnerDetails od, final @PathVariable int ownerId) {
 
 
-          return customersServiceClient.updateOwner(od,ownerId)
-                    .flatMap(owner ->
-                            visitsServiceClient.getVisitsForPets(owner.getPetIds())
-                                    .map(addVisitsToOwner(owner)));
+        return customersServiceClient.updateOwner(od,ownerId)
+                .flatMap(owner ->
+                        visitsServiceClient.getVisitsForPets(owner.getPetIds())
+                                .map(addVisitsToOwner(owner)));
 
 
 
@@ -133,7 +131,7 @@ public class BFFApiGatewayController {
     }
 
 
-        private Function<Visits, OwnerDetails> addVisitsToOwner(OwnerDetails owner) {
+    private Function<Visits, OwnerDetails> addVisitsToOwner(OwnerDetails owner) {
         return visits -> {
             owner.getPets()
                     .forEach(pet -> pet.getVisits()
@@ -155,16 +153,56 @@ public class BFFApiGatewayController {
         return visitsServiceClient.createVisitForPet(visit);
     }
 
+    /**
+     * Retrieve all vets from DB
+     */
     @GetMapping(value = "vets")
     public Flux<VetDetails> getVets() {
         return vetsServiceClient.getVets();
     }
 
+    /**
+     * Get a single vet given its vetID
+     */
+    @GetMapping(value = "vets/{vetId}")
+    public Mono<VetDetails> getVet(final @PathVariable long vetId) {
+        return vetsServiceClient.getVet(vetId);
+    }
+
+    /**
+     * Create Vet
+     */
+    @PostMapping(value = "vets",
+            consumes = "application/json",
+            produces = "application/json")
+    public Mono<VetDetails> createVet(@RequestBody VetDetails model) { return vetsServiceClient.getVet(model.getVetId()); }
+
+    /**
+     * Delete vet from DB given the vetID
+     */
+    @DeleteMapping(value = "vets/{vetId}")
+    public Mono<VetDetails> deleteVet(final @PathVariable long vetId) {
+        return vetsServiceClient.deleteVet(vetId);
+    }
+
+    /**
+     * Update vet details
+     */
+    @PutMapping(
+            value = "vets/{vetId}",
+            consumes = "application/json",
+            produces = "application/json"
+    )
+    Mono<VetDetails> updateVet(@RequestBody VetDetails vet, @PathVariable int vetId) {
+        return vetsServiceClient.updateVet(vetId, vet);
+    }
 
     @PostMapping(value = "users",
             consumes = "application/json",
             produces = "application/json")
-    public Mono<UserDetails> createUser(@RequestBody UserDetails model) { return authServiceClient.getUser(model.getId()); }
+    public Mono<UserDetails> createUser(@RequestBody Register model) {
+        return authServiceClient.createUser(model);
+    }
 
     @DeleteMapping(value = "users/{userId}")
     public Mono<UserDetails> deleteUser(final @PathVariable long userId) { return authServiceClient.deleteUser(userId); }
