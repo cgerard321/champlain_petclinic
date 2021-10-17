@@ -88,7 +88,7 @@ public class AuthServiceClient {
     public Mono<UserDetails> verifyUser(final String token) {
         return webClientBuilder.build()
                 .get()
-                .uri(authServiceUrl + "/users/" + token)
+                .uri(authServiceUrl + "/users/verification/{token}", token)
                 .retrieve()
                 .onStatus(HttpStatus::is4xxClientError,
                         n -> rethrower.rethrow(n,
