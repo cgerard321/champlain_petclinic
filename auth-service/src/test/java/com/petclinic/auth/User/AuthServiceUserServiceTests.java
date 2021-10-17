@@ -9,6 +9,7 @@
 package com.petclinic.auth.User;
 
 import com.petclinic.auth.Exceptions.IncorrectPasswordException;
+import com.petclinic.auth.Exceptions.InvalidInputException;
 import com.petclinic.auth.Exceptions.NotFoundException;
 import com.petclinic.auth.JWT.JWTService;
 import com.petclinic.auth.Mail.Mail;
@@ -33,6 +34,7 @@ import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 
@@ -277,4 +279,19 @@ public class AuthServiceUserServiceTests {
     void verify_email_failure() {
         assertThrows(NotFoundException.class, () -> userService.getUserByEmail(BADEMAIL));
     }
+
+    @Test
+    @DisplayName("Throw invalid input exception when ID is is the negatives for delete")
+    void delete_then_throw_invalid_input_exception(){
+        long id = -1;
+        assertThrows(InvalidInputException.class, () -> userService.deleteUser(id));
+    }
+
+    @Test
+    @DisplayName("Throw invalid input exception when ID is is the negatives for get")
+    void get_then_throw_invalid_input_exception(){
+        long id = -1;
+        assertThrows(InvalidInputException.class, () -> userService.getUserById(id));
+    }
+
 }

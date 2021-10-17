@@ -71,7 +71,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -449,6 +449,42 @@ public class AuthServiceUserControllerTests {
         NotFoundException notFoundException = new NotFoundException("No user found for userID " + id);
         given(userService.getUserById(id)).willThrow(notFoundException);
         mockMvc.perform(get("/users/" + id))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.statusCode").value(404))
+                .andExpect(jsonPath("$.message").value("No user found for userID " + id));
+
+
+    }
+
+    @Test
+    @DisplayName("given a user with a valid id exist, then delete User object with that ID")
+    void delete_user_with_valid_id() throws Exception {
+        mockMvc.perform(delete("/users/1").accept(APPLICATION_JSON))
+                .andExpect(status().isOk());
+        verify(userService, times(1)).deleteUser(1);
+    }
+
+    @Test
+    @DisplayName("given a user with a invalid id exist, then throw Unprocessable Entity")
+    void delete_user_with_invalid_id() throws Exception {
+
+        long id = -1;
+        InvalidInputException invalidInputException = new InvalidInputException("Id cannot be a negative number for " + id);
+        doThrow(invalidInputException).when(userService).deleteUser(id);
+        mockMvc.perform(delete("/users/" + id).accept(APPLICATION_JSON))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.statusCode").value(422))
+                .andExpect(jsonPath("$.message").value("Id cannot be a negative number for " + id));
+    }
+
+    @Test
+    @DisplayName("given a user with an id not found exist, then throw Not Found")
+    void delete_user_with_id_not_found() throws Exception {
+
+        long id = 23212;
+        NotFoundException notFoundException = new NotFoundException("No user found for userID " + id);
+        doThrow(notFoundException).when(userService).deleteUser(id);
+        mockMvc.perform(delete("/users/" + id))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.statusCode").value(404))
                 .andExpect(jsonPath("$.message").value("No user found for userID " + id));
