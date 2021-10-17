@@ -10,6 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 /*
@@ -96,14 +98,13 @@ public class VisitResource {
         return visitsService.getVisitsForPractitioner(practitionerId);
     }
 
-    @GetMapping(value = "visits/{practitionerId}",
-            consumes = "application/json",
-            produces = "application/json")
-    public List<Visit> getVisitsByPractitionerIdAndMonth(@Valid @RequestBody List<Date> dates,
-                                                         @PathVariable("practitionerId") int practitionerId) {
+    @GetMapping("visits/calendar/{practitionerId}")
+    public List<Visit> getVisitsByPractitionerIdAndMonth(@PathVariable("practitionerId") int practitionerId,
+                                                         @RequestParam("dates") List<String> dates)
+                                                         throws ParseException {
 
-        Date startDate = dates.get(0);
-        Date endDate = dates.get(1);
+        Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse(dates.get(0));
+        Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse(dates.get(1));
 
         log.debug("Calling VisitsService:getVisitsByPractitionerIdAndMonth:practitionerId={}:startDate={},endDate={}", practitionerId, startDate, endDate);
         return visitsService.getVisitsByPractitionerIdAndMonth(practitionerId, startDate, endDate);

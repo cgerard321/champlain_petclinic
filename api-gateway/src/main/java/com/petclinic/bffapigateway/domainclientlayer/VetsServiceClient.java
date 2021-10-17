@@ -1,14 +1,15 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.OwnerDetails;
+import com.petclinic.bffapigateway.dtos.UserDetails;
 import com.petclinic.bffapigateway.dtos.VetDetails;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
 
 /**
  * @author Christine Gerard
@@ -37,6 +38,31 @@ public class VetsServiceClient {
                 .bodyToFlux(VetDetails.class);
     }
 
+    public Mono<VetDetails> getVet(final long vetId) {
+        return webClientBuilder.build().get()
+                .uri(vetsServiceUrl + "/{vetId}", vetId)
+                .retrieve()
+                .bodyToMono(VetDetails.class);
+    }
 
+    public Mono<VetDetails> createVet (final VetDetails model) {
+        return webClientBuilder.build().post()
+                .uri(vetsServiceUrl + model)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve().bodyToMono(VetDetails.class);
+    }
+
+    public Mono<VetDetails> deleteVet(final long vetId) {
+        return webClientBuilder.build().delete()
+                .uri(vetsServiceUrl + "/{vetId}", vetId)
+                .retrieve().bodyToMono(VetDetails.class);
+    }
+
+    public Mono<VetDetails> updateVet(final int vetId, final VetDetails model){
+        return webClientBuilder.build().put()
+                .uri(vetsServiceUrl + vetId + model)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve().bodyToMono(VetDetails.class);
+    }
 
 }
