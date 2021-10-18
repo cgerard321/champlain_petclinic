@@ -115,23 +115,36 @@ public class AuthServiceClientIntegrationTest {
 
     @Test
     @DisplayName("Given valid Login, return JWT")
-    void valid_login() {
+    void valid_login() throws JsonProcessingException {
+
+        final String asString = objectMapper.writeValueAsString(
+                objectMapper.convertValue(USER_REGISTER, UserDetails.class)
+                        .toBuilder()
+                        .id(1)
+                        .roles(Collections.emptySet())
+                        .password(null)
+                        .build()
+        );
 
         final Login login = Login.builder()
-                .email("email")
-                .password("password")
+                .email(USER_REGISTER.getEmail())
+                .password(USER_REGISTER.getPassword())
                 .build();
         final String token = "some.valid.token";
         final MockResponse mockResponse = new MockResponse();
         mockResponse
                 .setHeader("Content-Type", "application/json")
-                .setBody(token);
+                .setBody(asString);
 
         server.enqueue(mockResponse);
 
-        final String block = authServiceClient.login(login).block();
+        final UserDetails block = authServiceClient.login(login).block();
 
-        assertEquals(token, block);
+        assertEquals(USER_REGISTER.getEmail(), block.getEmail());
+        assertEquals(USER_REGISTER.getUsername(), block.getUsername());
+        assertNull(block.getPassword());
+        assertNotNull(block.getId());
+        assertEquals(0, block.getRoles().size());
     }
 
     @Test
