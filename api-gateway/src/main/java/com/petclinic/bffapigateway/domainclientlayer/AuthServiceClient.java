@@ -7,21 +7,23 @@ import com.petclinic.bffapigateway.exceptions.GenericHttpException;
 import com.petclinic.bffapigateway.utils.Rethrower;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
-import java.util.concurrent.ForkJoinPool;
+import java.io.Serializable;
 
 import static java.lang.Integer.parseInt;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static reactor.core.publisher.Mono.just;
+import static reactor.core.publisher.Mono.zip;
 
 @Component
 public class AuthServiceClient {
@@ -104,22 +106,7 @@ public class AuthServiceClient {
     }
 
     public Mono<Tuple2<String, UserDetails>> login(final Login login) {
-        return webClientBuilder.build()
-                .post()
-                .uri(authServiceUrl + "/users/login")
-                .accept(MediaType.APPLICATION_JSON)
-                .body(just(login), Login.class)
-                .retrieve()
-                .onStatus(HttpStatus::is4xxClientError,
-                        n -> rethrower.rethrow(n,
-                                x -> new GenericHttpException(
-                                        x.get("message").toString(),
-                                        HttpStatus.valueOf(
-                                                parseInt(x.get("statusCode").toString())
-                                        )
-                                ))
-                )
-                .bodyToMono(UserDetails.class);
+        return null;
     }
 }
 
