@@ -57,26 +57,25 @@ public class VetServiceImpl implements VetService {
         if ( updateVet.getFirstName() != null && !updateVet.getFirstName().isEmpty()) {
             vet.setFirstName(updateVet.getFirstName());
         }
-        if (updateVet.getLastName() != null&&!updateVet.getLastName().isEmpty()  ) {
+        if (updateVet.getLastName() != null && !updateVet.getLastName().isEmpty()  ) {
             vet.setLastName(updateVet.getLastName());
         }
-        if ( updateVet.getPhoneNumber() != null&&!updateVet.getPhoneNumber().isEmpty() ) {
+        if ( updateVet.getPhoneNumber() != null && !updateVet.getPhoneNumber().isEmpty() ) {
             vet.setPhoneNumber(updateVet.getPostNumber());
         }
-        if ( updateVet.getResume() != null&& !updateVet.getResume().isEmpty()) {
+        if ( updateVet.getResume() != null && !updateVet.getResume().isEmpty()) {
             vet.setResume(updateVet.getResume());
         }
-        if (  updateVet.getWorkday() != null&&!updateVet.getWorkday().isEmpty()) {
+        if (  updateVet.getWorkday() != null && !updateVet.getWorkday().isEmpty()) {
             vet.setWorkday(updateVet.getWorkday());
         }
         if(updateVet.getImage() != null){
             vet.setImage(updateVet.getImage());
         }
-        if(updateVet.getSpecialties() != null &&!updateVet.getSpecialties().isEmpty()){
             Set<Specialty> specialties = new HashSet<>();
             specialties.addAll(updateVet.getSpecialties());
             vet.setSpecialties(specialties);
-        }
+
         return  vetRepository.save(vet);
     }
 

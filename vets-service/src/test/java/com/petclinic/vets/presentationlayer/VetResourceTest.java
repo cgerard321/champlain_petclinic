@@ -1,13 +1,11 @@
 package com.petclinic.vets.presentationlayer;
 
 import com.petclinic.vets.businesslayer.VetService;
-import com.petclinic.vets.datalayer.Vet;
-import com.petclinic.vets.datalayer.VetRepository;
+import com.petclinic.vets.datalayer.*;
 import com.petclinic.vets.presentationlayer.VetResource;
 import com.petclinic.vets.utils.exceptions.NotFoundException;
 import org.hibernate.validator.internal.util.logging.Messages_$bundle;
 import org.junit.jupiter.api.BeforeEach;
-import com.petclinic.vets.datalayer.Specialty;
 import com.petclinic.vets.datalayer.Vet;
 import com.petclinic.vets.datalayer.VetRepository;
 import com.petclinic.vets.utils.exceptions.InvalidInputException;
@@ -71,6 +69,8 @@ class VetResourceTest {
 	VetService vetService;
 	@MockBean
 	VetRepository vetRepository;
+	@Autowired
+	VetResource vetResource;
 
 	@Test
 	@DisplayName("Get Vet By vetId Resource Test")
@@ -92,7 +92,13 @@ class VetResourceTest {
 				.andExpect(jsonPath("$.vetId").value(874130));
 	}
 	@Test
-	@DisplayName("Get Vet By vetId Invalid Input Ressource Test")
+	@DisplayName("Get Vet By vetId Invalid Input Resource Test")
+	void getVetByVetIdInvalidInputId() throws Exception{
+
+		assertThrows(InvalidInputException.class, () -> vetResource.findVet(0));
+	}
+	@Test
+	@DisplayName("Get Vet By vetId Invalid Input Resource Test")
 	void getVetByVetIdInvalidInput() throws Exception{
 			assertThrows(NotFoundException.class,()->{
 				vetService.getVetByVetId(-10);
