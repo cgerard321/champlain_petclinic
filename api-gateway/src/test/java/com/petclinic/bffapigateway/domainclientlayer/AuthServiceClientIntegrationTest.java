@@ -5,6 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Login;
 import com.petclinic.bffapigateway.dtos.Register;
 import com.petclinic.bffapigateway.dtos.UserDetails;
+import com.petclinic.bffapigateway.exceptions.GenericHttpException;
+import com.petclinic.bffapigateway.exceptions.HttpErrorInfo;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterEach;
@@ -17,6 +19,7 @@ import java.io.IOException;
 import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 /**
  * Created by IntelliJ IDEA.
@@ -129,5 +132,26 @@ public class AuthServiceClientIntegrationTest {
         final String block = authServiceClient.login(login).block();
 
         assertEquals(token, block);
+    }
+
+    @Test
+    @DisplayName("Given invalid Login, throw 401")
+    void invalid_login() throws JsonProcessingException {
+
+        final String errorMessage = "bad login >:(";
+        final String asString = objectMapper.writeValueAsString(new HttpErrorInfo(UNAUTHORIZED.value(), errorMessage));
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setBody(asString)
+                .status("HTTP/1.1 401 Unauthorized");
+
+        server.enqueue(mockResponse);
+
+        final GenericHttpException ex = assertThrows(GenericHttpException.class, authServiceClient.login(login).block());
+
+        assertEquals(UNAUTHORIZED, ex.getHttpStatus());
+        assertEquals(errorMessage, ex.getMessage());
     }
 }
