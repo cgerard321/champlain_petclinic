@@ -105,6 +105,11 @@ public class AuthServiceClient {
                 .bodyToMono(UserDetails.class);
     }
 
+    // NOTE: At the time I am writing this method, there is no way to get the body of a response
+    // with exchange() other than doing more scuffed shit with AtomicReferences and even.
+    // then it's extremely messy because it returns yet another god damned Mono.
+    // Please take the time to look up if reactive web has added a fix
+    // to this when you see this in the future.
     public Mono<Tuple2<String, UserDetails>> login(final Login login) {
         AtomicReference<String> token = new AtomicReference<>();
 
