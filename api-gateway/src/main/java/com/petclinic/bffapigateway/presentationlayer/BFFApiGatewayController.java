@@ -12,6 +12,8 @@ import reactor.core.publisher.Mono;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+
 /**
  * @author Maciej Szarlinski
  * @author Christine Gerard
@@ -244,6 +246,10 @@ public class BFFApiGatewayController {
 
     @PostMapping("/users/login")
     public Mono<ResponseEntity<UserDetails>> login(@RequestBody final Login login) {
-        return null;
+        return authServiceClient.login(login)
+                .map(n -> ResponseEntity.ok()
+                        .header(AUTHORIZATION, n.getT1())
+                        .body(n.getT2())
+                );
     }
 }
