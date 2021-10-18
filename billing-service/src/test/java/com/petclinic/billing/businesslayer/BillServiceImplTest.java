@@ -91,6 +91,19 @@ public class BillServiceImplTest {
 
     }
 
+
+    @Test
+    public void test_CreateBillInvalidVisitTypeReceived(){
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(2021, Calendar.SEPTEMBER, 21);
+        Date date = calendar.getTime();
+
+        HashMap<String, Double> list = setUpVisitList();
+        BillDTO receivedDTO = new BillDTO(billId,customerId, date, "Checkup");
+        assertNull(list.get(receivedDTO.getVisitType()));
+
+    }
+
     @Test
     public void test_CreateBillInvalidInputException(){
         Calendar calendar = Calendar.getInstance();
