@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Login;
 import com.petclinic.bffapigateway.dtos.Register;
 import com.petclinic.bffapigateway.dtos.UserDetails;
+import com.petclinic.bffapigateway.exceptions.GenericHttpException;
 import com.petclinic.bffapigateway.exceptions.HttpErrorInfo;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -165,9 +166,9 @@ public class AuthServiceClientIntegrationTest {
 
         server.enqueue(mockResponse);
 
-//        final GenericHttpException ex = assertThrows(GenericHttpException.class, authServiceClient.login(new Login()).block());
-//
-//        assertEquals(UNAUTHORIZED, ex.getHttpStatus());
-//        assertEquals(errorMessage, ex.getMessage());
+        final GenericHttpException ex = assertThrows(GenericHttpException.class, () -> authServiceClient.login(new Login()).block());
+
+        assertEquals(UNAUTHORIZED, ex.getHttpStatus());
+        assertEquals(errorMessage, ex.getMessage());
     }
 }
