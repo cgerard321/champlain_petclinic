@@ -1,5 +1,6 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
+import com.petclinic.bffapigateway.dtos.Login;
 import com.petclinic.bffapigateway.dtos.Register;
 import com.petclinic.bffapigateway.dtos.UserDetails;
 import com.petclinic.bffapigateway.exceptions.GenericHttpException;
@@ -14,7 +15,11 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.concurrent.ForkJoinPool;
+
+import static java.lang.Integer.parseInt;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static reactor.core.publisher.Mono.just;
 
 @Component
@@ -93,6 +98,25 @@ public class AuthServiceClient {
                 .onStatus(HttpStatus::is4xxClientError,
                         n -> rethrower.rethrow(n,
                                 x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
+                )
+                .bodyToMono(UserDetails.class);
+    }
+
+    public Mono<UserDetails> login(final Login login) {
+        return webClientBuilder.build()
+                .post()
+                .uri(authServiceUrl + "/users/login")
+                .accept(MediaType.APPLICATION_JSON)
+                .body(just(login), Login.class)
+                .retrieve()
+                .onStatus(HttpStatus::is4xxClientError,
+                        n -> rethrower.rethrow(n,
+                                x -> new GenericHttpException(
+                                        x.get("message").toString(),
+                                        HttpStatus.valueOf(
+                                                parseInt(x.get("statusCode").toString())
+                                        )
+                                ))
                 )
                 .bodyToMono(UserDetails.class);
     }
