@@ -149,7 +149,7 @@ public class AuthServiceClientIntegrationTest {
 
         server.enqueue(mockResponse);
 
-        final GenericHttpException ex = assertThrows(GenericHttpException.class, authServiceClient.login(login).block());
+        final GenericHttpException ex = assertThrows(GenericHttpException.class, authServiceClient.login(new Login()).block());
 
         assertEquals(UNAUTHORIZED, ex.getHttpStatus());
         assertEquals(errorMessage, ex.getMessage());
