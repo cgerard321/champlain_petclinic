@@ -123,7 +123,7 @@ class VetResourceTest {
 		vet.setIsActive(1);
 
 		given(vetRepository.findAllEnabledVets()).willReturn(asList(vet));
-		mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
+		mvc.perform(get("/vets/enabled").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$[0].vetId").value(874130));
 	}
@@ -349,7 +349,7 @@ class VetResourceTest {
 		vet.setIsActive(1);
 
 		given(vetRepository.findAllEnabledVets()).willReturn(asList(vet));
-		mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
+		mvc.perform(get("/vets/enabled").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 //				.andExpect(jsonPath("$[0].id").value(1))
 				.andExpect(jsonPath("$[0].vetId").value(874130))
@@ -380,7 +380,7 @@ class VetResourceTest {
 
 		given(vetRepository.findAllEnabledVets()).willReturn(asList(vet));
 
-		mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
+		mvc.perform(get("/vets/enabled").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 //				.andExpect(jsonPath("$[0].id").value(1))
 				.andExpect(jsonPath("$[0].vetId").value(874130))

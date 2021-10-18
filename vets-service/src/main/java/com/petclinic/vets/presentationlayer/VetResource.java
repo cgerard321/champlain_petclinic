@@ -71,9 +71,15 @@ class VetResource {
         this.vetService = vetService;
     }
 
+    @GetMapping("/enabled")
+    public List<VetDTO> showResourcesVetListEnabled() {
+        List<VetDTO> vetList = vetService.getAllEnabledVetDTOs();
+        return vetList;
+    }
+
     @GetMapping
     public List<VetDTO> showResourcesVetList() {
-        List<VetDTO> vetList = vetService.getAllEnabledVetDTOs();
+        List<VetDTO> vetList = vetService.getAllVetDTOs();
         return vetList;
     }
 
