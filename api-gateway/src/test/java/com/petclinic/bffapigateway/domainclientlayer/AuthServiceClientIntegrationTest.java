@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Login;
 import com.petclinic.bffapigateway.dtos.Register;
 import com.petclinic.bffapigateway.dtos.UserDetails;
-import com.petclinic.bffapigateway.exceptions.GenericHttpException;
 import com.petclinic.bffapigateway.exceptions.HttpErrorInfo;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -15,12 +14,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.util.function.Tuple2;
-import reactor.util.function.Tuples;
 
 import java.io.IOException;
 import java.util.Collections;
 
-import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
@@ -138,7 +135,7 @@ public class AuthServiceClientIntegrationTest {
         final MockResponse mockResponse = new MockResponse();
         mockResponse
                 .setHeader("Content-Type", "application/json")
-                .setHeader("Authorization", format("Bearer: %s", token))
+                .setHeader("Authorization", token)
                 .setBody(asString);
 
         server.enqueue(mockResponse);
