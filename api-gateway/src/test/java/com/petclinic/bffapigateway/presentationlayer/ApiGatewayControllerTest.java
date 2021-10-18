@@ -26,6 +26,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 //
 //import com.petclinic.billing.datalayer.BillDTO;
@@ -679,7 +680,37 @@ class ApiGatewayControllerTest {
                 .json(objectMapper.writeValueAsString(user));
         ok.expectHeader()
                 .valueEquals(HttpHeaders.AUTHORIZATION, validToken);
+    }
 
+    @Test
+    @DisplayName("Given invalid Login, throw 401")
+    void login_invalid() {
+        final UserDetails user = UserDetails.builder()
+                .id(-1)
+                .password(null)
+                .email("e@mail.com")
+                .username("user")
+                .roles(Collections.emptySet())
+                .build();
+
+        final Login login = Login.builder()
+                .password("valid")
+                .email(user.getEmail())
+                .build();
+        final String message = "I live in unending agony. I spent 6 hours and ended up with nothing";
+        when(authServiceClient.login(login))
+                .thenThrow(new GenericHttpException(message, UNAUTHORIZED));
+
+        client.post()
+                .uri("/api/gateway/login")
+                .accept(APPLICATION_JSON)
+                .body(Mono.just(login), Login.class)
+                .exchange()
+                .expectStatus().isUnauthorized()
+                .expectBody()
+                .jsonPath("$.statusCode").isEqualTo(UNAUTHORIZED.value())
+                .jsonPath("$.message").isEqualTo(message)
+                .jsonPath("$.timestamp").exists();
     }
 }
 
