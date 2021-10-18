@@ -12,10 +12,10 @@
   </div>
   <div class="row g-5">
     <div class="col-md-7 col-lg-12">
-      <form id="vetForm" enctype="multipart/form-data" name="vetForm" ng-submit="$ctrl.submitVetForm()">
+      <form id="vetForm" enctype="multipart/form-data" name="vetForm">
         <div class="row g-3">
           <div class="col-sm-6">
-            <input class="form-control" name="fistName" type="text" ng-model="vet.firstName" placeholder="First Name" pattern="^(a-z| |,|.|-)+" required maxlength="30" minlength="3" title="Minimum of 3 characters and maximum of 30 characters. Only letters and punctuation mark."><br/>
+            <input class="form-control" name="firstName" type="text" ng-model="vet.firstName" placeholder="First Name" pattern="^(a-z| |,|.|-)+" required maxlength="30" minlength="3" title="Minimum of 3 characters and maximum of 30 characters. Only letters and punctuation mark."><br/>
           </div>
 
           <div class="col-sm-6">
@@ -27,7 +27,7 @@
           </div>
 
           <div class="col-sm-12">
-            <input class="form-control" type="number" name="phoneNumber" ng-model="vet.phoneNumber" placeholder="Phone Number" pattern="^(\d)" required maxlength="30" minlength="4" title="Accepts only numbers for a minimum of 4 characters and maximum of 30 characters.">
+            <input class="form-control" type="number" name="phoneNumber" ng-model="vet.phoneNumber" placeholder="Phone Number" required maxlength="30" minlength="4" title="Accepts only numbers for a minimum of 4 characters and maximum of 30 characters.">
           </div>
 
           <hr class="my-4"/>
@@ -72,25 +72,8 @@
 
           <div class="col-sm-12">
             <h5 class="form-label">Career Resume</h5>
-            <span id="checkmarkRes" style="display: none">&#10003;</span>
-            <input class="form-control"
-                   id="resume"
-                   type="file"
-                   name="careerResume"
-                   accept="application/pdf"
-                   ng-model="vet.careerResume"
-                   onchange="uploadResume(event)"
-                   title="Only .pdf accepted">
-            <br>
-          </div>
-          <script>
-            let uploadResume = function () {
-              let checkmark = document.getElementById('checkmarkRes');
-              if (document.getElementById('resume') != null) {
-                checkmark.style.display = "inline";
-              }
-            }
-          </script>
+            <textarea placeholder="Resume" name="resume" ng-model="vet.resume" pattern="^(.*)" maxlength="350" title="Maximum of 350 characters.">
+    </textarea>
         </div>
 
         <hr class="my-4"/>
@@ -102,61 +85,11 @@
           </div>
         </div>
 
-
-        <hr class="my-4"/>
-        <div class="row g-3">
-          <div class="col-sm-6">
-            <div class="my-3 check-align">
-              <h5 class="mb-3"> What Animals Can You Treat?</h5>
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="animalsTreated" value="Dogs">
-                <label class="form-check-label vet-label-input">Dogs</label>
-              </div>
-
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="animalsTreated"
-                       value="Cats"><label
-                      class="form-check-label vet-label-input">Cats</label>
-              </div>
-
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="animalsTreated"
-                       value="Birds"><label
-                      class="form-check-label vet-label-input">Birds</label>
-              </div>
-
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="animalsTreated"
-                       value="Exotic"><label
-                      class="form-check-label vet-label-input">Exotic Animals</label>
-              </div>
-            </div>
-          </div>
-
-
-          <div class="col-sm-6">
-            <div class="my-3 check-align">
-              <h5 class="mb-3">Available Work Days</h5>
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="workDays" value="Monday">
-                <label class="form-check-label vet-label-input">Monday</label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="workDays" value="Tuesday">
-                <label class="form-check-label vet-label-input">Tuesday</label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="workDays" value="Wednesday">
-                <label class="form-check-label vet-label-input">Wednesday</label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="workDays" value="Thursday">
-                <label class="form-check-label vet-label-input">Thursday</label>
-              </div>
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="workDays" value="Friday">
-                <label class="form-check-label vet-label-input">Friday</label>
-              </div>
+        <div class="col-sm-6">
+          <div class="my-3 check-align">
+            <h5 class="mb-3">Available Work Days</h5>
+            <div class="col-sm-12">
+            <input type="text" placeholder="ex:Monday, Tuesday" name="workday" ng-model="vet.workday" pattern="((\bMonday\b|\bTuesday\b|\bWednesday\b|\bThursday\b|\bFriday\b|\bSaturday\b|\bSunday\b)(,|)( |))+" maxlength="250" title="Maximum of 250 characters. Accepts only days of the week seperated by commas.">
             </div>
           </div>
         </div>
@@ -166,16 +99,16 @@
           <h5 class="mb-3">Active Vet</h5>
 
           <div class="form-check">
-            <input class="form-check-input" type="radio" name="isActive" value="1">
-            <label class="form-check-label vet-label-input" ng-model="vet.isActive" >Yes</label>
+            <label class="form-check-label vet-label-input" >
+              <input class="form-check-input" type="radio" ng-model="vet.isActive" ng-value="1" name="isActive" value="1">Yes</label>
           </div>
           <div class="form-check">
-            <input class="form-check-input" type="radio" name="isActive" value="0">
-            <label class="form-check-label vet-label-input" ng-model="vet.isActive">No</label>
+            <label class="form-check-label vet-label-input" >
+              <input class="form-check-input" type="radio" ng-model="vet.isActive" ng-value="0" name="isActive" value="0">No</label>
           </div>
         </div>
         <hr class="my-4"/>
-        <button type="submit" class="w-100 btn btn-primary btn-lg">Submit</button>
+        <button type="submit" class="w-100 btn btn-primary btn-lg" ng-click="$ctrl.submitVetForm(vet)">Submit</button>
       </form>
     </div>
   </div>
