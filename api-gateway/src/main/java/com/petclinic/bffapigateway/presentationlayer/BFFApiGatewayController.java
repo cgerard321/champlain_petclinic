@@ -240,4 +240,9 @@ public class BFFApiGatewayController {
     public Mono<UserDetails> verifyUser(@PathVariable final String token) {
         return authServiceClient.verifyUser(token);
     }
+
+    @PostMapping("/users/login")
+    public Mono<String> login(@RequestBody final Login login) {
+        return null;
+    }
 }

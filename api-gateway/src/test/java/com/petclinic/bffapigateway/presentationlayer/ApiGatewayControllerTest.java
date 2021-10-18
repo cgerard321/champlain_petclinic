@@ -670,7 +670,7 @@ class ApiGatewayControllerTest {
                 )));
 
         final WebTestClient.ResponseSpec ok = client.post()
-                .uri("/api/gateway/login")
+                .uri("/api/gateway/users/login")
                 .accept(APPLICATION_JSON)
                 .body(Mono.just(login), Login.class)
                 .exchange()
@@ -702,7 +702,7 @@ class ApiGatewayControllerTest {
                 .thenThrow(new GenericHttpException(message, UNAUTHORIZED));
 
         client.post()
-                .uri("/api/gateway/login")
+                .uri("/api/gateway/users/login")
                 .accept(APPLICATION_JSON)
                 .body(Mono.just(login), Login.class)
                 .exchange()
