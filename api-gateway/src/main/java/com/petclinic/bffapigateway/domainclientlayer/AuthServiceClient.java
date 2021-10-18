@@ -14,6 +14,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 
 import java.util.concurrent.ForkJoinPool;
 
@@ -102,7 +103,7 @@ public class AuthServiceClient {
                 .bodyToMono(UserDetails.class);
     }
 
-    public Mono<UserDetails> login(final Login login) {
+    public Mono<Tuple2<String, UserDetails>> login(final Login login) {
         return webClientBuilder.build()
                 .post()
                 .uri(authServiceUrl + "/users/login")

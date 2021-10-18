@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -237,7 +238,7 @@ public class BFFApiGatewayController {
     public Mono<OwnerDetails> createOwner(@RequestBody OwnerDetails model){ return customersServiceClient.getOwner(model.getId()); }
 
     @GetMapping("/verification/{token}")
-    public Mono<UserDetails> verifyUser(@PathVariable final String token) {
+    public Mono<Tuple2<String, UserDetails>> verifyUser(@PathVariable final String token) {
         return authServiceClient.verifyUser(token);
     }
 }
