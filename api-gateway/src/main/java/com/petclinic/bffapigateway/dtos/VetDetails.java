@@ -23,7 +23,7 @@ public class VetDetails {
 
         private String workday;
 
-        private Integer enabled;
+        private Integer isActive;
 
         private final List<Specialty> specialties = new ArrayList<>();
 
