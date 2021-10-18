@@ -155,7 +155,7 @@ public class AuthServiceClientIntegrationTest {
     @DisplayName("Given invalid Login, throw 401")
     void invalid_login() throws JsonProcessingException {
 
-        final String errorMessage = "bad login >:(";
+        final String errorMessage = "Unauthorized";
         final String asString = objectMapper.writeValueAsString(new HttpErrorInfo(UNAUTHORIZED.value(), errorMessage));
 
         final MockResponse mockResponse = new MockResponse();
