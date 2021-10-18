@@ -12,11 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuples;
 
 import java.util.Collections;
 
@@ -642,6 +644,42 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.statusCode").isEqualTo(BAD_REQUEST.value())
                 .jsonPath("$.timestamp").exists()
                 .jsonPath("$.message").isEqualTo(errorMessage);
+    }
+
+    @Test
+    @DisplayName("Given valid Login, return JWT and user details")
+    void login_valid() throws JsonProcessingException {
+        final String validToken = "some.valid.token";
+        final UserDetails user = UserDetails.builder()
+                .id(-1)
+                .password(null)
+                .email("e@mail.com")
+                .username("user")
+                .roles(Collections.emptySet())
+                .build();
+
+        final Login login = Login.builder()
+                .password("valid")
+                .email(user.getEmail())
+                .build();
+        when(authServiceClient.login(login))
+                .thenReturn(Mono.just(Tuples.of(
+                        validToken,
+                        user
+                )));
+
+        final WebTestClient.ResponseSpec ok = client.post()
+                .uri("/api/gateway/login")
+                .accept(APPLICATION_JSON)
+                .body(Mono.just(login), Login.class)
+                .exchange()
+                .expectStatus().isOk();
+
+        ok.expectBody()
+                .json(objectMapper.writeValueAsString(user));
+        ok.expectHeader()
+                .valueEquals(HttpHeaders.AUTHORIZATION, validToken);
+
     }
 }
 
