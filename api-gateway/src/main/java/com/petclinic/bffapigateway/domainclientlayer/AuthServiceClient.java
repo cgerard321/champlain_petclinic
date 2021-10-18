@@ -11,21 +11,19 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
-import java.io.Serializable;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static java.lang.Integer.parseInt;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+import static reactor.core.publisher.Mono.error;
 import static reactor.core.publisher.Mono.just;
-import static reactor.core.publisher.Mono.zip;
 
 @Component
 public class AuthServiceClient {
@@ -109,13 +107,25 @@ public class AuthServiceClient {
 
     public Mono<Tuple2<String, UserDetails>> login(final Login login) {
         AtomicReference<String> token = new AtomicReference<>();
+
         return webClientBuilder.build()
                 .post()
                 .uri(authServiceUrl + "/users/login")
                 .accept(MediaType.APPLICATION_JSON)
                 .body(just(login), Login.class)
                 .exchange()
-                .doOnSuccess(n -> token.set(n.headers().asHttpHeaders().get(HttpHeaders.AUTHORIZATION).get(0)))
+                .doOnNext(n -> {
+                    if(n.statusCode().is4xxClientError()) {
+                        n.releaseBody();
+                        throw new GenericHttpException("Unauthorized", UNAUTHORIZED);
+                    }
+                })
+                .doOnSuccess(n ->  {
+                    final List<String> strings = n.headers().asHttpHeaders().get(HttpHeaders.AUTHORIZATION);
+                    if(strings == null || strings.size() == 0)return;
+                    token.set(strings.get(0));
+                })
+                .switchIfEmpty(error(new RuntimeException("")))
                 .flatMap(n -> n.bodyToMono(UserDetails.class))
                 .map(n -> Tuples.of(token.get(), n));
     }
