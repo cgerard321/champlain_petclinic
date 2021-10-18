@@ -19,6 +19,8 @@ import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
 import java.io.Serializable;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static java.lang.Integer.parseInt;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -106,7 +108,16 @@ public class AuthServiceClient {
     }
 
     public Mono<Tuple2<String, UserDetails>> login(final Login login) {
-        return null;
+        AtomicReference<String> token = new AtomicReference<>();
+        return webClientBuilder.build()
+                .post()
+                .uri(authServiceUrl + "/users/login")
+                .accept(MediaType.APPLICATION_JSON)
+                .body(just(login), Login.class)
+                .exchange()
+                .doOnSuccess(n -> token.set(n.headers().asHttpHeaders().get(HttpHeaders.AUTHORIZATION).get(0)))
+                .flatMap(n -> n.bodyToMono(UserDetails.class))
+                .map(n -> Tuples.of(token.get(), n));
     }
 }
 
