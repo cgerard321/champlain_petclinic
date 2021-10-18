@@ -238,6 +238,7 @@ class VetResourceTest {
 				.andExpect(jsonPath("$.isActive").value(1));
 	}
 
+
 	@Test
 	@DisplayName("Disable Vet Resource Test")
 	void disableAVet() throws Exception {
