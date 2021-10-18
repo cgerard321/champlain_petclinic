@@ -14,10 +14,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.util.function.Tuple2;
+import reactor.util.function.Tuples;
 
 import java.io.IOException;
 import java.util.Collections;
 
+import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
@@ -117,23 +120,25 @@ public class AuthServiceClientIntegrationTest {
     @DisplayName("Given valid Login, return JWT")
     void valid_login() throws JsonProcessingException {
 
-        final String asString = objectMapper.writeValueAsString(
-                objectMapper.convertValue(USER_REGISTER, UserDetails.class)
-                        .toBuilder()
-                        .id(1)
-                        .roles(Collections.emptySet())
-                        .password(null)
-                        .build()
-        );
+        final UserDetails userDetails = objectMapper.convertValue(USER_REGISTER, UserDetails.class)
+                .toBuilder()
+                .id(1)
+                .roles(Collections.emptySet())
+                .password(null)
+                .build();
+
+        final String asString = objectMapper.writeValueAsString(userDetails);
 
         final Login login = Login.builder()
                 .email(USER_REGISTER.getEmail())
                 .password(USER_REGISTER.getPassword())
                 .build();
         final String token = "some.valid.token";
+
         final MockResponse mockResponse = new MockResponse();
         mockResponse
                 .setHeader("Content-Type", "application/json")
+                .setHeader("Authorization", format("Bearer: %s", token))
                 .setBody(asString);
 
         server.enqueue(mockResponse);
