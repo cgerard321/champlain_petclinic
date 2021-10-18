@@ -42,6 +42,18 @@ import java.util.zip.Inflater;
  * @author Arjen Poutsma
  * @author Maciej Szarlinski
  * Copied from https://github.com/spring-petclinic/spring-petclinic-microservices
+ *
+ * User: @BunTymofiy
+ * Date: 2021-9-27
+ * Ticket: feat(vets-cpc-40): modify vet info
+ *
+ * User: @BunTymofiy
+ * Date: 2021-9-28
+ * Ticket: feat(VETS-CPC-65): disabled vet list
+ *
+ * User: @BunTymofiy
+ * Date: 2021-10-11
+ * Ticket: feat(VETS-CPC-228): add dto and vet mapper
  */
 
 @RequestMapping("/vets")
