@@ -2,6 +2,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.petclinic.bffapigateway.dtos.Login;
 import com.petclinic.bffapigateway.dtos.Register;
 import com.petclinic.bffapigateway.dtos.UserDetails;
 import okhttp3.mockwebserver.MockResponse;
@@ -107,5 +108,26 @@ public class AuthServiceClientIntegrationTest {
         assertNull(block.getPassword());
         assertNotNull(block.getId());
         assertEquals(0, block.getRoles().size());
+    }
+
+    @Test
+    @DisplayName("Given valid Login, return JWT")
+    void valid_login() {
+
+        final Login login = Login.builder()
+                .email("email")
+                .password("password")
+                .build();
+        final String token = "some.valid.token";
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setBody(token);
+
+        server.enqueue(mockResponse);
+
+        final String block = authServiceClient.login(login).block();
+
+        assertEquals(token, block);
     }
 }
