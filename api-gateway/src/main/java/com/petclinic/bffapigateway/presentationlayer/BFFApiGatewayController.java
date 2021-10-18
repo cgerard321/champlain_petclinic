@@ -4,6 +4,7 @@ package com.petclinic.bffapigateway.presentationlayer;
 import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -242,7 +243,7 @@ public class BFFApiGatewayController {
     }
 
     @PostMapping("/users/login")
-    public Mono<String> login(@RequestBody final Login login) {
+    public Mono<ResponseEntity<UserDetails>> login(@RequestBody final Login login) {
         return null;
     }
 }
