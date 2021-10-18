@@ -1,7 +1,7 @@
 'use strict';
-
+let arr;
 angular.module('vetList')
-    .controller('VetListController', ['$http', function ($http) {
+    .controller('VetListController', ['$http','$scope', function ( $http, $scope) {
         var self = this;
 
         this.show = ($event,vetID) => {
@@ -27,21 +27,30 @@ angular.module('vetList')
             child.classList.add("modalOff");
         }
 
+        $http.get('api/gateway/vets').then(function (resp) {
+            self.vetList = resp.data;
+            arr = resp.data;
+        });
+
+        $scope.refreshList = self.vetList;
+
+        $scope.ReloadData = function () {
+            self.vetList = FilterList();
             $http.get('api/gateway/vets').then(function (resp) {
-                self.vetList = resp.data;
-                let arr = Object.keys(self.vetList);
-                console.log(typeof self.vetList)
-                console.log(Array.isArray(arr))
-                let optionSelection = document.getElementById("filterOption").value;
-                if(optionSelection === "All"){
-                    self.vetList = resp.data;
-                }else if(optionSelection === "Available"){
-                    self.vetList = self.vetList.filter(v => v.isActive === 1);
-                }else if(optionSelection === "Unavailable"){
-                    self.vetList = self.vetList.filter(v => v.isActive === 0);
-                }
-                console.log(self.vetList);
+                arr = resp.data;
             });
+        }
     }]);
 
-
+function FilterList(){
+    let optionSelection = document.getElementById("filterOption").value;
+    if(optionSelection === "Available"){
+        arr = arr.filter(v => v.isActive === 1);
+        return arr;
+    }else if(optionSelection === "Unavailable"){
+        arr = arr.filter(v => v.isActive === 0);
+        return arr;
+    }else{
+        return arr;
+    }
+}

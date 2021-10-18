@@ -8,7 +8,7 @@
 <div style="float: right;margin-bottom: 1%">
     <label for="filterOption">Filter</label>
 
-    <select id="filterOption" onchange="GetList()">
+    <select id="filterOption" ng-change="ReloadData()" ng-model="refreshList">
         <option selected value="All">All</option>
         <option value="Available">Available</option>
         <option value="Unavailable">Unavailable</option>
