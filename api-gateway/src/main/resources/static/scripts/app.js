@@ -22,6 +22,21 @@ petClinicApp.factory("authProvider", ["$window", function ($window) {
     }
 }]);
 
+petClinicApp.run(['$rootScope', '$location', 'authProvider', function ($rootScope, $location, authProvider) {
+    $rootScope.$on('$locationChangeSuccess', function (event) {
+
+        console.log("based")
+        if (!authProvider.isLoggedIn()) {
+            console.log('DENY : Redirecting to Login');
+            event.preventDefault();
+            $location.path('/login');
+        }
+        else {
+            console.log('ALLOW');
+        }
+    });
+}])
+
 petClinicApp.config(['$stateProvider', '$urlRouterProvider', '$locationProvider', '$httpProvider', function (
     $stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 
