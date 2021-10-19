@@ -24,7 +24,6 @@ public interface VetMapper
     @Mappings(
             {
                     @Mapping(target = "id", ignore = true),
-//                    @Mapping(target = "specialties", expression = "java(new HashSet())")
             }
     )
     Vet vetDTOToVet(VetDTO vetDTO);

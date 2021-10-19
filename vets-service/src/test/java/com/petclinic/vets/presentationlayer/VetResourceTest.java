@@ -177,7 +177,7 @@ class VetResourceTest {
 								"\"phoneNumber\": 2384," +
 								"\"resume\": \"Practicing since 3 years\"," +
 								"\"workday\": \"Monday, Tuesday, Friday\"," +
-								"\"specialties\":[{\"id\":2, \"specialtyId\":234567, \"name\":\"tester2\"}]," +
+								"\"specialties\":[{\"id\":2, \"specialtyId\":234567, \"name\":\"tester\"}]," +
 								"\"isActive\": 1}"))
 
 				// Validate the response code and content type
