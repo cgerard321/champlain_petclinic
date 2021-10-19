@@ -2,6 +2,7 @@ package com.petclinic.visits.businesslayer;
 
 import com.petclinic.visits.datalayer.Visit;
 import com.petclinic.visits.datalayer.VisitDTO;
+import com.petclinic.visits.datalayer.VisitIdLessDTO;
 import com.petclinic.visits.datalayer.VisitRepository;
 import com.petclinic.visits.utils.exceptions.InvalidInputException;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 /*
@@ -34,21 +36,20 @@ public class VisitsServiceImpl implements VisitsService {
     }
 
     @Override
-    public VisitDTO addVisit(VisitDTO visit) {
+    public VisitDTO addVisit(VisitIdLessDTO visit) {
 
         if(visit.getDescription().isEmpty()){
             throw new InvalidInputException("Visit description required.");
         }
 
         try{
-            Visit visitEntity = mapper.modelToEntity(visit);
-            Visit createdEntity = visitRepository.save(visitEntity);
+            Visit visitEntity = mapper.VisitIdLessDtoToEntity(visit);
             log.info("Calling visit repo to create a visit for pet with petId: {}", visit.getPetId());
-
+            Visit createdEntity = visitRepository.save(visitEntity);
             return mapper.entityToModel(createdEntity);
         }
         catch(DuplicateKeyException dke){
-            throw new InvalidInputException("Duplicate visitId: " + visit.getVisitId(), dke);
+            throw new InvalidInputException("Duplicate visitId.", dke);
         }
     }
 

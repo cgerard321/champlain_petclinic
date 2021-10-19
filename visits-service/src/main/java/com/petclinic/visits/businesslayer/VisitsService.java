@@ -2,6 +2,7 @@ package com.petclinic.visits.businesslayer;
 
 import com.petclinic.visits.datalayer.Visit;
 import com.petclinic.visits.datalayer.VisitDTO;
+import com.petclinic.visits.datalayer.VisitIdLessDTO;
 
 import java.util.Date;
 import java.util.List;
@@ -15,7 +16,7 @@ import java.util.List;
 
 public interface VisitsService {
 
-    public VisitDTO addVisit(VisitDTO visit);
+    public VisitDTO addVisit(VisitIdLessDTO visit);
 
     public List<Visit> getVisitsForPet(int petId);
 

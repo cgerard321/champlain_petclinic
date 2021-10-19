@@ -2,6 +2,7 @@ package com.petclinic.visits.businesslayer;
 
 import com.petclinic.visits.datalayer.Visit;
 import com.petclinic.visits.datalayer.VisitDTO;
+import com.petclinic.visits.datalayer.VisitIdLessDTO;
 import com.petclinic.visits.datalayer.VisitRepository;
 import com.petclinic.visits.utils.exceptions.InvalidInputException;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,6 +33,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 
 import javax.swing.text.html.Option;
+import java.io.Console;
 import java.sql.Time;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -48,9 +50,6 @@ public class VisitsServiceImplTests {
 
     @Autowired
     VisitsService visitsService;
-
-    @Autowired
-    VisitMapper mapper;
 
     private Visit visit;
 
@@ -71,9 +70,7 @@ public class VisitsServiceImplTests {
         List<Visit> list = Arrays.asList(visit, visit1);
         repo.saveAll(list);
     }
-    
-    
-    
+
     @Test
     public void whenValidPetIdThenShouldReturnVisitsForPet(){
         when(repo.findByPetId(1)).thenReturn(
@@ -142,7 +139,7 @@ public class VisitsServiceImplTests {
   
     @Test
     public void whenValidPetIdThenShouldCreateVisitForPet() {
-        VisitDTO visitDTO = new VisitDTO();
+        VisitIdLessDTO visitDTO = new VisitIdLessDTO();
         visitDTO.setPetId(1);
         visitDTO.setDate(new Date());
         visitDTO.setDescription("Description");
@@ -165,7 +162,7 @@ public class VisitsServiceImplTests {
     public void whenEmptyDescriptionThenShouldThrowInvalidInputException(){
         // arrange
         String expectedExceptionMessage = "Visit description required.";
-        VisitDTO visitDTO = new VisitDTO();
+        VisitIdLessDTO visitDTO = new VisitIdLessDTO();
         visitDTO.setPetId(1);
         visitDTO.setDate(new Date());
         visitDTO.setDescription("");
@@ -182,20 +179,18 @@ public class VisitsServiceImplTests {
     @Test
     public void whenVisitIdAlreadyExistsThenThrowInvalidInputException(){
         // arrange
-        String expectedExceptionMessage;
-        VisitDTO visitDTO = new VisitDTO();
-        visitDTO.setVisitId(UUID.randomUUID().toString());
-        visitDTO.setPetId(1);
-        visitDTO.setDate(new Date());
-        visitDTO.setDescription("Description");
-        visitDTO.setPractitionerId(123456);
+        String expectedExceptionMessage = "Duplicate visitId.";
+        VisitIdLessDTO visitIdLessDTO = new VisitIdLessDTO();
+        visitIdLessDTO.setPetId(1);
+        visitIdLessDTO.setDate(new Date());
+        visitIdLessDTO.setDescription("Description");
+        visitIdLessDTO.setPractitionerId(123456);
         when(repo.save(any(Visit.class))).thenThrow(DuplicateKeyException.class);
 
         // act and assert
         InvalidInputException ex = assertThrows(InvalidInputException.class, () ->{
-            visitsService.addVisit(visitDTO);
+            visitsService.addVisit(visitIdLessDTO);
         });
-        expectedExceptionMessage = "Duplicate visitId: " + visitDTO.getVisitId();
         assertEquals(ex.getMessage(), expectedExceptionMessage);
         assertThat(ex.getCause()).isInstanceOf(DuplicateKeyException.class);
     }
@@ -449,52 +444,10 @@ public class VisitsServiceImplTests {
         Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01");
         Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-31");
 
-        InvalidInputException ex = assertThrows(InvalidInputException.class, () ->{
+        InvalidInputException ex = assertThrows(InvalidInputException.class, () -> {
             visitsService.getVisitsByPractitionerIdAndMonth(-1, startDate, endDate);
         });
 
         assertEquals("PractitionerId can't be negative.", ex.getMessage());
-    }
-
-    // VisitMapper tests
-    @Test
-    public void shouldConvertToModel() throws ParseException {
-        Date date = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-12");
-        Visit entity = visit()
-                .petId(200)
-                .date(date)
-                .description("hello")
-                .status(true)
-                .practitionerId(123456)
-                .build();
-
-        VisitDTO model = mapper.entityToModel(entity);
-
-        assertEquals(entity.getPractitionerId(), model.getPractitionerId());
-        assertEquals(entity.getDate(), model.getDate());
-        assertEquals(entity.getDescription(), model.getDescription());
-        assertEquals(entity.isStatus(), model.isStatus());
-        assertEquals(entity.getPetId(), model.getPetId());
-        assertEquals(entity.getVisitId().toString(), model.getVisitId());
-    }
-
-    @Test
-    public void shouldConvertToEntity() throws ParseException {
-        Date date = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-12");
-        VisitDTO model = new VisitDTO(date, "hello", 200, 123456, true);
-
-        Visit entity = mapper.modelToEntity(model);
-
-        assertEquals(model.getPractitionerId(), entity.getPractitionerId());
-        assertEquals(model.getDate(), entity.getDate());
-        assertEquals(model.getDescription(),entity.getDescription());
-        assertEquals(model.isStatus(), entity.isStatus());
-        assertEquals(model.getPetId(), entity.getPetId());
-    }
-
-    @Test
-    public void shouldReturnNullWhenGivenNull(){
-        assertNull(mapper.entityToModel(null));
-        assertNull(mapper.modelToEntity(null));
     }
 }

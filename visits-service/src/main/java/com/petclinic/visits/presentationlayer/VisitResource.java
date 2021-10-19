@@ -4,6 +4,7 @@ package com.petclinic.visits.presentationlayer;
 import com.petclinic.visits.businesslayer.VisitsService;
 import com.petclinic.visits.datalayer.Visit;
 import com.petclinic.visits.datalayer.VisitDTO;
+import com.petclinic.visits.datalayer.VisitIdLessDTO;
 import io.micrometer.core.annotation.Timed;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +43,7 @@ public class VisitResource {
     @PostMapping("owners/*/pets/{petId}/visits")
     @ResponseStatus(HttpStatus.CREATED)
     public VisitDTO create(
-            @Valid @RequestBody VisitDTO visit,
+            @Valid @RequestBody VisitIdLessDTO visit,
             @PathVariable("petId") int petId) {
 
         visit.setPetId(petId);

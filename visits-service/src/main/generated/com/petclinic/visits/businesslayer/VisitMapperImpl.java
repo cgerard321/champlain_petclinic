@@ -3,20 +3,21 @@ package com.petclinic.visits.businesslayer;
 import com.petclinic.visits.datalayer.Visit;
 import com.petclinic.visits.datalayer.Visit.VisitBuilder;
 import com.petclinic.visits.datalayer.VisitDTO;
+import com.petclinic.visits.datalayer.VisitIdLessDTO;
 import java.util.UUID;
 import javax.annotation.Generated;
 import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2021-10-16T15:59:58-0400",
+    date = "2021-10-18T20:36:39-0400",
     comments = "version: 1.4.1.Final, compiler: javac, environment: Java 13 (Oracle Corporation)"
 )
 @Component
 public class VisitMapperImpl implements VisitMapper {
 
     @Override
-    public Visit modelToEntity(VisitDTO model) {
+    public Visit VisitDtoToEntity(VisitDTO model) {
         if ( model == null ) {
             return null;
         }
@@ -28,6 +29,8 @@ public class VisitMapperImpl implements VisitMapper {
         visit.petId( model.getPetId() );
         visit.practitionerId( model.getPractitionerId() );
         visit.status( model.isStatus() );
+
+        visit.visitId( UUID.fromString(model.getVisitId()) );
 
         return visit.build();
     }
@@ -49,5 +52,22 @@ public class VisitMapperImpl implements VisitMapper {
         visitDTO.setVisitId( entity.getVisitId().toString() );
 
         return visitDTO;
+    }
+
+    @Override
+    public Visit VisitIdLessDtoToEntity(VisitIdLessDTO visit) {
+        if ( visit == null ) {
+            return null;
+        }
+
+        VisitBuilder visit1 = Visit.visit();
+
+        visit1.date( visit.getDate() );
+        visit1.description( visit.getDescription() );
+        visit1.petId( visit.getPetId() );
+        visit1.practitionerId( visit.getPractitionerId() );
+        visit1.status( visit.isStatus() );
+
+        return visit1.build();
     }
 }
