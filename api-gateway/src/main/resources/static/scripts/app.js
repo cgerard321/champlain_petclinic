@@ -5,6 +5,23 @@ var petClinicApp = angular.module('petClinicApp', [
     , 'visits', 'vetList','vetForm','vetDetails', 'loginForm', 'rolesDetails', 'signupForm', 'billDetails', 'billHistory'
     , 'verification']);
 
+petClinicApp.factory("authProvider", ["$window", function ($window) {
+
+    return {
+        setUser: ({ token, username, email }) => {
+            $window.localStorage.setItem("token", token)
+            $window.localStorage.setItem("username", username)
+            $window.localStorage.setItem("email", email)
+        },
+        getUser: () => ({
+            token: $window.localStorage.getItem("token"),
+            username: $window.localStorage.getItem("username"),
+            email: $window.localStorage.getItem("email"),
+        }),
+        isLoggedIn: () => !!$window.localStorage.getItem("token")
+    }
+}]);
+
 petClinicApp.config(['$stateProvider', '$urlRouterProvider', '$locationProvider', '$httpProvider', function (
     $stateProvider, $urlRouterProvider, $locationProvider, $httpProvider) {
 
