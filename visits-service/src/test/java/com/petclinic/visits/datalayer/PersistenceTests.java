@@ -71,9 +71,9 @@ public class PersistenceTests {
     }
 
     @Test
-    public void shouldNotDeleteVisitWhenPassingEmptyEntity() {
+    public void shouldNotDeleteVisitWhenPassingEntityWithDifferentId() {
         Visit v = new Visit();
-
+        v.setId(2);
 
         repo.delete(v);
         assertTrue(repo.existsById(1));
