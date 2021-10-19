@@ -7,7 +7,6 @@ import java.util.List;
 @Data
 public class VetDetails {
 
-        private int id;
 
         private int vetId;
 
@@ -19,6 +18,8 @@ public class VetDetails {
 
         private String phoneNumber;
 
+        private byte[] image;
+
         private String resume;
 
         private String workday;
@@ -28,4 +29,3 @@ public class VetDetails {
         private final List<Specialty> specialties = new ArrayList<>();
 
 }
-

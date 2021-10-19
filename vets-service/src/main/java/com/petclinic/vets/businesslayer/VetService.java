@@ -1,5 +1,25 @@
 package com.petclinic.vets.businesslayer;
 
+/**
+ * Created by IntelliJ IDEA.
+ *
+ * @author Tymofiy Bun: Added getAllVets, getVetByVetId,
+ * updateVet, createVet, getAllDisabledVets, getAllEnabledVets,
+ * getAllVetDTOs, getVetDTOByVetId, updateVetWithDTO, createVetFromDTO, getAllDisabledVetDTOs,getAllEnabledVetDTOs,
+ * disableVetFromDTO, enableVetFromDTO, deleteVetByVetIdFromVetDTO
+ *
+ * User: @BunTymofiy
+ * Date: 2021-9-27
+ * Ticket: feat(vets-cpc-40): modify vet info
+ *
+ * User: @BunTymofiy
+ * Date: 2021-9-28
+ * Ticket: feat(VETS-CPC-65): disabled vet list
+ *
+ * User: @BunTymofiy
+ * Date: 2021-10-11
+ * Ticket: feat(VETS-CPC-228): add dto and vet mapper
+ */
 import com.petclinic.vets.datalayer.Vet;
 import com.petclinic.vets.datalayer.VetDTO;
 

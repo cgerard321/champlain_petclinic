@@ -20,6 +20,7 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @Entity
 @Table(name = "specialties")
+
 public class Specialty {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,7 +30,7 @@ public class Specialty {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @NotNull
     @UniqueElements(groups = Specialty.class)
-    @Length(min = 6,max = 6)
+    @Length(min = 6,max = 6, groups = Specialty.class)
     private Integer specialtyId;
 
     @Column(name = "name")
