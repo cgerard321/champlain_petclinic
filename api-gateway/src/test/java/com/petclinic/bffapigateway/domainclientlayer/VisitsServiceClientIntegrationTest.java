@@ -52,7 +52,6 @@ class VisitsServiceClientIntegrationTest {
         assertVisitDescriptionEquals(visits.block(), PET_ID,"test visit");
     }
 
-
     private void assertVisitDescriptionEquals(Visits visits, int petId, String description) {
         assertEquals(1, visits.getItems().size());
         assertNotNull(visits.getItems().get(0));
