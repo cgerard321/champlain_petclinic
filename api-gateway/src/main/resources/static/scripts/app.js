@@ -35,7 +35,7 @@ petClinicApp.factory("httpErrorInterceptor", ["$q", "$location", "authProvider",
         responseError: rej => {
             if (rej.status === 401 || rej.status === 403) {
                 authProvider.purgeUser();
-                $location.path('/error');
+                $location.path('/login');
                 return $q(() => null)
             }
             return $q.reject(rej);
