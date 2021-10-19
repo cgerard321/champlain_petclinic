@@ -500,7 +500,7 @@
         <th> <button class="btn btn-default" id="sortByDateButtonUpcomingVisits" ng-click="$ctrl.SortTableByDate(true)" style="color: white">Sort by date ⇅</button> </th>
         <th> <button class="btn btn-default" id="sortByDescButtonUpcomingVisits" ng-click="$ctrl.SortTableByDesc(true)" style="color: white">Sort by description ⇅</button> </th>
         <th> <button class="btn btn-default" id="sortByVetButtonUpcomingVisits" ng-click="$ctrl.SortTableByVet(true)" style="color: white">Sort by veterinarian ⇅</button> </th>
-        <th style="text-align:center; vertical-align:middle"> <label>Status</label> </th>
+        <th> <button class="btn btn-default" id="sortByStatusButtonUpcomingVisits" ng-click="$ctrl.SortTableByStatus(true)" style="color: white">Sort by status ⇅</button> </th>
         <th style="text-align:center; vertical-align:middle"> <label>Cancel</label> </th>
         <th style="text-align:center; vertical-align:middle"> <label>Edit</label> </th>
         <th style="text-align:center; vertical-align:middle"> <label>Delete</label> </th>
@@ -511,8 +511,8 @@
             <td class="col-sm-2">{{v.date}}</td>
             <td style="white-space: pre-line">{{v.description}}</td>
             <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>
-            <td style="white-space: pre-line">{{$ctrl.getStatus(v.status)}}</td>
-            <td style="text-align:center; vertical-align:middle"><button class="btn btn-default" style="background-color: lightcoral; color: white">Cancel Visit</button></td>
+            <td class="status-text" style="white-space: pre-line">{{$ctrl.getStatus(v.status)}}</td>
+            <td style="text-align:center; vertical-align:middle"><button class="btn btn-default cancel-button" style="background-color: orangered; color: white" ng-click="$ctrl.cancelVisit(v.id, v.status, v.practitionerId, v.date, v.description)">{{$ctrl.setCancelButtonText(v.status)}}</button></td>
             <td style="text-align:center; vertical-align:middle"><button class="btn btn-default" style="background-color: royalblue; color: white" ng-click="$ctrl.switchToUpdateForm(v.practitionerId, v.date, v.description, v.id)">Edit Visit</button></td>
             <td style="text-align:center; vertical-align:middle"><button class="btn btn-danger" ng-click="$ctrl.deleteVisit(v.id)">Delete visit</button></td>
         </tr>
@@ -526,7 +526,7 @@
             <th> <button class="btn btn-default" id="sortByDateButtonPreviousVisits" ng-click="$ctrl.SortTableByDate(false)" style="color: white">Sort by date ⇅</button> </th>
             <th> <button class="btn btn-default" id="sortByDescButtonPreviousVisits" ng-click="$ctrl.SortTableByDesc(false)" style="color: white">Sort by description ⇅</button> </th>
             <th> <button class="btn btn-default" id="sortByVetButtonPreviousVisits" ng-click="$ctrl.SortTableByVet(false)" style="color: white">Sort by veterinarian ⇅</button> </th>
-            <th style="text-align:center; vertical-align:middle"> <label>Status</label> </th>
+            <th> <button class="btn btn-default" id="sortByStatusButtonPreviousVisits" ng-click="$ctrl.SortTableByStatus(false)" style="color: white">Sort by status ⇅</button>  </th>
             <th style="text-align:center; vertical-align:middle"> <label>Edit</label> </th>
             <th style="text-align:center; vertical-align:middle"> <label>Delete</label> </th>
         </tr>
@@ -536,7 +536,7 @@
             <td class="col-sm-2">{{v.date}}</td>
             <td style="white-space: pre-line">{{v.description}}</td>
             <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>
-            <td style="white-space: pre-line">{{$ctrl.getStatus(v.status)}}</td>
+            <td class="status-text" style="white-space: pre-line">{{$ctrl.getStatus(v.status)}}</td>
             <td style="text-align:center; vertical-align:middle"><button class="btn btn-default" style="background-color: royalblue; color: white" ng-click="$ctrl.switchToUpdateForm(v.practitionerId, v.date, v.description, v.id)">Edit Visit</button></td>
             <td style="text-align:center; vertical-align:middle"><button class="btn btn-danger" ng-click="$ctrl.deleteVisit(v.id)">Delete visit</button></td>
         </tr>

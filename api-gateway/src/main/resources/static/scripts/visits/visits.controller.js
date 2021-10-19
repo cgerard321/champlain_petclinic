@@ -127,10 +127,12 @@ angular.module('visits')
                 $('#sortByDateButtonUpcomingVisits').text("Sort by date ⇅");
                 $('#sortByDescButtonUpcomingVisits').text("Sort by description ⇅");
                 $('#sortByVetButtonUpcomingVisits').text("Sort by veterinarian ⇅");
+                $('#sortByStatusButtonUpcomingVisits').text("Sort by status ⇅");
             } else {
                 $('#sortByDateButtonPreviousVisits').text("Sort by date ⇅");
                 $('#sortByDescButtonPreviousVisits').text("Sort by description ⇅");
                 $('#sortByVetButtonPreviousVisits').text("Sort by veterinarian ⇅");
+                $('#sortByStatusButtonPreviousVisits').text("Sort by status ⇅");
             }
         }
 
@@ -267,6 +269,54 @@ angular.module('visits')
             }
         }
 
+        let sortStatusAscendingUpcomingVisits = false;
+        let sortStatusAscendingPreviousVisits = false;
+        self.SortTableByStatus = function(isForUpcoming) {
+            ResetSortButtonArrows(isForUpcoming);
+
+            if(isForUpcoming) {
+                sortStatusAscendingUpcomingVisits = !sortStatusAscendingUpcomingVisits;
+
+                if(sortStatusAscendingUpcomingVisits) {
+                    self.upcomingVisits.sort(function (a, b) {
+                        a = self.getStatus(a.status).toLowerCase();
+                        b = self.getStatus(b.status).toLowerCase();
+
+                        return a < b ? -1 : a > b ? 1 : 0;
+                    });
+                    $('#sortByStatusButtonUpcomingVisits').text("Sort by status ↓")
+                } else {
+                    self.upcomingVisits.sort(function (a, b) {
+                        a = self.getStatus(a.status).toLowerCase();
+                        b = self.getStatus(b.status).toLowerCase();
+
+                        return a > b ? -1 : a < b ? 1 : 0;
+                    });
+                    $('#sortByStatusButtonUpcomingVisits').text("Sort by status ↑")
+                }
+            } else {
+                sortStatusAscendingPreviousVisits = !sortStatusAscendingPreviousVisits;
+
+                if(sortStatusAscendingPreviousVisits) {
+                    self.previousVisits.sort(function (a, b) {
+                        a = self.getStatus(a.status).toLowerCase();
+                        b = self.getStatus(b.status).toLowerCase();
+
+                        return a < b ? -1 : a > b ? 1 : 0;
+                    });
+                    $('#sortByStatusButtonPreviousVisits').text("Sort by status ↓")
+                } else {
+                    self.previousVisits.sort(function (a, b) {
+                        a = self.getStatus(a.status).toLowerCase();
+                        b = self.getStatus(b.status).toLowerCase();
+
+                        return a > b ? -1 : a < b ? 1 : 0;
+                    });
+                    $('#sortByStatusButtonPreviousVisits').text("Sort by status ↑")
+                }
+            }
+        }
+
         self.submit = function () {
             var data = {
                 date: $filter('date')(self.date, "yyyy-MM-dd"),
@@ -298,13 +348,62 @@ angular.module('visits')
         self.getStatus = function (status) {
             var statusText = "";
 
-            if(status == false){
-                statusText = "Canceled"
+            if(status === false){
+                statusText = "Canceled";
             }
             else{
-                statusText = "Not Canceled"
+                statusText = "Not Canceled";
             }
 
             return statusText;
+        };
+
+        self.cancelVisit = function (id, visitStatus, visitPractitionerId, visitDate, visitDescription){
+            visitId = id;
+            var data = {};
+
+            if (visitStatus) {
+                data = {
+                    date: visitDate,
+                    description: visitDescription,
+                    practitionerId: visitPractitionerId,
+                    status: false
+                };
+            }else {
+                data = {
+                    date: visitDate,
+                    description: visitDescription,
+                    practitionerId: visitPractitionerId,
+                    status: true
+                };
+            }
+
+
+            url = "api/gateway/owners/*/pets/" + petId + "/visits/" + visitId;
+
+            $http.put(url, data).then(function () {
+                $http.get("api/gateway/visits/"+petId).then(function (resp) {
+                    self.visits = resp.data;
+                    self.sortFetchedVisits();
+                });
+            },function (response) {
+                var error = response.data;
+                alert(error.error + "\r\n" + error.errors.map(function (e) {
+                    return e.field + ": " + e.defaultMessage;
+                }).join("\r\n"));
+            });
+        };
+
+        self.setCancelButtonText = function (visitStatus){
+            var cancelText = "";
+
+            if (visitStatus){
+                cancelText = "Cancel";
+            }
+            else {
+                cancelText = "Revert Cancel";
+            }
+
+            return cancelText;
         };
     }]);
