@@ -27,10 +27,25 @@ petClinicApp.factory("authProvider", ["$window", function ($window) {
     }
 }]);
 
+petClinicApp.factory("httpErrorInterceptor", ["$q", "$location", "authProvider", function ($q, $location, authProvider) {
+    return {
+        // NOTE: This is not the correct way to do this
+        // This method completely disregards whoever was subscribed to this promise and just cancels it
+        // I just do not care to implement it correctly because it is more complex
+        responseError: rej => {
+            if (rej.status === 401 || rej.status === 403) {
+                authProvider.purgeUser();
+                $location.path('/error');
+                return $q(() => null)
+            }
+            return $q.reject(rej);
+        }
+    }
+}]);
+
 petClinicApp.run(['$rootScope', '$location', 'authProvider', function ($rootScope, $location, authProvider) {
     $rootScope.$on('$locationChangeSuccess', function (event) {
 
-        console.log("based")
         if (!authProvider.isLoggedIn()) {
             console.log('DENY : Redirecting to Login');
             event.preventDefault();
@@ -62,6 +77,8 @@ petClinicApp.config(['$stateProvider', '$urlRouterProvider', '$locationProvider'
             url: '/welcome',
             template: '<layout-welcome></layout-welcome>'
         });
+
+    $httpProvider.interceptors.push('httpErrorInterceptor');
 }]);
 
 ['welcome', 'nav', 'footer'].forEach(function (c) {
