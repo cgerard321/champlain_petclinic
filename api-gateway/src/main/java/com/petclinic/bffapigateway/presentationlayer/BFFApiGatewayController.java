@@ -1,36 +1,10 @@
 package com.petclinic.bffapigateway.presentationlayer;
 
 
-
 import com.petclinic.bffapigateway.domainclientlayer.*;
-
-import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
-
-import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
-import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
-import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
-
-import com.petclinic.bffapigateway.dtos.Login;
-
-import com.petclinic.bffapigateway.dtos.BillDetails;
-
-import com.petclinic.bffapigateway.dtos.OwnerDetails;
-import com.petclinic.bffapigateway.dtos.VetDetails;
-import com.petclinic.bffapigateway.dtos.Visits;
-//import com.petclinic.billing.datalayer.Bill;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 import com.petclinic.bffapigateway.dtos.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -126,19 +100,19 @@ public class BFFApiGatewayController {
     }
 
     //Delete Visit
-    @DeleteMapping (value = "pets/visits/{petId}", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping (value = "pets/visits/{petId}")
     public Mono<Void> deleteVisitForPets(final @PathVariable int petId){
         return visitsServiceClient.deleteVisitForPets(petId);
     }
 
     //Update Visit
-    @PostMapping(value ="pets/visits/{petId}", consumes = "application/json", produces = "application/json")
+    @PutMapping(value ="pets/visits/{petId}", consumes = "application/json", produces = "application/json")
     public Mono<Visits> updateVisitForPets(final @PathVariable int petId){
         return visitsServiceClient.updateVisitForPets(petId);
     }
 
     @GetMapping(value = "visits/{petId}")
-    public Flux<VisitDetails> getVisitsForPet(@PathVariable int petId){
+    public Flux<VisitDetails> getVisitsForPet(final @PathVariable int petId){
         return visitsServiceClient.getVisitsForPet(petId);
     }
 
@@ -194,16 +168,56 @@ public class BFFApiGatewayController {
         return visitsServiceClient.createVisitForPet(visit);
     }
 
+    /**
+     * Retrieve all vets from DB
+     */
     @GetMapping(value = "vets")
     public Flux<VetDetails> getVets() {
         return vetsServiceClient.getVets();
     }
 
+    /**
+     * Get a single vet given its vetID
+     */
+    @GetMapping(value = "vets/{vetId}")
+    public Mono<VetDetails> getVet(final @PathVariable long vetId) {
+        return vetsServiceClient.getVet(vetId);
+    }
+
+    /**
+     * Create Vet
+     */
+    @PostMapping(value = "vets",
+            consumes = "application/json",
+            produces = "application/json")
+    public Mono<VetDetails> createVet(@RequestBody VetDetails model) { return vetsServiceClient.getVet(model.getVetId()); }
+
+    /**
+     * Delete vet from DB given the vetID
+     */
+    @DeleteMapping(value = "vets/{vetId}")
+    public Mono<VetDetails> deleteVet(final @PathVariable long vetId) {
+        return vetsServiceClient.deleteVet(vetId);
+    }
+
+    /**
+     * Update vet details
+     */
+    @PutMapping(
+            value = "vets/{vetId}",
+            consumes = "application/json",
+            produces = "application/json"
+    )
+    Mono<VetDetails> updateVet(@RequestBody VetDetails vet, @PathVariable int vetId) {
+        return vetsServiceClient.updateVet(vetId, vet);
+    }
 
     @PostMapping(value = "users",
             consumes = "application/json",
             produces = "application/json")
-    public Mono<UserDetails> createUser(@RequestBody UserDetails model) { return authServiceClient.getUser(model.getId()); }
+    public Mono<UserDetails> createUser(@RequestBody Register model) {
+        return authServiceClient.createUser(model);
+    }
 
     @DeleteMapping(value = "users/{userId}")
     public Mono<UserDetails> deleteUser(final @PathVariable long userId) { return authServiceClient.deleteUser(userId); }
@@ -237,4 +251,8 @@ public class BFFApiGatewayController {
             produces = "application/json")
     public Mono<OwnerDetails> createOwner(@RequestBody OwnerDetails model){ return customersServiceClient.getOwner(model.getId()); }
 
+    @GetMapping("/verification/{token}")
+    public Mono<UserDetails> verifyUser(@PathVariable final String token) {
+        return authServiceClient.verifyUser(token);
+    }
 }

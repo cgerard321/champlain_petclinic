@@ -8,10 +8,8 @@
  */
 package com.petclinic.auth.Role;
 
-import com.petclinic.auth.Role.Role;
-import com.petclinic.auth.Role.RoleIDLessDTO;
-import com.petclinic.auth.Role.RoleRepo;
-import com.petclinic.auth.Role.RoleService;
+import com.petclinic.auth.Role.data.Role;
+import com.petclinic.auth.Role.data.RoleIDLessDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

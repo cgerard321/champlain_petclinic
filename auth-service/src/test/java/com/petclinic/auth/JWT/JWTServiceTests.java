@@ -1,30 +1,32 @@
+/**
+ * Created by IntelliJ IDEA.
+ *
+ * User: @Fube
+ * Date: 2021-10-10
+ * Ticket: feat(AUTH-CPC-357)
+ *
+ * User: @Fube
+ * Date: 2021-10-14
+ * Ticket: feat(AUTH-CPC-388)
+ */
+
 package com.petclinic.auth.JWT;
 
-import com.petclinic.auth.Role.Role;
-import com.petclinic.auth.User.User;
+import com.petclinic.auth.Role.data.Role;
+import com.petclinic.auth.User.data.User;
 import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestComponent;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
-
-/**
- * Created by IntelliJ IDEA.
- * User: @Fube
- * Date: 2021-10-10
- * Ticket: feat(AUTH-CPC-357)
- */
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -56,8 +58,8 @@ public class JWTServiceTests {
     }
 
     @Test
-    @DisplayName("Given token, get user")
-    void get_user_from_jwt() {
+    @DisplayName("Given token for unverified, get user")
+    void get_unverified_user_from_jwt() {
         final String token = jwtService.encrypt(USER);
         final User decrypt = jwtService.decrypt(token);
 
@@ -66,6 +68,22 @@ public class JWTServiceTests {
         final Set<String> userRolesNameOnly = USER.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
         final Set<String> decryptRolesNameOnly = decrypt.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
         assertEquals(userRolesNameOnly, decryptRolesNameOnly);
+        assertEquals(USER.isVerified(), decrypt.isVerified());
+    }
+
+    @Test
+    @DisplayName("Given token for verified, get user")
+    void get_verified_user_from_jwt() {
+        final User verifiedUser = USER.toBuilder().verified(true).build();
+        final String token = jwtService.encrypt(verifiedUser);
+        final User decrypt = jwtService.decrypt(token);
+
+        assertEquals(verifiedUser.getEmail(), decrypt.getEmail());
+
+        final Set<String> userRolesNameOnly = verifiedUser.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
+        final Set<String> decryptRolesNameOnly = decrypt.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
+        assertEquals(userRolesNameOnly, decryptRolesNameOnly);
+        assertTrue(decrypt.isVerified());
     }
 
     @Test
@@ -85,7 +103,6 @@ public class JWTServiceTests {
     @Test
     @DisplayName("Given bad token, throw JwtException")
     void jwt_exception_flow() {
-        final RuntimeException ex = assertThrows(RuntimeException.class, () -> jwtService.decrypt("this.is.bad"));
-        assertEquals("Something wrong with the JWT boss", ex.getMessage());
+        assertThrows(JwtException.class, () -> jwtService.decrypt("this.is.bad"));
     }
 }

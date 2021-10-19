@@ -1,5 +1,6 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
+import com.petclinic.bffapigateway.dtos.VisitDetails;
 import com.petclinic.bffapigateway.dtos.Visits;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -7,6 +8,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
@@ -50,6 +52,22 @@ class VisitsServiceClientIntegrationTest {
         Mono<Visits> visits = visitsServiceClient.getVisitsForPets(Collections.singletonList(1));
 
         assertVisitDescriptionEquals(visits.block(), PET_ID,"test visit");
+    }
+
+    @Test
+    void getVisitsForPet() {
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody("{\"id\":5,\"date\":\"2018-11-15\",\"description\":\"test visit\",\"petId\":1, \"practitionerId\":1,\"status\":false}"));
+
+        Flux<VisitDetails> visits = visitsServiceClient.getVisitsForPet(1);
+
+        assertVisitDescriptionEq(visits.blockFirst(), PET_ID,"test visit");
+    }
+
+    private void assertVisitDescriptionEq(VisitDetails visits, int petId, String description) {
+        assertEquals(5, visits.getId());
+        assertEquals(description, visits.getDescription());
     }
 
     private void assertVisitDescriptionEquals(Visits visits, int petId, String description) {
