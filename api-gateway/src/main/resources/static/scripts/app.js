@@ -18,6 +18,11 @@ petClinicApp.factory("authProvider", ["$window", function ($window) {
             username: $window.localStorage.getItem("username"),
             email: $window.localStorage.getItem("email"),
         }),
+        purgeUser: () => {
+            $window.localStorage.removeItem("token")
+            $window.localStorage.removeItem("username")
+            $window.localStorage.removeItem("email")
+        },
         isLoggedIn: () => !!$window.localStorage.getItem("token")
     }
 }]);
