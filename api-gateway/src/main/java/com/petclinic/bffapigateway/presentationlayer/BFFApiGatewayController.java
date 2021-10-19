@@ -4,12 +4,21 @@ package com.petclinic.bffapigateway.presentationlayer;
 import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 /**
  * @author Maciej Szarlinski
@@ -113,6 +122,15 @@ public class BFFApiGatewayController {
     @GetMapping(value = "visits/vets/{practitionerId}")
     public Flux<VisitDetails> getVisitForPractitioner(@PathVariable int practitionerId){
         return visitsServiceClient.getVisitForPractitioner(practitionerId);
+    }
+
+    @GetMapping(value = "visits/calendar/{practitionerId}")
+    public Flux<VisitDetails> getVisitsByPractitionerIdAndMonth(@PathVariable("practitionerId") int practitionerId,
+                                                                @RequestParam("dates") List<String> dates) {
+        String startDate = dates.get(0);
+        String endDate = dates.get(1);
+
+        return visitsServiceClient.getVisitsByPractitionerIdAndMonth(practitionerId, startDate, endDate);
     }
 
     @PutMapping(value = "owners/{ownerId}",consumes = "application/json" ,produces = "application/json")
@@ -236,4 +254,17 @@ public class BFFApiGatewayController {
             produces = "application/json")
     public Mono<OwnerDetails> createOwner(@RequestBody OwnerDetails model){ return customersServiceClient.getOwner(model.getId()); }
 
+    @GetMapping("/verification/{token}")
+    public Mono<UserDetails> verifyUser(@PathVariable final String token) {
+        return authServiceClient.verifyUser(token);
+    }
+
+    @PostMapping("/users/login")
+    public Mono<ResponseEntity<UserDetails>> login(@RequestBody final Login login) {
+        return authServiceClient.login(login)
+                .map(n -> ResponseEntity.ok()
+                        .header(AUTHORIZATION, n.getT1())
+                        .body(n.getT2())
+                );
+    }
 }
