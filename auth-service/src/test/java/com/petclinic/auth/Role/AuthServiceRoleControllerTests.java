@@ -92,25 +92,6 @@ public class AuthServiceRoleControllerTests {
         assertEquals(ROLE_COUNT / PAGE_LIM, rolePage.getTotalPages());
     }
 
-    /*
-    @Test
-    @DisplayName("Add then delete role from controller")
-    void add_then_delete_role_from_controller() {
-
-        final Role save = roleRepo.save(new Role(0, "test", null));
-        final Optional<Role> found = roleRepo.findById(save.getId());
-        assertTrue(found.isPresent());
-        assertEquals("test", found.get().getName());
-        assertNull(found.get().getParent());
-
-        // Idempotency check
-        for (int i = 0; i < rng.nextInt(100); i++) {
-            roleController.deleteRole(save.getId());
-            assertFalse(roleRepo.findById(save.getId()).isPresent());
-        }
-    }
-     */
-
     @Test
     @DisplayName("Get all roles as admin")
     @WithMockUser(roles = {"ADMIN"})
