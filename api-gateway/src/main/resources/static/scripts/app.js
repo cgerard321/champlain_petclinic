@@ -83,8 +83,22 @@ petClinicApp.config(['$stateProvider', '$urlRouterProvider', '$locationProvider'
 
 ['welcome', 'nav', 'footer'].forEach(function (c) {
     var mod = 'layout' + c.toUpperCase().substring(0, 1) + c.substring(1);
+    const controller = mod+"Controller";
+
     angular.module(mod, []);
+    angular.module(mod)
+        .controller(controller, ['$scope', 'authProvider', function ($scope, authProvider) {
+
+            $scope.isLoggedIn = authProvider.isLoggedIn();
+            if(!$scope.isLoggedIn)return;
+
+            const { email, username } = authProvider.getUser();
+            $scope.email = email;
+            $scope.username = username;
+    }]);
+
     angular.module(mod).component(mod, {
-        templateUrl: "scripts/fragments/" + c + ".html"
+        templateUrl: "scripts/fragments/" + c + ".html",
+        controller,
     });
 });
