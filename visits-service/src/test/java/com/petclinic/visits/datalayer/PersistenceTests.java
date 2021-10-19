@@ -40,73 +40,17 @@ public class PersistenceTests {
 
         // add setup data here
         visit = Visit.visit()
-                .id(1)
-                .petId(1)
-                .practitionerId(200200)
+                .visitId(UUID.randomUUID())
                 .date(new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-02"))
+                .description("Description")
+                .petId(200)
+                .practitionerId(200200)
                 .status(true)
                 .build();
         repo.save(visit);
     }
 
-    @Test
-    public void getVisitsForPet() {
-        List<Visit> repoResponse = repo.findByPetId(1);
-        assertThat(repoResponse, hasSize(1));
-    }
-
-    @Test
-    public void shouldReturnEmptyListWhenPetDoesNotExist(){
-        List<Visit> repoResponse = repo.findByPetId(2);
-        assertThat(repoResponse, hasSize(0));
-    }
-    
-    @Test
-    public void confirmAndCancelAppointment(){
-        Visit v = visit().petId(1).status(false).build();
-        repo.save(v);
-
-        List<Visit> repoResponse = repo.findByPetId(1);
-
-        assertThat(repoResponse, hasSize(2));
-        assertThat(repoResponse.get(0).isStatus(), equalTo(true));
-        assertThat(repoResponse.get(1).isStatus(), equalTo(false));
-    }
-
-    
-    @Test
-    public void createVisitForPet() {
-        Visit visit = visit().petId(3).date(new Date()).description("").practitionerId(123456).build();
-
-        repo.save(visit);
-        List<Visit> repoResponse = repo.findByPetId(3);
-        assertThat(repoResponse, hasSize(1));
-    }
-
-
-    @Test
-    public void getVisitsForNonExistentPet(){
-        List<Visit> repoResponse = repo.findByPetId(0);
-        assertThat(repoResponse, hasSize(0));
-    }
-
-  
-    @Test
-    public void Is_deleting_Visit () {
-        repo.delete(visit);
-        assertFalse(repo.existsById(visit.getId()));
-    }
-
-    @Test
-    public void Is_Visit_Empty_Dont_Delete() {
-        Visit visit = new Visit();
-        Visit v = visit().petId(1).build();
-        repo.save(v);
-
-        repo.delete(visit);
-        assertEquals(repo.findByPetId(1).size(), 2);
-    }
-
+    // TESTS FOR UPDATING A VISIT ----------------------------------------------------------------------
     @Test
     public void updateVisit(){
         Visit savedVisit = new Visit(5, UUID.randomUUID(), new Date(), "Description", 5, 123456, true);
@@ -114,43 +58,132 @@ public class PersistenceTests {
 
         savedVisit.setDescription("Updated Description");
         repo.save(savedVisit);
-        
+
         Visit foundVisit = repo.findById(savedVisit.getId()).get();
         assertEquals("Updated Description", foundVisit.getDescription());
     }
 
+    // TESTS FOR DELETING A VISIT ----------------------------------------------------------------------
     @Test
-    public void findByPractitionerId(){
-        List<Visit> returnedVisits = repo.findVisitsByPractitionerId(200200);
-        assertEquals(1, returnedVisits.size());
+    public void shouldDeleteVisitWhenPassingValidEntity() {
+        repo.delete(visit);
+        assertFalse(repo.existsById(visit.getId()));
     }
 
     @Test
-    public void findByNonExistentPractitionerId(){
-        List<Visit> returnedVisits = repo.findVisitsByPractitionerId(234234);
-        assertEquals(0, returnedVisits.size());
+    public void shouldNotDeleteVisitWhenPassingEmptyEntity() {
+        Visit v = new Visit();
+
+
+        repo.delete(v);
+        assertTrue(repo.existsById(1));
     }
 
+    // TESTS FOR CREATING A VISIT ----------------------------------------------------------------------
+    @Test
+    public void createVisitForPet() {
+        Visit v = visit()
+                .visitId(UUID.randomUUID())
+                .date(new Date(System.currentTimeMillis()))
+                .description("Description")
+                .petId(200)
+                .practitionerId(200200)
+                .status(false).build();
+
+        Visit savedVisit = repo.save(v);
+
+        assertEquals(v.getVisitId(), savedVisit.getVisitId());
+        assertEquals(v.getDate(), savedVisit.getDate());
+        assertEquals(v.getDescription(), savedVisit.getDescription());
+        assertEquals(v.getPetId(), savedVisit.getPetId());
+        assertEquals(v.getPractitionerId(), savedVisit.getPractitionerId());
+        assertEquals(v.isStatus(), savedVisit.isStatus());
+    }
+
+    // TESTS FOR FETCHING VISITS BASED ON PET ID ----------------------------------------------------------------------
+    @Test
+    public void getVisitsForPet() {
+        List<Visit> repoResponse = repo.findByPetId(200);
+        assertThat(repoResponse, hasSize(1));
+    }
+
+    @Test
+    public void shouldReturnEmptyListWhenNoVisitsWithPetId(){
+        List<Visit> repoResponse = repo.findByPetId(404);
+        assertThat(repoResponse, hasSize(0));
+    }
+
+    // TESTS FOR FETCHING VISITS BASED ON PET IDS ----------------------------------------------------------------------
+    @Test
+    public void shouldFetchVisitsOfPetsWithPetIds() {
+        Visit v = visit()
+                .visitId(UUID.randomUUID())
+                .date(new Date(System.currentTimeMillis()))
+                .description("Description")
+                .petId(201)
+                .practitionerId(200200)
+                .status(false).build();
+        repo.save(v);
+
+        List<Integer> petIds = Arrays.asList(200, 201);
+        List<Visit> repoResponse = repo.findByPetIdIn(petIds);
+        assertEquals(2, repoResponse.size());
+        assertEquals(200, repoResponse.get(0).getPetId());
+        assertEquals(201, repoResponse.get(1).getPetId());
+    }
+
+    // TESTS FOR FETCH VISITS BASED ON PRACTITIONER ID AND DATES ----------------------------------------------------------------------
     @Test
     public void getVisitsByPractitionerIdAndMonth() throws ParseException {
         Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01");
         Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-31");
 
-        Visit visitDuring1 = new Visit(123, UUID.randomUUID(), new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01"), "Description", 2, 123456, true);
+        Visit visitDuring1 = new Visit(123, UUID.randomUUID(),
+                new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01"),
+                "Description", 2, 123456, true);
         repo.save(visitDuring1);
 
-        Visit visitDuring2 = new Visit(122, UUID.randomUUID(), new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-31"), "Description", 2, 123456, true);
+        Visit visitDuring2 = new Visit(122, UUID.randomUUID(),
+                new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-31"),
+                "Description", 2, 123456, true);
         repo.save(visitDuring2);
 
-        Visit visitAfter = new Visit(121, UUID.randomUUID(), new SimpleDateFormat("yyyy-MM-dd").parse("2021-11-01"), "Description", 2, 123456, true);
+        Visit visitAfter = new Visit(121, UUID.randomUUID(),
+                new SimpleDateFormat("yyyy-MM-dd").parse("2021-11-01"),
+                "Description", 2, 123456, true);
         repo.save(visitAfter);
 
-        Visit visitBefore = new Visit(120, UUID.randomUUID(), new SimpleDateFormat("yyyy-MM-dd").parse("2021-09-30"), "Description", 2, 123456, true);
+        Visit visitBefore = new Visit(120, UUID.randomUUID(),
+                new SimpleDateFormat("yyyy-MM-dd").parse("2021-09-30"),
+                "Description", 2, 123456, true);
         repo.save(visitBefore);
 
         List<Visit> repoResponse = repo.findAllByDateBetween(startDate, endDate);
 
         assertEquals(3, repoResponse.size());
+    }
+
+    // TESTS FOR FETCHING VISITS BASED ON PRACTITIONER ID ----------------------------------------------------------------------
+    @Test
+    public void shouldReturnVisitsWhenFetchingWithExistingPractitionerId(){
+        Visit v = visit()
+                .visitId(UUID.randomUUID())
+                .date(new Date(System.currentTimeMillis()))
+                .description("Description")
+                .petId(200)
+                .practitionerId(200200)
+                .status(false).build();
+
+        Visit savedVisit = repo.save(v);
+
+        List<Visit> returnedVisits = repo.findVisitsByPractitionerId(200200);
+        assertEquals(2, returnedVisits.size());
+    }
+
+    @Test
+    public void shouldReturnEmptyListWhenFetchingVisitsForNonExistentPractitioner(){
+        List<Visit> returnedVisits = repo.findVisitsByPractitionerId(234234);
+        assertEquals(0, returnedVisits.size());
     }
 }
 
