@@ -4,6 +4,7 @@ package com.petclinic.bffapigateway.presentationlayer;
 import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -16,6 +17,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 /**
  * @author Maciej Szarlinski
@@ -254,5 +257,14 @@ public class BFFApiGatewayController {
     @GetMapping("/verification/{token}")
     public Mono<UserDetails> verifyUser(@PathVariable final String token) {
         return authServiceClient.verifyUser(token);
+    }
+
+    @PostMapping("/users/login")
+    public Mono<ResponseEntity<UserDetails>> login(@RequestBody final Login login) {
+        return authServiceClient.login(login)
+                .map(n -> ResponseEntity.ok()
+                        .header(AUTHORIZATION, n.getT1())
+                        .body(n.getT2())
+                );
     }
 }
