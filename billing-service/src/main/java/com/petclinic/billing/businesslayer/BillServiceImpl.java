@@ -50,9 +50,14 @@ public class BillServiceImpl implements BillService{
             throw new InvalidInputException("That bill id does not exist");
         }
 
+        HashMap<String, Double> list = setUpVisitList();
+
+        if(list.get(model.getVisitType()) == null){
+            throw new InvalidInputException("That visit type does not exist");
+        }
+
         try{
             Bill entity = billMapper.ModelToEntity(model);
-            HashMap<String, Double> list = setUpVisitList();
             entity.setAmount(list.get(entity.getVisitType()));
             Bill newEntity = billRepository.save(entity);
 
