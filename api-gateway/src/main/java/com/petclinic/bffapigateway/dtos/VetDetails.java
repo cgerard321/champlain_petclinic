@@ -1,7 +1,6 @@
 package com.petclinic.bffapigateway.dtos;
 
 import lombok.Data;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +23,7 @@ public class VetDetails {
 
         private String workday;
 
-        private Integer enabled;
+        private Integer isActive;
 
         private final List<Specialty> specialties = new ArrayList<>();
 

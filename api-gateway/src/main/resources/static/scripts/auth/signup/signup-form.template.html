@@ -5,30 +5,33 @@
 <div style="display: flex; justify-content: center">
     <div>
         <h2 class="text-center">Signup</h2>
-        <form ng-submit="$ctrl.submitSignupForm()" style="max-width: 25em; justify-content: center;">
-            <div class="form-group">
-                <label>Username</label>
-                <input class="form-control" ng-model="$ctrl.signup.username" name="username" required/>
-                <span ng-show="signupForm.username.$error.required" class="help-block"> Username is required.</span>
-            </div>
+        <h3 class="text-danger text-center" ng-repeat="error in errorMessages">{{ error }}</h3>
+        <div class="d-flex justify-content-center">
+            <form ng-submit="$ctrl.submitSignupForm()" style="max-width: 25em; justify-content: center;">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input class="form-control" ng-model="signup.username" name="username" required/>
+                    <span ng-show="signupForm.username.$error.required" class="help-block"> Username is required.</span>
+                </div>
 
-            <div class="form-group">
-                <label>Password</label>
-                <input class="form-control" type="password" ng-model="$ctrl.signup.password" name="password" required/>
-                <span ng-show="signupForm.password.$error.required" class="help-block">Password is required.</span>
-            </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input class="form-control" type="password" ng-model="signup.password" name="password" required/>
+                    <span ng-show="signupForm.password.$error.required" class="help-block">Password is required.</span>
+                </div>
 
 
-            <div class="form-group">
-                <label>Email</label>
-                <input class="form-control" ng-model="$ctrl.signup.email" name="email" required/>
-                <span ng-show="signupForm.email.$error.required" class="help-block">Email is required.</span>
-            </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input class="form-control" ng-model="signup.email" name="email" required/>
+                    <span ng-show="signupForm.email.$error.required" class="help-block">Email is required.</span>
+                </div>
 
-            <div class="form-group">
-                <button class="btn btn-default" type="submit">Submit</button>
-            </div>
-        </form>
+                <div class="form-group text-center">
+                    <button ng-click="$ctrl.add()" class="btn btn-default" type="submit">Submit</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 

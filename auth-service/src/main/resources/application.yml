@@ -12,6 +12,9 @@ spring:
     url: jdbc:mysql://localhost:3310/auth
     username: user
     password: pwd
+  security:
+    filter:
+      order: 10
 
   flyway:
     url: jdbc:mysql://localhost:3310
@@ -34,6 +37,9 @@ gateway:
   origin: localhost:8080
   protocol: http
   subdomain:
+mailer-service:
+  host: mailer-service
+  port: 8080
 
 ---
 spring.profiles: test

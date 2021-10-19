@@ -110,6 +110,7 @@ public class VisitsServiceClient {
                 .retrieve()
                 .bodyToMono(Visits.class);
     }
+
     public Mono<VisitDetails> updateVisitForPet(VisitDetails visit) {
         String url = hostname + "/owners/*/pets/" + visit.getPetId() + "/visits/" + visit.getId();
         return webClientBuilder.build()
