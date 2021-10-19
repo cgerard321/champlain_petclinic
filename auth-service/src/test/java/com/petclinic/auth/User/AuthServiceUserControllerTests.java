@@ -266,15 +266,6 @@ public class AuthServiceUserControllerTests {
     }
 
     @Test
-    @DisplayName("Add then delete role from controller")
-    void add_then_delete_user_from_controller() {
-        // Idempotency check
-        for (int i = 0; i < rng.nextInt(100); i++) {
-            userController.deleteUser(1);
-        }
-    }
-
-    @Test
     public void  get_user() throws Exception {
 
         final long ID = 123;
