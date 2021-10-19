@@ -1,10 +1,10 @@
 'use strict';
 
 angular.module('loginForm')
-    .controller('LoginFormController', ["$http", '$state', '$stateParams', function ($http, $state, $stateParams) {
+    .controller('LoginFormController', ["$http", '$state', '$stateParams', "$scope", function ($http, $state, $stateParams, $scope) {
 
-        this.login = $http.post("/api/gateway/users/login", {
-            username: $scope.login.email,
+        this.login = () => $http.post("/api/gateway/users/login", {
+            email: $scope.login.email,
             password: $scope.login.password,
         })
             .then(n => {
