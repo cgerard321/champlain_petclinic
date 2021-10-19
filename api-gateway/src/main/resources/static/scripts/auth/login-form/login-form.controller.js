@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('loginForm')
-    .controller('LoginFormController', ["$http", '$location', '$window', "$scope", function ($http, $location, $window, $scope) {
+    .controller('LoginFormController', ["$http", '$location', "$scope", "authProvider", function ($http, $location, $scope, authProvider) {
 
         this.login = () => $http.post("/api/gateway/users/login", {
             email: $scope.login.email,
@@ -11,10 +11,11 @@ angular.module('loginForm')
                 const token = n.headers("Authorization");
                 const { data: { username, email } } = n;
 
-                $window.localStorage.setItem("token", token)
-                $window.localStorage.setItem("username", username)
-                $window.localStorage.setItem("email", email)
-
+                authProvider.setUser({
+                    token,
+                    username,
+                    email
+                });
                 $location.path("/welcome")
             })
             .catch(n => {
