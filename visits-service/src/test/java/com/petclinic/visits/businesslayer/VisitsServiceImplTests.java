@@ -202,24 +202,33 @@ public class VisitsServiceImplTests {
 
     // TESTS FOR FETCHING VISITS BASED ON PET ID ----------------------------------------------------------------------
     @Test
-    public void whenValidPetIdThenShouldReturnVisitsForPet(){
-        when(repo.findByPetId(1)).thenReturn(
+    public void shouldReturnVisitsForPetWhenValidPetId(){
+        when(repo.findByPetId(anyInt())).thenReturn(
                 asList(
                         visit()
-                                .id(1)
-                                .petId(1)
+                                .visitId(UUID.randomUUID())
+                                .petId(200)
                                 .build(),
                         visit()
-                                .id(2)
-                                .petId(1)
+                                .visitId(UUID.randomUUID())
+                                .petId(200)
                                 .build()
                 )
         );
 
-        List<Visit> serviceResponse = visitsService.getVisitsForPet(1);
+        List<VisitDTO> serviceResponse = visitsService.getVisitsForPet(200);
 
         assertThat(serviceResponse, hasSize(2));
-        assertThat(serviceResponse.get(1).getPetId(), equalTo(1));
+        assertThat(serviceResponse.get(1).getPetId(), equalTo(200));
+    }
+
+    @Test
+    public void shouldThrowInvalidInputExceptionWhenNegativePetId(){
+        InvalidInputException ex = assertThrows(InvalidInputException.class, () ->{
+           visitsService.getVisitsForPet(-1);
+        });
+
+        assertEquals("PetId can't be negative.", ex.getMessage());
     }
 
     // TESTS FOR FETCHING VISITS BASED ON PET IDS ----------------------------------------------------------------------
