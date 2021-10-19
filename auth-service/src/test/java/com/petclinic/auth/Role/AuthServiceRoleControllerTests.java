@@ -92,6 +92,7 @@ public class AuthServiceRoleControllerTests {
         assertEquals(ROLE_COUNT / PAGE_LIM, rolePage.getTotalPages());
     }
 
+    /*
     @Test
     @DisplayName("Add then delete role from controller")
     void add_then_delete_role_from_controller() {
@@ -108,6 +109,7 @@ public class AuthServiceRoleControllerTests {
             assertFalse(roleRepo.findById(save.getId()).isPresent());
         }
     }
+     */
 
     @Test
     @DisplayName("Get all roles as admin")
