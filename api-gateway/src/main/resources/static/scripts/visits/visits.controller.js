@@ -104,6 +104,34 @@ angular.module('visits')
             return practitionerName;
         };
 
+        self.showConfirmationModal = function(e, visitId = 0) {
+            // Get the name of button sender
+            let buttonText = $(e.target).text();
+
+            // Set modal's title and body to match the sender's request
+            let confirmationModal = $('#confirmationModalTitle');
+            confirmationModal.text(buttonText);
+            $('#confirmationModalBody').text("Are you sure you want to " + buttonText.toLowerCase() + "?");
+
+            // Set the targeted visit data attribute which is used if the button is for cancel or delete
+            $('#confirmationModalConfirmButton').data("targetVisit", visitId);
+
+            // Show the modal
+            $('#confirmationModal').modal('show');
+        }
+
+        self.completeFormAction = function() {
+            // Check which button modal was called by and perform appropriate action
+            let modalTitle = $('#confirmationModalTitle').text();
+
+            if(modalTitle === $('#submit_button').text()) {
+                $('#visitForm').submit();
+            }
+            else if(modalTitle === "Delete visit") {
+                self.deleteVisit($('#confirmationModalConfirmButton').data("targetVisit"));
+            }
+        }
+
         self.switchToUpdateForm = function (e, practitionerId, date, description, id, visitStatus){
             visitId = id;
             $("#selectedVet option[value='"+practitionerId+"']").prop("selected", true);
