@@ -53,14 +53,17 @@ public class BFFApiGatewayController {
                                 .map(addVisitsToOwner(owner))
                 );
     }
-//check this
+    //check this
     @GetMapping(value = "bills/{billId}")
     public Mono<BillDetails> getBillingInfo(final @PathVariable int billId)
     {
         return billServiceClient.getBilling(billId);
     }
 
-
+    @GetMapping(value = "bills")
+    public Flux<BillDetails> getAllBilling() {
+        return billServiceClient.getAllBilling();
+    }
 
     @GetMapping(value = "customer/owners")
     public Flux<OwnerDetails> getOwners() {
