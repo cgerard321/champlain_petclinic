@@ -12,6 +12,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Date;
 import java.util.List;
 
 import static java.util.stream.Collectors.joining;
@@ -54,8 +55,6 @@ public class VisitsServiceClient {
                 .bodyToMono(Visits.class);
     }
 
-
-
     public Flux<VisitDetails> getVisitsForPet(final int petId){
         return webClientBuilder.build()
                 .get()
@@ -71,6 +70,15 @@ public class VisitsServiceClient {
                 .retrieve()
                 .bodyToFlux(VisitDetails.class);
     }
+
+    public Flux<VisitDetails> getVisitsByPractitionerIdAndMonth(final int practitionerId, final String startDate, final String endDate) {
+        return webClientBuilder.build()
+                .get()
+                .uri(hostname + "/visits/calendar/{practitionerId}?dates={startDate},{endDate}", practitionerId, startDate, endDate)
+                .retrieve()
+                .bodyToFlux(VisitDetails.class);
+    }
+
 /*
     public Mono<Visits> createVisitForPets(final VisitDetails visitDetails){
         return webClientBuilder.build()
