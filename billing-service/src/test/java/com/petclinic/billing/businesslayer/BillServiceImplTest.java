@@ -100,7 +100,12 @@ public class BillServiceImplTest {
 
         HashMap<String, Double> list = setUpVisitList();
         BillDTO receivedDTO = new BillDTO(billId,customerId, date, "Checkup");
-        assertNull(list.get(receivedDTO.getVisitType()));
+        when(billRepository.save(any(Bill.class))).thenThrow(DuplicateKeyException.class);
+
+
+        assertThrows(InvalidInputException.class, () -> {
+            billService.CreateBill(receivedDTO);
+        });
 
     }
 
