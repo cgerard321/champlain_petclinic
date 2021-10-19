@@ -27,8 +27,11 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configurers.provisioning.InMemoryUserDetailsManagerConfigurer;
+import org.springframework.security.config.annotation.authentication.configurers.userdetails.DaoAuthenticationConfigurer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -88,9 +91,11 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
 
-        auth.userDetailsService(username -> userRepo.findByEmail(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User with email " + username + "not found"))
-        );
+        final DaoAuthenticationConfigurer dao = new DaoAuthenticationConfigurer<>(username -> userRepo.findByEmail(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User with email " + username + "not found")));
+
+        dao.passwordEncoder(bCryptPasswordEncoder());
+        auth.apply(dao);
     }
 
     @Override @Bean
