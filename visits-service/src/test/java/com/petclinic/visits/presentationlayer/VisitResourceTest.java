@@ -207,7 +207,7 @@ public class VisitResourceTest {
 	// TESTS FOR PREVIOUS AND SCHEDULED VISITS ----------------------------------------------------------------------
 	@Test
 	void shouldReturnListOfVisitsWhenFetchingPreviousVisitsWithValidPetId() throws Exception {
-		//when(visitsService.getVisitsForPet(200, false)).thenReturn(visitDTOList);
+		when(visitsService.getVisitsForPet(200, false)).thenReturn(visitDTOList);
 
 		mvc.perform(get("/visits/previous/{petId}", 200))
 				.andExpect(status().isOk())
@@ -220,7 +220,7 @@ public class VisitResourceTest {
 
 	@Test
 	void shouldReturnListOfVisitsWhenFetchingScheduledVisitsWithValidPetId() throws Exception {
-		//when(visitsService.getVisitsForPet(200, false)).thenReturn(visitDTOList);
+		when(visitsService.getVisitsForPet(200, false)).thenReturn(visitDTOList);
 
 		mvc.perform(get("/visits/previous/{petId}", 200))
 				.andExpect(status().isOk())

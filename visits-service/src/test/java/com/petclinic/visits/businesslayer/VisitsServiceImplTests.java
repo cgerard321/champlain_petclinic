@@ -301,30 +301,30 @@ public class VisitsServiceImplTests {
 
     // TESTS FOR FETCHING VISITS BASED ON DATE ----------------------------------------------------------------------
     @Test
-    public void shouldReturnVisitsAfterNow() throws ParseException {
+    public void shouldReturnVisitsAfterNowWhenFetchingScheduledVisits() throws ParseException {
         Date afterNow = new Date(System.currentTimeMillis() + 100000000); //
         Date beforeNow = new Date(System.currentTimeMillis() - 100000000);
 
         List<Visit> visitsList = asList(
                 visit()
-                        .id(1)
-                        .petId(1)
+                        .visitId(UUID.randomUUID())
+                        .petId(200)
                         .date(afterNow)
                         .build(),
                 visit()
-                        .id(3)
-                        .petId(1)
+                        .visitId(UUID.randomUUID())
+                        .petId(200)
                         .date(afterNow)
                         .build(),
                 visit()
-                        .id(2)
-                        .petId(1)
+                        .visitId(UUID.randomUUID())
+                        .petId(200)
                         .date(beforeNow)
                         .build());
 
-        when(repo.findByPetId(1)).thenReturn(visitsList);
+        when(repo.findByPetId(anyInt())).thenReturn(visitsList);
 
-        List<Visit> returnedVisits = visitsService.getVisitsForPet(1, true);
+        List<VisitDTO> returnedVisits = visitsService.getVisitsForPet(200, true);
 
         assertEquals(2, returnedVisits.size());
 
@@ -332,92 +332,91 @@ public class VisitsServiceImplTests {
 
     @Test
     public void shouldReturnVisitsBeforeNow() throws ParseException {
-        Date afterNow = new Date(System.currentTimeMillis() + 100000);
-        Date beforeNow = new Date(System.currentTimeMillis() - 100000);
+        Date afterNow = new Date(System.currentTimeMillis() + 100000000);
+        Date beforeNow = new Date(System.currentTimeMillis() - 100000000);
 
         List<Visit> visitsList = asList(
                 visit()
-                        .id(1)
-                        .petId(1)
+                        .visitId(UUID.randomUUID())
+                        .petId(200)
                         .date(afterNow)
                         .build(),
                 visit()
-                        .id(3)
-                        .petId(1)
+                        .visitId(UUID.randomUUID())
+                        .petId(200)
                         .date(afterNow)
                         .build(),
                 visit()
-                        .id(2)
-                        .petId(1)
+                        .visitId(UUID.randomUUID())
+                        .petId(200)
                         .date(beforeNow)
                         .build());
 
-        when(repo.findByPetId(1)).thenReturn(visitsList);
+        when(repo.findByPetId(anyInt())).thenReturn(visitsList);
 
-        List<Visit> returnedVisits = visitsService.getVisitsForPet(1, false);
+        List<VisitDTO> returnedVisits = visitsService.getVisitsForPet(200, false);
 
         assertEquals(1, returnedVisits.size());
-
     }
 
     @Test
     public void shouldReturnEmptyListWhenNoScheduledVisits(){
-        Date beforeNow = new Date(System.currentTimeMillis() - 100000);
+        Date beforeNow = new Date(System.currentTimeMillis() - 100000000);
 
         List<Visit> visitsList = asList(
                 visit()
-                        .id(1)
-                        .petId(1)
+                        .visitId(UUID.randomUUID())
+                        .petId(200)
                         .date(beforeNow)
                         .build(),
                 visit()
-                        .id(3)
-                        .petId(1)
+                        .visitId(UUID.randomUUID())
+                        .petId(200)
                         .date(beforeNow)
                         .build(),
                 visit()
-                        .id(2)
-                        .petId(1)
+                        .visitId(UUID.randomUUID())
+                        .petId(200)
                         .date(beforeNow)
                         .build());
 
-        when(repo.findByPetId(1)).thenReturn(visitsList);
+        when(repo.findByPetId(anyInt())).thenReturn(visitsList);
 
-        List<Visit> returnedVisits = visitsService.getVisitsForPet(1, true);
+        List<VisitDTO> returnedVisits = visitsService.getVisitsForPet(200, true);
 
         assertEquals(0, returnedVisits.size());
     }
 
     @Test
     public void shouldReturnEmptyListWhenNoPreviousVisits(){
-        Date afterNow = new Date(System.currentTimeMillis() + 100000);
+        Date afterNow = new Date(System.currentTimeMillis() + 100000000);
 
         List<Visit> visitsList = asList(
                 visit()
-                        .id(1)
-                        .petId(1)
+                        .visitId(UUID.randomUUID())
+                        .petId(200)
                         .date(afterNow)
                         .build(),
                 visit()
-                        .id(3)
-                        .petId(1)
+                        .visitId(UUID.randomUUID())
+                        .petId(200)
                         .date(afterNow)
                         .build(),
                 visit()
-                        .id(2)
-                        .petId(1)
+                        .visitId(UUID.randomUUID())
+                        .petId(200)
                         .date(afterNow)
                         .build());
 
-        when(repo.findByPetId(1)).thenReturn(visitsList);
+        when(repo.findByPetId(anyInt())).thenReturn(visitsList);
 
-        List<Visit> returnedVisits = visitsService.getVisitsForPet(1, false);
+        List<VisitDTO> returnedVisits = visitsService.getVisitsForPet(200, false);
 
         assertEquals(0, returnedVisits.size());
     }
 
     @Test
-    public void shouldThrowInvalidInputExceptionWhenFetchingScheduledVisitsWithNegativePetId(){
+    public void shouldThrowInvalidInputExceptionWhenFetchingVisitsWithNegativePetId(){
         InvalidInputException ex = assertThrows(InvalidInputException.class, () ->{
             visitsService.getVisitsForPet(-1, true);
         });
