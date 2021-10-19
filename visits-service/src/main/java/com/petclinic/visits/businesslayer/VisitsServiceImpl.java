@@ -38,7 +38,7 @@ public class VisitsServiceImpl implements VisitsService {
     @Override
     public VisitDTO addVisit(VisitIdLessDTO visit) {
 
-        if(visit.getDescription().isEmpty()){
+        if(visit.getDescription() == null || visit.getDescription().isEmpty()){
             throw new InvalidInputException("Visit description required.");
         }
 

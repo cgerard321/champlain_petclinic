@@ -47,8 +47,8 @@ public class VisitResource {
             @PathVariable("petId") int petId) {
 
         visit.setPetId(petId);
+        log.debug("Calling VisitService:addVisit for pet with petId: {}", petId);
         VisitDTO savedVisit = visitsService.addVisit(visit);
-        log.debug("Saving visit {}", savedVisit);
         return savedVisit;
     }
 
