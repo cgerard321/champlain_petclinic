@@ -97,14 +97,19 @@ petClinicApp.config(['$stateProvider', '$urlRouterProvider', '$locationProvider'
 
     angular.module(mod, []);
     angular.module(mod)
-        .controller(controller, ['$scope', 'authProvider', function ($scope, authProvider) {
+        .controller(controller, ['$rootScope', '$scope', 'authProvider', function ($rootScope, $scope, authProvider) {
 
-            $scope.isLoggedIn = authProvider.isLoggedIn();
-            if(!$scope.isLoggedIn)return;
+            const load = () => {
+                $scope.isLoggedIn = authProvider.isLoggedIn();
+                if(!$scope.isLoggedIn)return;
 
-            const { email, username } = authProvider.getUser();
-            $scope.email = email;
-            $scope.username = username;
+                const { email, username } = authProvider.getUser();
+                $scope.email = email;
+                $scope.username = username;
+            }
+
+            $rootScope.$on('$locationChangeSuccess', load);
+            load();
     }]);
 
     angular.module(mod).component(mod, {
