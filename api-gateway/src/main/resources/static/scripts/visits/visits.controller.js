@@ -321,7 +321,8 @@ angular.module('visits')
             var data = {
                 date: $filter('date')(self.date, "yyyy-MM-dd"),
                 description: self.desc,
-                practitionerId: self.practitionerId
+                practitionerId: self.practitionerId,
+                status: true
             };
 
             $http.post(url, data).then(function () {
