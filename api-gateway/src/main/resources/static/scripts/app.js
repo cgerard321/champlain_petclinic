@@ -46,6 +46,15 @@ petClinicApp.factory("httpErrorInterceptor", ["$q", "$location", "authProvider",
 petClinicApp.run(['$rootScope', '$location', 'authProvider', function ($rootScope, $location, authProvider) {
     $rootScope.$on('$locationChangeSuccess', function (event) {
 
+        const whiteList = new Set([
+            'login',
+            'signup',
+        ]);
+
+        if(whiteList.has($location.path().substring(1))) {
+            return console.log("WHITE LISTED: Ignoring");
+        }
+
         if (!authProvider.isLoggedIn()) {
             console.log('DENY : Redirecting to Login');
             event.preventDefault();
