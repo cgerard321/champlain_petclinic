@@ -79,7 +79,7 @@ public class Pet {
         this.owner = owner;
     }
 
-    /* Sames problem as Owner.ToString()
+    /* Same problem as Owner.ToString()
     @Override
     public String toString() {
         return new ToStringCreator(this)

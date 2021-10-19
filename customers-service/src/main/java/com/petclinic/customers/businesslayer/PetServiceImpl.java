@@ -37,16 +37,13 @@ public class PetServiceImpl implements PetService {
         try {
             //Search pet in database with the given id
             Optional<Pet> pet = petRepository.findById(petId);
-            if (!pet.isPresent()) {
-                throw new NotFoundException("Pet "+ petId +" not found");
-            }
             LOG.debug("Pet with ID: " + petId + " has been found");
             return pet;
         }
         catch (Exception e)
         {
             // Exception if pet not found
-            throw new NotFoundException("Pet not found!");
+            throw new NotFoundException("Pet with ID: " + petId + " not found!");
         }
     }
 
@@ -78,7 +75,7 @@ public class PetServiceImpl implements PetService {
         petRepository.findPetTypeById(petRequest.getTypeId())
                 .ifPresent(pet::setType);
 
-        LOG.info("Saving pet {}", pet);
+        LOG.debug("New pet has been saved! The pet name is: " + pet.getName());
         return petRepository.save(pet);
     }
 

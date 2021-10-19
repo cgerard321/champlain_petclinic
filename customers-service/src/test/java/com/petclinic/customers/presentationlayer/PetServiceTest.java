@@ -1,12 +1,14 @@
 package com.petclinic.customers.presentationlayer;
 
 import com.petclinic.customers.businesslayer.PetService;
+import com.petclinic.customers.customerExceptions.exceptions.NotFoundException;
 import com.petclinic.customers.datalayer.*;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -74,7 +76,6 @@ public class PetServiceTest {
         return pet;
     }
 
-    // TEST FOR FINDING PET BY ID
     @DisplayName("petService_FindByPetId")
     @Test
     public void test_findByPetId() throws ParseException {
@@ -90,8 +91,21 @@ public class PetServiceTest {
         assertThat(returnedPet.getId()).isEqualTo(petTest.getId());
     }
 
+    @DisplayName("ownerService_FindByPetId_NotFoundException")
+    @Test
+    public void test_findByPetId_NotFoundException()
+    {
+        int petId = 1;
+        String expectedErrorMsg = "Pet with ID: " + petId + " not found!";
+        Mockito.when(repository.findById(Mockito.anyInt())).thenThrow(new NotFoundException());
+        try {
+            service.findByPetId(petId);
+        } catch(NotFoundException ex) {
+            assertEquals(ex.getMessage(), expectedErrorMsg);
+        }
 
-    // TEST FOR FINDING ALL PETS
+    }
+
     @DisplayName("petService_FindAll")
     @Test
     public void test_findAll() throws ParseException {
@@ -125,6 +139,39 @@ public class PetServiceTest {
         assertThat(expectedLength).isEqualTo(returnedList.size());
     }
 
+    // TEST FOR FINDING ALL PET TYPES
+    @DisplayName("petService_FindAll_PetTypes")
+    @Test
+    public void test_findAll_PetTypes() {
+        //Arrange
+        int expectedLength = 4;
+        List<PetType> petTypeList = new ArrayList<>();
+
+        PetType p1 = new PetType();
+        p1.setId(1);
+        petTypeList.add(p1);
+
+        PetType p2 = new PetType();
+        p1.setId(2);
+        petTypeList.add(p2);
+
+        PetType p3 = new PetType();
+        p1.setId(3);
+        petTypeList.add(p3);
+
+        PetType p4 = new PetType();
+        p1.setId(4);
+        petTypeList.add(p4);
+
+        when(repository.findPetTypes()).thenReturn(petTypeList);
+
+        //Act
+        List<PetType> returnedList = service.getAllPetTypes();
+
+        //Assert
+        assertThat(expectedLength).isEqualTo(returnedList.size());
+    }
+
 
     @DisplayName("PetService_DeletePet")
     @Test
@@ -145,7 +192,6 @@ public class PetServiceTest {
 
     }
 
-    /*
     @DisplayName("PetService_CreatePet")
     @Test
     public void test_CreatePet() throws ParseException {
@@ -165,13 +211,12 @@ public class PetServiceTest {
 
         //Act
         service.CreatePet(petRequest, 1);
-        List<Pet> retrievedPet = repository.findAll();
+        Optional<Pet> retrievedPet = repository.findById(2);
 
         //Assert
-        assertEquals(petRequest.getName(), retrievedPet.get(1).getName());
+        assertEquals(petRequest.getName(), retrievedPet.get().getName());
 
     }
-    */
 
 
 

@@ -26,14 +26,25 @@ public class PetRequestTests {
     }
 
     @Test
-    public void test_PetDetails_HashCode() throws ParseException {
-        //ARRANGE - ACT
+    public void test_PetDetails_HashCode_NotEmpty() throws ParseException {
+        //ARRANGE
         String petName = "Marcus";
         Date date = new SimpleDateFormat( "yyyyMMdd" ).parse( "20100520" );
 
         //ACT
         PetRequest pr1 = new PetRequest(petName, date);
         PetRequest pr2 = new PetRequest(petName, date);
+
+        //ASSERT
+        assertTrue(pr1.equals(pr2) && pr1.equals(pr2));
+        assertTrue(pr1.hashCode() == pr2.hashCode());
+    }
+
+    @Test
+    public void test_PetDetails_HashCode_Empty() {
+        //ARRANGE - ACT
+        PetRequest pr1 = new PetRequest();
+        PetRequest pr2 = new PetRequest();
 
         //ASSERT
         assertTrue(pr1.equals(pr2) && pr1.equals(pr2));

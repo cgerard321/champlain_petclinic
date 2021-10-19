@@ -161,16 +161,17 @@ class OwnerPersistenceTest {
 
     @DisplayName("ownerPersistence_UpdateOwner")
     @Test
-    @Disabled
     public void update_owner_test()
     {
         // Arrange
-        int ownerid = 11;
-
-        Owner newOwner = new Owner (ownerid, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal",
+        int ownerId = 11;
+        Owner newOwner = new Owner (ownerId,
+                "Brian",
+                "Smith",
+                "940 Rue des Oiseaux",
+                "Montreal",
                 "1111111111");
         Owner savedOwner = repository.save(newOwner);;
-
         Owner foundSaved = repository.findById(savedOwner.getId()).orElse(null);
         assert foundSaved != null;
         assertThat(foundSaved, samePropertyValuesAs(newOwner));
@@ -181,8 +182,8 @@ class OwnerPersistenceTest {
         foundSaved.setAddress("670 Fort Kerton");
         foundSaved.setCity("Montreal");
         foundSaved.setTelephone("2222222222");
-
         Owner savedUpdate = repository.save(foundSaved);
+
         // Assert
         assertEquals(savedUpdate, foundSaved);
     }

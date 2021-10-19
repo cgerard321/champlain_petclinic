@@ -10,8 +10,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PetDetailsTests {
 
@@ -41,7 +40,36 @@ public class PetDetailsTests {
     }
 
     @Test
-    public void test_PetDetails_HashCode() throws ParseException {
+    public void test_PetDetails_NotEquals() throws ParseException {
+        //ARRANGE - ACT
+        Owner owner = setupOwner();
+
+        //PetType
+        PetType petType = new PetType();
+        petType.setId(1);
+
+        //Pet
+        Pet pet = new Pet();
+        pet.setId(1);
+        pet.setName("Marcus");
+        pet.setOwner(owner);
+        Date date = new SimpleDateFormat( "yyyyMMdd" ).parse( "20100520" );
+        pet.setBirthDate(date);
+        pet.setType(petType);
+
+        //ACT
+        PetDetails pd1 = new PetDetails(pet);
+        PetDetails pd2 = new PetDetails();
+        pd2.setId(2);
+
+        //ASSERT
+        assertNotEquals(pd1,pd2);
+    }
+
+
+
+    @Test
+    public void test_PetDetails_HashCode_NotEmpty() throws ParseException {
         //ARRANGE
         //Owner
         Owner owner = setupOwner();
@@ -67,6 +95,18 @@ public class PetDetailsTests {
         assertTrue(pd1.equals(pd2) && pd1.equals(pd2));
         assertTrue(pd1.hashCode() == pd2.hashCode());
     }
+
+    @Test
+    public void test_PetDetails_HashCode_Empty()  {
+        //ARRANGE - ACT
+        PetDetails pd1 = new PetDetails();
+        PetDetails pd2 = new PetDetails();
+
+        //ASSERT
+        assertTrue(pd1.equals(pd2) && pd1.equals(pd2));
+        assertTrue(pd1.hashCode() == pd2.hashCode());
+    }
+
 
     @Test
     public void testToString()
