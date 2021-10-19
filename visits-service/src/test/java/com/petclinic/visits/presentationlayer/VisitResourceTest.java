@@ -220,9 +220,9 @@ public class VisitResourceTest {
 
 	@Test
 	void shouldReturnListOfVisitsWhenFetchingScheduledVisitsWithValidPetId() throws Exception {
-		when(visitsService.getVisitsForPet(200, false)).thenReturn(visitDTOList);
+		when(visitsService.getVisitsForPet(anyInt(), anyBoolean())).thenReturn(visitDTOList);
 
-		mvc.perform(get("/visits/previous/{petId}", 200))
+		mvc.perform(get("/visits/scheduled/{petId}", 200))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.[0].visitId").value(visitDTOList.get(0).getVisitId()))
 				.andExpect(jsonPath("$.[1].visitId").value(visitDTOList.get(1).getVisitId()))
@@ -270,25 +270,14 @@ public class VisitResourceTest {
 	void whenValidPetIdThenShouldReturnVisitsForPet() throws Exception {
 
 		given(visitsService.getVisitsForPet(anyInt()))
-				.willReturn(
-						asList(
-								visit()
-										.id(1)
-										.petId(1)
-										.build(),
-								visit()
-										.id(2)
-										.petId(1)
-										.build()
-						)
-				);
+				.willReturn(visitDTOList);
 
 		mvc.perform(get("/visits/1"))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$[0].id").value(1))
-				.andExpect(jsonPath("$[1].id").value(2))
-				.andExpect(jsonPath("$[0].petId").value(1))
-				.andExpect(jsonPath("$[1].petId").value(1));
+				.andExpect(jsonPath("$[0].visitId").value(visitDTOList.get(0).getVisitId()))
+				.andExpect(jsonPath("$[1].visitId").value(visitDTOList.get(1).getVisitId()))
+				.andExpect(jsonPath("$[0].petId").value(visitDTOList.get(0).getPetId()))
+				.andExpect(jsonPath("$[1].petId").value(visitDTOList.get(1).getPetId()));
 	}
 
 	@Test
@@ -307,7 +296,7 @@ public class VisitResourceTest {
 				.andExpect(result -> assertEquals("PetId can't be negative.", result.getResolvedException().getMessage()));
 	}
 
-	// TESTS FOR FETCHING VISITS BASED ON PET ID ----------------------------------------------------------------------
+	// TESTS FOR FETCHING VISITS BASED ON PET IDs ----------------------------------------------------------------------
 
 
 	// TESTS FOR FETCHING VISITS BASED ON PRACTITIONER ID ----------------------------------------------------------------------

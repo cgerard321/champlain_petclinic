@@ -54,13 +54,35 @@ public class VisitsServiceImpl implements VisitsService {
     }
 
     @Override
-    public List<Visit> getVisitsForPet(int petId) {
+    public List<VisitDTO> getVisitsForPet(int petId) {
 
         if(petId < 0)
             throw new InvalidInputException("PetId can't be negative.");
 
         log.info("Calling visit repo to get visits for pet with petId: {}", petId);
-        return visitRepository.findByPetId(petId);
+        List<Visit> returnedVisits = visitRepository.findByPetId(petId);
+        List<VisitDTO> visitDTOList = returnedVisits.stream()
+                .filter(v -> v != null)
+                .map(visit -> mapper.entityToModel(visit))
+                .collect(Collectors.toList());
+        return visitDTOList;
+    }
+
+    @Override
+    public List<VisitDTO> getVisitsForPet(int petId, boolean scheduled) {
+        Date now = new Date(System.currentTimeMillis());
+        log.debug("Fetching the visits for pet with petId: {}", petId);
+        List<VisitDTO> visitsForPet = getVisitsForPet(petId);
+
+        if(scheduled){
+            log.debug("Filtering out visits before {}", now);
+            visitsForPet = visitsForPet.stream().filter(v -> v.getDate().after(now)).collect(Collectors.toList());
+        }
+        else{
+            log.debug("Filtering out visits after {}", now);
+            visitsForPet = visitsForPet.stream().filter(v -> v.getDate().before(now)).collect(Collectors.toList());
+        }
+        return visitsForPet;
     }
 
     @Override
@@ -80,23 +102,6 @@ public class VisitsServiceImpl implements VisitsService {
     @Override
     public List<Visit> getVisitsForPets(List<Integer> petIds){
         return visitRepository.findByPetIdIn(petIds);
-    }
-
-    @Override
-    public List<Visit> getVisitsForPet(int petId, boolean scheduled) {
-        Date now = new Date(System.currentTimeMillis());
-        log.debug("Fetching the visits for pet with petId: {}", petId);
-        List<Visit> visits = getVisitsForPet(petId);
-
-        if(scheduled){
-            log.debug("Filtering out visits before {}", now);
-            visits = visits.stream().filter(v -> v.getDate().after(now)).collect(Collectors.toList());
-        }
-        else{
-            log.debug("Filtering out visits after {}", now);
-            visits = visits.stream().filter(v -> v.getDate().before(now)).collect(Collectors.toList());
-        }
-        return visits;
     }
 
     @Override

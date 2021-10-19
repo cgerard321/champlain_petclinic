@@ -18,15 +18,15 @@ public interface VisitsService {
 
     public VisitDTO addVisit(VisitIdLessDTO visit);
 
-    public List<Visit> getVisitsForPet(int petId);
+    public List<VisitDTO> getVisitsForPet(int petId);
+
+    List<VisitDTO> getVisitsForPet(int petId, boolean scheduled);
 
     public void deleteVisit(int visitId);
 
     public Visit updateVisit(Visit visit);
 
     public List<Visit> getVisitsForPets(List<Integer> petIds);
-
-    List<Visit> getVisitsForPet(int petId, boolean scheduled);
 
     List<Visit> getVisitsForPractitioner(int practitionerId);
 

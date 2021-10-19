@@ -61,7 +61,7 @@ public class VisitResource {
 
     //This method will return every visits of people that have multiple pets
     @GetMapping("visits/{petId}")
-    public List<Visit> getVisitsForPet(@PathVariable("petId") int petId){
+    public List<VisitDTO> getVisitsForPet(@PathVariable("petId") int petId){
         log.info("Getting visits for pet with petid: {}", petId );
         return visitsService.getVisitsForPet(petId);
     }
@@ -83,13 +83,13 @@ public class VisitResource {
     }
 
     @GetMapping("visits/previous/{petId}")
-    public List<Visit> getPreviousVisitsForPet(@PathVariable("petId") int petId){
+    public List<VisitDTO> getPreviousVisitsForPet(@PathVariable("petId") int petId){
         log.debug("Calling VisitsService:getVisitsForPet:previous:petId={}", petId);
         return visitsService.getVisitsForPet(petId, false);
     }
 
     @GetMapping("visits/scheduled/{petId}")
-    public List<Visit> getScheduledVisitsForPet(@PathVariable("petId") int petId){
+    public List<VisitDTO> getScheduledVisitsForPet(@PathVariable("petId") int petId){
         log.debug("Calling VisitsService:getVisitsForPet:scheduled:petId={}", petId);
         return visitsService.getVisitsForPet(petId, true);
     }
