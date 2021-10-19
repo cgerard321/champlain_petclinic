@@ -1,4 +1,10 @@
 'use strict';
+// Whitelist for all things related to auth and Q 401/403 handling
+const whiteList = new Set([
+    'login',
+    'signup',
+]);
+
 /* App Module */
 var petClinicApp = angular.module('petClinicApp', [
     'ui.router', 'layoutNav', 'layoutFooter', 'layoutWelcome', 'ownerList', 'ownerDetails', 'ownerForm', 'petForm'
@@ -33,7 +39,7 @@ petClinicApp.factory("httpErrorInterceptor", ["$q", "$location", "authProvider",
         // This method completely disregards whoever was subscribed to this promise and just cancels it
         // I just do not care to implement it correctly because it is more complex
         responseError: rej => {
-            if (rej.status === 401 || rej.status === 403) {
+            if (!whiteList.has($location.path().substring(1)) && (rej.status === 401 || rej.status === 403)) {
                 authProvider.purgeUser();
                 $location.path('/login');
                 return $q(() => null)
@@ -45,11 +51,6 @@ petClinicApp.factory("httpErrorInterceptor", ["$q", "$location", "authProvider",
 
 petClinicApp.run(['$rootScope', '$location', 'authProvider', function ($rootScope, $location, authProvider) {
     $rootScope.$on('$locationChangeSuccess', function (event) {
-
-        const whiteList = new Set([
-            'login',
-            'signup',
-        ]);
 
         if(whiteList.has($location.path().substring(1))) {
             return console.log("WHITE LISTED: Ignoring");
