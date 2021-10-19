@@ -79,6 +79,7 @@ public class Pet {
         this.owner = owner;
     }
 
+    /* Sames problem as Owner.ToString()
     @Override
     public String toString() {
         return new ToStringCreator(this)
@@ -89,6 +90,20 @@ public class Pet {
                 .append("ownerFirstname", this.getOwner().getFirstName())
                 .append("ownerLastname", this.getOwner().getLastName())
                 .toString();
+    }
+     */
+    @Override
+    public String toString()
+    {
+        String id_str = this.id.toString();
+        String petString = "ID: " +
+                id_str + ", Name: " +
+                this.name + ", Birth of date: " +
+                this.birthDate + ", Type: " +
+                this.type.getName() + ", Owner - First name: " +
+                this.owner.getFirstName() + ", Last name: " +
+                this.owner.getLastName();
+        return petString;
     }
 
 }

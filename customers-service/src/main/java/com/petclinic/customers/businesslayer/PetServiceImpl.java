@@ -31,7 +31,6 @@ public class PetServiceImpl implements PetService {
     /**
      * ------------------------ FIND ------------------------
      * This method will find one specific pet in the database and display its data
-     * It is not use by the login system
      */
     @Override
     public Optional<Pet> findByPetId(int petId) {
@@ -83,10 +82,6 @@ public class PetServiceImpl implements PetService {
         return petRepository.save(pet);
     }
 
-    /**
-     * ------------------------ Delete Pet ------------------------
-     * This method will delete a pet
-     */
     @Override
     public void deletePet(int petId, int ownerId) {
 

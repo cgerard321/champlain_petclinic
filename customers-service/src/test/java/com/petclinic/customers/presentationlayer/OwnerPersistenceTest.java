@@ -184,7 +184,7 @@ class OwnerPersistenceTest {
 
         Owner savedUpdate = repository.save(foundSaved);
         // Assert
-       assertEquals(savedUpdate, foundSaved);
+        assertEquals(savedUpdate, foundSaved);
     }
 
 }

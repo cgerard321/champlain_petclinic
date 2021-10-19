@@ -1,6 +1,7 @@
 package com.petclinic.customers.presentationlayer;
 
 import com.petclinic.customers.businesslayer.OwnerService;
+import com.petclinic.customers.customerExceptions.exceptions.NotFoundException;
 import com.petclinic.customers.datalayer.Owner;
 import com.petclinic.customers.datalayer.OwnerRepository;
 import org.hamcrest.MatcherAssert;
@@ -16,6 +17,8 @@ import java.util.ArrayList;
 import java.util.Optional;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.hamcrest.Matchers.samePropertyValuesAs;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 import java.util.List;
@@ -31,10 +34,6 @@ public class OwnerServiceTest {
     OwnerService ownerService;
 
 
-    /**
-     * ------------------------ TEST_FIND ------------------------
-     * Testing the method findByOwnerId()
-     */
     @DisplayName("ownerService_FindByOwnerId")
     @Test
     public void test_findByOwnerId()
@@ -51,10 +50,19 @@ public class OwnerServiceTest {
         assertThat(returnedOwner.getId()).isEqualTo(ownerTest.getId());
     }
 
-    /**
-     * ------------------------ TEST_FIND_ALL ------------------------
-     * Testing the method findAll()
-     */
+    @DisplayName("ownerService_FindByOwnerId_NotFoundException")
+    @Test
+    public void test_findByOwnerId_NotFoundException()
+    {
+        //Arrange
+        int ownerId = 1;
+        when(ownerRepository.findById(ownerId)).thenThrow(new NotFoundException("Owner "+ ownerId +" not found"));
+
+        //Act
+        ownerService.findByOwnerId(1);
+
+    }
+
     @DisplayName("ownerService_FindAll")
     @Test
     public void test_findAll()
@@ -116,6 +124,25 @@ public class OwnerServiceTest {
 
         //Assert
         MatcherAssert.assertThat(retrievedOwner.get(), samePropertyValuesAs(ownerTest));
+    }
+
+    @DisplayName("ownerService_CreateOwner")
+    @Test
+    public void test_UpdateOwner()
+    {
+        //Arrange
+        int OwnerId = 1;
+        Owner newOwner1 = new Owner(OwnerId, "Michel", "Lebrie", "56 Yeet St.", "Longueuil", "1234567890");
+        when(ownerRepository.findById(OwnerId)).thenReturn(Optional.of(newOwner1));
+
+        //Act
+        ownerService.updateOwner(1, newOwner1);
+
+        assertEquals(ownerService.findByOwnerId(1).get().getFirstName(), "Michel");
+        assertEquals(ownerService.findByOwnerId(1).get().getLastName(), "Lebrie");
+        assertEquals(ownerService.findByOwnerId(1).get().getAddress(), "56 Yeet St.");
+        assertEquals(ownerService.findByOwnerId(1).get().getCity(), "Longueuil");
+        assertEquals(ownerService.findByOwnerId(1).get().getTelephone(), "1234567890");
     }
 
 

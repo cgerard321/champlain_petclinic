@@ -31,34 +31,7 @@ public class PetDetailsTests {
     }
 
     @Test
-    public void test_PetDetails_CanEqual_Empty() throws ParseException {
-        //ARRANGE
-        //Owner
-        Owner owner = setupOwner();
-
-        //PetType
-        PetType petType = new PetType();
-        petType.setId(1);
-
-        //Pet
-        Pet pet = new Pet();
-        pet.setId(1);
-        pet.setName("Marcus");
-        pet.setOwner(owner);
-        Date date = new SimpleDateFormat( "yyyyMMdd" ).parse( "20100520" );
-        pet.setBirthDate(date);
-        pet.setType(petType);
-
-        //ACT
-        PetDetails pd = new PetDetails(pet);
-
-
-        //ASSERT
-        assertTrue(pd.canEqual(pd));
-    }
-
-    @Test
-    public void test_PetDetails_CanEqual_NotEmpty()
+    public void test_PetDetails_CanEqual_Empty()
     {
         //ARRANGE - ACT
         PetDetails pd = new PetDetails();
