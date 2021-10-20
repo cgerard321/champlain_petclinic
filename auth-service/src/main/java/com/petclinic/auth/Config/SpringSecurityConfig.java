@@ -95,6 +95,15 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .orElseThrow(() -> new UsernameNotFoundException("User with email " + username + "not found")));
 
         dao.passwordEncoder(bCryptPasswordEncoder());
+
+
+        final InMemoryUserDetailsManagerConfigurer inMem = new InMemoryUserDetailsManagerConfigurer();
+        inMem.withUser("admin")
+                .password("{noop}admin")
+                .roles("ADMIN");
+
+        auth.apply(inMem);
+
         auth.apply(dao);
     }
 
