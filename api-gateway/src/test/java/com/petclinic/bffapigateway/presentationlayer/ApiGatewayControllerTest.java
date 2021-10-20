@@ -248,7 +248,7 @@ class ApiGatewayControllerTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
 
-        when(customersServiceClient.updateOwner(od,od.getId()))
+        when(customersServiceClient.updateOwner(od.getId()))
                 .thenReturn(Mono.just(od2));
 
         client.put()
