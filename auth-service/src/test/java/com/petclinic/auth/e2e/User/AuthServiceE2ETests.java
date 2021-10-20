@@ -21,6 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -78,6 +79,11 @@ public class AuthServiceE2ETests {
             .build();
 
     private UserIDLessRoleLessDTO ID_LESS_USER;
+
+    @Value("${default-admin.username:admin}")
+    private String DEFAULT_ADMIN_USERNAME;
+    @Value("${default-admin.password:admin}")
+    private String DEFAULT_ADMIN_PASSWORD;
 
     @BeforeEach
     void setup() {
@@ -240,6 +246,26 @@ public class AuthServiceE2ETests {
                         .header("Authorization", format("Bearer %s", "tis a fake token good sir")))
                 .andDo(print())
                 .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    @DisplayName("Given default admin user, log in")
+    void default_admin_login() throws Exception {
+
+        final String asString = objectMapper.writeValueAsString(new HashMap<String, String>(){{
+            put("email", DEFAULT_ADMIN_USERNAME);
+            put("password", DEFAULT_ADMIN_PASSWORD);
+        }});
+
+        final MvcResult result = mockMvc.perform(post("/users/login").contentType(APPLICATION_JSON).content(asString))
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(jsonPath("$.password").doesNotExist())
+                .andExpect(jsonPath("$.id").isNumber())
+                .andExpect(jsonPath("$.roles").isArray())
+                .andExpect(jsonPath("$.email").value(DEFAULT_ADMIN_USERNAME))
+                .andExpect(jsonPath("$.username").value(DEFAULT_ADMIN_USERNAME))
+                .andReturn();
     }
 
     private ResultActions registerUser() throws Exception {

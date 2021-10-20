@@ -24,6 +24,9 @@ spring:
 mailer-service:
   host: localhost
   port: 8888
+default-admin:
+  username: admin
+  password: admin
 
 ---
 spring.profiles: docker
