@@ -168,6 +168,7 @@ public class UserServiceImpl implements UserService {
                         .id(-1)
                         .username(userDetails.getUsername())
                         .email(userDetails.getUsername())
+                        .verified(true)
                         .password(userDetails.getPassword())
                         .roles(userDetails.getAuthorities().parallelStream()
                                 .map(n -> Role.builder()
