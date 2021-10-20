@@ -130,7 +130,7 @@ public class BillServiceImplTest {
         Calendar calendar = Calendar.getInstance();
         calendar.set(2021, Calendar.SEPTEMBER, 21);
         Date date = calendar.getTime();
-        Bill entity = new Bill(billId,customerId, date, "Checkup", 50.0);
+        Bill entity = new Bill(billId,customerId, date, "Consultations",39.99);
         when(billRepository.findById(1)).thenReturn(Optional.of(entity));
 
 
@@ -146,7 +146,7 @@ public class BillServiceImplTest {
         Calendar calendar = Calendar.getInstance();
         calendar.set(2021, Calendar.SEPTEMBER, 21);
         Date date = calendar.getTime();
-        Bill entity = new Bill(billId,customerId, date, "Checkup", 50.0);
+        Bill entity = new Bill(billId,customerId, date, "Consultations", 39.99);
 
 
         billService.DeleteBill(1);
