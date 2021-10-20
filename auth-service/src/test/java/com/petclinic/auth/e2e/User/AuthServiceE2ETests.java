@@ -79,6 +79,10 @@ public class AuthServiceE2ETests {
 
     private UserIDLessRoleLessDTO ID_LESS_USER;
 
+
+    private String DEFAULT_ADMIN_USERNAME = "admin";
+    private String DEFAULT_ADMIN_PASSWORD = "admin";
+
     @BeforeEach
     void setup() {
         ID_LESS_USER = objectMapper.convertValue(USER, UserIDLessRoleLessDTO.class);
@@ -240,6 +244,26 @@ public class AuthServiceE2ETests {
                         .header("Authorization", format("Bearer %s", "tis a fake token good sir")))
                 .andDo(print())
                 .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    @DisplayName("Given default admin user, log in")
+    void default_admin_login() throws Exception {
+
+        final String asString = objectMapper.writeValueAsString(new HashMap<String, String>(){{
+            put("email", DEFAULT_ADMIN_USERNAME);
+            put("password", DEFAULT_ADMIN_PASSWORD);
+        }});
+
+        final MvcResult result = mockMvc.perform(post("/users/login").contentType(APPLICATION_JSON).content(asString))
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(jsonPath("$.password").doesNotExist())
+                .andExpect(jsonPath("$.id").isNumber())
+                .andExpect(jsonPath("$.roles").isArray())
+                .andExpect(jsonPath("$.email").value(USER.getEmail()))
+                .andExpect(jsonPath("$.username").value(USER.getUsername()))
+                .andReturn();
     }
 
     private ResultActions registerUser() throws Exception {
