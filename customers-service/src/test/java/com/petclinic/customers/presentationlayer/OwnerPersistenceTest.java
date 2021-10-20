@@ -29,23 +29,12 @@ class OwnerPersistenceTest {
     @Autowired
     private OwnerRepository repository;
 
-
-    /**
-     * ------------------------ DELETE_REPO ------------------------
-     * Simple void method to delete the repo when testing
-     * Called before each test
-     */
     @BeforeEach
     public void setUpDB()
     {
         repository.deleteAll();
     }
 
-
-    /**
-     * ------------------------ TEST_FIND ------------------------
-     * Testing the find by id method
-     */
     @DisplayName("ownerPersistence_FindOwner")
     @Test
     public void findById() {
@@ -65,11 +54,6 @@ class OwnerPersistenceTest {
         assertThat(foundOwner, samePropertyValuesAs(savedOwner));
     }
 
-
-    /**
-     * ------------------------ TEST_FIND_ALL ------------------------
-     * Testing the find_all() method
-     */
     @DisplayName("ownerPersistence_FindAllOwner")
     @Test
     public void findAll()
@@ -110,11 +94,6 @@ class OwnerPersistenceTest {
         assertEquals(expectedLength, ownerList.size());
     }
 
-
-    /**
-     * ------------------------ TEST_DELETE ------------------------
-     * Testing the delete owner method
-     */
     @DisplayName("ownerPersistence_DeleteOwner")
     @Test
     public void deleteOwner()
@@ -132,10 +111,6 @@ class OwnerPersistenceTest {
 
     }
 
-    /**
-     * ------------------------ TEST_CREATE ------------------------
-     * Testing the create owner method
-     */
     @DisplayName("ownerPersistence_CreateOwner")
     @Test
     public void create_owner_test()
@@ -153,11 +128,6 @@ class OwnerPersistenceTest {
         assertThat(foundSaved, samePropertyValuesAs(savedOwner));
         assertEquals(1,repository.findAll().size());
     }
-
-    /**
-     * ------------------------ TEST_UPDATE ------------------------
-     * Testing the update owner method
-     */
 
     @DisplayName("ownerPersistence_UpdateOwner")
     @Test
