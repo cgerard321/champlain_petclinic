@@ -22,6 +22,7 @@ package com.petclinic.auth.Config;
 
 import com.petclinic.auth.User.UserRepo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -49,6 +50,10 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final UserRepo userRepo;
     private final JWTFilter jwtFilter;
+    @Value("${default-admin.username}")
+    private String DEFAULT_ADMIN_USERNAME = "admin";
+    @Value("${default-admin.password}")
+    private String DEFAULT_ADMIN_PASSWORD = "admin";
 
     private static final String[] AUTH_WHITELIST = {
             // -- Swagger UI v2
@@ -98,12 +103,11 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 
 
         final InMemoryUserDetailsManagerConfigurer inMem = new InMemoryUserDetailsManagerConfigurer();
-        inMem.withUser("admin")
-                .password("{noop}admin")
+        inMem.withUser(DEFAULT_ADMIN_USERNAME)
+                .password("{noop}" + DEFAULT_ADMIN_PASSWORD)
                 .roles("ADMIN");
 
         auth.apply(inMem);
-
         auth.apply(dao);
     }
 

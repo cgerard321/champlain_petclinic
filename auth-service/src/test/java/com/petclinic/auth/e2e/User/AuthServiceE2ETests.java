@@ -21,6 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -79,8 +80,9 @@ public class AuthServiceE2ETests {
 
     private UserIDLessRoleLessDTO ID_LESS_USER;
 
-
+    @Value("${default-admin.username}")
     private String DEFAULT_ADMIN_USERNAME = "admin";
+    @Value("${default-admin.password}")
     private String DEFAULT_ADMIN_PASSWORD = "admin";
 
     @BeforeEach
