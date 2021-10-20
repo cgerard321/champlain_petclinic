@@ -296,4 +296,10 @@ public class AuthServiceUserServiceTests {
         assertThrows(InvalidInputException.class, () -> userService.getUserById(id));
     }
 
+    @Test
+    @DisplayName("When userId is an unprocessable input, then throw InvalidInputException")
+    void throw_invalid_input_exception_when_id_is_unprocessable(){
+        assertThrows(InvalidInputException.class, () -> userService.deleteUser(-1));
+    }
+
 }
