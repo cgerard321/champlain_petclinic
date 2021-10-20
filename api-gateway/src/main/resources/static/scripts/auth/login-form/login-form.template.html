@@ -8,7 +8,7 @@
 
             <input id="email" class="form-control" ng-model="login.email" name="email" required/>
 
-            <span ng-show="loginForm.username.$error.required" class="help-block">Username is required.</span>
+            <span ng-show="loginForm.email.$error.required" class="help-block">Email is required.</span>
         </div>
 
         <div class="group-form">
@@ -31,7 +31,7 @@
         </div>
 
         <div class="group-form d-flex justify-content-center">
-            <button class="btn btn-default" type="submit">Login</button>
+            <button id="button" class="btn btn-default" type="submit">Login</button>
         </div>
     </form>
     </div>
