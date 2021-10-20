@@ -307,6 +307,8 @@
         if(monthDays.innerHTML === null) {
             location.reload();
         }
+
+        localStorage.setItem(practitionerIdAndMonth, getFormatPractitionerIdAndMonth());
     }
 
     //check if a date is on the weekend
@@ -371,6 +373,16 @@
             return "PM";
         }
     }
+
+    const getFormatPractitionerIdAndMonth = () => {
+        let lastDayOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+
+        let startDate = date.getFullYear() + "-" + date.getMonth() + "-01";
+        let endDate = date.getFullYear() + "-" + date.getMonth() + "-" + lastDayOfMonth;
+
+        return $("#selectedVet :selected").attr("data-id").toString() + "," + startDate + "," + endDate;
+    }
+
 
     renderCalendar();
 
