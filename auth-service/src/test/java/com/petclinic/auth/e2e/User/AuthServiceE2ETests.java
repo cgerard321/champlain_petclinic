@@ -261,8 +261,8 @@ public class AuthServiceE2ETests {
                 .andExpect(jsonPath("$.password").doesNotExist())
                 .andExpect(jsonPath("$.id").isNumber())
                 .andExpect(jsonPath("$.roles").isArray())
-                .andExpect(jsonPath("$.email").value(USER.getEmail()))
-                .andExpect(jsonPath("$.username").value(USER.getUsername()))
+                .andExpect(jsonPath("$.email").value(DEFAULT_ADMIN_USERNAME))
+                .andExpect(jsonPath("$.username").value(DEFAULT_ADMIN_USERNAME))
                 .andReturn();
     }
 
