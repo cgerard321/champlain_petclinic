@@ -8,6 +8,7 @@ angular.module('visits')
         var vetsUrl = "api/gateway/vets";
         var visitId = 0;
         self.practitionerId = 0;
+        self.visitType = "";
         self.date = new Date();
         self.desc = "";
 
@@ -94,7 +95,7 @@ angular.module('visits')
             });
             return practitionerName;
         };
-
+        
         self.switchToUpdateForm = function (practitionerId, date, description, id, visitStatus){
             visitId = id;
             $("#selectedVet option[value='"+practitionerId+"']").prop("selected", true);
