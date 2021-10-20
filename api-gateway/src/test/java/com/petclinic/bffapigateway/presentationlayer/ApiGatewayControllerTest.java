@@ -222,6 +222,50 @@ class ApiGatewayControllerTest {
     }
 
     @Test
+    void shouldUpdateOwnersGivenId(){
+        OwnerDetails od = new OwnerDetails();
+        od.setId(25);
+        od.setFirstName("Pablo");
+        od.setLastName("Escobar");
+        od.setAddress("123 Gringo Street");
+        od.setCity("Cancun");
+        od.setTelephone("5141234567");
+        when(customersServiceClient.createOwner(od))
+                .thenReturn(Mono.just(od));
+
+        OwnerDetails od2 = new OwnerDetails();
+        od2.setId(25);
+        od2.setFirstName("Pedro");
+        od2.setLastName("Sanchez");
+        od2.setAddress("123 Burrito Street");
+        od2.setCity("Riviera Maya");
+        od2.setTelephone("5141230000");
+
+
+        client.post()
+                .uri("/api/gateway/owners")
+                .body(Mono.just(od), OwnerDetails.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+
+        when(customersServiceClient.updateOwner(od,od.getId()))
+                .thenReturn(Mono.just(od2));
+
+        client.put()
+                .uri("/api/gateway/owners/{ownerId}",od.getId())
+                .body(Mono.just(od2), OwnerDetails.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+
+    }
+
+    @Test
     void deleteUser() {
         UserDetails user = new UserDetails();
         user.setId(1);

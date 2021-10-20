@@ -1,7 +1,9 @@
 package com.petclinic.bffapigateway.dtos;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +16,10 @@ import static java.util.stream.Collectors.toList;
  */
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class OwnerDetails {
+
 
     private int id;
 
