@@ -10,6 +10,8 @@ services:
 
   vets:
     build: vets-service
+    ports:
+      - "7002:8080"
     mem_limit: 350m
     environment:
       - SPRING_PROFILES_ACTIVE=docker
