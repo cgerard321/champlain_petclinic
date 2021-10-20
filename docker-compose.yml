@@ -11,6 +11,8 @@ services:
   vets:
     build: vets-service
     mem_limit: 350m
+    ports:
+      - "7002:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
     depends_on:
