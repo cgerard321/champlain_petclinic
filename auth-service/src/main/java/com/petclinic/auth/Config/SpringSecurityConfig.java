@@ -50,10 +50,10 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final UserRepo userRepo;
     private final JWTFilter jwtFilter;
-    @Value("${default-admin.username}")
-    private String DEFAULT_ADMIN_USERNAME = "admin";
-    @Value("${default-admin.password}")
-    private String DEFAULT_ADMIN_PASSWORD = "admin";
+    @Value("${default-admin.username:admin}")
+    private String DEFAULT_ADMIN_USERNAME;
+    @Value("${default-admin.password:admin}")
+    private String DEFAULT_ADMIN_PASSWORD;
 
     private static final String[] AUTH_WHITELIST = {
             // -- Swagger UI v2

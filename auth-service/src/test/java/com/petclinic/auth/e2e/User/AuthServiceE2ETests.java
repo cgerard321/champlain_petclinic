@@ -80,10 +80,10 @@ public class AuthServiceE2ETests {
 
     private UserIDLessRoleLessDTO ID_LESS_USER;
 
-    @Value("${default-admin.username}")
-    private String DEFAULT_ADMIN_USERNAME = "admin";
-    @Value("${default-admin.password}")
-    private String DEFAULT_ADMIN_PASSWORD = "admin";
+    @Value("${default-admin.username:admin}")
+    private String DEFAULT_ADMIN_USERNAME;
+    @Value("${default-admin.password:admin}")
+    private String DEFAULT_ADMIN_PASSWORD;
 
     @BeforeEach
     void setup() {
