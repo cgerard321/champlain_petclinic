@@ -6,6 +6,7 @@ import com.petclinic.customers.datalayer.Pet;
 import com.petclinic.customers.datalayer.PetRepository;
 import com.petclinic.customers.datalayer.PetType;
 import com.petclinic.customers.presentationlayer.PetRequest;
+import jdk.internal.jline.internal.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -37,8 +38,8 @@ public class PetServiceImpl implements PetService {
     public Optional<Pet> findByPetId(int ownerId, int petId) {
         try {
             Optional<Owner> optionalOwner = ownerService.findByOwnerId(ownerId);
-            Owner owner = optionalOwner.orElseThrow(() -> new NotFoundException("Owner "+ ownerId +" not found"));
-            //Search pet in database with the given id
+            Owner owner = optionalOwner.get();
+            //Search pet in database with the owner
             Optional<Pet> pet = petRepository.findPetByOwner(owner, petId);
             if (!pet.isPresent()) {
                 throw new NotFoundException("Pet "+ petId +" not found");
@@ -49,6 +50,7 @@ public class PetServiceImpl implements PetService {
         catch (Exception e)
         {
             // Exception if pet not found
+            LOG.debug(e.getMessage());
             throw new NotFoundException("Pet not found!");
         }
     }
@@ -61,7 +63,7 @@ public class PetServiceImpl implements PetService {
     public List<Pet> findAll(int ownerId) {
 
         Optional<Owner> optionalOwner = ownerService.findByOwnerId(ownerId);
-        Owner owner = optionalOwner.orElseThrow(() -> new NotFoundException("Owner "+ ownerId +" not found"));
+        Owner owner = optionalOwner.get();
         return petRepository.findAllPetByOwner(owner);
     }
 
