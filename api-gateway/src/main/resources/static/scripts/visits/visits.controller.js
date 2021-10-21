@@ -105,7 +105,7 @@ angular.module('visits')
             self.loadVetInfo();
             self.submit = function () {
                 var data = {
-                    date: $filter('date')(self.date, "yyyy-MM-dd"),
+                    date: $('#date_input').val(),
                     description: $('#description_textarea').val(),
                     practitionerId: $("#selectedVet").val()
                 };
