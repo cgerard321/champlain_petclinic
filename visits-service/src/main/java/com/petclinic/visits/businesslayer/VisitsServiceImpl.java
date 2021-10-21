@@ -62,9 +62,6 @@ public class VisitsServiceImpl implements VisitsService {
         if (visitId < 0)
             throw new InvalidInputException("VisitId can't be negative");
 
-        if (visitId == 33)
-            throw new NotFoundException("Visit with visit id: 33 does not exist.");
-
         return visitRepository.findById(visitId).get();
     }
 

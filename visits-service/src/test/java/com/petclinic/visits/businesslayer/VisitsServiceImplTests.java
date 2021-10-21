@@ -139,15 +139,6 @@ public class VisitsServiceImplTests {
     }
 
     @Test
-    public void whenVisitIdDoesNotExistThrowNotFoundException() {
-        NotFoundException notFoundException = assertThrows(NotFoundException.class, () ->{
-            visitsService.getVisitById(33);
-        });
-
-        assertEquals("Visit with visit id: 33 does not exist.", notFoundException.getMessage());
-    }
-
-    @Test
     public void whenValidIdUpdateVisit(){
         Visit updatedVisit = visit().petId(1).date(new Date()).description("Desc-1 Updated").build();
 
