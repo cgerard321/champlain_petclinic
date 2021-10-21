@@ -140,7 +140,15 @@ public class VisitResourceTest {
 		mvc.perform(get("/visit/{visitId}", -1))
 				.andExpect(status().isUnprocessableEntity())
 				.andExpect(result -> assertTrue(result.getResolvedException() instanceof InvalidInputException))
-				.andExpect(result -> assertEquals("visitId can't be negative.", result.getResolvedException().getMessage()));
+				.andExpect(result -> assertEquals("VisitId can't be negative.", result.getResolvedException().getMessage()));
+	}
+
+	@Test
+	void whenNegativeVisitIdThenShouldReturnUnprocessableEntity() throws Exception {
+		when(visitsService.getVisitById(33)).thenThrow(new NotFoundException("Visit with visit id: 33 does not exist."));
+
+		mvc.perform(get("/visit/{visitId}", 33))
+				.andExpect(result -> assertEquals("Visit with visit id: 33 does not exist.", result.getResolvedException().getMessage()));
 	}
 
 	@Test
