@@ -55,7 +55,7 @@ public class BillServiceImplTest {
         calendar.set(2021, Calendar.SEPTEMBER, 21);
 
         Date date = calendar.getTime();
-        Bill entity = new Bill(billId,customerId, date, "Checkup", 50.00);
+        Bill entity = new Bill(billId,customerId, "Checkup", date, 50.00);
         when(billRepository.findById(1)).thenReturn(Optional.of(entity));
 
         BillDTO returnedBill = billService.GetBill(1);
@@ -77,8 +77,8 @@ public class BillServiceImplTest {
         Date date = calendar.getTime();
 
         HashMap<String, Double> list = setUpVisitList();
-        BillDTO receivedDTO = new BillDTO(billId,customerId, date, "Consultations");
-        Bill entity = new Bill(billId,customerId, date, "Consultations", 39.99);
+        BillDTO receivedDTO = new BillDTO(billId,customerId, "Consultations", date, 39.99);
+        Bill entity = new Bill(billId,customerId, "Consultations", date, 39.99);
         receivedDTO.setAmount(list.get(receivedDTO.getVisitType()));
         when(billRepository.save(any(Bill.class))).thenReturn(entity);
 
@@ -112,7 +112,7 @@ public class BillServiceImplTest {
         Calendar calendar = Calendar.getInstance();
         calendar.set(2021, Calendar.SEPTEMBER, 21);
         Date date = calendar.getTime();
-        Bill entity = new Bill(billId,customerId, date, "Checkup", 50.0);
+        Bill entity = new Bill(billId,customerId, "Checkup", date, 50.0);
         when(billRepository.findById(1)).thenReturn(Optional.of(entity));
 
 
@@ -128,7 +128,7 @@ public class BillServiceImplTest {
         Calendar calendar = Calendar.getInstance();
         calendar.set(2021, Calendar.SEPTEMBER, 21);
         Date date = calendar.getTime();
-        Bill entity = new Bill(billId,customerId, date, "Checkup", 50.0);
+        Bill entity = new Bill(billId,customerId, "Checkup", date, 50.0);
 
 
         billService.DeleteBill(1);

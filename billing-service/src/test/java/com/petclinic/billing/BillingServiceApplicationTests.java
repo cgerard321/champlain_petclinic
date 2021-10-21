@@ -40,7 +40,7 @@ class BillingServiceApplicationTests {
 	public void createBill(){
 		int expectedSize = 1;
 		Date d = new Date();
-		Bill newBill = new Bill(BILL_ID,CUSTOMER_ID,d, "Daily Checkup", 199.86);
+		Bill newBill = new Bill(BILL_ID,CUSTOMER_ID, "Daily Checkup", d, 199.86);
 		billRepository.save(newBill);
 
 		assertEquals(expectedSize, billRepository.findByBillId(BILL_ID).size());
@@ -51,7 +51,7 @@ class BillingServiceApplicationTests {
 		int expectedLength = 1;
 
 		Date d = new Date();
-		Bill entity = new Bill(BILL_ID,CUSTOMER_ID,d, "Daily Checkup", 199.86);
+		Bill entity = new Bill(BILL_ID,CUSTOMER_ID, "Daily Checkup", d, 199.86);
 		billRepository.save(entity);
 
 		assertEquals(expectedLength, billRepository.findByBillId(BILL_ID).size());
@@ -62,7 +62,7 @@ class BillingServiceApplicationTests {
 	@Test
 	public void deleteBill(){
 		Date d = new Date();
-		Bill bill = new Bill(BILL_ID,CUSTOMER_ID, d, "Daily Checkup", 199.86);
+		Bill bill = new Bill(BILL_ID,CUSTOMER_ID, "Daily Checkup", d, 199.86);
 		billRepository.save(bill);
 
 		assertEquals(1, billRepository.findByBillId(BILL_ID).size());
