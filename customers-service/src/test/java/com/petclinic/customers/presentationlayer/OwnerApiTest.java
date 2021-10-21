@@ -13,6 +13,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
+import javax.print.attribute.standard.Media;
 import java.util.List;
 import java.util.Optional;
 
@@ -147,7 +148,25 @@ class OwnerAPITest {
                 .andExpect(status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").exists());
     }
+    /**
+     * ------------------------ UPDATE_OWNER ------------------------
+     * Test an HTTP PUT request
+     */
+    @Test
+    void updateOwner_API_Test() throws Exception{
 
+        Owner updateOwner = new Owner(5,"Adam","West","57 Adam St.","Bucharest","7777777777");
+
+        when(ownerService.findByOwnerId(5)).thenReturn(Optional.of(updateOwner));
+        mvc.perform(put("/owners/5").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(5))
+                .andExpect(jsonPath("$.firstName").value("Adam"))
+                .andExpect(jsonPath("$.lastName").value("West"))
+                .andExpect(jsonPath("$.address").value("57 Adam St."))
+                .andExpect(jsonPath("$.city").value("Bucharest"))
+                .andExpect(jsonPath("$.telephone").value("7777777777"));
+    }
 }
 
 
