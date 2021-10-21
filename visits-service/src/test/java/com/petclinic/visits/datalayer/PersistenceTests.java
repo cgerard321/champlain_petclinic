@@ -82,15 +82,16 @@ public class PersistenceTests {
     // TESTS FOR FETCHING VISIT BASED ON VISIT ID ----------------------------------------------------------------------
     @Test
     public void shouldFindVisitByVisitIdWhenExistingVisit(){
-        Visit v = repo.findByVisitId(visit.getVisitId());
+        Optional<Visit> v = repo.findByVisitId(visit.getVisitId());
 
-        assertEquals(v.getId(), visit.getId());
-        assertEquals(v.getVisitId(), visit.getVisitId());
-        assertEquals(v.getDate(), visit.getDate());
-        assertEquals(v.getDescription(), visit.getDescription());
-        assertEquals(v.getPetId(), visit.getPetId());
-        assertEquals(v.getPractitionerId(), visit.getPractitionerId());
-        assertEquals(v.isStatus(), visit.isStatus());
+        assertNotNull(v);
+        assertEquals(v.get().getId(), visit.getId());
+        assertEquals(v.get().getVisitId(), visit.getVisitId());
+        assertEquals(v.get().getDate(), visit.getDate());
+        assertEquals(v.get().getDescription(), visit.getDescription());
+        assertEquals(v.get().getPetId(), visit.getPetId());
+        assertEquals(v.get().getPractitionerId(), visit.getPractitionerId());
+        assertEquals(v.get().isStatus(), visit.isStatus());
     }
 
     @Test
