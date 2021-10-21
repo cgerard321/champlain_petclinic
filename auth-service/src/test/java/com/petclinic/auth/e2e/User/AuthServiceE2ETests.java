@@ -21,6 +21,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -28,6 +29,7 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicReference;
@@ -39,6 +41,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -75,6 +79,11 @@ public class AuthServiceE2ETests {
             .build();
 
     private UserIDLessRoleLessDTO ID_LESS_USER;
+
+    @Value("${default-admin.username:admin}")
+    private String DEFAULT_ADMIN_USERNAME;
+    @Value("${default-admin.password:admin}")
+    private String DEFAULT_ADMIN_PASSWORD;
 
     @BeforeEach
     void setup() {
@@ -190,10 +199,79 @@ public class AuthServiceE2ETests {
                 .andExpect(jsonPath("$.totalPages").value(ceil(userRepo.count() / 10.0)));
     }
 
-    private void registerUser() throws Exception {
+    @Test
+    @DisplayName("Given duplicate email, expect bad request exception with sensical message")
+    void duplicate_email_register() throws Exception {
+
+        registerUser();
 
         final String asString = objectMapper.writeValueAsString(ID_LESS_USER);
         mockMvc.perform(post("/users").contentType(APPLICATION_JSON).content(asString))
+                .andExpect(status().is4xxClientError())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(jsonPath("$.message").exists())
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.statusCode").exists());
+    }
+
+    @Test
+    @DisplayName("Given non-registered user login, return 401")
+    void non_registered_user() throws Exception {
+
+        final String asString = objectMapper.writeValueAsString(new HashMap<String, String>(){{
+            put("email", USER.getEmail());
+            put("password", USER.getPassword());
+        }});
+
+        final MvcResult result = mockMvc.perform(post("/users/login").contentType(APPLICATION_JSON).content(asString))
+                .andExpect(status().is4xxClientError())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(jsonPath("$.password").doesNotExist())
+                .andExpect(jsonPath("$.statusCode").value(UNAUTHORIZED.value()))
+                .andExpect(jsonPath("$.timestamp").exists())
+                .andExpect(jsonPath("$.message").value(format("Password not valid for email %s", USER.getEmail())))
+                .andReturn();
+
+        final String token = result.getResponse().getHeader(AUTHORIZATION);
+
+        assertNull(token);
+    }
+
+    @Test
+    @DisplayName("Given non-admin user, access protected roles endpoint")
+    void unauthorized_access_protected_route() throws Exception {
+
+        mockMvc.perform(get("/roles")
+                        .contentType(APPLICATION_JSON)
+                        .header("Authorization", format("Bearer %s", "tis a fake token good sir")))
+                .andDo(print())
+                .andExpect(status().is4xxClientError());
+    }
+
+    @Test
+    @DisplayName("Given default admin user, log in")
+    void default_admin_login() throws Exception {
+
+        final String asString = objectMapper.writeValueAsString(new HashMap<String, String>(){{
+            put("email", DEFAULT_ADMIN_USERNAME);
+            put("password", DEFAULT_ADMIN_PASSWORD);
+        }});
+
+        final MvcResult result = mockMvc.perform(post("/users/login").contentType(APPLICATION_JSON).content(asString))
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(content().contentType(APPLICATION_JSON))
+                .andExpect(jsonPath("$.password").doesNotExist())
+                .andExpect(jsonPath("$.id").isNumber())
+                .andExpect(jsonPath("$.roles").isArray())
+                .andExpect(jsonPath("$.email").value(DEFAULT_ADMIN_USERNAME))
+                .andExpect(jsonPath("$.username").value(DEFAULT_ADMIN_USERNAME))
+                .andReturn();
+    }
+
+    private ResultActions registerUser() throws Exception {
+
+        final String asString = objectMapper.writeValueAsString(ID_LESS_USER);
+        return mockMvc.perform(post("/users").contentType(APPLICATION_JSON).content(asString))
                 .andExpect(status().is2xxSuccessful())
                 .andExpect(content().contentType(APPLICATION_JSON))
                 .andExpect(jsonPath("$.password").doesNotExist())
