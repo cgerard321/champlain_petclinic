@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.billing.businesslayer.BillService;
 import com.petclinic.billing.datalayer.Bill;
 import com.petclinic.billing.datalayer.BillDTO;
+import com.petclinic.billing.datalayer.BillRepository;
 import com.petclinic.billing.exceptions.InvalidInputException;
 import com.petclinic.billing.exceptions.NotFoundException;
 import com.petclinic.billing.http.BillControllerExceptionHandler;
@@ -21,13 +22,18 @@ import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
 import java.util.Date;
 
+import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -38,6 +44,9 @@ class BillResourceTest {
 
     @MockBean
     BillService service;
+
+    @MockBean
+    BillRepository repository;
 
     @Autowired
     MockMvc mvc;
@@ -104,6 +113,21 @@ class BillResourceTest {
     @Test
     void deleteBill() {
 
+    }
+
+    @Test
+    void test_FindAllBills() throws Exception {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(2021, 9, 21);
+        Date date = calendar.getTime();
+
+        Bill bill = new Bill(1, 1, date, "general", 59.99);
+
+        given(repository.findAll()).willReturn(asList(bill));
+
+        mvc.perform(get("/bills").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].billId").value(1));
     }
 
     @Test
