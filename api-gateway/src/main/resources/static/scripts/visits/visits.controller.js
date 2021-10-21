@@ -4,7 +4,7 @@ angular.module('visits')
     .controller('VisitsController', ['$http', '$state', '$stateParams', '$filter', function ($http, $state, $stateParams, $filter) {
         var self = this;
         var petId = $stateParams.petId || 0;
-        var url = "api/gateway/visit/owners/" + ($stateParams.ownerId || 0) + "/pets/" + petId + "/visits";
+        var postURL = "api/gateway/visit/owners/" + ($stateParams.ownerId || 0) + "/pets/" + petId + "/visits";
         var vetsUrl = "api/gateway/vets";
         var billsUrl = "api/gateway/bill";
         var visitId = 0;
@@ -139,6 +139,10 @@ angular.module('visits')
 
             if(modalTitle === $('#submit_button').text()) {
                 $('#visitForm').submit();
+
+                if(modalTitle === "Update Visit") {
+                    self.resetForm();
+                }
             }
             else if(modalTitle === "Delete visit") {
                 self.deleteVisit($('#confirmationModalConfirmButton').data("targetVisit"));
@@ -175,9 +179,10 @@ angular.module('visits')
                     status: visitStatus
                 };
 
-                url = "api/gateway/owners/*/pets/" + petId + "/visits/" + visitId;
 
-                $http.put(url, data).then(function(response) {
+                let putURL = "api/gateway/owners/*/pets/" + petId + "/visits/" + visitId;
+
+                $http.put(putURL, data).then(function(response) {
                     let currentDate = getCurrentDate();
                     let form = $('#visitForm');
 
@@ -267,7 +272,7 @@ angular.module('visits')
                     status: true
                 };
 
-                $http.post(url, data).then(function () {
+                $http.post(postURL, data).then(function () {
                     // Temporary way to get rid of page reloading
                     $http.get("api/gateway/visits/"+petId).then(function (resp) {
                         self.visits = resp.data;
@@ -513,7 +518,7 @@ angular.module('visits')
                 visitType : $("#selectedVisitType").val()
             }
 
-            $http.post(url, data).then(function(response) {
+            $http.post(postURL, data).then(function(response) {
                 let currentDate = getCurrentDate();
 
                 // Add the visit to one of the lists depending on its date
@@ -602,9 +607,9 @@ angular.module('visits')
             }
 
 
-            url = "api/gateway/owners/*/pets/" + petId + "/visits/" + visitId;
+            let putURL = "api/gateway/owners/*/pets/" + petId + "/visits/" + visitId;
 
-            $http.put(url, data).then(function(response) {
+            $http.put(putURL, data).then(function(response) {
                 // Get the index of the sender from the parent table row data attribute
                 let index = parseInt($(e.target).closest('tr').data("index"));
 
