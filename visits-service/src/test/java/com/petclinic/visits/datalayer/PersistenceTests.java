@@ -111,12 +111,15 @@ public class PersistenceTests {
     }
 
     @Test
-    public void shouldReturnVisitWhenValidVisitID() {
+    public void getVisitByVisitID() {
+        Visit visit = new Visit(5, new Date(), "Description", 5);
+        visit = repo.save(visit);
+
         Visit foundVisit = repo.findById(visit.getId()).get();
 
-        assertEquals(1, foundVisit.getId());
-        assertEquals(1, foundVisit.getPetId());
-        assertTrue(foundVisit.isStatus());
+        assertEquals(visit.getId(), foundVisit.getId());
+        assertEquals(visit.getPetId(), foundVisit.getPetId());
+        assertEquals(visit.isStatus(), foundVisit.isStatus());
     }
 
     @Test
