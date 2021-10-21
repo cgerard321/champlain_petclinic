@@ -12,30 +12,30 @@ public class Bill {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(name = "billId")
     private int billId;
 
     @Column(name="customerId")
     private int customerId;
+
+    @Column(name = "visitType")
+    private String visitType;
 
     @Column(name = "visit_date")
     @Temporal(TemporalType.TIMESTAMP)
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date date = new Date();
 
-    @Column(name = "visitType")
-    private String visitType;
-
     @Column(name = "amount")
     private double amount;
 
     public Bill(){}
 
-
-    public Bill(int billId,int customerId, Date date, String visitType, double amount){
-        this.customerId = customerId;
+    public Bill(int billId,int customerId, String visitType, Date date, double amount){
         this.billId = billId;
-        this.date = date;
+        this.customerId = customerId;
         this.visitType = visitType;
+        this.date = date;
         this.amount = amount;
     }
 

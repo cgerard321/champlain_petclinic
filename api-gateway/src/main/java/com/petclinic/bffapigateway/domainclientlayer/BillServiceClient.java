@@ -14,7 +14,7 @@ import reactor.core.publisher.Mono;
 public class BillServiceClient {
 
     private final WebClient.Builder webClientBuilder;
-    private final String billServiceUrl;
+    private String billServiceUrl;
 
 
     public BillServiceClient(
@@ -26,6 +26,10 @@ public class BillServiceClient {
 
         billServiceUrl = "http://" + billingServiceHost + ":" + billingServicePort + "/bills";
 
+    }
+
+    void setHostname(String hostname) {
+        this.billServiceUrl = hostname;
     }
 
     public Mono<BillDetails> getBilling(final int billId) {
