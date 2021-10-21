@@ -1,3 +1,8 @@
+/**
+ * User: @SmoothWin
+ * Date: 16/10/21
+ * Ticket: feat(VETS-CPC-376)
+ */
 plugins {
 	id 'org.springframework.boot' version '2.3.2.RELEASE'
 	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
@@ -13,14 +18,23 @@ sourceCompatibility = '1.8'
 repositories {
 	mavenCentral()
 }
+ext {
+	mapstructVersion = "1.4.1.Final"
+}
 
 dependencies {
+	implementation 'io.springfox:springfox-boot-starter:3.0.0' //swagger documentation
 	implementation group: 'io.github.bonigarcia', name: 'selenium-jupiter', version: '3.3.5'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation('org.springframework.boot:spring-boot-starter-data-jpa')
 	implementation('mysql:mysql-connector-java')
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+	implementation("org.mapstruct:mapstruct:${mapstructVersion}")
+	compileOnly "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+	testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 
 	runtimeOnly 'com.h2database:h2'
 

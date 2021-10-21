@@ -6,7 +6,7 @@
  * Ticket: feat(AUTH-CPC-95)
  *
  */
-package com.petclinic.auth.Role;
+package com.petclinic.auth.Role.data;
 
 import lombok.*;
 
@@ -16,6 +16,7 @@ import javax.persistence.*;
 @Entity
 @Getter
 @Setter
+@ToString
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)

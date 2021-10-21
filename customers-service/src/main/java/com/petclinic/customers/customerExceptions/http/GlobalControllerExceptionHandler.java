@@ -1,3 +1,11 @@
+/**
+ * Created by IntelliJ IDEA.
+ *
+ * User: @Fube
+ * Date: 2021-10-14
+ * Ticket: feat(AUTH-CPC-388)
+ */
+
 package com.petclinic.customers.customerExceptions.http;
 
 import com.petclinic.customers.customerExceptions.exceptions.InvalidInputException;

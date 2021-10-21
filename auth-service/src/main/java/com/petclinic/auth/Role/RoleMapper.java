@@ -8,6 +8,8 @@
  */
 package com.petclinic.auth.Role;
 
+import com.petclinic.auth.Role.data.Role;
+import com.petclinic.auth.Role.data.RoleIDLessDTO;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;

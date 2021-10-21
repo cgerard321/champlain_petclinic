@@ -15,7 +15,7 @@
   border-radius:20px;
   width:400px !important;
   height:150px !important;
-  background: rgb(0, 0, 0,0.95) !important;
+  background: rgba(0, 0, 0,0.95) !important;
   color:white !important;
   display:grid !important;
   justify-content:center;

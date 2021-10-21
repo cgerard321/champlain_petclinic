@@ -1,8 +1,11 @@
 package com.petclinic.customers.presentationlayer;
 
 import com.petclinic.customers.customerExceptions.exceptions.InvalidInputException;
+import com.petclinic.customers.customerExceptions.exceptions.NotFoundException;
+import com.petclinic.customers.customerExceptions.http.HttpErrorInfo;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -23,8 +26,42 @@ public class ExceptionsTests {
     @Test
     void InvalidInputExceptionWithMessageTest(){
         InvalidInputException invalidInputException = assertThrows(InvalidInputException.class, ()->{
-            throw new InvalidInputException("Appropriate exception message");
+            throw new InvalidInputException("Appropriate InvalidInputException message");
         });
         assertNotNull(invalidInputException.getMessage());
+    }
+
+    @Test
+    void NotFoundExceptionWithEmptyConstructorTest(){
+        NotFoundException notFoundException = assertThrows(NotFoundException.class, ()->{
+            throw new NotFoundException();
+        });
+        assertEquals(notFoundException.getMessage(), null);
+    }
+
+    @Test
+    void NotFoundExceptionWithMessageTest(){
+        NotFoundException notFoundException = assertThrows(NotFoundException.class, ()->{
+            throw new NotFoundException("Appropriate NotFoundException message");
+        });
+        assertNotNull(notFoundException.getMessage());
+    }
+
+    @Test
+    void HttpErrorInfoWithNoConstructorTest(){
+            HttpErrorInfo httpErrorInfo = new HttpErrorInfo();
+            assertEquals(httpErrorInfo.getTimestamp(), null);
+            assertEquals(httpErrorInfo.getHttpStatus(), null);
+            assertEquals(httpErrorInfo.getPath(), null);
+            assertEquals(httpErrorInfo.getMessage(), null);
+    }
+
+    @Test
+    void HttpErrorInfoWithConstructorTest(){
+        HttpErrorInfo httpErrorInfo = new HttpErrorInfo(HttpStatus.BAD_REQUEST, "/owners/9999/", "Owner does not exist");
+        assertNotNull(httpErrorInfo.getTimestamp());
+        assertEquals(httpErrorInfo.getHttpStatus(), HttpStatus.BAD_REQUEST);
+        assertEquals(httpErrorInfo.getPath(), "/owners/9999/");
+        assertEquals(httpErrorInfo.getMessage(), "Owner does not exist");
     }
 }

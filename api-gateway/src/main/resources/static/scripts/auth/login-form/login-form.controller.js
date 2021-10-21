@@ -1,35 +1,27 @@
 'use strict';
 
 angular.module('loginForm')
-    .controller('LoginFormController', ["$http", '$state', '$stateParams', function ($http, $state, $stateParams) {
-        var self = this;
+    .controller('LoginFormController', ["$http", '$location', "$scope", "authProvider", function ($http, $location, $scope, authProvider) {
 
-        var ownerId = $stateParams.ownerId || 0;
+        this.login = () => $http.post("/api/gateway/users/login", {
+            email: $scope.login.email,
+            password: $scope.login.password,
+        })
+            .then(n => {
+                const token = n.headers("Authorization");
+                const { data: { username, email } } = n;
 
-        if (!ownerId) {
-            self.login = {};
-        } else {
-            $http.get("api/gateway/login/" + ownerId).then(function (resp) {
-                self.login = resp.data;
-            });
-        }
+                authProvider.setUser({
+                    token,
+                    username,
+                    email
+                });
+                $location.path("/welcome")
+            })
+            .catch(n => {
+                console.log(n)
+                $scope.errorMessages = n.data.message.split`\n`;
+            })
 
-        self.submitLoginForm = function () {
-            var id = self.owner.id;
-            var req;
-            if (id) {
-                req = $http.put("api/gateway/login/" + id, self.login);
-            } else {
-                req = $http.post("api/gateway/login", self.login);
-            }
-
-            req.then(function () {
-                $state.go('login');
-            }, function (response) {
-                var error = response.data;
-                alert(error.error + "\r\n" + error.errors.map(function (e) {
-                    return e.field + ": " + e.defaultMessage;
-                }).join("\r\n"));
-            });
-        };
+        this.keypress = ({ originalEvent: { key } }) => key === 'Enter' && this.add()
     }]);

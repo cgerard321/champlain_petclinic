@@ -1,14 +1,12 @@
 package com.petclinic.bffapigateway.dtos;
 
 import lombok.Data;
-
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
 public class VetDetails {
 
-        private int id;
 
         private int vetId;
 
@@ -20,13 +18,14 @@ public class VetDetails {
 
         private String phoneNumber;
 
+        private byte[] image;
+
         private String resume;
 
         private String workday;
 
-        private Integer enabled;
+        private Integer isActive;
 
         private final List<Specialty> specialties = new ArrayList<>();
 
 }
-

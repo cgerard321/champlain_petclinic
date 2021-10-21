@@ -1,13 +1,11 @@
 package com.petclinic.vets.presentationlayer;
 
 import com.petclinic.vets.businesslayer.VetService;
-import com.petclinic.vets.datalayer.Vet;
-import com.petclinic.vets.datalayer.VetRepository;
+import com.petclinic.vets.datalayer.*;
 import com.petclinic.vets.presentationlayer.VetResource;
 import com.petclinic.vets.utils.exceptions.NotFoundException;
 import org.hibernate.validator.internal.util.logging.Messages_$bundle;
 import org.junit.jupiter.api.BeforeEach;
-import com.petclinic.vets.datalayer.Specialty;
 import com.petclinic.vets.datalayer.Vet;
 import com.petclinic.vets.datalayer.VetRepository;
 import com.petclinic.vets.utils.exceptions.InvalidInputException;
@@ -23,16 +21,22 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.RequestBuilder;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import javax.servlet.ServletContext;
+import java.util.HashSet;
 import java.util.Optional;
+import java.util.Set;
 
 import static  org.hamcrest.MatcherAssert.assertThat;
 import static java.util.Arrays.asList;
@@ -65,6 +69,8 @@ class VetResourceTest {
 	VetService vetService;
 	@MockBean
 	VetRepository vetRepository;
+	@Autowired
+	VetResource vetResource;
 
 	@Test
 	@DisplayName("Get Vet By vetId Resource Test")
@@ -86,7 +92,13 @@ class VetResourceTest {
 				.andExpect(jsonPath("$.vetId").value(874130));
 	}
 	@Test
-	@DisplayName("Get Vet By vetId Invalid Input Ressource Test")
+	@DisplayName("Get Vet By vetId Invalid Input Resource Test")
+	void getVetByVetIdInvalidInputId() throws Exception{
+
+		assertThrows(InvalidInputException.class, () -> vetResource.findVet(0));
+	}
+	@Test
+	@DisplayName("Get Vet By vetId Invalid Input Resource Test")
 	void getVetByVetIdInvalidInput() throws Exception{
 			assertThrows(NotFoundException.class,()->{
 				vetService.getVetByVetId(-10);
@@ -111,7 +123,7 @@ class VetResourceTest {
 		vet.setIsActive(1);
 
 		given(vetRepository.findAllEnabledVets()).willReturn(asList(vet));
-		mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
+		mvc.perform(get("/vets/enabled").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$[0].vetId").value(874130));
 	}
@@ -142,6 +154,9 @@ class VetResourceTest {
 	@DisplayName("Create Vet Resource Test")
 	void createVet() throws Exception {
 		//assert
+		Specialty specialty = new Specialty(1,123456,"tester");
+		Set<Specialty> specialties= new HashSet<>();
+		specialties.add(specialty);
 		Vet vet2 = new Vet();
 		vet2.setId(1);
 		vet2.setVetId(874130);
@@ -152,6 +167,7 @@ class VetResourceTest {
 		vet2.setResume("Practicing since 3 years");
 		vet2.setWorkday("Monday, Tuesday, Friday");
 		vet2.setIsActive(1);
+		vet2.setSpecialties(specialties);
 		when(vetRepository.save(any(Vet.class))).thenReturn(vet2);
 		mvc.perform(post("/vets")
 						.contentType(MediaType.APPLICATION_JSON)
@@ -161,6 +177,7 @@ class VetResourceTest {
 								"\"phoneNumber\": 2384," +
 								"\"resume\": \"Practicing since 3 years\"," +
 								"\"workday\": \"Monday, Tuesday, Friday\"," +
+								"\"specialties\":[{\"id\":2, \"specialtyId\":234567, \"name\":\"tester\"}]," +
 								"\"isActive\": 1}"))
 
 				// Validate the response code and content type
@@ -172,6 +189,13 @@ class VetResourceTest {
 	@DisplayName("Update Vet Resource Test")
 	void updateVet() throws Exception {
 		//arrange
+		byte [] image = {  0x00, 0x00, 0x00, 0x00, 0x00, 0x60, 0x06, 0x00, 0x01, (byte) 0xc1, (byte) 0x83, (byte) 0x80, 0x07, (byte) 0xc3, (byte) 0xc3, (byte) 0xe0,
+				0x0f, (byte) 0xe3, (byte) 0xc7, (byte) 0xf0, 0x0f, (byte) 0xff, (byte) 0xff, (byte) 0xf0, 0x1f, (byte) 0xff, (byte) 0xff, (byte) 0xf8, 0x1f, (byte) 0xff, (byte) 0xff, (byte) 0xf8,
+				0x0f, (byte) 0xff, (byte) 0xff, (byte) 0xf0, 0x0f, 0x3b, (byte) 0xdc, (byte) 0xf0, 0x06, 0x01, (byte) 0x80, 0x60, 0x03, 0x01, (byte) 0x80, (byte) 0xc0,
+				0x00, 0x00, 0x00, 0x00};
+		Specialty specialty = new Specialty(1,123456,"tester");
+		Set<Specialty> specialties= new HashSet<>();
+		specialties.add(specialty);
 		Vet vet = new Vet();
 		vet.setId(1);
 		vet.setVetId(874130);
@@ -182,25 +206,32 @@ class VetResourceTest {
 		vet.setResume("Practicing since 3 years");
 		vet.setWorkday("Monday, Tuesday, Friday");
 		vet.setIsActive(1);
+		vet.setSpecialties(specialties);
+		vet.setImage(image);
 		//act
-		given(vetRepository.findByVetId(vet.getVetId())).willReturn(Optional.of(vet));
+		when(vetRepository.findByVetId(anyInt())).thenReturn(Optional.of(vet));
+		when(vetRepository.save(any())).thenAnswer(i -> i.getArgument(0, Vet.class));
 		//assert
+
+
 		mvc.perform(put("/vets/{vetId}",vet.getVetId())
 						.contentType(MediaType.APPLICATION_JSON)
-						.content("{ \"id\": 1," +
-								"\"vetId\": 874130," +
+				// Removed due to change of entity: \"id\": 1,"
+						.content("{\"vetId\": 874130," +
 								"\"firstName\": \"Jamess\"," +
 								"\"lastName\": \"Carterr\"," +
 								"\"email\": \"carter.james2@email.com\"," +
 								"\"phoneNumber\": 2383," +
 								"\"resume\": \"Practicing since 4 years\"," +
 								"\"workday\": \"Monday, Friday\"," +
+								"\"image\": \"NULL\"," +
+								"\"specialties\":[{\"id\":2, \"specialtyId\":234567, \"name\":\"testerA\"}]," +
 								"\"isActive\": 1}"))
 
 				// Validate the response code and content type
 				.andExpect(status().isNoContent())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-				.andExpect(jsonPath("$.id").value(1))
+//				.andExpect(jsonPath("$.id").value(1))
 				.andExpect(jsonPath("$.vetId").value(874130))
 				.andExpect(jsonPath("$.firstName").value("Jamess"))
 				.andExpect(jsonPath("$.lastName").value("Carterr"))
@@ -208,13 +239,17 @@ class VetResourceTest {
 				.andExpect(jsonPath("$.phoneNumber").value("(514)-634-8276 #2383"))
 				.andExpect(jsonPath("$.resume").value("Practicing since 4 years"))
 				.andExpect(jsonPath("$.workday").value("Monday, Friday"))
-				.andExpect(jsonPath("$.isActive").value(1));;
+				.andExpect(jsonPath("$.image").value("NULL"))
+				.andExpect(jsonPath("$.specialties[0].name").value("testerA"))
+				.andExpect(jsonPath("$.isActive").value(1));
 	}
+
 
 	@Test
 	@DisplayName("Disable Vet Resource Test")
 	void disableAVet() throws Exception {
 		//arrange
+
 		Vet vet = new Vet();
 		vet.setId(1);
 		vet.setVetId(874130);
@@ -225,13 +260,14 @@ class VetResourceTest {
 		vet.setResume("Practicing since 3 years");
 		vet.setWorkday("Monday, Tuesday, Friday");
 		vet.setIsActive(0);
+
 		//act
 		given(vetRepository.findByVetId(vet.getVetId())).willReturn(Optional.of(vet));
 		//assert
 		mvc.perform(put("/vets/{vetId}/disableVet",vet.getVetId())
 								.contentType(MediaType.APPLICATION_JSON)
-								.content("{ \"id\": 1," +
-										"\"vetId\": 874130," +
+								// Removed due to change of entity: \"id\": 1,"
+								.content("{ \"vetId\": 874130," +
 										"\"firstName\": \"James\"," +
 										"\"lastName\": \"Carter\"," +
 										"\"email\": \"carter.james@email.com\"," +
@@ -243,7 +279,7 @@ class VetResourceTest {
 						// Validate the response code and content type
 						.andExpect(status().isOk())
 						.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-				.andExpect(jsonPath("$.id").value(1))
+//				.andExpect(jsonPath("$.id").value(1))
 				.andExpect(jsonPath("$.vetId").value(874130))
 				.andExpect(jsonPath("$.firstName").value("James"))
 				.andExpect(jsonPath("$.lastName").value("Carter"))
@@ -273,8 +309,8 @@ class VetResourceTest {
 		//assert
 		mvc.perform(put("/vets/{vetId}/enableVet",vet.getVetId())
 						.contentType(MediaType.APPLICATION_JSON)
-						.content("{ \"id\": 1," +
-								"\"vetId\": 874130," +
+				// Removed due to change of entity: \"id\": 1,"
+						.content("{ \"vetId\": 874130," +
 								"\"firstName\": \"James\"," +
 								"\"lastName\": \"Carter\"," +
 								"\"email\": \"carter.james@email.com\"," +
@@ -286,7 +322,7 @@ class VetResourceTest {
 				// Validate the response code and content type
 				.andExpect(status().isOk())
 				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
-				.andExpect(jsonPath("$.id").value(1))
+//				.andExpect(jsonPath("$.id").value(1))
 				.andExpect(jsonPath("$.vetId").value(874130))
 				.andExpect(jsonPath("$.firstName").value("James"))
 				.andExpect(jsonPath("$.lastName").value("Carter"))
@@ -313,9 +349,9 @@ class VetResourceTest {
 		vet.setIsActive(1);
 
 		given(vetRepository.findAllEnabledVets()).willReturn(asList(vet));
-		mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
+		mvc.perform(get("/vets/enabled").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$[0].id").value(1))
+//				.andExpect(jsonPath("$[0].id").value(1))
 				.andExpect(jsonPath("$[0].vetId").value(874130))
 				.andExpect(jsonPath("$[0].firstName").value("James"))
 				.andExpect(jsonPath("$[0].lastName").value("Carter"))
@@ -344,9 +380,9 @@ class VetResourceTest {
 
 		given(vetRepository.findAllEnabledVets()).willReturn(asList(vet));
 
-		mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
+		mvc.perform(get("/vets/enabled").accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$[0].id").value(1))
+//				.andExpect(jsonPath("$[0].id").value(1))
 				.andExpect(jsonPath("$[0].vetId").value(874130))
 				.andExpect(jsonPath("$[0].firstName").value("James"))
 				.andExpect(jsonPath("$[0].lastName").value("Carter"))
