@@ -158,7 +158,11 @@ public class VisitsServiceClient {
     }
     
     public Mono<VisitDetails> getVisitById(int visitId) {
-        return null;
+        return webClientBuilder.build()
+                .get()
+                .uri(hostname + "/visits/visit/{visitId}")
+                .retrieve()
+                .bodyToMono(VisitDetails.class);
     }
 }
 

@@ -124,7 +124,7 @@ public class BFFApiGatewayController {
     
     @GetMapping(value ="visits/visit/{visitId}")
     public Mono<VisitDetails> getVisitById(final @PathVariable int visitId){
-        return null;
+        return visitsServiceClient.getVisitById(visitId);
     }
 
     @GetMapping(value = "visits/vets/{practitionerId}")
