@@ -17,7 +17,6 @@ package com.petclinic.auth.User;
  */
 
 import com.petclinic.auth.Exceptions.IncorrectPasswordException;
-import com.petclinic.auth.JWT.JWTService;
 import com.petclinic.auth.User.data.User;
 import com.petclinic.auth.User.data.UserIDLessRoleLessDTO;
 import com.petclinic.auth.User.data.UserPasswordLessDTO;
@@ -32,7 +31,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Base64;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
@@ -102,5 +100,10 @@ public class UserController {
         return ok()
                 .header(AUTHORIZATION, login.getToken())
                 .body(userMapper.modelToPasswordLessDTO(login.getUser()));
+    }
+
+    @RequestMapping(method = RequestMethod.HEAD)
+    public void preflight() {
+        log.info("Preflight request received and accepted");
     }
 }
