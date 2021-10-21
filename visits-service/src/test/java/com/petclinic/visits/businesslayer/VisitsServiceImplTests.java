@@ -112,7 +112,15 @@ public class VisitsServiceImplTests {
         
         assertArrayEquals(visitsList.toArray(), serviceResponse.toArray());
     }
-    
+
+    @Test
+    public void whenValidVisitIdThenShouldReturnVisit() {
+        Visit visitFromService = visitsService.getVisitById(1);
+
+        assertThat(visitFromService.getId(), equalTo(1));
+        assertThat(visitFromService.getPetId(), equalTo(1));
+    }
+
     @Test
     public void whenValidIdUpdateVisit(){
         Visit updatedVisit = visit().petId(1).date(new Date()).description("Desc-1 Updated").build();

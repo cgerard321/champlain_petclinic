@@ -100,6 +100,48 @@ public class VisitResourceTest {
 				.andExpect(jsonPath("$[1].petId").value(1));
 	}
 
+	@Test
+	void whenValidVisitIdThenShouldReturnVisit() throws Exception {
+		given(visitsService.getVisitById(1))
+				.willReturn(
+						visit()
+								.id(1)
+								.petId(1)
+								.description("description 1")
+								.build()
+				);
+
+		mvc.perform(get("/visit/1"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.id").value(1))
+				.andExpect(jsonPath("$.petId").value(1))
+				.andExpect(jsonPath("$.description").value("description 1"));
+	}
+
+	@Test
+	void whenInvalidParameterVisitIdThenShouldReturnBadRequest() throws Exception {
+		given(visitsService.getVisitById(1))
+				.willReturn(
+						visit()
+								.id(1)
+								.petId(1)
+								.description("description 1")
+								.build()
+				);
+
+		mvc.perform(get("/visit/INVALID_PARAMETER"))
+				.andExpect(status().isBadRequest());
+	}
+
+	@Test
+	void whenNegativeVisitIdThenShouldReturnUnprocessableEntity() throws Exception {
+		when(visitsService.getVisitById(-1)).thenThrow(new InvalidInputException("VisitId can't be negative."));
+
+		mvc.perform(get("/visit/{visitId}", -1))
+				.andExpect(status().isUnprocessableEntity())
+				.andExpect(result -> assertTrue(result.getResolvedException() instanceof InvalidInputException))
+				.andExpect(result -> assertEquals("visitId can't be negative.", result.getResolvedException().getMessage()));
+	}
 
 	@Test
 	void shouldFetchVisits() throws Exception {
