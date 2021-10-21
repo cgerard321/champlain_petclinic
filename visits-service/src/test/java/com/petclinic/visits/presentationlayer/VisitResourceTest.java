@@ -28,6 +28,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
@@ -73,13 +74,17 @@ public class VisitResourceTest {
 	ObjectMapper objectMapper;
 
 	List<VisitDTO> visitDTOList = Arrays.asList(
-			new VisitDTO(UUID.randomUUID().toString(), new Date(System.currentTimeMillis()), "Description", 200, 123456, true),
-			new VisitDTO(UUID.randomUUID().toString(), new Date(System.currentTimeMillis()), "Description", 200, 123456, true),
-			new VisitDTO(UUID.randomUUID().toString(), new Date(System.currentTimeMillis()), "Description", 200, 123456, true)
+			new VisitDTO(UUID.randomUUID().toString(), new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01"), "Description", 200, 123456, true),
+			new VisitDTO(UUID.randomUUID().toString(), new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01"), "Description", 200, 123456, true),
+			new VisitDTO(UUID.randomUUID().toString(), new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01"), "Description", 200, 123456, true)
 	);
 
 	VisitIdLessDTO visitIdLessDTO = new VisitIdLessDTO(new Date(System.currentTimeMillis()), "Description", 200, 12345, true);
 	VisitDTO visitDTO = new VisitDTO(UUID.randomUUID().toString(), new Date(System.currentTimeMillis()), "Description", 200, 123456, true);
+
+	public VisitResourceTest() throws ParseException {
+	}
+
 
 	// TESTS FOR UPDATING A VISIT ----------------------------------------------------------------------
 	@Test
@@ -93,7 +98,11 @@ public class VisitResourceTest {
 				.content(objectMapper.writeValueAsString(visitDTO))
 				.characterEncoding("utf-8"))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.petId").value(1));
+				.andExpect(jsonPath("$.visitId").value(visitDTO.getVisitId()))
+				.andExpect(jsonPath("$.date").value(visitDTO.getDate()))
+				.andExpect(jsonPath("$.description").value(visitDTO.getDescription()))
+				.andExpect(jsonPath("$.petId").value(visitDTO.getPetId()))
+				.andExpect(jsonPath("$.practitionerId").value(visitDTO.getPractitionerId()));
 	}
 
 	@Test
@@ -109,18 +118,19 @@ public class VisitResourceTest {
 				.andExpect(status().isBadRequest());
 	}
 
-	@Test
-	void shouldReturnBadRequestWhenInvalidParameterStringVisitId() throws Exception{
-		when(visitsService.updateVisit(any(VisitDTO.class)))
-				.thenReturn(visitDTO);
-
-		mvc.perform(put("/owners/*/pets/{petId}/visits/{id}", 200, "invalid_visit_id")
-				.contentType(MediaType.APPLICATION_JSON)
-				.accept(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(visitDTO))
-				.characterEncoding("utf-8"))
-				.andExpect(status().isBadRequest());
-	}
+	// Check with Christine if validation of visitId should happen at API level
+//	@Test
+//	void shouldReturnBadRequestWhenInvalidParameterStringVisitId() throws Exception{
+//		when(visitsService.updateVisit(any(VisitDTO.class)))
+//				.thenReturn(visitDTO);
+//
+//		mvc.perform(put("/owners/*/pets/{petId}/visits/{id}", 200, "invalid_visit_id")
+//				.contentType(MediaType.APPLICATION_JSON)
+//				.accept(MediaType.APPLICATION_JSON)
+//				.content(objectMapper.writeValueAsString(visitDTO))
+//				.characterEncoding("utf-8"))
+//				.andExpect(status().isBadRequest());
+//	}
 
 	// TESTS FOR DELETING A VISIT ----------------------------------------------------------------------
 	@Test
@@ -134,7 +144,7 @@ public class VisitResourceTest {
 	// TESTS FOR CREATING A VISIT ----------------------------------------------------------------------
 	@Test
 	void shouldReturnCreatedVisitWhenValidRequest() throws Exception {
-		when(visitsService.addVisit(any())).thenReturn(visitDTO);
+		given(visitsService.addVisit(any())).willReturn(visitDTO);
 
 		mvc.perform(post("/owners/*/pets/{petId}/visits", 200)
 				.content(objectMapper.writeValueAsString(visitIdLessDTO))
