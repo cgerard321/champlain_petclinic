@@ -5,7 +5,6 @@ services:
             - "80:80"
         volumes:
             - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-            - ./nginx/hello.js:/etc/nginx/hello.js:ro
 
     visits:
         build: visits-service
