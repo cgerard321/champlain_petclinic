@@ -95,7 +95,7 @@ angular.module('visits')
             return practitionerName;
         };
 
-        self.switchToUpdateForm = function (practitionerId, date, description, id){
+        self.switchToUpdateForm = function (practitionerId, date, description, id, visitStatus){
             visitId = id;
             $("#selectedVet option[value='"+practitionerId+"']").prop("selected", true);
             $('#date_input').val(date);
@@ -107,7 +107,8 @@ angular.module('visits')
                 var data = {
                     date: $('#date_input').val(),
                     description: $('#description_textarea').val(),
-                    practitionerId: $("#selectedVet").val()
+                    practitionerId: $("#selectedVet").val(),
+                    status: visitStatus
                 };
 
                 url = "api/gateway/owners/*/pets/" + petId + "/visits/" + visitId;
