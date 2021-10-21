@@ -473,20 +473,32 @@
 
         <br>
 
-        <label for="vetPhoneNumber" style="margin-top: 10px">Phone Number:</label>
-        <input id="vetPhoneNumber" disabled="disabled" style="background-color: #dbd9ce;"/>
+        <div>
+            <div>
+                <label for="vetPhoneNumber" style="margin-top: 10px; display: inline-block; width: 150px">Phone Number:</label>
+                <input id="vetPhoneNumber" disabled="disabled" style="background-color: #dbd9ce;"/>
+            </div>
 
-        <label for="vetEmailAddress">Email Address:</label>
-        <input id="vetEmailAddress" disabled="disabled" style="background-color: #dbd9ce;"/>
+            <div>
+                <label for="vetEmailAddress" style="margin-top: 10px; display: inline-block; width: 150px">Email Address:</label>
+                <input id="vetEmailAddress" disabled="disabled" style="background-color: #dbd9ce;"/>
+            </div>
+            <div>
+                <label for="vetSpecialties" style="margin-top: 10px; display: inline-block; width: 150px">Specialties:</label>
+                <input id="vetSpecialties" disabled="disabled" style="background-color: #dbd9ce;"/>
+            </div>
 
-        <label for="vetSpecialties">Specialties:</label>
-        <input id="vetSpecialties" disabled="disabled" style="background-color: #dbd9ce;"/>
+            <div>
+                <label for="vetWorkdays" style="margin-top: 10px; display: inline-block; width: 150px">Workdays:</label>
+                <input id="vetWorkdays" disabled="disabled" style="background-color: #dbd9ce;" onchange=selectChanged() />
+            </div>
 
-        <label for="vetWorkdays">Workdays:</label>
-        <input id="vetWorkdays" disabled="disabled" style="background-color: #dbd9ce;" onchange=selectChanged() />
+            <div>
+                <label for="billVisitType" style="margin-top: 10px; display: inline-block; width: 150px">Visit Type:</label>
+                <input id="billVisitType" disabled="disabled" style="background-color: #dbd9ce">
+            </div>
+        </div>
 
-        <label for="billVisitType">Visit Type:</label>
-        <input id="billVisitType" disabled="disabled" style="background-color: #dbd9ce">
     </div>
 
     <div class="form-group" style="margin-top: 6px">
