@@ -1,6 +1,7 @@
 package com.petclinic.visits.presentationlayer;
 
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.petclinic.visits.businesslayer.VisitsService;
 import com.petclinic.visits.datalayer.Visit;
 import com.petclinic.visits.datalayer.VisitDTO;
@@ -16,6 +17,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 /*
  * This class is a REST Controller that handles all the requests coming from the API Gateway.
  *
@@ -54,7 +56,7 @@ public class VisitResource {
 
 
     @DeleteMapping("visits/{visitId}")
-    public void deleteVisit(@PathVariable("visitId") int visitId) {
+    public void deleteVisit(@PathVariable("visitId") String visitId) {
         log.info("Deleting visits with visitId: {}", visitId );
         visitsService.deleteVisit(visitId);
     }

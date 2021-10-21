@@ -84,8 +84,8 @@ public class VisitResourceTest {
 	// TESTS FOR UPDATING A VISIT ----------------------------------------------------------------------
 	@Test
 	void shouldUpdateVisit() throws Exception{
-		when(visitsService.updateVisit(any(Visit.class)))
-				.thenReturn(new Visit(1, new Date(), "Desc-1", 1));
+		//when(visitsService.updateVisit(any(Visit.class)))
+		//		.thenReturn(new Visit(1, new Date(), "Desc-1", 1));
 
 		mvc.perform(put("/owners/*/pets/{petId}/visits/{id}", 1, 1)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -99,8 +99,8 @@ public class VisitResourceTest {
 
 	@Test
 	void updateVisitInvalidParameterStringPetId() throws Exception{
-		when(visitsService.updateVisit(any(Visit.class)))
-				.thenReturn(new Visit(1, new Date(), "Desc-1", 1));
+		//when(visitsService.updateVisit(any(Visit.class)))
+		//		.thenReturn(new Visit(1, new Date(), "Desc-1", 1));
 
 		mvc.perform(put("/owners/*/pets/{petId}/visits/{id}", "invalid_pet_id",1)
 				.contentType(MediaType.APPLICATION_JSON)
@@ -112,8 +112,8 @@ public class VisitResourceTest {
 
 	@Test
 	void updateVisitInvalidParameterStringVisitId() throws Exception{
-		when(visitsService.updateVisit(any(Visit.class)))
-				.thenReturn(new Visit(1, new Date(), "Desc-1", 1));
+		//when(visitsService.updateVisit(any(Visit.class)))
+		//		.thenReturn(new Visit(1, new Date(), "Desc-1", 1));
 
 		mvc.perform(put("/owners/*/pets/{petId}/visits/{id}", 1, "invalid_visit_id")
 				.contentType(MediaType.APPLICATION_JSON)
@@ -130,13 +130,6 @@ public class VisitResourceTest {
 		mvc.perform(delete("/visits/{visitId}", visitId))
 				.andExpect(status().isOk());
 		verify(visitsService, times(1)).deleteVisit(visitId);
-	}
-
-	@Test
-	public void shouldReturnBadRequestWhenDeletingWithInvalidVisitId() throws Exception {
-		mvc.perform(delete("/visits/{visitId}", "invalid"))
-				.andExpect(status().isBadRequest());
-		verify(visitsService, times(0)).deleteVisit(anyString());
 	}
 
 	// TESTS FOR CREATING A VISIT ----------------------------------------------------------------------
