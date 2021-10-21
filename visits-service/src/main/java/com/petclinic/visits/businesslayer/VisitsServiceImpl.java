@@ -97,10 +97,11 @@ public class VisitsServiceImpl implements VisitsService {
     }
 
     @Override
-    public Visit updateVisit(Visit visit){
-        Visit v = visitRepository.save(visit);
-        log.info("Updating visit with petId: {} and id: {}", visit.getPetId(), visit.getId());
-        return v;
+    public VisitDTO updateVisit(VisitDTO visit){
+        Visit visitEntity = mapper.VisitDtoToEntity(visit);
+        log.info("Updating visit with petId: {} and visitId: {}", visit.getPetId(), visit.getVisitId());
+        Visit updatedVisitEntity = visitRepository.save(visitEntity);
+        return mapper.entityToModel(updatedVisitEntity);
     }
 
     @Override
