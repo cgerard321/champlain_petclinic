@@ -44,13 +44,6 @@ public class BillServiceImplTest {
 
         db = new HashMap<>();
 
-//        when(billRepository.save(any()))
-//                .thenAnswer(args -> {
-//                    Bill argument = args.getArgument(0, Bill.class);
-//                    db.put(argument.getBillId(), argument);
-//                    return argument;
-//                });
-
         when(billRepository.count())
                 .thenAnswer(ignore -> Long.valueOf(db.size()));
     }
@@ -90,8 +83,6 @@ public class BillServiceImplTest {
             });
         List<Bill> bills = new ArrayList<>();
         db.forEach((k, v) -> bills.add(v));
-
-        //billService.CreateBill(new Bill())
 
         when(billRepository.findAll())
                 .thenReturn(bills);

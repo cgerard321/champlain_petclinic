@@ -127,7 +127,6 @@ class BillResourceTest {
 
         mvc.perform(get("/bills").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
-                //.andExpect(jsonPath("$[0].billId").value(1)); Need to find out why an empty body is found
     }
 
     @Test

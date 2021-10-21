@@ -53,7 +53,7 @@ public class BFFApiGatewayController {
                                 .map(addVisitsToOwner(owner))
                 );
     }
-    //check this
+
     @GetMapping(value = "bills/{billId}")
     public Mono<BillDetails> getBillingInfo(final @PathVariable int billId)
     {
