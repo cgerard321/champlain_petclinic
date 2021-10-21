@@ -93,14 +93,10 @@ public class BillServiceImpl implements BillService{
 
             List<BillDTO> response = billMapper.EntityListToModelList(bills);
 
-            LOG.debug("BillsAdded");
-
-            LOG.debug("Bill: GetBillByCustomerId: found customerId: {}", customerId);
-
             if(response.isEmpty()){
                 throw new NotFoundException("No bill found for customerId: " + customerId);
             }
             return response;
-            
+
     }
 }
