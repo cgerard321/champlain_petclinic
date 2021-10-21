@@ -16,7 +16,6 @@ angular.module('visits')
             self.visits = resp.data;
             self.sortFetchedVisits();
         });
-        
 
         // Function to... get the current date ;)
         function getCurrentDate() {
@@ -27,13 +26,35 @@ angular.module('visits')
             return Date.parse(yyyy + '-' + mm + '-' + dd);
         }
 
+        // Container div for all alerts
+        let alertsContainer = $('#alertsContainer');
+
+        // Function to delete last added alert
+        function deleteAlertAfter(time) {
+            setTimeout(function() {
+                alertsContainer.children(".alert:first-child").remove();
+            }, time);
+        }
+
+        // Function to create alert
+        function createAlert(alertType, alertMessage) {
+            // Create an alert based on parameters
+            alertsContainer.append(
+                "<div class=\"alert alert-"+ alertType +"\" role=\"alert\">" +
+                "<p>" + alertMessage + "</p>" +
+                "</div>"
+            );
+
+            // Delete the alert after x amount of time (millis)
+            deleteAlertAfter(3000);
+        }
+
         // Lists holding visits for the table to display
         self.upcomingVisits = [];
         self.previousVisits = [];
 
         self.sortFetchedVisits = function() {
             let currentDate = getCurrentDate();
-
 
             $.each(self.visits, function(i, visit) {
                 let selectedVisitDate = Date.parse(visit.date);
@@ -108,6 +129,16 @@ angular.module('visits')
             // Get the name of button sender
             let buttonText = $(e.target).text();
 
+            // Check if form needs to be valid for adding and updating a visit
+            if(buttonText === "Add New Visit" || buttonText === "Update Visit") {
+                var form = document.querySelector('form');
+
+                // If form isn't valid then don't display confirmation popup and alert required fields
+                if(!form.reportValidity()) {
+                    return false;
+                }
+            }
+
             // Set modal's title and body to match the sender's request
             let confirmationModal = $('#confirmationModalTitle');
             confirmationModal.text(buttonText);
@@ -179,7 +210,6 @@ angular.module('visits')
                     status: visitStatus
                 };
 
-
                 let putURL = "api/gateway/owners/*/pets/" + petId + "/visits/" + visitId;
 
                 $http.put(putURL, data).then(function(response) {
@@ -219,11 +249,10 @@ angular.module('visits')
 
                     // Call the last sort after adding if there is one
                     callLastSort(updatedVisitWillBeInUpcoming);
-                }, function (response) {
-                    var error = response.data;
-                    alert(error.error + "\r\n" + error.errors.map(function (e) {
-                        return e.field + ": " + e.defaultMessage;
-                    }).join("\r\n"));
+
+                    createAlert("success", "Successfully updated visit!");
+                }, function () {
+                    createAlert("danger", "Failed to update visit!");
                 });
             };
         };
@@ -278,11 +307,10 @@ angular.module('visits')
                         self.visits = resp.data;
                         self.sortFetchedVisits();
                     });
+
+                    createAlert("success", "Successfully added visit!");
                 }, function (response) {
-                    var error = response.data;
-                    alert(error.error + "\r\n" + error.errors.map(function (e) {
-                        return e.field + ": " + e.defaultMessage;
-                    }).join("\r\n"));
+                    createAlert("danger", "Failed to add visit!");
                 });
             }
 
@@ -531,20 +559,16 @@ angular.module('visits')
 
                 // Call the last sort after adding if there is one
                 callLastSort(isForUpcomingVisitsTable);
-            },function (response) {
-                var error = response.data;
-                alert(error.error + "\r\n" + error.errors.map(function (e) {
-                    return e.field + ": " + e.defaultMessage;
-                }).join("\r\n"));
+
+                createAlert("success", "Successfully created visit!");
+            },function () {
+                createAlert("danger", "Failed to add visit!");
             });
 
             $http.post(billsUrl, billData).then(function () {
 
-            }, function (response) {
-                var error = response.data;
-                alert(error.error + "\r\n" + error.errors.map(function (e) {
-                    return e.field + ": " + e.defaultMessage;
-                }).join("\r\n"));
+            }, function () {
+                console.log("Failed to create corresponding bill!");
             });
         }
 
@@ -565,11 +589,10 @@ angular.module('visits')
                 } else {
                     self.previousVisits.splice(index, 1);
                 }
-            }, function (response) {
-                var error = response.data;
-                alert(error.error + "\r\n" + error.errors.map(function (e) {
-                    return e.field + ": " + e.defaultMessage;
-                }).join("\r\n"));
+
+                createAlert("success", "Successfully deleted visit!");
+            }, function () {
+                createAlert("danger", "Failed to delete visit!");
             });
         };
 
@@ -618,11 +641,18 @@ angular.module('visits')
 
                 // Call the last sort if there was one
                 callLastSort(true);
+
+                if(visitStatus) {
+                    createAlert("success", "Successfully reverted cancel on visit!");
+                } else {
+                    createAlert("success", "Successfully cancelled visit!");
+                }
             },function (response) {
-                var error = response.data;
-                alert(error.error + "\r\n" + error.errors.map(function (e) {
-                    return e.field + ": " + e.defaultMessage;
-                }).join("\r\n"));
+                if(visitStatus) {
+                    createAlert("danger", "Failed to revert cancel on visit!");
+                } else {
+                    createAlert("danger", "Failed to cancel visit!");
+                }
             });
         };
 
