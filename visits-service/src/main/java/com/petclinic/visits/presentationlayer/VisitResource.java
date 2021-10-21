@@ -73,14 +73,14 @@ public class VisitResource {
         return new Visits(byPetIdIn);
     }
 
-    @PutMapping(value = "owners/*/pets/{petId}/visits/{id}",
+    @PutMapping(value = "owners/*/pets/{petId}/visits/{visitId}",
             consumes = "application/json",
             produces = "application/json")
-    public Visit update(@Valid @RequestBody Visit visit, @PathVariable("petId") int petId, @PathVariable("id") int id) {
-        visit.setId(id);
-        visit.setPetId(petId);
-        log.info("Updating visit {}", visit);
-        return visitsService.updateVisit(visit);
+    public Visit update(@Valid @RequestBody VisitDTO visitDTO, @PathVariable("petId") int petId, @PathVariable("visitId") String visitId) {
+        visitDTO.setVisitId(visitId);
+        visitDTO.setPetId(petId);
+        log.info("Updating visit {}", visitDTO);
+        return visitsService.updateVisit(visitDTO);
     }
 
     @GetMapping("visits/previous/{petId}")
