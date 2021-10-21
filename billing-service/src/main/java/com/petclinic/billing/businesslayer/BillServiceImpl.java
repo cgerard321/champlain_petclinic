@@ -10,8 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.HashMap;
 import java.util.List;
 
@@ -81,5 +79,23 @@ public class BillServiceImpl implements BillService{
     public void DeleteBill(int billId) {
         LOG.debug("Delete for bill ID: {}", billId);
         billRepository.findById(billId).ifPresent(entity -> billRepository.delete(entity));
+    }
+
+    @Override
+    public List<BillDTO> GetBillByCustomerId(int customerId) {
+
+            List<Bill> bills = billRepository.findByCustomerId(customerId);
+
+            List<BillDTO> response = billMapper.EntityListToModelList(bills);
+
+            LOG.debug("BillsAdded");
+
+            LOG.debug("Bill: GetBillByCustomerId: found customerId: {}", customerId);
+
+            if(response.isEmpty()){
+                throw new NotFoundException("No bill found for customerId: " + customerId);
+            }
+            return response;
+            
     }
 }

@@ -15,7 +15,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-
 import java.util.*;;
 
 
@@ -190,11 +189,16 @@ public class BillServiceImplTest {
         calendar.set(2021, Calendar.SEPTEMBER, 21);
 
         Date date = calendar.getTime();
-        Bill entity1 = new Bill(billId,customerId, date, "Checkup", 50.00);
-        Bill entity2 = new Bill(billId,customerId, date, "Vaccine", 100.00);
-        when(billRepository.findByCustomerId(customerId)).thenReturn("Ok");
+        Bill entity1 = new Bill(billId,customerId, "Checkup", date, 50.00);
+        Bill entity2 = new Bill(billId,customerId, "Vaccine", date, 100.00);
+
+        List<Bill> bills = new ArrayList<>();
+        bills.add(entity1);
+        bills.add(entity2);
+        when(billRepository.findByCustomerId(customerId)).thenReturn(bills);
 
         List<BillDTO> returnedBills = billService.GetBillByCustomerId(customerId);
+
 
         assertEquals(expectedSize, returnedBills.size());
     }
