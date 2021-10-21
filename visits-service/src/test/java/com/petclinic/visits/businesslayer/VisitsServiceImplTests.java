@@ -115,6 +115,13 @@ public class VisitsServiceImplTests {
 
     @Test
     public void whenValidVisitIdThenShouldReturnVisit() {
+        Visit visit = visit()
+                .id(1)
+                .petId(1)
+                .build();
+
+        when(repo.findById(1)).thenReturn(Optional.of(visit));
+
         Visit visitFromService = visitsService.getVisitById(1);
 
         assertThat(visitFromService.getId(), equalTo(1));
