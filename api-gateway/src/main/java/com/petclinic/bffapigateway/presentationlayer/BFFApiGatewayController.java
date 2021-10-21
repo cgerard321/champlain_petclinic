@@ -122,7 +122,7 @@ public class BFFApiGatewayController {
         return visitsServiceClient.getVisitsForPet(petId);
     }
     
-    @GetMapping(value ="visits/visit/{visitId}")
+    @GetMapping(value ="visit/{visitId}")
     public Mono<VisitDetails> getVisitById(final @PathVariable int visitId){
         return visitsServiceClient.getVisitById(visitId);
     }

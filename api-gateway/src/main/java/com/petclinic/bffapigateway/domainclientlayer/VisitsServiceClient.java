@@ -160,7 +160,7 @@ public class VisitsServiceClient {
     public Mono<VisitDetails> getVisitById(int visitId) {
         return webClientBuilder.build()
                 .get()
-                .uri(hostname + "/visits/visit/{visitId}", visitId)
+                .uri(hostname + "/visit/{visitId}", visitId)
                 .retrieve()
                 .bodyToMono(VisitDetails.class);
     }
