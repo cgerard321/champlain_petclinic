@@ -24,6 +24,17 @@ public class BillServiceImpl implements BillService{
         this.billMapper = billMapper;
     }
 
+    private HashMap<String, Double> setUpVisitList(){
+        HashMap<String, Double> visitTypesPrices = new HashMap<String, Double>();
+        visitTypesPrices.put("Examinations", 59.99);
+        visitTypesPrices.put("Injury", 229.99);
+        visitTypesPrices.put("Medical", 109.99);
+        visitTypesPrices.put("Chronic", 89.99);
+        visitTypesPrices.put("Consultations", 39.99);
+        visitTypesPrices.put("Operations", 399.99);
+        return visitTypesPrices;
+    }
+
     @Override
     public BillDTO GetBill(int billId) {
         Bill bill = billRepository.findById(billId)
@@ -50,6 +61,8 @@ public class BillServiceImpl implements BillService{
 
         try{
             Bill entity = billMapper.ModelToEntity(model);
+            HashMap<String, Double> list = setUpVisitList();
+            entity.setAmount(list.get(entity.getVisitType()));
             Bill newEntity = billRepository.save(entity);
 
             LOG.debug("Entity created for bill ID: {}", newEntity.getId());
