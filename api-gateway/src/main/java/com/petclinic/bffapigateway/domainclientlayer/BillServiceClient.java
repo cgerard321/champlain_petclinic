@@ -28,10 +28,6 @@ public class BillServiceClient {
 
     }
 
-    void setHostname(String hostname) {
-        this.billServiceUrl = hostname;
-    }
-
     public Mono<BillDetails> getBilling(final int billId) {
         return webClientBuilder.build().get()
                 .uri(billServiceUrl + "/{billId}", billId)

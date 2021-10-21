@@ -15,9 +15,9 @@
         </tr>
     </thead>
 
-    <tr id="billId" ng-repeat="bill in $ctrl.bills | filter:$ctrl.query track by bill.id">
-        <td>{{bill.id}}</td>
+    <tr id="billId" ng-repeat="bill in $ctrl.billHistory | filter:$ctrl.query track by bill.billId">
+        <td>{{bill.billId}}</td>
         <td>{{bill.amount}}</td>
-        <td>{{bill.dateTime}}</td>
+        <td>{{bill.date}}</td>
     </tr>
 </table>

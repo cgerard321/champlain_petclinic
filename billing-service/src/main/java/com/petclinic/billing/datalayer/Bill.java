@@ -6,19 +6,19 @@ import javax.persistence.*;
 import java.util.Date;
 
 @Entity
-@Table(name = "bills")
+@Table(name = "billings")
 public class Bill {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "billId")
+    @Column(name = "bill_id")
     private int billId;
 
-    @Column(name="customerId")
+    @Column(name="customer_id")
     private int customerId;
 
-    @Column(name = "visitType")
+    @Column(name = "visit_type")
     private String visitType;
 
     @Column(name = "visit_date")
