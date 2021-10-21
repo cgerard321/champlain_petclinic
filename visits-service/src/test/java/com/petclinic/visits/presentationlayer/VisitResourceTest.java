@@ -84,41 +84,40 @@ public class VisitResourceTest {
 	// TESTS FOR UPDATING A VISIT ----------------------------------------------------------------------
 	@Test
 	void shouldUpdateVisit() throws Exception{
-		//when(visitsService.updateVisit(any(Visit.class)))
-		//		.thenReturn(new Visit(1, new Date(), "Desc-1", 1));
+		when(visitsService.updateVisit(any(VisitDTO.class)))
+				.thenReturn(visitDTO);
 
-		mvc.perform(put("/owners/*/pets/{petId}/visits/{id}", 1, 1)
+		mvc.perform(put("/owners/*/pets/{petId}/visits/{visitId}", 200, visitDTO.getVisitId())
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON)
-				.content("{\"date\": \"2011-03-04\", \"description\": \"Desc-1 Updated\"}")
+				.content(objectMapper.writeValueAsString(visitDTO))
 				.characterEncoding("utf-8"))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.petId").value(1));
-
 	}
 
 	@Test
 	void updateVisitInvalidParameterStringPetId() throws Exception{
-		//when(visitsService.updateVisit(any(Visit.class)))
-		//		.thenReturn(new Visit(1, new Date(), "Desc-1", 1));
+		when(visitsService.updateVisit(any(Visit.class)))
+				.thenReturn(visitDTO);
 
-		mvc.perform(put("/owners/*/pets/{petId}/visits/{id}", "invalid_pet_id",1)
+		mvc.perform(put("/owners/*/pets/{petId}/visits/{id}", "invalid_pet_id",visitDTO.getVisitId())
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON)
-				.content("{\"date\": \"2011-03-04\", \"description\": \"Desc-1 Updated\"}")
+				.content(objectMapper.writeValueAsString(visitDTO))
 				.characterEncoding("utf-8"))
 				.andExpect(status().isBadRequest());
 	}
 
 	@Test
 	void updateVisitInvalidParameterStringVisitId() throws Exception{
-		//when(visitsService.updateVisit(any(Visit.class)))
-		//		.thenReturn(new Visit(1, new Date(), "Desc-1", 1));
+		when(visitsService.updateVisit(any(Visit.class)))
+				.thenReturn(visitDTO);
 
-		mvc.perform(put("/owners/*/pets/{petId}/visits/{id}", 1, "invalid_visit_id")
+		mvc.perform(put("/owners/*/pets/{petId}/visits/{id}", 200, "invalid_visit_id")
 				.contentType(MediaType.APPLICATION_JSON)
 				.accept(MediaType.APPLICATION_JSON)
-				.content("{\"date\": \"2011-03-04\", \"description\": \"Desc-1 Updated\"}")
+				.content(objectMapper.writeValueAsString(visitDTO))
 				.characterEncoding("utf-8"))
 				.andExpect(status().isBadRequest());
 	}
