@@ -67,18 +67,37 @@ public class VisitsServiceImplTests {
             false
     );
 
+    VisitDTO visitDTO = new VisitDTO(UUID.randomUUID().toString(),
+            new Date(System.currentTimeMillis()),
+            "Description",
+            200,
+            123456,
+            true);
+
+    Visit visitEntity = new Visit(1, UUID.fromString(visitDTO.getVisitId()),
+            new Date(System.currentTimeMillis()),
+            "Description",
+            200,
+            123456,
+            true);
+
 
     // TESTS FOR UPDATING A VISIT ----------------------------------------------------------------------
     @Test
     public void whenValidIdUpdateVisit(){
-        Visit updatedVisit = visit().petId(1).date(new Date()).description("Desc-1 Updated").build();
+        when(repo.save(any(Visit.class))).thenReturn(visitEntity);
 
-        when(repo.save(any(Visit.class))).thenReturn(updatedVisit);
+        VisitDTO visitFromService = visitsService.updateVisit(visitDTO);
 
-        Visit visitFromService = visitsService.updateVisit(updatedVisit);
-
-        assertThat(visitFromService.getDescription(), equalTo("Desc-1 Updated"));
+        assertEquals(visitDTO.getVisitId(), visitFromService.getVisitId());
+        assertEquals(visitDTO.getDate(), visitFromService.getDate());
+        assertEquals(visitDTO.getDescription(), visitFromService.getDescription());
+        assertEquals(visitDTO.getPetId(), visitFromService.getPetId());
+        assertEquals(visitDTO.getPractitionerId(), visitFromService.getPractitionerId());
+        assertEquals(visitDTO.isStatus(), visitFromService.isStatus());
     }
+
+    // should add tests for error handling and validation
 
     // TESTS FOR DELETING A VISIT ----------------------------------------------------------------------
     @Test
@@ -96,6 +115,8 @@ public class VisitsServiceImplTests {
         visitsService.deleteVisit(visit.getVisitId().toString());
         verify(repo, never()).delete(visit);
     }
+
+    // should add tests for error handling and validation
 
     // TESTS FOR CREATING A VISIT ----------------------------------------------------------------------
     @Test
@@ -182,6 +203,8 @@ public class VisitsServiceImplTests {
         assertThat(ex.getCause()).isInstanceOf(DuplicateKeyException.class);
     }
 
+    // should add tests for error handling and validation
+
     // TESTS FOR FETCHING VISITS BASED ON PET ID ----------------------------------------------------------------------
     @Test
     public void shouldReturnVisitsForPetWhenValidPetId(){
@@ -213,6 +236,8 @@ public class VisitsServiceImplTests {
         assertEquals("PetId can't be negative.", ex.getMessage());
     }
 
+    // should add tests for error handling and validation
+
     // TESTS FOR FETCHING VISITS BASED ON PET IDS ----------------------------------------------------------------------
     @Test
     public void whenValidPetIdThenShouldReturnVisitsForPetAsList(){
@@ -235,6 +260,8 @@ public class VisitsServiceImplTests {
 
         assertArrayEquals(visitsList.toArray(), serviceResponse.toArray());
     }
+
+    // should add tests for error handling and validation
 
     // TESTS FOR FETCH VISITS BASED ON PRACTITIONER ID AND DATES ----------------------------------------------------------------------
     @Test
@@ -289,6 +316,8 @@ public class VisitsServiceImplTests {
 
         assertEquals("PractitionerId can't be negative.", ex.getMessage());
     }
+
+    // should add tests for error handling and validation
 
     // TESTS FOR FETCHING VISITS BASED ON DATE ----------------------------------------------------------------------
     @Test
@@ -415,6 +444,8 @@ public class VisitsServiceImplTests {
         assertEquals("PetId can't be negative.", ex.getMessage());
     }
 
+    // should add tests for error handling and validation
+
     // TESTS FOR FETCHING VISITS BASED ON PRACTITIONER ID ----------------------------------------------------------------------
     @Test
     public void shouldThrowInvalidInputExceptionWhenFetchingDatesWithNegativePractitionerId(){
@@ -465,5 +496,5 @@ public class VisitsServiceImplTests {
         assertEquals(new SimpleDateFormat("yyyy-MM-dd").parse("2021-03-04"), returnedVisits.get(1).getDate());
     }
 
-
+    // should add tests for error handling and validation
 }
