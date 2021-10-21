@@ -604,7 +604,7 @@ class ApiGatewayControllerTest {
     }
     
     @Test
-    void shouldGetASingleVisit() {
+    void getSingleVisit_Valid() {
         VisitDetails visit = new VisitDetails();
         visit.setId(69);
         visit.setPetId(7);
@@ -616,7 +616,7 @@ class ApiGatewayControllerTest {
         when(visitsServiceClient.getVisitById(visit.getId())).thenReturn(Mono.just(visit));
     
         client.get()
-                .uri("/api/gateway/visits/visit/{petId}", visit.getId())
+                .uri("/api/gateway/visits/visit/{visitId}", visit.getId())
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -625,6 +625,24 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.date").isEqualTo(visit.getDate())
                 .jsonPath("$.description").isEqualTo(visit.getDescription())
                 .jsonPath("$.practitionerId").isEqualTo(visit.getPractitionerId());
+    }
+    
+    @Test
+    void getSingleVisit_Invalid() {
+        final int invalidVisitId = -5;
+        final String expectedErrorMessage = "error message";
+    
+        when(visitsServiceClient.getVisitById(invalidVisitId))
+                .thenThrow(new GenericHttpException(expectedErrorMessage, BAD_REQUEST));
+        
+        client.get()
+                .uri("/api/gateway/visits/visit/{visitId}", invalidVisitId)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.statusCode").isEqualTo(BAD_REQUEST.value())
+                .jsonPath("$.timestamp").exists()
+                .jsonPath("$.message").isEqualTo(expectedErrorMessage);
     }
 
     @Test
