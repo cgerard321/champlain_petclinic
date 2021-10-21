@@ -83,6 +83,7 @@ class VisitsServiceClientIntegrationTest {
         this.server.enqueue(response);
     }
     
+    @Test
     private void getVisitById() {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
