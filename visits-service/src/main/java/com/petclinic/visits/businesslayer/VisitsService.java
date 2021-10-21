@@ -22,7 +22,7 @@ public interface VisitsService {
 
     List<VisitDTO> getVisitsForPet(int petId, boolean scheduled);
 
-    public void deleteVisit(int visitId);
+    public void deleteVisit(String visitId);
 
     public Visit updateVisit(Visit visit);
 

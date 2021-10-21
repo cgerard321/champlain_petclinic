@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -86,9 +87,12 @@ public class VisitsServiceImpl implements VisitsService {
     }
 
     @Override
-    public void deleteVisit(int visitId) {
+    public void deleteVisit(String visitId) {
         log.debug("Visit object is deleted with this id: " + visitId);
-        visitRepository.findById(visitId).ifPresent(e -> visitRepository.delete(e));
+        Visit visit = visitRepository.findByVisitId(UUID.fromString(visitId)).orElse(new Visit());
+        if(visit.getVisitId() != null)
+            visitRepository.delete(visit);
+
         log.debug("Visit deleted");
     }
 

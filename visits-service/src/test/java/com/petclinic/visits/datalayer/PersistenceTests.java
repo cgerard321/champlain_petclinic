@@ -84,7 +84,6 @@ public class PersistenceTests {
     public void shouldFindVisitByVisitIdWhenExistingVisit(){
         Optional<Visit> v = repo.findByVisitId(visit.getVisitId());
 
-        assertNotNull(v);
         assertEquals(v.get().getId(), visit.getId());
         assertEquals(v.get().getVisitId(), visit.getVisitId());
         assertEquals(v.get().getDate(), visit.getDate());
@@ -95,10 +94,12 @@ public class PersistenceTests {
     }
 
     @Test
-    public void shouldNotFindVisitByVisitIdWhenNonExistingVisit(){
+    public void shouldThrowNoSuchElementExceptionWhenNonExistingVisit(){
         Optional<Visit> v = repo.findByVisitId(UUID.randomUUID());
 
-        assertNull(v);
+        assertThrows(NoSuchElementException.class, ()->{
+           v.get();
+        });
     }
 
     // TESTS FOR CREATING A VISIT ----------------------------------------------------------------------

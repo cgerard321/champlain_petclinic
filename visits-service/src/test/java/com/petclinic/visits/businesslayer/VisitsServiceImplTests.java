@@ -85,15 +85,15 @@ public class VisitsServiceImplTests {
     public void shouldCallRepoDeleteVisitWhenDeletingWithValidVisitId(){
         Visit visit = new Visit(1, UUID.randomUUID(), new Date(System.currentTimeMillis()), "Description", 200, 123456, true);
         when(repo.findByVisitId(visit.getVisitId())).thenReturn(Optional.of(visit));
-        visitsService.deleteVisit(visit.getVisitId());
+        visitsService.deleteVisit(visit.getVisitId().toString());
         verify(repo, times(1)).delete(visit);
     }
 
     @Test
-    public void whenVisitDoNotExist(){
+    public void shouldNotCallRepoDeleteVisitWhenDeletingWithNonExistentVisitId(){
         Visit visit = new Visit(1, UUID.randomUUID(), new Date(System.currentTimeMillis()), "Description", 200, 123456, true);
-        when(repo.findByVisitId(visit.getVisitId())).thenReturn(null);
-        visitsService.deleteVisit(visit.getVisitId());
+        when(repo.findByVisitId(visit.getVisitId())).thenReturn(Optional.of(new Visit()));
+        visitsService.deleteVisit(visit.getVisitId().toString());
         verify(repo, never()).delete(visit);
     }
 
