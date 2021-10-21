@@ -76,7 +76,7 @@ public class VisitResource {
     @PutMapping(value = "owners/*/pets/{petId}/visits/{visitId}",
             consumes = "application/json",
             produces = "application/json")
-    public Visit update(@Valid @RequestBody VisitDTO visitDTO, @PathVariable("petId") int petId, @PathVariable("visitId") String visitId) {
+    public VisitDTO update(@Valid @RequestBody VisitDTO visitDTO, @PathVariable("petId") int petId, @PathVariable("visitId") String visitId) {
         visitDTO.setVisitId(visitId);
         visitDTO.setPetId(petId);
         log.info("Updating visit {}", visitDTO);

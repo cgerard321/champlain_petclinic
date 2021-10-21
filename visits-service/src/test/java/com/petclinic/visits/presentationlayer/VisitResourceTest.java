@@ -83,7 +83,7 @@ public class VisitResourceTest {
 
 	// TESTS FOR UPDATING A VISIT ----------------------------------------------------------------------
 	@Test
-	void shouldUpdateVisit() throws Exception{
+	void shouldUpdateVisitWhenValidRequest() throws Exception{
 		when(visitsService.updateVisit(any(VisitDTO.class)))
 				.thenReturn(visitDTO);
 
@@ -97,8 +97,8 @@ public class VisitResourceTest {
 	}
 
 	@Test
-	void updateVisitInvalidParameterStringPetId() throws Exception{
-		when(visitsService.updateVisit(any(Visit.class)))
+	void shouldReturnBadRequestWhenInvalidParameterStringPetId() throws Exception{
+		when(visitsService.updateVisit(any(VisitDTO.class)))
 				.thenReturn(visitDTO);
 
 		mvc.perform(put("/owners/*/pets/{petId}/visits/{id}", "invalid_pet_id",visitDTO.getVisitId())
@@ -110,8 +110,8 @@ public class VisitResourceTest {
 	}
 
 	@Test
-	void updateVisitInvalidParameterStringVisitId() throws Exception{
-		when(visitsService.updateVisit(any(Visit.class)))
+	void shouldReturnBadRequestWhenInvalidParameterStringVisitId() throws Exception{
+		when(visitsService.updateVisit(any(VisitDTO.class)))
 				.thenReturn(visitDTO);
 
 		mvc.perform(put("/owners/*/pets/{petId}/visits/{id}", 200, "invalid_visit_id")
