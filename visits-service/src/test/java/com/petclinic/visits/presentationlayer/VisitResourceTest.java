@@ -144,7 +144,7 @@ public class VisitResourceTest {
 	}
 
 	@Test
-	void whenNegativeVisitIdThenShouldReturnUnprocessableEntity() throws Exception {
+	void whenVisitIdEquals33ShouldReturnNotFoundException() throws Exception {
 		when(visitsService.getVisitById(33)).thenThrow(new NotFoundException("Visit with visit id: 33 does not exist."));
 
 		mvc.perform(get("/visit/{visitId}", 33))
