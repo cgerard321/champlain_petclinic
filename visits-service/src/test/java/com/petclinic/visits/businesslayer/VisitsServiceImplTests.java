@@ -3,6 +3,7 @@ package com.petclinic.visits.businesslayer;
 import com.petclinic.visits.datalayer.Visit;
 import com.petclinic.visits.datalayer.VisitRepository;
 import com.petclinic.visits.utils.exceptions.InvalidInputException;
+import com.petclinic.visits.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -126,6 +127,24 @@ public class VisitsServiceImplTests {
 
         assertThat(visitFromService.getId(), equalTo(1));
         assertThat(visitFromService.getPetId(), equalTo(1));
+    }
+
+    @Test
+    public void whenInvalidVisitIdThenShouldThrowInvalidInputException() {
+        InvalidInputException invalidInputException = assertThrows(InvalidInputException.class, () ->{
+            visitsService.getVisitById(-1);
+        });
+
+        assertEquals("VisitId can't be negative", invalidInputException.getMessage());
+    }
+
+    @Test
+    public void whenVisitIdDoesNotExistThrowNotFoundException() {
+        NotFoundException notFoundException = assertThrows(NotFoundException.class, () ->{
+            visitsService.getVisitById(33);
+        });
+
+        assertEquals("Visit with visit id: 33 does not exist.", notFoundException.getMessage());
     }
 
     @Test
