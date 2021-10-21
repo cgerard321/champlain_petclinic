@@ -125,17 +125,18 @@ public class VisitResourceTest {
 
 	// TESTS FOR DELETING A VISIT ----------------------------------------------------------------------
 	@Test
-	public void whenValidVisitIdDeleteTheVisit() throws Exception {
-		mvc.perform(delete("/visits/1"))
+	public void shouldCallServiceDeleteVisitWhenDeletingWithValidVisitId() throws Exception {
+		String visitId = UUID.randomUUID().toString();
+		mvc.perform(delete("/visits/{visitId}", visitId))
 				.andExpect(status().isOk());
-		verify(visitsService, times(1)).deleteVisit(1);
+		verify(visitsService, times(1)).deleteVisit(visitId);
 	}
 
 	@Test
-	public void whenInvalidVisitIdDontDeleteAndReturnBadRequest() throws Exception {
+	public void shouldReturnBadRequestWhenDeletingWithInvalidVisitId() throws Exception {
 		mvc.perform(delete("/visits/{visitId}", "invalid"))
 				.andExpect(status().isBadRequest());
-		verify(visitsService, times(0)).deleteVisit(anyInt());
+		verify(visitsService, times(0)).deleteVisit(anyString());
 	}
 
 	// TESTS FOR CREATING A VISIT ----------------------------------------------------------------------

@@ -67,25 +67,6 @@ public class VisitsServiceImplTests {
             false
     );
 
-    private Visit visit;
-
-    @BeforeEach
-    public void setupDb(){
-        repo.deleteAll();
-
-        // add setup data here
-        visit = Visit.visit()
-                .id(1)
-                .petId(1)
-                .build();
-        Visit visit1 = Visit.visit()
-                .id(2)
-                .petId(1)
-                .build();
-
-        List<Visit> list = Arrays.asList(visit, visit1);
-        repo.saveAll(list);
-    }
 
     // TESTS FOR UPDATING A VISIT ----------------------------------------------------------------------
     @Test
@@ -101,18 +82,19 @@ public class VisitsServiceImplTests {
 
     // TESTS FOR DELETING A VISIT ----------------------------------------------------------------------
     @Test
-    public void whenValidIdDeleteVisit(){
-        Visit vise = new Visit(1, new Date(System.currentTimeMillis()), "Cancer", 1);
-        when(repo.findById(1)).thenReturn(Optional.of(vise));
-        visitsService.deleteVisit(1);
-        verify(repo, times(1)).delete(vise);
+    public void shouldCallRepoDeleteVisitWhenDeletingWithValidVisitId(){
+        Visit visit = new Visit(1, UUID.randomUUID(), new Date(System.currentTimeMillis()), "Description", 200, 123456, true);
+        when(repo.findByVisitId(visit.getVisitId())).thenReturn(Optional.of(visit));
+        visitsService.deleteVisit(visit.getVisitId());
+        verify(repo, times(1)).delete(visit);
     }
 
     @Test
     public void whenVisitDoNotExist(){
-        Visit vise = new Visit(3, new Date(System.currentTimeMillis()), "Cancer", 1);
-        visitsService.deleteVisit(3);
-        verify(repo, never()).delete(vise);
+        Visit visit = new Visit(1, UUID.randomUUID(), new Date(System.currentTimeMillis()), "Description", 200, 123456, true);
+        when(repo.findByVisitId(visit.getVisitId())).thenReturn(null);
+        visitsService.deleteVisit(visit.getVisitId());
+        verify(repo, never()).delete(visit);
     }
 
     // TESTS FOR CREATING A VISIT ----------------------------------------------------------------------

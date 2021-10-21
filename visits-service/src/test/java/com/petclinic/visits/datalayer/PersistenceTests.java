@@ -79,6 +79,27 @@ public class PersistenceTests {
         assertTrue(repo.existsById(1));
     }
 
+    // TESTS FOR FETCHING VISIT BASED ON VISIT ID ----------------------------------------------------------------------
+    @Test
+    public void shouldFindVisitByVisitIdWhenExistingVisit(){
+        Visit v = repo.findByVisitId(visit.getVisitId());
+
+        assertEquals(v.getId(), visit.getId());
+        assertEquals(v.getVisitId(), visit.getVisitId());
+        assertEquals(v.getDate(), visit.getDate());
+        assertEquals(v.getDescription(), visit.getDescription());
+        assertEquals(v.getPetId(), visit.getPetId());
+        assertEquals(v.getPractitionerId(), visit.getPractitionerId());
+        assertEquals(v.isStatus(), visit.isStatus());
+    }
+
+    @Test
+    public void shouldNotFindVisitByVisitIdWhenNonExistingVisit(){
+        Optional<Visit> v = repo.findByVisitId(UUID.randomUUID());
+
+        assertNull(v);
+    }
+
     // TESTS FOR CREATING A VISIT ----------------------------------------------------------------------
     @Test
     public void createVisitForPet() {
