@@ -642,13 +642,13 @@ angular.module('visits')
                 // Call the last sort if there was one
                 callLastSort(true);
 
-                if(visitStatus) {
+                if(!visitStatus) {
                     createAlert("success", "Successfully reverted cancel on visit!");
                 } else {
                     createAlert("success", "Successfully cancelled visit!");
                 }
             },function (response) {
-                if(visitStatus) {
+                if(!visitStatus) {
                     createAlert("danger", "Failed to revert cancel on visit!");
                 } else {
                     createAlert("danger", "Failed to cancel visit!");
