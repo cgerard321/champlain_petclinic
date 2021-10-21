@@ -104,7 +104,7 @@ angular.module('visits')
             return practitionerName;
         };
 
-        self.showConfirmationModal = function(e, visitId = 0) {
+        self.showConfirmationModal = function(e, visitId = 0, status = 0, practitionerId = 0, date = null, description = "") {
             // Get the name of button sender
             let buttonText = $(e.target).text();
 
@@ -113,8 +113,21 @@ angular.module('visits')
             confirmationModal.text(buttonText);
             $('#confirmationModalBody').text("Are you sure you want to " + buttonText.toLowerCase() + "?");
 
-            // Set the targeted visit data attribute which is used if the button is for cancel or delete
-            $('#confirmationModalConfirmButton').data("targetVisit", visitId);
+            // The confirm button on the popup modal
+            let modalConfirmButton = $('#confirmationModalConfirmButton');
+
+            if(buttonText !== "Add New Visit") {
+                // Set the targeted visit data attribute which is used if the button is for delete
+                modalConfirmButton.data("targetVisit", visitId);
+
+                // Set other data attributes if the button is for cancel
+                if(buttonText.toLowerCase().includes("cancel")) {
+                    modalConfirmButton.data("targetStatus", status);
+                    modalConfirmButton.data("targetPractitionerId", practitionerId);
+                    modalConfirmButton.data("targetDate", date);
+                    modalConfirmButton.data("targetDescription", description);
+                }
+            }
 
             // Show the modal
             $('#confirmationModal').modal('show');
@@ -130,6 +143,13 @@ angular.module('visits')
             else if(modalTitle === "Delete visit") {
                 self.deleteVisit($('#confirmationModalConfirmButton').data("targetVisit"));
             }
+            else if(modalTitle.toLowerCase().includes("cancel")) {
+                let modalButton = $('#confirmationModalConfirmButton');
+                self.cancelVisit(modalButton.data("targetVisit"), modalButton.data("targetStatus"), modalButton.data("targetPractitionerId"), modalButton.data("targetDate"), modalButton.data("targetDescription"));
+            }
+
+            // Hide modal after performing action
+            $('#confirmationModal').modal('hide');
         }
 
         self.switchToUpdateForm = function (e, practitionerId, date, description, id, visitStatus){
@@ -156,6 +176,7 @@ angular.module('visits')
                 };
 
                 url = "api/gateway/owners/*/pets/" + petId + "/visits/" + visitId;
+
                 $http.put(url, data).then(function(response) {
                     let currentDate = getCurrentDate();
                     let form = $('#visitForm');
@@ -211,7 +232,7 @@ angular.module('visits')
 
         // This function will call the last sorted option without changing ascending or descending
         function callLastSort(isForUpcoming) {
-            switch(lastSort) {
+            switch (lastSort) {
                 case dateSortName:
                     self.SortTableByDate(isForUpcoming, false);
                     break;
@@ -225,6 +246,42 @@ angular.module('visits')
                     self.SortTableByStatus(isForUpcoming, false);
                     break;
             }
+        }
+
+        self.resetForm = function() {
+            // Reset the Add Visit Form to default functionality
+            $('#visitForm')[0].reset();
+
+            // Restore default button name
+            $('#submit_button').text("Add New Visit");
+
+            // Hide the cancel button
+            $('#cancel_button').css("visibility", "hidden");
+
+            // Restore default functionality of form submit
+            self.submit = function () {
+                var data = {
+                    date: $filter('date')(self.date, "yyyy-MM-dd"),
+                    description: self.desc,
+                    practitionerId: self.practitionerId,
+                    status: true
+                };
+
+                $http.post(url, data).then(function () {
+                    // Temporary way to get rid of page reloading
+                    $http.get("api/gateway/visits/"+petId).then(function (resp) {
+                        self.visits = resp.data;
+                        self.sortFetchedVisits();
+                    });
+                }, function (response) {
+                    var error = response.data;
+                    alert(error.error + "\r\n" + error.errors.map(function (e) {
+                        return e.field + ": " + e.defaultMessage;
+                    }).join("\r\n"));
+                });
+            }
+
+            return false;
         }
 
         let ResetSortButtonArrows = function(isForUpcoming) {

@@ -456,7 +456,7 @@
 
 <form id="visitForm" ng-submit="$ctrl.submit()">
     <!-- Sensitive Action Confirmation Modal -->
-    <div class="modal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="visitModal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -469,7 +469,7 @@
                     <p id="confirmationModalBody">PLACEHOLDER</p>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary" id="confirmationModalDismissButton" data-dismiss="modal">Cancel</button>
                     <button type="button" class="btn btn-primary" id="confirmationModalConfirmButton" ng-click="$ctrl.completeFormAction()">Confirm</button>
                 </div>
             </div>
@@ -521,7 +521,7 @@
 
     <div class="form-group" style="margin-top: 6px; margin-bottom: 6px">
         <button id="submit_button" ng-click="$ctrl.showConfirmationModal($event)" class="btn btn-default" type="button" style="border: 1px solid gray; border-radius: 4px">Add New Visit</button>
-        <button id="cancel_button" onClick="window.location.reload()" class="btn btn-default" style="visibility: hidden; border: 1px solid gray; border-radius: 4px">Cancel</button>
+        <button id="cancel_button" ng-click="$ctrl.resetForm()" class="btn btn-default" type="button" style="visibility: hidden; border: 1px solid gray; border-radius: 4px">Cancel</button>
     </div>
 </form>
 
@@ -544,9 +544,9 @@
             <td style="white-space: pre-line">{{v.description}}</td>
             <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>
             <td class="status-text" style="white-space: pre-line">{{$ctrl.getStatus(v.status)}}</td>
-            <td style="text-align:center; vertical-align:middle"><button class="btn btn-default cancel-button" style="background-color: orangered; color: white" ng-click="$ctrl.cancelVisit($event, v.id, v.status, v.practitionerId, v.date, v.description)">{{$ctrl.setCancelButtonText(v.status)}}</button></td>
-            <td style="text-align:center; vertical-align:middle"><button class="btn btn-default" style="background-color: royalblue; color: white" ng-click="$ctrl.switchToUpdateForm($event, v.practitionerId, v.date, v.description, v.id, v.status)">Edit Visit</button></td>
-            <td style="text-align:center; vertical-align:middle"><button class="btn btn-danger" ng-click="$ctrl.showConfirmationModal($event, v.id)">Delete visit</button></td>
+            <td style="text-align:center; vertical-align:middle"><button class="btn btn-default cancel-button" type="button" style="background-color: orangered; color: white" ng-click="$ctrl.showConfirmationModal($event, v.id, v.status, v.practitionerId, v.date, v.description)">{{$ctrl.setCancelButtonText(v.status)}}</button></td>
+            <td style="text-align:center; vertical-align:middle"><button class="btn btn-default" type="button" style="background-color: royalblue; color: white" ng-click="$ctrl.switchToUpdateForm($event, v.practitionerId, v.date, v.description, v.id, v.status)">Edit Visit</button></td>
+            <td style="text-align:center; vertical-align:middle"><button class="btn btn-danger" type="button" ng-click="$ctrl.showConfirmationModal($event, v.id)">Delete visit</button></td>
         </tr>
     </tbody>
 </table>
@@ -555,10 +555,10 @@
 <table class="table">
     <thead>
         <tr>
-            <th> <button class="btn btn-default" id="sortByDateButtonPreviousVisits" ng-click="$ctrl.SortTableByDate(false)" style="color: white">Sort by date ⇅</button> </th>
-            <th> <button class="btn btn-default" id="sortByDescButtonPreviousVisits" ng-click="$ctrl.SortTableByDesc(false)" style="color: white">Sort by description ⇅</button> </th>
-            <th> <button class="btn btn-default" id="sortByVetButtonPreviousVisits" ng-click="$ctrl.SortTableByVet(false)" style="color: white">Sort by veterinarian ⇅</button> </th>
-            <th> <button class="btn btn-default" id="sortByStatusButtonPreviousVisits" ng-click="$ctrl.SortTableByStatus(false)" style="color: white">Sort by status ⇅</button>  </th>
+            <th> <button class="btn btn-default" id="sortByDateButtonPreviousVisits" type="button" ng-click="$ctrl.SortTableByDate(false)" style="color: white">Sort by date ⇅</button> </th>
+            <th> <button class="btn btn-default" id="sortByDescButtonPreviousVisits" type="button" ng-click="$ctrl.SortTableByDesc(false)" style="color: white">Sort by description ⇅</button> </th>
+            <th> <button class="btn btn-default" id="sortByVetButtonPreviousVisits" type="button" ng-click="$ctrl.SortTableByVet(false)" style="color: white">Sort by veterinarian ⇅</button> </th>
+            <th> <button class="btn btn-default" id="sortByStatusButtonPreviousVisits" type="button" ng-click="$ctrl.SortTableByStatus(false)" style="color: white">Sort by status ⇅</button>  </th>
             <th style="text-align:center; vertical-align:middle"> <label>Edit</label> </th>
             <th style="text-align:center; vertical-align:middle"> <label>Delete</label> </th>
         </tr>
