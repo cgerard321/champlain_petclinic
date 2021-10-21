@@ -463,7 +463,7 @@
         </select>
 
         <label for="selectedVisitType">Visit Type selection:</label>
-        <select id="selectedVisitType" name="selectedVisitType" ng-model="$ctrl.visitType" ng-change="$ctrl.selectionVisitTypeDisplay()">
+        <select id="selectedVisitType" name="selectedVisitType" ng-model="$ctrl.visitType">
             <option value="Examinations">Examinations</option>
             <option value="Injury">Injury</option>
             <option value="Medical">Medical</option>
@@ -491,11 +491,6 @@
             <div>
                 <label for="vetWorkdays" style="margin-top: 10px; display: inline-block; width: 150px">Workdays:</label>
                 <input id="vetWorkdays" disabled="disabled" style="background-color: #dbd9ce;" onchange=selectChanged() />
-            </div>
-
-            <div>
-                <label for="billVisitType" style="margin-top: 10px; display: inline-block; width: 150px">Visit Type:</label>
-                <input id="billVisitType" disabled="disabled" style="background-color: #dbd9ce">
             </div>
         </div>
 

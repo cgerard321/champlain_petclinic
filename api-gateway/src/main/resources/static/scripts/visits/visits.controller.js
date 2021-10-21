@@ -95,7 +95,7 @@ angular.module('visits')
             });
             return practitionerName;
         };
-        
+
         self.switchToUpdateForm = function (practitionerId, date, description, id, visitStatus){
             visitId = id;
             $("#selectedVet option[value='"+practitionerId+"']").prop("selected", true);
