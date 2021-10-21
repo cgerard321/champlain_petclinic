@@ -156,5 +156,9 @@ public class VisitsServiceClient {
     void setHostname(String hostname) {
         this.hostname = hostname;
     }
+    
+    public Mono<VisitDetails> getVisitById(int visitId) {
+        return null;
+    }
 }
 

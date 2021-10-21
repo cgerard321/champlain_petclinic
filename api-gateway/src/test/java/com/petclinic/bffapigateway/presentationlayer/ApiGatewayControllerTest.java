@@ -602,6 +602,30 @@ class ApiGatewayControllerTest {
                 .jsonPath("$[0].description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$[0].practitionerId").isEqualTo(1);
     }
+    
+    @Test
+    void shouldGetASingleVisit() {
+        VisitDetails visit = new VisitDetails();
+        visit.setId(69);
+        visit.setPetId(7);
+        visit.setDate("2022-04-20");
+        visit.setDescription("Fetching a single visit!");
+        visit.setStatus(false);
+        visit.setPractitionerId(177013);
+        
+        when(visitsServiceClient.getVisitById(visit.getId())).thenReturn(Mono.just(visit));
+    
+        client.get()
+                .uri("/api/gateway/visits/visit/{petId}", visit.getId())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$[0].id").isEqualTo(visit.getId())
+                .jsonPath("$[0].petId").isEqualTo(visit.getPetId())
+                .jsonPath("$[0].date").isEqualTo(visit.getDate())
+                .jsonPath("$[0].description").isEqualTo(visit.getDescription())
+                .jsonPath("$[0].practitionerId").isEqualTo(visit.getPractitionerId());
+    }
 
     @Test
     @DisplayName("Given valid JWT, verify user")
