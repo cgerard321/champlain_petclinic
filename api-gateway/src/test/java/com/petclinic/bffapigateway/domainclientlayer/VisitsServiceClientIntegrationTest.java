@@ -84,7 +84,7 @@ class VisitsServiceClientIntegrationTest {
     }
     
     @Test
-    private void getVisitById() {
+    void getVisitById() {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setBody("{\"id\":5,\"date\":\"2018-11-15\",\"description\":\"test visit\",\"petId\":1, \"practitionerId\":1,\"status\":false}"));

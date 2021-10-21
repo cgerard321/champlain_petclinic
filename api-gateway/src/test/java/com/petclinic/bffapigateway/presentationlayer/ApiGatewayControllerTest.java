@@ -620,11 +620,11 @@ class ApiGatewayControllerTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$[0].id").isEqualTo(visit.getId())
-                .jsonPath("$[0].petId").isEqualTo(visit.getPetId())
-                .jsonPath("$[0].date").isEqualTo(visit.getDate())
-                .jsonPath("$[0].description").isEqualTo(visit.getDescription())
-                .jsonPath("$[0].practitionerId").isEqualTo(visit.getPractitionerId());
+                .jsonPath("$.id").isEqualTo(visit.getId())
+                .jsonPath("$.petId").isEqualTo(visit.getPetId())
+                .jsonPath("$.date").isEqualTo(visit.getDate())
+                .jsonPath("$.description").isEqualTo(visit.getDescription())
+                .jsonPath("$.practitionerId").isEqualTo(visit.getPractitionerId());
     }
 
     @Test
