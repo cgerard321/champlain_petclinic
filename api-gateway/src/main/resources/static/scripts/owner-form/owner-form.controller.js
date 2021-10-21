@@ -17,11 +17,10 @@ angular.module('ownerForm')
         self.submitOwnerForm = function () {
             var id = self.owner.id;
             var req;
-            if (id) {
+            if (id)
                 req = $http.put("api/gateway/customer/owners/" + id, self.owner);
-            } else {
+            else
                 req = $http.post("api/gateway/customer/owners", self.owner);
-            }
 
             req.then(function () {
                 $state.go('owners');

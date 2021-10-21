@@ -76,25 +76,22 @@ public class OwnerServiceImpl implements OwnerService {
            foundOwner.setCity(newOwner.getCity());
            foundOwner.setTelephone(newOwner.getTelephone());
            LOG.debug("updateOwner: owner with id {} updated",id);
-       }else{
+       }
+       else{
            throw new NotFoundException("updateOwner failed, owner with id: " + id + " not found.");
        }
     }
 
-
     @Override
     public Owner createOwner(Owner owner) {
         try{
-            Owner savedOwner = repository.save(owner);
             LOG.debug("createOwner: owner with id {} saved",owner.getId());
-            return savedOwner;
-        }catch(DuplicateKeyException duplicateKeyException){
+            return repository.save(owner);
+        }
+        catch(DuplicateKeyException duplicateKeyException){
             throw new InvalidInputException("Duplicate key, ownerId: " + owner.getId());
         }
-        //INSERT METHOD
     }
-
-
 
     /**
      * ------------------------ DELETE ------------------------

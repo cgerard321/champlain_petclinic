@@ -63,9 +63,9 @@ class OwnerResource {
     @PutMapping(value = "/{ownerId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void updateOwner(@PathVariable("ownerId") int ownerId, @Valid @RequestBody Owner ownerRequest) {
-        /*
+
         //TRANSFER THIS CODE IN OwnerServiceImpl
-        final Optional<Owner> owner = ownerRepository.findById(ownerId);
+        final Optional<Owner> owner = ownerService.findById(ownerId);
 
         final Owner ownerModel = owner.orElseThrow(() -> new NotFoundException("Owner "+ownerId+" not found"));
         // This is done by hand for simplicity purpose. In a real life use-case we should consider using MapStruct.
@@ -75,8 +75,8 @@ class OwnerResource {
         ownerModel.setAddress(ownerRequest.getAddress());
         ownerModel.setTelephone(ownerRequest.getTelephone());
         log.info("Saving owner {}", ownerModel);
-        ownerRepository.save(ownerModel);
-        */
+        ownerService.save(ownerModel);
+
 
     }
 
