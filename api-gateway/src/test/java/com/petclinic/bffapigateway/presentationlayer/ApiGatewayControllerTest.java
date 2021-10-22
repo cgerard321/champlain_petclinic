@@ -616,7 +616,7 @@ class ApiGatewayControllerTest {
         when(visitsServiceClient.getVisitById(visit.getId())).thenReturn(Mono.just(visit));
     
         client.get()
-                .uri("/api/gateway/visits/visit/{visitId}", visit.getId())
+                .uri("/api/gateway/visit/{visitId}", visit.getId())
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -636,7 +636,7 @@ class ApiGatewayControllerTest {
                 .thenThrow(new GenericHttpException(expectedErrorMessage, BAD_REQUEST));
         
         client.get()
-                .uri("/api/gateway/visits/visit/{visitId}", invalidVisitId)
+                .uri("/api/gateway/visit/{visitId}", invalidVisitId)
                 .exchange()
                 .expectStatus().isBadRequest()
                 .expectBody()
