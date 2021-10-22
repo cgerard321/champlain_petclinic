@@ -331,25 +331,20 @@ public class VisitResourceTest {
 		Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01");
 		Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-31");
 
-		given(visitsService.getVisitsByPractitionerIdAndMonth(1, startDate, endDate))
-				.willReturn(
-						Collections.singletonList(
-								visit()
-										.id(1)
-										.petId(1)
-										.date(new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-15"))
-										.practitionerId(1)
-										.build())
-				);
+		given(visitsService.getVisitsByPractitionerIdAndMonth(123456, startDate, endDate))
+				.willReturn(visitDTOList);
 
-		mvc.perform(get("/visits/calendar/{practitionnerId}?dates={startDate},{endDate}", 1, "2021-10-01", "2021-10-31"))
-				.andExpect(status().isOk());
+		mvc.perform(get("/visits/calendar/{practitionnerId}?dates={startDate},{endDate}", 123456, "2021-10-01", "2021-10-31"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$[0].practitionerId").value(123456))
+				.andExpect(jsonPath("$[1].practitionerId").value(123456))
+				.andExpect(jsonPath("$[2].practitionerId").value(123456));
 
-		verify(visitsService, times(1)).getVisitsByPractitionerIdAndMonth(1, startDate, endDate);
+		verify(visitsService, times(1)).getVisitsByPractitionerIdAndMonth(123456, startDate, endDate);
 	}
 
 	@Test
-	void whenFetchingWithNegativePractitionerIdShouldHandleInvalidInputException() throws Exception {
+	void shouldHandleInvalidInputExceptionWhenFetchingWithNegativePractitionerId() throws Exception {
 		Date startDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01");
 		Date endDate = new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-31");
 
