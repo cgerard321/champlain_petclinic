@@ -240,7 +240,7 @@ public class VisitsServiceImplTests {
 
     // TESTS FOR FETCHING VISITS BASED ON PET IDS ----------------------------------------------------------------------
     @Test
-    public void whenValidPetIdThenShouldReturnVisitsForPetAsList(){
+    public void shouldReturnVisitsForPetAsListWhenValidPetIdThen(){
         List<Visit> visitsList = asList(
                 visit()
                         .id(1)
@@ -256,9 +256,9 @@ public class VisitsServiceImplTests {
 
         when(repo.findByPetIdIn(anyList())).thenReturn(visitsList);
 
-        List<Visit> serviceResponse = visitsService.getVisitsForPets(petIdsToSearchFor);
+        List<VisitDTO> serviceResponse = visitsService.getVisitsForPets(petIdsToSearchFor);
 
-        assertArrayEquals(visitsList.toArray(), serviceResponse.toArray());
+        assertEquals(2, serviceResponse.size());
     }
 
     // should add tests for error handling and validation
