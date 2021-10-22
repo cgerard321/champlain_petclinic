@@ -272,24 +272,28 @@ public class VisitsServiceImplTests {
         List<Visit> visitsList = asList(
                 visit()
                         .id(1)
+                        .visitId(UUID.randomUUID())
                         .petId(1)
                         .date(new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01"))
                         .practitionerId(1)
                         .build(),
                 visit()
-                        .id(1)
+                        .id(2)
+                        .visitId(UUID.randomUUID())
                         .petId(1)
                         .date(new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-06"))
                         .practitionerId(1)
                         .build(),
                 visit()
                         .id(3)
+                        .visitId(UUID.randomUUID())
                         .petId(1)
                         .date(new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-25"))
                         .practitionerId(2)
                         .build(),
                 visit()
-                        .id(2)
+                        .id(4)
+                        .visitId(UUID.randomUUID())
                         .petId(1)
                         .date(new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-25"))
                         .practitionerId(3)
@@ -298,7 +302,7 @@ public class VisitsServiceImplTests {
 
         when(repo.findAllByDateBetween(startDate, endDate)).thenReturn(visitsList);
 
-        List<Visit> returnedVisits = visitsService.getVisitsByPractitionerIdAndMonth(1, startDate, endDate);
+        List<VisitDTO> returnedVisits = visitsService.getVisitsByPractitionerIdAndMonth(1, startDate, endDate);
 
         assertEquals(2, returnedVisits.size());
         assertEquals(new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01"), returnedVisits.get(0).getDate());
