@@ -3,6 +3,7 @@ package com.petclinic.visits.businesslayer;
 import com.petclinic.visits.datalayer.Visit;
 import com.petclinic.visits.datalayer.VisitRepository;
 import com.petclinic.visits.utils.exceptions.InvalidInputException;
+import com.petclinic.visits.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -112,7 +113,31 @@ public class VisitsServiceImplTests {
         
         assertArrayEquals(visitsList.toArray(), serviceResponse.toArray());
     }
-    
+
+    @Test
+    public void whenValidVisitIdThenShouldReturnVisit() {
+        Visit visit = visit()
+                .id(1)
+                .petId(1)
+                .build();
+
+        when(repo.findById(1)).thenReturn(Optional.of(visit));
+
+        Visit visitFromService = visitsService.getVisitById(1);
+
+        assertThat(visitFromService.getId(), equalTo(1));
+        assertThat(visitFromService.getPetId(), equalTo(1));
+    }
+
+    @Test
+    public void whenInvalidVisitIdThenShouldThrowInvalidInputException() {
+        InvalidInputException invalidInputException = assertThrows(InvalidInputException.class, () ->{
+            visitsService.getVisitById(-1);
+        });
+
+        assertEquals("VisitId can't be negative", invalidInputException.getMessage());
+    }
+
     @Test
     public void whenValidIdUpdateVisit(){
         Visit updatedVisit = visit().petId(1).date(new Date()).description("Desc-1 Updated").build();

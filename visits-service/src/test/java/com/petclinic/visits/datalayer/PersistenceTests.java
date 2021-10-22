@@ -111,6 +111,18 @@ public class PersistenceTests {
     }
 
     @Test
+    public void getVisitByVisitID() {
+        Visit visit = new Visit(5, new Date(), "Description", 5);
+        visit = repo.save(visit);
+
+        Visit foundVisit = repo.findById(visit.getId()).get();
+
+        assertEquals(visit.getId(), foundVisit.getId());
+        assertEquals(visit.getPetId(), foundVisit.getPetId());
+        assertEquals(visit.isStatus(), foundVisit.isStatus());
+    }
+
+    @Test
     public void updateVisit(){
         Visit savedVisit = new Visit(5, new Date(), "Description", 5);
         savedVisit = repo.save(savedVisit);

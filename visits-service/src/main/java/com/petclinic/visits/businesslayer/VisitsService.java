@@ -18,6 +18,8 @@ public interface VisitsService {
 
     public List<Visit> getVisitsForPet(int petId);
 
+    public Visit getVisitById(int visitId);
+
     public void deleteVisit(int visitId);
 
     public Visit updateVisit(Visit visit);
