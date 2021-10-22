@@ -105,8 +105,13 @@ public class VisitsServiceImpl implements VisitsService {
     }
 
     @Override
-    public List<Visit> getVisitsForPets(List<Integer> petIds){
-        return visitRepository.findByPetIdIn(petIds);
+    public List<VisitDTO> getVisitsForPets(List<Integer> petIds){
+        List<Visit> returnedVisits = visitRepository.findByPetIdIn(petIds);
+        List<VisitDTO> visitDTOList = returnedVisits.stream()
+                .filter(v -> v != null)
+                .map(visit -> mapper.entityToModel(visit))
+                .collect(Collectors.toList());
+        return visitDTOList;
     }
 
     @Override

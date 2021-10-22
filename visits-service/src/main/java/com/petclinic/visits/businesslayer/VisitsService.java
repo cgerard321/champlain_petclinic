@@ -26,7 +26,7 @@ public interface VisitsService {
 
     public VisitDTO updateVisit(VisitDTO visit);
 
-    public List<Visit> getVisitsForPets(List<Integer> petIds);
+    public List<VisitDTO> getVisitsForPets(List<Integer> petIds);
 
     List<VisitDTO> getVisitsForPractitioner(int practitionerId);
 
