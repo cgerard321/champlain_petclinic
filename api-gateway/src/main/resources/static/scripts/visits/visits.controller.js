@@ -393,7 +393,7 @@ angular.module('visits')
             return statusText;
         };
 
-        self.cancelVisit = function (id, visitStatus, visitPractitionerId, visitDate, visitDescription){
+        self.cancelVisit = function (e, id, visitStatus, visitPractitionerId, visitDate, visitDescription){
             visitId = id;
             var data = {};
 
@@ -417,10 +417,14 @@ angular.module('visits')
             url = "api/gateway/owners/*/pets/" + petId + "/visits/" + visitId;
 
             $http.put(url, data).then(function () {
-                $http.get("api/gateway/visits/"+petId).then(function (resp) {
-                    self.visits = resp.data;
-                    self.sortFetchedVisits();
-                });
+                // Get the parent row of the sender
+                let parentRow = $(e.target).closest('tr');
+
+                // Get the index of the sender from the parent table row data attribute
+                let index = parseInt(parentRow.data("index"));
+
+                // Remove the visit from the list of either upcoming or previous visits
+                self.upcomingVisits[index].status = !self.upcomingVisits[index].status;
             },function (response) {
                 var error = response.data;
                 alert(error.error + "\r\n" + error.errors.map(function (e) {
