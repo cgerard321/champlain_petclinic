@@ -6,15 +6,19 @@ angular.module('visits')
         var petId = $stateParams.petId || 0;
         var url = "api/gateway/visit/owners/" + ($stateParams.ownerId || 0) + "/pets/" + petId + "/visits";
         var vetsUrl = "api/gateway/vets";
+        var billsUrl = "api/gateway/bill"
         var visitId = 0;
         self.practitionerId = 0;
-        self.visitType = "";
         self.date = new Date();
         self.desc = "";
 
         $http.get("api/gateway/visits/"+petId).then(function (resp) {
             self.visits = resp.data;
             self.sortFetchedVisits();
+        });
+
+        $http.get(billsUrl).then(function (resp) {
+            self.bills = resp.data;
         });
 
         self.sortFetchedVisits = function() {
@@ -327,9 +331,24 @@ angular.module('visits')
                 status: true
             };
 
+            var billData = {
+                ownerId: $stateParams.ownerId,
+                date: $filter('date')(self.date, "yyyy-MM-dd"),
+                visitType : $("#selectedVisitType").val()
+            }
+
             $http.post(url, data).then(function () {
                 $state.go("owners", {ownerId: $stateParams.ownerId});
-            }, function (response) {
+            },function (response) {
+                var error = response.data;
+                alert(error.error + "\r\n" + error.errors.map(function (e) {
+                    return e.field + ": " + e.defaultMessage;
+                }).join("\r\n"));
+            });
+
+            $http.post(billsUrl, billData).then(function () {
+
+            }, function (response){
                 var error = response.data;
                 alert(error.error + "\r\n" + error.errors.map(function (e) {
                     return e.field + ": " + e.defaultMessage;
