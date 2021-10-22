@@ -30,7 +30,7 @@ public class PetTests {
 
     @DisplayName("ToString_Test")
     @Test
-    public void test_setOwner() throws ParseException {
+    public void test_PetToString() throws ParseException {
         //Arrange
         Pet pet = new Pet();
         pet.setId(1);
