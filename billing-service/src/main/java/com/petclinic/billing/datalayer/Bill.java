@@ -6,36 +6,36 @@ import javax.persistence.*;
 import java.util.Date;
 
 @Entity
-@Table(name = "bills")
+@Table(name = "billings")
 public class Bill {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    @Column(name = "bill_id")
     private int billId;
 
-    @Column(name="customerId")
+    @Column(name="customer_id")
     private int customerId;
+
+    @Column(name = "visit_type")
+    private String visitType;
 
     @Column(name = "visit_date")
     @Temporal(TemporalType.TIMESTAMP)
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date date = new Date();
 
-    @Column(name = "visitType")
-    private String visitType;
-
     @Column(name = "amount")
     private double amount;
 
     public Bill(){}
 
-
-    public Bill(int billId,int customerId, Date date, String visitType, double amount){
-        this.customerId = customerId;
+    public Bill(int billId,int customerId, String visitType, Date date, double amount){
         this.billId = billId;
-        this.date = date;
+        this.customerId = customerId;
         this.visitType = visitType;
+        this.date = date;
         this.amount = amount;
     }
 
