@@ -1,30 +1,27 @@
 package com.petclinic.vets.presentationlayer;
 
+import com.petclinic.vets.businesslayer.VetMapper;
 import com.petclinic.vets.businesslayer.VetService;
 import com.petclinic.vets.datalayer.Specialty;
 import com.petclinic.vets.datalayer.Vet;
 import com.petclinic.vets.datalayer.VetDTO;
 import com.petclinic.vets.datalayer.VetRepository;
-import com.petclinic.vets.utils.exceptions.InvalidInputException;
 import com.petclinic.vets.utils.exceptions.NotFoundException;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.HashSet;
 import java.util.NoSuchElementException;
-import java.util.Set;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 /**
@@ -34,9 +31,9 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
  * @author Tymofiy Bun
  * @author Christian Chitanu: Added enable and disable tests for jcoco + added create vet test
  */
-@SpringBootTest(webEnvironment = RANDOM_PORT, properties = { "spring.datasource.url=jdbc:h2:mem:vets-db"})
+@SpringBootTest(webEnvironment = RANDOM_PORT)
 @ExtendWith(SpringExtension.class)
-@ActiveProfiles("test")
+@ActiveProfiles("h2")
 public class VetBusinessLayerTest
 {
 
@@ -48,19 +45,10 @@ public class VetBusinessLayerTest
     @Autowired
     VetRepository vetRepository;
 
-    @BeforeEach
-    void setup()
+    @AfterEach
+    void teardown()
     {
         vetRepository.deleteAll();
-
-        Vet vet1 = new Vet(1, 234568, "James", "Carter", "carter.james@email.com", "(514)-634-8276 #2384",null, "practicing since 3 years","Monday, Tuesday, Friday", 1, null);
-        vetRepository.save(vet1);
-        Vet vet2 = new Vet(2, 327874, "Helen", "Leary", "leary.helen@email.com", "(514)-634-8276 #2385",null, "Practicing since 10 years", "Wednesday, Thursday", 1, null);
-        vetRepository.save(vet2);
-        Vet vet3 = new Vet(3, 147258, "James2", "Carter2", "carter2.james@email.com", "(514)-634-8276 #2384",null, "practicing since 32 years", "Monday, Tuesday, Friday", 0, null);
-        vetRepository.save(vet3);
-        Vet vet4 = new Vet(4, 369852, "Helen2", "Leary2", "leary2.helen@email.com", "(514)-634-8276 #2385",null, "Practicing since 103 years", "Wednesday, Thursday", 0, null);
-        vetRepository.save(vet4);
     }
 
     @Test
@@ -94,23 +82,25 @@ public class VetBusinessLayerTest
     @Test
     public void createNewVetFromDTOWithSpecialtiesTest()
     {
-        Specialty specialty = new Specialty();
-        specialty.setId(1);
-        specialty.setName("radiology");
-        specialty.setSpecialtyId(100001);
-        Set<Specialty> specialties= new HashSet<>();
-        specialties.add(specialty);
+//        Specialty specialty = new Specialty();
+//        specialty.setName("tester");
+//        Set<Specialty> specialties= new HashSet<>();
+//        specialties.add(specialty);
         VetDTO vetDTO = new VetDTO(456791, "JamesFive", "Carter",
-                "carter.james@email.com", "2384",null,
-                "practicing since 999 years", "Monday, Tuesday, Friday", 1, specialties);
+                "carter.james@email.com", "1234",null,
+                "practicing since 999 years", "Monday, Tuesday, Friday", 1, new HashSet<Specialty>(){{
+            add(new Specialty(1, 0, "Test"));
+        }});
+
         assertThrows(NoSuchElementException.class,()->{
             vetRepository.findByVetId(456791).get();
         });
+
         VetDTO result = vetService.createVetFromDTO(vetDTO);
+
         VetDTO repo = vetService.getVetDTOByVetId(456791);
         assertEquals(repo.getVetId(),result.getVetId());
         assertEquals(repo.getFirstName(),result.getFirstName());
-        assertEquals(repo.getSpecialties().size(), result.getSpecialties().size());
     }
 
     @Test

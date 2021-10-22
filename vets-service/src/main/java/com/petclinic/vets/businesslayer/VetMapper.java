@@ -24,7 +24,8 @@ public interface VetMapper
     @Mappings(
             {
                     @Mapping(target = "id", ignore = true),
-//                    @Mapping(target = "specialties", ignore = true)
+                    // Should probably not ignore this :)
+                    //@Mapping(target = "specialties", ignore = true)
             }
     )
     Vet vetDTOToVet(VetDTO vetDTO);

@@ -125,7 +125,8 @@ public class VetServiceImpl implements VetService {
 
     @Override
     public VetDTO getVetDTOByVetId(int vetId)
-    {   Vet vet = getVetByVetId(vetId);
+    {
+        Vet vet = getVetByVetId(vetId);
         VetDTO vetDTO= vetMapper.vetToVetDTO(vet);
         return vetDTO;
     }
