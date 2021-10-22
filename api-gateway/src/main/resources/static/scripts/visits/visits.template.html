@@ -520,14 +520,14 @@
     </tr>
     </thead>
     <tbody>
-        <tr ng-repeat="v in $ctrl.upcomingVisits">
+        <tr ng-repeat="v in $ctrl.upcomingVisits" data-index="{{$index}}" data-table-name="upcomingVisits">
             <td class="col-sm-2">{{v.date}}</td>
             <td style="white-space: pre-line">{{v.description}}</td>
             <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>
             <td class="status-text" style="white-space: pre-line">{{$ctrl.getStatus(v.status)}}</td>
             <td style="text-align:center; vertical-align:middle"><button class="btn btn-default cancel-button" style="background-color: orangered; color: white" ng-click="$ctrl.cancelVisit(v.id, v.status, v.practitionerId, v.date, v.description)">{{$ctrl.setCancelButtonText(v.status)}}</button></td>
             <td style="text-align:center; vertical-align:middle"><button class="btn btn-default" style="background-color: royalblue; color: white" ng-click="$ctrl.switchToUpdateForm(v.practitionerId, v.date, v.description, v.id, v.status)">Edit Visit</button></td>
-            <td style="text-align:center; vertical-align:middle"><button class="btn btn-danger" ng-click="$ctrl.deleteVisit(v.id)">Delete visit</button></td>
+            <td style="text-align:center; vertical-align:middle"><button class="btn btn-danger" ng-click="$ctrl.deleteVisit($event, v.id)">Delete visit</button></td>
         </tr>
     </tbody>
 </table>
@@ -545,13 +545,13 @@
         </tr>
     </thead>
     <tbody>
-        <tr ng-repeat="v in $ctrl.previousVisits">
+        <tr ng-repeat="v in $ctrl.previousVisits" data-index="{{$index}}" data-table-name="previousVisits">
             <td class="col-sm-2">{{v.date}}</td>
             <td style="white-space: pre-line">{{v.description}}</td>
             <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>
             <td class="status-text" style="white-space: pre-line">{{$ctrl.getStatus(v.status)}}</td>
             <td style="text-align:center; vertical-align:middle"><button class="btn btn-default" style="background-color: royalblue; color: white" ng-click="$ctrl.switchToUpdateForm(v.practitionerId, v.date, v.description, v.id, v.status)">Edit Visit</button></td>
-            <td style="text-align:center; vertical-align:middle"><button class="btn btn-danger" ng-click="$ctrl.deleteVisit(v.id)">Delete visit</button></td>
+            <td style="text-align:center; vertical-align:middle"><button class="btn btn-danger" ng-click="$ctrl.deleteVisit($event, v.id)">Delete visit</button></td>
         </tr>
     </tbody>
 </table>

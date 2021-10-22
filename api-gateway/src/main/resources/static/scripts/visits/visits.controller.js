@@ -18,6 +18,10 @@ angular.module('visits')
         });
         
 
+        // Lists holding visits for the table to display
+        self.upcomingVisits = [];
+        self.previousVisits = [];
+
         self.sortFetchedVisits = function() {
             let dateObj = new Date();
             var dd = String(dateObj.getDate()).padStart(2, '0');
@@ -25,8 +29,6 @@ angular.module('visits')
             var yyyy = dateObj.getFullYear();
             let currentDate = Date.parse(yyyy + '-' + mm + '-' + dd);
 
-            self.upcomingVisits = [];
-            self.previousVisits = [];
 
             $.each(self.visits, function(i, visit) {
                 let selectedVisitDate = Date.parse(visit.date);
@@ -353,9 +355,23 @@ angular.module('visits')
             });
         }
 
-        self.deleteVisit = function (visitId){
+        self.deleteVisit = function (e, visitId){
             $http.delete("api/gateway/visits/" + visitId).then(function () {
-                window.location.reload();
+                // Get the parent row of the sender
+                let parentRow = $(e.target).closest('tr');
+
+                // Get the index of the sender from the parent table row data attribute
+                let index = parseInt(parentRow.data("index"));
+
+                // See if the sender is in upcoming or previous visits
+                let deleteFromUpcomingVisits = parentRow.data("table-name") === "upcomingVisits";
+
+                // Remove the visit from the list of either upcoming or previous visits
+                if(deleteFromUpcomingVisits) {
+                    self.upcomingVisits.splice(index, 1);
+                } else {
+                    self.previousVisits.splice(index, 1);
+                }
             }, function (response) {
                 var error = response.data;
                 alert(error.error + "\r\n" + error.errors.map(function (e) {
