@@ -6,7 +6,7 @@ angular.module('visits')
         var petId = $stateParams.petId || 0;
         var url = "api/gateway/visit/owners/" + ($stateParams.ownerId || 0) + "/pets/" + petId + "/visits";
         var vetsUrl = "api/gateway/vets";
-        var billsUrl = "api/gateway/bill"
+        var billsUrl = "api/gateway/bill";
         var visitId = 0;
         self.practitionerId = 0;
         self.date = new Date();
