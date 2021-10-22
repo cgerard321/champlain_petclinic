@@ -67,11 +67,11 @@ public class VisitResource {
         return visitsService.getVisitsForPet(petId);
     }
 
-//    @GetMapping("pets/visits")
-//    public Visits visitsMultiGet(@RequestParam("petId") List<Integer> petIds) {
-//        final List<Visit> byPetIdIn = visitsService.getVisitsForPets(petIds);
-//        return new Visits(byPetIdIn);
-//    }
+    @GetMapping("pets/visits")
+    public Visits visitsMultiGet(@RequestParam("petId") List<Integer> petIds) {
+        final List<VisitDTO> byPetIdIn = visitsService.getVisitsForPets(petIds);
+        return new Visits(byPetIdIn);
+    }
 
     @PutMapping(value = "owners/*/pets/{petId}/visits/{visitId}",
             consumes = "application/json",
@@ -115,6 +115,6 @@ public class VisitResource {
 
     @Value
     static class Visits {
-        List<Visit> items;
+        List<VisitDTO> items;
     }
 }

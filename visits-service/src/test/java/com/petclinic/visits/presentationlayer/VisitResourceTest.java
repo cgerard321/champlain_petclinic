@@ -74,9 +74,12 @@ public class VisitResourceTest {
 	ObjectMapper objectMapper;
 
 	List<VisitDTO> visitDTOList = Arrays.asList(
-			new VisitDTO(UUID.randomUUID().toString(), new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01"), "Description", 200, 123456, true),
-			new VisitDTO(UUID.randomUUID().toString(), new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01"), "Description", 200, 123456, true),
-			new VisitDTO(UUID.randomUUID().toString(), new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01"), "Description", 200, 123456, true)
+			new VisitDTO(UUID.randomUUID().toString(), new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01"),
+					"Description", 200, 123456, true),
+			new VisitDTO(UUID.randomUUID().toString(), new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01"),
+					"Description", 200, 123456, true),
+			new VisitDTO(UUID.randomUUID().toString(), new SimpleDateFormat("yyyy-MM-dd").parse("2021-10-01"),
+					"Description", 200, 123456, true)
 	);
 
 	VisitIdLessDTO visitIdLessDTO = new VisitIdLessDTO(new Date(System.currentTimeMillis()), "Description", 200, 12345, true);
@@ -300,7 +303,20 @@ public class VisitResourceTest {
 	}
 
 	// TESTS FOR FETCHING VISITS BASED ON PET IDs ----------------------------------------------------------------------
+	@Test
+	void shouldFetchVisitsWhenValidPetIds() throws Exception {
+		given(visitsService.getVisitsForPets(asList(111, 222)))
+				.willReturn(visitDTOList);
 
+		mvc.perform(get("/pets/visits?petId=111,222"))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.items[0].visitId").value(visitDTOList.get(0).getVisitId()))
+				.andExpect(jsonPath("$.items[1].visitId").value(visitDTOList.get(1).getVisitId()))
+				.andExpect(jsonPath("$.items[2].visitId").value(visitDTOList.get(2).getVisitId()))
+				.andExpect(jsonPath("$.items[0].petId").value(visitDTOList.get(0).getPetId()))
+				.andExpect(jsonPath("$.items[1].petId").value(visitDTOList.get(1).getPetId()))
+				.andExpect(jsonPath("$.items[2].petId").value(visitDTOList.get(2).getPetId()));
+	}
 
 	// TESTS FOR FETCHING VISITS BASED ON PRACTITIONER ID ----------------------------------------------------------------------
 	@Test
