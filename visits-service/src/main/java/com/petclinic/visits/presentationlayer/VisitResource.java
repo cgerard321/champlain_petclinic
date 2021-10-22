@@ -67,6 +67,13 @@ public class VisitResource {
         return visitsService.getVisitsForPet(petId);
     }
 
+    //This method will return one visit based on the visit id
+    @GetMapping("visit/{visitId}")
+    public Visit getVisitByVisitId(@PathVariable("visitId") int visitId){
+        log.info("Getting visit for visit with visitId: {}", visitId);
+        return visitsService.getVisitById(visitId);
+    }
+
     @GetMapping("pets/visits")
     public Visits visitsMultiGet(@RequestParam("petId") List<Integer> petIds) {
         final List<VisitDTO> byPetIdIn = visitsService.getVisitsForPets(petIds);

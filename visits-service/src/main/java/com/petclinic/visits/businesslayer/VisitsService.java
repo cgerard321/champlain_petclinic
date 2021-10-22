@@ -20,7 +20,10 @@ public interface VisitsService {
 
     public List<VisitDTO> getVisitsForPet(int petId);
 
+
     List<VisitDTO> getVisitsForPet(int petId, boolean scheduled);
+  
+    public Visit getVisitById(int visitId);
 
     public void deleteVisit(String visitId);
 

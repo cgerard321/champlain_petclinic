@@ -8,11 +8,14 @@
 
 package com.petclinic.auth.User;
 
+import com.petclinic.auth.Exceptions.EmailAlreadyExistsException;
 import com.petclinic.auth.Exceptions.IncorrectPasswordException;
+import com.petclinic.auth.Exceptions.InvalidInputException;
 import com.petclinic.auth.Exceptions.NotFoundException;
 import com.petclinic.auth.JWT.JWTService;
 import com.petclinic.auth.Mail.Mail;
 import com.petclinic.auth.Mail.MailService;
+import com.petclinic.auth.Role.data.Role;
 import com.petclinic.auth.User.data.User;
 import com.petclinic.auth.User.data.UserIDLessRoleLessDTO;
 import com.petclinic.auth.User.data.UserPasswordLessDTO;
@@ -28,12 +31,17 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.parameters.P;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
 import java.nio.charset.StandardCharsets;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Base64;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.lang.String.format;
 
@@ -59,10 +67,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserById(long id) {
-        User entity  = userRepo.findById(id)
-                .orElseThrow(() -> new NotFoundException("No user found for userID" + id));
-        log.info("User getUserById: found userId: {}", entity.getId());
-        return entity;
+        if (id <= 0){
+            throw new InvalidInputException("Id cannot be a negative number for " + id);
+        }
+        else {
+            User entity  = userRepo.findById(id)
+                    .orElseThrow(() -> new NotFoundException("No user found for userID " + id));
+            log.info("User getUserById: found userId: {}", entity.getId());
+            return entity;
+        }
     }
 
     @Override
@@ -72,6 +85,13 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User createUser(@Valid UserIDLessRoleLessDTO userIDLessDTO) {
+
+        final Optional<User> byEmail = userRepo.findByEmail(userIDLessDTO.getEmail());
+
+        if(byEmail.isPresent()) {
+            throw new EmailAlreadyExistsException(
+                    format("User with e-mail %s already exists", userIDLessDTO.getEmail()));
+        }
 
         log.info("Saving user with email {}", userIDLessDTO.getEmail());
         User user = userMapper.idLessRoleLessDTOToModel(userIDLessDTO);
@@ -137,7 +157,27 @@ public class UserServiceImpl implements UserService {
                     new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword())
             );
 
-            User principal = (User) authentication.getPrincipal();
+            final Object rawPrincipal = authentication.getPrincipal();
+            User principal;
+            if(rawPrincipal instanceof User) {
+
+                principal = (User) authentication.getPrincipal();
+            } else {
+                final UserDetails userDetails = (UserDetails) rawPrincipal;
+                principal = User.builder()
+                        .id(-1)
+                        .username(userDetails.getUsername())
+                        .email(userDetails.getUsername())
+                        .verified(true)
+                        .password(userDetails.getPassword())
+                        .roles(userDetails.getAuthorities().parallelStream()
+                                .map(n -> Role.builder()
+                                        .id(-1)
+                                        .name(n.getAuthority().split("_")[1].toUpperCase())
+                                        .build())
+                                .collect(Collectors.toSet()))
+                        .build();
+            }
 
             return UserTokenPair.builder()
                     .token(jwtService.encrypt(principal))

@@ -5,6 +5,7 @@ import com.petclinic.visits.datalayer.VisitDTO;
 import com.petclinic.visits.datalayer.VisitIdLessDTO;
 import com.petclinic.visits.datalayer.VisitRepository;
 import com.petclinic.visits.utils.exceptions.InvalidInputException;
+import com.petclinic.visits.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -116,8 +117,34 @@ public class VisitsServiceImplTests {
         verify(repo, never()).delete(visit);
     }
 
-    // should add tests for error handling and validation
 
+    // should add tests for error handling and validation
+  
+    // TESTS FOR GETTING A SINGLE VISIT ----------------------------------------------------------------------
+    @Test
+    public void whenValidVisitIdThenShouldReturnVisit() {
+        Visit visit = visit()
+                .id(1)
+                .petId(1)
+                .build();
+
+        when(repo.findById(1)).thenReturn(Optional.of(visit));
+
+        Visit visitFromService = visitsService.getVisitById(1);
+
+        assertThat(visitFromService.getId(), equalTo(1));
+        assertThat(visitFromService.getPetId(), equalTo(1));
+    }
+
+    @Test
+    public void whenInvalidVisitIdThenShouldThrowInvalidInputException() {
+        InvalidInputException invalidInputException = assertThrows(InvalidInputException.class, () ->{
+            visitsService.getVisitById(-1);
+        });
+
+        assertEquals("VisitId can't be negative", invalidInputException.getMessage());
+    }
+  
     // TESTS FOR CREATING A VISIT ----------------------------------------------------------------------
     @Test
     public void shouldCreateConfirmedVisitWhenValidPetId() {

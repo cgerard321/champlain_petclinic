@@ -91,24 +91,26 @@ public class VetBusinessLayerTest
         assertEquals(repo.getVetId(),result.getVetId());
         assertEquals(repo.getFirstName(),result.getFirstName());
     }
-//    @Test
-//    public void createNewVetFromDTOWithSpecialtiesTest()
-//    {
-//        Specialty specialty = new Specialty();
-//        specialty.setName("tester");
-//        Set<Specialty> specialties= new HashSet<>();
-//        specialties.add(specialty);
-//        VetDTO vetDTO = new VetDTO(456791, "JamesFive", "Carter",
-//                "carter.james@email.com", "2384",null,
-//                "practicing since 999 years", "Monday, Tuesday, Friday", 1, specialties);
-//        assertThrows(NoSuchElementException.class,()->{
-//            vetRepository.findByVetId(456791).get();
-//        });
-//        VetDTO result = vetService.createVetFromDTO(vetDTO);
-//        VetDTO repo = vetService.getVetDTOByVetId(456791);
-//        assertEquals(repo.getVetId(),result.getVetId());
-//        assertEquals(repo.getFirstName(),result.getFirstName());
-//    }
+    @Test
+    public void createNewVetFromDTOWithSpecialtiesTest()
+    {
+        Specialty specialty = new Specialty();
+        specialty.setName("ksm");
+        specialty.setSpecialtyId(123456);
+        Set<Specialty> specialties= new HashSet<>();
+        specialties.add(specialty);
+        specialties.add(specialty);
+        VetDTO vetDTO = new VetDTO(456791, "JamesFive", "Carter",
+                "carter.james@email.com", "2384",null,
+                "practicing since 999 years", "Monday, Tuesday, Friday", 1, specialties);
+        assertThrows(NoSuchElementException.class,()->{
+            vetRepository.findByVetId(456791).get();
+        });
+        VetDTO result = vetService.createVetFromDTO(vetDTO);
+        VetDTO repo = vetService.getVetDTOByVetId(456791);
+        assertEquals(repo.getVetId(),result.getVetId());
+        assertEquals(repo.getFirstName(),result.getFirstName());
+    }
 
     @Test
     public void getAllVetsTest()
@@ -136,8 +138,11 @@ public class VetBusinessLayerTest
     @Test
     public void updateVetByVetId()
     {
-        Vet vet1 = new Vet(1, 234568, "JamesUpdate", "CarterUpdate", "carterUpdate.james@email.com", "(514)-634-8276 #2384",null,
-                "practicing since 3 yearsUpdate", "Monday, Tuesday, Friday", 1, null);
+        Specialty specialty = new Specialty(1,123456,"tester");
+        Set<Specialty> specialties= new HashSet<>();
+        specialties.add(specialty);
+        Vet vet1 = new Vet(1, 784567, "JamesUpdate", "CarterUpdate", "carterUpdate.james@email.com", "(514)-634-8276 #2384",null,
+                "practicing since 3 yearsUpdate", "Monday, Tuesday, Friday", 1, specialties);
 
 
         vetService.updateVet(vetService.getVetByVetId(234568), vet1);
@@ -146,8 +151,10 @@ public class VetBusinessLayerTest
         assertEquals(vetService.getVetByVetId(234568).getLastName(), "CarterUpdate");
         assertEquals(vetService.getVetByVetId(234568).getEmail(), "carterUpdate.james@email.com");
         assertEquals(vetService.getVetByVetId(234568).getResume(), "practicing since 3 yearsUpdate");
+        assertEquals(vetService.getVetByVetId(234568).getSpecialties().get(0).getName(), "tester");
 
-        Vet vet2 = new Vet(1, 234568, "", "", "", "",null, "", "", 1, null);
+
+        Vet vet2 = new Vet(1, 456123, "", "", "", "",null, "", "", 1, null);
 
 
         vetService.updateVet(vetService.getVetByVetId(234568), vet2);
@@ -155,8 +162,19 @@ public class VetBusinessLayerTest
         assertEquals(vetService.getVetByVetId(234568).getFirstName(), "JamesUpdate");
         assertEquals(vetService.getVetByVetId(234568).getLastName(), "CarterUpdate");
         assertEquals(vetService.getVetByVetId(234568).getEmail(), "carterUpdate.james@email.com");
+
+
+        Vet vet3 = new Vet(1, 456123, null, null, null, null,null, null, null, 1, null);
+
+
+        vetService.updateVet(vetService.getVetByVetId(234568), vet3);
+
+        assertEquals(vetService.getVetByVetId(234568).getFirstName(), "JamesUpdate");
+        assertEquals(vetService.getVetByVetId(234568).getLastName(), "CarterUpdate");
+        assertEquals(vetService.getVetByVetId(234568).getEmail(), "carterUpdate.james@email.com");
         assertEquals(vetService.getVetByVetId(234568).getResume(), "practicing since 3 yearsUpdate");
     }
+
 
     @Test
     public void getAllDisabledVets()

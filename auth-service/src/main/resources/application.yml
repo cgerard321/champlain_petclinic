@@ -24,6 +24,9 @@ spring:
 mailer-service:
   host: localhost
   port: 8888
+default-admin:
+  username: admin
+  password: admin
 
 ---
 spring.profiles: docker
@@ -37,6 +40,9 @@ gateway:
   origin: localhost:8080
   protocol: http
   subdomain:
+mailer-service:
+  host: mailer-service
+  port: 8080
 
 ---
 spring.profiles: test

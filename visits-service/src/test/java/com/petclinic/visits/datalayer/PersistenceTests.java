@@ -123,11 +123,25 @@ public class PersistenceTests {
         assertEquals(v.isStatus(), savedVisit.isStatus());
     }
 
+    // TESTS FOR FETCHING A SINGLE VISIT ----------------------------------------------------------------------
+    @Test
+    public void getVisitByVisitID() {
+        Visit visit = new Visit(5, new Date(), "Description", 5);
+        visit = repo.save(visit);
+
+        Visit foundVisit = repo.findById(visit.getId()).get();
+
+        assertEquals(visit.getId(), foundVisit.getId());
+        assertEquals(visit.getPetId(), foundVisit.getPetId());
+        assertEquals(visit.isStatus(), foundVisit.isStatus());
+    }
+  
     // TESTS FOR FETCHING VISITS BASED ON PET ID ----------------------------------------------------------------------
     @Test
     public void getVisitsForPet() {
         List<Visit> repoResponse = repo.findByPetId(200);
         assertThat(repoResponse, hasSize(1));
+
     }
 
     @Test

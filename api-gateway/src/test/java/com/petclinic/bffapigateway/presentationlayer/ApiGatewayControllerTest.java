@@ -1,38 +1,33 @@
 package com.petclinic.bffapigateway.presentationlayer;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.domainclientlayer.*;
-import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
-import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
-import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
-import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
-import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
 import com.petclinic.bffapigateway.dtos.*;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Assertions;
+import com.petclinic.bffapigateway.exceptions.GenericHttpException;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import java.util.Calendar;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import java.net.ConnectException;
+import reactor.util.function.Tuples;
 
 import java.util.Collections;
-import java.util.Date;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.when;
-
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 //
 //import com.petclinic.billing.datalayer.BillDTO;
 
@@ -43,7 +38,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureWebTestClient
 class ApiGatewayControllerTest {
 
-
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @MockBean
     private CustomersServiceClient customersServiceClient;
@@ -171,7 +167,9 @@ class ApiGatewayControllerTest {
         user.setUsername("Johnny123");
         user.setPassword("password");
         user.setEmail("email@email.com");
-        when(authServiceClient.createUser(user)).thenReturn(Mono.just(user));
+        when(authServiceClient.createUser(argThat(
+                n -> user.getEmail().equals(n.getEmail())
+        ))).thenReturn(Mono.just(user));
 
         client.post()
                 .uri("/api/gateway/users")
@@ -231,7 +229,9 @@ class ApiGatewayControllerTest {
         user.setPassword("pass");
         user.setEmail("johndoe2@gmail.com");
 
-        when(authServiceClient.createUser(user))
+        when(authServiceClient.createUser(argThat(
+                n -> user.getEmail().equals(n.getEmail())
+        )))
                 .thenReturn(Mono.just(user));
 
         client.post()
@@ -601,6 +601,116 @@ class ApiGatewayControllerTest {
                 .jsonPath("$[0].date").isEqualTo("2021-12-12")
                 .jsonPath("$[0].description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$[0].practitionerId").isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("Given valid JWT, verify user")
+    void verify_user() throws JsonProcessingException {
+
+        final String validToken = "some.valid.token";
+        final UserDetails user = UserDetails.builder()
+                .id(1)
+                .password(null)
+                .email("e@mail.com")
+                .username("user")
+                .roles(Collections.emptySet())
+                .build();
+
+        when(authServiceClient.verifyUser(validToken))
+                .thenReturn(Mono.just(user));
+
+        client.get()
+                .uri("/api/gateway/verification/{token}", validToken)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .json(objectMapper.writeValueAsString(user));
+    }
+
+    @Test
+    @DisplayName("Given invalid JWT, expect 400")
+    void verify_user_bad_token() {
+
+        final String errorMessage = "some error message";
+        final String invalidToken = "some.invalid.token";
+
+        when(authServiceClient.verifyUser(invalidToken))
+                .thenThrow(new GenericHttpException(errorMessage, BAD_REQUEST));
+
+        client.get()
+                .uri("/api/gateway/verification/{token}", invalidToken)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.statusCode").isEqualTo(BAD_REQUEST.value())
+                .jsonPath("$.timestamp").exists()
+                .jsonPath("$.message").isEqualTo(errorMessage);
+    }
+
+    @Test
+    @DisplayName("Given valid Login, return JWT and user details")
+    void login_valid() throws JsonProcessingException {
+        final String validToken = "some.valid.token";
+        final UserDetails user = UserDetails.builder()
+                .id(-1)
+                .password(null)
+                .email("e@mail.com")
+                .username("user")
+                .roles(Collections.emptySet())
+                .build();
+
+        final Login login = Login.builder()
+                .password("valid")
+                .email(user.getEmail())
+                .build();
+        when(authServiceClient.login(login))
+                .thenReturn(Mono.just(Tuples.of(
+                        validToken,
+                        user
+                )));
+
+        final WebTestClient.ResponseSpec ok = client.post()
+                .uri("/api/gateway/users/login")
+                .accept(APPLICATION_JSON)
+                .body(Mono.just(login), Login.class)
+                .exchange()
+                .expectStatus().isOk();
+
+        ok.expectBody()
+                .json(objectMapper.writeValueAsString(user));
+        ok.expectHeader()
+                .valueEquals(HttpHeaders.AUTHORIZATION, validToken);
+    }
+
+    @Test
+    @DisplayName("Given invalid Login, throw 401")
+    void login_invalid() {
+        final UserDetails user = UserDetails.builder()
+                .id(-1)
+                .password(null)
+                .email("e@mail.com")
+                .username("user")
+                .roles(Collections.emptySet())
+                .build();
+
+        final Login login = Login.builder()
+                .password("valid")
+                .email(user.getEmail())
+                .build();
+        final String message = "I live in unending agony. I spent 6 hours and ended up with nothing";
+        when(authServiceClient.login(login))
+                .thenThrow(new GenericHttpException(message, UNAUTHORIZED));
+
+        client.post()
+                .uri("/api/gateway/users/login")
+                .accept(APPLICATION_JSON)
+                .body(Mono.just(login), Login.class)
+                .exchange()
+                .expectStatus().isUnauthorized()
+                .expectBody()
+                .jsonPath("$.statusCode").isEqualTo(UNAUTHORIZED.value())
+                .jsonPath("$.message").isEqualTo(message)
+                .jsonPath("$.timestamp").exists();
     }
 }
 
