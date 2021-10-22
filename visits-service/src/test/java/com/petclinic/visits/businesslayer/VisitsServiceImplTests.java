@@ -448,7 +448,7 @@ public class VisitsServiceImplTests {
 
     // TESTS FOR FETCHING VISITS BASED ON PRACTITIONER ID ----------------------------------------------------------------------
     @Test
-    public void shouldThrowInvalidInputExceptionWhenFetchingDatesWithNegativePractitionerId(){
+    public void shouldThrowInvalidInputExceptionWhenFetchingVisitsWithNegativePractitionerId(){
         InvalidInputException ex = assertThrows(InvalidInputException.class, ()->{
            visitsService.getVisitsForPractitioner(-1);
         });
@@ -461,7 +461,7 @@ public class VisitsServiceImplTests {
         List<Visit> repoResponse = new ArrayList<Visit>();
         when(repo.findVisitsByPractitionerId(anyInt())).thenReturn(repoResponse);
 
-        List<Visit> returnedVisits = visitsService.getVisitsForPractitioner(234);
+        List<VisitDTO> returnedVisits = visitsService.getVisitsForPractitioner(404);
 
         assertEquals(0, returnedVisits.size());
     }
@@ -490,7 +490,7 @@ public class VisitsServiceImplTests {
 
         when(repo.findVisitsByPractitionerId(anyInt())).thenReturn(visitsList);
 
-        List<Visit> returnedVisits = visitsService.getVisitsForPractitioner(200200);
+        List<VisitDTO> returnedVisits = visitsService.getVisitsForPractitioner(200200);
 
         assertEquals(3, returnedVisits.size());
         assertEquals(new SimpleDateFormat("yyyy-MM-dd").parse("2021-03-04"), returnedVisits.get(1).getDate());
