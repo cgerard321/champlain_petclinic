@@ -8,12 +8,12 @@
 <div class="container-calendar">
     <div class="calendar">
         <div class="month">
-            <i class="fas fa-angle-left prev"></i>
+            <i class="fas fa-angle-left prev" ng-click="$ctrl.getVisitsForPractitionerIdAndMonth()"></i>
             <div class="date">
                 <h1></h1>
                 <p></p>
             </div>
-            <i class="fas fa-angle-right next"></i>
+            <i class="fas fa-angle-right next" ng-click="$ctrl.getVisitsForPractitionerIdAndMonth()"></i>
         </div>
         <div class="weekdays">
             <div>Sun</div>
@@ -67,7 +67,6 @@
     let nameOnCalenderStr;
 
     const renderCalendar = () => {
-        console.log("------------------------------------------");
 
         date.setDate(1);
 
@@ -84,7 +83,6 @@
         const nextDays = 7 - lastDayIndex - 1;
 
         let showSelectedDate = new Date("" + months[date.getMonth()] + " " + selectedDate + ", " + date.getFullYear());
-        console.log("Selected Date: " + showSelectedDate);
 
         let formattedDate = showSelectedDate.toDateString().substring(0, 3) + ", " + showSelectedDate.toDateString().substring(3, 10).trim() + ", " + date.getFullYear();
 
@@ -241,8 +239,6 @@
 
         monthDays.innerHTML = days;
 
-        console.log("Number Of days in month " + (date.getMonth()+1) + " is equal to: " + numberOfDays);
-
         let slots = "";
         let timeIsSelected = false;
 
@@ -330,7 +326,6 @@
         let wasMaxReached = false;
 
         for(let a of availableDays) {
-            console.log(a);
             if(a > selectedDate && wasMaxReached === false) {
                 valMax = a;
                 wasMaxReached = true;
@@ -372,9 +367,14 @@
 
     const getFormatPractitionerIdAndMonth = () => {
         let lastDayOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+        let month = date.getMonth() + 1;
 
-        let startDate = date.getFullYear() + "-" + date.getMonth() + "-01";
-        let endDate = date.getFullYear() + "-" + date.getMonth() + "-" + lastDayOfMonth;
+        if (month < 10) {
+            month = "0" + month;
+        }
+
+        let startDate = date.getFullYear() + "-" + month + "-01";
+        let endDate = date.getFullYear() + "-" + month + "-" + lastDayOfMonth;
 
         return $("#selectedVet :selected").attr("value") + "," + startDate + "," + endDate;
     }
@@ -411,37 +411,22 @@
 
         let target = event.target.dataset.target;
 
-        //Recognize null clicks
-        if(target === undefined){
-            console.log("nothing was selected");
+        if(target !== undefined) {
+            if (target.substring(0, 13) === "previous-page") {
+                selectedDate = target.substring(14, 16).trim();
 
-        } else if(target.substring(0,13) === "previous-page") {
+                date.setMonth(date.getMonth() - 1);
 
-            selectedDate = target.substring(14, 16).trim();
+            } else if (target.substring(0, 9) === "next-page") {
+                selectedDate = target.substring(10, 12).trim();
 
-            date.setMonth(date.getMonth() - 1);
+                date.setMonth(date.getMonth() + 1);
 
+            } else {
+                selectedDate = target;
+                date.setDate(parseInt(target));
+            }
             selectedTime = "";
-
-            console.log("currently selected: ", target);
-
-        } else if(target.substring(0,9) === "next-page") {
-
-            selectedDate = target.substring(10, 12).trim();
-
-            date.setMonth(date.getMonth() + 1);
-
-            selectedTime = "";
-
-            console.log("currently selected: ", target);
-
-        } else {
-            selectedDate = target;
-            date.setDate(parseInt(target));
-
-            selectedTime = "";
-
-            console.log("currently selected: ", target);
         }
         renderCalendar();
     });
@@ -454,8 +439,6 @@
             selectedTime = selected;
         }
 
-        console.log("Time selected: " + selectedTime);
-
         renderCalendar();
     });
 </script>
@@ -466,7 +449,7 @@
 
     <div class="form-group">
         <label>Practitioner</label>
-        <select id="selectedVet" ng-model="$ctrl.practitionerId" ng-change="$ctrl.loadVetInfo(), $ctrl.getVisitsForPractitionerIdAndMonth()">
+        <select id="selectedVet" ng-model="$ctrl.practitionerId" ng-change="$ctrl.loadVetInfo();$ctrl.getVisitsForPractitionerIdAndMonth()">
             <option ng-repeat="p in $ctrl.vets" data-target="{{p.firstName}} {{p.lastName}}" value="{{p.vetId}}">{{p.firstName}} {{p.lastName}}</option>
         </select>
 

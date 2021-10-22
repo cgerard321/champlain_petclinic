@@ -43,16 +43,22 @@ angular.module('visits')
             if(pIdAndMonth != null && pIdAndMonth !== "") {
                 let info = pIdAndMonth.split(",");
 
-                if(info.get(0) !== undefined){
-                    let practitionerId = parseInt(info.get(0));
-                    let startDate = info.get(1);
-                    let endDate = info.get(2);
+                if(info[0] !== undefined){
+                    let practitionerId = parseInt(info[0]);
+                    let startDate = info[1];
+                    let endDate = info[2];
 
-                    $http.get("api/gateway/visits/calendar/{practitionerId}?dates={startDate},{endDate}", practitionerId, startDate, endDate).then(function (resp) {
+                    console.log(practitionerId);
+                    console.log(startDate);
+                    console.log(endDate);
+
+                    $http.get("api/gateway/visits/calendar/" + practitionerId + "?dates=" + startDate + "," + endDate).then(function (resp) {
                         self.availableVisits = resp.data;
-                        for (let i in availableDays) {
-                            console.log(i + "\n");
-                        }
+
+                        console.log(self.availableVisits);
+                        $.each(self.availableVisits, function(i, visit) {
+                            console.log(visit.date + ", " + visit.description + ", " + visit.id + "\n");
+                        });
                     });
                 }
             }
