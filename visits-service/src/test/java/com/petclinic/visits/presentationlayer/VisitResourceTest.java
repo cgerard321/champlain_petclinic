@@ -304,7 +304,7 @@ public class VisitResourceTest {
 
 	// TESTS FOR FETCHING VISITS BASED ON PRACTITIONER ID ----------------------------------------------------------------------
 	@Test
-	void whenFetchingVisitsWithNegativePractitionerIdThenShouldHandleInvalidInputException() throws Exception {
+	void shouldHandleInvalidInputExceptionWhenFetchingVisitsWithNegativePractitionerId() throws Exception {
 		when(visitsService.getVisitsForPractitioner(-1)).thenThrow(new InvalidInputException("PractitionerId can't be negative."));
 
 		mvc.perform(get("/visits/vets/{practitionerId}",-1))
@@ -314,25 +314,14 @@ public class VisitResourceTest {
 	}
 
 	@Test
-	void whenFetchingVisitsWithValidPractitionerIdThenShouldReturnListOfVisits() throws Exception {
-		List<Visit> returnedVisits =asList(
-				visit()
-						.id(1)
-						.petId(1)
-						.practitionerId(200200)
-						.build(),
-				visit()
-						.id(2)
-						.petId(1)
-						.practitionerId(200200)
-						.build());
+	void shouldReturnListOfVisitsWhenFetchingVisitsWithValidPractitionerId() throws Exception {
+		given(visitsService.getVisitsForPractitioner(123456)).willReturn(visitDTOList);
 
-		given(visitsService.getVisitsForPractitioner(200200)).willReturn(returnedVisits);
-
-		mvc.perform(get("/visits/vets/{practitionerId}",200200))
+		mvc.perform(get("/visits/vets/{practitionerId}",123456))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$[0].practitionerId").value(200200))
-				.andExpect(jsonPath("$[1].practitionerId").value(200200));
+				.andExpect(jsonPath("$[0].practitionerId").value(123456))
+				.andExpect(jsonPath("$[1].practitionerId").value(123456))
+				.andExpect(jsonPath("$[2].practitionerId").value(123456));
 	}
 
 
