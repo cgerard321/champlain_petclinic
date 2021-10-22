@@ -110,11 +110,15 @@ public class VisitsServiceImpl implements VisitsService {
     }
 
     @Override
-    public List<Visit> getVisitsForPractitioner(int practitionerId) {
+    public List<VisitDTO> getVisitsForPractitioner(int practitionerId) {
         if(practitionerId < 0)
             throw new InvalidInputException("PractitionerId can't be negative.");
-        List<Visit> visits = visitRepository.findVisitsByPractitionerId(practitionerId);
-        return visits;
+        List<Visit> returnedVisits = visitRepository.findVisitsByPractitionerId(practitionerId);
+        List<VisitDTO> visitDTOList = returnedVisits.stream()
+                .filter(v -> v != null)
+                .map(visit -> mapper.entityToModel(visit))
+                .collect(Collectors.toList());
+        return visitDTOList;
     }
 
     @Override

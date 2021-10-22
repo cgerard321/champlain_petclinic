@@ -28,7 +28,7 @@ public interface VisitsService {
 
     public List<Visit> getVisitsForPets(List<Integer> petIds);
 
-    List<Visit> getVisitsForPractitioner(int practitionerId);
+    List<VisitDTO> getVisitsForPractitioner(int practitionerId);
 
     List<Visit> getVisitsByPractitionerIdAndMonth(int practitionerId, Date startDate, Date EndDate);
 
