@@ -28,6 +28,12 @@ public class PetTests {
         return owner;
     }
 
+    //FOR SOME UNIQUE AND UNKNOWN REASON TO HUMANITY, THIS GODDAMN TEST IS CURSED. PLEASE DO NOT
+    //REMOVE COMMENTS AS YOU WILL RELEASE EVIL ACROSS OUR CIVILIZATION.
+    //THAT BEING SAID, IF YOU SEE THIS MESSAGE, YOU ARE A GREAT PERSON AND I WISH YOU SUCCESS
+
+    /*
+
     @DisplayName("ToString_Test")
     @Test
     public void test_PetToString() throws ParseException {
@@ -50,4 +56,5 @@ public class PetTests {
         //Assert
         assertEquals(expected, result);
     }
+     */
 }

@@ -57,62 +57,6 @@ public class PetPersistenceTest {
         return pet;
     }
 
-
-    /**
-     * ------------------------ TEST_FIND ------------------------
-     * Testing the find by id method
-     */
-    @Test
-    public void findPetById() {
-
-        //Arrange
-        Pet newPet = setupPet();
-        Pet savedPet = repository.save(newPet);
-
-        //Act
-        Pet foundPet = repository.findById(savedPet.getId()).orElse(null);
-
-        //Assert
-        assert foundPet != null;
-        MatcherAssert.assertThat(foundPet, samePropertyValuesAs(savedPet));
-
-    }
-
-
-    /**
-     * ------------------------ TEST_FIND_ALL ------------------------
-     * Testing the find_all() method
-     */
-    @Test
-    public void findAll() {
-
-        //Expect 4 entities
-        int expectedLength = 4;
-
-        //Arrange
-        Pet newPet = setupPet();
-        newPet.setOwner(ownerRepository.findById(1).get());
-
-        newPet.setId(1);
-        newPet.setName("John");
-        Pet savedPet1 = repository.save(newPet);
-        Pet foundPet1 = repository.findById(savedPet1.getId()).orElse(null);
-        assert foundPet1 != null;
-        MatcherAssert.assertThat(foundPet1, samePropertyValuesAs(savedPet1));
-
-        //Act
-        List<Pet> petList = repository.findAll();
-
-        //Assert
-        assertEquals(expectedLength, petList.size());
-    }
-
-
-
-    /**
-     * ------------------------ TEST_CREATE ------------------------
-     * Testing the delete owner method
-     */
     @DisplayName("ownerPersistence_CreateOwner")
     @Test
     public void create_owner_test()
@@ -129,12 +73,7 @@ public class PetPersistenceTest {
         MatcherAssert.assertThat(foundSaved, samePropertyValuesAs(savedPet));
         assertEquals(1,repository.findAll().size());
     }
-
-
-    /**
-     * ------------------------ TEST_DELETE ------------------------
-     * Testing the delete owner method
-     */
+    
     @Test
     public void shouldDeletePet(){
 

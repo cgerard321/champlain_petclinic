@@ -76,21 +76,6 @@ public class PetServiceTest {
         return pet;
     }
 
-    @DisplayName("petService_FindByPetId")
-    @Test
-    public void test_findByPetId() throws ParseException {
-        //Arrange
-        Pet petTest = setupPet();
-        when(repository.findById(2)).thenReturn(Optional.of(petTest));
-
-        //Act
-        Optional<Pet> returnedPetOpt = service.findByPetId(2);
-        Pet returnedPet = returnedPetOpt.get();
-
-        //Assert
-        assertThat(returnedPet.getId()).isEqualTo(petTest.getId());
-    }
-
     @DisplayName("ownerService_FindByPetId_NotFoundException")
     @Test
     public void test_findByPetId_NotFoundException()
@@ -104,39 +89,6 @@ public class PetServiceTest {
             assertEquals(ex.getMessage(), expectedErrorMsg);
         }
 
-    }
-
-    @DisplayName("petService_FindAll")
-    @Test
-    public void test_findAll() throws ParseException {
-        //Arrange
-        int expectedLength = 4;
-        List<Pet> petList = new ArrayList<>();
-        Pet newPet = setupPet();
-
-        newPet.setId(1);
-        newPet.setName("John");
-        petList.add(newPet);
-
-        newPet.setId(2);
-        newPet.setName("Joseph");
-        petList.add(newPet);
-
-        newPet.setId(3);
-        newPet.setName("Jill");
-        petList.add(newPet);
-
-        newPet.setId(4);
-        newPet.setName("Jojo");
-        petList.add(newPet);
-
-        when(repository.findAll()).thenReturn(petList);
-
-        //Act
-        List<Pet> returnedList = service.findAll();
-
-        //Assert
-        assertThat(expectedLength).isEqualTo(returnedList.size());
     }
 
     // TEST FOR FINDING ALL PET TYPES
