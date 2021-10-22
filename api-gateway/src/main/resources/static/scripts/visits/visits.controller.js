@@ -16,10 +16,7 @@ angular.module('visits')
             self.visits = resp.data;
             self.sortFetchedVisits();
         });
-
-        $http.get(billsUrl).then(function (resp) {
-            self.bills = resp.data;
-        });
+        
 
         self.sortFetchedVisits = function() {
             let dateObj = new Date();
