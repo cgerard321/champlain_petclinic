@@ -121,6 +121,11 @@ public class BFFApiGatewayController {
     public Flux<VisitDetails> getVisitsForPet(final @PathVariable int petId){
         return visitsServiceClient.getVisitsForPet(petId);
     }
+    
+    @GetMapping(value ="visit/{visitId}")
+    public Mono<VisitDetails> getVisitById(final @PathVariable int visitId){
+        return visitsServiceClient.getVisitById(visitId);
+    }
 
     @GetMapping(value = "visits/vets/{practitionerId}")
     public Flux<VisitDetails> getVisitForPractitioner(@PathVariable int practitionerId){

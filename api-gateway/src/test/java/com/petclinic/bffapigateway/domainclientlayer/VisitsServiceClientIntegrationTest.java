@@ -82,6 +82,17 @@ class VisitsServiceClientIntegrationTest {
         consumer.accept(response);
         this.server.enqueue(response);
     }
+    
+    @Test
+    void getVisitById() {
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody("{\"id\":5,\"date\":\"2018-11-15\",\"description\":\"test visit\",\"petId\":1, \"practitionerId\":1,\"status\":false}"));
+        
+        Mono<VisitDetails> visit = visitsServiceClient.getVisitById(5);
+        
+        assertEquals(5, visit.block().getId());
+    }
 
 }
 
