@@ -142,6 +142,8 @@ public class VetServiceImpl implements VetService {
     @Override
     public VetDTO createVetFromDTO(VetDTO vetDTO) {
         Vet vet = vetMapper.vetDTOToVet(vetDTO);
+        if(vetDTO.getSpecialties() != null)
+            vetDTO.getSpecialties().forEach(vet::addSpecialty);
         return vetMapper.vetToVetDTO(createVet(vet));
     }
 

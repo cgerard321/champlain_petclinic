@@ -95,10 +95,10 @@ public class VetBusinessLayerTest
     public void createNewVetFromDTOWithSpecialtiesTest()
     {
         Specialty specialty = new Specialty();
-        specialty.setName("ksm");
-        specialty.setSpecialtyId(123456);
+        specialty.setId(1);
+        specialty.setName("radiology");
+        specialty.setSpecialtyId(100001);
         Set<Specialty> specialties= new HashSet<>();
-        specialties.add(specialty);
         specialties.add(specialty);
         VetDTO vetDTO = new VetDTO(456791, "JamesFive", "Carter",
                 "carter.james@email.com", "2384",null,
@@ -110,6 +110,7 @@ public class VetBusinessLayerTest
         VetDTO repo = vetService.getVetDTOByVetId(456791);
         assertEquals(repo.getVetId(),result.getVetId());
         assertEquals(repo.getFirstName(),result.getFirstName());
+        assertEquals(repo.getSpecialties().size(), result.getSpecialties().size());
     }
 
     @Test
