@@ -308,7 +308,7 @@
             location.reload();
         }
 
-        localStorage.setItem(practitionerIdAndMonth, getFormatPractitionerIdAndMonth());
+        localStorage.setItem("practitionerIdAndMonth", getFormatPractitionerIdAndMonth());
     }
 
     //check if a date is on the weekend
@@ -367,11 +367,7 @@
 
     //get value either for PM or AM for the time slots
     const getAMorPM = (isAM) => {
-        if(isAM) {
-            return "AM";
-        } else {
-            return "PM";
-        }
+        return isAM ? "AM" : "PM";
     }
 
     const getFormatPractitionerIdAndMonth = () => {
@@ -380,7 +376,7 @@
         let startDate = date.getFullYear() + "-" + date.getMonth() + "-01";
         let endDate = date.getFullYear() + "-" + date.getMonth() + "-" + lastDayOfMonth;
 
-        return $("#selectedVet :selected").attr("data-id").toString() + "," + startDate + "," + endDate;
+        return $("#selectedVet :selected").attr("value") + "," + startDate + "," + endDate;
     }
 
 
@@ -470,7 +466,7 @@
 
     <div class="form-group">
         <label>Practitioner</label>
-        <select id="selectedVet" ng-model="$ctrl.practitionerId" ng-change="$ctrl.loadVetInfo()">
+        <select id="selectedVet" ng-model="$ctrl.practitionerId" ng-change="$ctrl.loadVetInfo(), $ctrl.getVisitsForPractitionerIdAndMonth()">
             <option ng-repeat="p in $ctrl.vets" data-target="{{p.firstName}} {{p.lastName}}" value="{{p.vetId}}">{{p.firstName}} {{p.lastName}}</option>
         </select>
 

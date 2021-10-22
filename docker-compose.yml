@@ -41,6 +41,7 @@ services:
 
 
   auth-service:
+    hostname: auth
     build: auth-service
     ports:
       - "7005:8080"
