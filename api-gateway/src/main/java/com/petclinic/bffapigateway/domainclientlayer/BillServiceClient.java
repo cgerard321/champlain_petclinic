@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 
@@ -13,7 +14,7 @@ import reactor.core.publisher.Mono;
 public class BillServiceClient {
 
     private final WebClient.Builder webClientBuilder;
-    private final String billServiceUrl;
+    private String billServiceUrl;
 
 
     public BillServiceClient(
@@ -32,6 +33,13 @@ public class BillServiceClient {
                 .uri(billServiceUrl + "/{billId}", billId)
                 .retrieve()
                 .bodyToMono(BillDetails.class);
+    }
+
+    public Flux<BillDetails> getAllBilling() {
+        return webClientBuilder.build().get()
+                .uri(billServiceUrl)
+                .retrieve()
+                .bodyToFlux(BillDetails.class);
     }
 }
 

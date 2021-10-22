@@ -37,6 +37,11 @@ public class BillResource {
         return SERVICE.GetBill(billId);
     }
 
+    @GetMapping(value = "/bills")
+    public List<BillDTO> findAllBills() {
+        return SERVICE.GetAllBills();
+    }
+
     // Delete Bill //
     @DeleteMapping(value = "/{billId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

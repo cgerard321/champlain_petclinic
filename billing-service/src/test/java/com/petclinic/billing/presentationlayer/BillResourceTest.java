@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.billing.businesslayer.BillService;
 import com.petclinic.billing.datalayer.Bill;
 import com.petclinic.billing.datalayer.BillDTO;
+import com.petclinic.billing.datalayer.BillRepository;
 import com.petclinic.billing.exceptions.InvalidInputException;
 import com.petclinic.billing.exceptions.NotFoundException;
 import com.petclinic.billing.http.BillControllerExceptionHandler;
@@ -21,13 +22,18 @@ import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
 import java.util.Date;
 
+import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -38,6 +44,9 @@ class BillResourceTest {
 
     @MockBean
     BillService service;
+
+    @MockBean
+    BillRepository repository;
 
     @Autowired
     MockMvc mvc;
@@ -50,7 +59,7 @@ class BillResourceTest {
 
     @Test
     void createBillNotFound() throws Exception {
-        BillDTO newDTO = new BillDTO(1, 1, new Date(), "type1", 1.0);
+        BillDTO newDTO = new BillDTO(1, 1, "type1", new Date(), 1.0);
 
         when(service.CreateBill(any())).thenThrow(new NotFoundException("Bill not found"));
 
@@ -66,7 +75,7 @@ class BillResourceTest {
 
     @Test
     void createBillInvalidInputNegativeNumber() throws Exception {
-        BillDTO newDTO = new BillDTO(-1, 1, new Date(), "type1", 1.0);
+        BillDTO newDTO = new BillDTO(-1, 1, "type1", new Date(), 1.0);
 
         when(service.CreateBill(any())).thenThrow(new InvalidInputException("That bill id does not exist"));
 
@@ -82,7 +91,7 @@ class BillResourceTest {
 
     @Test
     void createBillInvalidInputZero() throws Exception {
-        BillDTO newDTO = new BillDTO(0, 1, new Date(), "type1", 1.0);
+        BillDTO newDTO = new BillDTO(0, 1, "type1", new Date(), 1.0);
 
         when(service.CreateBill(any())).thenThrow(new InvalidInputException("That bill id does not exist"));
 
@@ -107,6 +116,20 @@ class BillResourceTest {
     }
 
     @Test
+    void test_FindAllBills() throws Exception {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(2021, 9, 21);
+        Date date = calendar.getTime();
+
+        Bill bill = new Bill(1, 1, "general", date, 59.99);
+
+        given(repository.findAll()).willReturn(asList(bill));
+
+        mvc.perform(get("/bills").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+    }
+
+    @Test
     void testEmptyHttpErrorInfo() {
         HttpErrorInfo httpErrorInfo = new HttpErrorInfo();
 
@@ -123,7 +146,7 @@ class BillResourceTest {
 
     @Test
     void testInvalidInputExceptionHandler() throws JsonProcessingException {
-        BillDTO newDTO = new BillDTO(1, 1, new Date(), "type1", 1.0);
+        BillDTO newDTO = new BillDTO(1, 1, "type1", new Date(), 1.0);
 
         HttpErrorInfo httpErrorInfo = exceptionHandler.handleInvalidInputException(MockServerHttpRequest.post("/bills", 1)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -137,7 +160,7 @@ class BillResourceTest {
 
     @Test
     void testNotFoundExceptionHandler() throws JsonProcessingException {
-        BillDTO newDTO = new BillDTO(1, 1, new Date(), "type1", 1.0);
+        BillDTO newDTO = new BillDTO(1, 1, "type1", new Date(), 1.0);
 
         HttpErrorInfo httpErrorInfo = exceptionHandler.handleNotFoundException(MockServerHttpRequest.post("/bills", 1)
                 .contentType(MediaType.APPLICATION_JSON)

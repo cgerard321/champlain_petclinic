@@ -10,7 +10,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.HashMap;
+import java.util.List;
 
 @Service
 public class BillServiceImpl implements BillService{
@@ -42,6 +45,14 @@ public class BillServiceImpl implements BillService{
         BillDTO response = billMapper.EntityToModel(bill);
         LOG.debug("Bill: GetBillByID: found bill ID: {}", billId);
         return response;
+    }
+
+    @Override
+    public List<BillDTO> GetAllBills() {
+        List<Bill> bills = billRepository.findAll();
+        List<BillDTO> dtos = billMapper.ListEntityToListModel(bills);
+
+        return dtos;
     }
 
     @Override
