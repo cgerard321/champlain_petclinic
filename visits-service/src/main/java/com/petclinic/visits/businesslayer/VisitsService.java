@@ -30,6 +30,6 @@ public interface VisitsService {
 
     List<VisitDTO> getVisitsForPractitioner(int practitionerId);
 
-    List<Visit> getVisitsByPractitionerIdAndMonth(int practitionerId, Date startDate, Date EndDate);
+    List<VisitDTO> getVisitsByPractitionerIdAndMonth(int practitionerId, Date startDate, Date EndDate);
 
 }

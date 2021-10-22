@@ -122,14 +122,19 @@ public class VisitsServiceImpl implements VisitsService {
     }
 
     @Override
-    public List<Visit> getVisitsByPractitionerIdAndMonth(int practitionerId, Date startDate, Date endDate) {
-        List<Visit> visits = visitRepository.findAllByDateBetween(startDate, endDate);
+    public List<VisitDTO> getVisitsByPractitionerIdAndMonth(int practitionerId, Date startDate, Date endDate) {
+        List<Visit> returnedVisits = visitRepository.findAllByDateBetween(startDate, endDate);
 
         if(practitionerId < 0)
             throw new InvalidInputException("PractitionerId can't be negative.");
 
-        visits = visits.stream().filter(v -> v.getPractitionerId() == practitionerId).collect(Collectors.toList());
+        returnedVisits = returnedVisits.stream().filter(v -> v.getPractitionerId() == practitionerId).collect(Collectors.toList());
 
-        return visits;
+        List<VisitDTO> visitDTOList = returnedVisits.stream()
+                .filter(v -> v != null)
+                .map(visit -> mapper.entityToModel(visit))
+                .collect(Collectors.toList());
+
+        return visitDTOList;
     }
 }
