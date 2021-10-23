@@ -140,15 +140,15 @@ angular.module('visits')
             }
 
             // Set modal's title and body to match the sender's request
-            let confirmationModal = $('#confirmationModalTitle');
-            confirmationModal.text(buttonText);
+            $('#confirmationModalTitle').text(buttonText);
             $('#confirmationModalBody').text("Are you sure you want to " + buttonText.toLowerCase() + "?");
 
             // The confirm button on the popup modal
             let modalConfirmButton = $('#confirmationModalConfirmButton');
 
+            // Check if the sender was the Add New Visit Button
             if(buttonText !== "Add New Visit") {
-                // Set the targeted visit data attribute which is used if the button is for delete
+                // Set the targeted visit data attribute to the visit's id
                 modalConfirmButton.data("targetVisit", visitId);
 
                 // Set other data attributes if the button is for cancel
@@ -173,19 +173,19 @@ angular.module('visits')
         self.completeFormAction = function() {
             // Check which button modal was called by and perform appropriate action
             let modalTitle = $('#confirmationModalTitle').text();
+            let modalButton = $('#confirmationModalConfirmButton');
 
             if(modalTitle === $('#submit_button').text()) {
                 $('#visitForm').submit();
 
-                if(modalTitle === "Update Visit") {
+                if(modalTitle.toLowerCase() === "update visit") {
                     self.resetForm();
                 }
             }
-            else if(modalTitle === "Delete visit") {
-                self.deleteVisit($('#confirmationModalConfirmButton').data("targetVisit"));
+            else if(modalTitle.toLowerCase() === "delete visit") {
+                self.deleteVisit(modalButton.data("targetVisit"));
             }
             else if(modalTitle.toLowerCase().includes("cancel")) {
-                let modalButton = $('#confirmationModalConfirmButton');
                 self.cancelVisit(modalButton.data("targetVisit"), modalButton.data("targetStatus"), modalButton.data("targetPractitionerId"), modalButton.data("targetDate"), modalButton.data("targetDescription"));
             }
 
@@ -670,7 +670,7 @@ angular.module('visits')
                 } else {
                     createAlert("success", "Successfully cancelled visit!");
                 }
-            },function (response) {
+            },function() {
                 if(!visitStatus) {
                     createAlert("danger", "Failed to revert cancel on visit!");
                 } else {
