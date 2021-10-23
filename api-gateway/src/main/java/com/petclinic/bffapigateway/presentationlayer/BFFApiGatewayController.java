@@ -64,9 +64,23 @@ public class BFFApiGatewayController {
         return billServiceClient.getAllBilling();
     }
 
+<<<<<<< HEAD
     @DeleteMapping(value = "bills/{billId}")
     public Mono<Void> deleteBill(final @PathVariable int billId){
         return billServiceClient.deleteBill(billId);
+=======
+
+
+    @PostMapping(value = "owners/{ownerId}/pets" , produces = "application/json", consumes = "application/json")
+    public Mono<PetDetails> createPet(@RequestBody PetDetails pet, @PathVariable int ownerId){
+        return customersServiceClient.createPet(pet);
+    }
+
+    //Testing purpose
+    @GetMapping(value = "pets/visits/All")
+    public Mono<Visits> getAllVisits(){
+        return visitsServiceClient.getAllVisits();
+>>>>>>> 83d87aee (Modified code so test passes)
     }
 
     @PutMapping(
