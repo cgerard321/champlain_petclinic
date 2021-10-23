@@ -123,22 +123,29 @@ public class PersistenceTests {
         assertEquals(v.isStatus(), savedVisit.isStatus());
     }
 
-    // TESTS FOR FETCHING A SINGLE VISIT ----------------------------------------------------------------------
+    // TESTS FOR FETCHING A SINGLE VISIT BY VISIT ID ----------------------------------------------------------------------
     @Test
-    public void getVisitByVisitID() {
+    public void shouldGetVisitWhenFetchingVisitWithExistingVisitId() {
         Visit visit = new Visit(5, UUID.randomUUID(), new Date(), "Description", 5, 123456, true);
         visit = repo.save(visit);
 
-        Visit foundVisit = repo.findById(visit.getId()).get();
+        Visit foundVisit = repo.findByVisitId(visit.getVisitId()).get();
 
         assertEquals(visit.getId(), foundVisit.getId());
         assertEquals(visit.getPetId(), foundVisit.getPetId());
         assertEquals(visit.isStatus(), foundVisit.isStatus());
     }
+
+    @Test
+    public void shouldThrowNoSuchElementExceptionWhenFetchingVisitWithNonExistentVisitId(){
+        assertThrows(NoSuchElementException.class, ()->{
+           repo.findByVisitId(UUID.randomUUID());
+        });
+    }
   
     // TESTS FOR FETCHING VISITS BASED ON PET ID ----------------------------------------------------------------------
     @Test
-    public void getVisitsForPet() {
+    public void shouldReturnVisitsForPetWhenFetchingVisitsWithExistingPetId() {
         List<Visit> repoResponse = repo.findByPetId(200);
         assertThat(repoResponse, hasSize(1));
 

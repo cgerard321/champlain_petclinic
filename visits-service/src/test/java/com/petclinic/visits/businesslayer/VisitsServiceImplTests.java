@@ -122,27 +122,34 @@ public class VisitsServiceImplTests {
   
     // TESTS FOR GETTING A SINGLE VISIT ----------------------------------------------------------------------
     @Test
-    public void whenValidVisitIdThenShouldReturnVisit() {
-        Visit visit = visit()
-                .id(1)
-                .petId(1)
-                .build();
+    public void shouldReturnVisitWhenFetchingWithValidVisitId() {
+        when(repo.findByVisitId(anyString())).thenReturn(Optional.of(visitEntity));
 
-        when(repo.findById(1)).thenReturn(Optional.of(visit));
+        VisitDTO visitFromService = visitsService.getVisitByVisitId(visitEntity.getVisitId().toString());
 
-        Visit visitFromService = visitsService.getVisitById(1);
-
-        assertThat(visitFromService.getId(), equalTo(1));
-        assertThat(visitFromService.getPetId(), equalTo(1));
+        assertEquals(visitEntity.getVisitId().toString(), visitFromService.getVisitId());
     }
 
     @Test
-    public void whenInvalidVisitIdThenShouldThrowInvalidInputException() {
+    public void shouldThrowInvalidInputExceptionWhenInvalidVisitId() {
         InvalidInputException invalidInputException = assertThrows(InvalidInputException.class, () ->{
-            visitsService.getVisitById(-1);
+            visitsService.getVisitByVisitId("invalid");
         });
 
-        assertEquals("VisitId can't be negative", invalidInputException.getMessage());
+        assertEquals("VisitId not in the right format.", invalidInputException.getMessage());
+    }
+
+    @Test
+    public void shouldThrowNotFoundExceptionWhenFetchingVisitWithNonExistentVisitId(){
+        when(repo.findByVisitId(anyString())).thenReturn(Optional.of(new Visit()));
+        String randomId = UUID.randomUUID().toString();
+
+        NotFoundException ex = assertThrows(NotFoundException.class, () ->{
+           visitsService.getVisitByVisitId(randomId);
+        });
+
+        assertEquals("Visit with visitId: " + randomId + " does not exist.", ex.getMessage());
+        assertEquals(NoSuchElementException.class, ex.getCause());
     }
   
     // TESTS FOR CREATING A VISIT ----------------------------------------------------------------------

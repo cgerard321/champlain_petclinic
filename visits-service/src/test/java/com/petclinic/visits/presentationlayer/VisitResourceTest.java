@@ -88,55 +88,42 @@ public class VisitResourceTest {
 	public VisitResourceTest() throws ParseException {
 	}
 
+	// TESTS FOR FETCHING A SINGLE VISIT ----------------------------------------------------------------------
 	@Test
 	void whenValidVisitIdThenShouldReturnVisit() throws Exception {
-		given(visitsService.getVisitById(1))
-				.willReturn(
-						visit()
-								.id(1)
-								.petId(1)
-								.description("description 1")
-								.build()
-				);
+		given(visitsService.getVisitById(anyString()))
+				.willReturn(visitDTO);
 
-		mvc.perform(get("/visit/1"))
+		mvc.perform(get("/visit/{visitId}", visitDTO.getVisitId()))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.id").value(1))
-				.andExpect(jsonPath("$.petId").value(1))
-				.andExpect(jsonPath("$.description").value("description 1"));
+				.andExpect(jsonPath("$.visitId").value(visitDTO.getVisitId()))
+				.andExpect(jsonPath("$.petId").value(visitDTO.getPetId()))
+				.andExpect(jsonPath("$.description").value(visitDTO.getDescription()))
+				.andExpect(jsonPath("$.practitionerId").value(visitDTO.getPractitionerId()))
+				.andExpect(jsonPath("$.status").value(visitDTO.isStatus()))
+				.andExpect(jsonPath("$.date").exists());
 	}
 
 	@Test
-	void whenInvalidParameterVisitIdThenShouldReturnBadRequest() throws Exception {
-		given(visitsService.getVisitById(1))
-				.willReturn(
-						visit()
-								.id(1)
-								.petId(1)
-								.description("description 1")
-								.build()
-				);
+	void shouldHandleInvalidInputExceptionWhenFetchingVisitWithInvalidVisitId() throws Exception {
+		when(visitsService.getVisitById(anyString())).thenThrow(new InvalidInputException("VisitId not in the right format."));
 
-		mvc.perform(get("/visit/INVALID_PARAMETER"))
-				.andExpect(status().isBadRequest());
-	}
-
-	@Test
-	void whenNegativeVisitIdThenShouldReturnUnprocessableEntity() throws Exception {
-		when(visitsService.getVisitById(-1)).thenThrow(new InvalidInputException("VisitId can't be negative."));
-
-		mvc.perform(get("/visit/{visitId}", -1))
+		mvc.perform(get("/visit/{visitId}", "invalid"))
 				.andExpect(status().isUnprocessableEntity())
 				.andExpect(result -> assertTrue(result.getResolvedException() instanceof InvalidInputException))
-				.andExpect(result -> assertEquals("VisitId can't be negative.", result.getResolvedException().getMessage()));
+				.andExpect(result -> assertEquals("VisitId not in the right format.", result.getResolvedException().getMessage()));
 	}
 
 	@Test
-	void whenVisitIdEquals33ShouldReturnNotFoundException() throws Exception {
-		when(visitsService.getVisitById(33)).thenThrow(new NotFoundException("Visit with visit id: 33 does not exist."));
+	void shouldHandleNotFoundExceptionWhenFetchingVisitWithNonExistentVisitId() throws Exception {
+		String randomId = UUID.randomUUID().toString();
+		String expectedExMsg = "Visit with visitId: " + randomId + " does not exist.";
+		when(visitsService.getVisitById(anyString())).thenThrow(new NotFoundException(expectedExMsg));
 
-		mvc.perform(get("/visit/{visitId}", 33))
-				.andExpect(result -> assertEquals("Visit with visit id: 33 does not exist.", result.getResolvedException().getMessage()));
+		mvc.perform(get("/visit/{visitId}", randomId))
+				.andExpect(status().isNotFound())
+				.andExpect(result -> assertTrue(result.getResolvedException() instanceof NotFoundException))
+				.andExpect(result -> assertEquals(expectedExMsg, result.getResolvedException().getMessage()));
 	}
 
 	// TESTS FOR UPDATING A VISIT ----------------------------------------------------------------------
