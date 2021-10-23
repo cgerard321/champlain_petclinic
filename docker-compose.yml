@@ -43,9 +43,8 @@ services:
       - vets
       - visits
 
-
-
   auth-service:
+    hostname: auth
     build: auth-service
     hostname: auth
     ports:
