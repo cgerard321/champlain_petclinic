@@ -455,39 +455,37 @@
 <h2>Visits</h2>
 
 <form id="visitForm" ng-submit="$ctrl.submit()">
-
     <div class="form-group">
-        <label style="display: inline-block; width: 100px">Practitioner:</label>
-        <select id="selectedVet" style="width: 125px" ng-model="$ctrl.practitionerId" ng-change="$ctrl.loadVetInfo()">
+        <label for="selectedVet">Practitioner:</label>
+        <select id="selectedVet" ng-model="$ctrl.practitionerId" ng-change="$ctrl.loadVetInfo()">
             <option ng-repeat="p in $ctrl.vets" data-target="{{p.firstName}} {{p.lastName}}" value="{{p.vetId}}">{{p.firstName}} {{p.lastName}}</option>
         </select>
-        <div>
-            <label for="selectedVisitType" style="display: inline-block; width: 100px">Visit Type:</label>
-            <select id="selectedVisitType" style="width: 125px" name="selectedVisitType" ng-model="$ctrl.visitType">
-                <option value="Examinations">Examinations</option>
-                <option value="Injury">Injury</option>
-                <option value="Medical">Medical</option>
-                <option value="Chronic">Chronic</option>
-                <option value="Consultations">Consultations</option>
-                <option value="Operations">Operations</option>
-            </select>
-        </div>
+
         <br>
 
-        <div>
-            <label for="vetPhoneNumber" style="margin-top: 10px;">Phone Number:</label>
-            <input id="vetPhoneNumber" disabled="disabled" style="background-color: #dbd9ce;"/>
+        <label for="vetPhoneNumber" style="margin-top: 10px;">Phone Number:</label>
+        <input id="vetPhoneNumber" disabled="disabled" style="background-color: #dbd9ce;"/>
 
-            <label for="vetEmailAddress">Email Address:</label>
-            <input id="vetEmailAddress" disabled="disabled" style="background-color: #dbd9ce;"/>
+        <label for="vetEmailAddress">Email Address:</label>
+        <input id="vetEmailAddress" disabled="disabled" style="background-color: #dbd9ce;"/>
 
-            <label for="vetSpecialties">Specialties:</label>
-            <input id="vetSpecialties" disabled="disabled" style="background-color: #dbd9ce;"/>
+        <label for="vetSpecialties">Specialties:</label>
+        <input id="vetSpecialties" disabled="disabled" style="background-color: #dbd9ce;"/>
 
-            <label for="vetWorkdays">Workdays:</label>
-            <input id="vetWorkdays" disabled="disabled" style="background-color: #dbd9ce;" onchange=selectChanged() />
-        </div>
+        <label for="vetWorkdays">Workdays:</label>
+        <input id="vetWorkdays" disabled="disabled" style="background-color: #dbd9ce;" onchange=selectChanged() />
+    </div>
 
+    <div class="form-group" style="margin-top: 12px">
+        <label for="selectedVisitType">Visit Type:</label>
+        <select id="selectedVisitType" name="selectedVisitType" ng-model="$ctrl.visitType">
+            <option value="Examinations">Examinations</option>
+            <option value="Injury">Injury</option>
+            <option value="Medical">Medical</option>
+            <option value="Chronic">Chronic</option>
+            <option value="Consultations">Consultations</option>
+            <option value="Operations">Operations</option>
+        </select>
     </div>
 
     <div class="form-group" style="margin-top: 6px">
