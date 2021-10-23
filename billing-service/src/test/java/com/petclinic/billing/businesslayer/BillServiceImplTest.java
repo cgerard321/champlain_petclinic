@@ -21,6 +21,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.util.Date;
+
 @SpringBootTest
 @ExtendWith(SpringExtension.class)
 public class BillServiceImplTest {
@@ -65,7 +67,7 @@ public class BillServiceImplTest {
         calendar.set(2021, Calendar.SEPTEMBER, 21);
 
         Date date = calendar.getTime();
-        Bill entity = new Bill(billId,customerId, "Checkup", date, 50.00);
+        Bill entity = new Bill(billId,customerId, "Examinations", date, 59.99);
         when(billRepository.findById(1)).thenReturn(Optional.of(entity));
 
         BillDTO returnedBill = billService.GetBill(1);
@@ -127,7 +129,7 @@ public class BillServiceImplTest {
         Date date = calendar.getTime();
 
         HashMap<String, Double> list = setUpVisitList();
-        BillDTO receivedDTO = new BillDTO(billId,customerId, date, "Checkup");
+        BillDTO receivedDTO = new BillDTO(billId,customerId, date, "Consultations");
         when(billRepository.save(any(Bill.class))).thenThrow(DuplicateKeyException.class);
 
 
@@ -158,7 +160,7 @@ public class BillServiceImplTest {
         Calendar calendar = Calendar.getInstance();
         calendar.set(2021, Calendar.SEPTEMBER, 21);
         Date date = calendar.getTime();
-        Bill entity = new Bill(billId,customerId, date, "Consultations",39.99);
+        Bill entity = new Bill(billId,customerId, "Consultations", date, 59.99);
         when(billRepository.findById(1)).thenReturn(Optional.of(entity));
 
 
@@ -174,7 +176,8 @@ public class BillServiceImplTest {
         Calendar calendar = Calendar.getInstance();
         calendar.set(2021, Calendar.SEPTEMBER, 21);
         Date date = calendar.getTime();
-        Bill entity = new Bill(billId,customerId, date, "Consultations", 39.99);
+        Bill entity = new Bill(billId,customerId, "Consultations", date, 59.99);
+
 
         billService.DeleteBill(1);
 
