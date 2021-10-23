@@ -8,9 +8,12 @@ INSERT IGNORE INTO vets VALUES (6, 784233, 'Sharon', 'Jenkins', 'jenkins.sharon@
 INSERT IGNORE INTO specialties VALUES (1,100001, 'radiology');
 INSERT IGNORE INTO specialties VALUES (2,100002, 'surgery');
 INSERT IGNORE INTO specialties VALUES (3,100003, 'dentistry');
+INSERT IGNORE INTO specialties VALUES (4,100004, 'general');
 
+INSERT IGNORE INTO vet_specialties VALUES (1, 4);
 INSERT IGNORE INTO vet_specialties VALUES (2, 1);
 INSERT IGNORE INTO vet_specialties VALUES (3, 2);
 INSERT IGNORE INTO vet_specialties VALUES (3, 3);
 INSERT IGNORE INTO vet_specialties VALUES (4, 2);
 INSERT IGNORE INTO vet_specialties VALUES (5, 1);
+INSERT IGNORE INTO vet_specialties VALUES (6, 4);
