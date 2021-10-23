@@ -235,7 +235,7 @@ class ApiGatewayControllerTest {
         pet.setBirthDate("2000-01-01");
         pet.setType(type);
 
-        when(customersServiceClient.createPet(od.getId(),pet))
+        when(customersServiceClient.createPet(pet,od.getId()))
                 .thenReturn(Mono.just(pet));
 
         client.post()
