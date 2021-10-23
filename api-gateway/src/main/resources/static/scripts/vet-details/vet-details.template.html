@@ -5,7 +5,7 @@
 
 
 <div class="bg-light">
-  <div class="container">
+  <div class="container" data-ng-controller="VetDetailsController">
     <div class="py-5 text-center"/>
     <h2 class="titleVetForm">Vet Information</h2>
   </div>
@@ -15,7 +15,7 @@
       <div class="row g-3">
         <div class="col-sm-6">
                         <span class="modal_image"><img ng-if="vet.image != null" src="data:image/png;base64,{{vet.image}}"/>
-                            <img ng-if="vet.image == null" src="images/vet_default.jpg" alt="Profile picture preview" id="preview"/>
+                            <img ng-if="vet.image == null" src="../../images/vet_default.jpg" alt="Profile picture preview" id="preview"/>
                         </span>
         </div>
         <div class="col-sm-6">
@@ -62,14 +62,14 @@
           <div class="col-md-12">
             <h5 class="mb-3">Work Day</h5>
             <div>
-              {{$ctrl.vet.workday}}
+              <p id="workDays">{{$ctrl.vet.workday}}</p>
             </div>
           </div>
         </div>
 
 
         <table style="display: none">
-          <tr style="display: none" ng-repeat="v in $ctrl.visitsList">
+          <tr style="display: none" ng-repeat="v in $ctrl.visitsList" ng-controller="VetDetailsController">
             <td style="display: none" id="{{v.date}}" class="visitsDates">{{v.date}}}</td>
           </tr>
         </table>
@@ -79,7 +79,7 @@
         <div class="row gy-3">
           <div class="col-md-12">
 
-            <button class="add-vet-button btn btn-primary" onclick="displayDays()" id="toggle">Show availabilities</button>
+            <button class="add-vet-button btn btn-primary" onclick="displayDays()" ng-click="ReloadVisitData()" id="toggle">Show availabilities</button>
           </div>
 
           <div class="col-md-12" id="displayNone" style="display: none">
