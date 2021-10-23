@@ -127,6 +127,31 @@ angular.module('visits')
             };
         };
 
+        // This value will be set depending on what was last clicked
+        let lastSort = "";
+        let dateSortName = "Date";
+        let descSortName = "Description";
+        let vetSortName = "Veterinarian";
+        let statusSortName = "Status";
+
+        // This function will call the last sorted option without changing ascending or descending
+        function callLastSort(isForUpcoming) {
+            switch(lastSort) {
+                case dateSortName:
+                    self.SortTableByDate(isForUpcoming, false);
+                    break;
+                case descSortName:
+                    self.SortTableByDesc(isForUpcoming, false);
+                    break;
+                case vetSortName:
+                    self.SortTableByVet(isForUpcoming, false);
+                    break;
+                case statusSortName:
+                    self.SortTableByStatus(isForUpcoming, false);
+                    break;
+            }
+        }
+
         let ResetSortButtonArrows = function(isForUpcoming) {
             if(isForUpcoming) {
                 $('#sortByDateButtonUpcomingVisits').text("Sort by date ⇅");
@@ -143,11 +168,14 @@ angular.module('visits')
 
         let sortTableDateAscendingUpcomingVisits = false;
         let sortTableDateAscendingPreviousVisits = false;
-        self.SortTableByDate = function(isForUpcoming) {
+        self.SortTableByDate = function(isForUpcoming, flipSortingBool = true) {
+            lastSort = dateSortName;
             ResetSortButtonArrows(isForUpcoming);
 
             if(isForUpcoming) {
-                sortTableDateAscendingUpcomingVisits = !sortTableDateAscendingUpcomingVisits;
+                if(flipSortingBool) {
+                    sortTableDateAscendingUpcomingVisits = !sortTableDateAscendingUpcomingVisits;
+                }
 
                 if(sortTableDateAscendingUpcomingVisits) {
                     self.upcomingVisits.sort(function (a, b) {
@@ -161,7 +189,9 @@ angular.module('visits')
                     $('#sortByDateButtonUpcomingVisits').text("Sort by date ↑")
                 }
             } else {
-                sortTableDateAscendingPreviousVisits = !sortTableDateAscendingPreviousVisits;
+                if(flipSortingBool) {
+                    sortTableDateAscendingPreviousVisits = !sortTableDateAscendingPreviousVisits;
+                }
 
                 if(sortTableDateAscendingPreviousVisits) {
                     self.previousVisits.sort(function (a, b) {
@@ -179,11 +209,14 @@ angular.module('visits')
 
         let sortDescriptionAscendingUpcomingVisits = false;
         let sortDescriptionAscendingPreviousVisits = false;
-        self.SortTableByDesc = function(isForUpcoming) {
+        self.SortTableByDesc = function(isForUpcoming, flipSortingBool = true) {
+            lastSort = descSortName;
             ResetSortButtonArrows(isForUpcoming);
 
             if(isForUpcoming) {
-                sortDescriptionAscendingUpcomingVisits = !sortDescriptionAscendingUpcomingVisits;
+                if(flipSortingBool) {
+                    sortDescriptionAscendingUpcomingVisits = !sortDescriptionAscendingUpcomingVisits;
+                }
 
                 if(sortDescriptionAscendingUpcomingVisits) {
                     self.upcomingVisits.sort(function (a, b) {
@@ -203,7 +236,9 @@ angular.module('visits')
                     $('#sortByDescButtonUpcomingVisits').text("Sort by description ↑")
                 }
             } else {
-                sortDescriptionAscendingPreviousVisits = !sortDescriptionAscendingPreviousVisits;
+                if(flipSortingBool) {
+                    sortDescriptionAscendingPreviousVisits = !sortDescriptionAscendingPreviousVisits;
+                }
 
                 if(sortDescriptionAscendingPreviousVisits) {
                     self.previousVisits.sort(function (a, b) {
@@ -228,11 +263,14 @@ angular.module('visits')
 
         let sortVetAscendingUpcomingVisits = false;
         let sortVetAscendingPreviousVisits = false;
-        self.SortTableByVet = function(isForUpcoming) {
+        self.SortTableByVet = function(isForUpcoming, flipSortingBool = true) {
+            lastSort = vetSortName;
             ResetSortButtonArrows(isForUpcoming);
 
             if(isForUpcoming) {
-                sortVetAscendingUpcomingVisits = !sortVetAscendingUpcomingVisits;
+                if(flipSortingBool) {
+                    sortVetAscendingUpcomingVisits = !sortVetAscendingUpcomingVisits;
+                }
 
                 if(sortVetAscendingUpcomingVisits) {
                     self.upcomingVisits.sort(function (a, b) {
@@ -252,7 +290,9 @@ angular.module('visits')
                     $('#sortByVetButtonUpcomingVisits').text("Sort by veterinarian ↑")
                 }
             } else {
-                sortVetAscendingPreviousVisits = !sortVetAscendingPreviousVisits;
+                if(flipSortingBool) {
+                    sortVetAscendingPreviousVisits = !sortVetAscendingPreviousVisits;
+                }
 
                 if(sortVetAscendingPreviousVisits) {
                     self.previousVisits.sort(function (a, b) {
@@ -276,11 +316,14 @@ angular.module('visits')
 
         let sortStatusAscendingUpcomingVisits = false;
         let sortStatusAscendingPreviousVisits = false;
-        self.SortTableByStatus = function(isForUpcoming) {
+        self.SortTableByStatus = function(isForUpcoming, flipSortingBool = true) {
+            lastSort = statusSortName;
             ResetSortButtonArrows(isForUpcoming);
 
             if(isForUpcoming) {
-                sortStatusAscendingUpcomingVisits = !sortStatusAscendingUpcomingVisits;
+                if(flipSortingBool) {
+                    sortStatusAscendingUpcomingVisits = !sortStatusAscendingUpcomingVisits;
+                }
 
                 if(sortStatusAscendingUpcomingVisits) {
                     self.upcomingVisits.sort(function (a, b) {
@@ -300,7 +343,9 @@ angular.module('visits')
                     $('#sortByStatusButtonUpcomingVisits').text("Sort by status ↑")
                 }
             } else {
-                sortStatusAscendingPreviousVisits = !sortStatusAscendingPreviousVisits;
+                if(flipSortingBool) {
+                    sortStatusAscendingPreviousVisits = !sortStatusAscendingPreviousVisits;
+                }
 
                 if(sortStatusAscendingPreviousVisits) {
                     self.previousVisits.sort(function (a, b) {
@@ -337,7 +382,22 @@ angular.module('visits')
             }
 
             $http.post(url, data).then(function () {
-                $state.go("owners", {ownerId: $stateParams.ownerId});
+                let dateObj = new Date();
+                var dd = String(dateObj.getDate()).padStart(2, '0');
+                var mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+                var yyyy = dateObj.getFullYear();
+                let currentDate = Date.parse(yyyy + '-' + mm + '-' + dd);
+
+                // Add the visit to one of the lists depending on its date
+                let isForUpcomingVisitsTable = Date.parse(data.date) >= currentDate;
+                if(isForUpcomingVisitsTable) {
+                    self.upcomingVisits.push(data);
+                } else {
+                    self.previousVisits.push(data);
+                }
+
+                // Call the last sort after adding if there is one
+                callLastSort(isForUpcomingVisitsTable);
             },function (response) {
                 var error = response.data;
                 alert(error.error + "\r\n" + error.errors.map(function (e) {
@@ -347,7 +407,7 @@ angular.module('visits')
 
             $http.post(billsUrl, billData).then(function () {
 
-            }, function (response){
+            }, function (response) {
                 var error = response.data;
                 alert(error.error + "\r\n" + error.errors.map(function (e) {
                     return e.field + ": " + e.defaultMessage;
