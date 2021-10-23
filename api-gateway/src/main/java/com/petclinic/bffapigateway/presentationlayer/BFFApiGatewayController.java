@@ -80,6 +80,7 @@ public class BFFApiGatewayController {
         return customersServiceClient.createPet(pet, ownerId);
     }
 
+<<<<<<< HEAD
 
 
 
@@ -87,6 +88,11 @@ public class BFFApiGatewayController {
     public Mono<PetDetails> createNewPet(@RequestBody PetDetails pet, @PathVariable int ownerId){
         return customersServiceClient.createPet(pet, ownerId);
 
+=======
+    @PostMapping(value = "owners/{ownerId}/pets" , produces = "application/json", consumes = "application/json")
+    public Mono<PetDetails> createPet(@RequestBody PetDetails pet, @PathVariable int ownerId){
+        return customersServiceClient.createPet(ownerId,pet);
+>>>>>>> 0d55775b (Modified code so test passes)
     }
 
     //Testing purpose
