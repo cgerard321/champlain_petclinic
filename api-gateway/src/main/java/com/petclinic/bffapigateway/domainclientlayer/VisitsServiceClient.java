@@ -120,7 +120,7 @@ public class VisitsServiceClient {
     }
 
     public Mono<VisitDetails> updateVisitForPet(VisitDetails visit) {
-        String url = hostname + "/owners/*/pets/" + visit.getPetId() + "/visits/" + visit.getId();
+        String url = hostname + "/owners/*/pets/" + visit.getPetId() + "/visits/" + visit.getVisitId();
         return webClientBuilder.build()
                 .put()
                 .uri(url)
@@ -141,7 +141,7 @@ public class VisitsServiceClient {
                 .bodyToMono(VisitDetails.class);
     }
 
-    public Mono<Void> deleteVisitsById(int visitId){
+    public Mono<Void> deleteVisitByVisitId(String visitId){
         return webClientBuilder.build()
                 .delete()
                 .uri(hostname + "/visits/{visitId}", visitId)
@@ -157,7 +157,7 @@ public class VisitsServiceClient {
         this.hostname = hostname;
     }
     
-    public Mono<VisitDetails> getVisitById(int visitId) {
+    public Mono<VisitDetails> getVisitByVisitId(String visitId) {
         return webClientBuilder.build()
                 .get()
                 .uri(hostname + "/visit/{visitId}", visitId)

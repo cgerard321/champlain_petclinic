@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class VisitDetails {
 
-    private Integer id = null;
+    private String visitId = null;
 
     private Integer petId = null;
 

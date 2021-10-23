@@ -358,7 +358,7 @@ class ApiGatewayControllerTest {
         OwnerDetails owner = new OwnerDetails();
         VisitDetails visit = new VisitDetails();
         owner.setId(1);
-        visit.setVisitId(1);
+        visit.setVisitId(UUID.randomUUID().toString());
         visit.setPetId(1);
         visit.setDate("2021-12-12");
         visit.setDescription("Charle's Richard cat has a paw infection.");
@@ -389,7 +389,7 @@ class ApiGatewayControllerTest {
         VisitDetails visit = new VisitDetails();
         OwnerDetails owner = new OwnerDetails();
         owner.setId(1);
-        visit.setVisitId(1);
+        visit.setVisitId(UUID.randomUUID().toString());
         visit.setPetId(1);
         visit.setDate("2021-12-12");
         visit.setDescription("Charle's Richard cat has a paw infection.");
@@ -423,7 +423,7 @@ class ApiGatewayControllerTest {
                 .isOk()
                 .expectBody();
 
-        assertEquals(null, visitsServiceClient.getVisitsForPet(visit.getVisitId()));
+        assertEquals(null, visitsServiceClient.getVisitsForPet(visit.getPetId()));
     }
 
     @Test
@@ -431,7 +431,7 @@ class ApiGatewayControllerTest {
         VisitDetails visit = new VisitDetails();
         OwnerDetails owner = new OwnerDetails();
         owner.setId(1);
-        visit.setVisitId();
+        visit.setVisitId(UUID.randomUUID().toString());
         visit.setPetId(1);
         visit.setDate("2021-12-12");
         visit.setDescription("Charle's Richard cat has a paw infection.");
@@ -464,7 +464,7 @@ class ApiGatewayControllerTest {
                 .isOk()
                 .expectBody();
 
-        assertEquals(null, visitsServiceClient.getVisitsForPet(visit.getVisitId()));
+        assertEquals(null, visitsServiceClient.getVisitsForPet(visit.getPetId()));
     }
 
     @Test
@@ -472,7 +472,7 @@ class ApiGatewayControllerTest {
         VisitDetails visit = new VisitDetails();
         OwnerDetails owner = new OwnerDetails();
         owner.setId(1);
-        visit.setVisitId(1);
+        visit.setVisitId(UUID.randomUUID().toString());
         visit.setPetId(1);
         visit.setDate("2021-12-12");
         visit.setDescription("Charle's Richard cat has a paw infection.");
@@ -505,7 +505,7 @@ class ApiGatewayControllerTest {
                 .isOk()
                 .expectBody();
 
-        assertEquals(null, visitsServiceClient.getVisitsForPet(visit.getVisitId()));
+        assertEquals(null, visitsServiceClient.getVisitsForPet(visit.getPetId()));
     }
 
     @Test
@@ -549,9 +549,6 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$.status").isEqualTo(false)
                 .jsonPath("$.practitionerId").isEqualTo(1);
-
-
-        assertEquals(id, visit.getVisitId());
 
         when(visitsServiceClient.updateVisitForPet(visit))
                 .thenReturn(Mono.just(visit2));

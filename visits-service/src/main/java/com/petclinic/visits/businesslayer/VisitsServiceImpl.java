@@ -74,7 +74,7 @@ public class VisitsServiceImpl implements VisitsService {
 
         Optional<Visit> returnedVisit = visitRepository.findByVisitId(UUID.fromString(visitId));
 
-        if(returnedVisit.isPresent())
+        if(returnedVisit.get().getDescription() == null)
             throw new NotFoundException("Visit with visitId: " + visitId + " does not exist.");
 
         VisitDTO visitDTO = mapper.entityToModel(returnedVisit.get());

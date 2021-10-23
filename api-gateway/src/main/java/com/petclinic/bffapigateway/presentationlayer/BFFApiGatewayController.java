@@ -90,19 +90,19 @@ public class BFFApiGatewayController {
 */
 
     @PutMapping(
-            value = "owners/*/pets/{petId}/visits/{id}",
+            value = "owners/*/pets/{petId}/visits/{visitId}",
             consumes = "application/json",
             produces = "application/json"
     )
-    Mono<VisitDetails> updateVisit(@RequestBody VisitDetails visit, @PathVariable int petId, @PathVariable int id) {
+    Mono<VisitDetails> updateVisit(@RequestBody VisitDetails visit, @PathVariable int petId, @PathVariable String visitId) {
         visit.setPetId(petId);
-        visit.setId(id);
+        visit.setVisitId(visitId);
         return visitsServiceClient.updateVisitForPet(visit);
     }
 
     @DeleteMapping (value = "visits/{visitId}")
-    public Mono<Void> deleteVisitsById(final @PathVariable int visitId){
-        return visitsServiceClient.deleteVisitsById(visitId);
+    public Mono<Void> deleteVisitsByVisitId(final @PathVariable String visitId){
+        return visitsServiceClient.deleteVisitByVisitId(visitId);
     }
 
     //Delete Visit
@@ -123,8 +123,8 @@ public class BFFApiGatewayController {
     }
     
     @GetMapping(value ="visit/{visitId}")
-    public Mono<VisitDetails> getVisitById(final @PathVariable int visitId){
-        return visitsServiceClient.getVisitById(visitId);
+    public Mono<VisitDetails> getVisitByVisitId(final @PathVariable String visitId){
+        return visitsServiceClient.getVisitByVisitId(visitId);
     }
 
     @GetMapping(value = "visits/vets/{practitionerId}")
