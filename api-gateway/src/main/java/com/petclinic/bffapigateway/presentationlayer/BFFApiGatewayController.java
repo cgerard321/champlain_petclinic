@@ -139,6 +139,7 @@ public class BFFApiGatewayController {
         String startDate = dates.get(0);
         String endDate = dates.get(1);
 
+<<<<<<< HEAD
         return visitsServiceClient.getVisitsByPractitionerIdAndMonth(practitionerId, startDate, endDate);
     }
 
@@ -159,6 +160,11 @@ public class BFFApiGatewayController {
 
 
 
+=======
+    public Mono<OwnerDetails> updateOwner(final @PathVariable int ownerId) {
+
+        return customersServiceClient.updateOwner(ownerId);
+>>>>>>> afec11ea (update owners still giving me errors, but test passes.)
 
     }
 
