@@ -18,16 +18,21 @@ angular.module('visits')
         });
         
 
+        // Function to... get the current date ;)
+        function getCurrentDate() {
+            let dateObj = new Date();
+            var dd = String(dateObj.getDate()).padStart(2, '0');
+            var mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+            var yyyy = dateObj.getFullYear();
+            return Date.parse(yyyy + '-' + mm + '-' + dd);
+        }
+
         // Lists holding visits for the table to display
         self.upcomingVisits = [];
         self.previousVisits = [];
 
         self.sortFetchedVisits = function() {
-            let dateObj = new Date();
-            var dd = String(dateObj.getDate()).padStart(2, '0');
-            var mm = String(dateObj.getMonth() + 1).padStart(2, '0');
-            var yyyy = dateObj.getFullYear();
-            let currentDate = Date.parse(yyyy + '-' + mm + '-' + dd);
+            let currentDate = getCurrentDate();
 
 
             $.each(self.visits, function(i, visit) {
@@ -99,14 +104,21 @@ angular.module('visits')
             return practitionerName;
         };
 
-        self.switchToUpdateForm = function (practitionerId, date, description, id, visitStatus){
+        self.switchToUpdateForm = function (e, practitionerId, date, description, id, visitStatus){
             visitId = id;
             $("#selectedVet option[value='"+practitionerId+"']").prop("selected", true);
             $('#date_input').val(date);
             $('#description_textarea').val(description);
             $('#submit_button').text("Update Visit");
             $('#cancel_button').css("visibility", "visible");
+
             self.loadVetInfo();
+
+            // Save the sender's index to data attribute on visitForm called data-update-index
+            let form = $('#visitForm');
+            form.data("update-table", $(e.target).closest('tr').data("table-name"));
+            form.data("update-index", $(e.target).closest('tr').data("index"));
+
             self.submit = function () {
                 var data = {
                     date: $('#date_input').val(),
@@ -116,8 +128,43 @@ angular.module('visits')
                 };
 
                 url = "api/gateway/owners/*/pets/" + petId + "/visits/" + visitId;
-                $http.put(url, data).then(function () {
-                    window.location.reload();
+                $http.put(url, data).then(function(response) {
+                    let currentDate = getCurrentDate();
+                    let form = $('#visitForm');
+
+                    // Get the index of the visit to be updated
+                    let index = parseInt(form.data("update-index"));
+
+                    // See if the unedited visit was in upcoming
+                    let outdatedVisitWasInUpcoming = form.data("update-table") === "upcomingVisits";
+
+                    // See if the edited visit will be in upcoming or not
+                    let updatedVisitWillBeInUpcoming = Date.parse(response.data.date) >= currentDate;
+
+                    // Perform an action depending on where the visit was located and where it will be
+                    if(outdatedVisitWasInUpcoming === true && updatedVisitWillBeInUpcoming === true) {
+                        self.upcomingVisits[index] = response.data;
+                    }
+                    if(outdatedVisitWasInUpcoming === false && updatedVisitWillBeInUpcoming === false) {
+                        self.previousVisits[index] = response.data;
+                    }
+                    if(outdatedVisitWasInUpcoming === true && updatedVisitWillBeInUpcoming === false) {
+                        // Remove the old visit from upcoming
+                        self.upcomingVisits.splice(index, 1);
+
+                        // Add the edited visit to previous visits
+                        self.previousVisits.push(response.data);
+                    }
+                    if(outdatedVisitWasInUpcoming === false && updatedVisitWillBeInUpcoming === true) {
+                        // Remove the old visit from upcoming
+                        self.previousVisits.splice(index, 1);
+
+                        // Add the edited visit to previous visits
+                        self.upcomingVisits.push(response.data);
+                    }
+
+                    // Call the last sort after adding if there is one
+                    callLastSort(updatedVisitWillBeInUpcoming);
                 }, function (response) {
                     var error = response.data;
                     alert(error.error + "\r\n" + error.errors.map(function (e) {
@@ -374,26 +421,22 @@ angular.module('visits')
                 practitionerId: self.practitionerId,
                 status: true
             };
-
+            
             var billData = {
                 ownerId: $stateParams.ownerId,
                 date: $filter('date')(self.date, "yyyy-MM-dd"),
                 visitType : $("#selectedVisitType").val()
             }
 
-            $http.post(url, data).then(function () {
-                let dateObj = new Date();
-                var dd = String(dateObj.getDate()).padStart(2, '0');
-                var mm = String(dateObj.getMonth() + 1).padStart(2, '0');
-                var yyyy = dateObj.getFullYear();
-                let currentDate = Date.parse(yyyy + '-' + mm + '-' + dd);
+            $http.post(url, data).then(function(response) {
+                let currentDate = getCurrentDate();
 
                 // Add the visit to one of the lists depending on its date
-                let isForUpcomingVisitsTable = Date.parse(data.date) >= currentDate;
+                let isForUpcomingVisitsTable = Date.parse(response.data.date) >= currentDate;
                 if(isForUpcomingVisitsTable) {
-                    self.upcomingVisits.push(data);
+                    self.upcomingVisits.push(response.data);
                 } else {
-                    self.previousVisits.push(data);
+                    self.previousVisits.push(response.data);
                 }
 
                 // Call the last sort after adding if there is one
@@ -476,15 +519,15 @@ angular.module('visits')
 
             url = "api/gateway/owners/*/pets/" + petId + "/visits/" + visitId;
 
-            $http.put(url, data).then(function () {
-                // Get the parent row of the sender
-                let parentRow = $(e.target).closest('tr');
-
+            $http.put(url, data).then(function(response) {
                 // Get the index of the sender from the parent table row data attribute
-                let index = parseInt(parentRow.data("index"));
+                let index = parseInt($(e.target).closest('tr').data("index"));
 
-                // Remove the visit from the list of either upcoming or previous visits
-                self.upcomingVisits[index].status = !self.upcomingVisits[index].status;
+                // Delete that visit (must delete in order to update index when sorted)
+                self.upcomingVisits[index] = response.data;
+
+                // Call the last sort if there was one
+                callLastSort(true);
             },function (response) {
                 var error = response.data;
                 alert(error.error + "\r\n" + error.errors.map(function (e) {
