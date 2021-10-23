@@ -37,6 +37,14 @@
         </div>
 
         <!-- remove script and place in required file -->
+        <hr class="my-4"/>
+
+        <div class="col-sm-12">
+          <h5 class="form-label">Specialisation(s)</h5>
+          <div>
+            <span ng-repeat="specialty in $ctrl.vet.specialties">{{specialty.name + ' '}}</span>
+          </div>
+        </div>
 
         <hr class="my-4"/>
 

@@ -39,7 +39,7 @@ public class VetsServiceClient {
                 .bodyToFlux(VetDetails.class);
     }
 
-    public Mono<VetDetails> getVet(final long vetId) {
+    public Mono<VetDetails> getVet(final int vetId) {
         return webClientBuilder.build().get()
                 .uri(vetsServiceUrl + "/{vetId}", vetId)
                 .retrieve()
