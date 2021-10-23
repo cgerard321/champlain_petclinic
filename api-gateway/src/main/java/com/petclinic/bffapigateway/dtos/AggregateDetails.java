@@ -19,8 +19,6 @@ public class AggregateDetails {
 
     private String telephone;
 
-    private UserDetails user;
-
     private final List<PetDetails> pets = new ArrayList<>();
 
     private final List<VetDetails> vets;
