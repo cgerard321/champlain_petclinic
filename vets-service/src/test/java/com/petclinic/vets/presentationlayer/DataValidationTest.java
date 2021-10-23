@@ -110,12 +110,10 @@ public class DataValidationTest {
     @DisplayName("Verify vetId InvalidInputException Test")
     void verifyVetIdInvalidInputException(){
         assertThrows(InvalidInputException.class,()->{
-            DataValidation.verifyVetId(0);
-        });
-        assertThrows(InvalidInputException.class,()->{
             DataValidation.verifyVetId(-120);
         });
     }
+
     @Test
     @DisplayName("Verify IsActive Test")
     void verifyIsActiveTest(){
@@ -130,6 +128,13 @@ public class DataValidationTest {
         });
         assertThrows(InvalidInputException.class,()->{
             DataValidation.verifyIsActive(-1);
+        });
+    }
+    @Test
+    @DisplayName("Verify Speciality InvalidInputException Test")
+    void verifySpecialityInvalidInputException(){
+        assertThrows(InvalidInputException.class,()->{
+            DataValidation.verifySpeciality("  #@$#$@$# ");
         });
     }
 }
