@@ -85,6 +85,7 @@ public class CustomersServiceClient {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     public Mono<PetDetails> createPet(final PetDetails model,final int ownerId){
         return webClientBuilder.build().post()
                 .uri(customersServiceUrl +"/{ownerId}/pets", ownerId)
@@ -109,14 +110,22 @@ public class CustomersServiceClient {
                 .uri(customersServiceUrl +"/{ownerId}/pets", ownerId)
                 .body(just(model), PetDetails.class)
 >>>>>>> cef5b393 (Ok, idk, help plz)
+=======
+    public Mono<PetDetails> createPet(final PetDetails model){
+        return webClientBuilder.build().post()
+                .uri(customersServiceUrl + "/pets")
+>>>>>>> c6febbaa (Created client method and failing test for the endpoint of adding a pet)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve().bodyToMono(PetDetails.class);
     }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 =======
 >>>>>>> b6da7faa (Created client method and failing test for the endpoint of adding a pet)
+=======
+>>>>>>> c6febbaa (Created client method and failing test for the endpoint of adding a pet)
 
 
 
