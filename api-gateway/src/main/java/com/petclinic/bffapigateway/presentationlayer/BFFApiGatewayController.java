@@ -60,7 +60,11 @@ public class BFFApiGatewayController {
 
     @PostMapping(value = "owners/{ownerId}/pets" , produces = "application/json", consumes = "application/json")
     public Mono<PetDetails> createPet(@RequestBody PetDetails pet, @PathVariable int ownerId){
-        return customersServiceClient.createPet(pet);
+
+        customersServiceClient.createPet(pet);
+
+        return customersServiceClient.createPet(pet, ownerId);
+
     }
 
     //Testing purpose

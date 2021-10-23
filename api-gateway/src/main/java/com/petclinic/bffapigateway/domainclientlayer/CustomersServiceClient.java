@@ -81,11 +81,19 @@ public class CustomersServiceClient {
 
 
 
-    public Mono<OwnerDetails> deleteOwner (final long ownerId){
+
+    public Mono<OwnerDetails> deleteOwner (final long ownerId) {
         return webClientBuilder.build().delete()
                 .uri(customersServiceUrl + ownerId)
                 .retrieve()
                 .bodyToMono(OwnerDetails.class);
+    }
+    public Mono<PetDetails> createPet(final PetDetails model,final int ownerId){
+        return webClientBuilder.build().post()
+                .uri(customersServiceUrl +"/{ownerId}/pets", ownerId)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve().bodyToMono(PetDetails.class);
+
     }
 
     public Mono<PetDetails> createPet(final PetDetails model) {
