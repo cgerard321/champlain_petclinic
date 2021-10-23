@@ -117,8 +117,8 @@ public class BFFApiGatewayController {
 
     @PutMapping(value = "owners/{ownerId}",consumes = "application/json" ,produces = "application/json")
 
-    public Mono<OwnerDetails> updateOwner(@RequestBody OwnerDetails od, final @PathVariable int ownerId) {
-        od.setId(ownerId);
+    public Mono<OwnerDetails> updateOwner(final @PathVariable int ownerId) {
+
         return customersServiceClient.updateOwner(ownerId);
 
     }
