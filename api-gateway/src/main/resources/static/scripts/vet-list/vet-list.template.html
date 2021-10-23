@@ -19,6 +19,7 @@
 <table class="table table-striped">
     <thead>
     <tr>
+        <th class="vet_id">Vet ID</th>
         <th class="vet_name">Name</th>
         <th class="vet_phone">Phone</th>
         <th class="vet_email">Email</th>
@@ -29,6 +30,7 @@
     </thead>
 
     <tr ng-repeat="vet in $ctrl.vetList | filter:$ctrl.query track by vet.vetId">
+        <td class="vet_id" >{{vet.vetId}}</td>
         <td class="isActive" style="display: none">{{vet.isActive}}</td>
         <td class="vet_name"><a style="text-decoration: none;" ui-sref="vetDetails({ vetId: vet.vetId })"><span ng-mouseenter="$ctrl.show($event,vet.vetId)" ng-mouseleave="$ctrl.hide($event,vet.vetId)" class="info v{{vet.vetId}}">{{vet.firstName}} {{vet.lastName}}</span></a></td>
         <td class="vet_phone"><span>{{vet.phoneNumber}}</span></td>
@@ -42,7 +44,9 @@
             <a id="disable" ui-sref="disableVet({vetId: $ctrl.vet.vetId})"></a>
             <a id="enable" ui-sref="enableVet({vetId: $ctrl.vet.vetId})"></a>
         </td>
-        <td><a class="btn btn-danger" ng-confirm-click="Are you sure you want to delete this vet?" confirmed-click="deleteVet({vetId: $ctrl.vet.vetId})">Delete Vet</a></td>
+        <td>
+            <a class="btn btn-danger"  href="javascript:void(0)" ng-click="delete(vet.vetId)">Delete Vet</a>
+        </td>
         <script>
             var setAvailable = function (input) {
                 if (input.checked) {

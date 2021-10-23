@@ -32,7 +32,30 @@ angular.module('vetList')
             arr = resp.data;
         });
 
+        $scope.delete = function (vetId) {
+            let varIsConf = confirm('Want to delete vet with vetId:' + vetId + '. Are you sure?');
+            if (varIsConf) {
+                $http.delete('/vets/' + vetId).success(function () {
+                    $scope.errors = [];
+                    alert(vetId + " Deleted Successfully!!!");
+                }).error(function () {
+                    alert(data.errors);
+                });
+            }
+        };
+
         $scope.refreshList = self.vetList;
+
+        $scope.ReloadData = function () {
+            self.vetList = FilterList();
+            $http.get('api/gateway/vets').then(function (resp) {
+                arr = resp.data;
+            });
+        }
+
+
+
+$scope.refreshList = self.vetList;
 
         $scope.ReloadData = function () {
             self.vetList = FilterList();
