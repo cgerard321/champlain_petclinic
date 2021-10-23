@@ -224,6 +224,35 @@ class ApiGatewayControllerTest {
     }
 
     @Test
+    void createPet(){
+        PetDetails pet = new PetDetails();
+        PetType type = new PetType();
+        type.setName("Dog");
+        pet.setId(30);
+        pet.setName("Fluffy");
+        pet.setBirthDate("2000-01-01");
+        pet.setType(type);
+
+        when(customersServiceClient.createPet(pet))
+                .thenReturn(Mono.just(pet));
+
+        client.post()
+                .uri("/api/gateway/owners/pets")
+                .body(Mono.just(pet), PetDetails.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+
+        assertEquals(pet.getId(), 30);
+        assertEquals(pet.getName(), "Fluffy");
+        assertEquals(pet.getBirthDate(), "2000-01-01");
+        assertEquals(type.getName(), "Dog");
+
+    }
+
+    @Test
     void deleteUser() {
         UserDetails user = new UserDetails();
         user.setId(1);
