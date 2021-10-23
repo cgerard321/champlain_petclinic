@@ -10,26 +10,26 @@ public class BillDTO {
 
     private int billId;
     private int customerId;
-    private Date date;
     private String visitType;
+    private Date date;
     @Nullable
     private double amount;
 
     public BillDTO(){
         billId = 0;
         customerId = 0;
-        date = null;
         visitType = null;
+        date = null;
         amount = 0;
 
     }
 
 
-    public BillDTO(int billId,int customerId, Date date, String visitType, double amount){
+    public BillDTO(int billId,int customerId, String visitType, Date date, double amount){
         this.billId = billId;
         this.customerId = customerId;
-        this.date = date;
         this.visitType = visitType;
+        this.date = date;
         this.amount = amount;
     }
 

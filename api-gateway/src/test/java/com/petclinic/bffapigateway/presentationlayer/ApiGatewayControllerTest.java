@@ -602,6 +602,48 @@ class ApiGatewayControllerTest {
                 .jsonPath("$[0].description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$[0].practitionerId").isEqualTo(1);
     }
+    
+    @Test
+    void getSingleVisit_Valid() {
+        VisitDetails visit = new VisitDetails();
+        visit.setId(69);
+        visit.setPetId(7);
+        visit.setDate("2022-04-20");
+        visit.setDescription("Fetching a single visit!");
+        visit.setStatus(false);
+        visit.setPractitionerId(177013);
+        
+        when(visitsServiceClient.getVisitById(visit.getId())).thenReturn(Mono.just(visit));
+    
+        client.get()
+                .uri("/api/gateway/visit/{visitId}", visit.getId())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.id").isEqualTo(visit.getId())
+                .jsonPath("$.petId").isEqualTo(visit.getPetId())
+                .jsonPath("$.date").isEqualTo(visit.getDate())
+                .jsonPath("$.description").isEqualTo(visit.getDescription())
+                .jsonPath("$.practitionerId").isEqualTo(visit.getPractitionerId());
+    }
+    
+    @Test
+    void getSingleVisit_Invalid() {
+        final int invalidVisitId = -5;
+        final String expectedErrorMessage = "error message";
+    
+        when(visitsServiceClient.getVisitById(invalidVisitId))
+                .thenThrow(new GenericHttpException(expectedErrorMessage, BAD_REQUEST));
+        
+        client.get()
+                .uri("/api/gateway/visit/{visitId}", invalidVisitId)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.statusCode").isEqualTo(BAD_REQUEST.value())
+                .jsonPath("$.timestamp").exists()
+                .jsonPath("$.message").isEqualTo(expectedErrorMessage);
+    }
 
     @Test
     @DisplayName("Given valid JWT, verify user")
