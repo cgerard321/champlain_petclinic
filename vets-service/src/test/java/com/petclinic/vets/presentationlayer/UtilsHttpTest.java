@@ -1,5 +1,7 @@
 package com.petclinic.vets.presentationlayer;
 
+import com.petclinic.vets.datalayer.DataValidation;
+import com.petclinic.vets.utils.exceptions.InvalidInputException;
 import com.petclinic.vets.utils.exceptions.NotFoundException;
 import com.petclinic.vets.utils.http.GlobalControllerExceptionHandler;
 import com.petclinic.vets.utils.http.HttpErrorInfo;
@@ -53,5 +55,12 @@ public class UtilsHttpTest {
         assertEquals(hei.getPath(),"/");
         assertEquals(hei.getHttpStatus(),UNPROCESSABLE_ENTITY);
         assertThat(hei.getTimestamp()).isNotNull();
+    }
+    @Test
+    @DisplayName("Verify Last Name InvalidInputException Test")
+    void verifyLastNameInvalidInputException(){
+        assertThrows(InvalidInputException.class,()->{
+            DataValidation.verifyLastName("  #@$#$@$# ");
+        });
     }
 }

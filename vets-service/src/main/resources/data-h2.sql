@@ -8,9 +8,12 @@ INSERT INTO vets VALUES (6, 784233, 'Sharon', 'Jenkins', 'jenkins.sharon@email.c
 INSERT INTO specialties VALUES (1, 100001, 'radiology');
 INSERT INTO specialties VALUES (2, 100002, 'surgery');
 INSERT INTO specialties VALUES (3, 100003, 'dentistry');
+INSERT INTO specialties VALUES (4,100004, 'general');
 
+INSERT INTO vet_specialties VALUES (1, 4);
 INSERT INTO vet_specialties VALUES (2, 1);
 INSERT INTO vet_specialties VALUES (3, 2);
 INSERT INTO vet_specialties VALUES (3, 3);
 INSERT INTO vet_specialties VALUES (4, 2);
 INSERT INTO vet_specialties VALUES (5, 1);
+INSERT INTO vet_specialties VALUES (6, 4);

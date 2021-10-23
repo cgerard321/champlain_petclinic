@@ -201,7 +201,7 @@ public class BFFApiGatewayController {
     @PostMapping(value = "vets",
             consumes = "application/json",
             produces = "application/json")
-    public Mono<VetDetails> createVet(@RequestBody VetDetails model) { return vetsServiceClient.getVet(model.getVetId()); }
+    public Mono<VetDetails> createVet(@RequestBody VetDetails model) { return vetsServiceClient.createVet(model); }
 
     /**
      * Delete vet from DB given the vetID
