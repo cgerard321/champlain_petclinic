@@ -461,26 +461,40 @@ const date = new Date();
 <h2>Visits</h2>
 
 <form id="visitForm" ng-submit="$ctrl.submit()">
-
-    <div class="form-group" ng-value="0" >
-        <label>Practitioner</label>
-        <select id="selectedVet" ng-model="$ctrl.practitionerId" ng-change="$ctrl.loadVetInfo();$ctrl.getVisitsForPractitionerIdAndMonth()">
+  
+    <div class="form-group">
+        <label style="display: inline-block; width: 100px">Practitioner:</label>
+        <select id="selectedVet" style="width: 125px" ng-model="$ctrl.practitionerId" ng-change="$ctrl.loadVetInfo();$ctrl.getVisitsForPractitionerIdAndMonth()">
             <option ng-repeat="p in $ctrl.vets" data-target="{{p.firstName}} {{p.lastName}}" value="{{p.vetId}}">{{p.firstName}} {{p.lastName}}</option>
         </select>
-
+      
+        <div>
+            <label for="selectedVisitType" style="display: inline-block; width: 100px">Visit Type:</label>
+            <select id="selectedVisitType" style="width: 125px" name="selectedVisitType" ng-model="$ctrl.visitType">
+                <option value="Examinations">Examinations</option>
+                <option value="Injury">Injury</option>
+                <option value="Medical">Medical</option>
+                <option value="Chronic">Chronic</option>
+                <option value="Consultations">Consultations</option>
+                <option value="Operations">Operations</option>
+            </select>
+        </div>
         <br>
 
-        <label for="vetPhoneNumber" style="margin-top: 10px">Phone Number:</label>
-        <input id="vetPhoneNumber" disabled="disabled" style="background-color: #dbd9ce;"/>
+        <div>
+            <label for="vetPhoneNumber" style="margin-top: 10px;">Phone Number:</label>
+            <input id="vetPhoneNumber" disabled="disabled" style="background-color: #dbd9ce;"/>
 
-        <label for="vetEmailAddress">Email Address:</label>
-        <input id="vetEmailAddress" disabled="disabled" style="background-color: #dbd9ce;"/>
+            <label for="vetEmailAddress">Email Address:</label>
+            <input id="vetEmailAddress" disabled="disabled" style="background-color: #dbd9ce;"/>
 
-        <label for="vetSpecialties">Specialties:</label>
-        <input id="vetSpecialties" disabled="disabled" style="background-color: #dbd9ce;"/>
+            <label for="vetSpecialties">Specialties:</label>
+            <input id="vetSpecialties" disabled="disabled" style="background-color: #dbd9ce;"/>
 
-        <label for="vetWorkdays">Workdays:</label>
-        <input id="vetWorkdays" disabled="disabled" style="background-color: #dbd9ce;" onchange=selectChanged() />
+            <label for="vetWorkdays">Workdays:</label>
+            <input id="vetWorkdays" disabled="disabled" style="background-color: #dbd9ce;" onchange=selectChanged() />
+        </div>
+
     </div>
 
     <div class="form-group" style="margin-top: 6px">
@@ -519,7 +533,7 @@ const date = new Date();
             <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>
             <td class="status-text" style="white-space: pre-line">{{$ctrl.getStatus(v.status)}}</td>
             <td style="text-align:center; vertical-align:middle"><button class="btn btn-default cancel-button" style="background-color: orangered; color: white" ng-click="$ctrl.cancelVisit(v.id, v.status, v.practitionerId, v.date, v.description)">{{$ctrl.setCancelButtonText(v.status)}}</button></td>
-            <td style="text-align:center; vertical-align:middle"><button class="btn btn-default" style="background-color: royalblue; color: white" ng-click="$ctrl.switchToUpdateForm(v.practitionerId, v.date, v.description, v.id)">Edit Visit</button></td>
+            <td style="text-align:center; vertical-align:middle"><button class="btn btn-default" style="background-color: royalblue; color: white" ng-click="$ctrl.switchToUpdateForm(v.practitionerId, v.date, v.description, v.id, v.status)">Edit Visit</button></td>
             <td style="text-align:center; vertical-align:middle"><button class="btn btn-danger" ng-click="$ctrl.deleteVisit(v.id)">Delete visit</button></td>
         </tr>
     </tbody>
@@ -543,7 +557,7 @@ const date = new Date();
             <td style="white-space: pre-line">{{v.description}}</td>
             <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>
             <td class="status-text" style="white-space: pre-line">{{$ctrl.getStatus(v.status)}}</td>
-            <td style="text-align:center; vertical-align:middle"><button class="btn btn-default" style="background-color: royalblue; color: white" ng-click="$ctrl.switchToUpdateForm(v.practitionerId, v.date, v.description, v.id)">Edit Visit</button></td>
+            <td style="text-align:center; vertical-align:middle"><button class="btn btn-default" style="background-color: royalblue; color: white" ng-click="$ctrl.switchToUpdateForm(v.practitionerId, v.date, v.description, v.id, v.status)">Edit Visit</button></td>
             <td style="text-align:center; vertical-align:middle"><button class="btn btn-danger" ng-click="$ctrl.deleteVisit(v.id)">Delete visit</button></td>
         </tr>
     </tbody>
