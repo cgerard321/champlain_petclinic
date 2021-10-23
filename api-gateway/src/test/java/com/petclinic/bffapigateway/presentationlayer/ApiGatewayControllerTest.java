@@ -230,8 +230,10 @@ class ApiGatewayControllerTest {
 
     @Test
     void createPet(){
+
         OwnerDetails od = new OwnerDetails();
         od.setId(1);
+
         PetDetails pet = new PetDetails();
         PetType type = new PetType();
         type.setName("Dog");
@@ -240,23 +242,28 @@ class ApiGatewayControllerTest {
         pet.setBirthDate("2000-01-01");
         pet.setType(type);
 
+
         when(customersServiceClient.createPet(pet,od.getId()))
 
                 .thenReturn(Mono.just(pet));
 
+
+
+
         client.post()
-                .uri("/api/gateway/owners/1/pets")
+                .uri("/api/gateway/owners/pets")
+
                 .body(Mono.just(pet), PetDetails.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
+
                 .expectBody()
                 .jsonPath("$.id").isEqualTo(pet.getId())
                 .jsonPath("$.name").isEqualTo(pet.getName())
                 .jsonPath("$.birthDate").isEqualTo(pet.getBirthDate())
                 .jsonPath("$.type").isEqualTo(pet.getType());
-
 
 
 

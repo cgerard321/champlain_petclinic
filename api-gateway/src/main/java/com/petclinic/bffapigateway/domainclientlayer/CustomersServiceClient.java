@@ -81,6 +81,13 @@ public class CustomersServiceClient {
 
     }
 
+    public Mono<PetDetails> createPet(final PetDetails model){
+        return webClientBuilder.build().post()
+                .uri(customersServiceUrl + "/pets")
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve().bodyToMono(PetDetails.class);
+    }
+
 
 
 
@@ -93,8 +100,6 @@ public class CustomersServiceClient {
     }
     public Mono<PetDetails> createPet(final PetDetails model,final int ownerId){
 
-    
-
         return webClientBuilder.build().post()
                 .uri(customersServiceUrl +"/{ownerId}/pets", ownerId)
                 .body(just(model), PetDetails.class)
@@ -103,16 +108,5 @@ public class CustomersServiceClient {
 
     }
 
-    public Mono<PetDetails> createPet(final PetDetails model) {
-        {
-
-            return webClientBuilder.build().post()
-                    .uri(customersServiceUrl + "/{ownerId}/pets")
-                    .accept(MediaType.APPLICATION_JSON)
-                    .retrieve().bodyToMono(PetDetails.class);
-        }
-
-
-    }
 
 }
