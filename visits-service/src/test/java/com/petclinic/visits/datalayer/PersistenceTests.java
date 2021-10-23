@@ -126,7 +126,7 @@ public class PersistenceTests {
     // TESTS FOR FETCHING A SINGLE VISIT ----------------------------------------------------------------------
     @Test
     public void getVisitByVisitID() {
-        Visit visit = new Visit(5, new Date(), "Description", 5);
+        Visit visit = new Visit(5, UUID.randomUUID(), new Date(), "Description", 5, 123456, true);
         visit = repo.save(visit);
 
         Visit foundVisit = repo.findById(visit.getId()).get();
