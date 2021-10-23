@@ -265,6 +265,7 @@ class ApiGatewayControllerTest {
 =======
 
 <<<<<<< HEAD
+<<<<<<< HEAD
         when(customersServiceClient.createPet(pet))
 >>>>>>> b6da7faa (Created client method and failing test for the endpoint of adding a pet)
                 .thenReturn(Mono.just(pet));
@@ -277,6 +278,9 @@ class ApiGatewayControllerTest {
 >>>>>>> b6da7faa (Created client method and failing test for the endpoint of adding a pet)
 =======
         when(customersServiceClient.createPet(od.getId(),pet))
+=======
+        when(customersServiceClient.createPet(pet,od.getId()))
+>>>>>>> 0558a528 (Customer service is fked gg.)
                 .thenReturn(Mono.just(pet));
 
         client.post()
