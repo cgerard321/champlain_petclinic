@@ -132,41 +132,30 @@ public class BFFApiGatewayController {
         return visitsServiceClient.getVisitForPractitioner(practitionerId);
     }
 
-<<<<<<< HEAD
+
     @GetMapping(value = "visits/calendar/{practitionerId}")
     public Flux<VisitDetails> getVisitsByPractitionerIdAndMonth(@PathVariable("practitionerId") int practitionerId,
                                                                 @RequestParam("dates") List<String> dates) {
         String startDate = dates.get(0);
         String endDate = dates.get(1);
 
-<<<<<<< HEAD
+
         return visitsServiceClient.getVisitsByPractitionerIdAndMonth(practitionerId, startDate, endDate);
     }
 
-    @PutMapping(value = "owners/{ownerId}",consumes = "application/json" ,produces = "application/json")
-    public Mono<OwnerDetails> updateOwner(@RequestBody OwnerDetails od, final @PathVariable int ownerId) {
-        od.setId(ownerId);
-        return customersServiceClient.updateOwner(od,ownerId);
 
-=======
+
     @PutMapping(value = "owners/{ownerId}",consumes = "application/json" ,produces = "application/json")
     public Mono<OwnerDetails> updateOwnerDetails(final @PathVariable int ownerId) {
         return customersServiceClient.updateOwner(ownerId)
                 .flatMap(owner ->
                         visitsServiceClient.getVisitsForPets(owner.getPetIds())
                                 .map(addVisitsToOwner(owner)));
->>>>>>> bdc51edc (Modifications in updateOwners)
-
-
-
-
-=======
-    public Mono<OwnerDetails> updateOwner(final @PathVariable int ownerId) {
-
-        return customersServiceClient.updateOwner(ownerId);
->>>>>>> afec11ea (update owners still giving me errors, but test passes.)
-
     }
+
+
+
+
 
 
     private Function<Visits, OwnerDetails> addVisitsToOwner(OwnerDetails owner) {
