@@ -30,23 +30,33 @@ angular.module('visits')
         let alertsContainer = $('#alertsContainer');
 
         // Function to delete last added alert
-        function deleteAlertAfter(time) {
+        function deleteAlertAfter(alertId, time) {
             setTimeout(function() {
-                alertsContainer.children(".alert:first-child").remove();
+                if(alertsContainer.children().length === 1 && alertsContainer.children(".alert:first-child").attr("id") === alertId) {
+                    alertsContainer.children(".alert:first-child").remove();
+                }
             }, time);
         }
 
+        let alertId = 0;
         // Function to create alert
         function createAlert(alertType, alertMessage) {
             // Create an alert based on parameters
             alertsContainer.append(
-                "<div class=\"alert alert-"+ alertType +"\" role=\"alert\">" +
+                "<div id=\"alert-"+ ++alertId +"\" class=\"alert alert-"+ alertType +"\" role=\"alert\">" +
                 "<p>" + alertMessage + "</p>" +
                 "</div>"
             );
 
+            // If there is already an alert make place for new one
+            if(alertsContainer.children().length > 1) {
+                alertsContainer.children(".alert:first-child").remove();
+            }
+
+            console.log(alertsContainer.children().length);
+
             // Delete the alert after x amount of time (millis)
-            deleteAlertAfter(3000);
+            deleteAlertAfter("alert-" + alertId, 3000);
         }
 
         // Lists holding visits for the table to display
