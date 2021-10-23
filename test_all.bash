@@ -1,12 +1,4 @@
 #!/usr/bin/env bash
-#
-# Sample usage:
-#
-#   HOST=localhost PORT=7000 ./test-em-all.bash
-#
-#When not in Docker
-#: ${HOST=localhost}
-#: ${PORT=7000}
 
 #When in Docker
 : ${HOST=localhost}
