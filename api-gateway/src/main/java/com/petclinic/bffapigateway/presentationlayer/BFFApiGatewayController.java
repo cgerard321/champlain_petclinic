@@ -191,7 +191,7 @@ public class BFFApiGatewayController {
      * Get a single vet given its vetID
      */
     @GetMapping(value = "vets/{vetId}")
-    public Mono<VetDetails> getVet(final @PathVariable long vetId) {
+    public Mono<VetDetails> getVet(final @PathVariable int vetId) {
         return vetsServiceClient.getVet(vetId);
     }
 
