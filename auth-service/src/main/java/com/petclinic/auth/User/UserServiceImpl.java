@@ -195,29 +195,4 @@ public class UserServiceImpl implements UserService {
         return userRepo.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("No account found for email: " + email));
     }
-
-    @Override
-    public User updateUser(long id,UserIDLessRoleLessDTO userIDLessDTO) {
-
-        final Optional<User> byEmail = userRepo.findByEmail(userIDLessDTO.getEmail());
-
-        if(byEmail.isPresent()) {
-            throw new EmailAlreadyExistsException(
-                    format("User with e-mail %s already exists", userIDLessDTO.getEmail()));
-        }
-
-        log.info("Saving user with email {}", userIDLessDTO.getEmail());
-        User user = userRepo.findById(id).orElseThrow(() -> new NotFoundException("No user for id:" + id));
-
-        log.info("Sending email to {}...", userIDLessDTO.getEmail());
-        log.info(mailService.sendMail(generateVerificationMail(user)));
-        log.info("Email sent to {}", userIDLessDTO.getEmail());
-
-        user.setId(id);
-        user.setEmail(userIDLessDTO.getEmail());
-        user.setUsername(userIDLessDTO.getUsername());
-        user.setPassword(passwordEncoder.encode(userIDLessDTO.getPassword()));
-
-        return userRepo.save(user);
-    }
 }

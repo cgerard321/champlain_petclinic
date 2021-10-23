@@ -86,19 +86,6 @@ public class UserController {
         return userMapper.modelToPasswordLessDTO(saved);
     }
 
-    @PutMapping("/{userId}")
-    public UserPasswordLessDTO updateUser(
-            @RequestBody @Valid UserIDLessRoleLessDTO dto,
-            @PathVariable long userId) {
-
-        log.info("Trying to persist user");
-        final User saved = userService.updateUser(userId, dto);
-        log.info("Successfully persisted user");
-
-        return userMapper.modelToPasswordLessDTO(saved);
-    }
-
-
     @PutMapping("/passwordReset/{userId}")
     public void passwordReset(@PathVariable long userId, @RequestBody String newPassword) {
 

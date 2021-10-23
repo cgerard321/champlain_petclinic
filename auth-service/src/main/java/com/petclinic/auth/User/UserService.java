@@ -59,6 +59,4 @@ public interface UserService {
     UserTokenPair login(UserIDLessRoleLessDTO user) throws IncorrectPasswordException;
 
     User getUserByEmail(String email) throws NotFoundException;
-
-    User updateUser(long id,UserIDLessRoleLessDTO user);
 }
