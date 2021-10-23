@@ -157,6 +157,12 @@ angular.module('visits')
                     modalConfirmButton.data("targetPractitionerId", practitionerId);
                     modalConfirmButton.data("targetDate", date);
                     modalConfirmButton.data("targetDescription", description);
+                    modalConfirmButton.data("cancel-index", $(e.target).closest("tr").data("index"));
+                }
+
+                if(buttonText.toLowerCase() === "delete visit") {
+                    modalConfirmButton.data("delete-index", $(e.target).closest("tr").data("index"));
+                    modalConfirmButton.data("delete-table-name", $(e.target).closest("tr").data("table-name"));
                 }
             }
 
@@ -198,9 +204,9 @@ angular.module('visits')
             self.loadVetInfo();
 
             // Save the sender's index to data attribute on visitForm called data-update-index
-            let form = $('#visitForm');
-            form.data("update-table", $(e.target).closest('tr').data("table-name"));
-            form.data("update-index", $(e.target).closest('tr').data("index"));
+            let modalConfirmButton = $('#confirmationModalConfirmButton');
+            modalConfirmButton.data("update-table", $(e.target).closest('tr').data("table-name"));
+            modalConfirmButton.data("update-index", $(e.target).closest('tr').data("index"));
 
             self.submit = function () {
                 var data = {
@@ -214,13 +220,13 @@ angular.module('visits')
 
                 $http.put(putURL, data).then(function(response) {
                     let currentDate = getCurrentDate();
-                    let form = $('#visitForm');
+                    let modalConfirmButton = $('#confirmationModalConfirmButton');
 
                     // Get the index of the visit to be updated
-                    let index = parseInt(form.data("update-index"));
+                    let index = parseInt(modalConfirmButton.data("update-index"));
 
                     // See if the unedited visit was in upcoming
-                    let outdatedVisitWasInUpcoming = form.data("update-table") === "upcomingVisits";
+                    let outdatedVisitWasInUpcoming = modalConfirmButton.data("update-table") === "upcomingVisits";
 
                     // See if the edited visit will be in upcoming or not
                     let updatedVisitWillBeInUpcoming = Date.parse(response.data.date) >= currentDate;
@@ -301,16 +307,35 @@ angular.module('visits')
                     status: true
                 };
 
-                $http.post(postURL, data).then(function () {
-                    // Temporary way to get rid of page reloading
-                    $http.get("api/gateway/visits/"+petId).then(function (resp) {
-                        self.visits = resp.data;
-                        self.sortFetchedVisits();
-                    });
+                var billData = {
+                    ownerId: $stateParams.ownerId,
+                    date: $filter('date')(self.date, "yyyy-MM-dd"),
+                    visitType : $("#selectedVisitType").val()
+                }
 
-                    createAlert("success", "Successfully added visit!");
-                }, function (response) {
+                $http.post(postURL, data).then(function(response) {
+                    let currentDate = getCurrentDate();
+
+                    // Add the visit to one of the lists depending on its date
+                    let isForUpcomingVisitsTable = Date.parse(response.data.date) >= currentDate;
+                    if(isForUpcomingVisitsTable) {
+                        self.upcomingVisits.push(response.data);
+                    } else {
+                        self.previousVisits.push(response.data);
+                    }
+
+                    // Call the last sort after adding if there is one
+                    callLastSort(isForUpcomingVisitsTable);
+
+                    createAlert("success", "Successfully created visit!");
+                },function () {
                     createAlert("danger", "Failed to add visit!");
+                });
+
+                $http.post(billsUrl, billData).then(function () {
+
+                }, function () {
+                    console.log("Failed to create corresponding bill!");
                 });
             }
 
@@ -572,16 +597,16 @@ angular.module('visits')
             });
         }
 
-        self.deleteVisit = function (e, visitId){
+        self.deleteVisit = function (visitId){
             $http.delete("api/gateway/visits/" + visitId).then(function () {
                 // Get the parent row of the sender
-                let parentRow = $(e.target).closest('tr');
+                let modalConfirmButton = $('#confirmationModalConfirmButton');
 
                 // Get the index of the sender from the parent table row data attribute
-                let index = parseInt(parentRow.data("index"));
+                let index = parseInt(modalConfirmButton.data("delete-index"));
 
                 // See if the sender is in upcoming or previous visits
-                let deleteFromUpcomingVisits = parentRow.data("table-name") === "upcomingVisits";
+                let deleteFromUpcomingVisits = modalConfirmButton.data("delete-table-name") === "upcomingVisits";
 
                 // Remove the visit from the list of either upcoming or previous visits
                 if(deleteFromUpcomingVisits) {
@@ -609,7 +634,7 @@ angular.module('visits')
             return statusText;
         };
 
-        self.cancelVisit = function (e, id, visitStatus, visitPractitionerId, visitDate, visitDescription){
+        self.cancelVisit = function (id, visitStatus, visitPractitionerId, visitDate, visitDescription){
             visitId = id;
             var data = {};
 
@@ -629,12 +654,10 @@ angular.module('visits')
                 };
             }
 
-
             let putURL = "api/gateway/owners/*/pets/" + petId + "/visits/" + visitId;
 
             $http.put(putURL, data).then(function(response) {
-                // Get the index of the sender from the parent table row data attribute
-                let index = parseInt($(e.target).closest('tr').data("index"));
+                let index = parseInt($('#confirmationModalConfirmButton').data("cancel-index"));
 
                 // Delete that visit (must delete in order to update index when sorted)
                 self.upcomingVisits[index] = response.data;
