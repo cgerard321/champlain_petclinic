@@ -139,7 +139,7 @@ public class PersistenceTests {
     @Test
     public void shouldThrowNoSuchElementExceptionWhenFetchingVisitWithNonExistentVisitId(){
         assertThrows(NoSuchElementException.class, ()->{
-           repo.findByVisitId(UUID.randomUUID());
+           repo.findByVisitId(UUID.randomUUID()).get();
         });
     }
   

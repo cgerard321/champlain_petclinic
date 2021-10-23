@@ -10,10 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /*
@@ -70,11 +67,19 @@ public class VisitsServiceImpl implements VisitsService {
         return visitDTOList;
     }
 
-     public Visit getVisitById(int visitId) {
-        if (visitId < 0)
-            throw new InvalidInputException("VisitId can't be negative");
+    @Override
+    public VisitDTO getVisitByVisitId(String visitId) {
+        if (!validateVisitId(visitId))
+            throw new InvalidInputException("VisitId not in the right format.");
 
-        return visitRepository.findById(visitId).get();
+        Optional<Visit> returnedVisit = visitRepository.findByVisitId(UUID.fromString(visitId));
+
+        if(returnedVisit.isPresent())
+            throw new NotFoundException("Visit with visitId: " + visitId + " does not exist.");
+
+        VisitDTO visitDTO = mapper.entityToModel(returnedVisit.get());
+
+        return visitDTO;
     }
   
     @Override
@@ -150,5 +155,13 @@ public class VisitsServiceImpl implements VisitsService {
                 .collect(Collectors.toList());
 
         return visitDTOList;
+    }
+
+    @Override
+    public boolean validateVisitId(String visitId){
+        String uuidRegex = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
+        if(visitId.matches(uuidRegex))
+            return true;
+        return false;
     }
 }

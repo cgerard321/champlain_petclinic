@@ -91,7 +91,7 @@ public class VisitResourceTest {
 	// TESTS FOR FETCHING A SINGLE VISIT ----------------------------------------------------------------------
 	@Test
 	void whenValidVisitIdThenShouldReturnVisit() throws Exception {
-		given(visitsService.getVisitById(anyString()))
+		given(visitsService.getVisitByVisitId(anyString()))
 				.willReturn(visitDTO);
 
 		mvc.perform(get("/visit/{visitId}", visitDTO.getVisitId()))
@@ -106,7 +106,7 @@ public class VisitResourceTest {
 
 	@Test
 	void shouldHandleInvalidInputExceptionWhenFetchingVisitWithInvalidVisitId() throws Exception {
-		when(visitsService.getVisitById(anyString())).thenThrow(new InvalidInputException("VisitId not in the right format."));
+		when(visitsService.getVisitByVisitId(anyString())).thenThrow(new InvalidInputException("VisitId not in the right format."));
 
 		mvc.perform(get("/visit/{visitId}", "invalid"))
 				.andExpect(status().isUnprocessableEntity())
@@ -118,7 +118,7 @@ public class VisitResourceTest {
 	void shouldHandleNotFoundExceptionWhenFetchingVisitWithNonExistentVisitId() throws Exception {
 		String randomId = UUID.randomUUID().toString();
 		String expectedExMsg = "Visit with visitId: " + randomId + " does not exist.";
-		when(visitsService.getVisitById(anyString())).thenThrow(new NotFoundException(expectedExMsg));
+		when(visitsService.getVisitByVisitId(anyString())).thenThrow(new NotFoundException(expectedExMsg));
 
 		mvc.perform(get("/visit/{visitId}", randomId))
 				.andExpect(status().isNotFound())

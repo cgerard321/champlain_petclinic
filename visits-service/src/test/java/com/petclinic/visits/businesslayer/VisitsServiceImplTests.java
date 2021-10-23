@@ -123,7 +123,7 @@ public class VisitsServiceImplTests {
     // TESTS FOR GETTING A SINGLE VISIT ----------------------------------------------------------------------
     @Test
     public void shouldReturnVisitWhenFetchingWithValidVisitId() {
-        when(repo.findByVisitId(anyString())).thenReturn(Optional.of(visitEntity));
+        when(repo.findByVisitId(any())).thenReturn(Optional.of(visitEntity));
 
         VisitDTO visitFromService = visitsService.getVisitByVisitId(visitEntity.getVisitId().toString());
 
@@ -141,7 +141,7 @@ public class VisitsServiceImplTests {
 
     @Test
     public void shouldThrowNotFoundExceptionWhenFetchingVisitWithNonExistentVisitId(){
-        when(repo.findByVisitId(anyString())).thenReturn(Optional.of(new Visit()));
+        when(repo.findByVisitId(any())).thenReturn(Optional.of(new Visit()));
         String randomId = UUID.randomUUID().toString();
 
         NotFoundException ex = assertThrows(NotFoundException.class, () ->{
@@ -149,7 +149,18 @@ public class VisitsServiceImplTests {
         });
 
         assertEquals("Visit with visitId: " + randomId + " does not exist.", ex.getMessage());
-        assertEquals(NoSuchElementException.class, ex.getCause());
+    }
+
+    @Test
+    public void shouldReturnTrueWhenGivenValidUUID(){
+        boolean valid = visitsService.validateVisitId(UUID.randomUUID().toString());
+        assertTrue(valid);
+    }
+
+    @Test
+    public void shouldReturnFalseWhenGivenInvalidUUID(){
+        boolean valid = visitsService.validateVisitId("invalid");
+        assertFalse(valid);
     }
   
     // TESTS FOR CREATING A VISIT ----------------------------------------------------------------------

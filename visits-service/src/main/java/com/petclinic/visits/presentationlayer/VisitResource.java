@@ -60,7 +60,6 @@ public class VisitResource {
         visitsService.deleteVisit(visitId);
     }
 
-    //This method will return every visits of people that have multiple pets
     @GetMapping("visits/{petId}")
     public List<VisitDTO> getVisitsForPet(@PathVariable("petId") int petId){
         log.info("Getting visits for pet with petid: {}", petId );
@@ -69,11 +68,12 @@ public class VisitResource {
 
     //This method will return one visit based on the visit id
     @GetMapping("visit/{visitId}")
-    public Visit getVisitByVisitId(@PathVariable("visitId") int visitId){
+    public VisitDTO getVisitByVisitId(@PathVariable("visitId") String visitId){
         log.info("Getting visit for visit with visitId: {}", visitId);
-        return visitsService.getVisitById(visitId);
+        return visitsService.getVisitByVisitId(visitId);
     }
 
+    //This method will return every visits of people that have multiple pets
     @GetMapping("pets/visits")
     public Visits visitsMultiGet(@RequestParam("petId") List<Integer> petIds) {
         final List<VisitDTO> byPetIdIn = visitsService.getVisitsForPets(petIds);

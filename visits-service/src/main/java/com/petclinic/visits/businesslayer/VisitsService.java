@@ -20,10 +20,9 @@ public interface VisitsService {
 
     public List<VisitDTO> getVisitsForPet(int petId);
 
-
     List<VisitDTO> getVisitsForPet(int petId, boolean scheduled);
   
-    public Visit getVisitById(int visitId);
+    public VisitDTO getVisitByVisitId(String visitId);
 
     public void deleteVisit(String visitId);
 
@@ -34,5 +33,7 @@ public interface VisitsService {
     List<VisitDTO> getVisitsForPractitioner(int practitionerId);
 
     List<VisitDTO> getVisitsByPractitionerIdAndMonth(int practitionerId, Date startDate, Date EndDate);
+
+    boolean validateVisitId(String visitId);
 
 }
