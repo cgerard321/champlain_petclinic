@@ -56,6 +56,13 @@ public class BFFApiGatewayController {
         return billServiceClient.getAllBilling();
     }
 
+
+
+    @PostMapping(value = "owners/{ownerId}/pets" , produces = "application/json", consumes = "application/json")
+    public Mono<PetDetails> createPet(@RequestBody PetDetails pet, @PathVariable int ownerId){
+        return customersServiceClient.createPet(pet);
+    }
+
     //Testing purpose
     @GetMapping(value = "pets/visits/All")
     public Mono<Visits> getAllVisits(){
