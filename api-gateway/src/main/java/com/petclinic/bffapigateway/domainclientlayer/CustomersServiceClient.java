@@ -87,6 +87,7 @@ public class CustomersServiceClient {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     public Mono<PetDetails> createPet(final PetDetails model,final int ownerId){
         return webClientBuilder.build().post()
                 .uri(customersServiceUrl +"/{ownerId}/pets", ownerId)
@@ -121,6 +122,11 @@ public class CustomersServiceClient {
         return webClientBuilder.build().post()
                 .uri(customersServiceUrl +"/{ownerId}" + ownerId + "/pets")
 >>>>>>> 0d55775b (Modified code so test passes)
+=======
+    public Mono<PetDetails> createPet(final PetDetails model,final int ownerId){
+        return webClientBuilder.build().post()
+                .uri(customersServiceUrl +"/{ownerId}/pets", ownerId)
+>>>>>>> f0a4334d (Customer service is fked gg.)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve().bodyToMono(PetDetails.class);
     }

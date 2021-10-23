@@ -284,6 +284,7 @@ class ApiGatewayControllerTest {
                 .thenReturn(Mono.just(pet));
 
 <<<<<<< HEAD
+<<<<<<< HEAD
         client.post()
 <<<<<<< HEAD
                 .uri("/api/gateway/owners/pets")
@@ -307,6 +308,9 @@ class ApiGatewayControllerTest {
 =======
 
         when(customersServiceClient.createPet(pet))
+=======
+        when(customersServiceClient.createPet(pet,od.getId()))
+>>>>>>> f0a4334d (Customer service is fked gg.)
                 .thenReturn(Mono.just(pet));
 
         client.post()
