@@ -2,6 +2,7 @@ USE `visits-db`;
 
 CREATE TABLE IF NOT EXISTS visits (
     id INT(4) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    visit_id VARCHAR(36),
     pet_id INT(4) UNSIGNED NOT NULL,
     visit_date DATE,
     description VARCHAR(8192),

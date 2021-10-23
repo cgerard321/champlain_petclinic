@@ -51,7 +51,7 @@
                     <th>Description</th>
                 </tr>
                 </thead>
-                <tr ng-repeat="visit in pet.visits track by visit.id">
+                <tr ng-repeat="visit in pet.visits track by visit.visitId">
                     <td>{{visit.date | date:'yyyy MMM dd'}}</td>
                     <td>{{visit.description}}</td>
                 </tr>
