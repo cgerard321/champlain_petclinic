@@ -15,7 +15,7 @@ logging:
 spring.profiles: h2
 
 # recommend setting this to "none" in a production environment
-#spring.jpa.hibernate.ddl-auto: none
+# spring.jpa.hibernate.ddl-auto: none
 
 #for h2
 spring:
@@ -25,7 +25,7 @@ spring:
 
   datasource:
     platform: h2
-    url: jdbc:h2:mem:vets-db;DB_CLOSE_DELAY=-1
+    url: jdbc:h2:mem:vet;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false;
     driver-class-name: org.h2.Driver
     username: sa
     password:
