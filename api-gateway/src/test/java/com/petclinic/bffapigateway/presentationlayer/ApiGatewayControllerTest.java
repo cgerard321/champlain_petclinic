@@ -248,12 +248,16 @@ class ApiGatewayControllerTest {
         pet.setType(type);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 
         when(customersServiceClient.createPet(pet,od.getId()))
 
 =======
         when(customersServiceClient.createPet(od.getId(),pet))
 >>>>>>> 0d55775b (Modified code so test passes)
+=======
+        when(customersServiceClient.createPet(pet,od.getId()))
+>>>>>>> f0a4334d (Customer service is fked gg.)
                 .thenReturn(Mono.just(pet));
 
 

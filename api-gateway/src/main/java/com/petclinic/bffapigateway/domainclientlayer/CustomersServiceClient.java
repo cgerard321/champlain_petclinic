@@ -81,9 +81,9 @@ public class CustomersServiceClient {
 
     }
 
-    public Mono<PetDetails> createPet(final int ownerId,final PetDetails model){
+    public Mono<PetDetails> createPet(final PetDetails model,final int ownerId){
         return webClientBuilder.build().post()
-                .uri(customersServiceUrl +"/{ownerId}" + ownerId + "/pets")
+                .uri(customersServiceUrl +"/{ownerId}/pets", ownerId)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve().bodyToMono(PetDetails.class);
     }
