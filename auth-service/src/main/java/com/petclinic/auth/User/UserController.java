@@ -27,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +35,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Base64;
+import java.util.List;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.ResponseEntity.ok;
@@ -66,6 +68,12 @@ public class UserController {
         return all;
     }
 
+    @GetMapping("/pages")
+    public List<User> getUserWithoutPage() {
+
+        return userService.findAllWithoutPage();
+    }
+
     @PostMapping
     public UserPasswordLessDTO createUser(
             @RequestBody @Valid UserIDLessRoleLessDTO dto,
@@ -79,6 +87,19 @@ public class UserController {
     }
 
     @PutMapping("/{userId}")
+    public UserPasswordLessDTO updateUser(
+            @RequestBody @Valid UserIDLessRoleLessDTO dto,
+            @PathVariable long userId) {
+
+        log.info("Trying to persist user");
+        final User saved = userService.updateUser(userId, dto);
+        log.info("Successfully persisted user");
+
+        return userMapper.modelToPasswordLessDTO(saved);
+    }
+
+
+    @PutMapping("/passwordReset/{userId}")
     public void passwordReset(@PathVariable long userId, @RequestBody String newPassword) {
 
         userService.passwordReset(userId, newPassword);

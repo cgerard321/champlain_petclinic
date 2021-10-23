@@ -229,6 +229,17 @@ public class BFFApiGatewayController {
     public Mono<UserDetails> getUserDetails(final @PathVariable long userId) {
         return authServiceClient.getUser(userId);
     }
+    @GetMapping(value = "users")
+    public Flux<UserDetails> getAll() {
+        return authServiceClient.getUsers();
+    }
+
+    @PutMapping(value = "users/{userId}",
+            consumes = "application/json",
+            produces = "application/json")
+    public Mono<UserDetails> updateUser(final @PathVariable long userId, @RequestBody Register model) {
+        return authServiceClient.updateUser(userId, model);
+    }
 
 
     // TODO: Hook this up to auth service

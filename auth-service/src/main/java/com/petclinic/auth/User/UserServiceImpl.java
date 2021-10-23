@@ -22,8 +22,6 @@ import com.petclinic.auth.User.data.UserPasswordLessDTO;
 import com.petclinic.auth.User.data.UserTokenPair;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -31,15 +29,14 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.parameters.P;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
 import java.nio.charset.StandardCharsets;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Base64;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -50,7 +47,6 @@ import static java.lang.String.format;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
-    private final Logger LOG = LoggerFactory.getLogger(UserServiceImpl.class);
     private final UserRepo userRepo;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
@@ -81,6 +77,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public Page<User> findAll(PageRequest of) {
         return userRepo.findAll(of);
+    }
+
+    @Override
+    public List<User> findAllWithoutPage() {
+        return userRepo.findAll();
     }
 
     @Override
@@ -193,5 +194,30 @@ public class UserServiceImpl implements UserService {
 
         return userRepo.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("No account found for email: " + email));
+    }
+
+    @Override
+    public User updateUser(long id,UserIDLessRoleLessDTO userIDLessDTO) {
+
+        final Optional<User> byEmail = userRepo.findByEmail(userIDLessDTO.getEmail());
+
+        if(byEmail.isPresent()) {
+            throw new EmailAlreadyExistsException(
+                    format("User with e-mail %s already exists", userIDLessDTO.getEmail()));
+        }
+
+        log.info("Saving user with email {}", userIDLessDTO.getEmail());
+        User user = userRepo.findById(id).orElseThrow(() -> new NotFoundException("No user for id:" + id));
+
+        log.info("Sending email to {}...", userIDLessDTO.getEmail());
+        log.info(mailService.sendMail(generateVerificationMail(user)));
+        log.info("Email sent to {}", userIDLessDTO.getEmail());
+
+        user.setId(id);
+        user.setEmail(userIDLessDTO.getEmail());
+        user.setUsername(userIDLessDTO.getUsername());
+        user.setPassword(passwordEncoder.encode(userIDLessDTO.getPassword()));
+
+        return userRepo.save(user);
     }
 }
