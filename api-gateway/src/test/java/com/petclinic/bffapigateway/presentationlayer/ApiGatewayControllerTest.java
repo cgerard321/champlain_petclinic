@@ -20,7 +20,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -637,6 +639,72 @@ class ApiGatewayControllerTest {
         
         client.get()
                 .uri("/api/gateway/visit/{visitId}", invalidVisitId)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.statusCode").isEqualTo(BAD_REQUEST.value())
+                .jsonPath("$.timestamp").exists()
+                .jsonPath("$.message").isEqualTo(expectedErrorMessage);
+    }
+
+    @Test
+    @DisplayName("Should get the previous visits of a pet")
+    void shouldGetPreviousVisitsOfAPet() {
+        VisitDetails visit1 = new VisitDetails();
+        VisitDetails visit2 = new VisitDetails();
+        visit1.setId(1);
+        visit1.setPetId(21);
+        visit1.setDate("2021-12-7");
+        visit1.setDescription("John Smith's cat has a paw infection.");
+        visit1.setStatus(false);
+        visit1.setPractitionerId(2);
+        visit2.setId(2);
+        visit2.setPetId(21);
+        visit2.setDate("2021-12-8");
+        visit2.setDescription("John Smith's dog has a paw infection.");
+        visit2.setStatus(false);
+        visit2.setPractitionerId(2);
+
+        List<VisitDetails> previousVisitsList = new ArrayList<>();
+        previousVisitsList.add(visit1);
+        previousVisitsList.add(visit2);
+
+        Flux<VisitDetails> previousVisits = Flux.fromIterable(previousVisitsList);
+
+        when(visitsServiceClient.getPreviousVisitsForPet(21))
+                .thenReturn(previousVisits);
+
+        client.get()
+                .uri("/api/gateway/visits/previous/{petId}", 21)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$[0].id").isEqualTo(1)
+                .jsonPath("$[0].petId").isEqualTo(21)
+                .jsonPath("$[0].date").isEqualTo("2021-12-7")
+                .jsonPath("$[0].description").isEqualTo("John Smith's cat has a paw infection.")
+                .jsonPath("$[0].status").isEqualTo(false)
+                .jsonPath("$[0].practitionerId").isEqualTo(2)
+                .jsonPath("$[1].id").isEqualTo(2)
+                .jsonPath("$[1].petId").isEqualTo(21)
+                .jsonPath("$[1].date").isEqualTo("2021-12-8")
+                .jsonPath("$[1].description").isEqualTo("John Smith's dog has a paw infection.")
+                .jsonPath("$[1].status").isEqualTo(false)
+                .jsonPath("$[1].practitionerId").isEqualTo(2);
+
+    }
+
+    @Test
+    @DisplayName("Should return a bad request if the petId is invalid when trying to get the previous visits of a pet")
+    void shouldGetBadRequestWhenInvalidPetIdToRetrievePreviousVisits() {
+        final int invalidPetId = -1;
+        final String expectedErrorMessage = "error message";
+
+        when(visitsServiceClient.getPreviousVisitsForPet(invalidPetId))
+                .thenThrow(new GenericHttpException(expectedErrorMessage, BAD_REQUEST));
+
+        client.get()
+                .uri("/api/gateway/visits/previous/{petId}", invalidPetId)
                 .exchange()
                 .expectStatus().isBadRequest()
                 .expectBody()
