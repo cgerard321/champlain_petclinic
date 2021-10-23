@@ -357,6 +357,64 @@ class ApiGatewayControllerTest {
     }
 
     @Test
+    void createBill(){
+        BillDetails bill = new BillDetails();
+        bill.setBillId(1);
+
+        bill.setDate(null);
+
+        bill.setAmount(600);
+
+        bill.setVisitType("Adoption");
+
+        when(billServiceClient.createBill(bill))
+                .thenReturn(Mono.just(bill));
+
+
+        client.post()
+                .uri("/api/gateway/bills")
+                .body(Mono.just(bill), BillDetails.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+
+
+
+        assertEquals(bill.getBillId(),1);
+    }
+
+    @Test
+    void getPutBillingRequestNotFound(){
+        client.put()
+                .uri("/bills/{billId}", 100)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.path").isEqualTo("/bills/100")
+                .jsonPath("$.message").isEqualTo(null);
+    }
+
+    @Test
+    void getPutBillingMissingPath(){
+        client.put()
+                .uri("/bills")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.path").isEqualTo("/bills")
+                .jsonPath("$.message").isEqualTo(null);
+    }
+
+
+
+
+
+
+    @Test
     void shouldCreateAVisitWithOwnerInfo(){
         OwnerDetails owner = new OwnerDetails();
         VisitDetails visit = new VisitDetails();
