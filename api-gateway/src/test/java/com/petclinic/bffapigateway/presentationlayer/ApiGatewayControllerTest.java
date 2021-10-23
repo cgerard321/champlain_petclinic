@@ -223,6 +223,8 @@ class ApiGatewayControllerTest {
 
     @Test
     void createPet(){
+        OwnerDetails od = new OwnerDetails();
+        od.setId(1);
         PetDetails pet = new PetDetails();
         PetType type = new PetType();
         type.setName("Dog");
@@ -231,11 +233,11 @@ class ApiGatewayControllerTest {
         pet.setBirthDate("2000-01-01");
         pet.setType(type);
 
-        when(customersServiceClient.createPet(pet))
+        when(customersServiceClient.createPet(od.getId(),pet))
                 .thenReturn(Mono.just(pet));
 
         client.post()
-                .uri("/api/gateway/owners/pets")
+                .uri("/api/gateway/owners/1/pets")
                 .body(Mono.just(pet), PetDetails.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
