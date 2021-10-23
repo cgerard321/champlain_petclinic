@@ -21,3 +21,5 @@ INSERT IGNORE INTO visits VALUES (19, 7, '2021-10-11', 'stomach medication', 327
 INSERT IGNORE INTO visits VALUES (20, 7, '2019-04-20', 'animal care', 238372, 1);
 INSERT IGNORE INTO visits VALUES (21, 7, '2019-09-11', 'examination', 327874, 1);
 INSERT IGNORE INTO visits VALUES (22, 7, '2021-11-11', 'examination', 234568, 1);
+INSERT IGNORE INTO visits VALUES (23, 7, '2021-11-11', 'stomach medication', 327874, 1);
+INSERT IGNORE INTO visits VALUES (24, 7, '2021-11-10', 'animal care', 327874, 1);

@@ -48,17 +48,17 @@ angular.module('visits')
                     let startDate = info[1];
                     let endDate = info[2];
 
-                    console.log(practitionerId);
-                    console.log(startDate);
-                    console.log(endDate);
-
                     $http.get("api/gateway/visits/calendar/" + practitionerId + "?dates=" + startDate + "," + endDate).then(function (resp) {
                         self.availableVisits = resp.data;
+                        availabilities = [];
 
-                        console.log(self.availableVisits);
                         $.each(self.availableVisits, function(i, visit) {
-                            console.log(visit.date + ", " + visit.description + ", " + visit.id + "\n");
+                            let date = visit.date.toString().split("-");
+
+                            availabilities.push(parseInt(date[2]));
                         });
+
+                        renderCalendar();
                     });
                 }
             }

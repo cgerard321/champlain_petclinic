@@ -41,7 +41,7 @@
 </div>
 <script>
 
-    const date = new Date();
+const date = new Date();
 
     //specify which months goes with which numbers
     //ex: 09 = September
@@ -65,6 +65,7 @@
     let availableDays = [];
     let vetAvailabilityStr;
     let nameOnCalenderStr;
+    let availabilities = [];
 
     const renderCalendar = () => {
 
@@ -74,13 +75,15 @@
 
         const timeSlots = document.querySelector('.times');
 
-        const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-        const prevLastDay = new Date(date.getFullYear(), date.getMonth(), 0).getDate();
+        const lastDay =  getDateTemplate(1).getDate();
+        const prevLastDay = getDateTemplate(0).getDate();
 
         const firstDayIndex = date.getDay();
-        const lastDayIndex = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDay();
+        const lastDayIndex = getDateTemplate(1).getDay();
 
         const nextDays = 7 - lastDayIndex - 1;
+
+        localStorage.setItem("practitionerIdAndMonth", getFormatPractitionerIdAndMonth());
 
         let showSelectedDate = new Date("" + months[date.getMonth()] + " " + selectedDate + ", " + date.getFullYear());
 
@@ -143,14 +146,15 @@
             let d = prevLastDay - x + 1;
 
             if(CheckWeekend(d, -1)) {
-                days += `<div data-target="previous-page-${d}" class="prev-date unavailable day">${d}</div>`;
+                days += `<div id="day${d}" data-target="previous-page-${d}" class="prev-date unavailable day">${d}</div>`;
             } else {
-                days += `<div data-target="previous-page-${d}" class="prev-date day">${d}</div>`;
+                days += `<div id="day${d}" data-target="previous-page-${d}" class="prev-date day">${d}</div>`;
             }
         }
 
         //get the week days that the vet works
         for(let i = 1; i <= lastDay; i++) {
+
             let workDay = false;
             for(let w of vetWorkDays) {
                 if(getWeekDay(i, 0) === w) {
@@ -158,47 +162,52 @@
                 }
             }
 
+            //get the already scheduled visits
+            let scheduledVisits = false;
+            if(availabilities != null) {
+                for (let a of availabilities) {
+                    if(a === i) {
+                        scheduledVisits = true;
+                    }
+                }
+            }
+
             //check if day is weekend
-            if(CheckWeekend(i, 0) && i === new Date().getDate() && date.getMonth() === new Date().getMonth() && new Date().getFullYear() === date.getFullYear() && vetAvailabilityStr !== null) {
-                days += `<div data-target="${i}" class="today_weekend day">${i}</div>`;
+            if(CheckWeekend(i, 0) && getDateFullFormatEqualsTo(i) && vetAvailabilityStr !== null) {
+                days += `<div id="day${i}" data-target="${i}" class="today_weekend day">${i}</div>`;
             }
 
             //check if day unavailable
-            else if((CheckWeekend(i, 0) ||
-                    vetAvailabilityStr === null) ||
-                (i < new Date().getDate() &&
-                    date.getMonth() <= new Date().getMonth() &&
-                    date.getFullYear() === new Date().getFullYear()) ||
-                (date.getMonth() < new Date().getMonth() &&
-                    date.getFullYear() === new Date().getFullYear()) ||
-                date.getFullYear() < new Date().getFullYear()) {
+            else if((CheckWeekend(i, 0) || vetAvailabilityStr === null) ||
+                (i < new Date().getDate() && date.getMonth() <= new Date().getMonth() && date.getFullYear() === new Date().getFullYear()) ||
+                (date.getMonth() < new Date().getMonth() && date.getFullYear() === new Date().getFullYear()) || date.getFullYear() < new Date().getFullYear()) {
 
-                days += `<div data-target="${i}" class="unavailable day">${i}</div>`;
+                days += `<div id="day${i}" data-target="${i}" class="unavailable day">${i}</div>`;
             }
 
             //check for vet availabilities
-            else if(workDay === false) {
-                if((i === new Date().getDate() && date.getMonth() === new Date().getMonth() && new Date().getFullYear() === date.getFullYear())) {
-                    days += `<div data-target="${i}" class="today_holiday day">${i}</div>`;
+            else if(workDay === false || scheduledVisits === true) {
+                if(getDateFullFormatEqualsTo(i)) {
+                    days += `<div id="day${i}" data-target="${i}" class="today_holiday day">${i}</div>`;
                 } else {
-                    days += `<div data-target="${i}" class="holiday day">${i}</div>`;
+                    days += `<div id="day${i}" data-target="${i}" class="holiday day">${i}</div>`;
                 }
             }
 
             //check for date selected by user
             else if(selectedDate === i.toString()) {
-                days += `<div data-target="${i}" class="date-selected day">${i}</div>`;
+                days += `<div id="day${i}" data-target="${i}" class="date-selected day">${i}</div>`;
                 availableDays.push(i);
             }
 
             //specify the date of today
-            else if (i === new Date().getDate() && date.getMonth() === new Date().getMonth() && new Date().getFullYear() === date.getFullYear()) {
-                days += `<div data-target="${i}" class="today day">${i}</div>`;
+            else if (getDateFullFormatEqualsTo(i)) {
+                days += `<div id="day${i}" data-target="${i}" class="today day">${i}</div>`;
             }
 
             //regular days
             else {
-                days += `<div data-target="${i}" class="day">${i}</div>`;
+                days += `<div id="day${i}" data-target="${i}" class="day">${i}</div>`;
                 availableDays.push(i);
             }
         }
@@ -206,9 +215,9 @@
         //insert the days for the next month
         for(let j = 1; j <= nextDays; j++) {
             if(CheckWeekend(j, 1)) {
-                days += `<div data-target="next-page-${j}" class="next-date unavailable day">${j}</div>`;
+                days += `<div id="day${j}" data-target="next-page-${j}" class="next-date unavailable day">${j}</div>`;
             } else {
-                days += `<div data-target="next-page-${j}" class="next-date day">${j}</div>`;
+                days += `<div id="day${j}" data-target="next-page-${j}" class="next-date day">${j}</div>`;
             }
         }
 
@@ -230,9 +239,9 @@
         if(numberOfRows !== 0) {
             for(let j = numberOfNext + 1; j <= (numberOfRows * 7) + numberOfNext; j++) {
                 if(CheckWeekend(j, 1)) {
-                    days += `<div data-target="next-page-${j}" class="next-date weekend day">${j}</div>`;
+                    days += `<div id="day${j}"data-target="next-page-${j}" class="next-date weekend day">${j}</div>`;
                 } else {
-                    days += `<div data-target="next-page-${j}" class="next-date day">${j}</div>`;
+                    days += `<div id="day${j}" data-target="next-page-${j}" class="next-date day">${j}</div>`;
                 }
             }
         }
@@ -303,14 +312,12 @@
         if(monthDays.innerHTML === null) {
             location.reload();
         }
-
-        localStorage.setItem("practitionerIdAndMonth", getFormatPractitionerIdAndMonth());
     }
 
     //check if a date is on the weekend
     const CheckWeekend = (tempDate, month) => {
-        return (new Date("" + months[date.getMonth() + month] + " " + tempDate + ", " + date.getFullYear()).getDay() === 0 ||
-            new Date("" + months[date.getMonth() + month] + " " + tempDate + ", " + date.getFullYear()).getDay() === 6);
+        let weekend = new Date("" + months[date.getMonth() + month] + " " + tempDate + ", " + date.getFullYear()).getDay();
+        return (weekend === 0 || weekend === 6);
 
     }
 
@@ -365,6 +372,15 @@
         return isAM ? "AM" : "PM";
     }
 
+    const getDateTemplate = (monthAddition) => {
+        return new Date(date.getFullYear(), date.getMonth() + monthAddition, 0);
+    }
+
+    const getDateFullFormatEqualsTo = (chosenDate) => {
+        return (chosenDate === new Date().getDate() && date.getMonth() === new Date().getMonth() && new Date().getFullYear() === date.getFullYear());
+    }
+
+    //Format the current month selected into a format that will be accepted by the api gateway route
     const getFormatPractitionerIdAndMonth = () => {
         let lastDayOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
         let month = date.getMonth() + 1;
@@ -378,7 +394,6 @@
 
         return $("#selectedVet :selected").attr("value") + "," + startDate + "," + endDate;
     }
-
 
     renderCalendar();
 
@@ -447,7 +462,7 @@
 
 <form id="visitForm" ng-submit="$ctrl.submit()">
 
-    <div class="form-group">
+    <div class="form-group" ng-value="0" >
         <label>Practitioner</label>
         <select id="selectedVet" ng-model="$ctrl.practitionerId" ng-change="$ctrl.loadVetInfo();$ctrl.getVisitsForPractitionerIdAndMonth()">
             <option ng-repeat="p in $ctrl.vets" data-target="{{p.firstName}} {{p.lastName}}" value="{{p.vetId}}">{{p.firstName}} {{p.lastName}}</option>
