@@ -3,6 +3,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 import com.petclinic.bffapigateway.dtos.Login;
 import com.petclinic.bffapigateway.dtos.OwnerDetails;
 
+import com.petclinic.bffapigateway.dtos.PetDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -74,6 +75,13 @@ public class CustomersServiceClient {
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve().bodyToMono(OwnerDetails.class);
 
+    }
+
+    public Mono<PetDetails> createPet(final PetDetails model){
+        return webClientBuilder.build().post()
+                .uri(customersServiceUrl + "/pets")
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve().bodyToMono(PetDetails.class);
     }
 
 
