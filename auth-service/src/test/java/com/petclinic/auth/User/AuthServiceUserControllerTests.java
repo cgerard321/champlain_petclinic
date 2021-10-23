@@ -235,14 +235,6 @@ public class AuthServiceUserControllerTests {
 
         assertThrows(ConstraintViolationException.class, () -> userController.createUser(userIDLessDTO, null));
     }
-    @Test
-    @DisplayName("Check if the input ID is correct")
-    void check_empty_id() throws Exception{
-
-
-        mockMvc.perform(put("/users/1000"))
-                .andExpect(status().isBadRequest());
-    }
 
     @Test
     @DisplayName("Get all users from controller")
