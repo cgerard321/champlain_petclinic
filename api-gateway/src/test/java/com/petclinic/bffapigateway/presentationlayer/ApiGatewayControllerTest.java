@@ -243,11 +243,16 @@ class ApiGatewayControllerTest {
     @Test
     void createPet(){
 <<<<<<< HEAD
+<<<<<<< HEAD
         OwnerDetails od = new OwnerDetails();
         od.setId(1);
 
 =======
 >>>>>>> b6da7faa (Created client method and failing test for the endpoint of adding a pet)
+=======
+        OwnerDetails od = new OwnerDetails();
+        od.setId(1);
+>>>>>>> 7ec8008a (Modified code so test passes)
         PetDetails pet = new PetDetails();
         PetType type = new PetType();
         type.setName("Dog");
@@ -259,6 +264,7 @@ class ApiGatewayControllerTest {
         when(customersServiceClient.createPet(pet,od.getId()))
 =======
 
+<<<<<<< HEAD
         when(customersServiceClient.createPet(pet))
 >>>>>>> b6da7faa (Created client method and failing test for the endpoint of adding a pet)
                 .thenReturn(Mono.just(pet));
@@ -269,6 +275,13 @@ class ApiGatewayControllerTest {
 
 =======
 >>>>>>> b6da7faa (Created client method and failing test for the endpoint of adding a pet)
+=======
+        when(customersServiceClient.createPet(od.getId(),pet))
+                .thenReturn(Mono.just(pet));
+
+        client.post()
+                .uri("/api/gateway/owners/1/pets")
+>>>>>>> 7ec8008a (Modified code so test passes)
                 .body(Mono.just(pet), PetDetails.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
