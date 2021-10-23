@@ -133,6 +133,7 @@ public class BFFApiGatewayController {
     }
 
 
+
     @GetMapping(value = "visits/calendar/{practitionerId}")
     public Flux<VisitDetails> getVisitsByPractitionerIdAndMonth(@PathVariable("practitionerId") int practitionerId,
                                                                 @RequestParam("dates") List<String> dates) {
@@ -155,8 +156,12 @@ public class BFFApiGatewayController {
 
 
 
+    @PutMapping(value = "owners/{ownerId}",consumes = "application/json" ,produces = "application/json")
 
+    public Mono<OwnerDetails> updateOwner(final @PathVariable int ownerId) {
 
+        return customersServiceClient.updateOwner(ownerId);
+    }
 
     private Function<Visits, OwnerDetails> addVisitsToOwner(OwnerDetails owner) {
         return visits -> {

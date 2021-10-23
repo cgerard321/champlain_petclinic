@@ -58,7 +58,6 @@ public class CustomersServiceClient {
             return webClientBuilder.build().put()
                     .uri(customersServiceUrl + "/{ownerId}", ownerId)
                     .body(Mono.just(ownerId), OwnerDetails.class)
-
                     .retrieve().bodyToMono(OwnerDetails.class);
     }
 
