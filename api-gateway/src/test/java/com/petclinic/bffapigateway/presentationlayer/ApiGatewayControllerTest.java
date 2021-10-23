@@ -21,8 +21,10 @@ import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
 
 import java.util.Collections;
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -116,7 +118,7 @@ class ApiGatewayControllerTest {
 
         Visits visits = new Visits();
         VisitDetails visit = new VisitDetails();
-        visit.setId(300);
+        visit.setVisitId(UUID.randomUUID().toString());
         visit.setDescription("First visit");
         visit.setPetId(cat.getId());
         visits.getItems().add(visit);
@@ -356,7 +358,7 @@ class ApiGatewayControllerTest {
         OwnerDetails owner = new OwnerDetails();
         VisitDetails visit = new VisitDetails();
         owner.setId(1);
-        visit.setId(1);
+        visit.setVisitId(1);
         visit.setPetId(1);
         visit.setDate("2021-12-12");
         visit.setDescription("Charle's Richard cat has a paw infection.");
@@ -375,23 +377,19 @@ class ApiGatewayControllerTest {
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.id").isEqualTo(1)
+                .jsonPath("$.visitId").isEqualTo(visit.getVisitId())
                 .jsonPath("$.petId").isEqualTo(1)
                 .jsonPath("$.date").isEqualTo("2021-12-12")
                 .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$.status").isEqualTo(false)
                 .jsonPath("$.practitionerId").isEqualTo(1);
-
-
-
-        assertEquals(id, visit.getId());
     }
     @Test
     void shouldDeleteAVisit() {
         VisitDetails visit = new VisitDetails();
         OwnerDetails owner = new OwnerDetails();
         owner.setId(1);
-        visit.setId(1);
+        visit.setVisitId(1);
         visit.setPetId(1);
         visit.setDate("2021-12-12");
         visit.setDescription("Charle's Richard cat has a paw infection.");
@@ -410,14 +408,12 @@ class ApiGatewayControllerTest {
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.id").isEqualTo(1)
+                .jsonPath("$.visitId").isEqualTo(visit.getVisitId())
                 .jsonPath("$.petId").isEqualTo(1)
                 .jsonPath("$.date").isEqualTo("2021-12-12")
                 .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$.status").isEqualTo(false)
                 .jsonPath("$.practitionerId").isEqualTo(1);
-
-        assertEquals(id, visit.getId());
 
         client.delete()
                 .uri("/api/gateway/pets/visits/{petId}", visit.getPetId())
@@ -427,7 +423,7 @@ class ApiGatewayControllerTest {
                 .isOk()
                 .expectBody();
 
-        assertEquals(null, visitsServiceClient.getVisitsForPet(visit.getId()));
+        assertEquals(null, visitsServiceClient.getVisitsForPet(visit.getVisitId()));
     }
 
     @Test
@@ -435,7 +431,7 @@ class ApiGatewayControllerTest {
         VisitDetails visit = new VisitDetails();
         OwnerDetails owner = new OwnerDetails();
         owner.setId(1);
-        visit.setId(1);
+        visit.setVisitId();
         visit.setPetId(1);
         visit.setDate("2021-12-12");
         visit.setDescription("Charle's Richard cat has a paw infection.");
@@ -453,24 +449,22 @@ class ApiGatewayControllerTest {
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.id").isEqualTo(1)
+                .jsonPath("$.visitId").isEqualTo(visit.getVisitId())
                 .jsonPath("$.petId").isEqualTo(1)
                 .jsonPath("$.date").isEqualTo("2021-12-12")
                 .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$.status").isEqualTo(false)
                 .jsonPath("$.practitionerId").isEqualTo(1);;
 
-        assertEquals(id, visit.getId());
-
         client.delete()
-                .uri("/api/gateway/visits/{visitId}", visit.getId())
+                .uri("/api/gateway/visits/{visitId}", visit.getVisitId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
                 .isOk()
                 .expectBody();
 
-        assertEquals(null, visitsServiceClient.getVisitsForPet(visit.getId()));
+        assertEquals(null, visitsServiceClient.getVisitsForPet(visit.getVisitId()));
     }
 
     @Test
@@ -478,7 +472,7 @@ class ApiGatewayControllerTest {
         VisitDetails visit = new VisitDetails();
         OwnerDetails owner = new OwnerDetails();
         owner.setId(1);
-        visit.setId(1);
+        visit.setVisitId(1);
         visit.setPetId(1);
         visit.setDate("2021-12-12");
         visit.setDescription("Charle's Richard cat has a paw infection.");
@@ -496,14 +490,12 @@ class ApiGatewayControllerTest {
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.id").isEqualTo(1)
+                .jsonPath("$.visitId").isEqualTo(visit.getVisitId())
                 .jsonPath("$.petId").isEqualTo(1)
                 .jsonPath("$.date").isEqualTo("2021-12-12")
                 .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$.status").isEqualTo(false)
                 .jsonPath("$.practitionerId").isEqualTo(1);;
-
-        assertEquals(id, visit.getId());
 
         client.delete()
                 .uri("/api/gateway/pets/visits/{petId}", visit.getPetId())
@@ -513,7 +505,7 @@ class ApiGatewayControllerTest {
                 .isOk()
                 .expectBody();
 
-        assertEquals(null, visitsServiceClient.getVisitsForPet(visit.getId()));
+        assertEquals(null, visitsServiceClient.getVisitsForPet(visit.getVisitId()));
     }
 
     @Test
@@ -521,7 +513,7 @@ class ApiGatewayControllerTest {
         VisitDetails visit = new VisitDetails();
         OwnerDetails owner = new OwnerDetails();
         owner.setId(1);
-        visit.setId(1);
+        visit.setVisitId(UUID.randomUUID().toString());
         visit.setPetId(1);
         visit.setDate("2021-12-12");
         visit.setDescription("Charle's Richard cat has a paw infection.");
@@ -532,7 +524,7 @@ class ApiGatewayControllerTest {
         OwnerDetails owner2 = new OwnerDetails();
 
         owner2.setId(2);
-        visit2.setId(2);
+        visit2.setVisitId(UUID.randomUUID().toString());
         visit2.setPetId(2);
         visit2.setDate("2034-12-12");
         visit2.setDescription("Charle's Richard dog has a paw infection.");
@@ -551,7 +543,7 @@ class ApiGatewayControllerTest {
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.id").isEqualTo(1)
+                .jsonPath("$.visitId").isEqualTo(visit.getVisitId())
                 .jsonPath("$.petId").isEqualTo(1)
                 .jsonPath("$.date").isEqualTo("2021-12-12")
                 .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
@@ -559,7 +551,7 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.practitionerId").isEqualTo(1);
 
 
-        assertEquals(id, visit.getId());
+        assertEquals(id, visit.getVisitId());
 
         when(visitsServiceClient.updateVisitForPet(visit))
                 .thenReturn(Mono.just(visit2));
@@ -581,7 +573,7 @@ class ApiGatewayControllerTest {
     @Test
     void shouldGetAVisit() {
         VisitDetails visit = new VisitDetails();
-        visit.setId(1);
+        visit.setVisitId(UUID.randomUUID().toString());
         visit.setPetId(1);
         visit.setDate("2021-12-12");
         visit.setDescription("Charle's Richard cat has a paw infection.");
@@ -596,7 +588,7 @@ class ApiGatewayControllerTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$[0].id").isEqualTo(1)
+                .jsonPath("$[0].visitId").isEqualTo(visit.getVisitId())
                 .jsonPath("$[0].petId").isEqualTo(1)
                 .jsonPath("$[0].date").isEqualTo("2021-12-12")
                 .jsonPath("$[0].description").isEqualTo("Charle's Richard cat has a paw infection.")
@@ -606,21 +598,21 @@ class ApiGatewayControllerTest {
     @Test
     void getSingleVisit_Valid() {
         VisitDetails visit = new VisitDetails();
-        visit.setId(69);
+        visit.setVisitId(UUID.randomUUID().toString());
         visit.setPetId(7);
         visit.setDate("2022-04-20");
         visit.setDescription("Fetching a single visit!");
         visit.setStatus(false);
         visit.setPractitionerId(177013);
         
-        when(visitsServiceClient.getVisitById(visit.getId())).thenReturn(Mono.just(visit));
+        when(visitsServiceClient.getVisitByVisitId(anyString())).thenReturn(Mono.just(visit));
     
         client.get()
-                .uri("/api/gateway/visit/{visitId}", visit.getId())
+                .uri("/api/gateway/visit/{visitId}", visit.getVisitId())
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.id").isEqualTo(visit.getId())
+                .jsonPath("$.visitId").isEqualTo(visit.getVisitId())
                 .jsonPath("$.petId").isEqualTo(visit.getPetId())
                 .jsonPath("$.date").isEqualTo(visit.getDate())
                 .jsonPath("$.description").isEqualTo(visit.getDescription())
@@ -629,10 +621,10 @@ class ApiGatewayControllerTest {
     
     @Test
     void getSingleVisit_Invalid() {
-        final int invalidVisitId = -5;
+        final String invalidVisitId = "invalid";
         final String expectedErrorMessage = "error message";
     
-        when(visitsServiceClient.getVisitById(invalidVisitId))
+        when(visitsServiceClient.getVisitByVisitId(invalidVisitId))
                 .thenThrow(new GenericHttpException(expectedErrorMessage, BAD_REQUEST));
         
         client.get()

@@ -47,7 +47,8 @@ class VisitsServiceClientIntegrationTest {
     void getVisitsForPets_withAvailableVisitsService() {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
-                .setBody("{\"items\":[{\"id\":5,\"date\":\"2018-11-15\",\"description\":\"test visit\",\"petId\":1}]}"));
+                .setBody("{\"items\":[{\"visitId\":\"773fa7b2-e04e-47b8-98e7-4adf7cfaaeee\"," +
+                        "\"date\":\"2018-11-15\",\"description\":\"test visit\",\"petId\":1}]}"));
 
         Mono<Visits> visits = visitsServiceClient.getVisitsForPets(Collections.singletonList(1));
 
@@ -58,7 +59,9 @@ class VisitsServiceClientIntegrationTest {
     void getVisitsForPet() {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
-                .setBody("{\"id\":5,\"date\":\"2018-11-15\",\"description\":\"test visit\",\"petId\":1, \"practitionerId\":1,\"status\":false}"));
+                .setBody("{\"visitId\":\"773fa7b2-e04e-47b8-98e7-4adf7cfaaeee\"," +
+                        "\"date\":\"2018-11-15\",\"description\":\"test visit\",\"petId\":1," +
+                        " \"practitionerId\":1,\"status\":false}"));
 
         Flux<VisitDetails> visits = visitsServiceClient.getVisitsForPet(1);
 
@@ -66,7 +69,7 @@ class VisitsServiceClientIntegrationTest {
     }
 
     private void assertVisitDescriptionEq(VisitDetails visits, int petId, String description) {
-        assertEquals(5, visits.getId());
+        assertEquals("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee", visits.getVisitId());
         assertEquals(description, visits.getDescription());
     }
 
@@ -87,11 +90,13 @@ class VisitsServiceClientIntegrationTest {
     void getVisitById() {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
-                .setBody("{\"id\":5,\"date\":\"2018-11-15\",\"description\":\"test visit\",\"petId\":1, \"practitionerId\":1,\"status\":false}"));
+                .setBody("{\"visitId\":\"773fa7b2-e04e-47b8-98e7-4adf7cfaaeee\"," +
+                        "\"date\":\"2018-11-15\",\"description\":\"test visit\"," +
+                        "\"petId\":1, \"practitionerId\":1,\"status\":false}"));
         
-        Mono<VisitDetails> visit = visitsServiceClient.getVisitById(5);
+        Mono<VisitDetails> visit = visitsServiceClient.getVisitByVisitId("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee");
         
-        assertEquals(5, visit.block().getId());
+        assertEquals("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee", visit.block().getVisitId());
     }
 
 }
