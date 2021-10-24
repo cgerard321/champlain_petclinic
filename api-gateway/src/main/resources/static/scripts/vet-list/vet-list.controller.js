@@ -8,14 +8,20 @@ angular.module('vetList')
 //               let body = document.getElementsByTagName("body")[0];
                 let child = document.getElementsByClassName("m"+vetID)[0];
                 let left = $event.pageX;
-                  let top = $event.pageY;
+                  let top = $event.clientY;
                   if(document.documentElement.clientWidth > 960){
                     child.style.left = (left + 221) + 'px';
+                  }
+                  if(document.documentElement.clientWidth < 420){
+                    child.style.left = (170)+'px';
+                  }
+                  else if(document.documentElement.clientWidth < 510){
+                    child.style.left = (left+334.5/2.5) + 'px';
                   }
                   else{
                     child.style.left = (left + 200) + 'px';
                   }
-                  child.style.top = (top+80) + 'px';
+                  child.style.top = (top) + 'px';
                child.classList.remove("modalOff");
                child.classList.add("modalOn");
 
