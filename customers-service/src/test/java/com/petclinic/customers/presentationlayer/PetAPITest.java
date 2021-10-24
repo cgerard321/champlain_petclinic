@@ -28,6 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 /**
+ * @author lpsim
  * @author Maciej Szarlinski
  * Copied from https://github.com/spring-petclinic/spring-petclinic-microservices
  */

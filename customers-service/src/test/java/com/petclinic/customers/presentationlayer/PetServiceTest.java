@@ -1,5 +1,6 @@
 package com.petclinic.customers.presentationlayer;
 
+import com.petclinic.customers.businesslayer.OwnerService;
 import com.petclinic.customers.businesslayer.PetService;
 import com.petclinic.customers.datalayer.*;
 import org.hamcrest.MatcherAssert;
@@ -36,6 +37,9 @@ public class PetServiceTest {
 
     @Autowired
     PetService service;
+
+    @Autowired
+    OwnerService ownerService;
 
 
 
@@ -75,6 +79,9 @@ public class PetServiceTest {
         //Arrange
         Owner ownerTest = setupOwner();
         Pet petTest = setupPet();
+
+        //Pet Service search pet by searching the owner first. Here, we return and optional of Owner Test
+        when(ownerService.findByOwnerId(ownerTest.getId())).thenReturn(Optional.of(ownerTest));
         when(repository.findPetByOwner(ownerTest, petTest.getId())).thenReturn(Optional.of(petTest));
 
         //Act
@@ -95,6 +102,7 @@ public class PetServiceTest {
         int expectedLength = 4;
         List<Pet> petList = new ArrayList<>();
         Pet newPet = setupPet();
+        when(ownerService.findByOwnerId(owner.getId())).thenReturn(Optional.of(owner));
 
         newPet.setId(1);
         newPet.setName("John");
@@ -143,10 +151,8 @@ public class PetServiceTest {
     }
 
 
-    /*
-
-    --WORK IN PROGRESS--
-
+    //**An error involving the pet ToString may occur when calling the createPet method in PetService**
+    //This error does not seem to affect the well being of the test
     @DisplayName("PetService_PetOwner")
     @Test
     public void test_CreatePet() throws ParseException {
@@ -170,8 +176,5 @@ public class PetServiceTest {
         //Assert
         MatcherAssert.assertThat(retrievedOwner.get(), samePropertyValuesAs(ownerTest));
     }
-
-     */
-
 
 }

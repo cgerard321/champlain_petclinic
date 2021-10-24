@@ -17,7 +17,10 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.samePropertyValuesAs;
 import static org.junit.jupiter.api.Assertions.*;
-
+/**
+ * @author lpsim
+ * @author Christopher
+ */
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
 @ActiveProfiles("test")
@@ -33,6 +36,7 @@ public class PetPersistenceTest {
     public void setUpDB()
     {
         repository.deleteAll();
+        ownerRepository.deleteAll();
     }
 
 
@@ -108,54 +112,38 @@ public class PetPersistenceTest {
         assertNotEquals(foundPet, fakePet);
     }
 
-
-
-
+    
+    //This test method is having a lot of trouble running in conjunction with other test method.
     @DisplayName("PetPersistence_findAll_test")
     @Test
-    @Disabled
     public void findAllPetByOwner() {
         //Expect 4 entities
-        int expectedLength = 4;
+        int expectedLength = 2;
 
+        Owner owner = setupOwner();
+        Owner savedOwner = ownerRepository.save(owner);
         //Arrange
         Pet newPet = setupPet();
+        Pet newPet2 = setupPet();
 
         newPet.setName("John");
-        newPet.setOwner(setupOwner());
+        newPet.setOwner(savedOwner);
         Pet savedPet1 = repository.save(newPet);
         Pet foundPet1 = repository.findPetByOwner(savedPet1.getOwner(), savedPet1.getId()).orElse(null);
 
         assert foundPet1 != null;
         assertEquals(foundPet1, savedPet1);
 
-        newPet.setName("Joseph");
-        newPet.setOwner(setupOwner());
-        Pet savedPet2 = repository.save(newPet);
+        newPet2.setName("Daisy");
+        newPet2.setOwner(savedOwner);
+        Pet savedPet2 = repository.save(newPet2);
         Pet foundPet2 = repository.findPetByOwner(savedPet2.getOwner(), savedPet2.getId()).orElse(null);
 
         assert foundPet2 != null;
         assertEquals(foundPet2, savedPet2);
 
-        newPet.setName("Jill");
-        newPet.setOwner(setupOwner());
-        Pet savedPet3 = repository.save(newPet);
-        Pet foundPet3 = repository.findPetByOwner(savedPet3.getOwner(), savedPet3.getId()).orElse(null);
-
-        assert foundPet3 != null;
-        assertEquals(foundPet3, savedPet3);
-
-        newPet.setName("Jojo");
-        newPet.setOwner(setupOwner());
-        Pet savedPet4 = repository.save(newPet);
-        Pet foundPet4 = repository.findPetByOwner(savedPet4.getOwner(), savedPet4.getId()).orElse(null);
-
-        assert foundPet4 != null;
-        assertEquals(foundPet4, savedPet4);
-
-
         //Act
-        List<Pet> petList = repository.findAllPetByOwner(setupPet().getOwner());
+        List<Pet> petList = repository.findAllPetByOwner(setupOwner());
 
         //Assert
         assertEquals(expectedLength, petList.size());
@@ -171,7 +159,7 @@ public class PetPersistenceTest {
         Pet newPet = setupPet();
         newPet.setOwner(setupOwner());
         setupOwner().addPet(newPet);
-        Pet savedPet = repository.save(newPet);;
+        Pet savedPet = repository.save(newPet);
 
         //Act
         Pet foundSaved = repository.findById(savedPet.getId()).orElse(null);
