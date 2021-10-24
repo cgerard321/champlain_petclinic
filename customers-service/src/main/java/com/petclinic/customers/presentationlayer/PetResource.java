@@ -47,7 +47,7 @@ class PetResource {
     }
 
     //Find Pet
-    @GetMapping("/{petId}")
+    @GetMapping(value = "/{petId}")
     public PetDetails findPet(@PathVariable("petId") int petId) {
         return new PetDetails(findPetById(petId).get());
     }

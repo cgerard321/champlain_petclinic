@@ -9,7 +9,7 @@ angular.module('petForm')
             self.types = resp.data;
         }).then(function () {
 
-            $http.get('api/gateway/customer/owners/' + ownerId).then(function (resp) {
+            $http.get('api/gateway/owners/' + ownerId).then(function (resp) {
                 self.pet = {
                     owner: resp.data.firstName + " " + resp.data.lastName
                 };
@@ -27,7 +27,12 @@ angular.module('petForm')
                 typeId: self.petTypeId
             };
 
-            var req = $http.post("api/gateway/customer/owners/" + ownerId + "/pets", data);
+            var req;
+
+            if(!id)
+                req = $http.post("api/gateway/customer/owners/" + ownerId + "/pets", data);
+            else
+                req = $http.delete("api/gateway/customer/owners/" + ownerId + "/pets", data);
 
             req.then(function () {
                 $state.go("owners", {ownerId: ownerId});

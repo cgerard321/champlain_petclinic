@@ -6,9 +6,9 @@ import com.petclinic.customers.customerExceptions.exceptions.InvalidInputExcepti
 import com.petclinic.customers.customerExceptions.exceptions.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -66,7 +66,7 @@ public class OwnerServiceImpl implements OwnerService {
 
 
     @Override
-    public void updateOwner(int id, Owner newOwner) {
+    public Owner updateOwner(int id, Owner newOwner) {
        Optional<Owner> optionalOwner = repository.findById(id);
        if(optionalOwner.isPresent()){
            Owner foundOwner = optionalOwner.get();
@@ -75,7 +75,10 @@ public class OwnerServiceImpl implements OwnerService {
            foundOwner.setAddress(newOwner.getAddress());
            foundOwner.setCity(newOwner.getCity());
            foundOwner.setTelephone(newOwner.getTelephone());
+
            LOG.debug("updateOwner: owner with id {} updated",id);
+
+           return repository.save(newOwner);
        }
        else{
            throw new NotFoundException("updateOwner failed, owner with id: " + id + " not found.");
