@@ -217,10 +217,9 @@ public class BFFApiGatewayController {
     }
 
 
-    // TODO: Hook this up to auth service
     @GetMapping(value = "admin/roles")
     public Object getRoles() {
-        return null;
+        return authServiceClient.getRoles();
     }
 
     // TODO: Hook this up to auth service

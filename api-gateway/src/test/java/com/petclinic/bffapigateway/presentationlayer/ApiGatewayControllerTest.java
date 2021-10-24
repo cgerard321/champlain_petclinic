@@ -886,6 +886,46 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.message").isEqualTo(message)
                 .jsonPath("$.timestamp").exists();
     }
+
+    @Test
+    @DisplayName("Should get all the roles")
+    void shouldGetRoles() {
+        Role parentRole = new Role();
+        parentRole.setId(1);
+        parentRole.setName("admin");
+
+        Role role1 = new Role();
+        role1.setId(2);
+        role1.setName("vet");
+        role1.setParent(parentRole);
+
+        Role role2 = new Role();
+        role2.setId(3);
+        role2.setName("user");
+        role2.setParent(parentRole);
+
+        List<Role> allRolesList = new ArrayList<>();
+        allRolesList.add(role1);
+        allRolesList.add(role2);
+
+        Flux<Role> allRoles = Flux.fromIterable(allRolesList);
+
+        when(authServiceClient.getRoles())
+                .thenReturn(allRoles);
+
+        client.get()
+                .uri("/api/gateway/admin/roles")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$[0].id").isEqualTo(2)
+                .jsonPath("$[0].name").isEqualTo("vet")
+                .jsonPath("$[0].parent").isEqualTo(role1.getParent())
+                .jsonPath("$[1].id").isEqualTo(3)
+                .jsonPath("$[1].name").isEqualTo("user")
+                .jsonPath("$[1].parent").isEqualTo(role2.getParent());
+
+    }
 }
 
 
