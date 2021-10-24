@@ -103,7 +103,7 @@ class VisitsServiceClientIntegrationTest {
     @Test
     void shouldGetScheduledVisitsForPet() throws JsonProcessingException {
         final VisitDetails visit = VisitDetails.builder()
-                .id(1)
+                .visitId(UUID.randomUUID().toString())
                 .petId(21)
                 .practitionerId(2)
                 .date("2021-12-7")
@@ -118,7 +118,7 @@ class VisitsServiceClientIntegrationTest {
 
         final VisitDetails scheduledVisits = visitsServiceClient.getScheduledVisitsForPet(21).blockFirst();
 
-        assertEquals(visit.getId(), scheduledVisits.getId());
+        assertEquals(visit.getVisitId(), scheduledVisits.getVisitId());
         assertEquals(visit.getPetId(), scheduledVisits.getPetId());
         assertEquals(visit.getPractitionerId(), scheduledVisits.getPractitionerId());
         assertEquals(visit.getDate(), scheduledVisits.getDate());

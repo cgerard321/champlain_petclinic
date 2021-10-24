@@ -669,13 +669,13 @@ class ApiGatewayControllerTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$[0].visitId").isEqualTo(1)
+                .jsonPath("$[0].visitId").isEqualTo(visit1.getVisitId())
                 .jsonPath("$[0].petId").isEqualTo(21)
                 .jsonPath("$[0].date").isEqualTo("2021-12-7")
                 .jsonPath("$[0].description").isEqualTo("John Smith's cat has a paw infection.")
                 .jsonPath("$[0].status").isEqualTo(false)
                 .jsonPath("$[0].practitionerId").isEqualTo(2)
-                .jsonPath("$[1].visitId").isEqualTo(2)
+                .jsonPath("$[1].visitId").isEqualTo(visit2.getVisitId())
                 .jsonPath("$[1].petId").isEqualTo(21)
                 .jsonPath("$[1].date").isEqualTo("2021-12-8")
                 .jsonPath("$[1].description").isEqualTo("John Smith's dog has a paw infection.")
@@ -707,13 +707,13 @@ class ApiGatewayControllerTest {
     void shouldGetScheduledVisitsOfAPet() {
         VisitDetails visit1 = new VisitDetails();
         VisitDetails visit2 = new VisitDetails();
-        visit1.setId(1);
+        visit1.setVisitId(UUID.randomUUID().toString());
         visit1.setPetId(21);
         visit1.setDate("2021-12-7");
         visit1.setDescription("John Smith's cat has a paw infection.");
         visit1.setStatus(true);
         visit1.setPractitionerId(2);
-        visit2.setId(2);
+        visit2.setVisitId(UUID.randomUUID().toString());
         visit2.setPetId(21);
         visit2.setDate("2021-12-8");
         visit2.setDescription("John Smith's dog has a paw infection.");
@@ -734,13 +734,13 @@ class ApiGatewayControllerTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$[0].id").isEqualTo(1)
+                .jsonPath("$[0].visitId").isEqualTo(visit1.getVisitId())
                 .jsonPath("$[0].petId").isEqualTo(21)
                 .jsonPath("$[0].date").isEqualTo("2021-12-7")
                 .jsonPath("$[0].description").isEqualTo("John Smith's cat has a paw infection.")
                 .jsonPath("$[0].status").isEqualTo(true)
                 .jsonPath("$[0].practitionerId").isEqualTo(2)
-                .jsonPath("$[1].id").isEqualTo(2)
+                .jsonPath("$[1].visitId").isEqualTo(visit2.getVisitId())
                 .jsonPath("$[1].petId").isEqualTo(21)
                 .jsonPath("$[1].date").isEqualTo("2021-12-8")
                 .jsonPath("$[1].description").isEqualTo("John Smith's dog has a paw infection.")
