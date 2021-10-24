@@ -47,7 +47,7 @@ public class OwnerServiceImpl implements OwnerService {
     @Override
     public Owner updateOwner(int id, Owner newOwner) {
         try{
-            Optional<Owner> optionalOwner = repository.findById(id);
+            Optional<Owner> optionalOwner = findByOwnerId(id);
             Owner foundOwner = optionalOwner.get();
             foundOwner.setFirstName(newOwner.getFirstName());
             foundOwner.setLastName(newOwner.getLastName());

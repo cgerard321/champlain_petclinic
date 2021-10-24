@@ -155,17 +155,19 @@ class OwnerAPITest {
     @Test
     void updateOwner_API_Test() throws Exception{
 
-        Owner updateOwner = new Owner(5,"Adam","West","57 Adam St.","Bucharest","7777777777");
-
-        when(ownerService.findByOwnerId(5)).thenReturn(Optional.of(updateOwner));
-        mvc.perform(put("/owners/5").accept(MediaType.APPLICATION_JSON))
+        Owner updateOwner = new Owner(5,"Adam","West","57 Adam St.","Bucharest","1234567890");
+        when(ownerService.findByOwnerId(updateOwner.getId())).thenReturn(Optional.of(updateOwner));
+        when(ownerService.updateOwner(anyInt(), any(Owner.class))).thenReturn(updateOwner);
+        mvc.perform(put("/owners/5")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"firstName\": \"Adam\", \"lastName\": \"West\",\"address\": \"57 Adam St.\",\"city\": \"Bucharest\",\"telephone\": \"1234567890\"}"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(5))
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.firstName").value("Adam"))
                 .andExpect(jsonPath("$.lastName").value("West"))
                 .andExpect(jsonPath("$.address").value("57 Adam St."))
                 .andExpect(jsonPath("$.city").value("Bucharest"))
-                .andExpect(jsonPath("$.telephone").value("7777777777"));
+                .andExpect(jsonPath("$.telephone").value("1234567890"));
     }
 }
 
