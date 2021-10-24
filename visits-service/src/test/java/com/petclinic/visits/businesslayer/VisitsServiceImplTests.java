@@ -86,6 +86,7 @@ public class VisitsServiceImplTests {
     // TESTS FOR UPDATING A VISIT ----------------------------------------------------------------------
     @Test
     public void whenValidIdUpdateVisit(){
+        when(repo.findByVisitId(any())).thenReturn(Optional.ofNullable(visitEntity));
         when(repo.save(any(Visit.class))).thenReturn(visitEntity);
 
         VisitDTO visitFromService = visitsService.updateVisit(visitDTO);
