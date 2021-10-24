@@ -7,8 +7,8 @@
 <div class="bg-light">
   <div class="container">
     <div class="py-5 text-center"/>
-    <h2 class="titleVetForm" ng-if="$ctrl.firstName === null">New Vet Sign Up</h2>
-    <h2 class="titleVetForm" ng-if="$ctrl">Edit Vet</h2>
+    <h2 id="title" class="titleVetForm" >New Vet Sign Up</h2>
+
     <p class="lead">Welcome to our team, please fill out the form below ensuring to fill all sections.</p>
   </div>
   <div class="row g-5">
@@ -73,7 +73,7 @@
 
           <div class="col-sm-12">
             <h5 class="form-label">Career Resume</h5>
-            <textarea id="resume" class="form-control" placeholder="Resume" name="resume" ng-model="vet.resume" pattern="^(.*)" maxlength="350" title="Maximum of 350 characters."></textarea>
+            <textarea id="vetResume" class="form-control" placeholder="Resume" name="resume" ng-model="vet.resume" pattern="^(.*)" maxlength="350" title="Maximum of 350 characters."></textarea>
           </div>
 
         <hr class="my-4"/>
@@ -107,7 +107,7 @@
           <div class="my-3 check-align">
             <h5 class="mb-3">Available Work Days</h5>
             <div class="col-sm-12">
-            <input class="form-control" type="text" placeholder="ex:Monday, Tuesday" name="workday" ng-model="vet.workday" pattern="((\bMonday\b|\bTuesday\b|\bWednesday\b|\bThursday\b|\bFriday\b|\bSaturday\b|\bSunday\b)(,|)( |))+" maxlength="250" title="Maximum of 250 characters. Accepts only days of the week seperated by commas.">
+            <input id="workDays" class="form-control" type="text" placeholder="ex:Monday, Tuesday" name="workday" ng-model="vet.workday" pattern="((\bMonday\b|\bTuesday\b|\bWednesday\b|\bThursday\b|\bFriday\b|\bSaturday\b|\bSunday\b)(,|)( |))+" maxlength="250" title="Maximum of 250 characters. Accepts only days of the week seperated by commas.">
             </div>
           </div>
         </div>
