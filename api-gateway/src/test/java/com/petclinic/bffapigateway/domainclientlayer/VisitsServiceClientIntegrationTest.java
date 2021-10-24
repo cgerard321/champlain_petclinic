@@ -73,7 +73,153 @@ class VisitsServiceClientIntegrationTest {
 
         assertVisitDescriptionEq(visits.blockFirst(), PET_ID,"test visit");
     }
- 
+
+    @Test
+    void shouldDeleteVisitsForPet() throws JsonProcessingException {
+        final VisitDetails visit = VisitDetails.builder()
+                .visitId(UUID.randomUUID().toString())
+                .petId(15)
+                .practitionerId(2)
+                .date("2021-12-12")
+                .description("Cat is crazy")
+                .status(false)
+                .build();
+
+        final String body = objectMapper.writeValueAsString(objectMapper.convertValue(visit, VisitDetails.class));
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(body));
+
+        final Mono<Void> empty = visitsServiceClient.deleteVisitByVisitId(visit.getVisitId());
+
+        assertEquals(empty.block(), null);
+    }
+
+    @Test
+    void shouldCreateVisitsForPet() throws JsonProcessingException {
+
+        final VisitDetails visit = VisitDetails.builder()
+                .visitId(UUID.randomUUID().toString())
+                .petId(21)
+                .practitionerId(2)
+                .date("2021-12-7")
+                .description("Cat is sick")
+                .status(false)
+                .build();
+
+        visitsServiceClient.createVisitForPet(visit);
+        final String body = objectMapper.writeValueAsString(objectMapper.convertValue(visit, VisitDetails.class));
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(body));
+
+        final VisitDetails petVisit = visitsServiceClient.getVisitsForPet(21).blockFirst();
+
+        assertEquals(visit.getVisitId(), petVisit.getVisitId());
+        assertEquals(visit.getPetId(), petVisit.getPetId());
+        assertEquals(visit.getPractitionerId(), petVisit.getPractitionerId());
+        assertEquals(visit.getDate(), petVisit.getDate());
+        assertEquals(visit.getDescription(), petVisit.getDescription());
+        assertEquals(visit.getStatus(), petVisit.getStatus());
+
+    }
+
+    @Test
+    void shouldUpdateVisitsForPet() throws JsonProcessingException {
+
+        final VisitDetails visit = VisitDetails.builder()
+                .visitId(UUID.randomUUID().toString())
+                .petId(21)
+                .practitionerId(2)
+                .date("2021-12-7")
+                .description("Cat is sick")
+                .status(false)
+                .build();
+
+        final VisitDetails visit2 = VisitDetails.builder()
+                .visitId(UUID.randomUUID().toString())
+                .petId(201)
+                .practitionerId(22)
+                .date("2021-12-7")
+                .description("Dog is sick")
+                .status(false)
+                .build();
+
+        final String body = objectMapper.writeValueAsString(objectMapper.convertValue(visit, VisitDetails.class));
+        final String body2 = objectMapper.writeValueAsString(objectMapper.convertValue(visit2, VisitDetails.class));
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(body2));
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(body));
+
+        visitsServiceClient.updateVisitForPet(visit2);
+        final VisitDetails petVisit = visitsServiceClient.getVisitsForPet(201).blockFirst();
+
+        assertEquals(visit2.getVisitId(), petVisit.getVisitId());
+        assertEquals(visit2.getPetId(), petVisit.getPetId());
+        assertEquals(visit2.getPractitionerId(), petVisit.getPractitionerId());
+        assertEquals(visit2.getDate(), petVisit.getDate());
+        assertEquals(visit2.getDescription(), petVisit.getDescription());
+        assertEquals(visit2.getStatus(), petVisit.getStatus());
+
+    }
+
+
+    @Test
+    void shouldGetVisitsForPractitioner() throws JsonProcessingException {
+        final VisitDetails visit = VisitDetails.builder()
+                .visitId(UUID.randomUUID().toString())
+                .petId(21)
+                .practitionerId(2)
+                .date("2021-12-7")
+                .description("Cat is sick")
+                .status(false)
+                .build();
+
+        final String body = objectMapper.writeValueAsString(objectMapper.convertValue(visit, VisitDetails.class));
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(body));
+
+        final VisitDetails previousVisits = visitsServiceClient.getVisitForPractitioner(21).blockFirst();
+
+        assertEquals(visit.getVisitId(), previousVisits.getVisitId());
+        assertEquals(visit.getPetId(), previousVisits.getPetId());
+        assertEquals(visit.getPractitionerId(), previousVisits.getPractitionerId());
+        assertEquals(visit.getDate(), previousVisits.getDate());
+        assertEquals(visit.getDescription(), previousVisits.getDescription());
+        assertEquals(visit.getStatus(), previousVisits.getStatus());
+    }
+
+    @Test
+    void shouldGetVisitsByPractitionerIdandMonth() throws JsonProcessingException {
+        final VisitDetails visit = VisitDetails.builder()
+                .visitId(UUID.randomUUID().toString())
+                .petId(21)
+                .practitionerId(2)
+                .date("2021-12-7")
+                .description("Cat is sick")
+                .status(false)
+                .build();
+
+        final String body = objectMapper.writeValueAsString(objectMapper.convertValue(visit, VisitDetails.class));
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(body));
+
+        final VisitDetails previousVisits = visitsServiceClient.getVisitsByPractitionerIdAndMonth(21,"start","end").blockFirst();
+
+        assertEquals(visit.getVisitId(), previousVisits.getVisitId());
+        assertEquals(visit.getPetId(), previousVisits.getPetId());
+        assertEquals(visit.getPractitionerId(), previousVisits.getPractitionerId());
+        assertEquals(visit.getDate(), previousVisits.getDate());
+        assertEquals(visit.getDescription(), previousVisits.getDescription());
+        assertEquals(visit.getStatus(), previousVisits.getStatus());
+    }
+
     @Test
     void shouldGetPreviousVisitsForPet() throws JsonProcessingException {
         final VisitDetails visit = VisitDetails.builder()
