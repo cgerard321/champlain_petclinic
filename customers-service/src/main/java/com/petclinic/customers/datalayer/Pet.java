@@ -18,7 +18,7 @@ import java.util.Date;
 
 @Entity
 @Table(name = "pets")
-public class Pet {
+public class    Pet {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -92,6 +92,7 @@ public class Pet {
                 .toString();
     }
      */
+  
     @Override
     public String toString()
     {
@@ -105,6 +106,7 @@ public class Pet {
                 this.owner.getLastName();
         return petString;
     }
+
 
 }
 

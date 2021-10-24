@@ -27,25 +27,30 @@ public class PetServiceImpl implements PetService {
         this.ownerService = ownerService;
     }
 
-    @Override
-    public Optional<Pet> findByPetId(int petId) {
+   @Override
+    public Optional<Pet> findByPetId(int ownerId, int petId) {
         try {
-            //Search pet in database with the given id
-            Optional<Pet> pet = petRepository.findById(petId);
+            Optional<Owner> optionalOwner = ownerService.findByOwnerId(ownerId);
+            Owner owner = optionalOwner.get();
+            //Search pet in database with the owner
+            Optional<Pet> pet = petRepository.findPetByOwner(owner, petId);
             LOG.debug("Pet with ID: " + petId + " has been found");
             return pet;
         }
         catch (Exception e)
         {
             // Exception if pet not found
+            LOG.debug(e.getMessage());
             throw new NotFoundException("Pet with ID: " + petId + " not found!");
         }
     }
 
     @Override
-    public List<Pet> findAll() {
+    public List<Pet> findAll(int ownerId) {
 
-        return petRepository.findAll();
+        Optional<Owner> optionalOwner = ownerService.findByOwnerId(ownerId);
+        Owner owner = optionalOwner.get();
+        return petRepository.findAllPetByOwner(owner);
     }
 
     @Override
@@ -78,8 +83,7 @@ public class PetServiceImpl implements PetService {
         try{
             Optional<Owner> ownerOpt = ownerService.findByOwnerId(ownerId);
             Owner owner = ownerOpt.get();
-            //Pet pet = findByPetId(petId).orElseThrow(()-> new NotFoundException("Pet with ID: " + petId + " has not been found"));
-            Optional<Pet> petOpt = findByPetId(petId);
+            Optional<Pet> petOpt = findByPetId(ownerId, petId);
             Pet pet = petOpt.get();
             owner.removePet(pet);
             petRepository.delete(pet);
