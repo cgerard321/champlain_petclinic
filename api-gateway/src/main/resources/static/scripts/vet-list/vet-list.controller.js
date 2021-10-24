@@ -42,9 +42,9 @@ angular.module('vetList')
 
                 function successCallback(response) {
                     $scope.errors = [];
-                    alert(vetId + " Deleted Successfully!!!");
+                    alert(vetId + " Deleted Successfully!");
                     console.log(response, 'res');
-
+                    $scope.refresh();
                 }
 
                 function errorCallback(error) {
@@ -53,17 +53,6 @@ angular.module('vetList')
                 }
             }
         };
-
-        $scope.refreshList = self.vetList;
-
-        $scope.ReloadData = function () {
-            self.vetList = FilterList();
-            $http.get('api/gateway/vets').then(function (resp) {
-                arr = resp.data;
-            });
-        }
-
-
 
 $scope.refreshList = self.vetList;
 
