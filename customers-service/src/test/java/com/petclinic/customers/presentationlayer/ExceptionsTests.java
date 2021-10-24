@@ -1,11 +1,17 @@
 package com.petclinic.customers.presentationlayer;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.customers.customerExceptions.exceptions.InvalidInputException;
 import com.petclinic.customers.customerExceptions.exceptions.NotFoundException;
+import com.petclinic.customers.customerExceptions.http.GlobalControllerExceptionHandler;
 import com.petclinic.customers.customerExceptions.http.HttpErrorInfo;
+import com.petclinic.customers.datalayer.Owner;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -14,6 +20,11 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
 public class ExceptionsTests {
+    // Global Controller Exception Handler
+    GlobalControllerExceptionHandler exceptionHandler;
+
+    // Object Mapper
+    ObjectMapper objectMapper;
 
     @Test
     void InvalidInputExceptionWithEmptyConstructorTest(){
@@ -63,5 +74,18 @@ public class ExceptionsTests {
         assertEquals(httpErrorInfo.getHttpStatus(), HttpStatus.BAD_REQUEST);
         assertEquals(httpErrorInfo.getPath(), "/owners/9999/");
         assertEquals(httpErrorInfo.getMessage(), "Owner does not exist");
+    }
+
+    @Test
+    void HandleNotFoundExceptionTest() throws JsonProcessingException {
+        Owner newOwner = new Owner(1, "Wael", "Osman", "Address-1", "City-1", "1234567890");
+
+        HttpErrorInfo httpErrorInfo = exceptionHandler.handleNotFoundException(MockServerHttpRequest.post("/owners", 1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body(objectMapper.writeValueAsString(newOwner)), new NotFoundException("Owner not found."));
+
+        assertEquals(httpErrorInfo.getHttpStatus(), HttpStatus.NOT_FOUND);
+        assertEquals(httpErrorInfo.getMessage(), "Owner not found.");
     }
 }
