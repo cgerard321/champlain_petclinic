@@ -225,7 +225,7 @@ class VetResourceTest {
 								"\"resume\": \"Practicing since 4 years\"," +
 								"\"workday\": \"Monday, Friday\"," +
 								"\"image\": \"NULL\"," +
-								"\"specialties\":[{\"id\":2, \"specialtyId\":234567, \"name\":\"testerA\"}]," +
+								"\"specialties\":[{\"id\":1, \"specialtyId\":234567, \"name\":\"testerA\"}]," +
 								"\"isActive\": 1}"))
 
 				// Validate the response code and content type
