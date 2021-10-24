@@ -25,3 +25,4 @@ angular.module('loginForm')
 
         this.keypress = ({ originalEvent: { key } }) => key === 'Enter' && this.add()
     }]);
+
