@@ -53,7 +53,7 @@ public class AuthServiceClient {
 
     public Flux<UserDetails> getUsers() {
         return webClientBuilder.build().get()
-                .uri(authServiceUrl + "/users/pages")
+                .uri(authServiceUrl + "/users/withoutPages")
                 .retrieve()
                 .bodyToFlux(UserDetails.class);
     }

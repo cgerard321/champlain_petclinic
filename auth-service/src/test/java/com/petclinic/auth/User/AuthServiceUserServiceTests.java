@@ -10,6 +10,7 @@ package com.petclinic.auth.User;
 
 import com.petclinic.auth.Exceptions.EmailAlreadyExistsException;
 import com.petclinic.auth.Exceptions.IncorrectPasswordException;
+import com.petclinic.auth.Exceptions.InvalidInputException;
 import com.petclinic.auth.Exceptions.NotFoundException;
 import com.petclinic.auth.JWT.JWTService;
 import com.petclinic.auth.Mail.Mail;
@@ -49,6 +50,7 @@ public class AuthServiceUserServiceTests {
             NEWPASSWORD = "change",
             BADPASS = "123",
             BADEMAIL = null;
+    final long BADID = -1;
 
     private String VALID_TOKEN = "a.fake.token";
 
@@ -146,8 +148,8 @@ public class AuthServiceUserServiceTests {
     }
 
     @Test
-    @DisplayName("Get all users")
-    void get_all_roles() {
+    @DisplayName("Get all users with pages")
+    void get_all_users_with_pages() {
 
         final int USER_COUNT = 10;
 
@@ -157,6 +159,20 @@ public class AuthServiceUserServiceTests {
 
         assertEquals(USER_COUNT, userRepo.count());
         assertEquals(USER_COUNT, userService.findAll(PageRequest.of(0, 10)).getTotalElements());
+    }
+
+    @Test
+    @DisplayName("Get all users")
+    void get_all_users() {
+
+        final int USER_COUNT = 10;
+
+        for (int i = 0; i < USER_COUNT; i++) {
+            userRepo.save(new User(USER, PASS, EMAIL + i));
+        }
+
+        assertEquals(USER_COUNT, userRepo.count());
+        assertEquals(USER_COUNT, userService.findAllWithoutPage().size());
     }
 
     @Test
@@ -278,5 +294,11 @@ public class AuthServiceUserServiceTests {
     @DisplayName("Verify email that does not exist")
     void verify_email_failure() {
         assertThrows(NotFoundException.class, () -> userService.getUserByEmail(BADEMAIL));
+    }
+
+    @Test
+    @DisplayName("if id is not unprocessable. then throw InvalidInputExeption")
+    void when_id_is_not_unprocessable_then_throw_InvalidInputExeption(){
+        assertThrows(InvalidInputException.class, () -> userService.getUserById(BADID));
     }
 }

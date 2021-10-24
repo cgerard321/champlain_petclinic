@@ -68,7 +68,7 @@ public class UserController {
         return all;
     }
 
-    @GetMapping("/pages")
+    @GetMapping("/withoutPages")
     public List<User> getUserWithoutPage() {
 
         return userService.findAllWithoutPage();
