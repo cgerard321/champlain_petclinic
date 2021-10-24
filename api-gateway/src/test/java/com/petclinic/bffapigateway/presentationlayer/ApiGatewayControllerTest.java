@@ -422,7 +422,7 @@ class ApiGatewayControllerTest {
         assertEquals(id, visit.getId());
 
         client.delete()
-                .uri("/api/gateway/pets/visits/{petId}", visit.getPetId())
+                .uri("/api/gateway/visits/{visitId}", visit.getPetId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
@@ -508,7 +508,7 @@ class ApiGatewayControllerTest {
         assertEquals(id, visit.getId());
 
         client.delete()
-                .uri("/api/gateway/pets/visits/{petId}", visit.getPetId())
+                .uri("/api/gateway/visits/{visitId}", visit.getPetId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
@@ -567,7 +567,7 @@ class ApiGatewayControllerTest {
                 .thenReturn(Mono.just(visit2));
 
         client.put()
-                .uri("/api/gateway/pets/visits/{petId}",visit.getPetId())
+                .uri("/api/gateway/owners/*/pets/{petId}/visits/{id}",visit.getPetId(), visit.getId())
                 .body(Mono.just(visit2), VisitDetails.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
