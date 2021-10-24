@@ -174,11 +174,11 @@ public class PetServiceTest {
     public void test_deletePet(){
 
         //Arrange
-        Pet petTest = setupPet();
-        when(repository.findById(petTest.getId())).thenReturn(Optional.of(petTest));
-
         Owner ownerTest = setupOwner();
         when(ownerRepository.findById(ownerTest.getId())).thenReturn(Optional.of(ownerTest));
+        
+        Pet petTest = setupPet();
+        when(repository.findPetByOwner(ownerTest, petTest.getId())).thenReturn(Optional.of(petTest));
 
         //Act
         service.deletePet(petTest.getId(), 1);
