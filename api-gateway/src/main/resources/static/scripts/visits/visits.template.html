@@ -550,9 +550,9 @@
             <td style="white-space: pre-line">{{v.description}}</td>
             <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>
             <td class="status-text" style="white-space: pre-line">{{$ctrl.getStatus(v.status)}}</td>
-            <td style="text-align:center; vertical-align:middle"><button class="btn btn-default cancel-button" type="button" style="background-color: orangered; color: white" ng-click="$ctrl.showConfirmationModal($event, v.id, v.status, v.practitionerId, v.date, v.description)">{{$ctrl.setCancelButtonText(v.status)}}</button></td>
-            <td style="text-align:center; vertical-align:middle"><button class="btn btn-default" type="button" style="background-color: royalblue; color: white" ng-click="$ctrl.switchToUpdateForm($event, v.practitionerId, v.date, v.description, v.id, v.status)">Edit Visit</button></td>
-            <td style="text-align:center; vertical-align:middle"><button class="btn btn-danger" type="button" ng-click="$ctrl.showConfirmationModal($event, v.id)">Delete visit</button></td>
+            <td style="text-align:center; vertical-align:middle"><button class="btn btn-default cancel-button" type="button" style="background-color: orangered; color: white" ng-click="$ctrl.showConfirmationModal($event, v.vistId, v.status, v.practitionerId, v.date, v.description)">{{$ctrl.setCancelButtonText(v.status)}}</button></td>
+            <td style="text-align:center; vertical-align:middle"><button class="btn btn-default" type="button" style="background-color: royalblue; color: white" ng-click="$ctrl.switchToUpdateForm($event, v.practitionerId, v.date, v.description, v.visitId, v.status)">Edit Visit</button></td>
+            <td style="text-align:center; vertical-align:middle"><button class="btn btn-danger" type="button" ng-click="$ctrl.showConfirmationModal($event, v.visitId)">Delete visit</button></td>
         </tr>
     </tbody>
 </table>
@@ -575,8 +575,8 @@
             <td style="white-space: pre-line">{{v.description}}</td>
             <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>
             <td class="status-text" style="white-space: pre-line">{{$ctrl.getStatus(v.status)}}</td>
-            <td style="text-align:center; vertical-align:middle"><button class="btn btn-default" style="background-color: royalblue; color: white" ng-click="$ctrl.switchToUpdateForm($event, v.practitionerId, v.date, v.description, v.id, v.status)">Edit Visit</button></td>
-            <td style="text-align:center; vertical-align:middle"><button class="btn btn-danger" ng-click="$ctrl.showConfirmationModal($event, v.id)">Delete visit</button></td>
+            <td style="text-align:center; vertical-align:middle"><button class="btn btn-default" style="background-color: royalblue; color: white" ng-click="$ctrl.switchToUpdateForm($event, v.practitionerId, v.date, v.description, v.visitId, v.status)">Edit Visit</button></td>
+            <td style="text-align:center; vertical-align:middle"><button class="btn btn-danger" ng-click="$ctrl.showConfirmationModal($event, v.visitId)">Delete visit</button></td>
         </tr>
     </tbody>
 </table>
