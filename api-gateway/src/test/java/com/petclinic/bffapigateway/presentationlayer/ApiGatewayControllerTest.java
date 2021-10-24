@@ -642,13 +642,13 @@ class ApiGatewayControllerTest {
     void shouldGetPreviousVisitsOfAPet() {
         VisitDetails visit1 = new VisitDetails();
         VisitDetails visit2 = new VisitDetails();
-        visit1.setId(1);
+        visit1.setVisitId(UUID.randomUUID().toString());
         visit1.setPetId(21);
         visit1.setDate("2021-12-7");
         visit1.setDescription("John Smith's cat has a paw infection.");
         visit1.setStatus(false);
         visit1.setPractitionerId(2);
-        visit2.setId(2);
+        visit2.setVisitId(UUID.randomUUID().toString());
         visit2.setPetId(21);
         visit2.setDate("2021-12-8");
         visit2.setDescription("John Smith's dog has a paw infection.");

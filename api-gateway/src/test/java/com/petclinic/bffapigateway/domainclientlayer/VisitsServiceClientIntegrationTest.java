@@ -15,6 +15,7 @@ import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 
@@ -76,7 +77,7 @@ class VisitsServiceClientIntegrationTest {
     @Test
     void shouldGetPreviousVisitsForPet() throws JsonProcessingException {
         final VisitDetails visit = VisitDetails.builder()
-                .id(1)
+                .visitId(UUID.randomUUID().toString())
                 .petId(21)
                 .practitionerId(2)
                 .date("2021-12-7")
@@ -91,7 +92,7 @@ class VisitsServiceClientIntegrationTest {
 
         final VisitDetails previousVisits = visitsServiceClient.getPreviousVisitsForPet(21).blockFirst();
 
-        assertEquals(visit.getId(), previousVisits.getId());
+        assertEquals(visit.getVisitId(), previousVisits.getVisitId());
         assertEquals(visit.getPetId(), previousVisits.getPetId());
         assertEquals(visit.getPractitionerId(), previousVisits.getPractitionerId());
         assertEquals(visit.getDate(), previousVisits.getDate());
