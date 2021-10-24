@@ -35,6 +35,7 @@ public class PetPersistenceTest {
     public Owner setupOwner()
     {
         Owner owner = new Owner();
+        owner.setId(11);
         owner.setFirstName("John");
         owner.setLastName("Wick");
         owner.setTelephone("5144041234");
@@ -80,11 +81,9 @@ public class PetPersistenceTest {
         return pet;
     }
 
-
-
     @DisplayName("PetPersistence_findPetByOwner_test")
     @Test
-    public void findPetByOwner() {
+    public void findPetByOwner_test() {
 
         //Arrange
         Owner owner = setupOwner();
@@ -107,7 +106,7 @@ public class PetPersistenceTest {
 
     @DisplayName("PetPersistence_findAll_test")
     @Test
-    public void findAllPetByOwner() {
+    public void findAllPetByOwner_test() {
 
         /*
          HOW IT WORKS?

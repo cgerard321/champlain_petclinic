@@ -1,6 +1,7 @@
 services:
   visits:
     build: visits-service
+    hostname: visits
     mem_limit: 350m
     environment:
       - SPRING_PROFILES_ACTIVE=docker
@@ -10,6 +11,9 @@ services:
 
   vets:
     build: vets-service
+    ports:
+      - "7002:8080"
+    hostname: vets
     mem_limit: 350m
     environment:
       - SPRING_PROFILES_ACTIVE=docker
@@ -19,6 +23,7 @@ services:
 
   customers:
     build: customers-service
+    hostname: customers
     mem_limit: 350m
     environment:
       - SPRING_PROFILES_ACTIVE=docker
@@ -38,22 +43,23 @@ services:
       - vets
       - visits
 
-
-
   auth-service:
+    hostname: auth
     build: auth-service
-    deploy:
-      resources:
-        limits:
-          memory: 2048m
+    hostname: auth
+    ports:
+      - "7005:8080"
     depends_on:
       mysql4:
-        condition: service_healthy
+          condition: service_healthy
+      mailer-service:
+        condition: service_started
     environment:
       - SPRING_PROFILES_ACTIVE=docker
 
   billing-service:
     build: billing-service
+    hostname: billing
     mem_limit: 350m
     environment:
       - SPRING_PROFILES_ACTIVE=docker
@@ -68,7 +74,8 @@ services:
     environment:
       - SMTP_USER=champlain.petclinic@gmail.com
       - SMTP_SERVER=smtp.gmail.com
-      - SMTP_PASS=nicetryguy
+    env_file:
+      - mailer.env
 
 
   mysql1:

@@ -78,3 +78,35 @@ input:checked + .slider:before {
 .slider.round:before {
   border-radius: 50%;
 }
+
+@media screen and (max-width:530px){
+    .day-of-week,
+    .date-grid {
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-areas:"a b c"
+                          "d e f"
+                          ". g ."
+    }
+  #Monday{
+    grid-area:a;
+  }
+  #Tuesday{
+    grid-area:b;
+  }
+  #Wednesday{
+    grid-area:c;
+  }
+  #Thursday{
+    grid-area:d;
+  }
+  #Friday{
+    grid-area:e;
+  }
+  #Saturday{
+    grid-area:f;
+  }
+  #Sunday{
+    grid-area:g;
+  }
+
+}

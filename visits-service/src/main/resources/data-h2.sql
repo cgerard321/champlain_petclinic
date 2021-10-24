@@ -20,4 +20,4 @@ INSERT INTO visits VALUES (18, 7, '2022-10-21', 'checkup', 327874, 1);
 INSERT INTO visits VALUES (19, 7, '2021-10-11', 'stomach medication', 327874, 1);
 INSERT INTO visits VALUES (20, 7, '2019-04-20', 'animal care', 238372, 1);
 INSERT INTO visits VALUES (21, 7, '2019-09-11', 'examination', 327874, 1);
-INSERT INTO visits VALUES (22, 7, '2021-11-11', 'examination', 234568, 1);
+INSERT INTO visits VALUES (22, 7, '2021-10-25', 'examination', 234568, 1);

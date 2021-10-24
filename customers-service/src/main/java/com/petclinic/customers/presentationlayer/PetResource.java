@@ -43,17 +43,19 @@ class PetResource {
     {
         return petService.findAll(ownerId);
     }
-
+  
     @GetMapping("/{petId}")
     public PetDetails findPet(@PathVariable("ownerId") int ownerId, @PathVariable("petId") int petId)
     {
         return new PetDetails(findPetById(ownerId, petId).get());
     }
 
-    private Optional<Pet> findPetById(int ownerId, int petId) {
+    private Optional<Pet> findPetById(int ownerId, int petId) 
+    {
         return petService.findByPetId(ownerId, petId);
-
     }
+
+   
     @DeleteMapping(value = "/{petId}")
     public void DeletePet(@PathVariable("petId") int petId, @PathVariable("ownerId") int ownerId)
     {

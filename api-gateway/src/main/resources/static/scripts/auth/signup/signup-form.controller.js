@@ -5,18 +5,18 @@
 'use strict';
 
 angular.module('signupForm')
-    .controller('SignupFormController', ['$http', '$scope', function ($http, $scope) {
-        $http.get('api/gateway/signup/')
-            .then(res => (this.signup = console.log(res) || res.data.content))
-            .catch(console.log);
+    .controller('SignupFormController', ['$http', '$scope', "$location", function ($http, $scope, $location) {
 
-        this.add = () => $http.post('api/gateway/signup/', {
-            username: $scope.newUser.username,
-            password: $scope.newUser.password,
-            email: $scope.newUser.email,
+        this.add = () => $http.post('/api/gateway/users/', {
+            username: $scope.signup.username,
+            password: $scope.signup.password,
+            email: $scope.signup.email,
         })
-            .then(res => this.singup.push(res.data) && ($scope.newUser.username = ''))
-            .catch(console.log);
+            .then(() => $location.path("/login"))
+            .catch(n => {
+                $scope.errorMessages = n.data.message.split`\n`;
+                console.log(n);
+            });
 
         this.keypress = ({ originalEvent: { key } }) => key === 'Enter' && this.add()
     }]);

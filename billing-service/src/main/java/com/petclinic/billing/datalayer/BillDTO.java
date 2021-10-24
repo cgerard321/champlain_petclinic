@@ -10,27 +10,34 @@ public class BillDTO {
 
     private int billId;
     private int customerId;
-    private Date date;
     private String visitType;
+    private Date date;
     @Nullable
     private double amount;
 
     public BillDTO(){
         billId = 0;
         customerId = 0;
-        date = null;
         visitType = null;
+        date = null;
         amount = 0;
 
     }
 
 
-    public BillDTO(int billId,int customerId, Date date, String visitType, double amount){
+    public BillDTO(int billId,int customerId, String visitType, Date date, double amount){
+        this.billId = billId;
+        this.customerId = customerId;
+        this.visitType = visitType;
+        this.date = date;
+        this.amount = amount;
+    }
+
+    public BillDTO(int billId,int customerId, Date date, String visitType){
         this.billId = billId;
         this.customerId = customerId;
         this.date = date;
         this.visitType = visitType;
-        this.amount = amount;
     }
 
 
@@ -42,7 +49,7 @@ public class BillDTO {
     public Date getDate(){
         return date;
     }
-    public String getVisiType(){
+    public String getVisitType(){
         return visitType;
     }
     public double getAmount(){
@@ -63,7 +70,7 @@ public class BillDTO {
         this.visitType = visitType;
     }
 
-    public void getAmount(double amount){
+    public void setAmount(double amount){
         this.amount = amount;
     }
 }

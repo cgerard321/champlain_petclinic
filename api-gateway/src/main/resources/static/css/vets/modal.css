@@ -76,3 +76,8 @@
     display:block;
   }
 }
+@media screen and (max-width:370px){
+  .modal{
+    width:290px !important;
+  }
+}

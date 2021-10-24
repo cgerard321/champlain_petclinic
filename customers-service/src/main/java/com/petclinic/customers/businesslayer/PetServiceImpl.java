@@ -28,13 +28,7 @@ public class PetServiceImpl implements PetService {
         this.ownerService = ownerService;
     }
 
-
-    /**
-     * ------------------------ FIND ------------------------
-     * This method will find one specific pet in the database and display its data
-     * It is not use by the login system
-     */
-    @Override
+   @Override
     public Optional<Pet> findByPetId(int ownerId, int petId) {
         try {
             Optional<Owner> optionalOwner = ownerService.findByOwnerId(ownerId);
@@ -55,10 +49,6 @@ public class PetServiceImpl implements PetService {
         }
     }
 
-    /**
-     * ------------------------ FIND ALL ------------------------
-     * This method will find all pet in the database
-     */
     @Override
     public List<Pet> findAll(int ownerId) {
 
@@ -67,55 +57,53 @@ public class PetServiceImpl implements PetService {
         return petRepository.findAllPetByOwner(owner);
     }
 
-
-    /**
-     * ------------------------ CREATE ALL ------------------------
-     * This method will create a new pet, assign it to an owner and save its data in repository
-     */
     @Override
     public Pet CreatePet(PetRequest petRequest, int ownerId)
     {
-        Pet pet = new Pet();
-        Optional<Owner> optionalOwner = ownerService.findByOwnerId(ownerId);
-        Owner owner = optionalOwner.orElseThrow(() -> new NotFoundException("Owner "+ ownerId +" not found"));
-        owner.addPet(pet);
+        try {
+            Pet pet = new Pet();
+            //Owner owner = ownerService.findByOwnerId(ownerId).orElseThrow(() -> new NotFoundException("Owner "+ ownerId +" not found"));
+            Optional<Owner> ownerOpt = ownerService.findByOwnerId(ownerId);
+            Owner owner = ownerOpt.get();
+            owner.addPet(pet);
 
-        pet.setName(petRequest.getName());
-        pet.setBirthDate(petRequest.getBirthDate());
-        petRepository.findPetTypeById(petRequest.getTypeId())
-                .ifPresent(pet::setType);
+            pet.setName(petRequest.getName());
+            pet.setBirthDate(petRequest.getBirthDate());
+            petRepository.findPetTypeById(petRequest.getTypeId())
+                    .ifPresent(pet::setType);
 
-        LOG.info("Saving pet {}", pet);
-        return petRepository.save(pet);
+            LOG.debug("New pet has been saved! The pet name is: " + pet.getName());
+            return petRepository.save(pet);
+        }
+        catch (Exception e)
+        {
+            throw new NotFoundException("Owner with ID : " + ownerId+ " is not found");
+        }
     }
 
-    /**
-     * ------------------------ Delete Pet ------------------------
-     * This method will delete a pet
-     */
     @Override
     public void deletePet(int petId, int ownerId) {
 
-        //Search the pet
-        Optional<Pet> optionalPet = petRepository.findById(petId);
-        Pet pet = optionalPet.orElseThrow(()-> new NotFoundException("Pet with ID: " + petId + " has not been found"));
+        try{
+            Optional<Owner> ownerOpt = ownerService.findByOwnerId(ownerId);
+            Owner owner = ownerOpt.get();
+            //Pet pet = findByPetId(petId).orElseThrow(()-> new NotFoundException("Pet with ID: " + petId + " has not been found"));
+            Optional<Pet> petOpt = findByPetId(petId);
+            Pet pet = petOpt.get();
+            owner.removePet(pet);
+            petRepository.delete(pet);
+            LOG.debug("Pet with ID: " + petId + " has been deleted successfully.");
+        }
+        catch (Exception ex)
+        {
+            throw new NotFoundException("Owner or pet is not valid. Please standby for assistance. A specialized support team will shortly make contact with you.");
+        }
 
-        //Search pet owner
-        Optional<Owner> optionalOwner = ownerService.findByOwnerId(ownerId);
-        Owner owner = optionalOwner.orElseThrow(() -> new NotFoundException("Owner "+ ownerId +" not found"));
 
-        //Remove pet from owner list of pet
-        owner.removePet(pet);
 
-        //Delete pet
-        petRepository.delete(pet);
-        LOG.debug("Pet with ID: " + petId + " has been deleted successfully.");
+
     }
 
-    /**
-     * ------------------------ FIND ALL PET TYPES ------------------------
-     * This method will return all pet types from the database
-     */
     @Override
     public List<PetType> getAllPetTypes() {
         return petRepository.findPetTypes();
