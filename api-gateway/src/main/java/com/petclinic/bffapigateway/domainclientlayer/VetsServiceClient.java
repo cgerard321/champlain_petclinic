@@ -5,6 +5,7 @@ import com.petclinic.bffapigateway.dtos.UserDetails;
 import com.petclinic.bffapigateway.dtos.VetDetails;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -38,7 +39,7 @@ public class VetsServiceClient {
                 .bodyToFlux(VetDetails.class);
     }
 
-    public Mono<VetDetails> getVet(final long vetId) {
+    public Mono<VetDetails> getVet(final int vetId) {
         return webClientBuilder.build().get()
                 .uri(vetsServiceUrl + "/{vetId}", vetId)
                 .retrieve()
@@ -47,9 +48,11 @@ public class VetsServiceClient {
 
     public Mono<VetDetails> createVet (final VetDetails model) {
         return webClientBuilder.build().post()
-                .uri(vetsServiceUrl + model)
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve().bodyToMono(VetDetails.class);
+                .uri(vetsServiceUrl)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(Mono.just(model), VetDetails.class)
+                .retrieve()
+                .bodyToMono(VetDetails.class);
     }
 
     public Mono<VetDetails> deleteVet(final long vetId) {

@@ -30,37 +30,36 @@ class PetResource {
         this.petService = petService;
     }
 
-    /**
-     * Create Pet
-     */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public Pet createNewPet(@RequestBody PetRequest petRequest, @PathVariable("ownerId") int ownerId) {
+    public Pet createNewPet(@RequestBody PetRequest petRequest, @PathVariable("ownerId") int ownerId)
+    {
         Pet pet = petService.CreatePet(petRequest, ownerId);
         return pet;
     }
 
     @GetMapping
-    public List<Pet> findAll()
+    public List<Pet> findAll(@PathVariable("ownerId") int ownerId)
     {
-        return petService.findAll();
+        return petService.findAll(ownerId);
     }
 
-    //Find Pet
     @GetMapping("/{petId}")
-    public PetDetails findPet(@PathVariable("petId") int petId) {
-        return new PetDetails(findPetById(petId).get());
+    public PetDetails findPet(@PathVariable("ownerId") int ownerId, @PathVariable("petId") int petId)
+    {
+        return new PetDetails(findPetById(ownerId, petId).get());
+
     }
 
+    private Optional<Pet> findPetById(int ownerId, int petId) 
+    {
+        return petService.findByPetId(ownerId, petId);
+    }
+  
     @DeleteMapping(value = "/{petId}")
-    public void DeletePet(@PathVariable("petId") int petId, @PathVariable("ownerId") int ownerId) {
-        //Call external method deletePet() from petService
+    public void DeletePet(@PathVariable("petId") int petId, @PathVariable("ownerId") int ownerId)
+    {
         petService.deletePet(petId, ownerId);
-    }
-
-    private Optional<Pet> findPetById(int petId) {
-        return petService.findByPetId(petId);
-
     }
 
 }
