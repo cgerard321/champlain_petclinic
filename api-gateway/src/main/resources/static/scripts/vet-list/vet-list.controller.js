@@ -44,15 +44,8 @@ angular.module('vetList')
                     alert(vetId + " Deleted Successfully!");
                     console.log(response, 'res');
                     //refresh list
-                    $scope.refreshList = self.vetList;
-
-                    $scope.ReloadData = function () {
-                        self.vetList = FilterList();
-                        $http.get('api/gateway/vets').then(function (resp) {
-                            arr = resp.data;
-                        });
-                    }
                 }
+                $http.get('api/gateway/vets')
 
                 function errorCallback(error) {
                     alert(data.errors);
@@ -65,7 +58,8 @@ $scope.refreshList = self.vetList;
 
         $scope.ReloadData = function () {
             self.vetList = FilterList();
-            $http.get('api/gateway/vets').then(function (resp) {
+            $http.get('api/gateway/vets')
+                .then(function (resp) {
                 arr = resp.data;
             });
         }
