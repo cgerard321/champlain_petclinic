@@ -35,9 +35,6 @@ public class PetServiceImpl implements PetService {
             Owner owner = optionalOwner.get();
             //Search pet in database with the owner
             Optional<Pet> pet = petRepository.findPetByOwner(owner, petId);
-            if (!pet.isPresent()) {
-                throw new NotFoundException("Pet "+ petId +" not found");
-            }
             LOG.debug("Pet with ID: " + petId + " has been found");
             return pet;
         }
@@ -45,7 +42,7 @@ public class PetServiceImpl implements PetService {
         {
             // Exception if pet not found
             LOG.debug(e.getMessage());
-            throw new NotFoundException("Pet not found!");
+            throw new NotFoundException("Pet with ID: " + petId + " not found!");
         }
     }
 
