@@ -111,9 +111,7 @@ public class PetPersistenceTest {
         assertEquals(foundPet, savedPet);
         assertNotEquals(foundPet, fakePet);
     }
-
     
-    //This test method is having a lot of trouble running in conjunction with other test method.
     @DisplayName("PetPersistence_findAll_test")
     @Test
     public void findAllPetByOwner() {
@@ -127,7 +125,7 @@ public class PetPersistenceTest {
         Pet newPet2 = setupPet();
 
         newPet.setName("John");
-        newPet.setOwner(savedOwner);
+        newPet.setOwner(ownerRepository.findById(savedOwner.getId()).get());
         Pet savedPet1 = repository.save(newPet);
         Pet foundPet1 = repository.findPetByOwner(savedPet1.getOwner(), savedPet1.getId()).orElse(null);
 
@@ -135,7 +133,7 @@ public class PetPersistenceTest {
         assertEquals(foundPet1, savedPet1);
 
         newPet2.setName("Daisy");
-        newPet2.setOwner(savedOwner);
+        newPet2.setOwner(ownerRepository.findById(savedOwner.getId()).get());
         Pet savedPet2 = repository.save(newPet2);
         Pet foundPet2 = repository.findPetByOwner(savedPet2.getOwner(), savedPet2.getId()).orElse(null);
 
@@ -143,7 +141,7 @@ public class PetPersistenceTest {
         assertEquals(foundPet2, savedPet2);
 
         //Act
-        List<Pet> petList = repository.findAllPetByOwner(setupOwner());
+        List<Pet> petList = repository.findAllPetByOwner(ownerRepository.findById(savedOwner.getId()).get());
 
         //Assert
         assertEquals(expectedLength, petList.size());
