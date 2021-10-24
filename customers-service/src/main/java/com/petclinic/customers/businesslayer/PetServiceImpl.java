@@ -6,7 +6,6 @@ import com.petclinic.customers.datalayer.Pet;
 import com.petclinic.customers.datalayer.PetRepository;
 import com.petclinic.customers.datalayer.PetType;
 import com.petclinic.customers.presentationlayer.PetRequest;
-import jdk.internal.jline.internal.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
