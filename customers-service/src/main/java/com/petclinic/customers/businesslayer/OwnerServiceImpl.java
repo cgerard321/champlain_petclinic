@@ -25,13 +25,6 @@ public class OwnerServiceImpl implements OwnerService {
     }
 
 
-    /**
-     * ------------------------ FIND ------------------------
-     * This method will find one specific owner in the database and display its data
-     * It is not use by the login system
-     *
-     * @return
-     */
     @Override
     public Optional<Owner> findByOwnerId(int id) {
         try {
@@ -45,41 +38,27 @@ public class OwnerServiceImpl implements OwnerService {
         }
     }
 
-    /**
-     * ------------------------ FIND ALL ------------------------
-     * This method will find one specific owner in the database and display its data
-     * It is not use by the login system
-     */
     @Override
     public List<Owner> findAll() {
 
         return repository.findAll();
     }
 
-    /**
-     * ------------------------ FIND AN ACCOUNT ------------------------
-     * PRIORITY -> IMPORTANT
-     * This method is used to search a user in the database based on the information he entered
-     * Is used by the login system
-     */
-
-
     @Override
     public Owner updateOwner(int id, Owner newOwner) {
-       Optional<Owner> optionalOwner = repository.findById(id);
-       if(optionalOwner.isPresent()){
-           Owner foundOwner = optionalOwner.get();
-           foundOwner.setFirstName(newOwner.getFirstName());
-           foundOwner.setLastName(newOwner.getLastName());
-           foundOwner.setAddress(newOwner.getAddress());
-           foundOwner.setCity(newOwner.getCity());
-           foundOwner.setTelephone(newOwner.getTelephone());
-
-           LOG.debug("updateOwner: owner with id {} updated",id);
-
+        try{
+            Optional<Owner> optionalOwner = repository.findById(id);
+            Owner foundOwner = optionalOwner.get();
+            foundOwner.setFirstName(newOwner.getFirstName());
+            foundOwner.setLastName(newOwner.getLastName());
+            foundOwner.setAddress(newOwner.getAddress());
+            foundOwner.setCity(newOwner.getCity());
+            foundOwner.setTelephone(newOwner.getTelephone());
+            LOG.debug("updateOwner: owner with id {} updated",id);
            return repository.save(foundOwner);
-       }
-       else{
+        }
+        catch (Exception e)
+        {
            throw new NotFoundException("updateOwner failed, owner with id: " + id + " not found.");
        }
     }
@@ -95,10 +74,6 @@ public class OwnerServiceImpl implements OwnerService {
         }
     }
 
-    /**
-     * ------------------------ DELETE ------------------------
-     * This method will find one specific owner in the database and delete its data
-     */
     @Override
     public void deleteOwner(int Id) {
 
