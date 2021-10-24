@@ -12,6 +12,9 @@ angular.module('vetList')
                   if(document.documentElement.clientWidth > 960){
                     child.style.left = (left + 221) + 'px';
                   }
+                  if(document.documentElement.clientWidth < 420){
+                    child.style.left = (200)+'px';
+                  }
                   else if(document.documentElement.clientWidth < 510){
                     child.style.left = (left+334.5/2.5) + 'px';
                   }
