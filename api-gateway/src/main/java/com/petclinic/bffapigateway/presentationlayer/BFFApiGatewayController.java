@@ -65,7 +65,7 @@ public class BFFApiGatewayController {
         return billServiceClient.getAllBilling();
     }
 
-    @GetMapping(value = "customer/owners")
+    @GetMapping(value = "owners")
     public Flux<OwnerDetails> getOwners() {
         return customersServiceClient.getOwners()
                 .flatMap(n ->
@@ -75,8 +75,8 @@ public class BFFApiGatewayController {
     }
 
     @PostMapping(value = "owners/{ownerId}/pets" , produces = "application/json", consumes = "application/json")
-    public Mono<PetDetails> createPet(@RequestBody PetDetails pet, @PathVariable int ownerId){
-        return customersServiceClient.createPet(pet, ownerId);
+    public Mono<PetDetails> createNewPet(@RequestBody PetDetails pet, @PathVariable int ownerId){
+        return customersServiceClient.createNewPet(pet, ownerId);
     }
 
     //Testing purpose
