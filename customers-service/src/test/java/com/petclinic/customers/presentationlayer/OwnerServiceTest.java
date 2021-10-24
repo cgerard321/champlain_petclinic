@@ -159,13 +159,12 @@ public class OwnerServiceTest {
     }
 
     @DisplayName("ownerService_UpdateOwner_NotFoundException")
-    @Disabled
     @Test
     public void test_UpdateOwner_NotFoundException()
     {
         int ownerId = 1;
         Owner ownerTest = new Owner(1, null, null, null, null, null);
-        String expectedErrorMsg = "Updating the owner has failed, owner with ID: " + ownerId + " not found.";
+        String expectedErrorMsg = "updateOwner failed, owner with id: " + ownerId + " not found.";
         Mockito.when(ownerRepository.findById(Mockito.anyInt())).thenThrow(new NotFoundException());
         try {
             ownerService.updateOwner(ownerId, ownerTest);
