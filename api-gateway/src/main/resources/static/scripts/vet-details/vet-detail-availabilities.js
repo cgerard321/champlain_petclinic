@@ -24,29 +24,46 @@ function displayDays() {
     let visitsDatesNode = document.querySelectorAll(".visitsDates");
     let visitsDatesArray = [];
     visitsDatesArray = convetNodeListIdToArray(visitsDatesArray,visitsDatesNode);
-
-
+    console.log(visitsDatesArray)
 
     let date = new Date();
     let onejan = new Date(date.getFullYear(), 0, 1);
     let currentWeek = Math.ceil((((date.getTime() - onejan.getTime()) / 86400000) + onejan.getDay() + 1) / 7);
 
-    let strDays = "Thursday, Monday, Friday";
+    let strDays = document.getElementById('workDays').textContent;
+
     let daysOfWeek = (strDays.replace(/\s+/g, '')).split(',');
-    // let daysToRemove = new Date('2021-10-11 00:00:00.0');
-    let d = visitsDatesArray[4].toString() + ' 00:00:00.0';
+    let d = "2021-10-19";
     let daysToRemove = new Date(d);
 
     let daysToRemoveYear= daysToRemove.getFullYear();
     let currentYear = date.getFullYear();
 
-    let nbDayWeekToRemove = daysToRemove.getDay();
+
+    let visitDaysToRemove = [];
+    let dayNb = [];
+    for (let i = 0; i < visitsDatesArray.length; i++) {
+        console.log(visitsDatesArray[i])
+        console.log(typeof visitsDatesArray[i])
+        if(currentYear === new Date(visitsDatesArray[i]).getFullYear()){
+            if(currentWeek === getWeekNumber(new Date(visitsDatesArray[i]))){
+                dayNb.push((new Date(visitsDatesArray[i])).getDay() + 1);
+            }
+        }
+    }
+    dayNb.forEach(function(item) {
+        visitDaysToRemove.push(dayOfWeekAsString(item));
+    });
+    console.log("visitDaysToRemove")
+    console.log(visitDaysToRemove)
+
+    let nbDayWeekToRemove = daysToRemove.getDay() + 1;
 
     let DayWeekToRemove = dayOfWeekAsString(nbDayWeekToRemove);
 
     getWeekNumber(daysToRemove);
-    if(currentYear == daysToRemoveYear){
-        if(currentWeek == getWeekNumber(daysToRemove)){
+    if(currentYear === daysToRemoveYear){
+        if(currentWeek === getWeekNumber(daysToRemove)){
             removeItem(daysOfWeek, DayWeekToRemove);
         }
     }
@@ -69,7 +86,7 @@ function displayDays() {
     daysArray = convetNodeListIdToArray(daysArray, days);
     for (let i = 0; i < daysArray.length; i++) {
         for(let x = 0; x < daysOfWeek.length; x++){
-            if(daysArray[i] == daysOfWeek[x]){
+            if(daysArray[i] === daysOfWeek[x]){
                 days[i].style.backgroundColor = "#c7ffdc";
             }
         }
