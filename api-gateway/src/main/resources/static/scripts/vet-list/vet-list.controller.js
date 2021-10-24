@@ -44,8 +44,12 @@ angular.module('vetList')
                     alert(vetId + " Deleted Successfully!");
                     console.log(response, 'res');
                     //refresh list
+                    $http.get('api/gateway/vets').then(function (resp) {
+                        self.vetList = resp.data;
+                        arr = resp.data;
+                    });
                 }
-                $http.get('api/gateway/vets')
+
 
                 function errorCallback(error) {
                     alert(data.errors);
