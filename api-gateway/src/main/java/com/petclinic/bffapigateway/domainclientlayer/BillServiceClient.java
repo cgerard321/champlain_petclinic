@@ -2,6 +2,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.BillDetails;
 import com.petclinic.bffapigateway.dtos.OwnerDetails;
+import com.petclinic.bffapigateway.dtos.UserDetails;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -40,6 +41,14 @@ public class BillServiceClient {
                 .uri(billServiceUrl)
                 .retrieve()
                 .bodyToFlux(BillDetails.class);
+    }
+
+    public Mono<BillDetails> deleteBill(final int billId) {
+        return webClientBuilder.build()
+                .delete()
+                .uri(billServiceUrl + "/bills/{billId}", billId)
+                .retrieve()
+                .bodyToMono(BillDetails.class);
     }
 }
 
