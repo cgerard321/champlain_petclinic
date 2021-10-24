@@ -218,7 +218,7 @@ public class BFFApiGatewayController {
 
 
     @GetMapping(value = "admin/roles")
-    public Object getRoles() {
+    public Flux<Role> getRoles() {
         return authServiceClient.getRoles();
     }
 
