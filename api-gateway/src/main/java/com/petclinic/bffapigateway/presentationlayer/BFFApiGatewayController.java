@@ -60,6 +60,18 @@ public class BFFApiGatewayController {
         return billServiceClient.getBilling(billId);
     }
 
+    @DeleteMapping(value = "bills/{billId}")
+    public Mono<BillDetails> deleteBill(final @PathVariable long billId) {
+        return billServiceClient.deleteBill(billId);
+    }
+
+    @PostMapping(value = "bill", //bills?
+            consumes = "application/json",
+            produces = "application/json")
+    public Mono<BillDetails> createBill(@RequestBody BillDetails model) {
+        return billServiceClient.getBilling(model.getBillId());
+    }
+
     @GetMapping(value = "bills")
     public Flux<BillDetails> getAllBilling() {
         return billServiceClient.getAllBilling();

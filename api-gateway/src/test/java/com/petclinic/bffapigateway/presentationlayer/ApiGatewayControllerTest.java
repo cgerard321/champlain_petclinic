@@ -352,6 +352,47 @@ class ApiGatewayControllerTest {
     }
 
     @Test
+    void deleteBill() {
+        BillDetails entity = new BillDetails();
+
+        entity.setBillId(3);
+
+        entity.setDate(null);
+
+        entity.setAmount(750);
+
+        entity.setVisitType("Consultation");
+
+//        when(billServiceClient.getBilling(3))
+//                .thenReturn(Mono.just(entity));
+        when(billServiceClient.createBill(argThat(
+                n -> entity.getVisitType().equals(n.getVisitType())
+        )))
+                .thenReturn(Mono.just(entity));
+//        client.post()
+//                .uri("/api/gateway/bills")
+//                .body(Mono.just(entity), BillDetails.class)
+//                .accept(MediaType.APPLICATION_JSON)
+//                .exchange()
+//                .expectStatus().isOk()
+//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+//                .expectBody();
+//
+//        assertEquals(entity.getBillId(),3);
+
+        client.delete()
+                .uri("/api/gateway/bills/3")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody();
+
+        assertEquals(null, billServiceClient.getBilling(entity.getBillId()));
+    }
+
+
+    @Test
     void shouldCreateAVisitWithOwnerInfo(){
         OwnerDetails owner = new OwnerDetails();
         VisitDetails visit = new VisitDetails();
