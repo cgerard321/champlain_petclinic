@@ -1,29 +1,16 @@
-function removeItem(array, item) {
-    var i = array.length;
-
-    while (i--) {
-        if (array[i] === item) {
-            array.splice(array.indexOf(item), 1);
-        }
-    }
-}
-
-
 function dayOfWeekAsString(dayIndex) {
     return ["Sunday", "Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][dayIndex] || '';
 }
 
 function getWeekNumber(d){
     let onejan = new Date(d.getFullYear(), 0, 1);
-    let week = Math.ceil((((d.getTime() - onejan.getTime()) / 86400000) + onejan.getDay() + 1) / 7);
-
-    return week;
+    return Math.ceil((((d.getTime() - onejan.getTime()) / 86400000) + onejan.getDay() + 1) / 7);
 }
 
 function displayDays() {
     let visitsDatesNode = document.querySelectorAll(".visitsDates");
     let visitsDatesArray = [];
-    visitsDatesArray = convetNodeListIdToArray(visitsDatesArray,visitsDatesNode);
+    visitsDatesArray = convertNodeListIdToArray(visitsDatesArray,visitsDatesNode);
 
     let date = new Date();
     let onejan = new Date(date.getFullYear(), 0, 1);
@@ -63,7 +50,7 @@ function displayDays() {
     let days = document.querySelectorAll(".square");
 
     let daysArray = [];
-    daysArray = convetNodeListIdToArray(daysArray, days);
+    daysArray = convertNodeListIdToArray(daysArray, days);
     for (let i = 0; i < daysArray.length; i++) {
         for(let x = 0; x < daysOfWeek.length; x++){
             if(daysArray[i] === daysOfWeek[x]){
@@ -73,7 +60,7 @@ function displayDays() {
     }
 }
 
-function convetNodeListIdToArray(array, nodeList){
+function convertNodeListIdToArray(array, nodeList){
     for(let i = 0; i < nodeList.length; i++){
         array.push(nodeList[i].id);
     }
