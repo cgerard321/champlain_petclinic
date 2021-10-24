@@ -43,8 +43,7 @@ function displayDays() {
     let visitDaysToRemove = [];
     let dayNb = [];
     for (let i = 0; i < visitsDatesArray.length; i++) {
-        console.log(visitsDatesArray[i])
-        console.log(typeof visitsDatesArray[i])
+
         if(currentYear === new Date(visitsDatesArray[i]).getFullYear()){
             if(currentWeek === getWeekNumber(new Date(visitsDatesArray[i]))){
                 dayNb.push((new Date(visitsDatesArray[i])).getDay() + 1);
