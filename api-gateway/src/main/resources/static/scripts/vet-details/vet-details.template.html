@@ -1,3 +1,4 @@
+
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet"
       integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
@@ -62,7 +63,7 @@
           <div class="col-md-12">
             <h5 class="mb-3">Work Day</h5>
             <div>
-              {{$ctrl.vet.workday}}
+              <p id="workDays">{{$ctrl.vet.workday}}</p>
             </div>
           </div>
         </div>
@@ -83,15 +84,15 @@
           </div>
 
           <div class="col-md-12" id="displayNone" style="display: none">
-              <div id="section" class="day-of-week">
-                <div id="Sunday" class="square">Sunday</div>
-                <div id="Monday" class="square">Monday</div>
-                <div id="Tuesday" class="square">Tuesday</div>
-                <div id="Wednesday" class="square">Wednesday</div>
-                <div id="Thursday" class="square">Thursday</div>
-                <div id="Friday" class="square">Friday</div>
-                <div id="Saturday" class="square">Saturday</div>
-              </div>
+            <div id="section" class="day-of-week">
+              <div id="Sunday" class="square">Sunday</div>
+              <div id="Monday" class="square">Monday</div>
+              <div id="Tuesday" class="square">Tuesday</div>
+              <div id="Wednesday" class="square">Wednesday</div>
+              <div id="Thursday" class="square">Thursday</div>
+              <div id="Friday" class="square">Friday</div>
+              <div id="Saturday" class="square">Saturday</div>
+            </div>
           </div>
 
         </div>
@@ -99,7 +100,7 @@
 
         <div class="row g-3">
           <div class="col-sm-12">
-              <a class="add-vet-button btn btn-success" ui-sref="vetEdit({vetId: $ctrl.vet.id})">Edit Vet</a>
+            <a class="add-vet-button btn btn-success" ui-sref="vetEdit({vetId: $ctrl.vet.id})">Edit Vet</a>
           </div>
         </div>
 
