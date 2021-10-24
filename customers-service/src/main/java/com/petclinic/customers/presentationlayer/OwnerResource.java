@@ -36,9 +36,6 @@ class OwnerResource {
         this.ownerService = ownerService;
     }
 
-    /**
-     * Create Owner
-     */
     @PostMapping(
             consumes = "application/json",
             produces = "application/json"
@@ -48,25 +45,16 @@ class OwnerResource {
         return ownerService.createOwner(owner);
     }
 
-    /**
-     * Read Single Owner
-     */
     @GetMapping(value = "/{ownerId}")
     public Optional<Owner> findOwner(@PathVariable("ownerId") int ownerId) {
         return ownerService.findByOwnerId(ownerId);
     }
 
-    /**
-     * Read List of Owners
-     */
     @GetMapping
     public List<Owner> findAll() {
         return ownerService.findAll();
     }
 
-    /**
-     * Update Owner
-     */
     @PutMapping(value = "/{ownerId}")
     public Owner updateOwner(@PathVariable int ownerId, @RequestBody Owner ownerRequest) {
         return ownerService.updateOwner(ownerId, ownerRequest);

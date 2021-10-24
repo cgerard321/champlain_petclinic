@@ -37,8 +37,8 @@ class OwnerPersistenceTest {
 
     @DisplayName("ownerPersistence_FindOwner")
     @Test
-    public void findById() {
-
+    public void findById()
+    {
         //Set ID
         int OwnerID = 1;
 
