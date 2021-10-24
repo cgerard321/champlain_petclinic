@@ -157,6 +157,7 @@ class OwnerPersistenceTest {
      * ------------------------ TEST_UPDATE ------------------------
      * Testing the update owner method
      */
+    /*
     @DisplayName("ownerPersistence_UpdateOwner")
     @Test
     public void update_owner_test()
@@ -183,5 +184,6 @@ class OwnerPersistenceTest {
         // Assert
        assertEquals(savedUpdate, foundSaved);
     }
+     */
 
 }

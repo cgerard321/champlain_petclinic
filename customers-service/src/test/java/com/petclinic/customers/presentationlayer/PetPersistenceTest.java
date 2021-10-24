@@ -32,19 +32,9 @@ public class PetPersistenceTest {
     @Autowired
     private OwnerRepository ownerRepository;
 
-    @BeforeEach
-    public void setUpDB()
-    {
-        repository.deleteAll();
-        ownerRepository.deleteAll();
-    }
-
-
-
     public Owner setupOwner()
     {
         Owner owner = new Owner();
-        owner.setId(11);
         owner.setFirstName("John");
         owner.setLastName("Wick");
         owner.setTelephone("5144041234");
@@ -76,15 +66,15 @@ public class PetPersistenceTest {
         owner.setTelephone("5144041234");
         owner.setCity("Montreal");
         owner.setAddress("420 Avenue");
+        PetType petType = new PetType();
+        petType.setId(6);
 
         Pet pet = new Pet();
         pet.setName("Daisy");
         pet.setId(2);
-
-        PetType petType = new PetType();
-        petType.setId(6);
         pet.setType(petType);
         pet.setOwner(owner);
+
         owner.addPet(pet);
 
         return pet;
@@ -97,51 +87,50 @@ public class PetPersistenceTest {
     public void findPetByOwner() {
 
         //Arrange
+        Owner owner = setupOwner();
+        Owner savedOwner = ownerRepository.save(owner);
+
         Pet newPet = setupPet();
-        newPet.setOwner(setupOwner());
-        setupOwner().addPet(newPet);
+        newPet.setOwner(ownerRepository.findById(savedOwner.getId()).get());
+        savedOwner.addPet(newPet);
         Pet fakePet = setupFakePet();
         Pet savedPet = repository.save(newPet);
 
         //Act
-        Pet foundPet = repository.findPetByOwner(newPet.getOwner(), savedPet.getId()).orElse(null);
+        Pet foundPet = repository.findPetByOwner(ownerRepository.findById(savedOwner.getId()).get(), savedPet.getId()).orElse(null);
 
         //Assert
         assert foundPet != null;
         assertEquals(foundPet, savedPet);
         assertNotEquals(foundPet, fakePet);
     }
-    
+
     @DisplayName("PetPersistence_findAll_test")
     @Test
     public void findAllPetByOwner() {
+
+        /*
+         HOW IT WORKS?
+         ownerRepository.findById(1).get() already exist and he has one pet. Here we are adding a new one to test if
+         the repository can find two pets
+        */
+
         //Expect 4 entities
         int expectedLength = 2;
 
-        Owner owner = setupOwner();
-        Owner savedOwner = ownerRepository.save(owner);
         //Arrange
         Pet newPet = setupPet();
-        Pet newPet2 = setupPet();
 
         newPet.setName("John");
-        newPet.setOwner(ownerRepository.findById(savedOwner.getId()).get());
+        newPet.setOwner(ownerRepository.findById(1).get());
         Pet savedPet1 = repository.save(newPet);
         Pet foundPet1 = repository.findPetByOwner(savedPet1.getOwner(), savedPet1.getId()).orElse(null);
 
         assert foundPet1 != null;
         assertEquals(foundPet1, savedPet1);
 
-        newPet2.setName("Daisy");
-        newPet2.setOwner(ownerRepository.findById(savedOwner.getId()).get());
-        Pet savedPet2 = repository.save(newPet2);
-        Pet foundPet2 = repository.findPetByOwner(savedPet2.getOwner(), savedPet2.getId()).orElse(null);
-
-        assert foundPet2 != null;
-        assertEquals(foundPet2, savedPet2);
-
         //Act
-        List<Pet> petList = repository.findAllPetByOwner(ownerRepository.findById(savedOwner.getId()).get());
+        List<Pet> petList = repository.findAllPetByOwner(ownerRepository.findById(1).get());
 
         //Assert
         assertEquals(expectedLength, petList.size());
@@ -153,7 +142,10 @@ public class PetPersistenceTest {
     @Test
     public void create_pet_test()
     {
-        //Arrange
+        //Here we delete the repo to make sure that there is not pet inside
+        //Therefore, when creating a pet, there should be only 1
+        repository.deleteAll();
+        int expectedPetInDB = 1;
         Pet newPet = setupPet();
         newPet.setOwner(setupOwner());
         setupOwner().addPet(newPet);
@@ -165,7 +157,7 @@ public class PetPersistenceTest {
         //Assert
         assert foundSaved != null;
         MatcherAssert.assertThat(foundSaved, samePropertyValuesAs(savedPet));
-        assertEquals(1,repository.findAll().size());
+        assertEquals(expectedPetInDB, repository.findAll().size());
     }
 
 
