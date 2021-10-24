@@ -1,25 +1,26 @@
 package com.petclinic.customers.presentationlayer;
 
+import com.petclinic.customers.businesslayer.OwnerService;
 import com.petclinic.customers.businesslayer.PetService;
+import com.petclinic.customers.customerExceptions.exceptions.NotFoundException;
 import com.petclinic.customers.datalayer.*;
-import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import javax.swing.text.html.Option;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Optional;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.hamcrest.Matchers.samePropertyValuesAs;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 import java.util.List;
@@ -35,9 +36,10 @@ public class PetServiceTest {
     PetRepository repository;
 
     @Autowired
+    OwnerService ownerService;
+
+    @Autowired
     PetService service;
-
-
 
     public Owner setupOwner()
     {
@@ -52,13 +54,19 @@ public class PetServiceTest {
         return owner;
     }
 
-    public Pet setupPet() {
+    public Pet setupPet() throws ParseException {
 
         Owner owner = setupOwner();
 
         Pet pet = new Pet();
         pet.setName("Daisy");
         pet.setId(2);
+
+        String pattern = "yyyy-MM-dd";
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
+        Date birthDate = simpleDateFormat.parse("2018-09-09");
+
+        pet.setBirthDate(birthDate);
 
         PetType petType = new PetType();
         petType.setId(6);
@@ -68,65 +76,58 @@ public class PetServiceTest {
         return pet;
     }
 
-    // TEST FOR FINDING PET BY ID
-    @DisplayName("petService_FindByPetId")
+    @DisplayName("ownerService_FindByPetId_NotFoundException")
     @Test
-    public void test_findByPetId() {
-        //Arrange
-        Pet petTest = setupPet();
-        when(repository.findById(2)).thenReturn(Optional.of(petTest));
+    public void test_findByPetId_NotFoundException()
+    {
+        int petId = 1;
+        String expectedErrorMsg = "Pet with ID: " + petId + " not found!";
+        Mockito.when(repository.findById(Mockito.anyInt())).thenThrow(new NotFoundException());
+        try {
+            service.findByPetId(petId);
+        } catch(NotFoundException ex) {
+            assertEquals(ex.getMessage(), expectedErrorMsg);
+        }
 
-        //Act
-        Optional<Pet> returnedPetOpt = service.findByPetId(2);
-        Pet returnedPet = returnedPetOpt.get();
-
-        //Assert
-        assertThat(returnedPet.getId()).isEqualTo(petTest.getId());
     }
 
-
-    // TEST FOR FINDING ALL PETS
-    @DisplayName("petService_FindAll")
+    // TEST FOR FINDING ALL PET TYPES
+    @DisplayName("petService_FindAll_PetTypes")
     @Test
-    public void test_findAll() {
+    public void test_findAll_PetTypes() {
         //Arrange
         int expectedLength = 4;
-        List<Pet> petList = new ArrayList<>();
-        Pet newPet = setupPet();
+        List<PetType> petTypeList = new ArrayList<>();
 
-        newPet.setId(1);
-        newPet.setName("John");
-        petList.add(newPet);
+        PetType p1 = new PetType();
+        p1.setId(1);
+        petTypeList.add(p1);
 
-        newPet.setId(2);
-        newPet.setName("Joseph");
-        petList.add(newPet);
+        PetType p2 = new PetType();
+        p1.setId(2);
+        petTypeList.add(p2);
 
-        newPet.setId(3);
-        newPet.setName("Jill");
-        petList.add(newPet);
+        PetType p3 = new PetType();
+        p1.setId(3);
+        petTypeList.add(p3);
 
-        newPet.setId(4);
-        newPet.setName("Jojo");
-        petList.add(newPet);
+        PetType p4 = new PetType();
+        p1.setId(4);
+        petTypeList.add(p4);
 
-        when(repository.findAll()).thenReturn(petList);
+        when(repository.findPetTypes()).thenReturn(petTypeList);
 
         //Act
-        List<Pet> returnedList = service.findAll();
+        List<PetType> returnedList = service.getAllPetTypes();
 
         //Assert
         assertThat(expectedLength).isEqualTo(returnedList.size());
     }
 
-    /**
-     * ------------------------ TEST_DELETE ------------------------
-     * Testing the method deleteOwner()
-     */
-    @DisplayName("ownerService_DeleteOwner")
+
+    @DisplayName("PetService_DeletePet")
     @Test
-    public void test_deletePet()
-    {
+    public void test_deletePet() throws ParseException {
 
         //Arrange
         Pet petTest = setupPet();
@@ -143,17 +144,21 @@ public class PetServiceTest {
 
     }
 
+    @DisplayName("ownerService_UpdateOwner_NotFoundExceptionForOwner")
+    @Test
+    public void test_deletePet_NotFoundException() throws ParseException {
+        int ownerId = 1;
+        Pet pet = setupPet();
+        String expectedErrorMsg = "Owner or pet is not valid. Please standby for assistance. A specialized support team will shortly make contact with you.";
+        Mockito.when(ownerRepository.findById(Mockito.anyInt())).thenThrow(new NotFoundException());
+        try {
+            service.deletePet(pet.getId(),ownerId);
+        } catch(NotFoundException ex) {
+            assertEquals(expectedErrorMsg, ex.getMessage());
+        }
+    }
 
-
-    /**
-     * ------------------------ TEST_CREATE ------------------------
-     * Testing the method createOwner()
-     */
-    /*
-
-    --WORK IN PROGRESS--
-
-    @DisplayName("ownerService_CreateOwner")
+    @DisplayName("PetService_CreatePet")
     @Test
     public void test_CreatePet() throws ParseException {
         //Arrange
@@ -163,21 +168,34 @@ public class PetServiceTest {
         Pet petTest = setupPet();
         when(repository.findById(petTest.getId())).thenReturn(Optional.of(petTest));
 
+
         String pattern = "yyyy-MM-dd";
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
         Date birthDate = simpleDateFormat.parse("2018-09-09");
 
-        PetRequest petRequest = new PetRequest("John", birthDate);
+        PetRequest petRequest = new PetRequest("Daisy", birthDate);
 
         //Act
         service.CreatePet(petRequest, 1);
-        Optional<Owner> retrievedOwner = ownerRepository.findById(ownerTest.getId());
+
+        Optional<Pet> retrievedPet = repository.findById(2);
 
         //Assert
-        MatcherAssert.assertThat(retrievedOwner.get(), samePropertyValuesAs(ownerTest));
+        assertEquals(petRequest.getName(), retrievedPet.get().getName());
     }
 
-     */
-
-
+    @DisplayName("ownerService_UpdateOwner_NotFoundException")
+    @Test
+    public void test_createPet_NotFoundException()
+    {
+        int ownerId = 1;
+        PetRequest petrequest = new PetRequest();
+        String expectedErrorMsg = "Owner with ID : " + ownerId+ " is not found";
+        Mockito.when(ownerRepository.findById(Mockito.anyInt())).thenThrow(new NotFoundException());
+        try {
+            service.CreatePet(petrequest, ownerId);
+        } catch(NotFoundException ex) {
+            assertEquals(ex.getMessage(), expectedErrorMsg);
+        }
+    }
 }
