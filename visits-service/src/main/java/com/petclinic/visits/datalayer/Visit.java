@@ -1,13 +1,15 @@
 package com.petclinic.visits.datalayer;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Type;
+import org.springframework.stereotype.Indexed;
 
 import javax.persistence.*;
 import javax.validation.constraints.Size;
 import java.util.Date;
+import java.util.UUID;
 
 /**
  * Simple JavaBean domain object representing a visit.
@@ -23,16 +25,26 @@ import java.util.Date;
  * Contributors:
  */
 
+@Data
 @Entity
 @Table(name = "visits")
 @Builder(builderMethodName = "visit")
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
 public class Visit {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    @GeneratedValue(generator = "uuid2")
+    @GenericGenerator(name = "uuid2", strategy = "uuid2")
+    @Type(type = "uuid-char")
+    @Column(name = "visit_id",unique = true, nullable = false)
+    @Builder.Default
+    private UUID visitId = UUID.randomUUID();
 
     @Builder.Default
     @Column(name = "visit_date")
@@ -53,65 +65,4 @@ public class Visit {
     @Column(name = "status")
     private boolean status;
 
-
-
-    //Constructor of the visit object
-    public Visit(int id, Date date, String description, int petId){
-        this.id = id;
-        this.date = date;
-        this.description = description;
-        this.petId = petId;
-    }
-
-    /*
-    Getter and setters for all values
-     */
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(int id){
-        this.id = id;
-    }
-
-    public Date getDate() {
-        return date;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public int getPetId() {
-        return petId;
-    }
-
-    public boolean isStatus() {
-        return status;
-    }
-
-    public void setStatus(boolean status) {
-        this.status = status;
-    }
-
-    public void setPetId(final int petId) {
-        this.petId = petId;
-    }
-
-    public void setDate(Date date) {
-        this.date = date;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-    
-    public int getPractitionerId() {
-        return practitionerId;
-    }
-    
-    public void setPractitionerId(int practitionerId) {
-        this.practitionerId = practitionerId;
-    }
 }
