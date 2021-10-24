@@ -33,7 +33,6 @@ angular.module('vetList')
         });
 
         $scope.deleteVet = function (vetId) {
-            // debugger
             let varIsConf = confirm('Want to delete vet with vetId:' + vetId + '. Are you sure?');
             if (varIsConf) {
 
@@ -44,7 +43,15 @@ angular.module('vetList')
                     $scope.errors = [];
                     alert(vetId + " Deleted Successfully!");
                     console.log(response, 'res');
-                    $scope.refresh();
+                    //refresh list
+                    $scope.refreshList = self.vetList;
+
+                    $scope.ReloadData = function () {
+                        self.vetList = FilterList();
+                        $http.get('api/gateway/vets').then(function (resp) {
+                            arr = resp.data;
+                        });
+                    }
                 }
 
                 function errorCallback(error) {
