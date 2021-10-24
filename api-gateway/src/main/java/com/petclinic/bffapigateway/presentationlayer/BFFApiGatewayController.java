@@ -44,7 +44,6 @@ public class BFFApiGatewayController {
     private final BillServiceClient billServiceClient;
 
 
-
     @GetMapping(value = "owners/{ownerId}")
     public Mono<OwnerDetails> getOwnerDetails(final @PathVariable int ownerId) {
         return customersServiceClient.getOwner(ownerId)
@@ -73,21 +72,6 @@ public class BFFApiGatewayController {
                                 .map(addVisitsToOwner(n))
                 );
     }
-    //Testing purpose
-    @GetMapping(value = "pets/visits/All")
-    public Mono<Visits> getAllVisits(){
-        return visitsServiceClient.getAllVisits();
-
-    }
-
-
-/*
-    //Add new Visit
-    @PostMapping (value = "/pets/visits", consumes = "application/json", produces = "application/json")
-    public Mono<Visits> createVisitForPets(final @RequestBody VisitDetails visitDetails){
-        return visitsServiceClient.createVisitForPets(visitDetails);
-        }
-*/
 
     @PutMapping(
             value = "owners/*/pets/{petId}/visits/{id}",
@@ -103,18 +87,6 @@ public class BFFApiGatewayController {
     @DeleteMapping (value = "visits/{visitId}")
     public Mono<Void> deleteVisitsById(final @PathVariable int visitId){
         return visitsServiceClient.deleteVisitsById(visitId);
-    }
-
-    //Delete Visit
-    @DeleteMapping (value = "pets/visits/{petId}")
-    public Mono<Void> deleteVisitForPets(final @PathVariable int petId){
-        return visitsServiceClient.deleteVisitForPets(petId);
-    }
-
-    //Update Visit
-    @PutMapping(value ="pets/visits/{petId}", consumes = "application/json", produces = "application/json")
-    public Mono<Visits> updateVisitForPets(final @PathVariable int petId){
-        return visitsServiceClient.updateVisitForPets(petId);
     }
 
     @GetMapping(value = "visits/{petId}")
@@ -155,18 +127,12 @@ public class BFFApiGatewayController {
     @PutMapping(value = "owners/{ownerId}",consumes = "application/json" ,produces = "application/json")
     public Mono<OwnerDetails> updateOwnerDetails(@RequestBody OwnerDetails od, final @PathVariable int ownerId) {
 
-
         return customersServiceClient.updateOwner(od,ownerId)
                 .flatMap(owner ->
                         visitsServiceClient.getVisitsForPets(owner.getPetIds())
                                 .map(addVisitsToOwner(owner)));
 
-
-
-
-
     }
-
 
     private Function<Visits, OwnerDetails> addVisitsToOwner(OwnerDetails owner) {
         return visits -> {
@@ -259,7 +225,6 @@ public class BFFApiGatewayController {
     // TODO: Hook this up to auth service
     @DeleteMapping(value = "admin/roles/{id}")
     public void deleteRole(@PathVariable int id) {
-
     }
 
     // TODO: Hook this up to auth service
