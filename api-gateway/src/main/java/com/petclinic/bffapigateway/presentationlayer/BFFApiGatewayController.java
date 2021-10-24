@@ -43,11 +43,15 @@ public class BFFApiGatewayController {
     private final BillServiceClient billServiceClient;
 
 
-//check this
     @GetMapping(value = "bills/{billId}")
     public Mono<BillDetails> getBillingInfo(final @PathVariable int billId)
     {
         return billServiceClient.getBilling(billId);
+    }
+
+    @GetMapping(value = "bills")
+    public Flux<BillDetails> getAllBilling() {
+        return billServiceClient.getAllBilling();
     }
 
     //Testing purpose
@@ -98,7 +102,23 @@ public class BFFApiGatewayController {
     public Flux<VisitDetails> getVisitsForPet(final @PathVariable int petId){
         return visitsServiceClient.getVisitsForPet(petId);
     }
+    
+    @GetMapping(value ="visit/{visitId}")
+    public Mono<VisitDetails> getVisitById(final @PathVariable int visitId){
+        return visitsServiceClient.getVisitById(visitId);
+    }
+    
+    @GetMapping(value = "visits/previous/{petId}")
+    public Flux<VisitDetails> getPreviousVisitsForPet(@PathVariable final int petId) {
+        return visitsServiceClient.getPreviousVisitsForPet(petId);
+    }
 
+    @GetMapping(value = "visits/scheduled/{petId}")
+    public Flux<VisitDetails> getScheduledVisitsForPet(@PathVariable final int petId) {
+        return visitsServiceClient.getScheduledVisitsForPet(petId);
+
+    }
+    
     @GetMapping(value = "visits/vets/{practitionerId}")
     public Flux<VisitDetails> getVisitForPractitioner(@PathVariable int practitionerId){
         return visitsServiceClient.getVisitForPractitioner(practitionerId);
@@ -147,7 +167,7 @@ public class BFFApiGatewayController {
      * Get a single vet given its vetID
      */
     @GetMapping(value = "vets/{vetId}")
-    public Mono<VetDetails> getVet(final @PathVariable long vetId) {
+    public Mono<VetDetails> getVet(final @PathVariable int vetId) {
         return vetsServiceClient.getVet(vetId);
     }
 
@@ -157,7 +177,7 @@ public class BFFApiGatewayController {
     @PostMapping(value = "vets",
             consumes = "application/json",
             produces = "application/json")
-    public Mono<VetDetails> createVet(@RequestBody VetDetails model) { return vetsServiceClient.getVet(model.getVetId()); }
+    public Mono<VetDetails> createVet(@RequestBody VetDetails model) { return vetsServiceClient.createVet(model); }
 
     /**
      * Delete vet from DB given the vetID
