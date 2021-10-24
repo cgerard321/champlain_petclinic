@@ -63,6 +63,14 @@ public class VisitsServiceClient {
                 .bodyToFlux(VisitDetails.class);
     }
 
+    public Flux<VisitDetails> getPreviousVisitsForPet(final int petId) {
+        return webClientBuilder.build()
+                .get()
+                .uri(hostname + "/visits/previous/{petId}", petId)
+                .retrieve()
+                .bodyToFlux(VisitDetails.class);
+    }
+
     public Flux<VisitDetails> getVisitForPractitioner(final int practitionerId){
         return webClientBuilder.build()
                 .get()
