@@ -32,13 +32,13 @@ public class CustomersServiceClient {
             @Value("${app.customers-service.port}") String customersServicePort
     ) {
         this.webClientBuilder = webClientBuilder;
-        customersServiceUrl = "http://" + customersServiceHost + ":" + customersServicePort + "/owners";
+        customersServiceUrl = "http://" + customersServiceHost + ":" + customersServicePort + "/owners/";
     }
 
 
     public Mono<OwnerDetails> getOwner(final int ownerId) {
         return webClientBuilder.build().get()
-                .uri(customersServiceUrl + "/{ownerId}", ownerId)
+                .uri(customersServiceUrl + ownerId)
                 .retrieve()
                 .bodyToMono(OwnerDetails.class);
     }
@@ -50,10 +50,11 @@ public class CustomersServiceClient {
                 .bodyToFlux(OwnerDetails.class);
     }
 
-    public Mono<OwnerDetails> updateOwner(OwnerDetails od,final int ownerId){
+    public Mono<OwnerDetails> updateOwner(int ownerId, OwnerDetails od){
 
             return webClientBuilder.build().put()
-                    .uri(customersServiceUrl + "/{ownerId}", ownerId)
+                    .uri(customersServiceUrl + ownerId)
+                    .body(Mono.just(od), OwnerDetails.class)
                     .retrieve().bodyToMono(OwnerDetails.class);
     }
 
@@ -68,15 +69,21 @@ public class CustomersServiceClient {
 
     }
 
-    public Mono<OwnerDetails> createOwner (final OwnerDetails model){
+    public Mono<OwnerDetails> createOwner (OwnerDetails model){
         return webClientBuilder.build().post()
-                .uri(customersServiceUrl+ model)
+                .uri(customersServiceUrl)
                 .accept(MediaType.APPLICATION_JSON)
+                .body(Mono.just(model), OwnerDetails.class)
                 .retrieve().bodyToMono(OwnerDetails.class);
 
     }
 
-
+    public Mono<OwnerDetails> deleteOwner (final long ownerId){
+        return webClientBuilder.build().delete()
+                .uri(customersServiceUrl + ownerId)
+                .retrieve()
+                .bodyToMono(OwnerDetails.class);
+    }
 
 
 

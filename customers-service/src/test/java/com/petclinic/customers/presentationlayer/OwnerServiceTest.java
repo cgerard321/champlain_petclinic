@@ -6,6 +6,7 @@ import com.petclinic.customers.customerExceptions.exceptions.NotFoundException;
 import com.petclinic.customers.datalayer.Owner;
 import com.petclinic.customers.datalayer.OwnerRepository;
 import org.hamcrest.MatcherAssert;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -163,7 +164,7 @@ public class OwnerServiceTest {
     {
         int ownerId = 1;
         Owner ownerTest = new Owner(1, null, null, null, null, null);
-        String expectedErrorMsg = "Updating the owner has failed, owner with ID: " + ownerId + " not found.";
+        String expectedErrorMsg = "updateOwner failed, owner with id: " + ownerId + " not found.";
         Mockito.when(ownerRepository.findById(Mockito.anyInt())).thenThrow(new NotFoundException());
         try {
             ownerService.updateOwner(ownerId, ownerTest);

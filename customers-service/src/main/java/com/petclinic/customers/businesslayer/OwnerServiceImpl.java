@@ -6,7 +6,6 @@ import com.petclinic.customers.customerExceptions.exceptions.InvalidInputExcepti
 import com.petclinic.customers.customerExceptions.exceptions.NotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
@@ -26,13 +25,6 @@ public class OwnerServiceImpl implements OwnerService {
     }
 
 
-    /**
-     * ------------------------ FIND ------------------------
-     * This method will find one specific owner in the database and display its data
-     * It is not use by the login system
-     *
-     * @return
-     */
     @Override
     public Optional<Owner> findByOwnerId(int id) {
         try {
@@ -46,28 +38,15 @@ public class OwnerServiceImpl implements OwnerService {
         }
     }
 
-    /**
-     * ------------------------ FIND ALL ------------------------
-     * This method will find one specific owner in the database and display its data
-     * It is not use by the login system
-     */
     @Override
     public List<Owner> findAll() {
 
         return repository.findAll();
     }
 
-    /**
-     * ------------------------ FIND AN ACCOUNT ------------------------
-     * PRIORITY -> IMPORTANT
-     * This method is used to search a user in the database based on the information he entered
-     * Is used by the login system
-     */
-
-
     @Override
-    public void updateOwner(int id, Owner newOwner) {
-        try {
+    public Owner updateOwner(int id, Owner newOwner) {
+        try{
             Optional<Owner> optionalOwner = repository.findById(id);
             Owner foundOwner = optionalOwner.get();
             foundOwner.setFirstName(newOwner.getFirstName());
@@ -75,36 +54,30 @@ public class OwnerServiceImpl implements OwnerService {
             foundOwner.setAddress(newOwner.getAddress());
             foundOwner.setCity(newOwner.getCity());
             foundOwner.setTelephone(newOwner.getTelephone());
-            LOG.debug("updateOwner: owner with id {} updated", id);
-        } catch (NotFoundException ex) {
-            throw new NotFoundException("Updating the owner has failed, owner with ID: " + id + " not found.");
+            LOG.debug("updateOwner: owner with id {} updated",id);
+           return repository.save(foundOwner);
         }
+        catch (Exception e)
+        {
+           throw new NotFoundException("updateOwner failed, owner with id: " + id + " not found.");
+       }
     }
-
 
     @Override
     public Owner createOwner(Owner owner) {
-        try {
-            Owner savedOwner = repository.save(owner);
-            LOG.debug("createOwner: owner with id {} saved", owner.getId());
-            return savedOwner;
-        } catch (DuplicateKeyException duplicateKeyException) {
+        try{
+            LOG.debug("createOwner: owner with id {} saved",owner.getId());
+            return repository.save(owner);
+        }
+        catch(DuplicateKeyException duplicateKeyException){
             throw new InvalidInputException("Duplicate key, ownerId: " + owner.getId());
         }
-        //INSERT METHOD
     }
 
-
-    /**
-     * ------------------------ DELETE ------------------------
-     * This method will find one specific owner in the database and delete its data
-     */
     @Override
     public void deleteOwner(int Id) {
 
         repository.findById(Id).ifPresent(o -> repository.delete(o));
         LOG.debug("User with ID: " + Id + " has been deleted successfully.");
-
-
     }
 }

@@ -9,27 +9,33 @@ angular.module('ownerForm')
         if (!ownerId) {
             self.owner = {};
         } else {
-            $http.get("api/gateway/customer/owners/" + ownerId).then(function (resp) {
+            $http.get("api/gateway/owners/" + ownerId).then(function (resp) {
                 self.owner = resp.data;
             });
         }
 
         self.submitOwnerForm = function () {
             var id = self.owner.id;
+            var method = $stateParams.method;
+            console.log(self.owner);
             var req;
-            if (id) {
-                req = $http.put("api/gateway/customer/owners/" + id, self.owner);
-            } else {
-                req = $http.post("api/gateway/customer/owners", self.owner);
+            if (id){
+                if(method == 'edit')
+                    req = $http.put("api/gateway/owners/" + id, self.owner);
+                else
+                    req = $http.delete("api/gateway/owners/" + id, self.owner)
             }
+            else
+                req = $http.post("api/gateway/owners", self.owner);
 
             req.then(function () {
                 $state.go('owners');
             }, function (response) {
                 var error = response.data;
+                error.errors = error.errors || [];
                 alert(error.error + "\r\n" + error.errors.map(function (e) {
-                        return e.field + ": " + e.defaultMessage;
-                    }).join("\r\n"));
+                    return e.field + ": " + e.defaultMessage;
+                }).join("\r\n"));
             });
         };
     }]);
