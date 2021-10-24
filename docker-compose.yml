@@ -46,7 +46,6 @@ services:
   auth-service:
     hostname: auth
     build: auth-service
-    hostname: auth
     ports:
       - "7005:8080"
     depends_on:
