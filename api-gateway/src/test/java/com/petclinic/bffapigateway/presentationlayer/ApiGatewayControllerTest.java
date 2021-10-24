@@ -33,6 +33,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 <<<<<<< HEAD
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
+<<<<<<< HEAD
 =======
 <<<<<<< HEAD
 >>>>>>> 4eb5a0c6 (Added error case tests)
@@ -46,6 +47,9 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.*;
 
+=======
+import static org.springframework.http.HttpStatus.*;
+>>>>>>> 8f4a5683 (Added error case tests)
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 //
 //import com.petclinic.billing.datalayer.BillDTO;
@@ -314,11 +318,15 @@ class ApiGatewayControllerTest {
                 .thenReturn(Mono.just(pet));
 
         client.post()
+<<<<<<< HEAD
                 .uri("/api/gateway/owners/pets")
 >>>>>>> c6febbaa (Created client method and failing test for the endpoint of adding a pet)
 =======
                 .uri("/api/gateway/owners/1/pets")
 >>>>>>> 0d55775b (Modified code so test passes)
+=======
+                .uri("/api/gateway/owners/{ownerId}/pets", od.getId())
+>>>>>>> 8f4a5683 (Added error case tests)
                 .body(Mono.just(pet), PetDetails.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -327,8 +335,11 @@ class ApiGatewayControllerTest {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 >>>>>>> cef5b393 (Ok, idk, help plz)
+=======
+>>>>>>> 8f4a5683 (Added error case tests)
                 .expectBody()
                 .jsonPath("$.id").isEqualTo(pet.getId())
                 .jsonPath("$.name").isEqualTo(pet.getName())
@@ -406,6 +417,58 @@ class ApiGatewayControllerTest {
         assertEquals(type.getName(), "Dog");
 
 >>>>>>> c6febbaa (Created client method and failing test for the endpoint of adding a pet)
+    }
+
+    @Test
+    void shouldThrowUnsupportedMediaTypeIfBodyDoesNotExist(){
+        OwnerDetails od = new OwnerDetails();
+        od.setId(0);
+        PetDetails pet = new PetDetails();
+        PetType type = new PetType();
+        type.setName("Dog");
+        pet.setId(30);
+        pet.setName("Fluffy");
+        pet.setBirthDate("2000-01-01");
+        pet.setType(type);
+
+        when(customersServiceClient.createNewPet(pet,od.getId()))
+        .thenReturn(Mono.just(pet));
+
+        client.post()
+                .uri("/api/gateway/owners/{ownerId}/pets", od.getId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(UNSUPPORTED_MEDIA_TYPE)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.path").isEqualTo("/api/gateway/owners/0/pets");
+
+
+    }
+
+    @Test
+    void ifOwnerIdIsNotSpecifiedInUrlThrowNotAllowed(){
+        OwnerDetails od = new OwnerDetails();
+        PetDetails pet = new PetDetails();
+        PetType type = new PetType();
+        type.setName("Dog");
+        pet.setId(30);
+        pet.setName("Fluffy");
+        pet.setBirthDate("2000-01-01");
+        pet.setType(type);
+
+        when(customersServiceClient.createNewPet(pet,od.getId()))
+                .thenReturn(Mono.just(pet));
+
+        client.post()
+                .uri("/api/gateway/owners/pets")
+                .body(Mono.just(pet), PetDetails.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(METHOD_NOT_ALLOWED)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.path").isEqualTo("/api/gateway/owners/pets");
     }
 
     @Test
