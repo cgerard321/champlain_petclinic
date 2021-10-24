@@ -61,6 +61,11 @@ public class BFFApiGatewayController {
 
     }
 
+    @DeleteMapping(value = "bills/{billId}")
+    public Mono<BillDetails> deleteBill(final @PathVariable int billId){
+        return billServiceClient.deleteBill(billId);
+    }
+
 
 /*
     //Add new Visit

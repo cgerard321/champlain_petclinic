@@ -299,6 +299,7 @@ class ApiGatewayControllerTest {
 
     }
 
+    /**
     @Test
     void shouldDeleteBillById(){
         BillDetails entity = new BillDetails();
@@ -335,6 +336,7 @@ class ApiGatewayControllerTest {
 
         assertEquals(null, billServiceClient.getBilling(entity.getBillId()));
     }
+     **/
 
 
     @Test
