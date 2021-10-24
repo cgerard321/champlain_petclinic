@@ -54,7 +54,7 @@ public class PetServiceTest {
         return owner;
     }
 
-    public Pet setupPet() throws ParseException {
+    public Pet setupPet() {
 
         Owner owner = setupOwner();
 
@@ -84,6 +84,7 @@ public class PetServiceTest {
         //Act
         Optional<Pet> returnedPetOpt = service.findByPetId(1, 2);
         Pet returnedPet = returnedPetOpt.get();
+    }
 
     @DisplayName("petService_FindByPetId_NotFoundException")
     @Test
@@ -92,11 +93,11 @@ public class PetServiceTest {
         int petId = 1;
         int ownerID=1;
         String expectedErrorMsg = "Pet with ID: " + petId + " not found!";
-        Mockito.when(repository.findPetByOwner(Mockito.any(), Mockito.anyInt())).thenThrow(new NotFoundException());
+        Mockito.when(repository.findPetByOwner(Mockito.any(Owner.class), Mockito.anyInt())).thenThrow(new NotFoundException());
         try {
             service.findByPetId(ownerID,petId);
         } catch(NotFoundException ex) {
-            assertEquals(ex.getMessage(), expectedErrorMsg);
+            assertEquals(expectedErrorMsg, ex.getMessage());
         }
     }
 
