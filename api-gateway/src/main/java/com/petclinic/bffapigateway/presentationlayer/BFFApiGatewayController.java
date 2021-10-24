@@ -126,6 +126,11 @@ public class BFFApiGatewayController {
     public Mono<VisitDetails> getVisitByVisitId(final @PathVariable String visitId){
         return visitsServiceClient.getVisitByVisitId(visitId);
     }
+    
+    @GetMapping(value = "visits/previous/{petId}")
+    public Flux<VisitDetails> getPreviousVisitsForPet(@PathVariable final int petId) {
+        return visitsServiceClient.getPreviousVisitsForPet(petId);
+    }
 
     @GetMapping(value = "visits/vets/{practitionerId}")
     public Flux<VisitDetails> getVisitForPractitioner(@PathVariable int practitionerId){
@@ -191,7 +196,7 @@ public class BFFApiGatewayController {
      * Get a single vet given its vetID
      */
     @GetMapping(value = "vets/{vetId}")
-    public Mono<VetDetails> getVet(final @PathVariable long vetId) {
+    public Mono<VetDetails> getVet(final @PathVariable int vetId) {
         return vetsServiceClient.getVet(vetId);
     }
 
