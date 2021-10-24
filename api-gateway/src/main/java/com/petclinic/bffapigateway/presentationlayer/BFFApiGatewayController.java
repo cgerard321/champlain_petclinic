@@ -220,7 +220,7 @@ public class BFFApiGatewayController {
      * Owners Methods
      * **/
 
-    @GetMapping(value = "/owners")
+    @GetMapping(value = "owners")
     public Flux<OwnerDetails> getOwners() {
         return customersServiceClient.getOwners()
                 .flatMap(n ->
@@ -253,7 +253,7 @@ public class BFFApiGatewayController {
                                 .map(addVisitsToOwner(owner)));
     }
 
-    @DeleteMapping(value = "/owners/{ownerId}")
+    @DeleteMapping(value = "owners/{ownerId}")
     public Mono<OwnerDetails> deleteOwner(@PathVariable int ownerId){
         return customersServiceClient.deleteOwner(ownerId);
     }

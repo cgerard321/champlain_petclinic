@@ -78,7 +78,7 @@ public class OwnerServiceImpl implements OwnerService {
 
            LOG.debug("updateOwner: owner with id {} updated",id);
 
-           return repository.save(newOwner);
+           return repository.save(foundOwner);
        }
        else{
            throw new NotFoundException("updateOwner failed, owner with id: " + id + " not found.");
@@ -105,8 +105,5 @@ public class OwnerServiceImpl implements OwnerService {
 
         repository.findById(Id).ifPresent(o -> repository.delete(o));
         LOG.debug("User with ID: " + Id + " has been deleted successfully.");
-
-
-
     }
 }
