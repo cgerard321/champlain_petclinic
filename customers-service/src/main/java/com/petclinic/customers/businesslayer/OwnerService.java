@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface OwnerService {
-
         /**
          * IF YOU SEE NEXT METHOD, EVERYTHING IS OK
          */
@@ -19,16 +18,12 @@ public interface OwnerService {
         public List<Owner> findAll();
 
         //UPDATE OWNER
-        public void updateOwner(int id, Owner owner);
+        public Owner updateOwner(int id, Owner owner);
 
         //CREATE OWNER
         public Owner createOwner(Owner owner);
 
         //DELETE OWNER
         public void deleteOwner(int id);
-
-
-
-
 
 }

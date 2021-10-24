@@ -10,10 +10,10 @@ import java.util.Optional;
 
 public interface PetService {
     //FIND PET
-    public Optional<Pet> findByPetId(int petId);
+    public Optional<Pet> findByPetId(int ownerId, int petId);
 
     //FIND ALL PETS
-    public List<Pet> findAll();
+    public List<Pet> findAll(int ownerId);
 
     //CREATE PET
     public Pet CreatePet(PetRequest pet, int ownerId);
