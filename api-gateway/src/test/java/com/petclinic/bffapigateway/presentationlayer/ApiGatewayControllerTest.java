@@ -238,8 +238,6 @@ class ApiGatewayControllerTest {
         pet.setBirthDate("2000-01-01");
         pet.setType(type);
 
-        when(customersServiceClient.createPet(pet));
-
         when(customersServiceClient.createPet(pet,od.getId()))
 
                 .thenReturn(Mono.just(pet));
@@ -251,12 +249,14 @@ class ApiGatewayControllerTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody();
+                .expectBody()
+                .jsonPath("$.id").isEqualTo(pet.getId())
+                .jsonPath("$.name").isEqualTo(pet.getName())
+                .jsonPath("$.birthDate").isEqualTo(pet.getBirthDate())
+                .jsonPath("$.type").isEqualTo(pet.getType());
 
-        assertEquals(pet.getId(), 30);
-        assertEquals(pet.getName(), "Fluffy");
-        assertEquals(pet.getBirthDate(), "2000-01-01");
-        assertEquals(type.getName(), "Dog");
+
+
 
     }
 

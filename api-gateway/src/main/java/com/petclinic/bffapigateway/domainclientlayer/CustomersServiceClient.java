@@ -14,6 +14,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import static reactor.core.publisher.Mono.just;
+
 /**
  * @author Maciej Szarlinski
  * @author Christine Gerard
@@ -82,6 +84,7 @@ public class CustomersServiceClient {
 
 
 
+
     public Mono<OwnerDetails> deleteOwner (final long ownerId) {
         return webClientBuilder.build().delete()
                 .uri(customersServiceUrl + ownerId)
@@ -89,8 +92,12 @@ public class CustomersServiceClient {
                 .bodyToMono(OwnerDetails.class);
     }
     public Mono<PetDetails> createPet(final PetDetails model,final int ownerId){
+
+    
+
         return webClientBuilder.build().post()
                 .uri(customersServiceUrl +"/{ownerId}/pets", ownerId)
+                .body(just(model), PetDetails.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve().bodyToMono(PetDetails.class);
 
