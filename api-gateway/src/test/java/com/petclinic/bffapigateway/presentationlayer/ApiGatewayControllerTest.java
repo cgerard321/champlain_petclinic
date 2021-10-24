@@ -20,7 +20,11 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -55,6 +59,9 @@ class ApiGatewayControllerTest {
 
     @MockBean
     private BillServiceClient billServiceClient;
+
+    @MockBean
+    private AggregateServiceClient aggregateServiceClient;
 
     @Autowired
     private WebTestClient client;
@@ -753,6 +760,74 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.statusCode").isEqualTo(UNAUTHORIZED.value())
                 .jsonPath("$.message").isEqualTo(message)
                 .jsonPath("$.timestamp").exists();
+    }
+
+    @Test
+    void shouldGetAllCombinedAggregateById(){
+        AggregateAllCombinedDetails combined = new AggregateAllCombinedDetails();
+
+        List<VetDetails> vets = new ArrayList<>();
+        List<PetDetails> pets = new ArrayList<>();
+        List<BillDetails> bills = new ArrayList<>();
+
+        VetDetails vet1 = new VetDetails();
+        vet1.setVetId(123456);
+        vet1.setFirstName("Frank");
+        vet1.setLastName("Johnson");
+        vet1.setEmail("frank.johnson@email.com");
+        vet1.setResume("Practicing since 15 years");
+        vet1.setWorkday("Monday, Tuesday, Wednesday");
+        vet1.setPhoneNumber("5554151125");
+        vet1.setIsActive(1);
+
+        PetDetails pet1 = new PetDetails();
+        PetType petType = new PetType();
+        pet1.setId(25);
+        pet1.setName("Jojo");
+        pet1.setBirthDate("2004-04-04");
+        petType.setName("cat");
+        pet1.setType(petType);
+
+        BillDetails bill1 = new BillDetails();
+        bill1.setCustomerId(1);
+        bill1.setVisitType("previous");
+        bill1.setDate(new Date());
+        bill1.setAmount(559.75);
+
+        vets.add(vet1);
+        pets.add(pet1);
+        bills.add(bill1);
+
+        combined.setId(1);
+        combined.setFirstName("John");
+        combined.setLastName("Robinson");
+        combined.setCity("New York");
+        combined.setAddress("123 5th Avenue");
+        combined.setVets(vets);
+        combined.setPets(pets);
+        combined.setBills(bills);
+
+        when(aggregateServiceClient.getOneAggregate(combined.getId()))
+                .thenReturn(Mono.just(combined));
+
+        client.get()
+                .uri("/api/gateway/aggregate/{id}", combined.getId())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.id").isEqualTo(combined.getId())
+                .jsonPath("$.firstName").isEqualTo(combined.getFirstName())
+                .jsonPath("$.lastName").isEqualTo(combined.getLastName())
+                .jsonPath("$.address").isEqualTo(combined.getAddress())
+                .jsonPath("$.city").isEqualTo(combined.getCity())
+                .jsonPath("$.telephone").isEqualTo(combined.getTelephone())
+                .jsonPath("$.pets").isEqualTo(combined.getPets())
+                .jsonPath("$.vets").isEqualTo(combined.getVets())
+                .jsonPath("$.bills").isEqualTo(combined.getBills());
+
+
+
+
     }
 }
 
