@@ -4,6 +4,7 @@ package com.petclinic.bffapigateway.presentationlayer;
 import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -29,6 +30,7 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 @RequestMapping("/api/gateway")
 public class BFFApiGatewayController {
 
@@ -218,7 +220,8 @@ public class BFFApiGatewayController {
             consumes = "application/json",
             produces = "application/json"
     )
-    Mono<VetDetails> updateVet(@RequestBody VetDetails vet, @PathVariable int vetId) {
+    public Mono<VetDetails> updateVet( @PathVariable int vetId, @RequestBody VetDetails vet) {
+        log.debug("Trying to update vet");
         return vetsServiceClient.updateVet(vetId, vet);
     }
 

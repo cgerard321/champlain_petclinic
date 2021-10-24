@@ -1,14 +1,28 @@
 'use strict';
 
 angular.module('vetForm')
-    .controller('VetFormController', ["$http", '$state', '$scope', function ($http, $state, $scope) {
+    .controller('VetFormController', ["$http", '$state', '$stateParams', function ($http, $state, $stateParams) {
         var self = this;
-        var vetId = $scope.vetId || 0;
+        var vetId = $stateParams.vetId || 0;
         if (!vetId || vetId === 0) {
             self.vet = {};
         } else {
-            $http.get("api/gateway/vets/" + vetId).then(function (resp) {
+            $http.get("api/gateway/vets/" + $stateParams.vetId).then(function (resp) {
                 self.vet = resp.data;
+
+                document.getElementById("firstName").value = self.vet.firstName;
+                document.getElementById("lastName").value = self.vet.lastName;
+
+                let isAct = document.getElementsByClassName("isActiveRadio");
+                if(self.vet.isActive === 1)
+                {
+                    isAct[0].checked = true;
+                }
+                else if(self.vet.isActive === 0)
+                {
+                    isAct[1].checked = true;
+                }
+
             });
         }
         self.submitVetForm = function (vet)
@@ -36,22 +50,22 @@ angular.module('vetForm')
             }
             specialtiesStr += "]"
             // console.log(specialties);
+            var id = self.vet.vetId;
             const specialties = JSON.parse(specialtiesStr);
             vet.specialties = specialties;
-            self.vet = vet;
-            var id = self.vet.vetId;
+            let vetC = vet;
             var req;
             if (id) {
-                req = $http.put("api/gateway/vets" + id, self.vet);
+                req = $http.put("api/gateway/vets/" + vetId, vetC);
             } else {
-                req = $http.post("api/gateway/vets", self.vet);
+                req = $http.post("api/gateway/vets", vetC);
                 console.log(self.vet)
             }
 
             req.then(function () {
                 $state.go('vets');
             }, function (response) {
-                var error = response.data;
+                let error = "Missing fields, please fill out the form";
                 alert(error);
             });
         };

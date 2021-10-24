@@ -7,7 +7,8 @@
 <div class="bg-light">
   <div class="container">
     <div class="py-5 text-center"/>
-    <h2 class="titleVetForm" ng-if="">New Vet Sign Up</h2>
+    <h2 class="titleVetForm" ng-if="$ctrl.firstName === null">New Vet Sign Up</h2>
+    <h2 class="titleVetForm" ng-if="$ctrl">Edit Vet</h2>
     <p class="lead">Welcome to our team, please fill out the form below ensuring to fill all sections.</p>
   </div>
   <div class="row g-5">
@@ -15,19 +16,19 @@
       <form id="vetForm" enctype="multipart/form-data" name="vetForm">
         <div class="row g-3">
           <div class="col-sm-6">
-            <input class="form-control" name="firstName" type="text" ng-model="vet.firstName" placeholder="First Name" pattern="^(a-z| |,|.|-)+" required maxlength="30" minlength="3" title="Minimum of 3 characters and maximum of 30 characters. Only letters and punctuation mark."><br/>
+            <input id="firstName" class="form-control" name="firstName" type="text" ng-model="vet.firstName" placeholder="First Name"  pattern="^(a-z| |,|.|-)+" required maxlength="30" minlength="3" title="Minimum of 3 characters and maximum of 30 characters. Only letters and punctuation mark."><br/>
           </div>
 
           <div class="col-sm-6">
-            <input class="form-control" name="lastName" type="text" ng-model="vet.lastName" placeholder="Last Name" pattern="^(a-z| |,|.|-)+" required maxlength="30" minlength="3" title="Minimum of 3 characters and maximum of 30 characters. Only letters and punctuation mark.">
+            <input id="lastName" class="form-control" name="lastName" type="text" ng-model="vet.lastName" placeholder="Last Name"  pattern="^(a-z| |,|.|-)+" required maxlength="30" minlength="3" title="Minimum of 3 characters and maximum of 30 characters. Only letters and punctuation mark.">
           </div>
 
           <div class="col-12">
-            <input class="form-control" name="email" type="email" ng-model="vet.email" placeholder="Email" pattern="\b[\w.%-]+@[-.\w]+\.[A-Za-z]{2,5}\b" required maxlength="100" minlength="5" title="Minimum of 5 characters and maximum of 100 characters. Top level domain should have 2 to 5 characters.">
+            <input id="email" class="form-control"  name="email" type="email" ng-model="vet.email" placeholder="Email" pattern="\b[\w.%-]+@[-.\w]+\.[A-Za-z]{2,5}\b" required maxlength="100" minlength="5" title="Minimum of 5 characters and maximum of 100 characters. Top level domain should have 2 to 5 characters.">
           </div>
 
           <div class="col-sm-12">
-            <input class="form-control" type="number" name="phoneNumber" ng-model="vet.phoneNumber" placeholder="Phone Number" required maxlength="4" minlength="4" title="Accepts only numbers for 4 characters.">
+            <input id="phoneNumber" class="form-control"  type="number" name="phoneNumber" ng-model="vet.phoneNumber" placeholder="Phone Number" required maxlength="4" minlength="4" title="Accepts only numbers for 4 characters.">
           </div>
 
           <hr class="my-4"/>
@@ -72,7 +73,7 @@
 
           <div class="col-sm-12">
             <h5 class="form-label">Career Resume</h5>
-            <textarea class="form-control" placeholder="Resume" name="resume" ng-model="vet.resume" pattern="^(.*)" maxlength="350" title="Maximum of 350 characters."></textarea>
+            <textarea id="resume" class="form-control" placeholder="Resume" name="resume" ng-model="vet.resume" pattern="^(.*)" maxlength="350" title="Maximum of 350 characters."></textarea>
           </div>
 
         <hr class="my-4"/>
@@ -117,11 +118,11 @@
 
           <div class="form-check">
             <label class="form-check-label vet-label-input" >
-              <input class="form-check-input" type="radio" ng-model="vet.isActive" ng-value="1" name="isActive" value="1">Yes</label>
+              <input class="form-check-input isActiveRadio" type="radio" ng-model="vet.isActive" ng-value="1" name="isActive" value="1">Yes</label>
           </div>
           <div class="form-check">
             <label class="form-check-label vet-label-input" >
-              <input class="form-check-input" type="radio" ng-model="vet.isActive" ng-value="0" name="isActive" value="0">No</label>
+              <input class="form-check-input isActiveRadio" type="radio" ng-model="vet.isActive" ng-value="0" name="isActive" value="0">No</label>
           </div>
         </div>
         <hr class="my-4"/>
