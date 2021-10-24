@@ -65,6 +65,7 @@ public class BFFApiGatewayController {
     }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     @DeleteMapping(value = "bills/{billId}")
     public Mono<Void> deleteBill(final @PathVariable int billId){
         return billServiceClient.deleteBill(billId);
@@ -74,6 +75,15 @@ public class BFFApiGatewayController {
     @PostMapping(value = "owners/{ownerId}/pets" , produces = "application/json", consumes = "application/json")
     public Mono<PetDetails> createNewPet(@RequestBody PetDetails pet, @PathVariable int ownerId) {
         return customersServiceClient.createPet(pet, ownerId);
+=======
+    @GetMapping(value = "owners")
+    public Flux<OwnerDetails> getOwners() {
+        return customersServiceClient.getOwners()
+                .flatMap(n ->
+                        visitsServiceClient.getVisitsForPets(n.getPetIds())
+                                .map(addVisitsToOwner(n))
+                );
+>>>>>>> cef5b393 (Ok, idk, help plz)
     }
 
 <<<<<<< HEAD
@@ -86,6 +96,7 @@ public class BFFApiGatewayController {
 
 =======
     @PostMapping(value = "owners/{ownerId}/pets" , produces = "application/json", consumes = "application/json")
+<<<<<<< HEAD
     public Mono<PetDetails> createPet(@RequestBody PetDetails pet, @PathVariable int ownerId){
 <<<<<<< HEAD
         return customersServiceClient.createPet(ownerId,pet);
@@ -93,6 +104,10 @@ public class BFFApiGatewayController {
 =======
         return customersServiceClient.createPet(pet, ownerId);
 >>>>>>> 0558a528 (Customer service is fked gg.)
+=======
+    public Mono<PetDetails> createNewPet(@RequestBody PetDetails pet, @PathVariable int ownerId){
+        return customersServiceClient.createNewPet(pet, ownerId);
+>>>>>>> cef5b393 (Ok, idk, help plz)
     }
 
     //Testing purpose

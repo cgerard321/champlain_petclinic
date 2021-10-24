@@ -84,6 +84,7 @@ public class CustomersServiceClient {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     public Mono<PetDetails> createPet(final PetDetails model,final int ownerId){
         return webClientBuilder.build().post()
                 .uri(customersServiceUrl +"/{ownerId}/pets", ownerId)
@@ -102,6 +103,12 @@ public class CustomersServiceClient {
         return webClientBuilder.build().post()
                 .uri(customersServiceUrl +"/{ownerId}/pets", ownerId)
 >>>>>>> 0558a528 (Customer service is fked gg.)
+=======
+    public Mono<PetDetails> createNewPet(final PetDetails model,final int ownerId){
+        return webClientBuilder.build().post()
+                .uri(customersServiceUrl +"/{ownerId}/pets", ownerId)
+                .body(just(model), PetDetails.class)
+>>>>>>> cef5b393 (Ok, idk, help plz)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve().bodyToMono(PetDetails.class);
     }

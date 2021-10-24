@@ -270,6 +270,7 @@ class ApiGatewayControllerTest {
 >>>>>>> b6da7faa (Created client method and failing test for the endpoint of adding a pet)
                 .thenReturn(Mono.just(pet));
 
+<<<<<<< HEAD
         client.post()
                 .uri("/api/gateway/owners/pets")
 <<<<<<< HEAD
@@ -281,6 +282,9 @@ class ApiGatewayControllerTest {
 =======
         when(customersServiceClient.createPet(pet,od.getId()))
 >>>>>>> 0558a528 (Customer service is fked gg.)
+=======
+        when(customersServiceClient.createNewPet(pet,od.getId()))
+>>>>>>> cef5b393 (Ok, idk, help plz)
                 .thenReturn(Mono.just(pet));
 
         client.post()
@@ -292,6 +296,9 @@ class ApiGatewayControllerTest {
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> cef5b393 (Ok, idk, help plz)
                 .expectBody()
                 .jsonPath("$.id").isEqualTo(pet.getId())
                 .jsonPath("$.name").isEqualTo(pet.getName())
@@ -299,6 +306,7 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.type").isEqualTo(pet.getType());
 
 
+<<<<<<< HEAD
 
     }
 
@@ -354,11 +362,9 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.path").isEqualTo("/api/gateway/owners/pets");
 =======
                 .expectBody();
+=======
+>>>>>>> cef5b393 (Ok, idk, help plz)
 
-        assertEquals(pet.getId(), 30);
-        assertEquals(pet.getName(), "Fluffy");
-        assertEquals(pet.getBirthDate(), "2000-01-01");
-        assertEquals(type.getName(), "Dog");
 
 >>>>>>> b6da7faa (Created client method and failing test for the endpoint of adding a pet)
     }
