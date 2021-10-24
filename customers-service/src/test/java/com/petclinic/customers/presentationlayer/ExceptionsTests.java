@@ -15,6 +15,9 @@ import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
@@ -87,5 +90,19 @@ public class ExceptionsTests {
 
         assertEquals(httpErrorInfo.getHttpStatus(), HttpStatus.NOT_FOUND);
         assertEquals(httpErrorInfo.getMessage(), "Owner not found.");
+    }
+
+    @Test
+    void HandleInvalidInputExceptionTest() throws JsonProcessingException {
+        Owner newOwner = new Owner(1, "Wael", "Osman", "Address-1", "City-1", "1234567890");
+
+        HttpErrorInfo httpErrorInfo = exceptionHandler.handleInvalidInputException(MockServerHttpRequest.post("/owners", 1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body(objectMapper.writeValueAsString(newOwner)), new InvalidInputException("Owner doesn't exist."));
+
+        assertEquals(httpErrorInfo.getHttpStatus(), HttpStatus.UNPROCESSABLE_ENTITY);
+        assertEquals(httpErrorInfo.getPath(), "/owners");
+        assertEquals(httpErrorInfo.getTimestamp().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss")), ZonedDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss")));
     }
 }
