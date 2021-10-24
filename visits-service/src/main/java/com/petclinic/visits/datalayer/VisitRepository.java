@@ -4,10 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Repository class for <code>Visit</code> domain objects All method names are compliant with Spring Data naming conventions so this interface can easily be extended for Spring
@@ -33,4 +30,5 @@ public interface VisitRepository extends JpaRepository<Visit, Integer> {
 
     List<Visit> findAllByDateBetween(Date startingDate, Date EndDate);
 
+    Optional<Visit> findByVisitId(UUID visitId);
 }

@@ -16,7 +16,7 @@ import lombok.NoArgsConstructor;
 @Builder(toBuilder = true)
 public class VisitDetails {
 
-    private Integer id = null;
+    private String visitId = null;
 
     private Integer petId = null;
 
