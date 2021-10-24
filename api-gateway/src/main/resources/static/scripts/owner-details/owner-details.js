@@ -8,4 +8,5 @@ angular.module('ownerDetails', ['ui.router'])
                 url: '/owners/details/:ownerId',
                 template: '<owner-details></owner-details>'
             })
+
     }]);

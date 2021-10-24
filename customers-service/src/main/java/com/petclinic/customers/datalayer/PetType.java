@@ -27,7 +27,7 @@ public class PetType {
     }
 
     public String getName() {
-        return this.name;
+        return name;
     }
 }
 
