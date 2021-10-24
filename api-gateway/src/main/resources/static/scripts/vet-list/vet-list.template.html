@@ -42,7 +42,7 @@
             <a id="disable" ui-sref="disableVet({vetId: $ctrl.vet.vetId})"></a>
             <a id="enable" ui-sref="enableVet({vetId: $ctrl.vet.vetId})"></a>
         </td>
-        <td><a class="btn btn-danger" ng-confirm-click="Are you sure to delete this vet ?" confirmed-click="deleteVet({vetId: $ctrl.vet.vetId})">Delete Vet</a></td>
+        <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteVet(vet.vetId)">Delete Vet</a></td>
         <script>
             var setAvailable = function (input) {
                 if (input.checked) {
