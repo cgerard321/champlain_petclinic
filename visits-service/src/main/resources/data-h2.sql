@@ -2,7 +2,6 @@ INSERT INTO visits VALUES (1, '6e4e8504-f5d1-448b-8f90-c9b220cdb5a8', 7, '2010-0
 INSERT INTO visits VALUES (2, '5e4e8504-f5d1-448b-8f90-c9b220cdb5a8', 8, '2011-03-04', 'rabies shot', 327874, 1);
 INSERT INTO visits VALUES (3, '4e4e8504-f5d1-448b-8f90-c9b220cdb5a8', 8, '2009-06-04', 'neutered', 327874, 1);
 INSERT INTO visits VALUES (4, '3e4e8504-f5d1-448b-8f90-c9b220cdb5a8', 7, '2008-09-04', 'spayed', 238372, 1);
-
 INSERT INTO visits VALUES (5, '7e4e8504-f5d1-448b-8f90-c9b220cdb5a8', 1, '2020-03-04', 'rabies shot', 234568, 0);
 INSERT INTO visits VALUES (6, '60747fd2-e06f-47a3-9e33-96f2fd240fec', 1, '2022-03-04', 'rabies shot', 327874, 1);
 INSERT INTO visits VALUES (7, '50747fd2-e06f-47a3-9e33-96f2fd240fec', 2, '2023-06-04', 'neutered', 327874, 1);
@@ -21,3 +20,4 @@ INSERT INTO visits VALUES (19, '64747fd2-e06f-47a3-9e33-96f2fd240fec', 7, '2021-
 INSERT INTO visits VALUES (20, '65747fd2-e06f-47a3-9e33-96f2fd240fec', 7, '2019-04-20', 'animal care', 238372, 1);
 INSERT INTO visits VALUES (21, '66747fd2-e06f-47a3-9e33-96f2fd240fec', 7, '2019-09-11', 'examination', 327874, 1);
 INSERT INTO visits VALUES (22, '67747fd2-e06f-47a3-9e33-96f2fd240fec', 7, '2021-11-11', 'examination', 234568, 1);
+
