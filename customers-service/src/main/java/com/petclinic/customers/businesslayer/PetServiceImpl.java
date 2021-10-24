@@ -84,7 +84,7 @@ public class PetServiceImpl implements PetService {
             Optional<Owner> ownerOpt = ownerService.findByOwnerId(ownerId);
             Owner owner = ownerOpt.get();
             //Pet pet = findByPetId(petId).orElseThrow(()-> new NotFoundException("Pet with ID: " + petId + " has not been found"));
-            Optional<Pet> petOpt = findByPetId(petId);
+            Optional<Pet> petOpt = findByPetId(ownerId, petId);
             Pet pet = petOpt.get();
             owner.removePet(pet);
             petRepository.delete(pet);
