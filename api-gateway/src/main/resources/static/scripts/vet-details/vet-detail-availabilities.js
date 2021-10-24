@@ -33,17 +33,12 @@ function displayDays() {
     let strDays = document.getElementById('workDays').textContent;
 
     let daysOfWeek = (strDays.replace(/\s+/g, '')).split(',');
-    let d = "2021-10-19";
-    let daysToRemove = new Date(d);
-
-    let daysToRemoveYear= daysToRemove.getFullYear();
     let currentYear = date.getFullYear();
 
 
     let visitDaysToRemove = [];
     let dayNb = [];
     for (let i = 0; i < visitsDatesArray.length; i++) {
-
         if(currentYear === new Date(visitsDatesArray[i]).getFullYear()){
             if(currentWeek === getWeekNumber(new Date(visitsDatesArray[i]))){
                 dayNb.push((new Date(visitsDatesArray[i])).getDay() + 1);
@@ -56,17 +51,7 @@ function displayDays() {
     console.log("visitDaysToRemove")
     console.log(visitDaysToRemove)
 
-    let nbDayWeekToRemove = daysToRemove.getDay() + 1;
-
-    let DayWeekToRemove = dayOfWeekAsString(nbDayWeekToRemove);
-
-    getWeekNumber(daysToRemove);
-    if(currentYear === daysToRemoveYear){
-        if(currentWeek === getWeekNumber(daysToRemove)){
-            removeItem(daysOfWeek, DayWeekToRemove);
-        }
-    }
-
+    daysOfWeek = daysOfWeek.filter(item => !visitDaysToRemove.includes(item));
 
     const targetDiv = document.getElementById("displayNone");
     const btn = document.getElementById("toggle");
