@@ -78,3 +78,9 @@ input:checked + .slider:before {
 .slider.round:before {
   border-radius: 50%;
 }
+
+@media screen and (max-width:530px){
+    .day-of-week{
+        grid-template-column: 1fr 1fr 1fr;
+     }
+}
