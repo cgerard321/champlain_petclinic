@@ -216,10 +216,9 @@ public class BFFApiGatewayController {
         return authServiceClient.getRoles();
     }
 
-    // TODO: Hook this up to auth service
     @DeleteMapping(value = "admin/roles/{id}")
-    public void deleteRole(@PathVariable int id) {
-
+    public Mono<Void> deleteRole(@PathVariable int id) {
+        return authServiceClient.deleteRole(id);
     }
 
     @PostMapping(value = "admin/roles")
