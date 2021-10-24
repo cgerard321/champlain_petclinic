@@ -1,21 +1,27 @@
 package com.petclinic.customers.presentationlayer;
 
 import com.petclinic.customers.businesslayer.OwnerService;
+import com.petclinic.customers.customerExceptions.exceptions.InvalidInputException;
+import com.petclinic.customers.customerExceptions.exceptions.NotFoundException;
 import com.petclinic.customers.datalayer.Owner;
 import com.petclinic.customers.datalayer.OwnerRepository;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.Optional;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.hamcrest.Matchers.samePropertyValuesAs;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 import java.util.List;
@@ -31,10 +37,6 @@ public class OwnerServiceTest {
     OwnerService ownerService;
 
 
-    /**
-     * ------------------------ TEST_FIND ------------------------
-     * Testing the method findByOwnerId()
-     */
     @DisplayName("ownerService_FindByOwnerId")
     @Test
     public void test_findByOwnerId()
@@ -51,10 +53,21 @@ public class OwnerServiceTest {
         assertThat(returnedOwner.getId()).isEqualTo(ownerTest.getId());
     }
 
-    /**
-     * ------------------------ TEST_FIND_ALL ------------------------
-     * Testing the method findAll()
-     */
+
+    @DisplayName("ownerService_FindByOwnerId_NotFoundException")
+    @Test
+    public void test_findByOwnerId_NotFoundException()
+    {
+        int ownerId = 1;
+        String expectedErrorMsg = "User with ID: " +ownerId+ " is not found!";
+        Mockito.when(ownerRepository.findById(Mockito.anyInt())).thenThrow(new NotFoundException());
+        try {
+            ownerService.findByOwnerId(ownerId);
+        } catch(NotFoundException ex) {
+           assertEquals(ex.getMessage(), expectedErrorMsg);
+        }
+    }
+
     @DisplayName("ownerService_FindAll")
     @Test
     public void test_findAll()
@@ -73,13 +86,8 @@ public class OwnerServiceTest {
 
         //Assert
         assertThat(expectedLength).isEqualTo(returnedList.size());
-
     }
 
-    /**
-     * ------------------------ TEST_DELETE ------------------------
-     * Testing the method deleteOwner()
-     */
     @DisplayName("ownerService_DeleteOwner")
     @Test
     public void test_deleteOwner()
@@ -97,10 +105,7 @@ public class OwnerServiceTest {
         verify(ownerRepository, times(1)).delete(ownerTest);
 
     }
-    /**
-     * ------------------------ TEST_CREATE ------------------------
-     * Testing the method createOwner()
-     */
+
     @DisplayName("ownerService_CreateOwner")
     @Test
     public void test_CreateOwner()
@@ -116,6 +121,55 @@ public class OwnerServiceTest {
 
         //Assert
         MatcherAssert.assertThat(retrievedOwner.get(), samePropertyValuesAs(ownerTest));
+    }
+
+    @DisplayName("ownerService_CreateOwner_DuplicateKeyException")
+    @Test
+    public void test_CreateOwner_DuplicateKeyException()
+    {
+        Owner ownerTest = new Owner(1, null, null, null, null, null);
+        String expectedErrorMsg = "Duplicate key, ownerId: " + ownerTest.getId();
+        Mockito.when(ownerRepository.save(Mockito.any(Owner.class))).thenThrow(new DuplicateKeyException("Duplicate key, ownerId: " + ownerTest.getId()));
+        try {
+            ownerService.createOwner(ownerTest);
+        } catch(Exception ex) {
+            assertEquals(ex.getMessage(), expectedErrorMsg);
+        }
+
+    }
+
+    @DisplayName("ownerService_CreateOwner")
+    @Test
+    public void test_UpdateOwner()
+    {
+        //Arrange
+        int OwnerId = 1;
+        Owner newOwner1 = new Owner(OwnerId, "Michel", "Lebrie", "56 Yeet St.", "Longueuil", "1234567890");
+        when(ownerRepository.findById(OwnerId)).thenReturn(Optional.of(newOwner1));
+
+        //Act
+        ownerService.updateOwner(1, newOwner1);
+
+        assertEquals(ownerService.findByOwnerId(1).get().getFirstName(), "Michel");
+        assertEquals(ownerService.findByOwnerId(1).get().getLastName(), "Lebrie");
+        assertEquals(ownerService.findByOwnerId(1).get().getAddress(), "56 Yeet St.");
+        assertEquals(ownerService.findByOwnerId(1).get().getCity(), "Longueuil");
+        assertEquals(ownerService.findByOwnerId(1).get().getTelephone(), "1234567890");
+    }
+
+    @DisplayName("ownerService_UpdateOwner_NotFoundException")
+    @Test
+    public void test_UpdateOwner_NotFoundException()
+    {
+        int ownerId = 1;
+        Owner ownerTest = new Owner(1, null, null, null, null, null);
+        String expectedErrorMsg = "Updating the owner has failed, owner with ID: " + ownerId + " not found.";
+        Mockito.when(ownerRepository.findById(Mockito.anyInt())).thenThrow(new NotFoundException());
+        try {
+            ownerService.updateOwner(ownerId, ownerTest);
+        } catch(NotFoundException ex) {
+            assertEquals(ex.getMessage(), expectedErrorMsg);
+        }
     }
 
 
