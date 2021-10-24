@@ -43,7 +43,7 @@ class PetResource {
     {
         return petService.findAll(ownerId);
     }
-  
+
     @GetMapping("/{petId}")
     public PetDetails findPet(@PathVariable("ownerId") int ownerId, @PathVariable("petId") int petId)
     {
@@ -54,8 +54,7 @@ class PetResource {
     {
         return petService.findByPetId(ownerId, petId);
     }
-
-   
+  
     @DeleteMapping(value = "/{petId}")
     public void DeletePet(@PathVariable("petId") int petId, @PathVariable("ownerId") int ownerId)
     {

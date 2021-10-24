@@ -65,34 +65,35 @@ public class OwnerServiceImpl implements OwnerService {
 
 
     @Override
-    public void updateOwner(int id, Owner newOwner) {
-        try {
-            Optional<Owner> optionalOwner = repository.findById(id);
-            Owner foundOwner = optionalOwner.get();
-            foundOwner.setFirstName(newOwner.getFirstName());
-            foundOwner.setLastName(newOwner.getLastName());
-            foundOwner.setAddress(newOwner.getAddress());
-            foundOwner.setCity(newOwner.getCity());
-            foundOwner.setTelephone(newOwner.getTelephone());
-            LOG.debug("updateOwner: owner with id {} updated", id);
-        } catch (NotFoundException ex) {
-            throw new NotFoundException("Updating the owner has failed, owner with ID: " + id + " not found.");
-        }
-    }
+    public Owner updateOwner(int id, Owner newOwner) {
+       Optional<Owner> optionalOwner = repository.findById(id);
+       if(optionalOwner.isPresent()){
+           Owner foundOwner = optionalOwner.get();
+           foundOwner.setFirstName(newOwner.getFirstName());
+           foundOwner.setLastName(newOwner.getLastName());
+           foundOwner.setAddress(newOwner.getAddress());
+           foundOwner.setCity(newOwner.getCity());
+           foundOwner.setTelephone(newOwner.getTelephone());
 
+           LOG.debug("updateOwner: owner with id {} updated",id);
+
+           return repository.save(foundOwner);
+       }
+       else{
+           throw new NotFoundException("updateOwner failed, owner with id: " + id + " not found.");
+       }
+    }
 
     @Override
     public Owner createOwner(Owner owner) {
-        try {
-            Owner savedOwner = repository.save(owner);
-            LOG.debug("createOwner: owner with id {} saved", owner.getId());
-            return savedOwner;
-        } catch (DuplicateKeyException duplicateKeyException) {
+        try{
+            LOG.debug("createOwner: owner with id {} saved",owner.getId());
+            return repository.save(owner);
+        }
+        catch(DuplicateKeyException duplicateKeyException){
             throw new InvalidInputException("Duplicate key, ownerId: " + owner.getId());
         }
-        //INSERT METHOD
     }
-
 
     /**
      * ------------------------ DELETE ------------------------
@@ -103,7 +104,5 @@ public class OwnerServiceImpl implements OwnerService {
 
         repository.findById(Id).ifPresent(o -> repository.delete(o));
         LOG.debug("User with ID: " + Id + " has been deleted successfully.");
-
-
     }
 }

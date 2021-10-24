@@ -1,12 +1,16 @@
 package com.petclinic.customers.presentationlayer;
 
 import com.petclinic.customers.businesslayer.OwnerService;
+import com.petclinic.customers.customerExceptions.exceptions.NotFoundException;
 import com.petclinic.customers.datalayer.Owner;
 import io.micrometer.core.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import springfox.documentation.spring.web.json.Json;
 
+import javax.print.attribute.standard.Media;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
@@ -32,9 +36,12 @@ class OwnerResource {
         this.ownerService = ownerService;
     }
 
-    @PostMapping
+    @PostMapping(
+            consumes = "application/json",
+            produces = "application/json"
+    )
     @ResponseStatus(HttpStatus.CREATED)
-    public Owner createOwner(@Valid @RequestBody Owner owner) {
+    public Owner createOwner(@RequestBody Owner owner) {
         return ownerService.createOwner(owner);
     }
 
@@ -49,14 +56,12 @@ class OwnerResource {
     }
 
     @PutMapping(value = "/{ownerId}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void updateOwner(@PathVariable("ownerId") int ownerId, @Valid @RequestBody Owner ownerRequest) {
-      ownerService.updateOwner(ownerId, ownerRequest);
+    public Owner updateOwner(@PathVariable int ownerId, @RequestBody Owner ownerRequest) {
+        return ownerService.updateOwner(ownerId, ownerRequest);
     }
 
     @DeleteMapping(value = "/{ownerId}")
-    public void deleteOwner(@PathVariable("ownerId") int ownerId)
-    {
+    public void deleteOwner(@PathVariable("ownerId") int ownerId) {
         ownerService.deleteOwner(ownerId);
     }
 

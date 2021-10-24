@@ -38,21 +38,10 @@ public class BFFApiGatewayController {
 
     private final VetsServiceClient vetsServiceClient;
 
-
     private final AuthServiceClient authServiceClient;
 
     private final BillServiceClient billServiceClient;
 
-
-
-    @GetMapping(value = "owners/{ownerId}")
-    public Mono<OwnerDetails> getOwnerDetails(final @PathVariable int ownerId) {
-        return customersServiceClient.getOwner(ownerId)
-                .flatMap(owner ->
-                        visitsServiceClient.getVisitsForPets(owner.getPetIds())
-                                .map(addVisitsToOwner(owner))
-                );
-    }
 
     @GetMapping(value = "bills/{billId}")
     public Mono<BillDetails> getBillingInfo(final @PathVariable int billId)
@@ -65,14 +54,6 @@ public class BFFApiGatewayController {
         return billServiceClient.getAllBilling();
     }
 
-    @GetMapping(value = "customer/owners")
-    public Flux<OwnerDetails> getOwners() {
-        return customersServiceClient.getOwners()
-                .flatMap(n ->
-                        visitsServiceClient.getVisitsForPets(n.getPetIds())
-                                .map(addVisitsToOwner(n))
-                );
-    }
     //Testing purpose
     @GetMapping(value = "pets/visits/All")
     public Mono<Visits> getAllVisits(){
@@ -152,22 +133,6 @@ public class BFFApiGatewayController {
         return visitsServiceClient.getVisitsByPractitionerIdAndMonth(practitionerId, startDate, endDate);
     }
 
-    @PutMapping(value = "owners/{ownerId}",consumes = "application/json" ,produces = "application/json")
-    public Mono<OwnerDetails> updateOwnerDetails(@RequestBody OwnerDetails od, final @PathVariable int ownerId) {
-
-
-        return customersServiceClient.updateOwner(od,ownerId)
-                .flatMap(owner ->
-                        visitsServiceClient.getVisitsForPets(owner.getPetIds())
-                                .map(addVisitsToOwner(owner)));
-
-
-
-
-
-    }
-
-
     private Function<Visits, OwnerDetails> addVisitsToOwner(OwnerDetails owner) {
         return visits -> {
             owner.getPets()
@@ -242,7 +207,9 @@ public class BFFApiGatewayController {
     }
 
     @DeleteMapping(value = "users/{userId}")
-    public Mono<UserDetails> deleteUser(final @PathVariable long userId) { return authServiceClient.deleteUser(userId); }
+    public Mono<UserDetails> deleteUser(final @PathVariable long userId) {
+        return authServiceClient.deleteUser(userId);
+    }
 
     @GetMapping(value = "users/{userId}")
     public Mono<UserDetails> getUserDetails(final @PathVariable long userId) {
@@ -268,10 +235,52 @@ public class BFFApiGatewayController {
         return null;
     }
 
+
+    /**
+     * Owners Methods
+     * **/
+
+    @GetMapping(value = "owners")
+    public Flux<OwnerDetails> getOwners() {
+        return customersServiceClient.getOwners()
+                .flatMap(n ->
+                        visitsServiceClient.getVisitsForPets(n.getPetIds())
+                                .map(addVisitsToOwner(n))
+                );
+    }
+
+    @GetMapping(value = "owners/{ownerId}")
+    public Mono<OwnerDetails> getOwnerDetails(final @PathVariable int ownerId) {
+        return customersServiceClient.getOwner(ownerId)
+                .flatMap(owner ->
+                        visitsServiceClient.getVisitsForPets(owner.getPetIds())
+                                .map(addVisitsToOwner(owner))
+                );
+    }
+
     @PostMapping(value = "owners",
             consumes = "application/json",
             produces = "application/json")
-    public Mono<OwnerDetails> createOwner(@RequestBody OwnerDetails model){ return customersServiceClient.getOwner(model.getId()); }
+    public Mono<OwnerDetails> createOwner(@RequestBody OwnerDetails model){
+        return customersServiceClient.createOwner(model);
+    }
+
+    @PutMapping(value = "owners/{ownerId}",consumes = "application/json" ,produces = "application/json")
+    public Mono<OwnerDetails> updateOwnerDetails(@PathVariable int ownerId, @RequestBody OwnerDetails od) {
+        return customersServiceClient.updateOwner(ownerId, od)
+                .flatMap(owner ->
+                        visitsServiceClient.getVisitsForPets(owner.getPetIds())
+                                .map(addVisitsToOwner(owner)));
+    }
+
+    @DeleteMapping(value = "owners/{ownerId}")
+    public Mono<OwnerDetails> deleteOwner(@PathVariable int ownerId){
+        return customersServiceClient.deleteOwner(ownerId);
+    }
+
+    /**
+     * End of Owner Methods
+     * **/
 
     @GetMapping("/verification/{token}")
     public Mono<UserDetails> verifyUser(@PathVariable final String token) {
