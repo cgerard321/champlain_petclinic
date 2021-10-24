@@ -4,7 +4,6 @@ import com.petclinic.customers.datalayer.Owner;
 import com.petclinic.customers.datalayer.Pet;
 import com.petclinic.customers.datalayer.PetType;
 import org.junit.jupiter.api.Test;
-import sun.jvm.hotspot.utilities.Assert;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
