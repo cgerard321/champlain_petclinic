@@ -77,7 +77,6 @@ public class BFFApiGatewayController {
     @GetMapping(value = "pets/visits/All")
     public Mono<Visits> getAllVisits(){
         return visitsServiceClient.getAllVisits();
-
     }
 
 

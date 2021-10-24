@@ -15,7 +15,7 @@ angular.module('vetForm')
         {
             let specialtyList = document.getElementsByClassName("specialty")
             let selectedSpecialtiesList = [];
-            let specialties = "[";
+            let specialtiesStr = "[";
             for(let i = 0; i<specialtyList.length; i++)
             {
                 if(specialtyList[i].checked)
@@ -28,15 +28,15 @@ angular.module('vetForm')
             {
                 if(selectedSpecialtiesList[i].checked)
                 {
-                    specialties += selectedSpecialtiesList[i].value;
+                    specialtiesStr += selectedSpecialtiesList[i].value;
                         if(i !== selectedSpecialtiesList.length - 1)
-                            specialties += ", ";
+                            specialtiesStr += ", ";
                 }
 
             }
-            specialties += "]"
+            specialtiesStr += "]"
             // console.log(specialties);
-            specialties.replace(/\\"/g,'"')
+            const specialties = JSON.parse(specialtiesStr);
             vet.specialties = specialties;
             self.vet = vet;
             var id = self.vet.vetId;

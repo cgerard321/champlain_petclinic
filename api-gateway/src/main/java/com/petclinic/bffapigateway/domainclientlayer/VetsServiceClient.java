@@ -63,9 +63,11 @@ public class VetsServiceClient {
 
     public Mono<VetDetails> updateVet(final int vetId, final VetDetails model){
         return webClientBuilder.build().put()
-                .uri(vetsServiceUrl + vetId + model)
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve().bodyToMono(VetDetails.class);
+                .uri(vetsServiceUrl + vetId)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(Mono.just(model), VetDetails.class)
+                .retrieve()
+                .bodyToMono(VetDetails.class);
     }
 
 }
