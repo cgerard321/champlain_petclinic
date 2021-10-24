@@ -134,7 +134,7 @@ class OwnerPersistenceTest {
     public void update_owner_test()
     {
         // Arrange
-        int ownerId = 11;
+        int ownerId = 14;
         Owner newOwner = new Owner (ownerId,
                 "Brian",
                 "Smith",
