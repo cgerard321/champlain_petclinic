@@ -422,7 +422,7 @@ class ApiGatewayControllerTest {
         assertEquals(id, visit.getId());
 
         client.delete()
-                .uri("/api/gateway/visits/{visitId}", visit.getPetId())
+                .uri("/api/gateway/visits/{visitId}", visit.getId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
@@ -508,7 +508,7 @@ class ApiGatewayControllerTest {
         assertEquals(id, visit.getId());
 
         client.delete()
-                .uri("/api/gateway/visits/{visitId}", visit.getPetId())
+                .uri("/api/gateway/visits/{visitId}", visit.getId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
