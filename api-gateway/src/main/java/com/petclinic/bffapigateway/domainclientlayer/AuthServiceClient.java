@@ -54,7 +54,7 @@ public class AuthServiceClient {
 
     public Flux<UserDetails> getUsers() {
         return webClientBuilder.build().get()
-                .uri(authServiceUrl + "/users")
+                .uri(authServiceUrl + "/users/withoutPages")
                 .retrieve()
                 .bodyToFlux(UserDetails.class);
     }
@@ -71,19 +71,17 @@ public class AuthServiceClient {
                         )
                 .bodyToMono(UserDetails.class);
     }
-
-    public Flux<UserDetails> createUsers (){
-        return webClientBuilder.build().post()
-                .uri(authServiceUrl + "/users")
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve().bodyToFlux(UserDetails.class);
-    }
-
-    public Mono<UserDetails> updateUser (final int userId, final UserDetails model){
+    public Mono<UserDetails> updateUser (final long userId, final Register model) {
         return webClientBuilder.build().put()
-                .uri(authServiceUrl + userId + model)
+                .uri(authServiceUrl + "/users/{userId}", userId)
+                .body(just(model), Register.class)
                 .accept(MediaType.APPLICATION_JSON)
-                .retrieve().bodyToMono(UserDetails.class);
+                .retrieve()
+                .onStatus(HttpStatus::is4xxClientError,
+                        n -> rethrower.rethrow(n,
+                                x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
+                        )
+                .bodyToMono(UserDetails.class);
     }
 
     public Mono<UserDetails> deleteUser(final long userId) {
