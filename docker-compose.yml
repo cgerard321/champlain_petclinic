@@ -11,6 +11,8 @@ services:
 
   vets:
     build: vets-service
+    ports:
+      - "7002:8080"
     hostname: vets
     mem_limit: 350m
     environment:
@@ -41,9 +43,8 @@ services:
       - vets
       - visits
 
-
-
   auth-service:
+    hostname: auth
     build: auth-service
     hostname: auth
     ports:

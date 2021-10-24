@@ -50,6 +50,11 @@ class PetResource {
     @GetMapping(value = "/{petId}")
     public PetDetails findPet(@PathVariable("petId") int petId) {
         return new PetDetails(findPetById(petId).get());
+
+        /*
+        String ownerInfo = findPetById(petId).get().getOwner().getFirstName() + " " + findPetById(petId).get().getOwner().getFirstName();
+        return new PetDetails(findPetById(petId).get().getId(), findPetById(petId).get().getName(), ownerInfo, findPetById(petId).get().getBirthDate(), findPetById(petId).get().getType() );
+         */
     }
 
     @DeleteMapping(value = "/{petId}")

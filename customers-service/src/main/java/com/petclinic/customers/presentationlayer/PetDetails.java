@@ -26,7 +26,12 @@ class PetDetails {
 
     private PetType type;
 
-    PetDetails(Pet pet) {
+    public PetDetails()
+    {
+
+    }
+
+    public PetDetails(Pet pet) {
         this.id = pet.getId();
         this.name = pet.getName();
         this.owner = pet.getOwner().getFirstName() + " " + pet.getOwner().getLastName();

@@ -20,7 +20,7 @@ public class OwnerServiceImpl implements OwnerService {
 
     private final OwnerRepository repository;
 
-    public OwnerServiceImpl(OwnerRepository repository){
+    public OwnerServiceImpl(OwnerRepository repository) {
         this.repository = repository;
     }
 
@@ -29,6 +29,7 @@ public class OwnerServiceImpl implements OwnerService {
      * ------------------------ FIND ------------------------
      * This method will find one specific owner in the database and display its data
      * It is not use by the login system
+     *
      * @return
      */
     @Override
@@ -38,11 +39,9 @@ public class OwnerServiceImpl implements OwnerService {
             Optional<Owner> owner = repository.findById(id);
             LOG.debug("Owner with ID: " + id + " has been found");
             return owner;
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             // Exception if owner not found
-            throw new NotFoundException("User is not found!");
+            throw new NotFoundException("User with ID: " + id + " is not found!");
         }
     }
 
