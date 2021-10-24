@@ -12,10 +12,13 @@ angular.module('vetList')
                   if(document.documentElement.clientWidth > 960){
                     child.style.left = (left + 221) + 'px';
                   }
+                  else if(document.documentElement.clientWidth < 510){
+                    child.style.left = (left) + 'px';
+                  }
                   else{
                     child.style.left = (left + 200) + 'px';
                   }
-                  child.style.top = (top+80) + 'px';
+                  child.style.top = (top) + 'px';
                child.classList.remove("modalOff");
                child.classList.add("modalOn");
 
