@@ -26,7 +26,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -885,6 +885,30 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.statusCode").isEqualTo(UNAUTHORIZED.value())
                 .jsonPath("$.message").isEqualTo(message)
                 .jsonPath("$.timestamp").exists();
+    }
+
+    @Test
+    void shouldAddRole() {
+        final Role parentRole = new Role();
+        parentRole.setId(1);
+        parentRole.setName("admin");
+
+        final Role role = new Role();
+        role.setId(2);
+        role.setName("vet");
+        role.setParent(parentRole);
+
+        when(authServiceClient.addRole(role))
+                .thenReturn(Mono.just(role));
+
+        client.post()
+                .uri("/api/gateway/admin/roles")
+                .contentType(APPLICATION_JSON)
+                .body(Mono.just(role), Role.class)
+                .exchange()
+                .expectStatus().isOk();
+
+        verify(authServiceClient).addRole(role);
     }
 }
 

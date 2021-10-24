@@ -229,10 +229,9 @@ public class BFFApiGatewayController {
 
     }
 
-    // TODO: Hook this up to auth service
     @PostMapping(value = "admin/roles")
-    public Object addRole() {
-        return null;
+    public Mono<Role> addRole(@RequestBody final Role model) {
+        return authServiceClient.addRole(model);
     }
 
 
