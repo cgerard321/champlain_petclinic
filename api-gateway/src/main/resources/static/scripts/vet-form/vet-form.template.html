@@ -77,27 +77,27 @@
 
         <hr class="my-4"/>
 
-        <div class="row gy-3">
+        <div class="row gy-3 ">
           <div class="col-md-12">
             <h5 class="mb-3">Specialty</h5>
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" name="specialties" ng-model="vet.specialties" ng-true-value='[{"id":1, "specialtyId":100001, "name":"radiology"}]'>
-              <label class="form-check-label vet-label-input">Radiology</label>
+              <input id="radiology" class="form-check-input specialty" type="checkbox" name="specialties" ng-model="vet.specialties" value='{"id":1, "specialtyId":100001, "name":"radiology"}' ng-true-value='[{"id":1, "specialtyId":100001, "name":"radiology"}]'>
+              <label for="radiology" class="form-check-label vet-label-input">Radiology</label>
             </div>
 
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" name="specialties" ng-model="vet.specialties" ng-true-value='[{"id":2, "specialtyId":100002, "name":"surgery"}]'>
-              <label class="form-check-label vet-label-input">Surgery</label>
+              <input id="surgery" class="form-check-input specialty" type="checkbox"  value='{"id":2, "specialtyId":100002, "name":"surgery"}' ng-true-value='[{"id":2, "specialtyId":100002, "name":"surgery"}]'>
+              <label for="surgery"  class="form-check-label vet-label-input">Surgery</label>
             </div>
 
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" name="specialties" ng-model="vet.specialties" ng-true-value='[{"id":3, "specialtyId":100003, "name":"dentistry"}]'>
-              <label class="form-check-label vet-label-input">Dentistry</label>
+              <input id="dentistry" class="form-check-input specialty" type="checkbox"  value='{"id":3, "specialtyId":100003, "name":"dentistry"}' ng-true-value='[{"id":3, "specialtyId":100003, "name":"dentistry"}]'>
+              <label for="dentistry"  class="form-check-label vet-label-input">Dentistry</label>
             </div>
 
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" name="specialties" ng-model="vet.specialties" ng-true-value='[{"id":4, "specialtyId":100004, "name":"general"}]'>
-              <label class="form-check-label vet-label-input">General</label>
+              <input id="general" class="form-check-input specialty" type="checkbox"  value='{"id":4, "specialtyId":100004, "name":"general"}' ng-true-value='[{"id":4, "specialtyId":100004, "name":"general"}]'>
+              <label for="general"  class="form-check-label vet-label-input">General</label>
             </div>
             </div>
           </div>

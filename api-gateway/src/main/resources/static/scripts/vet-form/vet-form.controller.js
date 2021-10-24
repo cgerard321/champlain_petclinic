@@ -11,7 +11,33 @@ angular.module('vetForm')
                 self.vet = resp.data;
             });
         }
-        self.submitVetForm = function (vet) {
+        self.submitVetForm = function (vet)
+        {
+            let specialtyList = document.getElementsByClassName("specialty")
+            let selectedSpecialtiesList = [];
+            let specialties = "[";
+            for(let i = 0; i<specialtyList.length; i++)
+            {
+                if(specialtyList[i].checked)
+                {
+                    selectedSpecialtiesList.push(specialtyList[i])
+                }
+
+            }
+            for(let i = 0; i<selectedSpecialtiesList.length; i++)
+            {
+                if(selectedSpecialtiesList[i].checked)
+                {
+                    specialties += selectedSpecialtiesList[i].value;
+                        if(i !== selectedSpecialtiesList.length - 1)
+                            specialties += ", ";
+                }
+
+            }
+            specialties += "]"
+            // console.log(specialties);
+            specialties.replace(/\\"/g,'"')
+            vet.specialties = specialties;
             self.vet = vet;
             var id = self.vet.vetId;
             var req;
