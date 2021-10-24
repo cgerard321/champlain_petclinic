@@ -77,6 +77,33 @@ angular.module('visits')
             });
         }
 
+        self.getVisitsForPractitionerIdAndMonth = function() {
+            let pIdAndMonth = localStorage.getItem("practitionerIdAndMonth");
+
+            if(pIdAndMonth != null && pIdAndMonth !== "") {
+                let info = pIdAndMonth.split(",");
+
+                if(info[0] !== undefined){
+                    let practitionerId = parseInt(info[0]);
+                    let startDate = info[1];
+                    let endDate = info[2];
+
+                    $http.get("api/gateway/visits/calendar/" + practitionerId + "?dates=" + startDate + "," + endDate).then(function (resp) {
+                        self.availableVisits = resp.data;
+                        availabilities = [];
+
+                        $.each(self.availableVisits, function(i, visit) {
+                            let date = visit.date.toString().split("-");
+
+                            availabilities.push(parseInt(date[2]));
+                        });
+
+                        renderCalendar();
+                    });
+                }
+            }
+        }
+
         $http.get(vetsUrl).then(function (resp) {
             self.vets = resp.data;
         });
