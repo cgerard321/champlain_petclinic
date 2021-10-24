@@ -20,4 +20,5 @@ INSERT INTO visits VALUES (19, '64747fd2-e06f-47a3-9e33-96f2fd240fec', 7, '2021-
 INSERT INTO visits VALUES (20, '65747fd2-e06f-47a3-9e33-96f2fd240fec', 7, '2019-04-20', 'animal care', 238372, 1);
 INSERT INTO visits VALUES (21, '66747fd2-e06f-47a3-9e33-96f2fd240fec', 7, '2019-09-11', 'examination', 327874, 1);
 INSERT INTO visits VALUES (22, '67747fd2-e06f-47a3-9e33-96f2fd240fec', 7, '2021-11-11', 'examination', 234568, 1);
-
+INSERT INTO visits VALUES (23, '67747fd2-e06f-47a3-9e33-96f2fd240fey', 7,'2021-11-11', 'stomach medication', 327874, 1);
+INSERT INTO visits VALUES (24,'67747fd2-e06f-47a3-9e33-96f2fd240fet', 7, '2021-11-10', 'animal care', 327874, 1);
