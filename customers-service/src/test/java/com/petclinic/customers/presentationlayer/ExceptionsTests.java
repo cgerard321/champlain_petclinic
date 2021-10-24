@@ -9,6 +9,8 @@ import com.petclinic.customers.customerExceptions.http.HttpErrorInfo;
 import com.petclinic.customers.datalayer.Owner;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
@@ -20,13 +22,15 @@ import java.time.format.DateTimeFormatter;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@SpringBootTest
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles("test")
 public class ExceptionsTests {
-    // Global Controller Exception Handler
+
+    @Autowired
     GlobalControllerExceptionHandler exceptionHandler;
 
-    // Object Mapper
+    @Autowired
     ObjectMapper objectMapper;
 
     @Test
