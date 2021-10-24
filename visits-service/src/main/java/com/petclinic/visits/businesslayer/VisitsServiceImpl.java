@@ -113,6 +113,8 @@ public class VisitsServiceImpl implements VisitsService {
     @Override
     public VisitDTO updateVisit(VisitDTO visit){
         Visit visitEntity = mapper.VisitDtoToEntity(visit);
+        Optional<Visit> entity = visitRepository.findByVisitId(UUID.fromString(visit.getVisitId()));
+        visitEntity.setId(entity.get().getId());
         log.info("Updating visit with petId: {} and visitId: {}", visit.getPetId(), visit.getVisitId());
         Visit updatedVisitEntity = visitRepository.save(visitEntity);
         return mapper.entityToModel(updatedVisitEntity);
