@@ -161,7 +161,6 @@ class OwnerPersistenceTest {
 
     @DisplayName("ownerPersistence_UpdateOwner")
     @Test
-    @Disabled
     public void update_owner_test()
     {
         // Arrange
