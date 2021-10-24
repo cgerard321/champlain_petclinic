@@ -24,7 +24,6 @@ function displayDays() {
     let visitsDatesNode = document.querySelectorAll(".visitsDates");
     let visitsDatesArray = [];
     visitsDatesArray = convetNodeListIdToArray(visitsDatesArray,visitsDatesNode);
-    console.log(visitsDatesArray)
 
     let date = new Date();
     let onejan = new Date(date.getFullYear(), 0, 1);
@@ -48,9 +47,6 @@ function displayDays() {
     dayNb.forEach(function(item) {
         visitDaysToRemove.push(dayOfWeekAsString(item));
     });
-    console.log("visitDaysToRemove")
-    console.log(visitDaysToRemove)
-
     daysOfWeek = daysOfWeek.filter(item => !visitDaysToRemove.includes(item));
 
     const targetDiv = document.getElementById("displayNone");
