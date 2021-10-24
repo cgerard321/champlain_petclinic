@@ -37,6 +37,30 @@ angular.module('vetList')
             self.vetList = resp.data;
             arr = resp.data;
         });
+        $scope.deleteVet = function (vetId) {
+            let varIsConf = confirm('Want to delete vet with vetId:' + vetId + '. Are you sure?');
+            if (varIsConf) {
+
+                $http.delete('api/gateway/vets/' + vetId)
+                    .then(successCallback, errorCallback)
+
+                function successCallback(response) {
+                    $scope.errors = [];
+                    alert(vetId + " Deleted Successfully!");
+                    console.log(response, 'res');
+                    //refresh list
+                    $http.get('api/gateway/vets').then(function (resp) {
+                        self.vetList = resp.data;
+                        arr = resp.data;
+                    });
+                }
+
+                function errorCallback(error) {
+                    alert(data.errors);
+                    console.log(error, 'can not get data.');
+                }
+            }
+        };
 
         $scope.refreshList = self.vetList;
 
