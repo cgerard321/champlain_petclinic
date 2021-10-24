@@ -23,6 +23,11 @@ public class PetRequest {
 
     private int typeId;
 
+    //USED FOR TESTING PURPOSE
+    public PetRequest()
+    {
+
+    }
 
     public PetRequest(String name, Date birthDate) {
         this.name = name;

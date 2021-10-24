@@ -9,23 +9,12 @@ angular.module('petForm')
             self.types = resp.data;
         }).then(function () {
 
-            var petId = $stateParams.petId || 0;
-
-            if (petId) { // edit
-                $http.get("api/gateway/customer/owners/" + ownerId + "/pets/" + petId).then(function (resp) {
-                    self.pet = resp.data;
-                    self.pet.birthDate = new Date(self.pet.birthDate);
-                    self.petTypeId = "" + self.pet.type.id;
-                });
-            } else {
-                $http.get('api/gateway/customer/owners/' + ownerId).then(function (resp) {
-                    self.pet = {
-                        owner: resp.data.firstName + " " + resp.data.lastName
-                    };
-                    self.petTypeId = "1";
-                })
-
-            }
+            $http.get('api/gateway/owners/' + ownerId).then(function (resp) {
+                self.pet = {
+                    owner: resp.data.firstName + " " + resp.data.lastName
+                };
+                self.petTypeId = "1";
+            })
         });
 
         self.submit = function () {
@@ -39,11 +28,11 @@ angular.module('petForm')
             };
 
             var req;
-            if (id) {
-                req = $http.put("api/gateway/customer/owners/" + ownerId + "/pets/" + id, data);
-            } else {
+
+            if(!id)
                 req = $http.post("api/gateway/customer/owners/" + ownerId + "/pets", data);
-            }
+            else
+                req = $http.delete("api/gateway/customer/owners/" + ownerId + "/pets", data);
 
             req.then(function () {
                 $state.go("owners", {ownerId: ownerId});

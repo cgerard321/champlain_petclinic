@@ -18,7 +18,7 @@ import java.util.Date;
 
 @Entity
 @Table(name = "pets")
-public class Pet {
+public class    Pet {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -79,6 +79,7 @@ public class Pet {
         this.owner = owner;
     }
 
+    /* Same problem as Owner.ToString()
     @Override
     public String toString() {
         return new ToStringCreator(this)
@@ -90,6 +91,22 @@ public class Pet {
                 .append("ownerLastname", this.getOwner().getLastName())
                 .toString();
     }
+     */
+  
+    @Override
+    public String toString()
+    {
+        String id_str = this.id.toString();
+        String petString = "ID: " +
+                id_str + ", Name: " +
+                this.name + ", Birth of date: " +
+                this.birthDate + ", Type: " +
+                this.type.getName() + ", Owner - First name: " +
+                this.owner.getFirstName() + ", Last name: " +
+                this.owner.getLastName();
+        return petString;
+    }
+
 
 }
 
