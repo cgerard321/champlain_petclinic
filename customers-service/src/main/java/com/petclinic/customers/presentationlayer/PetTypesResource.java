@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
-@RequestMapping("/petTypes")
+@RequestMapping("/pettypes")
 @RestController
 @Timed("petclinic.pet")
 @Slf4j
