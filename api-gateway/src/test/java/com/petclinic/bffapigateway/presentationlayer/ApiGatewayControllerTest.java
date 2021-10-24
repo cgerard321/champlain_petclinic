@@ -299,6 +299,43 @@ class ApiGatewayControllerTest {
 
     }
 
+    @Test
+    void shouldDeleteBillById(){
+        BillDetails entity = new BillDetails();
+
+        entity.setBillId(1);
+
+        entity.setAmount(39.99);
+
+        entity.setCustomerId(2);
+
+        entity.setVisitType("Consultation");
+
+        when(billServiceClient.getBilling(1))
+                .thenReturn(Mono.just(entity));
+
+        client.post()
+                .uri("api/gateway/bills")
+                .body(Mono.just(entity),BillDetails.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+
+        assertEquals(1, entity.getBillId());
+
+        client.delete()
+                .uri("/api/gateway/bills/1")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody();
+
+        assertEquals(null, billServiceClient.getBilling(entity.getBillId()));
+    }
+
 
     @Test
     void getBillingByRequestMissingPath(){
