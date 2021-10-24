@@ -48,6 +48,7 @@ class PetResource {
     public PetDetails findPet(@PathVariable("ownerId") int ownerId, @PathVariable("petId") int petId)
     {
         return new PetDetails(findPetById(ownerId, petId).get());
+
     }
 
     private Optional<Pet> findPetById(int ownerId, int petId) 
