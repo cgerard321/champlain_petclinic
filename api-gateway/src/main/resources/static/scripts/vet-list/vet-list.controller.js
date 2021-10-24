@@ -50,7 +50,6 @@ angular.module('vetList')
                     });
                 }
 
-
                 function errorCallback(error) {
                     alert(data.errors);
                     console.log(error, 'can not get data.');
