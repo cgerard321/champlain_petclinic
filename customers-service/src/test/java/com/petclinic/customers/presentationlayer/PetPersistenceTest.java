@@ -1,9 +1,6 @@
 package com.petclinic.customers.presentationlayer;
 
-import com.petclinic.customers.datalayer.Owner;
-import com.petclinic.customers.datalayer.Pet;
-import com.petclinic.customers.datalayer.PetRepository;
-import com.petclinic.customers.datalayer.PetType;
+import com.petclinic.customers.datalayer.*;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -25,8 +22,12 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 @DataJpaTest
 @ActiveProfiles("test")
 public class PetPersistenceTest {
+
     @Autowired
     private PetRepository repository;
+
+    @Autowired
+    private OwnerRepository ownerRepository;
 
     @BeforeEach
     public void setUpDB()
@@ -37,6 +38,7 @@ public class PetPersistenceTest {
 
     public Pet setupPet() {
         Owner owner = new Owner();
+        owner.setId(11);
         owner.setFirstName("John");
         owner.setLastName("Wick");
         owner.setTelephone("5144041234");
@@ -55,85 +57,6 @@ public class PetPersistenceTest {
         return pet;
     }
 
-
-    /**
-     * ------------------------ TEST_FIND ------------------------
-     * Testing the find by id method
-     */
-    @Test
-    public void findPetById() {
-
-        //Arrange
-        Pet newPet = setupPet();
-        Pet savedPet = repository.save(newPet);
-
-        //Act
-        Pet foundPet = repository.findById(savedPet.getId()).orElse(null);
-
-        //Assert
-        assert foundPet != null;
-        MatcherAssert.assertThat(foundPet, samePropertyValuesAs(savedPet));
-
-    }
-
-
-    /**
-     * ------------------------ TEST_FIND_ALL ------------------------
-     * Testing the find_all() method
-     */
-    @Test
-    public void findAll() {
-
-        //Expect 4 entities
-        int expectedLength = 4;
-
-        //Arrange
-        Pet newPet = setupPet();
-        repository.deleteAll();
-
-        newPet.setId(1);
-        newPet.setName("John");
-        Pet savedPet1 = repository.save(newPet);
-        Pet foundPet1 = repository.findById(savedPet1.getId()).orElse(null);
-        assert foundPet1 != null;
-        MatcherAssert.assertThat(foundPet1, samePropertyValuesAs(savedPet1));
-
-        newPet.setId(2);
-        newPet.setName("Joseph");
-        Pet savedPet2 = repository.save(newPet);
-        Pet foundPet2 = repository.findById(savedPet2.getId()).orElse(null);
-        assert foundPet2 != null;
-        MatcherAssert.assertThat(foundPet2, samePropertyValuesAs(savedPet2));
-
-
-        newPet.setId(3);
-        newPet.setName("Jill");
-        Pet savedPet3 = repository.save(newPet);
-        Pet foundPet3 = repository.findById(savedPet3.getId()).orElse(null);
-        assert foundPet3 != null;
-        MatcherAssert.assertThat(foundPet3, samePropertyValuesAs(savedPet3));
-
-        newPet.setId(4);
-        newPet.setName("Jojo");
-        Pet savedPet4 = repository.save(newPet);
-        Pet foundPet4 = repository.findById(savedPet4.getId()).orElse(null);
-        assert foundPet4 != null;
-        MatcherAssert.assertThat(foundPet4, samePropertyValuesAs(savedPet4));
-
-
-        //Act
-        List<Pet> petList = repository.findAll();
-
-        //Assert
-        assertEquals(expectedLength, petList.size());
-    }
-
-
-
-    /**
-     * ------------------------ TEST_CREATE ------------------------
-     * Testing the delete owner method
-     */
     @DisplayName("ownerPersistence_CreateOwner")
     @Test
     public void create_owner_test()
@@ -150,12 +73,7 @@ public class PetPersistenceTest {
         MatcherAssert.assertThat(foundSaved, samePropertyValuesAs(savedPet));
         assertEquals(1,repository.findAll().size());
     }
-
-
-    /**
-     * ------------------------ TEST_DELETE ------------------------
-     * Testing the delete owner method
-     */
+    
     @Test
     public void shouldDeletePet(){
 

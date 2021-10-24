@@ -138,7 +138,18 @@ public class BFFApiGatewayController {
     public Mono<VisitDetails> getVisitById(final @PathVariable int visitId){
         return visitsServiceClient.getVisitById(visitId);
     }
+    
+    @GetMapping(value = "visits/previous/{petId}")
+    public Flux<VisitDetails> getPreviousVisitsForPet(@PathVariable final int petId) {
+        return visitsServiceClient.getPreviousVisitsForPet(petId);
+    }
 
+    @GetMapping(value = "visits/scheduled/{petId}")
+    public Flux<VisitDetails> getScheduledVisitsForPet(@PathVariable final int petId) {
+        return visitsServiceClient.getScheduledVisitsForPet(petId);
+
+    }
+    
     @GetMapping(value = "visits/vets/{practitionerId}")
     public Flux<VisitDetails> getVisitForPractitioner(@PathVariable int practitionerId){
         return visitsServiceClient.getVisitForPractitioner(practitionerId);
