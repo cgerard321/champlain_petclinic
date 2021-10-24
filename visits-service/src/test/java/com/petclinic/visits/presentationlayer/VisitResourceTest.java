@@ -90,7 +90,7 @@ public class VisitResourceTest {
 
 	// TESTS FOR FETCHING A SINGLE VISIT ----------------------------------------------------------------------
 	@Test
-	void whenValidVisitIdThenShouldReturnVisit() throws Exception {
+	void shouldReturnVisitWhenFetchingVisitWithValidVisitId() throws Exception {
 		given(visitsService.getVisitByVisitId(anyString()))
 				.willReturn(visitDTO);
 
@@ -139,7 +139,7 @@ public class VisitResourceTest {
 				.characterEncoding("utf-8"))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.visitId").value(visitDTO.getVisitId()))
-				//.andExpect(jsonPath("$.date").value(visitDTO.getDate()))
+				.andExpect(jsonPath("$.date").exists())
 				.andExpect(jsonPath("$.description").value(visitDTO.getDescription()))
 				.andExpect(jsonPath("$.petId").value(visitDTO.getPetId()))
 				.andExpect(jsonPath("$.practitionerId").value(visitDTO.getPractitionerId()));
@@ -157,20 +157,6 @@ public class VisitResourceTest {
 				.characterEncoding("utf-8"))
 				.andExpect(status().isBadRequest());
 	}
-
-	// Check with Christine if validation of visitId should happen at API level
-//	@Test
-//	void shouldReturnBadRequestWhenInvalidParameterStringVisitId() throws Exception{
-//		when(visitsService.updateVisit(any(VisitDTO.class)))
-//				.thenReturn(visitDTO);
-//
-//		mvc.perform(put("/owners/*/pets/{petId}/visits/{id}", 200, "invalid_visit_id")
-//				.contentType(MediaType.APPLICATION_JSON)
-//				.accept(MediaType.APPLICATION_JSON)
-//				.content(objectMapper.writeValueAsString(visitDTO))
-//				.characterEncoding("utf-8"))
-//				.andExpect(status().isBadRequest());
-//	}
 
 	// TESTS FOR DELETING A VISIT ----------------------------------------------------------------------
 	@Test
@@ -193,7 +179,7 @@ public class VisitResourceTest {
 				.accept(MediaType.APPLICATION_JSON))
 				.andExpect(status().isCreated())
 				.andExpect(jsonPath("$.visitId").value(visitDTO.getVisitId()))
-				//.andExpect(jsonPath("$.date").value(visitDTO.getDate()))
+				.andExpect(jsonPath("$.date").exists())
 				.andExpect(jsonPath("$.description").value(visitDTO.getDescription()))
 				.andExpect(jsonPath("$.petId").value(visitDTO.getPetId()))
 				.andExpect(jsonPath("$.practitionerId").value(visitDTO.getPractitionerId()));

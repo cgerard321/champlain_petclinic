@@ -30,6 +30,8 @@ import static org.springframework.transaction.annotation.Propagation.NOT_SUPPORT
 @Transactional(propagation = NOT_SUPPORTED)
 public class PersistenceTests {
 
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
     @Autowired
     private VisitRepository repo;
     private Visit visit;
@@ -86,7 +88,7 @@ public class PersistenceTests {
 
         assertEquals(v.get().getId(), visit.getId());
         assertEquals(v.get().getVisitId(), visit.getVisitId());
-        //assertEquals(v.get().getDate().toString(), visit.getDate());
+        assertEquals(sdf.format(v.get().getDate()), sdf.format(visit.getDate()));
         assertEquals(v.get().getDescription(), visit.getDescription());
         assertEquals(v.get().getPetId(), visit.getPetId());
         assertEquals(v.get().getPractitionerId(), visit.getPractitionerId());
