@@ -238,11 +238,13 @@ angular.module('visits')
             visitId = id;
             $("#selectedVet option[value='"+practitionerId+"']").prop("selected", true);
             $('#date_input').val(date);
+            console.log(date);
             $('#description_textarea').val(description);
             $('#submit_button').text("Update Visit");
             $('#cancel_button').css("visibility", "visible");
 
-            editDateParsing(date);
+            let d = date.toString();
+            editDateParsing(d[0], d[1], d[2]);
 
             self.loadVetInfo();
 
