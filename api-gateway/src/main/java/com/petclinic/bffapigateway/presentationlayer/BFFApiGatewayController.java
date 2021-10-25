@@ -83,6 +83,11 @@ public class BFFApiGatewayController {
         return customersServiceClient.deletePet(ownerId,petId);
     }
 
+    @GetMapping("owners/petTypes")
+    public Flux<PetType> getPetTypes(){
+        return customersServiceClient.getPetTypes();
+    }
+
 
     @PutMapping(
             value = "owners/*/pets/{petId}/visits/{visitId}",

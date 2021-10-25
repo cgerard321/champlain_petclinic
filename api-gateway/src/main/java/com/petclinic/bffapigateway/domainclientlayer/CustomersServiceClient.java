@@ -4,6 +4,7 @@ import com.petclinic.bffapigateway.dtos.Login;
 import com.petclinic.bffapigateway.dtos.OwnerDetails;
 
 import com.petclinic.bffapigateway.dtos.PetDetails;
+import com.petclinic.bffapigateway.dtos.PetType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -81,6 +82,12 @@ public class CustomersServiceClient {
 
     }
 
+    public Flux<PetType> getPetTypes (){
+        return webClientBuilder.build().get()
+                .uri(customersServiceUrl + "/petTypes")
+                .retrieve()
+                .bodyToFlux(PetType.class);
+    }
 
     public Mono<PetDetails> createPet(final PetDetails model,final int ownerId){
         return webClientBuilder.build().post()
