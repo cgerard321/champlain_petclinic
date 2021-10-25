@@ -4,7 +4,6 @@ angular.module('petForm')
     .controller('PetFormController', ['$http', '$state', '$stateParams', function ($http, $state, $stateParams) {
         var self = this;
         var ownerId = $stateParams.ownerId || 0;
-        var petId = $stateParams.petId || 0;
 
         $http.get('api/gateway/owners/petTypes').then(function (resp) {
             self.types = resp.data;
@@ -31,9 +30,9 @@ angular.module('petForm')
             var req;
 
             if(!id)
-                req = $http.post("api/gateway/owners/" + ownerId + "/pets", self.pet);
+                req = $http.post("api/gateway/owners/" + ownerId + "/pets", data);
             else
-                req = $http.delete("api/gateway/owners/" + ownerId + "/pets/" + id, self.pet);
+                req = $http.delete("api/gateway/owners/" + ownerId + "/pets/" + id, data);
 
             req.then(function () {
                 $state.go("owners", {ownerId: ownerId});
