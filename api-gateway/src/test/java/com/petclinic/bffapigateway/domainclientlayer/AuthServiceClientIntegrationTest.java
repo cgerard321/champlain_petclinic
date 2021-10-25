@@ -233,7 +233,7 @@ public class AuthServiceClientIntegrationTest {
     }
 
     @Test
-    @DisplayName("Should add a role")
+    @DisplayName("Should delete a role")
     void shouldDeleteRole() throws JsonProcessingException {
         final Role parentRole = new Role();
         parentRole.setId(1);
@@ -254,7 +254,6 @@ public class AuthServiceClientIntegrationTest {
         server.enqueue(mockResponse);
 
         final Mono<Void> empty = authServiceClient.deleteRole(role.getId());
-        
         assertEquals(empty.block(), null);
     }
 }
