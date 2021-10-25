@@ -78,7 +78,10 @@ public class BFFApiGatewayController {
 
     }
 
-
+    @DeleteMapping("owners/{ownerId}/pets/{petId}")
+    public Mono<PetDetails> deletePet(@PathVariable int ownerId, @PathVariable int petId){
+        return customersServiceClient.deletePet(ownerId,petId);
+    }
 
 
     @PutMapping(
