@@ -13,7 +13,7 @@ angular.module('petForm')
                 self.pet = {
                     owner: resp.data.firstName + " " + resp.data.lastName
                 };
-                self.petTypeId = resp.data.petTypeId;
+                self.petTypeId = "0";
             })
         });
 
