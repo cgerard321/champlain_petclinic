@@ -23,7 +23,6 @@
         <th class="vet_phone">Phone</th>
         <th class="vet_email">Email</th>
         <th class="vet_speciality">Specialties</th>
-        <th>Available</th>
         <th>Delete</th>
     </tr>
     </thead>
@@ -34,24 +33,9 @@
         <td class="vet_phone"><span>{{vet.phoneNumber}}</span></td>
         <td class="vet_email"><span>{{vet.email}}</span></td>
         <td class="vet_speciality"><span ng-repeat="specialty in vet.specialties">{{specialty.name + ' '}}</span></td>
-        <td>
-            <label class="switch">
-                <input type="checkbox" onchange="setAvailable(this)" checked>
-                <span class="slider"></span>
-            </label>
-            <a id="disable" ui-sref="disableVet({vetId: $ctrl.vet.vetId})"></a>
-            <a id="enable" ui-sref="enableVet({vetId: $ctrl.vet.vetId})"></a>
-        </td>
-        <td><a class="btn btn-danger" ng-confirm-click="Are you sure to delete this vet ?" confirmed-click="deleteVet({vetId: $ctrl.vet.vetId})">Delete Vet</a></td>
-        <script>
-            var setAvailable = function (input) {
-                if (input.checked) {
-                    document.getElementById('enable').click();
-                } else {
-                    document.getElementById('disable').click();
-                }
-            };
-        </script>
+
+        <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteVet(vet.vetId)">Delete Vet</a></td>
+
     </tr>
     <div ng-repeat="vet in $ctrl.vetList" class="modal m{{vet.vetId}} modalOff">
         <span class="modal_image"><img ng-if="vet.image != null" src="data:image/png;base64,{{vet.image}}"/><img ng-if="vet.image == null" src="images/vet_default.jpg"/></span>

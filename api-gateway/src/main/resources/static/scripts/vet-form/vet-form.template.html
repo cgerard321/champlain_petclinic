@@ -7,7 +7,8 @@
 <div class="bg-light">
   <div class="container">
     <div class="py-5 text-center"/>
-    <h2 class="titleVetForm">New Vet Sign Up</h2>
+    <h2 id="title" class="titleVetForm" >New Vet Sign Up</h2>
+
     <p class="lead">Welcome to our team, please fill out the form below ensuring to fill all sections.</p>
   </div>
   <div class="row g-5">
@@ -15,19 +16,19 @@
       <form id="vetForm" enctype="multipart/form-data" name="vetForm">
         <div class="row g-3">
           <div class="col-sm-6">
-            <input class="form-control" name="firstName" type="text" ng-model="vet.firstName" placeholder="First Name" pattern="^(a-z| |,|.|-)+" required maxlength="30" minlength="3" title="Minimum of 3 characters and maximum of 30 characters. Only letters and punctuation mark."><br/>
+            <input id="firstName" class="form-control" name="firstName" type="text" ng-model="vet.firstName" placeholder="First Name"  pattern="^(a-z| |,|.|-)+" required maxlength="30" minlength="3" title="Minimum of 3 characters and maximum of 30 characters. Only letters and punctuation mark."><br/>
           </div>
 
           <div class="col-sm-6">
-            <input class="form-control" name="lastName" type="text" ng-model="vet.lastName" placeholder="Last Name" pattern="^(a-z| |,|.|-)+" required maxlength="30" minlength="3" title="Minimum of 3 characters and maximum of 30 characters. Only letters and punctuation mark.">
+            <input id="lastName" class="form-control" name="lastName" type="text" ng-model="vet.lastName" placeholder="Last Name"  pattern="^(a-z| |,|.|-)+" required maxlength="30" minlength="3" title="Minimum of 3 characters and maximum of 30 characters. Only letters and punctuation mark.">
           </div>
 
           <div class="col-12">
-            <input class="form-control" name="email" type="email" ng-model="vet.email" placeholder="Email" pattern="\b[\w.%-]+@[-.\w]+\.[A-Za-z]{2,5}\b" required maxlength="100" minlength="5" title="Minimum of 5 characters and maximum of 100 characters. Top level domain should have 2 to 5 characters.">
+            <input id="email" class="form-control"  name="email" type="email" ng-model="vet.email" placeholder="Email" pattern="\b[\w.%-]+@[-.\w]+\.[A-Za-z]{2,5}\b" required maxlength="100" minlength="5" title="Minimum of 5 characters and maximum of 100 characters. Top level domain should have 2 to 5 characters.">
           </div>
 
           <div class="col-sm-12">
-            <input class="form-control" type="number" name="phoneNumber" ng-model="vet.phoneNumber" placeholder="Phone Number" required maxlength="4" minlength="4" title="Accepts only numbers for 4 characters.">
+            <input id="phoneNumber" class="form-control"  type="number" name="phoneNumber" ng-model="vet.phoneNumber" placeholder="Phone Number" required maxlength="4" minlength="4" title="Accepts only numbers for 4 characters.">
           </div>
 
           <hr class="my-4"/>
@@ -72,32 +73,32 @@
 
           <div class="col-sm-12">
             <h5 class="form-label">Career Resume</h5>
-            <textarea class="form-control" placeholder="Resume" name="resume" ng-model="vet.resume" pattern="^(.*)" maxlength="350" title="Maximum of 350 characters."></textarea>
+            <textarea id="vetResume" class="form-control" placeholder="Resume" name="resume" ng-model="vet.resume" pattern="^(.*)" maxlength="350" title="Maximum of 350 characters."></textarea>
           </div>
 
         <hr class="my-4"/>
 
-        <div class="row gy-3">
+        <div class="row gy-3 ">
           <div class="col-md-12">
             <h5 class="mb-3">Specialty</h5>
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" name="specialties" ng-model="vet.specialties" ng-true-value='[{"id":1, "specialtyId":100001, "name":"radiology"}]'>
-              <label class="form-check-label vet-label-input">Radiology</label>
+              <input id="radiology" class="form-check-input specialty" type="checkbox" name="specialties" ng-model="vet.specialties" value='{"id":1, "specialtyId":100001, "name":"radiology"}' ng-true-value='[{"id":1, "specialtyId":100001, "name":"radiology"}]'>
+              <label for="radiology" class="form-check-label vet-label-input">Radiology</label>
             </div>
 
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" name="specialties" ng-model="vet.specialties" ng-true-value='[{"id":2, "specialtyId":100002, "name":"surgery"}]'>
-              <label class="form-check-label vet-label-input">Surgery</label>
+              <input id="surgery" class="form-check-input specialty" type="checkbox"  value='{"id":2, "specialtyId":100002, "name":"surgery"}' ng-true-value='[{"id":2, "specialtyId":100002, "name":"surgery"}]'>
+              <label for="surgery"  class="form-check-label vet-label-input">Surgery</label>
             </div>
 
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" name="specialties" ng-model="vet.specialties" ng-true-value='[{"id":3, "specialtyId":100003, "name":"dentistry"}]'>
-              <label class="form-check-label vet-label-input">Dentistry</label>
+              <input id="dentistry" class="form-check-input specialty" type="checkbox"  value='{"id":3, "specialtyId":100003, "name":"dentistry"}' ng-true-value='[{"id":3, "specialtyId":100003, "name":"dentistry"}]'>
+              <label for="dentistry"  class="form-check-label vet-label-input">Dentistry</label>
             </div>
 
             <div class="form-check">
-              <input class="form-check-input" type="checkbox" name="specialties" ng-model="vet.specialties" ng-true-value='[{"id":4, "specialtyId":100004, "name":"general"}]'>
-              <label class="form-check-label vet-label-input">General</label>
+              <input id="general" class="form-check-input specialty" type="checkbox"  value='{"id":4, "specialtyId":100004, "name":"general"}' ng-true-value='[{"id":4, "specialtyId":100004, "name":"general"}]'>
+              <label for="general"  class="form-check-label vet-label-input">General</label>
             </div>
             </div>
           </div>
@@ -106,7 +107,7 @@
           <div class="my-3 check-align">
             <h5 class="mb-3">Available Work Days</h5>
             <div class="col-sm-12">
-            <input class="form-control" type="text" placeholder="ex:Monday, Tuesday" name="workday" ng-model="vet.workday" pattern="((\bMonday\b|\bTuesday\b|\bWednesday\b|\bThursday\b|\bFriday\b|\bSaturday\b|\bSunday\b)(,|)( |))+" maxlength="250" title="Maximum of 250 characters. Accepts only days of the week seperated by commas.">
+            <input id="workDays" class="form-control" type="text" placeholder="ex:Monday, Tuesday" name="workday" ng-model="vet.workday" pattern="((\bMonday\b|\bTuesday\b|\bWednesday\b|\bThursday\b|\bFriday\b|\bSaturday\b|\bSunday\b)(,|)( |))+" maxlength="250" title="Maximum of 250 characters. Accepts only days of the week seperated by commas.">
             </div>
           </div>
         </div>
@@ -117,11 +118,11 @@
 
           <div class="form-check">
             <label class="form-check-label vet-label-input" >
-              <input class="form-check-input" type="radio" ng-model="vet.isActive" ng-value="1" name="isActive" value="1">Yes</label>
+              <input class="form-check-input isActiveRadio" type="radio" ng-model="vet.isActive" ng-value="1" name="isActive" value="1">Yes</label>
           </div>
           <div class="form-check">
             <label class="form-check-label vet-label-input" >
-              <input class="form-check-input" type="radio" ng-model="vet.isActive" ng-value="0" name="isActive" value="0">No</label>
+              <input class="form-check-input isActiveRadio" type="radio" ng-model="vet.isActive" ng-value="0" name="isActive" value="0">No</label>
           </div>
         </div>
         <hr class="my-4"/>
