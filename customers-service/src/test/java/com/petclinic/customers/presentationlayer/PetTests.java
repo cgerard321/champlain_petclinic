@@ -27,4 +27,30 @@ public class PetTests {
 
         return owner;
     }
+    @DisplayName("ToString_Test")
+    @Test
+    public void test_PetToString() throws ParseException
+    {
+        //Arrange
+        Pet pet = new Pet();
+        pet.setId(1);
+        pet.setName("Daisy");
+        Date date = new SimpleDateFormat( "yyyyMMdd" ).parse( "20100520" );
+        pet.setBirthDate(date);
+        PetType petType = new PetType();
+
+        //Since this test do not use any repo or service, petType cannot access the name associated with its id.  Therefore, it is set to null.
+        pet.setType(petType);
+        pet.setOwner(setupOwner());
+
+        String expectedToString = "";
+
+        //Act
+        String result = pet.toString();
+
+        //Assert
+        assertEquals(expectedToString, result);
+    }
+
+
 }
