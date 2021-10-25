@@ -81,67 +81,16 @@ public class CustomersServiceClient {
 
     }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
+
     public Mono<PetDetails> createPet(final PetDetails model,final int ownerId){
-        return webClientBuilder.build().post()
-                .uri(customersServiceUrl +"/{ownerId}/pets", ownerId)
-=======
-    public Mono<PetDetails> createPet(final PetDetails model){
-        return webClientBuilder.build().post()
-                .uri(customersServiceUrl + "/pets")
->>>>>>> b6da7faa (Created client method and failing test for the endpoint of adding a pet)
-=======
-    public Mono<PetDetails> createPet(final int ownerId,final PetDetails model){
-        return webClientBuilder.build().post()
-                .uri(customersServiceUrl +"/{ownerId}" + ownerId + "/pets")
->>>>>>> 7ec8008a (Modified code so test passes)
-=======
-    public Mono<PetDetails> createPet(final PetDetails model,final int ownerId){
-        return webClientBuilder.build().post()
-                .uri(customersServiceUrl +"/{ownerId}/pets", ownerId)
->>>>>>> 0558a528 (Customer service is fked gg.)
-=======
-    public Mono<PetDetails> createNewPet(final PetDetails model,final int ownerId){
-=======
-    public Mono<PetDetails> createPet(final PetDetails model, final int ownerId){
->>>>>>> d0618357 (I give up)
         return webClientBuilder.build().post()
                 .uri(customersServiceUrl +"/{ownerId}/pets", ownerId)
                 .body(just(model), PetDetails.class)
->>>>>>> cef5b393 (Ok, idk, help plz)
-=======
-    public Mono<PetDetails> createPet(final PetDetails model){
-        return webClientBuilder.build().post()
-                .uri(customersServiceUrl + "/pets")
->>>>>>> c6febbaa (Created client method and failing test for the endpoint of adding a pet)
-=======
-    public Mono<PetDetails> createPet(final int ownerId,final PetDetails model){
-        return webClientBuilder.build().post()
-                .uri(customersServiceUrl +"/{ownerId}" + ownerId + "/pets")
->>>>>>> 0d55775b (Modified code so test passes)
-=======
-    public Mono<PetDetails> createPet(final PetDetails model,final int ownerId){
-        return webClientBuilder.build().post()
-                .uri(customersServiceUrl +"/{ownerId}/pets", ownerId)
->>>>>>> f0a4334d (Customer service is fked gg.)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve().bodyToMono(PetDetails.class);
     }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 
-=======
->>>>>>> b6da7faa (Created client method and failing test for the endpoint of adding a pet)
-=======
->>>>>>> c6febbaa (Created client method and failing test for the endpoint of adding a pet)
 
 
 

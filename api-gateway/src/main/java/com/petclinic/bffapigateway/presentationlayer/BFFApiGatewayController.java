@@ -64,42 +64,16 @@ public class BFFApiGatewayController {
         return billServiceClient.getAllBilling();
     }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
+
     @DeleteMapping(value = "bills/{billId}")
     public Mono<Void> deleteBill(final @PathVariable int billId){
         return billServiceClient.deleteBill(billId);
-=======
 
 
-    @PostMapping(value = "owners/{ownerId}/pets" , produces = "application/json", consumes = "application/json")
-    public Mono<PetDetails> createNewPet(@RequestBody PetDetails pet, @PathVariable int ownerId) {
-        return customersServiceClient.createPet(pet, ownerId);
-=======
-    @GetMapping(value = "owners")
-    public Flux<OwnerDetails> getOwners() {
-        return customersServiceClient.getOwners()
-                .flatMap(n ->
-                        visitsServiceClient.getVisitsForPets(n.getPetIds())
-                                .map(addVisitsToOwner(n))
-                );
->>>>>>> cef5b393 (Ok, idk, help plz)
-    }
-=======
 
-    @PostMapping(value = "owners/{ownerId}/pets" , produces = "application/json", consumes = "application/json")
-<<<<<<< HEAD
-    public Mono<PetDetails> createPet(@RequestBody PetDetails pet, @PathVariable int ownerId){
-
-
-        return customersServiceClient.createPet(pet, ownerId);
 
     }
 
->>>>>>> 730338f3 (Forgot to solve this merge conflict)
-
-<<<<<<< HEAD
 
     @PostMapping(value = "owners/{ownerId}/pets" , produces = "application/json", consumes = "application/json")
     public Mono<PetDetails> createPet(@RequestBody PetDetails pet, @PathVariable int ownerId){
@@ -107,44 +81,10 @@ public class BFFApiGatewayController {
 
         return customersServiceClient.createPet(pet, ownerId);
 
-=======
-    @PostMapping(value = "owners/{ownerId}/pets" , produces = "application/json", consumes = "application/json")
-<<<<<<< HEAD
-    public Mono<PetDetails> createPet(@RequestBody PetDetails pet, @PathVariable int ownerId){
-<<<<<<< HEAD
-        return customersServiceClient.createPet(ownerId,pet);
->>>>>>> 7ec8008a (Modified code so test passes)
-=======
-        return customersServiceClient.createPet(pet, ownerId);
->>>>>>> 0558a528 (Customer service is fked gg.)
-=======
-    public Mono<PetDetails> createNewPet(@RequestBody PetDetails pet, @PathVariable int ownerId){
-        return customersServiceClient.createNewPet(pet, ownerId);
->>>>>>> cef5b393 (Ok, idk, help plz)
-=======
-    public Mono<PetDetails> createNewPet(@RequestBody PetDetails pet, @PathVariable int ownerId){
-        return customersServiceClient.createPet(pet, ownerId);
->>>>>>> d0618357 (I give up)
     }
 
-<<<<<<< HEAD
-=======
-    @PostMapping(value = "owners/{ownerId}/pets" , produces = "application/json", consumes = "application/json")
-    public Mono<PetDetails> createPet(@RequestBody PetDetails pet, @PathVariable int ownerId){
-        return customersServiceClient.createPet(pet, ownerId);
-    }
 
-<<<<<<< HEAD
->>>>>>> 0d55775b (Modified code so test passes)
-=======
 
->>>>>>> 730338f3 (Forgot to solve this merge conflict)
-    //Testing purpose
-    @GetMapping(value = "pets/visits/All")
-    public Mono<Visits> getAllVisits(){
-        return visitsServiceClient.getAllVisits();
->>>>>>> 83d87aee (Modified code so test passes)
-    }
 
     @PutMapping(
             value = "owners/*/pets/{petId}/visits/{visitId}",
