@@ -135,6 +135,7 @@ public class AuthServiceClient {
                 .map(n -> Tuples.of(token.get(), n));
     }
 
+
     public Flux<Role> getRoles() {
         return webClientBuilder.build().get()
                 .uri(authServiceUrl + "/admin/roles")
