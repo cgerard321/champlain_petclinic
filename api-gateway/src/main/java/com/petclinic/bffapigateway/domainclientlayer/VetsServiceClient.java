@@ -1,7 +1,5 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
-import com.petclinic.bffapigateway.dtos.OwnerDetails;
-import com.petclinic.bffapigateway.dtos.UserDetails;
 import com.petclinic.bffapigateway.dtos.VetDetails;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -14,7 +12,7 @@ import reactor.core.publisher.Mono;
 
 /**
  * @author Christine Gerard
- * */
+ */
 
 @Component
 @Slf4j
@@ -46,7 +44,7 @@ public class VetsServiceClient {
                 .bodyToMono(VetDetails.class);
     }
 
-    public Mono<VetDetails> createVet (final VetDetails model) {
+    public Mono<VetDetails> createVet(final VetDetails model) {
         return webClientBuilder.build().post()
                 .uri(vetsServiceUrl)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -61,7 +59,7 @@ public class VetsServiceClient {
                 .retrieve().bodyToMono(VetDetails.class);
     }
 
-    public Mono<VetDetails> updateVet(final int vetId, final VetDetails model){
+    public Mono<VetDetails> updateVet(final int vetId, final VetDetails model) {
         log.debug("in Update Vet Method");
         return webClientBuilder.build().put()
                 .uri(vetsServiceUrl + "/" + vetId)
