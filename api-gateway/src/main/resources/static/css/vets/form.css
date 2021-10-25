@@ -1,12 +1,13 @@
-.vet-label-input{
+.vet-label-input {
     display: inline;
     position: relative;
     text-align: left;
 }
-.check-align{
+
+.check-align {
     text-align: left;
 }
 
-.img-preview{
+.img-preview {
     align-content: center;
 }

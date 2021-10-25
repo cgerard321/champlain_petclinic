@@ -1,7 +1,7 @@
 <h2>Veterinarians</h2>
-<form onsubmit="javascript:void(0)" style="max-width: 20em; margin-top: 2em;">
+<form onsubmit="void(0)" style="max-width: 20em; margin-top: 2em;">
     <div class="form-group">
-        <input type="text" class="form-control" placeholder="Search" ng-model="$ctrl.query" />
+        <input class="form-control" ng-model="$ctrl.query" placeholder="Search" type="text"/>
     </div>
 </form>
 
@@ -29,7 +29,9 @@
 
     <tr ng-repeat="vet in $ctrl.vetList | filter:$ctrl.query track by vet.vetId">
         <td class="isActive" style="display: none">{{vet.isActive}}</td>
-        <td class="vet_name"><a style="text-decoration: none;" ui-sref="vetDetails({ vetId: vet.vetId })"><span ng-mouseenter="$ctrl.show($event,vet.vetId)" ng-mouseleave="$ctrl.hide($event,vet.vetId)" class="info v{{vet.vetId}}">{{vet.firstName}} {{vet.lastName}}</span></a></td>
+        <td class="vet_name"><a style="text-decoration: none;" ui-sref="vetDetails({ vetId: vet.vetId })"><span
+                class="info v{{vet.vetId}}" ng-mouseenter="$ctrl.show($event,vet.vetId)"
+                ng-mouseleave="$ctrl.hide($event,vet.vetId)">{{vet.firstName}} {{vet.lastName}}</span></a></td>
         <td class="vet_phone"><span>{{vet.phoneNumber}}</span></td>
         <td class="vet_email"><span>{{vet.email}}</span></td>
         <td class="vet_speciality"><span ng-repeat="specialty in vet.specialties">{{specialty.name + ' '}}</span></td>
@@ -37,14 +39,15 @@
         <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteVet(vet.vetId)">Delete Vet</a></td>
 
     </tr>
-    <div ng-repeat="vet in $ctrl.vetList" class="modal m{{vet.vetId}} modalOff">
-        <span class="modal_image"><img ng-if="vet.image != null" src="data:image/png;base64,{{vet.image}}"/><img ng-if="vet.image == null" src="images/vet_default.jpg"/></span>
+    <div class="modal m{{vet.vetId}} modalOff" ng-repeat="vet in $ctrl.vetList">
+        <span class="modal_image"><img ng-if="vet.image != null" src="data:image/png;base64,{{vet.image}}"/><img
+                ng-if="vet.image == null" src="images/vet_default.jpg"/></span>
         <span class="modal_name"><b>Name:</b> {{vet.firstName}} {{vet.lastName}}</span>
         <span class="modal_phone"><b>Phone:</b> {{vet.phoneNumber}}</span>
         <div class="modal_specialty">
             <span class="modal_specialty_title"><b>Specialization(s):</b></span>
             <span class="modal_specialty_items" ng-repeat="specialty in vet.specialties">
-                {{(specialty.name != null)?'  -'+specialty.name + ' ': 'no specialties'}}
+                {{(specialty.name != null) ? '  -' + specialty.name + ' ' : 'no specialties'}}
             </span>
         </div>
         <span class="modal_email"><b>Email:</b> <br/> {{vet.email}}</span>
