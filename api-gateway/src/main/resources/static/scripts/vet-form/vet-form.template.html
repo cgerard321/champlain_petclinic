@@ -16,7 +16,7 @@
       <form id="vetForm" enctype="multipart/form-data" name="vetForm">
         <div class="row g-3">
           <div class="col-sm-6">
-            <input id="firstName" class="form-control" name="firstName" type="text" ng-model="vet.firstName" placeholder="First Name"  pattern="^(a-z| |,|.|-)+" required maxlength="30" minlength="3" title="Minimum of 3 characters and maximum of 30 characters. Only letters and punctuation mark."><br/>
+            <input id="firstName" ng-value="$ctrl.vet.firstName" class="form-control" name="firstName" type="text" ng-model="vet.firstName" placeholder="First Name"  pattern="^(a-z| |,|.|-)+" required maxlength="30" minlength="3" title="Minimum of 3 characters and maximum of 30 characters. Only letters and punctuation mark."><br/>
           </div>
 
           <div class="col-sm-6">
