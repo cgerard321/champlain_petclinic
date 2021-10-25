@@ -135,13 +135,14 @@ public class AuthServiceClient {
                 .map(n -> Tuples.of(token.get(), n));
     }
 
+
     public Flux<Role> getRoles() {
         return webClientBuilder.build().get()
                 .uri(authServiceUrl + "/admin/roles")
                 .retrieve()
                 .bodyToFlux(Role.class);
     }
-  
+
     public Mono<Role> addRole(final Role model) {
         return webClientBuilder.build().post()
                 .uri(authServiceUrl + "/admin/roles")
@@ -149,6 +150,14 @@ public class AuthServiceClient {
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToMono(Role.class);
+    }
+
+    public Mono<Void> deleteRole(final int id) {
+        return webClientBuilder.build()
+                .delete()
+                .uri(authServiceUrl + "/admin/role/{id}", id)
+                .retrieve()
+                .bodyToMono(Void.class);
     }
 }
 

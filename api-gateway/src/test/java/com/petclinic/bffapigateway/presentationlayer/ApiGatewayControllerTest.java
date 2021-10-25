@@ -412,7 +412,41 @@ class ApiGatewayControllerTest {
     }
 
 
+    @Test
+    void shouldDeleteBillById(){
+            BillDetails bill = new BillDetails();
+            bill.setBillId(1);
 
+            bill.setDate(null);
+
+            bill.setAmount(600);
+
+            bill.setVisitType("Adoption");
+
+            when(billServiceClient.createBill(bill))
+                    .thenReturn(Mono.just(bill));
+
+
+            client.post()
+                    .uri("/api/gateway/bills")
+                    .body(Mono.just(bill), BillDetails.class)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .exchange()
+                    .expectStatus().isOk()
+                    .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                    .expectBody();
+
+            assertEquals(bill.getBillId(),1);
+        client.delete()
+                .uri("/api/gateway/bills/1")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody();
+
+        assertEquals(null, billServiceClient.getBilling(bill.getBillId()));
+    }
 
 
 
@@ -967,6 +1001,39 @@ class ApiGatewayControllerTest {
                 .expectStatus().isOk();
 
         verify(authServiceClient).addRole(role);
+    }
+
+    @Test
+    void shouldDeleteRole() {
+        final Role parentRole = new Role();
+        parentRole.setId(1);
+        parentRole.setName("admin");
+
+        final Role role = new Role();
+        role.setId(2);
+        role.setName("vet");
+        role.setParent(parentRole);
+
+        when(authServiceClient.addRole(role))
+                .thenReturn(Mono.just(role));
+
+        client.post()
+                .uri("/api/gateway/admin/roles")
+                .contentType(APPLICATION_JSON)
+                .body(Mono.just(role), Role.class)
+                .exchange()
+                .expectStatus().isOk();
+
+        verify(authServiceClient).addRole(role);
+
+        client.delete()
+                .uri("/api/gateway/admin/roles/{id}", role.getId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk();
+
+        verify(authServiceClient).deleteRole(role.getId());
     }
 }
 
