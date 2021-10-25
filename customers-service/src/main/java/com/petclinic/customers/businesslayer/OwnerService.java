@@ -1,6 +1,7 @@
 package com.petclinic.customers.businesslayer;
 
 import com.petclinic.customers.datalayer.Owner;
+import com.petclinic.customers.datalayer.Pet;
 import org.springframework.stereotype.Service;
 
 import javax.swing.text.html.Option;
