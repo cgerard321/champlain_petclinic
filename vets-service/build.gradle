@@ -4,11 +4,11 @@
  * Ticket: feat(VETS-CPC-376)
  */
 plugins {
-	id 'org.springframework.boot' version '2.3.2.RELEASE'
-	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
-	id 'java'
-	id "io.freefair.lombok" version "6.0.0-m2"
-	id 'jacoco'
+    id 'org.springframework.boot' version '2.3.2.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+    id 'java'
+    id "io.freefair.lombok" version "6.0.0-m2"
+    id 'jacoco'
 }
 
 group = 'com.petclinic.vets'
@@ -16,60 +16,60 @@ version = '1.0.0-SNAPSHOT'
 sourceCompatibility = '1.8'
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 ext {
-	mapstructVersion = "1.4.1.Final"
+    mapstructVersion = "1.4.1.Final"
 }
 
 dependencies {
-	implementation 'io.springfox:springfox-boot-starter:3.0.0' //swagger documentation
-	implementation group: 'io.github.bonigarcia', name: 'selenium-jupiter', version: '3.3.5'
-	implementation 'org.springframework.boot:spring-boot-starter-actuator'
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation('org.springframework.boot:spring-boot-starter-data-jpa')
-	implementation('mysql:mysql-connector-java')
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
+    implementation 'io.springfox:springfox-boot-starter:3.0.0' //swagger documentation
+    implementation group: 'io.github.bonigarcia', name: 'selenium-jupiter', version: '3.3.5'
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation('org.springframework.boot:spring-boot-starter-data-jpa')
+    implementation('mysql:mysql-connector-java')
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
 
-	implementation("org.mapstruct:mapstruct:${mapstructVersion}")
-	compileOnly "org.mapstruct:mapstruct-processor:${mapstructVersion}"
-	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
-	testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+    implementation("org.mapstruct:mapstruct:${mapstructVersion}")
+    compileOnly "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+    annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+    testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 
-	runtimeOnly 'com.h2database:h2'
+    runtimeOnly 'com.h2database:h2'
 
-	testImplementation('org.springframework.boot:spring-boot-starter-test') {
-		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
-	}
-	testImplementation 'io.projectreactor:reactor-test'
-	testImplementation('com.h2database:h2')
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+    testImplementation 'io.projectreactor:reactor-test'
+    testImplementation('com.h2database:h2')
 
 
 }
 jacoco {
-	toolVersion = "0.8.6"
+    toolVersion = "0.8.6"
 }
 
 jacocoTestReport {
-	dependsOn test
+    dependsOn test
 
-	afterEvaluate {
-		classDirectories.setFrom(files(classDirectories.files.collect {
-			fileTree(dir: it, exclude: [
-					"com/petclinic/**/AuthServiceApplication.class",
-			])
-		}))
-	}
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                    "com/petclinic/**/AuthServiceApplication.class",
+            ])
+        }))
+    }
 }
 
 jacocoTestCoverageVerification {
-	violationRules {
-		rule {
-			limit {
-				minimum = 0.90
-			}
-		}
-	}
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.90
+            }
+        }
+    }
 }
 
 test.finalizedBy jacocoTestReport
@@ -77,8 +77,8 @@ check.dependsOn jacocoTestCoverageVerification
 
 
 test {
-	useJUnitPlatform()
-	testLogging {
-		events "passed", "skipped", "failed"
-	}
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
 }
