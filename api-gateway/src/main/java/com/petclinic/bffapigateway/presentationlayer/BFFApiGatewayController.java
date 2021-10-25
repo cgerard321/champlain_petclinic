@@ -56,14 +56,6 @@ public class BFFApiGatewayController {
         return billServiceClient.getAllBilling();
     }
 
-<<<<<<< HEAD
-
-
-    @PostMapping(value = "owners/{ownerId}/pets" , produces = "application/json", consumes = "application/json")
-    public Mono<PetDetails> createNewPet(@RequestBody PetDetails pet, @PathVariable int ownerId) {
-        return customersServiceClient.createPet(pet, ownerId);
-    }
-
 
     @PostMapping(value = "owners/{ownerId}/pets" , produces = "application/json", consumes = "application/json")
     public Mono<PetDetails> createPet(@RequestBody PetDetails pet, @PathVariable int ownerId){
@@ -73,22 +65,13 @@ public class BFFApiGatewayController {
 
     }
 
-=======
-    @GetMapping(value = "owners")
-    public Flux<OwnerDetails> getOwners() {
-        return customersServiceClient.getOwners()
-                .flatMap(n ->
-                        visitsServiceClient.getVisitsForPets(n.getPetIds())
-                                .map(addVisitsToOwner(n))
-                );
-    }
 
     @PostMapping(value = "owners/{ownerId}/pets" , produces = "application/json", consumes = "application/json")
     public Mono<PetDetails> createNewPet(@RequestBody PetDetails pet, @PathVariable int ownerId){
         return customersServiceClient.createNewPet(pet, ownerId);
     }
 
->>>>>>> 8f4a5683cdf9e91280bf746708d135eab7db9c63
+
     //Testing purpose
     @GetMapping(value = "pets/visits/All")
     public Mono<Visits> getAllVisits(){
