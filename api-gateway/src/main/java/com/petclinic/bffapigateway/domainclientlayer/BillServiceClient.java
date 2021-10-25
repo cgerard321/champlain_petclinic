@@ -43,12 +43,12 @@ public class BillServiceClient {
                 .bodyToFlux(BillDetails.class);
     }
 
-    public Mono<BillDetails> deleteBill(final int billId) {
+    public Mono<Void> deleteBill(final int billId) {
         return webClientBuilder.build()
                 .delete()
-                .uri(billServiceUrl + "/bills/{billId}", billId)
+                .uri(billServiceUrl + "/{billId}", billId)
                 .retrieve()
-                .bodyToMono(BillDetails.class);
+                .bodyToMono(Void.class);
     }
 }
 
