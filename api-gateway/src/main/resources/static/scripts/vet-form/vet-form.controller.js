@@ -12,7 +12,7 @@ angular.module('vetForm')
             $http.get("api/gateway/vets/" + $stateParams.vetId).then(function (resp) {
                 self.vet = resp.data;
                 document.getElementById("title").innerHTML = "Edit Vet";
-                document.getElementById("firstName").value = self.vet.firstName;
+                // document.getElementById("firstName").value = self.vet.firstName;
                 document.getElementById("lastName").value = self.vet.lastName;
                 document.getElementById("lastName").value = self.vet.lastName;
                 document.getElementById("email").value = self.vet.email;
