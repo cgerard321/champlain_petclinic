@@ -440,6 +440,25 @@
         renderCalendar();
     }
 
+    const dateReset = () => {
+        date = new Date();
+        selectedDate = date.getDate();
+        let month = date.getMonth()
+
+        if (month < 9) {
+            month = "0" + (month + 1);
+        }
+        else if(month !== 12) {
+            month += 1;
+        }
+        else {
+            month = "01";
+        }
+
+        $('#date_input').val(date.getFullYear() + "-" + month + "-" + selectedDate);
+        renderCalendar();
+    }
+
     //previous page selector
     document.querySelector('.prev').addEventListener('click',() => {
         date.setMonth(date.getMonth() - 1);
@@ -572,7 +591,7 @@
 
     <div class="form-group" style="margin-top: 6px; margin-bottom: 6px">
         <button id="submit_button" ng-click="$ctrl.showConfirmationModal($event)" class="btn btn-default" type="button" style="border: 1px solid gray; border-radius: 4px">Add New Visit</button>
-        <button id="cancel_button" ng-click="$ctrl.resetForm()" class="btn btn-default" type="button" style="visibility: hidden; border: 1px solid gray; border-radius: 4px">Cancel</button>
+        <button id="cancel_button" ng-click="$ctrl.resetForm()" onclick="dateReset()" class="btn btn-default" type="button" style="visibility: hidden; border: 1px solid gray; border-radius: 4px">Cancel</button>
     </div>
 </form>
 

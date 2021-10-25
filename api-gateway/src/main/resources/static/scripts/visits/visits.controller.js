@@ -346,7 +346,7 @@ angular.module('visits')
             // Restore default functionality of form submit
             self.submit = function () {
                 var data = {
-                    date: $filter('date')(self.date, "yyyy-MM-dd"),
+                    date: getCurrentDate(),
                     description: self.desc,
                     practitionerId: self.practitionerId,
                     status: true
@@ -354,7 +354,7 @@ angular.module('visits')
 
                 var billData = {
                     ownerId: $stateParams.ownerId,
-                    date: $filter('date')(self.date, "yyyy-MM-dd"),
+                    date: getCurrentDate(),
                     visitType : $("#selectedVisitType").val()
                 }
 
