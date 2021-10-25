@@ -56,6 +56,7 @@ public class BFFApiGatewayController {
         return billServiceClient.getAllBilling();
     }
 
+
     //Testing purpose
     @GetMapping(value = "pets/visits/All")
     public Mono<Visits> getAllVisits(){
@@ -66,12 +67,6 @@ public class BFFApiGatewayController {
     public Mono<Void> deleteBill(final @PathVariable int billId){
         return billServiceClient.deleteBill(billId);
     }
-
-    @DeleteMapping(value = "bills/{billId}")
-    public Mono<BillDetails> deleteBill(final @PathVariable int billId){
-        return billServiceClient.deleteBill(billId);
-    }
-
 
 /*
     //Add new Visit
@@ -95,18 +90,6 @@ public class BFFApiGatewayController {
     @DeleteMapping (value = "visits/{visitId}")
     public Mono<Void> deleteVisitsByVisitId(final @PathVariable String visitId){
         return visitsServiceClient.deleteVisitByVisitId(visitId);
-    }
-
-    //Delete Visit
-    @DeleteMapping (value = "pets/visits/{petId}")
-    public Mono<Void> deleteVisitForPets(final @PathVariable int petId){
-        return visitsServiceClient.deleteVisitForPets(petId);
-    }
-
-    //Update Visit
-    @PutMapping(value ="pets/visits/{petId}", consumes = "application/json", produces = "application/json")
-    public Mono<Visits> updateVisitForPets(final @PathVariable int petId){
-        return visitsServiceClient.updateVisitForPets(petId);
     }
 
     @GetMapping(value = "visits/{petId}")
@@ -240,10 +223,9 @@ public class BFFApiGatewayController {
     }
 
 
-    // TODO: Hook this up to auth service
     @GetMapping(value = "admin/roles")
-    public Object getRoles() {
-        return null;
+    public Flux<Role> getRoles() {
+        return authServiceClient.getRoles();
     }
 
     // TODO: Hook this up to auth service
@@ -252,10 +234,9 @@ public class BFFApiGatewayController {
 
     }
 
-    // TODO: Hook this up to auth service
     @PostMapping(value = "admin/roles")
-    public Object addRole() {
-        return null;
+    public Mono<Role> addRole(@RequestBody final Role model) {
+        return authServiceClient.addRole(model);
     }
 
 
