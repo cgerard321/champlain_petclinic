@@ -243,7 +243,7 @@ angular.module('visits')
             $('#submit_button').text("Update Visit");
             $('#cancel_button').css("visibility", "visible");
 
-            let d = date.toString();
+            let d = date.toString().split("-");
             editDateParsing(d[0], d[1], d[2]);
 
             self.loadVetInfo();

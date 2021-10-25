@@ -182,13 +182,23 @@
                 (i < new Date().getDate() && date.getMonth() <= new Date().getMonth() && date.getFullYear() === new Date().getFullYear()) ||
                 (date.getMonth() < new Date().getMonth() && date.getFullYear() === new Date().getFullYear()) || date.getFullYear() < new Date().getFullYear()) {
 
-                days += `<div id="day${i}" data-target="${i}" class="unavailable day">${i}</div>`;
+                if(i.toString() === selectedDate) {
+                    days += `<div id="day${i}" data-target="${i}" class="editSelected unavailable day">${i}</div>`;
+                } else {
+                    days += `<div id="day${i}" data-target="${i}" class="unavailable day">${i}</div>`;
+                }
             }
 
             //check for vet availabilities
             else if(workDay === false || scheduledVisits === true) {
-                if(getDateFullFormatEqualsTo(i)) {
+
+                if (i.toString() === selectedDate) {
+                    days += `<div id="day${i}" data-target="${i}" class="editSelected holiday day">${i}</div>`;
+
+                } else if(getDateFullFormatEqualsTo(i)) {
                     days += `<div id="day${i}" data-target="${i}" class="today_holiday day">${i}</div>`;
+
+
                 } else {
                     days += `<div id="day${i}" data-target="${i}" class="holiday day">${i}</div>`;
                 }
@@ -337,6 +347,7 @@
         }
 
         console.log("Selected date: " + selectedDate);
+        isEditMode = false;
     }
 
     //check if a date is on the weekend
@@ -423,8 +434,8 @@
     renderCalendar();
 
     const editDateParsing = (year, month, day) => {
-        date = new Date("" + months[parseInt(month)] + " " + day + ", " + year);
-        selectedDate = date.getDate();
+        date = new Date("" + months[parseInt(month) - 1] + " " + day + ", " + year);
+        selectedDate = date.getDate().toString();
 
         renderCalendar();
     }
