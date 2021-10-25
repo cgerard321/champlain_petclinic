@@ -96,6 +96,7 @@ angular.module('visits')
                             $.each(self.availableVisits, function(i, visit) {
                                 let date = visit.date.toString().split("-");
 
+                                availableDays = availableDays.filter(e => e !== parseInt(date[2]));
                                 availabilities.push(parseInt(date[2]));
                             });
 
