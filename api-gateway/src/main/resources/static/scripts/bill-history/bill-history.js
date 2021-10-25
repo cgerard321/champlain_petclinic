@@ -8,4 +8,9 @@ angular.module('billHistory', ['ui.router'])
                 url: '/bills',
                 template: '<bill-history></bill-history>'
             })
+            .state('deleteBill', {
+                parent: 'app',
+                url: '/bills/:billId/deleteBill',
+                template: '<bill-history></bill-history>'
+            })
     }]);

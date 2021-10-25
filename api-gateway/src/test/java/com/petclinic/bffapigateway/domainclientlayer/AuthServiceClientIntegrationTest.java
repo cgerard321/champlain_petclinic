@@ -2,8 +2,10 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.petclinic.bffapigateway.dtos.*;
 import com.petclinic.bffapigateway.dtos.Login;
 import com.petclinic.bffapigateway.dtos.Register;
+import com.petclinic.bffapigateway.dtos.Role;
 import com.petclinic.bffapigateway.dtos.UserDetails;
 import com.petclinic.bffapigateway.exceptions.GenericHttpException;
 import com.petclinic.bffapigateway.exceptions.HttpErrorInfo;
@@ -14,7 +16,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
+import springfox.documentation.spring.web.json.Json;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -170,5 +174,86 @@ public class AuthServiceClientIntegrationTest {
 
         assertEquals(UNAUTHORIZED, ex.getHttpStatus());
         assertEquals(errorMessage, ex.getMessage());
+    }
+
+    @Test
+    @DisplayName("Should get all roles")
+    void shouldGetRoles() throws JsonProcessingException {
+        final Role parentRole = new Role();
+        parentRole.setId(1);
+        parentRole.setName("admin");
+
+        final Role role = new Role();
+        role.setId(2);
+        role.setName("vet");
+        role.setParent(parentRole);
+
+        final String body = objectMapper.writeValueAsString(objectMapper.convertValue(role, Role.class));
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setBody(body);
+
+        server.enqueue(mockResponse);
+
+        final Role aRole = authServiceClient.getRoles().blockFirst();
+
+        assertEquals(role.getId(), aRole.getId());
+        assertEquals(role.getName(), aRole.getName());
+        assertEquals(role.getParent(), aRole.getParent());
+    }
+  
+    @Test
+    @DisplayName("Should add a role")
+    void shouldAddRole() throws JsonProcessingException {
+        final Role parentRole = new Role();
+        parentRole.setId(1);
+        parentRole.setName("admin");
+
+        final Role role = new Role();
+        role.setId(2);
+        role.setName("vet");
+        role.setParent(parentRole);
+
+        final String body = objectMapper.writeValueAsString(objectMapper.convertValue(role, Role.class));
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setBody(body);
+
+        server.enqueue(mockResponse);
+
+        final Role block = authServiceClient.addRole(role).block();
+
+        assertEquals(role.getId(), block.getId());
+        assertEquals(role.getName(), block.getName());
+        assertEquals(role.getParent(), block.getParent());
+    }
+
+    @Test
+    @DisplayName("Should delete a role")
+    void shouldDeleteRole() throws JsonProcessingException {
+        final Role parentRole = new Role();
+        parentRole.setId(1);
+        parentRole.setName("admin");
+
+        final Role role = new Role();
+        role.setId(2);
+        role.setName("vet");
+        role.setParent(parentRole);
+
+        final String body = objectMapper.writeValueAsString(objectMapper.convertValue(role, Role.class));
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setBody(body);
+
+        server.enqueue(mockResponse);
+
+        final Mono<Void> empty = authServiceClient.deleteRole(role.getId());
+        assertEquals(empty.block(), null);
     }
 }

@@ -1,19 +1,20 @@
 //takes a day position to convert it into a day of the week
 function dayOfWeekAsString(dayIndex) {
-    return ["Sunday", "Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][dayIndex] || '';
+    return ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][dayIndex] || '';
 }
 
 //takes a date to figure out the week number so that we can compare it later to the current week
-function getWeekNumber(d){
+function getWeekNumber(d) {
     let onejan = new Date(d.getFullYear(), 0, 1);
     return Math.ceil((((d.getTime() - onejan.getTime()) / 86400000) + onejan.getDay() + 1) / 7);
 }
+
 //function is called by button click on vet detail page
 function displayDays() {
     let visitsDatesNode = document.querySelectorAll(".visitsDates");
     let visitsDatesArray = [];
     //converts a node list of id's into a usable array
-    visitsDatesArray = convertNodeListIdToArray(visitsDatesArray,visitsDatesNode);
+    visitsDatesArray = convertNodeListIdToArray(visitsDatesArray, visitsDatesNode);
 
     let date = new Date();
     let onejan = new Date(date.getFullYear(), 0, 1);
@@ -32,15 +33,15 @@ function displayDays() {
     let dayNb = [];
     //this section creates an array of visits positions (0,1,..) that are in the current year and week
     for (let i = 0; i < visitsDatesArray.length; i++) {
-        if(currentYear === new Date(visitsDatesArray[i]).getFullYear()){
-            if(currentWeek === getWeekNumber(new Date(visitsDatesArray[i]))){
+        if (currentYear === new Date(visitsDatesArray[i]).getFullYear()) {
+            if (currentWeek === getWeekNumber(new Date(visitsDatesArray[i]))) {
                 dayNb.push((new Date(visitsDatesArray[i])).getDay() + 1);
             }
         }
     }
 
     //this creates a new array of actual visits days (Monday, Tuesday, etc) based on the array of visits positions
-    dayNb.forEach(function(item) {
+    dayNb.forEach(function (item) {
         visitDaysToRemove.push(dayOfWeekAsString(item));
     });
 
@@ -64,16 +65,16 @@ function displayDays() {
     daysArray = convertNodeListIdToArray(daysArray, days);
     //if a vet is available, the day will be green
     for (let i = 0; i < daysArray.length; i++) {
-        for(let x = 0; x < daysOfWeek.length; x++){
-            if(daysArray[i] === daysOfWeek[x]){
+        for (let x = 0; x < daysOfWeek.length; x++) {
+            if (daysArray[i] === daysOfWeek[x]) {
                 days[i].style.backgroundColor = "#c7ffdc";
             }
         }
     }
 }
 
-function convertNodeListIdToArray(array, nodeList){
-    for(let i = 0; i < nodeList.length; i++){
+function convertNodeListIdToArray(array, nodeList) {
+    for (let i = 0; i < nodeList.length; i++) {
         array.push(nodeList[i].id);
     }
     return array;

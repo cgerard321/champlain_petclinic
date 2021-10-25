@@ -59,12 +59,10 @@ import java.util.zip.Inflater;
 @RequestMapping("/vets")
 @RestController
 @Timed("petclinic.vets")
-//@RequiredArgsConstructor
 class VetResource {
 
     private final VetService vetService;
     private static final Logger LOG = LoggerFactory.getLogger(VetResource.class);
-
 
     VetResource(VetService vetService)
     {
@@ -89,18 +87,14 @@ class VetResource {
         return vetList;
     }
 
-
     @GetMapping("/{vetId}")
     public VetDTO findVet(@PathVariable int vetId)
     {
         LOG.debug("/vet MS return the found product for vetId: " + vetId);
-
         if(vetId < 1) throw new InvalidInputException("Invalid vetId: " + vetId);
-
         VetDTO vet = vetService.getVetDTOByVetId(vetId);
         return vet;
     }
-
 
     @PostMapping(
             consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -112,7 +106,9 @@ class VetResource {
         return vetService.createVet(vet);
     }
 
-    @PutMapping( value = "/{vetId}")
+    @PutMapping( value = "/{vetId}",
+                consumes = MediaType.APPLICATION_JSON_VALUE,
+                produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public VetDTO updateVet(@PathVariable int vetId, @RequestBody VetDTO vetRequest)
     {
@@ -125,7 +121,6 @@ class VetResource {
     public VetDTO disableVet(@PathVariable("vetId") int vetId, @RequestBody VetDTO vetRequest) {
         return vetService.disableVetFromDTO(vetId, vetRequest);
     }
-
 
     @PutMapping(path = "/{vetId}/enableVet",
             consumes = MediaType.APPLICATION_JSON_VALUE,

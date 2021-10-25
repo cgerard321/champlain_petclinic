@@ -1,110 +1,114 @@
-
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet"
-      integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
-<link rel="stylesheet" href="form.css" type="text/css"/>
+<link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css"
+      integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet">
+<link href="form.css" rel="stylesheet" type="text/css"/>
 
 
 <div class="bg-light">
-  <div class="container">
-    <div class="py-5 text-center"/>
-    <h2 class="titleVetForm">Vet Information</h2>
-  </div>
-  <div class="row g-5">
-    <div class="col-md-7 col-lg-12">
-
-      <div class="row g-3">
-        <div class="col-sm-6">
-                        <span class="modal_image"><img ng-if="vet.image != null" src="data:image/png;base64,{{vet.image}}"/>
-                            <img ng-if="vet.image == null" src="images/vet_default.jpg" alt="Profile picture preview" id="preview"/>
-                        </span>
-        </div>
-        <div class="col-sm-6">
-
-        </div>
-      </div>
-
-      <div class="row g-3">
-        <div class="col-sm-12">
-          {{$ctrl.vet.firstName}} {{$ctrl.vet.lastName}}
-        </div>
-
-        <div class="col-6">
-          {{$ctrl.vet.email}}
-        </div>
-
-        <div class="col-sm-6">
-          {{$ctrl.vet.phoneNumber}}
-        </div>
-
-        <!-- remove script and place in required file -->
-        <hr class="my-4"/>
-
-        <div class="col-sm-12">
-          <h5 class="form-label">Specialisation(s)</h5>
-          <div>
-            <span ng-repeat="specialty in $ctrl.vet.specialties">{{specialty.name + ' '}}</span>
-          </div>
-        </div>
-
-        <hr class="my-4"/>
-
-        <div class="col-sm-12">
-          <h5 class="form-label">Career Resume</h5>
-          <div>
-            {{$ctrl.vet.resume}}
-          </div>
-        </div>
-
-
-        <hr class="my-4"/>
-
-        <div class="row gy-3">
-          <div class="col-md-12">
-            <h5 class="mb-3">Work Day</h5>
-            <div>
-              <p id="workDays">{{$ctrl.vet.workday}}</p>
-            </div>
-          </div>
-        </div>
-
-
-        <table style="display: none">
-          <tr style="display: none" ng-repeat="v in $ctrl.visitsList">
-            <td style="display: none" id="{{v.date}}" class="visitsDates">{{v.date}}}</td>
-          </tr>
-        </table>
-
-
-        <hr class="my-4"/>
-        <div class="row gy-3">
-          <div class="col-md-12">
-
-            <button class="add-vet-button btn btn-primary" onclick="displayDays()" id="toggle">Show availabilities</button>
-          </div>
-
-          <div class="col-md-12" id="displayNone" style="display: none">
-            <div id="section" class="day-of-week">
-              <div id="Sunday" class="square">Sunday</div>
-              <div id="Monday" class="square">Monday</div>
-              <div id="Tuesday" class="square">Tuesday</div>
-              <div id="Wednesday" class="square">Wednesday</div>
-              <div id="Thursday" class="square">Thursday</div>
-              <div id="Friday" class="square">Friday</div>
-              <div id="Saturday" class="square">Saturday</div>
-            </div>
-          </div>
-
-        </div>
-        <hr class="my-4"/>
-
-        <div class="row g-3">
-          <div class="col-sm-12">
-            <a class="add-vet-button btn btn-success" ui-sref="vetEdit({vetId: $ctrl.vet.id})">Edit Vet</a>
-          </div>
-        </div>
-
-      </div>
+    <div class="container">
+        <div class="py-5 text-center"/>
+        <h2 class="titleVetForm">Vet Information</h2>
     </div>
-  </div>
+    <div class="row g-5">
+        <div class="col-md-7 col-lg-12">
+
+            <div class="row g-3">
+                <div class="col-sm-6">
+                        <span class="modal_image"><img ng-if="vet.image != null"
+                                                       src="data:image/png;base64,{{vet.image}}"/>
+                            <img alt="Profile picture preview" id="preview" ng-if="vet.image == null"
+                                 src="images/vet_default.jpg"/>
+                        </span>
+                </div>
+                <div class="col-sm-6">
+
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-sm-12">
+                    {{$ctrl.vet.firstName}} {{$ctrl.vet.lastName}}
+                </div>
+
+                <div class="col-6">
+                    {{$ctrl.vet.email}}
+                </div>
+
+                <div class="col-sm-6">
+                    {{$ctrl.vet.phoneNumber}}
+                </div>
+
+                <hr class="my-4"/>
+
+                <div class="col-sm-12">
+                    <h5 class="form-label">Specialisation(s)</h5>
+                    <div>
+                        <span ng-repeat="specialty in $ctrl.vet.specialties">{{specialty.name + ' '}}</span>
+                    </div>
+                </div>
+
+                <hr class="my-4"/>
+
+                <div class="col-sm-12">
+                    <h5 class="form-label">Career Resume</h5>
+                    <div>
+                        {{$ctrl.vet.resume}}
+                    </div>
+                </div>
+
+
+                <hr class="my-4"/>
+
+                <div class="row gy-3">
+                    <div class="col-md-12">
+                        <h5 class="mb-3">Work Day</h5>
+                        <div>
+                            <p id="workDays">{{$ctrl.vet.workday}}</p>
+                        </div>
+                    </div>
+                </div>
+
+
+                <table style="display: none">
+                    <tr ng-repeat="v in $ctrl.visitsList" style="display: none">
+                        <td class="visitsDates" id="{{v.date}}" style="display: none">{{v.date}}}</td>
+                    </tr>
+                </table>
+
+
+                <hr class="my-4"/>
+                <div class="row gy-3">
+                    <div class="col-md-12">
+
+                        <button class="add-vet-button btn btn-primary" id="toggle" onclick="displayDays()">Show
+                            availabilities
+                        </button>
+                    </div>
+
+                    <div class="col-md-12" id="displayNone" style="display: none">
+                        <div class="day-of-week" id="section">
+                            <div class="square" id="Sunday">Sunday</div>
+                            <div class="square" id="Monday">Monday</div>
+                            <div class="square" id="Tuesday">Tuesday</div>
+                            <div class="square" id="Wednesday">Wednesday</div>
+                            <div class="square" id="Thursday">Thursday</div>
+                            <div class="square" id="Friday">Friday</div>
+                            <div class="square" id="Saturday">Saturday</div>
+                        </div>
+                    </div>
+
+                </div>
+                <hr class="my-4"/>
+
+                <div class="row g-3">
+                    <div class="col-sm-12">
+                        <a ui-sref="vetEdit({vetId: $ctrl.vet.vetId})">
+                            <button class="edit-vet-button btn btn-success">Edit Vet</button>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
 </div>
