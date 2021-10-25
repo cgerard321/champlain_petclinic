@@ -456,6 +456,20 @@ const date = new Date();
 
         renderCalendar();
     });
+
+    document.querySelector('.submitBTN').addEventListener('click',() => {
+        let month = date.getMonth();
+        let sDate = selectedDate;
+
+        if (month < 10) {
+            month = "0" + month;
+        }
+
+        if(selectedDate < 10) {
+            sDate = "0" + sDate;
+        }
+        document.querySelector('#date_input').value = date.getFullYear() + "-" + month + "-" + sDate;
+    });
 </script>
 
 <h2>Visits</h2>
