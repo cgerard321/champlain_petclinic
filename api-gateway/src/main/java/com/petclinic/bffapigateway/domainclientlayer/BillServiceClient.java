@@ -50,6 +50,14 @@ public class BillServiceClient {
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve().bodyToMono(BillDetails.class);
     }
+
+    public Mono<Void> deleteBill(final int billId) {
+        return webClientBuilder.build()
+                .delete()
+                .uri(billServiceUrl + "/{billId}", billId)
+                .retrieve()
+                .bodyToMono(Void.class);
+    }
 }
 
 
