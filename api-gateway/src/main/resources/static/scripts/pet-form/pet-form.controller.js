@@ -11,9 +11,11 @@ angular.module('petForm')
 
             $http.get('api/gateway/owners/' + ownerId).then(function (resp) {
                 self.pet = {
-                    owner: resp.data.firstName + " " + resp.data.lastName
+                    owner: resp.data.firstName + " " + resp.data.lastName,
+                    name: resp.data.pet.name,
+                    birthDate: resp.data.pet.birthDate,
                 };
-                self.petTypeId = "0";
+                self.petTypeId = self.types.id;
             })
         });
 
@@ -24,7 +26,7 @@ angular.module('petForm')
                 id: id,
                 name: self.pet.name,
                 birthDate: self.pet.birthDate,
-                typeId: self.petTypeId
+                typeId: self.types.id
             };
 
             console.log(data);
