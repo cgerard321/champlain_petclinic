@@ -27,6 +27,8 @@ angular.module('petForm')
                 typeId: self.petTypeId
             };
 
+            console.log(data);
+
             var req;
 
             if(!id)
@@ -35,7 +37,7 @@ angular.module('petForm')
                 req = $http.delete("api/gateway/owners/" + ownerId + "/pets/" + id, data);
 
             req.then(function () {
-                $state.go("owners", {ownerId: ownerId});
+                $state.go("owners/details", {ownerId: ownerId});
             }, function (response) {
                 var error = response.data;
                 error.errors = error.errors || [];
