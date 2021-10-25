@@ -12,6 +12,7 @@
             <td>Bill ID</td>
             <td>Amount</td>
             <td>Date/Time</td>
+            <td>Details</td>
         </tr>
     </thead>
 
@@ -19,5 +20,6 @@
         <td>{{bill.billId}}</td>
         <td>{{bill.amount}}</td>
         <td>{{bill.date}}</td>
+        <td><a href="http://localhost:8080/api/gateway/bills/{{bill.billId}}">Get Details</a></td>
     </tr>
 </table>
