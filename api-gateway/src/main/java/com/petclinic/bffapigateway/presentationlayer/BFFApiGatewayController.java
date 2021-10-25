@@ -56,21 +56,6 @@ public class BFFApiGatewayController {
         return billServiceClient.getAllBilling();
     }
 
-    //Testing purpose
-    @GetMapping(value = "pets/visits/All")
-    public Mono<Visits> getAllVisits(){
-        return visitsServiceClient.getAllVisits();
-    }
-
-
-/*
-    //Add new Visit
-    @PostMapping (value = "/pets/visits", consumes = "application/json", produces = "application/json")
-    public Mono<Visits> createVisitForPets(final @RequestBody VisitDetails visitDetails){
-        return visitsServiceClient.createVisitForPets(visitDetails);
-        }
-*/
-
     @PutMapping(
             value = "owners/*/pets/{petId}/visits/{visitId}",
             consumes = "application/json",
@@ -85,18 +70,6 @@ public class BFFApiGatewayController {
     @DeleteMapping (value = "visits/{visitId}")
     public Mono<Void> deleteVisitsByVisitId(final @PathVariable String visitId){
         return visitsServiceClient.deleteVisitByVisitId(visitId);
-    }
-
-    //Delete Visit
-    @DeleteMapping (value = "pets/visits/{petId}")
-    public Mono<Void> deleteVisitForPets(final @PathVariable int petId){
-        return visitsServiceClient.deleteVisitForPets(petId);
-    }
-
-    //Update Visit
-    @PutMapping(value ="pets/visits/{petId}", consumes = "application/json", produces = "application/json")
-    public Mono<Visits> updateVisitForPets(final @PathVariable int petId){
-        return visitsServiceClient.updateVisitForPets(petId);
     }
 
     @GetMapping(value = "visits/{petId}")
@@ -230,10 +203,9 @@ public class BFFApiGatewayController {
     }
 
 
-    // TODO: Hook this up to auth service
     @GetMapping(value = "admin/roles")
-    public Object getRoles() {
-        return null;
+    public Flux<Role> getRoles() {
+        return authServiceClient.getRoles();
     }
 
     // TODO: Hook this up to auth service
