@@ -41,10 +41,7 @@ public class BFFApiGatewayController {
     private final AuthServiceClient authServiceClient;
 
     private final BillServiceClient billServiceClient;
-
-    private final AggregateServiceClient aggregateServiceClient;
-
-
+    
     @GetMapping(value = "bills/{billId}")
     public Mono<BillDetails> getBillingInfo(final @PathVariable int billId)
     {
@@ -307,11 +304,5 @@ public class BFFApiGatewayController {
                         .header(AUTHORIZATION, n.getT1())
                         .body(n.getT2())
                 );
-    }
-
-    @GetMapping(value = "/aggregate/{id}")
-    public Mono<AggregateAllCombinedDetails> getOneAggregate(@PathVariable int id){
-        return aggregateServiceClient.getOneAggregate(id);
-
     }
 }

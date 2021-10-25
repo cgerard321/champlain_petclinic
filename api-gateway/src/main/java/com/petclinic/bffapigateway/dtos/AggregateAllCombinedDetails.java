@@ -27,7 +27,7 @@ public class AggregateAllCombinedDetails {
     private  List<PetDetails> pets = new ArrayList<>();
 
     private  List<VetDetails> vets = new ArrayList<>();
-    
+
     private  List<BillDetails> bills = new ArrayList<>();
 
 

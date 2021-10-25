@@ -67,15 +67,8 @@ class ApiGatewayControllerTest {
     @MockBean
     private BillServiceClient billServiceClient;
 
-//    @MockBean
-//    private AggregateServiceClient aggregateServiceClient;
-
     @Autowired
     private WebTestClient client;
-
-
-    Integer id = new Integer(1);
-    Integer id2 = new Integer(2);
 
     @Test
     void createAndDeleteVet() {
@@ -114,8 +107,6 @@ class ApiGatewayControllerTest {
 
         assertEquals(null, vetsServiceClient.getVet(vetId));
     }
-
-
 
 
     @Test
@@ -173,9 +164,9 @@ class ApiGatewayControllerTest {
 
         assertEquals(user.getId(), 1);
     }
-    
+
     @Test
-    void createUser(){
+    void createUser() {
         UserDetails user = new UserDetails();
         user.setId(1);
         user.setUsername("Johnny123");
@@ -202,9 +193,8 @@ class ApiGatewayControllerTest {
     }
 
 
-
-      @Test
-      void createOwner(){
+    @Test
+    void createOwner() {
         OwnerDetails owner = new OwnerDetails();
         owner.setId(1);
         owner.setFirstName("John");
@@ -226,13 +216,12 @@ class ApiGatewayControllerTest {
                 .expectBody();
 
 
-
-        assertEquals(owner.getId(),1);
-        assertEquals(owner.getFirstName(),"John");
-        assertEquals(owner.getLastName(),"Johnny");
-        assertEquals(owner.getAddress(),"111 John St");
-        assertEquals(owner.getCity(),"Johnston");
-        assertEquals(owner.getTelephone(),"51451545144");
+        assertEquals(owner.getId(), 1);
+        assertEquals(owner.getFirstName(), "John");
+        assertEquals(owner.getLastName(), "Johnny");
+        assertEquals(owner.getAddress(), "111 John St");
+        assertEquals(owner.getCity(), "Johnston");
+        assertEquals(owner.getTelephone(), "51451545144");
     }
 
     @Test
@@ -271,11 +260,10 @@ class ApiGatewayControllerTest {
     }
 
 
-
     //private static final int BILL_ID = 1;
 
     @Test
-    public void getBillById(){
+    public void getBillById() {
 
         //int expectedLength = 1;
 
@@ -304,8 +292,6 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.amount").isEqualTo(entity.getAmount());
 
 
-
-
         assertEquals(entity.getBillId(), 1);
 
 
@@ -313,7 +299,7 @@ class ApiGatewayControllerTest {
 
 
     @Test
-    void getBillingByRequestMissingPath(){
+    void getBillingByRequestMissingPath() {
         client.get()
                 .uri("/bills")
                 .accept(MediaType.APPLICATION_JSON)
@@ -325,7 +311,7 @@ class ApiGatewayControllerTest {
     }
 
     @Test
-     void getBillNotFound(){
+    void getBillNotFound() {
         client.get()
                 .uri("/bills/{billId}", 100)
                 .accept(APPLICATION_JSON)
@@ -339,10 +325,8 @@ class ApiGatewayControllerTest {
     }
 
 
-
-
     @Test
-    void getPutRequestNotFound(){
+    void getPutRequestNotFound() {
         client.put()
                 .uri("/owners/{ownerId}", 100)
                 .accept(MediaType.APPLICATION_JSON)
@@ -354,7 +338,7 @@ class ApiGatewayControllerTest {
     }
 
     @Test
-    void getPutRequestMissingPath(){
+    void getPutRequestMissingPath() {
         client.put()
                 .uri("/owners")
                 .accept(MediaType.APPLICATION_JSON)
@@ -366,7 +350,7 @@ class ApiGatewayControllerTest {
     }
 
     @Test
-    void shouldCreateAVisitWithOwnerInfo(){
+    void shouldCreateAVisitWithOwnerInfo() {
         OwnerDetails owner = new OwnerDetails();
         VisitDetails visit = new VisitDetails();
         owner.setId(1);
@@ -396,6 +380,7 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.status").isEqualTo(false)
                 .jsonPath("$.practitionerId").isEqualTo(1);
     }
+
     @Test
     void shouldDeleteAVisit() {
         VisitDetails visit = new VisitDetails();
@@ -466,7 +451,8 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.date").isEqualTo("2021-12-12")
                 .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$.status").isEqualTo(false)
-                .jsonPath("$.practitionerId").isEqualTo(1);;
+                .jsonPath("$.practitionerId").isEqualTo(1);
+        ;
 
         client.delete()
                 .uri("/api/gateway/visits/{visitId}", visit.getVisitId())
@@ -507,7 +493,8 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.date").isEqualTo("2021-12-12")
                 .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$.status").isEqualTo(false)
-                .jsonPath("$.practitionerId").isEqualTo(1);;
+                .jsonPath("$.practitionerId").isEqualTo(1);
+        ;
 
         client.delete()
                 .uri("/api/gateway/pets/visits/{petId}", visit.getPetId())
@@ -566,7 +553,7 @@ class ApiGatewayControllerTest {
                 .thenReturn(Mono.just(visit2));
 
         client.put()
-                .uri("/api/gateway/pets/visits/{petId}",visit.getPetId())
+                .uri("/api/gateway/pets/visits/{petId}", visit.getPetId())
                 .body(Mono.just(visit2), VisitDetails.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -603,7 +590,7 @@ class ApiGatewayControllerTest {
                 .jsonPath("$[0].description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$[0].practitionerId").isEqualTo(1);
     }
-    
+
     @Test
     void getSingleVisit_Valid() {
         VisitDetails visit = new VisitDetails();
@@ -613,9 +600,7 @@ class ApiGatewayControllerTest {
         visit.setDescription("Fetching a single visit!");
         visit.setStatus(false);
         visit.setPractitionerId(177013);
-        
         when(visitsServiceClient.getVisitByVisitId(anyString())).thenReturn(Mono.just(visit));
-    
         client.get()
                 .uri("/api/gateway/visit/{visitId}", visit.getVisitId())
                 .exchange()
@@ -627,15 +612,15 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.description").isEqualTo(visit.getDescription())
                 .jsonPath("$.practitionerId").isEqualTo(visit.getPractitionerId());
     }
-    
+
     @Test
     void getSingleVisit_Invalid() {
         final String invalidVisitId = "invalid";
         final String expectedErrorMessage = "error message";
-    
+
         when(visitsServiceClient.getVisitByVisitId(invalidVisitId))
                 .thenThrow(new GenericHttpException(expectedErrorMessage, BAD_REQUEST));
-        
+
         client.get()
                 .uri("/api/gateway/visit/{visitId}", invalidVisitId)
                 .exchange()
@@ -886,73 +871,6 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.timestamp").exists();
     }
 
-//    @Test
-//    void shouldGetAllCombinedAggregateById(){
-//        AggregateAllCombinedDetails combined = new AggregateAllCombinedDetails();
-//
-//        List<VetDetails> vets = new ArrayList<>();
-//        List<PetDetails> pets = new ArrayList<>();
-//        List<BillDetails> bills = new ArrayList<>();
-//
-//        VetDetails vet1 = new VetDetails();
-//        vet1.setVetId(123456);
-//        vet1.setFirstName("Frank");
-//        vet1.setLastName("Johnson");
-//        vet1.setEmail("frank.johnson@email.com");
-//        vet1.setResume("Practicing since 15 years");
-//        vet1.setWorkday("Monday, Tuesday, Wednesday");
-//        vet1.setPhoneNumber("5554151125");
-//        vet1.setIsActive(1);
-//
-//        PetDetails pet1 = new PetDetails();
-//        PetType petType = new PetType();
-//        pet1.setId(25);
-//        pet1.setName("Jojo");
-//        pet1.setBirthDate("2004-04-04");
-//        petType.setName("cat");
-//        pet1.setType(petType);
-//
-//        BillDetails bill1 = new BillDetails();
-//        bill1.setCustomerId(1);
-//        bill1.setVisitType("previous");
-//        bill1.setDate(new Date());
-//        bill1.setAmount(559.75);
-//
-//        vets.add(vet1);
-//        pets.add(pet1);
-//        bills.add(bill1);
-//
-//        combined.setId(1);
-//        combined.setFirstName("John");
-//        combined.setLastName("Robinson");
-//        combined.setCity("New York");
-//        combined.setAddress("123 5th Avenue");
-//        combined.setVets(vets);
-//        combined.setPets(pets);
-//        combined.setBills(bills);
-//
-//        when(aggregateServiceClient.getOneAggregate(combined.getId()))
-//                .thenReturn(Mono.just(combined));
-//
-//        client.get()
-//                .uri("/api/gateway/aggregate/{id}", combined.getId())
-//                .exchange()
-//                .expectStatus().isOk()
-//                .expectBody()
-//                .jsonPath("$.id").isEqualTo(combined.getId())
-//                .jsonPath("$.firstName").isEqualTo(combined.getFirstName())
-//                .jsonPath("$.lastName").isEqualTo(combined.getLastName())
-//                .jsonPath("$.address").isEqualTo(combined.getAddress())
-//                .jsonPath("$.city").isEqualTo(combined.getCity())
-//                .jsonPath("$.telephone").isEqualTo(combined.getTelephone())
-//                .jsonPath("$.pets").isEqualTo(combined.getPets())
-//                .jsonPath("$.vets").isEqualTo(combined.getVets())
-//                .jsonPath("$.bills").isEqualTo(combined.getBills());
-//
-//
-//
-//
-//    }
 }
 
 
