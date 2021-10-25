@@ -30,6 +30,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 
+
 import static org.mockito.Mockito.*;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
@@ -235,7 +236,6 @@ class ApiGatewayControllerTest {
     void createPet(){
         OwnerDetails od = new OwnerDetails();
         od.setId(1);
-
         PetDetails pet = new PetDetails();
         PetType type = new PetType();
         type.setName("Dog");
@@ -243,11 +243,12 @@ class ApiGatewayControllerTest {
         pet.setName("Fluffy");
         pet.setBirthDate("2000-01-01");
         pet.setType(type);
+
         when(customersServiceClient.createPet(pet,od.getId()))
                 .thenReturn(Mono.just(pet));
 
         client.post()
-                .uri("/api/gateway/owners/pets")
+                .uri("/api/gateway/owners/{ownerId}/pets", od.getId())
 
                 .body(Mono.just(pet), PetDetails.class)
                 .accept(MediaType.APPLICATION_JSON)
@@ -259,6 +260,8 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.name").isEqualTo(pet.getName())
                 .jsonPath("$.birthDate").isEqualTo(pet.getBirthDate())
                 .jsonPath("$.type").isEqualTo(pet.getType());
+
+
 
 
 
@@ -276,7 +279,9 @@ class ApiGatewayControllerTest {
         pet.setBirthDate("2000-01-01");
         pet.setType(type);
 
+
         when(customersServiceClient.createPet(pet,od.getId()))
+
         .thenReturn(Mono.just(pet));
 
         client.post()
@@ -302,7 +307,9 @@ class ApiGatewayControllerTest {
         pet.setBirthDate("2000-01-01");
         pet.setType(type);
 
+
         when(customersServiceClient.createPet(pet,od.getId()))
+
                 .thenReturn(Mono.just(pet));
 
         client.post()

@@ -90,6 +90,15 @@ public class CustomersServiceClient {
 
 
 
+    public Mono<PetDetails> createNewPet(final PetDetails model,final int ownerId){
+        return webClientBuilder.build().post()
+                .uri(customersServiceUrl +"/{ownerId}/pets", ownerId)
+                .body(just(model), PetDetails.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve().bodyToMono(PetDetails.class);
+    }
+
+
 
 
     public Mono<OwnerDetails> deleteOwner (final long ownerId) {
