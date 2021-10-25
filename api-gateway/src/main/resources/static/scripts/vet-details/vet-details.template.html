@@ -100,7 +100,9 @@
 
         <div class="row g-3">
           <div class="col-sm-12">
-            <a class="add-vet-button btn btn-success" ui-sref="vetEdit({vetId: $ctrl.vet.id})">Edit Vet</a>
+              <a ui-sref="vetEdit({vetId: $ctrl.vet.vetId})">
+               <button class="edit-vet-button btn btn-success">Edit Vet</button>
+              </a>
           </div>
         </div>
 

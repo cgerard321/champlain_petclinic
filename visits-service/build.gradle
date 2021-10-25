@@ -14,6 +14,10 @@ repositories {
 	mavenCentral()
 }
 
+ext {
+	mapstructVersion = "1.4.1.Final"
+}
+
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -22,6 +26,11 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 
 	implementation 'io.springfox:springfox-boot-starter:3.0.0'
+
+	implementation("org.mapstruct:mapstruct:${mapstructVersion}")
+	compileOnly "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+	testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 
 	runtimeOnly 'com.h2database:h2'
 

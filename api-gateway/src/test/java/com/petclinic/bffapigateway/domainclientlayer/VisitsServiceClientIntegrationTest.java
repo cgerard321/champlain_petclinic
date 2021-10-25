@@ -15,6 +15,7 @@ import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 
@@ -52,7 +53,8 @@ class VisitsServiceClientIntegrationTest {
     void getVisitsForPets_withAvailableVisitsService() {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
-                .setBody("{\"items\":[{\"id\":5,\"date\":\"2018-11-15\",\"description\":\"test visit\",\"petId\":1}]}"));
+                .setBody("{\"items\":[{\"visitId\":\"773fa7b2-e04e-47b8-98e7-4adf7cfaaeee\"," +
+                        "\"date\":\"2018-11-15\",\"description\":\"test visit\",\"petId\":1}]}"));
 
         Mono<Visits> visits = visitsServiceClient.getVisitsForPets(Collections.singletonList(1));
 
@@ -63,7 +65,9 @@ class VisitsServiceClientIntegrationTest {
     void getVisitsForPet() {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
-                .setBody("{\"id\":5,\"date\":\"2018-11-15\",\"description\":\"test visit\",\"petId\":1, \"practitionerId\":1,\"status\":false}"));
+                .setBody("{\"visitId\":\"773fa7b2-e04e-47b8-98e7-4adf7cfaaeee\"," +
+                        "\"date\":\"2018-11-15\",\"description\":\"test visit\",\"petId\":1," +
+                        " \"practitionerId\":1,\"status\":false}"));
 
         Flux<VisitDetails> visits = visitsServiceClient.getVisitsForPet(1);
 
@@ -73,7 +77,7 @@ class VisitsServiceClientIntegrationTest {
     @Test
     void shouldGetPreviousVisitsForPet() throws JsonProcessingException {
         final VisitDetails visit = VisitDetails.builder()
-                .id(1)
+                .visitId(UUID.randomUUID().toString())
                 .petId(21)
                 .practitionerId(2)
                 .date("2021-12-7")
@@ -88,7 +92,7 @@ class VisitsServiceClientIntegrationTest {
 
         final VisitDetails previousVisits = visitsServiceClient.getPreviousVisitsForPet(21).blockFirst();
 
-        assertEquals(visit.getId(), previousVisits.getId());
+        assertEquals(visit.getVisitId(), previousVisits.getVisitId());
         assertEquals(visit.getPetId(), previousVisits.getPetId());
         assertEquals(visit.getPractitionerId(), previousVisits.getPractitionerId());
         assertEquals(visit.getDate(), previousVisits.getDate());
@@ -99,7 +103,7 @@ class VisitsServiceClientIntegrationTest {
     @Test
     void shouldGetScheduledVisitsForPet() throws JsonProcessingException {
         final VisitDetails visit = VisitDetails.builder()
-                .id(1)
+                .visitId(UUID.randomUUID().toString())
                 .petId(21)
                 .practitionerId(2)
                 .date("2021-12-7")
@@ -114,7 +118,7 @@ class VisitsServiceClientIntegrationTest {
 
         final VisitDetails scheduledVisits = visitsServiceClient.getScheduledVisitsForPet(21).blockFirst();
 
-        assertEquals(visit.getId(), scheduledVisits.getId());
+        assertEquals(visit.getVisitId(), scheduledVisits.getVisitId());
         assertEquals(visit.getPetId(), scheduledVisits.getPetId());
         assertEquals(visit.getPractitionerId(), scheduledVisits.getPractitionerId());
         assertEquals(visit.getDate(), scheduledVisits.getDate());
@@ -124,7 +128,7 @@ class VisitsServiceClientIntegrationTest {
     }
 
     private void assertVisitDescriptionEq(VisitDetails visits, int petId, String description) {
-        assertEquals(5, visits.getId());
+        assertEquals("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee", visits.getVisitId());
         assertEquals(description, visits.getDescription());
     }
 
@@ -145,11 +149,13 @@ class VisitsServiceClientIntegrationTest {
     void getVisitById() {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
-                .setBody("{\"id\":5,\"date\":\"2018-11-15\",\"description\":\"test visit\",\"petId\":1, \"practitionerId\":1,\"status\":false}"));
+                .setBody("{\"visitId\":\"773fa7b2-e04e-47b8-98e7-4adf7cfaaeee\"," +
+                        "\"date\":\"2018-11-15\",\"description\":\"test visit\"," +
+                        "\"petId\":1, \"practitionerId\":1,\"status\":false}"));
         
-        Mono<VisitDetails> visit = visitsServiceClient.getVisitById(5);
+        Mono<VisitDetails> visit = visitsServiceClient.getVisitByVisitId("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee");
         
-        assertEquals(5, visit.block().getId());
+        assertEquals("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee", visit.block().getVisitId());
     }
 
 }
