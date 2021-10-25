@@ -112,7 +112,9 @@ class VetResource {
         return vetService.createVet(vet);
     }
 
-    @PutMapping( value = "/{vetId}")
+    @PutMapping( value = "/{vetId}",
+                consumes = MediaType.APPLICATION_JSON_VALUE,
+                produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public VetDTO updateVet(@PathVariable int vetId, @RequestBody VetDTO vetRequest)
     {
