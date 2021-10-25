@@ -26,13 +26,6 @@ import static java.util.stream.Collectors.joining;
 //@RequiredArgsConstructor
 public class VisitsServiceClient {
 
-//    private final WebClient.Builder webClientBuilder;
-//
-//    @Value("${app.visits-service.host}") String visitsServiceHost;
-//    @Value("${app.visits-service.port}") String visitsServicePort;
-//    private final String visitsServiceURL = "http://" + visitsServiceHost + ":" + visitsServicePort + "/";
-//    private String hostname = "http://" + visitsServiceHost + "/";
-
     private final WebClient.Builder webClientBuilder;
     //private final String visitsServiceURL;
     private String hostname = "http://visits-service";

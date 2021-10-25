@@ -27,4 +27,5 @@ public class VisitDetails {
     private String description = null;
 
     private Boolean status = null;
+
 }
