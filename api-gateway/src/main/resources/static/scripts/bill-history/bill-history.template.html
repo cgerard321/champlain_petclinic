@@ -13,6 +13,7 @@
             <td>Visit Type</td>
             <td>Amount</td>
             <td>Date/Time</td>
+            <td>Delete</td>
         </tr>
     </thead>
 
@@ -21,5 +22,6 @@
         <td>{{bill.visitType}}</td>
         <td>{{bill.amount}}</td>
         <td>{{bill.date}}</td>
+        <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteBill(bill.billId)">Delete Bill</a></td>
     </tr>
 </table>
