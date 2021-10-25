@@ -88,18 +88,20 @@ angular.module('visits')
                     let startDate = info[1];
                     let endDate = info[2];
 
-                    $http.get("api/gateway/visits/calendar/" + practitionerId + "?dates=" + startDate + "," + endDate).then(function (resp) {
-                        self.availableVisits = resp.data;
-                        availabilities = [];
+                    if(!isNaN(practitionerId)) {
+                        $http.get("api/gateway/visits/calendar/" + practitionerId + "?dates=" + startDate + "," + endDate).then(function (resp) {
+                            self.availableVisits = resp.data;
+                            availabilities = [];
 
-                        $.each(self.availableVisits, function(i, visit) {
-                            let date = visit.date.toString().split("-");
+                            $.each(self.availableVisits, function(i, visit) {
+                                let date = visit.date.toString().split("-");
 
-                            availabilities.push(parseInt(date[2]));
+                                availabilities.push(parseInt(date[2]));
+                            });
+
+                            renderCalendar();
                         });
-
-                        renderCalendar();
-                    });
+                    }
                 }
             }
         }
