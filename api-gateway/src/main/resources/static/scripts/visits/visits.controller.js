@@ -84,22 +84,26 @@ angular.module('visits')
                 let info = pIdAndMonth.split(",");
 
                 if(info[0] !== undefined){
+                    console.log(info[0].toString());
                     let practitionerId = parseInt(info[0]);
                     let startDate = info[1];
                     let endDate = info[2];
 
-                    $http.get("api/gateway/visits/calendar/" + practitionerId + "?dates=" + startDate + "," + endDate).then(function (resp) {
-                        self.availableVisits = resp.data;
-                        availabilities = [];
+                    if(!isNaN(practitionerId)) {
+                        $http.get("api/gateway/visits/calendar/" + practitionerId + "?dates=" + startDate + "," + endDate).then(function (resp) {
+                            self.availableVisits = resp.data;
+                            availabilities = [];
 
-                        $.each(self.availableVisits, function(i, visit) {
-                            let date = visit.date.toString().split("-");
+                            $.each(self.availableVisits, function(i, visit) {
+                                let date = visit.date.toString().split("-");
 
-                            availabilities.push(parseInt(date[2]));
+                                availableDays = availableDays.filter(e => e !== parseInt(date[2]));
+                                availabilities.push(parseInt(date[2]));
+                            });
+
+                            renderCalendar();
                         });
-
-                        renderCalendar();
-                    });
+                    }
                 }
             }
         }
@@ -234,9 +238,13 @@ angular.module('visits')
             visitId = id;
             $("#selectedVet option[value='"+practitionerId+"']").prop("selected", true);
             $('#date_input').val(date);
+            console.log(date);
             $('#description_textarea').val(description);
             $('#submit_button').text("Update Visit");
             $('#cancel_button').css("visibility", "visible");
+
+            let d = date.toString().split("-");
+            editDateParsing(d[0], d[1], d[2]);
 
             self.loadVetInfo();
 
@@ -338,7 +346,7 @@ angular.module('visits')
             // Restore default functionality of form submit
             self.submit = function () {
                 var data = {
-                    date: $filter('date')(self.date, "yyyy-MM-dd"),
+                    date: getCurrentDate(),
                     description: self.desc,
                     practitionerId: self.practitionerId,
                     status: true
@@ -346,7 +354,7 @@ angular.module('visits')
 
                 var billData = {
                     ownerId: $stateParams.ownerId,
-                    date: $filter('date')(self.date, "yyyy-MM-dd"),
+                    date: getCurrentDate(),
                     visitType : $("#selectedVisitType").val()
                 }
 
