@@ -41,7 +41,7 @@ public class BFFApiGatewayController {
     private final AuthServiceClient authServiceClient;
 
     private final BillServiceClient billServiceClient;
-    
+
     @GetMapping(value = "bills/{billId}")
     public Mono<BillDetails> getBillingInfo(final @PathVariable int billId)
     {
