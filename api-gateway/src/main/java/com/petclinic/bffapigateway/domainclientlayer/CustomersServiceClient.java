@@ -84,7 +84,7 @@ public class CustomersServiceClient {
 
     public Flux<PetType> getPetTypes (){
         return webClientBuilder.build().get()
-                .uri(customersServiceUrl + "/petTypes")
+                .uri(customersServiceUrl + "petTypes")
                 .retrieve()
                 .bodyToFlux(PetType.class);
     }

@@ -30,9 +30,10 @@ public class PetRequest {
 
     }
 
-    public PetRequest(String name, Date birthDate) {
+    public PetRequest(String name, Date birthDate, int typeId) {
         this.name = name;
         this.birthDate = birthDate;
+        this.typeId = typeId;
     }
 }
 

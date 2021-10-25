@@ -5,7 +5,7 @@ angular.module('petForm')
         var self = this;
         var ownerId = $stateParams.ownerId || 0;
 
-        $http.get('api/owners/petTypes').then(function (resp) {
+        $http.get('api/gateway/owners/petTypes').then(function (resp) {
             self.types = resp.data;
         }).then(function () {
 
@@ -13,7 +13,7 @@ angular.module('petForm')
                 self.pet = {
                     owner: resp.data.firstName + " " + resp.data.lastName
                 };
-                self.petTypeId = "1";
+                self.petTypeId = resp.data.petTypeId;
             })
         });
 
