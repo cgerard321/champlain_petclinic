@@ -89,6 +89,7 @@ public class BFFApiGatewayController {
 =======
 
     @PostMapping(value = "owners/{ownerId}/pets" , produces = "application/json", consumes = "application/json")
+<<<<<<< HEAD
     public Mono<PetDetails> createPet(@RequestBody PetDetails pet, @PathVariable int ownerId){
 
 
@@ -120,6 +121,10 @@ public class BFFApiGatewayController {
     public Mono<PetDetails> createNewPet(@RequestBody PetDetails pet, @PathVariable int ownerId){
         return customersServiceClient.createNewPet(pet, ownerId);
 >>>>>>> cef5b393 (Ok, idk, help plz)
+=======
+    public Mono<PetDetails> createNewPet(@RequestBody PetDetails pet, @PathVariable int ownerId){
+        return customersServiceClient.createPet(pet, ownerId);
+>>>>>>> d0618357 (I give up)
     }
 
 <<<<<<< HEAD

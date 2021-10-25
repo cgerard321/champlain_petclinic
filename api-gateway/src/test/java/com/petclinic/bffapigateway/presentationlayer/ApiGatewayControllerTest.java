@@ -245,11 +245,15 @@ class ApiGatewayControllerTest {
     }
 
     @Test
+<<<<<<< HEAD
     void createPet(){
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+=======
+    void shouldCreatePet(){
+>>>>>>> d0618357 (I give up)
         OwnerDetails od = new OwnerDetails();
         od.setId(1);
 
@@ -289,6 +293,7 @@ class ApiGatewayControllerTest {
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
         client.post()
 <<<<<<< HEAD
                 .uri("/api/gateway/owners/pets")
@@ -304,6 +309,9 @@ class ApiGatewayControllerTest {
 =======
         when(customersServiceClient.createNewPet(pet,od.getId()))
 >>>>>>> cef5b393 (Ok, idk, help plz)
+=======
+        when(customersServiceClient.createPet(pet, od.getId()))
+>>>>>>> d0618357 (I give up)
                 .thenReturn(Mono.just(pet));
 
         client.post()
@@ -354,7 +362,7 @@ class ApiGatewayControllerTest {
     @Test
     void shouldThrowUnsupportedMediaTypeIfBodyDoesNotExist(){
         OwnerDetails od = new OwnerDetails();
-        od.setId(0);
+        od.setId(1);
         PetDetails pet = new PetDetails();
         PetType type = new PetType();
         type.setName("Dog");
@@ -363,7 +371,13 @@ class ApiGatewayControllerTest {
         pet.setBirthDate("2000-01-01");
         pet.setType(type);
 
+<<<<<<< HEAD
         when(customersServiceClient.createPet(pet,od.getId()))
+=======
+
+        when(customersServiceClient.createPet(pet, od.getId()))
+
+>>>>>>> d0618357 (I give up)
         .thenReturn(Mono.just(pet));
 
         client.post()
@@ -373,11 +387,12 @@ class ApiGatewayControllerTest {
                 .expectStatus().isEqualTo(UNSUPPORTED_MEDIA_TYPE)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.path").isEqualTo("/api/gateway/owners/0/pets");
+                .jsonPath("$.path").isEqualTo("/api/gateway/owners/1/pets");
 
 
     }
 
+<<<<<<< HEAD
     @Test
     void ifOwnerIdIsNotSpecifiedInUrlThrowNotAllowed(){
         OwnerDetails od = new OwnerDetails();
@@ -470,6 +485,9 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$.path").isEqualTo("/api/gateway/owners/pets");
     }
+=======
+
+>>>>>>> d0618357 (I give up)
 
     @Test
     void deleteUser() {

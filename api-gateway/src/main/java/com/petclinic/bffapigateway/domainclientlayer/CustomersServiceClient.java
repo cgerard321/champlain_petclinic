@@ -88,6 +88,7 @@ public class CustomersServiceClient {
 <<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     public Mono<PetDetails> createPet(final PetDetails model,final int ownerId){
         return webClientBuilder.build().post()
                 .uri(customersServiceUrl +"/{ownerId}/pets", ownerId)
@@ -108,6 +109,9 @@ public class CustomersServiceClient {
 >>>>>>> 0558a528 (Customer service is fked gg.)
 =======
     public Mono<PetDetails> createNewPet(final PetDetails model,final int ownerId){
+=======
+    public Mono<PetDetails> createPet(final PetDetails model, final int ownerId){
+>>>>>>> d0618357 (I give up)
         return webClientBuilder.build().post()
                 .uri(customersServiceUrl +"/{ownerId}/pets", ownerId)
                 .body(just(model), PetDetails.class)
