@@ -35,15 +35,7 @@
         <td class="vet_speciality"><span ng-repeat="specialty in vet.specialties">{{specialty.name + ' '}}</span></td>
 
         <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteVet(vet.vetId)">Delete Vet</a></td>
-        <script>
-            var setAvailable = function (input) {
-                if (input.checked) {
-                    document.getElementById('enable').click();
-                } else {
-                    document.getElementById('disable').click();
-                }
-            };
-        </script>
+
     </tr>
     <div ng-repeat="vet in $ctrl.vetList" class="modal m{{vet.vetId}} modalOff">
         <span class="modal_image"><img ng-if="vet.image != null" src="data:image/png;base64,{{vet.image}}"/><img ng-if="vet.image == null" src="images/vet_default.jpg"/></span>
