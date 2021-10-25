@@ -1002,6 +1002,39 @@ class ApiGatewayControllerTest {
 
         verify(authServiceClient).addRole(role);
     }
+
+    @Test
+    void shouldDeleteRole() {
+        final Role parentRole = new Role();
+        parentRole.setId(1);
+        parentRole.setName("admin");
+
+        final Role role = new Role();
+        role.setId(2);
+        role.setName("vet");
+        role.setParent(parentRole);
+
+        when(authServiceClient.addRole(role))
+                .thenReturn(Mono.just(role));
+
+        client.post()
+                .uri("/api/gateway/admin/roles")
+                .contentType(APPLICATION_JSON)
+                .body(Mono.just(role), Role.class)
+                .exchange()
+                .expectStatus().isOk();
+
+        verify(authServiceClient).addRole(role);
+
+        client.delete()
+                .uri("/api/gateway/admin/roles/{id}", role.getId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk();
+
+        verify(authServiceClient).deleteRole(role.getId());
+    }
 }
 
 
