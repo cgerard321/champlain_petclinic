@@ -23,8 +23,7 @@ public class DataValidation {
 
     private static final Logger LOG = LoggerFactory.getLogger(Vet.class);
 
-
-
+    
     public static String verifyFirstName(String firstName){
         String confirmedValue = "";
         firstName = firstName.replaceAll("( |\\d)", "");
