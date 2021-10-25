@@ -4,18 +4,18 @@
     }
 </script>
 
-<h2 class="titleOwner">Bill Details: {{bills.billId}}</h2>
+<h2 class="titleOwner">Bill Details: {{$ctrl.bills.billId}}</h2>
 
 <div>
-    <h3>Payment Info for Bill {{bills.billId}}</h3>
+    <h3>Payment Info for Bill {{$ctrl.bills.billId}}</h3>
     <h3>505 Lincoln Str. Queens, New York</h3>
-    <h3>Final price: {{bills.amount}}</h3>
-    <h3>Visit type: {{bills.visitType}}</h3>
-    <h3>Date generated: {{bills.date}}</h3>
+    <h3>Final price: {{$ctrl.bills.amount}}</h3>
+    <h3>Visit type: {{$ctrl.bills.visitType}}</h3>
+    <h3>Date generated: {{$ctrl.bills.date}}</h3>
 
     <div>
-        <input type="button" value="Print this page" onclick="printPage()" />
+        <input class="newBtn btn btn-primary" type="button" value="Print this page" onclick="printPage()" />
     </div>
-
-    <button type="submit" formaction="/bills" >Back to History...</button>
+    <br>
+    <a class="newBtn btn btn-primary" href="http://localhost:8080/#!/bills">Back to History</a>
 </div>
