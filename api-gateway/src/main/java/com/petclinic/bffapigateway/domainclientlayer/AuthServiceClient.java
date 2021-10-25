@@ -1,5 +1,6 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
+import com.petclinic.bffapigateway.dtos.*;
 import com.petclinic.bffapigateway.dtos.Login;
 import com.petclinic.bffapigateway.dtos.Register;
 import com.petclinic.bffapigateway.dtos.Role;
@@ -134,6 +135,13 @@ public class AuthServiceClient {
                 .map(n -> Tuples.of(token.get(), n));
     }
 
+    public Flux<Role> getRoles() {
+        return webClientBuilder.build().get()
+                .uri(authServiceUrl + "/admin/roles")
+                .retrieve()
+                .bodyToFlux(Role.class);
+    }
+  
     public Mono<Role> addRole(final Role model) {
         return webClientBuilder.build().post()
                 .uri(authServiceUrl + "/admin/roles")
