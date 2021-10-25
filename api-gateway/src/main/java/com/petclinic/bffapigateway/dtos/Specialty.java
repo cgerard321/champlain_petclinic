@@ -6,6 +6,6 @@ import lombok.Data;
 public class Specialty {
 
     private int id;
-
+    private int specialtyId;
     private String name;
 }

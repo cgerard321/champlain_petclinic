@@ -4,6 +4,7 @@ package com.petclinic.bffapigateway.presentationlayer;
 import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.*;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -29,6 +30,7 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 @RestController
 @RequiredArgsConstructor
+@Slf4j
 @RequestMapping("/api/gateway")
 public class BFFApiGatewayController {
 
@@ -62,22 +64,6 @@ public class BFFApiGatewayController {
         return billServiceClient.getAllBilling();
     }
 
-    //Testing purpose
-    @GetMapping(value = "pets/visits/All")
-    public Mono<Visits> getAllVisits(){
-        return visitsServiceClient.getAllVisits();
-
-    }
-
-
-/*
-    //Add new Visit
-    @PostMapping (value = "/pets/visits", consumes = "application/json", produces = "application/json")
-    public Mono<Visits> createVisitForPets(final @RequestBody VisitDetails visitDetails){
-        return visitsServiceClient.createVisitForPets(visitDetails);
-        }
-*/
-
     @PutMapping(
             value = "owners/*/pets/{petId}/visits/{visitId}",
             consumes = "application/json",
@@ -92,18 +78,6 @@ public class BFFApiGatewayController {
     @DeleteMapping (value = "visits/{visitId}")
     public Mono<Void> deleteVisitsByVisitId(final @PathVariable String visitId){
         return visitsServiceClient.deleteVisitByVisitId(visitId);
-    }
-
-    //Delete Visit
-    @DeleteMapping (value = "pets/visits/{petId}")
-    public Mono<Void> deleteVisitForPets(final @PathVariable int petId){
-        return visitsServiceClient.deleteVisitForPets(petId);
-    }
-
-    //Update Visit
-    @PutMapping(value ="pets/visits/{petId}", consumes = "application/json", produces = "application/json")
-    public Mono<Visits> updateVisitForPets(final @PathVariable int petId){
-        return visitsServiceClient.updateVisitForPets(petId);
     }
 
     @GetMapping(value = "visits/{petId}")
@@ -203,7 +177,8 @@ public class BFFApiGatewayController {
             consumes = "application/json",
             produces = "application/json"
     )
-    Mono<VetDetails> updateVet(@RequestBody VetDetails vet, @PathVariable int vetId) {
+    public Mono<VetDetails> updateVet( @PathVariable int vetId, @RequestBody VetDetails vet) {
+        log.debug("Trying to update vet");
         return vetsServiceClient.updateVet(vetId, vet);
     }
 
@@ -236,10 +211,9 @@ public class BFFApiGatewayController {
     }
 
 
-    // TODO: Hook this up to auth service
     @GetMapping(value = "admin/roles")
-    public Object getRoles() {
-        return null;
+    public Flux<Role> getRoles() {
+        return authServiceClient.getRoles();
     }
 
     // TODO: Hook this up to auth service
@@ -248,10 +222,9 @@ public class BFFApiGatewayController {
 
     }
 
-    // TODO: Hook this up to auth service
     @PostMapping(value = "admin/roles")
-    public Object addRole() {
-        return null;
+    public Mono<Role> addRole(@RequestBody final Role model) {
+        return authServiceClient.addRole(model);
     }
 
 
