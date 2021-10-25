@@ -152,6 +152,12 @@
     border-color: rgba(0,0,0,0) !important;
 }
 
+.editSelected {
+    background-color: #d3d3d3;
+    border: 1px solid #5a5a5a;
+    padding-top: 0.3rem;
+}
+
 .holiday {
     font-weight: 400 !important;
     opacity: 1 !important;
