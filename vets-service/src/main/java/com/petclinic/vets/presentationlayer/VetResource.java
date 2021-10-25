@@ -121,7 +121,7 @@ class VetResource {
     public VetDTO disableVet(@PathVariable("vetId") int vetId, @RequestBody VetDTO vetRequest) {
         return vetService.disableVetFromDTO(vetId, vetRequest);
     }
-    
+
     @PutMapping(path = "/{vetId}/enableVet",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
