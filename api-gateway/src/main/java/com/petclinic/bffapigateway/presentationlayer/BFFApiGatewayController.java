@@ -64,6 +64,11 @@ public class BFFApiGatewayController {
         return billServiceClient.getAllBilling();
     }
 
+    @DeleteMapping(value = "bills/{billId}")
+    public Mono<Void> deleteBill(final @PathVariable int billId){
+        return billServiceClient.deleteBill(billId);
+    }
+
     @PutMapping(
             value = "owners/*/pets/{petId}/visits/{visitId}",
             consumes = "application/json",
