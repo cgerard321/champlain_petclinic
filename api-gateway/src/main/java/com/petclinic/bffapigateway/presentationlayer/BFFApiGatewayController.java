@@ -51,25 +51,23 @@ public class BFFApiGatewayController {
         return billServiceClient.getBilling(billId);
     }
 
+
+    @PostMapping(value = "bills",
+            consumes = "application/json",
+            produces = "application/json")
+    public Mono<BillDetails> createBill(@RequestBody BillDetails model) {
+        return billServiceClient.createBill(model);
+    }
+
     @GetMapping(value = "bills")
     public Flux<BillDetails> getAllBilling() {
         return billServiceClient.getAllBilling();
     }
 
-    //Testing purpose
-    @GetMapping(value = "pets/visits/All")
-    public Mono<Visits> getAllVisits(){
-        return visitsServiceClient.getAllVisits();
+    @DeleteMapping(value = "bills/{billId}")
+    public Mono<Void> deleteBill(final @PathVariable int billId){
+        return billServiceClient.deleteBill(billId);
     }
-
-
-/*
-    //Add new Visit
-    @PostMapping (value = "/pets/visits", consumes = "application/json", produces = "application/json")
-    public Mono<Visits> createVisitForPets(final @RequestBody VisitDetails visitDetails){
-        return visitsServiceClient.createVisitForPets(visitDetails);
-        }
-*/
 
     @PutMapping(
             value = "owners/*/pets/{petId}/visits/{visitId}",
@@ -85,18 +83,6 @@ public class BFFApiGatewayController {
     @DeleteMapping (value = "visits/{visitId}")
     public Mono<Void> deleteVisitsByVisitId(final @PathVariable String visitId){
         return visitsServiceClient.deleteVisitByVisitId(visitId);
-    }
-
-    //Delete Visit
-    @DeleteMapping (value = "pets/visits/{petId}")
-    public Mono<Void> deleteVisitForPets(final @PathVariable int petId){
-        return visitsServiceClient.deleteVisitForPets(petId);
-    }
-
-    //Update Visit
-    @PutMapping(value ="pets/visits/{petId}", consumes = "application/json", produces = "application/json")
-    public Mono<Visits> updateVisitForPets(final @PathVariable int petId){
-        return visitsServiceClient.updateVisitForPets(petId);
     }
 
     @GetMapping(value = "visits/{petId}")
@@ -229,16 +215,14 @@ public class BFFApiGatewayController {
         return authServiceClient.updateUser(userId, model);
     }
 
-
     @GetMapping(value = "admin/roles")
     public Flux<Role> getRoles() {
         return authServiceClient.getRoles();
     }
 
-    // TODO: Hook this up to auth service
     @DeleteMapping(value = "admin/roles/{id}")
-    public void deleteRole(@PathVariable int id) {
-
+    public Mono<Void> deleteRole(@PathVariable int id) {
+        return authServiceClient.deleteRole(id);
     }
 
     @PostMapping(value = "admin/roles")

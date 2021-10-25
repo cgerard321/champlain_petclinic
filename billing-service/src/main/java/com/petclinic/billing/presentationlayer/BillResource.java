@@ -32,7 +32,7 @@ public class BillResource {
     }
 
     // Read Bill //
-    @GetMapping(value = "/{billId}")
+    @GetMapping(value = "/bills/{billId}")
     public BillDTO findBill(@PathVariable("billId") int billId){
         return SERVICE.GetBill(billId);
     }
@@ -42,8 +42,11 @@ public class BillResource {
         return SERVICE.GetAllBills();
     }
 
+    @GetMapping(value = "/bills/customer/{customerId}")
+    public List<BillDTO> getBillByCustomerId(@PathVariable("customerId") int customerId) {return SERVICE.GetBillByCustomerId(customerId);}
+
     // Delete Bill //
-    @DeleteMapping(value = "/{billId}")
+    @DeleteMapping(value = "/bills/{billId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteBill(@PathVariable("billId") int billId){
         SERVICE.DeleteBill(billId);

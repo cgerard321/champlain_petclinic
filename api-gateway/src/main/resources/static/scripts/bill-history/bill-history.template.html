@@ -10,6 +10,7 @@
     <thead>
         <tr>
             <td>Bill ID</td>
+            <td>Visit Type</td>
             <td>Amount</td>
             <td>Date/Time</td>
         </tr>
@@ -17,6 +18,7 @@
 
     <tr id="billId" ng-repeat="bill in $ctrl.billHistory | filter:$ctrl.query track by bill.billId">
         <td>{{bill.billId}}</td>
+        <td>{{bill.visitType}}</td>
         <td>{{bill.amount}}</td>
         <td>{{bill.date}}</td>
     </tr>
