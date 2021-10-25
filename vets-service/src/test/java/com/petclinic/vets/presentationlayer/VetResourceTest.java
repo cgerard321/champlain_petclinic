@@ -105,10 +105,30 @@ class VetResourceTest {
 			}
 		);
 	}
+	@Test
+	@DisplayName("Get List of Vets All Test")
+	void shouldGetAListOfVets() throws Exception {
 
+		Vet vet = new Vet();
+		vet.setId(1);
+		vet.setVetId(874130);
+		vet.setFirstName("James");
+		vet.setLastName("Carter");
+		vet.setEmail("carter.james@email.com");
+		vet.setPhoneNumber("2384");
+		vet.setImage(null);
+		vet.setResume("Practicing since 3 years");
+		vet.setWorkday("Monday, Tuesday, Friday");
+		vet.setIsActive(1);
+
+		given(vetRepository.findAll()).willReturn(asList(vet));
+		mvc.perform(get("/vets").accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$[0].vetId").value(874130));
+	}
 	@Test
 	@DisplayName("Get List of Vets Resource Test")
-	void shouldGetAListOfVets() throws Exception {
+	void shouldGetAListOfEnabledVets() throws Exception {
 
 		Vet vet = new Vet();
 		vet.setId(1);
