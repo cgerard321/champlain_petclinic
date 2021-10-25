@@ -93,19 +93,7 @@ public class    Pet {
     }
      */
   
-    @Override
-    public String toString()
-    {
-        String id_str = this.id.toString();
-        String petString = "ID: " +
-                id_str + ", Name: " +
-                this.name + ", Birth of date: " +
-                this.birthDate + ", Type: " +
-                this.type.getName() + ", Owner - First name: " +
-                this.owner.getFirstName() + ", Last name: " +
-                this.owner.getLastName();
-        return petString;
-    }
+
 
 
 }
