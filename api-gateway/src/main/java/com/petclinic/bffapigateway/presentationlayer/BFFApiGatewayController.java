@@ -66,6 +66,7 @@ public class BFFApiGatewayController {
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     @DeleteMapping(value = "bills/{billId}")
     public Mono<Void> deleteBill(final @PathVariable int billId){
         return billServiceClient.deleteBill(billId);
@@ -85,6 +86,17 @@ public class BFFApiGatewayController {
                 );
 >>>>>>> cef5b393 (Ok, idk, help plz)
     }
+=======
+
+    @PostMapping(value = "owners/{ownerId}/pets" , produces = "application/json", consumes = "application/json")
+    public Mono<PetDetails> createPet(@RequestBody PetDetails pet, @PathVariable int ownerId){
+
+
+        return customersServiceClient.createPet(pet, ownerId);
+
+    }
+
+>>>>>>> 730338f3 (Forgot to solve this merge conflict)
 
 <<<<<<< HEAD
 
@@ -117,7 +129,11 @@ public class BFFApiGatewayController {
         return customersServiceClient.createPet(pet, ownerId);
     }
 
+<<<<<<< HEAD
 >>>>>>> 0d55775b (Modified code so test passes)
+=======
+
+>>>>>>> 730338f3 (Forgot to solve this merge conflict)
     //Testing purpose
     @GetMapping(value = "pets/visits/All")
     public Mono<Visits> getAllVisits(){
