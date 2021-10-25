@@ -43,7 +43,7 @@ public class PetTests {
         pet.setType(petType);
         pet.setOwner(setupOwner());
 
-        String expectedToString = "";
+        String expectedToString = "ID: 1, Name: Daisy, Birth of date: Thu May 20 00:00:00 EDT 2010, Type: null, OWNER | First name: John, Last name: Wick";
 
         //Act
         String result = pet.toString();
