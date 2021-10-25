@@ -3,6 +3,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 import com.petclinic.bffapigateway.dtos.Login;
 import com.petclinic.bffapigateway.dtos.OwnerDetails;
 
+import com.petclinic.bffapigateway.dtos.PetDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -12,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import static reactor.core.publisher.Mono.just;
 
 /**
  * @author Maciej Szarlinski
@@ -78,13 +81,28 @@ public class CustomersServiceClient {
 
     }
 
-    public Mono<OwnerDetails> deleteOwner (final long ownerId){
+
+    public Mono<PetDetails> createPet(final PetDetails model,final int ownerId){
+        return webClientBuilder.build().post()
+                .uri(customersServiceUrl +"/{ownerId}/pets", ownerId)
+                .body(just(model), PetDetails.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve().bodyToMono(PetDetails.class);
+    }
+
+    public Mono<PetDetails> deletePet(final int ownerId,final int petId){
+        return webClientBuilder.build().delete()
+                .uri(customersServiceUrl + "{ownerId}/pets/{petId}", ownerId ,petId)
+                .retrieve()
+                .bodyToMono(PetDetails.class);
+    }
+
+
+    public Mono<OwnerDetails> deleteOwner (final long ownerId) {
         return webClientBuilder.build().delete()
                 .uri(customersServiceUrl + ownerId)
                 .retrieve()
                 .bodyToMono(OwnerDetails.class);
     }
-
-
 
 }
