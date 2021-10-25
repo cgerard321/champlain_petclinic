@@ -90,8 +90,12 @@ public class CustomersServiceClient {
                 .retrieve().bodyToMono(PetDetails.class);
     }
 
-
-
+    public Mono<PetDetails> deletePet(final int ownerId,final int petId){
+        return webClientBuilder.build().delete()
+                .uri(customersServiceUrl + "{ownerId}/pets/{petId}", ownerId ,petId)
+                .retrieve()
+                .bodyToMono(PetDetails.class);
+    }
 
 
     public Mono<OwnerDetails> deleteOwner (final long ownerId) {
