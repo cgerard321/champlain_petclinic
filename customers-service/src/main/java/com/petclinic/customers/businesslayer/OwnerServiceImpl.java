@@ -4,6 +4,7 @@ import com.petclinic.customers.datalayer.Owner;
 import com.petclinic.customers.datalayer.OwnerRepository;
 import com.petclinic.customers.customerExceptions.exceptions.InvalidInputException;
 import com.petclinic.customers.customerExceptions.exceptions.NotFoundException;
+import com.petclinic.customers.datalayer.Pet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DuplicateKeyException;
@@ -80,4 +81,5 @@ public class OwnerServiceImpl implements OwnerService {
         repository.findById(Id).ifPresent(o -> repository.delete(o));
         LOG.debug("User with ID: " + Id + " has been deleted successfully.");
     }
+
 }
