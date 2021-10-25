@@ -45,7 +45,8 @@ public class BillServiceClient {
 
     public Mono<BillDetails> createBill(final BillDetails model){
         return webClientBuilder.build().post()
-                .uri(billServiceUrl + model)
+                .uri(billServiceUrl)
+                .body(Mono.just(model),BillDetails.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve().bodyToMono(BillDetails.class);
     }

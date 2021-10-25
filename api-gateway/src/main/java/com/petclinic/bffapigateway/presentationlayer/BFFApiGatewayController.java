@@ -49,11 +49,12 @@ public class BFFApiGatewayController {
         return billServiceClient.getBilling(billId);
     }
 
+
     @PostMapping(value = "bills",
             consumes = "application/json",
             produces = "application/json")
     public Mono<BillDetails> createBill(@RequestBody BillDetails model) {
-        return billServiceClient.getBilling(model.getBillId());
+        return billServiceClient.createBill(model);
     }
 
     @GetMapping(value = "bills")
