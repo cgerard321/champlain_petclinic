@@ -17,6 +17,7 @@ import java.util.Optional;
  * @author Sam Brannen
  * @author Michael Isvy
  * @author Maciej Szarlinski
+ * @author lpsim
  */
 
 public interface PetRepository extends JpaRepository<Pet, Integer> {

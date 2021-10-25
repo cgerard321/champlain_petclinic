@@ -14,6 +14,7 @@ import java.util.Date;
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @author Maciej Szarlinski
+ * @author lpsim
  */
 
 @Entity

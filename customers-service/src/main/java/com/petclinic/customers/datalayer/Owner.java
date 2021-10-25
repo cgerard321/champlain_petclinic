@@ -18,6 +18,7 @@ import java.util.*;
  * @author Sam Brannen
  * @author Michael Isvy
  * @author Maciej Szarlinski
+ * @author lpsim
  */
 
 @Entity
