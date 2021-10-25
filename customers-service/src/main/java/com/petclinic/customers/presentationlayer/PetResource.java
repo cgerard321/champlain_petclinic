@@ -15,6 +15,7 @@ import java.util.Optional;
  * @author Ken Krebs
  * @author Arjen Poutsma
  * @author Maciej Szarlinski
+ * @author lpsim
  * Copied from https://github.com/spring-petclinic/spring-petclinic-microservices
  */
 

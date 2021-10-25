@@ -42,6 +42,9 @@ public class BillResource {
         return SERVICE.GetAllBills();
     }
 
+    @GetMapping(value = "/bills/customer/{customerId}")
+    public List<BillDTO> getBillByCustomerId(@PathVariable("customerId") int customerId) {return SERVICE.GetBillByCustomerId(customerId);}
+
     // Delete Bill //
     @DeleteMapping(value = "/bills/{billId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

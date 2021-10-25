@@ -15,4 +15,6 @@ public interface BillService {
     BillDTO CreateBill(@RequestBody BillDTO model);
 
     void DeleteBill(@RequestParam(value = "billId", required = true) int billId);
+
+    List<BillDTO> GetBillByCustomerId(@RequestParam(value = "customerId", required = true) int customerId);
 }
