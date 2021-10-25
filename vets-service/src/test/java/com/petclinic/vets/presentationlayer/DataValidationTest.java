@@ -102,11 +102,14 @@ public class DataValidationTest {
     }
     @Test
     @DisplayName("Verify vetId Test")
-    void verifyVetIdTest(){
+    void verifyVetIdTest() {
         assertThat(DataValidation.verifyVetId(12341213)).isEqualTo(123412);
+        assertThat(DataValidation.verifyVetId(123412)).isEqualTo(123412);
         assertThat(DataValidation.verifyVetId(1234)).isEqualTo(1234);
+        assertThat(DataValidation.verifyVetId(0)).isGreaterThanOrEqualTo(1);
+        assertThat(DataValidation.verifyVetId(0)).isLessThanOrEqualTo(999999);
     }
-    @Test
+        @Test
     @DisplayName("Verify vetId InvalidInputException Test")
     void verifyVetIdInvalidInputException(){
         assertThrows(InvalidInputException.class,()->{

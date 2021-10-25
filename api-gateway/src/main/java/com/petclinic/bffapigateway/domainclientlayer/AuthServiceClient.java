@@ -1,7 +1,9 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
+import com.petclinic.bffapigateway.dtos.*;
 import com.petclinic.bffapigateway.dtos.Login;
 import com.petclinic.bffapigateway.dtos.Register;
+import com.petclinic.bffapigateway.dtos.Role;
 import com.petclinic.bffapigateway.dtos.UserDetails;
 import com.petclinic.bffapigateway.exceptions.GenericHttpException;
 import com.petclinic.bffapigateway.utils.Rethrower;
@@ -131,6 +133,22 @@ public class AuthServiceClient {
                 .switchIfEmpty(error(new RuntimeException("")))
                 .flatMap(n -> n.bodyToMono(UserDetails.class))
                 .map(n -> Tuples.of(token.get(), n));
+    }
+
+    public Flux<Role> getRoles() {
+        return webClientBuilder.build().get()
+                .uri(authServiceUrl + "/admin/roles")
+                .retrieve()
+                .bodyToFlux(Role.class);
+    }
+  
+    public Mono<Role> addRole(final Role model) {
+        return webClientBuilder.build().post()
+                .uri(authServiceUrl + "/admin/roles")
+                .body(just(model), Role.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(Role.class);
     }
 }
 
