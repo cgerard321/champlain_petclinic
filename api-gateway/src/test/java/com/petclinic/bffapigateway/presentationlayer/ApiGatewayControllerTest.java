@@ -30,18 +30,22 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
 <<<<<<< HEAD
+<<<<<<< HEAD
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
 =======
 <<<<<<< HEAD
 >>>>>>> 4eb5a0c6 (Added error case tests)
+=======
+
+>>>>>>> 029a0243 (More merge conflicts)
 import static org.mockito.Mockito.*;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
-=======
+
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.*;
->>>>>>> 8f4a5683 (Added error case tests)
+
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 //
 //import com.petclinic.billing.datalayer.BillDTO;
@@ -238,15 +242,9 @@ class ApiGatewayControllerTest {
 
     @Test
     void createPet(){
-<<<<<<< HEAD
-
         OwnerDetails od = new OwnerDetails();
         od.setId(1);
 
-=======
-        OwnerDetails od = new OwnerDetails();
-        od.setId(1);
->>>>>>> 0d55775b (Modified code so test passes)
         PetDetails pet = new PetDetails();
         PetType type = new PetType();
         type.setName("Dog");
@@ -254,34 +252,12 @@ class ApiGatewayControllerTest {
         pet.setName("Fluffy");
         pet.setBirthDate("2000-01-01");
         pet.setType(type);
-
-<<<<<<< HEAD
-<<<<<<< HEAD
-
         when(customersServiceClient.createPet(pet,od.getId()))
-
-=======
-        when(customersServiceClient.createPet(od.getId(),pet))
->>>>>>> 0d55775b (Modified code so test passes)
-=======
-        when(customersServiceClient.createPet(pet,od.getId()))
->>>>>>> f0a4334d (Customer service is fked gg.)
                 .thenReturn(Mono.just(pet));
 
-
-
-
         client.post()
-<<<<<<< HEAD
-<<<<<<< HEAD
                 .uri("/api/gateway/owners/pets")
 
-=======
-                .uri("/api/gateway/owners/1/pets")
->>>>>>> 0d55775b (Modified code so test passes)
-=======
-                .uri("/api/gateway/owners/{ownerId}/pets", od.getId())
->>>>>>> 8f4a5683 (Added error case tests)
                 .body(Mono.just(pet), PetDetails.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -309,7 +285,7 @@ class ApiGatewayControllerTest {
         pet.setBirthDate("2000-01-01");
         pet.setType(type);
 
-        when(customersServiceClient.createNewPet(pet,od.getId()))
+        when(customersServiceClient.createPet(pet,od.getId()))
         .thenReturn(Mono.just(pet));
 
         client.post()
@@ -335,7 +311,7 @@ class ApiGatewayControllerTest {
         pet.setBirthDate("2000-01-01");
         pet.setType(type);
 
-        when(customersServiceClient.createNewPet(pet,od.getId()))
+        when(customersServiceClient.createPet(pet,od.getId()))
                 .thenReturn(Mono.just(pet));
 
         client.post()
