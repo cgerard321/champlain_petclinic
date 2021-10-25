@@ -41,7 +41,7 @@
 </div>
 <script>
 
-const date = new Date();
+    let date = new Date();
 
     //specify which months goes with which numbers
     //ex: 09 = September
@@ -308,6 +308,23 @@ const date = new Date();
 
         timeSlots.innerHTML = slots;
 
+        if(timeIsSelected) {
+            document.querySelector('.submitBTN').addEventListener('click',() => {
+                let month = date.getMonth();
+                let sDate = selectedDate;
+
+                if (month < 10) {
+                    month = "0" + month;
+                }
+
+                if(selectedDate < 10) {
+                    sDate = "0" + sDate;
+                }
+                console.log("lol");
+                $('#date_input').val(date.getFullYear() + "-" + month + "-" + sDate);
+            });
+        }
+
         //fixes bug where window wouldn't load
         if(monthDays.innerHTML === null) {
             location.reload();
@@ -397,6 +414,12 @@ const date = new Date();
 
     renderCalendar();
 
+    const editDateParsing = (d) => {
+        date = d;
+        selectedDate = date.getDate();
+        renderCalendar();
+    }
+
     //previous page selector
     document.querySelector('.prev').addEventListener('click',() => {
         date.setMonth(date.getMonth() - 1);
@@ -455,20 +478,6 @@ const date = new Date();
         }
 
         renderCalendar();
-    });
-
-    document.querySelector('.submitBTN').addEventListener('click',() => {
-        let month = date.getMonth();
-        let sDate = selectedDate;
-
-        if (month < 10) {
-            month = "0" + month;
-        }
-
-        if(selectedDate < 10) {
-            sDate = "0" + sDate;
-        }
-        document.querySelector('#date_input').value = date.getFullYear() + "-" + month + "-" + sDate;
     });
 </script>
 
@@ -532,7 +541,6 @@ const date = new Date();
     </div>
 
     <div class="form-group" style="margin-top: 4px">
-        <label for="date_input">Date</label>
         <input id="date_input" type="date" class="form-control" ng-model='$ctrl.date' required/>
     </div>
 

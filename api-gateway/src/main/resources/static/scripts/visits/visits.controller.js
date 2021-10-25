@@ -84,6 +84,7 @@ angular.module('visits')
                 let info = pIdAndMonth.split(",");
 
                 if(info[0] !== undefined){
+                    console.log(info[0].toString());
                     let practitionerId = parseInt(info[0]);
                     let startDate = info[1];
                     let endDate = info[2];
@@ -240,6 +241,8 @@ angular.module('visits')
             $('#description_textarea').val(description);
             $('#submit_button').text("Update Visit");
             $('#cancel_button').css("visibility", "visible");
+
+            editDateParsing(date);
 
             self.loadVetInfo();
 
