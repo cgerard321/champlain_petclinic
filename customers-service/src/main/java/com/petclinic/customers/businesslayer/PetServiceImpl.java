@@ -86,6 +86,10 @@ public class PetServiceImpl implements PetService {
             Optional<Pet> petOpt = findByPetId(ownerId, petId);
             Pet pet = petOpt.get();
             owner.removePet(pet);
+
+            //Now, owner is safe from deletion
+            pet.setOwner(null);
+            petRepository.save(pet);
             petRepository.delete(pet);
             LOG.debug("Pet with ID: " + petId + " has been deleted successfully.");
         }
@@ -93,16 +97,11 @@ public class PetServiceImpl implements PetService {
         {
             throw new NotFoundException("Owner or pet is not valid. Please standby for assistance. A specialized support team will shortly make contact with you.");
         }
-
-
-
-
     }
 
     @Override
     public List<PetType> getAllPetTypes() {
         return petRepository.findPetTypes();
     }
-
 
 }

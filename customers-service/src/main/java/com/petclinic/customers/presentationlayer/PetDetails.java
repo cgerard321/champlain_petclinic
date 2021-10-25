@@ -9,6 +9,7 @@ import java.util.Date;
 
 /**
  * @author mszarlinski@bravurasolutions.com on 2016-12-05.
+ * @author lpsim
  * Copied from https://github.com/spring-petclinic/spring-petclinic-microservices
  *
  */

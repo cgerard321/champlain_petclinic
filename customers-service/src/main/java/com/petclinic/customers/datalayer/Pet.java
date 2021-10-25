@@ -14,6 +14,7 @@ import java.util.Date;
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @author Maciej Szarlinski
+ * @author lpsim
  */
 
 @Entity
@@ -78,21 +79,7 @@ public class    Pet {
     public void setOwner(final Owner owner) {
         this.owner = owner;
     }
-
-    /* Same problem as Owner.ToString()
-    @Override
-    public String toString() {
-        return new ToStringCreator(this)
-                .append("id", this.getId())
-                .append("name", this.getName())
-                .append("birthDate", this.getBirthDate())
-                .append("type", this.getType().getName())
-                .append("ownerFirstname", this.getOwner().getFirstName())
-                .append("ownerLastname", this.getOwner().getLastName())
-                .toString();
-    }
-     */
-  
+    
     @Override
     public String toString()
     {
