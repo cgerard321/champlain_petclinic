@@ -75,14 +75,6 @@ public class BFFApiGatewayController {
     }
 
 
-    @PostMapping(value = "owners/{ownerId}/pets" , produces = "application/json", consumes = "application/json")
-    public Mono<PetDetails> createPet(@RequestBody PetDetails pet, @PathVariable int ownerId){
-
-
-        return customersServiceClient.createPet(pet, ownerId);
-
-    }
-
 
 
 
@@ -248,6 +240,7 @@ public class BFFApiGatewayController {
     }
 
 
+
     /**
      * Owners Methods
      * **/
@@ -290,9 +283,26 @@ public class BFFApiGatewayController {
         return customersServiceClient.deleteOwner(ownerId);
     }
 
+    @PostMapping(value = "owners/{ownerId}/pets" , produces = "application/json", consumes = "application/json")
+    public Mono<PetDetails> createPet(@RequestBody PetDetails pet, @PathVariable int ownerId){
+        return customersServiceClient.createPet(pet, ownerId);
+    }
+
+    @GetMapping("owners/pettypes")
+    public Flux<PetType> getPetTypes(){
+        return customersServiceClient.getPetTypes();
+    }
+
+    @DeleteMapping("owners/*/pets/{petId}")
+    public Mono<PetDetails> deletePet(@PathVariable int petId){
+        return customersServiceClient.deletePet(petId);
+    }
+
     /**
      * End of Owner Methods
      * **/
+
+
 
     @GetMapping("/verification/{token}")
     public Mono<UserDetails> verifyUser(@PathVariable final String token) {
