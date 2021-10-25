@@ -210,7 +210,11 @@ public class BFFApiGatewayController {
         return authServiceClient.updateUser(userId, model);
     }
 
+<<<<<<< HEAD
 
+=======
+    // TODO: Hook this up to auth service
+>>>>>>> b6df991a (Added controller test, integration test)
     @GetMapping(value = "admin/roles")
     public Flux<Role> getRoles() {
         return authServiceClient.getRoles();
