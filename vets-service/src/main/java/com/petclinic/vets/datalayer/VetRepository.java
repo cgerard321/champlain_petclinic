@@ -2,9 +2,9 @@ package com.petclinic.vets.datalayer;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,9 +21,8 @@ import java.util.Optional;
  * Copied from https://github.com/spring-petclinic/spring-petclinic-microservices
  */
 @Repository
-public interface VetRepository extends JpaRepository<Vet, Integer>
-{
-    Optional<Vet> findByVetId (int vetId);
+public interface VetRepository extends JpaRepository<Vet, Integer> {
+    Optional<Vet> findByVetId(int vetId);
 
     @Query(value = "SELECT v FROM Vet v WHERE v.isActive = 0")
     List<Vet> findAllDisabledVets();

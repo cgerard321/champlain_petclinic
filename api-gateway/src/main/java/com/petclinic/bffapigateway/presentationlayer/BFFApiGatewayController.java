@@ -10,12 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -181,7 +176,9 @@ public class BFFApiGatewayController {
     @PostMapping(value = "vets",
             consumes = "application/json",
             produces = "application/json")
-    public Mono<VetDetails> createVet(@RequestBody VetDetails model) { return vetsServiceClient.createVet(model); }
+    public Mono<VetDetails> createVet(@RequestBody VetDetails model) {
+        return vetsServiceClient.createVet(model);
+    }
 
     /**
      * Delete vet from DB given the vetID
@@ -199,7 +196,7 @@ public class BFFApiGatewayController {
             consumes = "application/json",
             produces = "application/json"
     )
-    public Mono<VetDetails> updateVet( @PathVariable int vetId, @RequestBody VetDetails vet) {
+    public Mono<VetDetails> updateVet(@PathVariable int vetId, @RequestBody VetDetails vet) {
         log.debug("Trying to update vet");
         return vetsServiceClient.updateVet(vetId, vet);
     }

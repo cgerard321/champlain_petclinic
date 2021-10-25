@@ -11,8 +11,7 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class VetDTO
-{
+public class VetDTO {
     private Integer vetId;
     private String firstName;
     private String lastName;
