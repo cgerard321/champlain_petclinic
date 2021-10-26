@@ -89,9 +89,16 @@ public class CustomersServiceClient {
                 .bodyToFlux(PetType.class);
     }
 
+    public Mono<PetDetails> getPet(final int ownerId, final int petId){
+        return webClientBuilder.build().get()
+                .uri(customersServiceUrl + ownerId + "/pets/" + petId)
+                .retrieve()
+                .bodyToMono(PetDetails.class);
+    }
+
     public Mono<PetDetails> createPet(final PetDetails model,final int ownerId){
         return webClientBuilder.build().post()
-                .uri(customersServiceUrl +"/{ownerId}/pets", ownerId)
+                .uri(customersServiceUrl +"{ownerId}/pets", ownerId)
                 .body(just(model), PetDetails.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve().bodyToMono(PetDetails.class);
