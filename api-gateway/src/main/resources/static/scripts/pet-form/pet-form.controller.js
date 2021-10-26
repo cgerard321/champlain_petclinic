@@ -6,21 +6,25 @@ angular.module('petForm')
         var ownerId = $stateParams.ownerId || 0;
         var method = $stateParams.method;
         var petId = $stateParams.petId || 0;
-        var petType;
+        var owner = "";
+        var myDate = new Date();
+
+
+        $http.get('api/gateway/owners' + ownerId).then(function (resp){
+            owner = resp.data.firstName + " " + resp.data.lastName;
+        })
 
         $http.get('api/gateway/owners/petTypes').then(function (resp) {
             self.types = resp.data;
         }).then(function () {
-            $http.get('api/gateway/owners' + ownerId).then(function (resp){
-                var ownerName = resp.data.firstName + " " + resp.data.lastName;
             if(method == 'delete')
                 $http.get('api/gateway/owners/' + ownerId + "/pets/" + petId).then(function (resp) {
                     self.pet = {
-                        owner: ownerName,
+                        owner: owner,
                         name: resp.data.name,
-                        birthDate: resp.data.birthDate,
+                        birthDate: myDate = $filter(resp.data.birthDate)(myDate, 'YYYY-MM-DD'),
                     };
-                    self.petTypeId = resp.data.petTypeId.typeId;
+                    self.petTypeId = resp.data.typeId;
                     console.log(self.pet);
                     console.log(self.petTypeId);
                 })
@@ -29,8 +33,8 @@ angular.module('petForm')
                     self.pet = {
                         owner: resp.data.firstName + " " + resp.data.lastName,
                     };
+                    self.petTypeId = resp.data.typeId;
                 })
-            })
         });
 
         self.submit = function () {
@@ -41,7 +45,7 @@ angular.module('petForm')
                 name: self.pet.name,
                 birthDate: self.pet.birthDate,
                 owner: ownerId,
-                typeId: self.petTypeId.typeId
+                typeId: self.typeId
             };
 
             console.log(data);
@@ -62,10 +66,5 @@ angular.module('petForm')
                         return e.field + ": " + e.defaultMessage;
                     }).join("\r\n"));
             });
-        };
-
-        self.selectType = function (id) {
-            petType = id;
-            console.log(petType);
         };
     }]);
