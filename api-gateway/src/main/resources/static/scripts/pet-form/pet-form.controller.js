@@ -11,11 +11,10 @@ angular.module('petForm')
         $http.get('api/gateway/owners/petTypes').then(function (resp) {
             self.types = resp.data;
         }).then(function () {
+            $http.get('api/gateway/owners' + ownerId).then(function (resp){
+                var ownerName = resp.data.firstName + " " + resp.data.lastName;
             if(method == 'delete')
                 $http.get('api/gateway/owners/' + ownerId + "/pets/" + petId).then(function (resp) {
-                    var ownerName = self.owner = {
-                        name: resp.data.firstName + " " + resp.data.lastName
-                    }
                     self.pet = {
                         owner: ownerName,
                         name: resp.data.name,
@@ -31,6 +30,7 @@ angular.module('petForm')
                         owner: resp.data.firstName + " " + resp.data.lastName,
                     };
                 })
+            })
         });
 
         self.submit = function () {
