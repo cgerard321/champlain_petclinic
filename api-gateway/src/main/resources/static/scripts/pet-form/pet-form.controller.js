@@ -16,6 +16,7 @@ angular.module('petForm')
 
         $http.get('api/gateway/owners/petTypes').then(function (resp) {
             self.types = resp.data;
+            console.log(self.types);
         }).then(function () {
             if(method == 'delete')
                 $http.get('api/gateway/owners/' + ownerId + "/pets/" + petId).then(function (resp) {
