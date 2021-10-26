@@ -1,6 +1,6 @@
 <div class="bColor"><h2 class="titleOwner form">Pet</h2></div>
 
-<form id="petForm" class="form-horizontal" ng-submit="$ctrl.submit(t.id)">
+<form id="petForm" class="form-horizontal" ng-submit="$ctrl.submit()">
     <div class="form-group formColor">
         <label class="col-sm-2 control-label">Owner</label>
         <div class="pet marg col-sm-6">
@@ -28,7 +28,7 @@
         <label class="col-sm-2 control-label">Type</label>
         <div class="pet col-sm-6">
             <select class="form-control" ng-model="$ctrl.petTypeId">
-                <option ng-repeat="t in $ctrl.types track by $index" value="{{t.id}}">{{t.name}}</option>
+                <option ng-repeat="t in $ctrl.types track by $index" value="{{t.id}}" ng-click="$ctrl.selectType(t.id)">{{t.name}}</option>
             </select>
         </div>
     </div>

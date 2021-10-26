@@ -6,6 +6,7 @@ angular.module('petForm')
         var ownerId = $stateParams.ownerId || 0;
         var method = $stateParams.method;
         var petId = $stateParams.petId || 0;
+        var petType;
 
         $http.get('api/gateway/owners/petTypes').then(function (resp) {
             self.types = resp.data;
@@ -37,7 +38,7 @@ angular.module('petForm')
                 id: id,
                 name: self.pet.name,
                 birthDate: self.pet.birthDate,
-                typeId: self.petTypeId
+                typeId: petType
             };
 
             console.log(data);
@@ -59,4 +60,9 @@ angular.module('petForm')
                     }).join("\r\n"));
             });
         };
+
+        self.selectType = function (id) {
+            petType = id;
+            console.log(petType);
+        }
     }]);
