@@ -47,7 +47,7 @@ angular.module('petForm')
                 name: self.pet.name,
                 birthDate: self.pet.birthDate,
                 owner: ownerId,
-                typeId: self.pet.typeid
+                typeId: self.pet.type.id
             };
 
             console.log(data);

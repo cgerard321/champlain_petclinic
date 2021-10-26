@@ -22,7 +22,7 @@ public class PetRequest {
     @Size(min = 1)
     private String name;
 
-    private PetType type;
+    private int typeId;
 
     //USED FOR TESTING PURPOSE
     public PetRequest()
@@ -30,10 +30,10 @@ public class PetRequest {
 
     }
 
-    public PetRequest(String name, Date birthDate, PetType type) {
+    public PetRequest(String name, Date birthDate, int typeId) {
         this.name = name;
         this.birthDate = birthDate;
-        this.type = type;
+        this.typeId = typeId;
     }
 }
 
