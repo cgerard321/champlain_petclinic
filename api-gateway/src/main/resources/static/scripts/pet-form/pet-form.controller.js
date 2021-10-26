@@ -4,27 +4,18 @@ angular.module('petForm')
     .controller('PetFormController', ['$http', '$state', '$stateParams', function ($http, $state, $stateParams) {
         var self = this;
         var ownerId = $stateParams.ownerId || 0;
-        var petId = self.pet.id || 0;
 
         $http.get('api/gateway/owners/petTypes').then(function (resp) {
             self.types = resp.data;
         }).then(function () {
             if(petId)
-                $http.get('api/gateway/owners/' + ownerId + "/pets/" + petId).then(function (resp) {
+                $http.get('api/gateway/owners/' + ownerId).then(function (resp) {
                     self.pet = {
                         owner: resp.data.firstName + " " + resp.data.lastName,
                         name: resp.data.pet.name,
                         birthDate: resp.data.pet.birthDate,
                     };
                     self.petTypeId = resp.data.petTypeId;
-                    console.log(self.petTypeId);
-                })
-            else
-                $http.get('api/gateway/owners/' + ownerId).then(function (resp){
-                    self.pet = {
-                        owner: resp.data.firstName + " " + resp.data.lastName
-                    };
-                    self.petTypeId = "1";
                     console.log(self.petTypeId);
                 })
         });
@@ -36,7 +27,7 @@ angular.module('petForm')
                 id: id,
                 name: self.pet.name,
                 birthDate: self.pet.birthDate,
-                typeId: self.petTypeId
+                typeId: self.$index
             };
 
             console.log(data);

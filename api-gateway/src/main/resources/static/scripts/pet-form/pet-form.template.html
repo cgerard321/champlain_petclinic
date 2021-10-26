@@ -27,8 +27,8 @@
     <div class="form-group formColor">
         <label class="col-sm-2 control-label">Type</label>
         <div class="pet col-sm-6">
-            <select class="form-control" ng-model="$ctrl.petTypeId" ng-options="t.id as t.name for t in $ctrl.types">
-                <!--<option ng-repeat="t in $ctrl.types track by $index" value="{{t.id}}">{{t.name}}</option>-->
+            <select class="form-control" ng-model="$ctrl.petTypeId">
+                <option ng-repeat="t in $ctrl.types track by $index" value="{{t.id}}">{{t.name}}</option>
             </select>
         </div>
     </div>
