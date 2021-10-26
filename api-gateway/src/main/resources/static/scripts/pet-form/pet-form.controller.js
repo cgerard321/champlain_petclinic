@@ -9,7 +9,6 @@ angular.module('petForm')
         var owner = "";
         var myDate = new Date();
 
-
         $http.get('api/gateway/owners/' + ownerId).then(function (resp){
             owner = resp.data.firstName + " " + resp.data.lastName;
         })
@@ -19,22 +18,23 @@ angular.module('petForm')
             console.log(self.types);
         }).then(function () {
             if(method == 'delete')
-                $http.get('api/gateway/owners/' + ownerId + "/pets/" + petId + "/petType" + petTypeId).then(function (resp) {
+                $http.get('api/gateway/owners/' + ownerId + "/pets/" + petId).then(function (resp) {
+                    myDate = new Date(Date.parse(resp.data.birthDate))
                     self.pet = {
                         owner: owner,
                         name: resp.data.name,
-                        birthDate: myDate = $filter(resp.data.birthDate)(myDate, 'yyyy-MM-dd'),
+                        birthDate: myDate,
+                        typeId : resp.data.type.id.toString()
                     };
-                    self.pet.typeId = resp.data.type.id;
                     console.log(self.pet);
                     console.log(self.typeId);
                 })
             else
                 $http.get('api/gateway/owners/' + ownerId).then(function (resp) {
                     self.pet = {
-                        owner: owner
+                        owner: owner,
+                        typeId: '0'
                     };
-                    self.pet.typeId = "0";
                 })
         });
 
@@ -46,7 +46,7 @@ angular.module('petForm')
                 name: self.pet.name,
                 birthDate: self.pet.birthDate,
                 owner: ownerId,
-                typeId: self.pet.type.id
+                type: self.pet.type.id
             };
 
             console.log(data);
@@ -59,7 +59,7 @@ angular.module('petForm')
                 req = $http.delete("api/gateway/owners/" + ownerId + "/pets/" + id, data);
 
             req.then(function () {
-                $state.go("owners/details/", {ownerId: ownerId});
+                $state.go("owners/details/" + {ownerId: ownerId});
             }, function (response) {
                 var error = response.data;
                 error.errors = error.errors || [];
