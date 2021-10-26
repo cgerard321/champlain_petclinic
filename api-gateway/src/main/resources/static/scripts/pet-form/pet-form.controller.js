@@ -4,11 +4,12 @@ angular.module('petForm')
     .controller('PetFormController', ['$http', '$state', '$stateParams', function ($http, $state, $stateParams) {
         var self = this;
         var ownerId = $stateParams.ownerId || 0;
+        var method = $stateParams.method;
 
         $http.get('api/gateway/owners/petTypes').then(function (resp) {
             self.types = resp.data;
         }).then(function () {
-            if(petId)
+            if(method == 'delete')
                 $http.get('api/gateway/owners/' + ownerId).then(function (resp) {
                     self.pet = {
                         owner: resp.data.firstName + " " + resp.data.lastName,
@@ -16,6 +17,14 @@ angular.module('petForm')
                         birthDate: resp.data.pet.birthDate,
                     };
                     self.petTypeId = resp.data.petTypeId;
+                    console.log(self.petTypeId);
+                })
+            else
+                $http.get('api/gateway/owners/' + ownerId).then(function (resp) {
+                    self.pet = {
+                        owner: resp.data.firstName + " " + resp.data.lastName,
+                    };
+                    self.petTypeId = "1";
                     console.log(self.petTypeId);
                 })
         });

@@ -10,7 +10,7 @@ angular.module('petForm', ['ui.router'])
             })
             .state('deletePet', {
                 parent: 'app',
-                url: '/owners/:ownerId/pets/:petId',
+                url: '/owners/:ownerId/pets/:petId/:method',
                 template: '<pet-form></pet-form>'
             })
     }]);
