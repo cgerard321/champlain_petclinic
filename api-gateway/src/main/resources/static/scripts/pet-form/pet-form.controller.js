@@ -6,7 +6,6 @@ angular.module('petForm')
         var ownerId = $stateParams.ownerId || 0;
         var method = $stateParams.method;
         var petId = $stateParams.petId || 0;
-        var petTypeId = $stateParams.petTypeId || 0;
         var owner = "";
         var myDate = new Date();
 
@@ -24,7 +23,7 @@ angular.module('petForm')
                     self.pet = {
                         owner: owner,
                         name: resp.data.name,
-                        birthDate: myDate = $filter(resp.data.birthDate)(myDate, 'YYYY-MM-DD'),
+                        birthDate: myDate = $filter(resp.data.birthDate)(myDate, 'yyyy-MM-dd'),
                     };
                     self.pet.typeId = resp.data.type.id;
                     console.log(self.pet);
