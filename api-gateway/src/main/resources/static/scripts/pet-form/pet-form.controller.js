@@ -15,7 +15,7 @@ angular.module('petForm')
             owner = resp.data.firstName + " " + resp.data.lastName;
         })
 
-        $http.get('api/gateway/owners/' + ownerId + '/pets/petTypes').then(function (resp) {
+        $http.get('api/gateway/owners/petTypes').then(function (resp) {
             self.types = resp.data;
             console.log(self.types);
         }).then(function () {
