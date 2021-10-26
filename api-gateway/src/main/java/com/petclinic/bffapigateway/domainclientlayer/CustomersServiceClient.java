@@ -99,7 +99,7 @@ public class CustomersServiceClient {
     public Mono<PetType> getPetTypeFromPetId(final int petId, final int petTypeId){
         return webClientBuilder.build().get()
                 .uri(customersServiceUrl + "*/pets/" + petId + "/petType/" + petTypeId)
-                 .retrieve().bodyToMono(PetType.class)
+                 .retrieve().bodyToMono(PetType.class);
     }
 
     public Mono<PetDetails> createPet(final PetDetails model,final int ownerId){
