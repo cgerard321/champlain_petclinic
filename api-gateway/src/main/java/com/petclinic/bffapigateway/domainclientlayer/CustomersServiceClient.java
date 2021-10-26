@@ -84,7 +84,7 @@ public class CustomersServiceClient {
 
     public Flux<PetType> getPetTypes (){
         return webClientBuilder.build().get()
-                .uri(customersServiceUrl + "*/pets/petTypes")
+                .uri(customersServiceUrl + "/petTypes")
                 .retrieve()
                 .bodyToFlux(PetType.class);
     }
@@ -94,12 +94,6 @@ public class CustomersServiceClient {
                 .uri(customersServiceUrl + ownerId + "/pets/" + petId)
                 .retrieve()
                 .bodyToMono(PetDetails.class);
-    }
-
-    public Mono<PetType> getPetTypeFromPetId(final int petId, final int petTypeId){
-        return webClientBuilder.build().get()
-                .uri(customersServiceUrl + "*/pets/" + petId + "/petType/" + petTypeId)
-                 .retrieve().bodyToMono(PetType.class)
     }
 
     public Mono<PetDetails> createPet(final PetDetails model,final int ownerId){

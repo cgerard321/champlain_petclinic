@@ -80,17 +80,12 @@ public class BFFApiGatewayController {
         return customersServiceClient.getPet(ownerId, petId);
     }
 
-    @GetMapping(value = "owners/*/pets/{petId}/petType/{petTypeId}")
-    public Mono<PetType> getPetTypeFromPetId(@PathVariable int petId, @PathVariable int petTypeId){
-        return customersServiceClient.getPetTypeFromPetId(petId, petTypeId);
-    }
-
     @DeleteMapping("owners/{ownerId}/pets/{petId}")
     public Mono<PetDetails> deletePet(@PathVariable int ownerId, @PathVariable int petId){
         return customersServiceClient.deletePet(ownerId,petId);
     }
 
-    @GetMapping("owners/*/pets/petTypes")
+    @GetMapping("owners/petTypes")
     public Flux<PetType> getPetTypes(){
         return customersServiceClient.getPetTypes();
     }

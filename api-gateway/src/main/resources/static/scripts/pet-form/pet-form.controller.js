@@ -26,7 +26,7 @@ angular.module('petForm')
                         name: resp.data.name,
                         birthDate: myDate = $filter(resp.data.birthDate)(myDate, 'YYYY-MM-DD'),
                     };
-                    self.pet.typeId = resp.data.typeId;
+                    self.pet.typeId = resp.data.type.id;
                     console.log(self.pet);
                     console.log(self.typeId);
                 })
@@ -47,20 +47,20 @@ angular.module('petForm')
                 name: self.pet.name,
                 birthDate: self.pet.birthDate,
                 owner: ownerId,
-                typeId: self.pet.typeId
+                typeId: self.pet.typeid
             };
 
             console.log(data);
 
             var req;
 
-            if(!id)
+            if(method != 'delete')
                 req = $http.post("api/gateway/owners/" + ownerId + "/pets", data);
             else
                 req = $http.delete("api/gateway/owners/" + ownerId + "/pets/" + id, data);
 
             req.then(function () {
-                $state.go("owners/details", {ownerId: ownerId});
+                $state.go("owners/details/", {ownerId: ownerId});
             }, function (response) {
                 var error = response.data;
                 error.errors = error.errors || [];
