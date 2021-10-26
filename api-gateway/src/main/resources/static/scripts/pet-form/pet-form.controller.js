@@ -6,6 +6,7 @@ angular.module('petForm')
         var ownerId = $stateParams.ownerId || 0;
         var method = $stateParams.method;
         var petId = $stateParams.petId || 0;
+        var petTypeId = $stateParams.petTypeId || 0;
         var owner = "";
         var myDate = new Date();
 
@@ -19,7 +20,7 @@ angular.module('petForm')
             console.log(self.types);
         }).then(function () {
             if(method == 'delete')
-                $http.get('api/gateway/owners/' + ownerId + "/pets/" + petId).then(function (resp) {
+                $http.get('api/gateway/owners/' + ownerId + "/pets/" + petId + "/petType" + petTypeId).then(function (resp) {
                     self.pet = {
                         owner: owner,
                         name: resp.data.name,

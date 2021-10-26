@@ -9,6 +9,7 @@ import lombok.Data;
 
 @Data
 public class PetType {
+    private Integer id;
 
     private String name;
 }
