@@ -10,7 +10,7 @@ angular.module('petForm')
         var myDate = new Date();
 
 
-        $http.get('api/gateway/owners' + ownerId).then(function (resp){
+        $http.get('api/gateway/owners/' + ownerId).then(function (resp){
             owner = resp.data.firstName + " " + resp.data.lastName;
         })
 
@@ -25,16 +25,16 @@ angular.module('petForm')
                         name: resp.data.name,
                         birthDate: myDate = $filter(resp.data.birthDate)(myDate, 'YYYY-MM-DD'),
                     };
-                    self.petTypeId = resp.data.petTypeId;
+                    self.pet.typeId = resp.data.typeId;
                     console.log(self.pet);
-                    console.log(self.petTypeId);
+                    console.log(self.typeId);
                 })
             else
                 $http.get('api/gateway/owners/' + ownerId).then(function (resp) {
                     self.pet = {
                         owner: owner
                     };
-                    self.petTypeId = "0";
+                    self.pet.typeId = "0";
                 })
         });
 
@@ -46,7 +46,7 @@ angular.module('petForm')
                 name: self.pet.name,
                 birthDate: self.pet.birthDate,
                 owner: ownerId,
-                typeId: self.petTypeId
+                typeId: self.pet.typeId
             };
 
             console.log(data);
