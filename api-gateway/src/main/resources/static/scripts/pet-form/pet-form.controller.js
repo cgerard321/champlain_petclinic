@@ -13,12 +13,15 @@ angular.module('petForm')
         }).then(function () {
             if(method == 'delete')
                 $http.get('api/gateway/owners/' + ownerId + "/pets/" + petId).then(function (resp) {
+                    var ownerName = self.owner = {
+                        name: resp.data.firstName + " " + resp.data.lastName
+                    }
                     self.pet = {
-                        owner: resp.data.firstName + " " + resp.data.lastName,
+                        owner: ownerName,
                         name: resp.data.name,
                         birthDate: resp.data.birthDate,
                     };
-                    self.petTypeId = resp.data.petTypeId;
+                    self.petTypeId = resp.data.petTypeId.typeId;
                     console.log(self.pet);
                     console.log(self.petTypeId);
                 })
@@ -27,7 +30,6 @@ angular.module('petForm')
                     self.pet = {
                         owner: resp.data.firstName + " " + resp.data.lastName,
                     };
-                    self.petTypeId = "1";
                 })
         });
 
@@ -38,7 +40,8 @@ angular.module('petForm')
                 id: id,
                 name: self.pet.name,
                 birthDate: self.pet.birthDate,
-                typeId: petType
+                owner: ownerId,
+                typeId: self.petTypeId
             };
 
             console.log(data);
@@ -64,5 +67,5 @@ angular.module('petForm')
         self.selectType = function (id) {
             petType = id;
             console.log(petType);
-        }
+        };
     }]);

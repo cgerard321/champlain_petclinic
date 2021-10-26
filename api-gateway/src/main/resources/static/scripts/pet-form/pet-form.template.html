@@ -27,7 +27,7 @@
     <div class="form-group formColor">
         <label class="col-sm-2 control-label">Type</label>
         <div class="pet col-sm-6">
-            <select class="form-control" ng-model="$ctrl.petTypeId">
+            <select class="form-control" ng-model="$ctrl.petTypeId" ng-init="$ctrl.petTypeId='1'">
                 <option ng-repeat="t in $ctrl.types track by $index" value="{{t.id}}" ng-click="$ctrl.selectType(t.id)">{{t.name}}</option>
             </select>
         </div>
