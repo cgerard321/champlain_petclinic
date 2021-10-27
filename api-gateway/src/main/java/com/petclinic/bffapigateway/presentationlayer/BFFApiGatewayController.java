@@ -72,15 +72,22 @@ public class BFFApiGatewayController {
 
     @PostMapping(value = "owners/{ownerId}/pets" , produces = "application/json", consumes = "application/json")
     public Mono<PetDetails> createPet(@RequestBody PetDetails pet, @PathVariable int ownerId){
-
-
         return customersServiceClient.createPet(pet, ownerId);
+    }
 
+    @GetMapping(value = "owners/{ownerId}/pets/{petId}")
+    public Mono<PetDetails> getPet(@PathVariable int ownerId, @PathVariable int petId){
+        return customersServiceClient.getPet(ownerId, petId);
     }
 
     @DeleteMapping("owners/{ownerId}/pets/{petId}")
     public Mono<PetDetails> deletePet(@PathVariable int ownerId, @PathVariable int petId){
         return customersServiceClient.deletePet(ownerId,petId);
+    }
+
+    @GetMapping("owners/petTypes")
+    public Flux<PetType> getPetTypes(){
+        return customersServiceClient.getPetTypes();
     }
 
 

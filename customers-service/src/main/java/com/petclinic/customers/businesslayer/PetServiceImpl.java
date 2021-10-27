@@ -67,7 +67,6 @@ public class PetServiceImpl implements PetService {
             pet.setBirthDate(petRequest.getBirthDate());
             petRepository.findPetTypeById(petRequest.getTypeId())
                     .ifPresent(pet::setType);
-
             LOG.debug("New pet has been saved! The pet name is: " + pet.getName());
             return petRepository.save(pet);
         }
