@@ -96,7 +96,7 @@ public class CustomersServiceClient {
                 .bodyToMono(PetDetails.class);
     }
 
-    public Mono<PetDetails> createPet(final PetDetails model,final int ownerId){
+    public Mono<PetDetails> createPet(PetDetails model, final int ownerId){
         return webClientBuilder.build().post()
                 .uri(customersServiceUrl +"{ownerId}/pets", ownerId)
                 .body(just(model), PetDetails.class)
@@ -104,7 +104,7 @@ public class CustomersServiceClient {
                 .retrieve().bodyToMono(PetDetails.class);
     }
 
-    public Mono<PetDetails> deletePet(final int ownerId,final int petId){
+    public Mono<PetDetails> deletePet(final int ownerId, final int petId){
         return webClientBuilder.build().delete()
                 .uri(customersServiceUrl + "{ownerId}/pets/{petId}", ownerId ,petId)
                 .retrieve()

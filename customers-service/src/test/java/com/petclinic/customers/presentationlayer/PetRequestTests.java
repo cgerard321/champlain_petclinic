@@ -30,10 +30,11 @@ public class PetRequestTests {
         //ARRANGE
         String petName = "Marcus";
         Date date = new SimpleDateFormat( "yyyyMMdd" ).parse( "20100520" );
+        PetType pt = new PetType(1, "cat");
 
         //ACT
-        PetRequest pr1 = new PetRequest(petName, date, 1);
-        PetRequest pr2 = new PetRequest(petName, date, 1);
+        PetRequest pr1 = new PetRequest(petName, date, pt);
+        PetRequest pr2 = new PetRequest(petName, date, pt);
 
         //ASSERT
         assertTrue(pr1.equals(pr2) && pr1.equals(pr2));
@@ -56,7 +57,7 @@ public class PetRequestTests {
     {
         //ARRANGE - ACT
         PetRequest pr = new PetRequest();
-        String expected = "PetRequest(id=0, birthDate=null, name=null, typeId=0)";
+        String expected = "PetRequest(id=0, birthDate=null, name=null, type=null)";
 
         //ASSERT
         assertEquals(expected, pr.toString());
@@ -67,9 +68,10 @@ public class PetRequestTests {
         //Arrange
         String petName = "Marcus";
         Date date = new SimpleDateFormat( "yyyyMMdd" ).parse( "20100520" );
+        PetType pt = new PetType(1, "cat");
 
         //Act
-        PetRequest pr = new PetRequest(petName, date, 1);
+        PetRequest pr = new PetRequest(petName, date, pt);
 
         //Assert
         assertEquals(petName, pr.getName());
@@ -121,9 +123,9 @@ public class PetRequestTests {
         PetRequest pr = new PetRequest();
 
         //Act
-        pr.setTypeId(petType.getId());
+        pr.setType(petType);
 
         //Assert
-        assertEquals(petType.getId(), pr.getTypeId());
+    assertEquals(petType, pr.getType());
     }
 }

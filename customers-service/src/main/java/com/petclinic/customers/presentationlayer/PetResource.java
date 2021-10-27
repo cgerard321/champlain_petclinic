@@ -35,8 +35,7 @@ class PetResource {
     @ResponseStatus(HttpStatus.CREATED)
     public Pet createNewPet(@RequestBody PetRequest petRequest, @PathVariable("ownerId") int ownerId)
     {
-        Pet pet = petService.CreatePet(petRequest, ownerId);
-        return pet;
+        return petService.CreatePet(petRequest, ownerId);
     }
 
     @GetMapping

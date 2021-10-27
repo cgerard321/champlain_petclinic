@@ -219,7 +219,8 @@ public class PetServiceTest {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
         Date birthDate = simpleDateFormat.parse("2018-09-09");
 
-        PetRequest petRequest = new PetRequest("Daisy", birthDate, 1);
+        PetType pt = new PetType();
+        PetRequest petRequest = new PetRequest("Daisy", birthDate, pt);
 
         //Act
         service.CreatePet(petRequest, 1);
