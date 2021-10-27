@@ -113,7 +113,7 @@ class PetAPITest {
         pt3.setId(3);
 
         given(petService.getAllPetTypes()).willReturn(asList(pt1, pt2, pt3));
-        mvc.perform(get("/pettypes").accept(MediaType.APPLICATION_JSON))
+        mvc.perform(get("/owners/petTypes").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].id").value(1))
                 .andExpect(jsonPath("$[1].id").value(2))

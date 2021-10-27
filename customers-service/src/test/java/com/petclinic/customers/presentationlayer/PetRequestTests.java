@@ -32,8 +32,8 @@ public class PetRequestTests {
         Date date = new SimpleDateFormat( "yyyyMMdd" ).parse( "20100520" );
 
         //ACT
-        PetRequest pr1 = new PetRequest(petName, date);
-        PetRequest pr2 = new PetRequest(petName, date);
+        PetRequest pr1 = new PetRequest(petName, date, 1);
+        PetRequest pr2 = new PetRequest(petName, date, 1);
 
         //ASSERT
         assertTrue(pr1.equals(pr2) && pr1.equals(pr2));
@@ -69,7 +69,7 @@ public class PetRequestTests {
         Date date = new SimpleDateFormat( "yyyyMMdd" ).parse( "20100520" );
 
         //Act
-        PetRequest pr = new PetRequest(petName, date);
+        PetRequest pr = new PetRequest(petName, date, 1);
 
         //Assert
         assertEquals(petName, pr.getName());
