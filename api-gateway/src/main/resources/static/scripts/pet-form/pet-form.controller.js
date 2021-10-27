@@ -24,30 +24,28 @@ angular.module('petForm')
                         owner: owner,
                         name: resp.data.name,
                         birthDate: myDate,
+                        type: resp.data.type.id.toString()
                     };
-                    self.petType = resp.data.petType.id.toString();
                     console.log(self.pet);
-                    console.log(self.typeId);
+                    console.log(self.pet.type);
                 })
             else
                 $http.get('api/gateway/owners/' + ownerId).then(function (resp) {
                     self.pet = {
                         owner: owner,
-                        typeId: '0'
+                        type: '0'
                     };
                 })
         });
 
         self.submit = function () {
-            var id = self.pet.id || 0;
-
             var petType = {
-                id: self.petType.id,
-                name: self.petType.name
+                id: self.pet.type.id,
+                name: self.pet.type.name
             }
 
             var data = {
-                id: id,
+                id: petId,
                 name: self.pet.name,
                 birthDate: self.pet.birthDate,
                 owner: ownerId,
@@ -61,7 +59,7 @@ angular.module('petForm')
             if(method != 'delete')
                 req = $http.post("api/gateway/owners/" + ownerId + "/pets", data);
             else
-                req = $http.delete("api/gateway/owners/" + ownerId + "/pets/" + id, data);
+                req = $http.delete("api/gateway/owners/" + ownerId + "/pets/" + petId, data);
 
             req.then(function () {
                 $state.go("owners/details/" + ownerId);
