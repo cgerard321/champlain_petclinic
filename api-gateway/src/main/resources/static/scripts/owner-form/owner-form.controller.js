@@ -4,6 +4,7 @@ angular.module('ownerForm')
     .controller('OwnerFormController', ["$http", '$state', '$stateParams', function ($http, $state, $stateParams) {
         var self = this;
         var ownerId = $stateParams.ownerId || 0;
+        var method = $stateParams.method;
 
         if (!ownerId) {
             self.owner = {};
@@ -12,22 +13,21 @@ angular.module('ownerForm')
             $http.get("api/gateway/owners/" + ownerId).then(function (resp) {
                 self.owner = resp.data;
             });
+            if(method == 'edit')
+                self.checked = false
+            else
+                self.checked = true
         }
 
         self.submitOwnerForm = function () {
             var id = self.owner.id;
-            var method = $stateParams.method;
             console.log(self.owner);
             var req;
             if (id){
-                if(method == 'edit') {
+                if(method == 'edit')
                     req = $http.put("api/gateway/owners/" + id, self.owner);
-                    self.checked = false
-                }
-                else {
+                else
                     req = $http.delete("api/gateway/owners/" + id, self.owner)
-                    self.checked = true
-                }
             }
             else
                 req = $http.post("api/gateway/owners", self.owner);
