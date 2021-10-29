@@ -219,7 +219,7 @@ public class PetServiceTest {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(pattern);
         Date birthDate = simpleDateFormat.parse("2018-09-09");
 
-        PetType pt = new PetType();
+        PetType pt = new PetType(1, "cat");
         PetRequest petRequest = new PetRequest("Daisy", birthDate, pt);
 
         //Act
