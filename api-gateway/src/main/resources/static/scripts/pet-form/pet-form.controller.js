@@ -8,15 +8,13 @@ angular.module('petForm')
         var petId = $stateParams.petId || 0;
         var owner = "";
         var myDate = new Date();
-        var names;
-
+      
         $http.get('api/gateway/owners/' + ownerId).then(function (resp){
             owner = resp.data.firstName + " " + resp.data.lastName;
         })
 
         $http.get('api/gateway/owners/petTypes').then(function (resp) {
             self.types = resp.data;
-            names = self.types;
             console.log(self.types);
         }).then(function () {
             if(method == 'delete')
