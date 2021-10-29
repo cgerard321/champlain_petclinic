@@ -2,7 +2,6 @@ package com.petclinic.customers.presentationlayer;
 
 import com.petclinic.customers.datalayer.Owner;
 import com.petclinic.customers.datalayer.OwnerRepository;
-import com.sun.org.apache.xpath.internal.operations.String;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;

@@ -4,7 +4,7 @@
     <div class="form-group formColor">
         <label class="col-sm-2 control-label">First name</label>
         <div class="owner col-sm-6">
-            <input class="form-control col-sm-4" ng-model="$ctrl.owner.firstName" name="firstName" required/>
+            <input class="form-control col-sm-4" ng-model="$ctrl.owner.firstName" name="firstName" ng-disabled="$ctrl.checked" required/>
             <span ng-show="ownerForm.firstName.$error.required" class="help-block">First name is required.</span>
         </div>
     </div>
@@ -12,7 +12,7 @@
     <div class="form-group formColor">
         <label class="col-sm-2 control-label">Last name</label>
         <div class="owner col-sm-6">
-            <input class="form-control col-sm-4" ng-model="$ctrl.owner.lastName" name="lastName" required/>
+            <input class="form-control col-sm-4" ng-model="$ctrl.owner.lastName" name="lastName" ng-disabled="$ctrl.checked" required/>
             <span ng-show="ownerForm.lastName.$error.required" class="help-block">Last name is required.</span>
       </div>
     </div>
@@ -21,7 +21,7 @@
     <div class="form-group formColor">
         <label class="col-sm-2 control-label">Address</label>
         <div class="owner col-sm-6">
-            <input class="form-control col-sm-4" ng-model="$ctrl.owner.address" name="address" required/>
+            <input class="form-control col-sm-4" ng-model="$ctrl.owner.address" name="address" ng-disabled="$ctrl.checked" required/>
             <span ng-show="ownerForm.address.$error.required" class="help-block">Address is required.</span>
         </div>
     </div>
@@ -29,7 +29,7 @@
     <div class="form-group formColor">
         <label class="col-sm-2 control-label">City</label>
         <div class="owner col-sm-6">
-            <input class="form-control col-sm-4" ng-model="$ctrl.owner.city" name="city" required/>
+            <input class="form-control col-sm-4" ng-model="$ctrl.owner.city" name="city" ng-disabled="$ctrl.checked" required/>
             <span ng-show="ownerForm.city.$error.required" class="help-block">City is required.</span>
         </div>
     </div>
@@ -37,7 +37,7 @@
     <div class="form-group formColor">
         <label class="col-sm-2 control-label">Telephone</label>
         <div class="owner col-sm-6">
-            <input class="form-control col-sm-4" ng-model="$ctrl.owner.telephone" name="telephone" required/>
+            <input class="form-control col-sm-4" ng-model="$ctrl.owner.telephone" name="telephone" ng-disabled="$ctrl.checked" required/>
             <span ng-show="ownerForm.telephone.$error.required" class="help-block">Telephone is required.</span>
         </div>
     </div>

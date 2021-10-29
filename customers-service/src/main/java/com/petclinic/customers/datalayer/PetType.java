@@ -18,6 +18,15 @@ public class PetType {
     @Column(name = "name")
     private String name;
 
+    public PetType(int id, String name) {
+        this.id = id;
+        this.name = name;
+    }
+
+    public PetType(){
+
+    }
+
     public Integer getId() {
         return id;
     }
