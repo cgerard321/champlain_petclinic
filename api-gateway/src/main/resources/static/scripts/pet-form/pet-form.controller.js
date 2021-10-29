@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('petForm')
-    .controller('PetFormController', ['$http', '$state', '$stateParams', '$scope', function ($http, $state, $stateParams, $scope) {
+    .controller('PetFormController', ['$http', '$state', '$stateParams', function ($http, $state, $stateParams) {
         var self = this;
         var ownerId = $stateParams.ownerId || 0;
         var method = $stateParams.method;
