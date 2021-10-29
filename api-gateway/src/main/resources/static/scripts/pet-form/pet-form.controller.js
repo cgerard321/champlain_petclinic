@@ -44,14 +44,10 @@ angular.module('petForm')
 
         self.submit = function () {
             var petType = {
-                id: self.petType.type.id,
-                name: "cat"
+                id: self.petType.type,
+                name: self.petType.type.name
             }
 
-            var temp = {
-                id: self.pet.type,
-                name: names[self.pet.type]
-            }
             /*console.log(temp)*/
             var data = {
                 id: petId,
