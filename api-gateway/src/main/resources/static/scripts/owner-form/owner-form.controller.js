@@ -11,7 +11,6 @@ angular.module('ownerForm')
         } else {
             $http.get("api/gateway/owners/" + ownerId).then(function (resp) {
                 self.owner = resp.data;
-                self.checked = true
             });
         }
 
@@ -21,10 +20,14 @@ angular.module('ownerForm')
             console.log(self.owner);
             var req;
             if (id){
-                if(method == 'edit')
+                if(method == 'edit') {
                     req = $http.put("api/gateway/owners/" + id, self.owner);
-                else
+                    self.checked = false
+                }
+                else {
                     req = $http.delete("api/gateway/owners/" + id, self.owner)
+                    self.checked = true
+                }
             }
             else
                 req = $http.post("api/gateway/owners", self.owner);

@@ -41,14 +41,15 @@ angular.module('petForm')
                     self.pet = {
                         owner: owner
                     }
+
                     self.checked = false
                 })
         });
 
         self.submit = function () {
             var petType = {
-                id: self.petType.type   ,
-                name: self.petType.type.name
+                id: self.pet.type   ,
+                name: self.pet.type.name
             }
 
             /*console.log(temp)*/
