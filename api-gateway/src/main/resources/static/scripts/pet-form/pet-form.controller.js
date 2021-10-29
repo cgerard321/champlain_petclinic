@@ -30,7 +30,9 @@ angular.module('petForm')
                         name: resp.data.name,
                         birthDate: myDate,
                         type: self.petType
-                    };
+                    }
+
+                    self.checked = true
                     /*console.log(self.pet);
                     console.log(self.pet.type);*/
                 })
@@ -38,7 +40,8 @@ angular.module('petForm')
                 $http.get('api/gateway/owners/' + ownerId).then(function (resp) {
                     self.pet = {
                         owner: owner
-                    };
+                    }
+                    self.checked = false
                 })
         });
 
