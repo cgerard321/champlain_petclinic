@@ -44,7 +44,7 @@ angular.module('petForm')
 
         self.submit = function () {
             var petType = {
-                id: self.petType.type,
+                id: self.petType.type   ,
                 name: self.petType.type.name
             }
 
@@ -65,7 +65,7 @@ angular.module('petForm')
                 req = $http.delete("api/gateway/owners/" + ownerId + "/pets/" + petId, data);
 
             req.then(function () {
-                $window.history.back();
+                $state.go('ownerDetails', {ownerId: ownerId})
             }, function (response) {
                 var error = response.data;
                 error.errors = error.errors || [];

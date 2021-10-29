@@ -6,7 +6,7 @@ angular.module('ownerDetails', ['ui.router'])
             .state('ownerDetails', {
                 parent: 'app',
                 url: '/owners/details/:ownerId',
-                params: {ownerId : null},
+                params: {ownerId: null},
                 template: '<owner-details></owner-details>'
             })
 
