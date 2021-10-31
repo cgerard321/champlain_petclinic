@@ -147,7 +147,27 @@ class OwnerAPITest {
                 .andExpect(status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").exists());
     }
+    /**
+     * ------------------------ UPDATE_OWNER ------------------------
+     * Test an HTTP PUT request
+     */
+    @Test
+    void updateOwner_API_Test() throws Exception{
 
+        Owner updateOwner = new Owner(5,"Adam","West","57 Adam St.","Bucharest","1234567890");
+        when(ownerService.findByOwnerId(updateOwner.getId())).thenReturn(Optional.of(updateOwner));
+        when(ownerService.updateOwner(anyInt(), any(Owner.class))).thenReturn(updateOwner);
+        mvc.perform(put("/owners/5")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"firstName\": \"Adam\", \"lastName\": \"West\",\"address\": \"57 Adam St.\",\"city\": \"Bucharest\",\"telephone\": \"1234567890\"}"))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.firstName").value("Adam"))
+                .andExpect(jsonPath("$.lastName").value("West"))
+                .andExpect(jsonPath("$.address").value("57 Adam St."))
+                .andExpect(jsonPath("$.city").value("Bucharest"))
+                .andExpect(jsonPath("$.telephone").value("1234567890"));
+    }
 }
 
 
