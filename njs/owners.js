@@ -1,13 +1,4 @@
-/**
- *
- * @param {Request} req
- */
-function simple(req) {
-    var result = {
-        code: 200,
-        desc: "This is the description",
-    };
-
+function aggregation(req) {
     req.headersOut["Content-Type"] = "application/json;charset=UTF-8";
 
     req.subrequest(`/proxy/owners`)
@@ -50,4 +41,4 @@ function simple(req) {
         });
 }
 
-export default { simple };
+export default { aggregation };
