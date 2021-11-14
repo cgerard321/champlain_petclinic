@@ -10,36 +10,20 @@
     <thead>
         <tr>
             <td>Bill ID</td>
+            <td>Visit Type</td>
             <td>Amount</td>
             <td>Date/Time</td>
+            <td>Details</td>
+            <td>Delete</td>
         </tr>
     </thead>
 
-    <tr>
-        <td>
-            <a class="newBtn btn btn-default">
-                123456789
-            </a>
-        </td>
-        <td>$125.00</td>
-        <td>2021-09-28 00:00</td>
-    </tr>
-    <tr>
-        <td>
-            <a class="newBtn btn btn-default">
-                234567891
-            </a>
-        </td>
-        <td>$99.00</td>
-        <td>2021-09-29 00:00</td>
-    </tr>
-    <tr>
-        <td>
-            <a class="newBtn btn btn-default">
-                345678912
-            </a>
-        </td>
-        <td>$200.00</td>
-        <td>2021-09-30 00:00</td>
+    <tr id="billId" ng-repeat="bill in $ctrl.billHistory | filter:$ctrl.query track by bill.billId">
+        <td>{{bill.billId}}</td>
+        <td>{{bill.visitType}}</td>
+        <td>{{bill.amount}}</td>
+        <td>{{bill.date}}</td>
+        <td><a href="http://localhost:8080/#!/bills/details/{{bill.billId}}">Get Details</a></td>
+        <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteBill(bill.billId)">Delete Bill</a></td>
     </tr>
 </table>

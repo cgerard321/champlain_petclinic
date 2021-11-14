@@ -1,7 +1,9 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
+import com.petclinic.bffapigateway.dtos.*;
 import com.petclinic.bffapigateway.dtos.Login;
 import com.petclinic.bffapigateway.dtos.Register;
+import com.petclinic.bffapigateway.dtos.Role;
 import com.petclinic.bffapigateway.dtos.UserDetails;
 import com.petclinic.bffapigateway.exceptions.GenericHttpException;
 import com.petclinic.bffapigateway.utils.Rethrower;
@@ -53,7 +55,7 @@ public class AuthServiceClient {
 
     public Flux<UserDetails> getUsers() {
         return webClientBuilder.build().get()
-                .uri(authServiceUrl + "/users")
+                .uri(authServiceUrl + "/users/withoutPages")
                 .retrieve()
                 .bodyToFlux(UserDetails.class);
     }
@@ -70,19 +72,17 @@ public class AuthServiceClient {
                         )
                 .bodyToMono(UserDetails.class);
     }
-
-    public Flux<UserDetails> createUsers (){
-        return webClientBuilder.build().post()
-                .uri(authServiceUrl + "/users")
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve().bodyToFlux(UserDetails.class);
-    }
-
-    public Mono<UserDetails> updateUser (final int userId, final UserDetails model){
+    public Mono<UserDetails> updateUser (final long userId, final Register model) {
         return webClientBuilder.build().put()
-                .uri(authServiceUrl + userId + model)
+                .uri(authServiceUrl + "/users/{userId}", userId)
+                .body(just(model), Register.class)
                 .accept(MediaType.APPLICATION_JSON)
-                .retrieve().bodyToMono(UserDetails.class);
+                .retrieve()
+                .onStatus(HttpStatus::is4xxClientError,
+                        n -> rethrower.rethrow(n,
+                                x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
+                        )
+                .bodyToMono(UserDetails.class);
     }
 
     public Mono<UserDetails> deleteUser(final long userId) {
@@ -133,6 +133,31 @@ public class AuthServiceClient {
                 .switchIfEmpty(error(new RuntimeException("")))
                 .flatMap(n -> n.bodyToMono(UserDetails.class))
                 .map(n -> Tuples.of(token.get(), n));
+    }
+
+
+    public Flux<Role> getRoles() {
+        return webClientBuilder.build().get()
+                .uri(authServiceUrl + "/admin/roles")
+                .retrieve()
+                .bodyToFlux(Role.class);
+    }
+
+    public Mono<Role> addRole(final Role model) {
+        return webClientBuilder.build().post()
+                .uri(authServiceUrl + "/admin/roles")
+                .body(just(model), Role.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(Role.class);
+    }
+
+    public Mono<Void> deleteRole(final int id) {
+        return webClientBuilder.build()
+                .delete()
+                .uri(authServiceUrl + "/admin/role/{id}", id)
+                .retrieve()
+                .bodyToMono(Void.class);
     }
 }
 

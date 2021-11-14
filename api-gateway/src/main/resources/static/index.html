@@ -1,35 +1,42 @@
 <!DOCTYPE html>
 
-<html ng-app="petClinicApp" lang="en">
+<html lang="en" ng-app="petClinicApp">
 
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type"/>
     <meta charset="utf-8"/>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=0, minimal-ui"/>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+    <meta content="width=device-width, initial-scale=1, user-scalable=0, minimal-ui" name="viewport"/>
     <!-- The above 4 meta tags *must* come first in the head; any other head content must come *after* these tags -->
 
-    <link rel="shortcut icon" type="image/x-icon" href="/images/favicon.png"/>
+    <link href="/images/favicon.png" rel="shortcut icon" type="image/x-icon"/>
 
     <title>PetClinic :: a Spring Framework demonstration</title>
-    <link rel="stylesheet" href="/css/petclinic.css" type="text/css "/>
+    <link href="/css/petclinic.css" rel="stylesheet" type="text/css "/>
 
     <!--Vet service styling for modal on vet hover-->
-    <link rel="stylesheet" href="/css/vets/modal.css" type="text/css"/>
+    <link href="/css/vets/modal.css" rel="stylesheet" type="text/css"/>
     <!-- Vet service styling for vet table on different screen widths-->
-    <link rel="stylesheet" href="/css/vets/vetTable.css" type="text/css"/>
+    <link href="/css/vets/vetTable.css" rel="stylesheet" type="text/css"/>
 
-    <link rel="stylesheet" href="/css/vets/sevenDaysCalendar.css" type="text/css"/>
+    <link href="/css/vets/sevenDaysCalendar.css" rel="stylesheet" type="text/css"/>
 
     <!--Vet Service styling for form -->
-    <link rel="stylesheet" href="/css/vets/form.css" type="text/css"/>
+    <link href="/css/vets/form.css" rel="stylesheet" type="text/css"/>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css">
+    <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css"
+          integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet">
 
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script crossorigin="anonymous"
+            integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+            src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script crossorigin="anonymous"
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script crossorigin="anonymous"
+            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 
     <script src="/webjars/angular/1.8.2/angular.min.js"></script>
     <script src="/webjars/angular-ui-router/1.0.28/release/angular-ui-router.min.js"></script>
@@ -47,6 +54,10 @@
     <script src="scripts/owner-form/owner-form.js"></script>
     <script src="scripts/owner-form/owner-form.controller.js"></script>
     <script src="scripts/owner-form/owner-form.component.js"></script>
+
+    <script src="scripts/auth/admin-panel/admin-panel.js"></script>
+    <script src="scripts/auth/admin-panel/admin-panel.controller.js"></script>
+    <script src="scripts/auth/admin-panel/admin-panel.component.js"></script>
 
     <script src="scripts/pet-form/pet-form.js"></script>
     <script src="scripts/pet-form/pet-form.controller.js"></script>
@@ -79,7 +90,7 @@
     <script src="scripts/vet-details/vet-details.js"></script>
     <script src="scripts/vet-details/vet-details.controller.js"></script>
     <script src="scripts/vet-details/vet-details.component.js"></script>
-    <script src="scripts/vet-details/vet-details-availability.js"></script>
+    <script src="scripts/vet-details/vet-detail-availabilities.js"></script>
 
     <script src="scripts/auth/admin/roles-details.js"></script>
     <script src="scripts/auth/admin/roles-details.controller.js"></script>
@@ -99,13 +110,13 @@
 </head>
 
 <body id="bg">
-    <layout-nav></layout-nav>
-    <div class="container-fluid">
-        <div class="container xd-container">
-            <div ui-view=""></div>
-        </div>
+<layout-nav></layout-nav>
+<div class="container-fluid">
+    <div class="container xd-container">
+        <div ui-view=""></div>
     </div>
-    <layout-footer></layout-footer>
+</div>
+<layout-footer></layout-footer>
 </body>
 
 </html>

@@ -10,7 +10,7 @@ angular.module('ownerForm', ['ui.router'])
             })
             .state('ownerEdit', {
                 parent: 'app',
-                url: '/owners/:ownerId/edit',
+                url: '/owners/:ownerId/:method',
                 template: '<owner-form></owner-form>'
             })
     }]);

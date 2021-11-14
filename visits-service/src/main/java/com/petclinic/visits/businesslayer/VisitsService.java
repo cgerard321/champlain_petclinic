@@ -1,6 +1,8 @@
 package com.petclinic.visits.businesslayer;
 
 import com.petclinic.visits.datalayer.Visit;
+import com.petclinic.visits.datalayer.VisitDTO;
+import com.petclinic.visits.datalayer.VisitIdLessDTO;
 
 import java.util.Date;
 import java.util.List;
@@ -14,20 +16,24 @@ import java.util.List;
 
 public interface VisitsService {
 
-    public Visit addVisit(Visit visit);
+    public VisitDTO addVisit(VisitIdLessDTO visit);
 
-    public List<Visit> getVisitsForPet(int petId);
+    public List<VisitDTO> getVisitsForPet(int petId);
 
-    public void deleteVisit(int visitId);
+    List<VisitDTO> getVisitsForPet(int petId, boolean scheduled);
+  
+    public VisitDTO getVisitByVisitId(String visitId);
 
-    public Visit updateVisit(Visit visit);
+    public void deleteVisit(String visitId);
 
-    public List<Visit> getVisitsForPets(List<Integer> petIds);
+    public VisitDTO updateVisit(VisitDTO visit);
 
-    List<Visit> getVisitsForPet(int petId, boolean scheduled);
+    public List<VisitDTO> getVisitsForPets(List<Integer> petIds);
 
-    List<Visit> getVisitsForPractitioner(int practitionerId);
+    List<VisitDTO> getVisitsForPractitioner(int practitionerId);
 
-    List<Visit> getVisitsByPractitionerIdAndMonth(int practitionerId, Date startDate, Date EndDate);
+    List<VisitDTO> getVisitsByPractitionerIdAndMonth(int practitionerId, Date startDate, Date EndDate);
+
+    boolean validateVisitId(String visitId);
 
 }

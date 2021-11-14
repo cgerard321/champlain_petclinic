@@ -1,0 +1,26 @@
+<h2 class="admin-panel">Users</h2>
+
+<form onsubmit="javascript:void(0)" style="max-width: 20em; margin-top: 2em;">
+    <div class="form-group">
+        <input type="text" class="form-control" placeholder="Search Filter" ng-model="$ctrl.query" />
+        <br/>
+    </div>
+</form>
+
+<table id="users" class="table table-striped">
+    <thead>
+    <tr>
+        <th>Username</th>
+        <th>Email</th>
+        <th>Options</th>
+    </tr>
+    </thead>
+
+    <tr id="userTd" ng-repeat="user in $ctrl.users | filter:$ctrl.query track by user.id">
+        <td>{{user.username}}</td>
+        <td>{{user.email}}</td>
+        <td>
+            <input class="add-vet-button btn btn-success" type="button" value="Delete" ng-click="removeUser(user.id)"/>
+        </td>
+    </tr>
+</table>

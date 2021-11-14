@@ -63,6 +63,14 @@ public class VisitsServiceClient {
                 .bodyToFlux(VisitDetails.class);
     }
 
+    public Flux<VisitDetails> getPreviousVisitsForPet(final int petId) {
+        return webClientBuilder.build()
+                .get()
+                .uri(hostname + "/visits/previous/{petId}", petId)
+                .retrieve()
+                .bodyToFlux(VisitDetails.class);
+    }
+
     public Flux<VisitDetails> getVisitForPractitioner(final int practitionerId){
         return webClientBuilder.build()
                 .get()
@@ -79,48 +87,16 @@ public class VisitsServiceClient {
                 .bodyToFlux(VisitDetails.class);
     }
 
-/*
-    public Mono<Visits> createVisitForPets(final VisitDetails visitDetails){
-        return webClientBuilder.build()
-                .post()
-                .uri(hostname + "/pets/visits")
-                .body(Mono.just(visitDetails), VisitDetails.class)
-                .retrieve()
-                .bodyToMono(Visits.class);
-
-    }
-
-*/
-
-    public Mono<Visits> updateVisitForPets(final int petId){
-        return webClientBuilder.build()
-                .put()
-                .uri(hostname + "/pets/visits/{petId}", petId)
-                .body(Mono.just(petId), Visits.class)
-                .retrieve()
-                .bodyToMono(Visits.class);
-    }
-
-    public Mono<Void> deleteVisitForPets(final int petId){
-        return webClientBuilder.build()
-                .delete()
-                .uri(hostname + "/pets/visits/{petId}", petId)
-                .retrieve()
-                .bodyToMono(Void.class);
-    }
-
-    //Testing purpose
-
-    public Mono<Visits> getAllVisits(){
+    public Flux<VisitDetails> getScheduledVisitsForPet(final int petId) {
         return webClientBuilder.build()
                 .get()
-                .uri(hostname + "/pets/visits/All")
+                .uri(hostname + "/visits/scheduled/{petId}", petId)
                 .retrieve()
-                .bodyToMono(Visits.class);
+                .bodyToFlux(VisitDetails.class);
     }
 
     public Mono<VisitDetails> updateVisitForPet(VisitDetails visit) {
-        String url = hostname + "/owners/*/pets/" + visit.getPetId() + "/visits/" + visit.getId();
+        String url = hostname + "/owners/*/pets/" + visit.getPetId() + "/visits/" + visit.getVisitId();
         return webClientBuilder.build()
                 .put()
                 .uri(url)
@@ -141,7 +117,7 @@ public class VisitsServiceClient {
                 .bodyToMono(VisitDetails.class);
     }
 
-    public Mono<Void> deleteVisitsById(int visitId){
+    public Mono<Void> deleteVisitByVisitId(String visitId){
         return webClientBuilder.build()
                 .delete()
                 .uri(hostname + "/visits/{visitId}", visitId)
@@ -155,6 +131,14 @@ public class VisitsServiceClient {
 
     void setHostname(String hostname) {
         this.hostname = hostname;
+    }
+    
+    public Mono<VisitDetails> getVisitByVisitId(String visitId) {
+        return webClientBuilder.build()
+                .get()
+                .uri(hostname + "/visit/{visitId}", visitId)
+                .retrieve()
+                .bodyToMono(VisitDetails.class);
     }
 }
 

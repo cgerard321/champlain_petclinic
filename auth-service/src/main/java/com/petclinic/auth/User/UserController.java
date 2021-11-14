@@ -26,12 +26,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.parameters.P;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.Base64;
+import java.util.List;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.ResponseEntity.ok;
@@ -64,6 +66,12 @@ public class UserController {
         return all;
     }
 
+    @GetMapping("/withoutPages")
+    public List<User> getUserWithoutPage() {
+
+        return userService.findAllWithoutPage();
+    }
+
     @PostMapping
     public UserPasswordLessDTO createUser(
             @RequestBody @Valid UserIDLessRoleLessDTO dto,
@@ -76,7 +84,7 @@ public class UserController {
         return userMapper.modelToPasswordLessDTO(saved);
     }
 
-    @PutMapping("/{userId}")
+    @PutMapping("/passwordReset/{userId}")
     public void passwordReset(@PathVariable long userId, @RequestBody String newPassword) {
 
         userService.passwordReset(userId, newPassword);

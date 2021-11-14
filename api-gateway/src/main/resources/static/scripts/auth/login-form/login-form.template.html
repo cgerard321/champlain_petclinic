@@ -4,16 +4,29 @@
     <form ng-submit="$ctrl.login()" style="max-width: 25em;" style="justify-content: center">
         <h3 class="text-danger text-center" ng-repeat="error in errorMessages">{{ error }}</h3>
         <div class="group-form">
-            <label>Email
-                <input id="email" class="form-control" ng-model="login.email" name="email" required/>
-            </label>
+            <label>Email</label>
+
+            <input id="email" class="form-control" ng-model="login.email" name="email" required/>
+
             <span ng-show="loginForm.email.$error.required" class="help-block">Email is required.</span>
         </div>
 
         <div class="group-form">
-            <label>Password
+            <label>Password</label>
+
             <input id="pwd" type="password" class="form-control" ng-model="login.password" name="password" required/>
-            </label>
+                <i id="eye" onclick="viewPwd()" style="margin-left: 180px; margin-top: -700px; cursor: pointer" class="bi bi-eye-slash"></i>
+                <script>
+                    function viewPwd(){
+                    const x = document.getElementById("pwd");
+                    if (x.getAttribute("type") === "password"){
+                        x.setAttribute("type", "text");
+                    } else {
+                        x.setAttribute("type", "password");
+                    }
+                }
+            </script>
+
             <span ng-show="loginForm.password.$error.required" class="help-block">Password is required.</span>
         </div>
 

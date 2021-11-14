@@ -1,19 +1,19 @@
-<!-- Style for visits calender UI-->
+<!-- Style Loading START-->
 <link rel="stylesheet" href="/css/visitsCalendarStyle.css" xmlns="http://www.w3.org/1999/html"/>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300;400;500;600;700&display=swap">
 <link rel="stylesheet" href="/css/addVisitFormStyle.css" type="text/css" />
-<!-- calender UI END -->
+<!-- Style Loading END -->
 
 <div class="container-calendar">
     <div class="calendar">
         <div class="month">
-            <i class="fas fa-angle-left prev"></i>
+            <i class="fas fa-angle-left prev" ng-click="$ctrl.getVisitsForPractitionerIdAndMonth()"></i>
             <div class="date">
                 <h1></h1>
                 <p></p>
             </div>
-            <i class="fas fa-angle-right next"></i>
+            <i class="fas fa-angle-right next" ng-click="$ctrl.getVisitsForPractitionerIdAndMonth()"></i>
         </div>
         <div class="weekdays">
             <div>Sun</div>
@@ -41,7 +41,7 @@
 </div>
 <script>
 
-    const date = new Date();
+    let date = new Date();
 
     //specify which months goes with which numbers
     //ex: 09 = September
@@ -65,9 +65,9 @@
     let availableDays = [];
     let vetAvailabilityStr;
     let nameOnCalenderStr;
+    let availabilities = [];
 
     const renderCalendar = () => {
-        console.log("------------------------------------------");
 
         date.setDate(1);
 
@@ -75,16 +75,17 @@
 
         const timeSlots = document.querySelector('.times');
 
-        const lastDay = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-        const prevLastDay = new Date(date.getFullYear(), date.getMonth(), 0).getDate();
+        const lastDay =  getDateTemplate(1).getDate();
+        const prevLastDay = getDateTemplate(0).getDate();
 
         const firstDayIndex = date.getDay();
-        const lastDayIndex = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDay();
+        const lastDayIndex = getDateTemplate(1).getDay();
 
         const nextDays = 7 - lastDayIndex - 1;
 
+        localStorage.setItem("practitionerIdAndMonth", getFormatPractitionerIdAndMonth());
+
         let showSelectedDate = new Date("" + months[date.getMonth()] + " " + selectedDate + ", " + date.getFullYear());
-        console.log("Selected Date: " + showSelectedDate);
 
         let formattedDate = showSelectedDate.toDateString().substring(0, 3) + ", " + showSelectedDate.toDateString().substring(3, 10).trim() + ", " + date.getFullYear();
 
@@ -145,14 +146,15 @@
             let d = prevLastDay - x + 1;
 
             if(CheckWeekend(d, -1)) {
-                days += `<div data-target="previous-page-${d}" class="prev-date unavailable day">${d}</div>`;
+                days += `<div id="day${d}" data-target="previous-page-${d}" class="prev-date unavailable day">${d}</div>`;
             } else {
-                days += `<div data-target="previous-page-${d}" class="prev-date day">${d}</div>`;
+                days += `<div id="day${d}" data-target="previous-page-${d}" class="prev-date day">${d}</div>`;
             }
         }
 
         //get the week days that the vet works
         for(let i = 1; i <= lastDay; i++) {
+
             let workDay = false;
             for(let w of vetWorkDays) {
                 if(getWeekDay(i, 0) === w) {
@@ -160,47 +162,62 @@
                 }
             }
 
+            //get the already scheduled visits
+            let scheduledVisits = false;
+            if(availabilities != null) {
+                for (let a of availabilities) {
+                    if(a === i) {
+                        scheduledVisits = true;
+                    }
+                }
+            }
+
             //check if day is weekend
-            if(CheckWeekend(i, 0) && i === new Date().getDate() && date.getMonth() === new Date().getMonth() && new Date().getFullYear() === date.getFullYear() && vetAvailabilityStr !== null) {
-                days += `<div data-target="${i}" class="today_weekend day">${i}</div>`;
+            if(CheckWeekend(i, 0) && getDateFullFormatEqualsTo(i) && vetAvailabilityStr !== null) {
+                days += `<div id="day${i}" data-target="${i}" class="today_weekend day">${i}</div>`;
             }
 
             //check if day unavailable
-            else if((CheckWeekend(i, 0) ||
-                    vetAvailabilityStr === null) ||
-                (i < new Date().getDate() &&
-                    date.getMonth() <= new Date().getMonth() &&
-                    date.getFullYear() === new Date().getFullYear()) ||
-                (date.getMonth() < new Date().getMonth() &&
-                    date.getFullYear() === new Date().getFullYear()) ||
-                date.getFullYear() < new Date().getFullYear()) {
+            else if((CheckWeekend(i, 0) || vetAvailabilityStr === null) ||
+                (i < new Date().getDate() && date.getMonth() <= new Date().getMonth() && date.getFullYear() === new Date().getFullYear()) ||
+                (date.getMonth() < new Date().getMonth() && date.getFullYear() === new Date().getFullYear()) || date.getFullYear() < new Date().getFullYear()) {
 
-                days += `<div data-target="${i}" class="unavailable day">${i}</div>`;
+                if(i.toString() === selectedDate) {
+                    days += `<div id="day${i}" data-target="${i}" class="editSelected unavailable day">${i}</div>`;
+                } else {
+                    days += `<div id="day${i}" data-target="${i}" class="unavailable day">${i}</div>`;
+                }
             }
 
             //check for vet availabilities
-            else if(workDay === false) {
-                if((i === new Date().getDate() && date.getMonth() === new Date().getMonth() && new Date().getFullYear() === date.getFullYear())) {
-                    days += `<div data-target="${i}" class="today_holiday day">${i}</div>`;
+            else if(workDay === false || scheduledVisits === true) {
+
+                if (i.toString() === selectedDate) {
+                    days += `<div id="day${i}" data-target="${i}" class="editSelected holiday day">${i}</div>`;
+
+                } else if(getDateFullFormatEqualsTo(i)) {
+                    days += `<div id="day${i}" data-target="${i}" class="today_holiday day">${i}</div>`;
+
+
                 } else {
-                    days += `<div data-target="${i}" class="holiday day">${i}</div>`;
+                    days += `<div id="day${i}" data-target="${i}" class="holiday day">${i}</div>`;
                 }
             }
 
             //check for date selected by user
             else if(selectedDate === i.toString()) {
-                days += `<div data-target="${i}" class="date-selected day">${i}</div>`;
+                days += `<div id="day${i}" data-target="${i}" class="date-selected day">${i}</div>`;
                 availableDays.push(i);
             }
 
             //specify the date of today
-            else if (i === new Date().getDate() && date.getMonth() === new Date().getMonth() && new Date().getFullYear() === date.getFullYear()) {
-                days += `<div data-target="${i}" class="today day">${i}</div>`;
+            else if (getDateFullFormatEqualsTo(i)) {
+                days += `<div id="day${i}" data-target="${i}" class="today day">${i}</div>`;
             }
 
             //regular days
             else {
-                days += `<div data-target="${i}" class="day">${i}</div>`;
+                days += `<div id="day${i}" data-target="${i}" class="day">${i}</div>`;
                 availableDays.push(i);
             }
         }
@@ -208,9 +225,9 @@
         //insert the days for the next month
         for(let j = 1; j <= nextDays; j++) {
             if(CheckWeekend(j, 1)) {
-                days += `<div data-target="next-page-${j}" class="next-date unavailable day">${j}</div>`;
+                days += `<div id="day${j}" data-target="next-page-${j}" class="next-date unavailable day">${j}</div>`;
             } else {
-                days += `<div data-target="next-page-${j}" class="next-date day">${j}</div>`;
+                days += `<div id="day${j}" data-target="next-page-${j}" class="next-date day">${j}</div>`;
             }
         }
 
@@ -232,16 +249,14 @@
         if(numberOfRows !== 0) {
             for(let j = numberOfNext + 1; j <= (numberOfRows * 7) + numberOfNext; j++) {
                 if(CheckWeekend(j, 1)) {
-                    days += `<div data-target="next-page-${j}" class="next-date weekend day">${j}</div>`;
+                    days += `<div id="day${j}"data-target="next-page-${j}" class="next-date weekend day">${j}</div>`;
                 } else {
-                    days += `<div data-target="next-page-${j}" class="next-date day">${j}</div>`;
+                    days += `<div id="day${j}" data-target="next-page-${j}" class="next-date day">${j}</div>`;
                 }
             }
         }
 
         monthDays.innerHTML = days;
-
-        console.log("Number Of days in month " + (date.getMonth()+1) + " is equal to: " + numberOfDays);
 
         let slots = "";
         let timeIsSelected = false;
@@ -303,16 +318,42 @@
 
         timeSlots.innerHTML = slots;
 
+        if(timeIsSelected) {
+            document.querySelector('.submitBTN').addEventListener('click',() => {
+                let month = date.getMonth();
+                let sDate = selectedDate;
+
+                if (month < 9) {
+                    month = "0" + (month + 1);
+                }
+                else if(month !== 12) {
+                    month += 1;
+                }
+                else {
+                    month = "01";
+                }
+
+                if(selectedDate < 10) {
+                    sDate = "0" + sDate;
+                }
+                console.log("lol");
+                $('#date_input').val(date.getFullYear() + "-" + month + "-" + sDate);
+            });
+        }
+
         //fixes bug where window wouldn't load
         if(monthDays.innerHTML === null) {
             location.reload();
         }
+
+        console.log("Selected date: " + selectedDate);
+        isEditMode = false;
     }
 
     //check if a date is on the weekend
     const CheckWeekend = (tempDate, month) => {
-        return (new Date("" + months[date.getMonth() + month] + " " + tempDate + ", " + date.getFullYear()).getDay() === 0 ||
-            new Date("" + months[date.getMonth() + month] + " " + tempDate + ", " + date.getFullYear()).getDay() === 6);
+        let weekend = new Date("" + months[date.getMonth() + month] + " " + tempDate + ", " + date.getFullYear()).getDay();
+        return (weekend === 0 || weekend === 6);
 
     }
 
@@ -328,7 +369,6 @@
         let wasMaxReached = false;
 
         for(let a of availableDays) {
-            console.log(a);
             if(a > selectedDate && wasMaxReached === false) {
                 valMax = a;
                 wasMaxReached = true;
@@ -365,14 +405,59 @@
 
     //get value either for PM or AM for the time slots
     const getAMorPM = (isAM) => {
-        if(isAM) {
-            return "AM";
-        } else {
-            return "PM";
+        return isAM ? "AM" : "PM";
+    }
+
+    const getDateTemplate = (monthAddition) => {
+        return new Date(date.getFullYear(), date.getMonth() + monthAddition, 0);
+    }
+
+    const getDateFullFormatEqualsTo = (chosenDate) => {
+        return (chosenDate === new Date().getDate() && date.getMonth() === new Date().getMonth() && new Date().getFullYear() === date.getFullYear());
+    }
+
+    //Format the current month selected into a format that will be accepted by the api gateway route
+    const getFormatPractitionerIdAndMonth = () => {
+        let lastDayOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+        let month = date.getMonth() + 1;
+
+        if (month < 10) {
+            month = "0" + month;
         }
+
+        let startDate = date.getFullYear() + "-" + month + "-01";
+        let endDate = date.getFullYear() + "-" + month + "-" + lastDayOfMonth;
+
+        return $("#selectedVet :selected").attr("value") + "," + startDate + "," + endDate;
     }
 
     renderCalendar();
+
+    const editDateParsing = (year, month, day) => {
+        date = new Date("" + months[parseInt(month) - 1] + " " + day + ", " + year);
+        selectedDate = date.getDate().toString();
+
+        renderCalendar();
+    }
+
+    const dateReset = () => {
+        date = new Date();
+        selectedDate = date.getDate();
+        let month = date.getMonth()
+
+        if (month < 9) {
+            month = "0" + (month + 1);
+        }
+        else if(month !== 12) {
+            month += 1;
+        }
+        else {
+            month = "01";
+        }
+
+        $('#date_input').val(date.getFullYear() + "-" + month + "-" + selectedDate);
+        renderCalendar();
+    }
 
     //previous page selector
     document.querySelector('.prev').addEventListener('click',() => {
@@ -403,37 +488,22 @@
 
         let target = event.target.dataset.target;
 
-        //Recognize null clicks
-        if(target === undefined){
-            console.log("nothing was selected");
+        if(target !== undefined) {
+            if (target.substring(0, 13) === "previous-page") {
+                selectedDate = target.substring(14, 16).trim();
 
-        } else if(target.substring(0,13) === "previous-page") {
+                date.setMonth(date.getMonth() - 1);
 
-            selectedDate = target.substring(14, 16).trim();
+            } else if (target.substring(0, 9) === "next-page") {
+                selectedDate = target.substring(10, 12).trim();
 
-            date.setMonth(date.getMonth() - 1);
+                date.setMonth(date.getMonth() + 1);
 
+            } else {
+                selectedDate = target;
+                date.setDate(parseInt(target));
+            }
             selectedTime = "";
-
-            console.log("currently selected: ", target);
-
-        } else if(target.substring(0,9) === "next-page") {
-
-            selectedDate = target.substring(10, 12).trim();
-
-            date.setMonth(date.getMonth() + 1);
-
-            selectedTime = "";
-
-            console.log("currently selected: ", target);
-
-        } else {
-            selectedDate = target;
-            date.setDate(parseInt(target));
-
-            selectedTime = "";
-
-            console.log("currently selected: ", target);
         }
         renderCalendar();
     });
@@ -446,25 +516,44 @@
             selectedTime = selected;
         }
 
-        console.log("Time selected: " + selectedTime);
-
         renderCalendar();
     });
 </script>
 
 <h2>Visits</h2>
 
-<form id="visitForm" ng-submit="$ctrl.submit()">
+<form id="visitForm" ng-submit="$ctrl.submit()" onsubmit="return false;">
+    <!-- Sensitive Action Confirmation Modal -->
+    <div class="visitModal fade" id="confirmationModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmationModalTitle">PLACEHOLDER</h5>
+                    <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p id="confirmationModalBody">PLACEHOLDER</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="confirmationModalDismissButton" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" id="confirmationModalConfirmButton" ng-click="$ctrl.completeFormAction()">Confirm</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="form-group">
-        <label>Practitioner</label>
-        <select id="selectedVet" ng-model="$ctrl.practitionerId" ng-change="$ctrl.loadVetInfo()">
+        <label for="selectedVet">Practitioner</label>
+        <select id="selectedVet" ng-model="$ctrl.practitionerId" ng-change="$ctrl.loadVetInfo();$ctrl.getVisitsForPractitionerIdAndMonth()" required>
+            <option disabled selected value>Please Select A Veterinarian</option>
             <option ng-repeat="p in $ctrl.vets" data-target="{{p.firstName}} {{p.lastName}}" value="{{p.vetId}}">{{p.firstName}} {{p.lastName}}</option>
         </select>
 
         <br>
 
-        <label for="vetPhoneNumber" style="margin-top: 10px">Phone Number:</label>
+        <label for="vetPhoneNumber" style="margin-top: 10px;">Phone Number:</label>
         <input id="vetPhoneNumber" disabled="disabled" style="background-color: #dbd9ce;"/>
 
         <label for="vetEmailAddress">Email Address:</label>
@@ -477,9 +566,22 @@
         <input id="vetWorkdays" disabled="disabled" style="background-color: #dbd9ce;" onchange=selectChanged() />
     </div>
 
-    <div class="form-group" style="margin-top: 6px">
+    <div class="form-group" style="margin-top: 12px">
+        <label for="selectedVisitType">Visit Type:</label>
+        <select id="selectedVisitType" name="selectedVisitType" ng-model="$ctrl.visitType">
+            <option disabled selected value>Please Select A Visit Type</option>
+            <option value="Examinations">Examinations</option>
+            <option value="Injury">Injury</option>
+            <option value="Medical">Medical</option>
+            <option value="Chronic">Chronic</option>
+            <option value="Consultations">Consultations</option>
+            <option value="Operations">Operations</option>
+        </select>
+    </div>
+
+    <div class="form-group" style="margin-top: 4px">
         <label for="date_input">Date</label>
-        <input id="date_input" type="date" class="form-control" ng-model='$ctrl.date'/>
+        <input id="date_input" type="date" class="form-control" ng-model='$ctrl.date' required disabled/>
     </div>
 
     <div class="form-group">
@@ -488,10 +590,14 @@
     </div>
 
     <div class="form-group" style="margin-top: 6px; margin-bottom: 6px">
-        <button id="submit_button" class="btn btn-default" type="submit" style="border: 1px solid gray; border-radius: 4px">Add New Visit</button>
-        <button id="cancel_button" onClick="window.location.reload()" class="btn btn-default" style="visibility: hidden; border: 1px solid gray; border-radius: 4px">Cancel</button>
+        <button id="submit_button" ng-click="$ctrl.showConfirmationModal($event)" class="btn btn-default" type="button" style="border: 1px solid gray; border-radius: 4px">Add New Visit</button>
+        <button id="cancel_button" ng-click="$ctrl.resetForm()" onclick="dateReset()" class="btn btn-default" type="button" style="visibility: hidden; border: 1px solid gray; border-radius: 4px">Cancel</button>
     </div>
 </form>
+
+<!-- Notifications Container-->
+<h3 style="margin-top: 12px">Notifications</h3>
+<div id="alertsContainer" class="form-group"></div>
 
 <h3 style="margin-top: 18px">Upcoming Visits</h3>
 <table class="table">
@@ -507,14 +613,14 @@
     </tr>
     </thead>
     <tbody>
-        <tr ng-repeat="v in $ctrl.upcomingVisits">
+        <tr ng-repeat="v in $ctrl.upcomingVisits" data-index="{{$index}}" data-table-name="upcomingVisits">
             <td class="col-sm-2">{{v.date}}</td>
             <td style="white-space: pre-line">{{v.description}}</td>
             <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>
             <td class="status-text" style="white-space: pre-line">{{$ctrl.getStatus(v.status)}}</td>
-            <td style="text-align:center; vertical-align:middle"><button class="btn btn-default cancel-button" style="background-color: orangered; color: white" ng-click="$ctrl.cancelVisit(v.id, v.status, v.practitionerId, v.date, v.description)">{{$ctrl.setCancelButtonText(v.status)}}</button></td>
-            <td style="text-align:center; vertical-align:middle"><button class="btn btn-default" style="background-color: royalblue; color: white" ng-click="$ctrl.switchToUpdateForm(v.practitionerId, v.date, v.description, v.id)">Edit Visit</button></td>
-            <td style="text-align:center; vertical-align:middle"><button class="btn btn-danger" ng-click="$ctrl.deleteVisit(v.id)">Delete visit</button></td>
+            <td style="text-align:center; vertical-align:middle"><button class="btn btn-default cancel-button" type="button" style="background-color: orangered; color: white" ng-click="$ctrl.showConfirmationModal($event, v.visitId, v.status, v.practitionerId, v.date, v.description)">{{$ctrl.setCancelButtonText(v.status)}}</button></td>
+            <td style="text-align:center; vertical-align:middle"><button class="btn btn-default" type="button" style="background-color: royalblue; color: white" ng-click="$ctrl.switchToUpdateForm($event, v.practitionerId, v.date, v.description, v.visitId, v.status)">Edit Visit</button></td>
+            <td style="text-align:center; vertical-align:middle"><button class="btn btn-danger" type="button" ng-click="$ctrl.showConfirmationModal($event, v.visitId)">Delete visit</button></td>
         </tr>
     </tbody>
 </table>
@@ -523,22 +629,22 @@
 <table class="table">
     <thead>
         <tr>
-            <th> <button class="btn btn-default" id="sortByDateButtonPreviousVisits" ng-click="$ctrl.SortTableByDate(false)" style="color: white">Sort by date ⇅</button> </th>
-            <th> <button class="btn btn-default" id="sortByDescButtonPreviousVisits" ng-click="$ctrl.SortTableByDesc(false)" style="color: white">Sort by description ⇅</button> </th>
-            <th> <button class="btn btn-default" id="sortByVetButtonPreviousVisits" ng-click="$ctrl.SortTableByVet(false)" style="color: white">Sort by veterinarian ⇅</button> </th>
-            <th> <button class="btn btn-default" id="sortByStatusButtonPreviousVisits" ng-click="$ctrl.SortTableByStatus(false)" style="color: white">Sort by status ⇅</button>  </th>
+            <th> <button class="btn btn-default" id="sortByDateButtonPreviousVisits" type="button" ng-click="$ctrl.SortTableByDate(false)" style="color: white">Sort by date ⇅</button> </th>
+            <th> <button class="btn btn-default" id="sortByDescButtonPreviousVisits" type="button" ng-click="$ctrl.SortTableByDesc(false)" style="color: white">Sort by description ⇅</button> </th>
+            <th> <button class="btn btn-default" id="sortByVetButtonPreviousVisits" type="button" ng-click="$ctrl.SortTableByVet(false)" style="color: white">Sort by veterinarian ⇅</button> </th>
+            <th> <button class="btn btn-default" id="sortByStatusButtonPreviousVisits" type="button" ng-click="$ctrl.SortTableByStatus(false)" style="color: white">Sort by status ⇅</button>  </th>
             <th style="text-align:center; vertical-align:middle"> <label>Edit</label> </th>
             <th style="text-align:center; vertical-align:middle"> <label>Delete</label> </th>
         </tr>
     </thead>
     <tbody>
-        <tr ng-repeat="v in $ctrl.previousVisits">
+        <tr ng-repeat="v in $ctrl.previousVisits" data-index="{{$index}}" data-table-name="previousVisits">
             <td class="col-sm-2">{{v.date}}</td>
             <td style="white-space: pre-line">{{v.description}}</td>
             <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>
             <td class="status-text" style="white-space: pre-line">{{$ctrl.getStatus(v.status)}}</td>
-            <td style="text-align:center; vertical-align:middle"><button class="btn btn-default" style="background-color: royalblue; color: white" ng-click="$ctrl.switchToUpdateForm(v.practitionerId, v.date, v.description, v.id)">Edit Visit</button></td>
-            <td style="text-align:center; vertical-align:middle"><button class="btn btn-danger" ng-click="$ctrl.deleteVisit(v.id)">Delete visit</button></td>
+            <td style="text-align:center; vertical-align:middle"><button class="btn btn-default" style="background-color: royalblue; color: white" ng-click="$ctrl.switchToUpdateForm($event, v.practitionerId, v.date, v.description, v.visitId, v.status)">Edit Visit</button></td>
+            <td style="text-align:center; vertical-align:middle"><button class="btn btn-danger" ng-click="$ctrl.showConfirmationModal($event, v.visitId)">Delete visit</button></td>
         </tr>
     </tbody>
 </table>

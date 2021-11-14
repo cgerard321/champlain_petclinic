@@ -129,7 +129,7 @@ table:not(.noColor) {
 }
 
 h2.titleOwner {
-  color: cornflowerblue;
+  color: black;
   font-weight: bold;
   font-size: xxx-large;
   text-align: center;
@@ -153,7 +153,7 @@ p.pet {
 }
 
 #owner, #petForm>div>label, #ownerForm>div>label {
-  color: cornflowerblue;
+  color: black;
   font-weight: bold;
 }
 
@@ -173,13 +173,13 @@ div.pet:not(.marg), div.owner:not(.marg){
 }
 
 #owner.table>tbody>tr:hover{
-   background-color: skyblue;
+   background-color: darkgray;
    color: black;
 }
 
 #owner.table>tbody>tr:nth-child(even):hover{
-  background-color: lightblue;
-  color: cornflowerblue;
+  background-color: darkgray;
+  color: black;
 }
 
 #owner.table>tbody>tr>td {
@@ -188,7 +188,7 @@ div.pet:not(.marg), div.owner:not(.marg){
 }
 
 #owner.table>thead>tr>th {
-  background-color: cornflowerblue;
+  background-color: black;
 }
 
 #bg {

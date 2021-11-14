@@ -1,8 +1,11 @@
 package com.petclinic.visits.presentationlayer;
 
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.petclinic.visits.businesslayer.VisitsService;
 import com.petclinic.visits.datalayer.Visit;
+import com.petclinic.visits.datalayer.VisitDTO;
+import com.petclinic.visits.datalayer.VisitIdLessDTO;
 import io.micrometer.core.annotation.Timed;
 import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +17,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 /*
  * This class is a REST Controller that handles all the requests coming from the API Gateway.
  *
@@ -40,66 +44,72 @@ public class VisitResource {
 
     @PostMapping("owners/*/pets/{petId}/visits")
     @ResponseStatus(HttpStatus.CREATED)
-    public Visit create(
-            @Valid @RequestBody Visit visit,
+    public VisitDTO create(
+            @Valid @RequestBody VisitIdLessDTO visit,
             @PathVariable("petId") int petId) {
 
         visit.setPetId(petId);
-        Visit savedVisit = visitsService.addVisit(visit);
-        log.debug("Saving visit {}", savedVisit);
+        log.debug("Calling VisitService:addVisit for pet with petId: {}", petId);
+        VisitDTO savedVisit = visitsService.addVisit(visit);
         return savedVisit;
     }
 
-
     @DeleteMapping("visits/{visitId}")
-    public void deleteVisit(@PathVariable("visitId") int visitId) {
+    public void deleteVisit(@PathVariable("visitId") String visitId) {
         log.info("Deleting visits with visitId: {}", visitId );
         visitsService.deleteVisit(visitId);
     }
 
-    //This method will return every visits of people that have multiple pets
     @GetMapping("visits/{petId}")
-    public List<Visit> getVisitsForPet(@PathVariable("petId") int petId){
+    public List<VisitDTO> getVisitsForPet(@PathVariable("petId") int petId){
         log.info("Getting visits for pet with petid: {}", petId );
         return visitsService.getVisitsForPet(petId);
     }
 
+    //This method will return one visit based on the visit id
+    @GetMapping("visit/{visitId}")
+    public VisitDTO getVisitByVisitId(@PathVariable("visitId") String visitId){
+        log.info("Getting visit for visit with visitId: {}", visitId);
+        return visitsService.getVisitByVisitId(visitId);
+    }
+
+    //This method will return every visits of people that have multiple pets
     @GetMapping("pets/visits")
     public Visits visitsMultiGet(@RequestParam("petId") List<Integer> petIds) {
-        final List<Visit> byPetIdIn = visitsService.getVisitsForPets(petIds);
+        final List<VisitDTO> byPetIdIn = visitsService.getVisitsForPets(petIds);
         return new Visits(byPetIdIn);
     }
 
-    @PutMapping(value = "owners/*/pets/{petId}/visits/{id}",
+    @PutMapping(value = "owners/*/pets/{petId}/visits/{visitId}",
             consumes = "application/json",
             produces = "application/json")
-    public Visit update(@Valid @RequestBody Visit visit, @PathVariable("petId") int petId, @PathVariable("id") int id) {
-        visit.setId(id);
-        visit.setPetId(petId);
-        log.info("Updating visit {}", visit);
-        return visitsService.updateVisit(visit);
+    public VisitDTO update(@Valid @RequestBody VisitDTO visitDTO, @PathVariable("petId") int petId, @PathVariable("visitId") String visitId) {
+        visitDTO.setVisitId(visitId);
+        visitDTO.setPetId(petId);
+        log.info("Updating visit {}", visitDTO);
+        return visitsService.updateVisit(visitDTO);
     }
 
     @GetMapping("visits/previous/{petId}")
-    public List<Visit> getPreviousVisitsForPet(@PathVariable("petId") int petId){
+    public List<VisitDTO> getPreviousVisitsForPet(@PathVariable("petId") int petId){
         log.debug("Calling VisitsService:getVisitsForPet:previous:petId={}", petId);
         return visitsService.getVisitsForPet(petId, false);
     }
 
     @GetMapping("visits/scheduled/{petId}")
-    public List<Visit> getScheduledVisitsForPet(@PathVariable("petId") int petId){
+    public List<VisitDTO> getScheduledVisitsForPet(@PathVariable("petId") int petId){
         log.debug("Calling VisitsService:getVisitsForPet:scheduled:petId={}", petId);
         return visitsService.getVisitsForPet(petId, true);
     }
 
     @GetMapping("visits/vets/{practitionerId}")
-    public List<Visit> getVisitsForPractitioner(@PathVariable("practitionerId") int practitionerId){
-        log.debug("Calling VisitsService:getVisitDatesForPractitioner:practitionerId={}", practitionerId);
+    public List<VisitDTO> getVisitsForPractitioner(@PathVariable("practitionerId") int practitionerId){
+        log.debug("Calling VisitsService:getVisitsForPractitioner:practitionerId={}", practitionerId);
         return visitsService.getVisitsForPractitioner(practitionerId);
     }
 
     @GetMapping("visits/calendar/{practitionerId}")
-    public List<Visit> getVisitsByPractitionerIdAndMonth(@PathVariable("practitionerId") int practitionerId,
+    public List<VisitDTO> getVisitsByPractitionerIdAndMonth(@PathVariable("practitionerId") int practitionerId,
                                                          @RequestParam("dates") List<String> dates)
                                                          throws ParseException {
 
@@ -112,6 +122,6 @@ public class VisitResource {
 
     @Value
     static class Visits {
-        List<Visit> items;
+        List<VisitDTO> items;
     }
 }

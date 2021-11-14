@@ -1,26 +1,14 @@
 package com.petclinic.vets.datalayer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.vets.utils.exceptions.InvalidInputException;
-import com.petclinic.vets.utils.exceptions.NotFoundException;
-import com.petclinic.vets.utils.http.HttpErrorInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.style.ToStringCreator;
-import org.springframework.web.client.HttpClientErrorException;
-
-import java.io.IOException;
+import java.util.Random;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
-
 public class DataValidation {
-
-
     private static final Logger LOG = LoggerFactory.getLogger(Vet.class);
-
-
 
     public static String verifyFirstName(String firstName){
         String confirmedValue = "";
@@ -121,7 +109,12 @@ public class DataValidation {
 
     public static Integer verifyVetId(int vetId){
         int confirmedValue =0;
-        if(vetId < 1){
+        if (vetId == 0){
+            Random rnd = new Random();
+            int number = rnd.nextInt(999999);
+            confirmedValue = Integer.parseInt(String.format("%06d", number));
+        }
+        else if(vetId < 1){
             throw new InvalidInputException("Vet Id number has an invalid format"+vetId);
         }
         else if(Math.log10(vetId) < 7) {

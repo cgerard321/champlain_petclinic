@@ -1,32 +1,16 @@
 package com.petclinic.vets.datalayer;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.vets.utils.exceptions.InvalidInputException;
-import com.petclinic.vets.utils.exceptions.NotFoundException;
-import com.petclinic.vets.utils.http.GlobalControllerExceptionHandler;
-import com.petclinic.vets.utils.http.HttpErrorInfo;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-
-import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.UniqueElements;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PropertyComparator;
 import org.springframework.core.style.ToStringCreator;
-import org.springframework.web.client.HttpClientErrorException;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.NotNull;
 import javax.xml.bind.annotation.XmlElement;
-import java.io.IOException;
-import java.sql.Blob;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Simple JavaBean domain object representing a veterinarian.
@@ -44,7 +28,6 @@ import java.util.regex.Pattern;
  * Date: October 7th, 2021
  * Implementation: Added field for image file
  * Jira Story: CPC-237
- *
  */
 
 @Entity
@@ -92,7 +75,10 @@ public class Vet {
 
     @Column(name = "is_active")
     private Integer isActive;
-
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
+    @JoinTable(name = "vet_specialties", joinColumns = @JoinColumn(name = "vet_id"),
+            inverseJoinColumns = @JoinColumn(name = "specialty_id"))
+    private Set<Specialty> specialties;
 
     public byte[] getImage() {
         return image;
@@ -100,10 +86,6 @@ public class Vet {
 
     public void setImage(byte[] image) {
         this.image = image;
-    }
-
-    public void setSpecialties(Set<Specialty> specialties) {
-        this.specialties = specialties;
     }
 
     public Integer getIsActive() {
@@ -130,8 +112,7 @@ public class Vet {
         this.email = DataValidation.verifyEmail(email);
     }
 
-    public String getPostNumber()
-    {
+    public String getPostNumber() {
         String postNumber = getPhoneNumber().replaceAll("\\(\\d{3}\\)-\\d{3}-\\d{4}", "");
         return postNumber;
     }
@@ -160,12 +141,6 @@ public class Vet {
     public void setWorkday(String workday) {
         this.workday = DataValidation.verifyWorkday(workday);
     }
-
-
-    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.ALL})
-    @JoinTable(name = "vet_specialties", joinColumns = @JoinColumn(name = "vet_id"),
-            inverseJoinColumns = @JoinColumn(name = "specialty_id"))
-    private Set<Specialty> specialties;
 
     public Integer getId() {
         return id;
@@ -205,6 +180,10 @@ public class Vet {
         return Collections.unmodifiableList(sortedSpecs);
     }
 
+    public void setSpecialties(Set<Specialty> specialties) {
+        this.specialties = specialties;
+    }
+
     public int getNrOfSpecialties() {
         return getSpecialtiesInternal().size();
     }
@@ -214,7 +193,7 @@ public class Vet {
     }
 
     @Override
-    public String toString(){
+    public String toString() {
         return new ToStringCreator(this).append("id", this.getId())
                 .append("firstName", this.getFirstName())
                 .append("lastName", this.getLastName())

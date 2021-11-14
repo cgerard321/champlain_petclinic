@@ -18,6 +18,7 @@ import java.util.*;
  * @author Sam Brannen
  * @author Michael Isvy
  * @author Maciej Szarlinski
+ * @author lpsim
  */
 
 @Entity
@@ -165,6 +166,9 @@ public class Owner {
         getPetsInternal().remove(pet);
     }
 
+    /* OLD ToString -> For some reason,
+       it cannot be tested in this state because it returns a variable that changes each time the test is running
+
     @Override
     public String toString() {
         return new ToStringCreator(this)
@@ -177,5 +181,21 @@ public class Owner {
                 .append("telephone", this.telephone)
                 .toString();
     }
+     */
+
+    @Override
+    public String toString()
+    {
+        String id_str = this.id.toString();
+        String ownerString = "ID: " +
+                id_str + ", First Name: " +
+                this.firstName + ", Last Name: " +
+                this.lastName + ", Address: " +
+                this.address + ", City: " +
+                this.city + ", Telephone: " +
+                this.telephone;
+        return ownerString;
+    }
+
 }
 

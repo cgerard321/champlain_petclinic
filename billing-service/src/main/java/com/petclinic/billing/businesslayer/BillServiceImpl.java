@@ -11,6 +11,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 
 @Service
 public class BillServiceImpl implements BillService{
@@ -45,14 +46,27 @@ public class BillServiceImpl implements BillService{
     }
 
     @Override
+    public List<BillDTO> GetAllBills() {
+        List<Bill> bills = billRepository.findAll();
+        List<BillDTO> dtos = billMapper.ListEntityToListModel(bills);
+
+        return dtos;
+    }
+
+    @Override
     public BillDTO CreateBill(BillDTO model) {
         if(model.getBillId() <= 0) {
             throw new InvalidInputException("That bill id does not exist");
         }
 
+        HashMap<String, Double> list = setUpVisitList();
+
+        if(list.get(model.getVisitType()) == null){
+            throw new InvalidInputException("That visit type does not exist");
+        }
+
         try{
             Bill entity = billMapper.ModelToEntity(model);
-            HashMap<String, Double> list = setUpVisitList();
             entity.setAmount(list.get(entity.getVisitType()));
             Bill newEntity = billRepository.save(entity);
 
@@ -70,5 +84,19 @@ public class BillServiceImpl implements BillService{
     public void DeleteBill(int billId) {
         LOG.debug("Delete for bill ID: {}", billId);
         billRepository.findById(billId).ifPresent(entity -> billRepository.delete(entity));
+    }
+
+    @Override
+    public List<BillDTO> GetBillByCustomerId(int customerId) {
+
+            List<Bill> bills = billRepository.findByCustomerId(customerId);
+
+            List<BillDTO> response = billMapper.EntityListToModelList(bills);
+
+            if(response.isEmpty()){
+                throw new NotFoundException("No bill found for customerId: " + customerId);
+            }
+            return response;
+
     }
 }

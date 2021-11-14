@@ -1,5 +1,7 @@
 package com.petclinic.bffapigateway.dtos;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,9 +12,11 @@ import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder(toBuilder = true)
 public class VisitDetails {
 
-    private Integer id = null;
+    private String visitId = null;
 
     private Integer petId = null;
 

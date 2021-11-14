@@ -4,49 +4,72 @@ angular.module('petForm')
     .controller('PetFormController', ['$http', '$state', '$stateParams', function ($http, $state, $stateParams) {
         var self = this;
         var ownerId = $stateParams.ownerId || 0;
+        var method = $stateParams.method;
+        var petId = $stateParams.petId || 0;
+        var owner = "";
+        var myDate = new Date();
+      
+        $http.get('api/gateway/owners/' + ownerId).then(function (resp){
+            owner = resp.data.firstName + " " + resp.data.lastName;
+        })
 
-        $http.get('api/customer/petTypes').then(function (resp) {
+        $http.get('api/gateway/owners/petTypes').then(function (resp) {
             self.types = resp.data;
+            console.log(self.types);
         }).then(function () {
+            if(method == 'delete')
+                $http.get('api/gateway/owners/' + ownerId + "/pets/" + petId).then(function (resp) {
+                    myDate = new Date(Date.parse(resp.data.birthDate))
+                    self.petType = {
+                        id: resp.data.type.id,
+                        name: resp.data.type.name
+                    }
 
-            var petId = $stateParams.petId || 0;
-
-            if (petId) { // edit
-                $http.get("api/gateway/customer/owners/" + ownerId + "/pets/" + petId).then(function (resp) {
-                    self.pet = resp.data;
-                    self.pet.birthDate = new Date(self.pet.birthDate);
-                    self.petTypeId = "" + self.pet.type.id;
-                });
-            } else {
-                $http.get('api/gateway/customer/owners/' + ownerId).then(function (resp) {
                     self.pet = {
-                        owner: resp.data.firstName + " " + resp.data.lastName
-                    };
-                    self.petTypeId = "1";
-                })
+                        owner: owner,
+                        name: resp.data.name,
+                        birthDate: myDate,
+                        type: self.petType
+                    }
 
-            }
+                    self.checked = true
+                    /*console.log(self.pet);
+                    console.log(self.pet.type);*/
+                })
+            else
+                $http.get('api/gateway/owners/' + ownerId).then(function (resp) {
+                    self.pet = {
+                        owner: owner
+                    }
+
+                    self.checked = false
+                })
         });
 
         self.submit = function () {
-            var id = self.pet.id || 0;
-
-            var data = {
-                id: id,
-                name: self.pet.name,
-                birthDate: self.pet.birthDate,
-                typeId: self.petTypeId
-            };
-
-            var req;
-            if (id) {
-                req = $http.put("api/gateway/customer/owners/" + ownerId + "/pets/" + id, data);
-            } else {
-                req = $http.post("api/gateway/customer/owners/" + ownerId + "/pets", data);
+            var petType = {
+                id: self.pet.type   ,
+                name: self.pet.type.name
             }
 
+            /*console.log(temp)*/
+            var data = {
+                id: petId,
+                name: self.pet.name,
+                birthDate: self.pet.birthDate,
+                owner: ownerId,
+                type: petType
+            }
+            /*console.log(data);*/
+            var req;
+
+            if(method != 'delete')
+                req = $http.post("api/gateway/owners/" + ownerId + "/pets", data);
+            else
+                req = $http.delete("api/gateway/owners/" + ownerId + "/pets/" + petId, data);
+
             req.then(function () {
-                $state.go("owners", {ownerId: ownerId});
+                $state.go('ownerDetails', {ownerId: ownerId})
             }, function (response) {
                 var error = response.data;
                 error.errors = error.errors || [];

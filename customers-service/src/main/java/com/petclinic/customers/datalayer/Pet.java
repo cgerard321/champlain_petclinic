@@ -14,11 +14,12 @@ import java.util.Date;
  * @author Juergen Hoeller
  * @author Sam Brannen
  * @author Maciej Szarlinski
+ * @author lpsim
  */
 
 @Entity
 @Table(name = "pets")
-public class Pet {
+public class    Pet {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -78,18 +79,21 @@ public class Pet {
     public void setOwner(final Owner owner) {
         this.owner = owner;
     }
-
+    
     @Override
-    public String toString() {
-        return new ToStringCreator(this)
-                .append("id", this.getId())
-                .append("name", this.getName())
-                .append("birthDate", this.getBirthDate())
-                .append("type", this.getType().getName())
-                .append("ownerFirstname", this.getOwner().getFirstName())
-                .append("ownerLastname", this.getOwner().getLastName())
-                .toString();
+    public String toString()
+    {
+        String id_str = this.id.toString();
+        String petString = "ID: " +
+                id_str + ", Name: " +
+                this.name + ", Birth of date: " +
+                this.birthDate + ", Type: " +
+                this.type.getName() + ", Owner - First name: " +
+                this.owner.getFirstName() + ", Last name: " +
+                this.owner.getLastName();
+        return petString;
     }
+
 
 }
 

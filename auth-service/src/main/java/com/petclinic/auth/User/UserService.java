@@ -35,6 +35,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.List;
 
 public interface UserService {
 
@@ -47,6 +48,8 @@ public interface UserService {
 
     Page<User> findAll(PageRequest of);
 
+    List<User> findAllWithoutPage();
+
     void deleteUser(long id);
 
     Mail generateVerificationMail(User user);
@@ -54,5 +57,6 @@ public interface UserService {
     UserPasswordLessDTO verifyEmailFromToken(String token);
 
     UserTokenPair login(UserIDLessRoleLessDTO user) throws IncorrectPasswordException;
+
     User getUserByEmail(String email) throws NotFoundException;
 }
