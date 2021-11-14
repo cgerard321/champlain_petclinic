@@ -60,6 +60,7 @@ public class OwnerServiceImpl implements OwnerService {
         }
         catch (Exception e)
         {
+            System.out.println(e.getMessage());
            throw new NotFoundException("updateOwner failed, owner with id: " + id + " not found.");
        }
     }

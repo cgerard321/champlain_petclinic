@@ -1,3 +1,12 @@
+const catcher501 = (req) =>
+    req.return(
+        501,
+        JSON.stringify({
+            message: err.message,
+            timestamp: new Date().toISOString(),
+        })
+    );
+
 function aggregation(req) {
     req.headersOut["Content-Type"] = "application/json;charset=UTF-8";
 
@@ -7,7 +16,7 @@ function aggregation(req) {
             const owners = JSON.parse(res.responseText);
             for (let i = 0; i < owners.length; i++) {
                 const petIds = owners[i].pets.map((pet) => pet.id);
-                const cI = i;
+                const cI = i; // TODO: Fix extremely hacky to ensure the index is kept in scope
                 all.push(
                     // TODO: Probably better to use a pool...
                     Promise.all(
@@ -65,19 +74,17 @@ function singleAggregationGET(req) {
                     req.return(200, JSON.stringify(owner));
                 });
         })
-        .catch((err) => {
-            req.return(
-                501,
-                JSON.stringify({
-                    message: err.message,
-                    timestamp: new Date().toISOString(),
-                })
-            );
-        });
+        .catch(catcher501);
 }
 
 function singleAggregationPUT(req) {
-    req.return(200, JSON.stringify({ hihi: "hihi" }));
+    const id = req.uri.split`/`.pop();
+    req.subrequest(`/proxy/owners/${id}`, {
+        method: "PUT",
+        body: req.requestText,
+    })
+        .then((res) => req.return(res.status, res.responseText))
+        .catch(catcher501);
 }
 
 function singleAggregation(req) {
