@@ -41,11 +41,35 @@ function aggregation(req) {
         });
 }
 
+/**
+ *
+ * @param {Number} id - Pet id
+ * @param {Object} req - NJS Request object
+ */
+function getAllVisitsFor(id, req) {
+    return req.subrequest(`/proxy/visits/${id}`).then((res) => {
+        let visits = [];
+
+        if (res.status === 200) {
+            visits = JSON.parse(res.responseText);
+        }
+
+        return visits;
+    });
+}
+
 function singleAggregationGET(req) {
     const id = req.uri.split`/`.pop();
     req.subrequest(`/proxy/owners/${id}`)
         .then((res) => {
-            req.return(200, "Done");
+            const owner = JSON.parse(res.responseText);
+            const petIds = owner.pets.map((pet) => pet.id);
+            Promise.all(petIds.map((n) => getAllVisitsFor(n, req)))
+                .then((visits) => visits.reduce((a, b) => a.concat(b), [])) // Array.flat is not implemented
+                .then((visits) => {
+                    owner.visits = visits;
+                    req.return(200, JSON.stringify(owner));
+                });
         })
         .catch((err) => {
             req.return(
