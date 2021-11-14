@@ -54,6 +54,7 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -265,6 +266,7 @@ public class AuthServiceUserControllerTests {
     }
 
     @Test
+    @WithMockUser
     public void  get_user() throws Exception {
 
         final long ID = 123;
@@ -279,6 +281,7 @@ public class AuthServiceUserControllerTests {
     }
 
     @Test
+    @WithMockUser
     public void  reset_password() throws Exception {
 
         User entity = new User("Username", "password", "email@gmail.com");
@@ -303,6 +306,7 @@ public class AuthServiceUserControllerTests {
     }
 
     @Test
+    @WithMockUser
     @DisplayName("When POST on users endpoint with valid data, allow any")
     void allow_any_on_users() throws Exception {
 
@@ -434,6 +438,7 @@ public class AuthServiceUserControllerTests {
     }
 
     @Test
+    @WithMockUser
     @DisplayName("Given non-registered exception, then rethrow")
     void duplicate_email_climb_non_registered() throws Exception {
 
@@ -468,6 +473,7 @@ public class AuthServiceUserControllerTests {
     }
 
     @Test
+    @WithMockUser
     @DisplayName("Given unsatisfactory password, return sensical message and 400 status code")
     void bad_password_response() throws Exception {
 
@@ -494,6 +500,7 @@ public class AuthServiceUserControllerTests {
     }
 
     @Test
+    @WithMockUser
     @DisplayName("given a user with a invalid id exist, then throw Unprocessable Entity")
     void get_user_with_invalid_id() throws Exception {
 
@@ -511,6 +518,7 @@ public class AuthServiceUserControllerTests {
     }
 
     @Test
+    @WithMockUser
     @DisplayName("given a user with an id not found exist, then throw Not Found")
     void get_user_with_id_not_found() throws Exception {
 
@@ -526,6 +534,7 @@ public class AuthServiceUserControllerTests {
     }
 
     @Test
+    @WithMockUser
     @DisplayName("given a list of users with valid ids, then return a list of users with those ids")
     void get_all_users() throws Exception {
 
@@ -543,6 +552,7 @@ public class AuthServiceUserControllerTests {
     }
 
     @Test
+    @WithMockUser
     @DisplayName("given a page of users with valid ids, then return list of pageable users with those ids")
     void get_all_users_with_page() throws Exception {
 
