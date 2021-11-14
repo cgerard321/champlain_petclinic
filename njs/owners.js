@@ -7,9 +7,7 @@ const catcher501 = (req) =>
         })
     );
 
-function aggregation(req) {
-    req.headersOut["Content-Type"] = "application/json;charset=UTF-8";
-
+function aggregationGET(req) {
     req.subrequest(`/proxy/owners`)
         .then((res) => {
             const all = [];
@@ -33,15 +31,23 @@ function aggregation(req) {
                 req.return(200, JSON.stringify(owners));
             });
         })
-        .catch((err) => {
-            req.return(
-                501,
-                JSON.stringify({
-                    message: err.message,
-                    timestamp: new Date().toISOString(),
-                })
-            );
-        });
+        .catch(catcher501);
+}
+
+function aggregation(req) {
+    req.headersOut["Content-Type"] = "application/json;charset=UTF-8";
+    switch (req.method) {
+        case "GET":
+            aggregationGET(req);
+            break;
+        default:
+            req.subrequest(`/proxy/owners`, {
+                method: req.method,
+                body: req.requestText,
+            }).then((res) => {
+                req.return(res.status, res.responseText);
+            });
+    }
 }
 
 /**
