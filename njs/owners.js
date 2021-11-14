@@ -41,4 +41,45 @@ function aggregation(req) {
         });
 }
 
-export default { aggregation };
+function singleAggregationGET(req) {
+    const id = req.uri.split`/`.pop();
+    req.subrequest(`/proxy/owners/${id}`)
+        .then((res) => {
+            req.return(200, res.responseText);
+        })
+        .catch((err) => {
+            req.return(
+                501,
+                JSON.stringify({
+                    message: err.message,
+                    timestamp: new Date().toISOString(),
+                })
+            );
+        });
+}
+
+function singleAggregationPUT(req) {
+    req.return(200, JSON.stringify({ hihi: "hihi" }));
+}
+
+function singleAggregation(req) {
+    req.headersOut["Content-Type"] = "application/json;charset=UTF-8";
+    switch (req.method) {
+        case "GET":
+            singleAggregationGET(req);
+            break;
+        case "PUT":
+            singleAggregationPUT(req);
+            break;
+        default:
+            req.return(
+                405,
+                JSON.stringify({
+                    message: `Method ${req.method} not allowed`,
+                    timestamp: new Date().toISOString(),
+                })
+            );
+    }
+}
+
+export default { aggregation, singleAggregation };
