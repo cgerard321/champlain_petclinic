@@ -11,18 +11,12 @@ function aggregation(req) {
                 all.push(
                     // TODO: Probably better to use a pool...
                     Promise.all(
-                        petIds.map((petId) =>
-                            req
-                                .subrequest(`/proxy/visits/${petId}`)
-                                .then((vRes) => {
-                                    let visits = [];
-                                    if (vRes.status === 200) {
-                                        visits = JSON.parse(vRes.responseText);
-                                    }
-                                    owners[cI].visits = visits;
-                                })
-                        )
+                        petIds.map((petId) => getAllVisitsFor(petId, req))
                     )
+                        .then((visits) =>
+                            visits.reduce((a, b) => a.concat(b), [])
+                        )
+                        .then((visits) => (owners[cI].visits = visits))
                 );
             }
 
