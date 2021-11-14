@@ -45,7 +45,7 @@ function singleAggregationGET(req) {
     const id = req.uri.split`/`.pop();
     req.subrequest(`/proxy/owners/${id}`)
         .then((res) => {
-            req.return(200, res.responseText);
+            req.return(200, "Done");
         })
         .catch((err) => {
             req.return(
