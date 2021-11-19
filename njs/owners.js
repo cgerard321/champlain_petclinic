@@ -93,6 +93,15 @@ function singleAggregationPUT(req) {
         .catch(catcher501);
 }
 
+function justProxy(req, url) {
+    req.subrequest(url, {
+        method: req.method,
+        body: req.requestText,
+    })
+        .then((res) => req.return(res.status, res.responseText))
+        .catch(catcher501);
+}
+
 function singleAggregation(req) {
     req.headersOut["Content-Type"] = "application/json;charset=UTF-8";
     switch (req.method) {
@@ -100,7 +109,8 @@ function singleAggregation(req) {
             singleAggregationGET(req);
             break;
         case "PUT":
-            singleAggregationPUT(req);
+        case "DELETE":
+            justProxy(req, `/proxy/owners/${req.uri.split`/`.pop()}`);
             break;
         default:
             req.return(
