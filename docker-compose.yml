@@ -224,11 +224,3 @@ services:
             interval: 10s
             timeout: 5s
             retries: 10
-    # bff:
-    #     build: bff
-    #     hostname: bff
-    #     ports:
-    #         - "1337:1337"
-    #     environment:
-    #         - NODE_ENV=development
-    #         - INGRESS_URL=http://janus
