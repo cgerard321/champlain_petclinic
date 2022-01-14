@@ -2,7 +2,11 @@
 	import { createForm } from 'svelte-forms-lib';
 	import * as yup from 'yup';
 
-	const { form, errors, handleChange, handleSubmit } = createForm({
+	let status: {
+		message: string;
+		isError: boolean;
+	} = null;
+	const { form, errors, handleChange, handleSubmit, isSubmitting } = createForm({
 		initialValues: {
 			email: '',
 			password: ''
@@ -11,10 +15,34 @@
 			email: yup.string().required(),
 			password: yup.string().required()
 		}),
-		onSubmit: (values) => {
-			console.log(values);
+		onSubmit: async (values: { email: string; password: string }) => {
+			const [statusCode, body] = await doSubmit(values);
+			if (statusCode === 401 || statusCode === 403) {
+				status = { isError: true, message: 'Invalid login' };
+			} else if (statusCode !== 200) {
+				status = { isError: true, message: 'Something went wrong' };
+			} else {
+				status = { isError: false, message: 'Success' };
+			}
 		}
 	});
+
+	async function doSubmit({
+		email,
+		password
+	}: {
+		email: string;
+		password: string;
+	}): Promise<[number, any]> {
+		const res = await fetch('/api/login', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify({ email, password })
+		});
+		return [res.status, await res.json()];
+	}
 </script>
 
 <div class="flex flex-col h-full justify-center">
@@ -27,6 +55,11 @@
 				<div class="font-semibold bg-base-300 text-primary-focus py-3 px-6 mb-0">Login</div>
 
 				<div class="p-6 flex-grow flex flex-col justify-evenly">
+					{#if status}
+						<div class="text-center mb-4" class:text-error={status.isError}>
+							{status.message}
+						</div>
+					{/if}
 					<div class="form-control">
 						<label class="label-form" for="email">
 							<span>Email</span>
