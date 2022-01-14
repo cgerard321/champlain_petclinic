@@ -5,7 +5,10 @@ const { parse } = require("cookie");
 const proxy = hProxy.createProxyServer();
 
 proxy.on("proxyReq", (proxyReq, req, res, options) => {
-    proxyReq.setHeader("Authorization", getAuthHeader(req).Authorization);
+    const authHeader = getAuthHeader(req).Authorization;
+    if (authHeader) {
+        proxyReq.setHeader("Authorization", authHeader);
+    }
 });
 
 http.createServer((req, res) => {
