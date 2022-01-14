@@ -1,0 +1,11 @@
+{
+    "name": "bff",
+    "author": "Fube",
+    "version": "1.0.0",
+    "main": "index.js",
+    "license": "MIT",
+    "dependencies": {
+        "cookie": "^0.4.1",
+        "http-proxy": "^1.18.1"
+    }
+}
