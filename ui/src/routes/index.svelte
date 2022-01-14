@@ -1,13 +1,28 @@
 <script lang="ts">
-	let email: string = '';
-	let password: string = '';
+	import { createForm } from 'svelte-forms-lib';
+	import * as yup from 'yup';
+
+	const { form, errors, handleChange, handleSubmit } = createForm({
+		initialValues: {
+			email: '',
+			password: ''
+		},
+		validationSchema: yup.object().shape({
+			email: yup.string().required(),
+			password: yup.string().required()
+		}),
+		onSubmit: (values) => {
+			console.log(values);
+		}
+	});
 </script>
 
 <div class="flex flex-col h-full justify-center">
 	<div class="flex justify-center">
 		<div class="w-1/6">
-			<div
-				class="flex flex-col break-words bg-base-200 border-base-200 border-2 rounded shadow-md md:h-[36vh]"
+			<form
+				class="flex flex-col break-words bg-base-200 border-base-200 border-2 rounded shadow-md md:m-h-[36vh]"
+				on:submit|preventDefault={handleSubmit}
 			>
 				<div class="font-semibold bg-base-300 text-primary-focus py-3 px-6 mb-0">Login</div>
 
@@ -20,9 +35,13 @@
 								class="input-form"
 								type="text"
 								name="email"
-								bind:value={email}
+								on:change={handleChange}
+								bind:value={$form.email}
 							/>
 						</label>
+						{#if $errors.email}
+							<div class="error-message">{$errors.email}</div>
+						{/if}
 					</div>
 
 					<div class="form-control mt-6">
@@ -33,12 +52,18 @@
 								class="input-form"
 								type="password"
 								name="password"
-								bind:value={password}
+								on:change={handleChange}
+								bind:value={$form.password}
 							/>
 						</label>
+						{#if $errors.password}
+							<div class="error-message">{$errors.password}</div>
+						{/if}
 					</div>
+
+					<button class="btn btn-primary mt-6">Login</button>
 				</div>
-			</div>
+			</form>
 		</div>
 	</div>
 </div>
@@ -50,5 +75,9 @@
 
 	.input-form {
 		@apply input input-bordered input;
+	}
+
+	.error-message {
+		@apply text-error text-sm italic mt-2;
 	}
 </style>
