@@ -11,23 +11,7 @@ const config = {
 		adapter: adapter(),
 
 		// hydrate the <div id="svelte"> element in src/app.html
-		target: '#svelte',
-
-		vite: {
-			server: {
-				proxy: {
-					'/api/login': {
-						target: `${process.env.API_URL}/login`,
-						changeOrigin: true
-					},
-					'/api': {
-						target: process.env.API_URL,
-						changeOrigin: true,
-						rewrite: (path) => path.replace(/^\/api/, '')
-					}
-				}
-			}
-		}
+		target: '#svelte'
 	}
 };
 
