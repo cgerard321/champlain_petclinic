@@ -500,7 +500,7 @@ cssesc@^3.0.0:
   resolved "https://registry.yarnpkg.com/cssesc/-/cssesc-3.0.0.tgz#37741919903b868565e1c09ea747445cd18983ee"
   integrity sha512-/Tb/JcjK111nNScGob5MNtsntNM1aCNUDipB/TkwZFhyDrrE47SOx/18wF2bbjgc3ZzCSKW1T5nt5EbFoAz/Vg==
 
-daisyui@^1.22.0:
+daisyui@^1.22.2:
   version "1.22.2"
   resolved "https://registry.yarnpkg.com/daisyui/-/daisyui-1.22.2.tgz#4726290da87ec4a742bf7c934c5634c7a7136e96"
   integrity sha512-uaG7JC2wOEbcZT6mzODlfUjA0XOsCGcmJTda6qhdlYSaPoJDi9u87sfT64Hh8CNA1eeKpCm9xGt2WAWUcwqzIQ==
