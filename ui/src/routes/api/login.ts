@@ -1,5 +1,4 @@
 import type { RequestHandler } from '@sveltejs/kit';
-import type { JSONValue } from '@sveltejs/kit/types/helper';
 import { serialize } from 'cookie';
 
 type PostBody = {
