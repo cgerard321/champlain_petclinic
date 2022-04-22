@@ -19,10 +19,7 @@ const config = {
 					'/api': {
 						target: process.env.API_URL,
 						changeOrigin: true,
-						rewrite: (path) => {
-							console.log('pain');
-							return path.replace(/^\/api/, '/api/gateway');
-						}
+						rewrite: (path) => path.replace(/^\/api/, '/api/gateway')
 					}
 				}
 			}
