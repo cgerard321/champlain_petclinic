@@ -34,7 +34,7 @@
 		email: string;
 		password: string;
 	}): Promise<[number, any]> {
-		const res = await fetch('/api/login', {
+		const res = await fetch('/login', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
