@@ -4,8 +4,8 @@ services:
         ports:
             - "80:80"
         volumes:
-            - ./nginx.conf:/etc/nginx/nginx.conf:ro
-            - ./njs:/etc/nginx/njs
+            - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+            - ./nginx/njs:/etc/nginx/njs
 
     visits:
         build: visits-service
