@@ -15,3 +15,22 @@ interface TableColumn<T> {
 	headerClass?: string;
 	renderComponent?: SvelteComponent;
 }
+
+interface Specialty {
+	id: number;
+	specialtyId: number;
+	name: string;
+}
+
+interface Vet {
+	specialties: Specialty[];
+	vetId: number;
+	firstName: string;
+	lastName: string;
+	email: string;
+	phoneNumber: string;
+	image: string | null;
+	resume: string;
+	workday: string;
+	isActive: number;
+}
