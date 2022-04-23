@@ -38,6 +38,7 @@
     },
     "type": "module",
     "dependencies": {
-        "daisyui": "^1.22.2"
+        "daisyui": "^1.22.2",
+        "svelte-table": "^0.3.4"
     }
 }
