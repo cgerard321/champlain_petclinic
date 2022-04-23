@@ -1,4 +1,6 @@
 <script lang="ts">
+	import authService from '$lib/services/auth';
+
 	import { createForm } from 'svelte-forms-lib';
 	import * as yup from 'yup';
 
@@ -16,33 +18,15 @@
 			password: yup.string().required()
 		}),
 		onSubmit: async (values: { email: string; password: string }) => {
-			const [statusCode, body] = await doSubmit(values);
-			if (statusCode === 401 || statusCode === 403) {
-				status = { isError: true, message: 'Invalid login' };
-			} else if (statusCode !== 200) {
-				status = { isError: true, message: 'Something went wrong' };
-			} else {
-				status = { isError: false, message: 'Success' };
-			}
+			const [statusCode, , message] = await authService.login(values);
+			const isError = statusCode > 399;
+
+			status = {
+				isError,
+				message
+			};
 		}
 	});
-
-	async function doSubmit({
-		email,
-		password
-	}: {
-		email: string;
-		password: string;
-	}): Promise<[number, any]> {
-		const res = await fetch('/login', {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			body: JSON.stringify({ email, password })
-		});
-		return [res.status, await res.json()];
-	}
 </script>
 
 <div class="flex flex-col h-full justify-center">
