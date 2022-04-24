@@ -1,5 +1,8 @@
 <script lang="ts">
+	import DeleteButton from '$lib/components/DeleteButton.svelte';
+
 	import Table from '$lib/components/Table.svelte';
+	import { SvelteComponent } from 'svelte';
 
 	interface Thing {
 		id: number;
@@ -8,7 +11,7 @@
 		pet: string;
 	}
 
-	const rows = [
+	let rows = [
 		{ id: 1, first_name: 'Marilyn', last_name: 'Monroe', pet: 'dog' },
 		{ id: 2, first_name: 'Abraham', last_name: 'Lincoln', pet: 'dog' },
 		{ id: 3, first_name: 'Mother', last_name: 'Teresa', pet: '' },
@@ -109,6 +112,24 @@
 			renderValue: (v) => v.pet.charAt(0).toUpperCase() + v.pet.substring(1), // capitalize
 			sortable: true,
 			filterOptions: ['bird', 'cat', 'dog'] // provide array
+		},
+		{
+			key: 'actions',
+			title: 'Actions',
+			value: (v) => v.id,
+			renderComponent: {
+				component: DeleteButton,
+				props: {
+					onClick(row: Thing) {
+						//console.log(row);
+
+						// Delete from rows
+						const index = rows.findIndex((r) => r.id === row.id);
+						if (index > -1) rows = [...rows.slice(0, index), ...rows.slice(index + 1)];
+						// console.log(index);
+					}
+				}
+			}
 		}
 	];
 </script>

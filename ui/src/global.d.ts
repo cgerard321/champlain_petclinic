@@ -1,6 +1,11 @@
 /// <reference types="@sveltejs/kit" />
 /// <reference types="svelte" />
 
+interface DynamicSvelteComponent {
+	component: SvelteComponent;
+	props: Record<string, unknown>;
+}
+
 interface TableColumn<T> {
 	key: string;
 	title: string;
@@ -13,7 +18,7 @@ interface TableColumn<T> {
 	headerFilterClass?: string;
 	renderValue?: (v: T) => T[keyof T];
 	headerClass?: string;
-	renderComponent?: SvelteComponent;
+	renderComponent?: SvelteComponent | DynamicSvelteComponent;
 }
 
 interface Specialty {
