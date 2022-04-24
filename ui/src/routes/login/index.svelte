@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+
 	import authService from '$lib/services/auth';
 
 	import { createForm } from 'svelte-forms-lib';
@@ -27,6 +29,13 @@
 			};
 		}
 	});
+
+	$: {
+		if (status?.isError === false) {
+			// redirect to home
+			goto('/');
+		}
+	}
 </script>
 
 <div class="flex flex-col h-full justify-center">

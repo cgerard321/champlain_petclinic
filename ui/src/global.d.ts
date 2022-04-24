@@ -34,3 +34,16 @@ interface Vet {
 	workday: string;
 	isActive: number;
 }
+
+interface Role {
+	id: number;
+	name: string;
+	parent: Role;
+}
+
+interface User {
+	id: number;
+	username: string;
+	email: string;
+	roles: Role[];
+}
