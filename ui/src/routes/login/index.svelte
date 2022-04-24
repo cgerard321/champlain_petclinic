@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 
 	import authService from '$lib/services/auth';
+	import { user } from '$lib/stores/auth';
 
 	import { createForm } from 'svelte-forms-lib';
 	import * as yup from 'yup';
@@ -20,8 +21,12 @@
 			password: yup.string().required()
 		}),
 		onSubmit: async (values: { email: string; password: string }) => {
-			const [statusCode, , message] = await authService.login(values);
+			const [statusCode, body, message] = await authService.login(values);
 			const isError = statusCode > 399;
+
+			if (isError === false) {
+				user.set(body as User);
+			}
 
 			status = {
 				isError,

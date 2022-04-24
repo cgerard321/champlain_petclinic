@@ -4,7 +4,7 @@ async function login({
 }: {
 	email: string;
 	password: string;
-}): Promise<[number, unknown, string]> {
+}): Promise<[number, User | GenericError, string]> {
 	const res = await fetch('/login', {
 		method: 'POST',
 		headers: {

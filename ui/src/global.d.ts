@@ -47,3 +47,9 @@ interface User {
 	email: string;
 	roles: Role[];
 }
+
+interface GenericError {
+	statusCode: number;
+	message: string;
+	timestamp: string;
+}
