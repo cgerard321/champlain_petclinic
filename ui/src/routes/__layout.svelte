@@ -8,7 +8,10 @@
 
 		if (url.pathname === '/login' || isLoggedIn === true) {
 			return {
-				status: 200
+				status: 200,
+				props: {
+					isLoggedIn: true
+				}
 			};
 		}
 
@@ -19,7 +22,37 @@
 	}
 </script>
 
-<Nav />
+<script lang="ts">
+	export let isLoggedIn: boolean;
+
+	const pages: NavItem[] = [
+		{
+			text: 'Home',
+			href: '/'
+		}
+	];
+	const authPages: NavItem[] = [];
+
+	if (isLoggedIn) {
+		authPages.push({
+			text: 'Logout',
+			href: '/logout'
+		});
+	} else {
+		authPages.push(
+			{
+				text: 'Login',
+				href: '/login'
+			},
+			{
+				text: 'Register',
+				href: '/register'
+			}
+		);
+	}
+</script>
+
+<Nav {pages} {authPages} />
 <slot />
 
 <style global lang="postcss">
