@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { user } from '$lib/stores/auth';
 	import authClient from '$lib/clients/auth';
 
 	import { createForm } from 'svelte-forms-lib';
@@ -22,10 +21,6 @@
 		onSubmit: async (values: { email: string; password: string }) => {
 			const { status: statusCode, body, message } = await authClient.login(values);
 			const isError = statusCode > 399;
-
-			if (isError === false) {
-				user.set(body as User);
-			}
 
 			status = {
 				isError,

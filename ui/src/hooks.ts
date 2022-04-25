@@ -8,7 +8,7 @@ const doHandle: Handle = async function handle({ request, resolve }) {
 
 	const hasTokenCookie: boolean = token !== undefined;
 	request.locals['isLoggedIn'] = hasTokenCookie;
-	request.locals['user'] = user;
+	request.locals['user'] = JSON.parse(user);
 
 	return resolve(request);
 };
