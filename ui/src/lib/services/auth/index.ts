@@ -36,13 +36,6 @@ async function login({
 	};
 }
 
-async function logout(): Promise<Response> {
-	return fetch('/logout', {
-		method: 'DELETE'
-	});
-}
-
 export default {
-	login,
-	logout
+	login
 };

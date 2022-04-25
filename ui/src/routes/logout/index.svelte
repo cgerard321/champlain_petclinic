@@ -1,20 +1,18 @@
 <script context="module" lang="ts">
 	import { user } from '$lib/stores/auth';
-	import authService from '$lib/services/auth';
+	import authClient from '$lib/clients/auth';
 	import { goto } from '$app/navigation';
 
 	export async function load() {
-		const { status } = await authService.logout();
+		const { status } = await authClient.logout();
 
 		if (status < 400) {
+			console.log('user set to null');
 			user.set(null);
 		}
 
 		return {
-			status,
-			props: {
-				isLoggedIn: false
-			}
+			status
 		};
 	}
 </script>

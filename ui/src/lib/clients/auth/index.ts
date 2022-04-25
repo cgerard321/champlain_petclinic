@@ -21,6 +21,13 @@ async function login({
 	return body as Omit<LoginResponse, 'token'>;
 }
 
+async function logout(): Promise<Response> {
+	return fetch('/logout', {
+		method: 'DELETE'
+	});
+}
+
 export default {
-	login
+	login,
+	logout
 };
