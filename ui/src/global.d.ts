@@ -58,3 +58,8 @@ interface GenericError {
 	message: string;
 	timestamp: string;
 }
+
+interface NavItem {
+	text: string;
+	href: string;
+}

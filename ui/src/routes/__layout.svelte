@@ -1,4 +1,6 @@
 <script context="module" lang="ts">
+	import Nav from '$lib/components/Nav.svelte';
+
 	import type { LoadInput } from '@sveltejs/kit';
 
 	export async function load({ url, session }: LoadInput) {
@@ -17,7 +19,7 @@
 	}
 </script>
 
-<h1>Hihi</h1>
+<Nav />
 <slot />
 
 <style global lang="postcss">
