@@ -1,5 +1,8 @@
 <script lang="ts">
+	import { browser } from '$app/env';
+
 	import { goto } from '$app/navigation';
+	import { session } from '$app/stores';
 	import authClient from '$lib/clients/auth';
 
 	import { createForm } from 'svelte-forms-lib';
@@ -22,6 +25,14 @@
 			const { status: statusCode, body, message } = await authClient.login(values);
 			const isError = statusCode > 399;
 
+			if (!isError) {
+				session.update((store) => ({
+					...store,
+					user: body,
+					isLoggedIn: true
+				}));
+			}
+
 			status = {
 				isError,
 				message
@@ -29,13 +40,13 @@
 		}
 	});
 
-	$: {
-		if (status?.isError === false) {
-			// redirect to home
+	session.subscribe(({ isLoggedIn, user }) => {
+		console.log({ isLoggedIn, user });
+		if (!browser) return;
+		if (isLoggedIn === true && user !== null) {
 			goto('/');
-			// window.location.href = '/';
 		}
-	}
+	});
 </script>
 
 <div class="flex flex-col justify-center m-0 relative top-1/2 -translate-y-1/2">
