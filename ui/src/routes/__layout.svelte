@@ -10,7 +10,7 @@
 			return {
 				status: 200,
 				props: {
-					isLoggedIn: true
+					isLoggedIn: isLoggedIn
 				}
 			};
 		}
@@ -23,7 +23,7 @@
 </script>
 
 <script lang="ts">
-	export let isLoggedIn: boolean;
+	export let isLoggedIn: boolean = false;
 
 	const pages: NavItem[] = [
 		{
