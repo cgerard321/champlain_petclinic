@@ -7,7 +7,6 @@
 		const { status } = await authClient.logout();
 
 		if (status < 400) {
-			console.log('user set to null');
 			user.set(null);
 		}
 
