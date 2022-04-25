@@ -4,7 +4,7 @@ async function login({
 }: {
 	email: string;
 	password: string;
-}): Promise<Omit<LoginResponse, 'token'>> {
+}): Promise<LoginResponse> {
 	const res = await fetch('/login', {
 		method: 'POST',
 		headers: {
@@ -18,7 +18,18 @@ async function login({
 
 	const body = await res.json();
 
-	return body as Omit<LoginResponse, 'token'>;
+	let message = 'Success';
+	if (res.status === 401 || res.status === 403) {
+		message = 'Invalid login';
+	} else if (res.status !== 200) {
+		message = 'Something went wrong';
+	}
+
+	return {
+		status: res.status,
+		body,
+		message
+	};
 }
 
 async function logout(): Promise<Response> {
