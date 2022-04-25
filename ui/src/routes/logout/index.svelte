@@ -18,7 +18,7 @@
 </script>
 
 <script lang="ts">
-	goto('/login');
+	window.location.href = '/';
 </script>
 
 <p>Logging out...</p>

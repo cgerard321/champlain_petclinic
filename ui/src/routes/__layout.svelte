@@ -26,7 +26,7 @@
 <script lang="ts">
 	import { session } from '$app/stores';
 
-	console.log($session.user);
+	console.log('[Layout]', 'user', $session.user);
 
 	export let isLoggedIn: boolean = false;
 
