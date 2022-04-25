@@ -1,12 +1,15 @@
 <script context="module" lang="ts">
 	import Nav from '$lib/components/Nav.svelte';
+	import { user } from '$lib/stores/auth';
 
 	import type { LoadInput } from '@sveltejs/kit';
+	import { get } from 'svelte/store';
 
 	export async function load({ url, session }: LoadInput) {
 		const { isLoggedIn }: { isLoggedIn: boolean } = session;
+		const hasUser = get(user) !== null;
 
-		if (url.pathname === '/login' || isLoggedIn === true) {
+		if (url.pathname === '/login' || isLoggedIn === true || hasUser === true) {
 			return {
 				status: 200,
 				props: {
