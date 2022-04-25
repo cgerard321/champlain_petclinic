@@ -1,8 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-
-	import authService from '$lib/services/auth';
 	import { user } from '$lib/stores/auth';
+	import authClient from '$lib/clients/auth';
 
 	import { createForm } from 'svelte-forms-lib';
 	import * as yup from 'yup';
@@ -11,7 +10,7 @@
 		message: string;
 		isError: boolean;
 	} = null;
-	const { form, errors, handleChange, handleSubmit, isSubmitting } = createForm({
+	const { form, errors, handleChange, handleSubmit } = createForm({
 		initialValues: {
 			email: '',
 			password: ''
@@ -21,7 +20,7 @@
 			password: yup.string().required()
 		}),
 		onSubmit: async (values: { email: string; password: string }) => {
-			const [statusCode, body, message] = await authService.login(values);
+			const { status: statusCode, body, message } = await authClient.login(values);
 			const isError = statusCode > 399;
 
 			if (isError === false) {

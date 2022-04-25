@@ -4,14 +4,20 @@ async function login({
 }: {
 	email: string;
 	password: string;
-}): Promise<[number, User | GenericError, string]> {
-	const res = await fetch('/login', {
+}): Promise<LoginResponse> {
+	const res = await fetch(`${process.env.API_URL}/login`, {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json'
 		},
-		body: JSON.stringify({ email, password })
+		body: JSON.stringify({
+			email,
+			password
+		})
 	});
+
+	const body = await res.json();
+	const token = res.headers.get('Authorization');
 
 	let message = '';
 	if (res.status === 401 || res.status === 403) {
@@ -22,7 +28,12 @@ async function login({
 		message = 'Success';
 	}
 
-	return [res.status, await res.json(), message];
+	return {
+		status: res.status,
+		body,
+		message,
+		token
+	};
 }
 
 async function logout(): Promise<Response> {

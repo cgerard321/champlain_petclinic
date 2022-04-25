@@ -63,3 +63,10 @@ interface NavItem {
 	text: string;
 	href: string;
 }
+
+interface LoginResponse {
+	status: number;
+	body: User | GenericError;
+	message: string;
+	token?: string;
+}
