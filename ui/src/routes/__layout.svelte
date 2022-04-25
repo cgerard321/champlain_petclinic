@@ -7,13 +7,14 @@
 
 	export async function load({ url, session }: LoadInput) {
 		const { isLoggedIn, user }: { isLoggedIn: boolean; user: string } = session;
-		const hasUser = get(userStore) !== null;
+		let hasUser = get(userStore) !== null;
 
 		if (!hasUser && user !== null && user !== undefined && user !== '') {
 			userStore.set(JSON.parse(user) as User);
+			hasUser = true;
 		}
 
-		if (url.pathname === '/login' || isLoggedIn === true || hasUser === true) {
+		if (url.pathname === '/login' || (isLoggedIn === true && hasUser === true)) {
 			return {
 				status: 200,
 				props: {
