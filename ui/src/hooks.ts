@@ -8,8 +8,6 @@ const doHandle: Handle = async function handle({ request, resolve }) {
 		return resolve(request);
 	}
 
-	console.log(request.url.pathname);
-
 	const cookies = parse(request.headers['cookie'] ?? '');
 	const token = cookies.token;
 	const user = cookies.user ?? null;

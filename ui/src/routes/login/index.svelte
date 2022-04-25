@@ -19,16 +19,8 @@
 			password: yup.string().required()
 		}),
 		onSubmit: async (values: { email: string; password: string }) => {
-			console.log('[Login]', 'values', values);
-
 			const { status: statusCode, body, message } = await authClient.login(values);
 			const isError = statusCode > 399;
-
-			console.log('[Login]', {
-				statusCode,
-				body,
-				message
-			});
 
 			status = {
 				isError,
@@ -41,6 +33,7 @@
 		if (status?.isError === false) {
 			// redirect to home
 			goto('/');
+			// window.location.href = '/';
 		}
 	}
 </script>

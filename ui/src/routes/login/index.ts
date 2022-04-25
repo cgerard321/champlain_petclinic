@@ -1,6 +1,7 @@
-import type { RequestHandler } from '@sveltejs/kit';
-import { serialize } from 'cookie';
 import authService from '$lib/services/auth';
+import type { RequestHandler } from '@sveltejs/kit';
+import type { DefaultBody, EndpointOutput } from '@sveltejs/kit/types/endpoint';
+import { serialize } from 'cookie';
 
 type PostBody = {
 	email: string;
@@ -16,7 +17,7 @@ const postHandler: RequestHandler<Record<string, unknown>, PostBody> = async (re
 	if (status !== 200 || token === null || token === undefined || token === '') {
 		return {
 			status,
-			body
+			body: body as unknown as DefaultBody // See https://github.com/sveltejs/kit/issues/1997
 		};
 	}
 
@@ -42,7 +43,7 @@ const postHandler: RequestHandler<Record<string, unknown>, PostBody> = async (re
 				})
 			]
 		},
-		body
+		body: body as unknown as DefaultBody // See https://github.com/sveltejs/kit/issues/1997
 	};
 };
 

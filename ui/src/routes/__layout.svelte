@@ -2,7 +2,6 @@
 	import Nav from '$lib/components/Nav.svelte';
 
 	import type { LoadInput } from '@sveltejs/kit';
-	import { get } from 'svelte/store';
 
 	export async function load({ url, session }: LoadInput) {
 		const { isLoggedIn, user }: { isLoggedIn: boolean; user: unknown } = session;
@@ -17,7 +16,7 @@
 		}
 
 		return {
-			status: 302,
+			status: 307, // 307 is not cached while 301 and 302 are cached permanently and temporarily (respectively)
 			redirect: '/login'
 		};
 	}
@@ -25,8 +24,6 @@
 
 <script lang="ts">
 	import { session } from '$app/stores';
-
-	console.log('[Layout]', 'user', $session.user);
 
 	export let isLoggedIn: boolean = false;
 
