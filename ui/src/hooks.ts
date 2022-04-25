@@ -2,6 +2,14 @@ import type { GetSession, Handle } from '@sveltejs/kit';
 import { parse } from 'cookie';
 
 const doHandle: Handle = async function handle({ request, resolve }) {
+	if (request.url.pathname === '/logout') {
+		request.locals['isLoggedIn'] = false;
+		request.locals['user'] = null;
+		return resolve(request);
+	}
+
+	console.log(request.url.pathname);
+
 	const cookies = parse(request.headers['cookie'] ?? '');
 	const token = cookies.token;
 	const user = cookies.user ?? null;
