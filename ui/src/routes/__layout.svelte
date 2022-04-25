@@ -1,13 +1,13 @@
 <script context="module" lang="ts">
 	import Nav from '$lib/components/Nav.svelte';
-	import { user } from '$lib/stores/auth';
+	import { user as userStore } from '$lib/stores/auth';
 
 	import type { LoadInput } from '@sveltejs/kit';
 	import { get } from 'svelte/store';
 
 	export async function load({ url, session }: LoadInput) {
 		const { isLoggedIn }: { isLoggedIn: boolean } = session;
-		const hasUser = get(user) !== null;
+		const hasUser = get(userStore) !== null;
 
 		if (url.pathname === '/login' || isLoggedIn === true || hasUser === true) {
 			return {
@@ -27,6 +27,9 @@
 
 <script lang="ts">
 	export let isLoggedIn: boolean = false;
+	const user = get(userStore);
+
+	const computedLoggedIn = user !== null || isLoggedIn;
 
 	const pages: NavItem[] = [
 		{
@@ -36,7 +39,7 @@
 	];
 	const authPages: NavItem[] = [];
 
-	if (isLoggedIn) {
+	if (computedLoggedIn) {
 		authPages.push({
 			text: 'Logout',
 			href: '/logout'
