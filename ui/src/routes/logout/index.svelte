@@ -18,7 +18,7 @@
 </script>
 
 <script lang="ts">
-	goto('/');
+	goto('/login');
 </script>
 
 <p>Logging out...</p>

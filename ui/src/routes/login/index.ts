@@ -26,13 +26,21 @@ const postHandler: RequestHandler<Record<string, unknown>, PostBody> = async (re
 	return {
 		status,
 		headers: {
-			'Set-Cookie': serialize('token', token, {
-				path: '/',
-				expires: new Date(expires),
-				httpOnly: true,
-				sameSite: 'strict',
-				secure: true
-			})
+			'Set-Cookie': [
+				serialize('token', token, {
+					path: '/',
+					expires: new Date(expires),
+					httpOnly: true,
+					sameSite: 'strict',
+					secure: true
+				}),
+				serialize('user', JSON.stringify(body), {
+					path: '/',
+					expires: new Date(expires),
+					httpOnly: false,
+					sameSite: 'strict'
+				})
+			]
 		},
 		body
 	};

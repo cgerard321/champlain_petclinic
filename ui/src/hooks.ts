@@ -1,22 +1,22 @@
 import type { GetSession, Handle } from '@sveltejs/kit';
 import { parse } from 'cookie';
 
-const whiteListRoutes = ['/login', '/register', '/logout'];
-
 const doHandle: Handle = async function handle({ request, resolve }) {
-	const hasTokenCookie: boolean = parse(request.headers['cookie'] ?? '').token !== undefined;
-	request.locals['isLoggedIn'] = hasTokenCookie;
+	const cookies = parse(request.headers['cookie'] ?? '');
+	const token = cookies.token;
+	const user = cookies.user ?? null;
 
-	if (whiteListRoutes.includes(request.url.pathname)) {
-		return resolve(request);
-	}
+	const hasTokenCookie: boolean = token !== undefined;
+	request.locals['isLoggedIn'] = hasTokenCookie;
+	request.locals['user'] = user;
 
 	return resolve(request);
 };
 
 const doGetSession: GetSession = async function getSession(request) {
 	return {
-		isLoggedIn: request.locals['isLoggedIn']
+		isLoggedIn: request.locals['isLoggedIn'],
+		user: request.locals['user']
 	};
 };
 

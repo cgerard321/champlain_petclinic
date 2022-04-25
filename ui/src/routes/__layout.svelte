@@ -6,8 +6,12 @@
 	import { get } from 'svelte/store';
 
 	export async function load({ url, session }: LoadInput) {
-		const { isLoggedIn }: { isLoggedIn: boolean } = session;
+		const { isLoggedIn, user }: { isLoggedIn: boolean; user: string } = session;
 		const hasUser = get(userStore) !== null;
+
+		if (!hasUser && user !== null && user !== undefined && user !== '') {
+			userStore.set(JSON.parse(user) as User);
+		}
 
 		if (url.pathname === '/login' || isLoggedIn === true || hasUser === true) {
 			return {
