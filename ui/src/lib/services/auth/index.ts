@@ -31,9 +31,7 @@ async function logout(): Promise<Response> {
 	});
 }
 
-const toExport = {
+export default {
 	login,
 	logout
 };
-
-export default toExport;
