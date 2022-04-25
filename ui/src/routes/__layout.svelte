@@ -17,6 +17,7 @@
 	}
 </script>
 
+<h1>Hihi</h1>
 <slot />
 
 <style global lang="postcss">

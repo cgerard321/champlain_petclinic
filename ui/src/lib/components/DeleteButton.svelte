@@ -1,4 +1,5 @@
 <script lang="ts">
+	// TODO: Remake this into an adapter and make the delete button a pure component
 	export let row: unknown;
 	export let col: unknown;
 
