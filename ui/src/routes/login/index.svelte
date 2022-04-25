@@ -41,7 +41,6 @@
 	});
 
 	session.subscribe(({ isLoggedIn, user }) => {
-		console.log({ isLoggedIn, user });
 		if (!browser) return;
 		if (isLoggedIn === true && user !== null) {
 			goto('/');

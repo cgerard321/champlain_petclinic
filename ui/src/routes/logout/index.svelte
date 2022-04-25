@@ -1,14 +1,27 @@
 <script context="module" lang="ts">
+	import { browser } from '$app/env';
+	import { session as sessionStore } from '$app/stores';
+
 	import authClient from '$lib/clients/auth';
-	import { goto } from '$app/navigation';
+
 	import type { LoadInput } from '@sveltejs/kit';
 
-	export async function load({ session }: LoadInput) {
+	export async function load({}: LoadInput) {
 		const { status } = await authClient.logout();
 
 		if (status < 400) {
-			session['user'] = null;
-			session['isLoggedIn'] = false;
+			if (browser) {
+				sessionStore.update((store) => ({
+					...store,
+					isLoggedIn: false,
+					user: null
+				}));
+			}
+
+			return {
+				status: 307,
+				redirect: '/'
+			};
 		}
 
 		return {
@@ -18,7 +31,16 @@
 </script>
 
 <script lang="ts">
-	window.location.href = '/';
+	import { goto } from '$app/navigation';
+
+	sessionStore.subscribe(({ isLoggedIn, user }) => {
+		if (!browser) return;
+		if (!isLoggedIn) goto('/');
+	});
 </script>
 
-<p>Logging out...</p>
+{#if sessionStore.isLoggedIn}
+	<p>Unable to logout</p>
+{:else}
+	<p>Logging out...</p>
+{/if}

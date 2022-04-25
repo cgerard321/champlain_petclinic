@@ -1,6 +1,5 @@
 <script context="module" lang="ts">
 	import Nav from '$lib/components/Nav.svelte';
-
 	import type { LoadInput } from '@sveltejs/kit';
 
 	export async function load({ url, session }: LoadInput) {
@@ -10,7 +9,7 @@
 			return {
 				status: 200,
 				props: {
-					isLoggedIn: isLoggedIn
+					isLoggedIn
 				}
 			};
 		}
@@ -25,33 +24,35 @@
 <script lang="ts">
 	import { session } from '$app/stores';
 
-	export let isLoggedIn: boolean = false;
-
-	const pages: NavItem[] = [
+	let pages: NavItem[] = [
 		{
 			text: 'Home',
 			href: '/'
 		}
 	];
-	const authPages: NavItem[] = [];
+	let authPages: NavItem[] = [];
 
-	if (isLoggedIn) {
-		authPages.push({
-			text: 'Logout',
-			href: '/logout'
-		});
-	} else {
-		authPages.push(
-			{
-				text: 'Login',
-				href: '/login'
-			},
-			{
-				text: 'Register',
-				href: '/register'
-			}
-		);
-	}
+	session.subscribe((store) => {
+		if (store.isLoggedIn === true) {
+			authPages = [
+				{
+					text: 'Logout',
+					href: '/logout'
+				}
+			];
+		} else {
+			authPages = [
+				{
+					text: 'Login',
+					href: '/login'
+				},
+				{
+					text: 'Register',
+					href: '/register'
+				}
+			];
+		}
+	});
 </script>
 
 <Nav {pages} {authPages} />

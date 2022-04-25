@@ -1,6 +1,6 @@
 import authService from '$lib/services/auth';
 import type { RequestHandler } from '@sveltejs/kit';
-import type { DefaultBody, EndpointOutput } from '@sveltejs/kit/types/endpoint';
+import type { DefaultBody } from '@sveltejs/kit/types/endpoint';
 import { serialize } from 'cookie';
 
 type PostBody = {
