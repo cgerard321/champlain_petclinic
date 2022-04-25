@@ -25,8 +25,15 @@ async function login({
 	return [res.status, await res.json(), message];
 }
 
+async function logout(): Promise<Response> {
+	return fetch('/logout', {
+		method: 'DELETE'
+	});
+}
+
 const toExport = {
-	login
+	login,
+	logout
 };
 
 export default toExport;
