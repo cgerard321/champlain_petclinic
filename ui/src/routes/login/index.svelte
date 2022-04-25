@@ -43,7 +43,7 @@
 	}
 </script>
 
-<div class="flex flex-col h-full justify-center">
+<div class="flex flex-col justify-center m-0 relative top-1/2 -translate-y-1/2">
 	<div class="flex justify-center">
 		<div class="w-1/6">
 			<form
