@@ -9,7 +9,8 @@
 			return {
 				status: 200,
 				props: {
-					isLoggedIn
+					isLoggedIn,
+					currentPath: url.pathname
 				}
 			};
 		}
@@ -30,6 +31,7 @@
 			href: '/'
 		}
 	];
+
 	let authPages: NavItem[] = [];
 
 	session.subscribe((store) => {

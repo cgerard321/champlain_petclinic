@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { page as activePage } from '$app/stores';
 	export let pages: NavItem[] = [];
 	export let authPages: NavItem[] = [];
 </script>
@@ -9,7 +10,12 @@
 		<ul class="flex gap-4 px-4 w-full">
 			{#each pages as page}
 				<li class="flex">
-					<a href={page.href} class="text-base text-primary-focus">{page.text}</a>
+					<a href={page.href} class="text-base text-primary-focus"
+						>{page.text}
+						{#if page.href === $activePage.url.pathname}
+							<span class="text-primary-focus"> (current)</span>
+						{/if}
+					</a>
 				</li>
 			{/each}
 
