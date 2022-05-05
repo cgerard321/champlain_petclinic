@@ -18,7 +18,61 @@
 </script>
 
 <script lang="ts">
+	import Table from '$lib/components/Table.svelte';
+	import DeleteButton from '$lib/components/DeleteButton.svelte';
+
 	export let vets: Vet[] = [];
+
+	const columns: TableColumn<Vet>[] = [
+		{
+			key: 'name',
+			title: 'Name',
+			value: (vet) => `${vet.firstName} ${vet.lastName}`
+		},
+		{
+			key: 'phoneNumber',
+			title: 'Phone',
+			value: (vet) => vet.phoneNumber
+		},
+		{
+			key: 'email',
+			title: 'Email',
+			value: (vet) => vet.email
+		},
+		{
+			key: 'specialties',
+			title: 'Specialties',
+			value: (vet) => vet.specialties.map((specialty) => specialty.name).join(', ')
+		},
+		{
+			key: 'actions',
+			title: 'Actions',
+			value: (v) => v.vetId,
+			renderComponent: {
+				component: DeleteButton,
+				props: {
+					onClick(row: Vet) {
+						// TODO: Implement actual delete
+						const index = vets.findIndex((r) => r.vetId === row.vetId);
+						if (index > -1) vets = [...vets.slice(0, index), ...vets.slice(index + 1)];
+					},
+					buttonClass: 'btn btn-sm btn-error'
+				}
+			}
+		}
+	];
 </script>
 
-Length: {vets.length}
+{#if vets.length === 0}
+	<p>No vets found.</p>
+{:else}
+	<div class="mx-20 mt-10">
+		<Table
+			classNameTable="table table-zebra"
+			classNameThead="text-left bg-neutral rounded"
+			classNameRow="hover children:text-primary-focus children:even:text-secondary-focus"
+			{columns}
+			rows={vets}
+		/>
+	</div>
+{/if}
