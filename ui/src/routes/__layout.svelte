@@ -6,10 +6,13 @@
 	export async function load({ url, session }: LoadInput) {
 		const { isLoggedIn }: { isLoggedIn: boolean; user: unknown } = session;
 
-		if (
-			url.pathname === '/login' ||
-			(isLoggedIn === true && browser && parse(document?.cookie ?? '')?.user !== undefined)
-		) {
+		let allow: boolean = isLoggedIn;
+
+		if (browser && parse(document?.cookie ?? '')?.user === undefined) {
+			allow = false;
+		}
+
+		if (url.pathname === '/login' || allow === true) {
 			return {
 				status: 200,
 				props: {
