@@ -1,11 +1,15 @@
 <script context="module" lang="ts">
-	import Nav from '$lib/components/Nav.svelte';
+	import { browser } from '$app/env';
+	import { parse } from 'cookie';
 	import type { LoadInput } from '@sveltejs/kit';
 
 	export async function load({ url, session }: LoadInput) {
-		const { isLoggedIn, user }: { isLoggedIn: boolean; user: unknown } = session;
+		const { isLoggedIn }: { isLoggedIn: boolean; user: unknown } = session;
 
-		if (url.pathname === '/login' || (isLoggedIn === true && user !== null)) {
+		if (
+			url.pathname === '/login' ||
+			(isLoggedIn === true && browser && parse(document?.cookie ?? '')?.user !== undefined)
+		) {
 			return {
 				status: 200,
 				props: {
@@ -24,6 +28,7 @@
 
 <script lang="ts">
 	import { session } from '$app/stores';
+	import Nav from '$lib/components/Nav.svelte';
 
 	let pages: NavItem[] = [
 		{

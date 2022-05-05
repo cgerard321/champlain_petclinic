@@ -1,8 +1,6 @@
 <script lang="ts">
 	import DeleteButton from '$lib/components/DeleteButton.svelte';
-
 	import Table from '$lib/components/Table.svelte';
-	import { SvelteComponent } from 'svelte';
 
 	interface Thing {
 		id: number;
