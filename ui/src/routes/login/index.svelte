@@ -1,10 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/env';
-
 	import { goto } from '$app/navigation';
 	import { session } from '$app/stores';
-	import authClient from '$lib/clients/auth';
-
 	import { createForm } from 'svelte-forms-lib';
 	import * as yup from 'yup';
 
@@ -21,9 +18,27 @@
 			email: yup.string().required(),
 			password: yup.string().required()
 		}),
-		onSubmit: async (values: { email: string; password: string }) => {
-			const { status: statusCode, body, message } = await authClient.login(values);
-			const isError = statusCode > 399;
+		onSubmit: async ({ email, password }: { email: string; password: string }) => {
+			const res = await fetch('/login', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					email,
+					password
+				})
+			});
+
+			const body = await res.json();
+
+			let message = 'Success';
+			if (res.status === 401 || res.status === 403) {
+				message = 'Invalid login';
+			} else if (res.status !== 200) {
+				message = 'Something went wrong';
+			}
+			const isError = res.status > 399;
 
 			if (!isError) {
 				session.update((store) => ({

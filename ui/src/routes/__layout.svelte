@@ -29,6 +29,10 @@
 		{
 			text: 'Home',
 			href: '/'
+		},
+		{
+			text: 'Vets',
+			href: '/vets'
 		}
 	];
 

@@ -70,3 +70,21 @@ interface LoginResponse {
 	message: string;
 	token?: string;
 }
+interface Vet {
+	vetId: number;
+	firstName: string;
+	lastName: string;
+	email: string;
+	phoneNumber: string;
+	image: null;
+	resume: string;
+	workday: string;
+	isActive: number;
+	specialties: Specialty[];
+}
+
+interface Specialty {
+	id: number;
+	specialtyId: number;
+	name: string;
+}

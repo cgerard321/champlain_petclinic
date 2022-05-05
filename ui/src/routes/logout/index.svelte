@@ -1,13 +1,13 @@
 <script context="module" lang="ts">
 	import { browser } from '$app/env';
+	import { goto } from '$app/navigation';
 	import { session as sessionStore } from '$app/stores';
-
-	import authClient from '$lib/clients/auth';
-
 	import type { LoadInput } from '@sveltejs/kit';
 
 	export async function load({}: LoadInput) {
-		const { status } = await authClient.logout();
+		const { status } = await fetch('/logout', {
+			method: 'DELETE'
+		});
 
 		if (status < 400) {
 			if (browser) {
@@ -31,8 +31,6 @@
 </script>
 
 <script lang="ts">
-	import { goto } from '$app/navigation';
-
 	sessionStore.subscribe(({ isLoggedIn, user }) => {
 		if (!browser) return;
 		if (!isLoggedIn) goto('/');
