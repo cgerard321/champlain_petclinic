@@ -21,6 +21,7 @@
 	import Table from '$lib/components/Table.svelte';
 	import DeleteButton from '$lib/components/DeleteButton.svelte';
 	import { toast } from '@zerodevx/svelte-toast';
+	import * as verClient from '$lib/clients/vets';
 
 	export let vets: Vet[] = [];
 
@@ -53,14 +54,20 @@
 				component: DeleteButton,
 				props: {
 					onClick(row: Vet) {
-						// TODO: Implement actual delete
-						const index = vets.findIndex((r) => r.vetId === row.vetId);
-						if (index > -1) vets = [...vets.slice(0, index), ...vets.slice(index + 1)];
+						verClient.del(row.vetId).then((n) => {
+							if (n.status >= 400) {
+								toast.push(`Unable to delete vet ${row.firstName} ${row.lastName}`);
+								return;
+							}
 
-						toast.push('Vet deleted successfully', {
-							classes: ['success'],
-							duration: 2500,
-							pausable: true
+							const index = vets.findIndex((r) => r.vetId === row.vetId);
+							if (index > -1) vets = [...vets.slice(0, index), ...vets.slice(index + 1)];
+
+							toast.push(`${row.firstName} ${row.lastName} deleted successfully`, {
+								classes: ['success'],
+								duration: 2500,
+								pausable: true
+							});
 						});
 					},
 					buttonClass: 'btn btn-sm btn-error'
