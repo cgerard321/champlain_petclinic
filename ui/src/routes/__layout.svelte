@@ -30,6 +30,8 @@
 </script>
 
 <script lang="ts">
+	import { SvelteToast } from '@zerodevx/svelte-toast';
+
 	import { session } from '$app/stores';
 	import Nav from '$lib/components/Nav.svelte';
 
@@ -70,6 +72,11 @@
 </script>
 
 <Nav {pages} {authPages} />
+<SvelteToast
+	options={{
+		classes: ['toast']
+	}}
+/>
 <slot />
 
 <style global lang="postcss">
@@ -83,5 +90,13 @@
 
 	body {
 		@apply h-full;
+	}
+
+	.toast.success {
+		--toastBackground: #4bb543;
+	}
+
+	.toast.error {
+		--toastBackground: red;
 	}
 </style>

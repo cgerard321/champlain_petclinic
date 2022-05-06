@@ -20,6 +20,7 @@
 <script lang="ts">
 	import Table from '$lib/components/Table.svelte';
 	import DeleteButton from '$lib/components/DeleteButton.svelte';
+	import { toast } from '@zerodevx/svelte-toast';
 
 	export let vets: Vet[] = [];
 
@@ -55,6 +56,12 @@
 						// TODO: Implement actual delete
 						const index = vets.findIndex((r) => r.vetId === row.vetId);
 						if (index > -1) vets = [...vets.slice(0, index), ...vets.slice(index + 1)];
+
+						toast.push('Vet deleted successfully', {
+							classes: ['success'],
+							duration: 2500,
+							pausable: true
+						});
 					},
 					buttonClass: 'btn btn-sm btn-error'
 				}
