@@ -30,7 +30,6 @@ Database is: jdbc:h2:mem:customers-db (note this db is service specific)
 
 ### Docker Profile (for running with Docker or Docker-compose with a MySQL database)
 ```
-./gradlew build
 docker-compose build
 docker-compose up -d
 docker-compose logs -f
@@ -159,7 +158,7 @@ git reset --hard origin/main
 - Now we will want to make a new branch to start working on our feature or bug fix. Simply type:
 
 ```
-git checkout -b YOUR-BRANCH-NAME
+git switch -c YOUR-BRANCH-NAME
 ```
 
 - This command is broken down into 2 parts, `checkout` will move you to a given branch the `-b` modifier will create the branch
