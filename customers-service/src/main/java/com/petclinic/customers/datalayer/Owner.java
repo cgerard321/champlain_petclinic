@@ -50,6 +50,9 @@ public class Owner {
     @Digits(fraction = 0, integer = 10)
     private String telephone;
 
+    @OneToOne
+    private Photo photo;
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "owner")
     private Set<Pet> pets;
 
@@ -142,6 +145,12 @@ public class Owner {
 //    }
 
 
+    public Photo getPhoto() {
+        if(this.photo == null) {
+
+        }
+        return photo;
+    }
 
     protected Set<Pet> getPetsInternal() {
         if (this.pets == null) {

@@ -1,10 +1,13 @@
 package com.petclinic.bffapigateway.dtos;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreType;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
 import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.stream.Collectors.toList;
 
@@ -28,7 +31,11 @@ public class OwnerDetails {
 
     private String telephone;
 
+    //private final Optional<PhotoDetails> photo = new Optional<PhotoDetails>();
     private final List<PetDetails> pets = new ArrayList<>();
+
+//    @JsonIgnore
+//    public Optional<PhotoDetails>
 
     @JsonIgnore
     public List<Integer> getPetIds() {

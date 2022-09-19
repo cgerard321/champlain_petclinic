@@ -1,19 +1,15 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
-import com.petclinic.bffapigateway.dtos.Login;
-import com.petclinic.bffapigateway.dtos.OwnerDetails;
+import com.petclinic.bffapigateway.dtos.*;
 
-import com.petclinic.bffapigateway.dtos.PetDetails;
-import com.petclinic.bffapigateway.dtos.PetType;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Optional;
 
 import static reactor.core.publisher.Mono.just;
 
@@ -117,6 +113,21 @@ public class CustomersServiceClient {
                 .uri(customersServiceUrl + ownerId)
                 .retrieve()
                 .bodyToMono(OwnerDetails.class);
+    }
+
+    public Mono<PhotoDetails> addPhoto (Optional<PhotoDetails> model){
+        return webClientBuilder.build().post()
+                .uri(customersServiceUrl + "/upload/photo")
+                .accept(MediaType.IMAGE_JPEG)
+                .body(Mono.just(model), PhotoDetails.class)
+                .retrieve().bodyToMono(PhotoDetails.class);
+    }
+
+    public Mono<PhotoDetails> getPhoto(final int photoId){
+        return webClientBuilder.build().get()
+                .uri(customersServiceUrl + "/get/photo/" + photoId)
+                .retrieve()
+                .bodyToMono(PhotoDetails.class);
     }
 
 }
