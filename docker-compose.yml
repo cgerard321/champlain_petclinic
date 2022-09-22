@@ -27,15 +27,6 @@ services:
             mysql2:
                 condition: service_healthy
 
-    vet:
-        build: vet-service
-        hostname: vet
-        #mem_limit: 350m
-        environment:
-            - SPRING_PROFILES_ACTIVE=docker
-        depends_on:
-            - mongo
-
     customers:
         build: customers-service
         hostname: customers
