@@ -27,9 +27,9 @@ services:
             mysql2:
                 condition: service_healthy
 
-    vet-service:
+    vet:
         build: vet-service
-        hostname: vet-service
+        hostname: vet
         #mem_limit: 350m
         environment:
             - SPRING_PROFILES_ACTIVE=docker
@@ -261,7 +261,7 @@ services:
             - "3312:3306"
         environment:
             - MYSQL_ROOT_PASSWORD=rootpwd
-            - MYSQL_DATABASE=veterinarians-db
+            - MYSQL_DATABASE=vet-db
             - MYSQL_USER=user
             - MYSQL_PASSWORD=pwd
         volumes:
