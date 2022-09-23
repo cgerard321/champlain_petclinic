@@ -13,6 +13,8 @@ package com.petclinic.vet.dataaccesslayer;
 import com.petclinic.vet.servicelayer.DataValidation;
 import com.sun.istack.NotNull;
 import lombok.*;
+import org.hibernate.validator.constraints.Length;
+import org.hibernate.validator.constraints.UniqueElements;
 
 import javax.persistence.*;
 
@@ -27,23 +29,17 @@ import javax.persistence.*;
 public class Specialty {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private String id;
 
     @Column(name = "specialty_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @NotNull
     // **** CHECK WHAT THIS DOES LATER **** //
-    //@UniqueElements(groups = Specialty.class)
+    @UniqueElements(groups = Specialty.class)
     //@Length(min = 6,max = 6, groups = Specialty.class)
-    private Integer specialtyId;
+    private String specialtyId;
 
     @Column(name = "name")
     private String name;
-
-    //used in testing
-//    public void setName(final String name) {
-//        this.name = DataValidation.verifySpeciality(name);
-//    }
-
 
 }

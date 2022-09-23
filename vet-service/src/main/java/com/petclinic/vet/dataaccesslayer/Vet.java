@@ -11,6 +11,7 @@ package com.petclinic.vet.dataaccesslayer;
   * Ticket: feat(VVS-CPC-553): add veterinarian
  */
 
+import com.petclinic.vet.servicelayer.DataValidation;
 import lombok.*;
 import org.hibernate.validator.constraints.UniqueElements;
 
@@ -30,13 +31,13 @@ public class Vet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private String id;
 
 
     @Column(name = "vet_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @UniqueElements(groups = Vet.class)
-    private Integer vetId;
+    private String vetId;
 
     @Column(name = "first_name")
     @NotEmpty
@@ -66,11 +67,12 @@ public class Vet {
     @Column(name = "workday")
     private String workday;
 
-    @Column(name = "is_active")
-    private Integer isActive;
+//    @Column(name = "is_active")
+//    private Integer isActive;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
     @JoinTable(name = "vet_specialties", joinColumns = @JoinColumn(name = "vet_id"),
             inverseJoinColumns = @JoinColumn(name = "specialty_id"))
     private Set<Specialty> specialties;
+
 }
