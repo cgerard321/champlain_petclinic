@@ -1,4 +1,5 @@
 package com.petclinic.vet;
+
 /**
  @author Kamilah Hatteea & Brandon Levis : Vet-Service
   * Worked together with (Code with Friends) on IntelliJ IDEA
@@ -10,6 +11,7 @@ package com.petclinic.vet;
   * Date: 202
   * Ticket: feat(VVS-CPC-553): add veterinarian
  */
+
 
 import org.springframework.boot.SpringApplication;
 
