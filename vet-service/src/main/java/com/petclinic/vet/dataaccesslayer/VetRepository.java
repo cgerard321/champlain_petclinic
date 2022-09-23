@@ -11,14 +11,25 @@ package com.petclinic.vet.dataaccesslayer;
   * Ticket: feat(VVS-CPC-553): add veterinarian
  */
 
-import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 
-public interface VetRepository extends ReactiveMongoRepository<Vet, String> {
+@Repository
+public interface VetRepository extends ReactiveCrudRepository<Vet, String> {
 
     Mono<Vet> findVetByVetId(String vetId);
-    //Mono<Vet> findAllDisabledVets(String vetId);
-    //Mono<Vet> findAllEnabledVets(String vetId);
+
+//    @Query(value = "SELECT v FROM Vet v WHERE v.isActive = 0")
+//    Mono<Vet> findAllDisabledVets(String vetId);
+//
+//    @Query(value = "SELECT v FROM Vet v WHERE v.isActive = 1")
+//    Mono<Vet> findAllEnabledVets(String vetId);
+
+    @Modifying
+    @Query(value = "DELETE FROM Vet v WHERE v.vetId=?1")
     Mono<Void> deleteVetByVetId (String vetId);
 
 }

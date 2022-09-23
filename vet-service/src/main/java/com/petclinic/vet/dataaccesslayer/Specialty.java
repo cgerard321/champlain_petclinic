@@ -10,9 +10,11 @@ package com.petclinic.vet.dataaccesslayer;
   * Date: 2022-09-22
   * Ticket: feat(VVS-CPC-553): add veterinarian
  */
+import com.petclinic.vet.servicelayer.DataValidation;
+import com.sun.istack.NotNull;
 import lombok.*;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+
+import javax.persistence.*;
 
 @Data
 @ToString
@@ -20,13 +22,28 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @AllArgsConstructor
 @NoArgsConstructor
 
-@Document(value="veterinarians")
+@Entity
+@Table(name = "specialties")
 public class Specialty {
-
     @Id
-    private Integer id; //don't know if this is needed because we have one in vet class...
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    @Column(name = "specialty_id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @NotNull
+    // **** CHECK WHAT THIS DOES LATER **** //
+    //@UniqueElements(groups = Specialty.class)
+    //@Length(min = 6,max = 6, groups = Specialty.class)
     private Integer specialtyId;
+
+    @Column(name = "name")
     private String name;
+
+    //used in testing
+//    public void setName(final String name) {
+//        this.name = DataValidation.verifySpeciality(name);
+//    }
 
 
 }

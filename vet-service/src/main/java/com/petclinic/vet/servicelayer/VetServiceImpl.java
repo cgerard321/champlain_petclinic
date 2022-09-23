@@ -34,8 +34,8 @@ public class VetServiceImpl implements VetService {
     public Mono<VetDTO> insertVet(Mono<VetDTO> vetDTOMono) {
         return vetDTOMono
                 .map(EntityDtoUtil::toEntity)
-                .doOnNext(e -> e.setVetId(EntityDtoUtil.generateTeacherIdString()))
-                .flatMap((vetRepository::insert))
+                .doOnNext(e -> e.setVetId(EntityDtoUtil.generateVetIdString()))
+                .flatMap((vetRepository::save))
                 .map(EntityDtoUtil::toDTO);
     }
 

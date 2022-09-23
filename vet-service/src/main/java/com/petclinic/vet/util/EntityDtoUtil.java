@@ -33,19 +33,7 @@ public class EntityDtoUtil {
         return vet;
     }
 
-//    public static TeacherDTO toDTO(Teacher Teacher) {
-//        TeacherDTO dto = new TeacherDTO();
-//        BeanUtils.copyProperties(Teacher, dto);
-//        return dto;
-//    }
-//
-//    public static Teacher toEntity(TeacherDTO dto) {
-//        Teacher teacher = new Teacher();
-//        BeanUtils.copyProperties(dto, teacher);
-//        return teacher;
-//    }
-
-    public static String generateTeacherIdString() {
+    public static String generateVetIdString() {
         return UUID.randomUUID().toString();
     }
 
