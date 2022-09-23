@@ -27,6 +27,16 @@ services:
             mysql2:
                 condition: service_healthy
 
+    veterinarians:
+        build: vet-service
+        hostname: veterinarians
+        #mem_limit: 350m
+        environment:
+            - SPRING_PROFILES_ACTIVE=docker
+        depends_on:
+            mysql6:
+                condition: service_healthy
+
     customers:
         build: customers-service
         hostname: customers
@@ -253,6 +263,35 @@ services:
                     "-h",
                     "localhost",
                 ]
+            interval: 10s
+            timeout: 5s
+            retries: 10
+
+
+    mysql6:
+        image: mysql:5.7
+        #mem_limit: 350m
+        ports:
+            - "3312:3306"
+        environment:
+            - MYSQL_ROOT_PASSWORD=rootpwd
+            - MYSQL_DATABASE=veterinarians-db
+            - MYSQL_USER=user
+            - MYSQL_PASSWORD=pwd
+        volumes:
+            - ./data/mysql6:/var/lib/mysql6
+            - ./data/init.d:/docker-entrypoint-initdb.d
+        healthcheck:
+            test:
+              [
+                      "CMD",
+                      "mysqladmin",
+                      "ping",
+                      "-uuser",
+                      "-ppwd",
+                      "-h",
+                      "localhost",
+              ]
             interval: 10s
             timeout: 5s
             retries: 10

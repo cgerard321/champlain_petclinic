@@ -142,16 +142,16 @@ public class DataValidation {
         return confirmedValue;
     }
 
-    public static Integer verifyIsActive(int isActive){
-        int confirmedValue =0;
-        if (isActive > -1 && isActive < 2) {
-            confirmedValue = isActive;
-        }
-        else {
-            throw new InvalidInputException("Invalid input for isActive");
-        }
-        return confirmedValue;
-    }
+//    public static Integer verifyIsActive(int isActive){
+//        int confirmedValue =0;
+//        if (isActive > -1 && isActive < 2) {
+//            confirmedValue = isActive;
+//        }
+//        else {
+//            throw new InvalidInputException("Invalid input for isActive");
+//        }
+//        return confirmedValue;
+//    }
 
     public static String verifyResume (String resume){
         String confirmedValue = "";

@@ -14,12 +14,14 @@ package com.petclinic.vet.util;
 import com.petclinic.vet.dataaccesslayer.Vet;
 import com.petclinic.vet.servicelayer.VetDTO;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.BeanUtils;
 
 import java.util.UUID;
 
 public class EntityDtoUtil {
 
+    final static int LENGTH_ID = 20;
 
     public static VetDTO toDTO(Vet Vet) {
         VetDTO dto = new VetDTO();
@@ -33,8 +35,10 @@ public class EntityDtoUtil {
         return vet;
     }
 
-    public static String generateVetIdString() {
-        return UUID.randomUUID().toString();
+    public static Integer generateVetId() {
+        String vetId = RandomStringUtils.randomNumeric(LENGTH_ID);
+        Integer shortIdInt = Integer.valueOf(vetId);
+        return shortIdInt;
     }
 
 }

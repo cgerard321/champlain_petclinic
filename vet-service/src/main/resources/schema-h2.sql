@@ -1,8 +1,8 @@
 DROP TABLE "vet_specialties" IF EXISTS;
-DROP TABLE "vets" IF EXISTS;
+DROP TABLE "veterinarians" IF EXISTS;
 DROP TABLE "specialties" IF EXISTS;
 
-CREATE TABLE "vets"
+CREATE TABLE "veterinarians"
 (
     id           INTEGER IDENTITY PRIMARY KEY,
     vet_id       INTEGER (6),
@@ -15,7 +15,7 @@ CREATE TABLE "vets"
     workday      VARCHAR(250),
     is_active    BIT
 );
-CREATE INDEX vets_last_name ON vets (last_name);
+CREATE INDEX vets_last_name ON veterinarians (last_name);
 
 CREATE TABLE "specialties"
 (
@@ -31,6 +31,6 @@ CREATE TABLE "vet_specialties"
     specialty_id INTEGER NOT NULL
 );
 ALTER TABLE "vet_specialties"
-    ADD CONSTRAINT fk_vet_specialties_vets FOREIGN KEY (vet_id) REFERENCES vets (id);
+    ADD CONSTRAINT fk_vet_specialties_vets FOREIGN KEY (vet_id) REFERENCES veterinarians (id);
 ALTER TABLE "vet_specialties"
     ADD CONSTRAINT fk_vet_specialties_specialties FOREIGN KEY (specialty_id) REFERENCES specialties (id);
