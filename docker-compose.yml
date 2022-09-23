@@ -27,6 +27,16 @@ services:
             mysql2:
                 condition: service_healthy
 
+    vet:
+        build: vet-service
+        hostname: vet
+        #mem_limit: 350m
+        environment:
+            - SPRING_PROFILES_ACTIVE=docker
+        depends_on:
+            mysql6:
+                condition: service_healthy
+
     customers:
         build: customers-service
         hostname: customers
@@ -81,6 +91,24 @@ services:
             - SMTP_SERVER=smtp.gmail.com
         env_file:
             - mailer.env
+
+    mongo:
+        image: mongo
+        container_name: mongo
+        restart: always
+        ports:
+            - 27017:27017
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: root
+            MONGO_INITDB_ROOT_PASSWORD: password
+        #    volumes:
+        #     - /C/Mine/mongoData:/data/db
+        healthcheck:
+            test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
+            retries: 5
+            interval: 15s
+            start_period: 30s
+
 
     mysql1:
         image: mysql:5.7
@@ -221,6 +249,35 @@ services:
                     "-h",
                     "localhost",
                 ]
+            interval: 10s
+            timeout: 5s
+            retries: 10
+
+
+    mysql6:
+        image: mysql:5.7
+        #mem_limit: 350m
+        ports:
+            - "3312:3306"
+        environment:
+            - MYSQL_ROOT_PASSWORD=rootpwd
+            - MYSQL_DATABASE=vet-db
+            - MYSQL_USER=user
+            - MYSQL_PASSWORD=pwd
+        volumes:
+            - ./data/mysql6:/var/lib/mysql6
+            - ./data/init.d:/docker-entrypoint-initdb.d
+        healthcheck:
+            test:
+              [
+                      "CMD",
+                      "mysqladmin",
+                      "ping",
+                      "-uuser",
+                      "-ppwd",
+                      "-h",
+                      "localhost",
+              ]
             interval: 10s
             timeout: 5s
             retries: 10
