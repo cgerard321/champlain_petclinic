@@ -1,0 +1,48 @@
+server:
+  port: 1454
+
+logging:
+  level:
+    root: INFO
+    com.pet-clinic.vet: DEBUG
+
+spring:
+  config:
+    activate:
+      on-profile: default
+
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: vet
+      username: root
+      password: password
+      authentication-database: admin
+
+---
+spring:
+  config:
+    activate:
+      on-profile: integration
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: vet
+      username: root
+      password: password
+      authentication-database: admin
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+  data:
+    mongodb:
+      host: mongo
+      port: 27017
+      database: vet
+      username: root
+      password: password
+      authentication-database: admin
