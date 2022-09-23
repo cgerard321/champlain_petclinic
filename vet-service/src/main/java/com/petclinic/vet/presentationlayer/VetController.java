@@ -7,7 +7,7 @@ package com.petclinic.vet.presentationlayer;
   * Date: 2022-09-22
   * Ticket: feat(VVS-CPC-554): edit veterinarian
   * User: Brandon Levis
-  * Date: 202
+  * Date: 2022-09-22
   * Ticket: feat(VVS-CPC-553): add veterinarian
  */
 

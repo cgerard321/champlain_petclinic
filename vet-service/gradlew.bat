@@ -14,7 +14,11 @@
 @rem limitations under the License.
 @rem
 
+<<<<<<< HEAD
 @if "%DEBUG%" == "" @echo off
+=======
+@if "%DEBUG%"=="" @echo off
+>>>>>>> 426038163ca1c6a0ee1f1bc4be39a69c704b67f4
 @rem ##########################################################################
 @rem
 @rem  Gradle startup script for Windows
@@ -25,7 +29,11 @@
 if "%OS%"=="Windows_NT" setlocal
 
 set DIRNAME=%~dp0
+<<<<<<< HEAD
 if "%DIRNAME%" == "" set DIRNAME=.
+=======
+if "%DIRNAME%"=="" set DIRNAME=.
+>>>>>>> 426038163ca1c6a0ee1f1bc4be39a69c704b67f4
 set APP_BASE_NAME=%~n0
 set APP_HOME=%DIRNAME%
 
@@ -40,7 +48,11 @@ if defined JAVA_HOME goto findJavaFromJavaHome
 
 set JAVA_EXE=java.exe
 %JAVA_EXE% -version >NUL 2>&1
+<<<<<<< HEAD
 if "%ERRORLEVEL%" == "0" goto execute
+=======
+if %ERRORLEVEL% equ 0 goto execute
+>>>>>>> 426038163ca1c6a0ee1f1bc4be39a69c704b67f4
 
 echo.
 echo ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
@@ -75,13 +87,24 @@ set CLASSPATH=%APP_HOME%\gradle\wrapper\gradle-wrapper.jar
 
 :end
 @rem End local scope for the variables with windows NT shell
+<<<<<<< HEAD
 if "%ERRORLEVEL%"=="0" goto mainEnd
+=======
+if %ERRORLEVEL% equ 0 goto mainEnd
+>>>>>>> 426038163ca1c6a0ee1f1bc4be39a69c704b67f4
 
 :fail
 rem Set variable GRADLE_EXIT_CONSOLE if you need the _script_ return code instead of
 rem the _cmd.exe /c_ return code!
+<<<<<<< HEAD
 if  not "" == "%GRADLE_EXIT_CONSOLE%" exit 1
 exit /b 1
+=======
+set EXIT_CODE=%ERRORLEVEL%
+if %EXIT_CODE% equ 0 set EXIT_CODE=1
+if not ""=="%GRADLE_EXIT_CONSOLE%" exit %EXIT_CODE%
+exit /b %EXIT_CODE%
+>>>>>>> 426038163ca1c6a0ee1f1bc4be39a69c704b67f4
 
 :mainEnd
 if "%OS%"=="Windows_NT" endlocal

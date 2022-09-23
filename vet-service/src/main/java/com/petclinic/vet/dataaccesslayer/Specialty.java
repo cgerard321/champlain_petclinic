@@ -7,10 +7,9 @@ package com.petclinic.vet.dataaccesslayer;
   * Date: 2022-09-22
   * Ticket: feat(VVS-CPC-554): edit veterinarian
   * User: Brandon Levis
-  * Date: 202
+  * Date: 2022-09-22
   * Ticket: feat(VVS-CPC-553): add veterinarian
  */
-
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;

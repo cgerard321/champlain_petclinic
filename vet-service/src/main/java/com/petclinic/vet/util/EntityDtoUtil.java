@@ -13,6 +13,7 @@ package com.petclinic.vet.util;
 
 import com.petclinic.vet.dataaccesslayer.Vet;
 import com.petclinic.vet.servicelayer.VetDTO;
+
 import org.springframework.beans.BeanUtils;
 
 import java.util.UUID;
@@ -31,6 +32,18 @@ public class EntityDtoUtil {
         BeanUtils.copyProperties(dto, vet);
         return vet;
     }
+
+//    public static TeacherDTO toDTO(Teacher Teacher) {
+//        TeacherDTO dto = new TeacherDTO();
+//        BeanUtils.copyProperties(Teacher, dto);
+//        return dto;
+//    }
+//
+//    public static Teacher toEntity(TeacherDTO dto) {
+//        Teacher teacher = new Teacher();
+//        BeanUtils.copyProperties(dto, teacher);
+//        return teacher;
+//    }
 
     public static String generateTeacherIdString() {
         return UUID.randomUUID().toString();
