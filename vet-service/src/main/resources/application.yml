@@ -23,7 +23,7 @@ spring:
     console:
       enabled: true
   datasource:
-    url: jdbc:h2:mem:vet-db;DB_CLOSE_DELAY=-1
+    url: jdbc:h2:mem:veterinarians-db;DB_CLOSE_DELAY=-1
     driver-class-name: org.h2.Driver
     username: sa
     password:
@@ -51,7 +51,7 @@ spring.datasource.hikari.initializationFailTimeout: 60000
 ---
 spring:
   datasource:
-    url: jdbc:mysql://mysql6/vet-db
+    url: jdbc:mysql://mysql6/veterinarians-db
     username: user
     password: pwd
 
