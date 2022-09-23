@@ -27,9 +27,9 @@ services:
             mysql2:
                 condition: service_healthy
 
-    veterinarians:
+    vet-service:
         build: vet-service
-        hostname: veterinarians
+        hostname: vet-service
         #mem_limit: 350m
         environment:
             - SPRING_PROFILES_ACTIVE=docker
@@ -109,20 +109,6 @@ services:
             interval: 15s
             start_period: 30s
 
-    mongo-express:
-        image: mongo-express
-        restart: always
-        environment:
-            - ME_CONFIG_MONGODB_ADMINUSERNAME=root
-            - ME_CONFIG_MONGODB_ADMINPASSWORD=password
-            - ME_CONFIG_MONGODB_SERVER=mongo
-            - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
-        ports:
-            - 8081:8081
-        depends_on:
-            - mongo
-            - section-service
-            - teacher-service
 
     mysql1:
         image: mysql:5.7
