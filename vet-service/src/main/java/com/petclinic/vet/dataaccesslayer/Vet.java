@@ -14,30 +14,29 @@ package com.petclinic.vet.dataaccesslayer;
 import com.petclinic.vet.servicelayer.DataValidation;
 import lombok.*;
 import org.hibernate.validator.constraints.UniqueElements;
+import org.springframework.core.style.ToStringCreator;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotEmpty;
 import java.util.Set;
 
 @Data
-@ToString
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 
 @Entity
-@Table(name = "vets")
+@Table(name = "veterinarians")
 public class Vet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private String id;
+    private Integer id;
 
 
     @Column(name = "vet_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @UniqueElements(groups = Vet.class)
-    private String vetId;
+    private Integer vetId;
 
     @Column(name = "first_name")
     @NotEmpty
@@ -67,12 +66,42 @@ public class Vet {
     @Column(name = "workday")
     private String workday;
 
-//    @Column(name = "is_active")
-//    private Integer isActive;
+    @Column(name = "is_active")
+    private boolean isActive;
 
     @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
-    @JoinTable(name = "vet_specialties", joinColumns = @JoinColumn(name = "vet_id"),
-            inverseJoinColumns = @JoinColumn(name = "specialty_id"))
+    @JoinTable(name = "vet_specialties", joinColumns = @JoinColumn(name = "vet_id"), inverseJoinColumns = @JoinColumn(name = "specialty_id"))
     private Set<Specialty> specialties;
+
+
+    public void setVetId(int vetId) {
+        this.vetId = DataValidation.verifyVetId(vetId);
+    }
+    public void setEmail(String email) {
+        this.email = DataValidation.verifyEmail(email);
+    }
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = DataValidation.verifyPhoneNumber(phoneNumber);
+    }
+    public void setWorkday(String workday) {
+        this.workday = DataValidation.verifyWorkday(workday);
+    }
+    public void setFirstName(String firstName) {
+        this.firstName = DataValidation.verifyFirstName(firstName);
+    }
+    public void setLastName(String lastName) {
+        this.lastName = DataValidation.verifyLastName(lastName);
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringCreator(this).append("id", this.getId())
+                .append("firstName", this.getFirstName())
+                .append("lastName", this.getLastName())
+                .append("email", this.getEmail())
+                .append("phoneNumber", this.getPhoneNumber())
+                .append("resume", this.getResume())
+                .append("workday", this.getWorkday()).toString();
+    }
 
 }

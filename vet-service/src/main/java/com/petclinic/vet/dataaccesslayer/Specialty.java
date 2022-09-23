@@ -19,8 +19,6 @@ import org.hibernate.validator.constraints.UniqueElements;
 import javax.persistence.*;
 
 @Data
-@ToString
-@Builder
 @AllArgsConstructor
 @NoArgsConstructor
 
@@ -29,17 +27,20 @@ import javax.persistence.*;
 public class Specialty {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private String id;
+    private Integer id;
 
     @Column(name = "specialty_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @NotNull
-    // **** CHECK WHAT THIS DOES LATER **** //
     @UniqueElements(groups = Specialty.class)
-    //@Length(min = 6,max = 6, groups = Specialty.class)
-    private String specialtyId;
+    @Length(min = 6,max = 6, groups = Specialty.class)
+    private Integer specialtyId;
 
     @Column(name = "name")
     private String name;
+
+    public void setName(final String name) {
+        this.name = DataValidation.verifySpeciality(name);
+    }
 
 }

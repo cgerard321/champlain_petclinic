@@ -13,7 +13,6 @@ package com.petclinic.vet.servicelayer;
 
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
 public interface VetService {
 
     Flux<VetDTO> getAll();
@@ -21,4 +20,5 @@ public interface VetService {
     Mono<VetDTO> updateVet(String vetIdString, Mono<VetDTO> VetDTOMono);
     Mono<VetDTO> getVetByVetId(String vetIdString);
     Mono<Void> deleteVet(String vetIdString);
+    Flux<VetDTO> getVetByIsActive(boolean isActive);
 }

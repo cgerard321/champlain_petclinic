@@ -30,12 +30,22 @@ public class VetController {
     public Flux<VetDTO> getAllVets() {
         return vetService.getAll();
     }
+
     @GetMapping("{vetIdString}")
     public Mono<ResponseEntity<VetDTO>> getVetByVetId(@PathVariable String vetIdString) {
-        //System.out.println("getVetByVetId, VetController in Vet-Service");
         return vetService.getVetByVetId(vetIdString)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/active")
+    public Flux<VetDTO> getActiveVets() {
+        return vetService.getVetByIsActive(true);
+    }
+
+    @GetMapping("/inactive")
+    public Flux<VetDTO> getInactiveVets() {
+        return vetService.getVetByIsActive(false);
     }
 
     @PostMapping

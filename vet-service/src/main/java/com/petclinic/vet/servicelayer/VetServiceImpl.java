@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+
 @Service
 public class VetServiceImpl implements VetService {
 
@@ -34,7 +35,7 @@ public class VetServiceImpl implements VetService {
     public Mono<VetDTO> insertVet(Mono<VetDTO> vetDTOMono) {
         return vetDTOMono
                 .map(EntityDtoUtil::toEntity)
-                .doOnNext(e -> e.setVetId(EntityDtoUtil.generateVetIdString()))
+                .doOnNext(e -> e.setVetId(EntityDtoUtil.generateVetId()))
                 .flatMap((vetRepository::save))
                 .map(EntityDtoUtil::toDTO);
     }
@@ -53,8 +54,13 @@ public class VetServiceImpl implements VetService {
 
     @Override
     public Mono<VetDTO> getVetByVetId(String vetIdString) {
-        //System.out.println("getVetByVetId, VetService in Vet-Service");
         return vetRepository.findVetByVetId(vetIdString)
+                .map(EntityDtoUtil::toDTO);
+    }
+
+    @Override
+    public Flux<VetDTO> getVetByIsActive(boolean isActive) {
+        return vetRepository.findVetsByIsActive(isActive)
                 .map(EntityDtoUtil::toDTO);
     }
 
