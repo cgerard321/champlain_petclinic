@@ -18,6 +18,7 @@ public interface VisitRepo extends ReactiveCrudRepository<Visit, Integer> {
     Flux<Visit> findByPetIdIn(Collection<Integer> petIds);
 
     Flux<Visit> findVisitsByPractitionerId(int practitionerId);
+    Flux<Visit> findVisitsByPractitionerIdAndMonth(int practitionerId, int practitionerMonth);
 
     Flux<Visit> findAllByDateBetween(Date startingDate, Date EndDate);
 
