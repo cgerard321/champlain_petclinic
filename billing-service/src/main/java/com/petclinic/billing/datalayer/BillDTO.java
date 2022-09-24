@@ -8,17 +8,17 @@ import java.util.Date;
 
 public class BillDTO {
 
-    private int billId;
-    private int customerId;
-    private String visitType;
+    private int bill_id;
+    private int customer_id;
+    private String visit_type;
     private Date date;
     @Nullable
     private double amount;
 
     public BillDTO(){
-        billId = 0;
-        customerId = 0;
-        visitType = null;
+        bill_id = 0;
+        customer_id = 0;
+        visit_type = null;
         date = null;
         amount = 0;
 
@@ -26,48 +26,48 @@ public class BillDTO {
 
 
     public BillDTO(int billId,int customerId, String visitType, Date date, double amount){
-        this.billId = billId;
-        this.customerId = customerId;
-        this.visitType = visitType;
+        this.bill_id = billId;
+        this.customer_id = customerId;
+        this.visit_type = visitType;
         this.date = date;
         this.amount = amount;
     }
 
     public BillDTO(int billId,int customerId, Date date, String visitType){
-        this.billId = billId;
-        this.customerId = customerId;
+        this.bill_id = billId;
+        this.customer_id = customerId;
         this.date = date;
-        this.visitType = visitType;
+        this.visit_type = visitType;
     }
 
 
 
     public int getBillId(){
-        return billId;
+        return bill_id;
     }
-    public int getCustomerId(){return customerId;}
+    public int getCustomerId(){return customer_id;}
     public Date getDate(){
         return date;
     }
     public String getVisitType(){
-        return visitType;
+        return visit_type;
     }
     public double getAmount(){
         return amount;
     }
 
     public void setBillId(int billId){
-        this.billId = billId;
+        this.bill_id = billId;
     }
 
-    public void setCustomerId(int customerId){this.customerId = customerId;}
+    public void setCustomerId(int customerId){this.customer_id = customerId;}
 
     public void setDate(Date date){
         this.date = date;
     }
 
     public void setVisitType(String visitType){
-        this.visitType = visitType;
+        this.visit_type = visitType;
     }
 
     public void setAmount(double amount){

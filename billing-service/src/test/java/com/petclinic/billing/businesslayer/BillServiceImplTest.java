@@ -37,11 +37,11 @@ public class BillServiceImplTest {
     @Autowired
     BillService billService;
 
-    private Map<Integer, Bill> db;
-
-    private final int billId = 1;
-    private final int customerId = 1;
-
+//    private Map<Integer, Bill> db;
+//
+//    private final int billId = 1;
+//    private final int customerId = 1;
+/*
     @BeforeEach
     void setup() {
 
@@ -229,6 +229,6 @@ public class BillServiceImplTest {
             billService.GetBillByCustomerId(customerId);
         });
     }
-
+*/
 }
 

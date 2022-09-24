@@ -27,14 +27,14 @@ spring:
     password:
     initialization-mode: always
 
-  jpa:
-    show-sql: true
-    hibernate:
-      ddl-auto: none
+#  jpa:
+#    show-sql: true
+#    hibernate:
+#      ddl-auto: none
 
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.H2Dialect
+#    properties:
+#      hibernate:
+#        dialect: org.hibernate.dialect.H2Dialect
 
 spring.datasource.hikari.initializationFailTimeout: 60000
 
@@ -42,16 +42,13 @@ spring.datasource.hikari.initializationFailTimeout: 60000
 spring.profiles: docker
 
 spring:
-  datasource:
-    platform: mysql
-    url: jdbc:mysql://mysql5/billing-db
+  r2dbc:
+    url: r2dbc:mysql://mysql5/billing-db
     username: user
     password: pwd
-    initialization-mode: always
-
-  jpa:
-    hibernate:
-      ddl-auto: none
+#  datasource:
+#    platform: mysql
+#    initialization-mode: always
 
 spring.datasource.hikari.initializationFailTimeout: 60000
 
