@@ -21,14 +21,14 @@ public class BillResource {
     // Create Bill //
     @PostMapping("/bills")
     @ResponseStatus(HttpStatus.CREATED)
-    public Mono<BillDTO> createBill(@Valid @RequestBody BillDTO billDTO){
+    public Mono<BillDTO> createBill(@Valid @RequestBody Mono<BillDTO> billDTO){
         return SERVICE.CreateBill(billDTO);
     }
 
     // Read Bill //
-    @GetMapping(value = "/bills/{billId}")
-    public Mono<BillDTO> findBill(@PathVariable("billId") int billId){
-        return SERVICE.GetBill(billId);
+    @GetMapping(value = "/bills/{billUUID}")
+    public Mono<BillDTO> findBill(@PathVariable("billUUID") String billUUID){
+        return SERVICE.GetBill(billUUID);
     }
 
     @GetMapping(value = "/bills")
@@ -40,9 +40,9 @@ public class BillResource {
     public Flux<BillDTO> getBillByCustomerId(@PathVariable("customerId") int customerId) {return SERVICE.GetBillByCustomerId(customerId);}
 
     // Delete Bill //
-    @DeleteMapping(value = "/bills/{billId}")
+    @DeleteMapping(value = "/bills/{billUUID}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public Mono<Void> deleteBill(@PathVariable("billId") int billId){
-        return SERVICE.DeleteBill(billId);
+    public Mono<Void> deleteBill(@PathVariable("billUUID") String billUUID){
+        return SERVICE.DeleteBill(billUUID);
     }
 }

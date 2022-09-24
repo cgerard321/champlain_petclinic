@@ -26,20 +26,8 @@ public class BillServiceImpl implements BillService{
         this.billRepository = billRepository;
         this.billMapper = billMapper;
     }
-/*
-    private HashMap<String, Double> setUpVisitList(){
-        HashMap<String, Double> visitTypesPrices = new HashMap<String, Double>();
-        visitTypesPrices.put("Examinations", 59.99);
-        visitTypesPrices.put("Injury", 229.99);
-        visitTypesPrices.put("Medical", 109.99);
-        visitTypesPrices.put("Chronic", 89.99);
-        visitTypesPrices.put("Consultations", 39.99);
-        visitTypesPrices.put("Operations", 399.99);
-        return visitTypesPrices;
-    }
-*/
     @Override
-    public Mono<BillDTO> GetBill(int billId) {
+    public Mono<BillDTO> GetBill(String billUUID) {
 //        Bill bill = billRepository.findById(billId)
 //                .orElseThrow(() -> new NotFoundException("No bill found for billId: " + billId));
 
@@ -47,7 +35,7 @@ public class BillServiceImpl implements BillService{
 //        LOG.debug("Bill: GetBillByID: found bill ID: {}", billId);
 //        return response;
 
-        return billRepository.findByBillId(billId).map(EntityDtoUtil::toDto);
+        return billRepository.findByBillId(billUUID).map(EntityDtoUtil::toDto);
     }
 
     @Override
@@ -62,7 +50,7 @@ public class BillServiceImpl implements BillService{
     }
 
     @Override
-    public Mono<BillDTO> CreateBill(BillDTO model) {
+    public Mono<BillDTO> CreateBill(Mono<BillDTO> model) {
 //        if(model.getBillId() <= 0) {
 //            throw new InvalidInputException("That bill id does not exist");
 //        }
@@ -88,16 +76,26 @@ public class BillServiceImpl implements BillService{
 //            throw new InvalidInputException("Duplicate key, bill ID: " + entity.getId());
 //        }
 
-        return null;
-        //            /*return libraryDTOMono
-//                .map(EntityDtoUtil::toEntity)
-//                .doOnNext(e -> e.setLibraryUUID(EntityDtoUtil.generateUUIDString()))
-//                .flatMap(repository::insert)
-//                .map(EntityDtoUtil::toDto);*/
-    }
+
+            return model
+                    .map(EntityDtoUtil::toEntity)
+                    .doOnNext(e -> e.setBillId(EntityDtoUtil.generateUUIDString()))
+                    .flatMap(billRepository::insert)
+                    .map(EntityDtoUtil::toDto);
+        }
 
     @Override
-    public Mono<Void> DeleteBill(int billId) {
+    public Mono<BillDTO> SetUpBill(Mono<BillDTO> model) {
+
+        return model
+                .map(EntityDtoUtil::toEntity)
+                .flatMap(billRepository::insert)
+                .map(EntityDtoUtil::toDto);
+    }
+
+
+    @Override
+    public Mono<Void> DeleteBill(String billId) {
 //        LOG.debug("Delete for bill ID: {}", billId);
 //        billRepository.findById(billId).ifPresent(entity -> billRepository.delete(entity));
         return null;

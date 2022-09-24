@@ -1,30 +1,34 @@
 package com.petclinic.billing.datalayer;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import lombok.Data;
+import lombok.ToString;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.r2dbc.repository.config.EnableR2dbcRepositories;
-import org.springframework.data.relational.core.mapping.Table;
+//import org.springframework.data.r2dbc.repository.config.EnableR2dbcRepositories;
+//import org.springframework.data.relational.core.mapping.Table;
 
 import java.util.Date;
 
 //@EnableR2dbcRepositories
-@Table("billings")
+//@Table("billings")
+@Data
+@ToString
 public class Bill {
     @Id
     private Integer id;
 
-    private int bill_id;
+    private String billId;
 
-    private int customer_id;
+    private int customerId;
 
-    private String visit_type;
+    private String visitType;
 
 //    @Temporal(TemporalType.TIMESTAMP)
     @JsonFormat(pattern = "yyyy-MM-dd")
-    private Date visit_date = new Date();
+    private Date visitDate = new Date();
 
     private double amount;
-
+/*
     public Bill(){}
 
     public Bill(int billId,int customerId, String visitType, Date date, double amount){
@@ -65,4 +69,6 @@ public class Bill {
     public void setAmount(double amount) {
         this.amount = amount;
     }
+
+ */
 }

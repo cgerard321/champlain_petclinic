@@ -5,6 +5,8 @@ import com.petclinic.billing.datalayer.Bill;
 import com.petclinic.billing.datalayer.BillDTO;
 import org.springframework.beans.BeanUtils;
 
+import java.util.UUID;
+
 
 public class EntityDtoUtil {
 
@@ -18,5 +20,8 @@ public class EntityDtoUtil {
         Bill bill = new Bill();
         BeanUtils.copyProperties(dto, bill);
         return bill;
+    }
+    public static String generateUUIDString(){
+        return UUID.randomUUID().toString();
     }
 }
