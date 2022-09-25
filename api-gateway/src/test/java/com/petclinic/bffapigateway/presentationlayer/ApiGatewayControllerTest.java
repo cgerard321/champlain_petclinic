@@ -538,12 +538,10 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$.path").isEqualTo("/bills/100")
                 .jsonPath("$.message").isEqualTo(null);
-
     }
 
 
-
-
+    
     @Test
     void getPutRequestNotFound(){
         client.put()
@@ -572,16 +570,11 @@ class ApiGatewayControllerTest {
     void createBill(){
         BillDetails bill = new BillDetails();
         bill.setBillId("9");
-
         bill.setDate(null);
-
         bill.setAmount(600);
-
         bill.setVisitType("Adoption");
-
         when(billServiceClient.createBill(bill))
                 .thenReturn(Mono.just(bill));
-
 
         client.post()
                 .uri("/api/gateway/bills")
@@ -591,8 +584,6 @@ class ApiGatewayControllerTest {
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
-
-
 
         assertEquals(bill.getBillId(),"9");
     }

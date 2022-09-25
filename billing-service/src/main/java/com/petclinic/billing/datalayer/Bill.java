@@ -15,7 +15,7 @@ import java.util.Date;
 @ToString
 public class Bill {
     @Id
-    private Integer id;
+    private String id;
     private String billId;
     private int customerId;
     private String visitType;

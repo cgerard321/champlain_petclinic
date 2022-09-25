@@ -7,7 +7,9 @@ import java.util.Date;
 
 @Data
 @ToString
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class BillDTO {
 
     private String billId;
@@ -18,14 +20,6 @@ public class BillDTO {
     private double amount;
 
     public BillDTO(int customerId, String visitType, Date date, double amount) {
-        this.customerId = customerId;
-        this.visitType = visitType;
-        this.date = date;
-        this.amount = amount;
-    }
-
-    public BillDTO(String billId, int customerId, String visitType, Date date, double amount) {
-        this.billId = billId;
         this.customerId = customerId;
         this.visitType = visitType;
         this.date = date;
