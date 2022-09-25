@@ -144,17 +144,18 @@ public class CustomersServiceClient {
 //        }
 //    }
 
-    public Mono<ResponseMessage> setPhoto(MultipartFile file)
-            throws IOException {
-
-        PhotoDetails photo = new PhotoDetails().builder()
-                .name(file.getOriginalFilename())
-                .type(file.getContentType())
-                .photo(PhotoUtil.compressImage(file.getBytes())).build();
+    public Mono<String> setPhoto(PhotoDetails file){
         return webClientBuilder.build().post()
                 .uri(customersServiceUrl +"/upload/photo")
-                .body(just(photo), PhotoDetails.class)
-                .retrieve().bodyToMono(ResponseMessage.class);
+                .body(just(file), PhotoDetails.class)
+                .retrieve().bodyToMono(String.class);
+    }
+
+    public Mono<PhotoDetails> getPhoto(int id){
+        return webClientBuilder.build().get()
+                .uri(customersServiceUrl +"/photo/" + id)
+                .retrieve()
+                .bodyToMono(PhotoDetails.class);
     }
 
 //    public Mono<PhotoDetails> getPhoto(final int photoId) {

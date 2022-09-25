@@ -304,8 +304,13 @@ public class BFFApiGatewayController {
 
 
     @PostMapping(value = "owners/upload/photo")
-    public Mono<ResponseMessage> test(@RequestPart("photo") MultipartFile file) throws IOException {
-        return customersServiceClient.setPhoto(file);
+    public Mono<String> setPhoto(@RequestBody PhotoDetails photoDetails) {
+        return customersServiceClient.setPhoto(photoDetails);
+    }
+
+    @GetMapping(value = "owners/photo/{photoId}")
+    public Mono<PhotoDetails> getPhoto(@PathVariable int photoId) {
+        return customersServiceClient.getPhoto(photoId);
     }
 
 

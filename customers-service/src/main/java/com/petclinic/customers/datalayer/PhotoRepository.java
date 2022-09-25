@@ -5,5 +5,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PhotoRepository extends JpaRepository<Photo, String> {
+    public Photo findPhotoById(int id);
 
 }

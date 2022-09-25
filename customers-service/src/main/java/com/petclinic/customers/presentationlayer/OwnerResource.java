@@ -94,17 +94,14 @@ class OwnerResource {
 //    }
 
     @PostMapping(value = "/upload/photo")
-    public ResponseEntity<ResponseMessage> uploadImage(@RequestBody Photo photo)
-            throws IOException {
-
-//        photoRepository.save(Photo.builder()
-//                .name(file.getOriginalFilename())
-//                .type(file.getContentType())
-//                .photo(PhotoUtil.compressImage(file.getBytes())).build());
+    public String setPhoto(@RequestBody Photo photo){
         photoRepository.save(photo);
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new ResponseMessage("Image uploaded successfully: " +
-                        photo.getName()));
+        return "Image uploaded successfully: " + photo.getName();
+    }
+
+    @GetMapping(value = "/photo/{photoId}")
+    public Photo getPhoto(@PathVariable("photoId") int id) {
+         return photoRepository.findPhotoById(id);
     }
 
 }
