@@ -1,7 +1,7 @@
 USE
-`veterinarians-db`;
+`vet-db`;
 
-CREATE TABLE IF NOT EXISTS vets
+CREATE TABLE IF NOT EXISTS vet
 (
     id INT
 (
@@ -76,7 +76,7 @@ CREATE TABLE IF NOT EXISTS vet_specialties
     FOREIGN KEY
 (
     vet_id
-) REFERENCES vets
+) REFERENCES vet
 (
     id
 ),

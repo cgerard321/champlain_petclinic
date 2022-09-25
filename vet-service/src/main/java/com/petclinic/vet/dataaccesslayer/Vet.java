@@ -13,11 +13,9 @@ package com.petclinic.vet.dataaccesslayer;
 
 import com.petclinic.vet.servicelayer.DataValidation;
 import lombok.*;
-import org.hibernate.validator.constraints.UniqueElements;
 import org.springframework.core.style.ToStringCreator;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotEmpty;
 import java.util.Set;
 
 @Data
@@ -26,7 +24,7 @@ import java.util.Set;
 @Builder
 
 @Entity
-@Table(name = "vets")
+@Table(name = "vet")
 public class Vet {
 
     @org.springframework.data.annotation.Id

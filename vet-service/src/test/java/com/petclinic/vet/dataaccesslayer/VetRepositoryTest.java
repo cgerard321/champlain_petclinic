@@ -21,30 +21,20 @@ class VetRepositoryTest {
     public void getVetByVetId (){
         Vet vet = buildVet();
 
-
-        Publisher<Vet> find = vetRepository.findVetByVetId(234568);
-
+        Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(buildVet()));
         StepVerifier
-                .create(find)
+                .create(setup)
                 .consumeNextWith(foundVet -> {
-                    assertNotNull(foundVet.getVetId());
-                        })
-                .verifyComplete();
+                    assertEquals(vet.getVetId(), foundVet.getVetId());
+                    assertEquals(vet.getFirstName(), foundVet.getFirstName());
+                    assertEquals(vet.getLastName(), foundVet.getLastName());
+                    assertEquals(vet.getEmail(), foundVet.getEmail());
+                    assertEquals(vet.getPhoneNumber(), foundVet.getPhoneNumber());
+                    assertEquals(vet.getResume(), foundVet.getResume());
+                    assertEquals(vet.getWorkday(), foundVet.getWorkday());
+                })
 
-//        Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(buildVet()));
-//        StepVerifier
-//                .create(setup)
-//                .consumeNextWith(foundVet -> {
-//                    assertEquals(vet.getVetId(), foundVet.getVetId());
-//                    assertEquals(vet.getFirstName(), foundVet.getFirstName());
-//                    assertEquals(vet.getLastName(), foundVet.getLastName());
-//                    assertEquals(vet.getEmail(), foundVet.getEmail());
-//                    assertEquals(vet.getPhoneNumber(), foundVet.getPhoneNumber());
-//                    assertEquals(vet.getResume(), foundVet.getResume());
-//                    assertEquals(vet.getWorkday(), foundVet.getWorkday());
-//                })
-//
-//                .verifyComplete();
+                .verifyComplete();
     }
     @Test
     public void deleteVetByVetId () {
