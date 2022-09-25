@@ -31,9 +31,9 @@ public class VetController {
         return vetService.getAll();
     }
 
-    @GetMapping("{vetIdString}")
-    public Mono<ResponseEntity<VetDTO>> getVetByVetId(@PathVariable String vetIdString) {
-        return vetService.getVetByVetId(vetIdString)
+    @GetMapping("{vetId}")
+    public Mono<ResponseEntity<VetDTO>> getVetByVetId(@PathVariable Integer vetId) {
+        return vetService.getVetByVetId(vetId)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
@@ -53,16 +53,16 @@ public class VetController {
         return vetService.insertVet(vetDTOMono);
     }
 
-    @PutMapping("{vetIdString}")
-    public Mono<ResponseEntity<VetDTO>> updateVetByVetId(@PathVariable String vetIdString, @RequestBody Mono<VetDTO> vetDTOMono) {
-        return vetService.updateVet(vetIdString, vetDTOMono)
+    @PutMapping("{vetId}")
+    public Mono<ResponseEntity<VetDTO>> updateVetByVetId(@PathVariable Integer vetId, @RequestBody Mono<VetDTO> vetDTOMono) {
+        return vetService.updateVet(vetId, vetDTOMono)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @DeleteMapping("{vetIdString}")
-    public Mono<Void> deleteVet(@PathVariable String vetIdString) {
-        return vetService.deleteVet(vetIdString);
+    @DeleteMapping("{vetId}")
+    public Mono<Void> deleteVet(@PathVariable Integer vetId) {
+        return vetService.deleteVet(vetId);
     }
 
 

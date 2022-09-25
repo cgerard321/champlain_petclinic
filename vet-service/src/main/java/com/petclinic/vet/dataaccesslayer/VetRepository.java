@@ -13,19 +13,19 @@ package com.petclinic.vet.dataaccesslayer;
 
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import org.springframework.data.r2dbc.repository.R2dbcRepository;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Repository
-public interface VetRepository extends ReactiveCrudRepository<Vet, String> {
+public interface VetRepository extends R2dbcRepository<Vet, Integer> {
 
-    Mono<Vet> findVetByVetId(String vetId);
+    Mono<Vet> findVetByVetId(Integer vetId);
 
     @Modifying
     @Query(value = "DELETE FROM Vet v WHERE v.vetId=?1")
-    Mono<Void> deleteVetByVetId (String vetId);
+    Mono<Void> deleteVetByVetId (Integer vetId);
 
     Flux<Vet> findVetsByIsActive(boolean isActive);
 

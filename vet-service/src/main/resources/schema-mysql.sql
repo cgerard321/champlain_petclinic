@@ -1,7 +1,7 @@
 USE
-`veterinarians-db`;
+`vet-db`;
 
-CREATE TABLE IF NOT EXISTS vets
+CREATE TABLE IF NOT EXISTS vet
 (
     id INT
 (

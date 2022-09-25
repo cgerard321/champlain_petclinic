@@ -25,13 +25,12 @@ import java.util.Set;
 @AllArgsConstructor
 
 @Entity
-@Table(name = "veterinarians")
+@Table(name = "vet")
 public class Vet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-
 
     @Column(name = "vet_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)

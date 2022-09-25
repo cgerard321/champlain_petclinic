@@ -22,7 +22,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class VetDTO {
-    private String vetId;
+    private Integer vetId;
     private String firstName;
     private String lastName;
     private String email;
