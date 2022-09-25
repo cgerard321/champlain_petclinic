@@ -7,11 +7,15 @@ import com.sun.imageio.plugins.common.ImageUtil;
 import io.swagger.models.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -293,6 +297,20 @@ public class BFFApiGatewayController {
     public Mono<OwnerDetails> createOwner(@RequestBody OwnerDetails model){
         return customersServiceClient.createOwner(model);
     }
+
+
+
+
+
+
+    @PostMapping(value = "owners/upload/photo")
+    public Mono<ResponseMessage> test(@RequestPart("photo") MultipartFile file) throws IOException {
+        return customersServiceClient.setPhoto(file);
+    }
+
+
+
+
 
     @PutMapping(value = "owners/{ownerId}",consumes = "application/json" ,produces = "application/json")
     public Mono<OwnerDetails> updateOwnerDetails(@PathVariable int ownerId, @RequestBody OwnerDetails od) {

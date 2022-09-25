@@ -10,9 +10,11 @@ import com.petclinic.customers.util.PhotoUtil;
 import io.micrometer.core.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.spring.web.json.Json;
@@ -78,17 +80,31 @@ class OwnerResource {
 
 
 
-    @PostMapping("/upload/photo")
-    public ResponseEntity<ResponseMessage> uploadImage(@RequestParam("image") MultipartFile file)
+//    @PostMapping("/upload/photo")
+//    public ResponseEntity<ResponseMessage> uploadImage(@RequestParam("image") MultipartFile file)
+//            throws IOException {
+//
+//        photoRepository.save(Photo.builder()
+//                .name(file.getOriginalFilename())
+//                .type(file.getContentType())
+//                .photo(PhotoUtil.compressImage(file.getBytes())).build());
+//        return ResponseEntity.status(HttpStatus.OK)
+//                .body(new ResponseMessage("Image uploaded successfully: " +
+//                        file.getOriginalFilename()));
+//    }
+
+    @PostMapping(value = "/upload/photo")
+    public ResponseEntity<ResponseMessage> uploadImage(@RequestBody Photo photo)
             throws IOException {
 
-        photoRepository.save(Photo.builder()
-                .name(file.getOriginalFilename())
-                .type(file.getContentType())
-                .photo(PhotoUtil.compressImage(file.getBytes())).build());
+//        photoRepository.save(Photo.builder()
+//                .name(file.getOriginalFilename())
+//                .type(file.getContentType())
+//                .photo(PhotoUtil.compressImage(file.getBytes())).build());
+        photoRepository.save(photo);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new ResponseMessage("Image uploaded successfully: " +
-                        file.getOriginalFilename()));
+                        photo.getName()));
     }
 
 }
