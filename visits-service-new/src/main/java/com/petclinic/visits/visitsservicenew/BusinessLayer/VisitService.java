@@ -30,7 +30,7 @@ public interface VisitService {
 
     Flux<VisitDTO> getVisitsForPractitioner(int practitionerId); //this is to get the practitioner by their Id
 
-    Flux<VisitDTO> getVisitsByPractitionerIdAndMonth(int practitionerId, Date practitionerMonth); //this is the same thing as the one on top but its also by month
+    Flux<VisitDTO> getVisitsByPractitionerIdAndMonth(int practitionerId, int month); //this is the same thing as the one on top but its also by month
 
     //Boolean validateVisitId(String visitId); //ZERO clue what this does, at the moment im not gonna touch this
 }

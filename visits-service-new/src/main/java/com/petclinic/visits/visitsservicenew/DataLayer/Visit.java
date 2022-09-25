@@ -15,7 +15,11 @@ public class Visit {
 
     private String visitId;
 
-    private Date date = new Date();
+    private int year;
+
+    private int month;
+
+    private int day;
 
     private String description;
 

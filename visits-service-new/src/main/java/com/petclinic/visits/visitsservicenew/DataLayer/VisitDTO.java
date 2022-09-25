@@ -13,16 +13,22 @@ import java.util.UUID;
 public class VisitDTO {
 
     private String visitId;
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    private Date date;
+
+    private int year;
+
+    private int month;
+
+    private int day;
     private String description;
     private int petId;
     private int practitionerId;
     private boolean status;
 
-    public VisitDTO(String visitId, Date date, String description, int petId, int practitionerId, boolean status) {
+    public VisitDTO(String visitId, int year, int month, int day, String description, int petId, int practitionerId, boolean status) {
         this.visitId = visitId;
-        this.date = date;
+        this.year = year;
+        this.month = month;
+        this.day = day;
         this.description = description;
         this.petId = petId;
         this.practitionerId = practitionerId;

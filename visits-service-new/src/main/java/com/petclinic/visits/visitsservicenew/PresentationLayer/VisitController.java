@@ -51,19 +51,15 @@ public class VisitController {
          return visitService.deleteVisit(visitId);
     }
 
-    @GetMapping("practitioner/visits/{practitionerId}/{practitionerDate}")
-    public Flux<ResponseEntity<VisitDTO>> getVisitsByPractitionerIdAndMonth(@PathVariable int practitionerId, @PathVariable Date practitionerDate){
+    @GetMapping("practitioner/{practitionerId}/{month}")
+    public Flux<VisitDTO> getVisitsByPractitionerIdAndMonth(@PathVariable int practitionerId, @PathVariable int month){
 
-        return visitService.getVisitsByPractitionerIdAndMonth(practitionerId, practitionerDate)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+        return visitService.getVisitsByPractitionerIdAndMonth(practitionerId, month);
     }
 
-    @GetMapping("visits/{petId}")
-    public Flux<ResponseEntity<VisitDTO>> getVisitsForPet(int petId){
+    @GetMapping("/pets/{petId}")
+    public Flux<VisitDTO> getVisitsForPet(@PathVariable int petId){
 
-        return visitService.getVisitsForPet(petId)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+        return visitService.getVisitsForPet(petId);
     }
 }

@@ -71,8 +71,8 @@ public class VisitServiceImpl implements VisitService {
     }
 
     @Override
-    public Flux<VisitDTO> getVisitsByPractitionerIdAndMonth(int practitionerId, Date practitionerMonth) {
-        return repo.findVisitsByPractitionerIdAndDate(practitionerId, practitionerMonth)
+    public Flux<VisitDTO> getVisitsByPractitionerIdAndMonth(int practitionerId, int month) {
+        return repo.findVisitsByPractitionerIdAndMonth(practitionerId, month)
                 .map(EntityDtoUtil::toDTO);
     }
 

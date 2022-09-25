@@ -18,9 +18,9 @@ public interface VisitRepo extends ReactiveMongoRepository<Visit, Integer> {
     Flux<Visit> findByPetIdIn(Collection<Integer> petIds);
 
     Flux<Visit> findVisitsByPractitionerId(int practitionerId);
-    Flux<Visit> findVisitsByPractitionerIdAndDate(int practitionerId, Date practitionerDate);
+    Flux<Visit> findVisitsByPractitionerIdAndMonth(int practitionerId, int month);
 
-    Flux<Visit> findAllByDateBetween(Date startingDate, Date EndDate);
+    Flux<Visit> findAllByMonthBetween(int startingDay, int endingDay);
 
     Mono<Visit> findByVisitId(String visitId);
 }
