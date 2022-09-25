@@ -29,7 +29,7 @@ public class BillServiceClient {
 
     }
 
-    public Mono<BillDetails> getBilling(final int billId) {
+    public Mono<BillDetails> getBilling(final String billId) {
         return webClientBuilder.build().get()
                 .uri(billServiceUrl + "/{billId}", billId)
                 .retrieve()
@@ -51,7 +51,7 @@ public class BillServiceClient {
                 .retrieve().bodyToMono(BillDetails.class);
     }
 
-    public Mono<Void> deleteBill(final int billId) {
+    public Mono<Void> deleteBill(final String billId) {
         return webClientBuilder.build()
                 .delete()
                 .uri(billServiceUrl + "/{billId}", billId)

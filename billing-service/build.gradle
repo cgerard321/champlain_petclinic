@@ -1,6 +1,6 @@
 plugins {
-	id 'org.springframework.boot' version '2.3.2.RELEASE'
-	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+	id 'org.springframework.boot' version '2.7.3'
+	id 'io.spring.dependency-management' version '1.0.13.RELEASE'
 	id 'java'
 //	id "io.freefair.lombok" version "6.0.0-m2"
 	id 'jacoco'
@@ -20,7 +20,7 @@ repositories {
 }
 
 dependencies {
-//	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 //	implementation('org.springframework.boot:spring-boot-starter-data-jpa')
 	// https://mvnrepository.com/artifact/dev.miku/r2dbc-mysql
@@ -41,14 +41,13 @@ dependencies {
 	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 	testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
 
-	runtimeOnly 'com.h2database:h2'
-
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'io.projectreactor:reactor-test'
-	testImplementation('com.h2database:h2')
+	//	runtimeOnly 'com.h2database:h2'
+//	testImplementation('com.h2database:h2')
 
 }
 

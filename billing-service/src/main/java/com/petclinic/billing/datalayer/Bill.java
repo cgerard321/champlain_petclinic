@@ -16,17 +16,12 @@ import java.util.Date;
 public class Bill {
     @Id
     private Integer id;
-
     private String billId;
-
     private int customerId;
-
     private String visitType;
-
 //    @Temporal(TemporalType.TIMESTAMP)
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date visitDate = new Date();
-
     private double amount;
 /*
     public Bill(){}

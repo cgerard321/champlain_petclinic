@@ -98,7 +98,7 @@ public class BillServiceImpl implements BillService{
     public Mono<Void> DeleteBill(String billId) {
 //        LOG.debug("Delete for bill ID: {}", billId);
 //        billRepository.findById(billId).ifPresent(entity -> billRepository.delete(entity));
-        return null;
+        return billRepository.deleteBillByBillId(billId);
     }
 
     @Override
@@ -114,6 +114,6 @@ public class BillServiceImpl implements BillService{
             }
             return response;
 */
-return null;
+        return billRepository.findByCustomerId(customerId).map(EntityDtoUtil::toDto);
     }
 }
