@@ -31,7 +31,7 @@ services:
         build: customers-service
         hostname: customers
         ports:
-        - "8080:8080"
+            - "8080:8080"
         #mem_limit: 350m
         environment:
             - SPRING_PROFILES_ACTIVE=docker
