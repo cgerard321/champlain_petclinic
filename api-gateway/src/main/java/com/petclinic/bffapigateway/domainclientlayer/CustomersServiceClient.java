@@ -5,6 +5,8 @@ import com.petclinic.bffapigateway.dtos.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -115,13 +117,12 @@ public class CustomersServiceClient {
                 .bodyToMono(OwnerDetails.class);
     }
 
-    public Mono<PhotoDetails> createPhoto (PhotoDetails model){
-        return webClientBuilder.build().post()
-                .uri(customersServiceUrl)
-                .accept(MediaType.MULTIPART_FORM_DATA)
-                .body(Mono.just(model), PhotoDetails.class)
-                .retrieve().bodyToMono(PhotoDetails.class);
-    }
+//    public Mono<ResponseMessage> setPhoto (MultipartFile file){
+//        return webClientBuilder.build().post()
+//                .uri(customersServiceUrl)
+//                .contentType(MediaType.IMAGE_JPEG)
+//                .body(BodyInserters.fromMultipartData(file))
+//    }
 
 //    public Mono<PhotoDetails> getPhoto(final int photoId) {
 //        return webClientBuilder.build().get()
