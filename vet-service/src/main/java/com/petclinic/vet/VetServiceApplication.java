@@ -15,15 +15,14 @@ import io.r2dbc.spi.ConnectionFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.boot.SpringApplication;
+
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.r2dbc.connection.init.CompositeDatabasePopulator;
-import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
-import org.springframework.r2dbc.connection.init.ResourceDatabasePopulator;
+import org.springframework.data.r2dbc.connectionfactory.init.CompositeDatabasePopulator;
+import org.springframework.data.r2dbc.connectionfactory.init.ConnectionFactoryInitializer;
+import org.springframework.data.r2dbc.connectionfactory.init.ResourceDatabasePopulator;
+
 
 @SpringBootApplication
-//@ComponentScan("com.petclinic")
 public class VetServiceApplication {
     @Bean
     public ConnectionFactoryInitializer initializer(ConnectionFactory connectionFactory) {
@@ -32,8 +31,8 @@ public class VetServiceApplication {
         initializer.setConnectionFactory(connectionFactory);
 
         CompositeDatabasePopulator populator = new CompositeDatabasePopulator();
-        populator.addPopulators(new ResourceDatabasePopulator(new ClassPathResource("schema-h2.sql")));
-        populator.addPopulators(new ResourceDatabasePopulator(new ClassPathResource("data-h2.sql")));
+        populator.addPopulators(new ResourceDatabasePopulator(new ClassPathResource("schema.sql")));
+        populator.addPopulators(new ResourceDatabasePopulator(new ClassPathResource("data.sql")));
         initializer.setDatabasePopulator(populator);
 
         return initializer;

@@ -1,0 +1,47 @@
+INSERT INTO vets (vet_id, first_name, last_name, email, phone_number, image, resume, workday, is_active)
+VALUES (234568, 'James', 'Carter', 'carter.james@email.com', '(514)-634-8276 #2384', NULL,
+        'Practicing since 3 years', 'Monday, Tuesday, Friday', 1);
+
+INSERT INTO vets (vet_id, first_name, last_name, email, phone_number, image, resume, workday, is_active)
+VALUES (327874, 'Helen', 'Leary', 'leary.helen@email.com', '(514)-634-8276 #2385', NULL, 'Practicing since 10 years',
+        'Wednesday, Thursday', 1);
+
+INSERT INTO vets (vet_id, first_name, last_name, email, phone_number, image, resume, workday, is_active)
+VALUES (238372, 'Linda', 'Douglas', 'douglas.linda@email.com', '(514)-634-8276 #2386', NULL,
+        'Practicing since 5 years', 'Monday, Wednesday, Thursday', 1);
+
+INSERT INTO vets (vet_id, first_name, last_name, email, phone_number, image, resume, workday, is_active)
+VALUES (823097, 'Rafael', 'Ortega', 'ortega.rafael@email.com', '(514)-634-8276 #2387', NULL,
+        'Practicing since 8 years', 'Wednesday, Thursday, Friday', 0);
+
+INSERT INTO vets (vet_id, first_name, last_name, email, phone_number, image, resume, workday, is_active)
+VALUES (842370, 'Henry', 'Stevens', 'stevens.henry@email.com', '(514)-634-8276 #2389', NULL,
+        'Practicing since 1 years', 'Monday, Tuesday, Wednesday, Thursday', 0);
+
+INSERT INTO vets (vet_id, first_name, last_name, email, phone_number, image, resume, workday, is_active)
+VALUES (784233, 'Sharon', 'Jenkins', 'jenkins.sharon@email.com', '(514)-634-8276 #2383', NULL,
+        'Practicing since 6 years', 'Monday, Tuesday, Friday', 0);
+
+INSERT INTO specialties (specialty_id, name)
+VALUES (100001, 'radiology');
+INSERT INTO specialties (specialty_id, name)
+VALUES (100002, 'surgery');
+INSERT INTO specialties (specialty_id, name)
+VALUES (100003, 'dentistry');
+INSERT INTO specialties (specialty_id, name)
+VALUES (100004, 'general');
+
+INSERT INTO vet_specialties
+VALUES (1, 4);
+INSERT INTO vet_specialties
+VALUES (2, 1);
+INSERT INTO vet_specialties
+VALUES (3, 2);
+INSERT INTO vet_specialties
+VALUES (3, 3);
+INSERT INTO vet_specialties
+VALUES (4, 2);
+INSERT INTO vet_specialties
+VALUES (5, 1);
+INSERT INTO vet_specialties
+VALUES (6, 4);

@@ -11,10 +11,8 @@ package com.petclinic.vet.dataaccesslayer;
   * Ticket: feat(VVS-CPC-553): add veterinarian
  */
 import com.petclinic.vet.servicelayer.DataValidation;
-import com.sun.istack.NotNull;
 import lombok.*;
-import org.hibernate.validator.constraints.Length;
-import org.hibernate.validator.constraints.UniqueElements;
+
 
 import javax.persistence.*;
 
@@ -25,15 +23,13 @@ import javax.persistence.*;
 @Entity
 @Table(name = "specialties")
 public class Specialty {
+
+    @org.springframework.data.annotation.Id
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Column(name = "specialty_id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @NotNull
-    @UniqueElements(groups = Specialty.class)
-    @Length(min = 6,max = 6, groups = Specialty.class)
     private Integer specialtyId;
 
     @Column(name = "name")

@@ -15,30 +15,33 @@ logging:
 # recommend setting this to "none" in a production environment
 # spring.jpa.hibernate.ddl-auto: none
 #h2 profile
+spring.profiles: h2
+
+# recommend setting this to "none" in a production environment
+# spring.jpa.hibernate.ddl-auto: none
+
+#for h2
 spring:
-  config:
-    activate:
-      on-profile: h2
   h2:
     console:
       enabled: true
+
   datasource:
-    url: jdbc:h2:mem:vet-db;DB_CLOSE_DELAY=-1
+    platform: h2
+    url: jdbc:h2:mem:veterinarians-db;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false;
     driver-class-name: org.h2.Driver
     username: sa
     password:
+    initialization-mode: always
+
   jpa:
     show-sql: true
     hibernate:
       ddl-auto: none
+
     properties:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
-    defer-datasource-initialization: true
-  sql:
-    init:
-      platform: h2
-      mode: always
 
 #for real
 #spring.datasource:

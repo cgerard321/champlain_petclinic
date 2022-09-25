@@ -12,9 +12,8 @@ public class R2DBCConfiguration extends AbstractR2dbcConfiguration {
         public H2ConnectionFactory connectionFactory() {
             return new H2ConnectionFactory(
                     H2ConnectionConfiguration.builder()
-                            .url("mem:vet-db")
+                            .url("mem:veterinarians-db")
                             .username("sa")
                             .build());
         }
     }
-

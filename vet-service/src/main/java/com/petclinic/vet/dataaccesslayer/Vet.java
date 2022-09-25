@@ -24,43 +24,37 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+
 @Entity
-@Table(name = "vet")
+@Table(name = "vets")
 public class Vet {
 
+    @org.springframework.data.annotation.Id
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Column(name = "vet_id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @UniqueElements(groups = Vet.class)
     private Integer vetId;
 
     @Column(name = "first_name")
-    @NotEmpty
     private String firstName;
 
     @Column(name = "last_name")
-    @NotEmpty
     private String lastName;
 
     @Column(name = "email")
-    @NotEmpty
     private String email;
 
     @Column(name = "phone_number")
-    @NotEmpty
     private String phoneNumber;
 
     @Column(name = "image")
     @Lob
-    @Basic(fetch = FetchType.LAZY)
     private byte[] image;
 
     @Column(name = "resume")
     private String resume;
-
 
     @Column(name = "workday")
     private String workday;

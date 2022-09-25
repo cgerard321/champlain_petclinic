@@ -1,7 +1,7 @@
 USE
-`vet-db`;
+`veterinarians-db`;
 
-CREATE TABLE IF NOT EXISTS vet
+CREATE TABLE IF NOT EXISTS vets
 (
     id INT
 (
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS vet
 (
     250
 ),
-    is_active BIT,
+    is_active TINYINT,
     INDEX
 (
     last_name
