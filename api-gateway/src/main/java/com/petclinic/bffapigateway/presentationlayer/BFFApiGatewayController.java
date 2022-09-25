@@ -40,6 +40,7 @@ public class BFFApiGatewayController {
     private final BillServiceClient billServiceClient;
 
 
+
     @GetMapping(value = "bills/{billId}")
     public Mono<BillDetails> getBillingInfo(final @PathVariable int billId)
     {
@@ -68,7 +69,6 @@ public class BFFApiGatewayController {
 
 
     }
-
 
     @PostMapping(value = "owners/{ownerId}/pets" , produces = "application/json", consumes = "application/json")
     public Mono<PetDetails> createPet(@RequestBody PetDetails pet, @PathVariable int ownerId){
