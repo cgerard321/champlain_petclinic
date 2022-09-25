@@ -1,46 +1,29 @@
 package com.petclinic.customers.businesslayer;
 
-import com.petclinic.customers.customerExceptions.exceptions.InvalidInputException;
-import com.petclinic.customers.customerExceptions.exceptions.NotFoundException;
 import com.petclinic.customers.datalayer.Photo;
 import com.petclinic.customers.datalayer.PhotoRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.dao.DuplicateKeyException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
+import java.util.stream.Stream;
 
-import java.util.Optional;
+import java.io.IOException;
 
 @Service
-public class PhotoServiceImpl implements PhotoService{
+public class PhotoServiceImpl {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PhotoServiceImpl.class);
-    private final PhotoRepository repository;
+    @Autowired
+    private PhotoRepository photoRepository;
 
-    public PhotoServiceImpl(PhotoRepository repository) {
-        this.repository = repository;
-    }
+//    public Photo store(MultipartFile photo) throws IOException {
+//        String photoName = StringUtils.cleanPath(photo.getOriginalFilename());
+//        Photo Photo = new Photo(photoName, photo.getContentType(), photo.getBytes());
+//
+//        return photoRepository.save(Photo);
+//    }
 
-
-    @Override
-    public Photo uploadPhoto(Photo photo) {
-        try{
-            LOG.debug("uploadPhoto: photo with id {} saved",photo.getPhotoId());
-            return repository.save(photo);
-        }
-        catch(DuplicateKeyException duplicateKeyException){
-            throw new InvalidInputException("Duplicate key, photoId: " + photo.getPhotoId());
-        }
-    }
-
-    @Override
-    public Optional<Photo> findPhotoById(Integer photoId) {
-        try {
-            Optional<Photo> photo = repository.findPhotoById(photoId);
-            LOG.debug("Photo with ID: " + photoId + " has been found");
-            return photo;
-        } catch (Exception e) {
-            throw new NotFoundException("Photo with ID: " + photoId + " is not found!");
-        }
-    }
+//    public Photo getPhoto(String id) {
+//        return photoRepository.findById(id).get();
+//    }
 }

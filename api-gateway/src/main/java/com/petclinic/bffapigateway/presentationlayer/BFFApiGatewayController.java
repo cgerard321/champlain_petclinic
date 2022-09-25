@@ -307,21 +307,14 @@ public class BFFApiGatewayController {
         return customersServiceClient.deleteOwner(ownerId);
     }
 
+
     /**
      * End of Owner Methods
      * **/
 
-    @PostMapping(value = "owners/photo",
-                    consumes = "application/json",
-                    produces = "application/json")
-    public Mono<PhotoDetails> createPhoto(@RequestBody Optional<PhotoDetails> photo) {
-        return customersServiceClient.addPhoto(photo);
-    }
 
-    @GetMapping("owners/{ownerId}/photo/{photoId}")
-    public Mono<PhotoDetails> getPhoto(@PathVariable int ownerId, @PathVariable int photoId ) {
-        return customersServiceClient.getPhoto(photoId);
-    }
+
+
 
     @GetMapping("/verification/{token}")
     public Mono<UserDetails> verifyUser(@PathVariable final String token) {

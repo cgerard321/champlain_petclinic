@@ -115,19 +115,21 @@ public class CustomersServiceClient {
                 .bodyToMono(OwnerDetails.class);
     }
 
-    public Mono<PhotoDetails> addPhoto (Optional<PhotoDetails> model){
+    public Mono<PhotoDetails> createPhoto (PhotoDetails model){
         return webClientBuilder.build().post()
-                .uri(customersServiceUrl + "/upload/photo")
-                .accept(MediaType.IMAGE_JPEG)
+                .uri(customersServiceUrl)
+                .accept(MediaType.MULTIPART_FORM_DATA)
                 .body(Mono.just(model), PhotoDetails.class)
                 .retrieve().bodyToMono(PhotoDetails.class);
     }
 
-    public Mono<PhotoDetails> getPhoto(final int photoId){
-        return webClientBuilder.build().get()
-                .uri(customersServiceUrl + "/get/photo/" + photoId)
-                .retrieve()
-                .bodyToMono(PhotoDetails.class);
-    }
+//    public Mono<PhotoDetails> getPhoto(final int photoId) {
+//        return webClientBuilder.build().get()
+//                .uri(customersServiceUrl + ownerId)
+//                .retrieve()
+//                .bodyToMono(OwnerDetails.class);
+//    }
+
+
 
 }

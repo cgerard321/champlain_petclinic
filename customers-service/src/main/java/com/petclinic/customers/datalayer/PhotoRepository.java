@@ -1,15 +1,9 @@
 package com.petclinic.customers.datalayer;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
+@Repository
+public interface PhotoRepository extends JpaRepository<Photo, String> {
 
-import static org.springframework.http.HttpHeaders.FROM;
-
-public interface PhotoRepository extends JpaRepository<Photo, Integer> {
-
-    @Query("FROM Photo cPhoto WHERE cPhoto.photoId = :photoId")
-    Optional<Photo> findPhotoById(@Param("photoId") int photoId);
 }

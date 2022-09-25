@@ -31,11 +31,7 @@ public class OwnerDetails {
 
     private String telephone;
 
-    //private final Optional<PhotoDetails> photo = new Optional<PhotoDetails>();
     private final List<PetDetails> pets = new ArrayList<>();
-
-//    @JsonIgnore
-//    public Optional<PhotoDetails>
 
     @JsonIgnore
     public List<Integer> getPetIds() {

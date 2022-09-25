@@ -3,15 +3,23 @@ package com.petclinic.customers.presentationlayer;
 import com.petclinic.customers.businesslayer.OwnerService;
 import com.petclinic.customers.customerExceptions.exceptions.NotFoundException;
 import com.petclinic.customers.datalayer.Owner;
+import com.petclinic.customers.datalayer.Photo;
+import com.petclinic.customers.datalayer.PhotoRepository;
+import com.petclinic.customers.datalayer.ResponseMessage;
+import com.petclinic.customers.util.PhotoUtil;
 import io.micrometer.core.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import springfox.documentation.spring.web.json.Json;
 
 import javax.print.attribute.standard.Media;
 import javax.validation.Valid;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,6 +39,9 @@ import java.util.Optional;
 @Slf4j
 class OwnerResource {
     private final OwnerService ownerService;
+
+    @Autowired
+    PhotoRepository photoRepository;
 
     OwnerResource(OwnerService ownerService) {
         this.ownerService = ownerService;
@@ -63,6 +74,21 @@ class OwnerResource {
     @DeleteMapping(value = "/{ownerId}")
     public void deleteOwner(@PathVariable("ownerId") int ownerId) {
         ownerService.deleteOwner(ownerId);
+    }
+
+
+
+    @PostMapping("/upload/photo")
+    public ResponseEntity<ResponseMessage> uploadImage(@RequestParam("image") MultipartFile file)
+            throws IOException {
+
+        photoRepository.save(Photo.builder()
+                .name(file.getOriginalFilename())
+                .type(file.getContentType())
+                .photo(PhotoUtil.compressImage(file.getBytes())).build());
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ResponseMessage("Image uploaded successfully: " +
+                        file.getOriginalFilename()));
     }
 
 }
