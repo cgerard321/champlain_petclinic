@@ -2,17 +2,19 @@ package com.petclinic.visits.visitsservicenew.BusinessLayer;
 
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitDTO;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitIdLessDTO;
+import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Date;
-import java.util.List;
+import java.util.UUID;
 
+@Service
 public interface VisitService {
 
     //first comments by Josh
 
-    Mono<VisitIdLessDTO> addVisit(Mono<VisitIdLessDTO> visit); //this is to add a visit it's in the name
+    Mono<VisitDTO> addVisit(Mono<VisitDTO> visit); //this is to add a visit it's in the name
 
     Flux<VisitDTO> getVisitsForPet(int petId); //im assuming this is to get the visits by the petId
 

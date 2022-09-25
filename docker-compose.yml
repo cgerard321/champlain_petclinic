@@ -7,6 +7,15 @@ services:
             - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
             - ./nginx/njs:/etc/nginx/njs
 
+    visits-service-new:
+        build: visits-service-new
+        ports:
+            - "8080:8080"
+        environment:
+            - SPRING_PROFILES_ACTIVE=docker
+        depends_on:
+            - mongo
+
     visits:
         build: visits-service
         hostname: visits
@@ -81,6 +90,36 @@ services:
             - SMTP_SERVER=smtp.gmail.com
         env_file:
             - mailer.env
+
+
+    mongo:
+        image: mongo
+        container_name: mongo
+        restart: always
+        ports:
+            - 27017:27017
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: root
+            MONGO_INITDB_ROOT_PASSWORD: password
+        healthcheck:
+            test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
+            retries: 5
+            interval: 15s
+            start_period: 30s
+
+    mongo-express:
+        image: mongo-express
+        restart: always
+        environment:
+            - ME_CONFIG_MONGODB_ADMINUSERNAME=root
+            - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+            - ME_CONFIG_MONGODB_SERVER=mongo
+            - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
+        ports:
+            - 8081:8081
+        depends_on:
+            - mongo
+            - visits-service-new
 
     mysql1:
         image: mysql:5.7

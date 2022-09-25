@@ -4,7 +4,6 @@ package com.petclinic.visits.visitsservicenew.PresentationLayer;
 import com.petclinic.visits.visitsservicenew.BusinessLayer.VisitService;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitDTO;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitIdLessDTO;
-import io.micrometer.core.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -13,30 +12,28 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Date;
+import java.util.UUID;
 
 @RestController
-@Slf4j
-@Timed("petclinic.visit")
+@RequestMapping("visits")
 public class VisitController {
 
     @Autowired
     VisitService visitService;
 
-    @GetMapping("visits/{visitId}")
+    @GetMapping("/{visitId}")
     public Mono<ResponseEntity<VisitDTO>> getVisitByVisitId(@PathVariable String visitId){
         return visitService.getVisitByVisitId(visitId)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
     @GetMapping("practitioner/visits/{practitionerId}")
-    public Flux<ResponseEntity<VisitDTO>> getVisitByPractitionerId(@PathVariable int practitionerId){
-        return visitService.getVisitsForPractitioner(practitionerId)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    public Flux<VisitDTO> getVisitByPractitionerId(@PathVariable int practitionerId){
+        return visitService.getVisitsForPractitioner(practitionerId);
     }
 
     @PostMapping("owners/*/pets/{petId}/visits")
-    public Mono<VisitIdLessDTO> addVisit(@RequestBody Mono<VisitIdLessDTO> visitIdLessDTOMono){
+    public Mono<VisitDTO> addVisit(@RequestBody Mono<VisitDTO> visitIdLessDTOMono){
         return visitService.addVisit(visitIdLessDTOMono);
     }
 
@@ -49,15 +46,15 @@ public class VisitController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @DeleteMapping("visits/{visitId}")
+    @DeleteMapping("/{visitId}")
     public Mono<Void> deleteVisit(@PathVariable("visitId") String visitId) {
          return visitService.deleteVisit(visitId);
     }
 
-    @GetMapping("practitioner/visits/{practitionerId}/{month")
-    public Flux<ResponseEntity<VisitDTO>> getVisitsByPractitionerIdAndMonth(@PathVariable int practitionerId, @PathVariable Date practitionerMonth){
+    @GetMapping("practitioner/visits/{practitionerId}/{practitionerDate}")
+    public Flux<ResponseEntity<VisitDTO>> getVisitsByPractitionerIdAndMonth(@PathVariable int practitionerId, @PathVariable Date practitionerDate){
 
-        return visitService.getVisitsByPractitionerIdAndMonth(practitionerId, practitionerMonth)
+        return visitService.getVisitsByPractitionerIdAndMonth(practitionerId, practitionerDate)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }

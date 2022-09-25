@@ -1,10 +1,11 @@
 server:
-  port: 1454
+  error:
+    include-message: always
 
 logging:
   level:
     root: INFO
-    com.gerard: DEBUG
+    com.petclinic: DEBUG
 
 spring:
   config:

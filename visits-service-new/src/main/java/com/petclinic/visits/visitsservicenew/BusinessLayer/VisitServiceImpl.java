@@ -17,15 +17,15 @@ import java.util.UUID;
 public class VisitServiceImpl implements VisitService {
 
     @Autowired
-    VisitRepo repo;
+    private VisitRepo repo;
 
 
     @Override
-    public Mono<VisitIdLessDTO> addVisit(Mono<VisitIdLessDTO> visitIdLessDTOMono) {
+    public Mono<VisitDTO> addVisit(Mono<VisitDTO> visitIdLessDTOMono) {
         return visitIdLessDTOMono
-                .map(EntityDtoUtil::IdlesstoEntity)
+                .map(EntityDtoUtil::toEntity)
                 .flatMap(repo::save)
-                .map(EntityDtoUtil::toIdLessDTO);
+                .map(EntityDtoUtil::toDTO);
     }
 
     @Override
@@ -41,19 +41,19 @@ public class VisitServiceImpl implements VisitService {
 
     @Override
     public Mono<VisitDTO> getVisitByVisitId(String visitId) {
-        return repo.findByVisitId(UUID.fromString(visitId))
+        return repo.findByVisitId(visitId)
                 .map(EntityDtoUtil::toDTO);
     }
 
     @Override
     public Mono<Void> deleteVisit(String visitId) {
-        return repo.findByVisitId(UUID.fromString(visitId))
+        return repo.findByVisitId(visitId)
                 .flatMap(repo::delete);
     }
 
     @Override
     public Mono<VisitDTO> updateVisit(String visitId, Mono<VisitDTO> visitDTOMono) {
-        return repo.findByVisitId(UUID.fromString(visitId))
+        return repo.findByVisitId(visitId)
                 .flatMap(v -> visitDTOMono
                         .map(EntityDtoUtil::toEntity)
                         .doOnNext(e->e.setVisitId(e.getVisitId()))
@@ -72,9 +72,7 @@ public class VisitServiceImpl implements VisitService {
 
     @Override
     public Flux<VisitDTO> getVisitsByPractitionerIdAndMonth(int practitionerId, Date practitionerMonth) {
-        Calendar date = Calendar.getInstance();
-        date.setTime(practitionerMonth);
-        return repo.findVisitsByPractitionerIdAndMonth(practitionerId, date.get(Calendar.MONTH))
+        return repo.findVisitsByPractitionerIdAndDate(practitionerId, practitionerMonth)
                 .map(EntityDtoUtil::toDTO);
     }
 
