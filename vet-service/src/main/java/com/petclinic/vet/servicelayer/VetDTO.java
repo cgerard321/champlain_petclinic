@@ -30,6 +30,6 @@ public class VetDTO {
     private byte[] image;
     private String resume;
     private String workday;
-    private Integer isActive;
+    private Boolean isActive;
     private Set<Specialty> specialties;
 }

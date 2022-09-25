@@ -1,21 +1,21 @@
 INSERT INTO vet
 VALUES (1, 234568, 'James', 'Carter', 'carter.james@email.com', '(514)-634-8276 #2384', NULL,
-        'Practicing since 3 years', 'Monday, Tuesday, Friday', 1);
+        'Practicing since 3 years', 'Monday, Tuesday, Friday', TRUE);
 INSERT INTO vet
 VALUES (2, 327874, 'Helen', 'Leary', 'leary.helen@email.com', '(514)-634-8276 #2385', NULL, 'Practicing since 10 years',
-        'Wednesday, Thursday', 1);
+        'Wednesday, Thursday', TRUE);
 INSERT INTO vet
 VALUES (3, 238372, 'Linda', 'Douglas', 'douglas.linda@email.com', '(514)-634-8276 #2386', NULL,
-        'Practicing since 5 years', 'Monday, Wednesday, Thursday', 1);
+        'Practicing since 5 years', 'Monday, Wednesday, Thursday', TRUE);
 INSERT INTO vet
 VALUES (4, 823097, 'Rafael', 'Ortega', 'ortega.rafael@email.com', '(514)-634-8276 #2387', NULL,
-        'Practicing since 8 years', 'Wednesday, Thursday, Friday', 0);
+        'Practicing since 8 years', 'Wednesday, Thursday, Friday', FALSE);
 INSERT INTO vet
 VALUES (5, 842370, 'Henry', 'Stevens', 'stevens.henry@email.com', '(514)-634-8276 #2389', NULL,
-        'Practicing since 1 years', 'Monday, Tuesday, Wednesday, Thursday', 0);
+        'Practicing since 1 years', 'Monday, Tuesday, Wednesday, Thursday', FALSE);
 INSERT INTO vet
 VALUES (6, 784233, 'Sharon', 'Jenkins', 'jenkins.sharon@email.com', '(514)-634-8276 #2383', NULL,
-        'Practicing since 6 years', 'Monday, Tuesday, Friday', 0);
+        'Practicing since 6 years', 'Monday, Tuesday, Friday', FALSE);
 
 INSERT INTO specialties
 VALUES (1, 100001, 'radiology');
