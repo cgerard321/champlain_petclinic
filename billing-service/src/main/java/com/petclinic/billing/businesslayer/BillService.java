@@ -9,11 +9,9 @@ import reactor.core.publisher.Mono;
 
 public interface BillService {
     Mono<BillDTO> GetBill(@RequestParam(value = "billId", required = true) String billId);
-
     Flux<BillDTO> GetAllBills();
 
     Mono<BillDTO> CreateBill(@RequestBody Mono<BillDTO> model);
-    Mono<BillDTO> SetUpBill(@RequestBody Mono<BillDTO> model);
 
     Mono<Void> DeleteBill(@RequestParam(value = "billId", required = true) String billId);
 

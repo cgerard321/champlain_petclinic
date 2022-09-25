@@ -75,23 +75,12 @@ public class BillServiceImpl implements BillService{
 //            Bill entity = billMapper.ModelToEntity(model);
 //            throw new InvalidInputException("Duplicate key, bill ID: " + entity.getId());
 //        }
-
-
             return model
                     .map(EntityDtoUtil::toEntity)
                     .doOnNext(e -> e.setBillId(EntityDtoUtil.generateUUIDString()))
                     .flatMap(billRepository::insert)
                     .map(EntityDtoUtil::toDto);
         }
-
-    @Override
-    public Mono<BillDTO> SetUpBill(Mono<BillDTO> model) {
-
-        return model
-                .map(EntityDtoUtil::toEntity)
-                .flatMap(billRepository::insert)
-                .map(EntityDtoUtil::toDto);
-    }
 
 
     @Override
