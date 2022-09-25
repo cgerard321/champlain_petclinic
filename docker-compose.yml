@@ -30,8 +30,6 @@ services:
     customers:
         build: customers-service
         hostname: customers
-        ports:
-            - "8080:8080"
         #mem_limit: 350m
         environment:
             - SPRING_PROFILES_ACTIVE=docker
@@ -42,8 +40,8 @@ services:
     api-gateway:
         build: api-gateway
         #mem_limit: 350m
-#        ports:
-#            - "8080:8080"
+        ports:
+            - "8080:8080"
         environment:
             - SPRING_PROFILES_ACTIVE=docker
         depends_on:
