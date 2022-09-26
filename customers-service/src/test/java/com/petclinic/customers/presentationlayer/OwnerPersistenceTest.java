@@ -146,11 +146,11 @@ class OwnerPersistenceTest {
         assertThat(foundSaved, samePropertyValuesAs(newOwner));
 
         // Act
-        foundSaved.setFirstName("Kevin");
-        foundSaved.setLastName("Laplace");
-        foundSaved.setAddress("670 Fort Kerton");
+        foundSaved.setFirstName("Brian");
+        foundSaved.setLastName("Smith");
+        foundSaved.setAddress("940 Rue des Oiseaux");
         foundSaved.setCity("Montreal");
-        foundSaved.setTelephone("2222222222");
+        foundSaved.setTelephone("1111111111");
         Owner savedUpdate = repository.save(foundSaved);
 
         // Assert
