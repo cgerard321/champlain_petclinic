@@ -1,12 +1,11 @@
 'use strict';
 
-
-
 angular.module('visitList')
     .controller('VisitListController', ['$http', function ($http) {
         var self = this;
-        
-        $http.get('api/gateway/visits').then(function (resp) {
+        var petIds = [1,2]
+
+        $http.get("api/gateway/visits/"+petIds).then(function (resp) {
             self.visits = resp.data;
             self.sortFetchedVisits();
              console.log(resp)
@@ -27,5 +26,12 @@ angular.module('visitList')
                     self.previousVisits.push(visit);
                 }
             });
+        }
+        function getCurrentDate() {
+            let dateObj = new Date();
+            var dd = String(dateObj.getDate()).padStart(2, '0');
+            var mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+            var yyyy = dateObj.getFullYear();
+            return Date.parse(yyyy + '-' + mm + '-' + dd);
         }
     }]);
