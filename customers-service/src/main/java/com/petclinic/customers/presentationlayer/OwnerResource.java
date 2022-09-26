@@ -73,6 +73,9 @@ class OwnerResource {
     public String setPhoto(@RequestBody Photo photo, @PathVariable("ownerId") int id){
         photoRepository.save(photo);
         Owner owner = ownerRepository.findOwnerById(id);
+//        if (owner.getImageId()!=1){
+//            photoRepository.deletePhotoById(owner.getImageId());
+//        }
         owner.setImageId(photoRepository.findPhotoByName(photo.getName()).getId());
         ownerRepository.save(owner);
         return "Image uploaded successfully: " + photo.getName();
