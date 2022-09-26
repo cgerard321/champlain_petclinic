@@ -10,8 +10,8 @@ import reactor.core.publisher.Mono;
 
 @Repository
 public interface BillRepository extends ReactiveMongoRepository<Bill, String> {
-    @Transactional(readOnly = true)
 
+    @Transactional(readOnly = true)
     Mono<Bill> findByBillId(String billId);
 
     @Transactional(readOnly = true)

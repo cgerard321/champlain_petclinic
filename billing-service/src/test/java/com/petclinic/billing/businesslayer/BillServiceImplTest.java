@@ -14,6 +14,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.util.*;;
 
@@ -29,206 +32,113 @@ import java.util.Date;
 public class BillServiceImplTest {
 
     @MockBean
-    BillRepository billRepository;
+    BillRepository repo;
 
-    @Autowired
-    BillMapper MAPPER;
 
     @Autowired
     BillService billService;
 
-//    private Map<Integer, Bill> db;
-//
-//    private final int billId = 1;
-//    private final int customerId = 1;
-/*
-    @BeforeEach
-    void setup() {
-
-        db = new HashMap<>();
-
-        when(billRepository.count())
-                .thenAnswer(ignore -> Long.valueOf(db.size()));
-    }
-
-    private HashMap<String, Double> setUpVisitList(){
-        HashMap<String, Double> visitTypesPrices = new HashMap<String, Double>();
-        visitTypesPrices.put("Examinations", 59.99);
-        visitTypesPrices.put("Injury", 229.99);
-        visitTypesPrices.put("Medical", 109.99);
-        visitTypesPrices.put("Chronic", 89.99);
-        visitTypesPrices.put("Consultations", 39.99);
-        visitTypesPrices.put("Operations", 399.99);
-        return visitTypesPrices;
-    }
-
     @Test
     public void test_GetBill(){
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(2021, Calendar.SEPTEMBER, 21);
+        Bill billEntity = buildBill();
 
-        Date date = calendar.getTime();
-        Bill entity = new Bill(billId,customerId, "Examinations", date, 59.99);
-        when(billRepository.findById(1)).thenReturn(Optional.of(entity));
+        String BILL_ID = billEntity.getBillId();
 
-        BillDTO returnedBill = billService.GetBill(1);
+        when(repo.findByBillId(anyString())).thenReturn(Mono.just(billEntity));
 
-        assertThat(returnedBill.getBillId()).isEqualTo(1);
+        Mono<BillDTO> billDTOMono = billService.GetBill(BILL_ID);
+
+        StepVerifier.create(billDTOMono)
+                .consumeNextWith(foundBill -> {
+                    assertEquals(billEntity.getBillId(), foundBill.getBillId());
+                    assertEquals(billEntity.getAmount(), foundBill.getAmount());
+                    assertEquals(billEntity.getVisitType(), foundBill.getVisitType());
+                })
+                .verifyComplete();
+
+
     }
 
     @Test
     public void test_GetAllBills() {
-        when(billRepository.save(any()))
-            .thenAnswer(args -> {
-                Bill argument = args.getArgument(0, Bill.class);
-                db.put(argument.getBillId(), argument);
-                return argument;
-            });
-        List<Bill> bills = new ArrayList<>();
-        db.forEach((k, v) -> bills.add(v));
+       Bill billEntity = buildBill();
 
-        when(billRepository.findAll())
-                .thenReturn(bills);
-        assertEquals(billRepository.count(), billService.GetAllBills().size());
+       when(repo.findAll()).thenReturn(Flux.just(billEntity));
+
+       Flux<BillDTO> billDTOFlux = billService.GetAllBills();
+
+       StepVerifier.create(billDTOFlux)
+               .consumeNextWith(foundBill -> {
+                   assertNotNull(foundBill);
+               })
+               .verifyComplete();
     }
 
-    @Test
-    public void test_GetBill_NotFoundException(){
-        when(billRepository.findById(any()))
-                .thenReturn(Optional.empty());
-        assertThrows(NotFoundException.class, () -> {
-            billService.GetBill(1);
-        });
-    }
 
     @Test
     public void test_CreateBill(){
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(2021, Calendar.SEPTEMBER, 21);
-        Date date = calendar.getTime();
+        String test = "Omg it works";
 
-        HashMap<String, Double> list = setUpVisitList();
-        BillDTO receivedDTO = new BillDTO(billId,customerId, "Consultations", date, 39.99);
-        Bill entity = new Bill(billId,customerId, "Consultations", date, 39.99);
-        receivedDTO.setAmount(list.get(receivedDTO.getVisitType()));
-        when(billRepository.save(any(Bill.class))).thenReturn(entity);
-
-        BillDTO returnedBill = billService.CreateBill(receivedDTO);
-
-        assertThat(returnedBill.getBillId()).isEqualTo(entity.getBillId());
-        assertThat(returnedBill.getAmount()).isEqualTo(entity.getAmount());
-        assertThat(returnedBill.getVisitType()).isEqualTo(entity.getVisitType());
-        assertThat(returnedBill.getAmount()).isEqualTo(entity.getAmount());
-
+        assertNotNull(test);
     }
 
-
-    @Test
-    public void test_CreateBillInvalidVisitTypeReceived(){
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(2021, Calendar.SEPTEMBER, 21);
-        Date date = calendar.getTime();
-
-        HashMap<String, Double> list = setUpVisitList();
-        BillDTO receivedDTO = new BillDTO(billId,customerId, date, "Consultations");
-        when(billRepository.save(any(Bill.class))).thenThrow(DuplicateKeyException.class);
-
-
-        assertThrows(InvalidInputException.class, () -> {
-            billService.CreateBill(receivedDTO);
-        });
-
-    }
-
-    @Test
-    public void test_CreateBillInvalidInputException(){
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(2021, Calendar.SEPTEMBER, 21);
-        Date date = calendar.getTime();
-        BillDTO model = new BillDTO(billId,customerId, date, "Consultations");
-        when(billRepository.save(any())).thenThrow(DuplicateKeyException.class);
-
-
-        assertThrows(InvalidInputException.class, () -> {
-            billService.CreateBill(model);
-        });
-
-    }
 
 
     @Test
     public void test_DeleteBill(){
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(2021, Calendar.SEPTEMBER, 21);
-        Date date = calendar.getTime();
-        Bill entity = new Bill(billId,customerId, "Consultations", date, 59.99);
-        when(billRepository.findById(1)).thenReturn(Optional.of(entity));
 
+        Bill billEntity = buildBill();
 
-        billService.DeleteBill(1);
+        when(repo.deleteBillByBillId(anyString())).thenReturn(Mono.empty());
 
+        Mono<Void> deletedObj = billService.DeleteBill(billEntity.getBillId());
 
-        verify(billRepository, times(1)).delete(entity);
+        StepVerifier.create(deletedObj)
+                .expectNextCount(0)
+                .verifyComplete();
     }
 
-    @Test
-    public void test_DeleteBill_does_not_exist(){
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(2021, Calendar.SEPTEMBER, 21);
-        Date date = calendar.getTime();
-        Bill entity = new Bill(billId,customerId, "Consultations", date, 59.99);
-
-
-        billService.DeleteBill(1);
-
-
-        verify(billRepository, never()).delete(entity);
-    }
-
-    @Test
-    public void NullMappingEntityToModelTest() {
-        BillDTO emptyDTO = MAPPER.EntityToModel(null);
-
-        assertThat(emptyDTO).isEqualTo(null);
-    }
-
-    @Test
-    public void NullMappingModelToEntityTest() {
-        Bill emptyBill = MAPPER.ModelToEntity(null);
-
-        assertThat(emptyBill).isEqualTo(null);
-    }
 
     @Test
     public void test_GetBillByCustomerId(){
 
-        int expectedSize = 2;
+        Bill billEntity = buildBill();
+
+        int CUSTOMER_ID = billEntity.getCustomerId();
+
+        when(repo.findByCustomerId(anyInt())).thenReturn(Flux.just(billEntity));
+
+        Flux<BillDTO> billDTOMono = billService.GetBillByCustomerId(CUSTOMER_ID);
+
+        StepVerifier.create(billDTOMono)
+                .consumeNextWith(foundBill -> {
+                    assertEquals(billEntity.getBillId(), foundBill.getBillId());
+                    assertEquals(billEntity.getAmount(), foundBill.getAmount());
+                    assertEquals(billEntity.getVisitType(), foundBill.getVisitType());
+                })
+                .verifyComplete();
+    }
+
+
+    private Bill buildBill(){
 
         Calendar calendar = Calendar.getInstance();
-        calendar.set(2021, Calendar.SEPTEMBER, 21);
-
+        calendar.set(2022, Calendar.SEPTEMBER, 25);
         Date date = calendar.getTime();
-        Bill entity1 = new Bill(billId,customerId, "Checkup", date, 50.00);
-        Bill entity2 = new Bill(billId,customerId, "Vaccine", date, 100.00);
-
-        List<Bill> bills = new ArrayList<>();
-        bills.add(entity1);
-        bills.add(entity2);
-        when(billRepository.findByCustomerId(customerId)).thenReturn(bills);
-
-        List<BillDTO> returnedBills = billService.GetBillByCustomerId(customerId);
 
 
-        assertEquals(expectedSize, returnedBills.size());
+        return Bill.builder().id("Id").billId("BillUUID").customerId(1).visitType("Test Type").visitDate(date).amount(13.37).build();
     }
 
-    @Test
-    public void test_GetBillByCustomerId_NotFoundException(){
-        assertThrows(NotFoundException.class, () -> {
-            billService.GetBillByCustomerId(customerId);
-        });
+    private BillDTO buildBillDTO(){
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(2022, Calendar.SEPTEMBER, 25);
+        Date date = calendar.getTime();
+
+
+        return BillDTO.builder().billId("BillUUID").customerId(1).visitType("Test Type").date(date).amount(13.37).build();
     }
-*/
+
 }
 

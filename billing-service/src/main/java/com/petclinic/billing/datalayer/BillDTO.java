@@ -16,7 +16,6 @@ public class BillDTO {
     private int customerId;
     private String visitType;
     private Date date;
-//    @Nullable
     private double amount;
 
     public BillDTO(int customerId, String visitType, Date date, double amount) {

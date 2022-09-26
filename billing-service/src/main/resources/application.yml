@@ -13,15 +13,13 @@ spring:
   config:
     activate:
       on-profile: default
-
   data:
     mongodb:
-      host: localhost
-      port: 27017
+      port: 0
       database: billings
-      username: root
-      password: password
-      authentication-database: admin
+  mongodb:
+    embedded:
+      version: 4.0.21
 
 ---
 spring:
