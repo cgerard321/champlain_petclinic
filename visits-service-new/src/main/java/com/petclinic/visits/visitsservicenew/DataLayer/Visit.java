@@ -8,6 +8,9 @@ import java.util.UUID;
 
 @Data
 @ToString
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Visit {
 
     @Id

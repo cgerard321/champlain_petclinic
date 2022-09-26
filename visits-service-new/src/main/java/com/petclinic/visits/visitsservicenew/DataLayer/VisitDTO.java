@@ -9,7 +9,7 @@ import java.util.UUID;
 
 @Data
 @NoArgsConstructor
-
+@Builder
 public class VisitDTO {
 
     private String visitId;

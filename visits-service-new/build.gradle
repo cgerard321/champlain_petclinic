@@ -2,6 +2,7 @@ plugins {
     id 'org.springframework.boot' version '2.3.2.RELEASE'
     id 'io.spring.dependency-management' version '1.0.9.RELEASE'
     id 'java'
+    //id 'jacoco'
 }
 
 configurations {
@@ -24,14 +25,21 @@ dependencies {
     testImplementation 'io.projectreactor:reactor-test'
 }
 
+tasks.named('test'){
+    useJunitPlatform()
+}
+/**
+jacoco{
+    toolVersion = "0.8.6"
+}
 
-/**jacocoTestReport {
+jacocoTestReport {
     dependsOn test
 
     afterEvaluate {
         classDirectories.setFrom(files(classDirectories.files.collect {
             fileTree(dir: it, exclude: [
-                    "com/petclinic/VisitsServiceApplication.class"
+                    "com/petclinic/VisitsServiceNewApplication.class"
             ])
         }))
     }
@@ -45,11 +53,14 @@ jacocoTestCoverageVerification {
             }
         }
     }
-}**/
+}
+
+test.finalizedBy jacocoTestReport
+check.dependsOn jacocoTestCoverageVerification
 
 test {
     useJUnitPlatform()
     testLogging {
         events "passed", "skipped", "failed"
     }
-}
+}**/
