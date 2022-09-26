@@ -128,7 +128,7 @@ class OwnerPersistenceTest {
         assertEquals(1,repository.findAll().size());
     }
 
-    @DisplayName("ownerPersistence_UpdateOwner")
+/*    @DisplayName("ownerPersistence_UpdateOwner")
     @Test
     public void update_owner_test()
     {
@@ -155,6 +155,6 @@ class OwnerPersistenceTest {
 
         // Assert
         assertEquals(savedUpdate, foundSaved);
-    }
+    }*/
 
 }
