@@ -4,6 +4,7 @@ import com.petclinic.customers.businesslayer.PetService;
 import com.petclinic.customers.datalayer.*;
 import io.micrometer.core.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,6 +27,12 @@ import java.util.Optional;
 class PetResource {
 
     private final PetService petService;
+
+    @Autowired
+    PhotoRepository photoRepository;
+
+    @Autowired
+    PetRepository petRepository;
 
     public PetResource(PetService petService) {
         this.petService = petService;
@@ -60,6 +67,23 @@ class PetResource {
     public void DeletePet(@PathVariable("petId") int petId, @PathVariable("ownerId") int ownerId)
     {
         petService.deletePet(petId, ownerId);
+    }
+
+
+    @PostMapping(value = "/photo/{petId}")
+    public String setPhoto(@RequestBody Photo photo, @PathVariable("petId") int id){
+        photoRepository.save(photo);
+        Pet pet = petRepository.findPetById(id);
+//        if (pet.getImageId() != 1)
+//            photoRepository.deletePhotoById(pet.getImageId());
+        pet.setImageId(photoRepository.findPhotoByName(photo.getName()).getId());
+        petRepository.save(pet);
+        return "Image uploaded successfully: " + photo.getName();
+    }
+
+    @GetMapping(value = "/photo/{petId}")
+    public Photo getPhoto(@PathVariable("petId") int id) {
+        return photoRepository.findPhotoById(petRepository.findPetById(id).getImageId());
     }
 
 }

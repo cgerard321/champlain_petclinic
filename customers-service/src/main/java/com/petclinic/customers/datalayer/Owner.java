@@ -135,6 +135,14 @@ public class Owner {
         this.telephone = telephone;
     }
 
+    public int getImageId() {
+        return this.imageId;
+    }
+
+    public void setImageId(int imageId) {
+        this.imageId = imageId;
+    }
+
 
 
 //    public String getCustodian() {

@@ -40,6 +40,9 @@ public class    Pet {
     @JsonIgnore
     private Owner owner;
 
+    @Column(name = "image_id")
+    private int imageId;
+
     public Integer getId() {
         return id;
     }
@@ -78,6 +81,14 @@ public class    Pet {
 
     public void setOwner(final Owner owner) {
         this.owner = owner;
+    }
+
+    public int getImageId() {
+        return this.imageId;
+    }
+
+    public void setImageId(int imageId) {
+        this.imageId = imageId;
     }
     
     @Override
