@@ -11,23 +11,22 @@ package com.petclinic.vet.dataaccesslayer;
   * Ticket: feat(VVS-CPC-553): add veterinarian
  */
 
-import org.springframework.data.r2dbc.repository.R2dbcRepository;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import javax.transaction.Transactional;
-
 @Repository
-public interface VetRepository extends R2dbcRepository<Vet, Integer> {
+public interface VetRepository extends ReactiveCrudRepository<Vet, Integer>{
 
-    @Transactional
+    Flux<Vet> findAll();
+
     Mono<Vet> findVetByVetId(Integer vetId);
 
-    @Transactional
+
     Mono<Void> deleteVetByVetId (Integer vetId);
 
-    @Transactional
+
     Flux<Vet> findVetsByIsActive(boolean isActive);
 
 }

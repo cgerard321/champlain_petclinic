@@ -11,6 +11,7 @@ package com.petclinic.vet.servicelayer;
   * Ticket: feat(VVS-CPC-553): add veterinarian
  */
 
+import org.springframework.data.jpa.repository.Query;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 public interface VetService {
