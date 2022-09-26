@@ -32,12 +32,12 @@ public class VisitController {
         return visitService.getVisitsForPractitioner(practitionerId);
     }
 
-    @PostMapping("owners/*/pets/{petId}/visits")
+    @PostMapping()
     public Mono<VisitDTO> addVisit(@RequestBody Mono<VisitDTO> visitIdLessDTOMono){
         return visitService.addVisit(visitIdLessDTOMono);
     }
 
-    @PutMapping(value = "owners/*/pets/{petId}/visits/{visitId}",
+    @PutMapping(value = "visits/{visitId}",
             consumes = "application/json",
             produces = "application/json")
     public Mono<ResponseEntity<VisitDTO>> updateVisitByVisitId(@PathVariable String visitId, @RequestBody Mono<VisitDTO> visitDTOMono){

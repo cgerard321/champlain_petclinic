@@ -38,14 +38,14 @@ public class VisitServiceImplTest {
 
         StepVerifier
                 .create(visitDTOMono)
-                .consumeNextWith(foundProduct -> {
-                    assertEquals(visit.getVisitId(), foundProduct.getVisitId());
-                    assertEquals(visit.getYear(), foundProduct.getYear());
-                    assertEquals(visit.getMonth(), foundProduct.getMonth());
-                    assertEquals(visit.getDay(), foundProduct.getDay());
-                    assertEquals(visit.getDescription(), foundProduct.getDescription());
-                    assertEquals(visit.getPetId(), foundProduct.getPetId());
-                    assertEquals(visit.getPractitionerId(), foundProduct.getPractitionerId());
+                .consumeNextWith(foundVisit -> {
+                    assertEquals(visit.getVisitId(), foundVisit.getVisitId());
+                    assertEquals(visit.getYear(), foundVisit.getYear());
+                    assertEquals(visit.getMonth(), foundVisit.getMonth());
+                    assertEquals(visit.getDay(), foundVisit.getDay());
+                    assertEquals(visit.getDescription(), foundVisit.getDescription());
+                    assertEquals(visit.getPetId(), foundVisit.getPetId());
+                    assertEquals(visit.getPractitionerId(), foundVisit.getPractitionerId());
                 }).verifyComplete();
     }
 
