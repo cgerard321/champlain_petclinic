@@ -1,9 +1,9 @@
 'use strict';
 
 angular.module('visitList')
-    .controller('VisitListController', ['$http', function ($http) {
+    .controller('VisitListController', ['$http','$stateParams', function ($http) {
         var self = this;
-        var petIds = [1,2]
+        var petIds = $stateParams.petIds || [0,1,2]
 
         $http.get("api/gateway/visits/"+petIds).then(function (resp) {
             self.visits = resp.data;
