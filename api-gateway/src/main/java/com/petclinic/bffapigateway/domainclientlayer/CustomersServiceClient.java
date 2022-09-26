@@ -2,26 +2,12 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.*;
 
-import com.petclinic.bffapigateway.utils.PhotoUtil;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.MultipartBodyBuilder;
-import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.io.IOException;
-import java.util.Optional;
 
 import static reactor.core.publisher.Mono.just;
 
@@ -127,23 +113,6 @@ public class CustomersServiceClient {
                 .bodyToMono(OwnerDetails.class);
     }
 
-//    public Mono<ResponseMessage> setPhoto (MultipartFile file){
-//        try {
-//            MultipartBodyBuilder builder = new MultipartBodyBuilder();
-//            builder.part("file", new ByteArrayResource(file.getBytes())).filename(file.getName());
-//            return webClientBuilder.build().post()
-//                    .uri(customersServiceUrl + "/upload/photo")
-//                    .contentType(MediaType.MULTIPART_FORM_DATA)
-//                    .header(HttpHeaders.CONTENT_TYPE, MediaType.MULTIPART_FORM_DATA.toString())
-//                    .accept(MediaType.APPLICATION_JSON)
-//                    .body(BodyInserters.fromMultipartData(builder.build()))
-//                    .retrieve()
-//                    .bodyToMono(ResponseMessage.class);
-//        } catch(Exception e) {
-//            return null;
-//        }
-//    }
-
     public Mono<String> setPhotoOwner(PhotoDetails file, int id){
         return webClientBuilder.build().post()
                 .uri(customersServiceUrl +"/photo/" + id)
@@ -173,15 +142,4 @@ public class CustomersServiceClient {
                 .retrieve()
                 .bodyToMono(PhotoDetails.class);
     }
-
-
-//    public Mono<PhotoDetails> getPhoto(final int photoId) {
-//        return webClientBuilder.build().get()
-//                .uri(customersServiceUrl + ownerId)
-//                .retrieve()
-//                .bodyToMono(OwnerDetails.class);
-//    }
-
-
-
 }

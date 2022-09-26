@@ -74,8 +74,6 @@ class PetResource {
     public String setPhoto(@RequestBody Photo photo, @PathVariable("petId") int id){
         photoRepository.save(photo);
         Pet pet = petRepository.findPetById(id);
-//        if (pet.getImageId() != 1)
-//            photoRepository.deletePhotoById(pet.getImageId());
         pet.setImageId(photoRepository.findPhotoByName(photo.getName()).getId());
         petRepository.save(pet);
         return "Image uploaded successfully: " + photo.getName();

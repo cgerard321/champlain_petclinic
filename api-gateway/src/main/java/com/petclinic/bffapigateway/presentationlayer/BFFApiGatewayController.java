@@ -299,10 +299,6 @@ public class BFFApiGatewayController {
     }
 
 
-
-
-
-
     @PostMapping(value = "owners/photo/{ownerId}")
     public Mono<String> setPhotoOwner(@RequestBody PhotoDetails photoDetails, @PathVariable int ownerId) {
         return customersServiceClient.setPhotoOwner(photoDetails, ownerId);
@@ -322,9 +318,6 @@ public class BFFApiGatewayController {
     public Mono<PhotoDetails> getPhotoPet(@PathVariable int ownerId, @PathVariable int petId) {
         return customersServiceClient.getPhotoPet(ownerId, petId);
     }
-
-
-
 
 
     @PutMapping(value = "owners/{ownerId}",consumes = "application/json" ,produces = "application/json")
