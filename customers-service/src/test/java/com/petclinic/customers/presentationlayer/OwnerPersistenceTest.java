@@ -128,7 +128,7 @@ class OwnerPersistenceTest {
         assertEquals(1,repository.findAll().size());
     }
 
-/*    @DisplayName("ownerPersistence_UpdateOwner")
+    @DisplayName("ownerPersistence_UpdateOwner")
     @Test
     public void update_owner_test()
     {
@@ -146,15 +146,15 @@ class OwnerPersistenceTest {
         assertThat(foundSaved, samePropertyValuesAs(newOwner));
 
         // Act
-        foundSaved.setFirstName("Brian");
-        foundSaved.setLastName("Smith");
+        foundSaved.setFirstName("Felix");
+        foundSaved.setLastName("Labrie");
         foundSaved.setAddress("940 Rue des Oiseaux");
         foundSaved.setCity("Montreal");
-        foundSaved.setTelephone("1111111111");
+        foundSaved.setTelephone("2222222222");
         Owner savedUpdate = repository.save(foundSaved);
 
         // Assert
         assertEquals(savedUpdate, foundSaved);
-    }*/
+    }
 
 }
