@@ -1,6 +1,7 @@
 package com.petclinic.customers.presentationlayer;
 
 import com.petclinic.customers.businesslayer.PetService;
+import com.petclinic.customers.businesslayer.PhotoService;
 import com.petclinic.customers.datalayer.*;
 import io.micrometer.core.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
@@ -28,14 +29,11 @@ class PetResource {
 
     private final PetService petService;
 
-    @Autowired
-    PhotoRepository photoRepository;
+    private final PhotoService photoService;
 
-    @Autowired
-    PetRepository petRepository;
-
-    public PetResource(PetService petService) {
+    public PetResource(PetService petService, PhotoService photoService) {
         this.petService = petService;
+        this.photoService = photoService;
     }
 
     @PostMapping
@@ -72,19 +70,17 @@ class PetResource {
 
     @PostMapping(value = "/photo/{petId}")
     public String setPhoto(@RequestBody Photo photo, @PathVariable("petId") int id){
-        photoRepository.save(photo);
-        Pet pet = petRepository.findPetById(id);
-//        if (pet.getImageId()!=1){
-//            photoRepository.deletePhotoById(pet.getImageId());
-//        }
-        pet.setImageId(photoRepository.findPhotoByName(photo.getName()).getId());
-        petRepository.save(pet);
-        return "Image uploaded successfully: " + photo.getName();
+        return photoService.setPhotoPet(photo,id);
     }
 
     @GetMapping(value = "/photo/{petId}")
     public Photo getPhoto(@PathVariable("petId") int id) {
-        return photoRepository.findPhotoById(petRepository.findPetById(id).getImageId());
+        return photoService.getPhotoPet(id);
+    }
+
+    @DeleteMapping(value = "/photo/{photoId}")
+    public void deletePhoto(@PathVariable("photoId") int photoId) {
+        photoService.deletePhoto(photoId);
     }
 
 }
