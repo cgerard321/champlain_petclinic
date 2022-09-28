@@ -34,8 +34,7 @@ services:
         environment:
             - SPRING_PROFILES_ACTIVE=docker
         depends_on:
-            mysql6:
-                condition: service_healthy
+            - mongo
 
     customers:
         build: customers-service
@@ -121,8 +120,7 @@ services:
             - 8081:8081
         depends_on:
             - mongo
-            - section-service
-            - teacher-service
+            - vet-service
 
     mysql1:
         image: mysql:5.7
@@ -263,35 +261,6 @@ services:
                     "-h",
                     "localhost",
                 ]
-            interval: 10s
-            timeout: 5s
-            retries: 10
-
-
-    mysql6:
-        image: mysql:5.7
-        #mem_limit: 350m
-        ports:
-            - "3312:3306"
-        environment:
-            - MYSQL_ROOT_PASSWORD=rootpwd
-            - MYSQL_DATABASE=veterinarians-db
-            - MYSQL_USER=user
-            - MYSQL_PASSWORD=pwd
-        volumes:
-            - ./data/mysql6:/var/lib/mysql6
-            - ./data/init.d:/docker-entrypoint-initdb.d
-        healthcheck:
-            test:
-              [
-                      "CMD",
-                      "mysqladmin",
-                      "ping",
-                      "-uuser",
-                      "-ppwd",
-                      "-h",
-                      "localhost",
-              ]
             interval: 10s
             timeout: 5s
             retries: 10

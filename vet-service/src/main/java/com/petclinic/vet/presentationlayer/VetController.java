@@ -20,7 +20,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
-@RequestMapping("vets")
+@RequestMapping("veterinarians")
 public class VetController {
 
     @Autowired

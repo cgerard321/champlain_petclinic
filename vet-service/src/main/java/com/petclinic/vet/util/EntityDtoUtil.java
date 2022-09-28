@@ -14,7 +14,6 @@ package com.petclinic.vet.util;
 import com.petclinic.vet.dataaccesslayer.Vet;
 import com.petclinic.vet.servicelayer.VetDTO;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.BeanUtils;
 
 import java.util.UUID;
@@ -35,10 +34,8 @@ public class EntityDtoUtil {
         return vet;
     }
 
-    public static Integer generateVetId() {
-        String vetId = RandomStringUtils.randomNumeric(LENGTH_ID);
-        Integer shortIdInt = Integer.valueOf(vetId);
-        return shortIdInt;
+    public static String generateVetId() {
+        return UUID.randomUUID().toString();
     }
 
 }

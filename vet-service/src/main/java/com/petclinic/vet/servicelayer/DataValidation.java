@@ -119,39 +119,43 @@ public class DataValidation {
         }
         return confirmedValue;
     }
-
-    public static Integer verifyVetId(int vetId){
+    //to implement
+//    public static String verifyVetId(String vetId) {
+//        return null;
+//    }
+    public static String verifyVetId (String vetId){
         int confirmedValue =0;
-        if (vetId == 0){
+        int vet = Integer.parseInt(vetId);
+        if (vet == 0){
             Random rnd = new Random();
             int number = rnd.nextInt(999999);
             confirmedValue = Integer.parseInt(String.format("%06d", number));
         }
-        else if(vetId < 1){
+        else if(vet < 1){
             throw new InvalidInputException("Vet Id number has an invalid format"+vetId);
         }
-        else if(Math.log10(vetId) < 7) {
-            confirmedValue = vetId;
+        else if(Math.log10(vet) < 7) {
+            confirmedValue = vet;
         }
-        else if (Math.log10(vetId) > 6){
-            while (Math.log10(vetId) > 6){
-                vetId = vetId /10;
+        else if (Math.log10(vet) > 6){
+            while (Math.log10(vet) > 6){
+                vet = vet /10;
             }
-            confirmedValue = vetId;
+            confirmedValue = vet;
+        }
+        return Integer.toString(confirmedValue);
+    }
+
+    public static Integer verifyIsActive(int isActive){
+        int confirmedValue =0;
+        if (isActive > -1 && isActive < 2) {
+            confirmedValue = isActive;
+        }
+        else {
+            throw new InvalidInputException("Invalid input for isActive");
         }
         return confirmedValue;
     }
-
-//    public static Integer verifyIsActive(int isActive){
-//        int confirmedValue =0;
-//        if (isActive > -1 && isActive < 2) {
-//            confirmedValue = isActive;
-//        }
-//        else {
-//            throw new InvalidInputException("Invalid input for isActive");
-//        }
-//        return confirmedValue;
-//    }
 
     public static String verifyResume (String resume){
         String confirmedValue = "";
@@ -159,4 +163,5 @@ public class DataValidation {
         confirmedValue = resume;
         return confirmedValue;
     }
+
 }
