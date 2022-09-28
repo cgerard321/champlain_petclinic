@@ -9,12 +9,13 @@ CREATE TABLE types (
 CREATE INDEX types_name ON types (name);
 
 CREATE TABLE photos (
-                        id  INTEGER IDENTITY PRIMARY KEY,
-                        name VARCHAR(80)
-                        type VARCHAR(80),
-                        image LONGBLOB
+                        photoId         INTEGER IDENTITY PRIMARY KEY,
+                        name  VARCHAR(30),
+                        type  VARCHAR(30),
+                        photo LONGBLOB
+
 );
-CREATE INDEX types_name ON types (name);
+CREATE photo_name ON photos (name);
 
 CREATE TABLE owners (
                         id         INTEGER IDENTITY PRIMARY KEY,

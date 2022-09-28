@@ -1,18 +1,19 @@
 USE `customers-db`;
 
-CREATE TABLE IF NOT EXISTS photos (
-    id INT(4) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(80),
-    type VARCHAR(80),
-    image LONGBLOB,
-    INDEX(name)
-    ) engine=InnoDB;
-
 CREATE TABLE IF NOT EXISTS types (
     id INT(4) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(80),
     INDEX(name)
     ) engine=InnoDB;
+
+CREATE TABLE IF NOT EXISTS photos (
+    id INT(4) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(80),
+    types VARCHAR(80),
+    photo LONGBLOB,
+    INDEX(name)
+    ) engine=InnoDB;
+
 
 CREATE TABLE IF NOT EXISTS owners (
     id INT(4) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -21,7 +22,6 @@ CREATE TABLE IF NOT EXISTS owners (
     address VARCHAR(255),
     city VARCHAR(80),
     telephone VARCHAR(20),
-    image_id INT(4),
     INDEX(last_name)
     ) engine=InnoDB;
 
