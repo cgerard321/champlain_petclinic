@@ -15,6 +15,7 @@ CREATE TABLE photos (
                         type VARCHAR(80),
                         image blob
 );
+CREATE INDEX photo_id ON photo (id);
 
 CREATE TABLE owners (
                         id         INTEGER IDENTITY PRIMARY KEY,

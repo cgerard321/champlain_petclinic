@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS photos (
     name VARCHAR(80),
     type VARCHAR(80),
     image LONGBLOB,
-    INDEX(name)
+    INDEX(id)
     ) engine=InnoDB;
 
 CREATE TABLE IF NOT EXISTS types (
