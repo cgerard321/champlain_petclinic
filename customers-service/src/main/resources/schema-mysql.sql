@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS photos (
     name VARCHAR(80),
     types VARCHAR(80),
     photo LONGBLOB,
-    INDEX(id)
+    INDEX(name)
     ) engine=InnoDB;
 
 
@@ -22,7 +22,6 @@ CREATE TABLE IF NOT EXISTS owners (
     address VARCHAR(255),
     city VARCHAR(80),
     telephone VARCHAR(20),
-    image_id INT(4),
     INDEX(last_name)
     ) engine=InnoDB;
 
