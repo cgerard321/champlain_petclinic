@@ -319,15 +319,6 @@ public class BFFApiGatewayController {
         return customersServiceClient.getPhotoPet(ownerId, petId);
     }
 
-    @DeleteMapping(value = "owners/photo/{photoId}")
-    public Mono<Void> deletePhotoOwner(@PathVariable int photoId){
-        return customersServiceClient.deletePhotoOwner(photoId);
-    }
-
-    @DeleteMapping(value = "owners/{ownerId}/pet/photo/{photoId}")
-    public Mono<Void> deletePhotoPet(@PathVariable int ownerId, @PathVariable int photoId){
-        return customersServiceClient.deletePhotoPet(ownerId, photoId);
-    }
 
     @PutMapping(value = "owners/{ownerId}",consumes = "application/json" ,produces = "application/json")
     public Mono<OwnerDetails> updateOwnerDetails(@PathVariable int ownerId, @RequestBody OwnerDetails od) {

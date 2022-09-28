@@ -2,7 +2,6 @@ package com.petclinic.customers.presentationlayer;
 
 import com.petclinic.customers.businesslayer.OwnerService;
 import com.petclinic.customers.businesslayer.PetService;
-import com.petclinic.customers.businesslayer.PhotoService;
 import com.petclinic.customers.datalayer.Owner;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,8 +42,6 @@ class OwnerAPITest {
     @MockBean
     PetService petService;
 
-    @MockBean
-    PhotoService photoService;
 
     //SIMPLE OWNER OBJECT CREATION METHOD
     //*** Used for testing only ***
