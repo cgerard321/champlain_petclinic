@@ -332,10 +332,14 @@ public class BFFApiGatewayController {
     public Mono<OwnerDetails> deleteOwner(@PathVariable int ownerId){
         return customersServiceClient.deleteOwner(ownerId);
     }
-    
+
+
     /**
      * End of Owner Methods
      * **/
+
+
+
 
 
     @GetMapping("/verification/{token}")
