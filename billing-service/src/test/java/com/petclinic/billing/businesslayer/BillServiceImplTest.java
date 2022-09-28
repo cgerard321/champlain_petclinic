@@ -18,7 +18,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.util.*;;
+import java.util.*;
 
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -77,9 +77,23 @@ public class BillServiceImplTest {
 
     @Test
     public void test_CreateBill(){
-        String test = "Omg it works";
 
-        assertNotNull(test);
+        Bill billEntity = buildBill();
+
+        Mono<Bill> billMono = Mono.just(billEntity);
+        BillDTO billDTO = buildBillDTO();
+
+        when(repo.insert(any(Bill.class))).thenReturn(billMono);
+
+        Mono<BillDTO> returnedBill = billService.CreateBill(Mono.just(billDTO));
+
+        StepVerifier.create(returnedBill)
+                .consumeNextWith(monoDTO -> {
+                    assertEquals(billEntity.getCustomerId(), monoDTO.getCustomerId());
+                    assertEquals(billEntity.getAmount(), monoDTO.getAmount());
+                })
+                .verifyComplete();
+
     }
 
 
