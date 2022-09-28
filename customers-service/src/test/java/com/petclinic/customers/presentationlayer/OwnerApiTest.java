@@ -50,6 +50,9 @@ class OwnerAPITest {
     //*** Used for testing only ***
     private Owner setupOwner() {
 
+        final String test = "Test photo";
+        final byte[] testBytes = test.getBytes();
+
         Owner owner = new Owner();
         owner.setId(5);
         owner.setFirstName("John");
@@ -57,6 +60,7 @@ class OwnerAPITest {
         owner.setAddress("56 John St.");
         owner.setCity("Amsterdam");
         owner.setTelephone("9999999999");
+        owner.setImageId(1);
 
         return owner;
     }
@@ -150,6 +154,7 @@ class OwnerAPITest {
                 .andExpect(status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").exists());
     }
+
 
 }
 
