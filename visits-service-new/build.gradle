@@ -1,9 +1,13 @@
 plugins {
-    id 'org.springframework.boot' version '2.3.2.RELEASE'
-    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+    id 'org.springframework.boot' version '2.7.3'
+    id 'io.spring.dependency-management' version '1.0.13.RELEASE'
     id 'java'
     //id 'jacoco'
 }
+
+group = 'com.pet-clinic'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '17'
 
 configurations {
     compileOnly {
@@ -14,8 +18,8 @@ configurations {
 repositories {
     mavenCentral()
 }
-
 dependencies {
+
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     compileOnly 'org.projectlombok:lombok'
@@ -23,11 +27,14 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo'
     testImplementation 'io.projectreactor:reactor-test'
+
 }
 
-tasks.named('test'){
-    useJunitPlatform()
+
+tasks.named('test') {
+    useJUnitPlatform()
 }
+
 /**
 jacoco{
     toolVersion = "0.8.6"

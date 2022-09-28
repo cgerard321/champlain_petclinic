@@ -4,5 +4,6 @@ include 'visits-service'
 include 'api-gateway'
 include 'billing-service'
 include 'auth-service'
+include 'visits-service-new'
 
 
