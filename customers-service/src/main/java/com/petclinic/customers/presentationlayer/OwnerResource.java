@@ -1,6 +1,7 @@
 package com.petclinic.customers.presentationlayer;
 
 import com.petclinic.customers.businesslayer.OwnerService;
+import com.petclinic.customers.businesslayer.PhotoService;
 import com.petclinic.customers.datalayer.*;
 import io.micrometer.core.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
@@ -28,14 +29,11 @@ import java.util.Optional;
 class OwnerResource {
     private final OwnerService ownerService;
 
-    @Autowired
-    PhotoRepository photoRepository;
+    private final PhotoService photoService;
 
-    @Autowired
-    OwnerRepository ownerRepository;
-
-    OwnerResource(OwnerService ownerService) {
+    OwnerResource(OwnerService ownerService, PhotoService photoService) {
         this.ownerService = ownerService;
+        this.photoService = photoService;
     }
 
     @PostMapping(
@@ -71,20 +69,19 @@ class OwnerResource {
 
     @PostMapping(value = "/photo/{ownerId}")
     public String setPhoto(@RequestBody Photo photo, @PathVariable("ownerId") int id){
-        photoRepository.save(photo);
-        Owner owner = ownerRepository.findOwnerById(id);
-//        if (owner.getImageId()!=1){
-//            photoRepository.deletePhotoById(owner.getImageId());
-//        }
-        owner.setImageId(photoRepository.findPhotoByName(photo.getName()).getId());
-        ownerRepository.save(owner);
-        return "Image uploaded successfully: " + photo.getName();
+        return photoService.setPhotoOwner(photo,id);
     }
 
     @GetMapping(value = "/photo/{ownerId}")
     public Photo getPhoto(@PathVariable("ownerId") int id) {
-         return photoRepository.findPhotoById(ownerRepository.findOwnerById(id).getImageId());
+         return photoService.getPhotoOwner(id);
     }
+
+    @DeleteMapping(value = "/photo/{photoId}")
+    public void deletePhoto(@PathVariable("photoId") int photoId) {
+        photoService.deletePhoto(photoId);
+    }
+
 
 }
 

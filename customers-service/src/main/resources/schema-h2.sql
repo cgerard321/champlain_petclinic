@@ -1,6 +1,7 @@
 DROP TABLE pets IF EXISTS;
 DROP TABLE types IF EXISTS;
 DROP TABLE owners IF EXISTS;
+DROP TABLE photos IF EXISTS;
 
 CREATE TABLE types (
                        id   INTEGER IDENTITY PRIMARY KEY,
@@ -9,13 +10,11 @@ CREATE TABLE types (
 CREATE INDEX types_name ON types (name);
 
 CREATE TABLE photos (
-                        photoId         INTEGER IDENTITY PRIMARY KEY,
-                        name  VARCHAR(30),
-                        type  VARCHAR(30),
-                        photo LONGBLOB
-
+                        id  INTEGER IDENTITY PRIMARY KEY,
+                        name VARCHAR(80),
+                        type VARCHAR(80),
+                        image LONGBLOB
 );
-CREATE photo_name ON photos (name);
 
 CREATE TABLE owners (
                         id         INTEGER IDENTITY PRIMARY KEY,
@@ -23,7 +22,8 @@ CREATE TABLE owners (
                         last_name  VARCHAR(30),
                         address    VARCHAR(255),
                         city       VARCHAR(80),
-                        telephone  VARCHAR(20)
+                        telephone  VARCHAR(20),
+                        image_id   INTEGER(4)
 );
 CREATE INDEX owners_last_name ON owners (last_name);
 
@@ -32,7 +32,8 @@ CREATE TABLE pets (
                       name       VARCHAR(30),
                       birth_date DATE,
                       type_id    INTEGER NOT NULL,
-                      owner_id   INTEGER
+                      owner_id   INTEGER,
+                      image_id   INTEGER(4)
 );
 ALTER TABLE pets ADD CONSTRAINT fk_pets_owners FOREIGN KEY (owner_id) REFERENCES owners (id);
 ALTER TABLE pets ADD CONSTRAINT fk_pets_types FOREIGN KEY (type_id) REFERENCES types (id);

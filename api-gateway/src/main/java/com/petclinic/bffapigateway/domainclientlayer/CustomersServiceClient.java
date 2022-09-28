@@ -127,6 +127,13 @@ public class CustomersServiceClient {
                 .bodyToMono(PhotoDetails.class);
     }
 
+    public Mono<Void> deletePhotoOwner (int photoId) {
+        return webClientBuilder.build().delete()
+                .uri(customersServiceUrl + "/photo/" + photoId)
+                .retrieve()
+                .bodyToMono(Void.class);
+    }
+
 
 
     public Mono<String> setPhotoPet(int ownerId, PhotoDetails file, int id){
@@ -141,5 +148,12 @@ public class CustomersServiceClient {
                 .uri(customersServiceUrl + ownerId + "/pets/photo/" + id)
                 .retrieve()
                 .bodyToMono(PhotoDetails.class);
+    }
+
+    public Mono<Void> deletePhotoPet (int ownerId, int photoId) {
+        return webClientBuilder.build().delete()
+                .uri(customersServiceUrl + ownerId + "/pets/photo/" + photoId)
+                .retrieve()
+                .bodyToMono(Void.class);
     }
 }
