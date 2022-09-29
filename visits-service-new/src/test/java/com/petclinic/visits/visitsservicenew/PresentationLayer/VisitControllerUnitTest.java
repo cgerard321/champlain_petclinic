@@ -16,8 +16,7 @@ import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
@@ -25,6 +24,8 @@ import static org.mockito.Mockito.when;
 public class VisitControllerUnitTest {
 
     private VisitDTO dto = buildVisitDto();
+
+    private Mono<VisitDTO> monoVisit= Mono.just(buildVisitDto());
     private final String Visit_UUID_OK = dto.getVisitId();
     private final int Practitioner_Id_OK = dto.getPractitionerId();
 
@@ -37,6 +38,7 @@ public class VisitControllerUnitTest {
     
     @MockBean
     VisitService visitService;
+
 
     @Test
     public void getVisitByVisitId(){
@@ -117,27 +119,24 @@ public class VisitControllerUnitTest {
     @Test
     public void addVisit(){
 
-        VisitDTO visitDtoInsert = new VisitDTO("1", 2022, 11, 24, "This is awesome", 2, 2, true);
+        when(visitService.addVisit(monoVisit)).thenReturn(Mono.just(dto));
 
-
-        when(visitService.addVisit(Mono.just(visitDtoInsert))).thenReturn(Mono.just(visitDtoInsert));
-
-        webFluxTest.post()
-                .uri("http://localhost:8080/visits")
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(BodyInserters.fromValue(visitDtoInsert))
+        webFluxTest.post().uri("http://localhost:8080/visits")
+                .body(Mono.just(monoVisit), VisitDTO.class)
                 .exchange()
-                .expectStatus().isOk();
+                .expectStatus()
+                .isOk()
+                .expectBody(VisitDTO.class);
 
         Mockito.verify(visitService, times(1))
-                .addVisit(Mono.just(visitDtoInsert));
+                .addVisit(monoVisit);
 
     }
 
     @Test
     public void updateVisitByVisitId(){
 
-        when(visitService.updateVisit(anyString(), Mono.just(dto))).thenReturn(Mono.just(dto));
+        when(visitService.updateVisit(anyString(), monoVisit)).thenReturn(Mono.just(dto));
 
         webFluxTest.put()
                 .uri("http://localhost:8080/visits/visits/", Visit_UUID_OK)
@@ -148,7 +147,7 @@ public class VisitControllerUnitTest {
 
         Mockito.verify(visitService, times(1)).updateVisit(Visit_UUID_OK, Mono.just(dto));
     }
-    @Test//this is a test
+    @Test
     public void deleteVisit(){
 
         webFluxTest.delete()
