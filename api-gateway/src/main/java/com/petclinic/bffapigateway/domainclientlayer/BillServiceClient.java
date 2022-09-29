@@ -36,6 +36,12 @@ public class BillServiceClient {
                 .bodyToMono(BillDetails.class);
     }
 
+    public Mono<BillDetails> getBillByOwnerId(final int ownerId) {
+        return webClientBuilder.build().get()
+                .uri(billServiceUrl + "/{ownerId}", ownerId)
+                .retrieve()
+                .bodyToMono(BillDetails.class);
+    }
     public Flux<BillDetails> getAllBilling() {
         return webClientBuilder.build().get()
                 .uri(billServiceUrl)

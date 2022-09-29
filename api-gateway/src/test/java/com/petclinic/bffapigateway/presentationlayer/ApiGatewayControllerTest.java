@@ -2,6 +2,7 @@ package com.petclinic.bffapigateway.presentationlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.petclinic.bffapigateway.businesslayer.BillingOwnerAggregateService;
 import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.*;
 import com.petclinic.bffapigateway.exceptions.GenericHttpException;
@@ -73,6 +74,9 @@ class ApiGatewayControllerTest {
 
     @MockBean
     private BillServiceClient billServiceClient;
+
+    @MockBean
+    private BillingOwnerAggregateService billingOwnerAggregate;
 
     @Autowired
     private WebTestClient client;
@@ -1244,6 +1248,39 @@ class ApiGatewayControllerTest {
                 .isOk();
 
         verify(authServiceClient).deleteRole(role.getId());
+    }
+ //Marina Melnichuk
+    @Test
+    public void getBillByOwner(){
+
+        BillDetails bill = new BillDetails();
+
+        bill.setBillId(7);
+        bill.setAmount(599);
+        bill.setCustomerId(3);
+        bill.setVisitType("Consultation");
+
+        when(billServiceClient.getBillByOwnerId(3))
+                .thenReturn(Mono.just(bill));
+
+        client.get()
+                //check the URI
+                .uri("/api/gateway/bills/owner/3")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.customerId").isEqualTo(3)
+                .jsonPath("$.billId").isEqualTo(bill.getBillId())
+                .jsonPath("$.visitType").isEqualTo(bill.getVisitType())
+                .jsonPath("$.amount").isEqualTo(bill.getAmount());
+
+
+
+
+        assertEquals(bill.getCustomerId(), 3);
+
+
+
     }
 }
 

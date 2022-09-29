@@ -1,6 +1,7 @@
 package com.petclinic.bffapigateway.presentationlayer;
 
 
+import com.petclinic.bffapigateway.businesslayer.BillingOwnerAggregateService;
 import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.*;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +40,7 @@ public class BFFApiGatewayController {
 
     private final BillServiceClient billServiceClient;
 
-
+    private final BillingOwnerAggregateService billingOwnerAggregate;
 
     @GetMapping(value = "bills/{billId}")
     public Mono<BillDetails> getBillingInfo(final @PathVariable int billId)
@@ -47,6 +48,12 @@ public class BFFApiGatewayController {
         return billServiceClient.getBilling(billId);
     }
 
+    //M.M.
+    @GetMapping(value="bills/owner/{ownerId}")
+    public Mono<BillDetails> getBillByOwnerId(final @PathVariable int ownerId)
+    {
+        return billServiceClient.getBillByOwnerId(ownerId);
+    }
 
     @PostMapping(value = "bills",
             consumes = "application/json",
@@ -61,14 +68,21 @@ public class BFFApiGatewayController {
     }
 
 
+
     @DeleteMapping(value = "bills/{billId}")
     public Mono<Void> deleteBill(final @PathVariable int billId){
         return billServiceClient.deleteBill(billId);
 
-
-
-
     }
+
+    //M.M.
+    @GetMapping("aggregate/{ownerId}")
+    public Mono<ResponseEntity<TransactionDetails>> getTransaction(@PathVariable Integer ownerId){
+        return this.billingOwnerAggregate.getTransaction(ownerId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
 
     @PostMapping(value = "owners/{ownerId}/pets" , produces = "application/json", consumes = "application/json")
     public Mono<PetDetails> createPet(@RequestBody PetDetails pet, @PathVariable int ownerId){
