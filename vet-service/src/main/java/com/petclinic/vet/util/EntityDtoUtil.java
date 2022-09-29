@@ -11,27 +11,48 @@ package com.petclinic.vet.util;
   * Ticket: feat(VVS-CPC-553): add veterinarian
  */
 
+import com.petclinic.vet.dataaccesslayer.Specialty;
 import com.petclinic.vet.dataaccesslayer.Vet;
+import com.petclinic.vet.servicelayer.SpecialtyDTO;
 import com.petclinic.vet.servicelayer.VetDTO;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.BeanUtils;
 
-import java.util.UUID;
+import java.util.HashSet;
+import java.util.Set;
 
 public class EntityDtoUtil {
 
     final static int LENGTH_ID = 20;
 
-    public static VetDTO toDTO(Vet Vet) {
+    public static VetDTO toDTO(Vet vet) {
         VetDTO dto = new VetDTO();
-        BeanUtils.copyProperties(Vet, dto);
+        dto.setVetId(vet.getVetId());
+        dto.setFirstName(vet.getFirstName());
+        dto.setLastName(vet.getLastName());
+        dto.setEmail(vet.getEmail());
+        dto.setPhoneNumber(vet.getPhoneNumber());
+        dto.setImage(vet.getImage());
+        dto.setResume(vet.getResume());
+        dto.setWorkday(vet.getWorkday());
+        dto.setActive(vet.isActive());
+        dto.setSpecialties(toDTOSet(vet.getSpecialties()));
         return dto;
     }
 
     public static Vet toEntity(VetDTO dto) {
         Vet vet = new Vet();
-        BeanUtils.copyProperties(dto, vet);
+        vet.setVetId(generateVetId());
+        vet.setFirstName(dto.getFirstName());
+        vet.setLastName(dto.getLastName());
+        vet.setEmail(dto.getEmail());
+        vet.setPhoneNumber(dto.getPhoneNumber());
+        vet.setImage(dto.getImage());
+        vet.setResume(dto.getResume());
+        vet.setWorkday(dto.getWorkday());
+        vet.setActive(dto.isActive());
+        vet.setSpecialties(toEntitySet(dto.getSpecialties()));
         return vet;
     }
 
@@ -41,4 +62,37 @@ public class EntityDtoUtil {
         return shortIdInt;
     }
 
+    public static SpecialtyDTO toDTO(Specialty specialty) {
+        SpecialtyDTO dto = new SpecialtyDTO();
+        BeanUtils.copyProperties(specialty, dto);
+        return dto;
+    }
+
+    public static Specialty toEntity(SpecialtyDTO dto) {
+        Specialty specialty = new Specialty();
+        BeanUtils.copyProperties(dto, specialty);
+        return specialty;
+    }
+
+    public static Set<SpecialtyDTO> toDTOSet(Set<Specialty> specialties) {
+        Set<SpecialtyDTO> specialtyDTOS = new HashSet<>();
+        for (Specialty specialty:
+             specialties) {
+            SpecialtyDTO specialtyDTO = toDTO(specialty);
+            specialtyDTOS.add(specialtyDTO);
+        }
+
+        return specialtyDTOS;
+    }
+
+    public static Set<Specialty>  toEntitySet(Set<SpecialtyDTO> specialtyDTOS){
+        Set<Specialty> specialties = new HashSet<>();
+        for (SpecialtyDTO specialtyDTO:
+            specialtyDTOS) {
+            Specialty specialty = toEntity(specialtyDTO);
+            specialties.add(specialty);
+        }
+
+        return specialties;
+    }
 }

@@ -11,88 +11,74 @@ package com.petclinic.vet.dataaccesslayer;
   * Ticket: feat(VVS-CPC-553): add veterinarian
  */
 
-import com.petclinic.vet.servicelayer.DataValidation;
 import lombok.*;
-import org.springframework.core.style.ToStringCreator;
+import org.springframework.data.annotation.Id;
 
-import javax.persistence.*;
 import java.util.Set;
 
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 @Builder
+@ToString
 
-@Entity
-@Table(name = "vet")
 public class Vet {
 
-    @org.springframework.data.annotation.Id
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "vet_id")
     private Integer vetId;
-
-    @Column(name = "first_name")
     private String firstName;
-
-    @Column(name = "last_name")
     private String lastName;
-
-    @Column(name = "email")
     private String email;
-
-    @Column(name = "phone_number")
     private String phoneNumber;
-
-    @Column(name = "image")
-    @Lob
     private byte[] image;
-
-    @Column(name = "resume")
     private String resume;
-
-    @Column(name = "workday")
     private String workday;
-
-    @Column(name = "is_active")
     private boolean isActive;
-
-    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
-    @JoinTable(name = "vet_specialties", joinColumns = @JoinColumn(name = "vet_id"), inverseJoinColumns = @JoinColumn(name = "specialty_id"))
     private Set<Specialty> specialties;
 
-
-    public void setVetId(int vetId) {
-        this.vetId = DataValidation.verifyVetId(vetId);
-    }
-    public void setEmail(String email) {
-        this.email = DataValidation.verifyEmail(email);
-    }
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = DataValidation.verifyPhoneNumber(phoneNumber);
-    }
-    public void setWorkday(String workday) {
-        this.workday = DataValidation.verifyWorkday(workday);
-    }
-    public void setFirstName(String firstName) {
-        this.firstName = DataValidation.verifyFirstName(firstName);
-    }
-    public void setLastName(String lastName) {
-        this.lastName = DataValidation.verifyLastName(lastName);
+    public Vet(Integer id, Integer vetId, String firstName, String lastName, String email, String phoneNumber, byte[] image, String resume, String workday, boolean isActive, Set<Specialty> specialties) {
+        this.id = id;
+        this.vetId = vetId;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
+        this.image = image;
+        this.resume = resume;
+        this.workday = workday;
+        this.isActive = isActive;
+        this.specialties = specialties;
     }
 
-    @Override
-    public String toString() {
-        return new ToStringCreator(this).append("id", this.getId())
-                .append("firstName", this.getFirstName())
-                .append("lastName", this.getLastName())
-                .append("email", this.getEmail())
-                .append("phoneNumber", this.getPhoneNumber())
-                .append("resume", this.getResume())
-                .append("workday", this.getWorkday()).toString();
-    }
+    //    public void setVetId(int vetId) {
+//        this.vetId = DataValidation.verifyVetId(vetId);
+//    }
+//    public void setEmail(String email) {
+//        this.email = DataValidation.verifyEmail(email);
+//    }
+//    public void setPhoneNumber(String phoneNumber) {
+//        this.phoneNumber = DataValidation.verifyPhoneNumber(phoneNumber);
+//    }
+//    public void setWorkday(String workday) {
+//        this.workday = DataValidation.verifyWorkday(workday);
+//    }
+//    public void setFirstName(String firstName) {
+//        this.firstName = DataValidation.verifyFirstName(firstName);
+//    }
+//    public void setLastName(String lastName) {
+//        this.lastName = DataValidation.verifyLastName(lastName);
+//    }
+
+//    @Override
+//    public String toString() {
+//        return new ToStringCreator(this).append("id", this.getId())
+//                .append("firstName", this.getFirstName())
+//                .append("lastName", this.getLastName())
+//                .append("email", this.getEmail())
+//                .append("phoneNumber", this.getPhoneNumber())
+//                .append("resume", this.getResume())
+//                .append("workday", this.getWorkday()).toString();
+//    }
 
 }
