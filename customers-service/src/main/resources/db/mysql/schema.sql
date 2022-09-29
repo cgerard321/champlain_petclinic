@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS photos (
     name VARCHAR(80),
     type VARCHAR(80),
     image LONGBLOB,
-    INDEX(id)
+    INDEX(name)
     ) engine=InnoDB;
 
 CREATE TABLE IF NOT EXISTS types (
@@ -16,7 +16,6 @@ CREATE TABLE IF NOT EXISTS types (
     name VARCHAR(80),
     INDEX(name)
     ) engine=InnoDB;
-
 CREATE TABLE IF NOT EXISTS owners (
     id INT(4) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     first_name VARCHAR(30),
