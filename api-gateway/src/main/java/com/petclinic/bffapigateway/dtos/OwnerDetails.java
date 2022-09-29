@@ -31,6 +31,8 @@ public class OwnerDetails {
 
     private String telephone;
 
+    private int imageId;
+
     private final List<PetDetails> pets = new ArrayList<>();
 
     @JsonIgnore

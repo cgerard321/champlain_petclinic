@@ -4,6 +4,7 @@ import com.petclinic.customers.businesslayer.OwnerService;
 import com.petclinic.customers.businesslayer.PetService;
 import com.petclinic.customers.businesslayer.PhotoService;
 import com.petclinic.customers.datalayer.Owner;
+import com.petclinic.customers.datalayer.Photo;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +66,19 @@ class OwnerAPITest {
         return owner;
     }
 
+    private Photo setupPhoto() {
+
+        final String test = "Test photo";
+        final byte[] testBytes = test.getBytes();
+
+        Photo photo = new Photo();
+        photo.setId(2);
+        photo.setName("Test photo");
+        photo.setType("jpeg");
+        photo.setPhoto(testBytes);
+
+        return photo;
+    }
 
 
     /**
@@ -84,7 +98,8 @@ class OwnerAPITest {
                 .andExpect(jsonPath("$.lastName").value("Wick"))
                 .andExpect(jsonPath("$.address").value("56 John St."))
                 .andExpect(jsonPath("$.city").value("Amsterdam"))
-                .andExpect(jsonPath("$.telephone").value("9999999999"));
+                .andExpect(jsonPath("$.telephone").value("9999999999"))
+                .andExpect(jsonPath("$.imageId").value(1));
     }
 
 
@@ -114,6 +129,7 @@ class OwnerAPITest {
         owner_1.setAddress("56 John St.");
         owner_1.setCity("Amsterdam");
         owner_1.setTelephone("9999999999");
+        owner_1.setImageId(1);
 
         Owner owner_2 = new Owner();
         owner_2.setId(2);
@@ -122,6 +138,7 @@ class OwnerAPITest {
         owner_2.setAddress("678 Rue Tremblay");
         owner_2.setCity("Montreal");
         owner_2.setTelephone("0123456789");
+        owner_2.setImageId(1);
 
         Owner owner_3 = new Owner();
         owner_3.setId(3);
@@ -130,6 +147,7 @@ class OwnerAPITest {
         owner_3.setAddress("111 Test St.");
         owner_3.setCity("Testopolis");
         owner_3.setTelephone("9876543210");
+        owner_3.setImageId(1);
 
         given(ownerService.findAll()).willReturn(asList(owner_1, owner_2, owner_3));
         mvc.perform(get("/owners").accept(MediaType.APPLICATION_JSON))
@@ -150,10 +168,14 @@ class OwnerAPITest {
         when(ownerService.createOwner(any(Owner.class))).thenReturn(owner);
         mvc.perform(post("/owners")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"firstName\": \"John\"," + "\"lastName\": \"Wick\"," + "\"address\": \"56 John St.\"," + "\"city\": \"Amsterdam\"," + "\"telephone\": \"9999999999\"}"))
+                .content("{\"firstName\": \"John\"," + "\"lastName\": \"Wick\"," + "\"address\": \"56 John St.\"," + "\"city\": \"Amsterdam\"," + "\"telephone\": \"9999999999\"," + "\"imageId\": \"2\"}"))
                 .andExpect(status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").exists());
     }
+
+//    void setPhotoOwner_API_TEST() throws Exception {
+//        when(photoService.setPhotoOwner(any(Photo.class))).thenReturn(photo);
+//    }
 
 
 }
