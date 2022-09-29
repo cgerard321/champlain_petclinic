@@ -24,6 +24,7 @@ public class VisitServiceImpl implements VisitService {
     public Mono<VisitDTO> addVisit(Mono<VisitDTO> visitIdLessDTOMono) {
         return visitIdLessDTOMono
                 .map(EntityDtoUtil::toEntity)
+                .doOnNext(x -> x.setVisitId(EntityDtoUtil.generateVisitIdString()))
                 .flatMap(repo::save)
                 .map(EntityDtoUtil::toDTO);
     }

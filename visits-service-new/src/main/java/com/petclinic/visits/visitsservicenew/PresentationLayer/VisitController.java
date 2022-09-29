@@ -33,17 +33,15 @@ public class VisitController {
     }
 
     @PostMapping()
-    public Mono<VisitDTO> addVisit(@RequestBody Mono<VisitDTO> visitIdLessDTOMono){
-        return visitService.addVisit(visitIdLessDTOMono);
+    public Mono<VisitDTO> addVisit(@RequestBody Mono<VisitDTO> visitDTOMono){
+        return visitService.addVisit(visitDTOMono);
     }
 
     @PutMapping(value = "visits/{visitId}",
             consumes = "application/json",
             produces = "application/json")
-    public Mono<ResponseEntity<VisitDTO>> updateVisitByVisitId(@PathVariable String visitId, @RequestBody Mono<VisitDTO> visitDTOMono){
-        return visitService.updateVisit(visitId, visitDTOMono)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    public Mono<VisitDTO> updateVisitByVisitId(@PathVariable String visitId, @RequestBody Mono<VisitDTO> visitDTOMono){
+        return visitService.updateVisit(visitId, visitDTOMono);
     }
 
     @DeleteMapping("/{visitId}")

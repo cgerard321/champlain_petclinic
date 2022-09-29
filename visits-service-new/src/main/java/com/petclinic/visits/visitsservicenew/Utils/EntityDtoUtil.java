@@ -34,7 +34,7 @@ public class EntityDtoUtil {
         return visit;
     }
 
-    public static String generateSecIdString(){
+    public static String generateVisitIdString(){
         return UUID.randomUUID().toString();
     }
 
