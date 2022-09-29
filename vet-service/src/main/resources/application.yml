@@ -1,5 +1,5 @@
 server:
-  port: 1453
+  port: 8080
 
 logging:
   level:
