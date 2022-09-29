@@ -278,6 +278,20 @@ class ApiGatewayControllerTest {
     }
 
 
+//TODO
+    @Test
+    void createPhotoOwner(){}
+    @Test
+    void getPhotoOwner(){}
+    @Test
+    void createPhotoPet(){}
+    @Test
+    void getPhotoPet(){}
+
+
+
+
+
     @Test
     void shouldThrowUnsupportedMediaTypeIfBodyDoesNotExist(){
         OwnerDetails od = new OwnerDetails();

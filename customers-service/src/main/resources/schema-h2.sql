@@ -13,7 +13,7 @@ CREATE TABLE photos (
                         id  INTEGER IDENTITY PRIMARY KEY,
                         name VARCHAR(80),
                         type VARCHAR(80),
-                        image LONGBLOB
+                        image LONGTEXT
 );
 CREATE INDEX photo_id ON photos (id);
 

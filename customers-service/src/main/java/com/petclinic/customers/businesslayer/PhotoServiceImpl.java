@@ -25,6 +25,7 @@ public class PhotoServiceImpl implements PhotoService{
         photoRepository.save(photo);
         Owner owner = ownerRepository.findOwnerById(ownerId);
         int deleteId = owner.getImageId();
+        //find by name needs to be reworked, this is a bad idea but will be changed when migrated to reactive
         owner.setImageId(photoRepository.findPhotoByName(photo.getName()).getId());
         ownerRepository.save(owner);
         if(deleteId!=1){
@@ -44,6 +45,7 @@ public class PhotoServiceImpl implements PhotoService{
             photoRepository.save(photo);
             Pet pet = petRepository.findPetById(petId);
             int deleteId = pet.getImageId();
+            //find by name needs to be reworked, this is a bad idea but will be changed when migrated to reactive
             pet.setImageId(photoRepository.findPhotoByName(photo.getName()).getId());
             petRepository.save(pet);
             if(deleteId!=1){
