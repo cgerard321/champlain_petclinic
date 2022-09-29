@@ -15,6 +15,7 @@ CREATE TABLE photos (
                         type VARCHAR(80),
                         image LONGBLOB
 );
+CREATE INDEX photo_id ON photos (id);
 
 CREATE TABLE owners (
                         id         INTEGER IDENTITY PRIMARY KEY,

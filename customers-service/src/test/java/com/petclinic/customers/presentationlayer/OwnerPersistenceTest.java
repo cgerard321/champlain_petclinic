@@ -2,6 +2,7 @@ package com.petclinic.customers.presentationlayer;
 
 import com.petclinic.customers.datalayer.Owner;
 import com.petclinic.customers.datalayer.OwnerRepository;
+import com.petclinic.customers.datalayer.PhotoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
@@ -27,6 +28,9 @@ class OwnerPersistenceTest {
 
     @Autowired
     private OwnerRepository repository;
+
+    @Autowired
+    private PhotoRepository photoRepository;
 
     @BeforeEach
     public void setUpDB()

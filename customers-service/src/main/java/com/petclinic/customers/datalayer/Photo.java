@@ -26,58 +26,7 @@ public class Photo {
     @Column(name = "type")
     private String type;
 
-    @Lob
+//    @Lob
     @Column(name = "image", unique = false, nullable = false, length = 100000)
     private byte[] photo;
 }
-
-
-
-
-//public class Photo {
-//
-//    @Id
-//    @GeneratedValue(generator = "uuid")
-//    @GenericGenerator(name = "uuid",  strategy = "uuid2")
-//    private String id;
-//    private String name;
-//    private String type;
-//    @Lob
-//    private byte[] photo;
-//
-//    public Photo(){}
-//
-//    public Photo(String name, String type, byte[] photo) {
-//        this.name = name;
-//        this.type = type;
-//        this.photo = photo;
-//    }
-//
-//    public String getId() {
-//        return id;
-//    }
-//
-//    public String getName() {
-//        return name;
-//    }
-//
-//    public void setName(String name) {
-//        this.name = name;
-//    }
-//
-//    public String getType() {
-//        return type;
-//    }
-//
-//    public void setType(String type) {
-//        this.type = type;
-//    }
-//
-//    public byte[] getPhoto() {
-//        return photo;
-//    }
-//
-//    public void setPhoto(byte[] photo) {
-//        this.photo = photo;
-//    }
-//}
