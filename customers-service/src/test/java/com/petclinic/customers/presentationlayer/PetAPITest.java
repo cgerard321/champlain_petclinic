@@ -65,6 +65,20 @@ class PetAPITest {
         return owner;
     }
 
+    private Photo setupPhoto() {
+
+        final String test = "Test photo";
+        final byte[] testBytes = test.getBytes();
+
+        Photo photo = new Photo();
+        photo.setId(1);
+        photo.setName("photo");
+        photo.setType("jpeg");
+        photo.setPhoto(testBytes);
+
+        return photo;
+    }
+
     public Pet setupPet() {
 
         Owner owner = setupOwner();
@@ -166,7 +180,38 @@ class PetAPITest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").exists());
     }
 
+    @Test
+    void getPhotoPet_API_TEST() throws Exception {
+        Photo photo = setupPhoto();
+        given(photoService.getPhotoPet(2)).willReturn(photo);
+        mvc.perform(get("/owners/1/pets/photo/2").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json"))
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.name").value("photo"))
+                .andExpect(jsonPath("$.type").value("jpeg"));
 
+    }
+
+    @Test
+    void setPhotoPet_API_TEST() throws Exception {
+        Photo photo = setupPhoto();
+        Pet pet = setupPet();
+        String out = "Image uploaded successfully: " + photo.getName();
+        when(photoService.setPhotoPet(any(Photo.class), eq(pet.getId()))).thenReturn(out);
+        mvc.perform(post("/owners/1/pets/photo/2")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\": \"photo\"," + "\"type\": \"jpeg\"," + "\"image\": \"testimage\"}"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Image uploaded successfully: " + photo.getName()));
+    }
+
+    @Test
+    void deletePetPhoto_API_TEST() throws Exception {
+        mvc.perform(delete("/owners/1/pets/photo/1").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+        verify(photoService, times(1)).deletePhoto(1);
+    }
 
 }
 
