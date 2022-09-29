@@ -29,8 +29,8 @@ services:
 
     vet-service:
         build: vet-service
-        ports:
-            - "2745:8080"
+#        ports:
+#            - "2745:8080"
         environment:
             - SPRING_PROFILES_ACTIVE=docker
         depends_on:
@@ -262,35 +262,6 @@ services:
                     "-h",
                     "localhost",
                 ]
-            interval: 10s
-            timeout: 5s
-            retries: 10
-
-
-    mysql6:
-        image: mysql:5.7
-        #mem_limit: 350m
-        ports:
-            - "3312:3306"
-        environment:
-            - MYSQL_ROOT_PASSWORD=rootpwd
-            - MYSQL_DATABASE=vet-db
-            - MYSQL_USER=user
-            - MYSQL_PASSWORD=pwd
-        volumes:
-            - ./data/mysql6:/var/lib/mysql6
-            - ./data/init.d:/docker-entrypoint-initdb.d
-        healthcheck:
-            test:
-              [
-                      "CMD",
-                      "mysqladmin",
-                      "ping",
-                      "-uuser",
-                      "-ppwd",
-                      "-h",
-                      "localhost",
-              ]
             interval: 10s
             timeout: 5s
             retries: 10

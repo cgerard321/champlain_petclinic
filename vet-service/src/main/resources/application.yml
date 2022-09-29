@@ -13,13 +13,12 @@ spring:
 
   data:
     mongodb:
-      host: localhost
-      port: 27017
+      port: 0
       database: veterinarians
 
   mongodb:
-      embedded:
-        version: 4.0.21
+    embedded:
+      version: 4.0.21
 
 ---
 spring:
