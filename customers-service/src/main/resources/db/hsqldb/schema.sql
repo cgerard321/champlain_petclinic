@@ -13,9 +13,9 @@ CREATE TABLE photos (
                         id  INTEGER IDENTITY PRIMARY KEY,
                         name VARCHAR(80),
                         type VARCHAR(80),
-                        image blob
+                        image LONGTEXT
 );
-CREATE INDEX photo_id ON photo (id);
+CREATE INDEX name ON photos (name);
 
 CREATE TABLE owners (
                         id         INTEGER IDENTITY PRIMARY KEY,

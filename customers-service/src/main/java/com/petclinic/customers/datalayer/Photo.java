@@ -26,7 +26,7 @@ public class Photo {
     @Column(name = "type")
     private String type;
 
-    @Lob
+//    @Lob
     @Column(name = "image", unique = false, nullable = false, length = 100000)
     private byte[] photo;
 }
