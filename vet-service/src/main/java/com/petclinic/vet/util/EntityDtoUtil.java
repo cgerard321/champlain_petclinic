@@ -58,9 +58,6 @@ public class EntityDtoUtil {
     }
 
     public static String generateVetId() {
-//        String vetId = RandomStringUtils.randomNumeric(LENGTH_ID);
-//        Integer shortIdInt = Integer.valueOf(vetId);
-//        return shortIdInt;
         Random random = new Random();
         int number = random.nextInt(99999);
         return "22" + (String.format("%05d", number));
