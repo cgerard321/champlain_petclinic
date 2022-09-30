@@ -16,7 +16,6 @@ import com.petclinic.vet.dataaccesslayer.Vet;
 import com.petclinic.vet.servicelayer.SpecialtyDTO;
 import com.petclinic.vet.servicelayer.VetDTO;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.BeanUtils;
 
 import java.util.HashSet;
@@ -25,7 +24,6 @@ import java.util.Set;
 
 public class EntityDtoUtil {
 
-    final static int LENGTH_ID = 20;
 
     public static VetDTO toDTO(Vet vet) {
         VetDTO dto = new VetDTO();
