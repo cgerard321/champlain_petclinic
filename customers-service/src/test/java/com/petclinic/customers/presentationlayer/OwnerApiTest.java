@@ -51,9 +51,6 @@ class OwnerAPITest {
     //*** Used for testing only ***
     private Owner setupOwner() {
 
-        final String test = "Test photo";
-        final byte[] testBytes = test.getBytes();
-
         Owner owner = new Owner();
         owner.setId(5);
         owner.setFirstName("John");
@@ -72,14 +69,13 @@ class OwnerAPITest {
         final byte[] testBytes = test.getBytes();
 
         Photo photo = new Photo();
-        photo.setId(2);
-        photo.setName("Test photo");
+        photo.setId(1);
+        photo.setName("photo");
         photo.setType("jpeg");
         photo.setPhoto(testBytes);
 
         return photo;
     }
-
 
     /**
      * ------------------------ FIND_BY_ID_OWNER_API_TEST ------------------------
@@ -168,15 +164,10 @@ class OwnerAPITest {
         when(ownerService.createOwner(any(Owner.class))).thenReturn(owner);
         mvc.perform(post("/owners")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"firstName\": \"John\"," + "\"lastName\": \"Wick\"," + "\"address\": \"56 John St.\"," + "\"city\": \"Amsterdam\"," + "\"telephone\": \"9999999999\"," + "\"imageId\": \"2\"}"))
+                        .content("{\"firstName\": \"John\"," + "\"lastName\": \"Wick\"," + "\"address\": \"56 John St.\"," + "\"city\": \"Amsterdam\"," + "\"telephone\": \"9999999999\"}"))
                 .andExpect(status().isCreated())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").exists());
     }
-
-//    void setPhotoOwner_API_TEST() throws Exception {
-//        when(photoService.setPhotoOwner(any(Photo.class))).thenReturn(photo);
-//    }
-
 
 }
 
