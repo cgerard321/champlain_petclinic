@@ -57,7 +57,7 @@ class VetRepositoryTest {
     }
     private Vet buildVet() {
         return Vet.builder()
-                .vetId(678910)
+                .vetId("678910")
                 .firstName("Pauline")
                 .lastName("LeBlanc")
                 .email("skjfhf@gmail.com")
