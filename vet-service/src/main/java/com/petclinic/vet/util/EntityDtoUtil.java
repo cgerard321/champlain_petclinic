@@ -20,6 +20,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.beans.BeanUtils;
 
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 public class EntityDtoUtil {
@@ -56,10 +57,13 @@ public class EntityDtoUtil {
         return vet;
     }
 
-    public static Integer generateVetId() {
-        String vetId = RandomStringUtils.randomNumeric(LENGTH_ID);
-        Integer shortIdInt = Integer.valueOf(vetId);
-        return shortIdInt;
+    public static String generateVetId() {
+//        String vetId = RandomStringUtils.randomNumeric(LENGTH_ID);
+//        Integer shortIdInt = Integer.valueOf(vetId);
+//        return shortIdInt;
+        Random random = new Random();
+        int number = random.nextInt(99999);
+        return "22" + (String.format("%05d", number));
     }
 
     public static SpecialtyDTO toDTO(Specialty specialty) {

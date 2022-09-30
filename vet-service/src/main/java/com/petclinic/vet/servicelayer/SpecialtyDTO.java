@@ -10,6 +10,6 @@ import lombok.*;
 @Builder
 
 public class SpecialtyDTO {
-    private Integer specialtyId;
+    private String specialtyId;
     private String name;
 }

@@ -20,13 +20,14 @@ import java.util.Set;
 @NoArgsConstructor
 @Builder
 @ToString
+@AllArgsConstructor
 
 public class Vet {
 
     @Id
-    private Integer id;
+    private String id;
 
-    private Integer vetId;
+    private String vetId;
     private String firstName;
     private String lastName;
     private String email;
@@ -37,19 +38,6 @@ public class Vet {
     private boolean isActive;
     private Set<Specialty> specialties;
 
-    public Vet(Integer id, Integer vetId, String firstName, String lastName, String email, String phoneNumber, byte[] image, String resume, String workday, boolean isActive, Set<Specialty> specialties) {
-        this.id = id;
-        this.vetId = vetId;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.phoneNumber = phoneNumber;
-        this.image = image;
-        this.resume = resume;
-        this.workday = workday;
-        this.isActive = isActive;
-        this.specialties = specialties;
-    }
 
     //    public void setVetId(int vetId) {
 //        this.vetId = DataValidation.verifyVetId(vetId);

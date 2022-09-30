@@ -24,8 +24,9 @@ import org.springframework.data.annotation.Id;
 
 public class Specialty {
     @Id
-    private Integer id;
-    private Integer specialtyId;
+    private String id;
+
+    private String specialtyId;
     private String name;
 
 //    public void setName(final String name) {

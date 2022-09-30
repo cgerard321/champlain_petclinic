@@ -41,7 +41,7 @@ public class VetServiceImpl implements VetService {
     }
 
     @Override
-    public Mono<VetDTO> updateVet(Integer vetId, Mono<VetDTO> vetDTOMono) {
+    public Mono<VetDTO> updateVet(String vetId, Mono<VetDTO> vetDTOMono) {
         return vetRepository.findVetByVetId(vetId)
                 .flatMap(p -> vetDTOMono
                         .map(EntityDtoUtil::toEntity)
@@ -53,7 +53,7 @@ public class VetServiceImpl implements VetService {
     }
 
     @Override
-    public Mono<VetDTO> getVetByVetId(Integer vetId) {
+    public Mono<VetDTO> getVetByVetId(String vetId) {
         return vetRepository.findVetByVetId(vetId)
                 .map(EntityDtoUtil::toDTO);
     }
@@ -65,7 +65,7 @@ public class VetServiceImpl implements VetService {
     }
 
     @Override
-    public Mono<Void> deleteVet(Integer vetId) {
+    public Mono<Void> deleteVet(String vetId) {
         return vetRepository.deleteVetByVetId(vetId);
     }
 

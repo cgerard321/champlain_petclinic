@@ -19,8 +19,9 @@ import java.util.Set;
 @ToString
 @Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class VetDTO {
-    private Integer vetId;
+    private String vetId;
     private String firstName;
     private String lastName;
     private String email;
@@ -31,16 +32,5 @@ public class VetDTO {
     private boolean isActive;
     private Set<SpecialtyDTO> specialties;
 
-    public VetDTO(Integer vetId, String firstName, String lastName, String email, String phoneNumber, byte[] image, String resume, String workday, boolean isActive, Set<SpecialtyDTO> specialties) {
-        this.vetId = vetId;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.email = email;
-        this.phoneNumber = phoneNumber;
-        this.image = image;
-        this.resume = resume;
-        this.workday = workday;
-        this.isActive = isActive;
-        this.specialties = specialties;
-    }
+
 }

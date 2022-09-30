@@ -17,14 +17,11 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Repository
-public interface VetRepository extends ReactiveMongoRepository<Vet, Integer> {
-
-    Flux<Vet> findAll();
-
-    Mono<Vet> findVetByVetId(Integer vetId);
+public interface VetRepository extends ReactiveMongoRepository<Vet, String> {
+    Mono<Vet> findVetByVetId(String vetId);
 
 
-    Mono<Void> deleteVetByVetId (Integer vetId);
+    Mono<Void> deleteVetByVetId (String vetId);
 
 
     Flux<Vet> findVetsByIsActive(boolean isActive);
