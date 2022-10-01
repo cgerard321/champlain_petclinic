@@ -62,13 +62,16 @@ class PhotoServiceTest {
         when(photoRepository.save(photo)).thenReturn(photo);
 
         when(ownerRepository.findOwnerById(1)).thenReturn(owner);
-        int deleteId = owner.getImageId();
+//        int deleteId = owner.getImageId();
 
-        when(photoRepository.findPhotoByName(photo.getName()).getId()).thenReturn(photo.getId());
+        when(photoRepository.findPhotoByName(photo.getName()).getId()).thenReturn();
 
-        owner.setImageId(photo.getId());
+        ownerService.updateOwner(owner.getId(), owner)
+                        .setImageId(2);
 
         when(ownerRepository.save(owner)).thenReturn(owner);
+
+        assertThat(owner.getImageId()).isEqualTo(photo.getId());
 
     }
 
