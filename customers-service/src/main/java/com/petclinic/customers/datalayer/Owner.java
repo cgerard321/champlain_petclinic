@@ -1,5 +1,8 @@
 package com.petclinic.customers.datalayer;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PropertyComparator;
 import org.springframework.core.style.ToStringCreator;
@@ -22,6 +25,8 @@ import java.util.*;
  */
 
 @Entity
+@Builder
+@AllArgsConstructor
 @Table(name = "owners")
 public class Owner {
 

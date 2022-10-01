@@ -21,6 +21,8 @@ public class PetDetails {
 
     private PetType type;
 
+    private int imageId;
+
     private final List<VisitDetails> visits = new ArrayList<>();
 
 }
