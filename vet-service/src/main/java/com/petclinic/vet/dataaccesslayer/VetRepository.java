@@ -20,10 +20,9 @@ import reactor.core.publisher.Mono;
 public interface VetRepository extends ReactiveMongoRepository<Vet, String> {
     Mono<Vet> findVetByVetId(String vetId);
 
-
     Mono<Void> deleteVetByVetId (String vetId);
 
-
     Flux<Vet> findVetsByIsActive(boolean isActive);
+
 
 }

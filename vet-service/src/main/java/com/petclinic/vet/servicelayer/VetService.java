@@ -19,6 +19,6 @@ public interface VetService {
     Mono<VetDTO> insertVet(Mono<VetDTO> VetDTOMono);
     Mono<VetDTO> updateVet(String vetId, Mono<VetDTO> VetDTOMono);
     Mono<VetDTO> getVetByVetId(String vetId);
-    Mono<Void> deleteVet(String vetId);
+    Mono<Void> deleteVetByVetId(String vetId);
     Flux<VetDTO> getVetByIsActive(boolean isActive);
 }

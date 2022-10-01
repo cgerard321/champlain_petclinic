@@ -65,7 +65,7 @@ public class VetServiceImpl implements VetService {
     }
 
     @Override
-    public Mono<Void> deleteVet(String vetId) {
+    public Mono<Void> deleteVetByVetId(String vetId) {
         return vetRepository.deleteVetByVetId(vetId);
     }
 

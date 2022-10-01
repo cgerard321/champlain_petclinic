@@ -14,14 +14,11 @@ package com.petclinic.vet.dataaccesslayer;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 
-
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @ToString
-
 public class Specialty {
     @Id
     private String id;

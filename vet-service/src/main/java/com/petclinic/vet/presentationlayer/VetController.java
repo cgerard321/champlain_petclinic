@@ -62,7 +62,7 @@ public class VetController {
 
     @DeleteMapping("{vetId}")
     public Mono<Void> deleteVet(@PathVariable String vetId) {
-        return vetService.deleteVet(vetId);
+        return vetService.deleteVetByVetId(vetId);
     }
 
 
