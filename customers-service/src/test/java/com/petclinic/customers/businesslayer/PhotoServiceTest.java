@@ -39,12 +39,21 @@ class PhotoServiceTest {
     @Autowired
     PetService petService;
 
-//    @BeforeEach
-//    void setup(){
-//
-//        when(photoRepository.save(Photo.builder().build()));
-//
-//    }
+    public Pet setupPet() {
+
+        Owner owner = buildOwner();
+
+        Pet pet = new Pet();
+        pet.setName("Daisy");
+        pet.setId(2);
+
+        PetType petType = new PetType();
+        petType.setId(6);
+        pet.setType(petType);
+
+        owner.addPet(pet);
+        return pet;
+    }
 
     @Test
     void setOwnerPhoto() {
@@ -76,25 +85,39 @@ class PhotoServiceTest {
     }
 
     @Test
-    void setPhotoPet() {
+    void setPetPhoto() {
+
+
     }
 
     @Test
-    void getPhotoOwner() {
+    void getOwnerPhoto() {
 
         Owner owner = buildOwner();
         Photo photo = buildPhoto();
-        when(photoRepository.findPhotoById(ownerRepository.findOwnerById(1).getImageId())).thenReturn(photo);
 
-        photoRepository.findPhotoById(2);
+        when(ownerRepository.findOwnerById(owner.getId())).thenReturn(owner);
+        when(photoRepository.findPhotoById(owner.getImageId())).thenReturn(photo);
 
-        verify(photoRepository.findPhotoById(2).equals(photo.getId()));
+        Photo returnedPhoto = photoService.getOwnerPhoto(1);
 
+        assertThat(returnedPhoto.getId()).isEqualTo(photo.getId());
     }
 
 
     @Test
-    void getPhotoPet() {
+    void getPetPhoto() {
+
+        Pet pet = setupPet();
+        Photo photo = buildPhoto();
+
+        when(petRepository.findPetById(pet.getId())).thenReturn(pet);
+        when(photoRepository.findPhotoById(pet.getImageId())).thenReturn(photo);
+
+        Photo returnedPhoto = photoService.getPetPhoto(2);
+
+        assertThat(returnedPhoto.getId()).isEqualTo(photo.getId());
+
     }
 
     @Test
@@ -115,6 +138,7 @@ class PhotoServiceTest {
                 .imageId(2)
                 .build();
     }
+
 
     private Photo buildPhoto(){
         final String test = "Test photo";

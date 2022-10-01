@@ -181,9 +181,9 @@ class PetAPITest {
     }
 
     @Test
-    void getPhotoPet_API_TEST() throws Exception {
+    void getPetPhoto_API_TEST() throws Exception {
         Photo photo = setupPhoto();
-        given(photoService.getPhotoPet(2)).willReturn(photo);
+        given(photoService.getPetPhoto(2)).willReturn(photo);
         mvc.perform(get("/owners/1/pets/photo/2").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType("application/json"))
@@ -198,7 +198,7 @@ class PetAPITest {
         Photo photo = setupPhoto();
         Pet pet = setupPet();
         String out = "Image uploaded successfully: " + photo.getName();
-        when(photoService.setPhotoPet(any(Photo.class), eq(pet.getId()))).thenReturn(out);
+        when(photoService.setPetPhoto(any(Photo.class), eq(pet.getId()))).thenReturn(out);
         mvc.perform(post("/owners/1/pets/photo/2")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"name\": \"photo\"," + "\"type\": \"jpeg\"," + "\"image\": \"testimage\"}"))

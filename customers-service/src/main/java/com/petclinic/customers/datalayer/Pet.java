@@ -1,6 +1,7 @@
 package com.petclinic.customers.datalayer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Builder;
 import org.springframework.core.style.ToStringCreator;
 
 import javax.persistence.*;
