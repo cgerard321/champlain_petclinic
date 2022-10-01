@@ -18,6 +18,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest
@@ -64,14 +65,14 @@ class PhotoServiceTest {
         when(ownerRepository.findOwnerById(1)).thenReturn(owner);
 //        int deleteId = owner.getImageId();
 
-        when(photoRepository.findPhotoByName(photo.getName()).getId()).thenReturn();
+        when(photoRepository.findPhotoByName(photo.getName()).getId()).thenReturn(photo.getId());
 
         ownerService.updateOwner(owner.getId(), owner)
                         .setImageId(2);
 
         when(ownerRepository.save(owner)).thenReturn(owner);
 
-        assertThat(owner.getImageId()).isEqualTo(photo.getId());
+        assertThat(content()).isEqualTo("Image uploaded successfully: " + photo.getName());
 
     }
 

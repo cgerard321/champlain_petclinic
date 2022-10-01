@@ -139,7 +139,7 @@ public class CustomerServiceClientIntegrationTest {
     }
 
     @Test
-    void deletePhoto() throws JsonProcessingException {
+    void deleteOwnerPhoto() throws JsonProcessingException {
 
         final String body = mapper.writeValueAsString(mapper.convertValue(TEST_PHOTO, PhotoDetails.class));
         prepareResponse(response -> response
@@ -147,6 +147,19 @@ public class CustomerServiceClientIntegrationTest {
                 .setBody(body));
 
         final Mono<Void> empty = customersServiceClient.deleteOwnerPhoto(TEST_PHOTO.getId());
+
+        assertEquals(empty.block(), null);
+    }
+
+    @Test
+    void deletePetPhoto() throws JsonProcessingException {
+
+        final String body = mapper.writeValueAsString(mapper.convertValue(TEST_PHOTO, PhotoDetails.class));
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(body));
+
+        final Mono<Void> empty = customersServiceClient.deletePetPhoto(1,TEST_PHOTO.getId());
 
         assertEquals(empty.block(), null);
     }
