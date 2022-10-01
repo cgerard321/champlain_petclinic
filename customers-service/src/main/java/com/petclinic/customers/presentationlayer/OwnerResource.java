@@ -69,12 +69,12 @@ class OwnerResource {
 
     @PostMapping(value = "/photo/{ownerId}")
     public String setPhoto(@RequestBody Photo photo, @PathVariable("ownerId") int id){
-        return photoService.setPhotoOwner(photo,id);
+        return photoService.setOwnerPhoto(photo,id);
     }
 
     @GetMapping(value = "/photo/{ownerId}")
     public Photo getPhoto(@PathVariable("ownerId") int id) {
-         return photoService.getPhotoOwner(id);
+         return photoService.getOwnerPhoto(id);
     }
 
     @DeleteMapping(value = "/photo/{photoId}")

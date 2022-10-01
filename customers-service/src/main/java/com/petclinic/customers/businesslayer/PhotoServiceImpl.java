@@ -20,7 +20,7 @@ public class PhotoServiceImpl implements PhotoService{
     }
 
     @Override
-    public String setPhotoOwner(Photo photo, int ownerId) {
+    public String setOwnerPhoto(Photo photo, int ownerId) {
         try {
         photoRepository.save(photo);
         Owner owner = ownerRepository.findOwnerById(ownerId);
@@ -40,7 +40,7 @@ public class PhotoServiceImpl implements PhotoService{
     }
 
     @Override
-    public String setPhotoPet(Photo photo, int petId) {
+    public String setPetPhoto(Photo photo, int petId) {
         try {
             photoRepository.save(photo);
             Pet pet = petRepository.findPetById(petId);
@@ -60,7 +60,7 @@ public class PhotoServiceImpl implements PhotoService{
     }
 
     @Override
-    public Photo getPhotoOwner(int ownerId){
+    public Photo getOwnerPhoto(int ownerId){
         try {
             return photoRepository.findPhotoById(ownerRepository.findOwnerById(ownerId).getImageId());
         }
@@ -71,7 +71,7 @@ public class PhotoServiceImpl implements PhotoService{
     }
 
     @Override
-    public Photo getPhotoPet(int petId){
+    public Photo getPetPhoto(int petId){
         try {
             return photoRepository.findPhotoById(petRepository.findPetById(petId).getImageId());
         }

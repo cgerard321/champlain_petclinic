@@ -300,33 +300,33 @@ public class BFFApiGatewayController {
 
 
     @PostMapping(value = "owners/photo/{ownerId}")
-    public Mono<String> setPhotoOwner(@RequestBody PhotoDetails photoDetails, @PathVariable int ownerId) {
-        return customersServiceClient.setPhotoOwner(photoDetails, ownerId);
+    public Mono<String> setOwnerPhoto(@RequestBody PhotoDetails photoDetails, @PathVariable int ownerId) {
+        return customersServiceClient.setOwnerPhoto(photoDetails, ownerId);
     }
 
     @GetMapping(value = "owners/photo/{ownerId}")
-    public Mono<PhotoDetails> getPhotoOwner(@PathVariable int ownerId) {
-        return customersServiceClient.getPhotoOwner(ownerId);
+    public Mono<PhotoDetails> getOwnerPhoto(@PathVariable int ownerId) {
+        return customersServiceClient.getOwnerPhoto(ownerId);
     }
 
     @PostMapping(value = "owners/{ownerId}/pet/photo/{petId}")
-    public Mono<String> setPhotoPet(@PathVariable int ownerId, @RequestBody PhotoDetails photoDetails, @PathVariable int petId) {
-        return customersServiceClient.setPhotoPet(ownerId, photoDetails, petId);
+    public Mono<String> setPetPhoto(@PathVariable int ownerId, @RequestBody PhotoDetails photoDetails, @PathVariable int petId) {
+        return customersServiceClient.setPetPhoto(ownerId, photoDetails, petId);
     }
 
     @GetMapping(value = "owners/{ownerId}/pet/photo/{petId}")
-    public Mono<PhotoDetails> getPhotoPet(@PathVariable int ownerId, @PathVariable int petId) {
-        return customersServiceClient.getPhotoPet(ownerId, petId);
+    public Mono<PhotoDetails> getPetPhoto(@PathVariable int ownerId, @PathVariable int petId) {
+        return customersServiceClient.getPetPhoto(ownerId, petId);
     }
 
     @DeleteMapping(value = "owners/photo/{photoId}")
-    public Mono<Void> deletePhotoOwner(@PathVariable int photoId){
-        return customersServiceClient.deletePhotoOwner(photoId);
+    public Mono<Void> deleteOwnerPhoto(@PathVariable int photoId){
+        return customersServiceClient.deleteOwnerPhoto(photoId);
     }
 
     @DeleteMapping(value = "owners/{ownerId}/pet/photo/{photoId}")
-    public Mono<Void> deletePhotoPet(@PathVariable int ownerId, @PathVariable int photoId){
-        return customersServiceClient.deletePhotoPet(ownerId, photoId);
+    public Mono<Void> deletePetPhoto(@PathVariable int ownerId, @PathVariable int photoId){
+        return customersServiceClient.deletePetPhoto(ownerId, photoId);
     }
 
     @PutMapping(value = "owners/{ownerId}",consumes = "application/json" ,produces = "application/json")

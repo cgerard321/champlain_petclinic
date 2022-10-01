@@ -1,9 +1,6 @@
 package com.petclinic.customers.businesslayer;
 
-import com.petclinic.customers.datalayer.Owner;
-import com.petclinic.customers.datalayer.OwnerRepository;
-import com.petclinic.customers.datalayer.Photo;
-import com.petclinic.customers.datalayer.PhotoRepository;
+import com.petclinic.customers.datalayer.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,11 +28,16 @@ class PhotoServiceTest {
     @MockBean
     OwnerRepository ownerRepository;
 
-    @Autowired
-    PhotoService photoService;
+    @MockBean
+    PetRepository petRepository;
 
     @Autowired
+    PhotoService photoService;
+    @Autowired
     OwnerService ownerService;
+
+    @Autowired
+    PetService petService;
 
 //    @BeforeEach
 //    void setup(){
@@ -45,16 +47,32 @@ class PhotoServiceTest {
 //    }
 
     @Test
-    void setPhotoOwner() {
+    void setOwnerPhoto() {
         Owner owner = buildOwner();
         Photo photo = buildPhoto();
 
+        when(photoRepository.save(photo)).thenReturn(photo);
+
         when(ownerRepository.findOwnerById(1)).thenReturn(owner);
+        int deleteId = owner.getImageId();
 
-        Owner owner1 = ownerService.findByOwnerId(1).get();
+        when(photoRepository.findPhotoByName(photo.getName()).getId()).thenReturn(photo.getId());
+
+        owner.setImageId(photo.getId());
+
+        when(ownerRepository.save(owner)).thenReturn(owner);
+
+//        String response =;
+//
+//
+////        if (deleteId !=1) {
+////            this.deletePhoto();
+////        }
+//
+//        assertThat(response).isEqualTo("Image uploaded successfully: " + photo.getName());
 
 
-        verify(photoRepository.findPhotoById(2).equals(photo.getId()));
+
     }
 
     @Test

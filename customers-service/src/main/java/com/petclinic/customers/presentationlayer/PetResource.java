@@ -70,12 +70,12 @@ class PetResource {
 
     @PostMapping(value = "/photo/{petId}")
     public String setPhoto(@RequestBody Photo photo, @PathVariable("petId") int id){
-        return photoService.setPhotoPet(photo,id);
+        return photoService.setPetPhoto(photo,id);
     }
 
     @GetMapping(value = "/photo/{petId}")
     public Photo getPhoto(@PathVariable("petId") int id) {
-        return photoService.getPhotoPet(id);
+        return photoService.getPetPhoto(id);
     }
 
     @DeleteMapping(value = "/photo/{photoId}")
