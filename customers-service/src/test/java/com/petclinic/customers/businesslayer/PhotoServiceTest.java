@@ -27,12 +27,11 @@ class PhotoServiceTest {
     PhotoRepository photoRepository;
     @MockBean
     OwnerRepository ownerRepository;
-
     @MockBean
     PetRepository petRepository;
-
     @Autowired
     PhotoService photoService;
+
     @Autowired
     OwnerService ownerService;
 
@@ -71,22 +70,10 @@ class PhotoServiceTest {
 
         when(ownerRepository.save(owner)).thenReturn(owner);
 
-//        String response =;
-//
-//
-////        if (deleteId !=1) {
-////            this.deletePhoto();
-////        }
-//
-//        assertThat(response).isEqualTo("Image uploaded successfully: " + photo.getName());
-
-
-
     }
 
     @Test
     void setPetPhoto() {
-
 
     }
 
@@ -122,6 +109,14 @@ class PhotoServiceTest {
 
     @Test
     void deletePhoto() {
+
+        Photo photo = buildPhoto();
+
+        when(photoRepository.findPhotoById(photo.getId())).thenReturn(photo);
+
+        photoService.deletePhoto(photo.getId());
+
+        verify(photoRepository,times(1)).delete(photo);
 
     }
 
