@@ -15,8 +15,9 @@ import lombok.*;
 
 import java.util.Set;
 
-@Data
-@ToString
+
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor

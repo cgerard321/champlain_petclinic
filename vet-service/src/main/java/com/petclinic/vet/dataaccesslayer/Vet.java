@@ -16,10 +16,10 @@ import org.springframework.data.annotation.Id;
 
 import java.util.Set;
 
-@Data
+@Setter
+@Getter
 @NoArgsConstructor
 @Builder
-@ToString
 @AllArgsConstructor
 public class Vet {
 
@@ -37,35 +37,5 @@ public class Vet {
     private boolean isActive;
     private Set<Specialty> specialties;
 
-
-    //    public void setVetId(int vetId) {
-//        this.vetId = DataValidation.verifyVetId(vetId);
-//    }
-//    public void setEmail(String email) {
-//        this.email = DataValidation.verifyEmail(email);
-//    }
-//    public void setPhoneNumber(String phoneNumber) {
-//        this.phoneNumber = DataValidation.verifyPhoneNumber(phoneNumber);
-//    }
-//    public void setWorkday(String workday) {
-//        this.workday = DataValidation.verifyWorkday(workday);
-//    }
-//    public void setFirstName(String firstName) {
-//        this.firstName = DataValidation.verifyFirstName(firstName);
-//    }
-//    public void setLastName(String lastName) {
-//        this.lastName = DataValidation.verifyLastName(lastName);
-//    }
-
-//    @Override
-//    public String toString() {
-//        return new ToStringCreator(this).append("id", this.getId())
-//                .append("firstName", this.getFirstName())
-//                .append("lastName", this.getLastName())
-//                .append("email", this.getEmail())
-//                .append("phoneNumber", this.getPhoneNumber())
-//                .append("resume", this.getResume())
-//                .append("workday", this.getWorkday()).toString();
-//    }
 
 }

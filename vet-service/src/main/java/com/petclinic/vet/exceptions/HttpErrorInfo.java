@@ -28,5 +28,7 @@ public class HttpErrorInfo {
         this.path = path;
         this.message = message;
     }
+
+
 }
 

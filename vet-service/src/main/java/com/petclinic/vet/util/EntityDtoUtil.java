@@ -13,10 +13,10 @@ package com.petclinic.vet.util;
 
 import com.petclinic.vet.dataaccesslayer.Specialty;
 import com.petclinic.vet.dataaccesslayer.Vet;
+import com.petclinic.vet.exceptions.InvalidInputException;
 import com.petclinic.vet.servicelayer.SpecialtyDTO;
 import com.petclinic.vet.servicelayer.VetDTO;
-
-import org.apache.commons.lang3.RandomStringUtils;
+import lombok.Generated;
 import org.springframework.beans.BeanUtils;
 
 import java.util.HashSet;
@@ -24,8 +24,8 @@ import java.util.Random;
 import java.util.Set;
 
 public class EntityDtoUtil {
-
-    final static int LENGTH_ID = 20;
+    @Generated
+    public EntityDtoUtil(){}
 
     public static VetDTO toDTO(Vet vet) {
         VetDTO dto = new VetDTO();
@@ -95,5 +95,15 @@ public class EntityDtoUtil {
         }
 
         return specialties;
+    }
+
+    public static String verifyId(String id) {
+        try {
+            Integer.parseInt(id);
+        }
+        catch(NumberFormatException e) {
+            throw new InvalidInputException ("This id is not valid");
+        }
+        return id;
     }
 }

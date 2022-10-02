@@ -12,22 +12,12 @@ package com.petclinic.vet.dataaccesslayer;
  */
 
 import lombok.*;
-import org.springframework.data.annotation.Id;
 
-@Data
-@AllArgsConstructor
+@Getter
+@Setter
 @NoArgsConstructor
-@Builder
-@ToString
 public class Specialty {
-    @Id
-    private String id;
-
     private String specialtyId;
     private String name;
-
-//    public void setName(final String name) {
-//        this.name = DataValidation.verifySpeciality(name);
-//    }
 
 }

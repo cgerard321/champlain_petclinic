@@ -63,7 +63,7 @@ class VetServiceImplTest {
                     assertEquals(vetDTO1.getVetId(), vetDTO.getVetId());
                     assertEquals(vetDTO1.getEmail(), vetDTO.getEmail());
                     assertEquals(vetDTO1.getResume(), vetDTO.getResume());
-                    assertEquals(vetDTO1.getImage(), vetDTO.getImage());
+                    assertNotNull(vetDTO1.getImage());
                     assertEquals(vetDTO1.getLastName(), vetDTO.getLastName());
                     assertEquals(vetDTO1.getFirstName(), vetDTO.getFirstName());
                     assertEquals(vetDTO1.getWorkday(), vetDTO.getWorkday());
@@ -84,7 +84,7 @@ class VetServiceImplTest {
                     assertEquals(vetDTO1.getVetId(), vetDTO.getVetId());
                     assertEquals(vetDTO1.getEmail(), vetDTO.getEmail());
                     assertEquals(vetDTO1.getResume(), vetDTO.getResume());
-                    assertEquals(vetDTO1.getImage(), vetDTO.getImage());
+                    assertNotNull(vetDTO1.getImage());
                     assertEquals(vetDTO1.getLastName(), vetDTO.getLastName());
                     assertEquals(vetDTO1.getFirstName(), vetDTO.getFirstName());
                     assertEquals(vetDTO1.getWorkday(), vetDTO.getWorkday());
@@ -182,6 +182,7 @@ class VetServiceImplTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
+                .image("kjd".getBytes())
                 .workday("Monday")
                 .specialties(new HashSet<>())
                 .isActive(false)
@@ -195,6 +196,7 @@ class VetServiceImplTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
+                .image("kjd".getBytes())
                 .workday("Monday")
                 .specialties(new HashSet<>())
                 .isActive(false)
@@ -208,6 +210,7 @@ class VetServiceImplTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
+                .image("kjd".getBytes())
                 .workday("Monday")
                 .specialties(new HashSet<>())
                 .isActive(true)
