@@ -78,8 +78,9 @@ services:
         environment:
             - SPRING_PROFILES_ACTIVE=docker
         depends_on:
-            mysql5:
-                condition: service_healthy
+            - mongo
+#            mysql5:
+#                condition: service_healthy
 
     mailer-service:
         build: mailer-service
@@ -237,13 +238,43 @@ services:
             interval: 10s
             timeout: 5s
             retries: 10
+#
+#    mysql5:
+#        image: mysql:5.7
+#        #mem_limit: 350m
+#        ports:
+#            - "3311:3306"
+#        environment:
+#            - MYSQL_ROOT_PASSWORD=rootpwd
+#            - MYSQL_DATABASE=billing-db
+#            - MYSQL_USER=user
+#            - MYSQL_PASSWORD=pwd
+#        volumes:
+#            - ./data/mysql5:/var/lib/mysql5
+#            - ./data/init.d:/docker-entrypoint-initdb.d
+#        healthcheck:
+#            test:
+#                [
+#                    "CMD",
+#                    "mysqladmin",
+#                    "ping",
+#                    "-uuser",
+#                    "-ppwd",
+#                    "-h",
+#                    "localhost",
+#                ]
+#            interval: 10s
+#            timeout: 5s
+#            retries: 10
 
-    mysql5:
-        image: mysql:5.7
-        #mem_limit: 350m
+    mongo:
+        image: mongo
+        container_name: mongo
+        restart: always
         ports:
-            - "3311:3306"
+            - 27017:27017
         environment:
+<<<<<<< HEAD
             - MYSQL_ROOT_PASSWORD=rootpwd
             - MYSQL_DATABASE=billing-db
             - MYSQL_USER=user
@@ -265,3 +296,26 @@ services:
             interval: 10s
             timeout: 5s
             retries: 10
+=======
+            MONGO_INITDB_ROOT_USERNAME: root
+            MONGO_INITDB_ROOT_PASSWORD: password
+        #    healthcheck:
+        #      test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
+        #      retries: 5
+        #      interval: 15s
+        #      start_period: 30s
+
+    mongo-express:
+        image: mongo-express
+        restart: always
+        environment:
+            - ME_CONFIG_MONGODB_ADMINUSERNAME=root
+            - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+            - ME_CONFIG_MONGODB_SERVER=mongo
+            - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
+        ports:
+            - 8081:8081
+        depends_on:
+            - mongo
+            - billing-service
+>>>>>>> 57dc406ca50a89d742642bd06c3068bbea3a8d01
