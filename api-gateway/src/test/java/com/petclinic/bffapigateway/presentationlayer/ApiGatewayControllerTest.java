@@ -484,7 +484,7 @@ class ApiGatewayControllerTest {
 
         BillDetails entity = new BillDetails();
 
-        entity.setBillId(1);
+        entity.setBillId("9");
 
         entity.setAmount(599);
 
@@ -492,16 +492,16 @@ class ApiGatewayControllerTest {
 
         entity.setVisitType("Consultation");
 
-        when(billServiceClient.getBilling(1))
+        when(billServiceClient.getBilling("9"))
                 .thenReturn(Mono.just(entity));
 
         client.get()
                 //check the URI
-                .uri("/api/gateway/bills/1")
+                .uri("/api/gateway/bills/9")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$.billId").isEqualTo(1)
+                .jsonPath("$.billId").isEqualTo("9")
                 .jsonPath("$.customerId").isEqualTo(entity.getCustomerId())
                 .jsonPath("$.visitType").isEqualTo(entity.getVisitType())
                 .jsonPath("$.amount").isEqualTo(entity.getAmount());
@@ -509,7 +509,7 @@ class ApiGatewayControllerTest {
 
 
 
-        assertEquals(entity.getBillId(), 1);
+        assertEquals(entity.getBillId(), "9");
 
 
     }
@@ -538,12 +538,10 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$.path").isEqualTo("/bills/100")
                 .jsonPath("$.message").isEqualTo(null);
-
     }
 
 
-
-
+    
     @Test
     void getPutRequestNotFound(){
         client.put()
@@ -571,17 +569,12 @@ class ApiGatewayControllerTest {
     @Test
     void createBill(){
         BillDetails bill = new BillDetails();
-        bill.setBillId(1);
-
+        bill.setBillId("9");
         bill.setDate(null);
-
         bill.setAmount(600);
-
         bill.setVisitType("Adoption");
-
         when(billServiceClient.createBill(bill))
                 .thenReturn(Mono.just(bill));
-
 
         client.post()
                 .uri("/api/gateway/bills")
@@ -592,9 +585,7 @@ class ApiGatewayControllerTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
 
-
-
-        assertEquals(bill.getBillId(),1);
+        assertEquals(bill.getBillId(),"9");
     }
 
     @Test
@@ -625,7 +616,7 @@ class ApiGatewayControllerTest {
     @Test
     void shouldDeleteBillById(){
             BillDetails bill = new BillDetails();
-            bill.setBillId(1);
+            bill.setBillId("9");
 
             bill.setDate(null);
 
@@ -646,9 +637,9 @@ class ApiGatewayControllerTest {
                     .expectHeader().contentType(MediaType.APPLICATION_JSON)
                     .expectBody();
 
-            assertEquals(bill.getBillId(),1);
+            assertEquals(bill.getBillId(),"9");
         client.delete()
-                .uri("/api/gateway/bills/1")
+                .uri("/api/gateway/bills/9")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
