@@ -41,7 +41,7 @@ public class BFFApiGatewayController {
 
 
     @GetMapping(value = "bills/{billId}")
-    public Mono<BillDetails> getBillingInfo(final @PathVariable int billId)
+    public Mono<BillDetails> getBillingInfo(final @PathVariable String billId)
     {
         return billServiceClient.getBilling(billId);
     }
@@ -61,7 +61,7 @@ public class BFFApiGatewayController {
 
 
     @DeleteMapping(value = "bills/{billId}")
-    public Mono<Void> deleteBill(final @PathVariable int billId){
+    public Mono<Void> deleteBill(final @PathVariable String billId){
         return billServiceClient.deleteBill(billId);
 
 
