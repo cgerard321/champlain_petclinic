@@ -30,4 +30,11 @@ class NotFoundExceptionTest {
             throw new NotFoundException("Something went wrong", new Exception());
         });
     }
+
+    @Test
+    void TestNotFoundExceptionMessageOnly() {
+        assertThrows(NotFoundException.class, () -> {
+            throw new NotFoundException("Something went wrong");
+        });
+    }
 }

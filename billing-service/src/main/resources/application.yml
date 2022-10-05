@@ -1,58 +1,93 @@
 server.port: 7004
+#server.port: 8080
 
-server:
-  error:
-    include-message: always
+
 
 logging:
   level:
     root: INFO
     com.petclinic: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
----
-spring.profiles: h2
 
 spring:
-  h2:
-    console:
-      enabled: true
-
-  datasource:
-    platform: h2
-    url: jdbc:h2:mem:billing-db;DB_CLOSE_DELAY=-1
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-    initialization-mode: always
-
-  jpa:
-    show-sql: true
-    hibernate:
-      ddl-auto: none
-
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.H2Dialect
-
-spring.datasource.hikari.initializationFailTimeout: 60000
+  config:
+    activate:
+      on-profile: default
+  data:
+    mongodb:
+      port: 0
+      database: billings
+  mongodb:
+    embedded:
+      version: 4.0.21
 
 ---
-spring.profiles: docker
-
 spring:
-  datasource:
-    platform: mysql
-    url: jdbc:mysql://mysql5/billing-db
-    username: user
-    password: pwd
-    initialization-mode: always
+  config:
+    activate:
+      on-profile: integration
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: billings
+      username: root
+      password: password
+      authentication-database: admin
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+  data:
+    mongodb:
+      host: mongo
+      port: 27017
+      database: billings
+      username: root
+      password: password
+      authentication-database: admin
 
-  jpa:
-    hibernate:
-      ddl-auto: none
 
-spring.datasource.hikari.initializationFailTimeout: 60000
+#server:
+#  error:
+#    include-message: always
 
-server.port: 8080
+#    org.hibernate.SQL: DEBUG
+#    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+
+#---
+#spring.profiles: h2
+#
+#spring:
+#  h2:
+#    console:
+#      enabled: true
+#
+#  datasource:
+#    platform: h2
+#    url: jdbc:h2:mem:billing-db;DB_CLOSE_DELAY=-1
+#    driver-class-name: org.h2.Driver
+#    username: sa
+#    password:
+#    initialization-mode: always
+#
+#
+#spring.datasource.hikari.initializationFailTimeout: 60000
+#
+#---
+#spring.profiles: docker
+#
+#  spring:
+#    r2dbc:
+#      url: r2dbc:mysql://mysql5/billing-db
+#      username: user
+#      password: pwd
+#  #  datasource:
+#  #    platform: mysql
+#  #    initialization-mode: always
+#
+#spring.datasource.hikari.initializationFailTimeout: 60000
+
+
+

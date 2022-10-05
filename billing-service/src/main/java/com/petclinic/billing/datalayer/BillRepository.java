@@ -1,16 +1,21 @@
 package com.petclinic.billing.datalayer;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+//import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
+//import org.springframework.data.repository.reactive.ReactiveCrudRepository;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-
-import java.util.List;
-import java.util.Optional;
-
-public interface BillRepository extends JpaRepository<Bill, Integer> {
-    @Transactional(readOnly = true)
-    List<Bill> findByBillId(int billId);
+@Repository
+public interface BillRepository extends ReactiveMongoRepository<Bill, String> {
 
     @Transactional(readOnly = true)
-    List<Bill> findByCustomerId(int customerId);
+    Mono<Bill> findByBillId(String billId);
+
+    @Transactional(readOnly = true)
+    Flux<Bill> findByCustomerId(int customerId);
+
+    Mono<Void>deleteBillByBillId(String billId);
 }
