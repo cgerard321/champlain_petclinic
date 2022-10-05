@@ -78,7 +78,7 @@ services:
         environment:
             - SPRING_PROFILES_ACTIVE=docker
         depends_on:
-            - mongo
+            - mongo1
 #            mysql5:
 #                condition: service_healthy
 
