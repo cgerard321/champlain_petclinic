@@ -66,8 +66,8 @@ class ApiGatewayControllerTest {
     @MockBean
     private VisitsServiceClient visitsServiceClient;
 
-    @MockBean
-    private VetsServiceClient vetsServiceClient;
+//    @MockBean
+//    private VetsServiceClient vetsServiceClient;
 
     @MockBean
     private AuthServiceClient authServiceClient;
