@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.util.Arrays;
 
 @Entity
 @Table(name = "photos")
@@ -26,7 +27,16 @@ public class Photo {
     @Column(name = "type")
     private String type;
 
-//    @Lob
     @Column(name = "image", unique = false, nullable = false, length = 100000)
     private byte[] photo;
+
+    @Override
+    public String toString()
+    {
+        return "ID: " +
+                this.id + ", Name: " +
+                this.name + ", Type: " +
+                this.type + ", Image: " +
+                Arrays.toString(this.photo);
+    }
 }
