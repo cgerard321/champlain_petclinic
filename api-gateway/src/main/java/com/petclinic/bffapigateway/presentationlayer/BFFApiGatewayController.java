@@ -55,7 +55,7 @@ public class BFFApiGatewayController {
 
 
     @GetMapping(value = "bills/{billId}")
-    public Mono<BillDetails> getBillingInfo(final @PathVariable int billId)
+    public Mono<BillDetails> getBillingInfo(final @PathVariable String billId)
     {
         return billServiceClient.getBilling(billId);
     }
@@ -75,7 +75,7 @@ public class BFFApiGatewayController {
 
 
     @DeleteMapping(value = "bills/{billId}")
-    public Mono<Void> deleteBill(final @PathVariable int billId){
+    public Mono<Void> deleteBill(final @PathVariable String billId){
         return billServiceClient.deleteBill(billId);
 
 
@@ -178,52 +178,48 @@ public class BFFApiGatewayController {
         return visitsServiceClient.createVisitForPet(visit);
     }
 
-    /**
-     * Retrieve all vets from DB
-     */
+
     @GetMapping(value = "vets")
-    public Flux<VetDetails> getVets() {
+    public Flux<VetDTO> getVets() {
         return vetsServiceClient.getVets();
     }
 
-    /**
-     * Get a single vet given its vetID
-     */
-    @GetMapping(value = "vets/{vetId}")
-    public Mono<VetDetails> getVet(final @PathVariable int vetId) {
-        return vetsServiceClient.getVet(vetId);
+    @GetMapping("/active")
+    public Flux<VetDTO> getActiveVets() {
+        return vetsServiceClient.getActiveVets();
+    }
+    @GetMapping("/inactive")
+    public Flux<VetDTO> getInactiveVets() {
+        return vetsServiceClient.getInactiveVets();
     }
 
-    /**
-     * Create Vet
-     */
-    @PostMapping(value = "vets",
-            consumes = "application/json",
-            produces = "application/json")
-    public Mono<VetDetails> createVet(@RequestBody VetDetails model) {
+    @GetMapping(value = "/vets/{vetId}")
+    public Mono<VetDTO> getVet(@PathVariable String vetId) {
+        return vetsServiceClient.getVetByVetId(vetId);
+    }
+
+
+    @PostMapping(value = "/vets",consumes = "application/json",produces = "application/json")
+    public Mono<VetDTO> createVet(@RequestBody VetDTO model) {
         return vetsServiceClient.createVet(model);
     }
 
-    /**
-     * Delete vet from DB given the vetID
-     */
-    @DeleteMapping(value = "vets/{vetId}")
-    public Mono<VetDetails> deleteVet(final @PathVariable long vetId) {
+
+    @DeleteMapping(value = "/vets/{vetId}")
+    public Mono<VetDTO> deleteVet(@PathVariable String vetId) {
         return vetsServiceClient.deleteVet(vetId);
     }
 
-    /**
-     * Update vet details
-     */
-    @PutMapping(
-            value = "vets/{vetId}",
-            consumes = "application/json",
-            produces = "application/json"
-    )
-    public Mono<VetDetails> updateVet(@PathVariable int vetId, @RequestBody VetDetails vet) {
+
+    @PutMapping(value = "/vets/{vetId}",consumes = "application/json",produces = "application/json")
+    public Mono<VetDTO> updateVet(@PathVariable String vetId, @RequestBody VetDTO vet) {
         log.debug("Trying to update vet");
         return vetsServiceClient.updateVet(vetId, vet);
     }
+
+
+
+
 
     @PostMapping(value = "users",
             consumes = "application/json",

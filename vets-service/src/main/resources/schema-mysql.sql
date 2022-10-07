@@ -1,5 +1,5 @@
 USE
-`vets-db`;
+`vet-db`;
 
 CREATE TABLE IF NOT EXISTS vets
 (

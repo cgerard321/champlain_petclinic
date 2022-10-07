@@ -12,7 +12,7 @@ import static java.util.stream.Collectors.toList;
 
 @Data
 public class BillDetails {
-    private int billId;
+    private String billId;
     private Date date;
     private int customerId;
     private String visitType;
