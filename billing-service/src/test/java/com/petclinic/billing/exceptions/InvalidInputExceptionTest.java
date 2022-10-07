@@ -30,4 +30,12 @@ class InvalidInputExceptionTest {
             throw new InvalidInputException("Something went wrong", new Exception());
         });
     }
+
+
+    @Test
+    void TestInvalidInputMessageOnly() {
+        assertThrows(InvalidInputException.class, () -> {
+            throw new InvalidInputException("Something went wrong");
+        });
+    }
 }

@@ -18,6 +18,8 @@ import org.mapstruct.Mappings;
 
 import java.util.List;
 
+//test comment
+
 @Mapper(componentModel = "spring")
 public interface VetMapper {
     @Mappings(
