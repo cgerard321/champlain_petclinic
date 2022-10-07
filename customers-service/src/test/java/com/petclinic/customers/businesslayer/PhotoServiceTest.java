@@ -1,11 +1,14 @@
 package com.petclinic.customers.businesslayer;
 
+import com.petclinic.customers.customerExceptions.exceptions.NotFoundException;
 import com.petclinic.customers.datalayer.*;
 import com.petclinic.customers.presentationlayer.PetRequest;
 import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -165,5 +168,19 @@ class PhotoServiceTest {
                 .type("jpeg")
                 .photo(testBytes)
                 .build();
+    }
+
+    @Test
+    public void test_NotFoundException()
+    {
+        Owner owner = buildOwner();
+        String expectedErrorMsg = "Owner with ID : " + owner.getId()+ " is not found";
+        Mockito.when(ownerRepository.findOwnerById(Mockito.anyInt())).thenThrow(new NotFoundException());
+
+        try {
+            photoService.getOwnerPhoto(owner.getId());
+        } catch(NotFoundException ex) {
+            assertEquals(ex.getMessage(), expectedErrorMsg);
+        }
     }
 }

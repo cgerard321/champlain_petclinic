@@ -11,8 +11,8 @@ import java.util.Arrays;
 
 @Entity
 @Table(name = "photos")
-@Data
 @Builder
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Photo {
