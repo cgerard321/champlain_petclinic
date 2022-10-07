@@ -22,17 +22,17 @@ public class PhotoServiceImpl implements PhotoService{
     @Override
     public String setOwnerPhoto(Photo photo, int ownerId) {
         try {
-        photoRepository.save(photo);
-        Owner owner = ownerRepository.findOwnerById(ownerId);
-        int deleteId = owner.getImageId();
-        //find by name needs to be reworked, this is a bad idea but will be changed when migrated to reactive
-        owner.setImageId(photoRepository.findPhotoByName(photo.getName()).getId());
-        ownerRepository.save(owner);
-        if(deleteId!=1){
-            this.deletePhoto(deleteId);
-        }
-        return "Image uploaded successfully: " + photo.getName();
-        }
+            photoRepository.save(photo);
+            Owner owner = ownerRepository.findOwnerById(ownerId);
+            int deleteId = owner.getImageId();
+            //find by name needs to be reworked, this is a bad idea but will be changed when migrated to reactive
+            owner.setImageId(photoRepository.findPhotoByName(photo.getName()).getId());
+            ownerRepository.save(owner);
+            if(deleteId!=1){
+                this.deletePhoto(deleteId);
+            }
+            return "Image uploaded successfully: " + photo.getName();
+            }
         catch (Exception e)
         {
             throw new NotFoundException("Owner with ID : " + ownerId+ " is not found");

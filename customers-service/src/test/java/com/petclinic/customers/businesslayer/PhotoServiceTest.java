@@ -1,6 +1,8 @@
 package com.petclinic.customers.businesslayer;
 
 import com.petclinic.customers.datalayer.*;
+import com.petclinic.customers.presentationlayer.PetRequest;
+import org.hamcrest.MatcherAssert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,9 +14,12 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.hamcrest.Matchers.samePropertyValuesAs;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -60,24 +65,34 @@ class PhotoServiceTest {
         Owner owner = buildOwner();
         Photo photo = buildPhoto();
 
-        when(photoRepository.save(photo)).thenReturn(photo);
-
         when(ownerRepository.findOwnerById(1)).thenReturn(owner);
-//        int deleteId = owner.getImageId();
+        when(photoRepository.findPhotoByName(photo.getName())).thenReturn(photo);
 
-        when(photoRepository.findPhotoByName(photo.getName()).getId()).thenReturn(photo.getId());
+        ownerService.createOwner(owner);
+        photoService.setOwnerPhoto(photo,owner.getId());
 
-        ownerService.updateOwner(owner.getId(), owner)
-                        .setImageId(2);
-
-        when(ownerRepository.save(owner)).thenReturn(owner);
-
-        assertThat(content()).isEqualTo("Image uploaded successfully: " + photo.getName());
+        final String photoResult = photoService.setOwnerPhoto(photo,owner.getId());
+        assertEquals("Image uploaded successfully: " + photo.getName(), photoResult);
 
     }
 
     @Test
     void setPetPhoto() {
+        PetRequest petRequest = buildPetRequest();
+        Pet pet = buildPet();
+        Owner owner = buildOwner();
+        Photo photo = buildPhoto();
+
+        when(ownerRepository.findOwnerById(1)).thenReturn(owner);
+        when(petRepository.findPetById(1)).thenReturn(pet);
+        when(photoRepository.findPhotoByName(photo.getName())).thenReturn(photo);
+
+        ownerService.createOwner(owner);
+        //petService.CreatePet(petRequest,owner.getId());
+        photoService.setPetPhoto(photo,pet.getId());
+
+        final String photoResult = photoService.setPetPhoto(photo,pet.getId());
+        assertEquals("Image uploaded successfully: " + photo.getName(), photoResult);
 
     }
 
@@ -92,7 +107,7 @@ class PhotoServiceTest {
 
         Photo returnedPhoto = photoService.getOwnerPhoto(1);
 
-        assertThat(returnedPhoto.getId()).isEqualTo(photo.getId());
+        assertThat(returnedPhoto.getName()).isEqualTo(photo.getName());
     }
 
 
@@ -125,16 +140,31 @@ class PhotoServiceTest {
     }
 
     private Owner buildOwner() {
-        final String test = "Test photo";
-        final byte[] testBytes = test.getBytes();
-        return Owner.builder()
+            return Owner.builder()
                 .id(1)
                 .firstName("John")
                 .lastName("Smith")
                 .address("534 Oak Road")
                 .city("Brossard")
                 .telephone("5554443333")
-                .imageId(2)
+                .imageId(1)
+                .build();
+    }
+
+    private PetRequest buildPetRequest() {
+        return PetRequest.builder()
+                .id(1)
+                .name("Joe")
+                .birthDate(new Date())
+                .build();
+    }
+
+    private Pet buildPet() {
+        return Pet.builder()
+                .id(1)
+                .name("Joe")
+                .birthDate(new Date())
+                .imageId(1)
                 .build();
     }
 
