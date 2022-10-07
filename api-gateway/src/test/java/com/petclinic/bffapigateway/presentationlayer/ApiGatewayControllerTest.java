@@ -26,6 +26,7 @@ import java.util.UUID;
 import java.util.List;
 
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -84,8 +85,8 @@ class ApiGatewayControllerTest {
     @Test
     void createAndDeleteVet() {
 
-        final int vetId = 1234567;
-        VetDetails vet = new VetDetails();
+        final String vetId = "1234567";
+        VetDTO vet = new VetDTO();
         vet.setVetId(vetId);
         vet.setFirstName("Kevin");
         vet.setLastName("Tremblay");
@@ -99,7 +100,7 @@ class ApiGatewayControllerTest {
 
         client.post()
                 .uri("/api/gateway/vets")
-                .body(Mono.just(vet), VetDetails.class)
+                .body(Mono.just(vet), VetDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -116,7 +117,7 @@ class ApiGatewayControllerTest {
                 .isOk()
                 .expectBody();
 
-        assertEquals(null, vetsServiceClient.getVet(vetId));
+        assertEquals(null, vetsServiceClient.getVetByVetId(vetId));
     }
 
 
