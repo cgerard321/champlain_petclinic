@@ -169,6 +169,39 @@ class OwnerAPITest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").exists());
     }
 
+
+    @Test
+    void getPhotoOwner_API_TEST() throws Exception {
+        Photo photo = setupPhoto();
+        given(photoService.getOwnerPhoto(5)).willReturn(photo);
+        mvc.perform(get("/owners/photo/5").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json"))
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.name").value("photo"))
+                .andExpect(jsonPath("$.type").value("jpeg"));
+
+    }
+
+    @Test
+    void setPhotoOwner_API_TEST() throws Exception {
+        Photo photo = setupPhoto();
+        Owner owner = setupOwner();
+        String out = "Image uploaded successfully: " + photo.getName();
+        when(photoService.setOwnerPhoto(any(Photo.class), eq(owner.getId()))).thenReturn(out);
+        mvc.perform(post("/owners/photo/5")
+                .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\": \"photo\"," + "\"type\": \"jpeg\"," + "\"image\": \"testimage\"}"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Image uploaded successfully: " + photo.getName()));
+    }
+
+    @Test
+    void deletePhotoOwner_API_TEST() throws Exception {
+        mvc.perform(delete("/owners/photo/1").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+        verify(photoService, times(1)).deletePhoto(1);
+    }
 }
 
 
