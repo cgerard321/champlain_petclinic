@@ -30,4 +30,3 @@ INSERT INTO pets VALUES (11, 'Freddy', '2010-03-09', 5, 9, 1);
 INSERT INTO pets VALUES (12, 'Lucky', '2010-06-24', 2, 10, 1);
 INSERT INTO pets VALUES (13, 'Sly', '2012-06-08', 1, 10, 1);
 
-INSERT INTO photos (id, name, type, image) VALUES (1, 'defaultpic', 'jpeg', 'testimagebase64');

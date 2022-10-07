@@ -10,6 +10,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.samePropertyValuesAs;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @ExtendWith(SpringExtension.class)
 @DataJpaTest
@@ -19,36 +21,73 @@ class PhotoPersistenceTest {
     @Autowired
     private PhotoRepository photoRepository;
 
-//    @BeforeEach
-//    public void setUpDB()
-//    {
-//        photoRepository.deleteAll();
-//    }
+    @BeforeEach
+    public void setUpDB()
+    {
+        photoRepository.deleteAll();
+    }
 
-    @Test
-    public void findById(){
-//        int photoId = 1;
-//        final String test = "Test photo";
-//        final byte[] testBytes = test.getBytes();
-//        //Arrange
-//        Photo photo = new Photo(1,"image","jpeg",testBytes);
-//        Photo savedPhoto = photoRepository.save(photo);
-//
-//
-//        //Act
-//        Photo foundPhoto = photoRepository.findPhotoById(savedPhoto.getId());
-//
-//        //Assert
-//        assert foundPhoto != null;
-//        assertThat(foundPhoto, samePropertyValuesAs(savedPhoto));
+    private Photo buildPhoto(){
+        final String test = "Test photo";
+        final byte[] testBytes = test.getBytes();
+        return Photo.builder()
+                .id(1)
+                .name("test photo")
+                .type("jpeg")
+                .photo(testBytes)
+                .build();
     }
 
     @Test
-    public void findByName(){}
+    public void findById(){
+
+        Photo photo = buildPhoto();
+        Photo savedPhoto = photoRepository.save(photo);
+
+        //Act
+        Photo foundPhoto = photoRepository.findPhotoById(savedPhoto.getId());
+
+        //Assert
+        assert foundPhoto != null;
+        assertThat(foundPhoto, samePropertyValuesAs(savedPhoto));
+    }
 
     @Test
-    public void deleteById(){}
+    public void findByName(){
+        Photo photo = buildPhoto();
+        Photo savedPhoto = photoRepository.save(photo);
+
+        //Act
+        Photo foundPhoto = photoRepository.findPhotoByName(photo.getName());
+
+        //Assert
+        assert foundPhoto != null;
+        assertThat(foundPhoto, samePropertyValuesAs(savedPhoto));
+    }
 
     @Test
-    public void save(){}
+    public void delete(){
+        Photo photo = buildPhoto();
+        photoRepository.save(photo);
+
+        //Act
+        photoRepository.delete(photo);
+
+        //Assert
+        assertFalse(photoRepository.existsById(photo.getId()));
+    }
+
+    @Test
+    public void save(){
+        Photo photo = buildPhoto();
+        Photo savedPhoto = photoRepository.save(photo);
+
+        //Act
+        Photo foundPhoto = photoRepository.findPhotoById(savedPhoto.getId());
+
+        //Assert
+        assert foundPhoto != null;
+        assertThat(foundPhoto, samePropertyValuesAs(savedPhoto));
+        assertEquals(1,photoRepository.findAll().size());
+    }
 }

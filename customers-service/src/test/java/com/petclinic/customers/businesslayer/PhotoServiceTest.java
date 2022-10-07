@@ -78,17 +78,12 @@ class PhotoServiceTest {
 
     @Test
     void setPetPhoto() {
-        PetRequest petRequest = buildPetRequest();
         Pet pet = buildPet();
-        Owner owner = buildOwner();
         Photo photo = buildPhoto();
 
-        when(ownerRepository.findOwnerById(1)).thenReturn(owner);
         when(petRepository.findPetById(1)).thenReturn(pet);
         when(photoRepository.findPhotoByName(photo.getName())).thenReturn(photo);
 
-        ownerService.createOwner(owner);
-        //petService.CreatePet(petRequest,owner.getId());
         photoService.setPetPhoto(photo,pet.getId());
 
         final String photoResult = photoService.setPetPhoto(photo,pet.getId());
@@ -148,14 +143,6 @@ class PhotoServiceTest {
                 .city("Brossard")
                 .telephone("5554443333")
                 .imageId(1)
-                .build();
-    }
-
-    private PetRequest buildPetRequest() {
-        return PetRequest.builder()
-                .id(1)
-                .name("Joe")
-                .birthDate(new Date())
                 .build();
     }
 
