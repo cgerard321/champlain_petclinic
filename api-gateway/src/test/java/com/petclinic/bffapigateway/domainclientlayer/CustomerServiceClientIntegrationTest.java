@@ -64,7 +64,6 @@ public class CustomerServiceClientIntegrationTest {
                 server.getHostName(),
                 String.valueOf(server.getPort())
         );
-//        customersServiceClient.setHostname(server.url("/").toString());
         mapper = new ObjectMapper();
     }
 
