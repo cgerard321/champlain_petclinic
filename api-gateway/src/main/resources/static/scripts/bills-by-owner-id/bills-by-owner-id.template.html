@@ -6,6 +6,7 @@
     <tr>
         <td>Bill ID</td>
         <td>Customer ID</td>
+        <td>Owner Details</td>
         <td>Details</td>
     </tr>
     </thead>
@@ -13,11 +14,9 @@
     <tr id="customerId" ng-repeat="bill in $ctrl.billsByOwnerId">
         <td>{{bill.billId}}</td>
         <td>{{bill.customerId}}</td>
-        <td>{{bill.date}}</td>
-        <td><a href="http://localhost:8080/#!/bills/details/{{bill.billId}}">Get Details</a></td>
+        <td><a href="http://localhost:8080/#!/owners/details/{{bill.customerId}}">Owner Details</a></td>
+        <td><a href="http://localhost:8080/#!/bills/details/{{bill.billId}}/owner/{{bill.customerId}}">Bill Details</a></td>
     </tr>
 </table>
-<a class="newBtn btn btn-primary" href="http://localhost:8080/#!/owner/{{$ctrl.bills.customerId}}">
-    View Owner Info</a>
 <a class="newBtn btn btn-primary" href="http://localhost:8080/#!/bills">
     View all Bills</a>
