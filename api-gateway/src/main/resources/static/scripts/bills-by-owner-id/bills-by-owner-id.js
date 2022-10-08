@@ -6,6 +6,6 @@ angular.module('billsByOwnerId', ['ui.router'])
             .state('billsByOwnerId', {
                 parent: 'app',
                 url: '/bills/customerId/:customerId',
-                template: '<bills-by-customer-id></bills-by-customer-id>'
+                template: '<bills-by-owner-id></bills-by-owner-id>'
             })
     }]);

@@ -1,24 +1,23 @@
 
-<h2 class="titleOwner">Bill History for customer</h2>
+<h2 class="titleOwner">Bill History for customer {{$ctrl.owner.firstName}}, {{$ctrl.owner.lastName}}</h2>
 
-<!--<table class="table table-striped">
+<table class="table table-striped">
     <thead>
     <tr>
         <td>Bill ID</td>
         <td>Customer ID</td>
-        <td>Visit Type</td>
-        <td>Amount</td>
-        <td>Date/Time</td>
         <td>Details</td>
-        <td>Delete</td>
     </tr>
     </thead>
 
-    <tr id="billId" ng-repeat="bill in $ctrl.billsByOwnerId | filter:$ctrl.query track by bill.customerId">
+    <tr id="customerId" ng-repeat="bill in $ctrl.billsByOwnerId">
         <td>{{bill.billId}}</td>
         <td>{{bill.customerId}}</td>
-        <td>{{bill.visitType}}</td>
-        <td>{{bill.amount}}</td>
         <td>{{bill.date}}</td>
+        <td><a href="http://localhost:8080/#!/bills/details/{{bill.billId}}">Get Details</a></td>
     </tr>
-</table>-->
+</table>
+<a class="newBtn btn btn-primary" href="http://localhost:8080/#!/owner/{{$ctrl.bills.customerId}}">
+    View Owner Info</a>
+<a class="newBtn btn btn-primary" href="http://localhost:8080/#!/bills">
+    View all Bills</a>
