@@ -1,14 +1,7 @@
 package com.petclinic.bffapigateway.exceptions;
 /**
- @author Kamilah Hatteea & Brandon Levis : Vet-Service
-  * Worked together with (Code with Friends) on IntelliJ IDEA
-  * <p>
+ @author
   * User: @Kamilah Hatteea
-  * Date: 2022-09-22
-  * Ticket: feat(VVS-CPC-554): edit veterinarian
-  * User: Brandon Levis
-  * Date: 202
-  * Ticket: feat(VVS-CPC-553): add veterinarian
  */
 
 public class InvalidInputException extends RuntimeException{

@@ -94,9 +94,14 @@ public class VetsServiceClient {
     }
 
     public Mono<Void> deleteVet(String vetId) {
-        return webClientBuilder.build().delete()
+        Mono<Void> response = webClientBuilder
+                .build()
+                .delete()
                 .uri(vetsServiceUrl + "/{vetId}", vetId)
-                .retrieve().bodyToMono(Void.class);
+                .retrieve()
+                .bodyToMono(Void.class);
+
+        return response;
     }
 
     public Mono<VetDTO> updateVet(String vetId,Mono<VetDTO> model) {

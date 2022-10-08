@@ -265,7 +265,6 @@ class ApiGatewayControllerTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("This id is not valid");
-
     }
 
     @Test
@@ -283,7 +282,6 @@ class ApiGatewayControllerTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("This id is not valid");
-
     }
 
     @Test
@@ -300,13 +298,14 @@ class ApiGatewayControllerTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("This id is not valid");
-
     }
 
     @Test
-    void toStringBuilders() {
+    void toStringBuilderVets() {
         System.out.println(VetDTO.builder());
     }
+
+
 
 
     @Test
