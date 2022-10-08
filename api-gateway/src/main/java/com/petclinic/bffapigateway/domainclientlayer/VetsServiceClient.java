@@ -79,29 +79,37 @@ public class VetsServiceClient {
     }
 
 
-    public Mono<VetDTO> createVet(VetDTO model) {
-        return webClientBuilder.build().post()
+    public Mono<VetDTO> createVet(Mono<VetDTO> model) {
+        Mono<VetDTO> vetDTO =
+                webClientBuilder
+                        .build()
+                        .post()
                 .uri(vetsServiceUrl)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .body(Mono.just(model), VetDTO.class)
+                .body(model, VetDTO.class)
                 .retrieve()
                 .bodyToMono(VetDTO.class);
+
+        return vetDTO;
     }
 
-    public Mono<VetDTO> deleteVet(String vetId) {
+    public Mono<Void> deleteVet(String vetId) {
         return webClientBuilder.build().delete()
                 .uri(vetsServiceUrl + "/{vetId}", vetId)
-                .retrieve().bodyToMono(VetDTO.class);
+                .retrieve().bodyToMono(Void.class);
     }
 
-    public Mono<VetDTO> updateVet(String vetId, final VetDTO model) {
-        log.debug("in Update Vet Method");
-        return webClientBuilder.build().put()
-                .uri(vetsServiceUrl + "/" + vetId)
+    public Mono<VetDTO> updateVet(String vetId,Mono<VetDTO> model) {
+        Mono<VetDTO> vetDTOMono = webClientBuilder
+                .build()
+                .put()
+                .uri(vetsServiceUrl + "/{vetId}", vetId)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .body(Mono.just(model), VetDTO.class)
+                .body(model, VetDTO.class)
                 .retrieve()
                 .bodyToMono(VetDTO.class);
+
+        return vetDTOMono;
     }
 
 }

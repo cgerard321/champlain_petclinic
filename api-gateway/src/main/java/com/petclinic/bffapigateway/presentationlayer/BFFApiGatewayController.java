@@ -3,6 +3,7 @@ package com.petclinic.bffapigateway.presentationlayer;
 
 import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.*;
+import com.petclinic.bffapigateway.utils.VetsEntityDtoUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -165,43 +166,84 @@ public class BFFApiGatewayController {
     }
 
 
+
     @GetMapping(value = "vets")
-    public Flux<VetDTO> getVets() {
+    public Flux<VetDTO> getAllVets() {
         return vetsServiceClient.getVets();
     }
 
-    @GetMapping("/active")
+    @GetMapping("/vets/{vetId}")
+    public Mono<ResponseEntity<VetDTO>> getVetByVetId(@PathVariable String vetId) {
+        return vetsServiceClient.getVetByVetId(VetsEntityDtoUtil.verifyId(vetId))
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/vets/active")
     public Flux<VetDTO> getActiveVets() {
         return vetsServiceClient.getActiveVets();
     }
-    @GetMapping("/inactive")
+
+    @GetMapping("/vets/inactive")
     public Flux<VetDTO> getInactiveVets() {
         return vetsServiceClient.getInactiveVets();
     }
 
-    @GetMapping(value = "/vets/{vetId}")
-    public Mono<VetDTO> getVet(@PathVariable String vetId) {
-        return vetsServiceClient.getVetByVetId(vetId);
-    }
-
-
     @PostMapping(value = "/vets",consumes = "application/json",produces = "application/json")
-    public Mono<VetDTO> createVet(@RequestBody VetDTO model) {
-        return vetsServiceClient.createVet(model);
+    public Mono<VetDTO> insertVet(@RequestBody Mono<VetDTO> vetDTOMono) {
+        return vetsServiceClient.createVet(vetDTOMono);
     }
-
-
-    @DeleteMapping(value = "/vets/{vetId}")
-    public Mono<VetDTO> deleteVet(@PathVariable String vetId) {
-        return vetsServiceClient.deleteVet(vetId);
-    }
-
 
     @PutMapping(value = "/vets/{vetId}",consumes = "application/json",produces = "application/json")
-    public Mono<VetDTO> updateVet(@PathVariable String vetId, @RequestBody VetDTO vet) {
-        log.debug("Trying to update vet");
-        return vetsServiceClient.updateVet(vetId, vet);
+    public Mono<ResponseEntity<VetDTO>> updateVetByVetId(@PathVariable String vetId, @RequestBody Mono<VetDTO> vetDTOMono) {
+        return vetsServiceClient.updateVet(VetsEntityDtoUtil.verifyId(vetId), vetDTOMono)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
+    @DeleteMapping(value = "/vets/{vetId}")
+    public Mono<Void> deleteVet(@PathVariable String vetId) {
+        return vetsServiceClient.deleteVet(VetsEntityDtoUtil.verifyId(vetId));
+    }
+
+
+
+//    @GetMapping(value = "vets")
+//    public Flux<VetDTO> getVets() {
+//        return vetsServiceClient.getVets();
+//    }
+//
+//    @GetMapping("/active")
+//    public Flux<VetDTO> getActiveVets() {
+//        return vetsServiceClient.getActiveVets();
+//    }
+//    @GetMapping("/inactive")
+//    public Flux<VetDTO> getInactiveVets() {
+//        return vetsServiceClient.getInactiveVets();
+//    }
+//
+//    @GetMapping(value = "/vets/{vetId}")
+//    public Mono<VetDTO> getVet(@PathVariable String vetId) {
+//
+//        return vetsServiceClient.getVetByVetId(vetId);
+//    }
+//    @PostMapping(value = "/vets",consumes = "application/json",produces = "application/json")
+//    public Mono<VetDTO> createVet(@RequestBody Mono<VetDTO> model) {
+//        return vetsServiceClient.createVet(model);
+//    }
+//
+//
+//    @DeleteMapping(value = "/vets/{vetId}")
+//    public Mono<VetDTO> deleteVet(@PathVariable String vetId) {
+//        return vetsServiceClient.deleteVet(vetId);
+//    }
+//
+//
+//    @PutMapping(value = "/vets/{vetId}",consumes = "application/json",produces = "application/json")
+//    public Mono<VetDTO> updateVet(@PathVariable String vetId, @RequestBody Mono<VetDTO> vet) {
+//        log.debug("Trying to update vet");
+//        return vetsServiceClient.updateVet(vetId, vet);
+//    }
 
 
 
