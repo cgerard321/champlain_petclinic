@@ -33,8 +33,8 @@ public class VisitController {
     }
 
     @PostMapping()
-    public Mono<VisitDTO> addVisit(@RequestBody VisitDTO visitDTO){
-        return visitService.addVisit(Mono.just(visitDTO));
+    public Mono<VisitDTO> addVisit(@RequestBody Mono<VisitDTO> visitDTOMono){
+        return visitService.addVisit(visitDTOMono);
     }
 
     @PutMapping(value = "visits/{visitId}",
