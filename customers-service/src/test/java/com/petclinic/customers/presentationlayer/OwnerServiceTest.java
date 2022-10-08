@@ -16,6 +16,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
@@ -107,6 +109,22 @@ public class OwnerServiceTest {
 
     }
 
+//    @Test
+//    public void deleteOwner() {
+//
+//        Owner owner = buildOwner();
+//        int OWNER_ID = owner.getId();
+//
+//        when(ownerRepository.findById(anyInt())).thenReturn(Mono.just(owner));
+//
+//        Mono<Void> ownerDTO = ownerService.deleteOwner(OWNER_ID);
+//
+//        StepVerifier
+//                .create(ownerDTO)
+//                .expectNextCount(0)
+//                .verifyComplete();
+//    }
+
     @DisplayName("ownerService_CreateOwner")
     @Test
     public void test_CreateOwner()
@@ -173,7 +191,17 @@ public class OwnerServiceTest {
         }
     }
 
+    private Owner buildOwner() {
+        return Owner.builder()
+                .id(1)
+                .firstName("Don")
+                .lastName("Corleone")
+                .address("45 Elm")
+                .city("Montreal")
+                .telephone("5141234567")
+                .build();
 
+    }
 
 
 }

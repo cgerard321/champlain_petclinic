@@ -65,6 +65,11 @@ class OwnerResource {
         ownerService.deleteOwner(ownerId);
     }
 
+//    @DeleteMapping("/{ownerId}")
+//    public Mono<Void> deleteOwner(@PathVariable("ownerId") int ownerId) {
+//        return ownerService.deleteOwner(ownerId);
+//    }
+
 }
 
 

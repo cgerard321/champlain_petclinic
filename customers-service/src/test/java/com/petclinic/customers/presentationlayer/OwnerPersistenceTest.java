@@ -7,10 +7,12 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import reactor.test.StepVerifier;
 
 import java.util.List;
 import java.util.Optional;
@@ -110,6 +112,26 @@ class OwnerPersistenceTest {
 
     }
 
+//    @Test
+//    public void deleteOwnerByOwnerId() {
+//
+//        Owner owner = buildOwner();
+//
+//        Publisher<Owner> setup = repository.deleteAll().thenMany(repository.save(buildOwner()));
+//
+//        StepVerifier
+//                .create(setup)
+//                .consumeNextWith(foundOwner ->{
+//                    assertEquals(owner.getFirstName(), foundOwner.getFirstName());
+//                    assertEquals(owner.getLastName(), foundOwner.getLastName());
+//                    assertEquals(owner.getAddress(), foundOwner.getAddress());
+//                    assertEquals(owner.getCity(), foundOwner.getCity());
+//                    assertEquals(owner.getTelephone(), foundOwner.getTelephone());
+//                })
+//                .then(this::deleteOwnerByOwnerId)
+//                .verifyComplete();
+//    }
+
     @DisplayName("ownerPersistence_CreateOwner")
     @Test
     public void create_owner_test()
@@ -155,6 +177,18 @@ class OwnerPersistenceTest {
 
         // Assert
         assertEquals(savedUpdate, foundSaved);
+    }
+
+    private Owner buildOwner() {
+        return Owner.builder()
+                .id(1)
+                .firstName("Fred")
+                .lastName("Flintstone")
+                .address("54 Quarry Ave.")
+                .city("Bedrock")
+                .telephone("0000000004")
+                .build();
+
     }
 
 }
