@@ -27,6 +27,8 @@ class PetDetails {
 
     private PetType type;
 
+    private int imageId;
+
     public PetDetails()
     {
 
@@ -38,6 +40,7 @@ class PetDetails {
         this.owner = pet.getOwner().getFirstName() + " " + pet.getOwner().getLastName();
         this.birthDate = pet.getBirthDate();
         this.type = pet.getType();
+        this.imageId = pet.getImageId();
     }
 }
 

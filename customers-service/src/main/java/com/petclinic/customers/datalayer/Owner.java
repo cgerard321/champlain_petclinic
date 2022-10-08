@@ -1,5 +1,8 @@
 package com.petclinic.customers.datalayer;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 import org.springframework.beans.support.MutableSortDefinition;
 import org.springframework.beans.support.PropertyComparator;
 import org.springframework.core.style.ToStringCreator;
@@ -22,6 +25,8 @@ import java.util.*;
  */
 
 @Entity
+@Builder
+@AllArgsConstructor
 @Table(name = "owners")
 public class Owner {
 
@@ -50,39 +55,28 @@ public class Owner {
     @Digits(fraction = 0, integer = 10)
     private String telephone;
 
+    @Column(name = "image_id")
+    private int imageId;
+
+
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, mappedBy = "owner")
     private Set<Pet> pets;
 
-
-//    @Column(name = "custodian")
-//    private String custodian;
 
     public Owner()
     {
 
     }
-
     public Owner(@NotEmpty  Integer id, @NotEmpty String firstName, @NotEmpty String lastName,
-                 @NotEmpty String address, @NotEmpty String city, @NotEmpty @Digits(fraction = 0, integer = 10) String telephone) {
+                 @NotEmpty String address, @NotEmpty String city, @NotEmpty @Digits(fraction = 0, integer = 10) String telephone, @NotEmpty int imageId) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.address = address;
         this.city = city;
         this.telephone = telephone;
+        this.imageId = imageId;
     }
-
-//    public Owner(@NotEmpty Integer id, @NotEmpty String firstName, @NotEmpty String lastName,
-//                 @NotEmpty String address, @NotEmpty String city, @NotEmpty @Digits(fraction = 0,
-//            integer = 10) String telephone, String custodian) {
-//        this.id = id;
-//        this.firstName = firstName;
-//        this.lastName = lastName;
-//        this.address = address;
-//        this.city = city;
-//        this.telephone = telephone;
-//        this.custodian = custodian;
-//    }
 
 
     public void setId(Integer id) {
@@ -132,16 +126,13 @@ public class Owner {
         this.telephone = telephone;
     }
 
+    public int getImageId() {
+        return this.imageId;
+    }
 
-//    public String getCustodian() {
-//        return custodian;
-//    }
-//
-//    public void setCustodian(String custodian) {
-//        this.custodian = custodian;
-//    }
-
-
+    public void setImageId(int imageId) {
+        this.imageId = imageId;
+    }
 
     protected Set<Pet> getPetsInternal() {
         if (this.pets == null) {
@@ -166,22 +157,6 @@ public class Owner {
         getPetsInternal().remove(pet);
     }
 
-    /* OLD ToString -> For some reason,
-       it cannot be tested in this state because it returns a variable that changes each time the test is running
-
-    @Override
-    public String toString() {
-        return new ToStringCreator(this)
-
-                .append("id", this.getId())
-                .append("lastName", this.getLastName())
-                .append("firstName", this.getFirstName())
-                .append("address", this.address)
-                .append("city", this.city)
-                .append("telephone", this.telephone)
-                .toString();
-    }
-     */
 
     @Override
     public String toString()
