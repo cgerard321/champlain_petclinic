@@ -33,7 +33,7 @@ app:
     host: visits
     port: 8080
   vet-service:
-    host: vets
+    host: vet-service
     port: 8080
   customers-service:
     host: customers
