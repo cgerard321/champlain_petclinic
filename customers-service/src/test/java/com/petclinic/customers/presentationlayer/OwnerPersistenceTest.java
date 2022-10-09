@@ -127,6 +127,7 @@ class OwnerPersistenceTest {
 //                    assertEquals(owner.getAddress(), foundOwner.getAddress());
 //                    assertEquals(owner.getCity(), foundOwner.getCity());
 //                    assertEquals(owner.getTelephone(), foundOwner.getTelephone());
+//                      assertEquals(owner.getPhotoId(), foundOwner.getPhotoId());
 //                })
 //                .then(this::deleteOwnerByOwnerId)
 //                .verifyComplete();

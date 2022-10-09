@@ -92,6 +92,13 @@ class OwnerAPITest {
         verify(ownerService, times(1)).deleteOwner(5);
     }
 
+//    @Test
+//    void deleteOwner_API-Test() {
+//        webTestClient.perform(delete("/owners/5")).accept(MediaType.APPLICATION_JSON)
+//                .andExpect(status().isOk());
+//        verify(ownerService, times(1)).deleteOwner(5);
+//    }
+
     /**
      * ------------------------ SETUP_OWNER ------------------------
      * Test an HTTP Get Request, but to get all owners

@@ -125,6 +125,22 @@ public class OwnerServiceTest {
 //                .verifyComplete();
 //    }
 
+//    @Test
+//    public void deleteOwnerNotFound() {
+//
+//        Owner owner = buildOwner();
+//        int OWNER_ID = 00;
+//
+//        when(ownerRepository.findById(anyInt())).thenReturn(Mono.just(owner));
+//
+//        Mono<OwnerDTO> ownerDTOMono = ownerService.findByOwnerId(OWNER_ID);
+//
+//        StepVerifier
+//                .create(ownerDTOMono)
+//                .expectNextCount(1)
+//                .expectError();
+//    }
+
     @DisplayName("ownerService_CreateOwner")
     @Test
     public void test_CreateOwner()
