@@ -1,16 +1,10 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
-import com.petclinic.bffapigateway.dtos.Login;
-import com.petclinic.bffapigateway.dtos.OwnerDetails;
+import com.petclinic.bffapigateway.dtos.*;
 
-import com.petclinic.bffapigateway.dtos.PetDetails;
-import com.petclinic.bffapigateway.dtos.PetType;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -119,4 +113,47 @@ public class CustomersServiceClient {
                 .bodyToMono(OwnerDetails.class);
     }
 
+    public Mono<String> setOwnerPhoto(PhotoDetails file, int id){
+        return webClientBuilder.build().post()
+                .uri(customersServiceUrl +"/photo/" + id)
+                .body(just(file), PhotoDetails.class)
+                .retrieve().bodyToMono(String.class);
+    }
+
+    public Mono<PhotoDetails> getOwnerPhoto(int id){
+        return webClientBuilder.build().get()
+                .uri(customersServiceUrl +"/photo/" + id)
+                .retrieve()
+                .bodyToMono(PhotoDetails.class);
+    }
+
+    public Mono<Void> deleteOwnerPhoto(int photoId) {
+        return webClientBuilder.build().delete()
+                .uri(customersServiceUrl + "/photo/" + photoId)
+                .retrieve()
+                .bodyToMono(Void.class);
+    }
+
+
+
+    public Mono<String> setPetPhoto(int ownerId, PhotoDetails file, int id){
+        return webClientBuilder.build().post()
+                .uri(customersServiceUrl + ownerId + "/pets/photo/" + id)
+                .body(just(file), PhotoDetails.class)
+                .retrieve().bodyToMono(String.class);
+    }
+
+    public Mono<PhotoDetails> getPetPhoto(int ownerId, int id){
+        return webClientBuilder.build().get()
+                .uri(customersServiceUrl + ownerId + "/pets/photo/" + id)
+                .retrieve()
+                .bodyToMono(PhotoDetails.class);
+    }
+
+    public Mono<Void> deletePetPhoto (int ownerId, int photoId) {
+        return webClientBuilder.build().delete()
+                .uri(customersServiceUrl + ownerId + "/pets/photo/" + photoId)
+                .retrieve()
+                .bodyToMono(Void.class);
+    }
 }

@@ -50,6 +50,7 @@ public class PetServiceTest {
         owner.setTelephone("5144041234");
         owner.setCity("Montreal");
         owner.setAddress("420 Avenue");
+        owner.setImageId(1);
 
         return owner;
     }
