@@ -3,14 +3,28 @@ package com.petclinic.bffapigateway.presentationlayer;
 
 import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.*;
+import com.sun.imageio.plugins.common.ImageUtil;
+import io.swagger.models.Response;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.imageio.ImageIO;
+import javax.imageio.ImageWriter;
+import java.awt.*;
+import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -165,10 +179,12 @@ public class BFFApiGatewayController {
     }
 
      //Retrieve all vets from DB
+
     @GetMapping(value = "vets")
     public Flux<VetDTO> getVets() {
         return vetsServiceClient.getVets();
     }
+
 
     //See if vet is Active
     @GetMapping("/active")
@@ -183,17 +199,18 @@ public class BFFApiGatewayController {
     }
 
     //Get Vet by Id
+
     @GetMapping(value = "/vets/{vetId}")
     public Mono<VetDTO> getVet(@PathVariable String vetId) {
         return vetsServiceClient.getVetByVetId(vetId);
     }
-
     //Create Vets
+
+
     @PostMapping(value = "/vets",consumes = "application/json",produces = "application/json")
     public Mono<VetDTO> createVet(@RequestBody VetDTO model) {
         return vetsServiceClient.createVet(model);
     }
-
     //Delete Vets
     @DeleteMapping(value = "/vets/{vetId}")
     public Mono<VetDTO> deleteVet(@PathVariable String vetId) {
@@ -281,6 +298,37 @@ public class BFFApiGatewayController {
         return customersServiceClient.createOwner(model);
     }
 
+
+    @PostMapping(value = "owners/photo/{ownerId}")
+    public Mono<String> setOwnerPhoto(@RequestBody PhotoDetails photoDetails, @PathVariable int ownerId) {
+        return customersServiceClient.setOwnerPhoto(photoDetails, ownerId);
+    }
+
+    @GetMapping(value = "owners/photo/{ownerId}")
+    public Mono<PhotoDetails> getOwnerPhoto(@PathVariable int ownerId) {
+        return customersServiceClient.getOwnerPhoto(ownerId);
+    }
+
+    @PostMapping(value = "owners/{ownerId}/pet/photo/{petId}")
+    public Mono<String> setPetPhoto(@PathVariable int ownerId, @RequestBody PhotoDetails photoDetails, @PathVariable int petId) {
+        return customersServiceClient.setPetPhoto(ownerId, photoDetails, petId);
+    }
+
+    @GetMapping(value = "owners/{ownerId}/pet/photo/{petId}")
+    public Mono<PhotoDetails> getPetPhoto(@PathVariable int ownerId, @PathVariable int petId) {
+        return customersServiceClient.getPetPhoto(ownerId, petId);
+    }
+
+    @DeleteMapping(value = "owners/photo/{photoId}")
+    public Mono<Void> deleteOwnerPhoto(@PathVariable int photoId){
+        return customersServiceClient.deleteOwnerPhoto(photoId);
+    }
+
+    @DeleteMapping(value = "owners/{ownerId}/pet/photo/{photoId}")
+    public Mono<Void> deletePetPhoto(@PathVariable int ownerId, @PathVariable int photoId){
+        return customersServiceClient.deletePetPhoto(ownerId, photoId);
+    }
+
     @PutMapping(value = "owners/{ownerId}",consumes = "application/json" ,produces = "application/json")
     public Mono<OwnerDetails> updateOwnerDetails(@PathVariable int ownerId, @RequestBody OwnerDetails od) {
         return customersServiceClient.updateOwner(ownerId, od)
@@ -293,10 +341,11 @@ public class BFFApiGatewayController {
     public Mono<OwnerDetails> deleteOwner(@PathVariable int ownerId){
         return customersServiceClient.deleteOwner(ownerId);
     }
-
+    
     /**
      * End of Owner Methods
      * **/
+
 
     @GetMapping("/verification/{token}")
     public Mono<UserDetails> verifyUser(@PathVariable final String token) {
