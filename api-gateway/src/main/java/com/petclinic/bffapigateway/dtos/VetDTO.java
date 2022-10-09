@@ -5,6 +5,7 @@ import java.util.Set;
 
 @Getter
 @Builder
+@NoArgsConstructor
 @AllArgsConstructor
 public class VetDTO {
     private String vetId;
