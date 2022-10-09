@@ -7,27 +7,30 @@
             <input class="form-control col-sm-4" ng-model="$ctrl.bill.date" name="date"/>
         </div>
     </div>
-
     <div class="form-group formColor">
-        <label class="col-sm-2 control-label">Visit type</label>
+        <label class="col-sm-2 control-label">Visit Type</label>
         <div class="bill col-sm-6">
-            <input class="form-control col-sm-4" ng-model="$ctrl.bill.visitType" name="visitType" ng-disabled="$ctrl.checked" required/>
-            <span ng-show="billForm.visitType.$error.required" class="help-block">Visit type is required.</span>
+            <select class="form-control col-sm-4" name="visitType" ng-model="$ctrl.bill.visitType">
+                <option value="general">general</option>
+                <option value="operation">operation</option>
+                <option value="consultation">consultation</option>
+                <option value="examination">examination</option>
+                <option value="injury">injury</option>
+                <option value="medical">medical</option>
+                <option value="chronic">chronic</option>
+            </select>
         </div>
     </div>
-
     <div class="form-group formColor">
-        <label class="col-sm-2 control-label">Ammount</label>
+        <label class="col-sm-2 control-label">Amount</label>
         <div class="bill col-sm-6">
-            <input class="form-control col-sm-4" ng-model="$ctrl.bill.amount" name="amount" ng-disabled="$ctrl.checked" required/>
+            <input class="form-control col-sm-4" ng-model="$ctrl.bill.amount" name="amount" required/>
             <span ng-show="billForm.amount.$error.required" class="help-block">Amount is required.</span>
         </div>
     </div>
-
     <div class="form-group formColor">
         <div class="bill marg col-sm-6">
             <button id="newBtn" class="btn btn-default" type="submit">Submit</button>
         </div>
-
     </div>
 </form>
