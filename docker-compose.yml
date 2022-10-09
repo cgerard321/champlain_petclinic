@@ -216,7 +216,7 @@ services:
       container_name: mongo1
       restart: always
       ports:
-        - 27018:27017
+        - 8089:8081
       environment:
         MONGO_INITDB_ROOT_USERNAME: root
         MONGO_INITDB_ROOT_PASSWORD: password
@@ -249,3 +249,17 @@ services:
       environment:
         MONGO_INITDB_ROOT_USERNAME: root
         MONGO_INITDB_ROOT_PASSWORD: password
+
+    mongo-express-customers:
+      image: mongo-express
+      restart: always
+      environment:
+        - ME_CONFIG_MONGODB_ADMINUSERNAME=root
+        - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+        - ME_CONFIG_MONGODB_SERVER=mongo-customers
+        - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
+      ports:
+        - 8085:8081
+      depends_on:
+        - mongo-customers
+        - customers-service-reactive

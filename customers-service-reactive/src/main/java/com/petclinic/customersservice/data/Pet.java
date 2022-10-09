@@ -1,0 +1,22 @@
+package com.petclinic.customersservice.data;
+
+import lombok.*;
+import org.springframework.data.annotation.Id;
+
+import java.util.Date;
+
+@Setter
+@Getter
+@NoArgsConstructor
+@Builder
+@AllArgsConstructor
+public class Pet {
+
+    @Id
+    private int id;
+    private String name;
+    private Date date;
+    private int petTypeId;
+    private int photoId;
+
+}
