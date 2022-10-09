@@ -11,16 +11,6 @@ import reactor.core.publisher.Mono;
 @Service
 public class PhotoServiceImpl implements PhotoService {
 
-    @Autowired
-    PhotoRepo photoRepo;
-
-    @Autowired
-    PetRepo petRepo;
-
-    @Autowired
-    OwnerRepo ownerRepo;
-
-
     @Override
     public Mono<Photo> setOwnerPhoto(Mono<Photo> PhotoMono, int ownerId) {
         return null;
