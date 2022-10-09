@@ -15,8 +15,9 @@ public class Pet {
     @Id
     private int id;
     private String name;
-    private Date date;
+    private Date birthDate;
     private int petTypeId;
     private int photoId;
+    private int ownerId;
 
 }
