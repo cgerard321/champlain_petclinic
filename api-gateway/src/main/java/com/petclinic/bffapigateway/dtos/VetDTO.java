@@ -1,14 +1,10 @@
 package com.petclinic.bffapigateway.dtos;
-
 import lombok.*;
-
 import java.util.Set;
 
 
 @Getter
-@Setter
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
 public class VetDTO {
     private String vetId;
@@ -21,5 +17,6 @@ public class VetDTO {
     private String workday;
     private boolean isActive;
     private Set<SpecialtyDTO> specialties;
+
 
 }

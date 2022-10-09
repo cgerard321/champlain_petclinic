@@ -62,7 +62,11 @@ public class DataSetupService implements CommandLineRunner {
                 "(514)-634-8276 #2383","".getBytes(), "Practicing since 6 years", "Monday, Tuesday, Friday",
                 false, set1);
 
-        Flux.just(v1, v2, v3, v4, v5, v6)
+        VetDTO v7 = new VetDTO("784233", "John", "Doe", "john.doe@email.com",
+                "(514)-634-8276 #2363","".getBytes(), "Practicing since 9 years", "Monday, Friday",
+                true, set1);
+
+        Flux.just(v1, v2, v3, v4, v5, v6, v7)
                 .flatMap(p -> vetService.insertVet(Mono.just(p))
                         .log(p.toString()))
                 .subscribe();

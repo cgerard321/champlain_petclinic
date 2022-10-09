@@ -1,6 +1,9 @@
 package com.petclinic.customers.datalayer;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 import org.springframework.core.style.ToStringCreator;
 
 import javax.persistence.*;
@@ -18,6 +21,9 @@ import java.util.Date;
  */
 
 @Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "pets")
 public class    Pet {
     @Id
@@ -39,6 +45,9 @@ public class    Pet {
     @JoinColumn(name = "owner_id")
     @JsonIgnore
     private Owner owner;
+
+    @Column(name = "image_id")
+    private int imageId;
 
     public Integer getId() {
         return id;
@@ -78,6 +87,14 @@ public class    Pet {
 
     public void setOwner(final Owner owner) {
         this.owner = owner;
+    }
+
+    public int getImageId() {
+        return this.imageId;
+    }
+
+    public void setImageId(int imageId) {
+        this.imageId = imageId;
     }
     
     @Override

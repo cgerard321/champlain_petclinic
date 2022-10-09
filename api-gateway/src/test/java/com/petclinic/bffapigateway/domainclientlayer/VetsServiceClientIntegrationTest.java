@@ -1,5 +1,6 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.VetDTO;
 import okhttp3.mockwebserver.MockResponse;
@@ -7,41 +8,22 @@ import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.function.Consumer;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+
+
+@SpringBootTest(webEnvironment = RANDOM_PORT)
+@AutoConfigureWebTestClient
 class VetsServiceClientIntegrationTest {
-
-    @Test
-    void getVets() {
-    }
-
-    @Test
-    void getVetByVetId() {
-    }
-
-    @Test
-    void getInactiveVets() {
-    }
-
-    @Test
-    void getActiveVets() {
-    }
-
-    @Test
-    void createVet() {
-    }
-
-    @Test
-    void deleteVet() {
-    }
-
-    @Test
-    void updateVet() {
-    }
 
 
     private VetsServiceClient vetsServiceClient;
@@ -117,4 +99,7 @@ class VetsServiceClientIntegrationTest {
                 .isActive(false)
                 .build();
     }
+
+
+
 }
