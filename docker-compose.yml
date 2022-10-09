@@ -205,7 +205,7 @@ services:
         - ME_CONFIG_MONGODB_SERVER=mongo
         - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
       ports:
-        - 9000:8082
+        - 9000:8081
       depends_on:
         - mongo
         - vet-service
@@ -216,7 +216,7 @@ services:
       container_name: mongo1
       restart: always
       ports:
-        - 8089:8081
+        - 27018:27017
       environment:
         MONGO_INITDB_ROOT_USERNAME: root
         MONGO_INITDB_ROOT_PASSWORD: password
