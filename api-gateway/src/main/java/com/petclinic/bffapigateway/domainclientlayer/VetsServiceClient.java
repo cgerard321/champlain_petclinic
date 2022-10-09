@@ -13,7 +13,6 @@ import reactor.core.publisher.Mono;
 /**
  * @author Christine Gerard
  */
-
 @Component
 @Slf4j
 public class VetsServiceClient {
@@ -78,7 +77,7 @@ public class VetsServiceClient {
         return  vetDTOFlux;
     }
 
-
+    // https://champlainsaintlambert.atlassian.net/browse/CPC626atlOrigin=eyJpIjoiNGFjNGE1YTY3NmFiNGFkNTljMGIzYzdiZDQzOWNlNWEiLCJwIjoiaiJ9
     public Mono<VetDTO> createVet(Mono<VetDTO> model) {
         Mono<VetDTO> vetDTO =
                 webClientBuilder
@@ -103,7 +102,7 @@ public class VetsServiceClient {
 
         return response;
     }
-
+    //https://champlainsaintlambert.atlassian.net/browse/CPC626atlOrigin=eyJpIjoiNGFjNGE1YTY3NmFiNGFkNTljMGIzYzdiZDQzOWNlNWEiLCJwIjoiaiJ9
     public Mono<VetDTO> updateVet(String vetId,Mono<VetDTO> model) {
         Mono<VetDTO> vetDTOMono = webClientBuilder
                 .build()
