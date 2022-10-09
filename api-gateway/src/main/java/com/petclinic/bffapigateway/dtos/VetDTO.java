@@ -1,16 +1,17 @@
 package com.petclinic.bffapigateway.dtos;
 
-import lombok.Data;
+import lombok.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
-@Data
-public class VetDetails {
+import java.util.Set;
 
 
-    private final List<Specialty> specialties = new ArrayList<>();
-    private int vetId;
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class VetDTO {
+    private String vetId;
     private String firstName;
     private String lastName;
     private String email;
@@ -18,6 +19,7 @@ public class VetDetails {
     private byte[] image;
     private String resume;
     private String workday;
-    private Integer isActive;
+    private boolean isActive;
+    private Set<SpecialtyDTO> specialties;
 
 }

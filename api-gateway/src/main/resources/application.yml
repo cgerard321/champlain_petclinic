@@ -5,7 +5,7 @@ app:
   visits-service:
     host: localhost
     port: 7001
-  vets-service:
+  vet-service:
     host: localhost
     port: 7002
   customers-service:
@@ -32,7 +32,7 @@ app:
   visits-service:
     host: visits
     port: 8080
-  vets-service:
+  vet-service:
     host: vets
     port: 8080
   customers-service:

@@ -1,4 +1,4 @@
-package com.petclinic.vet.presentationlayer;
+package com.petclinic.vet.exceptions.presentationlayer;
 /**
  @author Kamilah Hatteea & Brandon Levis : Vet-Service
   * Worked together with (Code with Friends) on IntelliJ IDEA
