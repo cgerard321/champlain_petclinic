@@ -20,12 +20,14 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
 
+import java.security.acl.Owner;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.UUID;
 import java.util.List;
 
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -84,8 +86,8 @@ class ApiGatewayControllerTest {
     @Test
     void createAndDeleteVet() {
 
-        final int vetId = 1234567;
-        VetDetails vet = new VetDetails();
+        final String vetId = "1234567";
+        VetDTO vet = new VetDTO();
         vet.setVetId(vetId);
         vet.setFirstName("Kevin");
         vet.setLastName("Tremblay");
@@ -99,7 +101,7 @@ class ApiGatewayControllerTest {
 
         client.post()
                 .uri("/api/gateway/vets")
-                .body(Mono.just(vet), VetDetails.class)
+                .body(Mono.just(vet), VetDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -116,7 +118,7 @@ class ApiGatewayControllerTest {
                 .isOk()
                 .expectBody();
 
-        assertEquals(null, vetsServiceClient.getVet(vetId));
+        assertEquals(null, vetsServiceClient.getVetByVetId(vetId));
     }
 
 
@@ -272,9 +274,153 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.birthDate").isEqualTo(pet.getBirthDate())
                 .jsonPath("$.type").isEqualTo(pet.getType());
 
+    }
 
 
+//TODO
+    @Test
+    void createOwnerPhoto(){
+        OwnerDetails owner = new OwnerDetails();
+        owner.setId(1);
+        owner.setFirstName("John");
+        owner.setLastName("Smith");
+        owner.setAddress("456 Elm");
+        owner.setCity("Montreal");
+        owner.setTelephone("5553334444");
+        owner.setImageId(1);
 
+        final String test = "Test photo";
+        final byte[] testBytes = test.getBytes();
+
+        PhotoDetails photo = new PhotoDetails();
+        photo.setId(2);
+        photo.setName("photo");
+        photo.setType("jpeg");
+        photo.setPhoto(testBytes);
+
+        when(customersServiceClient.setOwnerPhoto(photo, owner.getId()))
+                .thenReturn(Mono.just("Image uploaded successfully: " + photo.getName()));
+
+
+        client.post()
+                .uri("/api/gateway/owners/photo/1")
+                .body(Mono.just(photo), PhotoDetails.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
+                .expectBody();
+
+    }
+    @Test
+    void getOwnerPhoto(){
+
+        OwnerDetails owner = new OwnerDetails();
+        owner.setId(1);
+        owner.setFirstName("John");
+        owner.setLastName("Smith");
+        owner.setAddress("456 Elm");
+        owner.setCity("Montreal");
+        owner.setTelephone("5553334444");
+        owner.setImageId(1);
+
+        final String test = "Test photo";
+        final byte[] testBytes = test.getBytes();
+
+        PhotoDetails photo = new PhotoDetails();
+        photo.setId(2);
+        photo.setName("photo");
+        photo.setType("jpeg");
+        photo.setPhoto(testBytes);
+
+        when(customersServiceClient.getOwnerPhoto(owner.getId()))
+                .thenReturn(Mono.just(photo));
+
+        client.get()
+                .uri("/api/gateway/owners/photo/1")
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.name").isEqualTo("photo")
+                .jsonPath("$.type").isEqualTo("jpeg");
+//                .jsonPath("$.photo").isEqualTo(testBytes); --> need to fix
+
+
+//        assertEquals(photo.getId(), 2);
+
+
+    }
+    @Test
+    void createPetPhoto(){
+
+            OwnerDetails owner = new OwnerDetails();
+            owner.setId(1);
+            PetDetails pet = new PetDetails();
+            PetType type = new PetType();
+            type.setName("Cat");
+            pet.setId(1);
+            pet.setName("Bonkers");
+            pet.setBirthDate("2015-03-03");
+            pet.setType(type);
+            pet.setImageId(2);
+
+            final String test = "Test photo";
+            final byte[] testBytes = test.getBytes();
+
+            PhotoDetails photo = new PhotoDetails();
+            photo.setId(2);
+            photo.setName("photo");
+            photo.setType("jpeg");
+            photo.setPhoto(testBytes);
+
+            when(customersServiceClient.setPetPhoto(owner.getId(), photo, pet.getId()))
+                    .thenReturn(Mono.just("Image uploaded successfully: " + photo.getName()));
+
+            client.post()
+                    .uri("/api/gateway/owners/1/pet/photo/1")
+                    .body(Mono.just(photo), PhotoDetails.class)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .exchange()
+                    .expectStatus().isOk()
+                    .expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
+                    .expectBody();
+        }
+
+    @Test
+    void getPetPhoto(){
+
+        OwnerDetails owner = new OwnerDetails();
+        owner.setId(1);
+        PetDetails pet = new PetDetails();
+        PetType type = new PetType();
+        type.setName("Cat");
+        pet.setId(1);
+        pet.setName("Bonkers");
+        pet.setBirthDate("2015-03-03");
+        pet.setType(type);
+        pet.setImageId(2);
+
+        final String test = "Test photo";
+        final byte[] testBytes = test.getBytes();
+
+        PhotoDetails photo = new PhotoDetails();
+        photo.setId(2);
+        photo.setName("photo");
+        photo.setType("jpeg");
+        photo.setPhoto(testBytes);
+
+        when(customersServiceClient.getPetPhoto(owner.getId(), pet.getId()))
+                .thenReturn(Mono.just(photo));
+
+        client.get()
+                .uri("/api/gateway/owners/1/pet/photo/1")
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.name").isEqualTo("photo")
+                .jsonPath("$.type").isEqualTo("jpeg");
     }
 
 

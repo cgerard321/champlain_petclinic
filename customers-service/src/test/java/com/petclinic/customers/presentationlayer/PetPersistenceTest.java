@@ -41,6 +41,7 @@ public class PetPersistenceTest {
         owner.setTelephone("5144041234");
         owner.setCity("Montreal");
         owner.setAddress("420 Avenue");
+        owner.setImageId(1);
 
         return owner;
     }
@@ -67,6 +68,7 @@ public class PetPersistenceTest {
         owner.setTelephone("5144041234");
         owner.setCity("Montreal");
         owner.setAddress("420 Avenue");
+        owner.setImageId(1);
         PetType petType = new PetType();
         petType.setId(6);
 

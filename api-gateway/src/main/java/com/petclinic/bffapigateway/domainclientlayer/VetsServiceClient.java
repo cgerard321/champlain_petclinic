@@ -1,6 +1,6 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
-import com.petclinic.bffapigateway.dtos.VetDetails;
+import com.petclinic.bffapigateway.dtos.VetDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -23,50 +23,85 @@ public class VetsServiceClient {
 
     public VetsServiceClient(
             WebClient.Builder webClientBuilder,
-            @Value("${app.vets-service.host}") String vetsServiceHost,
-            @Value("${app.vets-service.port}") String vetsServicePort
+            @Value("${app.vet-service.host}") String vetsServiceHost,
+            @Value("${app.vet-service.port}") String vetsServicePort
     ) {
         this.webClientBuilder = webClientBuilder;
         vetsServiceUrl = "http://" + vetsServiceHost + ":" + vetsServicePort + "/vets";
     }
 
-    public Flux<VetDetails> getVets() {
-        return webClientBuilder.build().get()
-                .uri(vetsServiceUrl)
-                .retrieve()
-                .bodyToFlux(VetDetails.class);
+    public Flux<VetDTO> getVets() {
+        Flux<VetDTO> vetDTOFlux =
+               webClientBuilder
+                 .build()
+                 .get()
+                 .uri(vetsServiceUrl)
+                 .retrieve()
+                 .bodyToFlux(VetDTO.class);
+
+        return  vetDTOFlux;
     }
 
-    public Mono<VetDetails> getVet(final int vetId) {
-        return webClientBuilder.build().get()
-                .uri(vetsServiceUrl + "/{vetId}", vetId)
-                .retrieve()
-                .bodyToMono(VetDetails.class);
+    public Mono<VetDTO> getVetByVetId(String vetId) {
+        Mono<VetDTO> vetDTOMono =
+                webClientBuilder
+                  .build()
+                  .get()
+                  .uri(vetsServiceUrl + "/{vetId}", vetId)
+                  .retrieve()
+                  .bodyToMono(VetDTO.class);
+
+        return vetDTOMono;
     }
 
-    public Mono<VetDetails> createVet(final VetDetails model) {
+    public Flux<VetDTO> getInactiveVets() {
+        Flux<VetDTO> vetDTOFlux =
+                webClientBuilder
+                        .build()
+                        .get()
+                        .uri(vetsServiceUrl + "/inactive")
+                        .retrieve()
+                        .bodyToFlux(VetDTO.class);
+
+        return  vetDTOFlux;
+    }
+
+    public Flux<VetDTO> getActiveVets() {
+        Flux<VetDTO> vetDTOFlux =
+                webClientBuilder
+                        .build()
+                        .get()
+                        .uri(vetsServiceUrl + "/active")
+                        .retrieve()
+                        .bodyToFlux(VetDTO.class);
+
+        return  vetDTOFlux;
+    }
+
+
+    public Mono<VetDTO> createVet(VetDTO model) {
         return webClientBuilder.build().post()
                 .uri(vetsServiceUrl)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .body(Mono.just(model), VetDetails.class)
+                .body(Mono.just(model), VetDTO.class)
                 .retrieve()
-                .bodyToMono(VetDetails.class);
+                .bodyToMono(VetDTO.class);
     }
 
-    public Mono<VetDetails> deleteVet(final long vetId) {
+    public Mono<VetDTO> deleteVet(String vetId) {
         return webClientBuilder.build().delete()
                 .uri(vetsServiceUrl + "/{vetId}", vetId)
-                .retrieve().bodyToMono(VetDetails.class);
+                .retrieve().bodyToMono(VetDTO.class);
     }
 
-    public Mono<VetDetails> updateVet(final int vetId, final VetDetails model) {
+    public Mono<VetDTO> updateVet(String vetId, final VetDTO model) {
         log.debug("in Update Vet Method");
         return webClientBuilder.build().put()
                 .uri(vetsServiceUrl + "/" + vetId)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .body(Mono.just(model), VetDetails.class)
+                .body(Mono.just(model), VetDTO.class)
                 .retrieve()
-                .bodyToMono(VetDetails.class);
+                .bodyToMono(VetDTO.class);
     }
 
 }

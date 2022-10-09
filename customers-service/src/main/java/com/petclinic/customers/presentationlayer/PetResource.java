@@ -1,9 +1,11 @@
 package com.petclinic.customers.presentationlayer;
 
 import com.petclinic.customers.businesslayer.PetService;
+import com.petclinic.customers.businesslayer.PhotoService;
 import com.petclinic.customers.datalayer.*;
 import io.micrometer.core.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,8 +29,11 @@ class PetResource {
 
     private final PetService petService;
 
-    public PetResource(PetService petService) {
+    private final PhotoService photoService;
+
+    public PetResource(PetService petService, PhotoService photoService) {
         this.petService = petService;
+        this.photoService = photoService;
     }
 
     @PostMapping
@@ -60,6 +65,22 @@ class PetResource {
     public void DeletePet(@PathVariable("petId") int petId, @PathVariable("ownerId") int ownerId)
     {
         petService.deletePet(petId, ownerId);
+    }
+
+
+    @PostMapping(value = "/photo/{petId}")
+    public String setPhoto(@RequestBody Photo photo, @PathVariable("petId") int id){
+        return photoService.setPetPhoto(photo,id);
+    }
+
+    @GetMapping(value = "/photo/{petId}")
+    public Photo getPhoto(@PathVariable("petId") int id) {
+        return photoService.getPetPhoto(id);
+    }
+
+    @DeleteMapping(value = "/photo/{photoId}")
+    public void deletePhoto(@PathVariable("photoId") int photoId) {
+        photoService.deletePhoto(photoId);
     }
 
 }

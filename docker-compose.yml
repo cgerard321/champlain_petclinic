@@ -17,20 +17,9 @@ services:
             mysql1:
                 condition: service_healthy
 
-    vets:
-        build: vets-service
-        hostname: vets
-        #mem_limit: 350m
-        environment:
-            - SPRING_PROFILES_ACTIVE=docker
-        depends_on:
-            mysql2:
-                condition: service_healthy
 
     vet-service:
         build: vet-service
-        ports:
-            - "2745:8080"
         environment:
             - SPRING_PROFILES_ACTIVE=docker
         depends_on:
@@ -55,8 +44,9 @@ services:
             - SPRING_PROFILES_ACTIVE=docker
         depends_on:
             - customers
-            - vets
+#            - vets
             - visits
+            - vet-service
 
     auth-service:
         build: auth-service
@@ -122,33 +112,6 @@ services:
             timeout: 5s
             retries: 10
 
-    mysql2:
-        image: mysql:5.7
-        #mem_limit: 350m
-        ports:
-            - "3308:3306"
-        environment:
-            - MYSQL_ROOT_PASSWORD=rootpwd
-            - MYSQL_DATABASE=vets-db
-            - MYSQL_USER=user
-            - MYSQL_PASSWORD=pwd
-        volumes:
-            - ./data/mysql2:/var/lib/mysql2
-            - ./data/init.d:/docker-entrypoint-initdb.d
-        healthcheck:
-            test:
-                [
-                    "CMD",
-                    "mysqladmin",
-                    "ping",
-                    "-uuser",
-                    "-ppwd",
-                    "-h",
-                    "localhost",
-                ]
-            interval: 10s
-            timeout: 5s
-            retries: 10
 
     mysql3:
         image: mysql:5.7

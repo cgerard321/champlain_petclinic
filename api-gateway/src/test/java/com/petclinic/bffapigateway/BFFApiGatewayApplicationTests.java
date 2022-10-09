@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.domainclientlayer.CustomersServiceClient;
 import com.petclinic.bffapigateway.dtos.OwnerDetails;
-import com.petclinic.bffapigateway.dtos.VetDetails;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,14 +36,6 @@ import static reactor.core.publisher.Mono.when;
 @AutoConfigureWebTestClient
 
 class BFFApiGatewayApplicationTests {
-
-
-
-
-
-
-
-
 
 	@Test
 	void contextLoads() {
