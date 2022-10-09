@@ -9,3 +9,6 @@ public class SpecialtyDTO {
     private String specialtyId;
     private String name;
 }
+
+
+

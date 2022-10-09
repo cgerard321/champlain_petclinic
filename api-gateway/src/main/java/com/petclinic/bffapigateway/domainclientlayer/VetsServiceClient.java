@@ -13,7 +13,7 @@ import reactor.core.publisher.Mono;
 /**
  * @author Christine Gerard
  */
-
+//Old Version  - new version vet
 @Component
 @Slf4j
 public class VetsServiceClient {
@@ -32,6 +32,7 @@ public class VetsServiceClient {
 
     public Flux<VetDTO> getVets() {
         Flux<VetDTO> vetDTOFlux =
+
                webClientBuilder
                  .build()
                  .get()
@@ -50,6 +51,7 @@ public class VetsServiceClient {
                   .uri(vetsServiceUrl + "/{vetId}", vetId)
                   .retrieve()
                   .bodyToMono(VetDTO.class);
+
 
         return vetDTOMono;
     }
@@ -118,3 +120,4 @@ public class VetsServiceClient {
     }
 
 }
+
