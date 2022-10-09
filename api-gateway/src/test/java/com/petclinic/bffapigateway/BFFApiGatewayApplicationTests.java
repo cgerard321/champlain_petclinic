@@ -38,14 +38,6 @@ import static reactor.core.publisher.Mono.when;
 
 class BFFApiGatewayApplicationTests {
 
-
-
-
-
-
-
-
-
 	@Test
 	void contextLoads() {
 	}

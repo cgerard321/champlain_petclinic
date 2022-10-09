@@ -37,7 +37,7 @@ spring:
   flyway:
     url: jdbc:mysql://mysql4
 gateway:
-  origin: localhost:8080
+  origin: localhost:8080/api/gateway
   protocol: http
   subdomain:
 mailer-service:

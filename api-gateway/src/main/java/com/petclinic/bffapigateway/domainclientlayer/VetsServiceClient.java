@@ -32,25 +32,26 @@ public class VetsServiceClient {
 
     public Flux<VetDTO> getVets() {
         Flux<VetDTO> vetDTOFlux =
-                webClientBuilder
-                        .build()
-                        .get()
-                        .uri(vetsServiceUrl)
-                        .retrieve()
-                        .bodyToFlux(VetDTO.class);
+
+               webClientBuilder
+                 .build()
+                 .get()
+                 .uri(vetsServiceUrl)
+                 .retrieve()
+                 .bodyToFlux(VetDTO.class);
 
         return  vetDTOFlux;
     }
 
-
     public Mono<VetDTO> getVetByVetId(String vetId) {
         Mono<VetDTO> vetDTOMono =
                 webClientBuilder
-                        .build()
-                        .get()
-                        .uri(vetsServiceUrl + "/{vetId}", vetId)
-                        .retrieve()
-                        .bodyToMono(VetDTO.class);
+                  .build()
+                  .get()
+                  .uri(vetsServiceUrl + "/{vetId}", vetId)
+                  .retrieve()
+                  .bodyToMono(VetDTO.class);
+
 
         return vetDTOMono;
     }
