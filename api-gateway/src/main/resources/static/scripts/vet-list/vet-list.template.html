@@ -5,7 +5,11 @@
     </div>
 </form>
 
-<div style="float: right;margin-bottom: 1%">
+<a ui-sref="vetsNew" style="float: right;margin-bottom: 1%">
+    <button class="add-vet-button btn btn-success">Add A Vet</button>
+</a>
+
+<div style="margin-bottom: 1%; margin-top: 1%">
     <label for="filterOption">Filter</label>
 
     <select id="filterOption" ng-change="ReloadData()" ng-model="refreshList">
@@ -14,6 +18,7 @@
         <option value="Unavailable">Unavailable</option>
     </select>
 </div>
+
 
 
 <table class="table table-striped">
@@ -54,7 +59,3 @@
 
     </div>
 </table>
-
-<a ui-sref="vetsNew">
-    <button class="add-vet-button btn btn-success">Add A Vet</button>
-</a>
