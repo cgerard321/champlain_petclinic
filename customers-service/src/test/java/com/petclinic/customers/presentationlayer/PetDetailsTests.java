@@ -112,7 +112,7 @@ public class PetDetailsTests {
     {
         //ARRANGE - ACT
         PetDetails pd = new PetDetails();
-        String expected = "PetDetails(id=0, name=null, owner=null, birthDate=null, type=null)";
+        String expected = "PetDetails(id=0, name=null, owner=null, birthDate=null, type=null, imageId=0)";
 
         //ASSERT
         assertEquals(expected, pd.toString());

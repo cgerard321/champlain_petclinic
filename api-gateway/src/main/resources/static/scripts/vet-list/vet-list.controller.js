@@ -1,7 +1,7 @@
 'use strict';
 let arr;
 angular.module('vetList')
-    .controller('VetListController', ['$http', '$scope', function ($http, $scope) {
+    .controller('VetListController', ['$http', '$scope', '$filter', function ($http, $scope, $filter) {
         var self = this;
 
         this.show = ($event, vetID) => {
@@ -61,23 +61,20 @@ angular.module('vetList')
 
         $scope.refreshList = self.vetList;
 
-        $scope.ReloadData = function () {
-            self.vetList = FilterList();
+        $scope.ReloadData = function ($filter) {
+            self.vetList = FilterList($filter);
             $http.get('api/gateway/vets').then(function (resp) {
                 arr = resp.data;
             });
         }
     }]);
 
-function FilterList() {
+function FilterList($filter) {
     let optionSelection = document.getElementById("filterOption").value;
-    if (optionSelection === "Available") {
-        arr = arr.filter(v => v.isActive === 1);
-        return arr;
-    } else if (optionSelection === "Unavailable") {
-        arr = arr.filter(v => v.isActive === 0);
-        return arr;
-    } else {
+    if (optionSelection === "All") {
         return arr;
     }
+    let isActive = optionSelection === "Active";
+    return $filter("filter")(arr, v => v.isActive === isActive);
+
 }
