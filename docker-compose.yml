@@ -7,20 +7,11 @@ services:
             - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
             - ./nginx/njs:/etc/nginx/njs
 
-    visits:
-        build: visits-service
-        hostname: visits
-        #mem_limit: 350m
-        environment:
-            - SPRING_PROFILES_ACTIVE=docker
-        depends_on:
-            mysql1:
-                condition: service_healthy
-
     visits-service-new:
         build: visits-service-new
+        hostname: visits-service-new
         environment:
-            - SPRING_PROFILES_ACTIVE=docker
+          - SPRING_PROFILES_ACTIVE=docker
         depends_on:
             - mongo3
 
@@ -51,7 +42,6 @@ services:
         depends_on:
             - customers
             - visits-service-new
-            - visits
             - vet-service
 
     auth-service:
@@ -259,7 +249,7 @@ services:
         environment:
             - ME_CONFIG_MONGODB_ADMINUSERNAME=root
             - ME_CONFIG_MONGODB_ADMINPASSWORD=password
-            - ME_CONFIG_MONGODB_SERVER=mongo1
+            - ME_CONFIG_MONGODB_SERVER=mongo3
             - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
         ports:
             - 9003:8082
