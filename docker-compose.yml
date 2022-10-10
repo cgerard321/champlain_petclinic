@@ -16,15 +16,15 @@ services:
         depends_on:
             - mongo
 
-    visits:
-        build: visits-service
-        hostname: visits
-        #mem_limit: 350m
-        environment:
-            - SPRING_PROFILES_ACTIVE=docker
-        depends_on:
-            mysql1:
-                condition: service_healthy
+#    visits:
+#        build: visits-service
+#        hostname: visits
+#        #mem_limit: 350m
+#        environment:
+#            - SPRING_PROFILES_ACTIVE=docker
+#        depends_on:
+#            mysql1:
+#                condition: service_healthy
 
     vets:
         build: vets-service
@@ -56,7 +56,7 @@ services:
         depends_on:
             - customers
             - vets
-            - visits
+            - visits-service-new
 
     auth-service:
         build: auth-service
