@@ -1,17 +1,14 @@
 package com.petclinic.customers.presentationlayer;
 
 import com.petclinic.customers.businesslayer.OwnerService;
-import com.petclinic.customers.customerExceptions.exceptions.NotFoundException;
-import com.petclinic.customers.datalayer.Owner;
+import com.petclinic.customers.businesslayer.PhotoService;
+import com.petclinic.customers.datalayer.*;
 import io.micrometer.core.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.spring.web.json.Json;
 
-import javax.print.attribute.standard.Media;
-import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,8 +29,11 @@ import java.util.Optional;
 class OwnerResource {
     private final OwnerService ownerService;
 
-    OwnerResource(OwnerService ownerService) {
+    private final PhotoService photoService;
+
+    OwnerResource(OwnerService ownerService, PhotoService photoService) {
         this.ownerService = ownerService;
+        this.photoService = photoService;
     }
 
     @PostMapping(
@@ -64,6 +64,24 @@ class OwnerResource {
     public void deleteOwner(@PathVariable("ownerId") int ownerId) {
         ownerService.deleteOwner(ownerId);
     }
+
+
+
+    @PostMapping(value = "/photo/{ownerId}")
+    public String setPhoto(@RequestBody Photo photo, @PathVariable("ownerId") int id){
+        return photoService.setOwnerPhoto(photo,id);
+    }
+
+    @GetMapping(value = "/photo/{ownerId}")
+    public Photo getPhoto(@PathVariable("ownerId") int id) {
+         return photoService.getOwnerPhoto(id);
+    }
+
+    @DeleteMapping(value = "/photo/{photoId}")
+    public void deletePhoto(@PathVariable("photoId") int photoId) {
+        photoService.deletePhoto(photoId);
+    }
+
 
 }
 

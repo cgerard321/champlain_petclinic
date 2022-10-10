@@ -11,6 +11,7 @@ var petClinicApp = angular.module('petClinicApp', [
     , 'visits', 'vetList','vetForm','vetDetails', 'loginForm', 'rolesDetails', 'signupForm', 'billDetails', 'billsByOwnerId', 'billHistory'
     , 'verification' , 'adminPanel']);
 
+
 petClinicApp.factory("authProvider", ["$window", function ($window) {
 
     return {
