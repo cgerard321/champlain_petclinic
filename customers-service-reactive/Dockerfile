@@ -10,4 +10,4 @@ FROM openjdk:8-alpine
 ARG JAR_FILE=build/libs/*.jar
 COPY --from=builder /usr/src/app/${JAR_FILE} app.jar
 RUN apk --no-cache add curl
-ENTRYPOINT ["java", "-jar","/app.jar"]
+ENTRYPOINT ["java", "-jar", "/app.jar"]
