@@ -29,7 +29,12 @@
     </tr>
 </table>
 
-<div class="bColor"><h2 class="titleOwner form">Pets and Visits</h2></div>
+<div class="bColor">
+
+    <h2 class="titleOwner form">Pets and Visits</h2>
+    <a class="newBtn btn-default btn btn-success" style="background-color: #198754;" ui-sref="addPet({ownerId: $ctrl.owner.id, method: 'new-pet'})">Add Pet</a>
+
+</div>
 
 
 
@@ -37,7 +42,7 @@
     <tr ng-repeat="pet in $ctrl.owner.pets track by pet.id">
         <td valign="top">
             <dl class="dl-horizontal">
-                <a class="newBtn btn-default btn btn-success" style="background-color: #198754;" ui-sref="addPet({ownerId: $ctrl.owner.id, method: 'new-pet'})">Add Pet</a>
+
                 <a class="newBtn btn-default btn btn-success" style="background-color: #198754;" ui-sref="visits({ownerId: $ctrl.owner.id, petId: pet.id})">Add Visit</a>
                 <dt>Name</dt>
                 <dd>{{pet.name}}</dd>
