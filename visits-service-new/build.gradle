@@ -9,6 +9,7 @@ plugins {
 group = 'com.petclinic.visits-service-new'
 version = '1.0.0-SNAPSHOT'
 sourceCompatibility = '1.8'
+
 configurations {
     compileOnly {
         extendsFrom annotationProcessor
@@ -31,13 +32,13 @@ dependencies {
 }
 
 
+
 tasks.named('test') {
     useJUnitPlatform()
 }
-
-/**
-jacoco{
-    toolVersion = "0.8.6"
+jacoco {
+    toolVersion = "0.8.8"
+    reportsDirectory = layout.buildDirectory.dir('customJacocoReportDir')
 }
 
 jacocoTestReport {
@@ -46,7 +47,7 @@ jacocoTestReport {
     afterEvaluate {
         classDirectories.setFrom(files(classDirectories.files.collect {
             fileTree(dir: it, exclude: [
-                    "com/petclinic/VisitsServiceNewApplication.class"
+                    "com/petclinic/**/AuthServiceApplication.class",
             ])
         }))
     }
@@ -65,9 +66,10 @@ jacocoTestCoverageVerification {
 test.finalizedBy jacocoTestReport
 check.dependsOn jacocoTestCoverageVerification
 
+
 test {
     useJUnitPlatform()
     testLogging {
         events "passed", "skipped", "failed"
     }
-}**/
+}
