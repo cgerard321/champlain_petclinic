@@ -18,6 +18,5 @@ public class PhotoDetails {
 
     private String type;
 
-    private byte[] photo;
-
+    private String photo;
 }

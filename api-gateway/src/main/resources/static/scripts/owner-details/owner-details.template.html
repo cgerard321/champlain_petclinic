@@ -1,9 +1,19 @@
+<link href="/css/ownerdetail.css" rel="stylesheet" type="text/css"/>
+
 <div class="bColor"><h2 class="titleOwner form">Owner Information</h2></div>
 
 <table class="table table-striped">
     <tr>
+        <td rowspan="5">
+            <div class="parent">
+                <img alt="Profile picture preview" src="data:image/png;base64, {{$ctrl.ownerPhoto.photo}}" width="150" height="150" class="image1">
+                <img alt="" src="data:image/png;base64, {{$ctrl.PreviewImage}}" ng-show="$ctrl.PreviewImage != null" width="150" height="150" class="image2"/>
+                <input type="file" accept="image/jpeg" class="fileInput" id="photoOwner"/>
+            </div>
+        </td>
         <th class="col-sm-3">Name</th>
         <td id="tableName"><b>{{$ctrl.owner.firstName}} {{$ctrl.owner.lastName}}</b></td>
+
     </tr>
     <tr>
         <th>Address</th>
@@ -16,10 +26,6 @@
     <tr>
         <th>Telephone</th>
         <td>{{$ctrl.owner.telephone}}</td>
-    </tr>
-    <tr>
-        <th>Photo</th>
-        <td>{{$ctrl.owner.photo}}</td>
     </tr>
 
     <tr>
@@ -39,6 +45,8 @@
     <tr ng-repeat="pet in $ctrl.owner.pets track by pet.id">
         <td valign="top">
             <dl class="dl-horizontal">
+                <dt>Photo</dt>
+<!--                <dd><img alt="Profile picture preview" src="data:image/png;base64, {{$ctrl.getPetPhoto(pet.id)}}" width="100" height="100"></dd>-->
                 <dt>Name</dt>
                 <dd>{{pet.name}}</dd>
                 <dt>Birth Date</dt>
@@ -71,6 +79,7 @@
         </td>
     </tr>
 </table>
+
 
 
 

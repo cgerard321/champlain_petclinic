@@ -4,7 +4,7 @@ CREATE TABLE IF NOT EXISTS photos (
     id INT(4) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(80),
     type VARCHAR(80),
-    image LONGBLOB,
+    image LONGTEXT,
     INDEX(name)
     ) engine=InnoDB;
 

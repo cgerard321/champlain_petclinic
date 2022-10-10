@@ -28,7 +28,7 @@ public class Photo {
     private String type;
 
     @Column(name = "image", unique = false, nullable = false, length = 100000)
-    private byte[] photo;
+    private String photo;
 
     @Override
     public String toString()
@@ -37,6 +37,6 @@ public class Photo {
                 this.id + ", Name: " +
                 this.name + ", Type: " +
                 this.type + ", Image: " +
-                Arrays.toString(this.photo);
+                this.photo;
     }
 }

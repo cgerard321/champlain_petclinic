@@ -28,13 +28,11 @@ class PhotoPersistenceTest {
     }
 
     private Photo buildPhoto(){
-        final String test = "Test photo";
-        final byte[] testBytes = test.getBytes();
         return Photo.builder()
                 .id(1)
                 .name("test photo")
                 .type("jpeg")
-                .photo(testBytes)
+                .photo("testBytes")
                 .build();
     }
 
