@@ -157,6 +157,28 @@ class BillResourceIntegrationTest {
 
 
     }
+    @Test
+    void deleteBillsByCustomerId() {
+
+        Bill billEntity = buildBill();
+
+        repo.save(billEntity);
+
+        Publisher<Void> setup = repo.deleleBillsByCustomerId(billEntity.getCustomerId());
+
+        StepVerifier.create(setup)
+                .expectNextCount(0)
+                .verifyComplete();
+
+        client.delete()
+                .uri("/bills/customer/" + billEntity.getCustomerId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent()
+                .expectBody();
+
+
+    }
 
     private Bill buildBill(){
 

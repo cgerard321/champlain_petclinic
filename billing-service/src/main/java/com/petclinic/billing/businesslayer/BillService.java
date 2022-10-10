@@ -14,7 +14,7 @@ public interface BillService {
     Mono<BillDTO> CreateBill(@RequestBody Mono<BillDTO> model);
 
     Mono<Void> DeleteBill(@RequestParam(value = "billId", required = true) String billId);
-
+    Flux<Void> DeleteBillsByCustomerId(@RequestParam(value = "customerId", required = true) int customerId);
     Flux<BillDTO> GetBillByCustomerId(@RequestParam(value = "customerId", required = true) int customerId);
 
 
