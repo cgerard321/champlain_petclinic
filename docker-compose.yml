@@ -25,6 +25,13 @@ services:
         depends_on:
             - mongo
 
+    customers-service-reactive:
+        build: customers-service-reactive
+        environment:
+            - SPRING_PROFILES_ACTIVE=docker
+        depends_on:
+            - mongo-customers
+
     customers:
         build: customers-service
         hostname: customers
@@ -198,7 +205,7 @@ services:
         - ME_CONFIG_MONGODB_SERVER=mongo
         - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
       ports:
-        - 9000:8082
+        - 9000:8081
       depends_on:
         - mongo
         - vet-service
@@ -232,3 +239,27 @@ services:
       depends_on:
         - mongo1
         - billing-service
+
+    mongo-customers:
+      image: mongo
+      container_name: mongo-customers
+      restart: always
+      ports:
+        - 27019:27017
+      environment:
+        MONGO_INITDB_ROOT_USERNAME: root
+        MONGO_INITDB_ROOT_PASSWORD: password
+
+    mongo-express-customers:
+      image: mongo-express
+      restart: always
+      environment:
+        - ME_CONFIG_MONGODB_ADMINUSERNAME=root
+        - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+        - ME_CONFIG_MONGODB_SERVER=mongo-customers
+        - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
+      ports:
+        - 8085:8081
+      depends_on:
+        - mongo-customers
+        - customers-service-reactive
