@@ -19,7 +19,10 @@ import reactor.core.publisher.Mono;
 public class VetsServiceClient {
 
     private final WebClient.Builder webClientBuilder;
-    private final String vetsServiceUrl;
+    private String vetsServiceUrl;
+    public void setVetsServiceUrl(String vetsServiceUrl) {
+        this.vetsServiceUrl = vetsServiceUrl;
+    }
 
     public VetsServiceClient(
             WebClient.Builder webClientBuilder,
