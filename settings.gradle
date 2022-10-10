@@ -1,5 +1,6 @@
 include 'customers-service'
 include 'vets-service'
+include 'vet-service'
 include 'visits-service'
 include 'api-gateway'
 include 'billing-service'
