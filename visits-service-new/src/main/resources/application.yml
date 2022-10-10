@@ -1,10 +1,11 @@
 server:
-  port: 8080
+  error:
+    include-message: always
 
 logging:
   level:
     root: INFO
-    com.pet-clinic: DEBUG
+    com.petclinic: DEBUG
 
 spring:
   config:
@@ -26,7 +27,7 @@ spring:
   data:
     mongodb:
       host: localhost
-      port: 27017
+      port: 27016
       database: visits
       username: root
       password: password
@@ -38,8 +39,8 @@ spring:
       on-profile: docker
   data:
     mongodb:
-      host: visits-service-new
-      port: 27020
+      host: mongo3
+      port: 27016
       database: visits
       username: root
       password: password

@@ -9,8 +9,6 @@ services:
 
     visits-service-new:
         build: visits-service-new
-        ports:
-            - "8080:8080"
         environment:
             - SPRING_PROFILES_ACTIVE=docker
         depends_on:
@@ -119,7 +117,7 @@ services:
             - 8081:8081
         depends_on:
             - mongo
-            - visits-service-new
+            - vet-service
 
     mysql1:
         image: mysql:5.7
@@ -263,3 +261,31 @@ services:
             interval: 10s
             timeout: 5s
             retries: 10
+    mongo3:
+        image: mongo
+        container_name: mongo3
+        restart: always
+        ports:
+            - 27016:27016
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: root
+            MONGO_INITDB_ROOT_PASSWORD: password
+        healthcheck:
+            test: echo 'db.runCommand("ping").ok' | mongo localhost:27016/test --quiet
+            retries: 5
+            interval: 15s
+            start_period: 30s
+
+    mongo-express3:
+        image: mongo-express
+        restart: always
+        environment:
+            - ME_CONFIG_MONGODB_ADMINUSERNAME=root
+            - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+            - ME_CONFIG_MONGODB_SERVER=mongo3
+            - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
+        ports:
+            - 9000:8084
+        depends_on:
+            - mongo3
+            - visits-service-new
