@@ -6,8 +6,7 @@ import lombok.*;
 
 import java.util.Date;
 
-@Getter
-@Setter
+@Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -15,9 +14,9 @@ public class PetDTO {
 
     private int id;
     private int ownerId;
-    private PetType petType;
     private String name;
     private Date birthDate;
+    private PetType petType;
     private Photo photo;
 
 }

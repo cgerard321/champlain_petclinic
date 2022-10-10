@@ -5,8 +5,7 @@ import org.springframework.data.annotation.Id;
 
 import java.util.Date;
 
-@Setter
-@Getter
+@Data
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor

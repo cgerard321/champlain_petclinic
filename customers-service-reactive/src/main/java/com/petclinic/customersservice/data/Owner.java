@@ -3,8 +3,7 @@ package com.petclinic.customersservice.data;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 
-@Setter
-@Getter
+@Data
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
