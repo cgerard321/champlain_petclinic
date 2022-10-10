@@ -6,7 +6,7 @@ plugins {
     id 'jacoco'
 }
 
-group = 'com.petclinic.vet'
+group = 'com.petclinic.visits-service-new'
 version = '1.0.0-SNAPSHOT'
 sourceCompatibility = '1.8'
 

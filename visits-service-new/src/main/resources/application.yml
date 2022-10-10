@@ -1,6 +1,5 @@
 server:
-  error:
-    include-message: always
+  port: 8080
 
 logging:
   level:
@@ -39,7 +38,7 @@ spring:
       on-profile: docker
   data:
     mongodb:
-      host: mongo3
+      host: mongo-service-new
       port: 27019
       database: visits
       username: root
