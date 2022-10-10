@@ -1,13 +1,14 @@
 plugins {
-    id 'org.springframework.boot' version '2.7.3'
+    id 'org.springframework.boot' version '2.7.4'
     id 'io.spring.dependency-management' version '1.0.13.RELEASE'
     id 'java'
-    //id 'jacoco'
+    id 'io.freefair.lombok' version '6.0.0-m2'
+    id 'jacoco'
 }
 
-group = 'com.pet-clinic'
-version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '17'
+group = 'com.petclinic.visits-service-new'
+version = '1.0.0-SNAPSHOT'
+sourceCompatibility = '1.8'
 
 configurations {
     compileOnly {
@@ -31,13 +32,13 @@ dependencies {
 }
 
 
+
 tasks.named('test') {
     useJUnitPlatform()
 }
-
-/**
-jacoco{
-    toolVersion = "0.8.6"
+jacoco {
+    toolVersion = "0.8.8"
+    reportsDirectory = layout.buildDirectory.dir('customJacocoReportDir')
 }
 
 jacocoTestReport {
@@ -46,7 +47,7 @@ jacocoTestReport {
     afterEvaluate {
         classDirectories.setFrom(files(classDirectories.files.collect {
             fileTree(dir: it, exclude: [
-                    "com/petclinic/VisitsServiceNewApplication.class"
+                    "com/petclinic/**/AuthServiceApplication.class",
             ])
         }))
     }
@@ -65,9 +66,10 @@ jacocoTestCoverageVerification {
 test.finalizedBy jacocoTestReport
 check.dependsOn jacocoTestCoverageVerification
 
+
 test {
     useJUnitPlatform()
     testLogging {
         events "passed", "skipped", "failed"
     }
-}**/
+}

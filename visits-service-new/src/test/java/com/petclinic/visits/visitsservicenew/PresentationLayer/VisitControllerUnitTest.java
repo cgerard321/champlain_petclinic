@@ -2,7 +2,9 @@ package com.petclinic.visits.visitsservicenew.PresentationLayer;
 
 
 import com.petclinic.visits.visitsservicenew.BusinessLayer.VisitService;
+import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitDTO;
+import com.petclinic.visits.visitsservicenew.Utils.EntityDtoUtil;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -17,16 +19,18 @@ import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.swing.text.html.parser.Entity;
+
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.util.AssertionErrors.assertNotNull;
 
 @WebFluxTest(controllers = VisitController.class)
 public class VisitControllerUnitTest {
 
     private VisitDTO dto = buildVisitDto();
 
-    private Mono<VisitDTO> monoVisit= Mono.just(buildVisitDto());
     private final String Visit_UUID_OK = dto.getVisitId();
     private final int Practitioner_Id_OK = dto.getPractitionerId();
 
@@ -118,36 +122,46 @@ public class VisitControllerUnitTest {
 
     }
 
-    @Disabled
+    @Test
     public void addVisit(){
 
-        when(visitService.addVisit(Mono.just(dto)).thenReturn(Mono.just(dto)));//this code returns NOTHING it is NULL
+        Mono<VisitDTO> monoVisit= Mono.just(dto);
+        when(visitService.addVisit(monoVisit))
+                .thenReturn(monoVisit);
 
-        webFluxTest.post().uri("http://localhost:8080/visits")
-                .body(BodyInserters.fromValue(dto))
+        webFluxTest
+                .post()
+                .uri("/visits")
+                .body(monoVisit, Visit.class)
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody(VisitDTO.class);
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
 
-        Mockito.verify(visitService, times(1))
-                .addVisit(Mono.just(dto));
+        Mockito.verify(visitService, times(2))
+                .addVisit(any(Mono.class));
 
     }
 
-    @Disabled
+    @Test
     public void updateVisitByVisitId(){
 
-        when(visitService.updateVisit(anyString(), monoVisit)).thenReturn(Mono.just(dto));//for some reason this code here returns null
+        Mono<VisitDTO> monoVisit= Mono.just(dto);
+        when(visitService.updateVisit(anyString(), any(Mono.class))).thenReturn(monoVisit);//for some reason this code here returns null
 
         webFluxTest.put()
-                .uri("http://localhost:8080/visits/visits/", Visit_UUID_OK)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(BodyInserters.fromValue(dto))
+                .uri("/visits/visits/" + Visit_UUID_OK)
+                .accept(MediaType.APPLICATION_JSON)
+                .body(monoVisit, Visit.class)
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isAccepted();
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
 
-        Mockito.verify(visitService, times(1)).updateVisit(Visit_UUID_OK, Mono.just(dto));
+
+        Mockito.verify(visitService, times(1)).updateVisit(anyString(), any(Mono.class));
     }
     @Test
     public void deleteVisit(){
