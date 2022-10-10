@@ -9,7 +9,7 @@ services:
 
     visits-service-new:
         build: visits-service-new
-        hostname: visits-service-new
+        hostname: visits
         environment:
           - SPRING_PROFILES_ACTIVE=docker
         depends_on:
@@ -43,6 +43,8 @@ services:
             - customers
             - visits-service-new
             - vet-service
+            - auth-service
+            - billing-service
 
     auth-service:
         build: auth-service
@@ -227,7 +229,7 @@ services:
             - mongo1
             - billing-service
 
-    # billing mongo container
+    # visits mongo container
     mongo3:
         image: mongo
         container_name: mongo3

@@ -4,13 +4,10 @@ server.error.include-message: always
 app:
   visits-service-new:
     host: localhost
-    port: 7001
+    port: 7006
   vet-service:
     host: localhost
     port: 7002
-  vets-service:
-    host: localhost
-    port: 7006
   customers-service:
     host: localhost
     port: 7003

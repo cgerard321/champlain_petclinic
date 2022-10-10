@@ -4,7 +4,7 @@ server:
 logging:
   level:
     root: INFO
-    com.petclinic: DEBUG
+    com.pet-clinic: DEBUG
 
 spring:
   config:
@@ -26,7 +26,7 @@ spring:
   data:
     mongodb:
       host: localhost
-      port: 27019
+      port: 27017
       database: visits
       username: root
       password: password
@@ -38,8 +38,8 @@ spring:
       on-profile: docker
   data:
     mongodb:
-      host: mongo-service-new
-      port: 27019
+      host: visits-service-new
+      port: 27020
       database: visits
       username: root
       password: password
