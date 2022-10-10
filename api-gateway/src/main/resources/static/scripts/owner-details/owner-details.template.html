@@ -24,11 +24,11 @@
 
     <tr>
         <td>
-            <a class="newBtn btn btn-default" ui-sref="ownerEdit({ownerId: $ctrl.owner.id, method: 'edit'})">Edit Owner</a>
+            <a class="newBtn btn-default btn" style="background-color: royalblue; color: white" ui-sref="ownerEdit({ownerId: $ctrl.owner.id, method: 'edit'})">Edit Owner</a>
         </td>
         <td>
-            <a class="newBtn btn btn-default" ui-sref="addPet({ownerId: $ctrl.owner.id, method: 'new-pet'})">Add New Pet</a>
-            <a class="newBtn btn btn-default" ui-sref="ownerEdit({ownerId: $ctrl.owner.id, method: 'delete'})">Delete Owner</a>
+            <a class="newBtn btn-default btn btn-success" style="background-color: #198754;" ui-sref="addPet({ownerId: $ctrl.owner.id, method: 'new-pet'})">Add Pet</a>
+            <a class="newBtn btn-default btn btn-danger" style="background-color: #dc3545;" ui-sref="ownerEdit({ownerId: $ctrl.owner.id, method: 'delete'})">Delete Owner</a>
         </td>
     </tr>
 </table>
@@ -61,10 +61,10 @@
                 </tr>
                 <tr>
                     <td>
-                        <a class="newBtn btn btn-default" ui-sref="visits({ownerId: $ctrl.owner.id, petId: pet.id})">Add Visit</a>
+                        <a class="newBtn btn-default btn btn-success" style="background-color: #198754;" ui-sref="visits({ownerId: $ctrl.owner.id, petId: pet.id})">Add Visit</a>
                     </td>
                     <td>
-                        <a class="newBtn btn btn-default" ui-sref="deletePet({ownerId: $ctrl.owner.id, petId: pet.id, method: 'delete'})">Delete Pet</a>
+                        <a class="newBtn btn-default btn btn-danger" style="background-color: #dc3545;" ui-sref="deletePet({ownerId: $ctrl.owner.id, petId: pet.id, method: 'delete'})">Delete Pet</a>
                     </td>
                 </tr>
             </table>
