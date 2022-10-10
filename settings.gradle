@@ -1,4 +1,5 @@
 include 'customers-service'
+include 'customers-service-reactive'
 include 'vets-service'
 include 'visits-service'
 include 'api-gateway'
