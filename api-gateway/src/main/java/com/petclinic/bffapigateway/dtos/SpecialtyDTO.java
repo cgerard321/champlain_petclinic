@@ -1,15 +1,10 @@
 package com.petclinic.bffapigateway.dtos;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
-@Setter
-@Getter
-@AllArgsConstructor
-@NoArgsConstructor
+
+@Data
 public class SpecialtyDTO {
     private String specialtyId;
     private String name;

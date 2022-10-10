@@ -3,28 +3,15 @@ package com.petclinic.bffapigateway.presentationlayer;
 
 import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.*;
-import com.sun.imageio.plugins.common.ImageUtil;
-import io.swagger.models.Response;
+import com.petclinic.bffapigateway.utils.VetsEntityDtoUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import javax.imageio.ImageIO;
-import javax.imageio.ImageWriter;
-import java.awt.*;
-import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -60,7 +47,6 @@ public class BFFApiGatewayController {
         return billServiceClient.getBilling(billId);
     }
 
-
     @PostMapping(value = "bills",
             consumes = "application/json",
             produces = "application/json")
@@ -77,11 +63,8 @@ public class BFFApiGatewayController {
     @DeleteMapping(value = "bills/{billId}")
     public Mono<Void> deleteBill(final @PathVariable String billId){
         return billServiceClient.deleteBill(billId);
-
-
-
-
     }
+
 
 
     @PostMapping(value = "owners/{ownerId}/pets" , produces = "application/json", consumes = "application/json")
@@ -103,6 +86,7 @@ public class BFFApiGatewayController {
     public Flux<PetType> getPetTypes(){
         return customersServiceClient.getPetTypes();
     }
+
 
 
     @PutMapping(
@@ -179,45 +163,46 @@ public class BFFApiGatewayController {
     }
 
 
+
+
     @GetMapping(value = "vets")
-    public Flux<VetDTO> getVets() {
+    public Flux<VetDTO> getAllVets() {
         return vetsServiceClient.getVets();
     }
 
-    @GetMapping("/active")
+    @GetMapping("/vets/{vetId}")
+    public Mono<ResponseEntity<VetDTO>> getVetByVetId(@PathVariable String vetId) {
+        return vetsServiceClient.getVetByVetId(VetsEntityDtoUtil.verifyId(vetId))
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/vets/active")
     public Flux<VetDTO> getActiveVets() {
         return vetsServiceClient.getActiveVets();
     }
-    @GetMapping("/inactive")
+
+    @GetMapping("/vets/inactive")
     public Flux<VetDTO> getInactiveVets() {
         return vetsServiceClient.getInactiveVets();
     }
 
-    @GetMapping(value = "/vets/{vetId}")
-    public Mono<VetDTO> getVet(@PathVariable String vetId) {
-        return vetsServiceClient.getVetByVetId(vetId);
-    }
-
-
     @PostMapping(value = "/vets",consumes = "application/json",produces = "application/json")
-    public Mono<VetDTO> createVet(@RequestBody VetDTO model) {
-        return vetsServiceClient.createVet(model);
+    public Mono<VetDTO> insertVet(@RequestBody Mono<VetDTO> vetDTOMono) {
+        return vetsServiceClient.createVet(vetDTOMono);
     }
-
-
-    @DeleteMapping(value = "/vets/{vetId}")
-    public Mono<VetDTO> deleteVet(@PathVariable String vetId) {
-        return vetsServiceClient.deleteVet(vetId);
-    }
-
 
     @PutMapping(value = "/vets/{vetId}",consumes = "application/json",produces = "application/json")
-    public Mono<VetDTO> updateVet(@PathVariable String vetId, @RequestBody VetDTO vet) {
-        log.debug("Trying to update vet");
-        return vetsServiceClient.updateVet(vetId, vet);
+    public Mono<ResponseEntity<VetDTO>> updateVetByVetId(@PathVariable String vetId, @RequestBody Mono<VetDTO> vetDTOMono) {
+        return vetsServiceClient.updateVet(VetsEntityDtoUtil.verifyId(vetId), vetDTOMono)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-
+    @DeleteMapping(value = "/vets/{vetId}")
+    public Mono<Void> deleteVet(@PathVariable String vetId) {
+        return vetsServiceClient.deleteVet(VetsEntityDtoUtil.verifyId(vetId));
+    }
 
 
 
