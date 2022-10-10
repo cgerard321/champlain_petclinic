@@ -30,7 +30,7 @@ server.port: 8080
 
 app:
   visits-service-new:
-    host: visits
+    host: visits-service-new
     port: 8080
   vet-service:
     host: vet-service

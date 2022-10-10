@@ -27,7 +27,7 @@ spring:
   data:
     mongodb:
       host: localhost
-      port: 27016
+      port: 27017
       database: visits
       username: root
       password: password
@@ -39,8 +39,8 @@ spring:
       on-profile: docker
   data:
     mongodb:
-      host: mongo3
-      port: 27016
+      host: mongo2
+      port: 27017
       database: visits
       username: root
       password: password

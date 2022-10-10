@@ -1,10 +1,11 @@
 include 'customers-service'
 include 'customers-service-reactive'
-include 'vets-service'
-include 'visits-service'
+//include 'vets-service'
+//include 'visits-service'
 include 'api-gateway'
 include 'billing-service'
 include 'auth-service'
 include 'visits-service-new'
+include 'vet-service'
 
 
