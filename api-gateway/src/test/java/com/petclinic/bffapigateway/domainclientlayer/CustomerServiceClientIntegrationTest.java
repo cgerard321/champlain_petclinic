@@ -31,7 +31,7 @@ public class CustomerServiceClientIntegrationTest {
             .id(2)
             .name("photo")
             .type("jpeg")
-            .photo(testBytes)
+            .photo("testBytes")
             .build();
 
     private final OwnerDetails TEST_OWNER = OwnerDetails.builder()
