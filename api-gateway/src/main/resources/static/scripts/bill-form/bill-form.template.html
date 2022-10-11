@@ -10,7 +10,7 @@
             </div>
             <div class="col-sm-6 form-group">
                 <label class="control-label" for="vetId">Veterinarian</label>
-                <select class="form-control" name="visitType" id="vetId" ng-model="$ctrl.vet.vetId" required title="Please select a veterinarian.">
+                <select class="form-control" name="visitType" id="vetId" ng-model="$ctrl.bill.vetId" required title="Please select a veterinarian.">
                     <option ng-repeat="vet in $ctrl.vetList | filter:$ctrl.query track by vet.vetId" value="vet.vetId">{{vet.firstName}} {{vet.lastName}}</option>
                 </select>
             </div>
@@ -33,9 +33,6 @@
                 </select>
             </div>
         </div>
-
-    <!--    tr id="billId" ng-repeat="bill in $ctrl.billHistory | filter:$ctrl.query track by bill.billId">-->
-    <!--    <td>{{bill.customerId}}</td>-->
         <div class="row">
             <div class="form-group col-sm-12">
                 <label class="control-label" for="amount">Amount</label>
