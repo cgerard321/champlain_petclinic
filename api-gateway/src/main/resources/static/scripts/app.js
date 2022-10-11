@@ -8,8 +8,11 @@ const whiteList = new Set([
 /* App Module */
 var petClinicApp = angular.module('petClinicApp', [
     'ui.router', 'layoutNav', 'layoutFooter', 'layoutWelcome', 'ownerList', 'ownerDetails', 'ownerForm', 'petForm'
-    , 'visits', 'vetList','vetForm','vetDetails', 'loginForm', 'rolesDetails', 'signupForm', 'billDetails', 'billHistory'
-    , 'verification' , 'adminPanel', 'visitList']);
+    , 'visits', 'vetList','vetForm','vetDetails', 'visitList', 'billForm', 'loginForm', 'rolesDetails', 'signupForm',
+    'billDetails', 'billsByOwnerId', 'billHistory'
+    , 'verification' , 'adminPanel' ]);
+
+
 
 petClinicApp.factory("authProvider", ["$window", function ($window) {
 

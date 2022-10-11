@@ -30,27 +30,37 @@
 
     <tr>
         <td>
-            <a class="newBtn btn btn-default" ui-sref="ownerEdit({ownerId: $ctrl.owner.id, method: 'edit'})">Edit Owner</a>
+            <a class="newBtn btn-default btn" style="background-color: royalblue; color: white" ui-sref="ownerEdit({ownerId: $ctrl.owner.id, method: 'edit'})">Edit Owner</a>
         </td>
         <td>
-            <a class="newBtn btn btn-default" ui-sref="addPet({ownerId: $ctrl.owner.id, method: 'new-pet'})">Add New Pet</a>
-            <a class="newBtn btn btn-default" ui-sref="ownerEdit({ownerId: $ctrl.owner.id, method: 'delete'})">Delete Owner</a>
+
+            <a class="newBtn btn-default btn btn-danger" style="background-color: #dc3545;" ui-sref="ownerEdit({ownerId: $ctrl.owner.id, method: 'delete'})">Delete Owner</a>
         </td>
     </tr>
 </table>
 
-<div class="bColor"><h2 class="titleOwner form">Pets and Visits</h2></div>
+<div class="bColor">
+
+    <h2 class="titleOwner form">Pets and Visits</h2>
+    <a class="newBtn btn-default btn btn-success" style="background-color: #198754;" ui-sref="addPet({ownerId: $ctrl.owner.id, method: 'new-pet'})">Add Pet</a>
+
+</div>
+
+
 
 <table class="table table-striped">
     <tr ng-repeat="pet in $ctrl.owner.pets track by pet.id">
         <td valign="top">
             <dl class="dl-horizontal">
+
+                <a class="newBtn btn-default btn btn-success" style="background-color: #198754;" ui-sref="visits({ownerId: $ctrl.owner.id, petId: pet.id})">Add Visit</a>
                 <dt>Name</dt>
                 <dd>{{pet.name}}</dd>
                 <dt>Birth Date</dt>
                 <dd>{{pet.birthDate | date:'yyyy MMM dd'}}</dd>
                 <dt>Type</dt>
                 <dd>{{pet.type.name}}</dd>
+                <a class="newBtn btn-default btn btn-danger" style="background-color: #dc3545;" ui-sref="deletePet({ownerId: $ctrl.owner.id, petId: pet.id, method: 'delete'})">Delete Pet</a>
             </dl>
         </td>
         <td valign="top">
@@ -67,15 +77,19 @@
                 </tr>
                 <tr>
                     <td>
-                        <a class="newBtn btn btn-default" ui-sref="visits({ownerId: $ctrl.owner.id, petId: pet.id})">Add Visit</a>
+
                     </td>
                     <td>
-                        <a class="newBtn btn btn-default" ui-sref="deletePet({ownerId: $ctrl.owner.id, petId: pet.id, method: 'delete'})">Delete Pet</a>
+
+
                     </td>
                 </tr>
             </table>
         </td>
+
+
     </tr>
+    <td><a href="http://localhost:8080/#!/bills/customerId/{{$ctrl.owner.id}}">Get Bills</a></td>
 </table>
 
 

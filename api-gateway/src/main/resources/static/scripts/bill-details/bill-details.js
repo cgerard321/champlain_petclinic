@@ -5,7 +5,7 @@ angular.module('billDetails', ['ui.router'])
         $stateProvider
             .state('billDetails', {
                 parent: 'app',
-                url: '/bills/details/:billId',
+                url: '/bills/details/:billId/owner/:ownerId',
                 template: '<bill-details></bill-details>'
             })
     }]);
