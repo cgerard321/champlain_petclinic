@@ -35,14 +35,11 @@ angular.module('ownerDetails')
             reader.readAsDataURL(file);
         });
 
-
-        // $http.post('api/gateway/owners/photo/' + $stateParams.ownerId, data);
-
-        // self.getPetPhoto = function (petId){
-        //     $http.get('api/gateway/owners/' + $stateParams.ownerId + '/pet/photo/' + petId).then(function (resp) {
-        //         return resp.data.photo;
-        //     });
-        // };
+        self.init = function (id){
+            $http.get('api/gateway/owners/' + $stateParams.ownerId + '/pet/photo/' + id).then(function (resp) {
+                self.petPhoto = resp.data;
+            });
+        }
 
         function uuidv4() {
             return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
