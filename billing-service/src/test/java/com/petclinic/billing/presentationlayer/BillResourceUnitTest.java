@@ -117,7 +117,21 @@ class BillResourceUnitTest {
 
 
     }
+    @Test
+    void deleteBillsByCustomerId() {
+        when(billService.DeleteBillsByCustomerId(anyInt())).thenReturn(Flux.empty());
 
+        client.get()
+                .uri("/bills/customer/" + dto.getCustomerId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+
+        Mockito.verify(billService, times(1)).DeleteBillsByCustomerId(CUSTOMER_ID_OK);
+
+    }
     @Test
     void deleteBill() {
 
