@@ -11,7 +11,7 @@
             <div class="col-sm-6 form-group">
                 <label class="control-label" for="vetId">Veterinarian</label>
                 <select class="form-control" name="visitType" id="vetId" ng-model="$ctrl.bill.vetId" required title="Please select a veterinarian.">
-                    <option ng-repeat="vet in $ctrl.vetList | filter:$ctrl.query track by vet.vetId" value="vet.vetId">{{vet.firstName}} {{vet.lastName}}</option>
+                    <option ng-repeat="vet in $ctrl.vetList | filter:$ctrl.query track by vet.vetId" value="{{vet.vetId}}">{{vet.firstName}} {{vet.lastName}}</option>
                 </select>
             </div>
         </div>
