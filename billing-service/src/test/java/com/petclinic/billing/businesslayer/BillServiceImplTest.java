@@ -114,7 +114,7 @@ public class BillServiceImplTest {
     @Test
     public void test_DeleteBillsByCustomerId(){
         Bill billEntity = buildBill();
-        when(repo.deleleBillsByCustomerId(anyInt())).thenReturn(Flux.empty());
+        when(repo.deleteBillsByCustomerId(anyInt())).thenReturn(Flux.empty());
 
         Flux<Void> deletedObjs = billService.DeleteBillsByCustomerId(billEntity.getCustomerId());
 

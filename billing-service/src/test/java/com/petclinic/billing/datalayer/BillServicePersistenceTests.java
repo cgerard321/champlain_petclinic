@@ -98,7 +98,7 @@ public class BillServicePersistenceTests {
     void shouldDeleteBillsByCustomerId(){
         Bill bill = buildBill();
         Publisher<Bill> setup = repo.deleteAll().thenMany(repo.save(bill));
-        Publisher<Void> delete = repo.deleleBillsByCustomerId(bill.getCustomerId());
+        Publisher<Void> delete = repo.deleteBillsByCustomerId(bill.getCustomerId());
 
         StepVerifier
                 .create(setup)

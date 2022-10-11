@@ -54,7 +54,10 @@ public class BillServiceImpl implements BillService{
     }
 
     @Override
-    public Flux<Void> DeleteBillsByCustomerId(int customerId) {return billRepository.deleleBillsByCustomerId(customerId);}
+    public Flux<Void> DeleteBillsByCustomerId(int customerId)
+    {
+        return billRepository.deleteBillsByCustomerId(customerId);
+    }
 
     @Override
     public Flux<BillDTO> GetBillByCustomerId(int customerId) {

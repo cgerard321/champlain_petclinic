@@ -164,7 +164,7 @@ class BillResourceIntegrationTest {
 
         repo.save(billEntity);
 
-        Publisher<Void> setup = repo.deleleBillsByCustomerId(billEntity.getCustomerId());
+        Publisher<Void> setup = repo.deleteBillsByCustomerId(billEntity.getCustomerId());
 
         StepVerifier.create(setup)
                 .expectNextCount(0)
