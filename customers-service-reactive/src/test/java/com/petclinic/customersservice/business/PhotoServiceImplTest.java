@@ -15,6 +15,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
@@ -76,6 +77,44 @@ class PhotoServiceImplTest {
 //                })
 //                .verifyComplete();
 //    }
+
+    @Test
+    public void getPhotoByPhotoId() {
+
+        Photo photo = buildPhoto();
+
+        String PHOTO_ID = photo.getId();
+
+        when(photoRepo.findPhotoById(anyString())).thenReturn(Mono.just(photo));
+
+        Mono<Photo> photoMono = photoService.getPhotoByPhotoId(PHOTO_ID);
+
+        StepVerifier
+                .create(photoMono)
+                .consumeNextWith(foundPhoto -> {
+                    assertEquals(photo.getName(), foundPhoto.getName());
+                    assertEquals(photo.getType(), foundPhoto.getType());
+                    assertEquals(photo.getPhoto(), foundPhoto.getPhoto());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    public void getPhotoByPhotoIdNotFound() {
+
+        Photo photo = buildPhoto();
+
+        String PHOTO_ID = "00";
+
+        when(photoRepo.findPhotoById(anyString())).thenReturn(Mono.just(photo));
+
+        Mono<Photo> photoMono = photoService.getPhotoByPhotoId(PHOTO_ID);
+
+        StepVerifier
+                .create(photoMono)
+                .expectNextCount(1)
+                .expectError();
+    }
 
 
     private Owner buildOwner() {

@@ -61,6 +61,54 @@ class PhotoControllerIntegrationTest {
 
     }
 
+    @Test
+    public void getPhotoByPhotoId() {
+
+        Photo photo = buildPhoto();
+
+        Publisher<Photo> setup = photoRepo.deleteAll().thenMany(photoRepo.save(photo));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        client
+                .get()
+                .uri("/photos/" + photo.getId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.name").isEqualTo(photo.getName())
+                .jsonPath("$.type").isEqualTo(photo.getType())
+                .jsonPath("$.photo").isEqualTo(photo.getPhoto());
+
+    }
+
+//    @Test
+//    public void getPhotoByPhotoIdNotFound() {
+//
+//        Photo photo = buildPhoto();
+//
+//        String PHOTO_ID_NOT_FOUND = "5";
+//
+//        Publisher<Photo> setup = photoRepo.deleteAll().thenMany(photoRepo.save(photo));
+//
+//        StepVerifier
+//                .create(setup)
+//                .expectNextCount(1)
+//                .verifyComplete();
+//
+//        client
+//                .get()
+//                .uri("/photos/" + PHOTO_ID_NOT_FOUND)
+//                .accept(MediaType.APPLICATION_JSON)
+//                .exchange()
+//                .expectStatus().isNotFound();
+//
+//    }
     private Photo buildPhoto() {
         final String test = "Test photo";
         return Photo.builder()
