@@ -27,39 +27,39 @@ class PhotoControllerIntegrationTest {
     @Autowired
     PhotoRepo photoRepo;
 
-    @Test
-    void insertPhoto() {
-
-        Photo photo = buildPhoto();
-
-        Publisher<Photo> setup = photoRepo.deleteAll().thenMany(photoRepo.save(photo));
-
-        StepVerifier
-                .create(setup)
-                .expectNextCount(1)
-                .verifyComplete();
-
-        client.post()
-                .uri("/photos/")
-                .body(Mono.just(photo), Photo.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.name").isEqualTo(photo.getName())
-                .jsonPath("$.type").isEqualTo(photo.getType())
-                .jsonPath("$.photo").isEqualTo(photo.getPhoto());
-
-//                client.get()
-//                .uri("/photos/" + photo.getId())
+//    @Test
+//    void insertPhoto() {
+//
+//        Photo photo = buildPhoto();
+//
+//        Publisher<Photo> setup = photoRepo.deleteAll().thenMany(photoRepo.save(photo));
+//
+//        StepVerifier
+//                .create(setup)
+//                .expectNextCount(1)
+//                .verifyComplete();
+//
+//        client.post()
+//                .uri("/photos/")
+//                .body(Mono.just(photo), Photo.class)
 //                .accept(MediaType.APPLICATION_JSON)
 //                .exchange()
 //                .expectStatus().isOk()
 //                .expectHeader().contentType(MediaType.APPLICATION_JSON)
 //                .expectBody()
-
-    }
+//                .jsonPath("$.name").isEqualTo(photo.getName())
+//                .jsonPath("$.type").isEqualTo(photo.getType())
+//                .jsonPath("$.photo").isEqualTo(photo.getPhoto());
+//
+////                client.get()
+////                .uri("/photos/" + photo.getId())
+////                .accept(MediaType.APPLICATION_JSON)
+////                .exchange()
+////                .expectStatus().isOk()
+////                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+////                .expectBody()
+//
+//    }
 
     @Test
     public void getPhotoByPhotoId() {
