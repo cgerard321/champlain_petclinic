@@ -11,8 +11,8 @@ import java.util.Optional;
 public interface PetRepo extends ReactiveMongoRepository<Pet, Integer> {
 
     Flux<Pet> findAllPetByOwnerId(int ownerId);
-    Flux<PetType> findPetTypes();
-    Optional<PetType> findPetTypeById();
-    Optional<Pet> findPetByOwner(int ownerId, int petId);
+//    Flux<PetType> findPetTypes();
+//    Optional<PetType> findPetTypeById();
+    Mono<Pet> findPetByOwnerId(int ownerId, int petId);
 
 }

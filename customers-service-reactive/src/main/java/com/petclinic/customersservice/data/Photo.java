@@ -10,9 +10,9 @@ import org.springframework.data.annotation.Id;
 public class Photo {
 
     @Id
-    private int id;
+    private String id;
     private String name;
     private String type;
-    private byte[] photo;
+    private String photo;
 
 }
