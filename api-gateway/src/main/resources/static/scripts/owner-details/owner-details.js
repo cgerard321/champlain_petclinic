@@ -9,11 +9,4 @@ angular.module('ownerDetails', ['ui.router'])
                 params: {ownerId: null},
                 template: '<owner-details></owner-details>'
             })
-        $stateProvider
-            .state('photoDetails', {
-                parent: 'app',
-                url: '/owners/photo/:ownerId',
-                params: {ownerId: null},
-                template: '<photo-details></photo-details>'
-            })
     }]);
