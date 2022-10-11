@@ -12,9 +12,9 @@ class PhotoTest {
     public void test_setPhoto()
     {
         //Arrange
-        Photo photo = new Photo(1,"photoName","jpeg","testPhoto".getBytes());
+        Photo photo = new Photo(1,"photoName","jpeg","testPhoto");
 
-        String expected = "ID: 1, Name: photoName, Type: jpeg, Image: " + Arrays.toString("testPhoto".getBytes());
+        String expected = "ID: 1, Name: photoName, Type: jpeg, Image: testPhoto";
 
         //Act
         String result = photo.toString();
