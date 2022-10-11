@@ -60,7 +60,7 @@ public class BFFApiGatewayController {
     }
 
     @GetMapping(value = "bills/customer/{customerId}")
-    public Flux<BillDetails> getBillByOwnerId(final @PathVariable int customerId)
+    public Flux<BillDetails> getBillsByOwnerId(final @PathVariable int customerId)
     {
         return billServiceClient.getBillByOwnerId(customerId);
     }
