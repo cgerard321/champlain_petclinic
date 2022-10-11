@@ -828,14 +828,14 @@ class ApiGatewayControllerTest {
     }
 
     @Test
-    public void getBillByOwnerId(){
+    public void getBillsByOwnerId(){
         BillDetails bill = new BillDetails();
         bill.setBillId(UUID.randomUUID().toString());
         bill.setCustomerId(1);
         bill.setAmount(499);
         bill.setVisitType("Test");
 
-        when(billServiceClient.getBillByOwnerId(bill.getCustomerId()))
+        when(billServiceClient.getBillsByOwnerId(bill.getCustomerId()))
                 .thenReturn(Flux.just(bill));
 
         client.get()
