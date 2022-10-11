@@ -833,7 +833,7 @@ class ApiGatewayControllerTest {
         bill.setBillId(UUID.randomUUID().toString());
         bill.setCustomerId(1);
         bill.setAmount(499);
-        bill.setVisitType("Test Service");
+        bill.setVisitType("Test");
 
         when(billServiceClient.getBillsByOwnerId(bill.getCustomerId()))
                 .thenReturn(Flux.just(bill));
