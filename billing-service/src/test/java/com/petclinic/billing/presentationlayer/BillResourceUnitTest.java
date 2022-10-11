@@ -125,8 +125,7 @@ class BillResourceUnitTest {
                 .uri("/bills/customer/" + dto.getCustomerId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectStatus().isNoContent()
                 .expectBody();
 
         Mockito.verify(billService, times(1)).DeleteBillsByCustomerId(CUSTOMER_ID_OK);
