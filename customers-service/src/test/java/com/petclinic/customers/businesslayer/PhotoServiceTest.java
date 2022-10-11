@@ -160,13 +160,11 @@ class PhotoServiceTest {
 
 
     private Photo buildPhoto(){
-        final String test = "Test photo";
-        final byte[] testBytes = test.getBytes();
         return Photo.builder()
                 .id(2)
                 .name("test photo")
                 .type("jpeg")
-                .photo(testBytes)
+                .photo("testPhoto")
                 .build();
     }
 

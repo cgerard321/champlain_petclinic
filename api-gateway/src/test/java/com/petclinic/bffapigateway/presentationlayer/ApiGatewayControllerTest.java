@@ -463,7 +463,7 @@ class ApiGatewayControllerTest {
         photo.setId(2);
         photo.setName("photo");
         photo.setType("jpeg");
-        photo.setPhoto(testBytes);
+        photo.setPhoto("testBytes");
 
         when(customersServiceClient.setOwnerPhoto(photo, owner.getId()))
                 .thenReturn(Mono.just("Image uploaded successfully: " + photo.getName()));
@@ -498,7 +498,7 @@ class ApiGatewayControllerTest {
         photo.setId(2);
         photo.setName("photo");
         photo.setType("jpeg");
-        photo.setPhoto(testBytes);
+        photo.setPhoto("testBytes");
 
         when(customersServiceClient.getOwnerPhoto(owner.getId()))
                 .thenReturn(Mono.just(photo));
@@ -539,7 +539,7 @@ class ApiGatewayControllerTest {
             photo.setId(2);
             photo.setName("photo");
             photo.setType("jpeg");
-            photo.setPhoto(testBytes);
+            photo.setPhoto("testBytes");
 
             when(customersServiceClient.setPetPhoto(owner.getId(), photo, pet.getId()))
                     .thenReturn(Mono.just("Image uploaded successfully: " + photo.getName()));
@@ -575,7 +575,7 @@ class ApiGatewayControllerTest {
         photo.setId(2);
         photo.setName("photo");
         photo.setType("jpeg");
-        photo.setPhoto(testBytes);
+        photo.setPhoto("testBytes");
 
         when(customersServiceClient.getPetPhoto(owner.getId(), pet.getId()))
                 .thenReturn(Mono.just(photo));

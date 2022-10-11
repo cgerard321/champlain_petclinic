@@ -67,14 +67,11 @@ class PetAPITest {
 
     private Photo setupPhoto() {
 
-        final String test = "Test photo";
-        final byte[] testBytes = test.getBytes();
-
         Photo photo = new Photo();
         photo.setId(1);
         photo.setName("photo");
         photo.setType("jpeg");
-        photo.setPhoto(testBytes);
+        photo.setPhoto("testBytes");
 
         return photo;
     }
