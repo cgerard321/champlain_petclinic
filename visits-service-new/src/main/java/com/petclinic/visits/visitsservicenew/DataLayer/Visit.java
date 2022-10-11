@@ -3,12 +3,9 @@ package com.petclinic.visits.visitsservicenew.DataLayer;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 
-import java.util.Date;
-import java.util.UUID;
-
-@Data
-@ToString
 @Builder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Visit {

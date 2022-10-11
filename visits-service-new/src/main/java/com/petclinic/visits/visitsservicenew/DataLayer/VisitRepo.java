@@ -6,8 +6,6 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.*;
-
 @Repository
 public interface VisitRepo extends ReactiveMongoRepository<Visit, Integer> {
 
@@ -17,4 +15,6 @@ public interface VisitRepo extends ReactiveMongoRepository<Visit, Integer> {
     Flux<Visit> findVisitsByPractitionerIdAndMonth(int practitionerId, int month);
 
     Mono<Visit> findByVisitId(String visitId);
+
+    Mono<Void> deleteVisitByVisitId(String visitId);
 }

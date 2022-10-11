@@ -1,14 +1,10 @@
 package com.petclinic.visits.visitsservicenew.DataLayer;
 
-
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 
-import java.util.Date;
-import java.util.UUID;
-
-@Data
 @NoArgsConstructor
+@Getter
+@Setter
 @Builder
 public class VisitDTO {
 

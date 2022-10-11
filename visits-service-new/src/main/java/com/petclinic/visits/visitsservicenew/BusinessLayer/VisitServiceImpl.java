@@ -1,7 +1,6 @@
 package com.petclinic.visits.visitsservicenew.BusinessLayer;
 
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitDTO;
-import com.petclinic.visits.visitsservicenew.DataLayer.VisitIdLessDTO;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
 import com.petclinic.visits.visitsservicenew.Utils.EntityDtoUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,9 +8,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.UUID;
 
 @Service
 public class VisitServiceImpl implements VisitService {
@@ -25,7 +21,7 @@ public class VisitServiceImpl implements VisitService {
         return visitIdLessDTOMono
                 .map(EntityDtoUtil::toEntity)
                 .doOnNext(x -> x.setVisitId(EntityDtoUtil.generateVisitIdString()))
-                .flatMap(repo::save)
+                .flatMap((repo::save))
                 .map(EntityDtoUtil::toDTO);
     }
 
@@ -35,11 +31,6 @@ public class VisitServiceImpl implements VisitService {
                 .map(EntityDtoUtil::toDTO);
     }
 
-    /*@Override //check the VisitService comments
-    public Flux<VisitDTO> getVisitsForPet(int petId, boolean scheduled) {
-        return null;
-    }*/
-
     @Override
     public Mono<VisitDTO> getVisitByVisitId(String visitId) {
         return repo.findByVisitId(visitId)
@@ -48,8 +39,7 @@ public class VisitServiceImpl implements VisitService {
 
     @Override
     public Mono<Void> deleteVisit(String visitId) {
-        return repo.findByVisitId(visitId)
-                .flatMap(repo::delete);
+        return repo.deleteVisitByVisitId(visitId);
     }
 
     @Override
@@ -76,16 +66,4 @@ public class VisitServiceImpl implements VisitService {
         return repo.findVisitsByPractitionerIdAndMonth(practitionerId, month)
                 .map(EntityDtoUtil::toDTO);
     }
-
-
-
-
-
-    /*@Override
-    public Boolean validateVisitId(String visitId) { //ive got zero idea what this does if somebody knows PLEASE tell me
-        String uuidRegex = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
-        if(visitId.matches(uuidRegex))
-            return true;
-        return false;
-    }*/
 }

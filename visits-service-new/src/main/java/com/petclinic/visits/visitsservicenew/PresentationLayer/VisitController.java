@@ -3,16 +3,11 @@ package com.petclinic.visits.visitsservicenew.PresentationLayer;
 
 import com.petclinic.visits.visitsservicenew.BusinessLayer.VisitService;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitDTO;
-import com.petclinic.visits.visitsservicenew.DataLayer.VisitIdLessDTO;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.util.Date;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("visits")
@@ -32,7 +27,7 @@ public class VisitController {
         return visitService.getVisitsForPractitioner(practitionerId);
     }
 
-    @PostMapping()
+    @PostMapping
     public Mono<VisitDTO> addVisit(@RequestBody Mono<VisitDTO> visitDTOMono){
         return visitService.addVisit(visitDTOMono);
     }

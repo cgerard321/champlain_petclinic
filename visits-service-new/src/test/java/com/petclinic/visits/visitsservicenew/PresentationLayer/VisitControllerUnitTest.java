@@ -4,38 +4,27 @@ package com.petclinic.visits.visitsservicenew.PresentationLayer;
 import com.petclinic.visits.visitsservicenew.BusinessLayer.VisitService;
 import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitDTO;
-import com.petclinic.visits.visitsservicenew.Utils.EntityDtoUtil;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import javax.swing.text.html.parser.Entity;
-
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.util.AssertionErrors.assertNotNull;
 
 @WebFluxTest(controllers = VisitController.class)
 public class VisitControllerUnitTest {
 
-    private VisitDTO dto = buildVisitDto();
+    private final VisitDTO dto = buildVisitDto();
 
     private final String Visit_UUID_OK = dto.getVisitId();
     private final int Practitioner_Id_OK = dto.getPractitionerId();
-
     private final int Pet_Id_OK = dto.getPetId();
-
     private final int Get_Month = dto.getMonth();
 
     @Autowired
@@ -46,12 +35,12 @@ public class VisitControllerUnitTest {
 
 
     @Test
-    public void getVisitByVisitId(){
+    void getVisitByVisitId(){
         
         when(visitService.getVisitByVisitId(anyString())).thenReturn(Mono.just(dto));
         
         webFluxTest.get()
-                .uri("http://localhost:8080/visits/" + Visit_UUID_OK)
+                .uri("/visits/" + Visit_UUID_OK)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -72,12 +61,12 @@ public class VisitControllerUnitTest {
     }
 
     @Test
-    public void getVisitByPractitionerId(){
+    void getVisitByPractitionerId(){
 
         when(visitService.getVisitsForPractitioner(anyInt())).thenReturn(Flux.just(dto));
 
         webFluxTest.get()
-                .uri("http://localhost:8080/visits/practitioner/visits/" + Practitioner_Id_OK)
+                .uri("/visits/practitioner/visits/" + Practitioner_Id_OK)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -89,12 +78,12 @@ public class VisitControllerUnitTest {
     }
 
     @Test
-    public void getVisitsByPetId(){
+    void getVisitsByPetId(){
 
         when(visitService.getVisitsForPet(anyInt())).thenReturn(Flux.just(dto));
 
         webFluxTest.get()
-                .uri("http://localhost:8080/visits/pets/" + Pet_Id_OK)
+                .uri("/visits/pets/" + Pet_Id_OK)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -106,12 +95,12 @@ public class VisitControllerUnitTest {
     }
 
     @Test
-    public void getByPractitionerIdAndMonth(){
+    void getByPractitionerIdAndMonth(){
 
         when(visitService.getVisitsByPractitionerIdAndMonth(anyInt(), anyInt())).thenReturn(Flux.just(dto));
 
         webFluxTest.get()
-                .uri("http://localhost:8080/visits/practitioner/" + Practitioner_Id_OK+ "/" + Get_Month)
+                .uri("/visits/practitioner/" + Practitioner_Id_OK+ "/" + Get_Month)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -122,30 +111,30 @@ public class VisitControllerUnitTest {
 
     }
 
-//    @Test
-//    public void addVisit(){
-//
-//        Mono<VisitDTO> monoVisit= Mono.just(dto);
-//        when(visitService.addVisit(monoVisit))
-//                .thenReturn(monoVisit);
-//
-//        webFluxTest
-//                .post()
-//                .uri("/visits")
-//                .body(monoVisit, Visit.class)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .exchange()
-//                .expectStatus().isOk()
-//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-//                .expectBody();
-//
-//        Mockito.verify(visitService, times(1))
-//                .addVisit(any(Mono.class));
-//
-//    }
+    @Test
+    void addVisit(){
+
+        Mono<VisitDTO> monoVisit= Mono.just(dto);
+        when(visitService.addVisit(monoVisit))
+                .thenReturn(monoVisit);
+
+        webFluxTest
+                .post()
+                .uri("/visits")
+                .body(monoVisit, Visit.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+
+        Mockito.verify(visitService, times(1))
+                .addVisit(any(Mono.class));
+
+    }
 
     @Test
-    public void updateVisitByVisitId(){
+    void updateVisitByVisitId(){
 
         Mono<VisitDTO> monoVisit= Mono.just(dto);
         when(visitService.updateVisit(anyString(), any(Mono.class))).thenReturn(monoVisit);//for some reason this code here returns null
@@ -164,10 +153,10 @@ public class VisitControllerUnitTest {
         Mockito.verify(visitService, times(1)).updateVisit(anyString(), any(Mono.class));
     }
     @Test
-    public void deleteVisit(){
+    void deleteVisit(){
 
         webFluxTest.delete()
-                .uri("http://localhost:8080/visits/" + Visit_UUID_OK)
+                .uri("/visits/" + Visit_UUID_OK)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk();
