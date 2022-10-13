@@ -118,7 +118,7 @@ class OwnerPersistenceTest {
         //Arrange
         int OwnerId = 1;
         Owner newOwner = new Owner (OwnerId, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111",1);
-        Owner savedOwner = repository.save(newOwner);;
+        Owner savedOwner = repository.save(newOwner);
 
         //Act
         Owner foundSaved = repository.findById(savedOwner.getId()).orElse(null);
@@ -134,7 +134,7 @@ class OwnerPersistenceTest {
     public void update_owner_test()
     {
         // Arrange
-        int ownerId = 11;
+        int ownerId = 14;
         Owner newOwner = new Owner (ownerId,
                 "Brian",
                 "Smith",
@@ -142,9 +142,10 @@ class OwnerPersistenceTest {
                 "Montreal",
                 "1111111111",
                 1);
-        Owner savedOwner = repository.save(newOwner);;
+        Owner savedOwner = repository.save(newOwner);
         Owner foundSaved = repository.findById(savedOwner.getId()).orElse(null);
         assert foundSaved != null;
+        newOwner.setId(foundSaved.getId());
         assertThat(foundSaved, samePropertyValuesAs(newOwner));
 
         // Act
