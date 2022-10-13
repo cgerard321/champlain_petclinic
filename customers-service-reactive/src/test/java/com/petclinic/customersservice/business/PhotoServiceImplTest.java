@@ -1,18 +1,12 @@
 package com.petclinic.customersservice.business;
 
-import com.petclinic.customersservice.business.PetTypeService;
-import com.petclinic.customersservice.business.PhotoService;
-import com.petclinic.customersservice.data.PetType;
-import com.petclinic.customersservice.data.PetTypeRepo;
 import com.petclinic.customersservice.data.Photo;
 import com.petclinic.customersservice.data.PhotoRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.web.reactive.server.WebTestClient;
 import org.junit.jupiter.api.Test;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import static org.mockito.ArgumentMatchers.any;
@@ -37,9 +31,7 @@ class PhotoServiceImplTest {
         Mono<Photo> photoMono = Mono.just(photoEntity);
         when(repo.insert(any(Photo.class))).thenReturn(photoMono);
         Mono<Photo> returnedPhoto = photoService.insertPhoto(Mono.just(photoEntity));
-        StepVerifier
-                .create(returnedPhoto)
-                .consumeNextWith(foundPhoto -> {
+        StepVerifier.create(returnedPhoto).consumeNextWith(foundPhoto -> {
                     assertEquals(photoEntity.getId(), foundPhoto.getId());
                     assertEquals(photoEntity.getName(), foundPhoto.getName());
                     assertEquals(photoEntity.getType(), foundPhoto.getType());
@@ -53,7 +45,7 @@ class PhotoServiceImplTest {
                 .id(5)
                 .name("Test")
                 .type("test2")
-                .photo("photo")
+                .photo("photoString")
                 .build();
     }
 
