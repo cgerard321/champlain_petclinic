@@ -5,6 +5,6 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 
 @Repository
-public interface OwnerRepo extends ReactiveMongoRepository<Owner, Integer> {
+public interface PetTypeRepo extends ReactiveMongoRepository<PetType, Integer> {
 
 }

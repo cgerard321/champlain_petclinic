@@ -11,28 +11,12 @@ import reactor.core.publisher.Mono;
 @Service
 public class PhotoServiceImpl implements PhotoService {
 
-    @Override
-    public Mono<Photo> setOwnerPhoto(Mono<Photo> PhotoMono, int ownerId) {
-        return null;
-    }
+    @Autowired
+    PhotoRepo repo;
 
     @Override
-    public Mono<Photo> setPetPhoto(Mono<Photo> PhotoMono, int petId) {
-        return null;
-    }
-
-    @Override
-    public Mono<Photo> getOwnerPhoto(int ownerId) {
-        return null;
-    }
-
-    @Override
-    public Mono<Photo> getPetPhoto(int petId) {
-        return null;
-    }
-
-    @Override
-    public Mono<Void> deletePhoto(int photoId) {
-        return null;
+    public Mono<Photo> insertPhoto(Mono<Photo> photoMono) {
+        return photoMono
+                .flatMap(repo::insert);
     }
 }
