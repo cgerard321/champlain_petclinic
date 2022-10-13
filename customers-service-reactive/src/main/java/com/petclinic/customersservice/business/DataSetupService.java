@@ -1,5 +1,6 @@
 package com.petclinic.customersservice.business;
 
+import com.petclinic.customersservice.data.Owner;
 import com.petclinic.customersservice.data.Pet;
 import com.petclinic.customersservice.data.PetType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,9 @@ public class DataSetupService implements CommandLineRunner {
 
     @Autowired
     private PetService petService;
+
+    @Autowired
+    private OwnerService ownerService;
 
     @Override
     public void run(String... args) throws Exception {
@@ -53,5 +57,16 @@ public class DataSetupService implements CommandLineRunner {
                 .flatMap(p -> petService.insertPet(Mono.just(p))
                         .log(p.toString()))
                 .subscribe();
+
+        Owner o1 = new Owner(1, "George", "Franklin", "110 W. Liberty St.", "Madison", "6085551023", 1);
+        Owner o2 = new Owner(2, "Betty", "Davis", "638 Cardinal Ave.", "Sun Prairie", "6085551749", 1);
+        Owner o3 = new Owner(3, "Eduardo", "Rodriguez", "2693 Commerce St.", "McFarland", "6085558763", 1);
+        Owner o4 = new Owner(4, "Harold", "Davis", "563 Friendly St.", "Windsor", "6085553198", 1);
+        Owner o5 = new Owner(5, "Peter", "McTavish", "2387 S. Fair Way", "Madison", "6085552765", 1);
+        Owner o6 = new Owner(6, "Jean", "Coleman", "105 N. Lake St.", "Monona", "6085552654", 1);
+        Owner o7 = new Owner(7, "Jeff", "Black", "1450 Oak Blvd.", "Monona", "6085555387", 1);
+        Owner o8 = new Owner(8, "Maria", "Escobito", "345 Maple St.", "Madison", "6085557683", 1);
+        Owner o9 = new Owner(9, "David", "Schroeder", "2749 Blackhawk Trail", "Madison", "6085559435", 1);
+        Owner o10 = new Owner(10, "Carlos", "Esteban", "2335 Independence La.", "Waunakee", "6085555487", 1);
     }
 }
