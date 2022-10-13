@@ -3,15 +3,15 @@ package com.petclinic.customersservice.business;
 
 import com.petclinic.customersservice.data.PetType;
 import com.petclinic.customersservice.data.Photo;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.Date;
 
 @NoArgsConstructor
-@Setter
 @Getter
+@Setter
+@Builder
+@AllArgsConstructor
 public class PetAggregate {
 
     private int id;

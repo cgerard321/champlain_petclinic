@@ -20,5 +20,5 @@ public class Pet {
     private String type;
     private Photo photo;
     private PetType petType;
-    
+
 }
