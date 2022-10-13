@@ -1,4 +1,4 @@
-package com.petclinic.customersservice.presentation;
+package com.petclinic.customersservice.business;
 
 import com.petclinic.customersservice.business.PetTypeService;
 import com.petclinic.customersservice.business.PhotoService;
@@ -23,7 +23,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port: 27019"})
 @AutoConfigureWebTestClient
-public class PhotoServiceImplTest {
+class PhotoServiceImplTest {
 
     @MockBean
     private PhotoRepo repo;
