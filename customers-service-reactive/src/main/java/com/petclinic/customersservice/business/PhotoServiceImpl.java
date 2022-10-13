@@ -11,4 +11,12 @@ import reactor.core.publisher.Mono;
 @Service
 public class PhotoServiceImpl implements PhotoService {
 
+    @Autowired
+    PhotoRepo repo;
+
+    @Override
+    public Mono<Photo> insertPhoto(Mono<Photo> photoMono) {
+        return photoMono
+                .flatMap(repo::insert);
+    }
 }
