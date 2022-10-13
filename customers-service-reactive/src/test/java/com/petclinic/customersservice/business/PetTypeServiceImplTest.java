@@ -1,4 +1,4 @@
-package com.petclinic.customersservice.presentation;
+package com.petclinic.customersservice.business;
 
 import com.petclinic.customersservice.business.PetTypeService;
 import com.petclinic.customersservice.data.PetType;
