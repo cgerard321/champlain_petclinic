@@ -30,13 +30,17 @@ class PhotoServiceImplTest {
 
     private static final byte[] photoByte = new byte[] {0};
 
+    @Autowired
+    private PhotoService photoService;
+
     @Test
     void insertPhoto() {
         Photo photoEntity = buildPhoto();
         Mono<Photo> photoMono = Mono.just(photoEntity);
         when(repo.insert(any(Photo.class))).thenReturn(photoMono);
+        Mono<Photo> returnedPhoto = photoService.insertPhoto(Mono.just(photoEntity));
         StepVerifier
-                .create(photoMono)
+                .create(returnedPhoto)
                 .consumeNextWith(foundPhoto -> {
                     assertEquals(photoEntity.getId(), foundPhoto.getId());
                     assertEquals(photoEntity.getName(), foundPhoto.getName());
