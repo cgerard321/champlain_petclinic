@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-@SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port: 27019"})
+@SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port: 27017"})
 @AutoConfigureWebTestClient
 class PhotoServiceImplTest {
 
