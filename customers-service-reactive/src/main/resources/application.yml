@@ -1,6 +1,3 @@
-server:
-  port: 8080
-
 logging:
   level:
     root: INFO
@@ -28,7 +25,7 @@ spring:
   data:
     mongodb:
       host: localhost
-      port: 27019
+      port: 27017
       database: customers
       username: root
       password: password
@@ -40,8 +37,8 @@ spring:
       on-profile: docker
   data:
     mongodb:
-      host: mongo
-      port: 27019
+      host: mongo-customers
+      port: 27017
       database: customers
       username: root
       password: password
