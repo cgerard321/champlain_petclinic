@@ -25,18 +25,10 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @AutoConfigureWebTestClient
 public class PhotoServiceImplTest {
 
-    @Autowired
-    private WebTestClient webTestClient;
-
-    @Autowired
-    private PhotoService photoService;
-
     @MockBean
     private PhotoRepo repo;
 
-    private static final byte[] photoByte = new byte[] { (byte)0xe0, 0x4f, (byte)0xd0,
-            0x20, (byte)0xea, 0x3a, 0x69, 0x10, (byte)0xa2, (byte)0xd8, 0x08, 0x00, 0x2b,
-            0x30, 0x30, (byte)0x9d };
+    private static final byte[] photoByte = new byte[] {0};
 
     @Test
     void insertPhoto() {
