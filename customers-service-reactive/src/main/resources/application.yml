@@ -1,18 +1,19 @@
-logging:
-  level:
-    root: INFO
-    com.petclinic: DEBUG
+server:
+  error:
+    include-message: always
+  logging:
+    level:
+      root: INFO
+      com.petclinic: DEBUG
 
 spring:
   config:
     activate:
       on-profile: default
-
   data:
     mongodb:
       port: 0
       database: customers
-
   mongodb:
     embedded:
       version: 4.0.21
