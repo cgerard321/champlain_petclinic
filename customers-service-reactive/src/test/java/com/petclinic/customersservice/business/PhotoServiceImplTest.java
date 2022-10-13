@@ -43,7 +43,7 @@ class PhotoServiceImplTest {
                     assertEquals(photoEntity.getId(), foundPhoto.getId());
                     assertEquals(photoEntity.getName(), foundPhoto.getName());
                     assertEquals(photoEntity.getType(), foundPhoto.getType());
-                    //assertEquals(photoEntity.getPhoto(), foundPhoto.getPhoto());
+                    assertEquals(photoEntity.getPhoto(), foundPhoto.getPhoto());
                 })
                 .verifyComplete();
     }
@@ -53,7 +53,7 @@ class PhotoServiceImplTest {
                 .id(5)
                 .name("Test")
                 .type("test2")
-                //.photo("photo")
+                .photo("photo")
                 .build();
     }
 
