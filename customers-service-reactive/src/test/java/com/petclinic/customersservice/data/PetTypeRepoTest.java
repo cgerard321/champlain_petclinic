@@ -23,7 +23,7 @@ class PetTypeRepoTest {
     PetTypeRepo petTypeRepo;
 
     @Test
-    public void insertPetType() {
+    void insertPetType() {
         PetType petType = buildPetType();
 
         Publisher<PetType> setup = petTypeRepo.deleteAll().thenMany(petTypeRepo.save(petType));

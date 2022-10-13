@@ -45,7 +45,7 @@ class PetTypeServiceImplTest {
     }
 
     private PetType buildPetType() {
-        return PetType.builder().id(5).name("Dog").build();
+        return PetType.builder().id(10).name("Test").build();
     }
 
 }
