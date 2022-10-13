@@ -51,7 +51,7 @@ public class PhotoServiceImplTest {
                 .id(5)
                 .name("Test")
                 .type("test2")
-                .photo(photoByte)
+                //.photo(photoByte)
                 .build();
     }
 
