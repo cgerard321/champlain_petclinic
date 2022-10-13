@@ -19,4 +19,5 @@ public class Pet {
     private int photoId;
     private int ownerId;
 
+
 }
