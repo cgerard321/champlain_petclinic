@@ -68,5 +68,10 @@ public class DataSetupService implements CommandLineRunner {
         Owner o8 = new Owner(8, "Maria", "Escobito", "345 Maple St.", "Madison", "6085557683", 1);
         Owner o9 = new Owner(9, "David", "Schroeder", "2749 Blackhawk Trail", "Madison", "6085559435", 1);
         Owner o10 = new Owner(10, "Carlos", "Esteban", "2335 Independence La.", "Waunakee", "6085555487", 1);
+
+        Flux.just(o1, o2, o3, o4, o5, o6, o7, o8, o9, o10)
+                .flatMap(p -> ownerService.insertOwner(Mono.just(p))
+                        .log(p.toString()))
+                .subscribe();
     }
 }
