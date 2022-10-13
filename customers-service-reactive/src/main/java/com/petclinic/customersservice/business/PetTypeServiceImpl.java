@@ -16,6 +16,6 @@ public class PetTypeServiceImpl implements PetTypeService {
     @Override
     public Mono<PetType> insertPetType(Mono<PetType> petTypeMono) {
         return petTypeMono
-                .flatMap(petTypeRepo::insert);
+                .flatMap(petTypeRepo::save);
     }
 }
