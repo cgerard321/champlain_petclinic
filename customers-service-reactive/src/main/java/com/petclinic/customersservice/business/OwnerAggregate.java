@@ -20,6 +20,6 @@ public class OwnerAggregate {
     private String city;
     private String telephone;
     private Photo photo;
-    private List<Pet> pets;
+    private List<PetAggregate> pets;
 
 }
