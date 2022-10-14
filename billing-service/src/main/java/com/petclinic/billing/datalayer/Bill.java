@@ -19,6 +19,7 @@ public class Bill {
     private String billId;              // Should be renamed to BillUUID
     private int customerId;
     private String visitType;
+    private String vetId;
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date visitDate = new Date();
     private double amount;

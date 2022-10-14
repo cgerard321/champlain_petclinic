@@ -50,10 +50,18 @@
 
 <table class="table table-striped">
     <tr ng-repeat="pet in $ctrl.owner.pets track by pet.id">
+        <td valign="top" ng-init="$ctrl.init(pet.id)">
+            <div class="parent">
+                <img alt="Profile picture preview" src="data:image/png;base64, {{$ctrl.petPhoto.photo}}" width="150" height="150" class="image1">
+                <img alt="" src="data:image/png;base64, {{$ctrl.PreviewImage}}" ng-show="$ctrl.PreviewImage != null" width="150" height="150" class="image2"/>
+                <input type="file" accept="image/jpeg" class="fileInput" id="pet.name"/>
+            </div>
+        </td>
         <td valign="top">
             <dl class="dl-horizontal">
 
                 <a class="newBtn btn-default btn btn-success" style="background-color: #198754;" ui-sref="visits({ownerId: $ctrl.owner.id, petId: pet.id})">Add Visit</a>
+
                 <dt>Name</dt>
                 <dd>{{pet.name}}</dd>
                 <dt>Birth Date</dt>
