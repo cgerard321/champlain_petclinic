@@ -17,4 +17,13 @@ class HttpErrorInfoTest {
         assertThat(error.getTimestamp()).isNotNull();
     }
 
+    @Test
+    void HttpErrorInfoWithNoConstructorTest(){
+        HttpErrorInfo httpErrorInfo = new HttpErrorInfo();
+        assertEquals(httpErrorInfo.getTimestamp(), null);
+        assertEquals(httpErrorInfo.getHttpStatus(), null);
+        assertEquals(httpErrorInfo.getPath(), null);
+        assertEquals(httpErrorInfo.getMessage(), null);
+    }
+
 }
