@@ -5,7 +5,6 @@ import com.petclinic.customersservice.business.PetAggregate;
 import com.petclinic.customersservice.data.Owner;
 import com.petclinic.customersservice.data.Pet;
 import org.springframework.beans.BeanUtils;
-import org.springframework.context.annotation.Bean;
 
 public class EntityAggregateUtil {
 

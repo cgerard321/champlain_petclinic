@@ -17,8 +17,6 @@ public class Pet {
     private int petTypeId;
     private String name;
     private Date birthDate;
-    private String type;
-    private Photo photo;
-    private PetType petType;
+    private int photoId;
 
 }
