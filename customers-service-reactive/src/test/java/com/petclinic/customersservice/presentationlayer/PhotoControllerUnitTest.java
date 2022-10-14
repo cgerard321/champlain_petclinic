@@ -32,7 +32,6 @@ class PhotoControllerUnitTest {
     PhotoService photoService;
 
 
-
 //    @Test
 //    public void getPhotoByPhotoIdNotFound() {
 //

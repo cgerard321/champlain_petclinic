@@ -24,5 +24,4 @@ public class PhotoController {
         return photoService.getPhotoByPhotoId(photoId);
     }
 
-
 }

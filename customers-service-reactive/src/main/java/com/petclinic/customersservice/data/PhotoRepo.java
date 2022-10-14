@@ -10,8 +10,6 @@ public interface PhotoRepo extends ReactiveMongoRepository<Photo, String> {
 
     Mono<Photo> findPhotoById(int photoId);
     Mono<Photo> findPhotoByName(String name);
-    Mono<Boolean> existsById(String id);
-
-    Flux<Photo> findAll();
+    Mono<Boolean> existsById(int id);
 
 }
