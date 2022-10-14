@@ -30,9 +30,28 @@ class PhotoRepoTest {
                 .verifyComplete();
     }
 
+    @Test
+    public void findPhotoByPhotoId() {
+
+        Photo photo = buildPhoto();
+
+        Publisher<Photo> setup = repo.deleteAll().thenMany(repo.save(photo));
+        Publisher<Photo> find = repo.findPhotoById(photo.getId());
+
+        StepVerifier
+                .create(setup)
+                .expectNext(photo)
+                .verifyComplete();
+
+        StepVerifier
+                .create(find)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
     private Photo buildPhoto() {
         return Photo.builder()
-                .id(5)
+                .id("5")
                 .name("Test")
                 .type("test2")
                 .photo("photo")

@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -40,9 +41,46 @@ class PhotoServiceImplTest {
                 .verifyComplete();
     }
 
+    @Test
+    void getPhotoByPhotoId() {
+
+        Photo photoEntity = buildPhoto();
+        String PHOTO_ID = photoEntity.getId();
+
+        when(repo.findPhotoById(anyString())).thenReturn(Mono.just(photoEntity));
+
+        Mono<Photo> returnedPhoto = photoService.getPhotoByPhotoId(PHOTO_ID);
+
+        StepVerifier.create(returnedPhoto)
+                .consumeNextWith(foundPhoto -> {
+                    assertEquals(photoEntity.getName(), foundPhoto.getName());
+                    assertEquals(photoEntity.getType(), foundPhoto.getType());
+                    assertEquals(photoEntity.getPhoto(), foundPhoto.getPhoto());
+                })
+                .verifyComplete();
+    }
+
+//    @Test
+//    public void getPhotoByPhotoIdNotFound() {
+//
+//        Photo photo = buildPhoto();
+//
+//        String PHOTO_ID = "00";
+//
+//        when(photoRepo.findPhotoById(anyString())).thenReturn(Mono.just(photo));
+//
+//        Mono<Photo> photoMono = photoService.getPhotoByPhotoId(PHOTO_ID);
+//
+//        StepVerifier
+//                .create(photoMono)
+//                .expectNextCount(1)
+//                .expectError();
+//    }
+
+
     private Photo buildPhoto() {
         return Photo.builder()
-                .id(5)
+                .id("5")
                 .name("Test")
                 .type("test2")
                 .photo("photoString")

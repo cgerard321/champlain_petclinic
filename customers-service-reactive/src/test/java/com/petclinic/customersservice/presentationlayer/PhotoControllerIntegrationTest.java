@@ -17,7 +17,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 
 
-@SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port: 27019"})
+@SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port: 27018"})
 @AutoConfigureWebTestClient
 class PhotoControllerIntegrationTest {
 
@@ -92,7 +92,7 @@ class PhotoControllerIntegrationTest {
 //
 //        Photo photo = buildPhoto();
 //
-//        String PHOTO_ID_NOT_FOUND = "5";
+//        String PHOTO_ID_NOT_FOUND = "0045";
 //
 //        Publisher<Photo> setup = photoRepo.deleteAll().thenMany(photoRepo.save(photo));
 //
