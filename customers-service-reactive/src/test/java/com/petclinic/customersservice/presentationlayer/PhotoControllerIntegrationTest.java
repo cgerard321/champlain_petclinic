@@ -40,7 +40,7 @@ class PhotoControllerIntegrationTest {
 //                .verifyComplete();
 //
 //        client.post()
-//                .uri("/photos/")
+//                .uri("/photos")
 //                .body(Mono.just(photo), Photo.class)
 //                .accept(MediaType.APPLICATION_JSON)
 //                .exchange()
@@ -51,13 +51,13 @@ class PhotoControllerIntegrationTest {
 //                .jsonPath("$.type").isEqualTo(photo.getType())
 //                .jsonPath("$.photo").isEqualTo(photo.getPhoto());
 //
-////                client.get()
-////                .uri("/photos/" + photo.getId())
-////                .accept(MediaType.APPLICATION_JSON)
-////                .exchange()
-////                .expectStatus().isOk()
-////                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-////                .expectBody()
+//                client.get()
+//                .uri("/photos/" + photo.getId())
+//                .accept(MediaType.APPLICATION_JSON)
+//                .exchange()
+//                .expectStatus().isOk()
+//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+//                .expectBody();
 //
 //    }
 
@@ -92,7 +92,7 @@ class PhotoControllerIntegrationTest {
 //
 //        Photo photo = buildPhoto();
 //
-//        String PHOTO_ID_NOT_FOUND = "0045";
+//        int PHOTO_ID_NOT_FOUND = 00;
 //
 //        Publisher<Photo> setup = photoRepo.deleteAll().thenMany(photoRepo.save(photo));
 //
@@ -107,12 +107,12 @@ class PhotoControllerIntegrationTest {
 //                .accept(MediaType.APPLICATION_JSON)
 //                .exchange()
 //                .expectStatus().isNotFound();
-//
 //    }
+
     private Photo buildPhoto() {
         final String test = "Test photo";
         return Photo.builder()
-                .id("2")
+                .id(2)
                 .name("test photo")
                 .type("jpeg")
                 .photo(test)

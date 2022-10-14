@@ -51,7 +51,7 @@ class PhotoRepoTest {
 
     private Photo buildPhoto() {
         return Photo.builder()
-                .id("5")
+                .id(5)
                 .name("Test")
                 .type("test2")
                 .photo("photo")

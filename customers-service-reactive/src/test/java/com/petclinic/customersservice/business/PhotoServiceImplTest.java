@@ -45,9 +45,9 @@ class PhotoServiceImplTest {
     void getPhotoByPhotoId() {
 
         Photo photoEntity = buildPhoto();
-        String PHOTO_ID = photoEntity.getId();
+        int PHOTO_ID = photoEntity.getId();
 
-        when(repo.findPhotoById(anyString())).thenReturn(Mono.just(photoEntity));
+        when(repo.findPhotoById(any(Integer.class))).thenReturn(Mono.just(photoEntity));
 
         Mono<Photo> returnedPhoto = photoService.getPhotoByPhotoId(PHOTO_ID);
 
@@ -60,27 +60,27 @@ class PhotoServiceImplTest {
                 .verifyComplete();
     }
 
-//    @Test
-//    public void getPhotoByPhotoIdNotFound() {
-//
-//        Photo photo = buildPhoto();
-//
-//        String PHOTO_ID = "00";
-//
-//        when(photoRepo.findPhotoById(anyString())).thenReturn(Mono.just(photo));
-//
-//        Mono<Photo> photoMono = photoService.getPhotoByPhotoId(PHOTO_ID);
-//
-//        StepVerifier
-//                .create(photoMono)
-//                .expectNextCount(1)
-//                .expectError();
-//    }
+    @Test
+    public void getPhotoByPhotoIdNotFound() {
+
+        Photo photo = buildPhoto();
+
+        int PHOTO_ID_NOT_FOUND = 00;
+
+        when(repo.findPhotoById(any(Integer.class))).thenReturn(Mono.just(photo));
+
+        Mono<Photo> photoMono = photoService.getPhotoByPhotoId(PHOTO_ID_NOT_FOUND);
+
+        StepVerifier
+                .create(photoMono)
+                .expectNextCount(1)
+                .expectError();
+    }
 
 
     private Photo buildPhoto() {
         return Photo.builder()
-                .id("5")
+                .id(5)
                 .name("Test")
                 .type("test2")
                 .photo("photoString")

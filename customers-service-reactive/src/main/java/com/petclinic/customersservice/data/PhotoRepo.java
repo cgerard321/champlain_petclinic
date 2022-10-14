@@ -8,7 +8,7 @@ import reactor.core.publisher.Mono;
 @Repository
 public interface PhotoRepo extends ReactiveMongoRepository<Photo, String> {
 
-    Mono<Photo> findPhotoById(String photoId);
+    Mono<Photo> findPhotoById(int photoId);
     Mono<Photo> findPhotoByName(String name);
     Mono<Boolean> existsById(String id);
 

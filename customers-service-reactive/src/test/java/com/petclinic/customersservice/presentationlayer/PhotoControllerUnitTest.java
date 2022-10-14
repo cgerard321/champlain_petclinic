@@ -21,9 +21,9 @@ class PhotoControllerUnitTest {
 
     private Photo photo =buildPhoto();
 
-    private final String PHOTO_ID = photo.getId();
+    private final int PHOTO_ID = photo.getId();
 
-    private final String PHOTO_ID_NOT_FOUND = "Not found";
+    private final int PHOTO_ID_NOT_FOUND = 00;
 
     @Autowired
     private WebTestClient client;
@@ -58,7 +58,7 @@ class PhotoControllerUnitTest {
     private Photo buildPhoto() {
         final String test = "Test photo";
         return Photo.builder()
-                .id("3")
+                .id(3)
                 .name("test photo")
                 .type("jpeg")
                 .photo(test)

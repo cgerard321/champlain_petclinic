@@ -20,13 +20,8 @@ public class PhotoController {
     }
 
     @GetMapping("/{photoId}")
-    public Mono<Photo> getPhotoByPhotoId(@PathVariable String photoId) {
+    public Mono<Photo> getPhotoByPhotoId(@PathVariable int photoId) {
         return photoService.getPhotoByPhotoId(photoId);
-    }
-
-    @GetMapping
-    public Flux<Photo> getAll() {
-        return photoService.getAll();
     }
 
 
