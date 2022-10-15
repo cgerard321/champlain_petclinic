@@ -17,4 +17,9 @@ public class OwnerServiceImpl implements OwnerService {
         return ownerMono
                 .flatMap(repo::insert);
     }
+
+    @Override
+    public Mono<Owner> getOwnerByOwnerId(int ownerId) {
+        return repo.findById(ownerId);
+    }
 }

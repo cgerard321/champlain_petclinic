@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -41,6 +42,26 @@ class OwnerServiceImplTest {
         })
                 .verifyComplete();
     }
+
+     @Test
+     void getOwnerByOwnerId() {
+        Owner ownerEntity = buildOwner();
+        int OWNER_ID = ownerEntity.getId();
+        when(repo.findById(anyInt())).thenReturn(Mono.just(ownerEntity));
+        Mono<Owner> ownerMono = ownerService.getOwnerByOwnerId(OWNER_ID);
+        StepVerifier
+                .create(ownerMono)
+                .consumeNextWith(foundOwner -> {
+                    assertEquals(ownerEntity.getId(), foundOwner.getId());
+                    assertEquals(ownerEntity.getFirstName(), foundOwner.getFirstName());
+                    assertEquals(ownerEntity.getLastName(), foundOwner.getLastName());
+                    assertEquals(ownerEntity.getAddress(), foundOwner.getAddress());
+                    assertEquals(ownerEntity.getCity(), foundOwner.getCity());
+                    assertEquals(ownerEntity.getTelephone(), foundOwner.getTelephone());
+                    assertEquals(ownerEntity.getPhotoId(), foundOwner.getPhotoId());
+                })
+                .verifyComplete();
+     }
 
     private Owner buildOwner() {
         return Owner.builder()

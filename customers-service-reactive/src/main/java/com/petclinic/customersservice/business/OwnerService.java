@@ -7,4 +7,6 @@ public interface OwnerService {
 
     Mono<Owner> insertOwner(Mono<Owner> ownerMono);
 
+    Mono<Owner> getOwnerByOwnerId(int ownerId);
+
 }
