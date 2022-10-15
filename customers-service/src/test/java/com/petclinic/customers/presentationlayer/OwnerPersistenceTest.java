@@ -113,26 +113,6 @@ class OwnerPersistenceTest {
 
     }
 
-//    @Test
-//    public void deleteOwnerByOwnerId() {
-//
-//        Owner owner = buildOwner();
-//
-//        Publisher<Owner> setup = repository.deleteAll().thenMany(repository.save(buildOwner()));
-//
-//        StepVerifier
-//                .create(setup)
-//                .consumeNextWith(foundOwner ->{
-//                    assertEquals(owner.getFirstName(), foundOwner.getFirstName());
-//                    assertEquals(owner.getLastName(), foundOwner.getLastName());
-//                    assertEquals(owner.getAddress(), foundOwner.getAddress());
-//                    assertEquals(owner.getCity(), foundOwner.getCity());
-//                    assertEquals(owner.getTelephone(), foundOwner.getTelephone());
-//                      assertEquals(owner.getPhotoId(), foundOwner.getPhotoId());
-//                })
-//                .then(this::deleteOwnerByOwnerId)
-//                .verifyComplete();
-//    }
 
     @DisplayName("ownerPersistence_CreateOwner")
     @Test

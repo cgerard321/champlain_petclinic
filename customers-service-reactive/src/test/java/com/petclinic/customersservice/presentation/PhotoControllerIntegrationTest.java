@@ -1,4 +1,4 @@
-package com.petclinic.customersservice.presentationlayer;
+package com.petclinic.customersservice.presentation;
 
 import com.petclinic.customersservice.data.Photo;
 import com.petclinic.customersservice.data.PhotoRepo;
