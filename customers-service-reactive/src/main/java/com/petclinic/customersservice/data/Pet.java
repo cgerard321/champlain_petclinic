@@ -18,5 +18,4 @@ public class Pet {
     private String name;
     private Date birthDate;
     private int photoId;
-
 }
