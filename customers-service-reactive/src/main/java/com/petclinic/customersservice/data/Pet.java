@@ -13,12 +13,9 @@ public class Pet {
 
     @Id
     private int id;
+    private int ownerId;
+    private int petTypeId;
     private String name;
     private Date birthDate;
-    private int petTypeId;
-    private int ownerId;
     private int photoId;
-
-
-
 }
