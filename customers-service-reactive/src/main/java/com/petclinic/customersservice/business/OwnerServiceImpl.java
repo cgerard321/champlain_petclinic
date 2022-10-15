@@ -22,4 +22,9 @@ public class OwnerServiceImpl implements OwnerService {
     public Mono<Owner> getOwnerByOwnerId(int ownerId) {
         return repo.findById(ownerId);
     }
+
+    @Override
+    public Mono<Void> deleteOwner(int ownerId) {
+        return repo.deleteById(ownerId);
+    }
 }

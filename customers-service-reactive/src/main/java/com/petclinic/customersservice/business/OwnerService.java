@@ -9,4 +9,6 @@ public interface OwnerService {
 
     Mono<Owner> getOwnerByOwnerId(int ownerId);
 
+    Mono<Void> deleteOwner(int ownerId);
+
 }

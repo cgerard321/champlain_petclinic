@@ -63,6 +63,18 @@ class OwnerServiceImplTest {
                 .verifyComplete();
      }
 
+     @Test
+     void deleteOwnerByOwnerId() {
+        Owner ownerEntity = buildOwner();
+        int OWNER_ID = ownerEntity.getId();
+        when(repo.deleteById(anyInt())).thenReturn(Mono.empty());
+        Mono<Void> deleteObj = ownerService.deleteOwner(OWNER_ID);
+        StepVerifier
+                .create(deleteObj)
+                .expectNextCount(0)
+                .verifyComplete();
+     }
+
     private Owner buildOwner() {
         return Owner.builder()
                 .id(55)
