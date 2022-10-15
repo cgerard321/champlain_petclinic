@@ -15,7 +15,6 @@ public class PetAggregate {
 
     private int id;
     private int ownerId;
-//    private int petTypeId;
     private String name;
     private Date birthDate;
     private PetType petType;
