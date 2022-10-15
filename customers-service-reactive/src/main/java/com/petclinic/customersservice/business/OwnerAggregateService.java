@@ -5,6 +5,6 @@ import reactor.core.publisher.Mono;
 
 public interface OwnerAggregateService {
 
-    Mono<OwnerAggregate> insertOwnerAggregate(OwnerAggregate ownerAggregateMono);
+    Mono<OwnerAggregate> getOwnerAggregateByOwnerId(int ownerId);
 
 }
