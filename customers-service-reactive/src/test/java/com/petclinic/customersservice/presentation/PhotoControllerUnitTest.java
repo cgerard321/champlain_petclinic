@@ -1,7 +1,8 @@
-package com.petclinic.customersservice.presentationlayer;
+package com.petclinic.customersservice.presentation;
 
 import com.petclinic.customersservice.business.PhotoService;
 import com.petclinic.customersservice.data.Photo;
+import com.petclinic.customersservice.presentationlayer.PhotoController;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
