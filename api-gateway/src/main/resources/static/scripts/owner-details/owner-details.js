@@ -11,3 +11,5 @@ angular.module('ownerDetails', ['ui.router'])
             })
 
     }]);
+
+

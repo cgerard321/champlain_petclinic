@@ -68,6 +68,7 @@ public class OwnerServiceImpl implements OwnerService {
     @Override
     public Owner createOwner(Owner owner) {
         try{
+            owner.setImageId(1);
             LOG.debug("createOwner: owner with id {} saved",owner.getId());
             return repository.save(owner);
         }
@@ -83,8 +84,10 @@ public class OwnerServiceImpl implements OwnerService {
         LOG.debug("User with ID: " + Id + " has been deleted successfully.");
     }
 
+
 //    @Override
 //    Mono<Void> deleteOwner(int ownerId) {
 //        repository.deleteById(ownerId);
 //    }
+
 }

@@ -2,6 +2,7 @@ package com.petclinic.customers.presentationlayer;
 
 import com.petclinic.customers.businesslayer.OwnerService;
 import com.petclinic.customers.businesslayer.PetService;
+import com.petclinic.customers.businesslayer.PhotoService;
 import com.petclinic.customers.datalayer.*;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,6 +48,9 @@ class PetAPITest {
     @MockBean
     PetService petService;
 
+    @MockBean
+    PhotoService photoService;
+
 
     public Owner setupOwner()
     {
@@ -59,6 +63,17 @@ class PetAPITest {
         owner.setAddress("420 Avenue");
 
         return owner;
+    }
+
+    private Photo setupPhoto() {
+
+        Photo photo = new Photo();
+        photo.setId(1);
+        photo.setName("photo");
+        photo.setType("jpeg");
+        photo.setPhoto("testBytes");
+
+        return photo;
     }
 
     public Pet setupPet() {
@@ -162,7 +177,38 @@ class PetAPITest {
                 .andExpect(MockMvcResultMatchers.jsonPath("$.id").exists());
     }
 
+    @Test
+    void getPetPhoto_API_TEST() throws Exception {
+        Photo photo = setupPhoto();
+        given(photoService.getPetPhoto(2)).willReturn(photo);
+        mvc.perform(get("/owners/1/pets/photo/2").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType("application/json"))
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.name").value("photo"))
+                .andExpect(jsonPath("$.type").value("jpeg"));
 
+    }
+
+    @Test
+    void setPhotoPet_API_TEST() throws Exception {
+        Photo photo = setupPhoto();
+        Pet pet = setupPet();
+        String out = "Image uploaded successfully: " + photo.getName();
+        when(photoService.setPetPhoto(any(Photo.class), eq(pet.getId()))).thenReturn(out);
+        mvc.perform(post("/owners/1/pets/photo/2")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"name\": \"photo\"," + "\"type\": \"jpeg\"," + "\"image\": \"testimage\"}"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Image uploaded successfully: " + photo.getName()));
+    }
+
+    @Test
+    void deletePetPhoto_API_TEST() throws Exception {
+        mvc.perform(delete("/owners/1/pets/photo/1").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
+        verify(photoService, times(1)).deletePhoto(1);
+    }
 
 }
 

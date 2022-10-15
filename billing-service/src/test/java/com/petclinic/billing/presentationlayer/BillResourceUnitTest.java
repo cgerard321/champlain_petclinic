@@ -100,7 +100,7 @@ class BillResourceUnitTest {
     @Test
     void getBillByCustomerId() {
 
-        when(billService.GetBillByCustomerId(anyInt())).thenReturn(Flux.just(dto));
+        when(billService.GetBillsByCustomerId(anyInt())).thenReturn(Flux.just(dto));
 
         client.get()
                 .uri("/bills/customer/" + dto.getCustomerId())
@@ -113,7 +113,7 @@ class BillResourceUnitTest {
                 .jsonPath("$[0].customerId").isEqualTo(dto.getCustomerId())
                 .jsonPath("$[0].amount").isEqualTo(dto.getAmount());
 
-        Mockito.verify(billService, times(1)).GetBillByCustomerId(CUSTOMER_ID_OK);
+        Mockito.verify(billService, times(1)).GetBillsByCustomerId(CUSTOMER_ID_OK);
 
 
     }

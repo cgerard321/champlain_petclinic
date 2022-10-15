@@ -37,7 +37,7 @@ public class BillResource {
     }
 
     @GetMapping(value = "/bills/customer/{customerId}")
-    public Flux<BillDTO> getBillByCustomerId(@PathVariable("customerId") int customerId) {return SERVICE.GetBillByCustomerId(customerId);}
+    public Flux<BillDTO> getBillsByCustomerId(@PathVariable("customerId") int customerId) {return SERVICE.GetBillsByCustomerId(customerId);}
 
     // Delete Bill //
     @DeleteMapping(value = "/bills/{billId}")

@@ -1,0 +1,39 @@
+.parent {
+    position: relative;
+    height: 150px;
+    width: 150px;
+    top: 0;
+    left: 0;
+    z-index: 50;
+}
+
+
+.image1 {
+    position: relative;
+    top: 0;
+    left: 0;
+    border: 1px solid #000000;
+}
+
+.image2 {
+    position: absolute;
+    top: 0;
+    left: 0;
+    border: 1px solid #000000;
+}
+
+.fileInput {
+    cursor: pointer;
+    position:absolute;
+    opacity: 0;
+    top: 0;
+    right: 0;
+    height:150px;
+    width:150px;
+    z-index: 60;
+}
+
+.parent:hover {
+    background-color: black;
+    opacity: 0.8;
+}
