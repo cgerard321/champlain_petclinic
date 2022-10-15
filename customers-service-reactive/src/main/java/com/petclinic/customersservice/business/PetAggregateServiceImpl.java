@@ -11,6 +11,6 @@ public class PetAggregateServiceImpl implements PetAggregateService {
     public Mono<PetAggregate> insertPetAggregate(Mono<PetAggregate> petAggregateMono) {
         return petAggregateMono
                 .map(EntityAggregateUtil::toPet)
-                .
+                .flatMap(PetServiceImpl::insertPet())
     }
 }
