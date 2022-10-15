@@ -2,7 +2,7 @@ plugins {
 	id 'org.springframework.boot' version '2.7.4'
 	id 'io.spring.dependency-management' version '1.0.13.RELEASE'
 	id 'java'
-	id 'io.freefair.lombok' version '6.0.0-m2'
+	id "io.freefair.lombok" version "6.0.0-m2"
 	id 'jacoco'
 }
 
@@ -24,11 +24,11 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	compileOnly 'org.projectlombok:lombok'
-	implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo'
 	testImplementation 'io.projectreactor:reactor-test'
+	implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
 }
 
 tasks.named('test') {

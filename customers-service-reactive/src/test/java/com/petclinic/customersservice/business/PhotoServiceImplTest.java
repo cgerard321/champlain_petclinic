@@ -10,13 +10,13 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.*;
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-@SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port: 27018"})
-@AutoConfigureWebTestClient
+@SpringBootTest
 class PhotoServiceImplTest {
 
     @MockBean
@@ -39,6 +39,43 @@ class PhotoServiceImplTest {
                 })
                 .verifyComplete();
     }
+
+    @Test
+    void getPhotoByPhotoId() {
+
+        Photo photoEntity = buildPhoto();
+        int PHOTO_ID = photoEntity.getId();
+
+        when(repo.findPhotoById(any(Integer.class))).thenReturn(Mono.just(photoEntity));
+
+        Mono<Photo> returnedPhoto = photoService.getPhotoByPhotoId(PHOTO_ID);
+
+        StepVerifier.create(returnedPhoto)
+                .consumeNextWith(foundPhoto -> {
+                    assertEquals(photoEntity.getName(), foundPhoto.getName());
+                    assertEquals(photoEntity.getType(), foundPhoto.getType());
+                    assertEquals(photoEntity.getPhoto(), foundPhoto.getPhoto());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    public void getPhotoByPhotoIdNotFound() {
+
+        Photo photo = buildPhoto();
+
+        int PHOTO_ID_NOT_FOUND = 00;
+
+        when(repo.findPhotoById(any(Integer.class))).thenReturn(Mono.just(photo));
+
+        Mono<Photo> photoMono = photoService.getPhotoByPhotoId(PHOTO_ID_NOT_FOUND);
+
+        StepVerifier
+                .create(photoMono)
+                .expectNextCount(1)
+                .expectError();
+    }
+
 
     private Photo buildPhoto() {
         return Photo.builder()
