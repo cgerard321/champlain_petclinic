@@ -65,11 +65,6 @@ class OwnerResource {
         ownerService.deleteOwner(ownerId);
     }
 
-//    @DeleteMapping("/{ownerId}")
-//    public Mono<Void> deleteOwner(@PathVariable("ownerId") int ownerId) {
-//        return ownerService.deleteOwner(ownerId);
-//    }
-
     @PostMapping(value = "/photo/{ownerId}")
     public String setPhoto(@RequestBody Photo photo, @PathVariable("ownerId") int id){
         return photoService.setOwnerPhoto(photo,id);

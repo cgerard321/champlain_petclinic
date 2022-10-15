@@ -25,8 +25,6 @@ import java.util.*;
  */
 
 @Entity
-@Builder
-@AllArgsConstructor
 @Table(name = "owners")
 @Builder
 @AllArgsConstructor
