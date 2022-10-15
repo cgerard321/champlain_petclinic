@@ -12,7 +12,7 @@ import com.petclinic.customersservice.business.OwnerServiceImpl;
 public class OwnerAggregateServiceImpl implements OwnerAggregateService {
 
     private OwnerServiceImpl ownerService;
-    //private PetAggregate;
+    private PetServiceImpl petService;
     private PhotoServiceImpl photoService;
     private PetTypeServiceImpl petTypeService;
 
@@ -20,7 +20,7 @@ public class OwnerAggregateServiceImpl implements OwnerAggregateService {
     public Mono<OwnerAggregate> getOwnerAggregateByOwnerId(int ownerId) {
         return ownerService.getOwnerByOwnerId(ownerId)
                 .map(EntityAggregateUtil::toOwnerAggregate)
-                .flatMap(x -> photoService.getPhotoByPhotoId(x.getPhoto().getId()))
-                .flatMap(x -> petService.);
+                .flatMap(x -> photoService.getPhotoByPhotoId(x.getPhoto().getId())
+                .flatMap(y -> petService.getPetByPetId(y.get)));
     }
 }

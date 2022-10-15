@@ -17,4 +17,9 @@ public class PetServiceImpl implements PetService {
         return petMono
                 .flatMap(petRepo::insert);
     }
+
+    @Override
+    public Mono<Pet> getPetByPetId(int petId) {
+        return petRepo.findPetByPetId(petId);
+    }
 }
