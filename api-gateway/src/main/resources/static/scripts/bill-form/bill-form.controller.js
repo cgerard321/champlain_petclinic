@@ -3,6 +3,16 @@
 angular.module('billForm')
     .controller('BillFormController', ["$http", '$state', '$stateParams', function ($http, $state, $stateParams) {
         var self = this;
+        //for vets dropdown
+        $http.get('api/gateway/vets').then(function (resp) {
+            self.vetList = resp.data;
+            arr = resp.data;
+        });
+        //for owner dropdown
+        // $http.get('api/gateway/owners').then(function (resp) {
+        //     self.owners = resp.data;
+        //     console.log(resp)
+        // });
 
         self.submitBillForm = function () {
             var req;

@@ -1,11 +1,10 @@
 server:
   error:
     include-message: always
-
-logging:
-  level:
-    root: INFO
-    com.petclinic: DEBUG
+  logging:
+    level:
+      root: INFO
+      com.petclinic: DEBUG
 
 spring:
   config:
@@ -14,7 +13,7 @@ spring:
   data:
     mongodb:
       port: 0
-      database: visits
+      database: customers
   mongodb:
     embedded:
       version: 4.0.21
@@ -28,7 +27,7 @@ spring:
     mongodb:
       host: localhost
       port: 27017
-      database: visits
+      database: customers
       username: root
       password: password
       authentication-database: admin
@@ -39,9 +38,9 @@ spring:
       on-profile: docker
   data:
     mongodb:
-      host: mongo2
+      host: mongo-customers
       port: 27017
-      database: visits
+      database: customers
       username: root
       password: password
       authentication-database: admin
