@@ -77,18 +77,3 @@ angular.module('vetList')
             });
         }
     }]);
-
-// function FilterList() {
-//     let optionSelection = document.getElementById("filterOption").value;
-//     if (optionSelection === "Active") {
-//         console.log("Get active");
-//         arr = arr.filter(v => {return v.isActive === true;});
-//         return arr;
-//     } else if (optionSelection === "Inactive") {
-//         console.log("Get inactive");
-//         arr = arr.filter(v => {return v.isActive === false;});
-//         return arr;
-//     } else {
-//         return arr;
-//     }
-
