@@ -16,6 +16,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
@@ -174,7 +176,17 @@ public class OwnerServiceTest {
         }
     }
 
+    private Owner buildOwner() {
+        return Owner.builder()
+                .id(1)
+                .firstName("Don")
+                .lastName("Corleone")
+                .address("45 Elm")
+                .city("Montreal")
+                .telephone("5141234567")
+                .build();
 
+    }
 
 
 }

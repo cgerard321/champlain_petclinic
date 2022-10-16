@@ -65,8 +65,6 @@ class OwnerResource {
         ownerService.deleteOwner(ownerId);
     }
 
-
-
     @PostMapping(value = "/photo/{ownerId}")
     public String setPhoto(@RequestBody Photo photo, @PathVariable("ownerId") int id){
         return photoService.setOwnerPhoto(photo,id);
@@ -81,7 +79,6 @@ class OwnerResource {
     public void deletePhoto(@PathVariable("photoId") int photoId) {
         photoService.deletePhoto(photoId);
     }
-
 
 }
 
