@@ -18,4 +18,9 @@ public class PetTypeServiceImpl implements PetTypeService {
         return petTypeMono
                 .flatMap(petTypeRepo::insert);
     }
+
+    @Override
+    public Flux<PetType> getAll() {
+        return petTypeRepo.findAll();
+    }
 }
