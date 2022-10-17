@@ -1,5 +1,6 @@
 package com.petclinic.customersservice.business;
 
+
 import com.petclinic.customersservice.data.PetType;
 import com.petclinic.customersservice.data.Photo;
 import lombok.*;
@@ -8,9 +9,9 @@ import java.util.Date;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class PetDTO {
+@NoArgsConstructor
+public class PetAggregate {
 
     private int id;
     private int ownerId;

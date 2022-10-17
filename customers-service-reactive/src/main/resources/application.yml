@@ -1,21 +1,19 @@
 server:
-  port: 8080
-
-logging:
-  level:
-    root: INFO
-    com.petclinic: DEBUG
+  error:
+    include-message: always
+  logging:
+    level:
+      root: INFO
+      com.petclinic: DEBUG
 
 spring:
   config:
     activate:
       on-profile: default
-
   data:
     mongodb:
       port: 0
       database: customers
-
   mongodb:
     embedded:
       version: 4.0.21
@@ -28,7 +26,7 @@ spring:
   data:
     mongodb:
       host: localhost
-      port: 27019
+      port: 27017
       database: customers
       username: root
       password: password
@@ -40,8 +38,8 @@ spring:
       on-profile: docker
   data:
     mongodb:
-      host: mongo
-      port: 27019
+      host: mongo-customers
+      port: 27017
       database: customers
       username: root
       password: password
