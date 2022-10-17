@@ -1,6 +1,5 @@
 package com.petclinic.customersservice.business;
 
-import com.petclinic.customersservice.data.Pet;
 import com.petclinic.customersservice.data.Photo;
 import lombok.*;
 
@@ -11,7 +10,7 @@ import java.util.List;
 @Setter
 @Builder
 @AllArgsConstructor
-public class OwnerAggregate {
+public class OwnerDTO {
 
     private int id;
     private String firstName;
@@ -20,6 +19,6 @@ public class OwnerAggregate {
     private String city;
     private String telephone;
     private Photo photo;
-    private List<PetAggregate> pets;
+    private List<PetDTO> pets;
 
 }
