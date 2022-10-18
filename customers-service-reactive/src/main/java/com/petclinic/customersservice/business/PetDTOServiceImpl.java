@@ -14,7 +14,6 @@ public class PetDTOServiceImpl implements PetDTOService {
     @Override
     public Mono<PetDTO> getPetDTOByPetId(int petId) {
         return petService.getPetByPetId(petId)
-                .map(EntityDTOUtil::toPetDTO)
-                .flatMap(x -> petTypeService.getPetTypeByPetTypeId(x.))
+                .map(EntityDTOUtil::toPetDTO);
     }
 }

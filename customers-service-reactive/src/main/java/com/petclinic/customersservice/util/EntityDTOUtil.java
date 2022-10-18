@@ -2,11 +2,16 @@ package com.petclinic.customersservice.util;
 
 import com.petclinic.customersservice.business.OwnerDTO;
 import com.petclinic.customersservice.business.PetDTO;
+import com.petclinic.customersservice.business.PetTypeServiceImpl;
+import com.petclinic.customersservice.business.PhotoServiceImpl;
 import com.petclinic.customersservice.data.Owner;
 import com.petclinic.customersservice.data.Pet;
 import org.springframework.beans.BeanUtils;
 
 public class EntityDTOUtil {
+
+    private static PhotoServiceImpl photoService;
+    private static PetTypeServiceImpl petTypeService;
 
     public static OwnerDTO toOwnerDTO(Owner owner) {
         OwnerDTO ownerDTO = new OwnerDTO();
@@ -22,7 +27,11 @@ public class EntityDTOUtil {
 
     public static PetDTO toPetDTO(Pet pet) {
         PetDTO petDTO = new PetDTO();
-        BeanUtils.copyProperties(pet, petDTO);
+        petDTO.setId(pet.getId());
+        petDTO.setName(pet.getName());
+        petDTO.setBirthDate(pet.getBirthDate());
+        petDTO.setPhoto(photoService.getPhotoByPhotoId(pet.getPhotoId()).block());
+        petDTO.setPetType(petTypeService.getPetTypeByPetTypeId(pet.getPetTypeId()).block());
         return petDTO;
     }
 
