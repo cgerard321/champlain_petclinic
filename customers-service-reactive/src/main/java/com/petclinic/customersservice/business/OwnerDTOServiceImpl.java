@@ -15,9 +15,6 @@ public class OwnerDTOServiceImpl implements OwnerDTOService {
 
     @Override
     public Mono<OwnerDTO> getOwnerAggregateByOwnerId(int ownerId) {
-        return ownerService.getOwnerByOwnerId(ownerId)
-                .map(EntityDTOUtil::toOwnerDTO)
-                .flatMap(x -> photoService.getPhotoByPhotoId(x.getPhoto().getId())
-                .flatMap(y -> petService.getPetByPetId(y.get)));
+        return null;
     }
 }

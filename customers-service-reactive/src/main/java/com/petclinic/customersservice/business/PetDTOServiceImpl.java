@@ -7,9 +7,7 @@ import reactor.core.publisher.Mono;
 @Service
 public class PetDTOServiceImpl implements PetDTOService {
 
-    private PetServiceImpl petService;
-    private PetTypeServiceImpl petTypeService;
-    private PhotoServiceImpl photoService;
+    private PetService petService;
 
     @Override
     public Mono<PetDTO> getPetDTOByPetId(int petId) {
