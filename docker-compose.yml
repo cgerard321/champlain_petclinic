@@ -17,7 +17,6 @@ services:
             mysql1:
                 condition: service_healthy
 
-
     vet-service:
         build: vet-service
         environment:
@@ -27,6 +26,7 @@ services:
 
     customers-service-reactive:
         build: customers-service-reactive
+        ports: -"8090:8080"
         environment:
             - SPRING_PROFILES_ACTIVE=docker
         depends_on:
@@ -51,7 +51,7 @@ services:
             - SPRING_PROFILES_ACTIVE=docker
         depends_on:
             - customers
-#            - vets
+            #            - vets
             - visits
             - vet-service
 
@@ -76,8 +76,8 @@ services:
             - SPRING_PROFILES_ACTIVE=docker
         depends_on:
             - mongo1
-#            mysql5:
-#                condition: service_healthy
+    #            mysql5:
+    #                condition: service_healthy
 
     mailer-service:
         build: mailer-service
@@ -88,8 +88,6 @@ services:
             - SMTP_SERVER=smtp.gmail.com
         env_file:
             - mailer.env
-
-
 
     mysql1:
         image: mysql:5.7
@@ -113,12 +111,11 @@ services:
                     "-uuser",
                     "-ppwd",
                     "-h",
-                    "localhost",
+                    "localhost"
                 ]
             interval: 10s
             timeout: 5s
             retries: 10
-
 
     mysql3:
         image: mysql:5.7
@@ -142,7 +139,7 @@ services:
                     "-uuser",
                     "-ppwd",
                     "-h",
-                    "localhost",
+                    "localhost"
                 ]
             interval: 10s
             timeout: 5s
@@ -173,93 +170,92 @@ services:
                     "-uroot",
                     "-prootpwd",
                     "-h",
-                    "localhost",
+                    "localhost"
                 ]
             interval: 10s
             timeout: 5s
             retries: 10
 
-
-  # vet mongo container
+    # vet mongo container
     mongo:
-      image: mongo
-      container_name: mongo
-      restart: always
-      ports:
-        - 27017:27017
-      environment:
-        MONGO_INITDB_ROOT_USERNAME: root
-        MONGO_INITDB_ROOT_PASSWORD: password
-  #      healthcheck:
-  #        test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
-  #        retries: 5
-  #        interval: 15s
-  #        start_period: 30s
+        image: mongo
+        container_name: mongo
+        restart: always
+        ports:
+            - 27017:27017
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: root
+            MONGO_INITDB_ROOT_PASSWORD: password
+    #      healthcheck:
+    #        test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
+    #        retries: 5
+    #        interval: 15s
+    #        start_period: 30s
 
     mongo-express:
-      image: mongo-express
-      restart: always
-      environment:
-        - ME_CONFIG_MONGODB_ADMINUSERNAME=root
-        - ME_CONFIG_MONGODB_ADMINPASSWORD=password
-        - ME_CONFIG_MONGODB_SERVER=mongo
-        - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
-      ports:
-        - 9000:8081
-      depends_on:
-        - mongo
-        - vet-service
+        image: mongo-express
+        restart: always
+        environment:
+            - ME_CONFIG_MONGODB_ADMINUSERNAME=root
+            - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+            - ME_CONFIG_MONGODB_SERVER=mongo
+            - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
+        ports:
+            - 9000:8081
+        depends_on:
+            - mongo
+            - vet-service
 
-  # billing mongo container
+    # billing mongo container
     mongo1:
-      image: mongo
-      container_name: mongo1
-      restart: always
-      ports:
-        - 27018:27017
-      environment:
-        MONGO_INITDB_ROOT_USERNAME: root
-        MONGO_INITDB_ROOT_PASSWORD: password
-  #      healthcheck:
-  #        test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
-  #        retries: 5
-  #        interval: 15s
-  #        start_period: 30s
+        image: mongo
+        container_name: mongo1
+        restart: always
+        ports:
+            - 27018:27017
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: root
+            MONGO_INITDB_ROOT_PASSWORD: password
+    #      healthcheck:
+    #        test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
+    #        retries: 5
+    #        interval: 15s
+    #        start_period: 30s
 
     mongo-express1:
-      image: mongo-express
-      restart: always
-      environment:
-        - ME_CONFIG_MONGODB_ADMINUSERNAME=root
-        - ME_CONFIG_MONGODB_ADMINPASSWORD=password
-        - ME_CONFIG_MONGODB_SERVER=mongo1
-        - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
-      ports:
-        - 8081:8081
-      depends_on:
-        - mongo1
-        - billing-service
+        image: mongo-express
+        restart: always
+        environment:
+            - ME_CONFIG_MONGODB_ADMINUSERNAME=root
+            - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+            - ME_CONFIG_MONGODB_SERVER=mongo1
+            - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
+        ports:
+            - 8081:8081
+        depends_on:
+            - mongo1
+            - billing-service
 
     mongo-customers:
-      image: mongo
-      container_name: mongo-customers
-      restart: always
-      ports:
-        - 27019:27017
-      environment:
-        MONGO_INITDB_ROOT_USERNAME: root
-        MONGO_INITDB_ROOT_PASSWORD: password
+        image: mongo
+        container_name: mongo-customers
+        restart: always
+        ports:
+            - 27019:27017
+        environment:
+            MONGO_INITDB_ROOT_USERNAME: root
+            MONGO_INITDB_ROOT_PASSWORD: password
 
     mongo-express-customers:
-      image: mongo-express
-      restart: always
-      environment:
-        - ME_CONFIG_MONGODB_ADMINUSERNAME=root
-        - ME_CONFIG_MONGODB_ADMINPASSWORD=password
-        - ME_CONFIG_MONGODB_SERVER=mongo-customers
-        - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
-      ports:
-        - 8085:8081
-      depends_on:
-        - mongo-customers
-        - customers-service-reactive
+        image: mongo-express
+        restart: always
+        environment:
+            - ME_CONFIG_MONGODB_ADMINUSERNAME=root
+            - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+            - ME_CONFIG_MONGODB_SERVER=mongo-customers
+            - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
+        ports:
+            - 8085:8081
+        depends_on:
+            - mongo-customers
+            - customers-service-reactive
