@@ -60,21 +60,7 @@ angular.module('vetList')
         };
 
         $scope.refreshList = self.vetList;
-
-        $scope.ReloadData = function ($filter) {
-            self.vetList = FilterList($filter);
-            $http.get('api/gateway/vets').then(function (resp) {
                 arr = resp.data;
             });
         }
     }]);
-
-function FilterList($filter) {
-    let optionSelection = document.getElementById("filterOption").value;
-    if (optionSelection === "All") {
-        return arr;
-    }
-    let isActive = optionSelection === "Active";
-    return $filter("filter")(arr, v => v.isActive === isActive);
-
-}
