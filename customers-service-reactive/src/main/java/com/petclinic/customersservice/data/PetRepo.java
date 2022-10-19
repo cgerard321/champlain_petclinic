@@ -16,6 +16,6 @@ public interface PetRepo extends ReactiveMongoRepository<Pet, Integer> {
 
     Mono<Pet> findPetByOwnerId(int ownerId, int petId);
 
-    Mono<Pet> findPetByPetId(int petId);
+    Mono<Pet> findPetByPetId(int id);
 
 }
