@@ -20,7 +20,14 @@ public class PetTypeServiceImpl implements PetTypeService {
     }
 
     @Override
-    public Mono<PetType> getPetTypeByPetTypeId(int petTypeId) {
-        return petTypeRepo.findById(petTypeId);
+    public Flux<PetType> getAllPetTypes() {
+        return petTypeRepo.findAll();
     }
+
+    //@Override
+    //public Mono<PetType> getPetTypeByPetTypeId(int petTypeId) {
+        //return petTypeRepo.findById(petTypeId);
+    //}
+
+
 }

@@ -12,7 +12,7 @@ import java.util.Date;
 public class Pet {
 
     @Id
-    private int id;
+    private int petId;
     private int ownerId;
     private int petTypeId;
     private String name;

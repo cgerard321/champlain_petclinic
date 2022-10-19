@@ -6,12 +6,13 @@ import com.petclinic.customersservice.business.PetTypeServiceImpl;
 import com.petclinic.customersservice.business.PhotoServiceImpl;
 import com.petclinic.customersservice.data.Owner;
 import com.petclinic.customersservice.data.Pet;
+import lombok.Generated;
 import org.springframework.beans.BeanUtils;
 
 public class EntityDTOUtil {
 
-    private static PhotoServiceImpl photoService;
-    private static PetTypeServiceImpl petTypeService;
+    @Generated
+    public EntityDTOUtil(){};
 
     public static OwnerDTO toOwnerDTO(Owner owner) {
         OwnerDTO ownerDTO = new OwnerDTO();
@@ -27,11 +28,12 @@ public class EntityDTOUtil {
 
     public static PetDTO toPetDTO(Pet pet) {
         PetDTO petDTO = new PetDTO();
-        petDTO.setId(pet.getId());
+        petDTO.setId(pet.getPetId());
         petDTO.setName(pet.getName());
         petDTO.setBirthDate(pet.getBirthDate());
-        petDTO.setPhoto(photoService.getPhotoByPhotoId(pet.getPhotoId()).block());
-        petDTO.setPetType(petTypeService.getPetTypeByPetTypeId(pet.getPetTypeId()).block());
+        petDTO.setOwnerId(pet.getOwnerId());
+        //petDTO.setPhoto(photoService.getPhotoByPhotoId(pet.getPhotoId()).block());
+        //petDTO.setPetType(petTypeService.getPetTypeByPetTypeId(pet.getPetTypeId()).block());
         return petDTO;
     }
 
