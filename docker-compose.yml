@@ -7,34 +7,37 @@ services:
             - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
             - ./nginx/njs:/etc/nginx/njs
 
-    visits:
-        build: visits-service
-        hostname: visits
-        #mem_limit: 350m
+    visits-service-new:
+        build: visits-service-new
         environment:
             - SPRING_PROFILES_ACTIVE=docker
         depends_on:
-            mysql1:
-                condition: service_healthy
+            - mongo2
 
-    vets:
-        build: vets-service
-        hostname: vets
-        #mem_limit: 350m
-        environment:
-            - SPRING_PROFILES_ACTIVE=docker
-        depends_on:
-            mysql2:
-                condition: service_healthy
+#    visits:
+#        build: visits-service
+#        hostname: visits
+#        #mem_limit: 350m
+#        environment:
+#            - SPRING_PROFILES_ACTIVE=docker
+#        depends_on:
+#            mysql1:
+#                condition: service_healthy
+
 
     vet-service:
         build: vet-service
-        ports:
-            - "2745:8080"
         environment:
             - SPRING_PROFILES_ACTIVE=docker
         depends_on:
             - mongo
+
+    customers-service-reactive:
+        build: customers-service-reactive
+        environment:
+            - SPRING_PROFILES_ACTIVE=docker
+        depends_on:
+            - mongo-customers
 
     customers:
         build: customers-service
@@ -55,8 +58,10 @@ services:
             - SPRING_PROFILES_ACTIVE=docker
         depends_on:
             - customers
-            - vets
-            - visits
+#            - vets
+#            - visits
+            - vet-service
+            - visits-service-new
 
     auth-service:
         build: auth-service
@@ -94,61 +99,34 @@ services:
 
 
 
-    mysql1:
-        image: mysql:5.7
-        #mem_limit: 350m
-        ports:
-            - "3307:3306"
-        environment:
-            - MYSQL_ROOT_PASSWORD=rootpwd
-            - MYSQL_DATABASE=visits-db
-            - MYSQL_USER=user
-            - MYSQL_PASSWORD=pwd
-        volumes:
-            - ./data/mysql1:/var/lib/mysql1
-            - ./data/init.d:/docker-entrypoint-initdb.d
-        healthcheck:
-            test:
-                [
-                    "CMD",
-                    "mysqladmin",
-                    "ping",
-                    "-uuser",
-                    "-ppwd",
-                    "-h",
-                    "localhost",
-                ]
-            interval: 10s
-            timeout: 5s
-            retries: 10
+#    mysql1:
+#        image: mysql:5.7
+#        #mem_limit: 350m
+#        ports:
+#            - "3307:3306"
+#        environment:
+#            - MYSQL_ROOT_PASSWORD=rootpwd
+#            - MYSQL_DATABASE=visits-db
+#            - MYSQL_USER=user
+#            - MYSQL_PASSWORD=pwd
+#        volumes:
+#            - ./data/mysql1:/var/lib/mysql1
+#            - ./data/init.d:/docker-entrypoint-initdb.d
+#        healthcheck:
+#            test:
+#                [
+#                    "CMD",
+#                    "mysqladmin",
+#                    "ping",
+#                    "-uuser",
+#                    "-ppwd",
+#                    "-h",
+#                    "localhost",
+#                ]
+#            interval: 10s
+#            timeout: 5s
+#            retries: 10
 
-    mysql2:
-        image: mysql:5.7
-        #mem_limit: 350m
-        ports:
-            - "3308:3306"
-        environment:
-            - MYSQL_ROOT_PASSWORD=rootpwd
-            - MYSQL_DATABASE=vets-db
-            - MYSQL_USER=user
-            - MYSQL_PASSWORD=pwd
-        volumes:
-            - ./data/mysql2:/var/lib/mysql2
-            - ./data/init.d:/docker-entrypoint-initdb.d
-        healthcheck:
-            test:
-                [
-                    "CMD",
-                    "mysqladmin",
-                    "ping",
-                    "-uuser",
-                    "-ppwd",
-                    "-h",
-                    "localhost",
-                ]
-            interval: 10s
-            timeout: 5s
-            retries: 10
 
     mysql3:
         image: mysql:5.7
@@ -235,7 +213,7 @@ services:
         - ME_CONFIG_MONGODB_SERVER=mongo
         - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
       ports:
-        - 9000:8082
+        - 9000:8081
       depends_on:
         - mongo
         - vet-service
@@ -269,3 +247,58 @@ services:
       depends_on:
         - mongo1
         - billing-service
+
+
+    mongo2:
+      image: mongo
+      container_name: mongo2
+      restart: always
+      ports:
+        - 27015:27017
+      environment:
+        MONGO_INITDB_ROOT_USERNAME: root
+        MONGO_INITDB_ROOT_PASSWORD: password
+      healthcheck:
+        test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
+        retries: 5
+        interval: 15s
+        start_period: 30s
+
+    mongo-express2:
+      image: mongo-express
+      restart: always
+      environment:
+        - ME_CONFIG_MONGODB_ADMINUSERNAME=root
+        - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+        - ME_CONFIG_MONGODB_SERVER=mongo2
+        - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
+      ports:
+        - 9001:8082
+      depends_on:
+        - mongo2
+        - visits-service-new
+
+
+    mongo-customers:
+      image: mongo
+      container_name: mongo-customers
+      restart: always
+      ports:
+        - 27019:27017
+      environment:
+        MONGO_INITDB_ROOT_USERNAME: root
+        MONGO_INITDB_ROOT_PASSWORD: password
+
+    mongo-express-customers:
+      image: mongo-express
+      restart: always
+      environment:
+        - ME_CONFIG_MONGODB_ADMINUSERNAME=root
+        - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+        - ME_CONFIG_MONGODB_SERVER=mongo-customers
+        - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
+      ports:
+        - 8085:8081
+      depends_on:
+        - mongo-customers
+        - customers-service-reactive

@@ -8,6 +8,8 @@
 
 <div>
     <h3>Payment Info for Bill {{$ctrl.bills.billId}}</h3>
+    <h3>Customer ID: {{$ctrl.bills.customerId}}</h3>
+    <h3>Customer Name: {{$ctrl.owner.firstName}}, {{$ctrl.owner.lastName}}</h3>
     <h3>505 Lincoln Str. Queens, New York</h3>
     <h3>Final price: {{$ctrl.bills.amount}}</h3>
     <h3>Visit type: {{$ctrl.bills.visitType}}</h3>
@@ -18,4 +20,8 @@
     </div>
     <br>
     <a class="newBtn btn btn-primary" href="http://localhost:8080/#!/bills">Back to History</a>
+    <br><br>
+
+    <a class="newBtn btn btn-primary" href="http://localhost:8080/#!/bills/customerId/{{$ctrl.bills.customerId}}">
+        Get all bills by customer</a>
 </div>

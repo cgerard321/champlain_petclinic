@@ -1,5 +1,5 @@
 plugins {
-	id 'org.springframework.boot' version '2.3.2.RELEASE'
+	id 'org.springframework.boot' version '2.3.10.RELEASE'
 	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
 	id 'java'
 	id "io.freefair.lombok" version "6.0.0-m2"
@@ -62,7 +62,7 @@ dependencies {
 }
 
 jacoco {
-	toolVersion = "0.8.6"
+	toolVersion = "0.8.8"
 }
 
 jacocoTestReport {

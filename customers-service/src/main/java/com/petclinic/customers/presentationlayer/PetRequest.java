@@ -2,7 +2,10 @@ package com.petclinic.customers.presentationlayer;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.petclinic.customers.datalayer.PetType;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Size;
 import java.util.Date;
@@ -14,6 +17,8 @@ import java.util.Date;
  */
 
 @Data
+@Builder
+@AllArgsConstructor
 public class PetRequest {
     private int id;
 

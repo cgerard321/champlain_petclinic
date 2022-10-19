@@ -16,6 +16,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.security.InvalidKeyException;
 import java.util.ArrayList;
@@ -43,7 +45,7 @@ public class OwnerServiceTest {
     public void test_findByOwnerId()
     {
         //Arrange
-        Owner ownerTest = new Owner(1, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
+        Owner ownerTest = new Owner(1, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111",1);
         when(ownerRepository.findById(1)).thenReturn(Optional.of(ownerTest));
 
         //Act
@@ -76,10 +78,10 @@ public class OwnerServiceTest {
         //Arrange
         int expectedLength = 4;
         List<Owner> ownerList = new ArrayList<>();
-        ownerList.add(new Owner(1, "firstname1", "lastname1", "address1","city1","1111111111"));
-        ownerList.add(new Owner(2, "firstname2", "lastname2", "address2","city2","2222222222"));
-        ownerList.add(new Owner(3, "firstname3", "lastname3", "address3","city3","3333333333"));
-        ownerList.add(new Owner(4, "firstname4", "lastname4", "address4","city4","4444444444"));
+        ownerList.add(new Owner(1, "firstname1", "lastname1", "address1","city1","1111111111",1));
+        ownerList.add(new Owner(2, "firstname2", "lastname2", "address2","city2","2222222222",1));
+        ownerList.add(new Owner(3, "firstname3", "lastname3", "address3","city3","3333333333",1));
+        ownerList.add(new Owner(4, "firstname4", "lastname4", "address4","city4","4444444444",1));
         when(ownerRepository.findAll()).thenReturn(ownerList);
 
         //Act
@@ -96,7 +98,7 @@ public class OwnerServiceTest {
 
         //Arrange
         int OwnerId = 1;
-        Owner ownerTest = new Owner(OwnerId, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
+        Owner ownerTest = new Owner(OwnerId, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111",1);
         when(ownerRepository.findById(OwnerId)).thenReturn(Optional.of(ownerTest));
 
         //Act
@@ -113,7 +115,7 @@ public class OwnerServiceTest {
     {
         //Arrange
         int OwnerId = 1;
-        Owner ownerTest = new Owner(OwnerId, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
+        Owner ownerTest = new Owner(OwnerId, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111",1);
         when(ownerRepository.findById(OwnerId)).thenReturn(Optional.of(ownerTest));
 
         //Act
@@ -128,7 +130,7 @@ public class OwnerServiceTest {
     @Test
     public void test_CreateOwner_DuplicateKeyException()
     {
-        Owner ownerTest = new Owner(1, null, null, null, null, null);
+        Owner ownerTest = new Owner(1, null, null, null, null, null, 1);
         String expectedErrorMsg = "Duplicate key, ownerId: " + ownerTest.getId();
         Mockito.when(ownerRepository.save(Mockito.any(Owner.class))).thenThrow(new DuplicateKeyException("Duplicate key, ownerId: " + ownerTest.getId()));
         try {
@@ -145,7 +147,7 @@ public class OwnerServiceTest {
     {
         //Arrange
         int OwnerId = 1;
-        Owner newOwner1 = new Owner(OwnerId, "Michel", "Lebrie", "56 Yeet St.", "Longueuil", "1234567890");
+        Owner newOwner1 = new Owner(OwnerId, "Michel", "Lebrie", "56 Yeet St.", "Longueuil", "1234567890",1);
         when(ownerRepository.findById(OwnerId)).thenReturn(Optional.of(newOwner1));
 
         //Act
@@ -156,6 +158,7 @@ public class OwnerServiceTest {
         assertEquals(ownerService.findByOwnerId(1).get().getAddress(), "56 Yeet St.");
         assertEquals(ownerService.findByOwnerId(1).get().getCity(), "Longueuil");
         assertEquals(ownerService.findByOwnerId(1).get().getTelephone(), "1234567890");
+        assertEquals(ownerService.findByOwnerId(1).get().getImageId(), 1);
     }
 
     @DisplayName("ownerService_UpdateOwner_NotFoundException")
@@ -163,7 +166,7 @@ public class OwnerServiceTest {
     public void test_UpdateOwner_NotFoundException()
     {
         int ownerId = 1;
-        Owner ownerTest = new Owner(1, null, null, null, null, null);
+        Owner ownerTest = new Owner(1, null, null, null, null, null,1);
         String expectedErrorMsg = "updateOwner failed, owner with id: " + ownerId + " not found.";
         Mockito.when(ownerRepository.findById(Mockito.anyInt())).thenThrow(new NotFoundException());
         try {
@@ -173,7 +176,17 @@ public class OwnerServiceTest {
         }
     }
 
+    private Owner buildOwner() {
+        return Owner.builder()
+                .id(1)
+                .firstName("Don")
+                .lastName("Corleone")
+                .address("45 Elm")
+                .city("Montreal")
+                .telephone("5141234567")
+                .build();
 
+    }
 
 
 }

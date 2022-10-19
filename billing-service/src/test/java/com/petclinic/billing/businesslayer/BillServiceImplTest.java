@@ -131,7 +131,7 @@ public class BillServiceImplTest {
 
         when(repo.findByCustomerId(anyInt())).thenReturn(Flux.just(billEntity));
 
-        Flux<BillDTO> billDTOMono = billService.GetBillByCustomerId(CUSTOMER_ID);
+        Flux<BillDTO> billDTOMono = billService.GetBillsByCustomerId(CUSTOMER_ID);
 
         StepVerifier.create(billDTOMono)
                 .consumeNextWith(foundBill -> {

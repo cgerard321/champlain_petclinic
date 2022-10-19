@@ -85,7 +85,7 @@ public class ExceptionsTests {
 
     @Test
     void HandleNotFoundExceptionTest() throws JsonProcessingException {
-        Owner newOwner = new Owner(1, "Wael", "Osman", "Address-1", "City-1", "1234567890");
+        Owner newOwner = new Owner(1, "Wael", "Osman", "Address-1", "City-1", "1234567890",1);
 
         HttpErrorInfo httpErrorInfo = exceptionHandler.handleNotFoundException(MockServerHttpRequest.post("/owners", 1)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -98,7 +98,7 @@ public class ExceptionsTests {
 
     @Test
     void HandleInvalidInputExceptionTest() throws JsonProcessingException {
-        Owner newOwner = new Owner(1, "Wael", "Osman", "Address-1", "City-1", "1234567890");
+        Owner newOwner = new Owner(1, "Wael", "Osman", "Address-1", "City-1", "1234567890",1);
 
         HttpErrorInfo httpErrorInfo = exceptionHandler.handleInvalidInputException(MockServerHttpRequest.post("/owners", 1)
                 .contentType(MediaType.APPLICATION_JSON)

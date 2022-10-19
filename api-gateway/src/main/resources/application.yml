@@ -2,10 +2,10 @@ server.port: 7000
 server.error.include-message: always
 
 app:
-  visits-service:
+  visits-service-new:
     host: localhost
-    port: 7001
-  vets-service:
+    port: 7006
+  vet-service:
     host: localhost
     port: 7002
   customers-service:
@@ -29,11 +29,11 @@ spring.profiles: docker
 server.port: 8080
 
 app:
-  visits-service:
-    host: visits
+  visits-service-new:
+    host: visits-service-new
     port: 8080
-  vets-service:
-    host: vets
+  vet-service:
+    host: vet-service
     port: 8080
   customers-service:
     host: customers

@@ -2,15 +2,18 @@ package com.petclinic.customers.presentationlayer;
 
 import com.petclinic.customers.datalayer.Owner;
 import com.petclinic.customers.datalayer.OwnerRepository;
+import com.petclinic.customers.datalayer.PhotoRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import reactor.test.StepVerifier;
 
 import java.util.List;
 import java.util.Optional;
@@ -42,7 +45,7 @@ class OwnerPersistenceTest {
         int OwnerID = 1;
 
         //Arrange
-        Owner newOwner = new Owner(OwnerID, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
+        Owner newOwner = new Owner(OwnerID, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111", 1);
         Owner savedOwner = repository.save(newOwner);
 
         //Act
@@ -61,26 +64,26 @@ class OwnerPersistenceTest {
         int expectedLength = 4;
 
         //Arrange
-        Owner owner1 = new Owner (1, "Brian1", "Smith1", "940 Rue des Oiseaux", "Montreal", "1111111111");
+        Owner owner1 = new Owner (1, "Brian1", "Smith1", "940 Rue des Oiseaux", "Montreal", "1111111111", 1);
         Owner savedOwner1 = repository.save(owner1);
         Owner foundOwner1 = repository.findById(savedOwner1.getId()).orElse(null);
         assert foundOwner1 != null;
         assertThat(foundOwner1, samePropertyValuesAs(savedOwner1));
 
-        Owner owner2 = new Owner (2, "Brian2", "Smith2", "940 Rue des Oiseaux", "Montreal", "1111111111");
+        Owner owner2 = new Owner (2, "Brian2", "Smith2", "940 Rue des Oiseaux", "Montreal", "1111111111",1);
         Owner savedOwner2 = repository.save(owner2);
         Owner foundOwner2 = repository.findById(savedOwner2.getId()).orElse(null);
         assert foundOwner2 != null;
         assertThat(foundOwner2, samePropertyValuesAs(savedOwner2));
 
 
-        Owner owner3 = new Owner (3, "Brian3", "Smith3", "940 Rue des Oiseaux", "Montreal", "1111111111");
+        Owner owner3 = new Owner (3, "Brian3", "Smith3", "940 Rue des Oiseaux", "Montreal", "1111111111",1);
         Owner savedOwner3 = repository.save(owner3);
         Owner foundOwner3 = repository.findById(savedOwner3.getId()).orElse(null);
         assert foundOwner3 != null;
         assertThat(foundOwner3, samePropertyValuesAs(savedOwner3));
 
-        Owner owner4 = new Owner (4, "Brian4", "Smith4", "940 Rue des Oiseaux", "Montreal", "1111111111");
+        Owner owner4 = new Owner (4, "Brian4", "Smith4", "940 Rue des Oiseaux", "Montreal", "1111111111",1);
         Owner savedOwner4 = repository.save(owner4);
         Owner foundOwner4 = repository.findById(savedOwner4.getId()).orElse(null);
         assert foundOwner4 != null;
@@ -99,7 +102,7 @@ class OwnerPersistenceTest {
     {
         //Arrange
         int OwnerID = 1;
-        Owner newOwner = new Owner (OwnerID, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
+        Owner newOwner = new Owner (OwnerID, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111",1);
         Owner savedOwner = repository.save(newOwner);
 
         //Act
@@ -110,14 +113,15 @@ class OwnerPersistenceTest {
 
     }
 
+
     @DisplayName("ownerPersistence_CreateOwner")
     @Test
     public void create_owner_test()
     {
         //Arrange
         int OwnerId = 1;
-        Owner newOwner = new Owner (OwnerId, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111");
-        Owner savedOwner = repository.save(newOwner);;
+        Owner newOwner = new Owner (OwnerId, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111",1);
+        Owner savedOwner = repository.save(newOwner);
 
         //Act
         Owner foundSaved = repository.findById(savedOwner.getId()).orElse(null);
@@ -133,16 +137,18 @@ class OwnerPersistenceTest {
     public void update_owner_test()
     {
         // Arrange
-        int ownerId = 11;
+        int ownerId = 14;
         Owner newOwner = new Owner (ownerId,
                 "Brian",
                 "Smith",
                 "940 Rue des Oiseaux",
                 "Montreal",
-                "1111111111");
-        Owner savedOwner = repository.save(newOwner);;
+                "1111111111",
+                1);
+        Owner savedOwner = repository.save(newOwner);
         Owner foundSaved = repository.findById(savedOwner.getId()).orElse(null);
         assert foundSaved != null;
+        newOwner.setId(foundSaved.getId());
         assertThat(foundSaved, samePropertyValuesAs(newOwner));
 
         // Act
@@ -151,10 +157,23 @@ class OwnerPersistenceTest {
         foundSaved.setAddress("940 Rue des Oiseaux");
         foundSaved.setCity("Montreal");
         foundSaved.setTelephone("2222222222");
+        foundSaved.setImageId(2);
         Owner savedUpdate = repository.save(foundSaved);
 
         // Assert
         assertEquals(savedUpdate, foundSaved);
+    }
+
+    private Owner buildOwner() {
+        return Owner.builder()
+                .id(1)
+                .firstName("Fred")
+                .lastName("Flintstone")
+                .address("54 Quarry Ave.")
+                .city("Bedrock")
+                .telephone("0000000004")
+                .build();
+
     }
 
 }

@@ -4,6 +4,11 @@ angular.module('billForm')
     .controller('BillFormController', ["$http", '$state', '$stateParams', function ($http, $state, $stateParams) {
         var self = this;
 
+        $http.get('api/gateway/vets').then(function (resp) {
+            self.vetList = resp.data;
+            arr = resp.data;
+        });
+
         self.submitBillForm = function () {
             var req;
                 req = $http.post("api/gateway/bills", self.bill);

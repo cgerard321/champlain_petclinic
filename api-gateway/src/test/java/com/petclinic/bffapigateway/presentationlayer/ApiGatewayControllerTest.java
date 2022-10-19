@@ -8,6 +8,7 @@ import com.petclinic.bffapigateway.exceptions.GenericHttpException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
@@ -20,31 +21,13 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.UUID;
-import java.util.List;
-
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
-
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.when;
-
-
-
 import static org.mockito.Mockito.*;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
-
-import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpStatus.*;
-
-
-import static org.springframework.http.HttpStatus.*;
-
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 //
 //import com.petclinic.billing.datalayer.BillDTO;
@@ -68,6 +51,11 @@ class ApiGatewayControllerTest {
     @MockBean
     private VetsServiceClient vetsServiceClient;
 
+    VetDTO vetDTO = buildVetDTO();
+    VetDTO vetDTO2 = buildVetDTO2();
+    String VET_ID = buildVetDTO().getVetId();
+    String INVALID_VET_ID = "mjbedf";
+
     @MockBean
     private AuthServiceClient authServiceClient;
 
@@ -78,45 +66,226 @@ class ApiGatewayControllerTest {
     private WebTestClient client;
 
 
-    Integer id = new Integer(1);
-    Integer id2 = new Integer(2);
 
     @Test
-    void createAndDeleteVet() {
+    void getAllVets() {
+        when(vetsServiceClient.getVets())
+                .thenReturn(Flux.just(vetDTO));
 
-        final int vetId = 1234567;
-        VetDetails vet = new VetDetails();
-        vet.setVetId(vetId);
-        vet.setFirstName("Kevin");
-        vet.setLastName("Tremblay");
-        vet.setEmail("hello@test.com");
-        vet.setPhoneNumber("1-800-GOT-JUNK");
-        vet.setResume("Working since I started working.");
-        vet.setWorkday("Monday");
-
-        when(vetsServiceClient.createVet(vet))
-                .thenReturn(Mono.just(vet));
-
-        client.post()
+        client
+                .get()
                 .uri("/api/gateway/vets")
-                .body(Mono.just(vet), VetDetails.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$[0].vetId").isEqualTo(vetDTO.getVetId())
+                .jsonPath("$[0].resume").isEqualTo(vetDTO.getResume())
+                .jsonPath("$[0].lastName").isEqualTo(vetDTO.getLastName())
+                .jsonPath("$[0].firstName").isEqualTo(vetDTO.getFirstName())
+                .jsonPath("$[0].email").isEqualTo(vetDTO.getEmail())
+                .jsonPath("$[0].image").isNotEmpty()
+                .jsonPath("$[0].active").isEqualTo(vetDTO.isActive())
+                .jsonPath("$[0].workday").isEqualTo(vetDTO.getWorkday());
+
+        Mockito.verify(vetsServiceClient, times(1))
+                .getVets();
+    }
+
+    @Test
+    void getVetByVetId() {
+        when(vetsServiceClient.getVetByVetId(anyString()))
+                .thenReturn(Mono.just(vetDTO));
+
+        client
+                .get()
+                .uri("/api/gateway/vets/" + VET_ID)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.vetId").isEqualTo(vetDTO.getVetId())
+                .jsonPath("$.resume").isEqualTo(vetDTO.getResume())
+                .jsonPath("$.lastName").isEqualTo(vetDTO.getLastName())
+                .jsonPath("$.firstName").isEqualTo(vetDTO.getFirstName())
+                .jsonPath("$.email").isEqualTo(vetDTO.getEmail())
+                .jsonPath("$.image").isNotEmpty()
+                .jsonPath("$.active").isEqualTo(vetDTO.isActive())
+                .jsonPath("$.workday").isEqualTo(vetDTO.getWorkday());
+
+        Mockito.verify(vetsServiceClient, times(1))
+                .getVetByVetId(VET_ID);
+    }
+
+    @Test
+    void getActiveVets() {
+        when(vetsServiceClient.getActiveVets())
+                .thenReturn(Flux.just(vetDTO2));
+
+        client
+                .get()
+                .uri("/api/gateway/vets/active")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$[0].vetId").isEqualTo(vetDTO2.getVetId())
+                .jsonPath("$[0].resume").isEqualTo(vetDTO2.getResume())
+                .jsonPath("$[0].lastName").isEqualTo(vetDTO2.getLastName())
+                .jsonPath("$[0].firstName").isEqualTo(vetDTO2.getFirstName())
+                .jsonPath("$[0].email").isEqualTo(vetDTO2.getEmail())
+                .jsonPath("$[0].image").isNotEmpty()
+                .jsonPath("$[0].active").isEqualTo(vetDTO2.isActive())
+                .jsonPath("$[0].workday").isEqualTo(vetDTO2.getWorkday());
+
+        Mockito.verify(vetsServiceClient, times(1))
+                .getActiveVets();
+    }
+
+    @Test
+    void getInactiveVets() {
+        when(vetsServiceClient.getInactiveVets())
+                .thenReturn(Flux.just(vetDTO));
+
+        client
+                .get()
+                .uri("/api/gateway/vets/inactive")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$[0].vetId").isEqualTo(vetDTO.getVetId())
+                .jsonPath("$[0].resume").isEqualTo(vetDTO.getResume())
+                .jsonPath("$[0].lastName").isEqualTo(vetDTO.getLastName())
+                .jsonPath("$[0].firstName").isEqualTo(vetDTO.getFirstName())
+                .jsonPath("$[0].email").isEqualTo(vetDTO.getEmail())
+                .jsonPath("$[0].image").isNotEmpty()
+                .jsonPath("$[0].active").isEqualTo(vetDTO.isActive())
+                .jsonPath("$[0].workday").isEqualTo(vetDTO.getWorkday());
+
+        Mockito.verify(vetsServiceClient, times(1))
+                .getInactiveVets();
+    }
+
+    @Test
+    void createVet() {
+        Mono<VetDTO> dto = Mono.just(vetDTO);
+        when(vetsServiceClient.createVet(dto))
+                .thenReturn(dto);
+
+        client
+                .post()
+                .uri("/api/gateway/vets")
+                .body(dto, VetDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
 
-        assertEquals(vetId, vet.getVetId());
+        Mockito.verify(vetsServiceClient, times(1))
+                .createVet(any(Mono.class));
+    }
 
-        client.delete()
-                .uri("/api/gateway/vets/" + vetId)
+    @Test
+    void updateVet() {
+        when(vetsServiceClient.updateVet(anyString(), any(Mono.class)))
+                .thenReturn(Mono.just(vetDTO));
+
+        client
+                .put()
+                .uri("/api/gateway/vets/" + VET_ID)
+                .body(Mono.just(vetDTO), VetDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody();
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.vetId").isEqualTo(vetDTO.getVetId())
+                .jsonPath("$.resume").isEqualTo(vetDTO.getResume())
+                .jsonPath("$.lastName").isEqualTo(vetDTO.getLastName())
+                .jsonPath("$.firstName").isEqualTo(vetDTO.getFirstName())
+                .jsonPath("$.email").isEqualTo(vetDTO.getEmail())
+                .jsonPath("$.image").isNotEmpty()
+                .jsonPath("$.active").isEqualTo(vetDTO.isActive())
+                .jsonPath("$.workday").isEqualTo(vetDTO.getWorkday());
 
-        assertEquals(null, vetsServiceClient.getVet(vetId));
+        Mockito.verify(vetsServiceClient, times(1))
+                .updateVet(anyString(), any(Mono.class));
+    }
+
+    @Test
+    void deleteVet() {
+        when(vetsServiceClient.deleteVet(anyString()))
+                .thenReturn((Mono.empty()));
+
+        client
+                .delete()
+                .uri("/api/gateway/vets/" + VET_ID)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk();
+
+        Mockito.verify(vetsServiceClient, times(1))
+                .deleteVet(VET_ID);
+    }
+
+    @Test
+    void getByVetId_Invalid() {
+        when(vetsServiceClient.getVetByVetId(anyString()))
+                .thenReturn(Mono.just(vetDTO));
+
+        client
+                .get()
+                .uri("/api/gateway/vets/" + INVALID_VET_ID)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(INTERNAL_SERVER_ERROR)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("This id is not valid");
+    }
+
+    @Test
+    void updateByVetId_Invalid() {
+        when(vetsServiceClient.updateVet(anyString(), any(Mono.class)))
+                .thenReturn(Mono.just(vetDTO));
+
+        client
+                .put()
+                .uri("/api/gateway/vets/" + INVALID_VET_ID)
+                .body(Mono.just(vetDTO), VetDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(INTERNAL_SERVER_ERROR)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("This id is not valid");
+    }
+
+    @Test
+    void deleteByVetId_Invalid() {
+        when(vetsServiceClient.deleteVet(anyString()))
+                .thenReturn((Mono.empty()));
+
+        client
+                .delete()
+                .uri("/api/gateway/vets/" + INVALID_VET_ID)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(INTERNAL_SERVER_ERROR)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("This id is not valid");
+    }
+
+    @Test
+    void toStringBuilderVets() {
+        System.out.println(VetDTO.builder());
     }
 
 
@@ -272,9 +441,153 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.birthDate").isEqualTo(pet.getBirthDate())
                 .jsonPath("$.type").isEqualTo(pet.getType());
 
+    }
 
 
+//TODO
+    @Test
+    void createOwnerPhoto(){
+        OwnerDetails owner = new OwnerDetails();
+        owner.setId(1);
+        owner.setFirstName("John");
+        owner.setLastName("Smith");
+        owner.setAddress("456 Elm");
+        owner.setCity("Montreal");
+        owner.setTelephone("5553334444");
+        owner.setImageId(1);
 
+        final String test = "Test photo";
+        final byte[] testBytes = test.getBytes();
+
+        PhotoDetails photo = new PhotoDetails();
+        photo.setId(2);
+        photo.setName("photo");
+        photo.setType("jpeg");
+        photo.setPhoto("testBytes");
+
+        when(customersServiceClient.setOwnerPhoto(photo, owner.getId()))
+                .thenReturn(Mono.just("Image uploaded successfully: " + photo.getName()));
+
+
+        client.post()
+                .uri("/api/gateway/owners/photo/1")
+                .body(Mono.just(photo), PhotoDetails.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
+                .expectBody();
+
+    }
+    @Test
+    void getOwnerPhoto(){
+
+        OwnerDetails owner = new OwnerDetails();
+        owner.setId(1);
+        owner.setFirstName("John");
+        owner.setLastName("Smith");
+        owner.setAddress("456 Elm");
+        owner.setCity("Montreal");
+        owner.setTelephone("5553334444");
+        owner.setImageId(1);
+
+        final String test = "Test photo";
+        final byte[] testBytes = test.getBytes();
+
+        PhotoDetails photo = new PhotoDetails();
+        photo.setId(2);
+        photo.setName("photo");
+        photo.setType("jpeg");
+        photo.setPhoto("testBytes");
+
+        when(customersServiceClient.getOwnerPhoto(owner.getId()))
+                .thenReturn(Mono.just(photo));
+
+        client.get()
+                .uri("/api/gateway/owners/photo/1")
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.name").isEqualTo("photo")
+                .jsonPath("$.type").isEqualTo("jpeg");
+//                .jsonPath("$.photo").isEqualTo(testBytes); --> need to fix
+
+
+//        assertEquals(photo.getId(), 2);
+
+
+    }
+    @Test
+    void createPetPhoto(){
+
+            OwnerDetails owner = new OwnerDetails();
+            owner.setId(1);
+            PetDetails pet = new PetDetails();
+            PetType type = new PetType();
+            type.setName("Cat");
+            pet.setId(1);
+            pet.setName("Bonkers");
+            pet.setBirthDate("2015-03-03");
+            pet.setType(type);
+            pet.setImageId(2);
+
+            final String test = "Test photo";
+            final byte[] testBytes = test.getBytes();
+
+            PhotoDetails photo = new PhotoDetails();
+            photo.setId(2);
+            photo.setName("photo");
+            photo.setType("jpeg");
+            photo.setPhoto("testBytes");
+
+            when(customersServiceClient.setPetPhoto(owner.getId(), photo, pet.getId()))
+                    .thenReturn(Mono.just("Image uploaded successfully: " + photo.getName()));
+
+            client.post()
+                    .uri("/api/gateway/owners/1/pet/photo/1")
+                    .body(Mono.just(photo), PhotoDetails.class)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .exchange()
+                    .expectStatus().isOk()
+                    .expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
+                    .expectBody();
+        }
+
+    @Test
+    void getPetPhoto(){
+
+        OwnerDetails owner = new OwnerDetails();
+        owner.setId(1);
+        PetDetails pet = new PetDetails();
+        PetType type = new PetType();
+        type.setName("Cat");
+        pet.setId(1);
+        pet.setName("Bonkers");
+        pet.setBirthDate("2015-03-03");
+        pet.setType(type);
+        pet.setImageId(2);
+
+        final String test = "Test photo";
+        final byte[] testBytes = test.getBytes();
+
+        PhotoDetails photo = new PhotoDetails();
+        photo.setId(2);
+        photo.setName("photo");
+        photo.setType("jpeg");
+        photo.setPhoto("testBytes");
+
+        when(customersServiceClient.getPetPhoto(owner.getId(), pet.getId()))
+                .thenReturn(Mono.just(photo));
+
+        client.get()
+                .uri("/api/gateway/owners/1/pet/photo/1")
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.name").isEqualTo("photo")
+                .jsonPath("$.type").isEqualTo("jpeg");
     }
 
 
@@ -514,7 +827,27 @@ class ApiGatewayControllerTest {
 
     }
 
+    @Test
+    public void getBillsByOwnerId(){
+        BillDetails bill = new BillDetails();
+        bill.setBillId(UUID.randomUUID().toString());
+        bill.setCustomerId(1);
+        bill.setAmount(499);
+        bill.setVisitType("Test");
 
+        when(billServiceClient.getBillsByOwnerId(bill.getCustomerId()))
+                .thenReturn(Flux.just(bill));
+
+        client.get()
+                .uri("/api/gateway/bills/customer/{customerId}", bill.getCustomerId())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$[0].billId").isEqualTo(bill.getBillId())
+                .jsonPath("$[0].customerId").isEqualTo(1)
+                .jsonPath("$[0].amount").isEqualTo(499)
+                .jsonPath("$[0].visitType").isEqualTo("Test");
+        }
     @Test
     void getBillingByRequestMissingPath(){
         client.get()
@@ -1235,6 +1568,37 @@ class ApiGatewayControllerTest {
                 .isOk();
 
         verify(authServiceClient).deleteRole(role.getId());
+    }
+
+
+
+    private VetDTO buildVetDTO() {
+        return VetDTO.builder()
+                .vetId("678910")
+                .firstName("Pauline")
+                .lastName("LeBlanc")
+                .email("skjfhf@gmail.com")
+                .phoneNumber("947-238-2847")
+                .resume("Just became a vet")
+                .workday("Monday")
+                .image("kjd".getBytes())
+                .specialties(new HashSet<>())
+                .isActive(false)
+                .build();
+    }
+    private VetDTO buildVetDTO2() {
+        return VetDTO.builder()
+                .vetId("678910")
+                .firstName("Pauline")
+                .lastName("LeBlanc")
+                .email("skjfhf@gmail.com")
+                .phoneNumber("947-238-2847")
+                .image("kjd".getBytes())
+                .resume("Just became a vet")
+                .workday("Monday")
+                .specialties(new HashSet<>())
+                .isActive(true)
+                .build();
     }
 }
 
