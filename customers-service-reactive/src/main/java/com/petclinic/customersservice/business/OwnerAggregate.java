@@ -6,11 +6,12 @@ import lombok.*;
 
 import java.util.List;
 
-@Data
-@Builder
 @NoArgsConstructor
+@Getter
+@Setter
+@Builder
 @AllArgsConstructor
-public class OwnerDTO {
+public class OwnerAggregate {
 
     private int id;
     private String firstName;
@@ -19,6 +20,6 @@ public class OwnerDTO {
     private String city;
     private String telephone;
     private Photo photo;
-    private List<PetDTO> pets;
+    private List<PetAggregate> pets;
 
 }

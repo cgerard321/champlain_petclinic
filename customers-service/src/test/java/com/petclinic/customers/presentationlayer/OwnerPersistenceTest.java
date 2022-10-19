@@ -8,10 +8,12 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import reactor.test.StepVerifier;
 
 import java.util.List;
 import java.util.Optional;
@@ -111,6 +113,7 @@ class OwnerPersistenceTest {
 
     }
 
+
     @DisplayName("ownerPersistence_CreateOwner")
     @Test
     public void create_owner_test()
@@ -118,7 +121,7 @@ class OwnerPersistenceTest {
         //Arrange
         int OwnerId = 1;
         Owner newOwner = new Owner (OwnerId, "Brian", "Smith", "940 Rue des Oiseaux", "Montreal", "1111111111",1);
-        Owner savedOwner = repository.save(newOwner);;
+        Owner savedOwner = repository.save(newOwner);
 
         //Act
         Owner foundSaved = repository.findById(savedOwner.getId()).orElse(null);
@@ -134,7 +137,7 @@ class OwnerPersistenceTest {
     public void update_owner_test()
     {
         // Arrange
-        int ownerId = 11;
+        int ownerId = 14;
         Owner newOwner = new Owner (ownerId,
                 "Brian",
                 "Smith",
@@ -142,9 +145,10 @@ class OwnerPersistenceTest {
                 "Montreal",
                 "1111111111",
                 1);
-        Owner savedOwner = repository.save(newOwner);;
+        Owner savedOwner = repository.save(newOwner);
         Owner foundSaved = repository.findById(savedOwner.getId()).orElse(null);
         assert foundSaved != null;
+        newOwner.setId(foundSaved.getId());
         assertThat(foundSaved, samePropertyValuesAs(newOwner));
 
         // Act
@@ -158,6 +162,18 @@ class OwnerPersistenceTest {
 
         // Assert
         assertEquals(savedUpdate, foundSaved);
+    }
+
+    private Owner buildOwner() {
+        return Owner.builder()
+                .id(1)
+                .firstName("Fred")
+                .lastName("Flintstone")
+                .address("54 Quarry Ave.")
+                .city("Bedrock")
+                .telephone("0000000004")
+                .build();
+
     }
 
 }
