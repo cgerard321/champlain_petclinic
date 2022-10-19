@@ -55,9 +55,9 @@ jacocoTestReport {
 	afterEvaluate {
 		classDirectories.setFrom(files(classDirectories.files.collect {
 			fileTree(dir: it, exclude: [
-					"com/petclinic/**/BillingServiceApplication.class",
-					"com/petclinic/**/BillControllerExceptionHandler.class",
-					"com/petclinic/**/HttpErrorInfo.class"
+					"com/petclinic/**/InventoryServiceApplication.class",
+					//"com/petclinic/**/InventoryControllerExceptionHandler.class",
+					//"com/petclinic/**/HttpErrorInfo.class"
 			])
 		}))
 	}
