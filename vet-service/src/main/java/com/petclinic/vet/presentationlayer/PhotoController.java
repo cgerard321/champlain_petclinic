@@ -2,6 +2,7 @@ package com.petclinic.vet.presentationlayer;
 
 import com.petclinic.vet.dataaccesslayer.Photo;
 import com.petclinic.vet.servicelayer.PhotoService;
+import com.petclinic.vet.util.EntityDtoUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
@@ -23,4 +24,14 @@ public class PhotoController {
         return photoService.getPhotoByPhotoId(photoId);
     }
 
+
+    @GetMapping("/{photoName}")
+    public Mono<Photo> getPhotoByPhotoName (@PathVariable String photoName){
+        return photoService.getPhotoByPhotoName(photoName);
+    }
+
+    @DeleteMapping(value = "/photo/{photoId}")
+    public Mono<Photo> deletePhoto(@PathVariable int photoId) {
+        return photoService.deletePhoto(photoId);
+    }
 }

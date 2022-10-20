@@ -10,4 +10,5 @@ public interface PhotoRepository extends ReactiveMongoRepository<Photo, String> 
     Mono<Photo> findPhotoByName(String name);
     Mono<Boolean> existsById(int id);
 
+    Mono<Photo> deletePhoto(int photoId);
 }
