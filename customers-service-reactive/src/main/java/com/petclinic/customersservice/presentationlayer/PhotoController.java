@@ -20,7 +20,7 @@ public class PhotoController {
     }
 
     @GetMapping("/{photoId}")
-    public Mono<Photo> getPhotoByPhotoId(@PathVariable int photoId) {
+    public Mono<Photo> getPhotoByPhotoId(@PathVariable String photoId) {
         return photoService.getPhotoByPhotoId(photoId);
     }
 

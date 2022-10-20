@@ -10,7 +10,7 @@ import org.springframework.data.annotation.Id;
 public class Photo {
 
     @Id
-    private String Id;
+    private String id;
     private String name;
     private String type;
     private String photo;

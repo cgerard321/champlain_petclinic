@@ -13,7 +13,7 @@ import java.util.Date;
 @NoArgsConstructor
 public class PetDTO {
 
-    private String Id;
+    private String id;
     private String ownerId;
     private String name;
     private Date birthDate;

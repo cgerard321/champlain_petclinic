@@ -2,6 +2,8 @@ package com.petclinic.customersservice.presentationlayer;
 
 import com.petclinic.customersservice.business.PetDTO;
 import com.petclinic.customersservice.business.PetDTOService;
+import com.petclinic.customersservice.business.PetService;
+import com.petclinic.customersservice.data.Pet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,11 +16,11 @@ import reactor.core.publisher.Mono;
 public class PetController {
 
     @Autowired
-    private PetDTOService petDTOService;
+    private PetService petService;
 
     @GetMapping("/{petId}")
-    public Mono<PetDTO> getPetDTOByPetId(@PathVariable String petId) {
-        return petDTOService.getPetDTOByPetId(petId);
+    public Mono<Pet> getPetDTOByPetId(@PathVariable String petId) {
+        return petService.getPetById(petId);
     }
 
 }
