@@ -17,5 +17,6 @@ public interface BillService {
 
     Flux<BillDTO> GetBillsByCustomerId(@RequestParam(value = "customerId", required = true) int customerId);
 
+    Flux<BillDTO> GetBillsByVetId(@RequestParam(value = "vetId", required = true) String vetId);
 
 }
