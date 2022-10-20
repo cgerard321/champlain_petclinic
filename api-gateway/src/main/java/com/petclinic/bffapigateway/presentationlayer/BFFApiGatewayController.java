@@ -79,6 +79,10 @@ public class BFFApiGatewayController {
     public Flux<Void> deleteBillsByCustomerId(final @PathVariable int customerId){
         return billServiceClient.deleteBillsByCustomerId(customerId);
     }
+    @DeleteMapping(value = "bills/vet/{vetId}")
+    public Flux<Void> deleteBillsByVetId(final @PathVariable String vetId){
+        return billServiceClient.deleteBillsByVetId(vetId);
+    }
 
     @DeleteMapping(value = "bills/vet/{vetId}")
     public Flux<Void> deleteBillsByVetId(final @PathVariable String vetId){
