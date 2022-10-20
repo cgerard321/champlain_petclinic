@@ -1,0 +1,13 @@
+package com.petclinic.vet.servicelayer;
+
+import com.petclinic.vet.dataaccesslayer.Photo;
+import reactor.core.publisher.Mono;
+
+public interface PhotoService {
+    Mono<Photo> insertPhoto(Mono<Photo> PhotoMono);
+
+    Mono<Photo> getPhotoByPhotoId(int photoId);
+
+    Mono<Void> deletePhoto(int photoId);
+
+}
