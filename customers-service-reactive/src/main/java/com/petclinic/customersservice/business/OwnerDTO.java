@@ -12,12 +12,13 @@ import java.util.List;
 @AllArgsConstructor
 public class OwnerDTO {
 
-    private int id;
+    private String id;
     private String firstName;
     private String lastName;
     private String address;
     private String city;
     private String telephone;
+    private String photoId;
     private Photo photo;
     private List<PetDTO> pets;
 
