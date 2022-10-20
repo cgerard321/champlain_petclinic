@@ -23,7 +23,12 @@ services:
 #        depends_on:
 #            mysql1:
 #                condition: service_healthy
-
+    inventory-service:
+      build: inventory-service
+      environment:
+        - SPRING_PROFILES_ACTIVE=docker
+#      depends_on:
+#        - mongo
 
     vet-service:
         build: vet-service
