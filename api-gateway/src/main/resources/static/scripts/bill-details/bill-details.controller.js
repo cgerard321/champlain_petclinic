@@ -10,5 +10,8 @@ angular.module('billDetails')
         $http.get('api/gateway/owners/' + $stateParams.ownerId).then(function (resp) {
             self.owner = resp.data;
         });
+        $http.get('api/gateway/vets/details/' + $stateParams.vetId).then(function (resp) {
+            self.vet = resp.data;
+        });
 
     }]);
