@@ -8,7 +8,7 @@ public interface PhotoService {
 
     Mono<Photo> insertPhoto(Mono<Photo> PhotoMono);
 
-    Mono<Photo> getPhotoByPhotoId(int photoId);
+    Mono<Photo> getPhotoByPhotoId(String photoId);
 
     Mono<Void> deletePhoto(int photoId);
 

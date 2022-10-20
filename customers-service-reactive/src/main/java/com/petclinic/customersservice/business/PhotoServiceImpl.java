@@ -19,7 +19,7 @@ public class PhotoServiceImpl implements PhotoService {
                 .flatMap(photoRepo::insert);
     }
     @Override
-    public Mono<Photo> getPhotoByPhotoId(int photoId) {
+    public Mono<Photo> getPhotoByPhotoId(String photoId) {
         return photoRepo.findPhotoById(photoId);
     }
 

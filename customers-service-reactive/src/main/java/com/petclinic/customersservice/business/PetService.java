@@ -6,6 +6,6 @@ import reactor.core.publisher.Mono;
 public interface PetService {
 
     Mono<Pet> insertPet(Mono<Pet> petMono);
-    Mono<Pet> getPetByPetId(int petId);
+    Mono<Pet> getPetById(String Id);
 
 }

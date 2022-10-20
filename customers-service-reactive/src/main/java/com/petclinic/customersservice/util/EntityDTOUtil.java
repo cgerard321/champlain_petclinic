@@ -28,12 +28,7 @@ public class EntityDTOUtil {
 
     public static PetDTO toPetDTO(Pet pet) {
         PetDTO petDTO = new PetDTO();
-        petDTO.setId(pet.getPetId());
-        petDTO.setName(pet.getName());
-        petDTO.setBirthDate(pet.getBirthDate());
-        petDTO.setOwnerId(pet.getOwnerId());
-        //petDTO.setPhoto(photoService.getPhotoByPhotoId(pet.getPhotoId()).block());
-        //petDTO.setPetType(petTypeService.getPetTypeByPetTypeId(pet.getPetTypeId()).block());
+        BeanUtils.copyProperties(pet, petDTO);
         return petDTO;
     }
 

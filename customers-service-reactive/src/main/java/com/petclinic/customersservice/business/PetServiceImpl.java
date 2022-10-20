@@ -19,7 +19,7 @@ public class PetServiceImpl implements PetService {
     }
 
     @Override
-    public Mono<Pet> getPetByPetId(int petId) {
-        return petRepo.findPetByPetId(petId);
+    public Mono<Pet> getPetById(String Id) {
+        return petRepo.findPetById(Id);
     }
 }

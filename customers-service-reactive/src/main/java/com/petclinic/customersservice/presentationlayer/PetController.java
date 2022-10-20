@@ -17,7 +17,7 @@ public class PetController {
     private PetDTOService petDTOService;
 
     @GetMapping("/{petId}")
-    public Mono<PetDTO> getPetDTOByPetId(@PathVariable int petId) {
+    public Mono<PetDTO> getPetDTOByPetId(@PathVariable String petId) {
         return petDTOService.getPetDTOByPetId(petId);
     }
 

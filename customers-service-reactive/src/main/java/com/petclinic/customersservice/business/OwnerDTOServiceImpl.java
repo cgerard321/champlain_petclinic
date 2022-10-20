@@ -14,7 +14,7 @@ public class OwnerDTOServiceImpl implements OwnerDTOService {
     private PetTypeServiceImpl petTypeService;
 
     @Override
-    public Mono<OwnerDTO> getOwnerAggregateByOwnerId(int ownerId) {
+    public Mono<OwnerDTO> getOwnerDTOByOwnerId(int ownerId) {
         return null;
     }
 }

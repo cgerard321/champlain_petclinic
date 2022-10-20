@@ -4,6 +4,6 @@ import reactor.core.publisher.Mono;
 
 public interface OwnerDTOService {
 
-    Mono<OwnerDTO> getOwnerAggregateByOwnerId(int ownerId);
+    public Mono<OwnerDTO> getOwnerDTOByOwnerId(int ownerId);
 
 }

@@ -13,10 +13,12 @@ import java.util.Date;
 @NoArgsConstructor
 public class PetDTO {
 
-    private int id;
-    private int ownerId;
+    private String Id;
+    private String ownerId;
     private String name;
     private Date birthDate;
+    private String petTypeId;
+    private String photoId;
     private PetType petType;
     private Photo photo;
 
