@@ -21,7 +21,7 @@ class PhotoControllerUnitTest {
 
     private Photo photo =buildPhoto();
 
-    private final int PHOTO_ID = photo.getId();
+    private final String PHOTO_ID = photo.getId();
 
     private final int PHOTO_ID_NOT_FOUND = 00;
 
@@ -57,7 +57,7 @@ class PhotoControllerUnitTest {
     private Photo buildPhoto() {
         final String test = "Test photo";
         return Photo.builder()
-                .id(3)
+                .id("3")
                 .name("test photo")
                 .type("jpeg")
                 .photo(test)

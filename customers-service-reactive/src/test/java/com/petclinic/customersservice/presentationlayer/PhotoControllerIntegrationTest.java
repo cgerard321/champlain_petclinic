@@ -112,7 +112,7 @@ class PhotoControllerIntegrationTest {
     private Photo buildPhoto() {
         final String test = "Test photo";
         return Photo.builder()
-                .id(2)
+                .id("2")
                 .name("test photo")
                 .type("jpeg")
                 .photo(test)

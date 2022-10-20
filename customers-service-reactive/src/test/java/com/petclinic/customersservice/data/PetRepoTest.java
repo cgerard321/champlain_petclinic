@@ -37,12 +37,12 @@ class PetRepoTest {
 
     private Pet buildPet() {
         return Pet.builder()
-                .id(55)
+                .id("55")
                 .name("Coco")
                 .birthDate(date)
-                .petTypeId(2)
-                .photoId(2)
-                .ownerId(2)
+                .petTypeId("2")
+                .photoId("2")
+                .ownerId("2")
                 .build();
     }
 

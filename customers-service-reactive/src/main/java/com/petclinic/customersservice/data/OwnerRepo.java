@@ -5,6 +5,9 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 
 @Repository
-public interface OwnerRepo extends ReactiveMongoRepository<Owner, Integer> {
+public interface OwnerRepo extends ReactiveMongoRepository<Owner, String> {
 
+    Mono<Owner> findById(String ownerId);
+
+    Mono<Void> deleteById(String ownerId);
 }

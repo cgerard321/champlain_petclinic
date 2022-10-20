@@ -7,8 +7,8 @@ public interface OwnerService {
 
     Mono<Owner> insertOwner(Mono<Owner> ownerMono);
 
-    Mono<Owner> getOwnerByOwnerId(int ownerId);
+    Mono<Owner> getOwnerByOwnerId(String Id);
 
-    Mono<Void> deleteOwner(int ownerId);
+    Mono<Void> deleteOwner(String Id);
 
 }
