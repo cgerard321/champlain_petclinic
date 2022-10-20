@@ -73,6 +73,10 @@ public class BFFApiGatewayController {
     public Mono<Void> deleteBill(final @PathVariable String billId){
         return billServiceClient.deleteBill(billId);
     }
+    @DeleteMapping(value = "bills/customer/{customerId}")
+    public Flux<Void> deleteBillsByCustomerId(final @PathVariable int customerId){
+        return billServiceClient.deleteBillsByCustomerId(customerId);
+    }
 
 
 
