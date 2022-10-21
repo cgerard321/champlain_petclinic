@@ -3,6 +3,7 @@
 angular.module('vetDetails')
     .controller('VetDetailsController', ['$http', '$stateParams', function ($http, $stateParams) {
         var self = this;
+        //var vetId = $stateParams.vetId || 0;
 
         /* added /{{vet.vetID}} in the url */
         $http.get('api/gateway/vets/' + $stateParams.vetId).then(function (resp) {
