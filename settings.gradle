@@ -6,5 +6,3 @@ include 'api-gateway'
 include 'billing-service'
 include 'auth-service'
 include 'vet-service'
-include 'bill-aggregate'
-
