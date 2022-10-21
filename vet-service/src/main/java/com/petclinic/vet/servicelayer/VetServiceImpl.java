@@ -59,6 +59,12 @@ public class VetServiceImpl implements VetService {
     }
 
     @Override
+    public Mono<VetDTO> getVetByVetBillId(String vetBillId) {
+       return  vetRepository.findVetByVetBillId(vetBillId)
+                .map(EntityDtoUtil::toDTO);
+    }
+
+    @Override
     public Flux<VetDTO> getVetByIsActive(boolean isActive) {
         return vetRepository.findVetsByActive(isActive)
                 .map(EntityDtoUtil::toDTO);
