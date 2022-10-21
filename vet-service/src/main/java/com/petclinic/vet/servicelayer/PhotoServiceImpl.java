@@ -21,12 +21,11 @@ public class PhotoServiceImpl implements PhotoService{
         return photoRepo.findPhotoById(photoId);
     }
 
-    @Override
-    public Mono<Photo> getPhotoByPhotoName (String photoName) { return photoRepo.findPhotoByName(photoName); }
-
-    @Override
+//    @Override
+//    public Mono<Photo> getPhotoByPhotoName (String photoName) { return photoRepo.findPhotoByName(photoName); }
+//    @Override
     public Mono<Photo> deletePhoto(int photoId) {
-        return photoRepo.deletePhoto(photoId);
+        return null;
     }
 }
 

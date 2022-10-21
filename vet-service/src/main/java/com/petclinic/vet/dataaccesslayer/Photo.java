@@ -12,7 +12,7 @@ import org.springframework.data.annotation.Id;
 @AllArgsConstructor
 public class Photo {
     @Id
-    private int id;
+    private String id;
     private String photoName;
     private String type;
     private String photo;

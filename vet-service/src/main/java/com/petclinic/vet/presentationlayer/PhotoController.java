@@ -25,13 +25,13 @@ public class PhotoController {
     }
 
 
-    @GetMapping("/{photoName}")
-    public Mono<Photo> getPhotoByPhotoName (@PathVariable String photoName){
-        return photoService.getPhotoByPhotoName(photoName);
-    }
+//    @GetMapping("/{photoName}")
+//    public Mono<Photo> getPhotoByPhotoName (@PathVariable String photoName){
+//        return photoService.getPhotoByPhotoName(photoName);
+//    }
 
-    @DeleteMapping(value = "/photo/{photoId}")
-    public Mono<Photo> deletePhoto(@PathVariable int photoId) {
-        return photoService.deletePhoto(photoId);
-    }
+//    @DeleteMapping(value = "/photo/{photoId}")
+//    public Mono<Photo> deletePhoto(@PathVariable String photoId) {
+//        return photoService.deletePhoto(photoId);
+//    }
 }
