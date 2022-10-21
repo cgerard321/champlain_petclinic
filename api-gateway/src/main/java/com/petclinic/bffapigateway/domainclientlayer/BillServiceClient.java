@@ -41,7 +41,7 @@ public class BillServiceClient {
                 .retrieve()
                 .bodyToFlux(BillDetails.class);
     }
-    public Flux<BillDetails> getBillsByVetId(final int vetId) {
+    public Flux<BillDetails> getBillsByVetId(final String vetId) {
         return webClientBuilder.build().get()
                 .uri(billServiceUrl + "/vet/{vetId}", vetId)
                 .retrieve()
