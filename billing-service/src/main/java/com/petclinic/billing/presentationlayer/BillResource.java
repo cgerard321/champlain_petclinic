@@ -43,7 +43,7 @@ public class BillResource {
     }
 
     @GetMapping(value="/bills/vet/{vetId}")
-    public Flux<BillDTO> getBillsByVetId(@PathVariable("vetId") int vetId)
+    public Flux<BillDTO> getBillsByVetId(@PathVariable("vetId") String vetId)
     {
         return SERVICE.GetBillsByVetId(vetId);
     }
@@ -64,8 +64,8 @@ public class BillResource {
 
     @DeleteMapping(value="/bills/vet/{vetIntId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public Flux<Void> deleteBillsByVetId (@PathVariable("vetIntId") int vetIntId)
+    public Flux<Void> deleteBillsByVetId (@PathVariable("vetId") String vetId)
     {
-        return SERVICE.DeleteBillsByVetId(vetIntId);
+        return SERVICE.DeleteBillsByVetId(vetId);
     }
 }
