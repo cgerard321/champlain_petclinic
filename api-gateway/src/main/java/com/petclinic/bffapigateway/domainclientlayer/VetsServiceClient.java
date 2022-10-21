@@ -57,6 +57,20 @@ public class VetsServiceClient {
         return vetDTOMono;
     }
 
+    public Mono<VetDTO> getVetByVetBillId(String vetBillId) {
+        Mono<VetDTO> vetDTOMono =
+                webClientBuilder
+                        .build()
+                        .get()
+                        .uri(vetsServiceUrl + "/vetBillId/{vetBillId}", vetBillId)
+                        .retrieve()
+                        .bodyToMono(VetDTO.class);
+
+        return vetDTOMono;
+    }
+
+
+
     public Flux<VetDTO> getInactiveVets() {
         Flux<VetDTO> vetDTOFlux =
                 webClientBuilder
