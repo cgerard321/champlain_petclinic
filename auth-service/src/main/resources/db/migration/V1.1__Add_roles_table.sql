@@ -13,3 +13,5 @@ CREATE TABLE auth.roles(
         FOREIGN KEY(parent_id) REFERENCES auth.roles(id),
         PRIMARY KEY(id)
 );
+
+INSERT IGNORE INTO roles (id, name) VALUES (1, 'admin');
