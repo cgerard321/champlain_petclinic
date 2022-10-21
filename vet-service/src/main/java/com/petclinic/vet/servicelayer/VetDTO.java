@@ -23,6 +23,7 @@ import java.util.Set;
 @AllArgsConstructor
 public class VetDTO {
     private String vetId;
+    private int vetIntId;
     private String firstName;
     private String lastName;
     private String email;

@@ -41,7 +41,7 @@ public class BillServiceClient {
                 .retrieve()
                 .bodyToFlux(BillDetails.class);
     }
-    public Flux<BillDetails> getBillsByVetId(final String vetId) {
+    public Flux<BillDetails> getBillsByVetId(final int vetId) {
         return webClientBuilder.build().get()
                 .uri(billServiceUrl + "/vet/{vetId}", vetId)
                 .retrieve()
@@ -78,7 +78,7 @@ public class BillServiceClient {
                 .bodyToFlux(Void.class);
     }
 
-    public Flux<Void> deleteBillsByVetId(final String vetId) {
+    public Flux<Void> deleteBillsByVetId(final int vetId) {
         return webClientBuilder.build()
                 .delete()
                 .uri(billServiceUrl + "/vet/{vetId}", vetId)

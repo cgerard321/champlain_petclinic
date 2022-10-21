@@ -15,12 +15,15 @@
     <tr id="customerId" ng-repeat="bill in $ctrl.billsByOwnerId">
         <td>{{bill.billId}}</td>
         <td>{{bill.customerId}}</td>
-        <td><a href="http://localhost:8080/#!/owners/details/{{bill.customerId}}">Owner Details</a></td>
-        <td><a href="http://localhost:8080/#!/bills/details/{{bill.billId}}/owner/{{bill.customerId}}">Bill Details</a></td>
-        <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteBill(bill.billId)">Delete Bill</a></td>
+        <td><a href="http://localhost:8080/#!/owners/details/{{bill.customerId}}">
+            Owner Details</a></td>
+        <td><a href="http://localhost:8080/#!/bills/details/{{bill.billId}}/owner/{{bill.customerId}}/vet/{{bill.vetId}}">
+            Bill Details</a></td>
+        <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteBill(bill.billId)">
+            Delete Bill</a></td>
     </tr>
 </table>
 <a class="newBtn btn btn-primary" href="http://localhost:8080/#!/bills">
     View all Bills</a>
-<a class="newBtn btn btn-primary" >
+<a class="newBtn btn btn-danger" href="javascript:void(0)" ng-click="deleteBillsByOwnerId(bill.customerId)">
     Delete all Bills by Owner</a>

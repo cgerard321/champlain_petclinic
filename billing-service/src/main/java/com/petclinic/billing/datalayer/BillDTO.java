@@ -15,11 +15,11 @@ public class BillDTO {
     private String billId;
     private int customerId;
     private String visitType;
-    private String vetId;
+    private int vetId;
     private Date date;
     private double amount;
 
-    public BillDTO(int customerId, String visitType, String vetId, Date date, double amount) {
+    public BillDTO(int customerId, String visitType, int vetId, Date date, double amount) {
         this.customerId = customerId;
         this.visitType = visitType;
         this.vetId = vetId;
