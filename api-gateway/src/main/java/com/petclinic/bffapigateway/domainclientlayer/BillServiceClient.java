@@ -78,7 +78,7 @@ public class BillServiceClient {
                 .bodyToFlux(Void.class);
     }
 
-    public Flux<Void> deleteBillsByVetId(final int vetId) {
+    public Flux<Void> deleteBillsByVetId(final String vetId) {
         return webClientBuilder.build()
                 .delete()
                 .uri(billServiceUrl + "/vet/{vetId}", vetId)
