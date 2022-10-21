@@ -58,7 +58,7 @@ public class BillServiceImpl implements BillService{
         return billRepository.deleteBillsByCustomerId(customerId);
     }
     @Override
-    public Flux<Void> DeleteBillsByVetId(int vetId) {
+    public Flux<Void> DeleteBillsByVetId(String vetId) {
         return billRepository.deleteBillsByVetId(vetId);
     }
 
@@ -70,7 +70,7 @@ public class BillServiceImpl implements BillService{
     }
 
     @Override
-    public Flux<BillDTO> GetBillsByVetId(int vetId) {
+    public Flux<BillDTO> GetBillsByVetId(String vetId) {
         return billRepository.findByVetId(vetId).map(EntityDtoUtil::toDto);
     }
 }

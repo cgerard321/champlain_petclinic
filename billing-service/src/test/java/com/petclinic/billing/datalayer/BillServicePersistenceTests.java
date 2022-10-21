@@ -72,6 +72,25 @@ public class BillServicePersistenceTests {
                 .verifyComplete();
 
     }
+    @Test
+    void shouldFindBillByVetId(){
+
+        Bill bill = buildBill();
+
+        Publisher<Bill> setup = repo.deleteAll().thenMany(repo.save(buildBill()));
+        Publisher<Bill> find = repo.findByVetId(bill.getVetId());
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        StepVerifier
+                .create(find)
+                .expectNextCount(1)
+                .verifyComplete();
+
+    }
 
     @Test
     void shouldDeleteBillByBillUUID(){

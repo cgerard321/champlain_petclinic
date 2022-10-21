@@ -62,10 +62,10 @@ public class BillResource {
         return SERVICE.DeleteBillsByCustomerId(customerId);
     }
 
-    @DeleteMapping(value="/bills/vet/{vetId}")
+    @DeleteMapping(value="/bills/vet/{vetIntId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public Flux<Void> deleteBillsByVetId (@PathVariable("vetId") int vetId)
+    public Flux<Void> deleteBillsByVetId (@PathVariable("vetIntId") int vetIntId)
     {
-        return SERVICE.DeleteBillsByVetId(vetId);
+        return SERVICE.DeleteBillsByVetId(vetIntId);
     }
 }
