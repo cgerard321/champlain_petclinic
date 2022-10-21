@@ -12,7 +12,6 @@
     <thead>
         <tr>
             <td>Bill ID</td>
-            <td>Owner ID</td>
             <td>Vet</td>
             <td>Owner</td>
             <td>Visit Type</td>
@@ -25,13 +24,13 @@
 
     <tr id="billId" ng-repeat="bill in $ctrl.billHistory | filter:$ctrl.query track by bill.billId">
         <td>{{bill.billId}}</td>
-        <td>{{bill.customerId}}</td>
-        <td><a href="http://localhost:8080/#!/vets/details/{{bill.VetId}}">Vet</a></td>
+        <td><a href="http://localhost:8080/#!/vets/details/{{bill.vetId}}">Vet</a></td>
         <td><a href="http://localhost:8080/#!/owners/details/{{bill.customerId}}">Owner</a></td>
         <td>{{bill.visitType}}</td>
         <td>{{bill.amount}}</td>
         <td>{{bill.date}}</td>
-        <td><a href="http://localhost:8080/#!/bills/details/{{bill.billId}}/owner/{{bill.customerId}}">Get Details</a></td>
+        <td><a href="http://localhost:8080/#!/bills/details/{{bill.billId}}/owner/{{bill.customerId}}/vet/{{bill.vetId}}">
+            Get Details</a></td>
         <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteBill(bill.billId)">Delete Bill</a></td>
     </tr>
 </table>
