@@ -70,7 +70,7 @@ public class BillServiceImpl implements BillService{
     }
 
     @Override
-    public Flux<BillDTO> GetBillsByVetId(String vetId) {
-        return billRepository.findByVetId(vetId).map(EntityDtoUtil::toDto);
+    public Flux<BillDTO> GetBillsByVetId(String vetBillId) {
+        return billRepository.findByVetId(vetBillId).map(EntityDtoUtil::toDto);
     }
 }
