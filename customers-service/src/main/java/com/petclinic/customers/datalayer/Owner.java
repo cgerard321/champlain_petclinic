@@ -25,9 +25,10 @@ import java.util.*;
  */
 
 @Entity
+@Table(name = "owners")
 @Builder
 @AllArgsConstructor
-@Table(name = "owners")
+@NoArgsConstructor
 public class Owner {
 
     @Id
@@ -63,10 +64,11 @@ public class Owner {
     private Set<Pet> pets;
 
 
-    public Owner()
-    {
 
-    }
+//    @Column(name = "custodian")
+//    private String custodian;
+
+
     public Owner(@NotEmpty  Integer id, @NotEmpty String firstName, @NotEmpty String lastName,
                  @NotEmpty String address, @NotEmpty String city, @NotEmpty @Digits(fraction = 0, integer = 10) String telephone, @NotEmpty int imageId) {
         this.id = id;

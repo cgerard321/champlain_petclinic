@@ -1,0 +1,47 @@
+server:
+  error:
+    include-message: always
+
+logging:
+  level:
+    root: INFO
+    com.petclinic: DEBUG
+
+spring:
+  config:
+    activate:
+      on-profile: default
+  data:
+    mongodb:
+      port: 0
+      database: visits
+  mongodb:
+    embedded:
+      version: 4.0.21
+
+---
+spring:
+  config:
+    activate:
+      on-profile: integration
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: visits
+      username: root
+      password: password
+      authentication-database: admin
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+  data:
+    mongodb:
+      host: mongo2
+      port: 27017
+      database: visits
+      username: root
+      password: password
+      authentication-database: admin
