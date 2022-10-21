@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -40,6 +41,38 @@ class OwnerServiceImplTest {
             assertEquals(ownerEntity.getPhotoId(), foundOwner.getPhotoId());
         })
                 .verifyComplete();
+    }
+
+    @Test
+    public void deleteOwner() {
+
+        Owner owner = buildOwner();
+        int OWNER_ID = owner.getId();
+
+        when(repo.deleteById(anyInt())).thenReturn(Mono.empty());
+
+        Mono<Void> ownerDelete = ownerService.deleteOwner(OWNER_ID);
+
+        StepVerifier
+                .create(ownerDelete)
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
+    @Test
+    public void deleteOwnerNotFound() {
+
+        Owner owner = buildOwner();
+        int OWNER_ID = 00;
+
+        when(repo.deleteById(anyInt())).thenReturn(Mono.empty());
+
+        Mono<Void> ownerDelete = ownerService.deleteOwner(OWNER_ID);
+
+        StepVerifier
+                .create(ownerDelete)
+                .expectNextCount(1)
+                .expectError();
     }
 
     private Owner buildOwner() {

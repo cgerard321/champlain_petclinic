@@ -7,6 +7,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.*;
 import com.petclinic.customersservice.data.Photo;
@@ -48,6 +49,38 @@ class PetServiceImplTest {
                     assertEquals(petEntity.getBirthDate(), foundPet.getBirthDate());
                 })
                 .verifyComplete();
+    }
+
+    @Test
+    public void deletePet() {
+
+        Pet pet = buildPet();
+        int PET_ID = pet.getId();
+
+        when(repo.deleteById(anyInt())).thenReturn(Mono.empty());
+
+        Mono<Void> petDelete = petService.deletePet(PET_ID);
+
+        StepVerifier
+                .create(petDelete)
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
+    @Test
+    public void deletePetNotFound() {
+
+        Pet pet = buildPet();
+        int PET_ID = 00;
+
+        when(repo.deleteById(anyInt())).thenReturn(Mono.empty());
+
+        Mono<Void> petDelete = petService.deletePet(PET_ID);
+
+        StepVerifier
+                .create(petDelete)
+                .expectNextCount(1)
+                .expectError();
     }
 
     Date date = new Date(20221010);

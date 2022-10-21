@@ -62,22 +62,18 @@ angular.module('vetList')
         $scope.refreshList = self.vetList;
 
         $scope.ReloadData = function () {
-            self.vetList = FilterList();
-            $http.get('api/gateway/vets').then(function (resp) {
+            let url = 'api/gateway/vets';
+            let optionSelection = document.getElementById("filterOption").value;
+            if (optionSelection === "Active") {
+                console.log("Get active");
+                url+= '/active';
+            } else if (optionSelection === "Inactive") {
+                console.log("Get inactive");
+                url+= '/inactive';
+            }
+            $http.get(url).then(function (resp) {
+                self.vetList = resp.data;
                 arr = resp.data;
             });
         }
     }]);
-
-function FilterList() {
-    let optionSelection = document.getElementById("filterOption").value;
-    if (optionSelection === "Available") {
-        arr = arr.filter(v => v.isActive === 1);
-        return arr;
-    } else if (optionSelection === "Unavailable") {
-        arr = arr.filter(v => v.isActive === 0);
-        return arr;
-    } else {
-        return arr;
-    }
-}

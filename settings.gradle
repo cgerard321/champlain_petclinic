@@ -5,6 +5,9 @@ include 'visits-service'
 include 'api-gateway'
 include 'billing-service'
 include 'auth-service'
+include 'visits-service-new'
 include 'vet-service'
 include 'bill-aggregate'
+include 'inventory-service'
+
 

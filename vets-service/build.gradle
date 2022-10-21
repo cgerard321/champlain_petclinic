@@ -1,8 +1,4 @@
-/**
- * User: @SmoothWin
- * Date: 16/10/21
- * Ticket: feat(VETS-CPC-376)
- */
+
 plugins {
     id 'org.springframework.boot' version '2.3.2.RELEASE'
     id 'io.spring.dependency-management' version '1.0.9.RELEASE'
@@ -47,7 +43,8 @@ dependencies {
 
 }
 jacoco {
-    toolVersion = "0.8.6"
+    toolVersion = "0.8.8"
+    reportsDirectory = layout.buildDirectory.dir('customJacocoReportDir')
 }
 
 jacocoTestReport {
