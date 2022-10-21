@@ -137,7 +137,7 @@ public class BillServiceImplTest {
 
         Bill billEntity = buildBill();
 
-        String VET_ID = billEntity.getVetId();
+        String VET_ID = billEntity.getVetBillId();
 
         when(repo.findByVetId(anyString())).thenReturn(Flux.just(billEntity));
 
@@ -146,7 +146,7 @@ public class BillServiceImplTest {
         StepVerifier.create(billDTOMono)
                 .consumeNextWith(foundBill -> {
                     assertEquals(billEntity.getBillId(), foundBill.getBillId());
-                    assertEquals(billEntity.getVetId(), foundBill.getVetId());
+                    assertEquals(billEntity.getVetBillId(), foundBill.getVetBillId());
                     assertEquals(billEntity.getVisitType(), foundBill.getVisitType());
                 })
                 .verifyComplete();

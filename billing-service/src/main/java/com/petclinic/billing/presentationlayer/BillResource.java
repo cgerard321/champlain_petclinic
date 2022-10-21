@@ -42,10 +42,10 @@ public class BillResource {
         return SERVICE.GetBillsByCustomerId(customerId);
     }
 
-    @GetMapping(value="/bills/vet/{vetId}")
-    public Flux<BillDTO> getBillsByVetId(@PathVariable("vetId") String vetId)
+    @GetMapping(value="/bills/vet/{vetBillId}")
+    public Flux<BillDTO> getBillsByVetId(@PathVariable("vetBillId") String vetBillId)
     {
-        return SERVICE.GetBillsByVetId(vetId);
+        return SERVICE.GetBillsByVetId(vetBillId);
     }
 
     // Delete Bill //
@@ -62,10 +62,10 @@ public class BillResource {
         return SERVICE.DeleteBillsByCustomerId(customerId);
     }
 
-    @DeleteMapping(value="/bills/vet/{vetIntId}")
+    @DeleteMapping(value="/bills/vet/{vetBillId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public Flux<Void> deleteBillsByVetId (@PathVariable("vetId") String vetId)
+    public Flux<Void> deleteBillsByVetId (@PathVariable("vetBillId") String vetBillId)
     {
-        return SERVICE.DeleteBillsByVetId(vetId);
+        return SERVICE.DeleteBillsByVetId(vetBillId);
     }
 }

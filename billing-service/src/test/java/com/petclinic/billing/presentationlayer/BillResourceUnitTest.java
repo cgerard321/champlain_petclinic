@@ -30,7 +30,7 @@ class BillResourceUnitTest {
     private BillDTO dto = buildBillDTO();
     private final String BILL_ID_OK = dto.getBillId();
     private final int CUSTOMER_ID_OK = dto.getCustomerId();
-    private final String VET_ID_OK = dto.getVetId();
+    private final String VET_ID_OK = dto.getVetBillId();
 
     @Autowired
     private WebTestClient client;
@@ -124,14 +124,14 @@ class BillResourceUnitTest {
         when(billService.GetBillsByVetId(anyString())).thenReturn(Flux.just(dto));
 
         client.get()
-                .uri("/bills/vet/" + dto.getVetId())
+                .uri("/bills/vet/" + dto.getVetBillId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$[0].visitType").isEqualTo(dto.getVisitType())
-                .jsonPath("$[0].vetId").isEqualTo(dto.getVetId())
+                .jsonPath("$[0].vetId").isEqualTo(dto.getVetBillId())
                 .jsonPath("$[0].amount").isEqualTo(dto.getAmount());
 
         Mockito.verify(billService, times(1)).GetBillsByVetId(VET_ID_OK);

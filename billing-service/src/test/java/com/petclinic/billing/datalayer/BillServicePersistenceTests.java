@@ -78,7 +78,7 @@ public class BillServicePersistenceTests {
         Bill bill = buildBill();
 
         Publisher<Bill> setup = repo.deleteAll().thenMany(repo.save(buildBill()));
-        Publisher<Bill> find = repo.findByVetId(bill.getVetId());
+        Publisher<Bill> find = repo.findByVetId(bill.getVetBillId());
 
         StepVerifier
                 .create(setup)
