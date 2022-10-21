@@ -41,7 +41,7 @@ angular.module('vetDetails')
         });
 
         self.init = function (id){
-            $http.get('api/gateway/vets/' + $stateParams.vetId + '/vet/photo/' + id).then(function (resp) {
+            $http.get('api/gateway/vets/' + $stateParams.vetId + '/vets/photo/' + id).then(function (resp) {
                 self.vetPhoto = resp.data;
             });
         }
