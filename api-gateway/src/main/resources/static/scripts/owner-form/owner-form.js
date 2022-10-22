@@ -13,4 +13,9 @@ angular.module('ownerForm', ['ui.router'])
                 url: '/owners/:ownerId/:method',
                 template: '<owner-form></owner-form>'
             })
+            // .state('ownerEdit', {
+            //     parent: 'app',
+            //     url: '/owners/:ownerId/deleteOwner',
+            //     template: '<owner-form></owner-form>'
+            // })
     }]);

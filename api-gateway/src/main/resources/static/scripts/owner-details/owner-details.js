@@ -9,7 +9,6 @@ angular.module('ownerDetails', ['ui.router'])
                 params: {ownerId: null},
                 template: '<owner-details></owner-details>'
             })
-
     }]);
 
 

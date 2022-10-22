@@ -32,10 +32,6 @@
         <td>
             <a class="newBtn btn-default btn" style="background-color: royalblue; color: white" ui-sref="ownerEdit({ownerId: $ctrl.owner.id, method: 'edit'})">Edit Owner</a>
         </td>
-        <td>
-
-            <a class="newBtn btn-default btn btn-danger" style="background-color: #dc3545;" ui-sref="ownerEdit({ownerId: $ctrl.owner.id, method: 'delete'})">Delete Owner</a>
-        </td>
     </tr>
 </table>
 
@@ -68,7 +64,8 @@
                 <dd>{{pet.birthDate | date:'yyyy MMM dd'}}</dd>
                 <dt>Type</dt>
                 <dd>{{pet.type.name}}</dd>
-                <a class="newBtn btn-default btn btn-danger" style="background-color: #dc3545;" ui-sref="deletePet({ownerId: $ctrl.owner.id, petId: pet.id, method: 'delete'})">Delete Pet</a>
+               <a class="newBtn btn-default btn btn-danger" style="background-color: #dc3545;" ui-sref="deletePet({ownerId: $ctrl.owner.id, petId: pet.id, method: 'delete'})">Delete Pet</a>
+
             </dl>
         </td>
         <td valign="top">
