@@ -26,7 +26,7 @@ public class OwnerDTOController {
 //    public Mono<OwnerDTO> getOwnerDTOByOwnerId(@PathVariable String ownerId) {
 //        return ownerDTOService.getOwnerDTOByOwnerId(ownerId);
 //    }
-    @GetMapping("/{ownderId}")
+    @GetMapping("/{ownerId}")
     public Mono<Owner> getOwnerByOwnerId(@PathVariable String ownerId) {
         return ownerService.getOwnerByOwnerId(ownerId);
     }
