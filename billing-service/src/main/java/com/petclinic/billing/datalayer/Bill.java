@@ -20,6 +20,7 @@ public class Bill {
     private int customerId;
     private String visitType;
     private String vetId;
+    private int vetIntId;
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date visitDate = new Date();
     private double amount;
