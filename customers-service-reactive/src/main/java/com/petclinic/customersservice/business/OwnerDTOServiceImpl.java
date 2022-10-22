@@ -18,26 +18,20 @@ public class OwnerDTOServiceImpl implements OwnerDTOService {
 
     @Override
     public Mono<OwnerDTO> getOwnerDTOByOwnerId(String ownerId) {
-        return ownerService.getOwnerByOwnerId(ownerId)
-                .map(EntityDTOUtil::toOwnerDTO)
-                .flatMap(x -> photoService.getPhotoByPhotoId(x.getPhotoId())
-                        .map(y -> {
-                            x.setPhoto(y);
-                            return x;
-                        }))
-                .flatMap(x -> petDTOService.getPetsByOwnerId(x.getId())
-                        .collectList()
-                        .map((list) -> {
-                            return new OwnerDTO(x.getId(),
-                                    x.getFirstName(),
-                                    x.getLastName(),
-                                    x.getAddress(),
-                                    x.getCity(),
-                                    x.getTelephone(),
-                                    x.getPhoto(),
-                                    x.getPets(),list);
-                        })
-
-                );
+        return null;
+                //ownerService.getOwnerByOwnerId(ownerId)
+//                .map(EntityDTOUtil::toOwnerDTO)
+//                .flatMap(x -> photoService.getPhotoByPhotoId(x.getPhotoId())
+//                        .map(y -> {
+//                            x.setPhoto(y);
+//                            return x;
+//                        }))
+//                .flatMap(x -> petDTOService.getPetsByOwnerId(x.getId())
+//                        .collectList()
+//                        .map((list) -> {
+//                            return new PetDTO();
+//                        })
+//
+//                );
     }
 }
