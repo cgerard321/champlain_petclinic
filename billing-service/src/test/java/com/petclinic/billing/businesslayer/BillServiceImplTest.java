@@ -145,6 +145,26 @@ public class BillServiceImplTest {
                 .verifyComplete();
     }
 
+    @Test
+    public void test_GetBillByVetId(){
+
+        Bill billEntity = buildBill();
+
+        String VET_ID = billEntity.getVetId();
+
+        when(repo.findByVetId(anyString())).thenReturn(Flux.just(billEntity));
+
+        Flux<BillDTO> billDTOMono = billService.GetBillsByVetId(VET_ID);
+
+        StepVerifier.create(billDTOMono)
+                .consumeNextWith(foundBill -> {
+                    assertEquals(billEntity.getBillId(), foundBill.getBillId());
+                    assertEquals(billEntity.getAmount(), foundBill.getAmount());
+                    assertEquals(billEntity.getVisitType(), foundBill.getVisitType());
+                })
+                .verifyComplete();
+    }
+
 
     private Bill buildBill(){
 
