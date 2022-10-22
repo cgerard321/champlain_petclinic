@@ -14,4 +14,4 @@ CREATE TABLE auth.roles(
         PRIMARY KEY(id)
 );
 
-INSERT IGNORE INTO roles (id, name) VALUES (1, 'admin');
+INSERT INTO roles (id, name) VALUES (1, 'CLIENT');
