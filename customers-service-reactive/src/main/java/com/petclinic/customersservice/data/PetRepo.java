@@ -14,7 +14,7 @@ public interface PetRepo extends ReactiveMongoRepository<Pet, String> {
 //    Flux<PetType> findPetTypes();
 //    Optional<PetType> findPetTypeById();
 
-    Mono<Pet> findPetByOwnerId(String ownerId);
+    Flux<Pet> findPetsByOwnerId(String ownerId);
 
     Mono<Pet> findPetById(String Id);
 

@@ -5,14 +5,13 @@ import lombok.*;
 
 import java.util.List;
 
-@NoArgsConstructor
-@Getter
-@Setter
+@Data
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class OwnerDTO {
 
-    private String id;
+    private String Id;
     private String firstName;
     private String lastName;
     private String address;
