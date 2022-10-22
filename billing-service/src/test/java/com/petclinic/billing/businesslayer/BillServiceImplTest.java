@@ -112,7 +112,19 @@ public class BillServiceImplTest {
                 .verifyComplete();
     }
 
+    @Test
+    public void test_DeleteBillByVetId(){
 
+        Bill billEntity = buildBill();
+
+        when(repo.deleteBillsByVetId(anyString())).thenReturn(Flux.empty());
+
+        Flux<Void> deletedObj = billService.DeleteBillsByVetId(billEntity.getVetId());
+
+        StepVerifier.create(deletedObj)
+                .expectNextCount(0)
+                .verifyComplete();
+    }
     @Test
     public void test_GetBillByCustomerId(){
 
@@ -141,7 +153,7 @@ public class BillServiceImplTest {
         Date date = calendar.getTime();
 
 
-        return Bill.builder().id("Id").billId("BillUUID").customerId(1).visitType("Test Type").visitDate(date).amount(13.37).build();
+        return Bill.builder().id("Id").billId("BillUUID").customerId(1).vetId("1").visitType("Test Type").visitDate(date).amount(13.37).build();
     }
 
     private BillDTO buildBillDTO(){
@@ -151,7 +163,7 @@ public class BillServiceImplTest {
         Date date = calendar.getTime();
 
 
-        return BillDTO.builder().billId("BillUUID").customerId(1).visitType("Test Type").date(date).amount(13.37).build();
+        return BillDTO.builder().billId("BillUUID").customerId(1).vetId("1").visitType("Test Type").date(date).amount(13.37).build();
     }
 
 }
