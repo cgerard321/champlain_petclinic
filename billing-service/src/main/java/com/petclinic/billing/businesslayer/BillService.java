@@ -17,5 +17,7 @@ public interface BillService {
 
     Flux<BillDTO> GetBillsByCustomerId(@RequestParam(value = "customerId", required = true) int customerId);
 
+    Flux<Void> DeleteBillsByVetId(@RequestParam(value="vetId", required = true) String vetId);
+
 
 }
