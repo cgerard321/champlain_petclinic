@@ -134,7 +134,29 @@ class BillResourceIntegrationTest {
                 .jsonPath("$[0].customerId").isEqualTo(billEntity.getCustomerId())
                 .jsonPath("$[0].amount").isEqualTo(billEntity.getAmount());
     }
+    @Test
+    void getBillByVetId() {
 
+        Bill billEntity = buildBill();
+
+        Publisher<Bill> setup = repo.deleteAll().thenMany(repo.save(billEntity));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        client.get()
+                .uri("/bills/vet/" + billEntity.getVetId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$[0].visitType").isEqualTo(billEntity.getVisitType())
+                .jsonPath("$[0].vetId").isEqualTo(billEntity.getVetId())
+                .jsonPath("$[0].amount").isEqualTo(billEntity.getAmount());
+    }
     @Test
     void deleteBillByBillId() {
 
@@ -165,6 +187,6 @@ class BillResourceIntegrationTest {
         Date date = calendar.getTime();
 
 
-        return Bill.builder().id("Id").billId("BillUUID").customerId(1).visitType("Test Type").visitDate(date).amount(13.37).build();
+        return Bill.builder().id("Id").billId("BillUUID").customerId(1).vetId("1").visitType("Test Type").visitDate(date).amount(13.37).build();
     }
 }

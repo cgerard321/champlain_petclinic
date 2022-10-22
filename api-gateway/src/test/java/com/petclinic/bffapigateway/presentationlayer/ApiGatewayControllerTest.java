@@ -848,6 +848,28 @@ class ApiGatewayControllerTest {
                 .jsonPath("$[0].amount").isEqualTo(499)
                 .jsonPath("$[0].visitType").isEqualTo("Test");
         }
+
+    @Test
+    public void getBillsByVetId(){
+        BillDetails bill = new BillDetails();
+        bill.setBillId(UUID.randomUUID().toString());
+        bill.setVetId("1");
+        bill.setAmount(499);
+        bill.setVisitType("Test");
+
+        when(billServiceClient.getBillsByVetId(bill.getVetId()))
+                .thenReturn(Flux.just(bill));
+
+        client.get()
+                .uri("/api/gateway/bills/vet/{vetId}", bill.getVetId())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$[0].billId").isEqualTo(bill.getBillId())
+                .jsonPath("$[0].vetId").isEqualTo("1")
+                .jsonPath("$[0].amount").isEqualTo(499)
+                .jsonPath("$[0].visitType").isEqualTo("Test");
+    }
     @Test
     void getBillingByRequestMissingPath(){
         client.get()

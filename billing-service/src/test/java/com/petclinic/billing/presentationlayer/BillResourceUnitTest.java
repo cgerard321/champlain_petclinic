@@ -30,6 +30,7 @@ class BillResourceUnitTest {
     private BillDTO dto = buildBillDTO();
     private final String BILL_ID_OK = dto.getBillId();
     private final int CUSTOMER_ID_OK = dto.getCustomerId();
+    private final String VET_ID_OK = dto.getVetId();
 
     @Autowired
     private WebTestClient client;
@@ -117,7 +118,26 @@ class BillResourceUnitTest {
 
 
     }
+    @Test
+    void getBillByVetId() {
 
+        when(billService.GetBillsByVetId(anyString())).thenReturn(Flux.just(dto));
+
+        client.get()
+                .uri("/bills/vet/" + dto.getVetId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$[0].visitType").isEqualTo(dto.getVisitType())
+                .jsonPath("$[0].vetId").isEqualTo(dto.getVetId())
+                .jsonPath("$[0].amount").isEqualTo(dto.getAmount());
+
+        Mockito.verify(billService, times(1)).GetBillsByVetId(VET_ID_OK);
+
+
+    }
     @Test
     void deleteBill() {
 
@@ -140,6 +160,6 @@ class BillResourceUnitTest {
         Date date = calendar.getTime();
 
 
-        return BillDTO.builder().billId("BillUUID").customerId(1).visitType("Test Type").date(date).amount(13.37).build();
+        return BillDTO.builder().billId("BillUUID").customerId(1).vetId("1").visitType("Test Type").date(date).amount(13.37).build();
     }
 }
