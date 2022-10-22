@@ -35,9 +35,7 @@ import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
@@ -96,6 +94,10 @@ public class UserServiceImpl implements UserService {
 
         log.info("Saving user with email {}", userIDLessDTO.getEmail());
         User user = userMapper.idLessRoleLessDTOToModel(userIDLessDTO);
+        Role role = new Role(1,"admin");
+        Set<Role> roleSet = new HashSet<Role>();
+        roleSet.add(role);
+        user.setRoles(roleSet);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         log.info("Sending email to {}...", userIDLessDTO.getEmail());
