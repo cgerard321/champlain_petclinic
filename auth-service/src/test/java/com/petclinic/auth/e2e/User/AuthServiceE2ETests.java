@@ -92,8 +92,6 @@ public class AuthServiceE2ETests {
         userRepo.deleteAllInBatch();
         roleRepo.deleteAllInBatch();
 
-        roleRepo.save(new Role(1,"client"));
-
         when(mailService.sendMail(any()))
                 .thenReturn("Your verification link: someFakeLink");
     }
