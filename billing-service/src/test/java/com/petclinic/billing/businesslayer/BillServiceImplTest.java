@@ -138,9 +138,9 @@ public class BillServiceImplTest {
 
         Bill billEntity = buildBill();
 
-        int VET_ID = billEntity.getVetIntId();
+        String VET_ID = billEntity.getVetId();
 
-        when(repo.findByIntVetId(anyInt())).thenReturn(Flux.just(billEntity));
+        when(repo.findByVetId(anyString())).thenReturn(Flux.just(billEntity));
 
         Flux<BillDTO> billDTOMono = billService.GetBillsByVetId(VET_ID);
 
