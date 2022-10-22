@@ -19,8 +19,8 @@ public class OwnerServiceImpl implements OwnerService {
     }
 
     @Override
-    public Mono<Owner> getOwnerByOwnerId(String ownerId) {
-        return repo.findById(ownerId);
+    public Mono<Owner> getOwnerByOwnerId(String Id) {
+        return repo.findById(Id);
     }
 
     @Override

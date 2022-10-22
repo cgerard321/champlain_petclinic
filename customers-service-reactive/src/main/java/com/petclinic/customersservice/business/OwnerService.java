@@ -9,6 +9,6 @@ public interface OwnerService {
 
     Mono<Owner> getOwnerByOwnerId(String ownerId);
 
-    Mono<Void> deleteOwner(String Id);
+    Mono<Void> deleteOwner(String ownerId);
 
 }
