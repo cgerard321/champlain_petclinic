@@ -35,13 +35,13 @@ public class VisitsServiceClient {
 
     private final WebClient.Builder webClientBuilder;
     //private final String visitsServiceURL;
-    private String hostname = "http://visits-service";
+    private String hostname;
 
     @Autowired
     public VisitsServiceClient(
             WebClient.Builder webClientBuilder,
-            @Value("${app.visits-service-new.host}") String visitsServiceHost,
-            @Value("${app.visits-service-new.port}") String visitsServicePort
+            @Value("${app.visits-service.host}") String visitsServiceHost,
+            @Value("${app.visits-service.port}") String visitsServicePort
     ) {
         this.webClientBuilder = webClientBuilder;
         hostname = "http://" + visitsServiceHost + ":" + visitsServicePort;
