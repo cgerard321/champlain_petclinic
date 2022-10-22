@@ -32,6 +32,7 @@ class VetServiceImplTest {
     VetDTO vetDTO = buildVetDTO();
     Vet vet = buildVet();
     String VET_ID = vet.getVetId();
+    String VET_BILL_ID = vet.getVetBillId();
 
     @Test
     void getAllVets() {
@@ -44,6 +45,7 @@ class VetServiceImplTest {
                 .create(vetDTO)
                 .consumeNextWith(foundVet -> {
                     assertEquals(vet.getVetId(), foundVet.getVetId());
+                    assertEquals(vet.getVetBillId(), foundVet.getVetBillId());
                     assertEquals(vet.getFirstName(), foundVet.getFirstName());
                     assertEquals(vet.getLastName(), foundVet.getLastName());
                     assertEquals(vet.getEmail(), foundVet.getEmail());
@@ -107,6 +109,32 @@ class VetServiceImplTest {
                 .create(vetDTOMono)
                 .consumeNextWith(foundVet -> {
                     assertEquals(vet.getVetId(), foundVet.getVetId());
+                    assertEquals(vet.getVetBillId(), foundVet.getVetBillId());
+                    assertEquals(vet.getFirstName(), foundVet.getFirstName());
+                    assertEquals(vet.getLastName(), foundVet.getLastName());
+                    assertEquals(vet.getEmail(), foundVet.getEmail());
+                    assertEquals(vet.getPhoneNumber(), foundVet.getPhoneNumber());
+                    assertEquals(vet.getResume(), foundVet.getResume());
+                    assertEquals(vet.getWorkday(), foundVet.getWorkday());
+                    assertFalse(foundVet.isActive());
+                })
+
+                .verifyComplete();
+    }
+
+    @Test
+    void getVetByVetBillId() {
+
+        when(vetRepository.findVetByVetBillId(anyString())).thenReturn(Mono.just(vet));
+
+        Mono<VetDTO> vetDTOMono = vetService.getVetByVetBillId(VET_BILL_ID);
+
+
+        StepVerifier
+                .create(vetDTOMono)
+                .consumeNextWith(foundVet -> {
+                    assertEquals(vet.getVetId(), foundVet.getVetId());
+                    assertEquals(vet.getVetBillId(), foundVet.getVetBillId());
                     assertEquals(vet.getFirstName(), foundVet.getFirstName());
                     assertEquals(vet.getLastName(), foundVet.getLastName());
                     assertEquals(vet.getEmail(), foundVet.getEmail());
@@ -177,6 +205,7 @@ class VetServiceImplTest {
     private Vet buildVet() {
         return Vet.builder()
                 .vetId("678910")
+                .vetBillId("1")
                 .firstName("Pauline")
                 .lastName("LeBlanc")
                 .email("skjfhf@gmail.com")
@@ -191,6 +220,7 @@ class VetServiceImplTest {
     private VetDTO buildVetDTO() {
         return VetDTO.builder()
                 .vetId("678910")
+                .vetBillId("1")
                 .firstName("Pauline")
                 .lastName("LeBlanc")
                 .email("skjfhf@gmail.com")
@@ -205,6 +235,7 @@ class VetServiceImplTest {
     private Vet buildVet2() {
         return Vet.builder()
                 .vetId("678910")
+                .vetBillId("2")
                 .firstName("Pauline")
                 .lastName("LeBlanc")
                 .email("skjfhf@gmail.com")

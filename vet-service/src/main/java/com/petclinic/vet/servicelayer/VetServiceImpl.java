@@ -65,6 +65,12 @@ public class VetServiceImpl implements VetService {
     }
 
     @Override
+    public Mono<VetDTO> getVetByVetBillId(String vetBillId) {
+        return  vetRepository.findVetByVetBillId(vetBillId)
+                .map(EntityDtoUtil::toDTO);
+    }
+
+    @Override
     public Mono<Void> deleteVetByVetId(String vetId) {
         return vetRepository.deleteVetByVetId(vetId);
     }

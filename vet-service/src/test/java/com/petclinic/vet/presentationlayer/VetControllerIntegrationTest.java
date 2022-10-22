@@ -34,6 +34,7 @@ class VetControllerIntegrationTest {
     Vet vet2 = buildVet2();
     VetDTO vetDTO = buildVetDTO();
     String VET_ID = vet.getVetId();
+    String VET_BILL_ID = vet.getVetBillId();
     String INVALID_VET_ID = "mjbedf";
 
     @Test
@@ -81,6 +82,37 @@ class VetControllerIntegrationTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.vetId").isEqualTo(vet.getVetId())
+                .jsonPath("$.vetBillId").isEqualTo(vet.getVetBillId())
+                .jsonPath("$.resume").isEqualTo(vet.getResume())
+                .jsonPath("$.lastName").isEqualTo(vet.getLastName())
+                .jsonPath("$.firstName").isEqualTo(vet.getFirstName())
+                .jsonPath("$.email").isEqualTo(vet.getEmail())
+                .jsonPath("$.image").isNotEmpty()
+                .jsonPath("$.active").isEqualTo(vet.isActive())
+                .jsonPath("$.workday").isEqualTo(vet.getWorkday());
+
+    }
+
+    @Test
+    void getVetByVetBillId() {
+        Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet));
+        String uri = "/vets/vetBillId/{vetBillId}";
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        client
+                .get()
+                .uri("/vets/vetBillId/" + VET_BILL_ID)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.vetId").isEqualTo(vet.getVetId())
+                //.jsonPath("$.vetBillId").isEqualTo(vet.getVetBillId())
                 .jsonPath("$.resume").isEqualTo(vet.getResume())
                 .jsonPath("$.lastName").isEqualTo(vet.getLastName())
                 .jsonPath("$.firstName").isEqualTo(vet.getFirstName())
@@ -299,6 +331,7 @@ class VetControllerIntegrationTest {
     private Vet buildVet() {
         return Vet.builder()
                 .vetId("678910")
+                .vetBillId("1")
                 .firstName("Pauline")
                 .lastName("LeBlanc")
                 .email("skjfhf@gmail.com")
@@ -313,6 +346,7 @@ class VetControllerIntegrationTest {
     private Vet buildVet2() {
         return Vet.builder()
                 .vetId("678910")
+                .vetBillId("2")
                 .firstName("Pauline")
                 .lastName("LeBlanc")
                 .email("skjfhf@gmail.com")
@@ -327,6 +361,7 @@ class VetControllerIntegrationTest {
     private VetDTO buildVetDTO() {
         return VetDTO.builder()
                 .vetId("678910")
+                .vetBillId("1")
                 .firstName("Clementine")
                 .lastName("LeBlanc")
                 .email("skjfhf@gmail.com")
