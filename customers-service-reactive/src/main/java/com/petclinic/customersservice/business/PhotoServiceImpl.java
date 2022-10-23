@@ -26,5 +26,6 @@ public class PhotoServiceImpl implements PhotoService {
     @Override
     public Mono<Void> deletePhotoByPhotoId(String photoId) {
         return photoRepo.deleteById(photoId);
+
     }
 }

@@ -12,4 +12,5 @@ public interface PhotoService {
 
     Mono<Void> deletePhotoByPhotoId(String photoId);
 
+
 }

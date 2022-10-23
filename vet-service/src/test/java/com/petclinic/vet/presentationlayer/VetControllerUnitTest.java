@@ -58,7 +58,7 @@ class VetControllerUnitTest {
                 .jsonPath("$[0].lastName").isEqualTo(vetDTO.getLastName())
                 .jsonPath("$[0].firstName").isEqualTo(vetDTO.getFirstName())
                 .jsonPath("$[0].email").isEqualTo(vetDTO.getEmail())
-                .jsonPath("$[0].image").isNotEmpty()
+                .jsonPath("$[0].imageId").isNotEmpty()
                 .jsonPath("$[0].active").isEqualTo(vetDTO.isActive())
                 .jsonPath("$[0].workday").isEqualTo(vetDTO.getWorkday());
 
@@ -84,7 +84,7 @@ class VetControllerUnitTest {
                 .jsonPath("$.lastName").isEqualTo(vet.getLastName())
                 .jsonPath("$.firstName").isEqualTo(vet.getFirstName())
                 .jsonPath("$.email").isEqualTo(vet.getEmail())
-                .jsonPath("$.image").isNotEmpty()
+                .jsonPath("$.imageId").isNotEmpty()
                 .jsonPath("$.active").isEqualTo(vet.isActive())
                 .jsonPath("$.workday").isEqualTo(vet.getWorkday());
 
@@ -110,7 +110,7 @@ class VetControllerUnitTest {
                 .jsonPath("$[0].lastName").isEqualTo(vetDTO2.getLastName())
                 .jsonPath("$[0].firstName").isEqualTo(vetDTO2.getFirstName())
                 .jsonPath("$[0].email").isEqualTo(vetDTO2.getEmail())
-                .jsonPath("$[0].image").isNotEmpty()
+                .jsonPath("$[0].imageId").isNotEmpty()
                 .jsonPath("$[0].active").isEqualTo(vetDTO2.isActive())
                 .jsonPath("$[0].workday").isEqualTo(vetDTO2.getWorkday());
 
@@ -157,7 +157,7 @@ class VetControllerUnitTest {
                 .jsonPath("$.lastName").isEqualTo(vetDTO.getLastName())
                 .jsonPath("$.firstName").isEqualTo(vetDTO.getFirstName())
                 .jsonPath("$.email").isEqualTo(vetDTO.getEmail())
-                .jsonPath("$.image").isNotEmpty()
+                .jsonPath("$.imageId").isNotEmpty()
                 .jsonPath("$.active").isEqualTo(vetDTO.isActive())
                 .jsonPath("$.workday").isEqualTo(vetDTO.getWorkday());
 
@@ -183,7 +183,7 @@ class VetControllerUnitTest {
                 .jsonPath("$[0].lastName").isEqualTo(vetDTO.getLastName())
                 .jsonPath("$[0].firstName").isEqualTo(vetDTO.getFirstName())
                 .jsonPath("$[0].email").isEqualTo(vetDTO.getEmail())
-                .jsonPath("$[0].image").isNotEmpty()
+                .jsonPath("$[0].imageId").isNotEmpty()
                 .jsonPath("$[0].active").isEqualTo(vetDTO.isActive())
                 .jsonPath("$[0].workday").isEqualTo(vetDTO.getWorkday());
 
@@ -267,7 +267,7 @@ class VetControllerUnitTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
-                .image("kjd".getBytes())
+                .imageId("kjd")
                 .workday("Monday")
                 .specialties(new HashSet<>())
                 .isActive(false)
@@ -283,7 +283,7 @@ class VetControllerUnitTest {
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
                 .workday("Monday")
-                .image("kjd".getBytes())
+                .imageId("kjd")
                 .specialties(new HashSet<>())
                 .isActive(false)
                 .build();
@@ -295,7 +295,7 @@ class VetControllerUnitTest {
                 .lastName("LeBlanc")
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-2847")
-                .image("kjd".getBytes())
+                .imageId("kjd")
                 .resume("Just became a vet")
                 .workday("Monday")
                 .specialties(new HashSet<>())
