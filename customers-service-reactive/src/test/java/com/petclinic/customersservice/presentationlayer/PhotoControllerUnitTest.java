@@ -23,7 +23,7 @@ class PhotoControllerUnitTest {
 
     private final String PHOTO_ID = photo.getId();
 
-    private final int PHOTO_ID_NOT_FOUND = 00;
+    private final String PHOTO_ID_NOT_FOUND = "00";
 
     @Autowired
     private WebTestClient client;
@@ -41,8 +41,9 @@ class PhotoControllerUnitTest {
 //                .uri("/photos/" + PHOTO_ID_NOT_FOUND)
 //                .accept(MediaType.APPLICATION_JSON)
 //                .exchange()
-//                .expectStatus().isNotFound();
-//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+//                .expectStatus().isNotFound()
+//                .expectHeader()
+//                .contentType(MediaType.APPLICATION_JSON)
 //                .expectBody()
 //                .jsonPath("$.name").isEqualTo(photo.getName())
 //                .jsonPath("$.type").isEqualTo(photo.getType())

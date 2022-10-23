@@ -12,9 +12,6 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-
 @SpringBootTest
 @AutoConfigureWebTestClient
 class PetControllerIntegrationTest {

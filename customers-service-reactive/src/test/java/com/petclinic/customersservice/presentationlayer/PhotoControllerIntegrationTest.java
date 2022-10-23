@@ -92,7 +92,7 @@ class PhotoControllerIntegrationTest {
 //
 //        Photo photo = buildPhoto();
 //
-//        int PHOTO_ID_NOT_FOUND = 00;
+//        String PHOTO_ID_NOT_FOUND = "abc123";
 //
 //        Publisher<Photo> setup = photoRepo.deleteAll().thenMany(photoRepo.save(photo));
 //
