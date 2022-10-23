@@ -270,6 +270,8 @@ public class AuthServiceE2ETests {
 
     private ResultActions registerUser() throws Exception {
 
+//        Role role = new Role(1,"client");
+//        roleRepo.save(role);
         final String asString = objectMapper.writeValueAsString(ID_LESS_USER);
         return mockMvc.perform(post("/users").contentType(APPLICATION_JSON).content(asString))
                 .andExpect(status().is2xxSuccessful())
