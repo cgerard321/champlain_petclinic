@@ -5,6 +5,7 @@ import com.petclinic.customersservice.data.Owner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -32,6 +33,11 @@ public class OwnerController {
     @PutMapping("/{ownerId}")
     public Mono<Owner> updateOwnerByOwnerId(@PathVariable String ownerId, @RequestBody Mono<Owner> ownerMono) {
         return ownerService.updateOwner(ownerId, ownerMono);
+    }
+
+    @GetMapping()
+    public Flux<Owner> getAllOwners() {
+        return ownerService.getAllOwners();
     }
 
 }
