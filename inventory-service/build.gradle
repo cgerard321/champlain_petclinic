@@ -32,7 +32,7 @@ dependencies {
 jacoco {
     toolVersion = "0.8.8"
 }
-/*
+/**
 jacocoTestReport {
     dependsOn test
 
@@ -54,7 +54,7 @@ jacocoTestCoverageVerification {
         }
     }
 }
-*/
+
 test.finalizedBy jacocoTestReport
 check.dependsOn jacocoTestCoverageVerification
 
@@ -62,5 +62,5 @@ test {
     useJUnitPlatform()
     testLogging {
         events "passed", "skipped", "failed"
-    }
+    }**/
 }
