@@ -1,14 +1,23 @@
-.image1 {
-    text-align: center;
+.parent {
+    position: relative;
+    height: 150px;
+    width: 150px;
     top: 0;
-    left: 0;
+    left: 100px;
+    z-index: 50;
+}
+
+.image1 {
+    position: relative;
+    top: 0;
+    left: 100px;
     border: 1px solid #000000;
 }
 
 .image2 {
-    text-align: center;
+    position: relative;
     top: 0;
-    left: 0;
+    left: 100px;
     border: 1px solid #000000;
 }
 
@@ -18,21 +27,10 @@
     opacity: 0;
     top: 0;
     right: 0;
+    left: 100px;
     height:150px;
     width:150px;
     z-index: 60;
 }
 
-.parent {
-    text-align: center;
-    top: 0;
-    left: 0;
-    z-index: 50;
-}
-
-.parent:hover {
-    text-align: center;
-    background-color: black;
-    opacity: 0.5;
-}
 
