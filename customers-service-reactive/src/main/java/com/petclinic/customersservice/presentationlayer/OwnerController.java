@@ -30,10 +30,8 @@ public class OwnerController {
     }
 
     @PutMapping("/{ownerId}")
-    public Mono<ResponseEntity<Owner>> updateOwnerByOwnerId(@PathVariable String ownerId, @RequestBody Mono<Owner> ownerMono) {
-        return ownerService.updateOwner(ownerId, ownerMono)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    public Mono<Owner> updateOwnerByOwnerId(@PathVariable String ownerId, @RequestBody Mono<Owner> ownerMono) {
+        return ownerService.updateOwner(ownerId, ownerMono);
     }
 
 }
