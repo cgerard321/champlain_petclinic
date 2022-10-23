@@ -11,24 +11,26 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/photos")
 public class PhotoController {
 
-    @Autowired
-    private PhotoService photoService;
-
-    @PostMapping
-    public Mono<Photo> insertPhoto(@RequestBody Mono<Photo> photoMono) {
-        return photoService.insertPhoto(photoMono);
-    }
-
-    @GetMapping("/{photoId}")
-    public Mono<Photo> getPhotoByPhotoId(@PathVariable int photoId) {
-        return photoService.getPhotoByPhotoId(photoId);
-    }
-
-
+//    @Autowired
+//    private PhotoService photoService;
+//
+//    @PostMapping
+//    public Mono<Photo> insertPhoto(@RequestBody Mono<Photo> photoMono) {
+//        return photoService.insertPhoto(photoMono);
+//    }
+//
+//    @GetMapping("/{photoId}")
+//    public Mono<Photo> getPhotoByPhotoId(@PathVariable int photoId) {
+//        return photoService.getPhotoByPhotoId(photoId);
+//    }
+//
+//
 //    @GetMapping("/{photoName}")
 //    public Mono<Photo> getPhotoByPhotoName (@PathVariable String photoName){
 //        return photoService.getPhotoByPhotoName(photoName);
 //    }
+//
+    //-------------
 
 //    @DeleteMapping(value = "/photo/{photoId}")
 //    public Mono<Photo> deletePhoto(@PathVariable String photoId) {
