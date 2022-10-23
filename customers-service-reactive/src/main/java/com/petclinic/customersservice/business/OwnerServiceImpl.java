@@ -32,11 +32,13 @@ public class OwnerServiceImpl implements OwnerService {
     public Mono<Owner> updateOwner(String ownerId, Mono<Owner> ownerMono) {
         return repo.findById(ownerId)
                 .flatMap(p -> ownerMono
+                        .doOnNext(e -> e.setId(p.getId()))
                         .doOnNext(e -> e.setFirstName(p.getFirstName()))
                         .doOnNext(e -> e.setLastName(p.getLastName()))
                         .doOnNext(e -> e.setAddress(p.getAddress()))
                         .doOnNext(e -> e.setCity(p.getCity()))
                         .doOnNext(e -> e.setTelephone(p.getTelephone()))
+                        .doOnNext(e -> e.setPhotoId(p.getPhotoId()))
                 )
                 .flatMap(repo::save);
     }
