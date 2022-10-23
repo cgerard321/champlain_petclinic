@@ -22,10 +22,10 @@ public class OwnerDTOController {
     @Autowired
     private OwnerService ownerService;
 
-//    @GetMapping("/{ownerId}")
-//    public Mono<OwnerDTO> getOwnerDTOByOwnerId(@PathVariable String ownerId) {
-//        return ownerDTOService.getOwnerDTOByOwnerId(ownerId);
-//    }
+    @GetMapping("/test/{ownerId}")
+    public Mono<OwnerDTO> getOwnerDTOByOwnerId(@PathVariable String ownerId) {
+        return ownerDTOService.getOwnerDTOByOwnerId(ownerId);
+    }
     @GetMapping("/{ownerId}")
     public Mono<Owner> getOwnerByOwnerId(@PathVariable String ownerId) {
         return ownerService.getOwnerByOwnerId(ownerId);

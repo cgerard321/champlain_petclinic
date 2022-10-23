@@ -8,7 +8,7 @@ import reactor.core.publisher.Mono;
 @Repository
 public interface OwnerRepo extends ReactiveMongoRepository<Owner, String> {
 
-    Mono<Owner> findById(String Id);
+    Mono<Owner> findOwnerById(String Id);
 
     Mono<Void> deleteById(String Id);
 
