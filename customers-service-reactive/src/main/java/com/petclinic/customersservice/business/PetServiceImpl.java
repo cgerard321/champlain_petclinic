@@ -31,7 +31,7 @@ public class PetServiceImpl implements PetService {
 
     @Override
     public Mono<Pet> updatePetByPetId(String petId, Mono<Pet> petMono) {
-        return petRepo.findPetById(petId)
+        return petRepo.findById(petId)
                 .flatMap(p -> petMono
                         .doOnNext(e -> e.setName(p.getName()))
                         .doOnNext(e -> e.setBirthDate(p.getBirthDate()))
