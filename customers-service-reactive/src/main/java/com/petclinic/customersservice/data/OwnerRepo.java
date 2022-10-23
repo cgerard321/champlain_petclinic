@@ -6,5 +6,4 @@ import reactor.core.publisher.Mono;
 
 @Repository
 public interface OwnerRepo extends ReactiveMongoRepository<Owner, Integer> {
-
 }

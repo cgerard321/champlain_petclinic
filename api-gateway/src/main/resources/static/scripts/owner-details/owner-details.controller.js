@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('ownerDetails')
-    .controller('OwnerDetailsController', ['$http', '$stateParams', function ($http, $stateParams) {
+    .controller('OwnerDetailsController', ['$http', '$state', '$stateParams', function ($http, $state, $stateParams) {
         var self = this;
 
         $http.get('api/gateway/owners/' + $stateParams.ownerId).then(function (resp) {
@@ -40,6 +40,13 @@ angular.module('ownerDetails')
                 self.petPhoto = resp.data;
             });
         }
+
+        self.deleteOwner = function(){
+            var req = $http.delete('api/gateway/owners/' + $stateParams.ownerId);
+            req.then(function(){
+                $state.go('owners');
+            });
+        };
 
         function uuidv4() {
             return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
