@@ -77,7 +77,7 @@ class OwnerServiceImplTest {
 
     private Owner buildOwner() {
         return Owner.builder()
-                .Id("55")
+                .id("55")
                 .firstName("FirstName")
                 .lastName("LastName")
                 .address("Test address")
