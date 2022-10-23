@@ -15,6 +15,7 @@ import com.petclinic.auth.Exceptions.NotFoundException;
 import com.petclinic.auth.JWT.JWTService;
 import com.petclinic.auth.Mail.Mail;
 import com.petclinic.auth.Mail.MailService;
+import com.petclinic.auth.Role.RoleRepo;
 import com.petclinic.auth.Role.data.Role;
 import com.petclinic.auth.User.data.User;
 import com.petclinic.auth.User.data.UserIDLessRoleLessDTO;
@@ -35,9 +36,7 @@ import org.springframework.stereotype.Service;
 
 import javax.validation.Valid;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.lang.String.format;
@@ -48,6 +47,7 @@ import static java.lang.String.format;
 public class UserServiceImpl implements UserService {
 
     private final UserRepo userRepo;
+    private final RoleRepo roleRepo;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final MailService mailService;
@@ -96,6 +96,12 @@ public class UserServiceImpl implements UserService {
 
         log.info("Saving user with email {}", userIDLessDTO.getEmail());
         User user = userMapper.idLessRoleLessDTOToModel(userIDLessDTO);
+
+        Optional<Role> role = roleRepo.findById(1L);
+        Set<Role> roleSet = new HashSet<>();
+        role.ifPresent(roleSet::add);
+        user.setRoles(roleSet);
+
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         log.info("Sending email to {}...", userIDLessDTO.getEmail());
