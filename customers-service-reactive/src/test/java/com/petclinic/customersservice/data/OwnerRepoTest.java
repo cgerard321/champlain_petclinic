@@ -33,6 +33,20 @@ class OwnerRepoTest {
                 .verifyComplete();
     }
 
+    @Test
+    void deleteOwner() {
+
+        Owner owner = buildOwner();
+        repo.save(owner);
+
+        Publisher<Void> setup = repo.deleteById(owner.getId());
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
     private Owner buildOwner() {
         return Owner.builder()
                 //.Id("55")

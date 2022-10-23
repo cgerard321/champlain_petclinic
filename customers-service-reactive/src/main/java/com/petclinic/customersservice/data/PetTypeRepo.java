@@ -6,7 +6,6 @@ import reactor.core.publisher.Mono;
 
 @Repository
 public interface PetTypeRepo extends ReactiveMongoRepository<PetType, Integer> {
-
     Mono<PetType> findPetTypeById(String Id);
 
 }

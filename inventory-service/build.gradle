@@ -1,0 +1,33 @@
+plugins {
+    id 'org.springframework.boot' version '2.7.4'
+    id 'io.spring.dependency-management' version '1.0.14.RELEASE'
+    id 'java'
+    id 'jacoco'
+}
+
+group = 'com.petclinic.inventory'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+
+ext {
+    mapstructVersion = "1.4.1.Final"
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo'
+    testImplementation 'io.projectreactor:reactor-test'
+}
+
+jacoco {
+    toolVersion = "0.8.8"
+}

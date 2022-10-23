@@ -35,7 +35,7 @@ public class VisitsServiceClient {
 
     private final WebClient.Builder webClientBuilder;
     //private final String visitsServiceURL;
-    private String hostname = "http://visits-service";
+    private String hostname;
 
     @Autowired
     public VisitsServiceClient(

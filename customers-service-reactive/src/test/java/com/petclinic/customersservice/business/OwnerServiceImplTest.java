@@ -9,8 +9,13 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+<<<<<<< HEAD
 
 import static org.mockito.ArgumentMatchers.*;
+=======
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+>>>>>>> main
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -43,6 +48,7 @@ class OwnerServiceImplTest {
                 .verifyComplete();
     }
 
+<<<<<<< HEAD
 //     @Test
 //     void getOwnerByOwnerId() {
 //        Owner ownerEntity = buildOwner();
@@ -74,13 +80,37 @@ class OwnerServiceImplTest {
                 .expectNextCount(0)
                 .verifyComplete();
      }
+=======
+    @Test
+    public void deleteOwner() {
+
+        Owner owner = buildOwner();
+        int OWNER_ID = owner.getId();
+
+        when(repo.deleteById(anyInt())).thenReturn(Mono.empty());
+
+        Mono<Void> ownerDelete = ownerService.deleteOwner(OWNER_ID);
+
+        StepVerifier
+                .create(ownerDelete)
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
+>>>>>>> main
     @Test
     public void deleteOwnerNotFound() {
 
         Owner owner = buildOwner();
+<<<<<<< HEAD
         String OWNER_ID = "00";
 
         when(repo.deleteById(anyString())).thenReturn(Mono.empty());
+=======
+        int OWNER_ID = 00;
+
+        when(repo.deleteById(anyInt())).thenReturn(Mono.empty());
+>>>>>>> main
 
         Mono<Void> ownerDelete = ownerService.deleteOwner(OWNER_ID);
 
@@ -90,7 +120,10 @@ class OwnerServiceImplTest {
                 .expectError();
     }
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> main
     private Owner buildOwner() {
         return Owner.builder()
                 .id("55")

@@ -43,4 +43,5 @@ public class OwnerServiceImpl implements OwnerService {
     public Flux<Owner> getAllOwners() {
         return repo.findAll();
     }
+
 }

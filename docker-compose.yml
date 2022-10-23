@@ -7,6 +7,13 @@ services:
             - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
             - ./nginx/njs:/etc/nginx/njs
 
+    visits-service-new:
+        build: visits-service-new
+        environment:
+            - SPRING_PROFILES_ACTIVE=docker
+        depends_on:
+            - mongo2
+
     visits:
         build: visits-service
         hostname: visits
@@ -17,6 +24,16 @@ services:
             mysql1:
                 condition: service_healthy
 
+<<<<<<< HEAD
+=======
+    inventory-service:
+      build: inventory-service
+      environment:
+        - SPRING_PROFILES_ACTIVE=docker
+#      depends_on:
+#        - mongo
+
+>>>>>>> main
     vet-service:
         build: vet-service
         environment:
@@ -52,9 +69,14 @@ services:
             - SPRING_PROFILES_ACTIVE=docker
         depends_on:
             - customers
+<<<<<<< HEAD
             #            - vets
             - visits
+=======
+#            - vets
+>>>>>>> main
             - vet-service
+            - visits
 
     auth-service:
         build: auth-service
@@ -236,6 +258,37 @@ services:
         depends_on:
             - mongo1
             - billing-service
+
+
+    mongo2:
+      image: mongo
+      container_name: mongo2
+      restart: always
+      ports:
+        - 27015:27017
+      environment:
+        MONGO_INITDB_ROOT_USERNAME: root
+        MONGO_INITDB_ROOT_PASSWORD: password
+      healthcheck:
+        test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
+        retries: 5
+        interval: 15s
+        start_period: 30s
+
+    mongo-express2:
+      image: mongo-express
+      restart: always
+      environment:
+        - ME_CONFIG_MONGODB_ADMINUSERNAME=root
+        - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+        - ME_CONFIG_MONGODB_SERVER=mongo2
+        - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
+      ports:
+        - 9001:8082
+      depends_on:
+        - mongo2
+        - visits-service-new
+
 
     mongo-customers:
         image: mongo

@@ -19,5 +19,4 @@ public class PetTypeController {
     public Flux<PetType> getAllPetTypes() {
         return petTypeService.getAllPetTypes();
     }
-
 }

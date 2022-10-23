@@ -15,5 +15,4 @@ public interface OwnerService {
     Mono<Owner> updateOwner(String ownerId, Mono<Owner> ownerMono);
 
     Flux<Owner> getAllOwners();
-
 }

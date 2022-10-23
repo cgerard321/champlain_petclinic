@@ -26,8 +26,12 @@ public class PetController {
     public Mono<Void> deletePetByPetId(@PathVariable String petId) {
         return petService.deletePetByPetId(petId);
     }
+    @GetMapping()
+    public Flux<Pet> getAll() {
+        return petService.getAllPets();
+    }
 
-    @PostMapping()
+    @PostMapping
     public Mono<Pet> insertPet(@RequestBody Mono<Pet> petMono) {
         return petService.insertPet(petMono);
     }

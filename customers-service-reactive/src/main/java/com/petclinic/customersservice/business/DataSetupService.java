@@ -17,7 +17,6 @@ import java.util.Date;
 
 @Service
 public class DataSetupService implements CommandLineRunner {
-
     @Autowired
     private PetTypeService petTypeService;
 

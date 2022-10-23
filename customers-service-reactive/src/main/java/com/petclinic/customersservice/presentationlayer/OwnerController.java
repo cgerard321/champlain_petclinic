@@ -3,13 +3,13 @@ package com.petclinic.customersservice.presentationlayer;
 import com.petclinic.customersservice.business.OwnerService;
 import com.petclinic.customersservice.data.Owner;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
 @RequestMapping("/owner")
+
 public class OwnerController {
 
     @Autowired
@@ -18,6 +18,7 @@ public class OwnerController {
     @GetMapping("/{ownerId}")
     public Mono<Owner> getOwnerByOwnerId(@PathVariable String ownerId) {
         return ownerService.getOwnerByOwnerId(ownerId);
+
     }
 
     @PostMapping()

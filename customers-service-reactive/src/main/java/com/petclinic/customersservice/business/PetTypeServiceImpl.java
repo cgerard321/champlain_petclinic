@@ -29,5 +29,4 @@ public class PetTypeServiceImpl implements PetTypeService {
         return petTypeRepo.findPetTypeById(Id);
     }
 
-
 }

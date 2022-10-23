@@ -84,6 +84,4 @@ public class OwnerServiceImpl implements OwnerService {
         LOG.debug("User with ID: " + Id + " has been deleted successfully.");
     }
 
-
-
 }

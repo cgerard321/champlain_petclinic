@@ -56,7 +56,11 @@ class PetTypeServiceImplTest {
 
         when(repo.findAll()).thenReturn(Flux.just(petType));
 
+<<<<<<< HEAD
         Flux<PetType> petTypeTest = petTypeService.getAllPetTypes();
+=======
+        Flux<PetType> petTypeTest = petTypeService.getAll();
+>>>>>>> main
 
         StepVerifier
                 .create(petTypeTest)

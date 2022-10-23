@@ -35,6 +35,20 @@ class PetRepoTest {
                 .verifyComplete();
     }
 
+    @Test
+    void deletePet() {
+
+        Pet pet = buildPet();
+        repo.save(pet);
+
+        Publisher<Void> setup = repo.deletePetById(pet.getId());
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
     private Pet buildPet() {
         return Pet.builder()
                 .id("55")

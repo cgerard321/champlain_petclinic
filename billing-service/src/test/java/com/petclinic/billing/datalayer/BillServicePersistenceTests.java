@@ -72,6 +72,25 @@ public class BillServicePersistenceTests {
                 .verifyComplete();
 
     }
+    @Test
+    void shouldFindBillByVetId(){
+
+        Bill bill = buildBill();
+
+        Publisher<Bill> setup = repo.deleteAll().thenMany(repo.save(buildBill()));
+        Publisher<Bill> find = repo.findByVetId(bill.getVetId());
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        StepVerifier
+                .create(find)
+                .expectNextCount(1)
+                .verifyComplete();
+
+    }
 
     @Test
     void shouldDeleteBillByBillUUID(){
@@ -95,6 +114,27 @@ public class BillServicePersistenceTests {
 
     }
 
+    @Test
+    void shouldDeleteBillByVetId(){
+
+        Bill bill = buildBill();
+        Publisher<Bill> setup = repo.deleteAll().thenMany(repo.save(bill));
+
+        Publisher<Void> delete = repo.deleteBillsByVetId(bill.getVetId());
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        StepVerifier
+                .create(delete)
+                .expectNextCount(0)
+                .verifyComplete();
+
+
+
+    }
 
 
     private Bill buildBill(){
@@ -104,6 +144,6 @@ public class BillServicePersistenceTests {
         Date date = calendar.getTime();
 
 
-        return Bill.builder().id("Id").billId("BillUUID").customerId(1).visitType("Test Type").visitDate(date).amount(13.37).build();
+        return Bill.builder().id("Id").billId("BillUUID").customerId(1).vetId("1").visitType("Test Type").visitDate(date).amount(13.37).build();
     }
 }
