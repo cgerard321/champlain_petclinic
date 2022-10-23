@@ -53,7 +53,12 @@ public class BillServiceImpl implements BillService{
         return billRepository.deleteBillByBillId(billId);
     }
 
-    
+
+    @Override
+    public Flux<Void> DeleteBillsByVetId(String vetId) {
+        return billRepository.deleteBillsByVetId(vetId);
+    }
+
     @Override
     public Flux<BillDTO> GetBillsByCustomerId(int customerId) {
 /**/

@@ -1004,7 +1004,41 @@ class ApiGatewayControllerTest {
         assertEquals(null, billServiceClient.getBilling(bill.getBillId()));
     }
 
+    @Test
+    void shouldDeleteBillByVetId(){
+        BillDetails bill = new BillDetails();
+        bill.setVetId("9");
 
+        bill.setDate(null);
+
+        bill.setAmount(600);
+
+        bill.setVisitType("Adoption");
+
+        when(billServiceClient.createBill(bill))
+                .thenReturn(Mono.just(bill));
+
+
+        client.post()
+                .uri("/api/gateway/bills")
+                .body(Mono.just(bill), BillDetails.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+
+        assertEquals(bill.getVetId(),"9");
+        client.delete()
+                .uri("/api/gateway/bills/vet/9")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody();
+
+        assertEquals(null, billServiceClient.getBilling(bill.getVetId()));
+    }
 
     @Test
     void shouldCreateAVisitWithOwnerInfo(){
