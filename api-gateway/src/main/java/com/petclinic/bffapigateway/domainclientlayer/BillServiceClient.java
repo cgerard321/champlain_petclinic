@@ -69,6 +69,14 @@ public class BillServiceClient {
                 .retrieve()
                 .bodyToMono(Void.class);
     }
+
+    public Flux<Void> deleteBillsByVetId(final String vetId) {
+        return webClientBuilder.build()
+                .delete()
+                .uri(billServiceUrl + "/vet/{vetId}", vetId)
+                .retrieve()
+                .bodyToFlux(Void.class);
+    }
 }
 
 

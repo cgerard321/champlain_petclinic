@@ -21,4 +21,6 @@ public interface BillRepository extends ReactiveMongoRepository<Bill, String> {
     Flux<Bill> findByVetId(String vetId);
 
     Mono<Void>deleteBillByBillId(String billId);
+
+    Flux<Void> deleteBillsByVetId(String vetId);
 }
