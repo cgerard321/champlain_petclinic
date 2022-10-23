@@ -58,7 +58,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$[0].lastName").isEqualTo(vet.getLastName())
                 .jsonPath("$[0].firstName").isEqualTo(vet.getFirstName())
                 .jsonPath("$[0].email").isEqualTo(vet.getEmail())
-                .jsonPath("$[0].image").isNotEmpty()
+                .jsonPath("$[0].imageId").isNotEmpty()
                 .jsonPath("$[0].active").isEqualTo(vet.isActive())
                 .jsonPath("$[0].workday").isEqualTo(vet.getWorkday());
     }
@@ -85,7 +85,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.lastName").isEqualTo(vet.getLastName())
                 .jsonPath("$.firstName").isEqualTo(vet.getFirstName())
                 .jsonPath("$.email").isEqualTo(vet.getEmail())
-                .jsonPath("$.image").isNotEmpty()
+                .jsonPath("$.imageId").isNotEmpty()
                 .jsonPath("$.active").isEqualTo(vet.isActive())
                 .jsonPath("$.workday").isEqualTo(vet.getWorkday());
 
@@ -114,7 +114,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.lastName").isEqualTo(vetDTO.getLastName())
                 .jsonPath("$.firstName").isEqualTo(vetDTO.getFirstName())
                 .jsonPath("$.email").isEqualTo(vetDTO.getEmail())
-                .jsonPath("$.image").isNotEmpty()
+                .jsonPath("$.imageId").isNotEmpty()
                 .jsonPath("$.active").isEqualTo(vetDTO.isActive())
                 .jsonPath("$.workday").isEqualTo(vetDTO.getWorkday());
 
@@ -142,7 +142,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$[0].lastName").isEqualTo(vet2.getLastName())
                 .jsonPath("$[0].firstName").isEqualTo(vet2.getFirstName())
                 .jsonPath("$[0].email").isEqualTo(vet2.getEmail())
-                .jsonPath("$[0].image").isNotEmpty()
+                .jsonPath("$[0].imageId").isNotEmpty()
                 .jsonPath("$[0].active").isEqualTo(vet2.isActive())
                 .jsonPath("$[0].workday").isEqualTo(vet2.getWorkday());
     }
@@ -169,7 +169,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$[0].lastName").isEqualTo(vet.getLastName())
                 .jsonPath("$[0].firstName").isEqualTo(vet.getFirstName())
                 .jsonPath("$[0].email").isEqualTo(vet.getEmail())
-                .jsonPath("$[0].image").isNotEmpty()
+                .jsonPath("$[0].imageId").isNotEmpty()
                 .jsonPath("$[0].active").isEqualTo(vet.isActive())
                 .jsonPath("$[0].workday").isEqualTo(vet.getWorkday());
     }
@@ -200,7 +200,7 @@ class VetControllerIntegrationTest {
                 assertThat(dto.getResume()).isEqualTo(vet.getResume());
                 assertThat(dto.getEmail()).isEqualTo(vet.getEmail());
                 assertThat(dto.getWorkday()).isEqualTo(vet.getWorkday());
-                assertThat(dto.getImage()).isEqualTo(vet.getImage());
+                assertThat(dto.getImageId()).isEqualTo(vet.getImageId());
                 assertThat(dto.isActive()).isEqualTo(vet.isActive());
                 assertThat(dto.getSpecialties()).isEqualTo(vet.getSpecialties());
                 });
@@ -305,7 +305,7 @@ class VetControllerIntegrationTest {
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
                 .workday("Monday")
-                .image("kjd".getBytes())
+                .imageId("kjd")
                 .specialties(new HashSet<>())
                 .isActive(false)
                 .build();
@@ -318,7 +318,7 @@ class VetControllerIntegrationTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
-                .image("kjd".getBytes())
+                .imageId("kjd")
                 .workday("Monday")
                 .isActive(true)
                 .specialties(new HashSet<>())
@@ -332,7 +332,7 @@ class VetControllerIntegrationTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
-                .image("kjd".getBytes())
+                .imageId("kjd")
                 .workday("Monday")
                 .specialties(new HashSet<>())
                 .isActive(false)
