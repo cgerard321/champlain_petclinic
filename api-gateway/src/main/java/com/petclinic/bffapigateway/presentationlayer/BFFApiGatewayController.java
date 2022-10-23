@@ -6,6 +6,7 @@ import com.petclinic.bffapigateway.dtos.*;
 import com.petclinic.bffapigateway.utils.VetsEntityDtoUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -234,8 +235,8 @@ public class BFFApiGatewayController {
         return authServiceClient.getUser(userId);
     }
     @GetMapping(value = "users")
-    public Flux<UserDetails> getAll() {
-        return authServiceClient.getUsers();
+    public Flux<UserDetails> getAll(@RequestHeader(AUTHORIZATION) String auth) {
+        return authServiceClient.getUsers(auth);
     }
 
     @PutMapping(value = "users/{userId}",

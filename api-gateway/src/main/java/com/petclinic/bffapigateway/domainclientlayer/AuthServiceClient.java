@@ -53,9 +53,10 @@ public class AuthServiceClient {
                 .bodyToMono(UserDetails.class);
     }
 
-    public Flux<UserDetails> getUsers() {
+    public Flux<UserDetails> getUsers(String auth) {
         return webClientBuilder.build().get()
                 .uri(authServiceUrl + "/users/withoutPages")
+                .header("Authorization", auth)
                 .retrieve()
                 .bodyToFlux(UserDetails.class);
     }
