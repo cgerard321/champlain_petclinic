@@ -16,7 +16,6 @@
         <th class="hidden-xs">Pets</th>
     </tr>
     </thead>
-
     <tr id="ownerTd" ng-repeat="owner in $ctrl.owners | filter:$ctrl.query track by owner.id">
         <td>
             <a class="newBtn btn btn-default" ui-sref="ownerDetails({ ownerId: owner.id })">

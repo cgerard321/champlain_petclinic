@@ -848,6 +848,28 @@ class ApiGatewayControllerTest {
                 .jsonPath("$[0].amount").isEqualTo(499)
                 .jsonPath("$[0].visitType").isEqualTo("Test");
         }
+
+    @Test
+    public void getBillsByVetId(){
+        BillDetails bill = new BillDetails();
+        bill.setBillId(UUID.randomUUID().toString());
+        bill.setVetId("1");
+        bill.setAmount(499);
+        bill.setVisitType("Test");
+
+        when(billServiceClient.getBillsByVetId(bill.getVetId()))
+                .thenReturn(Flux.just(bill));
+
+        client.get()
+                .uri("/api/gateway/bills/vet/{vetId}", bill.getVetId())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$[0].billId").isEqualTo(bill.getBillId())
+                .jsonPath("$[0].vetId").isEqualTo("1")
+                .jsonPath("$[0].amount").isEqualTo(499)
+                .jsonPath("$[0].visitType").isEqualTo("Test");
+    }
     @Test
     void getBillingByRequestMissingPath(){
         client.get()
@@ -982,7 +1004,41 @@ class ApiGatewayControllerTest {
         assertEquals(null, billServiceClient.getBilling(bill.getBillId()));
     }
 
+    @Test
+    void shouldDeleteBillByVetId(){
+        BillDetails bill = new BillDetails();
+        bill.setVetId("9");
 
+        bill.setDate(null);
+
+        bill.setAmount(600);
+
+        bill.setVisitType("Adoption");
+
+        when(billServiceClient.createBill(bill))
+                .thenReturn(Mono.just(bill));
+
+
+        client.post()
+                .uri("/api/gateway/bills")
+                .body(Mono.just(bill), BillDetails.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+
+        assertEquals(bill.getVetId(),"9");
+        client.delete()
+                .uri("/api/gateway/bills/vet/9")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody();
+
+        assertEquals(null, billServiceClient.getBilling(bill.getVetId()));
+    }
 
     @Test
     void shouldCreateAVisitWithOwnerInfo(){
