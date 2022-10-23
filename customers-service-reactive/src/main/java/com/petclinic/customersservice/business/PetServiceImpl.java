@@ -20,6 +20,11 @@ public class PetServiceImpl implements PetService {
     }
 
     @Override
+    public Flux<Pet> getAllPets() {
+        return petRepo.findAll();
+    }
+
+    @Override
     public Mono<Pet> getPetById(String Id) {
         return petRepo.findPetById(Id);
     }

@@ -39,4 +39,9 @@ public class PetController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @GetMapping()
+    public Flux<Pet> getAllPets() {
+        return petService.getAllPets();
+    }
+
 }
