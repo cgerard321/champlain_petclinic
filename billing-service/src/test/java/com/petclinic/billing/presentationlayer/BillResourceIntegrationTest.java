@@ -180,6 +180,29 @@ class BillResourceIntegrationTest {
 
     }
 
+    @Test
+    void deleteBillByVetId() {
+
+        Bill billEntity = buildBill();
+
+        repo.save(billEntity);
+
+        Publisher<Void> setup = repo.deleteBillsByVetId(billEntity.getVetId());
+
+        StepVerifier.create(setup)
+                .expectNextCount(0)
+                .verifyComplete();
+
+        client.delete()
+                .uri("/bills/vet/" + billEntity.getVetId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent()
+                .expectBody();
+
+
+    }
+
     private Bill buildBill(){
 
         Calendar calendar = Calendar.getInstance();
