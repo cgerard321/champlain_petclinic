@@ -5,23 +5,23 @@ angular.module('vetDetails', ['ui.router'])
         $stateProvider
             .state('vetDetails', {
                 parent: 'app',
-                url: '/vet/details/:vetId',
+                url: '/vets/details/:vetId',
                 params: {vetId: null},
                 template: '<vet-details></vet-details>'
             })
             .state('disableVet', {
                 parent: 'app',
-                url: '/vet/details/:vetId/disableVet',
+                url: '/vets/details/:vetId/disableVet',
                 template: '<vet-details></vet-details>'
             })
             .state('enableVet', {
                 parent: 'app',
-                url: '/vet/details/:vetId/enableVet',
+                url: '/vets/details/:vetId/enableVet',
                 template: '<vet-details></vet-details>'
             })
             .state('deleteVet', {
                 parent: 'app',
-                url: '/vet/details/:vetId/deleteVet',
+                url: '/vets/details/:vetId/deleteVet',
                 template: '<vet-details></vet-details>'
             })
     }]);
