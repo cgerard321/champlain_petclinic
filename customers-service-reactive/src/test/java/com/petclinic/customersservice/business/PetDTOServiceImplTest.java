@@ -30,7 +30,7 @@ class PetDTOServiceImplTest {
     @Test
     void GetPetDTOByPetID() throws ParseException {
         Pet petEntity = buildPet();
-        
+
     }
 
     private Pet buildPet() {

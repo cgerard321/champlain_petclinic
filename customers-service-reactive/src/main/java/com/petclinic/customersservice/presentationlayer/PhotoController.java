@@ -24,4 +24,9 @@ public class PhotoController {
         return photoService.getPhotoByPhotoId(photoId);
     }
 
+    @DeleteMapping("/{photoId)")
+    public Mono<Void> deletePhotoByPhotoId(@PathVariable String photoId) {
+        return photoService.deletePhoto(photoId);
+    }
+
 }
