@@ -5,24 +5,15 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-<<<<<<< HEAD
-
 import static org.mockito.ArgumentMatchers.*;
-=======
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
->>>>>>> main
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.*;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-
-import java.text.SimpleDateFormat;
 import java.util.Date;
-
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port: 27019"})
@@ -58,19 +49,11 @@ class PetServiceImplTest {
     public void deletePet() {
 
         Pet pet = buildPet();
-<<<<<<< HEAD
         String PET_ID = pet.getId();
 
         when(repo.deleteById(anyString())).thenReturn(Mono.empty());
 
         Mono<Void> petDelete = petService.deletePetByPetId(PET_ID);
-=======
-        int PET_ID = pet.getId();
-
-        when(repo.deleteById(anyInt())).thenReturn(Mono.empty());
-
-        Mono<Void> petDelete = petService.deletePet(PET_ID);
->>>>>>> main
 
         StepVerifier
                 .create(petDelete)
@@ -78,7 +61,6 @@ class PetServiceImplTest {
                 .verifyComplete();
     }
 
-<<<<<<< HEAD
 //    @Test
 //    public void findPetsByOwnerId() {
 //
@@ -99,26 +81,15 @@ class PetServiceImplTest {
 //                })
 //                .verifyComplete();
 //    }
-
-=======
->>>>>>> main
     @Test
     public void deletePetNotFound() {
 
         Pet pet = buildPet();
-<<<<<<< HEAD
         String PET_ID = "00";
 
         when(repo.deleteById(anyString())).thenReturn(Mono.empty());
 
         Mono<Void> petDelete = petService.deletePetByPetId(PET_ID);
-=======
-        int PET_ID = 00;
-
-        when(repo.deleteById(anyInt())).thenReturn(Mono.empty());
-
-        Mono<Void> petDelete = petService.deletePet(PET_ID);
->>>>>>> main
 
         StepVerifier
                 .create(petDelete)

@@ -41,7 +41,7 @@ class PetRepoTest {
         Pet pet = buildPet();
         repo.save(pet);
 
-        Publisher<Void> setup = repo.deletePetById(pet.getId());
+        Publisher<Void> setup = repo.deleteById(pet.getId());
 
         StepVerifier
                 .create(setup)

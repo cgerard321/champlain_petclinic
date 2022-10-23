@@ -49,7 +49,7 @@ class OwnerRepoTest {
 
     private Owner buildOwner() {
         return Owner.builder()
-                //.Id("55")
+                .id("55")
                 .firstName("Felix")
                 .lastName("Labrie")
                 .address("308 ave de Stanley")
