@@ -19,16 +19,9 @@ public class OwnerDTOController {
     @Autowired
     private OwnerDTOService ownerDTOService;
 
-    @Autowired
-    private OwnerService ownerService;
-
-    @GetMapping("/test/{ownerId}")
+    @GetMapping("/{ownerId}")
     public Mono<OwnerDTO> getOwnerDTOByOwnerId(@PathVariable String ownerId) {
         return ownerDTOService.getOwnerDTOByOwnerId(ownerId);
-    }
-    @GetMapping("/{ownerId}")
-    public Mono<Owner> getOwnerByOwnerId(@PathVariable String ownerId) {
-        return ownerService.getOwnerByOwnerId(ownerId);
     }
 
 }
