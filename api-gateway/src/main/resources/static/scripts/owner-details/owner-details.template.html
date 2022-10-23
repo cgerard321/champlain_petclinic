@@ -5,11 +5,11 @@
 <table class="table table-striped">
     <tr>
         <td rowspan="5">
-                <div class="parent">
-                    <img alt="Profile picture preview" src="data:image/png;base64, {{$ctrl.ownerPhoto.photo}}" width="150" height="150" class="image1">
-                    <img alt="" src="data:image/png;base64, {{$ctrl.PreviewImage}}" ng-show="$ctrl.PreviewImage != null" width="150" height="150" class="image2"/>
-                    <input type="file" accept="image/jpeg" class="fileInput" id="photoOwner"/>
-                </div>
+            <div class="parent">
+                <img alt="Profile picture preview" src="data:image/png;base64, {{$ctrl.ownerPhoto.photo}}" width="150" height="150" class="image1">
+                <img alt="" src="data:image/png;base64, {{$ctrl.PreviewImage}}" ng-show="$ctrl.PreviewImage != null" width="150" height="150" class="image2"/>
+                <input type="file" accept="image/jpeg" class="fileInput" id="photoOwner"/>
+            </div>
         </td>
         <th class="col-sm-3">Name</th>
         <td id="tableName"><b>{{$ctrl.owner.firstName}} {{$ctrl.owner.lastName}}</b></td>
