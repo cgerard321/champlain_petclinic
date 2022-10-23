@@ -25,65 +25,65 @@ class PhotoServiceImplTest {
     @Autowired
     private PhotoService photoService;
 
-//    @Test
-//    void insertPhoto() {
-//        Photo photoEntity = buildPhoto();
-//        Mono<Photo> photoMono = Mono.just(photoEntity);
-//        when(repo.insert(any(Photo.class))).thenReturn(photoMono);
-//        Mono<Photo> returnedPhoto = photoService.insertPhoto(Mono.just(photoEntity));
-//        StepVerifier.create(returnedPhoto).consumeNextWith(foundPhoto -> {
-//                    assertEquals(photoEntity.getId(), foundPhoto.getId());
-//                    assertEquals(photoEntity.getName(), foundPhoto.getName());
-//                    assertEquals(photoEntity.getType(), foundPhoto.getType());
-//                    assertEquals(photoEntity.getPhoto(), foundPhoto.getPhoto());
-//                })
-//                .verifyComplete();
-//    }
-//
-//    @Test
-//    void getPhotoByPhotoId() {
-//
-//        Photo photoEntity = buildPhoto();
-//        int PHOTO_ID = photoEntity.getId();
-//
-//        when(repo.findPhotoById(any(Integer.class))).thenReturn(Mono.just(photoEntity));
-//
-//        Mono<Photo> returnedPhoto = photoService.getPhotoByPhotoId(PHOTO_ID);
-//
-//        StepVerifier.create(returnedPhoto)
-//                .consumeNextWith(foundPhoto -> {
-//                    assertEquals(photoEntity.getName(), foundPhoto.getName());
-//                    assertEquals(photoEntity.getType(), foundPhoto.getType());
-//                    assertEquals(photoEntity.getPhoto(), foundPhoto.getPhoto());
-//                })
-//                .verifyComplete();
-//    }
-//
-//    @Test
-//    public void getPhotoByPhotoIdNotFound() {
-//
-//        Photo photo = buildPhoto();
-//
-//        int PHOTO_ID_NOT_FOUND = 00;
-//
-//        when(repo.findPhotoById(any(Integer.class))).thenReturn(Mono.just(photo));
-//
-//        Mono<Photo> photoMono = photoService.getPhotoByPhotoId(PHOTO_ID_NOT_FOUND);
-//
-//        StepVerifier
-//                .create(photoMono)
-//                .expectNextCount(1)
-//                .expectError();
-//    }
-//
-//
-//    private Photo buildPhoto() {
-//        return Photo.builder()
-//                .id(5)
-//                .name("Test")
-//                .type("test2")
-//                .photo("photoString")
-//                .build();
-//    }
+    @Test
+    void insertPhoto() {
+        Photo photoEntity = buildPhoto();
+        Mono<Photo> photoMono = Mono.just(photoEntity);
+        when(repo.insert(any(Photo.class))).thenReturn(photoMono);
+        Mono<Photo> returnedPhoto = photoService.insertPhoto(Mono.just(photoEntity));
+        StepVerifier.create(returnedPhoto).consumeNextWith(foundPhoto -> {
+                    assertEquals(photoEntity.getId(), foundPhoto.getId());
+                    assertEquals(photoEntity.getName(), foundPhoto.getName());
+                    assertEquals(photoEntity.getType(), foundPhoto.getType());
+                    assertEquals(photoEntity.getPhoto(), foundPhoto.getPhoto());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void getPhotoByPhotoId() {
+
+        Photo photoEntity = buildPhoto();
+        String PHOTO_ID = photoEntity.getId();
+
+        when(repo.findPhotoById(any(String.class))).thenReturn(Mono.just(photoEntity));
+
+        Mono<Photo> returnedPhoto = photoService.getPhotoByPhotoId(PHOTO_ID);
+
+        StepVerifier.create(returnedPhoto)
+                .consumeNextWith(foundPhoto -> {
+                    assertEquals(photoEntity.getName(), foundPhoto.getName());
+                    assertEquals(photoEntity.getType(), foundPhoto.getType());
+                    assertEquals(photoEntity.getPhoto(), foundPhoto.getPhoto());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    public void getPhotoByPhotoIdNotFound() {
+
+        Photo photo = buildPhoto();
+
+        String PHOTO_ID_NOT_FOUND = "00";
+
+        when(repo.findPhotoById(any(String.class))).thenReturn(Mono.just(photo));
+
+        Mono<Photo> photoMono = photoService.getPhotoByPhotoId(PHOTO_ID_NOT_FOUND);
+
+        StepVerifier
+                .create(photoMono)
+                .expectNextCount(1)
+                .expectError();
+    }
+
+
+    private Photo buildPhoto() {
+        return Photo.builder()
+                .id("5")
+                .name("Test")
+                .type("test2")
+                .photo("photoString")
+                .build();
+    }
 
 }
