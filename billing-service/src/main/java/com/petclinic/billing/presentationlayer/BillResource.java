@@ -55,4 +55,10 @@ public class BillResource {
     public Mono<Void> deleteBill(@PathVariable("billId") String billId){
         return SERVICE.DeleteBill(billId);
     }
+
+    @DeleteMapping (value = "/bills/vet/{vetId}")
+    @ResponseStatus (HttpStatus.NO_CONTENT)
+    public Flux<Void> deleteBillsByVetId (@PathVariable("vetId") String vetId){
+        return SERVICE.DeleteBillsByVetId(vetId);
+    }
 }

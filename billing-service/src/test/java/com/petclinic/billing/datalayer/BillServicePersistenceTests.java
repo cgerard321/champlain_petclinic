@@ -114,6 +114,27 @@ public class BillServicePersistenceTests {
 
     }
 
+    @Test
+    void shouldDeleteBillByVetId(){
+
+        Bill bill = buildBill();
+        Publisher<Bill> setup = repo.deleteAll().thenMany(repo.save(bill));
+
+        Publisher<Void> delete = repo.deleteBillsByVetId(bill.getVetId());
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        StepVerifier
+                .create(delete)
+                .expectNextCount(0)
+                .verifyComplete();
+
+
+
+    }
 
 
     private Bill buildBill(){
