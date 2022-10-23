@@ -112,6 +112,8 @@ class OwnerControllerIntegrationTest {
                 .jsonPath("$.photoId").isEqualTo(ownerEntity.getPhotoId());
     }
 
+
+
     private Owner buildOwner() {
         return Owner.builder()
                 .id("9")
