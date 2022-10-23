@@ -9,11 +9,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 @AutoConfigureWebTestClient
@@ -31,6 +36,23 @@ class PetDTOServiceImplTest {
     void GetPetDTOByPetID() throws ParseException {
         Pet petEntity = buildPet();
 
+        String PET_ID = petEntity.getId();
+
+        when(repo.findPetById(anyString())).thenReturn(Mono.just(petEntity));
+
+        Mono<PetDTO> petDTOMono = petDTOService.getPetDTOByPetId(PET_ID);
+
+        StepVerifier.create(petDTOMono)
+                .consumeNextWith(foundPet ->{
+                    assertEquals(petEntity.getId(), foundPet.getId());
+                    assertEquals(petEntity.getOwnerId(), foundPet.getOwnerId());
+                    assertEquals(petEntity.getName(), foundPet.getName());
+                    assertEquals(petEntity.getPetTypeId(), foundPet.getPetTypeId());
+                    assertEquals(petEntity.getPhotoId(), foundPet.getPhotoId());
+                    assertEquals(petEntity.getBirthDate(), foundPet.getBirthDate());
+                })
+                .verifyComplete();
+
     }
 
     private Pet buildPet() {
@@ -43,5 +65,17 @@ class PetDTOServiceImplTest {
                 .ownerId("4")
                 .build();
     }
+
+//    private PetDTO petDTObuilder() throws ParseException {
+//        return PetDTO.builder()
+//                .id("1")
+//                .name("felix")
+//                .petTypeId("1")
+//                .birthDate(new SimpleDateFormat( "yyyyMMdd" ).parse( "2000-11-30"))
+//                .petType(PetType.builder().id("1").name("TESTPETTYPE").build())
+//                .photo(Photo.builder().id("1").photo("1").name("test").type("test").build())
+//                .ownerId("1")
+//                .build();
+//    }
 
 }
