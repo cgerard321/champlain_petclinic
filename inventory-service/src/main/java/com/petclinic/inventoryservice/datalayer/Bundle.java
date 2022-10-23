@@ -15,6 +15,7 @@ import java.util.UUID;
 public class Bundle {
 
     @Id
+    private String id;
     private String bundleUUID;
     private String item;
     private int quantity;
