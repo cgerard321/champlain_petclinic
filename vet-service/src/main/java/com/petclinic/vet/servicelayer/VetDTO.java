@@ -27,7 +27,7 @@ public class VetDTO {
     private String lastName;
     private String email;
     private String phoneNumber;
-    private byte[] image;
+    private String imageId;
     private String resume;
     private String workday;
     private boolean isActive;

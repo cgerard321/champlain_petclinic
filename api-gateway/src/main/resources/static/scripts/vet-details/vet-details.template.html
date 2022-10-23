@@ -2,6 +2,8 @@
       integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet">
 <link href="form.css" rel="stylesheet" type="text/css"/>
+<link href="/css/ownerdetail.css" rel="stylesheet" type="text/css"/>
+
 
 
 <div class="bg-light">
@@ -14,11 +16,18 @@
 
             <div class="row g-3">
                 <div class="col-sm-6">
-                        <span class="modal_image"><img ng-if="vet.image != null"
-                                                       src="data:image/png;base64,{{vet.image}}"/>
-                            <img alt="Profile picture preview" id="preview" ng-if="vet.image == null"
-                                 src="images/vet_default.jpg"/>
-                        </span>
+                    <td rowspan="5">
+                        <div class="parent">
+                            <img alt="Profile picture preview" src="data:image/png;base64, {{$ctrl.vetPhoto.photo}}" width="150" height="150" class="image1">
+                            <img alt="" src="data:image/png;base64, {{$ctrl.PreviewImage}}" ng-show="$ctrl.PreviewImage != null" width="150" height="150" class="image2"/>
+                            <input type="file" accept="image/jpeg" class="fileInput" id="photoVet"/>
+                        </div>
+                    </td>
+<!--                        <span class="modal_image"><img ng-if="vet.image != null"-->
+<!--                                                       src="data:image/png;base64,{{vet.image}}"/>-->
+<!--                            <img alt="Profile picture preview" id="preview" ng-if="vet.image == null"-->
+<!--                                 src="images/vet_default.jpg"/>-->
+<!--                        </span>-->
                 </div>
                 <div class="col-sm-6">
 
