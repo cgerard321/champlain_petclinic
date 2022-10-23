@@ -28,4 +28,21 @@ public class PetServiceImpl implements PetService {
     public Flux<Pet> getPetsByOwnerId(String ownerId) {
         return petRepo.findAllPetByOwnerId(ownerId);
     }
+
+    @Override
+    public Mono<Pet> updatePetByPetId(String petId, Mono<Pet> petMono) {
+        return petRepo.findPetById(petId)
+                .flatMap(p -> petMono
+                        .doOnNext(e -> e.setName(p.getName()))
+                        .doOnNext(e -> e.setBirthDate(p.getBirthDate()))
+                        .doOnNext(e -> e.setPetTypeId(p.getPetTypeId()))
+                        .doOnNext(e -> e.setOwnerId(p.getOwnerId()))
+                )
+                .flatMap(petRepo::save);
+    }
+
+    @Override
+    public Mono<Void> deletePetByPetId(String petId) {
+        return petRepo.deleteById(petId);
+    }
 }

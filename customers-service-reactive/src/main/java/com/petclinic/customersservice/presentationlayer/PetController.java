@@ -5,10 +5,8 @@ import com.petclinic.customersservice.business.PetDTOService;
 import com.petclinic.customersservice.business.PetService;
 import com.petclinic.customersservice.data.Pet;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -22,6 +20,23 @@ public class PetController {
     @GetMapping("/{petId}")
     public Mono<Pet> getPetDTOByPetId(@PathVariable String petId) {
         return petService.getPetById(petId);
+    }
+
+    @DeleteMapping("/{petId}")
+    public Mono<Void> deletePetByPetId(@PathVariable String petId) {
+        return petService.deletePetByPetId(petId);
+    }
+
+    @PostMapping()
+    public Mono<Pet> insertPet(@RequestBody Mono<Pet> petMono) {
+        return petService.insertPet(petMono);
+    }
+
+    @PutMapping("/{petId}")
+    public Mono<ResponseEntity<Pet>> updatePetByPetId(@PathVariable String petId, @RequestBody Mono<Pet> petMono) {
+        return petService.updatePetByPetId(petId, petMono)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
 }
