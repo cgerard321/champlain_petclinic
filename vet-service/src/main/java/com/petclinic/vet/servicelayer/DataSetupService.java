@@ -1,6 +1,6 @@
 package com.petclinic.vet.servicelayer;
 
-import com.petclinic.vet.dataaccesslayer.Photo;
+//import com.petclinic.vet.dataaccesslayer.Photo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
@@ -17,8 +17,8 @@ public class DataSetupService implements CommandLineRunner {
     @Autowired
     private VetService vetService;
 
-    @Autowired
-    private PhotoService photoService;
+//    @Autowired
+//    private PhotoService photoService;
     @Override
     public void run(String... args) throws Exception {
 
