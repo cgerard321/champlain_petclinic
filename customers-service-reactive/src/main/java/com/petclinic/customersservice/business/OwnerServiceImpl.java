@@ -27,4 +27,17 @@ public class OwnerServiceImpl implements OwnerService {
     public Mono<Void> deleteOwner(String ownerId) {
         return repo.deleteById(ownerId);
     }
+
+    @Override
+    public Mono<Owner> updateOwner(String ownerId, Mono<Owner> ownerMono) {
+        return repo.findById(ownerId)
+                .flatMap(p -> ownerMono
+                        .doOnNext(e -> e.setFirstName(p.getFirstName()))
+                        .doOnNext(e -> e.setLastName(p.getLastName()))
+                        .doOnNext(e -> e.setAddress(p.getAddress()))
+                        .doOnNext(e -> e.setCity(p.getCity()))
+                        .doOnNext(e -> e.setTelephone(p.getTelephone()))
+                )
+                .flatMap(repo::save);
+    }
 }

@@ -19,17 +19,9 @@ public class PetController {
     @Autowired
     private PetService petService;
 
-    @Autowired
-    private PetDTOService petDTOService;
-
     @GetMapping("/{petId}")
     public Mono<Pet> getPetDTOByPetId(@PathVariable String petId) {
         return petService.getPetById(petId);
-    }
-
-    @GetMapping("/ownerId/{ownerId}")
-    public Flux<PetDTO> getPetsByOwnerId(@PathVariable String ownerId) {
-        return petDTOService.getPetsByOwnerId(ownerId);
     }
 
 }

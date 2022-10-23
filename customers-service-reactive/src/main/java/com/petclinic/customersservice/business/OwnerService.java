@@ -11,4 +11,6 @@ public interface OwnerService {
 
     Mono<Void> deleteOwner(String ownerId);
 
+    Mono<Owner> updateOwner(String ownerId, Mono<Owner> ownerMono);
+
 }
