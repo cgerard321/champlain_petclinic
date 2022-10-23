@@ -20,11 +20,11 @@ public class EntityDTOUtil {
         return ownerDTO;
     }
 
-    public static Owner toOwner(OwnerDTO ownerDTO) {
-        Owner owner = new Owner();
-        BeanUtils.copyProperties(ownerDTO, owner);
-        return owner;
-    }
+//    public static Owner toOwner(OwnerDTO ownerDTO) {
+//        Owner owner = new Owner();
+//        BeanUtils.copyProperties(ownerDTO, owner);
+//        return owner;
+//    }
 
     public static PetDTO toPetDTO(Pet pet) {
         PetDTO petDTO = new PetDTO();
@@ -32,10 +32,10 @@ public class EntityDTOUtil {
         return petDTO;
     }
 
-    public static Pet toPet(PetDTO petDTO) {
-        Pet pet = new Pet();
-        BeanUtils.copyProperties(petDTO, pet);
-        return pet;
-    }
+//    public static Pet toPet(PetDTO petDTO) {
+//        Pet pet = new Pet();
+//        BeanUtils.copyProperties(petDTO, pet);
+//        return pet;
+//    }
 
 }
