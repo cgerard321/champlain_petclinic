@@ -6,7 +6,7 @@
     <tr>
         <td rowspan="5">
             <div class="parent">
-                <img alt="Profile picture preview" src="data:image/png;base64, {{$ctrl.ownerPhoto.photo}}" width="150" height="150" class="image1">
+                <img class="image" alt="Profile picture preview" src="data:image/png;base64, {{$ctrl.ownerPhoto.photo}}" width="150" height="150" class="image1">
                 <img alt="" src="data:image/png;base64, {{$ctrl.PreviewImage}}" ng-show="$ctrl.PreviewImage != null" width="150" height="150" class="image2"/>
                 <input type="file" accept="image/jpeg" class="fileInput" id="photoOwner"/>
             </div>
@@ -31,6 +31,7 @@
     <tr>
         <td>
             <a class="newBtn btn-default btn" style="background-color: royalblue; color: white" ui-sref="ownerEdit({ownerId: $ctrl.owner.id, method: 'edit'})">Edit Owner</a>
+            <a class="newBtn btn-default btn btn-danger" style="background-color: #dc3545;" ng-click = "$ctrl.deleteOwner()">Delete Owner</a>
         </td>
         <td>
 

@@ -7,6 +7,9 @@
     z-index: 50;
 }
 
+.image {
+    text-align: center;
+}
 
 .image1 {
     position: relative;
