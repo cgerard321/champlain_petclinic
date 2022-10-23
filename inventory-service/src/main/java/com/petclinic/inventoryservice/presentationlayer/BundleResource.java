@@ -33,7 +33,7 @@ public class BundleResource {
     public Flux<BundleDTO> findAllBundles() {
         return SERVICE.GetAllBundles();
     }
-    @GetMapping(value = "/bundles/{item}")
+    @GetMapping(value = "/bundles/item/{item}")
     public Flux<BundleDTO> findBundlesByItem(@PathVariable("item") String item) {
         return SERVICE.GetBundlesByItem(item);
     }
