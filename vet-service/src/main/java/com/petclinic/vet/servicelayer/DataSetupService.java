@@ -55,7 +55,7 @@ public class DataSetupService implements CommandLineRunner {
                 true, set2);
 
         VetDTO v4 = new VetDTO("823097","4", "Rafael", "Ortega", "ortega.rafael@email.com",
-                "(514)-634-8276 #2387","1"), "Practicing since 8 years", "Wednesday, Thursday, Friday",
+                "(514)-634-8276 #2387","1", "Practicing since 8 years", "Wednesday, Thursday, Friday",
                 false, set2);
 
         VetDTO v5 = new VetDTO("842370","5", "Henry", "Stevens", "stevens.henry@email.com",
