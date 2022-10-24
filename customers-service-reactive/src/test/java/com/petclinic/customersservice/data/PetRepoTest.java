@@ -41,7 +41,7 @@ class PetRepoTest {
         Pet pet = buildPet();
         repo.save(pet);
 
-        Publisher<Void> setup = repo.deletePetById(pet.getId());
+        Publisher<Void> setup = repo.deleteById(pet.getId());
 
         StepVerifier
                 .create(setup)
@@ -51,12 +51,12 @@ class PetRepoTest {
 
     private Pet buildPet() {
         return Pet.builder()
-                .id(55)
+                .id("55")
                 .name("Coco")
                 .birthDate(date)
-                .petTypeId(2)
-                .photoId(2)
-                .ownerId(2)
+                .petTypeId("2")
+                .photoId("2")
+                .ownerId("2")
                 .build();
     }
 

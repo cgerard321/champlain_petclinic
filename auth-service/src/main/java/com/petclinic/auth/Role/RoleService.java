@@ -14,9 +14,12 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
+import java.util.List;
+
 public interface RoleService {
 
     Role createRole(RoleIDLessDTO roleIDLessDTO);
     Page<Role> findAll(PageRequest pageRequest);
     void deleteById(long id) throws EmptyResultDataAccessException;
+    public List<Role> findAllWithoutPage();
 }

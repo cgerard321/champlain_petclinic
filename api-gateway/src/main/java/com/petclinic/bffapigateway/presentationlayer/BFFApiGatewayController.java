@@ -6,6 +6,7 @@ import com.petclinic.bffapigateway.dtos.*;
 import com.petclinic.bffapigateway.utils.VetsEntityDtoUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -198,6 +199,13 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/vets/vetBillId/{vetId}")
+    public Mono<ResponseEntity<VetDTO>> getVetByVetBillId(@PathVariable String vetBillId) {
+        return vetsServiceClient.getVetByVetBillId(VetsEntityDtoUtil.verifyId(vetBillId))
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
     @GetMapping("/vets/active")
     public Flux<VetDTO> getActiveVets() {
         return vetsServiceClient.getActiveVets();
@@ -235,8 +243,8 @@ public class BFFApiGatewayController {
     }
 
     @DeleteMapping(value = "users/{userId}")
-    public Mono<UserDetails> deleteUser(final @PathVariable long userId) {
-        return authServiceClient.deleteUser(userId);
+    public Mono<UserDetails> deleteUser(@RequestHeader(AUTHORIZATION) String auth, final @PathVariable long userId) {
+        return authServiceClient.deleteUser(auth, userId);
     }
 
     @GetMapping(value = "users/{userId}")
@@ -244,8 +252,8 @@ public class BFFApiGatewayController {
         return authServiceClient.getUser(userId);
     }
     @GetMapping(value = "users")
-    public Flux<UserDetails> getAll() {
-        return authServiceClient.getUsers();
+    public Flux<UserDetails> getAll(@RequestHeader(AUTHORIZATION) String auth) {
+        return authServiceClient.getUsers(auth);
     }
 
     @PutMapping(value = "users/{userId}",
@@ -256,19 +264,20 @@ public class BFFApiGatewayController {
     }
 
     @GetMapping(value = "admin/roles")
-    public Flux<Role> getRoles() {
-        return authServiceClient.getRoles();
+    public Flux<Role> getRoles(@RequestHeader(AUTHORIZATION) String auth) {
+        return authServiceClient.getRoles(auth);
     }
 
     @DeleteMapping(value = "admin/roles/{id}")
-    public Mono<Void> deleteRole(@PathVariable int id) {
-        return authServiceClient.deleteRole(id);
+    public Mono<Void> deleteRole(@RequestHeader(AUTHORIZATION) String auth, @PathVariable int id) {
+        return authServiceClient.deleteRole(auth, id);
     }
 
     @PostMapping(value = "admin/roles")
-    public Mono<Role> addRole(@RequestBody final Role model) {
-        return authServiceClient.addRole(model);
+    public Mono<Role> addRole(@RequestHeader(AUTHORIZATION) String auth, @RequestBody final Role model) {
+        return authServiceClient.addRole(auth, model);
     }
+
 
 
     /**
@@ -299,7 +308,6 @@ public class BFFApiGatewayController {
     public Mono<OwnerDetails> createOwner(@RequestBody OwnerDetails model){
         return customersServiceClient.createOwner(model);
     }
-
 
     @PostMapping(value = "owners/photo/{ownerId}")
     public Mono<String> setOwnerPhoto(@RequestBody PhotoDetails photoDetails, @PathVariable int ownerId) {
@@ -347,7 +355,6 @@ public class BFFApiGatewayController {
     /**
      * End of Owner Methods
      * **/
-
 
     @GetMapping("/verification/{token}")
     public Mono<UserDetails> verifyUser(@PathVariable final String token) {

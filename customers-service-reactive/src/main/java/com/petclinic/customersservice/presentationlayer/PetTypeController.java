@@ -13,12 +13,10 @@ import reactor.core.publisher.Flux;
 public class PetTypeController {
 
     @Autowired
-    private PetTypeService petTypeService;
+    PetTypeService petTypeService;
 
-    @GetMapping
-    public Flux<PetType> getAll() {
-        return petTypeService.getAll();
+    @GetMapping()
+    public Flux<PetType> getAllPetTypes() {
+        return petTypeService.getAllPetTypes();
     }
-
-
 }

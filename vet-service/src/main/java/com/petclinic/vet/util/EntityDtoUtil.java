@@ -30,6 +30,7 @@ public class EntityDtoUtil {
     public static VetDTO toDTO(Vet vet) {
         VetDTO dto = new VetDTO();
         dto.setVetId(vet.getVetId());
+        dto.setVetBillId(vet.getVetBillId());
         dto.setFirstName(vet.getFirstName());
         dto.setLastName(vet.getLastName());
         dto.setEmail(vet.getEmail());
@@ -45,6 +46,7 @@ public class EntityDtoUtil {
     public static Vet toEntity(VetDTO dto) {
         Vet vet = new Vet();
         vet.setVetId(generateVetId());
+        vet.setVetBillId(dto.getVetBillId());
         vet.setFirstName(dto.getFirstName());
         vet.setLastName(dto.getLastName());
         vet.setEmail(dto.getEmail());

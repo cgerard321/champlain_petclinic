@@ -39,6 +39,13 @@ public class VetController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/vetBillId/{vetBillId}")
+    public Mono<ResponseEntity<VetDTO>> getVetByBillId(@PathVariable String vetBillId) {
+        return vetService.getVetByVetBillId(EntityDtoUtil.verifyId(vetBillId))
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
     @GetMapping("/active")
     public Flux<VetDTO> getActiveVets() {
         return vetService.getVetByIsActive(true);
