@@ -65,10 +65,8 @@ angular.module('vetList')
             let url = 'api/gateway/vets';
             let optionSelection = document.getElementById("filterOption").value;
             if (optionSelection === "Active") {
-                console.log("Get active");
                 url+= '/active';
             } else if (optionSelection === "Inactive") {
-                console.log("Get inactive");
                 url+= '/inactive';
             }
             $http.get(url).then(function (resp) {

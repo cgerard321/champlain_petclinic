@@ -22,7 +22,7 @@ public interface VetRepository extends ReactiveMongoRepository<Vet, String> {
 
     Mono<Void> deleteVetByVetId (String vetId);
 
-    Flux<Vet> findVetsByIsActive(boolean isActive);
+    Flux<Vet> findVetsByActive(boolean isActive);
 
     Mono<Vet> findVetByVetBillId(String vetBillId);
 

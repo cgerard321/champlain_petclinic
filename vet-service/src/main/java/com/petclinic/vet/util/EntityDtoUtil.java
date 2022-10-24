@@ -35,7 +35,7 @@ public class EntityDtoUtil {
         dto.setLastName(vet.getLastName());
         dto.setEmail(vet.getEmail());
         dto.setPhoneNumber(vet.getPhoneNumber());
-        dto.setImage(vet.getImage());
+        dto.setImageId(vet.getImageId());
         dto.setResume(vet.getResume());
         dto.setWorkday(vet.getWorkday());
         dto.setActive(vet.isActive());
@@ -51,7 +51,7 @@ public class EntityDtoUtil {
         vet.setLastName(dto.getLastName());
         vet.setEmail(dto.getEmail());
         vet.setPhoneNumber(dto.getPhoneNumber());
-        vet.setImage(dto.getImage());
+        vet.setImageId(dto.getImageId());
         vet.setResume(dto.getResume());
         vet.setWorkday(dto.getWorkday());
         vet.setActive(dto.isActive());

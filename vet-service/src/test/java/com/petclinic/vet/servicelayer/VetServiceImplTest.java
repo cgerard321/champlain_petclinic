@@ -12,10 +12,8 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.HashSet;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -65,7 +63,7 @@ class VetServiceImplTest {
                     assertEquals(vetDTO1.getVetId(), vetDTO.getVetId());
                     assertEquals(vetDTO1.getEmail(), vetDTO.getEmail());
                     assertEquals(vetDTO1.getResume(), vetDTO.getResume());
-                    assertNotNull(vetDTO1.getImage());
+                    assertNotNull(vetDTO1.getImageId());
                     assertEquals(vetDTO1.getLastName(), vetDTO.getLastName());
                     assertEquals(vetDTO1.getFirstName(), vetDTO.getFirstName());
                     assertEquals(vetDTO1.getWorkday(), vetDTO.getWorkday());
@@ -86,7 +84,7 @@ class VetServiceImplTest {
                     assertEquals(vetDTO1.getVetId(), vetDTO.getVetId());
                     assertEquals(vetDTO1.getEmail(), vetDTO.getEmail());
                     assertEquals(vetDTO1.getResume(), vetDTO.getResume());
-                    assertNotNull(vetDTO1.getImage());
+                    assertNotNull(vetDTO1.getImageId());
                     assertEquals(vetDTO1.getLastName(), vetDTO.getLastName());
                     assertEquals(vetDTO1.getFirstName(), vetDTO.getFirstName());
                     assertEquals(vetDTO1.getWorkday(), vetDTO.getWorkday());
@@ -150,7 +148,7 @@ class VetServiceImplTest {
     @Test
     void getVetByIsInactive() {
 
-        when(vetRepository.findVetsByIsActive(anyBoolean())).thenReturn(Flux.just(vet));
+        when(vetRepository.findVetsByActive(anyBoolean())).thenReturn(Flux.just(vet));
 
         Flux<VetDTO> vetDTO = vetService.getVetByIsActive(vet.isActive());
 
@@ -174,7 +172,7 @@ class VetServiceImplTest {
     void getVetByIsActive() {
         Vet vet = buildVet2();
 
-        when(vetRepository.findVetsByIsActive(anyBoolean())).thenReturn(Flux.just(vet));
+        when(vetRepository.findVetsByActive(anyBoolean())).thenReturn(Flux.just(vet));
 
         Flux<VetDTO> vetDTO = vetService.getVetByIsActive(vet.isActive());
 
@@ -211,10 +209,10 @@ class VetServiceImplTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
-                .image("kjd".getBytes())
+                .imageId("kjd")
                 .workday("Monday")
                 .specialties(new HashSet<>())
-                .isActive(false)
+                .active(false)
                 .build();
     }
     private VetDTO buildVetDTO() {
@@ -226,10 +224,10 @@ class VetServiceImplTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
-                .image("kjd".getBytes())
+                .imageId("kjd")
                 .workday("Monday")
                 .specialties(new HashSet<>())
-                .isActive(false)
+                .active(false)
                 .build();
     }
     private Vet buildVet2() {
@@ -241,10 +239,10 @@ class VetServiceImplTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
-                .image("kjd".getBytes())
+                .imageId("kjd")
                 .workday("Monday")
                 .specialties(new HashSet<>())
-                .isActive(true)
+                .active(true)
                 .build();
     }
 }
