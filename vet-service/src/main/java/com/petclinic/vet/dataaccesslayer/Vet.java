@@ -27,6 +27,7 @@ public class Vet {
     private String id;
 
     private String vetId;
+    private String vetBillId;
     private String firstName;
     private String lastName;
     private String email;
