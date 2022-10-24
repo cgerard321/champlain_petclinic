@@ -53,8 +53,11 @@ class ApiGatewayControllerTest {
 
     VetDTO vetDTO = buildVetDTO();
     VetDTO vetDTO2 = buildVetDTO2();
+    VisitDetails visitDto = buildVisitDTo();
     String VET_ID = buildVetDTO().getVetId();
     String INVALID_VET_ID = "mjbedf";
+
+    private final String Visit_UUID_OK = visitDto.getVisitId();
 
     @MockBean
     private AuthServiceClient authServiceClient;
@@ -1047,7 +1050,9 @@ class ApiGatewayControllerTest {
         owner.setId(1);
         visit.setVisitId(UUID.randomUUID().toString());
         visit.setPetId(1);
-        visit.setDate("2021-12-12");
+        visit.setDay(24);
+        visit.setMonth(11);
+        visit.setYear(2022);
         visit.setDescription("Charle's Richard cat has a paw infection.");
         visit.setStatus(false);
         visit.setPractitionerId(1);
@@ -1066,143 +1071,114 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$.visitId").isEqualTo(visit.getVisitId())
                 .jsonPath("$.petId").isEqualTo(1)
-                .jsonPath("$.date").isEqualTo("2021-12-12")
+                .jsonPath("$.day").isEqualTo(24)
+                .jsonPath("$.month").isEqualTo(11)
+                .jsonPath("$.year").isEqualTo(2022)
                 .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$.status").isEqualTo(false)
                 .jsonPath("$.practitionerId").isEqualTo(1);
     }
+    //working
     @Test
     void shouldDeleteAVisit() {
-        VisitDetails visit = new VisitDetails();
-        OwnerDetails owner = new OwnerDetails();
-        owner.setId(1);
-        visit.setVisitId(UUID.randomUUID().toString());
-        visit.setPetId(1);
-        visit.setDate("2021-12-12");
-        visit.setDescription("Charle's Richard cat has a paw infection.");
-        visit.setStatus(false);
-        visit.setPractitionerId(1);
+        when(visitsServiceClient.deleteVisitByVisitId(anyString()))
+                .thenReturn((Mono.empty()));
 
+        client
+                .delete()
+                .uri("/api/gateway/visits/" + Visit_UUID_OK)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk();
 
-        when(visitsServiceClient.createVisitForPet(visit))
-                .thenReturn(Mono.just(visit));
+        Mockito.verify(visitsServiceClient, times(1))
+                .deleteVisitByVisitId(Visit_UUID_OK);
+    }
+    //working
+    @Test
+    void addVisit(){
+        Mono<VisitDetails> dto = Mono.just(visitDto);
+        when(visitsServiceClient.createVisitForPet(visitDto))
+                .thenReturn(dto);
 
-        client.post()
-                .uri("/api/gateway/visit/owners/{ownerId}/pets/{petId}/visits", owner.getId(), visit.getPetId())
-                .body(Mono.just(visit), VisitDetails.class)
+        client
+                .post()
+                .uri("/api/gateway/visits")
+                .body(dto, VisitDetails.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.visitId").isEqualTo(visit.getVisitId())
-                .jsonPath("$.petId").isEqualTo(1)
-                .jsonPath("$.date").isEqualTo("2021-12-12")
-                .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
-                .jsonPath("$.status").isEqualTo(false)
-                .jsonPath("$.practitionerId").isEqualTo(1);
-
-        client.delete()
-                .uri("/api/gateway/visits/{visitId}", visit.getVisitId())
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus()
-                .isOk()
                 .expectBody();
 
-        assertEquals(null, visitsServiceClient.getVisitsForPet(visit.getPetId()));
+        Mockito.verify(visitsServiceClient, times(1))
+                .createVisitForPet(any(VisitDetails.class));
     }
-
+    //working
     @Test
     void shouldUpdateAVisitsById() {
-        VisitDetails visit = new VisitDetails();
-        OwnerDetails owner = new OwnerDetails();
-        owner.setId(1);
-        visit.setVisitId(UUID.randomUUID().toString());
-        visit.setPetId(1);
-        visit.setDate("2021-12-12");
-        visit.setDescription("Charle's Richard cat has a paw infection.");
-        visit.setStatus(false);
-        visit.setPractitionerId(1);
+        Mono<VisitDetails> monoVisit = Mono.just(visitDto);
 
-        VisitDetails visit2 = new VisitDetails();
-        OwnerDetails owner2 = new OwnerDetails();
+        when(visitsServiceClient.updateVisitForPet(anyString(),any(Mono.class)))
+                .thenReturn(monoVisit);
 
-        owner2.setId(1);
-        visit2.setVisitId(UUID.randomUUID().toString());
-        visit2.setPetId(2);
-        visit2.setDate("2034-12-12");
-        visit2.setDescription("Charle's Richard dog has a paw infection.");
-        visit2.setStatus(false);
-        visit2.setPractitionerId(2);
-
-
-        when(visitsServiceClient.createVisitForPet(visit))
-                .thenReturn(Mono.just(visit));
-
-        client.post()
-                .uri("/api/gateway/visit/owners/{ownerId}/pets/{petId}/visits", owner.getId(), visit.getPetId())
-                .body(Mono.just(visit), VisitDetails.class)
+        client
+                .put()
+                .uri("/api/gateway/visits/" + VET_ID)
+                .body(Mono.just(vetDTO), VetDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.visitId").isEqualTo(visit.getVisitId())
-                .jsonPath("$.petId").isEqualTo(1)
-                .jsonPath("$.date").isEqualTo("2021-12-12")
-                .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
+                .jsonPath("$.visitId").isEqualTo(visitDto.getVisitId())
+                .jsonPath("$.petId").isEqualTo(2)
+                .jsonPath("$.day").isEqualTo(24)
+                .jsonPath("$.month").isEqualTo(11)
+                .jsonPath("$.year").isEqualTo(2022)
+                .jsonPath("$.description").isEqualTo("Cat is sick")
                 .jsonPath("$.status").isEqualTo(false)
                 .jsonPath("$.practitionerId").isEqualTo(1);
 
-        when(visitsServiceClient.updateVisitForPet(visit2))
-                .thenReturn(Mono.just(visit2));
+        Mockito.verify(visitsServiceClient, times(1))
+                .updateVisitForPet(anyString(), any(Mono.class));
 
-        client.put()
-                .uri("/api/gateway/owners/*/pets/{petId}/visits/{visitId}",visit.getPetId(), visit.getVisitId())
-                .body(Mono.just(visit2), VisitDetails.class)
+
+    }
+    //working
+    @Test
+    void getVisitByVisitId() {
+        when(visitsServiceClient.getVisitByVisitId(anyString()))
+                .thenReturn(Mono.just(visitDto));
+
+        client
+                .get()
+                .uri("/api/gateway/visits/visits/" + Visit_UUID_OK)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody();
-
-        assertEquals(visitsServiceClient.getVisitsForPet(1), null);
-
-
-    }
-
-    @Test
-    void shouldGetAVisit() {
-        VisitDetails visit = new VisitDetails();
-        visit.setVisitId(UUID.randomUUID().toString());
-        visit.setPetId(1);
-        visit.setDate("2021-12-12");
-        visit.setDescription("Charle's Richard cat has a paw infection.");
-        visit.setStatus(false);
-        visit.setPractitionerId(1);
-
-        when(visitsServiceClient.getVisitsForPet(visit.getPetId()))
-                .thenReturn(Flux.just(visit));
-
-        client.get()
-                .uri("/api/gateway/visits/{petId}", visit.getPetId())
-                .exchange()
-                .expectStatus().isOk()
                 .expectBody()
-                .jsonPath("$[0].visitId").isEqualTo(visit.getVisitId())
-                .jsonPath("$[0].petId").isEqualTo(1)
-                .jsonPath("$[0].date").isEqualTo("2021-12-12")
-                .jsonPath("$[0].description").isEqualTo("Charle's Richard cat has a paw infection.")
-                .jsonPath("$[0].practitionerId").isEqualTo(1);
-    }
+                .jsonPath("$.visitId").isEqualTo(visitDto.getVisitId())
+                .jsonPath("$.petId").isEqualTo(2)
+                .jsonPath("$.day").isEqualTo(24)
+                .jsonPath("$.month").isEqualTo(11)
+                .jsonPath("$.year").isEqualTo(2022)
+                .jsonPath("$.description").isEqualTo("Cat is sick")
+                .jsonPath("$.practitionerId").isEqualTo(1);
 
+        Mockito.verify(visitsServiceClient, times(1))
+                .getVisitByVisitId(Visit_UUID_OK);
+    }
+    //working
     @Test
     void shouldGetAVisitForPractitioner(){
         VisitDetails visit = new VisitDetails();
         visit.setVisitId(UUID.randomUUID().toString());
         visit.setPetId(1);
-        visit.setDate("2021-12-12");
+        visit.setDay(24);
+        visit.setMonth(11);
+        visit.setYear(2022);
         visit.setDescription("Charle's Richard cat has a paw infection.");
         visit.setStatus(false);
         visit.setPractitionerId(1);
@@ -1217,206 +1193,40 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$[0].visitId").isEqualTo(visit.getVisitId())
                 .jsonPath("$[0].petId").isEqualTo(1)
-                .jsonPath("$[0].date").isEqualTo("2021-12-12")
+                .jsonPath("$[0].day").isEqualTo(24)
+                .jsonPath("[0].month").isEqualTo(11)
+                .jsonPath("[0].year").isEqualTo(2022)
                 .jsonPath("$[0].description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$[0].practitionerId").isEqualTo(1);
     }
-
+    //working
     @Test
     void shouldGetAVisitByPractitionerIdAndMonth(){
         VisitDetails visit = new VisitDetails();
         visit.setVisitId(UUID.randomUUID().toString());
         visit.setPetId(1);
-        visit.setDate("2021-12-12");
+        visit.setDay(24);
+        visit.setMonth(11);
+        visit.setYear(2022);
         visit.setDescription("Charle's Richard cat has a paw infection.");
         visit.setStatus(false);
         visit.setPractitionerId(1);
 
-        when(visitsServiceClient.getVisitsByPractitionerIdAndMonth(visit.getPractitionerId(), "start", "end"))
+        when(visitsServiceClient.getVisitsByPractitionerIdAndMonth(visit.getPractitionerId(), 11))
                 .thenReturn(Flux.just(visit));
 
         client.get()
-                .uri("/api/gateway/visits/calendar/{practitionerId}?dates={startDate},{endDate}", visit.getPractitionerId(), "start", "end")
+                .uri("/api/gateway/practitioner/{practitionerId}/{month}", visit.getPractitionerId(), 11)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$[0].visitId").isEqualTo(visit.getVisitId())
                 .jsonPath("$[0].petId").isEqualTo(1)
-                .jsonPath("$[0].date").isEqualTo("2021-12-12")
+                .jsonPath("$[0].day").isEqualTo(24)
+                .jsonPath("[0].month").isEqualTo(11)
+                .jsonPath("[0].year").isEqualTo(2022)
                 .jsonPath("$[0].description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$[0].practitionerId").isEqualTo(1);
-    }
-
-    @Test
-    void getSingleVisit_Valid() {
-        VisitDetails visit = new VisitDetails();
-        visit.setVisitId(UUID.randomUUID().toString());
-        visit.setPetId(7);
-        visit.setDate("2022-04-20");
-        visit.setDescription("Fetching a single visit!");
-        visit.setStatus(false);
-        visit.setPractitionerId(177013);
-        
-        when(visitsServiceClient.getVisitByVisitId(anyString())).thenReturn(Mono.just(visit));
-    
-        client.get()
-                .uri("/api/gateway/visit/{visitId}", visit.getVisitId())
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.visitId").isEqualTo(visit.getVisitId())
-                .jsonPath("$.petId").isEqualTo(visit.getPetId())
-                .jsonPath("$.date").isEqualTo(visit.getDate())
-                .jsonPath("$.description").isEqualTo(visit.getDescription())
-                .jsonPath("$.practitionerId").isEqualTo(visit.getPractitionerId());
-    }
-    
-    @Test
-    void getSingleVisit_Invalid() {
-        final String invalidVisitId = "invalid";
-        final String expectedErrorMessage = "error message";
-    
-        when(visitsServiceClient.getVisitByVisitId(invalidVisitId))
-                .thenThrow(new GenericHttpException(expectedErrorMessage, BAD_REQUEST));
-        
-        client.get()
-                .uri("/api/gateway/visit/{visitId}", invalidVisitId)
-                .exchange()
-                .expectStatus().isBadRequest()
-                .expectBody()
-                .jsonPath("$.statusCode").isEqualTo(BAD_REQUEST.value())
-                .jsonPath("$.timestamp").exists()
-                .jsonPath("$.message").isEqualTo(expectedErrorMessage);
-    }
-
-    @Test
-    @DisplayName("Should get the previous visits of a pet")
-    void shouldGetPreviousVisitsOfAPet() {
-        VisitDetails visit1 = new VisitDetails();
-        VisitDetails visit2 = new VisitDetails();
-        visit1.setVisitId(UUID.randomUUID().toString());
-        visit1.setPetId(21);
-        visit1.setDate("2021-12-7");
-        visit1.setDescription("John Smith's cat has a paw infection.");
-        visit1.setStatus(false);
-        visit1.setPractitionerId(2);
-        visit2.setVisitId(UUID.randomUUID().toString());
-        visit2.setPetId(21);
-        visit2.setDate("2021-12-8");
-        visit2.setDescription("John Smith's dog has a paw infection.");
-        visit2.setStatus(false);
-        visit2.setPractitionerId(2);
-
-        List<VisitDetails> previousVisitsList = new ArrayList<>();
-        previousVisitsList.add(visit1);
-        previousVisitsList.add(visit2);
-
-        Flux<VisitDetails> previousVisits = Flux.fromIterable(previousVisitsList);
-
-        when(visitsServiceClient.getPreviousVisitsForPet(21))
-                .thenReturn(previousVisits);
-
-        client.get()
-                .uri("/api/gateway/visits/previous/{petId}", 21)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$[0].visitId").isEqualTo(visit1.getVisitId())
-                .jsonPath("$[0].petId").isEqualTo(21)
-                .jsonPath("$[0].date").isEqualTo("2021-12-7")
-                .jsonPath("$[0].description").isEqualTo("John Smith's cat has a paw infection.")
-                .jsonPath("$[0].status").isEqualTo(false)
-                .jsonPath("$[0].practitionerId").isEqualTo(2)
-                .jsonPath("$[1].visitId").isEqualTo(visit2.getVisitId())
-                .jsonPath("$[1].petId").isEqualTo(21)
-                .jsonPath("$[1].date").isEqualTo("2021-12-8")
-                .jsonPath("$[1].description").isEqualTo("John Smith's dog has a paw infection.")
-                .jsonPath("$[1].status").isEqualTo(false)
-                .jsonPath("$[1].practitionerId").isEqualTo(2);
-
-    }
-
-    @Test
-    @DisplayName("Should return a bad request if the petId is invalid when trying to get the previous visits of a pet")
-    void shouldGetBadRequestWhenInvalidPetIdToRetrievePreviousVisits() {
-        final int invalidPetId = -1;
-        final String expectedErrorMessage = "error message";
-
-        when(visitsServiceClient.getPreviousVisitsForPet(invalidPetId))
-                .thenThrow(new GenericHttpException(expectedErrorMessage, BAD_REQUEST));
-
-        client.get()
-                .uri("/api/gateway/visits/previous/{petId}", invalidPetId)
-                .exchange()
-                .expectStatus().isBadRequest()
-                .expectBody()
-                .jsonPath("$.statusCode").isEqualTo(BAD_REQUEST.value())
-                .jsonPath("$.timestamp").exists()
-                .jsonPath("$.message").isEqualTo(expectedErrorMessage);
-    }
-
-    @Test
-    void shouldGetScheduledVisitsOfAPet() {
-        VisitDetails visit1 = new VisitDetails();
-        VisitDetails visit2 = new VisitDetails();
-        visit1.setVisitId(UUID.randomUUID().toString());
-        visit1.setPetId(21);
-        visit1.setDate("2021-12-7");
-        visit1.setDescription("John Smith's cat has a paw infection.");
-        visit1.setStatus(true);
-        visit1.setPractitionerId(2);
-        visit2.setVisitId(UUID.randomUUID().toString());
-        visit2.setPetId(21);
-        visit2.setDate("2021-12-8");
-        visit2.setDescription("John Smith's dog has a paw infection.");
-        visit2.setStatus(true);
-        visit2.setPractitionerId(2);
-
-        List<VisitDetails> scheduledVisitsList = new ArrayList<>();
-        scheduledVisitsList.add(visit1);
-        scheduledVisitsList.add(visit2);
-
-        Flux<VisitDetails> scheduledVisits = Flux.fromIterable(scheduledVisitsList);
-
-        when(visitsServiceClient.getScheduledVisitsForPet(21))
-                .thenReturn(scheduledVisits);
-
-        client.get()
-                .uri("/api/gateway/visits/scheduled/{petId}", 21)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$[0].visitId").isEqualTo(visit1.getVisitId())
-                .jsonPath("$[0].petId").isEqualTo(21)
-                .jsonPath("$[0].date").isEqualTo("2021-12-7")
-                .jsonPath("$[0].description").isEqualTo("John Smith's cat has a paw infection.")
-                .jsonPath("$[0].status").isEqualTo(true)
-                .jsonPath("$[0].practitionerId").isEqualTo(2)
-                .jsonPath("$[1].visitId").isEqualTo(visit2.getVisitId())
-                .jsonPath("$[1].petId").isEqualTo(21)
-                .jsonPath("$[1].date").isEqualTo("2021-12-8")
-                .jsonPath("$[1].description").isEqualTo("John Smith's dog has a paw infection.")
-                .jsonPath("$[1].status").isEqualTo(true)
-                .jsonPath("$[1].practitionerId").isEqualTo(2);
-    }
-
-    @Test
-    @DisplayName("Should return a bad request if the petId is invalid when trying to get the scheduled visits of a pet")
-    void shouldGetBadRequestWhenInvalidPetIdToRetrieveScheduledVisits() {
-        final int invalidPetId = -1;
-        final String expectedErrorMessage = "error message";
-
-        when(visitsServiceClient.getScheduledVisitsForPet(invalidPetId))
-                .thenThrow(new GenericHttpException(expectedErrorMessage, BAD_REQUEST));
-
-        client.get()
-                .uri("/api/gateway/visits/scheduled/{petId}", invalidPetId)
-                .exchange()
-                .expectStatus().isBadRequest()
-                .expectBody()
-                .jsonPath("$.statusCode").isEqualTo(BAD_REQUEST.value())
-                .jsonPath("$.timestamp").exists()
-                .jsonPath("$.message").isEqualTo(expectedErrorMessage);
     }
 
     @Test
@@ -1654,6 +1464,19 @@ class ApiGatewayControllerTest {
                 .workday("Monday")
                 .specialties(new HashSet<>())
                 .isActive(true)
+                .build();
+    }
+
+    private VisitDetails buildVisitDTo(){
+        return VisitDetails.builder()
+                .visitId(UUID.randomUUID().toString())
+                .day(24)
+                .month(11)
+                .year(2022)
+                .petId(2)
+                .practitionerId(1)
+                .description("Cat is sick")
+                .status(false)
                 .build();
     }
 }

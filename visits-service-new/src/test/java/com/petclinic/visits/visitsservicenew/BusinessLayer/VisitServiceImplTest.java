@@ -12,6 +12,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
@@ -32,7 +35,6 @@ public class VisitServiceImplTest {
 
     int PRAC_ID = visitDTO.getPractitionerId();
     int PET_ID = visitDTO.getPetId();
-
     int MONTH = visitDTO.getMonth();
     String VISIT_ID = visitDTO.getVisitId();
 

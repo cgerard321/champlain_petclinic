@@ -106,14 +106,12 @@ public class BFFApiGatewayController {
 
 
     @PutMapping(
-            value = "owners/*/pets/{petId}/visits/{visitId}",
+            value = "visits/update/{visitId}",
             consumes = "application/json",
             produces = "application/json"
     )
-    Mono<VisitDetails> updateVisit(@RequestBody VisitDetails visit, @PathVariable int petId, @PathVariable String visitId) {
-        visit.setPetId(petId);
-        visit.setVisitId(visitId);
-        return visitsServiceClient.updateVisitForPet(visit);
+    Mono<VisitDetails> updateVisit(@RequestBody Mono<VisitDetails> visit, @PathVariable String visitId) {
+        return visitsServiceClient.updateVisitForPet(visitId, visit);
     }
 
     @DeleteMapping (value = "visits/{visitId}")
@@ -121,25 +119,14 @@ public class BFFApiGatewayController {
         return visitsServiceClient.deleteVisitByVisitId(visitId);
     }
 
-    @GetMapping(value = "visits/{petId}")
+    @GetMapping(value = "visits/pet/{petId}")
     public Flux<VisitDetails> getVisitsForPet(final @PathVariable int petId){
         return visitsServiceClient.getVisitsForPet(petId);
     }
     
-    @GetMapping(value ="visit/{visitId}")
+    @GetMapping(value ="visits/visits/{visitId}")
     public Mono<VisitDetails> getVisitByVisitId(final @PathVariable String visitId){
         return visitsServiceClient.getVisitByVisitId(visitId);
-    }
-    
-    @GetMapping(value = "visits/previous/{petId}")
-    public Flux<VisitDetails> getPreviousVisitsForPet(@PathVariable final int petId) {
-        return visitsServiceClient.getPreviousVisitsForPet(petId);
-    }
-
-    @GetMapping(value = "visits/scheduled/{petId}")
-    public Flux<VisitDetails> getScheduledVisitsForPet(@PathVariable final int petId) {
-        return visitsServiceClient.getScheduledVisitsForPet(petId);
-
     }
     
     @GetMapping(value = "visits/vets/{practitionerId}")
@@ -147,13 +134,11 @@ public class BFFApiGatewayController {
         return visitsServiceClient.getVisitForPractitioner(practitionerId);
     }
 
-    @GetMapping(value = "visits/calendar/{practitionerId}")
+    @GetMapping(value = "practitioner/{practitionerId}/{month}")
     public Flux<VisitDetails> getVisitsByPractitionerIdAndMonth(@PathVariable("practitionerId") int practitionerId,
-                                                                @RequestParam("dates") List<String> dates) {
-        String startDate = dates.get(0);
-        String endDate = dates.get(1);
+                                                                @PathVariable("month") int month) {
 
-        return visitsServiceClient.getVisitsByPractitionerIdAndMonth(practitionerId, startDate, endDate);
+        return visitsServiceClient.getVisitsByPractitionerIdAndMonth(practitionerId, month);
     }
 
     private Function<Visits, OwnerDetails> addVisitsToOwner(OwnerDetails owner) {
@@ -169,12 +154,11 @@ public class BFFApiGatewayController {
     }
 
     @PostMapping(
-            value = "visit/owners/{ownerId}/pets/{petId}/visits",
+            value = "visits",
             consumes = "application/json",
             produces = "application/json"
     )
-    Mono<VisitDetails> addVisit(@RequestBody VisitDetails visit, @PathVariable String ownerId, @PathVariable String petId) {
-        visit.setPetId(Integer.parseInt(petId));
+    Mono<VisitDetails> addVisit(@RequestBody VisitDetails visit) {
         return visitsServiceClient.createVisitForPet(visit);
     }
 

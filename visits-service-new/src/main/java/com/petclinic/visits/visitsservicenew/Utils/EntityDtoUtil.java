@@ -5,7 +5,10 @@ import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitDTO;
 import org.springframework.beans.BeanUtils;
 
+import java.util.List;
 import java.util.UUID;
+
+import static java.util.stream.Collectors.joining;
 
 public class EntityDtoUtil {
 

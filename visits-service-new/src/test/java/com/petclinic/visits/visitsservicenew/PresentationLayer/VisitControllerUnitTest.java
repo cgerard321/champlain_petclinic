@@ -13,6 +13,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
+
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -21,7 +24,6 @@ import static org.mockito.Mockito.when;
 public class VisitControllerUnitTest {
 
     private final VisitDTO dto = buildVisitDto();
-
     private final String Visit_UUID_OK = dto.getVisitId();
     private final int Practitioner_Id_OK = dto.getPractitionerId();
     private final int Pet_Id_OK = dto.getPetId();

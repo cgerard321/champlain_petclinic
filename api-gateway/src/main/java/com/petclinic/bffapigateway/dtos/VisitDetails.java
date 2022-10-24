@@ -1,30 +1,32 @@
 package com.petclinic.bffapigateway.dtos;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 /**
  * @author Maciej Szarlinski
  * Copied from https://github.com/spring-petclinic/spring-petclinic-microservices
  */
 
-@Data
+@Getter
+@Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder(toBuilder = true)
 public class VisitDetails {
 
-    private String visitId = null;
+    private String visitId;
 
-    private Integer petId = null;
+    private int year;
 
-    private Integer practitionerId = null;
+    private int month;
 
-    private String date = null;
+    private int day;
 
-    private String description = null;
+    private String description;
 
-    private Boolean status = null;
+    private int petId;
+
+    private int practitionerId;
+
+    private boolean status;
 }

@@ -64,6 +64,7 @@ public class VisitRepoTest {
                     assertEquals(visit.isStatus(), gotVisit.isStatus());
                 }).verifyComplete();
     }
+
     @Test
     void findVisitsByPractitionerId(){
 

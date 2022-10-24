@@ -4,6 +4,8 @@ import com.petclinic.visits.visitsservicenew.DataLayer.VisitDTO;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 public interface VisitService {
 
     Mono<VisitDTO> addVisit(Mono<VisitDTO> visit);

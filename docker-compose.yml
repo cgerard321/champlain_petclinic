@@ -9,20 +9,21 @@ services:
 
     visits-service-new:
         build: visits-service-new
+        hostname: visits
         environment:
             - SPRING_PROFILES_ACTIVE=docker
         depends_on:
             - mongo2
 
-    visits:
-        build: visits-service
-        hostname: visits
-        #mem_limit: 350m
-        environment:
-            - SPRING_PROFILES_ACTIVE=docker
-        depends_on:
-            mysql1:
-                condition: service_healthy
+#    visits:
+#        build: visits-service
+#        hostname: visits
+#        #mem_limit: 350m
+#        environment:
+#            - SPRING_PROFILES_ACTIVE=docker
+#        depends_on:
+#            mysql1:
+#                condition: service_healthy
 
     inventory-service:
       build: inventory-service
@@ -66,7 +67,7 @@ services:
             - customers
 #            - vets
             - vet-service
-            - visits
+            - visits-service-new
 
     auth-service:
         build: auth-service
@@ -104,33 +105,33 @@ services:
 
 
 
-    mysql1:
-        image: mysql:5.7
-        #mem_limit: 350m
-        ports:
-            - "3307:3306"
-        environment:
-            - MYSQL_ROOT_PASSWORD=rootpwd
-            - MYSQL_DATABASE=visits-db
-            - MYSQL_USER=user
-            - MYSQL_PASSWORD=pwd
-        volumes:
-            - ./data/mysql1:/var/lib/mysql1
-            - ./data/init.d:/docker-entrypoint-initdb.d
-        healthcheck:
-            test:
-                [
-                    "CMD",
-                    "mysqladmin",
-                    "ping",
-                    "-uuser",
-                    "-ppwd",
-                    "-h",
-                    "localhost",
-                ]
-            interval: 10s
-            timeout: 5s
-            retries: 10
+#    mysql1:
+#        image: mysql:5.7
+#        #mem_limit: 350m
+#        ports:
+#            - "3307:3306"
+#        environment:
+#            - MYSQL_ROOT_PASSWORD=rootpwd
+#            - MYSQL_DATABASE=visits-db
+#            - MYSQL_USER=user
+#            - MYSQL_PASSWORD=pwd
+#        volumes:
+#            - ./data/mysql1:/var/lib/mysql1
+#            - ./data/init.d:/docker-entrypoint-initdb.d
+#        healthcheck:
+#            test:
+#                [
+#                    "CMD",
+#                    "mysqladmin",
+#                    "ping",
+#                    "-uuser",
+#                    "-ppwd",
+#                    "-h",
+#                    "localhost",
+#                ]
+#            interval: 10s
+#            timeout: 5s
+#            retries: 10
 
 
     mysql3:

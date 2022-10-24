@@ -2,9 +2,9 @@ server.port: 7000
 server.error.include-message: always
 
 app:
-  visits-service:
+  visits-service-new:
     host: localhost
-    port: 7001
+    port: 7006
   vet-service:
     host: localhost
     port: 7002
@@ -29,7 +29,7 @@ spring.profiles: docker
 server.port: 8080
 
 app:
-  visits-service:
+  visits-service-new:
     host: visits
     port: 8080
   vet-service:

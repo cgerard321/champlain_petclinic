@@ -1,6 +1,4 @@
-server:
-  error:
-    include-message: always
+server.port: 7006
 
 logging:
   level:

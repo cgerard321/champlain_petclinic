@@ -1,5 +1,6 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
+import com.petclinic.bffapigateway.dtos.VetDTO;
 import com.petclinic.bffapigateway.dtos.VisitDetails;
 import com.petclinic.bffapigateway.dtos.Visits;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,25 +24,16 @@ import static java.util.stream.Collectors.joining;
  */
 
 @Component
-//@RequiredArgsConstructor
 public class VisitsServiceClient {
 
-//    private final WebClient.Builder webClientBuilder;
-//
-//    @Value("${app.visits-service.host}") String visitsServiceHost;
-//    @Value("${app.visits-service.port}") String visitsServicePort;
-//    private final String visitsServiceURL = "http://" + visitsServiceHost + ":" + visitsServicePort + "/";
-//    private String hostname = "http://" + visitsServiceHost + "/";
-
     private final WebClient.Builder webClientBuilder;
-    //private final String visitsServiceURL;
     private String hostname;
 
     @Autowired
     public VisitsServiceClient(
             WebClient.Builder webClientBuilder,
-            @Value("${app.visits-service.host}") String visitsServiceHost,
-            @Value("${app.visits-service.port}") String visitsServicePort
+            @Value("${app.visits-service-new.host}") String visitsServiceHost,
+            @Value("${app.visits-service-new.port}") String visitsServicePort
     ) {
         this.webClientBuilder = webClientBuilder;
         hostname = "http://" + visitsServiceHost + ":" + visitsServicePort;
@@ -58,15 +50,7 @@ public class VisitsServiceClient {
     public Flux<VisitDetails> getVisitsForPet(final int petId){
         return webClientBuilder.build()
                 .get()
-                .uri(hostname + "/visits/{petId}", petId)
-                .retrieve()
-                .bodyToFlux(VisitDetails.class);
-    }
-
-    public Flux<VisitDetails> getPreviousVisitsForPet(final int petId) {
-        return webClientBuilder.build()
-                .get()
-                .uri(hostname + "/visits/previous/{petId}", petId)
+                .uri(hostname + "/visits/pets/{petId}", petId)
                 .retrieve()
                 .bodyToFlux(VisitDetails.class);
     }
@@ -74,40 +58,32 @@ public class VisitsServiceClient {
     public Flux<VisitDetails> getVisitForPractitioner(final int practitionerId){
         return webClientBuilder.build()
                 .get()
-                .uri(hostname + "visits/vets/{practitionerId}", practitionerId)
+                .uri(hostname + "/visits/practitioner/visits/{practitionerId}", practitionerId)
                 .retrieve()
                 .bodyToFlux(VisitDetails.class);
     }
 
-    public Flux<VisitDetails> getVisitsByPractitionerIdAndMonth(final int practitionerId, final String startDate, final String endDate) {
+    public Flux<VisitDetails> getVisitsByPractitionerIdAndMonth(final int practitionerId, final int month) {
         return webClientBuilder.build()
                 .get()
-                .uri(hostname + "/visits/calendar/{practitionerId}?dates={startDate},{endDate}", practitionerId, startDate, endDate)
+                .uri(hostname + "/visits/practitioner/{practitionerId}/{month}", practitionerId, month)
                 .retrieve()
                 .bodyToFlux(VisitDetails.class);
     }
 
-    public Flux<VisitDetails> getScheduledVisitsForPet(final int petId) {
-        return webClientBuilder.build()
-                .get()
-                .uri(hostname + "/visits/scheduled/{petId}", petId)
-                .retrieve()
-                .bodyToFlux(VisitDetails.class);
-    }
+    public Mono<VisitDetails> updateVisitForPet(String visitId, Mono<VisitDetails> visitDetailsMono) {
 
-    public Mono<VisitDetails> updateVisitForPet(VisitDetails visit) {
-        String url = hostname + "/owners/*/pets/" + visit.getPetId() + "/visits/" + visit.getVisitId();
         return webClientBuilder.build()
                 .put()
-                .uri(url)
+                .uri(hostname + "/visits/visits/{visitId}", visitId)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .body(Mono.just(visit), VisitDetails.class)
+                .body(visitDetailsMono, VisitDetails.class)
                 .retrieve()
                 .bodyToMono(VisitDetails.class);
     }
 
     public Mono<VisitDetails> createVisitForPet(VisitDetails visit) {
-        String url = hostname + "/owners/*/pets/" + visit.getPetId() + "/visits";
+        String url = hostname + "/visits";
         return webClientBuilder.build()
                 .post()
                 .uri(url)
@@ -134,9 +110,10 @@ public class VisitsServiceClient {
     }
     
     public Mono<VisitDetails> getVisitByVisitId(String visitId) {
-        return webClientBuilder.build()
+        return webClientBuilder
+                .build()
                 .get()
-                .uri(hostname + "/visit/{visitId}", visitId)
+                .uri(hostname + "/visits/{visitId}", visitId)
                 .retrieve()
                 .bodyToMono(VisitDetails.class);
     }
