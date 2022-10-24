@@ -24,7 +24,6 @@ class PhotoControllerUnitTest {
 
     private final String PHOTO_ID = photo.getId();
 
-    private final String PHOTO_ID_NOT_FOUND = "00";
 
     @Autowired
     private WebTestClient client;
@@ -33,25 +32,25 @@ class PhotoControllerUnitTest {
     PhotoService photoService;
 
 
-//    @Test
-//    public void getPhotoByPhotoIdNotFound() {
-//
-//        when(photoService.getPhotoByPhotoId(anyString())).thenReturn(Mono.just(photo));
-//
-//        client.get()
-//                .uri("/photos/" + PHOTO_ID_NOT_FOUND)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .exchange()
-//                .expectStatus().isNotFound()
-//                .expectHeader()
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .expectBody()
-//                .jsonPath("$.name").isEqualTo(photo.getName())
-//                .jsonPath("$.type").isEqualTo(photo.getType())
-//                .jsonPath("$.photo").isEqualTo(photo.getPhoto());
-//
-//        Mockito.verify(photoService, times(1)).getPhotoByPhotoId(PHOTO_ID);
-//    }
+    @Test
+    public void getPhotoByPhotoId() {
+
+        when(photoService.getPhotoByPhotoId(anyString())).thenReturn(Mono.just(photo));
+
+        client.get()
+                .uri("/photos/" + PHOTO_ID)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.name").isEqualTo(photo.getName())
+                .jsonPath("$.type").isEqualTo(photo.getType())
+                .jsonPath("$.photo").isEqualTo(photo.getPhoto());
+
+        Mockito.verify(photoService, times(1)).getPhotoByPhotoId(PHOTO_ID);
+    }
 
 
 

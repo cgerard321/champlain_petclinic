@@ -62,15 +62,16 @@ class PetServiceImplTest {
     }
 
 //    @Test
-//    public void findPetsByOwnerId() {
+//    public void findPetsById() {
 //
-//        Owner owner = buildOwner();
+//        //Owner owner = buildOwner();
 //        Pet pet = buildPet();
-//        String OWNER_ID = pet.getOwnerId();
-//        Flux<Pet> petList = petService.getPetsByOwnerId(OWNER_ID);
+//        String PET_ID = pet.getId();
+//        Mono<Pet> petEntity = petService.getPetById(PET_ID);
+////        Flux<Pet> petList = petService.getPetsByOwnerId(OWNER_ID);
 //
 //        StepVerifier
-//                .create(petList)
+//                .create(petEntity)
 //                .consumeNextWith(foundPet -> {
 //                    assertEquals(pet.getId(), foundPet.getId());
 //                    assertEquals(pet.getName(), foundPet.getName());
@@ -81,6 +82,21 @@ class PetServiceImplTest {
 //                })
 //                .verifyComplete();
 //    }
+
+    @Test
+    void getPetByIdNotFound() {
+
+        Pet petEntity = buildPet();
+        String PET_ID = "Not found";
+        when(repo.findPetById(PET_ID)).thenReturn(Mono.just(petEntity));
+        Mono<Pet> petMono = petService.getPetById(PET_ID);
+        StepVerifier
+                .create(petMono)
+                .expectNextCount(1)
+                .expectError();
+
+    }
+
     @Test
     public void deletePetNotFound() {
 
