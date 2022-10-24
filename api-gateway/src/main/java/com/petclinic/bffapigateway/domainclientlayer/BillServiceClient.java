@@ -77,6 +77,14 @@ public class BillServiceClient {
                 .retrieve()
                 .bodyToFlux(Void.class);
     }
+
+    public Flux<Void> deleteBillsByCustomerId(final int customerId) {
+        return webClientBuilder.build()
+                .delete()
+                .uri(billServiceUrl + "/customer/{customerId}", customerId)
+                .retrieve()
+                .bodyToFlux(Void.class);
+    }
 }
 
 

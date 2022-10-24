@@ -7,9 +7,9 @@ import reactor.core.publisher.Mono;
 public interface PetService {
 
     Mono<Pet> insertPet(Mono<Pet> petMono);
-
-    Mono<Void> deletePet(int petId);
-
-    Flux<Pet> getAll();
-
+    Flux<Pet> getAllPets();
+    Mono<Pet> getPetById(String Id);
+    Flux<Pet> getPetsByOwnerId(String ownerId);
+    Mono<Pet> updatePetByPetId(String petId, Mono<Pet> petMono);
+    Mono<Void> deletePetByPetId(String petId);
 }

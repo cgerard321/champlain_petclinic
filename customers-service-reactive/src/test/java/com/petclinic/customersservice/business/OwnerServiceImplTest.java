@@ -9,8 +9,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -43,30 +42,57 @@ class OwnerServiceImplTest {
                 .verifyComplete();
     }
 
-    @Test
-    public void deleteOwner() {
-
-        Owner owner = buildOwner();
-        int OWNER_ID = owner.getId();
-
-        when(repo.deleteById(anyInt())).thenReturn(Mono.empty());
-
-        Mono<Void> ownerDelete = ownerService.deleteOwner(OWNER_ID);
-
+     @Test
+     void getOwnerByOwnerId() {
+        Owner ownerEntity = buildOwner();
+        String OWNER_ID = ownerEntity.getId();
+        when(repo.findOwnerById(OWNER_ID)).thenReturn(Mono.just(ownerEntity));
+        Mono<Owner> ownerMono = ownerService.getOwnerByOwnerId(OWNER_ID);
         StepVerifier
-                .create(ownerDelete)
+                .create(ownerMono)
+                .consumeNextWith(foundOwner -> {
+                    assertEquals(ownerEntity.getId(), foundOwner.getId());
+                    assertEquals(ownerEntity.getFirstName(), foundOwner.getFirstName());
+                    assertEquals(ownerEntity.getLastName(), foundOwner.getLastName());
+                    assertEquals(ownerEntity.getAddress(), foundOwner.getAddress());
+                    assertEquals(ownerEntity.getCity(), foundOwner.getCity());
+                    assertEquals(ownerEntity.getTelephone(), foundOwner.getTelephone());
+                    assertEquals(ownerEntity.getPhotoId(), foundOwner.getPhotoId());
+                })
+                .verifyComplete();
+     }
+
+     @Test
+     void getOwnerByOwnerIdNotFound() {
+
+         Owner ownerEntity = buildOwner();
+         String OWNER_ID = "Not found";
+         when(repo.findOwnerById(OWNER_ID)).thenReturn(Mono.just(ownerEntity));
+         Mono<Owner> ownerMono = ownerService.getOwnerByOwnerId(OWNER_ID);
+         StepVerifier
+                 .create(ownerMono)
+                 .expectNextCount(1)
+                 .expectError();
+
+     }
+
+     @Test
+     void deleteOwnerByOwnerId() {
+        Owner ownerEntity = buildOwner();
+        String OWNER_ID = ownerEntity.getId();
+        when(repo.deleteById(anyString())).thenReturn(Mono.empty());
+        Mono<Void> deleteObj = ownerService.deleteOwner(OWNER_ID);
+        StepVerifier
+                .create(deleteObj)
                 .expectNextCount(0)
                 .verifyComplete();
-    }
-
+     }
     @Test
     public void deleteOwnerNotFound() {
 
         Owner owner = buildOwner();
-        int OWNER_ID = 00;
-
-        when(repo.deleteById(anyInt())).thenReturn(Mono.empty());
-
+        String OWNER_ID = "00";
+        when(repo.deleteById(anyString())).thenReturn(Mono.empty());
         Mono<Void> ownerDelete = ownerService.deleteOwner(OWNER_ID);
 
         StepVerifier
@@ -74,16 +100,15 @@ class OwnerServiceImplTest {
                 .expectNextCount(1)
                 .expectError();
     }
-
     private Owner buildOwner() {
         return Owner.builder()
-                .id(55)
+                .id("55")
                 .firstName("FirstName")
                 .lastName("LastName")
                 .address("Test address")
                 .city("test city")
                 .telephone("telephone")
-                .photoId(1)
+                .photoId("1")
                 .build();
     }
 

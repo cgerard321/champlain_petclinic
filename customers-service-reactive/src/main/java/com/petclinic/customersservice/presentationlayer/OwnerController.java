@@ -8,15 +8,17 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
-@RequestMapping("/owners")
+@RequestMapping("/owner")
+
 public class OwnerController {
 
     @Autowired
     private OwnerService ownerService;
 
-    @GetMapping()
-    public Flux<Owner> getAll(){
-        return ownerService.getAll();
+    @GetMapping("/{ownerId}")
+    public Mono<Owner> getOwnerByOwnerId(@PathVariable String ownerId) {
+        return ownerService.getOwnerByOwnerId(ownerId);
+
     }
 
     @PostMapping()
@@ -25,8 +27,18 @@ public class OwnerController {
     }
 
     @DeleteMapping("/{ownerId}")
-    public Mono<Void> deleteOwner(@PathVariable("ownerId") int ownerId) {
+    public Mono<Void> deleteOwnerByOwnerId(@PathVariable String ownerId) {
         return ownerService.deleteOwner(ownerId);
+    }
+
+    @PutMapping("/{ownerId}")
+    public Mono<Owner> updateOwnerByOwnerId(@PathVariable String ownerId, @RequestBody Mono<Owner> ownerMono) {
+        return ownerService.updateOwner(ownerId, ownerMono);
+    }
+
+    @GetMapping()
+    public Flux<Owner> getAllOwners() {
+        return ownerService.getAllOwners();
     }
 
 }

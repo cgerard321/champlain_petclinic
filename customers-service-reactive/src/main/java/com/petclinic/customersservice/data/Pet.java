@@ -12,10 +12,10 @@ import java.util.Date;
 public class Pet {
 
     @Id
-    private int id;
-    private int ownerId;
-    private int petTypeId;
+    private String id;
+    private String ownerId;
     private String name;
     private Date birthDate;
-    private int photoId;
+    private String petTypeId;
+    private String photoId;
 }

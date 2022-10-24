@@ -10,17 +10,22 @@ package com.petclinic.auth.Role;
 
 import com.petclinic.auth.Role.data.Role;
 import com.petclinic.auth.Role.data.RoleIDLessDTO;
+import com.petclinic.auth.User.UserService;
+import com.petclinic.auth.User.data.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.data.domain.Page;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.Random;
 
@@ -29,6 +34,8 @@ import static java.lang.Math.min;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.BDDMockito.given;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -59,6 +66,9 @@ public class AuthServiceRoleControllerTests {
 
     @Autowired
     private RoleController roleController;
+
+    @SpyBean
+    private RoleService roleService;
 
     private final RoleIDLessDTO ID_LESS_USER_ROLE = new RoleIDLessDTO("user");
 
@@ -178,5 +188,23 @@ public class AuthServiceRoleControllerTests {
         mockMvc.perform(get("/roles"))
                 .andDo(print())
                 .andExpect(status().isForbidden());
+    }
+
+    @Test
+    @WithMockUser
+    @DisplayName("given a list of roles with valid ids, then return a list of roles with those ids")
+    void get_all_users() throws Exception {
+
+        Role r1 = new Role(1, "role");
+        Role r2 = new Role(2, "roleaswell");
+        List<Role> roles = Arrays.asList(r1, r2);
+
+        given(roleService.findAllWithoutPage()).willReturn(roles);
+
+        mockMvc.perform(get("/roles/withoutPages").accept(APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$", hasSize(2)))
+                .andExpect(jsonPath("$[0].id").value(r1.getId()))
+                .andExpect(jsonPath("$[1].id").value(r2.getId()));
     }
 }

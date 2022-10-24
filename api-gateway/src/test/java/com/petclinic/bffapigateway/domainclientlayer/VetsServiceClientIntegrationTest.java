@@ -243,7 +243,7 @@ class VetsServiceClientIntegrationTest {
                 .image("kjd".getBytes())
                 .workday("Monday")
                 .specialties(new HashSet<>())
-                .isActive(false)
+                .active(false)
                 .build();
     }
 

@@ -44,9 +44,9 @@ class PhotoServiceImplTest {
     void getPhotoByPhotoId() {
 
         Photo photoEntity = buildPhoto();
-        int PHOTO_ID = photoEntity.getId();
+        String PHOTO_ID = photoEntity.getId();
 
-        when(repo.findPhotoById(any(Integer.class))).thenReturn(Mono.just(photoEntity));
+        when(repo.findPhotoById(any(String.class))).thenReturn(Mono.just(photoEntity));
 
         Mono<Photo> returnedPhoto = photoService.getPhotoByPhotoId(PHOTO_ID);
 
@@ -64,9 +64,9 @@ class PhotoServiceImplTest {
 
         Photo photo = buildPhoto();
 
-        int PHOTO_ID_NOT_FOUND = 00;
+        String PHOTO_ID_NOT_FOUND = "00";
 
-        when(repo.findPhotoById(any(Integer.class))).thenReturn(Mono.just(photo));
+        when(repo.findPhotoById(any(String.class))).thenReturn(Mono.just(photo));
 
         Mono<Photo> photoMono = photoService.getPhotoByPhotoId(PHOTO_ID_NOT_FOUND);
 
@@ -79,7 +79,7 @@ class PhotoServiceImplTest {
 
     private Photo buildPhoto() {
         return Photo.builder()
-                .id(5)
+                .id("5")
                 .name("Test")
                 .type("test2")
                 .photo("photoString")

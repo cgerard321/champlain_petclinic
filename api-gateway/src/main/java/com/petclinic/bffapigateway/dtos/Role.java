@@ -1,6 +1,9 @@
 package com.petclinic.bffapigateway.dtos;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * Created by IntelliJ IDEA.
@@ -11,6 +14,9 @@ import lombok.Data;
  */
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder(toBuilder = true)
 public class Role {
 
     private int id;
