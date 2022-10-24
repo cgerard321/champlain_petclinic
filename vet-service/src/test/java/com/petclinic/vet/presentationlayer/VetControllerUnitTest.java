@@ -270,7 +270,7 @@ class VetControllerUnitTest {
                 .imageId("kjd")
                 .workday("Monday")
                 .specialties(new HashSet<>())
-                .isActive(false)
+                .active(false)
                 .build();
     }
 
@@ -285,7 +285,7 @@ class VetControllerUnitTest {
                 .workday("Monday")
                 .imageId("kjd")
                 .specialties(new HashSet<>())
-                .isActive(false)
+                .active(false)
                 .build();
     }
     private VetDTO buildVetDTO2() {
@@ -299,7 +299,7 @@ class VetControllerUnitTest {
                 .resume("Just became a vet")
                 .workday("Monday")
                 .specialties(new HashSet<>())
-                .isActive(true)
+                .active(true)
                 .build();
     }
 }

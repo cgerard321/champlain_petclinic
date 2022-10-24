@@ -185,7 +185,7 @@ class VetRepositoryTest {
                 .resume("Just became a vet")
                 .imageId("kjd")
                 .workday("Monday")
-                .isActive(true)
+                .active(true)
                 .build();
     }
     private Vet buildVet2() {
@@ -198,7 +198,7 @@ class VetRepositoryTest {
                 .imageId("kjd")
                 .resume("Just became a vet")
                 .workday("Monday")
-                .isActive(false)
+                .active(false)
                 .build();
     }
 
