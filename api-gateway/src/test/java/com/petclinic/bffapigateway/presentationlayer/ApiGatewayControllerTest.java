@@ -21,6 +21,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
 
+import java.sql.Date;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
@@ -61,6 +62,9 @@ class ApiGatewayControllerTest {
 
     @MockBean
     private BillServiceClient billServiceClient;
+
+    @MockBean
+    private InventoryServiceClient inventoryServiceClient;
 
     @Autowired
     private WebTestClient client;
@@ -1630,7 +1634,154 @@ class ApiGatewayControllerTest {
 
         verify(authServiceClient).deleteRole("Bearer token", role.getId());
     }
+    //inventory tests
+    @Test
+    public void getBundle(){
+        BundleDetails bundle = new BundleDetails();
+        bundle.setBundleUUID("1");
+        bundle.setItem("Penicillin");
+        bundle.setQuantity(70);
+        bundle.setExpiryDate(Date.valueOf("2022-11-19"));
 
+        when(inventoryServiceClient.getBundle(bundle.getBundleUUID()))
+                .thenReturn(Mono.just(bundle));
+
+        client.get()
+                //check the URI
+                .uri("/api/gateway/bundles/{bundleUUID}", bundle.getBundleUUID())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.bundleUUID").isEqualTo("1")
+                .jsonPath("$.item").isEqualTo("Penicillin")
+                .jsonPath("$.quantity").isEqualTo(70)
+                .jsonPath("$.expiryDate").isEqualTo("2022-11-19");
+    }
+    @Test
+    public void getBundlesByItem(){
+        BundleDetails bundle = new BundleDetails();
+        bundle.setBundleUUID("1");
+        bundle.setItem("Penicillin");
+        bundle.setQuantity(70);
+        bundle.setExpiryDate(Date.valueOf("2022-11-19"));
+
+        when(inventoryServiceClient.getBundlesByItem(bundle.getItem()))
+                .thenReturn(Flux.just(bundle));
+
+        client.get()
+                .uri("/api/gateway/bundles/item/{item}", bundle.getItem())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$[0].bundleUUID").isEqualTo("1")
+                .jsonPath("$[0].item").isEqualTo("Penicillin")
+                .jsonPath("$[0].quantity").isEqualTo(70)
+                .jsonPath("$[0].expiryDate").isEqualTo("2022-11-19");
+    }
+    @Test
+    void getBundleByRequestMissingPath(){
+        client.get()
+                .uri("/bundles")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.path").isEqualTo("/bundles")
+                .jsonPath("$.message").isEqualTo(null);
+    }
+
+    @Test
+    void getBundleNotFound(){
+        client.get()
+                .uri("/bundles/{bundleUUID}", 0)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectHeader().contentType(APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.path").isEqualTo("/bundles/0")
+                .jsonPath("$.message").isEqualTo(null);
+    }
+    @Test
+    void createBundle(){
+        BundleDetails bundle = new BundleDetails();
+        bundle.setBundleUUID("1");
+        bundle.setItem("Penicillin");
+        bundle.setQuantity(70);
+        bundle.setExpiryDate(Date.valueOf("2022-11-19"));
+
+        when(inventoryServiceClient.createBundle(bundle))
+                .thenReturn(Mono.just(bundle));
+
+        client.post()
+                .uri("/api/gateway/bundles")
+                .body(Mono.just(bundle), BundleDetails.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+
+        assertEquals(bundle.getBundleUUID(),"1");
+    }
+
+    @Test
+    void getPutBundleRequestNotFound(){
+        client.put()
+                .uri("/bundles/{bundleUUID}", 100)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.path").isEqualTo("/bundles/100")
+                .jsonPath("$.message").isEqualTo(null);
+    }
+
+    @Test
+    void getPutBundleMissingPath(){
+        client.put()
+                .uri("/bundles")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.path").isEqualTo("/bundles")
+                .jsonPath("$.message").isEqualTo(null);
+    }
+
+
+    @Test
+    void shouldDeleteBundleByBundleUUID(){
+        BundleDetails bundle = new BundleDetails();
+        bundle.setBundleUUID("1");
+        bundle.setItem("Penicillin");
+        bundle.setQuantity(70);
+        bundle.setExpiryDate(Date.valueOf("2022-11-19"));
+
+        when(inventoryServiceClient.createBundle(bundle))
+                .thenReturn(Mono.just(bundle));
+
+
+        client.post()
+                .uri("/api/gateway/bundles")
+                .body(Mono.just(bundle), BundleDetails.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+
+        assertEquals(bundle.getBundleUUID(),"1");
+        client.delete()
+                .uri("/api/gateway/bundles/1")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody();
+
+        assertEquals(null, inventoryServiceClient.getBundle(bundle.getBundleUUID()));
+    }
 
 
     private VetDTO buildVetDTO() {
@@ -1661,6 +1812,7 @@ class ApiGatewayControllerTest {
                 .active(true)
                 .build();
     }
+
 }
 
 

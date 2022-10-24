@@ -25,11 +25,13 @@ services:
                 condition: service_healthy
 
     inventory-service:
-        build: inventory-service
-        environment:
-            - SPRING_PROFILES_ACTIVE=docker
-    #      depends_on:
-    #        - mongo
+      build: inventory-service
+      hostname: inventory
+      environment:
+        - SPRING_PROFILES_ACTIVE=docker
+      depends_on:
+        - mongo-inventory
+
     vet-service:
         build: vet-service
         environment:
@@ -67,6 +69,7 @@ services:
             - customers
             - vet-service
             - visits
+#            - inventory-service
 
     auth-service:
         build: auth-service
@@ -289,15 +292,46 @@ services:
             MONGO_INITDB_ROOT_PASSWORD: password
 
     mongo-express-customers:
-        image: mongo-express
-        restart: always
-        environment:
-            - ME_CONFIG_MONGODB_ADMINUSERNAME=root
-            - ME_CONFIG_MONGODB_ADMINPASSWORD=password
-            - ME_CONFIG_MONGODB_SERVER=mongo-customers
-            - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
-        ports:
-            - 8085:8081
-        depends_on:
-            - mongo-customers
-            - customers-service-reactive
+      image: mongo-express
+      restart: always
+      environment:
+        - ME_CONFIG_MONGODB_ADMINUSERNAME=root
+        - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+        - ME_CONFIG_MONGODB_SERVER=mongo-customers
+        - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
+      ports:
+        - 8085:8081
+      depends_on:
+        - mongo-customers
+        - customers-service-reactive
+
+      # billing mongo container
+    mongo-inventory:
+      image: mongo
+      container_name: mongo-inventory
+      restart: always
+      ports:
+        - 27020:27017
+      environment:
+        MONGO_INITDB_ROOT_USERNAME: root
+        MONGO_INITDB_ROOT_PASSWORD: password
+#      healthcheck:
+#        test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
+#        retries: 5
+#        interval: 15s
+#        start_period: 30s
+
+    mongo-express-inventory:
+      image: mongo-express
+      restart: always
+      environment:
+        - ME_CONFIG_MONGODB_ADMINUSERNAME=root
+        - ME_CONFIG_MONGODB_ADMINPASSWORD=password
+        - ME_CONFIG_MONGODB_SERVER=mongo-inventory
+        - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
+      ports:
+        - 8083:8083
+      depends_on:
+        - mongo-inventory
+        - inventory-service
+
