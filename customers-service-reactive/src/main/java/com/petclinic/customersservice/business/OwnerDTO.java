@@ -20,5 +20,4 @@ public class OwnerDTO {
     private String photoId;
     private Photo photo;
     private List<PetDTO> pets;
-
 }
