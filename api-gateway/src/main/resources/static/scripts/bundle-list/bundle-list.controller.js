@@ -32,22 +32,4 @@ angular.module('bundleList')
                         }
                     }
                 };
-
-                $scope.refreshList = self.bundleList;
-
-                $scope.ReloadData = function () {
-                    let url = 'api/gateway/bundles';
-                    let optionSelection = document.getElementById("filterOption").value;
-                    if (optionSelection === "Active") {
-                        console.log("Get active");
-                        url+= '/active';
-                    } else if (optionSelection === "Inactive") {
-                        console.log("Get inactive");
-                        url+= '/inactive';
-                    }
-                    $http.get(url).then(function (resp) {
-                        self.bundleList = resp.data;
-                        arr = resp.data;
-                    });
-                }
             }]);
