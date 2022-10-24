@@ -15,7 +15,6 @@ public class Bill {
 
     @Id
     private String id;
-
     private String billId;              // Should be renamed to BillUUID
     private int customerId;
     private String visitType;

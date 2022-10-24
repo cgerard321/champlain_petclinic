@@ -1,7 +1,4 @@
 server.port: 7004
-#server.port: 8080
-
-
 
 logging:
   level:

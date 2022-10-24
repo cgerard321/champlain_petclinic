@@ -26,6 +26,7 @@ services:
 
     inventory-service:
       build: inventory-service
+      hostname: inventory
       environment:
         - SPRING_PROFILES_ACTIVE=docker
       depends_on:
@@ -67,7 +68,7 @@ services:
 #            - vets
             - vet-service
             - visits
-            - inventory-service
+#            - inventory-service
 
     auth-service:
         build: auth-service

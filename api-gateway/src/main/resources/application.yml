@@ -17,7 +17,9 @@ app:
   auth-service:
     host: localhost
     port: 7005
-
+  inventory-service:
+    host: localhost
+    port: 7006
 
 logging:
   level:
@@ -44,4 +46,6 @@ app:
   auth-service:
     host: auth
     port: 8080
-
+  inventory-service:
+    host: inventory
+    port: 8080

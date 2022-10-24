@@ -62,7 +62,8 @@ function waitForService(){
   until testUrl $url
   do
     n=$((n + 1))
-    if [[$n == 100]]
+    # shellcheck disable=SC1073
+    if [[ $n == 100 ]]
     then
       echo " Give up"
       exit 1
