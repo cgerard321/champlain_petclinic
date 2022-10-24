@@ -10,12 +10,12 @@ import org.springframework.data.annotation.Id;
 public class Owner {
 
     @Id
-    private int id;
+    private String id;
     private String firstName;
     private String lastName;
     private String address;
     private String city;
     private String telephone;
-    private int photoId;
+    private String photoId;
 
 }
