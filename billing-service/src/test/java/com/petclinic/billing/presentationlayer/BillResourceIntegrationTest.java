@@ -203,6 +203,24 @@ class BillResourceIntegrationTest {
 
     }
 
+    @Test
+    void deleteBillsByCustomerId() {
+        Bill billEntity = buildBill();
+        repo.save(billEntity);
+        Publisher<Void> setup = repo.deleteBillsByCustomerId(billEntity.getCustomerId());
+
+        StepVerifier.create(setup)
+                .expectNextCount(0)
+                .verifyComplete();
+
+        client.delete()
+                .uri("/bills/customer/" + billEntity.getCustomerId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.METHOD_NOT_ALLOWED)
+                .expectBody();
+    }
+
     private Bill buildBill(){
 
         Calendar calendar = Calendar.getInstance();

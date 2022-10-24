@@ -3,11 +3,13 @@ package com.petclinic.billing.presentationlayer;
 import com.petclinic.billing.businesslayer.BillService;
 import com.petclinic.billing.datalayer.Bill;
 import com.petclinic.billing.datalayer.BillDTO;
+import io.netty.handler.codec.spdy.SpdyHeaders;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
@@ -167,7 +169,22 @@ class BillResourceUnitTest {
 
         Mockito.verify(billService, times(1)).DeleteBillsByVetId(VET_ID_OK);
     }
+/*
+    @Test
+    void deleteBillsByCustomerId() {
 
+        when(billService.DeleteBillsByCustomerId(anyInt())).thenReturn(Flux.empty());
+
+        client.delete()
+                .uri("/bills/customer/" + dto.getCustomerId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.METHOD_NOT_ALLOWED)
+                .expectBody();
+
+        Mockito.verify(billService, times(1)).DeleteBillsByCustomerId(CUSTOMER_ID_OK);
+    }
+*/
     private BillDTO buildBillDTO(){
 
         Calendar calendar = Calendar.getInstance();
