@@ -126,6 +126,16 @@ public class BillServiceImplTest {
                 .verifyComplete();
     }
     @Test
+    public void test_DeleteBillsByCustomerId(){
+        Bill billEntity = buildBill();
+        when(repo.deleteBillsByCustomerId(anyInt())).thenReturn(Flux.empty());
+        Flux<Void> deletedObj = billService.DeleteBillsByCustomerId(billEntity.getCustomerId());
+
+        StepVerifier.create(deletedObj)
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+    @Test
     public void test_GetBillByCustomerId(){
 
         Bill billEntity = buildBill();
