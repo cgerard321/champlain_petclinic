@@ -93,7 +93,7 @@ class VetControllerIntegrationTest {
 
     @Test
     void updateVet() {
-        Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet));
+        Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet2));
 
         StepVerifier
                 .create(setup)

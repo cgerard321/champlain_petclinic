@@ -194,25 +194,25 @@ class ApiGatewayControllerTest {
     @Test
     void updateVet() {
         when(vetsServiceClient.updateVet(anyString(), any(Mono.class)))
-                .thenReturn(Mono.just(vetDTO));
+                .thenReturn(Mono.just(vetDTO2));
 
         client
                 .put()
                 .uri("/api/gateway/vets/" + VET_ID)
-                .body(Mono.just(vetDTO), VetDTO.class)
+                .body(Mono.just(vetDTO2), VetDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.vetId").isEqualTo(vetDTO.getVetId())
-                .jsonPath("$.resume").isEqualTo(vetDTO.getResume())
-                .jsonPath("$.lastName").isEqualTo(vetDTO.getLastName())
-                .jsonPath("$.firstName").isEqualTo(vetDTO.getFirstName())
-                .jsonPath("$.email").isEqualTo(vetDTO.getEmail())
+                .jsonPath("$.vetId").isEqualTo(vetDTO2.getVetId())
+                .jsonPath("$.resume").isEqualTo(vetDTO2.getResume())
+                .jsonPath("$.lastName").isEqualTo(vetDTO2.getLastName())
+                .jsonPath("$.firstName").isEqualTo(vetDTO2.getFirstName())
+                .jsonPath("$.email").isEqualTo(vetDTO2.getEmail())
                 .jsonPath("$.image").isNotEmpty()
-                .jsonPath("$.active").isEqualTo(vetDTO.isActive())
-                .jsonPath("$.workday").isEqualTo(vetDTO.getWorkday());
+                .jsonPath("$.active").isEqualTo(vetDTO2.isActive())
+                .jsonPath("$.workday").isEqualTo(vetDTO2.getWorkday());
 
         Mockito.verify(vetsServiceClient, times(1))
                 .updateVet(anyString(), any(Mono.class));
