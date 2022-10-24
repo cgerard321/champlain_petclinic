@@ -6,7 +6,15 @@ import reactor.core.publisher.Mono;
 
 public interface PetTypeService {
 
-    Mono<PetType> insertPetType(Mono<PetType> petTypeMono);
+   public Mono<PetType> insertPetType(Mono<PetType> petTypeMono);
 
-    Flux<PetType> getAll();
+   public Flux<PetType> getAll();
+
+    public Mono<Void> deletePetTypeByID(int id);
+
+    public Mono<Void> deletePetType(int id);
+
+    public Mono<PetType> updatePetType(int id, Mono<PetType> petTypeMono);
+
+
 }

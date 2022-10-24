@@ -7,5 +7,7 @@ import reactor.core.publisher.Mono;
 @Repository
 public interface PetTypeRepo extends ReactiveMongoRepository<PetType, Integer> {
 
+    public Mono<PetType> findPetTypesById(int id);
+    public Mono<Void> deletePetTypeById(int id);
 
 }

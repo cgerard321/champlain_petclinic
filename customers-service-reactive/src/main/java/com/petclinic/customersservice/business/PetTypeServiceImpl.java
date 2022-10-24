@@ -11,7 +11,7 @@ import reactor.core.publisher.Flux;
 public class PetTypeServiceImpl implements PetTypeService {
 
     @Autowired
-    PetTypeRepo petTypeRepo;
+    private PetTypeRepo petTypeRepo;
 
     @Override
     public Mono<PetType> insertPetType(Mono<PetType> petTypeMono) {
@@ -23,4 +23,25 @@ public class PetTypeServiceImpl implements PetTypeService {
     public Flux<PetType> getAll() {
         return petTypeRepo.findAll();
     }
+
+    @Override
+    public Mono<Void> deletePetTypeByID(int id){
+        return petTypeRepo.deleteById(id);
+    }
+
+    @Override
+    public Mono<Void> deletePetType(int id){
+        return petTypeRepo.deletePetTypeById(id);
+    }
+
+    @Override
+    public Mono<PetType> updatePetType(int id, Mono<PetType> petTypeMono){
+
+        return petTypeRepo.findPetTypesById(id)
+            .flatMap(p -> petTypeMono
+                    .doOnNext(e -> e.setId(p.getId()))
+            )
+            .flatMap(petTypeRepo::save);
+    }
+
 }

@@ -37,6 +37,39 @@ class PetTypeRepoTest {
                 .verifyComplete();
     }
 
+    @Test
+    void deletePetTypeByID(){
+
+        PetType petType = buildPetType();
+
+        petTypeRepo.save(petType);
+
+        Publisher<Void> setup = petTypeRepo.deletePetTypeById(petType.getId());
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
+    @Test
+    void findPetTypeByID(){
+        PetType pet = buildPetType();
+
+        Publisher<PetType> setup = petTypeRepo.deleteAll().thenMany(petTypeRepo.save(pet));
+        Publisher<PetType> find = petTypeRepo.findPetTypesById(pet.getId());
+
+        StepVerifier
+                .create(setup)
+                .expectNext(pet)
+                .verifyComplete();
+
+        StepVerifier
+                .create(find)
+                .expectNextCount(1)
+                .verifyComplete();
+
+    }
 
     private PetType buildPetType() {
         return PetType.builder().id(10).name("TestType").build();
