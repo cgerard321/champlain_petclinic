@@ -61,27 +61,27 @@ class PetServiceImplTest {
                 .verifyComplete();
     }
 
-//    @Test
-//    public void findPetsById() {
-//
-//        //Owner owner = buildOwner();
-//        Pet pet = buildPet();
-//        String PET_ID = pet.getId();
-//        Mono<Pet> petEntity = petService.getPetById(PET_ID);
-////        Flux<Pet> petList = petService.getPetsByOwnerId(OWNER_ID);
-//
-//        StepVerifier
-//                .create(petEntity)
-//                .consumeNextWith(foundPet -> {
-//                    assertEquals(pet.getId(), foundPet.getId());
-//                    assertEquals(pet.getName(), foundPet.getName());
-//                    assertEquals(pet.getPetTypeId(), foundPet.getPetTypeId());
-//                    assertEquals(pet.getPhotoId(), foundPet.getPhotoId());
-//                    assertEquals(pet.getOwnerId(), foundPet.getOwnerId());
-//                    assertEquals(pet.getBirthDate(), foundPet.getBirthDate());
-//                })
-//                .verifyComplete();
-//    }
+    @Test
+    void findPetByPetId() {
+
+        //Owner owner = buildOwner();
+        Pet pet = buildPet();
+        String PET_ID = pet.getId();
+        when(repo.findPetById(PET_ID)).thenReturn(Mono.just(pet));
+        Mono<Pet> petEntity = petService.getPetById(PET_ID);
+
+        StepVerifier
+                .create(petEntity)
+                .consumeNextWith(foundPet -> {
+                    assertEquals(pet.getId(), foundPet.getId());
+                    assertEquals(pet.getName(), foundPet.getName());
+                    assertEquals(pet.getPetTypeId(), foundPet.getPetTypeId());
+                    assertEquals(pet.getPhotoId(), foundPet.getPhotoId());
+                    assertEquals(pet.getOwnerId(), foundPet.getOwnerId());
+                    assertEquals(pet.getBirthDate(), foundPet.getBirthDate());
+                })
+                .verifyComplete();
+    }
 
     @Test
     void getPetByIdNotFound() {
