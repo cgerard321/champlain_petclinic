@@ -17,7 +17,7 @@ public class VetDTO {
     private byte[] image;
     private String resume;
     private String workday;
-    private boolean isActive;
+    private boolean active;
     private Set<SpecialtyDTO> specialties;
 
 

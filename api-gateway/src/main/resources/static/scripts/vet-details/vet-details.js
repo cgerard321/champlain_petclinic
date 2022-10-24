@@ -6,6 +6,7 @@ angular.module('vetDetails', ['ui.router'])
             .state('vetDetails', {
                 parent: 'app',
                 url: '/vets/details/:vetId',
+                params: {vetId: null},
                 template: '<vet-details></vet-details>'
             })
             .state('disableVet', {

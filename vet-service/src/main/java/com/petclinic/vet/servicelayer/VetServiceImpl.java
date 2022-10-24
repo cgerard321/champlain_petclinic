@@ -60,7 +60,7 @@ public class VetServiceImpl implements VetService {
 
     @Override
     public Flux<VetDTO> getVetByIsActive(boolean isActive) {
-        return vetRepository.findVetsByIsActive(isActive)
+        return vetRepository.findVetsByActive(isActive)
                 .map(EntityDtoUtil::toDTO);
     }
 
