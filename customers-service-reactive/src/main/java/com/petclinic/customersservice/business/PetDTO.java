@@ -11,12 +11,14 @@ import java.util.Date;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class PetAggregate {
+public class PetDTO {
 
-    private int id;
-    private int ownerId;
+    private String id;
+    private String ownerId;
     private String name;
     private Date birthDate;
+    private String petTypeId;
+    private String photoId;
     private PetType petType;
     private Photo photo;
 

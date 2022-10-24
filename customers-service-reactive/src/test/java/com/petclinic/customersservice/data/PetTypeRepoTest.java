@@ -39,7 +39,7 @@ class PetTypeRepoTest {
 
 
     private PetType buildPetType() {
-        return PetType.builder().id(10).name("TestType").build();
+        return PetType.builder().id("10").name("TestType").build();
     }
 
 }

@@ -20,12 +20,28 @@ public class OwnerServiceImpl implements OwnerService {
     }
 
     @Override
-    public Flux<Owner> getAll() {
-        return repo.findAll();
+    public Mono<Owner> getOwnerByOwnerId(String Id) {
+        return repo.findOwnerById(Id);
     }
 
     @Override
-    public Mono<Void> deleteOwner(int ownerId) {
+    public Mono<Void> deleteOwner(String ownerId) {
         return repo.deleteById(ownerId);
     }
+
+    @Override
+    public Mono<Owner> updateOwner(String ownerId, Mono<Owner> ownerMono) {
+        return repo.findById(ownerId)
+                .flatMap(p -> ownerMono
+                        .doOnNext(e -> e.setId(p.getId()))
+                        .doOnNext(e -> e.setPhotoId(p.getPhotoId()))
+                )
+                .flatMap(repo::save);
+    }
+
+    @Override
+    public Flux<Owner> getAllOwners() {
+        return repo.findAll();
+    }
+
 }
