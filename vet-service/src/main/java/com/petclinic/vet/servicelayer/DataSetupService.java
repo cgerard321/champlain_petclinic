@@ -41,31 +41,31 @@ public class DataSetupService implements CommandLineRunner {
         set3.add(s4);
 
 
-        VetDTO v1 = new VetDTO("234568", "James", "Carter", "carter.james@email.com",
+       VetDTO v1 = new VetDTO("234568","1", "James", "Carter", "carter.james@email.com",
                 "(514)-634-8276 #2384","1","Practicing since 3 years", "Monday, Tuesday, Friday",
                 true, set1);
 
-        VetDTO v2 = new VetDTO("327874", "Helen", "Leary", "leary.helen@email.com",
+         VetDTO v2 = new VetDTO("327874","2", "Helen", "Leary", "leary.helen@email.com",
                 "(514)-634-8276 #2385","1", "Practicing since 10 years", "Wednesday, Thursday",
                 true, set3);
 
-        VetDTO v3 = new VetDTO("238372", "Linda", "Douglas", "douglas.linda@email.com",
+         VetDTO v3 = new VetDTO("238372","3", "Linda", "Douglas", "douglas.linda@email.com",
                 "(514)-634-8276 #2386","1", "Practicing since 5 years", "Monday, Wednesday, Thursday",
                 true, set2);
 
-        VetDTO v4 = new VetDTO("823097", "Rafael", "Ortega", "ortega.rafael@email.com",
+        VetDTO v4 = new VetDTO("823097","4", "Rafael", "Ortega", "ortega.rafael@email.com",
                 "(514)-634-8276 #2387","1", "Practicing since 8 years", "Wednesday, Thursday, Friday",
                 false, set2);
 
-        VetDTO v5 = new VetDTO("842370", "Henry", "Stevens", "stevens.henry@email.com",
+       VetDTO v5 = new VetDTO("842370","5", "Henry", "Stevens", "stevens.henry@email.com",
                 "(514)-634-8276 #2389","1", "Practicing since 1 years", "Monday, Tuesday, Wednesday, Thursday",
                 false, set1);
 
-        VetDTO v6 = new VetDTO("784233", "Sharon", "Jenkins", "jenkins.sharon@email.com",
+        VetDTO v6 = new VetDTO("784233","6", "Sharon", "Jenkins", "jenkins.sharon@email.com",
                 "(514)-634-8276 #2383","1", "Practicing since 6 years", "Monday, Tuesday, Friday",
                 false, set1);
 
-        VetDTO v7 = new VetDTO("784233", "John", "Doe", "john.doe@email.com",
+       VetDTO v7 = new VetDTO("784233","7", "John", "Doe", "john.doe@email.com",
                 "(514)-634-8276 #2363","1", "Practicing since 9 years", "Monday, Friday",
                 true, set1);
 

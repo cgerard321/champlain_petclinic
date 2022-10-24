@@ -24,5 +24,7 @@ public interface VetRepository extends ReactiveMongoRepository<Vet, String> {
 
     Flux<Vet> findVetsByActive(boolean isActive);
 
+    Mono<Vet> findVetByVetBillId(String vetBillId);
+
 
 }
