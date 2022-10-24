@@ -10,12 +10,15 @@ package com.petclinic.auth.Role;
 
 import com.petclinic.auth.Role.data.Role;
 import com.petclinic.auth.Role.data.RoleIDLessDTO;
+import com.petclinic.auth.User.data.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @Slf4j
@@ -41,6 +44,12 @@ public class RoleServiceImpl implements RoleService {
 
         return roleRepo.findAll(pageRequest);
     }
+
+    @Override
+    public List<Role> findAllWithoutPage() {
+        return roleRepo.findAll();
+    }
+
 
     @Override
     public void deleteById(long id) throws EmptyResultDataAccessException {

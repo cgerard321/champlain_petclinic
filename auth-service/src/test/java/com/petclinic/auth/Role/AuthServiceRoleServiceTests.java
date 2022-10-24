@@ -10,6 +10,7 @@ package com.petclinic.auth.Role;
 
 import com.petclinic.auth.Role.data.Role;
 import com.petclinic.auth.Role.data.RoleIDLessDTO;
+import com.petclinic.auth.User.data.User;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -74,5 +75,19 @@ public class AuthServiceRoleServiceTests {
 
         assertEquals(ROLE_COUNT, roleRepo.count());
         assertEquals(ROLE_COUNT, roleService.findAll(PageRequest.of(0, 10)).getTotalElements());
+    }
+
+    @Test
+    @DisplayName("Get all roles no page")
+    void get_all_roles_no_page() {
+
+        final int ROLE_COUNT = 10;
+
+        for (int i = 0; i < ROLE_COUNT; i++) {
+            roleRepo.save(new Role(i,"something"+i));
+        }
+
+        assertEquals(ROLE_COUNT, roleRepo.count());
+        assertEquals(ROLE_COUNT, roleService.findAllWithoutPage().size());
     }
 }
