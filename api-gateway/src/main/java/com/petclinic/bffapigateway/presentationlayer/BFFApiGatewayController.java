@@ -267,10 +267,10 @@ public class BFFApiGatewayController {
     }
 
 
+
     /**
      * Owners Methods
      * **/
-
 
     @GetMapping(value = "owners")
     public Flux<OwnerDetails> getOwners() {
@@ -296,7 +296,6 @@ public class BFFApiGatewayController {
     public Mono<OwnerDetails> createOwner(@RequestBody OwnerDetails model){
         return customersServiceClient.createOwner(model);
     }
-
 
     @PostMapping(value = "owners/photo/{ownerId}")
     public Mono<String> setOwnerPhoto(@RequestBody PhotoDetails photoDetails, @PathVariable int ownerId) {
@@ -344,7 +343,6 @@ public class BFFApiGatewayController {
     /**
      * End of Owner Methods
      * **/
-
 
     @GetMapping("/verification/{token}")
     public Mono<UserDetails> verifyUser(@PathVariable final String token) {

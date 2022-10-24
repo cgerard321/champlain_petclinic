@@ -57,8 +57,8 @@ public class RoleController {
         return roleService.findAllWithoutPage();
     }
 
-    @DeleteMapping
-    public void deleteRole(@RequestParam long id) {
+    @DeleteMapping("/{id}")
+    public void deleteRole(@PathVariable long id) {
 
         roleService.deleteById(id);
         log.info("Deleted role with id {}", id);

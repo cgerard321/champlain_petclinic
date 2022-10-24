@@ -18,5 +18,4 @@ import java.util.Set;
 public interface RoleRepo extends JpaRepository<Role, Long> {
 
     Set<Role> getRolesByParent(Role parent);
-
 }
