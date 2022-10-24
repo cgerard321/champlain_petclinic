@@ -12,36 +12,21 @@ angular.module('vetForm')
             $http.get("api/gateway/vets/" + $stateParams.vetId).then(function (resp) {
                 self.vet = resp.data;
                 document.getElementById("title").innerHTML = "Edit Vet";
-                document.getElementById("lastName").value = self.vet.lastName;
+                document.getElementById("firstName").value = self.vet.firstName;
                 document.getElementById("lastName").value = self.vet.lastName;
                 document.getElementById("email").value = self.vet.email;
                 document.getElementById("vetResume").value = self.vet.resume;
-
                 document.getElementById("workDays").value = self.vet.workday;
 
                 const specialties = self.vet.specialties;
-                let specialtiesIds = [];
                 specialties.forEach(specs => {
-                    specialtiesIds.push(specs.id);
-                });
-
-                if (specialtiesIds.includes(1)) {
-                    document.getElementById("radiology").checked = true;
-                }
-                if (specialtiesIds.includes(2)) {
-                    document.getElementById("surgery").checked = true;
-                }
-                if (specialtiesIds.includes(3)) {
-                    document.getElementById("dentistry").checked = true;
-                }
-                if (specialtiesIds.includes(4)) {
-                    document.getElementById("general").checked = true;
-                }
+                    document.getElementById(specs.name).checked = true;
+                })
 
                 let isAct = document.getElementsByClassName("isActiveRadio");
-                if (self.vet.isActive === 1) {
+                if (self.vet.active) {
                     isAct[0].checked = true;
-                } else if (self.vet.isActive === 0) {
+                } else {
                     isAct[1].checked = true;
                 }
                 let phoneNumber = self.vet.phoneNumber;
@@ -66,18 +51,29 @@ angular.module('vetForm')
                     if (i !== selectedSpecialtiesList.length - 1)
                         specialtiesStr += ", ";
                 }
-
             }
             specialtiesStr += "]"
             var id = self.vet.vetId;
             const specialties = JSON.parse(specialtiesStr);
             vet.specialties = specialties;
-            let vetC = vet;
+
+            vet.firstName = document.getElementById("firstName").value;
+            vet.lastName = document.getElementById("lastName").value;
+            vet.email = document.getElementById("email").value;
+            vet.resume = document.getElementById("vetResume").value;
+            vet.workday = document.getElementById("workDays").value;
+
+            let phoneNumber = self.vet.phoneNumber.substring(0, self.vet.phoneNumber.length - 4);
+            vet.phoneNumber = phoneNumber + document.getElementById("phoneNumber").value;
+
+            let isAct = document.getElementsByClassName("isActiveRadio");
+            vet.active = isAct[0].checked;
+
             var req;
             if (id) {
-                req = $http.put("api/gateway/vets/" + vetId, vetC);
+                req = $http.put("api/gateway/vets/" + vetId, vet);
             } else {
-                req = $http.post("api/gateway/vets", vetC);
+                req = $http.post("api/gateway/vets", vet);
                 console.log(self.vet)
             }
 

@@ -1,13 +1,9 @@
 package com.petclinic.vet.dataaccesslayer;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
-import org.springframework.boot.test.autoconfigure.data.r2dbc.DataR2dbcTest;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -128,7 +124,7 @@ class VetRepositoryTest {
                 .expectNextCount(1)
                 .verifyComplete();
 
-        Flux<Vet> find = vetRepository.findVetsByIsActive(vet.isActive());
+        Flux<Vet> find = vetRepository.findVetsByActive(vet.isActive());
         Publisher<Vet> composite = Mono
                 .from(setup)
                 .thenMany(find);
@@ -157,7 +153,7 @@ class VetRepositoryTest {
                 .expectNextCount(1)
                 .verifyComplete();
 
-        Flux<Vet> find = vetRepository.findVetsByIsActive(vet.isActive());
+        Flux<Vet> find = vetRepository.findVetsByActive(vet.isActive());
         Publisher<Vet> composite = Mono
                 .from(setup)
                 .thenMany(find);
@@ -189,7 +185,7 @@ class VetRepositoryTest {
                 .resume("Just became a vet")
                 .imageId("kjd")
                 .workday("Monday")
-                .isActive(true)
+                .active(true)
                 .build();
     }
     private Vet buildVet2() {
@@ -202,7 +198,7 @@ class VetRepositoryTest {
                 .imageId("kjd")
                 .resume("Just became a vet")
                 .workday("Monday")
-                .isActive(false)
+                .active(false)
                 .build();
     }
 

@@ -93,7 +93,7 @@ class VetControllerIntegrationTest {
 
     @Test
     void updateVet() {
-        Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet));
+        Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet2));
 
         StepVerifier
                 .create(setup)
@@ -307,7 +307,7 @@ class VetControllerIntegrationTest {
                 .workday("Monday")
                 .imageId("kjd")
                 .specialties(new HashSet<>())
-                .isActive(false)
+                .active(false)
                 .build();
     }
     private Vet buildVet2() {
@@ -320,7 +320,7 @@ class VetControllerIntegrationTest {
                 .resume("Just became a vet")
                 .imageId("kjd")
                 .workday("Monday")
-                .isActive(true)
+                .active(true)
                 .specialties(new HashSet<>())
                 .build();
     }
@@ -335,7 +335,7 @@ class VetControllerIntegrationTest {
                 .imageId("kjd")
                 .workday("Monday")
                 .specialties(new HashSet<>())
-                .isActive(false)
+                .active(false)
                 .build();
     }
 
