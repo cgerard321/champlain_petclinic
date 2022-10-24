@@ -14,8 +14,12 @@ angular.module('adminPanel')
 
 
         $scope.removeUser = function (userid) {
-            $http.delete('api/gateway/users/' + userid).then(function () {
-                $http.get('api/gateway/users').then(function (resp) {
+            $http.delete('api/gateway/users/' + userid, {
+                headers: {'Authorization': "Bearer " + authProvider.getUser().token}})
+                .then(function () {
+                $http.get('api/gateway/users', {
+                    headers: {'Authorization': "Bearer " + authProvider.getUser().token}})
+                    .then(function (resp) {
                     self.users = resp.data;
                 });
             });

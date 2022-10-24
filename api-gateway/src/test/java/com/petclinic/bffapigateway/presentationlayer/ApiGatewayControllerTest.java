@@ -775,6 +775,7 @@ class ApiGatewayControllerTest {
 
         client.delete()
                 .uri("/api/gateway/users/1")
+                .header("Authorization", "Bearer token")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
@@ -1518,11 +1519,12 @@ class ApiGatewayControllerTest {
 
         Flux<Role> allRoles = Flux.fromIterable(allRolesList);
 
-        when(authServiceClient.getRoles())
+        when(authServiceClient.getRoles("Bearer token"))
                 .thenReturn(allRoles);
 
         client.get()
                 .uri("/api/gateway/admin/roles")
+                .header("Authorization", "Bearer token")
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -1546,17 +1548,18 @@ class ApiGatewayControllerTest {
         role.setName("vet");
         role.setParent(parentRole);
 
-        when(authServiceClient.addRole(role))
+        when(authServiceClient.addRole("Bearer token", role))
                 .thenReturn(Mono.just(role));
 
         client.post()
                 .uri("/api/gateway/admin/roles")
+                .header("Authorization", "Bearer token")
                 .contentType(APPLICATION_JSON)
                 .body(Mono.just(role), Role.class)
                 .exchange()
                 .expectStatus().isOk();
 
-        verify(authServiceClient).addRole(role);
+        verify(authServiceClient).addRole("Bearer token", role);
     }
 
     @Test
@@ -1570,26 +1573,28 @@ class ApiGatewayControllerTest {
         role.setName("vet");
         role.setParent(parentRole);
 
-        when(authServiceClient.addRole(role))
+        when(authServiceClient.addRole("Bearer token", role))
                 .thenReturn(Mono.just(role));
 
         client.post()
                 .uri("/api/gateway/admin/roles")
+                .header("Authorization", "Bearer token")
                 .contentType(APPLICATION_JSON)
                 .body(Mono.just(role), Role.class)
                 .exchange()
                 .expectStatus().isOk();
 
-        verify(authServiceClient).addRole(role);
+        verify(authServiceClient).addRole("Bearer token", role);
 
         client.delete()
                 .uri("/api/gateway/admin/roles/{id}", role.getId())
+                .header("Authorization", "Bearer token")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
                 .isOk();
 
-        verify(authServiceClient).deleteRole(role.getId());
+        verify(authServiceClient).deleteRole("Bearer token", role.getId());
     }
 
 

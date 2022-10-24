@@ -10,11 +10,14 @@ package com.petclinic.auth.Role;
 
 import com.petclinic.auth.Role.data.Role;
 import com.petclinic.auth.Role.data.RoleIDLessDTO;
+import com.petclinic.auth.User.data.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/roles")
@@ -46,6 +49,12 @@ public class RoleController {
         log.info("Retrieved paginated result with {} entries and {} pages", all.getTotalElements(), all.getTotalPages());
 
         return all;
+    }
+
+    @GetMapping("/withoutPages")
+    public List<Role> getRolesWithoutPage() {
+
+        return roleService.findAllWithoutPage();
     }
 
     @DeleteMapping

@@ -226,8 +226,8 @@ public class BFFApiGatewayController {
     }
 
     @DeleteMapping(value = "users/{userId}")
-    public Mono<UserDetails> deleteUser(final @PathVariable long userId) {
-        return authServiceClient.deleteUser(userId);
+    public Mono<UserDetails> deleteUser(@RequestHeader(AUTHORIZATION) String auth, final @PathVariable long userId) {
+        return authServiceClient.deleteUser(auth, userId);
     }
 
     @GetMapping(value = "users/{userId}")
@@ -247,24 +247,25 @@ public class BFFApiGatewayController {
     }
 
     @GetMapping(value = "admin/roles")
-    public Flux<Role> getRoles() {
-        return authServiceClient.getRoles();
+    public Flux<Role> getRoles(@RequestHeader(AUTHORIZATION) String auth) {
+        return authServiceClient.getRoles(auth);
     }
 
     @DeleteMapping(value = "admin/roles/{id}")
-    public Mono<Void> deleteRole(@PathVariable int id) {
-        return authServiceClient.deleteRole(id);
+    public Mono<Void> deleteRole(@RequestHeader(AUTHORIZATION) String auth, @PathVariable int id) {
+        return authServiceClient.deleteRole(auth, id);
     }
 
     @PostMapping(value = "admin/roles")
-    public Mono<Role> addRole(@RequestBody final Role model) {
-        return authServiceClient.addRole(model);
+    public Mono<Role> addRole(@RequestHeader(AUTHORIZATION) String auth, @RequestBody final Role model) {
+        return authServiceClient.addRole(auth, model);
     }
 
 
     /**
      * Owners Methods
      * **/
+
 
     @GetMapping(value = "owners")
     public Flux<OwnerDetails> getOwners() {
