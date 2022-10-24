@@ -197,7 +197,7 @@ public class AuthServiceClientIntegrationTest {
 
         server.enqueue(mockResponse);
 
-        final Role aRole = authServiceClient.getRoles().blockFirst();
+        final Role aRole = authServiceClient.getRoles("Bearer token").blockFirst();
 
         assertEquals(role.getId(), aRole.getId());
         assertEquals(role.getName(), aRole.getName());
@@ -225,7 +225,7 @@ public class AuthServiceClientIntegrationTest {
 
         server.enqueue(mockResponse);
 
-        final Role block = authServiceClient.addRole(role).block();
+        final Role block = authServiceClient.addRole("Bearer token", role).block();
 
         assertEquals(role.getId(), block.getId());
         assertEquals(role.getName(), block.getName());
@@ -253,7 +253,7 @@ public class AuthServiceClientIntegrationTest {
 
         server.enqueue(mockResponse);
 
-        final Mono<Void> empty = authServiceClient.deleteRole(role.getId());
+        final Mono<Void> empty = authServiceClient.deleteRole("Bearer token", role.getId());
         assertEquals(empty.block(), null);
     }
 }

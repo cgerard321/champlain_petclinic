@@ -53,9 +53,10 @@ public class AuthServiceClient {
                 .bodyToMono(UserDetails.class);
     }
 
-    public Flux<UserDetails> getUsers() {
+    public Flux<UserDetails> getUsers(String auth) {
         return webClientBuilder.build().get()
                 .uri(authServiceUrl + "/users/withoutPages")
+                .header("Authorization", auth)
                 .retrieve()
                 .bodyToFlux(UserDetails.class);
     }
@@ -85,10 +86,11 @@ public class AuthServiceClient {
                 .bodyToMono(UserDetails.class);
     }
 
-    public Mono<UserDetails> deleteUser(final long userId) {
+    public Mono<UserDetails> deleteUser(String auth, final long userId) {
         return webClientBuilder.build()
                 .delete()
                 .uri(authServiceUrl + "/users/{userId}", userId)
+                .header("Authorization", auth)
                 .retrieve()
                 .bodyToMono(UserDetails.class);
     }
@@ -136,26 +138,30 @@ public class AuthServiceClient {
     }
 
 
-    public Flux<Role> getRoles() {
+    public Flux<Role> getRoles(String auth) {
         return webClientBuilder.build().get()
-                .uri(authServiceUrl + "/admin/roles")
+                .uri(authServiceUrl + "/roles/withoutPages")
+                .header("Authorization", auth)
                 .retrieve()
                 .bodyToFlux(Role.class);
     }
 
-    public Mono<Role> addRole(final Role model) {
+
+    public Mono<Role> addRole(String auth, final Role model) {
         return webClientBuilder.build().post()
-                .uri(authServiceUrl + "/admin/roles")
+                .uri(authServiceUrl + "/roles")
+                .header("Authorization", auth)
                 .body(just(model), Role.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToMono(Role.class);
     }
 
-    public Mono<Void> deleteRole(final int id) {
+    public Mono<Void> deleteRole(String auth, final int id) {
         return webClientBuilder.build()
                 .delete()
-                .uri(authServiceUrl + "/admin/role/{id}", id)
+                .uri(authServiceUrl + "/roles/{id}", id)
+                .header("Authorization", auth)
                 .retrieve()
                 .bodyToMono(Void.class);
     }
