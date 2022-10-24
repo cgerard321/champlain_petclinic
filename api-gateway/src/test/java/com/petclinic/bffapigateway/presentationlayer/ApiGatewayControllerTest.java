@@ -1639,7 +1639,7 @@ class ApiGatewayControllerTest {
                 .workday("Monday")
                 .image("kjd".getBytes())
                 .specialties(new HashSet<>())
-                .isActive(false)
+                .active(false)
                 .build();
     }
     private VetDTO buildVetDTO2() {
@@ -1653,7 +1653,7 @@ class ApiGatewayControllerTest {
                 .resume("Just became a vet")
                 .workday("Monday")
                 .specialties(new HashSet<>())
-                .isActive(true)
+                .active(true)
                 .build();
     }
 }
