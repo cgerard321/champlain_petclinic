@@ -241,66 +241,6 @@ class VisitsServiceClientIntegrationTest {
         assertEquals(visit.isStatus(), previousVisits.isStatus());
     }
 
-//    @Test
-//    void shouldGetPreviousVisitsForPet() throws JsonProcessingException {
-//        final VisitDetails visit = VisitDetails.builder()
-//                .visitId(UUID.randomUUID().toString())
-//                .petId(15)
-//                .practitionerId(2)
-//                .day(24)
-//                .month(11)
-//                .year(2022)
-//                .description("Cat is crazy")
-//                .status(false)
-//                .build();
-//
-//        final String body = objectMapper.writeValueAsString(objectMapper.convertValue(visit, VisitDetails.class));
-//        prepareResponse(response -> response
-//                .setHeader("Content-Type", "application/json")
-//                .setBody(body));
-//
-//        final VisitDetails previousVisits = visitsServiceClient.getPreviousVisitsForPet(21).blockFirst();
-//
-//        assertEquals(visit.getVisitId(), previousVisits.getVisitId());
-//        assertEquals(visit.getPetId(), previousVisits.getPetId());
-//        assertEquals(visit.getPractitionerId(), previousVisits.getPractitionerId());
-//        assertEquals(visit.getDay(), previousVisits.getDay());
-//        assertEquals(visit.getMonth(), previousVisits.getMonth());
-//        assertEquals(visit.getYear(), previousVisits.getYear());
-//        assertEquals(visit.getDescription(), previousVisits.getDescription());
-//        assertEquals(visit.isStatus(), previousVisits.isStatus());
-//    }
- 
-//    @Test
-//    void shouldGetScheduledVisitsForPet() throws JsonProcessingException {
-//        final VisitDetails visit = VisitDetails.builder()
-//                .visitId(UUID.randomUUID().toString())
-//                .petId(15)
-//                .practitionerId(2)
-//                .day(24)
-//                .month(11)
-//                .year(2022)
-//                .description("Cat is crazy")
-//                .status(false)
-//                .build();
-//
-//        final String body = objectMapper.writeValueAsString(objectMapper.convertValue(visit, VisitDetails.class));
-//        prepareResponse(response -> response
-//                .setHeader("Content-Type", "application/json")
-//                .setBody(body));
-//
-//        final VisitDetails scheduledVisits = visitsServiceClient.getScheduledVisitsForPet(21).blockFirst();
-//
-//        assertEquals(visit.getVisitId(), scheduledVisits.getVisitId());
-//        assertEquals(visit.getPetId(), scheduledVisits.getPetId());
-//        assertEquals(visit.getPractitionerId(), scheduledVisits.getPractitionerId());
-//        assertEquals(visit.getDay(), scheduledVisits.getDay());
-//        assertEquals(visit.getMonth(), scheduledVisits.getMonth());
-//        assertEquals(visit.getYear(), scheduledVisits.getYear());
-//        assertEquals(visit.getDescription(), scheduledVisits.getDescription());
-//        assertEquals(visit.isStatus(), scheduledVisits.isStatus());
-//
-//    }
     //working
     private void assertVisitDescriptionEq(VisitDetails visits, int petId, String description) {
         assertEquals("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee", visits.getVisitId());

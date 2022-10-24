@@ -41,6 +41,7 @@ public class BFFApiGatewayController {
 
     private final BillServiceClient billServiceClient;
 
+    private final InventoryServiceClient inventoryServiceClient;
 
     @GetMapping(value = "bills/{billId}")
     public Mono<BillDetails> getBillingInfo(final @PathVariable String billId)
@@ -179,6 +180,13 @@ public class BFFApiGatewayController {
     @GetMapping("/vets/{vetId}")
     public Mono<ResponseEntity<VetDTO>> getVetByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getVetByVetId(VetsEntityDtoUtil.verifyId(vetId))
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/vets/vetBillId/{vetId}")
+    public Mono<ResponseEntity<VetDTO>> getVetByVetBillId(@PathVariable String vetBillId) {
+        return vetsServiceClient.getVetByVetBillId(VetsEntityDtoUtil.verifyId(vetBillId))
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
@@ -346,4 +354,31 @@ public class BFFApiGatewayController {
                         .body(n.getT2())
                 );
     }
+
+    //Start of Bundle Methods
+
+    @GetMapping(value = "bundles/{bundleUUID}")
+    public Mono<BundleDetails> getBundle(final @PathVariable String bundleUUID)
+    {
+        return inventoryServiceClient.getBundle(bundleUUID);
+    }
+    @GetMapping(value = "bundles")
+    public Flux<BundleDetails> getAllBundles() {
+        return inventoryServiceClient.getAllBundles();
+    }
+    @GetMapping(value = "bundles/item/{item}")
+    public Flux<BundleDetails> getBundlesByItem(@PathVariable String item) {
+        return inventoryServiceClient.getBundlesByItem(item);
+    }
+    @PostMapping(value = "bundles",
+            consumes = "application/json",
+            produces = "application/json")
+    public Mono<BundleDetails> createBundle(@RequestBody BundleDetails model) {
+        return inventoryServiceClient.createBundle(model);
+    }
+    @DeleteMapping(value = "bundles/{bundleUUID}")
+    public Mono<Void> deleteBundle(final @PathVariable String bundleUUID){
+        return inventoryServiceClient.deleteBundle(bundleUUID);
+    }
+
 }

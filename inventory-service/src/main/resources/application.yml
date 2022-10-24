@@ -1,0 +1,46 @@
+server.port: 7006
+
+logging:
+  level:
+    root: INFO
+    com.petclinic: DEBUG
+
+
+spring:
+  config:
+    activate:
+      on-profile: default
+  data:
+    mongodb:
+      port: 0
+      database: billings
+  mongodb:
+    embedded:
+      version: 4.0.21
+
+---
+spring:
+  config:
+    activate:
+      on-profile: integration
+  data:
+    mongodb:
+      host: localhost
+      port: 27017
+      database: inventory
+      username: root
+      password: password
+      authentication-database: admin
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+  data:
+    mongodb:
+      host: mongo
+      port: 27017
+      database: inventory
+      username: root
+      password: password
+      authentication-database: admin
