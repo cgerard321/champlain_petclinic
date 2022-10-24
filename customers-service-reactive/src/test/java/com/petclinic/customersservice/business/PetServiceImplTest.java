@@ -1,25 +1,19 @@
 package com.petclinic.customersservice.business;
 
-import com.petclinic.customersservice.data.Pet;
-import com.petclinic.customersservice.data.PetRepo;
+import com.petclinic.customersservice.data.*;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.*;
-import com.petclinic.customersservice.data.Photo;
-import com.petclinic.customersservice.data.PhotoRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-
-import java.text.SimpleDateFormat;
 import java.util.Date;
-
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port: 27019"})
@@ -55,11 +49,11 @@ class PetServiceImplTest {
     public void deletePet() {
 
         Pet pet = buildPet();
-        int PET_ID = pet.getId();
+        String PET_ID = pet.getId();
 
-        when(repo.deleteById(anyInt())).thenReturn(Mono.empty());
+        when(repo.deleteById(anyString())).thenReturn(Mono.empty());
 
-        Mono<Void> petDelete = petService.deletePet(PET_ID);
+        Mono<Void> petDelete = petService.deletePetByPetId(PET_ID);
 
         StepVerifier
                 .create(petDelete)
@@ -68,14 +62,69 @@ class PetServiceImplTest {
     }
 
     @Test
+    void findPetByPetId() {
+
+        //Owner owner = buildOwner();
+        Pet pet = buildPet();
+        String PET_ID = pet.getId();
+        when(repo.findPetById(PET_ID)).thenReturn(Mono.just(pet));
+        Mono<Pet> petEntity = petService.getPetById(PET_ID);
+
+        StepVerifier
+                .create(petEntity)
+                .consumeNextWith(foundPet -> {
+                    assertEquals(pet.getId(), foundPet.getId());
+                    assertEquals(pet.getName(), foundPet.getName());
+                    assertEquals(pet.getPetTypeId(), foundPet.getPetTypeId());
+                    assertEquals(pet.getPhotoId(), foundPet.getPhotoId());
+                    assertEquals(pet.getOwnerId(), foundPet.getOwnerId());
+                    assertEquals(pet.getBirthDate(), foundPet.getBirthDate());
+                })
+                .verifyComplete();
+    }
+
+//    @Test
+//    void findPetsByOwnerId() {
+//        Pet pet = buildPet();
+//        String OWNER_ID = pet.getOwnerId();
+//        when(repo.findPetsByOwnerId(anyString())).thenReturn(Flux.just(pet));
+//        Flux<Pet> petFlux = petService.getPetsByOwnerId(OWNER_ID);
+//        StepVerifier
+//                .create(petFlux)
+//                .consumeNextWith(foundPet -> {
+//                    assertEquals(pet.getId(), foundPet.getId());
+//                    assertEquals(pet.getName(), foundPet.getName());
+//                    assertEquals(pet.getPetTypeId(), foundPet.getPetTypeId());
+//                    assertEquals(pet.getPhotoId(), foundPet.getPhotoId());
+//                    assertEquals(pet.getOwnerId(), foundPet.getOwnerId());
+//                    assertEquals(pet.getBirthDate(), foundPet.getOwnerId());
+//                })
+//                .verifyComplete();
+//    }
+
+    @Test
+    void getPetByIdNotFound() {
+
+        Pet petEntity = buildPet();
+        String PET_ID = "Not found";
+        when(repo.findPetById(PET_ID)).thenReturn(Mono.just(petEntity));
+        Mono<Pet> petMono = petService.getPetById(PET_ID);
+        StepVerifier
+                .create(petMono)
+                .expectNextCount(1)
+                .expectError();
+
+    }
+
+    @Test
     public void deletePetNotFound() {
 
         Pet pet = buildPet();
-        int PET_ID = 00;
+        String PET_ID = "00";
 
-        when(repo.deleteById(anyInt())).thenReturn(Mono.empty());
+        when(repo.deleteById(anyString())).thenReturn(Mono.empty());
 
-        Mono<Void> petDelete = petService.deletePet(PET_ID);
+        Mono<Void> petDelete = petService.deletePetByPetId(PET_ID);
 
         StepVerifier
                 .create(petDelete)
@@ -87,12 +136,24 @@ class PetServiceImplTest {
 
     private Pet buildPet() {
         return Pet.builder()
-                .id(55)
+                .id("55")
                 .name("Test Pet")
-                .petTypeId(5)
-                .photoId(3)
+                .petTypeId("5")
+                .photoId("3")
                 .birthDate(date)
-                .ownerId(4)
+                .ownerId("4")
+                .build();
+    }
+
+    private Owner buildOwner() {
+        return Owner.builder()
+                .id("44")
+                .firstName("FirstName")
+                .lastName("LastName")
+                .address("Test address")
+                .city("test city")
+                .telephone("telephone")
+                .photoId("1")
                 .build();
     }
 

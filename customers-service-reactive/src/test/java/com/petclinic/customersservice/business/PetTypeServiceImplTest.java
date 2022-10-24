@@ -50,13 +50,30 @@ class PetTypeServiceImplTest {
     }
 
     @Test
+    void getPetTypeById() {
+
+        PetType petType = buildPetType();
+        String PET_TYPE_ID = petType.getId();
+
+        when(repo.findPetTypeById(anyString())).thenReturn(Mono.just(petType));
+
+        Mono<PetType> petTypeTest = petTypeService.getPetTypeById(PET_TYPE_ID);
+
+        StepVerifier
+                .create(petTypeTest)
+                .consumeNextWith(foundPetType ->{
+                    assertEquals(petType.getName(), foundPetType.getName());
+                })
+                .verifyComplete();
+    }
+
+    @Test
     void getAll() {
 
         PetType petType = buildPetType();
 
         when(repo.findAll()).thenReturn(Flux.just(petType));
-
-        Flux<PetType> petTypeTest = petTypeService.getAll();
+        Flux<PetType> petTypeTest = petTypeService.getAllPetTypes();
 
         StepVerifier
                 .create(petTypeTest)
@@ -67,7 +84,7 @@ class PetTypeServiceImplTest {
     }
 
     private PetType buildPetType() {
-        return PetType.builder().id(10).name("TestType").build();
+        return PetType.builder().id("10").name("TestType").build();
     }
 
 }

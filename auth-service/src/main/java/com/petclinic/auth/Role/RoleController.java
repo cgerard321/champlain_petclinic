@@ -10,11 +10,14 @@ package com.petclinic.auth.Role;
 
 import com.petclinic.auth.Role.data.Role;
 import com.petclinic.auth.Role.data.RoleIDLessDTO;
+import com.petclinic.auth.User.data.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/roles")
@@ -48,8 +51,14 @@ public class RoleController {
         return all;
     }
 
-    @DeleteMapping
-    public void deleteRole(@RequestParam long id) {
+    @GetMapping("/withoutPages")
+    public List<Role> getRolesWithoutPage() {
+
+        return roleService.findAllWithoutPage();
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteRole(@PathVariable long id) {
 
         roleService.deleteById(id);
         log.info("Deleted role with id {}", id);

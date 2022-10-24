@@ -20,12 +20,34 @@ public class PetServiceImpl implements PetService {
     }
 
     @Override
-    public Mono<Void> deletePet(int petId) {
-        return petRepo.deleteById(petId);
+    public Flux<Pet> getAllPets() {
+        return petRepo.findAll();
     }
 
     @Override
-    public Flux<Pet> getAll() {
-        return petRepo.findAll();
+    public Mono<Pet> getPetById(String Id) {
+        return petRepo.findPetById(Id);
     }
+
+    @Override
+    public Flux<Pet> getPetsByOwnerId(String ownerId) {
+        return petRepo.findAllPetByOwnerId(ownerId);
+    }
+
+    @Override
+    public Mono<Pet> updatePetByPetId(String petId, Mono<Pet> petMono) {
+        return petRepo.findPetById(petId)
+                .flatMap(p -> petMono
+                        .doOnNext(e -> e.setId(p.getId()))
+                        .doOnNext(e -> e.setOwnerId(p.getOwnerId()))
+                        .doOnNext(e -> e.setPhotoId(p.getPhotoId()))
+                )
+                .flatMap(petRepo::save);
+    }
+
+    @Override
+    public Mono<Void> deletePetByPetId(String petId) {
+        return petRepo.deleteById(petId);
+    }
+
 }
