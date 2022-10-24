@@ -12,7 +12,6 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 public class OwnerAggregate {
-
     private int id;
     private String firstName;
     private String lastName;
