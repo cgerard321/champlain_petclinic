@@ -13,8 +13,8 @@
         <tr>
             <td>Bill ID</td>
             <td>Owner ID</td>
-            <td>Vet. Name</td>
             <td>Owner Details</td>
+            <td>Vet. Id</td>
             <td>Visit Type</td>
             <td>Amount</td>
             <td>Date/Time</td>
@@ -26,8 +26,9 @@
     <tr id="billId" ng-repeat="bill in $ctrl.billHistory | filter:$ctrl.query track by bill.billId">
         <td>{{bill.billId}}</td>
         <td>{{bill.customerId}}</td>
-        <td>{{bill.vetId}}</td>
         <td><a href="http://localhost:8080/#!/owners/details/{{bill.customerId}}">Owner details</a></td>
+<!--        <td ng-app="billHistory" ng-controller="BillHistoryController">{{getVetByVetId(bill.vetId)}}</td>-->
+        <td>{{bill.vetId}}</td>
         <td>{{bill.visitType}}</td>
         <td>{{bill.amount}}</td>
         <td>{{bill.date}}</td>
