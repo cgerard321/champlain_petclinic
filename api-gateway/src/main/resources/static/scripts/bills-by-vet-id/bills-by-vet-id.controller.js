@@ -20,7 +20,7 @@ angular.module('billsByVetId')
 
                 function successCallback(response) {
                     $scope.errors = [];
-                    alert(billId + " bills were deleted successfully");
+                    alert(vetId + " bills were deleted successfully");
                     console.log(response, 'res');
                     //refresh list
                     $http.get('api/gateway/bills/vet/' + vetId).then(function (resp) {
