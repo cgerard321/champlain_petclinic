@@ -123,6 +123,7 @@ public class AuthServiceUserServiceTests {
 
         final User u = new User(USER, PASS, EMAIL);
         final Role test = new Role(1,"tester");
+        roleRepo.save(test);
         Set<Role> roleSet = new HashSet<>();
         roleSet.add(test);
         u.setRoles(roleSet);
