@@ -165,5 +165,13 @@ public class AuthServiceClient {
                 .retrieve()
                 .bodyToMono(Void.class);
     }
+
+    public Mono<UserDetails> changeRole(String auth, final long userId, final int roleId) {
+        return webClientBuilder.build().get()
+                .uri(authServiceUrl + "/users/rolechange/"+ userId +"/" + roleId)
+                .header("Authorization", auth)
+                .retrieve()
+                .bodyToMono(UserDetails.class);
+    }
 }
 

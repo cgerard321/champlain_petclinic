@@ -38,6 +38,8 @@ import com.petclinic.auth.Exceptions.InvalidInputException;
 import com.petclinic.auth.Exceptions.NotFoundException;
 import com.petclinic.auth.JWT.JWTService;
 import com.petclinic.auth.Mail.MailService;
+import com.petclinic.auth.Role.RoleRepo;
+import com.petclinic.auth.Role.data.Role;
 import com.petclinic.auth.User.data.User;
 import com.petclinic.auth.User.data.UserIDLessRoleLessDTO;
 import com.petclinic.auth.User.data.UserPasswordLessDTO;
@@ -122,6 +124,9 @@ public class AuthServiceUserControllerTests {
     private UserRepo userRepo;
 
     @Autowired
+    private RoleRepo roleRepo;
+
+    @Autowired
     private UserMapper userMap;
 
     @Autowired
@@ -154,6 +159,28 @@ public class AuthServiceUserControllerTests {
         assertNotNull(user);
         assertThat(user.getId(), instanceOf(Long.TYPE));
     }
+
+    @Test
+    @DisplayName("change role")
+    void change_role() {
+        final User u = new User(USER, PASS, EMAIL);
+        final Role test = new Role(1,"tester");
+        Set<Role> roleSet = new HashSet<>();
+        roleSet.add(test);
+        u.setRoles(roleSet);
+        userRepo.save(u);
+
+        final Role r = new Role(2,"test");
+        roleRepo.save(r);
+
+        User user = userController.roleChange(u.getId(), r.getId());
+        Optional<User> find = userRepo.findById(user.getId());
+        assertTrue(find.isPresent());
+
+        assertEquals(1, find.get().getRoles().size());
+    }
+
+
     @Test
     @DisplayName("Check the required fields with empty data")
     void check_empty_require_fields() {

@@ -362,4 +362,9 @@ public class BFFApiGatewayController {
                         .body(n.getT2())
                 );
     }
+
+    @GetMapping(value ="users/rolechange/{userId}/{roleId}")
+    public Mono<UserDetails> changeUserRole(@RequestHeader(AUTHORIZATION) String auth, final @PathVariable long userId, final @PathVariable int roleId){
+        return authServiceClient.changeRole(auth, userId, roleId);
+    }
 }

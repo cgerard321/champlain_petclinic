@@ -110,6 +110,15 @@ public class UserController {
                 .body(userMapper.modelToPasswordLessDTO(login.getUser()));
     }
 
+
+    @GetMapping("/rolechange/{userId}/{roleId}")
+    public User roleChange(@PathVariable long userId, @PathVariable long roleId) {
+
+        return userService.changeRole(userId, roleId);
+
+    }
+
+
     @RequestMapping(method = RequestMethod.HEAD)
     public void preflight() {
         log.info("Preflight request received and accepted");

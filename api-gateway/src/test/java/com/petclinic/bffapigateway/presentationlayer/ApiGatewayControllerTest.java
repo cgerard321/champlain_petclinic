@@ -1631,6 +1631,34 @@ class ApiGatewayControllerTest {
         verify(authServiceClient).deleteRole("Bearer token", role.getId());
     }
 
+    @Test
+    void getRoleChange() {
+        UserDetails user = new UserDetails();
+        user.setId(1);
+        user.setUsername("roger675");
+        user.setPassword("secretnooneknows");
+        user.setEmail("RogerBrown@gmail.com");
+        final Role test = new Role(1,"tester");
+        Set<Role> roleSet = new HashSet<>();
+        roleSet.add(test);
+        user.setRoles(roleSet);
+
+        when(authServiceClient.changeRole("Bearer token", 1,2))
+                .thenReturn(Mono.just(user));
+
+        client
+                .get()
+                .uri("/api/gateway/users/rolechange/1/2")
+                .accept(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer token")
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.username").isEqualTo("roger675")
+                .jsonPath("$.email").isEqualTo("RogerBrown@gmail.com");
+
+    }
 
 
     private VetDTO buildVetDTO() {

@@ -15,6 +15,8 @@ import com.petclinic.auth.Exceptions.NotFoundException;
 import com.petclinic.auth.JWT.JWTService;
 import com.petclinic.auth.Mail.Mail;
 import com.petclinic.auth.Mail.MailService;
+import com.petclinic.auth.Role.RoleRepo;
+import com.petclinic.auth.Role.data.Role;
 import com.petclinic.auth.User.data.User;
 import com.petclinic.auth.User.data.UserIDLessRoleLessDTO;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,7 +30,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -57,6 +62,9 @@ public class AuthServiceUserServiceTests {
 
     @Autowired
     private UserRepo userRepo;
+
+    @Autowired
+    private RoleRepo roleRepo;
 
     @Autowired
     private UserMapper userMapper;
@@ -107,6 +115,28 @@ public class AuthServiceUserServiceTests {
         assertTrue(find.isPresent());
         assertEquals(NEWPASSWORD, user.getPassword());
         assertEquals(NEWPASSWORD, find.get().getPassword());
+    }
+
+    @Test
+    @DisplayName("change role")
+    void test_user_role_change() {
+
+        final User u = new User(USER, PASS, EMAIL);
+        final Role test = new Role(1,"tester");
+        Set<Role> roleSet = new HashSet<>();
+        roleSet.add(test);
+        u.setRoles(roleSet);
+        userRepo.save(u);
+
+        final Role r = new Role(2,"test");
+        roleRepo.save(r);
+
+        User user = userService.changeRole(u.getId(), r.getId());
+
+        Optional<User> find = userRepo.findById(user.getId());
+        assertTrue(find.isPresent());
+
+        assertEquals(1, find.get().getRoles().size());
     }
 
     @Test

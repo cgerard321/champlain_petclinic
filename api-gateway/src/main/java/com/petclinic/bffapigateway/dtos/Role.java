@@ -22,4 +22,10 @@ public class Role {
     private int id;
     private String name;
     private Role parent;
+
+    public Role(int id, String name) {
+        this.id = id;
+        this.name = name;
+        this.parent = null;
+    }
 }

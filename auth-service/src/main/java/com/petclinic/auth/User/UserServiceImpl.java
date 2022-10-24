@@ -201,4 +201,24 @@ public class UserServiceImpl implements UserService {
         return userRepo.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("No account found for email: " + email));
     }
+
+
+    @Override
+    public User changeRole(long id, long roleId) {
+        if (id <= 0){
+            throw new InvalidInputException("Id cannot be a negative number for " + id);
+        }
+        else {
+            User entity  = userRepo.findById(id)
+                    .orElseThrow(() -> new NotFoundException("No user found for userID " + id));
+            log.info("User getUserById: found userId: {}", entity.getId());
+            Optional<Role> role = roleRepo.findById(roleId);
+            Set<Role> roleSet = new HashSet<>();
+            role.ifPresent(roleSet::add);
+            entity.setRoles(roleSet);
+
+            return entity;
+        }
+    }
+
 }
