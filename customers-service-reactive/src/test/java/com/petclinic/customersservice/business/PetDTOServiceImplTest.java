@@ -33,6 +33,16 @@ class PetDTOServiceImplTest {
     Date date = new Date(20221010);
 
 //    @Test
+//    void getPetDTOByPetId() throws ParseException {
+//        PetDTO petDTO = petDTObuilder();
+//        String PET_ID = petDTO.getPetTypeId();
+//
+//        Mono<PetDTO> petDTOMono = petDTOService.getPetDTOByPetId(PET_ID);
+//
+//
+//    }
+
+//    @Test
 //    void GetPetDTOByPetID() throws ParseException {
 //        Pet petEntity = buildPet();
 //
@@ -66,16 +76,16 @@ class PetDTOServiceImplTest {
                 .build();
     }
 
-//    private PetDTO petDTObuilder() throws ParseException {
-//        return PetDTO.builder()
-//                .id("1")
-//                .name("felix")
-//                .petTypeId("1")
-//                .birthDate(new SimpleDateFormat( "yyyyMMdd" ).parse( "2000-11-30"))
-//                .petType(PetType.builder().id("1").name("TESTPETTYPE").build())
-//                .photo(Photo.builder().id("1").photo("1").name("test").type("test").build())
-//                .ownerId("1")
-//                .build();
-//    }
+    private PetDTO petDTObuilder() throws ParseException {
+        return PetDTO.builder()
+                .id("1")
+                .name("felix")
+                .petTypeId("1")
+                .birthDate(new SimpleDateFormat( "yyyyMMdd" ).parse( "2000-11-30"))
+                .petType(PetType.builder().id("1").name("TESTPETTYPE").build())
+                .photo(Photo.builder().id("1").photo("1").name("test").type("test").build())
+                .ownerId("1")
+                .build();
+    }
 
 }

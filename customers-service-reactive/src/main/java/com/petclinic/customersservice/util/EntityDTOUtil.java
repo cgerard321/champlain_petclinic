@@ -32,10 +32,10 @@ public class EntityDTOUtil {
         return petDTO;
     }
 
-//    public static Pet toPet(PetDTO petDTO) {
-//        Pet pet = new Pet();
-//        BeanUtils.copyProperties(petDTO, pet);
-//        return pet;
-//    }
+    public static Pet toPet(PetDTO petDTO) {
+        Pet pet = new Pet();
+        BeanUtils.copyProperties(petDTO, pet);
+        return pet;
+    }
 
 }
