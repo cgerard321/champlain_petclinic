@@ -30,6 +30,5 @@ public class DataSetupService implements CommandLineRunner {
                 .flatMap(b -> billService.CreateBill(Mono.just(b))
                         .log(b.toString()))
                 .subscribe();
-
     }
 }

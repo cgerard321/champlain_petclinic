@@ -8,7 +8,7 @@ angular.module('billsByVetId')
             self.billsByVetId = resp.data;
         });
 
-        $http.get("api/gateway/vets/" +($stateParams.vetBillId)).then(function(resp){
+        $http.get("api/gateway/vets/" +($stateParams.vetId)).then(function(resp){
             self.vet = resp.data;
         });
 
