@@ -153,6 +153,21 @@ class BillResourceUnitTest {
         Mockito.verify(billService, times(1)).DeleteBill(BILL_ID_OK);
     }
 
+    @Test
+    void deleteBillByVetId() {
+
+        when(billService.DeleteBillsByVetId(anyString())).thenReturn(Flux.empty());
+
+        client.delete()
+                .uri("/bills/vet/" + dto.getVetId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent()
+                .expectBody();
+
+        Mockito.verify(billService, times(1)).DeleteBillsByVetId(VET_ID_OK);
+    }
+
     private BillDTO buildBillDTO(){
 
         Calendar calendar = Calendar.getInstance();

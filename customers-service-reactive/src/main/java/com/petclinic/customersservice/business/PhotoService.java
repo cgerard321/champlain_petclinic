@@ -10,6 +10,6 @@ public interface PhotoService {
 
     Mono<Photo> getPhotoByPhotoId(int photoId);
 
-    Mono<Void> deletePhoto(int photoId);
+    Mono<Void> deletePhoto(String photoId);
 
 }
