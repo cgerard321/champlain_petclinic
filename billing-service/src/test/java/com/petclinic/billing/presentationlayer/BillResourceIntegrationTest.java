@@ -86,6 +86,58 @@ class BillResourceIntegrationTest {
     }
 
     @Test
+    void updateBill() {
+
+        Bill billEntity = buildBill();
+        Bill billEntity2 = buildBill();
+
+        billEntity2.setVisitType("Different");
+        billEntity2.setAmount(199239);
+        billEntity2.setId("2");
+
+        String BILL_ID_OK = billEntity.getBillId();
+
+        Publisher<Bill> setup = repo.deleteAll().thenMany(repo.save(billEntity));
+
+        StepVerifier.create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        client.get()
+                .uri("/bills/" + BILL_ID_OK)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.visitType").isEqualTo(billEntity.getVisitType())
+                .jsonPath("$.customerId").isEqualTo(billEntity.getCustomerId())
+                .jsonPath("$.amount").isEqualTo(billEntity.getAmount());
+
+        client.put()
+                .uri("/bills/" + BILL_ID_OK)
+                .body(just(billEntity2), Bill.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.visitType").isEqualTo(billEntity2.getVisitType());
+
+        client.get()
+                .uri("/bills/" + BILL_ID_OK)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.visitType").isEqualTo(billEntity2.getVisitType())
+                .jsonPath("$.customerId").isEqualTo(billEntity2.getCustomerId())
+                .jsonPath("$.amount").isEqualTo(billEntity2.getAmount());
+
+    }
+
+    @Test
     void findBillByValidBillID() {
 
         Bill billEntity = buildBill();
