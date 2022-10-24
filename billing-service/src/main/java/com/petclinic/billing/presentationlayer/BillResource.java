@@ -36,6 +36,11 @@ public class BillResource {
         return SERVICE.GetAllBills();
     }
 
+    @PutMapping(value ="/bills/{billId}")
+    public Mono<BillDTO> updateBill(@PathVariable String billId, @RequestBody Mono<BillDTO> billDTOMono){
+        return SERVICE.updateBill(billId, billDTOMono);
+    }
+
     @GetMapping(value = "/bills/customer/{customerId}")
     public Flux<BillDTO> getBillsByCustomerId(@PathVariable("customerId") int customerId)
     {
