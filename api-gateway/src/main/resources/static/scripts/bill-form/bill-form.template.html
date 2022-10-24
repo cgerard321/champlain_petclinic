@@ -2,12 +2,12 @@
 <div class="p-3 formColor m-0">
     <form id="billForm" class="form-horizontal" enctype="multipart/form-data" ng-submit="$ctrl.submitBillForm()">
         <div class="row">
-<!--            <div class="col-sm-6 form-group">-->
-<!--                <label class="control-label" for="owner">Owner</label>-->
-<!--                <select class="form-control" name="owner" id="owner" ng-model="$ctrl.bill.customerId" required title="Please select an owner.">-->
-<!--                    <option ng-repeat="owner in $ctrl.owners | filter:$ctrl.query track by owner.id" value="owner.id">{{owner.firstName}} {{owner.lastName}}</option>-->
-<!--                </select>-->
-<!--            </div>-->
+            <div class="col-sm-6 form-group">
+                <label class="control-label" for="owner">Owner</label>
+                <select class="form-control" name="owner" id="owner" ng-model="$ctrl.bill.customerId" required title="Please select an owner.">
+                    <option ng-repeat="owner in $ctrl.owners | filter:$ctrl.query track by owner.id" value="{{owner.id}}">{{owner.firstName}} {{owner.lastName}}</option>
+                </select>
+            </div>
             <div class="col-sm-6 form-group">
                 <label class="control-label" for="vetId">Veterinarian</label>
                 <select class="form-control" name="visitType" id="vetId" ng-model="$ctrl.bill.vetId" required title="Please select a veterinarian.">

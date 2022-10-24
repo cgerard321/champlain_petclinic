@@ -9,10 +9,10 @@ angular.module('billForm')
             arr = resp.data;
         });
         //for owner dropdown
-        // $http.get('api/gateway/owners').then(function (resp) {
-        //     self.owners = resp.data;
-        //     console.log(resp)
-        // });
+        $http.get('api/gateway/owners').then(function (owners) {
+            self.owners = owners.data;
+            console.log(owners)
+        });
 
         self.submitBillForm = function () {
             var req;
