@@ -38,15 +38,19 @@ public class OwnerDTOControllerIntegrationTest {
 //    @Test
 //    void returnOwnerDTOByOwnerId() {
 //
-//        OwnerDTO ownerEntity = buildOwnerDTO();
+//        Owner ownerEntity = buildOwner();
 //
 //        String OWNER_ID = ownerEntity.getId();
 //
-//        when(ownerDTOService.getOwnerDTOByOwnerId(anyString())).thenReturn(Mono.just(ownerEntity));
+//        Publisher<Owner> setup = ownerRepo.deleteAll().thenMany(ownerRepo.insert(ownerEntity));
+//
+//        StepVerifier
+//                .create(setup)
+//                .expectNextCount(1)
+//                .verifyComplete();
 //
 //        client.get()
 //                .uri("/ownerdto/" + OWNER_ID)
-//                .accept(MediaType.APPLICATION_JSON)
 //                .exchange()
 //                .expectStatus().isOk()
 //                .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -55,21 +59,21 @@ public class OwnerDTOControllerIntegrationTest {
 //                .jsonPath("$.lastName").isEqualTo(ownerEntity.getLastName())
 //                .jsonPath("$.address").isEqualTo(ownerEntity.getAddress())
 //                .jsonPath("$.city").isEqualTo(ownerEntity.getCity())
-//                .jsonPath("$.telephone").isEqualTo(ownerEntity.getTelephone())
-//                .jsonPath("$.photo").isEqualTo(ownerEntity.getPhoto());
+//                .jsonPath("$.telephone").isEqualTo(ownerEntity.getTelephone());
+//  //              .jsonPath("$.photo").isEqualTo(ownerEntity.getPhoto());
 //    }
 
-//    private Owner buildOwner() {
-//        return Owner.builder()
-//                .id("1")
-//                .firstName("FirstName")
-//                .lastName("LastName")
-//                .address("Test address")
-//                .city("test city")
-//                .telephone("telephone")
-//                .photoId("1")
-//                .build();
-//    }
+    private Owner buildOwner() {
+        return Owner.builder()
+                .id("1")
+                .firstName("FirstName")
+                .lastName("LastName")
+                .address("Test address")
+                .city("test city")
+                .telephone("telephone")
+                .photoId("1")
+                .build();
+    }
 
 
         private OwnerDTO buildOwnerDTO() {
@@ -80,7 +84,7 @@ public class OwnerDTOControllerIntegrationTest {
                 .address("Test address")
                 .city("test city")
                 .telephone("telephone")
-                .photo(Photo.builder().id("1").photo("1").name("test").type("test").build())
+               // .photo(Photo.builder().id("1").photo("1").name("test").type("test").build())
                 .build();
     }
 }

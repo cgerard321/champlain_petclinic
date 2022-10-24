@@ -87,27 +87,50 @@ class PhotoControllerIntegrationTest {
 
     }
 
-//    @Test
-//    public void getPhotoByPhotoIdNotFound() {
-//
-//        Photo photo = buildPhoto();
-//
-//        String PHOTO_ID_NOT_FOUND = "abc123";
-//
-//        Publisher<Photo> setup = photoRepo.deleteAll().thenMany(photoRepo.save(photo));
-//
-//        StepVerifier
-//                .create(setup)
-//                .expectNextCount(1)
-//                .verifyComplete();
-//
-//        client
-//                .get()
-//                .uri("/photos/" + PHOTO_ID_NOT_FOUND)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .exchange()
-//                .expectStatus().isNotFound();
-//    }
+    @Test
+    public void getPhotoByPhotoIdNotFound() {
+
+        Photo photo = buildPhoto();
+
+        String PHOTO_ID_NOT_FOUND = "abc123";
+
+        Publisher<Photo> setup = photoRepo.deleteAll().thenMany(photoRepo.save(photo));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        client
+                .get()
+                .uri("/photos/" + PHOTO_ID_NOT_FOUND)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk();
+    }
+
+    @Test
+    void deletePhotoById() {
+
+        Photo photo = buildPhoto();
+
+        photoRepo.save(photo);
+
+        Publisher<Void> setup = photoRepo.deleteById(buildPhoto().getId());
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(0)
+                .verifyComplete();
+
+        client
+                .delete()
+                .uri("/photos/" + photo.getId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody();
+    }
 
     private Photo buildPhoto() {
         final String test = "Test photo";

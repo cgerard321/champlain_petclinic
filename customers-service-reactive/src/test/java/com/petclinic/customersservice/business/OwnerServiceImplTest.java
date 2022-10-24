@@ -42,25 +42,39 @@ class OwnerServiceImplTest {
                 .verifyComplete();
     }
 
-//     @Test
-//     void getOwnerByOwnerId() {
-//        Owner ownerEntity = buildOwner();
-//        String OWNER_ID = ownerEntity.getId();
-//        when(repo.findById(anyString())).thenReturn(Mono.just(ownerEntity));
-//        Mono<Owner> ownerMono = ownerService.getOwnerByOwnerId(OWNER_ID);
-//        StepVerifier
-//                .create(ownerMono)
-//                .consumeNextWith(foundOwner -> {
-//                    assertEquals(ownerEntity.getId(), foundOwner.getId());
-//                    assertEquals(ownerEntity.getFirstName(), foundOwner.getFirstName());
-//                    assertEquals(ownerEntity.getLastName(), foundOwner.getLastName());
-//                    assertEquals(ownerEntity.getAddress(), foundOwner.getAddress());
-//                    assertEquals(ownerEntity.getCity(), foundOwner.getCity());
-//                    assertEquals(ownerEntity.getTelephone(), foundOwner.getTelephone());
-//                    assertEquals(ownerEntity.getPhotoId(), foundOwner.getPhotoId());
-//                })
-//                .verifyComplete();
-//     }
+     @Test
+     void getOwnerByOwnerId() {
+        Owner ownerEntity = buildOwner();
+        String OWNER_ID = ownerEntity.getId();
+        when(repo.findOwnerById(OWNER_ID)).thenReturn(Mono.just(ownerEntity));
+        Mono<Owner> ownerMono = ownerService.getOwnerByOwnerId(OWNER_ID);
+        StepVerifier
+                .create(ownerMono)
+                .consumeNextWith(foundOwner -> {
+                    assertEquals(ownerEntity.getId(), foundOwner.getId());
+                    assertEquals(ownerEntity.getFirstName(), foundOwner.getFirstName());
+                    assertEquals(ownerEntity.getLastName(), foundOwner.getLastName());
+                    assertEquals(ownerEntity.getAddress(), foundOwner.getAddress());
+                    assertEquals(ownerEntity.getCity(), foundOwner.getCity());
+                    assertEquals(ownerEntity.getTelephone(), foundOwner.getTelephone());
+                    assertEquals(ownerEntity.getPhotoId(), foundOwner.getPhotoId());
+                })
+                .verifyComplete();
+     }
+
+     @Test
+     void getOwnerByOwnerIdNotFound() {
+
+         Owner ownerEntity = buildOwner();
+         String OWNER_ID = "Not found";
+         when(repo.findOwnerById(OWNER_ID)).thenReturn(Mono.just(ownerEntity));
+         Mono<Owner> ownerMono = ownerService.getOwnerByOwnerId(OWNER_ID);
+         StepVerifier
+                 .create(ownerMono)
+                 .expectNextCount(1)
+                 .expectError();
+
+     }
 
      @Test
      void deleteOwnerByOwnerId() {

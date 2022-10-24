@@ -32,28 +32,28 @@ class PetDTOServiceImplTest {
 
     Date date = new Date(20221010);
 
-    @Test
-    void GetPetDTOByPetID() throws ParseException {
-        Pet petEntity = buildPet();
-
-        String PET_ID = petEntity.getId();
-
-        when(repo.findPetById(anyString())).thenReturn(Mono.just(petEntity));
-
-        Mono<PetDTO> petDTOMono = petDTOService.getPetDTOByPetId(PET_ID);
-
-        StepVerifier.create(petDTOMono)
-                .consumeNextWith(foundPet ->{
-                    assertEquals(petEntity.getId(), foundPet.getId());
-                    assertEquals(petEntity.getOwnerId(), foundPet.getOwnerId());
-                    assertEquals(petEntity.getName(), foundPet.getName());
-                    assertEquals(petEntity.getPetTypeId(), foundPet.getPetTypeId());
-                    assertEquals(petEntity.getPhotoId(), foundPet.getPhotoId());
-                    assertEquals(petEntity.getBirthDate(), foundPet.getBirthDate());
-                })
-                .verifyComplete();
-
-    }
+//    @Test
+//    void GetPetDTOByPetID() throws ParseException {
+//        Pet petEntity = buildPet();
+//
+//        String PET_ID = petEntity.getId();
+//
+//        when(repo.findPetById(anyString())).thenReturn(Mono.just(petEntity));
+//
+//        Mono<PetDTO> petDTOMono = petDTOService.getPetDTOByPetId(PET_ID);
+//
+//        StepVerifier.create(petDTOMono)
+//                .consumeNextWith(foundPet ->{
+//                    assertEquals(petEntity.getId(), foundPet.getId());
+//                    assertEquals(petEntity.getName(), foundPet.getName());
+//                    assertEquals(petEntity.getPetTypeId(), foundPet.getPetTypeId());
+//                    assertEquals(petEntity.getPhotoId(), foundPet.getPhotoId());
+//                    assertEquals(petEntity.getBirthDate(), foundPet.getBirthDate());
+//                    assertEquals(petEntity.getOwnerId(), foundPet.getOwnerId());
+//                })
+//                .verifyComplete();
+//
+//    }
 
     private Pet buildPet() {
         return Pet.builder()

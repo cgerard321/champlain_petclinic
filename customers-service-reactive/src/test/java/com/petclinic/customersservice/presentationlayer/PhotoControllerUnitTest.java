@@ -13,6 +13,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -24,7 +25,6 @@ class PhotoControllerUnitTest {
 
     private final String PHOTO_ID = photo.getId();
 
-    private final String PHOTO_ID_NOT_FOUND = "00";
 
     @Autowired
     private WebTestClient client;
@@ -32,26 +32,66 @@ class PhotoControllerUnitTest {
     @MockBean
     PhotoService photoService;
 
+    @Test
+    void insertPhoto() {
 
-//    @Test
-//    public void getPhotoByPhotoIdNotFound() {
-//
-//        when(photoService.getPhotoByPhotoId(anyString())).thenReturn(Mono.just(photo));
-//
-//        client.get()
-//                .uri("/photos/" + PHOTO_ID_NOT_FOUND)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .exchange()
-//                .expectStatus().isNotFound()
-//                .expectHeader()
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .expectBody()
-//                .jsonPath("$.name").isEqualTo(photo.getName())
-//                .jsonPath("$.type").isEqualTo(photo.getType())
-//                .jsonPath("$.photo").isEqualTo(photo.getPhoto());
-//
-//        Mockito.verify(photoService, times(1)).getPhotoByPhotoId(PHOTO_ID);
-//    }
+        Photo photo = buildPhoto();
+
+        Mono<Photo> photoMono = Mono.just(photo);
+
+        when(photoService.insertPhoto(photoMono)).thenReturn(photoMono);
+
+        client.post()
+                .uri("/photos")
+                .body(photoMono, Photo.class)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+
+        Mockito.verify(photoService, times(1)).insertPhoto(any(Mono.class));
+    }
+
+
+    @Test
+    public void getPhotoByPhotoId() {
+
+        when(photoService.getPhotoByPhotoId(anyString())).thenReturn(Mono.just(photo));
+
+        client.get()
+                .uri("/photos/" + PHOTO_ID)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.name").isEqualTo(photo.getName())
+                .jsonPath("$.type").isEqualTo(photo.getType())
+                .jsonPath("$.photo").isEqualTo(photo.getPhoto());
+
+        Mockito.verify(photoService, times(1)).getPhotoByPhotoId(PHOTO_ID);
+    }
+
+    @Test
+    void deletePhotoById() {
+
+        Photo photo = buildPhoto();
+
+        String PHOTO_ID = photo.getId();
+
+        when(photoService.getPhotoByPhotoId(anyString())).thenReturn(Mono.just(photo));
+
+        client
+                .delete()
+                .uri("/photos/" + PHOTO_ID)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody();
+
+        Mockito.verify(photoService, times(1)).deletePhotoByPhotoId(PHOTO_ID);
+    }
 
 
 
