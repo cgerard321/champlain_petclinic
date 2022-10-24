@@ -8,6 +8,11 @@ public interface OwnerService {
 
     Mono<Owner> insertOwner(Mono<Owner> ownerMono);
 
-    Flux<Owner> getAll();
-    Mono<Void> deleteOwner(int id);
+    Mono<Owner> getOwnerByOwnerId(String ownerId);
+
+    Mono<Void> deleteOwner(String ownerId);
+
+    Mono<Owner> updateOwner(String ownerId, Mono<Owner> ownerMono);
+
+    Flux<Owner> getAllOwners();
 }

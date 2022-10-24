@@ -8,10 +8,9 @@ import reactor.core.publisher.Mono;
 import java.util.Optional;
 
 @Repository
-public interface PetRepo extends ReactiveMongoRepository<Pet, Integer> {
+public interface PetRepo extends ReactiveMongoRepository<Pet, String> {
 
-    Flux<Pet> findAllPetByOwnerId(int ownerId);
-
-    Mono<Pet> findPetByOwnerId(int ownerId, int petId);
-    Mono<Void> deletePetById(int petId);
+    Flux<Pet> findAllPetByOwnerId(String ownerId);
+    Flux<Pet> findPetsByOwnerId(String ownerId);
+    Mono<Pet> findPetById(String Id);
 }

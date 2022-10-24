@@ -11,8 +11,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.test.StepVerifier;
 
-import static org.junit.jupiter.api.Assertions.*;
-
 @SpringBootTest
 @AutoConfigureWebTestClient
 class PetTypeControllerIntegrationTest {
@@ -48,6 +46,8 @@ class PetTypeControllerIntegrationTest {
 
 
     private PetType buildPetType() {
-        return PetType.builder().id(10).name("TestType").build();
+        return PetType.builder().id("10").name("TestType").build();
     }
 }
+
+
