@@ -109,7 +109,8 @@ public class AuthServiceUserControllerTests {
 
     @BeforeEach
     void setup() {
-        userRepo.deleteAllInBatch();
+        userRepo.deleteAll();
+        roleRepo.deleteAll();
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
     }

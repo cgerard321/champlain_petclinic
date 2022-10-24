@@ -80,7 +80,8 @@ public class AuthServiceUserServiceTests {
 
     @BeforeEach
     void setup() {
-        userRepo.deleteAllInBatch();
+        userRepo.deleteAll();
+        roleRepo.deleteAll();
         when(jwtService.encrypt(any()))
                 .thenReturn(VALID_TOKEN);
         when(mailService.sendMail(any()))
@@ -121,9 +122,10 @@ public class AuthServiceUserServiceTests {
     @DisplayName("change role")
     void test_user_role_change() {
 
-        final User u = new User(USER, PASS, EMAIL);
         final Role test = new Role(1,"tester");
         roleRepo.save(test);
+
+        final User u = new User(USER, PASS, EMAIL);
         Set<Role> roleSet = new HashSet<>();
         roleSet.add(test);
         u.setRoles(roleSet);
