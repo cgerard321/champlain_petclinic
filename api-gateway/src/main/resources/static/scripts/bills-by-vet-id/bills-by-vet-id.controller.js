@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('billsByVetId')
-.controller('BillsByVetIdController', ['$http', '$stateParams', 'scope',
+.controller('BillsByVetIdController', ['$http', '$stateParams', '$scope',
     function ($http, $stateParams, $scope) {
         var self = this;
         $http.get("api/gateway/bills/vet/" + ($stateParams.vetId)).then(function (resp) {
