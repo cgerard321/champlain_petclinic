@@ -109,6 +109,29 @@ class PhotoControllerIntegrationTest {
                 .expectStatus().isOk();
     }
 
+    @Test
+    void deletePhotoById() {
+
+        Photo photo = buildPhoto();
+
+        photoRepo.save(photo);
+
+        Publisher<Void> setup = photoRepo.deleteById(buildPhoto().getId());
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(0)
+                .verifyComplete();
+
+        client
+                .delete()
+                .uri("/photos/" + photo.getId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody();
+    }
+
     private Photo buildPhoto() {
         final String test = "Test photo";
         return Photo.builder()
