@@ -194,25 +194,25 @@ class ApiGatewayControllerTest {
     @Test
     void updateVet() {
         when(vetsServiceClient.updateVet(anyString(), any(Mono.class)))
-                .thenReturn(Mono.just(vetDTO));
+                .thenReturn(Mono.just(vetDTO2));
 
         client
                 .put()
                 .uri("/api/gateway/vets/" + VET_ID)
-                .body(Mono.just(vetDTO), VetDTO.class)
+                .body(Mono.just(vetDTO2), VetDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.vetId").isEqualTo(vetDTO.getVetId())
-                .jsonPath("$.resume").isEqualTo(vetDTO.getResume())
-                .jsonPath("$.lastName").isEqualTo(vetDTO.getLastName())
-                .jsonPath("$.firstName").isEqualTo(vetDTO.getFirstName())
-                .jsonPath("$.email").isEqualTo(vetDTO.getEmail())
+                .jsonPath("$.vetId").isEqualTo(vetDTO2.getVetId())
+                .jsonPath("$.resume").isEqualTo(vetDTO2.getResume())
+                .jsonPath("$.lastName").isEqualTo(vetDTO2.getLastName())
+                .jsonPath("$.firstName").isEqualTo(vetDTO2.getFirstName())
+                .jsonPath("$.email").isEqualTo(vetDTO2.getEmail())
                 .jsonPath("$.image").isNotEmpty()
-                .jsonPath("$.active").isEqualTo(vetDTO.isActive())
-                .jsonPath("$.workday").isEqualTo(vetDTO.getWorkday());
+                .jsonPath("$.active").isEqualTo(vetDTO2.isActive())
+                .jsonPath("$.workday").isEqualTo(vetDTO2.getWorkday());
 
         Mockito.verify(vetsServiceClient, times(1))
                 .updateVet(anyString(), any(Mono.class));
@@ -1005,7 +1005,41 @@ class ApiGatewayControllerTest {
         assertEquals(null, billServiceClient.getBilling(bill.getBillId()));
     }
 
+    @Test
+    void shouldDeleteBillByVetId(){
+        BillDetails bill = new BillDetails();
+        bill.setVetId("9");
 
+        bill.setDate(null);
+
+        bill.setAmount(600);
+
+        bill.setVisitType("Adoption");
+
+        when(billServiceClient.createBill(bill))
+                .thenReturn(Mono.just(bill));
+
+
+        client.post()
+                .uri("/api/gateway/bills")
+                .body(Mono.just(bill), BillDetails.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+
+        assertEquals(bill.getVetId(),"9");
+        client.delete()
+                .uri("/api/gateway/bills/vet/9")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody();
+
+        assertEquals(null, billServiceClient.getBilling(bill.getVetId()));
+    }
 
     @Test
     void shouldCreateAVisitWithOwnerInfo(){
@@ -1610,7 +1644,7 @@ class ApiGatewayControllerTest {
                 .workday("Monday")
                 .image("kjd".getBytes())
                 .specialties(new HashSet<>())
-                .isActive(false)
+                .active(false)
                 .build();
     }
     private VetDTO buildVetDTO2() {
@@ -1624,7 +1658,7 @@ class ApiGatewayControllerTest {
                 .resume("Just became a vet")
                 .workday("Monday")
                 .specialties(new HashSet<>())
-                .isActive(true)
+                .active(true)
                 .build();
     }
 }
