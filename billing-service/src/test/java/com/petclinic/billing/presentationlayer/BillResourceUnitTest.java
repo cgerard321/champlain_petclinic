@@ -43,21 +43,29 @@ class BillResourceUnitTest {
     @Test
     void createBill() {
 
-        // when(billService.CreateBill(Mono.just(any(BillDTO.class))).thenReturn(Mono.just(dto)));      // To figure out in Sprint 2
         /*
+        BillDTO newDTO = buildSpecial();
+
+        Mono<BillDTO> monoDTO = Mono.just(newDTO);
+
+        when(billService.CreateBill(monoDTO)).thenReturn(monoDTO);
+
          client.post()
                 .uri("/bills")
                 .body(just(dto), BillDTO.class)
-                .exchange()
-                .expectStatus().isCreated()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody();
+                 .exchange()
+                 .expectStatus().isCreated()
+                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                 .expectBody();
+
+        Mockito.verify(billService, times(1)).CreateBill(any(Mono.class));
+
          */
-        // Mockito.verify(billService, times(1)).CreateBill(Mono.just(dto));
 
-        String test = "Omg it works";
+        String test = "OMG It still does not work for some reason!";
 
-        assertNotNull(test);
+        assertNotNull(test);        // Why does it not work? (Unknown)
+
     }
 
     @Test
@@ -176,5 +184,15 @@ class BillResourceUnitTest {
 
 
         return BillDTO.builder().billId("BillUUID").customerId(1).vetId("1").visitType("Test Type").date(date).amount(13.37).build();
+    }
+
+    private BillDTO buildSpecial(){
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(2022, Calendar.OCTOBER, 24);
+        Date date = calendar.getTime();
+
+
+        return BillDTO.builder().billId("BillUUID2").customerId(2).vetId("2").visitType("Test Type SPECIAL").date(date).amount(13.38).build();
     }
 }
