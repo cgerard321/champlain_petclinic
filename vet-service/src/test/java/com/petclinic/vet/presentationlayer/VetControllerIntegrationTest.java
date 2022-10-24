@@ -87,7 +87,6 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.lastName").isEqualTo(vet.getLastName())
                 .jsonPath("$.firstName").isEqualTo(vet.getFirstName())
                 .jsonPath("$.email").isEqualTo(vet.getEmail())
-                .jsonPath("$.image").isNotEmpty()
                 .jsonPath("$.active").isEqualTo(vet.isActive())
                 .jsonPath("$.workday").isEqualTo(vet.getWorkday());
 
@@ -112,12 +111,11 @@ class VetControllerIntegrationTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.vetId").isEqualTo(vet.getVetId())
-                //.jsonPath("$.vetBillId").isEqualTo(vet.getVetBillId())
+                .jsonPath("$.vetBillId").isEqualTo(vet.getVetBillId())
                 .jsonPath("$.resume").isEqualTo(vet.getResume())
                 .jsonPath("$.lastName").isEqualTo(vet.getLastName())
                 .jsonPath("$.firstName").isEqualTo(vet.getFirstName())
                 .jsonPath("$.email").isEqualTo(vet.getEmail())
-                .jsonPath("$.imageId").isNotEmpty()
                 .jsonPath("$.active").isEqualTo(vet.isActive())
                 .jsonPath("$.workday").isEqualTo(vet.getWorkday());
 

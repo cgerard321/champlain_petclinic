@@ -113,7 +113,6 @@ class VetControllerUnitTest {
                 .jsonPath("$.lastName").isEqualTo(vet.getLastName())
                 .jsonPath("$.firstName").isEqualTo(vet.getFirstName())
                 .jsonPath("$.email").isEqualTo(vet.getEmail())
-                .jsonPath("$.image").isNotEmpty()
                 .jsonPath("$.active").isEqualTo(vet.isActive())
                 .jsonPath("$.workday").isEqualTo(vet.getWorkday());
 
