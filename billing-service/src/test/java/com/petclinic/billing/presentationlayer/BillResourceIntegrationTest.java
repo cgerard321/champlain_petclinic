@@ -217,7 +217,7 @@ class BillResourceIntegrationTest {
                 .uri("/bills/customer/" + billEntity.getCustomerId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(HttpStatus.METHOD_NOT_ALLOWED)
+                .expectStatus().isNoContent()//.isEqualTo(HttpStatus.METHOD_NOT_ALLOWED)
                 .expectBody();
     }
 

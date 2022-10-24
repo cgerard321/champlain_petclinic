@@ -169,7 +169,7 @@ class BillResourceUnitTest {
 
         Mockito.verify(billService, times(1)).DeleteBillsByVetId(VET_ID_OK);
     }
-/*
+
     @Test
     void deleteBillsByCustomerId() {
 
@@ -179,12 +179,12 @@ class BillResourceUnitTest {
                 .uri("/bills/customer/" + dto.getCustomerId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(HttpStatus.METHOD_NOT_ALLOWED)
+                .expectStatus().isNoContent()//.isEqualTo(HttpStatus.METHOD_NOT_ALLOWED)
                 .expectBody();
 
         Mockito.verify(billService, times(1)).DeleteBillsByCustomerId(CUSTOMER_ID_OK);
     }
-*/
+
     private BillDTO buildBillDTO(){
 
         Calendar calendar = Calendar.getInstance();
