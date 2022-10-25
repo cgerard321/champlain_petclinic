@@ -4,6 +4,6 @@ import reactor.core.publisher.Mono;
 
 public interface OwnerDTOService {
 
-    public Mono<OwnerDTO> getOwnerDTOByOwnerId(String ownerId);
+    Mono<OwnerDTO> getOwnerDTOByOwnerId(String ownerId);
 
 }

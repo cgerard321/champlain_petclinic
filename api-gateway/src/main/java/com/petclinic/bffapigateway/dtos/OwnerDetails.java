@@ -24,7 +24,7 @@ import static java.util.stream.Collectors.toList;
 @Data
 public class OwnerDetails {
 
-    private int id;
+    private String ownerId;
 
     private String firstName;
 
@@ -41,9 +41,9 @@ public class OwnerDetails {
     private final List<PetDetails> pets = new ArrayList<>();
 
     @JsonIgnore
-    public List<Integer> getPetIds() {
+    public List<String> getPetIds() {
         return pets.stream()
-                .map(PetDetails::getId)
+                .map(PetDetails::getPetId)
                 .collect(toList());
     }
 }

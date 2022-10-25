@@ -39,7 +39,7 @@ class OwnerRepoTest {
         Owner owner = buildOwner();
         repo.save(owner);
 
-        Publisher<Void> setup = repo.deleteById(owner.getId());
+        Publisher<Void> setup = repo.deleteByOwnerId(owner.getId());
 
         StepVerifier
                 .create(setup)

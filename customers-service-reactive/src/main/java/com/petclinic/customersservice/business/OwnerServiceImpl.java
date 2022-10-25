@@ -21,19 +21,19 @@ public class OwnerServiceImpl implements OwnerService {
 
     @Override
     public Mono<Owner> getOwnerByOwnerId(String Id) {
-        return repo.findOwnerById(Id);
+        return repo.findOwnerByOwnerId(Id);
     }
 
     @Override
     public Mono<Void> deleteOwner(String ownerId) {
-        return repo.deleteById(ownerId);
+        return repo.deleteByOwnerId(ownerId);
     }
 
     @Override
     public Mono<Owner> updateOwner(String ownerId, Mono<Owner> ownerMono) {
         return repo.findById(ownerId)
                 .flatMap(p -> ownerMono
-                        .doOnNext(e -> e.setId(p.getId()))
+                        .doOnNext(e -> e.setId(p.getOwnerId()))
                         .doOnNext(e -> e.setPhotoId(p.getPhotoId()))
                 )
                 .flatMap(repo::save);

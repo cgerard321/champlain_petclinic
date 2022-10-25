@@ -34,7 +34,7 @@ public class CustomersServiceClient {
     }
 
 
-    public Mono<OwnerDetails> getOwner(final int ownerId) {
+    public Mono<OwnerDetails> getOwner(final String ownerId) {
         return webClientBuilder.build().get()
                 .uri(customersServiceUrl + ownerId)
                 .retrieve()
@@ -48,7 +48,7 @@ public class CustomersServiceClient {
                 .bodyToFlux(OwnerDetails.class);
     }
 
-    public Mono<OwnerDetails> updateOwner(int ownerId, OwnerDetails od){
+    public Mono<OwnerDetails> updateOwner(String ownerId, OwnerDetails od){
 
             return webClientBuilder.build().put()
                     .uri(customersServiceUrl + ownerId)
@@ -83,14 +83,14 @@ public class CustomersServiceClient {
                 .bodyToFlux(PetType.class);
     }
 
-    public Mono<PetDetails> getPet(final int ownerId, final int petId){
+    public Mono<PetDetails> getPet(final String ownerId, final String petId){
         return webClientBuilder.build().get()
                 .uri(customersServiceUrl + ownerId + "/pets/" + petId)
                 .retrieve()
                 .bodyToMono(PetDetails.class);
     }
 
-    public Mono<PetDetails> createPet(PetDetails model, final int ownerId){
+    public Mono<PetDetails> createPet(PetDetails model, final String ownerId){
         return webClientBuilder.build().post()
                 .uri(customersServiceUrl +"{ownerId}/pets", ownerId)
                 .body(just(model), PetDetails.class)
@@ -98,7 +98,7 @@ public class CustomersServiceClient {
                 .retrieve().bodyToMono(PetDetails.class);
     }
 
-    public Mono<PetDetails> deletePet(final int ownerId, final int petId){
+    public Mono<PetDetails> deletePet(final String ownerId, final String petId){
         return webClientBuilder.build().delete()
                 .uri(customersServiceUrl + "{ownerId}/pets/{petId}", ownerId ,petId)
                 .retrieve()
@@ -106,21 +106,21 @@ public class CustomersServiceClient {
     }
 
 
-    public Mono<OwnerDetails> deleteOwner (final long ownerId) {
+    public Mono<OwnerDetails> deleteOwner (final String ownerId) {
         return webClientBuilder.build().delete()
                 .uri(customersServiceUrl + ownerId)
                 .retrieve()
                 .bodyToMono(OwnerDetails.class);
     }
 
-    public Mono<String> setOwnerPhoto(PhotoDetails file, int id){
+    public Mono<String> setOwnerPhoto(PhotoDetails file, String id){
         return webClientBuilder.build().post()
                 .uri(customersServiceUrl +"/photo/" + id)
                 .body(just(file), PhotoDetails.class)
                 .retrieve().bodyToMono(String.class);
     }
 
-    public Mono<PhotoDetails> getOwnerPhoto(int id){
+    public Mono<PhotoDetails> getOwnerPhoto(String id){
         return webClientBuilder.build().get()
                 .uri(customersServiceUrl +"/photo/" + id)
                 .retrieve()
@@ -136,21 +136,21 @@ public class CustomersServiceClient {
 
 
 
-    public Mono<String> setPetPhoto(int ownerId, PhotoDetails file, int id){
+    public Mono<String> setPetPhoto(String ownerId, PhotoDetails file, String id){
         return webClientBuilder.build().post()
                 .uri(customersServiceUrl + ownerId + "/pets/photo/" + id)
                 .body(just(file), PhotoDetails.class)
                 .retrieve().bodyToMono(String.class);
     }
 
-    public Mono<PhotoDetails> getPetPhoto(int ownerId, int id){
+    public Mono<PhotoDetails> getPetPhoto(String ownerId, String id){
         return webClientBuilder.build().get()
                 .uri(customersServiceUrl + ownerId + "/pets/photo/" + id)
                 .retrieve()
                 .bodyToMono(PhotoDetails.class);
     }
 
-    public Mono<Void> deletePetPhoto (int ownerId, int photoId) {
+    public Mono<Void> deletePetPhoto (String ownerId, int photoId) {
         return webClientBuilder.build().delete()
                 .uri(customersServiceUrl + ownerId + "/pets/photo/" + photoId)
                 .retrieve()

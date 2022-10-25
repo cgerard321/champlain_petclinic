@@ -18,7 +18,9 @@ import java.util.List;
 @Data
 public class PetDetails {
 
-    private int id;
+    private String petId;
+
+    private String onwerId;
 
     private String name;
 

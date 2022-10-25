@@ -13,6 +13,7 @@ public class Pet {
 
     @Id
     private String id;
+    private String petId;
     private String ownerId;
     private String name;
     private Date birthDate;

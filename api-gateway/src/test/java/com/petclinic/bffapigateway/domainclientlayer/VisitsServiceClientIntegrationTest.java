@@ -56,7 +56,7 @@ class VisitsServiceClientIntegrationTest {
                 .setBody("{\"items\":[{\"visitId\":\"773fa7b2-e04e-47b8-98e7-4adf7cfaaeee\"," +
                         "\"date\":\"2018-11-15\",\"description\":\"test visit\",\"petId\":1}]}"));
 
-        Mono<Visits> visits = visitsServiceClient.getVisitsForPets(Collections.singletonList(1));
+        Mono<Visits> visits = visitsServiceClient.getVisitsForPets(Collections.singletonList("1"));
 
         assertVisitDescriptionEquals(visits.block(), PET_ID,"test visit");
     }
@@ -69,7 +69,7 @@ class VisitsServiceClientIntegrationTest {
                         "\"date\":\"2018-11-15\",\"description\":\"test visit\",\"petId\":1," +
                         " \"practitionerId\":1,\"status\":false}"));
 
-        Flux<VisitDetails> visits = visitsServiceClient.getVisitsForPet(1);
+        Flux<VisitDetails> visits = visitsServiceClient.getVisitsForPet("1");
 
         assertVisitDescriptionEq(visits.blockFirst(), PET_ID,"test visit");
     }
@@ -78,7 +78,7 @@ class VisitsServiceClientIntegrationTest {
     void shouldDeleteVisitsForPet() throws JsonProcessingException {
         final VisitDetails visit = VisitDetails.builder()
                 .visitId(UUID.randomUUID().toString())
-                .petId(15)
+                .petId("15")
                 .practitionerId(2)
                 .date("2021-12-12")
                 .description("Cat is crazy")
@@ -100,7 +100,7 @@ class VisitsServiceClientIntegrationTest {
 
         final VisitDetails visit = VisitDetails.builder()
                 .visitId(UUID.randomUUID().toString())
-                .petId(21)
+                .petId("21")
                 .practitionerId(2)
                 .date("2021-12-7")
                 .description("Cat is sick")
@@ -113,7 +113,7 @@ class VisitsServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody(body));
 
-        final VisitDetails petVisit = visitsServiceClient.getVisitsForPet(21).blockFirst();
+        final VisitDetails petVisit = visitsServiceClient.getVisitsForPet("21").blockFirst();
 
         assertEquals(visit.getVisitId(), petVisit.getVisitId());
         assertEquals(visit.getPetId(), petVisit.getPetId());
@@ -129,7 +129,7 @@ class VisitsServiceClientIntegrationTest {
 
         final VisitDetails visit = VisitDetails.builder()
                 .visitId(UUID.randomUUID().toString())
-                .petId(21)
+                .petId("21")
                 .practitionerId(2)
                 .date("2021-12-7")
                 .description("Cat is sick")
@@ -138,7 +138,7 @@ class VisitsServiceClientIntegrationTest {
 
         final VisitDetails visit2 = VisitDetails.builder()
                 .visitId(UUID.randomUUID().toString())
-                .petId(201)
+                .petId("201")
                 .practitionerId(22)
                 .date("2021-12-7")
                 .description("Dog is sick")
@@ -156,7 +156,7 @@ class VisitsServiceClientIntegrationTest {
                 .setBody(body));
 
         visitsServiceClient.updateVisitForPet(visit2);
-        final VisitDetails petVisit = visitsServiceClient.getVisitsForPet(201).blockFirst();
+        final VisitDetails petVisit = visitsServiceClient.getVisitsForPet("201").blockFirst();
 
         assertEquals(visit2.getVisitId(), petVisit.getVisitId());
         assertEquals(visit2.getPetId(), petVisit.getPetId());
@@ -172,7 +172,7 @@ class VisitsServiceClientIntegrationTest {
     void shouldGetVisitsForPractitioner() throws JsonProcessingException {
         final VisitDetails visit = VisitDetails.builder()
                 .visitId(UUID.randomUUID().toString())
-                .petId(21)
+                .petId("21")
                 .practitionerId(2)
                 .date("2021-12-7")
                 .description("Cat is sick")
@@ -198,7 +198,7 @@ class VisitsServiceClientIntegrationTest {
     void shouldGetVisitsByPractitionerIdandMonth() throws JsonProcessingException {
         final VisitDetails visit = VisitDetails.builder()
                 .visitId(UUID.randomUUID().toString())
-                .petId(21)
+                .petId("21")
                 .practitionerId(2)
                 .date("2021-12-7")
                 .description("Cat is sick")
@@ -224,7 +224,7 @@ class VisitsServiceClientIntegrationTest {
     void shouldGetPreviousVisitsForPet() throws JsonProcessingException {
         final VisitDetails visit = VisitDetails.builder()
                 .visitId(UUID.randomUUID().toString())
-                .petId(21)
+                .petId("21")
                 .practitionerId(2)
                 .date("2021-12-7")
                 .description("Cat is sick")
@@ -236,7 +236,7 @@ class VisitsServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody(body));
 
-        final VisitDetails previousVisits = visitsServiceClient.getPreviousVisitsForPet(21).blockFirst();
+        final VisitDetails previousVisits = visitsServiceClient.getPreviousVisitsForPet("21").blockFirst();
 
         assertEquals(visit.getVisitId(), previousVisits.getVisitId());
         assertEquals(visit.getPetId(), previousVisits.getPetId());
@@ -250,7 +250,7 @@ class VisitsServiceClientIntegrationTest {
     void shouldGetScheduledVisitsForPet() throws JsonProcessingException {
         final VisitDetails visit = VisitDetails.builder()
                 .visitId(UUID.randomUUID().toString())
-                .petId(21)
+                .petId("21")
                 .practitionerId(2)
                 .date("2021-12-7")
                 .description("Cat is sick")
@@ -262,7 +262,7 @@ class VisitsServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody(body));
 
-        final VisitDetails scheduledVisits = visitsServiceClient.getScheduledVisitsForPet(21).blockFirst();
+        final VisitDetails scheduledVisits = visitsServiceClient.getScheduledVisitsForPet("21").blockFirst();
 
         assertEquals(visit.getVisitId(), scheduledVisits.getVisitId());
         assertEquals(visit.getPetId(), scheduledVisits.getPetId());

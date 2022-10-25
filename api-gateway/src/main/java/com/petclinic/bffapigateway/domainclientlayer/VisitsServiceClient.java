@@ -47,7 +47,7 @@ public class VisitsServiceClient {
         hostname = "http://" + visitsServiceHost + ":" + visitsServicePort;
     }
 
-    public Mono<Visits> getVisitsForPets(final List<Integer> petIds) {
+    public Mono<Visits> getVisitsForPets(final List<String> petIds) {
         return webClientBuilder.build()
                 .get()
                 .uri(hostname + "/pets/visits?petId={petId}", joinIds(petIds))
@@ -55,7 +55,7 @@ public class VisitsServiceClient {
                 .bodyToMono(Visits.class);
     }
 
-    public Flux<VisitDetails> getVisitsForPet(final int petId){
+    public Flux<VisitDetails> getVisitsForPet(final String petId){
         return webClientBuilder.build()
                 .get()
                 .uri(hostname + "/visits/{petId}", petId)
@@ -63,7 +63,7 @@ public class VisitsServiceClient {
                 .bodyToFlux(VisitDetails.class);
     }
 
-    public Flux<VisitDetails> getPreviousVisitsForPet(final int petId) {
+    public Flux<VisitDetails> getPreviousVisitsForPet(final String petId) {
         return webClientBuilder.build()
                 .get()
                 .uri(hostname + "/visits/previous/{petId}", petId)
@@ -87,7 +87,7 @@ public class VisitsServiceClient {
                 .bodyToFlux(VisitDetails.class);
     }
 
-    public Flux<VisitDetails> getScheduledVisitsForPet(final int petId) {
+    public Flux<VisitDetails> getScheduledVisitsForPet(final String petId) {
         return webClientBuilder.build()
                 .get()
                 .uri(hostname + "/visits/scheduled/{petId}", petId)
@@ -125,7 +125,7 @@ public class VisitsServiceClient {
                 .bodyToMono(Void.class);
     }
 
-    private String joinIds(List<Integer> petIds) {
+    private String joinIds(List<String> petIds) {
         return petIds.stream().map(Object::toString).collect(joining(","));
     }
 

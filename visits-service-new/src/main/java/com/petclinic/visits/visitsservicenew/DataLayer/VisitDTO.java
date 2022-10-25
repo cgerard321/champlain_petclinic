@@ -16,11 +16,11 @@ public class VisitDTO {
 
     private int day;
     private String description;
-    private int petId;
+    private String petId;
     private int practitionerId;
     private boolean status;
 
-    public VisitDTO(String visitId, int year, int month, int day, String description, int petId, int practitionerId, boolean status) {
+    public VisitDTO(String visitId, int year, int month, int day, String description, String petId, int practitionerId, boolean status) {
         this.visitId = visitId;
         this.year = year;
         this.month = month;

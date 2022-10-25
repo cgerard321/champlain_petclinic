@@ -25,7 +25,7 @@ public class OwnerDTOServiceImpl implements OwnerDTOService {
                             x.setPhoto(y);
                             return x;
                         }))
-                .flatMap(x -> petDTOService.getPetsByOwnerId(x.getId())
+                .flatMap(x -> petDTOService.getPetsByOwnerId(x.getOwnerId())
                         .collectList()
                         .map(y -> {
                             x.setPets(y);

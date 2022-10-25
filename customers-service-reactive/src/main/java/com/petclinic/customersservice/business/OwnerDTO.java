@@ -11,7 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 public class OwnerDTO {
 
-    private String id;
+    private String ownerId;
     private String firstName;
     private String lastName;
     private String address;

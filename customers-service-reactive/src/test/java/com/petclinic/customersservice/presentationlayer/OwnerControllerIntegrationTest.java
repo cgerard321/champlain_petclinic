@@ -29,7 +29,7 @@ class OwnerControllerIntegrationTest {
     @Test
     void deleteOwnerByOwnerId() {
         repo.save(ownerEntity);
-        Publisher<Void> setup = repo.deleteById(OWNER_ID);
+        Publisher<Void> setup = repo.deleteByOwnerId(OWNER_ID);
         StepVerifier.create(setup).expectNextCount(0).verifyComplete();
         client.delete().uri("/owner/" + OWNER_ID)
                 .accept(MediaType.APPLICATION_JSON)

@@ -46,7 +46,7 @@ class OwnerServiceImplTest {
      void getOwnerByOwnerId() {
         Owner ownerEntity = buildOwner();
         String OWNER_ID = ownerEntity.getId();
-        when(repo.findOwnerById(OWNER_ID)).thenReturn(Mono.just(ownerEntity));
+        when(repo.findOwnerByOwnerId(OWNER_ID)).thenReturn(Mono.just(ownerEntity));
         Mono<Owner> ownerMono = ownerService.getOwnerByOwnerId(OWNER_ID);
         StepVerifier
                 .create(ownerMono)
@@ -67,7 +67,7 @@ class OwnerServiceImplTest {
 
          Owner ownerEntity = buildOwner();
          String OWNER_ID = "Not found";
-         when(repo.findOwnerById(OWNER_ID)).thenReturn(Mono.just(ownerEntity));
+         when(repo.findOwnerByOwnerId(OWNER_ID)).thenReturn(Mono.just(ownerEntity));
          Mono<Owner> ownerMono = ownerService.getOwnerByOwnerId(OWNER_ID);
          StepVerifier
                  .create(ownerMono)
@@ -80,7 +80,7 @@ class OwnerServiceImplTest {
      void deleteOwnerByOwnerId() {
         Owner ownerEntity = buildOwner();
         String OWNER_ID = ownerEntity.getId();
-        when(repo.deleteById(anyString())).thenReturn(Mono.empty());
+        when(repo.deleteByOwnerId(anyString())).thenReturn(Mono.empty());
         Mono<Void> deleteObj = ownerService.deleteOwner(OWNER_ID);
         StepVerifier
                 .create(deleteObj)
@@ -92,7 +92,7 @@ class OwnerServiceImplTest {
 
         Owner owner = buildOwner();
         String OWNER_ID = "00";
-        when(repo.deleteById(anyString())).thenReturn(Mono.empty());
+        when(repo.deleteByOwnerId(anyString())).thenReturn(Mono.empty());
         Mono<Void> ownerDelete = ownerService.deleteOwner(OWNER_ID);
 
         StepVerifier

@@ -35,7 +35,7 @@ public class CustomerServiceClientIntegrationTest {
             .build();
 
     private final OwnerDetails TEST_OWNER = OwnerDetails.builder()
-            .id(1)
+            .ownerId("1")
             .firstName("John")
             .lastName("Smith")
             .address("456 Elm")
@@ -47,7 +47,7 @@ public class CustomerServiceClientIntegrationTest {
 
     private final PetDetails TEST_PET = PetDetails.builder()
             .name("Cat")
-            .id(1)
+            .petId("1")
             .name("Bonkers")
             .birthDate("2015-03-03")
             .type(type)
@@ -76,13 +76,13 @@ public class CustomerServiceClientIntegrationTest {
     @Test
     void createOwnerPhoto() throws JsonProcessingException {
 
-        customersServiceClient.setOwnerPhoto(TEST_PHOTO, 1);
+        customersServiceClient.setOwnerPhoto(TEST_PHOTO, "1");
         final String body = mapper.writeValueAsString(mapper.convertValue(TEST_PHOTO, PhotoDetails.class));
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setBody(body));
 
-        final PhotoDetails testPhoto = customersServiceClient.getOwnerPhoto(2).block();
+        final PhotoDetails testPhoto = customersServiceClient.getOwnerPhoto("2").block();
 
         assertEquals(TEST_PHOTO.getId(), testPhoto.getId());
         assertEquals(TEST_PHOTO.getName(), testPhoto.getName());
@@ -97,7 +97,7 @@ public class CustomerServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody(body));
 
-        final PhotoDetails testPhoto = customersServiceClient.getOwnerPhoto(2).block();
+        final PhotoDetails testPhoto = customersServiceClient.getOwnerPhoto("2").block();
 
         assertEquals(TEST_PHOTO.getId(), testPhoto.getId());
         assertEquals(TEST_PHOTO.getName(), testPhoto.getName());
@@ -108,13 +108,13 @@ public class CustomerServiceClientIntegrationTest {
     @Test
     void createPetPhoto() throws JsonProcessingException {
 
-        customersServiceClient.setPetPhoto(1, TEST_PHOTO,1);
+        customersServiceClient.setPetPhoto("1", TEST_PHOTO,"1");
         final String body = mapper.writeValueAsString(mapper.convertValue(TEST_PHOTO, PhotoDetails.class));
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setBody(body));
 
-        final PhotoDetails testPhoto = customersServiceClient.getPetPhoto(1, 2).block();
+        final PhotoDetails testPhoto = customersServiceClient.getPetPhoto("1", "2").block();
 
         assertEquals(TEST_PHOTO.getId(), testPhoto.getId());
         assertEquals(TEST_PHOTO.getName(), testPhoto.getName());
@@ -130,7 +130,7 @@ public class CustomerServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody(body));
 
-        final PhotoDetails testPhoto = customersServiceClient.getPetPhoto(1,1).block();
+        final PhotoDetails testPhoto = customersServiceClient.getPetPhoto("1", "1").block();
 
         assertEquals(TEST_PHOTO.getId(), testPhoto.getId());
         assertEquals(TEST_PHOTO.getName(), testPhoto.getName());
@@ -158,7 +158,7 @@ public class CustomerServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody(body));
 
-        final Mono<Void> empty = customersServiceClient.deletePetPhoto(1,TEST_PHOTO.getId());
+        final Mono<Void> empty = customersServiceClient.deletePetPhoto("1", TEST_PHOTO.getId());
 
         assertEquals(empty.block(), null);
     }
