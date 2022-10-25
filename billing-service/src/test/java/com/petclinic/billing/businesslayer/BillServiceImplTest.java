@@ -62,17 +62,17 @@ public class BillServiceImplTest {
 
     @Test
     public void test_GetAllBills() {
-       Bill billEntity = buildBill();
+        Bill billEntity = buildBill();
 
-       when(repo.findAll()).thenReturn(Flux.just(billEntity));
+        when(repo.findAll()).thenReturn(Flux.just(billEntity));
 
-       Flux<BillDTO> billDTOFlux = billService.GetAllBills();
+        Flux<BillDTO> billDTOFlux = billService.GetAllBills();
 
-       StepVerifier.create(billDTOFlux)
-               .consumeNextWith(foundBill -> {
-                   assertNotNull(foundBill);
-               })
-               .verifyComplete();
+        StepVerifier.create(billDTOFlux)
+                .consumeNextWith(foundBill -> {
+                    assertNotNull(foundBill);
+                })
+                .verifyComplete();
     }
 
 

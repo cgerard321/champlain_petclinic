@@ -22,7 +22,7 @@ class OwnerDTOControllerUnitTest {
 
 
     private OwnerDTO dto = buildOwnerDTO();
-    private final String OWNER_ID = dto.getId();
+    private final String OWNER_ID = dto.getOwnerId();
 
     @Autowired
     private WebTestClient client;
@@ -54,13 +54,13 @@ class OwnerDTOControllerUnitTest {
 
     private OwnerDTO buildOwnerDTO() {
         return OwnerDTO.builder()
-                .id("1")
+                .ownerId("1")
                 .firstName("FirstName")
                 .lastName("LastName")
                 .address("Test address")
                 .city("test city")
                 .telephone("telephone")
-                .photo(Photo.builder().id("1").photo("1").name("test").type("test").build())
+                .photo(Photo.builder().photoId("1").photo("1").name("test").type("test").build())
                 .build();
     }
 }

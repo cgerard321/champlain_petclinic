@@ -41,7 +41,7 @@ public class CustomerServiceClientIntegrationTest {
             .address("456 Elm")
             .city("Montreal")
             .telephone("5553334444")
-            .imageId(1)
+            .photoId("1")
             .build();
     PetType type = new PetType();
 

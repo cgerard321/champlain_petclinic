@@ -12,7 +12,9 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-@SpringBootTest
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+
+@SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port: 27018"})
 @AutoConfigureWebTestClient
 class OwnerControllerIntegrationTest {
 
@@ -24,14 +26,14 @@ class OwnerControllerIntegrationTest {
 
     Owner ownerEntity = buildOwner();
 
-    String OWNER_ID = ownerEntity.getId();
+    String OWNER_ID = ownerEntity.getOwnerId();
 
     @Test
     void deleteOwnerByOwnerId() {
         repo.save(ownerEntity);
         Publisher<Void> setup = repo.deleteByOwnerId(OWNER_ID);
         StepVerifier.create(setup).expectNextCount(0).verifyComplete();
-        client.delete().uri("/owner/" + OWNER_ID)
+        client.delete().uri("/owners/" + OWNER_ID)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange().expectStatus().isOk().expectBody();
 
@@ -41,12 +43,12 @@ class OwnerControllerIntegrationTest {
     void getAllOwners() {
         Publisher<Owner> setup = repo.deleteAll().thenMany(repo.save(ownerEntity));
         StepVerifier.create(setup).expectNextCount(1).verifyComplete();
-        client.get().uri("/owner/")
+        client.get().uri("/owners/")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange().expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$[0].id").isEqualTo(ownerEntity.getId())
+                .jsonPath("$[0].ownerId").isEqualTo(ownerEntity.getOwnerId())
                 .jsonPath("$[0].firstName").isEqualTo(ownerEntity.getFirstName())
                 .jsonPath("$[0].lastName").isEqualTo(ownerEntity.getLastName())
                 .jsonPath("$[0].address").isEqualTo(ownerEntity.getAddress())
@@ -59,12 +61,12 @@ class OwnerControllerIntegrationTest {
     void getOwnerByOwnerId() {
         Publisher<Owner> setup = repo.deleteAll().thenMany(repo.save(ownerEntity));
         StepVerifier.create(setup).expectNextCount(1).verifyComplete();
-        client.get().uri("/owner/" + OWNER_ID)
+        client.get().uri("/owners/" + OWNER_ID)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange().expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.id").isEqualTo(ownerEntity.getId())
+                .jsonPath("$.ownerId").isEqualTo(ownerEntity.getOwnerId())
                 .jsonPath("$.firstName").isEqualTo(ownerEntity.getFirstName())
                 .jsonPath("$.lastName").isEqualTo(ownerEntity.getLastName())
                 .jsonPath("$.address").isEqualTo(ownerEntity.getAddress())
@@ -77,13 +79,13 @@ class OwnerControllerIntegrationTest {
     void updateOwnerByOwnerId() {
         Publisher<Owner> setup = repo.deleteAll().thenMany(repo.save(ownerEntity));
         StepVerifier.create(setup).expectNextCount(1).verifyComplete();
-        client.put().uri("/owner/" + OWNER_ID)
+        client.put().uri("/owners/" + OWNER_ID)
                 .body(Mono.just(ownerEntity), Owner.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange().expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.id").isEqualTo(ownerEntity.getId())
+                .jsonPath("$.ownerId").isEqualTo(ownerEntity.getOwnerId())
                 .jsonPath("$.firstName").isEqualTo(ownerEntity.getFirstName())
                 .jsonPath("$.lastName").isEqualTo(ownerEntity.getLastName())
                 .jsonPath("$.address").isEqualTo(ownerEntity.getAddress())
@@ -95,15 +97,16 @@ class OwnerControllerIntegrationTest {
 
     @Test
     void insertOwner() {
-        Publisher<Void> setup = repo.deleteAll();
-        StepVerifier.create(setup).expectNextCount(0).verifyComplete();
-        client.post().uri("/owner")
+        Owner ownerEntity = buildOwner();
+        Publisher<Owner> setup = repo.deleteAll().thenMany(repo.save(ownerEntity));
+        StepVerifier.create(setup).expectNextCount(1).verifyComplete();
+        client.post().uri("/owners")
                 .body(Mono.just(ownerEntity), Owner.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange().expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.id").isEqualTo(ownerEntity.getId())
+                .jsonPath("$.ownerId").isEqualTo(ownerEntity.getOwnerId())
                 .jsonPath("$.firstName").isEqualTo(ownerEntity.getFirstName())
                 .jsonPath("$.lastName").isEqualTo(ownerEntity.getLastName())
                 .jsonPath("$.address").isEqualTo(ownerEntity.getAddress())
@@ -116,7 +119,7 @@ class OwnerControllerIntegrationTest {
 
     private Owner buildOwner() {
         return Owner.builder()
-                .id("9")
+                .ownerId("123")
                 .firstName("FirstName")
                 .lastName("LastName")
                 .address("Test address")

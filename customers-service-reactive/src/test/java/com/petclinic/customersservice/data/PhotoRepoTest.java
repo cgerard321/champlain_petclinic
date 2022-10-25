@@ -22,7 +22,7 @@ class PhotoRepoTest {
         StepVerifier
                 .create(setup)
                 .consumeNextWith(foundPhoto ->{
-                    assertEquals(photo.getId(), foundPhoto.getId());
+                    assertEquals(photo.getPhotoId(), foundPhoto.getPhotoId());
                     assertEquals(photo.getName(), foundPhoto.getName());
                     assertEquals(photo.getType(), foundPhoto.getType());
                     assertEquals(photo.getPhoto(), foundPhoto.getPhoto());
@@ -36,7 +36,7 @@ class PhotoRepoTest {
         Photo photo = buildPhoto();
 
         Publisher<Photo> setup = repo.deleteAll().thenMany(repo.save(photo));
-        Publisher<Photo> find = repo.findPhotoById(photo.getId());
+        Publisher<Photo> find = repo.findPhotoByPhotoId(photo.getPhotoId());
 
         StepVerifier
                 .create(setup)
@@ -51,7 +51,7 @@ class PhotoRepoTest {
 
     private Photo buildPhoto() {
         return Photo.builder()
-                .id("5")
+                .photoId("5")
                 .name("Test")
                 .type("test2")
                 .photo("photo")

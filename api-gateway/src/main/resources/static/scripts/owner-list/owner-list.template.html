@@ -16,7 +16,7 @@
         <th class="hidden-xs">Pets</th>
     </tr>
     </thead>
-    <tr id="ownerTd" ng-repeat="owner in $ctrl.owners | filter:$ctrl.query track by owner.id">
+    <tr id="ownerTd" ng-repeat="owner in $ctrl.owners | filter:$ctrl.query track by owner.ownerId">
         <td>
             <a class="newBtn btn btn-default" ui-sref="ownerDetails({ ownerId: owner.id })">
                 {{owner.firstName}} {{owner.lastName}}
@@ -25,6 +25,6 @@
         <td class="hidden-sm hidden-xs">{{owner.address}}</td>
         <td>{{owner.city}}</td>
         <td>{{owner.telephone}}</td>
-        <td class="hidden-xs"><span ng-repeat="pet in owner.pets track by pet.id">{{pet.name + ' '}}</span></td>
+        <td class="hidden-xs"><span ng-repeat="pet in owner.pets track by pet.petId">{{pet.name + ' '}}</span></td>
     </tr>
 </table>

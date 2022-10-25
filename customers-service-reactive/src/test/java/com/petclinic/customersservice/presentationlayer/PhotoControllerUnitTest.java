@@ -21,9 +21,9 @@ import static org.mockito.Mockito.when;
 @WebFluxTest(controllers = PhotoController.class)
 class PhotoControllerUnitTest {
 
-    private Photo photo =buildPhoto();
+    private Photo photo = buildPhoto();
 
-    private final String PHOTO_ID = photo.getId();
+    private final String PHOTO_ID = photo.getPhotoId();
 
 
     @Autowired
@@ -74,11 +74,11 @@ class PhotoControllerUnitTest {
     }
 
     @Test
-    void deletePhotoById() {
+    void deletePhotoByPhotoId() {
 
         Photo photo = buildPhoto();
 
-        String PHOTO_ID = photo.getId();
+        String PHOTO_ID = photo.getPhotoId();
 
         when(photoService.getPhotoByPhotoId(anyString())).thenReturn(Mono.just(photo));
 
@@ -99,7 +99,7 @@ class PhotoControllerUnitTest {
     private Photo buildPhoto() {
         final String test = "Test photo";
         return Photo.builder()
-                .id("3")
+                .photoId("3")
                 .name("test photo")
                 .type("jpeg")
                 .photo(test)

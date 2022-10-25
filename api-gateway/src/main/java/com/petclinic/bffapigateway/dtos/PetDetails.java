@@ -20,7 +20,7 @@ public class PetDetails {
 
     private String petId;
 
-    private String onwerId;
+    private String ownerId;
 
     private String name;
 

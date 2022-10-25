@@ -20,9 +20,10 @@ import reactor.test.StepVerifier;
 
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port: 27017"})
 @AutoConfigureWebTestClient
 public class OwnerDTOControllerIntegrationTest {
 
@@ -65,7 +66,7 @@ public class OwnerDTOControllerIntegrationTest {
 
     private Owner buildOwner() {
         return Owner.builder()
-                .id("1")
+                .ownerId("1")
                 .firstName("FirstName")
                 .lastName("LastName")
                 .address("Test address")
@@ -78,7 +79,7 @@ public class OwnerDTOControllerIntegrationTest {
 
         private OwnerDTO buildOwnerDTO() {
         return OwnerDTO.builder()
-                .id("1")
+                .ownerId("1")
                 .firstName("FirstName")
                 .lastName("LastName")
                 .address("Test address")

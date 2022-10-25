@@ -40,7 +40,7 @@ class PetDTOControllerIntegrationTest {
 
     private PetDTO petDTObuilder() throws ParseException {
         return PetDTO.builder()
-                .id("1")
+                .petId("1")
                 .name("felix")
                 .petTypeId("1")
                 .birthDate(new SimpleDateFormat( "yyyyMMdd" ).parse( "2000-11-30"))

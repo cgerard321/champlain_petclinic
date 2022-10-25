@@ -9,6 +9,8 @@ import com.petclinic.customersservice.data.Pet;
 import lombok.Generated;
 import org.springframework.beans.BeanUtils;
 
+import java.util.UUID;
+
 public class EntityDTOUtil {
 
     @Generated
@@ -37,5 +39,7 @@ public class EntityDTOUtil {
         BeanUtils.copyProperties(petDTO, pet);
         return pet;
     }
-
+    public static String generateUUIDString(){
+        return UUID.randomUUID().toString();
+    }
 }

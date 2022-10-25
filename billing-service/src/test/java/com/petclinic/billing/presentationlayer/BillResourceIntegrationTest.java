@@ -2,13 +2,11 @@ package com.petclinic.billing.presentationlayer;
 
 import com.petclinic.billing.datalayer.Bill;
 import com.petclinic.billing.datalayer.BillRepository;
-import com.petclinic.billing.http.HttpErrorInfo;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.test.StepVerifier;
@@ -17,7 +15,6 @@ import java.util.Calendar;
 import java.util.Date;
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port: 27017"})
 @AutoConfigureWebTestClient
@@ -269,7 +266,7 @@ class BillResourceIntegrationTest {
                 .uri("/bills/customer/" + billEntity.getCustomerId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isNoContent()//.isEqualTo(HttpStatus.METHOD_NOT_ALLOWED)
+                .expectStatus().isNoContent()
                 .expectBody();
     }
 

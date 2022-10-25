@@ -5,7 +5,7 @@
             <div class="col-sm-6 form-group">
                 <label class="control-label" for="owner">Owner</label>
                 <select class="form-control" name="owner" id="owner" ng-model="$ctrl.bill.customerId" required title="Please select an owner.">
-                    <option ng-repeat="owner in $ctrl.owners | filter:$ctrl.query track by owner.id" value="{{owner.id}}">{{owner.firstName}} {{owner.lastName}}</option>
+                    <option ng-repeat="owner in $ctrl.owners | filter:$ctrl.query track by owner.ownerId" value="{{owner.ownerId}}">{{owner.firstName}} {{owner.lastName}}</option>
                 </select>
             </div>
             <div class="col-sm-6 form-group">

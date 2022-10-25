@@ -24,7 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class VisitsServiceClientIntegrationTest {
 
-    private static final Integer PET_ID = 1;
+    private static final String PET_ID = "1";
 
     private VisitsServiceClient visitsServiceClient;
 
@@ -273,12 +273,12 @@ class VisitsServiceClientIntegrationTest {
       
     }
 
-    private void assertVisitDescriptionEq(VisitDetails visits, int petId, String description) {
+    private void assertVisitDescriptionEq(VisitDetails visits, String petId, String description) {
         assertEquals("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee", visits.getVisitId());
         assertEquals(description, visits.getDescription());
     }
 
-    private void assertVisitDescriptionEquals(Visits visits, int petId, String description) {
+    private void assertVisitDescriptionEquals(Visits visits, String petId, String description) {
         assertEquals(1, visits.getItems().size());
         assertNotNull(visits.getItems().get(0));
         assertEquals(petId, visits.getItems().get(0).getPetId());

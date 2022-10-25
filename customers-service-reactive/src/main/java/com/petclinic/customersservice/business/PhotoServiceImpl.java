@@ -4,7 +4,6 @@ import com.petclinic.customersservice.data.Photo;
 import com.petclinic.customersservice.data.PhotoRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -20,7 +19,7 @@ public class PhotoServiceImpl implements PhotoService {
     }
     @Override
     public Mono<Photo> getPhotoByPhotoId(String photoId) {
-        return photoRepo.findPhotoById(photoId);
+        return photoRepo.findPhotoByPhotoId(photoId);
     }
 
     @Override

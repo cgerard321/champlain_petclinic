@@ -12,7 +12,7 @@ public interface OwnerService {
 
     Mono<Void> deleteOwner(String ownerId);
 
-    Mono<Owner> updateOwner(String ownerId, Mono<Owner> ownerMono);
+    Mono<OwnerDTO> updateOwner(String ownerId, Mono<OwnerDTO> ownerDTOMono);
 
-    Flux<Owner> getAllOwners();
+    Flux<OwnerDTO> getAllOwners();
 }

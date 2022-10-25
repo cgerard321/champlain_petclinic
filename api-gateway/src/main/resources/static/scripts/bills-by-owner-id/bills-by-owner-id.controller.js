@@ -3,6 +3,7 @@
 angular.module('billsByOwnerId')
 .controller('BillsByOwnerIdController', ['$http', '$stateParams',
     function ($http, $stateParams) {
+    console.log("in billsByOwnerId, the customerId is: "+$stateParams.customerId);
         var self = this;
         $http.get("api/gateway/bills/customer/" + ($stateParams.customerId)).then(function (resp) {
             self.billsByOwnerId = resp.data;

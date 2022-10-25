@@ -11,8 +11,11 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/photos")
 public class PhotoController {
 
-    @Autowired
-    private PhotoService photoService;
+    private final PhotoService photoService;
+
+    PhotoController(PhotoService photoService) {
+        this.photoService = photoService;
+    }
 
     @PostMapping
     public Mono<Photo> insertPhoto(@RequestBody Mono<Photo> photoMono) {

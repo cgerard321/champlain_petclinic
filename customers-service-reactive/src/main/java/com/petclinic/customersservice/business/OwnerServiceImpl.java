@@ -2,6 +2,7 @@ package com.petclinic.customersservice.business;
 
 import com.petclinic.customersservice.data.Owner;
 import com.petclinic.customersservice.data.OwnerRepo;
+import com.petclinic.customersservice.util.EntityDTOUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -16,6 +17,11 @@ public class OwnerServiceImpl implements OwnerService {
     @Override
     public Mono<Owner> insertOwner(Mono<Owner> ownerMono) {
         return ownerMono
+                .doOnNext(event -> {
+                    if (event.getOwnerId() == null) {
+                        event.setOwnerId(EntityDTOUtil.generateUUIDString());
+                    }
+                })
                 .flatMap(repo::insert);
     }
 
@@ -30,18 +36,21 @@ public class OwnerServiceImpl implements OwnerService {
     }
 
     @Override
-    public Mono<Owner> updateOwner(String ownerId, Mono<Owner> ownerMono) {
+    public Mono<OwnerDTO> updateOwner(String ownerId, Mono<OwnerDTO> ownerDTOMono) {
         return repo.findById(ownerId)
-                .flatMap(p -> ownerMono
-                        .doOnNext(e -> e.setId(p.getOwnerId()))
+                .flatMap(p -> ownerDTOMono
+                        .map(EntityDTOUtil::toOwner)
+                        .doOnNext(e -> e.setId(p.getId()))
+                        .doOnNext(e -> e.setOwnerId(p.getOwnerId()))
                         .doOnNext(e -> e.setPhotoId(p.getPhotoId()))
                 )
-                .flatMap(repo::save);
+                .flatMap(repo::save)
+                .map(EntityDTOUtil::toOwnerDTO);
     }
 
     @Override
-    public Flux<Owner> getAllOwners() {
-        return repo.findAll();
+    public Flux<OwnerDTO> getAllOwners() {
+        return repo.findAll().map(EntityDTOUtil::toOwnerDTO);
     }
 
 }

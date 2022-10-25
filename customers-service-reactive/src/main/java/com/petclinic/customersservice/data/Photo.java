@@ -11,7 +11,7 @@ public class Photo {
 
     @Id
     private String id;
-
+    private String photoId;
     private String name;
     private String type;
     private String photo;

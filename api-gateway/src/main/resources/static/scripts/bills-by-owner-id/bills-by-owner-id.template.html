@@ -2,7 +2,7 @@
 <h2 class="titleOwner">Bill History for customer {{$ctrl.owner.firstName}}, {{$ctrl.owner.lastName}}</h2>
 
 <a class="newBtn btn btn-primary" href="http://localhost:8080/#!/bills">View all Bills</a>
-<a class="btn btn-danger float-end" href="javascript:void(0)" ng-click="deleteBillsByOwnerId($ctrl.owner.id)">DELETE ALL BILLS FOR {{$ctrl.owner.firstName}}, {{$ctrl.owner.lastName}}</a>
+<a class="btn btn-danger float-end" href="javascript:void(0)" ng-click="deleteBillsByOwnerId($ctrl.owner.ownerId)">DELETE ALL BILLS FOR {{$ctrl.owner.firstName}}, {{$ctrl.owner.lastName}}</a>
 
 <table class="table table-striped">
     <thead>

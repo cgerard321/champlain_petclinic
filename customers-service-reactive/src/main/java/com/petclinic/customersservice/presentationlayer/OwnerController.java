@@ -1,5 +1,6 @@
 package com.petclinic.customersservice.presentationlayer;
 
+import com.petclinic.customersservice.business.OwnerDTO;
 import com.petclinic.customersservice.business.OwnerService;
 import com.petclinic.customersservice.data.Owner;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +9,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
-@RequestMapping("/owner")
+@RequestMapping("/owners")
 
 public class OwnerController {
 
@@ -32,12 +33,12 @@ public class OwnerController {
     }
 
     @PutMapping("/{ownerId}")
-    public Mono<Owner> updateOwnerByOwnerId(@PathVariable String ownerId, @RequestBody Mono<Owner> ownerMono) {
-        return ownerService.updateOwner(ownerId, ownerMono);
+    public Mono<OwnerDTO> updateOwnerByOwnerId(@PathVariable String ownerId, @RequestBody Mono<OwnerDTO> ownerDTOMono) {
+        return ownerService.updateOwner(ownerId, ownerDTOMono);
     }
 
     @GetMapping()
-    public Flux<Owner> getAllOwners() {
+    public Flux<OwnerDTO> getAllOwners() {
         return ownerService.getAllOwners();
     }
 

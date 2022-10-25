@@ -29,7 +29,7 @@
 
     <tr>
         <td>
-            <a class="newBtn btn-default btn" style="background-color: royalblue; color: white" ui-sref="ownerEdit({ownerId: $ctrl.owner.id, method: 'edit'})">Edit Owner</a>
+            <a class="newBtn btn-default btn" style="background-color: royalblue; color: white" ui-sref="ownerEdit({ownerId: $ctrl.owner.ownerId, method: 'edit'})">Edit Owner</a>
             <a class="newBtn btn-default btn btn-danger" style="background-color: #dc3545;" ng-click = "$ctrl.deleteOwner()">Delete Owner</a>
         </td>
 
@@ -45,8 +45,8 @@
 
 
 <table class="table table-striped">
-    <tr ng-repeat="pet in $ctrl.owner.pets track by pet.id">
-        <td valign="top" ng-init="$ctrl.init(pet.id)">
+    <tr ng-repeat="pet in $ctrl.owner.pets track by pet.petId">
+        <td valign="top" ng-init="$ctrl.init(pet.petId)">
             <div class="parent">
                 <img alt="Profile picture preview" src="data:image/png;base64, {{$ctrl.petPhoto.photo}}" width="150" height="150" class="image1">
             </div>
@@ -62,17 +62,17 @@
                 <dd>{{pet.birthDate | date:'yyyy MMM dd'}}</dd>
                 <dt>Type</dt>
                 <dd>{{pet.type.name}}</dd>
-                <a class="newBtn btn-default btn btn-success" style="background-color: #198754;" ui-sref="addPet({ownerId: $ctrl.owner.id, method: 'new-pet'})">Add Pet</a>
-                <a class="newBtn btn-default btn btn-danger" style="background-color: #dc3545;" ui-sref="deletePet({ownerId: $ctrl.owner.id, petId: pet.id, method: 'delete'})">Delete Pet</a>
+                <a class="newBtn btn-default btn btn-success" style="background-color: #198754;" ui-sref="addPet({ownerId: $ctrl.owner.ownerId, method: 'new-pet'})">Add Pet</a>
+                <a class="newBtn btn-default btn btn-danger" style="background-color: #dc3545;" ui-sref="deletePet({ownerId: $ctrl.owner.ownerId, petId: pet.petId, method: 'delete'})">Delete Pet</a>
             </dl>
         </td>
         <td valign="top">
             <table class="noColor table-condensed">
                 <thead>
-                <tr>
-                    <th>Visit Date</th>
-                    <th>Description</th>
-                </tr>
+                    <tr>
+                        <th>Visit Date</th>
+                        <th>Description</th>
+                    </tr>
                 </thead>
                 <tr ng-repeat="visit in pet.visits track by visit.visitId">
                     <td>{{visit.date | date:'yyyy MMM dd'}}</td>
@@ -90,9 +90,8 @@
             </table>
         </td>
 
-
     </tr>
-    <td><a href="http://localhost:8080/#!/bills/customerId/{{$ctrl.owner.id}}">Get Bills</a></td>
+    <td><a href="http://localhost:8080/#!/bills/customerId/{{$ctrl.owner.ownerId}}">Get Bills</a></td>
 </table>
 
 

@@ -3,18 +3,14 @@ package com.petclinic.customersservice.business;
 import com.petclinic.customersservice.data.Photo;
 import com.petclinic.customersservice.data.PhotoRepo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.*;
-
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @SpringBootTest
 class PhotoServiceImplTest {
@@ -46,7 +42,7 @@ class PhotoServiceImplTest {
         Photo photoEntity = buildPhoto();
         String PHOTO_ID = photoEntity.getId();
 
-        when(repo.findPhotoById(any(String.class))).thenReturn(Mono.just(photoEntity));
+        when(repo.findPhotoByPhotoId(any(String.class))).thenReturn(Mono.just(photoEntity));
 
         Mono<Photo> returnedPhoto = photoService.getPhotoByPhotoId(PHOTO_ID);
 
@@ -66,7 +62,7 @@ class PhotoServiceImplTest {
 
         String PHOTO_ID_NOT_FOUND = "00";
 
-        when(repo.findPhotoById(any(String.class))).thenReturn(Mono.just(photo));
+        when(repo.findPhotoByPhotoId(any(String.class))).thenReturn(Mono.just(photo));
 
         Mono<Photo> photoMono = photoService.getPhotoByPhotoId(PHOTO_ID_NOT_FOUND);
 

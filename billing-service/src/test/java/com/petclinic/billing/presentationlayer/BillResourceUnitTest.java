@@ -39,8 +39,9 @@ class BillResourceUnitTest {
     @MockBean
     BillService billService;
 
+    // todo add a update method
 
-
+    // todo make this test work properly
     @Test
     void createBill() {
         /*
