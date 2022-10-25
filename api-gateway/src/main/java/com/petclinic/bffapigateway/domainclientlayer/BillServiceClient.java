@@ -1,8 +1,6 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.BillDetails;
-import com.petclinic.bffapigateway.dtos.OwnerDetails;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -35,9 +33,9 @@ public class BillServiceClient {
                 .retrieve()
                 .bodyToMono(BillDetails.class);
     }
-    public Flux<BillDetails> getBillsByOwnerId(final int customerId) {
+    public Flux<BillDetails> getBillsByOwnerId(final String ownerId) {
         return webClientBuilder.build().get()
-                .uri(billServiceUrl + "/customer/{customerId}", customerId)
+                .uri(billServiceUrl + "/owner/{ownerId}", ownerId)
                 .retrieve()
                 .bodyToFlux(BillDetails.class);
     }
@@ -78,10 +76,10 @@ public class BillServiceClient {
                 .bodyToFlux(Void.class);
     }
 
-    public Flux<Void> deleteBillsByCustomerId(final int customerId) {
+    public Flux<Void> deleteBillsByOwnerId(final String ownerId) {
         return webClientBuilder.build()
                 .delete()
-                .uri(billServiceUrl + "/customer/{customerId}", customerId)
+                .uri(billServiceUrl + "/owner/{ownerId}", ownerId)
                 .retrieve()
                 .bodyToFlux(Void.class);
     }

@@ -4,9 +4,6 @@ import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
-import org.springframework.transaction.annotation.Transactional;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.Calendar;
@@ -23,7 +20,6 @@ public class BillServicePersistenceTests {
 
     @Test
     void shouldSaveOneBill(){
-
         Publisher<Bill> setup = repo.deleteAll().thenMany(repo.save(buildBill()));
 
         StepVerifier
@@ -34,7 +30,6 @@ public class BillServicePersistenceTests {
 
     @Test
     void shouldFindBillByBillUUID(){
-
         Bill bill = buildBill();
 
         Publisher<Bill> setup = repo.deleteAll().thenMany(repo.save(buildBill()));
@@ -54,12 +49,11 @@ public class BillServicePersistenceTests {
 
 
     @Test
-    void shouldFindBillByCustomerId(){
-
+    void shouldFindBillByOwnerId(){
         Bill bill = buildBill();
 
         Publisher<Bill> setup = repo.deleteAll().thenMany(repo.save(buildBill()));
-        Publisher<Bill> find = repo.findByCustomerId(bill.getCustomerId());
+        Publisher<Bill> find = repo.findByOwnerId(bill.getOwnerId());
 
         StepVerifier
                 .create(setup)
@@ -70,11 +64,9 @@ public class BillServicePersistenceTests {
                 .create(find)
                 .expectNextCount(1)
                 .verifyComplete();
-
     }
     @Test
     void shouldFindBillByVetId(){
-
         Bill bill = buildBill();
 
         Publisher<Bill> setup = repo.deleteAll().thenMany(repo.save(buildBill()));
@@ -89,7 +81,6 @@ public class BillServicePersistenceTests {
                 .create(find)
                 .expectNextCount(1)
                 .verifyComplete();
-
     }
 
     @Test
@@ -109,9 +100,6 @@ public class BillServicePersistenceTests {
                 .create(delete)
                 .expectNextCount(0)
                 .verifyComplete();
-
-
-
     }
 
     @Test
@@ -131,17 +119,14 @@ public class BillServicePersistenceTests {
                 .create(delete)
                 .expectNextCount(0)
                 .verifyComplete();
-
-
-
     }
     @Test
-    void shouldDeleteBillsByCustomerId(){
+    void shouldDeleteBillsByOwnerId(){
 
         Bill bill = buildBill();
         Publisher<Bill> setup = repo.deleteAll().thenMany(repo.save(bill));
 
-        Publisher<Void> delete = repo.deleteBillsByCustomerId(bill.getCustomerId());
+        Publisher<Void> delete = repo.deleteBillsByOwnerId(bill.getOwnerId());
 
         StepVerifier
                 .create(setup)
@@ -162,6 +147,6 @@ public class BillServicePersistenceTests {
         Date date = calendar.getTime();
 
 
-        return Bill.builder().id("Id").billId("BillUUID").customerId(1).vetId("1").visitType("Test Type").visitDate(date).amount(13.37).build();
+        return Bill.builder().id("Id").billId("BillUUID").ownerId("1").vetId("1").visitType("Test Type").visitDate(date).amount(13.37).build();
     }
 }

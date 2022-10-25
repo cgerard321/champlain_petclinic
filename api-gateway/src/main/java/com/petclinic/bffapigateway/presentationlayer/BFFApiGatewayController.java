@@ -6,7 +6,6 @@ import com.petclinic.bffapigateway.dtos.*;
 import com.petclinic.bffapigateway.utils.VetsEntityDtoUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -61,15 +60,13 @@ public class BFFApiGatewayController {
         return billServiceClient.getAllBilling();
     }
 
-    @GetMapping(value = "bills/customer/{customerId}")
-    public Flux<BillDetails> getBillsByOwnerId(final @PathVariable int customerId)
-    {
-        return billServiceClient.getBillsByOwnerId(customerId);
+    @GetMapping(value = "bills/owner/{ownerId}")
+    public Flux<BillDetails> getBillsByOwnerId(final @PathVariable String ownerId) {
+        return billServiceClient.getBillsByOwnerId(ownerId);
     }
 
     @GetMapping(value = "bills/vet/{vetId}")
-    public Flux<BillDetails> getBillsByVetId(final @PathVariable String vetId)
-    {
+    public Flux<BillDetails> getBillsByVetId(final @PathVariable String vetId) {
         return billServiceClient.getBillsByVetId(vetId);
     }
 
@@ -83,9 +80,9 @@ public class BFFApiGatewayController {
         return billServiceClient.deleteBillsByVetId(vetId);
     }
 
-    @DeleteMapping(value = "bills/customer/{customerId}")
-    public Flux<Void> deleteBillsByCustomerId(final @PathVariable int customerId){
-        return billServiceClient.deleteBillsByCustomerId(customerId);
+    @DeleteMapping(value = "bills/owner/{ownerId}")
+    public Flux<Void> deleteBillsByOwnerId(final @PathVariable String ownerId){
+        return billServiceClient.deleteBillsByOwnerId(ownerId);
     }
 
 

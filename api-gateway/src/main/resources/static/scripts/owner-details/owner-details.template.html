@@ -54,7 +54,7 @@
         <td valign="top">
             <dl class="dl-horizontal">
 
-                <a class="newBtn btn-default btn btn-success" style="background-color: #198754;" ui-sref="visits({ownerId: $ctrl.owner.id, petId: pet.id})">Add Visit</a>
+                <a class="newBtn btn-default btn btn-success" style="background-color: #198754;" ui-sref="visits({ownerId: $ctrl.owner.ownerId, petId: pet.id})">Add Visit</a>
 
                 <dt>Name</dt>
                 <dd>{{pet.name}}</dd>
@@ -91,7 +91,7 @@
         </td>
 
     </tr>
-    <td><a href="http://localhost:8080/#!/bills/customerId/{{$ctrl.owner.ownerId}}">Get Bills</a></td>
+    <td><a ui-sref="billsByOwnerId({ownerId: $ctrl.owner.ownerId})">Get Bills</a></td>
 </table>
 
 

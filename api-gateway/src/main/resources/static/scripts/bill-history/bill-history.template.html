@@ -25,14 +25,14 @@
 
     <tr id="billId" ng-repeat="bill in $ctrl.billHistory | filter:$ctrl.query track by bill.billId">
         <td>{{bill.billId}}</td>
-        <td>{{bill.customerId}}</td>
-        <td><a href="http://localhost:8080/#!/owners/details/{{bill.customerId}}">Owner details</a></td>
+        <td>{{bill.ownerId}}</td>
+        <td><a href="http://localhost:8080/#!/owners/details/{{bill.ownerId}}">Owner details</a></td>
 <!--        <td ng-app="billHistory" ng-controller="BillHistoryController">{{getVetByVetId(bill.vetId)}}</td>-->
         <td>{{bill.vetId}}</td>
         <td>{{bill.visitType}}</td>
         <td>{{bill.amount}}</td>
         <td>{{bill.date}}</td>
-        <td><a href="http://localhost:8080/#!/bills/details/{{bill.billId}}/owner/{{bill.customerId}}">Get Details</a></td>
+        <td><a  ui-sref="billsByOwnerId({billId: $ctrl.bill.billId, ownerId: $ctrl.bill.ownerId})" href="http://localhost:8080/#!/bills/details/{{bill.billId}}/owner/{{bill.ownerId}}">Get Details</a></td>
         <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteBill(bill.billId)">Delete Bill</a></td>
     </tr>
 </table>

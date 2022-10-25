@@ -3,16 +3,12 @@ package com.petclinic.billing.businesslayer;
 import com.petclinic.billing.datalayer.Bill;
 import com.petclinic.billing.datalayer.BillDTO;
 import com.petclinic.billing.datalayer.BillRepository;
-import com.petclinic.billing.exceptions.InvalidInputException;
-import com.petclinic.billing.exceptions.NotFoundException;
-import org.assertj.core.api.AssertionsForClassTypes;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -69,9 +65,7 @@ public class BillServiceImplTest {
         Flux<BillDTO> billDTOFlux = billService.GetAllBills();
 
         StepVerifier.create(billDTOFlux)
-                .consumeNextWith(foundBill -> {
-                    assertNotNull(foundBill);
-                })
+                .consumeNextWith(Assertions::assertNotNull)
                 .verifyComplete();
     }
 
@@ -90,7 +84,7 @@ public class BillServiceImplTest {
 
         StepVerifier.create(returnedBill)
                 .consumeNextWith(monoDTO -> {
-                    assertEquals(billEntity.getCustomerId(), monoDTO.getCustomerId());
+                    assertEquals(billEntity.getOwnerId(), monoDTO.getOwnerId());
                     assertEquals(billEntity.getAmount(), monoDTO.getAmount());
                 })
                 .verifyComplete();
@@ -113,9 +107,7 @@ public class BillServiceImplTest {
         Mono<BillDTO> billDTOMono = billService.updateBill(billId, Mono.just(dto));
 
         StepVerifier.create(billDTOMono)
-                .consumeNextWith(foundBill -> {
-                    assertNotEquals(billEntity.getVisitType(), foundBill.getVisitType());
-                })
+                .consumeNextWith(foundBill -> assertNotEquals(billEntity.getVisitType(), foundBill.getVisitType()))
                 .verifyComplete();
     }
 
@@ -148,25 +140,25 @@ public class BillServiceImplTest {
                 .verifyComplete();
     }
     @Test
-    public void test_DeleteBillsByCustomerId(){
+    public void test_DeleteBillsByOwnerId(){
         Bill billEntity = buildBill();
-        when(repo.deleteBillsByCustomerId(anyInt())).thenReturn(Flux.empty());
-        Flux<Void> deletedObj = billService.DeleteBillsByCustomerId(billEntity.getCustomerId());
+        when(repo.deleteBillsByOwnerId(anyString())).thenReturn(Flux.empty());
+        Flux<Void> deletedObj = billService.DeleteBillsByOwnerId(billEntity.getOwnerId());
 
         StepVerifier.create(deletedObj)
                 .expectNextCount(0)
                 .verifyComplete();
     }
     @Test
-    public void test_GetBillByCustomerId(){
+    public void test_GetBillByOwnerId(){
 
         Bill billEntity = buildBill();
 
-        int CUSTOMER_ID = billEntity.getCustomerId();
+        String OWNER_ID = billEntity.getOwnerId();
 
-        when(repo.findByCustomerId(anyInt())).thenReturn(Flux.just(billEntity));
+        when(repo.findByOwnerId(anyString())).thenReturn(Flux.just(billEntity));
 
-        Flux<BillDTO> billDTOMono = billService.GetBillsByCustomerId(CUSTOMER_ID);
+        Flux<BillDTO> billDTOMono = billService.GetBillsByOwnerId(OWNER_ID);
 
         StepVerifier.create(billDTOMono)
                 .consumeNextWith(foundBill -> {
@@ -205,7 +197,8 @@ public class BillServiceImplTest {
         Date date = calendar.getTime();
 
 
-        return Bill.builder().id("Id").billId("BillUUID").customerId(1).vetId("1").visitType("Test Type").visitDate(date).amount(13.37).build();
+//        return Bill.builder().id("Id").billId("BillUUID").ownerId("1").vetId("1").visitType("Test Type").visitDate(date).amount(13.37).build();
+        return Bill.builder().billId("BillUUID").ownerId("1").vetId("1").visitType("Test Type").visitDate(date).amount(13.37).build();
     }
 
     private BillDTO buildBillDTO(){
@@ -215,7 +208,7 @@ public class BillServiceImplTest {
         Date date = calendar.getTime();
 
 
-        return BillDTO.builder().billId("BillUUID").customerId(1).vetId("1").visitType("Test Type").date(date).amount(13.37).build();
+        return BillDTO.builder().billId("BillUUID").ownerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).build();
     }
 
 }

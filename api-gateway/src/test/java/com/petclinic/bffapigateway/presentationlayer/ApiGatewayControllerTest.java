@@ -788,12 +788,9 @@ class ApiGatewayControllerTest {
 
         assertEquals(null, authServiceClient.getUser(user.getId()));
     }
-
-
-
-
-
-    //private static final int BILL_ID = 1;
+    
+    
+    
 
     @Test
     public void getBillById(){
@@ -806,7 +803,7 @@ class ApiGatewayControllerTest {
 
         entity.setAmount(599);
 
-        entity.setCustomerId(2);
+        entity.setOwnerId("2");
 
         entity.setVisitType("Consultation");
 
@@ -820,7 +817,7 @@ class ApiGatewayControllerTest {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.billId").isEqualTo("9")
-                .jsonPath("$.customerId").isEqualTo(entity.getCustomerId())
+                .jsonPath("$.ownerId").isEqualTo(entity.getOwnerId())
                 .jsonPath("$.visitType").isEqualTo(entity.getVisitType())
                 .jsonPath("$.amount").isEqualTo(entity.getAmount());
 
@@ -836,20 +833,20 @@ class ApiGatewayControllerTest {
     public void getBillsByOwnerId(){
         BillDetails bill = new BillDetails();
         bill.setBillId(UUID.randomUUID().toString());
-        bill.setCustomerId(1);
+        bill.setOwnerId("1");
         bill.setAmount(499);
         bill.setVisitType("Test");
 
-        when(billServiceClient.getBillsByOwnerId(bill.getCustomerId()))
+        when(billServiceClient.getBillsByOwnerId(bill.getOwnerId()))
                 .thenReturn(Flux.just(bill));
 
         client.get()
-                .uri("/api/gateway/bills/customer/{customerId}", bill.getCustomerId())
+                .uri("/api/gateway/bills/owner/{ownerId}", bill.getOwnerId())
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$[0].billId").isEqualTo(bill.getBillId())
-                .jsonPath("$[0].customerId").isEqualTo(1)
+                .jsonPath("$[0].ownerId").isEqualTo("1")
                 .jsonPath("$[0].amount").isEqualTo(499)
                 .jsonPath("$[0].visitType").isEqualTo("Test");
         }
@@ -890,7 +887,7 @@ class ApiGatewayControllerTest {
     @Test
      void getBillNotFound(){
         client.get()
-                .uri("/bills/{billId}", 100)
+                .uri("/bills/{billId}", "100")
                 .accept(APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNotFound()
@@ -905,7 +902,7 @@ class ApiGatewayControllerTest {
     @Test
     void getPutRequestNotFound(){
         client.put()
-                .uri("/owners/{ownerId}", 100)
+                .uri("/owners/{ownerId}", "100")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNotFound()

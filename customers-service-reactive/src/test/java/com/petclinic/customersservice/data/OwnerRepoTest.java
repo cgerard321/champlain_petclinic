@@ -22,7 +22,7 @@ class OwnerRepoTest {
         StepVerifier
                 .create(setup)
                 .consumeNextWith(foundOwner -> {
-                    //assertEquals(owner.getId(), foundOwner.getId());
+                    assertEquals(owner.getOwnerId(), foundOwner.getOwnerId());
                     assertEquals(owner.getFirstName(), foundOwner.getFirstName());
                     assertEquals(owner.getLastName(), foundOwner.getLastName());
                     assertEquals(owner.getAddress(), foundOwner.getAddress());

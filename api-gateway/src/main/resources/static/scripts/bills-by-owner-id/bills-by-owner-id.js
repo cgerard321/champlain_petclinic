@@ -5,8 +5,8 @@ angular.module('billsByOwnerId', ['ui.router'])
         $stateProvider
             .state('billsByOwnerId', {
                 parent: 'app',
-                url: '/bills/customerId/:customerId',
-                params: {customerId: "1"},
+                url: '/bills/ownerId/:ownerId/bills',
+                params: {ownerId: null},
                 template: '<bills-by-owner-id></bills-by-owner-id>'
             })
     }]);

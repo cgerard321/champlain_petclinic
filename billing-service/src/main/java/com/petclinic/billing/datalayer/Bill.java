@@ -16,7 +16,7 @@ public class Bill {
     @Id
     private String id;
     private String billId;              // Should be renamed to BillUUID
-    private int customerId;
+    private String ownerId; // todo refactor all ownerId to ownerUUID
     private String visitType;
     private String vetId;
     @JsonFormat(pattern = "yyyy-MM-dd")

@@ -33,7 +33,12 @@ public class BillServiceImpl implements BillService{
 
             return model
                     .map(EntityDtoUtil::toEntity)
-                    .doOnNext(e -> e.setBillId(EntityDtoUtil.generateUUIDString()))
+                    .doOnNext(event -> {
+                        if (event.getBillId() == null || event.getBillId().trim().isEmpty()) {
+                            event.setBillId(EntityDtoUtil.generateUUIDString());
+                        }
+                        System.out.println(event.getOwnerId());
+                    })
                     .flatMap(billRepository::insert)
                     .map(EntityDtoUtil::toDto);
         }
@@ -64,22 +69,17 @@ public class BillServiceImpl implements BillService{
     }
 
     @Override
-    public Flux<BillDTO> GetBillsByCustomerId(int customerId) {
-/**/
-        return billRepository.findByCustomerId(customerId).map(EntityDtoUtil::toDto);
+    public Flux<BillDTO> GetBillsByOwnerId(String ownerId) {
+        return billRepository.findByOwnerId(ownerId).map(EntityDtoUtil::toDto);
     }
-
-
 
     @Override
     public Flux<BillDTO> GetBillsByVetId(String vetId) {
         return billRepository.findByVetId(vetId).map(EntityDtoUtil::toDto);
     }
 
-
     @Override
-    public Flux<Void> DeleteBillsByCustomerId(int customerId){
-        return billRepository.deleteBillsByCustomerId(customerId);
-
+    public Flux<Void> DeleteBillsByOwnerId(String ownerId){
+        return billRepository.deleteBillsByOwnerId(ownerId);
     }
 }

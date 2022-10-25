@@ -1,14 +1,12 @@
 package com.petclinic.billing.presentationlayer;
 
 import com.petclinic.billing.businesslayer.BillService;
-import com.petclinic.billing.datalayer.Bill;
 import com.petclinic.billing.datalayer.BillDTO;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
@@ -22,7 +20,6 @@ import java.util.Calendar;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static reactor.core.publisher.Mono.just;
 
 
 @WebFluxTest(controllers = BillResource.class)
@@ -30,7 +27,7 @@ class BillResourceUnitTest {
 
     private BillDTO dto = buildBillDTO();
     private final String BILL_ID_OK = dto.getBillId();
-    private final int CUSTOMER_ID_OK = dto.getCustomerId();
+    private final String OWNER_ID_OK = dto.getOwnerId();
     private final String VET_ID_OK = dto.getVetId();
 
     @Autowired
@@ -76,7 +73,7 @@ class BillResourceUnitTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.visitType").isEqualTo(dto.getVisitType())
-                .jsonPath("$.customerId").isEqualTo(dto.getCustomerId())
+                .jsonPath("$.ownerId").isEqualTo(dto.getOwnerId())
                 .jsonPath("$.amount").isEqualTo(dto.getAmount());
 
         Mockito.verify(billService, times(1)).GetBill(BILL_ID_OK);
@@ -96,28 +93,28 @@ class BillResourceUnitTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$[0].visitType").isEqualTo(dto.getVisitType())
-                .jsonPath("$[0].customerId").isEqualTo(dto.getCustomerId());
+                .jsonPath("$[0].ownerId").isEqualTo(dto.getOwnerId());
 
         Mockito.verify(billService, times(1)).GetAllBills();
     }
 
     @Test
-    void getBillByCustomerId() {
+    void getBillByOwnerId() {
 
-        when(billService.GetBillsByCustomerId(anyInt())).thenReturn(Flux.just(dto));
+        when(billService.GetBillsByOwnerId(anyString())).thenReturn(Flux.just(dto));
 
         client.get()
-                .uri("/bills/customer/" + dto.getCustomerId())
+                .uri("/bills/owner/" + dto.getOwnerId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$[0].visitType").isEqualTo(dto.getVisitType())
-                .jsonPath("$[0].customerId").isEqualTo(dto.getCustomerId())
+                .jsonPath("$[0].ownerId").isEqualTo(dto.getOwnerId())
                 .jsonPath("$[0].amount").isEqualTo(dto.getAmount());
 
-        Mockito.verify(billService, times(1)).GetBillsByCustomerId(CUSTOMER_ID_OK);
+        Mockito.verify(billService, times(1)).GetBillsByOwnerId(OWNER_ID_OK);
 
 
     }
@@ -172,18 +169,18 @@ class BillResourceUnitTest {
     }
 
     @Test
-    void deleteBillsByCustomerId() {
+    void deleteBillsByOwnerId() {
 
-        when(billService.DeleteBillsByCustomerId(anyInt())).thenReturn(Flux.empty());
+        when(billService.DeleteBillsByOwnerId(anyString())).thenReturn(Flux.empty());
 
         client.delete()
-                .uri("/bills/customer/" + dto.getCustomerId())
+                .uri("/bills/owner/" + dto.getOwnerId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNoContent()//.isEqualTo(HttpStatus.METHOD_NOT_ALLOWED)
                 .expectBody();
 
-        Mockito.verify(billService, times(1)).DeleteBillsByCustomerId(CUSTOMER_ID_OK);
+        Mockito.verify(billService, times(1)).DeleteBillsByOwnerId(OWNER_ID_OK);
     }
 
     private BillDTO buildBillDTO(){
@@ -193,6 +190,6 @@ class BillResourceUnitTest {
         Date date = calendar.getTime();
 
 
-        return BillDTO.builder().billId("BillUUID").customerId(1).vetId("1").visitType("Test Type").date(date).amount(13.37).build();
+        return BillDTO.builder().billId("BillUUID").ownerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).build();
     }
 }

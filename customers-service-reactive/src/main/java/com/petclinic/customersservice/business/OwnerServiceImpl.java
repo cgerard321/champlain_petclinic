@@ -18,7 +18,7 @@ public class OwnerServiceImpl implements OwnerService {
     public Mono<Owner> insertOwner(Mono<Owner> ownerMono) {
         return ownerMono
                 .doOnNext(event -> {
-                    if (event.getOwnerId() == null) {
+                    if (event.getOwnerId() == null || event.getOwnerId().trim().isEmpty()) {
                         event.setOwnerId(EntityDTOUtil.generateUUIDString());
                     }
                 })
