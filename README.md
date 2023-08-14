@@ -10,6 +10,10 @@ Docker setup has been changed.
 ## Running the project
 Once you have cloned the repo (see the setup instructions below), you need to do the following:
 
+### mailer.env
+In the project's top-level folder, you will need to create a file called mailer.env. It will contain SMTP_PASS property set to the hashed password of the mailing service you will be using. 
+My students: I'll provide this to you. 
+
 ### H2 Profile (for testing with H2 database outside of Docker)
 ```
 ./gradlew customers-service:build
