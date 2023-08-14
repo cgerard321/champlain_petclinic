@@ -22,13 +22,13 @@ Test with curl:
 curl localhost:7003/owners | jq
 ```
 To view H2 database in browser: 
-
+```
 localhost:7003/h2-console
-
+```
 Database is: jdbc:h2:mem:customers-db (note this db is service specific)
 
 
-### Docker Profile (for running with Docker or Docker-compose with a MySQL database)
+### Docker Profile (for running with Docker or Docker-compose with a MySQL or other database)
 ```
 docker-compose build
 docker-compose up -d
@@ -37,7 +37,7 @@ docker-compose logs -f
 
 Test in browser:
 ```
-curl localhost:8080/
+localhost:8080/
 ```
 In terminal:
 
