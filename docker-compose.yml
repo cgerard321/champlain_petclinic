@@ -107,6 +107,7 @@ services:
 
     mysql1:
         image: mysql:5.7
+        platform: linux/amd64
         #mem_limit: 350m
         ports:
             - "3307:3306"
@@ -135,6 +136,7 @@ services:
 
     mysql3:
         image: mysql:5.7
+        platform: linux/amd64
         #mem_limit: 350m
         ports:
             - "3309:3306"
@@ -163,6 +165,7 @@ services:
 
     mysql4:
         image: mysql:5.7
+        platform: linux/amd64
         deploy:
             resources:
                 limits:
