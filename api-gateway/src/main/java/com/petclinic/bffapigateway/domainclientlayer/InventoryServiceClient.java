@@ -25,7 +25,7 @@ public class InventoryServiceClient {
     ) {
         this.webClientBuilder = webClientBuilder;
 
-        inventoryServiceUrl = "http://" + inventoryServiceHost + ":" + inventoryServicePort + "/bundles";
+        inventoryServiceUrl = "http://" + inventoryServiceHost + ":" + inventoryServicePort + "/inventory";
 
     }
 
