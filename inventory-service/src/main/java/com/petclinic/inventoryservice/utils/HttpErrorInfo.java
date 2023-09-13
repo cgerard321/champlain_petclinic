@@ -1,4 +1,4 @@
-package com.champlain.courseservice.utils;
+package com.petclinic.inventoryservice.utils;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;

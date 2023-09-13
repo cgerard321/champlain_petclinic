@@ -1,7 +1,8 @@
-package com.champlain.courseservice.utils;
+package com.petclinic.inventoryservice.utils;
 
-import com.champlain.courseservice.utils.exceptions.InvalidInputException;
-import com.champlain.courseservice.utils.exceptions.NotFoundException;
+
+import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
+import com.petclinic.inventoryservice.utils.exceptions.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -9,7 +10,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Slf4j
 @RestControllerAdvice
