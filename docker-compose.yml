@@ -106,36 +106,40 @@ services:
         env_file:
             - mailer.env
 
-#    mysql1:
-#        image: mysql:5.7
-#        #mem_limit: 350m
-#        ports:
-#            - "3307:3306"
-#        environment:
-#            - MYSQL_ROOT_PASSWORD=rootpwd
-#            - MYSQL_DATABASE=visits-db
-#            - MYSQL_USER=user
-#            - MYSQL_PASSWORD=pwd
-#        volumes:
-#            - ./data/mysql1:/var/lib/mysql1
-#            - ./data/init.d:/docker-entrypoint-initdb.d
-#        healthcheck:
-#            test:
-#                [
-#                    "CMD",
-#                    "mysqladmin",
-#                    "ping",
-#                    "-uuser",
-#                    "-ppwd",
-#                    "-h",
-#                    "localhost"
-#                ]
-#            interval: 10s
-#            timeout: 5s
-#            retries: 10
+
+#     mysql1:
+#         image: mysql:5.7
+#         platform: linux/amd64
+#         #mem_limit: 350m
+#         ports:
+#             - "3307:3306"
+#         environment:
+#             - MYSQL_ROOT_PASSWORD=rootpwd
+#             - MYSQL_DATABASE=visits-db
+#             - MYSQL_USER=user
+#             - MYSQL_PASSWORD=pwd
+#         volumes:
+#             - ./data/mysql1:/var/lib/mysql1
+#             - ./data/init.d:/docker-entrypoint-initdb.d
+#         healthcheck:
+#             test:
+#                 [
+#                     "CMD",
+#                     "mysqladmin",
+#                     "ping",
+#                     "-uuser",
+#                     "-ppwd",
+#                     "-h",
+#                     "localhost"
+#                 ]
+#             interval: 10s
+#             timeout: 5s
+#             retries: 10
+
 
     mysql3:
         image: mysql:5.7
+        platform: linux/amd64
         #mem_limit: 350m
         ports:
             - "3309:3306"
@@ -164,6 +168,7 @@ services:
 
     mysql4:
         image: mysql:5.7
+        platform: linux/amd64
         deploy:
             resources:
                 limits:
