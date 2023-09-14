@@ -1,5 +1,6 @@
 package com.petclinic.bffapigateway.config;
 
+import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import com.petclinic.bffapigateway.exceptions.GenericHttpException;
 import com.petclinic.bffapigateway.exceptions.HttpErrorInfo;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,14 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = GenericHttpException.class)
     public ResponseEntity<HttpErrorInfo> resourceNotFoundException(GenericHttpException ex) {
+
+        return ResponseEntity.status(ex.getHttpStatus())
+                .body(new HttpErrorInfo(ex.getHttpStatus().value(), ex.getMessage()));
+    }
+
+    // existing vet not found exception
+    @ExceptionHandler(value = ExistingVetNotFoundException.class)
+    public ResponseEntity<HttpErrorInfo> resourceNotFoundException(ExistingVetNotFoundException ex) {
 
         return ResponseEntity.status(ex.getHttpStatus())
                 .body(new HttpErrorInfo(ex.getHttpStatus().value(), ex.getMessage()));

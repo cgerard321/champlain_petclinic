@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.*;
+import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import com.petclinic.bffapigateway.exceptions.GenericHttpException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -71,6 +72,41 @@ class ApiGatewayControllerTest {
 
 
 
+    @Test
+    void getAllRatingsForVet() {
+        RatingResponseDTO ratingResponseDTO = buildRatingResponseDTO();
+        when(vetsServiceClient.getRatingsByVetId(anyString()))
+                .thenReturn(Flux.just(ratingResponseDTO));
+
+        client
+                .get()
+                .uri("/api/gateway/vets/" + VET_ID + "/ratings")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$[0].ratingId").isEqualTo(ratingResponseDTO.getRatingId())
+                .jsonPath("$[0].vetId").isEqualTo(ratingResponseDTO.getVetId())
+                .jsonPath("$[0].rateScore").isEqualTo(ratingResponseDTO.getRateScore());
+    }
+
+    @Test
+    void getAllRatingsForVet_ByInvalidVetId() {
+        RatingResponseDTO ratingResponseDTO = buildRatingResponseDTO();
+        when(vetsServiceClient.getRatingsByVetId(anyString()))
+                .thenThrow(new ExistingVetNotFoundException("This id is not valid", NOT_FOUND));
+
+        client
+                .get()
+                .uri("/api/gateway/vets/" + INVALID_VET_ID + "/ratings")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(NOT_FOUND)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("This id is not valid");
+    }
     @Test
     void getAllVets() {
         when(vetsServiceClient.getVets())
@@ -1810,6 +1846,14 @@ class ApiGatewayControllerTest {
                 .workday("Monday")
                 .specialties(new HashSet<>())
                 .active(true)
+                .build();
+    }
+
+    private RatingResponseDTO buildRatingResponseDTO() {
+        return RatingResponseDTO.builder()
+                .ratingId("123456")
+                .vetId("678910")
+                .rateScore(4.0)
                 .build();
     }
 
