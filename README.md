@@ -7,6 +7,21 @@ This project is based on the spring petclinic microservices (https://github.com/
 However, only the customers, visits, vets, and api-gateway services have been retained. In addition, the 
 Docker setup has been changed.
 
+## Requirements for a user story to be considered DONE 
+For a User Story to be considered as DONE, all the following need to be met:
+<ol>
+<li>A pull request has been made, reviewed and merged into Main.</li>
+<li>Any pull request that affects other teams' implementations needs to be reviewed by at least 1 member of each affected team.</li>
+<li>Merging does not cause any tests to fail.</li>
+<li>None of the previously implemented features ceased working unexpectedly.</li>
+<li>All the user acceptance criteria for the story are met.</li>
+</ol>
+
+
+
+
+
+
 ## Running the project
 Once you have cloned the repo (see the setup instructions below), you need to do the following:
 
