@@ -1,14 +1,21 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
+import com.petclinic.bffapigateway.dtos.RatingResponseDTO;
 import com.petclinic.bffapigateway.dtos.VetDTO;
+import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
+import com.petclinic.bffapigateway.utils.Rethrower;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 /**
  * @author Christine Gerard
@@ -17,7 +24,6 @@ import reactor.core.publisher.Mono;
 @Component
 @Slf4j
 public class VetsServiceClient {
-
     private final WebClient.Builder webClientBuilder;
     private String vetsServiceUrl;
     public void setVetsServiceUrl(String vetsServiceUrl) {
@@ -33,6 +39,17 @@ public class VetsServiceClient {
         vetsServiceUrl = "http://" + vetsServiceHost + ":" + vetsServicePort + "/vets";
     }
 
+    public Flux<RatingResponseDTO> getRatingsByVetId(String vetId) {
+        Flux<RatingResponseDTO> ratingResponseDTOFlux =
+                webClientBuilder
+                        .build()
+                        .get()
+                        .uri(vetsServiceUrl + "/" + vetId + "/ratings")
+                        .retrieve()
+                        .bodyToFlux(RatingResponseDTO.class);
+
+        return  ratingResponseDTOFlux;
+    }
     public Flux<VetDTO> getVets() {
         Flux<VetDTO> vetDTOFlux =
                webClientBuilder
