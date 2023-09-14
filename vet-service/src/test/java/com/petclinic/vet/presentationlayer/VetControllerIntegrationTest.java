@@ -1,7 +1,10 @@
 package com.petclinic.vet.presentationlayer;
 
+import com.petclinic.vet.dataaccesslayer.Rating;
+import com.petclinic.vet.dataaccesslayer.RatingRepository;
 import com.petclinic.vet.dataaccesslayer.Vet;
 import com.petclinic.vet.dataaccesslayer.VetRepository;
+import com.petclinic.vet.servicelayer.RatingResponseDTO;
 import com.petclinic.vet.servicelayer.VetDTO;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
@@ -14,9 +17,12 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
@@ -29,14 +35,70 @@ class VetControllerIntegrationTest {
     @Autowired
     VetRepository vetRepository;
 
+    @Autowired
+    RatingRepository ratingRepository;
+
 
     Vet vet = buildVet();
     Vet vet2 = buildVet2();
+    Rating rating1 = buildRating("12345", vet.getVetId(), 5.0);
+    Rating rating2 = buildRating("12346", vet.getVetId(), 4.0);
     VetDTO vetDTO = buildVetDTO();
     String VET_ID = vet.getVetId();
     String VET_BILL_ID = vet.getVetBillId();
     String INVALID_VET_ID = "mjbedf";
 
+    @Test
+    void getAllRatingsForAVet_WithValidVetId_ShouldSucceed() {
+        Publisher<Rating> setup = ratingRepository.deleteAll()
+                .thenMany(ratingRepository.save(rating1))
+                .thenMany(ratingRepository.save(rating2));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        client
+                .get()
+                .uri("/vets/" + VET_ID + "/ratings")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(RatingResponseDTO.class)
+                .value((list) -> {
+                    assertEquals(2, list.size());
+                    assertEquals(rating1.getRatingId(), list.get(0).getRatingId());
+                    assertEquals(rating1.getVetId(), list.get(0).getVetId());
+                    assertEquals(rating1.getRateScore(), list.get(0).getRateScore());
+                    assertEquals(rating2.getRatingId(), list.get(1).getRatingId());
+                    assertEquals(rating2.getVetId(), list.get(1).getVetId());
+                    assertEquals(rating2.getRateScore(), list.get(1).getRateScore());
+                });
+    }
+
+//    @Test
+//    void getAllRatingsForAVet_WithInvalidVetId_ShouldReturnNotFound() {
+//        Publisher<Rating> setup = ratingRepository.deleteAll()
+//                .thenMany(ratingRepository.save(rating1))
+//                .thenMany(ratingRepository.save(rating2));
+//
+//        StepVerifier
+//                .create(setup)
+//                .expectNextCount(1)
+//                .verifyComplete();
+//
+//        client
+//                .get()
+//                .uri("/vets/" + INVALID_VET_ID + "/ratings")
+//                .accept(MediaType.APPLICATION_JSON)
+//                .exchange()
+//                .expectStatus().isNotFound()
+//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+//                .expectBody()
+//                .jsonPath("$.message").isEqualTo("Vet with id " + INVALID_VET_ID + " not found.");
+//    }
     @Test
     void getAllVets() {
         Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet));
@@ -354,6 +416,14 @@ class VetControllerIntegrationTest {
                 .workday("Monday")
                 .active(true)
                 .specialties(new HashSet<>())
+                .build();
+    }
+
+    private Rating buildRating(String ratingId, String vetId, Double rateScore) {
+        return Rating.builder()
+                .ratingId(ratingId)
+                .vetId(vetId)
+                .rateScore(rateScore)
                 .build();
     }
     private VetDTO buildVetDTO() {

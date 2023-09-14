@@ -52,7 +52,6 @@ public class VisitServiceImpl implements VisitService {
                 )
                 .flatMap(repo::save)
                 .map(EntityDtoUtil::toDTO);
-
     }
 
     @Override

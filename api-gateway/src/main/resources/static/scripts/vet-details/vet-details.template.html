@@ -117,6 +117,20 @@
                     </div>
                 </div>
 
+                <div class="row g-3">
+                    <div class="col-sm-12">
+                        <h5 class="form-label">Ratings</h5>
+                        <div ng-if="$ctrl.ratings.length === 0">
+                            This vet has no ratings.
+                        </div>
+                        <div ng-repeat="rating in $ctrl.ratings" ng-if="$ctrl.ratings.length > 0">
+                            <div class="rating-item">
+                                <span class="rating-value">{{ rating.rateScore }} / 5</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>

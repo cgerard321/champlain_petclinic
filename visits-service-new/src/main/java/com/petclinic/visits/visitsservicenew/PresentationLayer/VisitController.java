@@ -41,7 +41,7 @@ public class VisitController {
 
     @DeleteMapping("/{visitId}")
     public Mono<Void> deleteVisit(@PathVariable("visitId") String visitId) {
-         return visitService.deleteVisit(visitId);
+        return visitService.deleteVisit(visitId);
     }
 
     @GetMapping("practitioner/{practitionerId}/{month}")
