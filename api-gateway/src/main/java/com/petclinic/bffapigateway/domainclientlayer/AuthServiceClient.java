@@ -67,10 +67,10 @@ public class AuthServiceClient {
                 .body(just(model), Register.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-//                .onStatus(HttpStatus::is4xxClientError,
-//                        n -> rethrower.rethrow(n,
-//                                x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
-//                        )
+                .onStatus(HttpStatus::is4xxClientError,
+                        n -> rethrower.rethrow(n,
+                                x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
+                        )
                 .bodyToMono(UserDetails.class);
     }
     public Mono<UserDetails> updateUser (final long userId, final Register model) {
@@ -79,10 +79,10 @@ public class AuthServiceClient {
                 .body(just(model), Register.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-//                .onStatus(HttpStatus::is4xxClientError,
-//                        n -> rethrower.rethrow(n,
-//                                x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
-//                        )
+                .onStatus(HttpStatus::is4xxClientError,
+                        n -> rethrower.rethrow(n,
+                                x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
+                        )
                 .bodyToMono(UserDetails.class);
     }
 
@@ -100,10 +100,10 @@ public class AuthServiceClient {
                 .get()
                 .uri(authServiceUrl + "/users/verification/{token}", token)
                 .retrieve()
-//                .onStatus(HttpStatus::is4xxClientError,
-//                        n -> rethrower.rethrow(n,
-//                                x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
-//                )
+                .onStatus(HttpStatus::is4xxClientError,
+                        n -> rethrower.rethrow(n,
+                                x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
+                )
                 .bodyToMono(UserDetails.class);
     }
 
