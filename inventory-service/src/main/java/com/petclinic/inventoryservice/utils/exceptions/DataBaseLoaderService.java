@@ -25,14 +25,14 @@ public class DataBaseLoaderService  implements CommandLineRunner {
                 .build();
         Product product1 = Product.builder()
                 .productName("Benzodiazepines")
-                .sku(123456789)
+                .sku("123F567C9")
                 .productPrice(100.00)
                 .inventoryId("1")
                 .productQuantity(10)
                 .build();
         Product product2 = Product.builder()
                 .productName("Trazodone")
-                .sku(987654321)
+                .sku("98C6543T1")
                 .productPrice(150.00)
                 .inventoryId("1")
                 .productQuantity(10)

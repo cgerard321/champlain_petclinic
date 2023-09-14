@@ -72,7 +72,7 @@ public Mono<ProductResponseDTO> addProductToInventory(Mono<ProductRequestDTO> pr
 }
 
 
-    private Mono<Integer> generateUniqueSku() {
+    private Mono<String> generateUniqueSku() {
         return Mono.defer(() -> {
             String generatedSku = EntityDTOUtil.generateSKU();
             return productRepository.existsBySku(generatedSku)
