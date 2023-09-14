@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 /**
@@ -186,14 +187,15 @@ public class BFFApiGatewayController {
         return visitsServiceClient.createVisitForPet(visit);
     }
 
-
-
-
     @GetMapping(value = "vets")
     public Flux<VetDTO> getAllVets() {
         return vetsServiceClient.getVets();
     }
 
+    @GetMapping(value = "vets/{vetId}/ratings")
+    public Flux<RatingResponseDTO> getRatingsByVetId(@PathVariable String vetId) {
+        return vetsServiceClient.getRatingsByVetId(vetId);
+    }
     @GetMapping("/vets/{vetId}")
     public Mono<ResponseEntity<VetDTO>> getVetByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getVetByVetId(VetsEntityDtoUtil.verifyId(vetId))
