@@ -6,10 +6,7 @@ import com.petclinic.bffapigateway.dtos.VisitDetails;
 import com.petclinic.bffapigateway.dtos.Visits;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.web.reactive.function.client.WebClient;
+import org.junit.jupiter.api.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -18,9 +15,7 @@ import java.util.Collections;
 import java.util.UUID;
 import java.util.function.Consumer;
 
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 class VisitsServiceClientIntegrationTest {
 
@@ -28,25 +23,23 @@ class VisitsServiceClientIntegrationTest {
 
     private VisitsServiceClient visitsServiceClient;
 
-    private MockWebServer server;
+    private static MockWebServer server;
 
-    private ObjectMapper objectMapper;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
-    void setUp() {
+    void setUp() throws IOException {
         server = new MockWebServer();
+        server.start();
         visitsServiceClient = new VisitsServiceClient(
-                WebClient.builder(),
-                "http://visits-service",
-                "7000"
+                "localhost",
+                String.valueOf(server.getPort())
         );
-        visitsServiceClient.setHostname(server.url("/").toString());
-        objectMapper = new ObjectMapper();
     }
 
-    @AfterEach
-    void shutdown() throws IOException {
-        this.server.shutdown();
+    @AfterAll
+    static void tearDown() throws IOException {
+        server.shutdown();
     }
 
     @Test
@@ -92,7 +85,7 @@ class VisitsServiceClientIntegrationTest {
 
         final Mono<Void> empty = visitsServiceClient.deleteVisitByVisitId(visit.getVisitId());
 
-        assertEquals(empty.block(), null);
+        assertNull(empty.block());
     }
 
     @Test
@@ -245,7 +238,7 @@ class VisitsServiceClientIntegrationTest {
         assertEquals(visit.getDescription(), previousVisits.getDescription());
         assertEquals(visit.getStatus(), previousVisits.getStatus());
     }
- 
+
     @Test
     void shouldGetScheduledVisitsForPet() throws JsonProcessingException {
         final VisitDetails visit = VisitDetails.builder()
@@ -270,7 +263,6 @@ class VisitsServiceClientIntegrationTest {
         assertEquals(visit.getDate(), scheduledVisits.getDate());
         assertEquals(visit.getDescription(), scheduledVisits.getDescription());
         assertEquals(visit.getStatus(), scheduledVisits.getStatus());
-      
     }
 
     private void assertVisitDescriptionEq(VisitDetails visits, int petId, String description) {
@@ -288,7 +280,7 @@ class VisitsServiceClientIntegrationTest {
     private void prepareResponse(Consumer<MockResponse> consumer) {
         MockResponse response = new MockResponse();
         consumer.accept(response);
-        this.server.enqueue(response);
+        server.enqueue(response);
     }
     
     @Test
