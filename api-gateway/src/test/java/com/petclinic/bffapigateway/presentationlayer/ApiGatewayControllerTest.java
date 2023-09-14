@@ -326,57 +326,57 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.pets[0].name").isEqualTo("Garfield")
                 .jsonPath("$.pets[0].visits[0].description").isEqualTo("First visit");
     }
-
-    @Test
-    void getUserDetails() {
-        UserDetails user = new UserDetails();
-        user.setId(1);
-        user.setUsername("roger675");
-        user.setPassword("secretnooneknows");
-        user.setEmail("RogerBrown@gmail.com");
-
-        when(authServiceClient.getUser(1))
-                .thenReturn(Mono.just(user));
-
-        client.get()
-
-                .uri("/api/gateway/users/1")
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.username").isEqualTo("roger675")
-                .jsonPath("$.password").isEqualTo("secretnooneknows")
-                .jsonPath("$.email").isEqualTo("RogerBrown@gmail.com");
-
-        assertEquals(user.getId(), 1);
-    }
-    
-    @Test
-    void createUser(){
-        UserDetails user = new UserDetails();
-        user.setId(1);
-        user.setUsername("Johnny123");
-        user.setPassword("password");
-        user.setEmail("email@email.com");
-        when(authServiceClient.createUser(argThat(
-                n -> user.getEmail().equals(n.getEmail())
-        ))).thenReturn(Mono.just(user));
-
-        client.post()
-                .uri("/api/gateway/users")
-                .body(Mono.just(user), UserDetails.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody();
-
-        assertEquals(user.getId(), 1);
-        assertEquals(user.getUsername(), "Johnny123");
-        assertEquals(user.getPassword(), "password");
-        assertEquals(user.getEmail(), "email@email.com");
-
-    }
+//
+//    @Test
+//    void getUserDetails() {
+//        UserDetails user = new UserDetails();
+//        user.setId(1);
+//        user.setUsername("roger675");
+//        user.setPassword("secretnooneknows");
+//        user.setEmail("RogerBrown@gmail.com");
+//
+//        when(authServiceClient.getUser(1))
+//                .thenReturn(Mono.just(user));
+//
+//        client.get()
+//
+//                .uri("/api/gateway/users/1")
+//                .exchange()
+//                .expectStatus().isOk()
+//                .expectBody()
+//                .jsonPath("$.username").isEqualTo("roger675")
+//                .jsonPath("$.password").isEqualTo("secretnooneknows")
+//                .jsonPath("$.email").isEqualTo("RogerBrown@gmail.com");
+//
+//        assertEquals(user.getId(), 1);
+//    }
+//
+//    @Test
+//    void createUser(){
+//        UserDetails user = new UserDetails();
+//        user.setId(1);
+//        user.setUsername("Johnny123");
+//        user.setPassword("password");
+//        user.setEmail("email@email.com");
+//        when(authServiceClient.createUser(argThat(
+//                n -> user.getEmail().equals(n.getEmail())
+//        ))).thenReturn(Mono.just(user));
+//
+//        client.post()
+//                .uri("/api/gateway/users")
+//                .body(Mono.just(user), UserDetails.class)
+//                .accept(MediaType.APPLICATION_JSON)
+//                .exchange()
+//                .expectStatus().isOk()
+//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+//                .expectBody();
+//
+//        assertEquals(user.getId(), 1);
+//        assertEquals(user.getUsername(), "Johnny123");
+//        assertEquals(user.getPassword(), "password");
+//        assertEquals(user.getEmail(), "email@email.com");
+//
+//    }
 
 
 
@@ -752,42 +752,42 @@ class ApiGatewayControllerTest {
                 .expectBody();
     }
 
-
-    @Test
-    void deleteUser() {
-        UserDetails user = new UserDetails();
-        user.setId(1);
-        user.setUsername("johndoe");
-        user.setPassword("pass");
-        user.setEmail("johndoe2@gmail.com");
-
-        when(authServiceClient.createUser(argThat(
-                n -> user.getEmail().equals(n.getEmail())
-        )))
-                .thenReturn(Mono.just(user));
-
-        client.post()
-                .uri("/api/gateway/users")
-                .body(Mono.just(user), UserDetails.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody();
-
-        assertEquals(1, user.getId());
-
-        client.delete()
-                .uri("/api/gateway/users/1")
-                .header("Authorization", "Bearer token")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody();
-
-        assertEquals(null, authServiceClient.getUser(user.getId()));
-    }
+//
+//    @Test
+//    void deleteUser() {
+//        UserDetails user = new UserDetails();
+//        user.setId(1);
+//        user.setUsername("johndoe");
+//        user.setPassword("pass");
+//        user.setEmail("johndoe2@gmail.com");
+//
+//        when(authServiceClient.createUser(argThat(
+//                n -> user.getEmail().equals(n.getEmail())
+//        )))
+//                .thenReturn(Mono.just(user));
+//
+//        client.post()
+//                .uri("/api/gateway/users")
+//                .body(Mono.just(user), UserDetails.class)
+//                .accept(MediaType.APPLICATION_JSON)
+//                .exchange()
+//                .expectStatus().isOk()
+//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+//                .expectBody();
+//
+//        assertEquals(1, user.getId());
+//
+//        client.delete()
+//                .uri("/api/gateway/users/1")
+//                .header("Authorization", "Bearer token")
+//                .accept(MediaType.APPLICATION_JSON)
+//                .exchange()
+//                .expectStatus()
+//                .isOk()
+//                .expectBody();
+//
+//        assertEquals(null, authServiceClient.getUser(user.getId()));
+//    }
 
 
 
@@ -1424,29 +1424,29 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.message").isEqualTo(expectedErrorMessage);
     }
 
-    @Test
-    @DisplayName("Given valid JWT, verify user")
-    void verify_user() throws JsonProcessingException {
-
-        final String validToken = "some.valid.token";
-        final UserDetails user = UserDetails.builder()
-                .id(1)
-                .password(null)
-                .email("e@mail.com")
-                .username("user")
-                .roles(Collections.emptySet())
-                .build();
-
-        when(authServiceClient.verifyUser(validToken))
-                .thenReturn(Mono.just(user));
-
-        client.get()
-                .uri("/api/gateway/verification/{token}", validToken)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .json(objectMapper.writeValueAsString(user));
-    }
+//    @Test
+//    @DisplayName("Given valid JWT, verify user")
+//    void verify_user() throws JsonProcessingException {
+//
+//        final String validToken = "some.valid.token";
+//        final UserDetails user = UserDetails.builder()
+//                .id(1)
+//                .password(null)
+//                .email("e@mail.com")
+//                .username("user")
+//                .roles(Collections.emptySet())
+//                .build();
+//
+//        when(authServiceClient.verifyUser(validToken))
+//                .thenReturn(Mono.just(user));
+//
+//        client.get()
+//                .uri("/api/gateway/verification/{token}", validToken)
+//                .exchange()
+//                .expectStatus().isOk()
+//                .expectBody()
+//                .json(objectMapper.writeValueAsString(user));
+//    }
 
 //    @Test
 //    @DisplayName("Given invalid JWT, expect 400")

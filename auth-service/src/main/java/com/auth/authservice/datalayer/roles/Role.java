@@ -11,7 +11,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 
-@Table(schema = "auth", name = "roles")
+@Table(name = "roles")
 @Entity
 @Getter
 @Setter

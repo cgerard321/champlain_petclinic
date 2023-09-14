@@ -164,38 +164,47 @@ services:
             retries: 10
 
     mysql4:
-        image: mysql:5.7
-        platform: linux/amd64
-        deploy:
-            resources:
-                limits:
-                    memory: 350m
-        ports:
-            - "3310:3306"
-        environment:
-            - MYSQL_ROOT_PASSWORD=rootpwd
-            - MYSQL_DATABASE=auth
-            - MYSQL_USER=user
-            - MYSQL_PASSWORD=pwd
-        volumes:
-            - ./data/mysql4:/var/lib/mysql4
-            - ./data/init.d:/docker-entrypoint-initdb.d
-        healthcheck:
-            test:
-                [
-                    "CMD",
-                    "mysqladmin",
-                    "ping",
-                    "-uroot",
-                    "-prootpwd",
-                    "-h",
-                    "localhost"
-                ]
-            interval: 10s
-            timeout: 5s
-            retries: 10
+      image: mysql:5.7
+      ports:
+        - "3310:3306"
+      environment:
+        - MYSQL_ROOT_PASSWORD=rootpwd
+        - MYSQL_DATABASE=auth-db
+        - MYSQL_USER=user
+        - MYSQL_PASSWORD=pwd
+      volumes:
+        - ./data/mysql4:/var/lib/mysql4
+        - ./data/init.d:/docker-entrypoint-initdb.d
+      healthcheck:
+        test:
+          [
+            "CMD",
+            "mysqladmin",
+            "ping",
+            "-uuser",
+            "-ppwd",
+            "-h",
+            "localhost",
+          ]
+        interval: 10s
+        timeout: 5s
+        retries: 10
 
-    # vet mongo container
+    phpmyadmin:
+      image: phpmyadmin:5.2.0
+      container_name: PhpMyAdmin
+      links:
+        - mysql4
+        - mysql3
+        - mysql1
+      restart: always
+      ports:
+        - 5013:80
+      environment:
+        - PMA_ARBITRARY=1
+
+
+  # vet mongo container
     mongo:
         image: mongo
         container_name: mongo
@@ -338,14 +347,3 @@ services:
         - mongo-inventory
         - inventory-service
 
-
-    phpmyadmin:
-      image: phpmyadmin:5.2.0
-      container_name: PhpMyAdmin
-      links:
-        - mysql4
-      restart: always
-      ports:
-        - 5013:80
-      environment:
-        - PMA_ARBITRARY=1

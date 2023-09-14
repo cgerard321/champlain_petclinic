@@ -51,66 +51,66 @@ public class AuthServiceClient {
     }
 
 
-    public Mono<UserDetails> getUser(final long userId) {
-        return webClientBuilder.build().get()
-                .uri(authServiceUrl + "/users/{userId}", userId)
-                .retrieve()
-                .bodyToMono(UserDetails.class);
-    }
-
-    public Flux<UserDetails> getUsers(String auth) {
-        return webClientBuilder.build().get()
-                .uri(authServiceUrl + "/users/withoutPages")
-                .header("Authorization", auth)
-                .retrieve()
-                .bodyToFlux(UserDetails.class);
-    }
-
-    public Mono<UserDetails> createUser (final Register model) {
-        return webClientBuilder.build().post()
-                .uri(authServiceUrl + "/users")
-                .body(just(model), Register.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .onStatus(HttpStatus::is4xxClientError,
-                        n -> rethrower.rethrow(n,
-                                x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
-                        )
-                .bodyToMono(UserDetails.class);
-    }
-    public Mono<UserDetails> updateUser (final long userId, final Register model) {
-        return webClientBuilder.build().put()
-                .uri(authServiceUrl + "/users/{userId}", userId)
-                .body(just(model), Register.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .onStatus(HttpStatus::is4xxClientError,
-                        n -> rethrower.rethrow(n,
-                                x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
-                        )
-                .bodyToMono(UserDetails.class);
-    }
-
-    public Mono<UserDetails> deleteUser(String auth, final long userId) {
-        return webClientBuilder.build()
-                .delete()
-                .uri(authServiceUrl + "/users/{userId}", userId)
-                .header("Authorization", auth)
-                .retrieve()
-                .bodyToMono(UserDetails.class);
-    }
-
-    public Mono<UserDetails> verifyUser(final String token) {
-        return webClientBuilder.build()
-                .get()
-                .uri(authServiceUrl + "/users/verification/{token}", token)
-                .retrieve()
-                .onStatus(HttpStatus::is4xxClientError,
-                        n -> rethrower.rethrow(n,
-                                x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
-                )
-                .bodyToMono(UserDetails.class);
-    }
+//    public Mono<UserDetails> getUser(final long userId) {
+//        return webClientBuilder.build().get()
+//                .uri(authServiceUrl + "/users/{userId}", userId)
+//                .retrieve()
+//                .bodyToMono(UserDetails.class);
+//    }
+//
+//    public Flux<UserDetails> getUsers(String auth) {
+//        return webClientBuilder.build().get()
+//                .uri(authServiceUrl + "/users/withoutPages")
+//                .header("Authorization", auth)
+//                .retrieve()
+//                .bodyToFlux(UserDetails.class);
+//    }
+//
+//    public Mono<UserDetails> createUser (final Register model) {
+//        return webClientBuilder.build().post()
+//                .uri(authServiceUrl + "/users")
+//                .body(just(model), Register.class)
+//                .accept(MediaType.APPLICATION_JSON)
+//                .retrieve()
+//                .onStatus(HttpStatus::is4xxClientError,
+//                        n -> rethrower.rethrow(n,
+//                                x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
+//                        )
+//                .bodyToMono(UserDetails.class);
+//    }
+//    public Mono<UserDetails> updateUser (final long userId, final Register model) {
+//        return webClientBuilder.build().put()
+//                .uri(authServiceUrl + "/users/{userId}", userId)
+//                .body(just(model), Register.class)
+//                .accept(MediaType.APPLICATION_JSON)
+//                .retrieve()
+//                .onStatus(HttpStatus::is4xxClientError,
+//                        n -> rethrower.rethrow(n,
+//                                x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
+//                        )
+//                .bodyToMono(UserDetails.class);
+//    }
+//
+//    public Mono<UserDetails> deleteUser(String auth, final long userId) {
+//        return webClientBuilder.build()
+//                .delete()
+//                .uri(authServiceUrl + "/users/{userId}", userId)
+//                .header("Authorization", auth)
+//                .retrieve()
+//                .bodyToMono(UserDetails.class);
+//    }
+//
+//    public Mono<UserDetails> verifyUser(final String token) {
+//        return webClientBuilder.build()
+//                .get()
+//                .uri(authServiceUrl + "/users/verification/{token}", token)
+//                .retrieve()
+//                .onStatus(HttpStatus::is4xxClientError,
+//                        n -> rethrower.rethrow(n,
+//                                x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
+//                )
+//                .bodyToMono(UserDetails.class);
+//    }
 
     // NOTE: At the time I am writing this method, there is no way to get the body of a response
     // with exchange() other than doing more scuffed shit with AtomicReferences and even.

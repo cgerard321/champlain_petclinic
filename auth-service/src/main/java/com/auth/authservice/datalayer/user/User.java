@@ -44,7 +44,7 @@ import java.util.Set;
 
 import static java.lang.String.format;
 
-@Table(schema = "auth", name = "users")
+@Table(name = "users")
 @Entity
 @Getter
 @Setter
@@ -84,7 +84,6 @@ public class User implements UserDetails {
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-            schema = "auth",
             name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id")

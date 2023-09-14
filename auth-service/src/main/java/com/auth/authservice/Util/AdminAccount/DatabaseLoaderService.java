@@ -4,6 +4,7 @@ import com.auth.authservice.datalayer.roles.Role;
 import com.auth.authservice.datalayer.roles.RoleRepo;
 import com.auth.authservice.datalayer.user.User;
 import com.auth.authservice.datalayer.user.UserRepo;
+import lombok.RequiredArgsConstructor;
 import org.hibernate.mapping.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -14,20 +15,20 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Component
+@RequiredArgsConstructor
 public class DatabaseLoaderService implements CommandLineRunner {
 
-    @Autowired
-    UserRepo userRepo;
+    private final UserRepo userRepo;
 
-    @Autowired
-    PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    RoleRepo roleRepo;
+    private final RoleRepo roleRepo;
 
 
     @Override
     public void run(String... args) throws Exception {
+        roleRepo.save(Role.builder().name("ADMIN").build());
+
         Set<Role> roles = new HashSet<>();
         roles.add(roleRepo.findById(1L).get());
         User admin = User.builder()

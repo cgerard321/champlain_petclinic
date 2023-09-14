@@ -31,7 +31,7 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-api:0.11.2'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.2'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.2'
-    implementation 'org.flywaydb:flyway-core'
+    //implementation 'org.flywaydb:flyway-core'
     // https://mvnrepository.com/artifact/com.squareup.retrofit2/retrofit
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     // https://mvnrepository.com/artifact/com.squareup.retrofit2/converter-jackson
@@ -46,7 +46,8 @@ dependencies {
     testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
     implementation group: 'org.springframework.security', name: 'spring-security-oauth2-resource-server', version: '6.1.2'
 
-    runtimeOnly 'com.h2database:h2'
+    implementation 'mysql:mysql-connector-java'
+    testImplementation('com.h2database:h2')
 
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
