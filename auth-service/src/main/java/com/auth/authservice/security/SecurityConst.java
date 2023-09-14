@@ -1,9 +1,5 @@
 package com.auth.authservice.security;
 
-import io.jsonwebtoken.security.Keys;
-
-import java.nio.charset.StandardCharsets;
-
 public class SecurityConst {
 
     public static final long EXPIRATION_TIME = 60 * 60 * 1000;     // 24 hours

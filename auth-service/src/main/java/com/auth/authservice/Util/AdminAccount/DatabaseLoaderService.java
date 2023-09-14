@@ -5,8 +5,6 @@ import com.auth.authservice.datalayer.roles.RoleRepo;
 import com.auth.authservice.datalayer.user.User;
 import com.auth.authservice.datalayer.user.UserRepo;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.mapping.List;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;

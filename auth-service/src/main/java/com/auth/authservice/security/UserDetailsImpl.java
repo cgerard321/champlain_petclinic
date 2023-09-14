@@ -2,7 +2,6 @@ package com.auth.authservice.security;
 
 import com.auth.authservice.datalayer.user.User;
 import com.auth.authservice.datalayer.user.UserRepo;
-
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;

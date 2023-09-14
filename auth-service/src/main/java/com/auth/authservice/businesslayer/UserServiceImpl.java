@@ -9,7 +9,6 @@
 package com.auth.authservice.businesslayer;
 
 import com.auth.authservice.Util.Exceptions.EmailAlreadyExistsException;
-import com.auth.authservice.Util.Exceptions.IncorrectPasswordException;
 import com.auth.authservice.Util.Exceptions.InvalidInputException;
 import com.auth.authservice.Util.Exceptions.NotFoundException;
 import com.auth.authservice.datalayer.roles.Role;
@@ -20,9 +19,7 @@ import com.auth.authservice.domainclientlayer.Mail.Mail;
 import com.auth.authservice.domainclientlayer.Mail.MailService;
 import com.auth.authservice.presentationlayer.User.UserIDLessRoleLessDTO;
 import com.auth.authservice.presentationlayer.User.UserPasswordLessDTO;
-import com.auth.authservice.presentationlayer.User.UserTokenPair;
 import com.auth.authservice.security.JwtTokenUtil;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,14 +27,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
-import java.nio.file.attribute.UserPrincipal;
 import java.util.*;
 
 import static java.lang.String.format;

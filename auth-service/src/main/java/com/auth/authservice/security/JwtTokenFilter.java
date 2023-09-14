@@ -8,8 +8,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,22 +26,17 @@ import java.util.Optional;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class JwtTokenFilter extends OncePerRequestFilter {
-    @Autowired
     @Qualifier("handlerExceptionResolver")
-    private HandlerExceptionResolver resolver;
+    private final HandlerExceptionResolver resolver;
     private final JwtTokenUtil jwtTokenUtil;
 
     private final UserRepo userRepo;
     private final ObjectMapper objectMapper;
 
 
-    public JwtTokenFilter(JwtTokenUtil jwtTokenUtil
-            , UserRepo userRepo, ObjectMapper objectMapper) {
-        this.jwtTokenUtil = jwtTokenUtil;
-        this.userRepo = userRepo;
-        this.objectMapper = objectMapper;
-    }
+
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,

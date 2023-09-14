@@ -20,7 +20,6 @@ import com.auth.authservice.Util.Exceptions.IncorrectPasswordException;
 import com.auth.authservice.businesslayer.UserService;
 import com.auth.authservice.datalayer.user.User;
 import com.auth.authservice.datamapperlayer.UserMapper;
-
 import com.auth.authservice.security.JwtTokenUtil;
 import com.auth.authservice.security.UserPrincipalImpl;
 import jakarta.servlet.http.HttpServletResponse;
@@ -44,9 +43,6 @@ import org.springframework.web.bind.annotation.*;
 import java.time.Duration;
 import java.util.Base64;
 import java.util.List;
-
-import static org.springframework.http.HttpHeaders.AUTHORIZATION;
-import static org.springframework.http.ResponseEntity.ok;
 
 @RestController
 @RequestMapping("/users")
