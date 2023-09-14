@@ -1,4 +1,4 @@
-package com.petclinic.inventoryservice.utils.exceptions;
+package com.petclinic.inventoryservice.utils;
 
 import com.petclinic.inventoryservice.datalayer.Inventory.Inventory;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryRepository;
