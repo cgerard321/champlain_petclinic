@@ -7,12 +7,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Date;
 import java.util.List;
 
 import static java.util.stream.Collectors.joining;
@@ -23,83 +21,71 @@ import static java.util.stream.Collectors.joining;
  */
 
 @Component
-//@RequiredArgsConstructor
 public class VisitsServiceClient {
-
-//    private final WebClient.Builder webClientBuilder;
-//
-//    @Value("${app.visits-service.host}") String visitsServiceHost;
-//    @Value("${app.visits-service.port}") String visitsServicePort;
-//    private final String visitsServiceURL = "http://" + visitsServiceHost + ":" + visitsServicePort + "/";
-//    private String hostname = "http://" + visitsServiceHost + "/";
-
-    private final WebClient.Builder webClientBuilder;
-    //private final String visitsServiceURL;
-    private String hostname;
+    private final WebClient webClient;
 
     @Autowired
     public VisitsServiceClient(
-            WebClient.Builder webClientBuilder,
-            @Value("${app.visits-service.host}") String visitsServiceHost,
-            @Value("${app.visits-service.port}") String visitsServicePort
+            @Value("${app.visits-service-new.host}") String visitsServiceHost,
+            @Value("${app.visits-service-new.port}") String visitsServicePort
     ) {
-        this.webClientBuilder = webClientBuilder;
-        hostname = "http://" + visitsServiceHost + ":" + visitsServicePort;
+        this.webClient = WebClient.builder()
+                .baseUrl("http://" + visitsServiceHost + ":" + visitsServicePort)
+                .build();
     }
 
     public Mono<Visits> getVisitsForPets(final List<Integer> petIds) {
-        return webClientBuilder.build()
+        return this.webClient
                 .get()
-                .uri(hostname + "/pets/visits?petId={petId}", joinIds(petIds))
+                .uri("/pets/visits?petId={petId}", joinIds(petIds))
                 .retrieve()
                 .bodyToMono(Visits.class);
     }
 
     public Flux<VisitDetails> getVisitsForPet(final int petId){
-        return webClientBuilder.build()
+        return webClient
                 .get()
-                .uri(hostname + "/visits/{petId}", petId)
+                .uri("/visits/{petId}", petId)
                 .retrieve()
                 .bodyToFlux(VisitDetails.class);
     }
 
     public Flux<VisitDetails> getPreviousVisitsForPet(final int petId) {
-        return webClientBuilder.build()
+        return webClient
                 .get()
-                .uri(hostname + "/visits/previous/{petId}", petId)
+                .uri("/visits/previous/{petId}", petId)
                 .retrieve()
                 .bodyToFlux(VisitDetails.class);
     }
 
     public Flux<VisitDetails> getVisitForPractitioner(final int practitionerId){
-        return webClientBuilder.build()
+        return webClient
                 .get()
-                .uri(hostname + "visits/vets/{practitionerId}", practitionerId)
+                .uri("visits/vets/{practitionerId}", practitionerId)
                 .retrieve()
                 .bodyToFlux(VisitDetails.class);
     }
 
     public Flux<VisitDetails> getVisitsByPractitionerIdAndMonth(final int practitionerId, final String startDate, final String endDate) {
-        return webClientBuilder.build()
+        return webClient
                 .get()
-                .uri(hostname + "/visits/calendar/{practitionerId}?dates={startDate},{endDate}", practitionerId, startDate, endDate)
+                .uri("/visits/calendar/{practitionerId}?dates={startDate},{endDate}", practitionerId, startDate, endDate)
                 .retrieve()
                 .bodyToFlux(VisitDetails.class);
     }
 
     public Flux<VisitDetails> getScheduledVisitsForPet(final int petId) {
-        return webClientBuilder.build()
+        return webClient
                 .get()
-                .uri(hostname + "/visits/scheduled/{petId}", petId)
+                .uri("/visits/scheduled/{petId}", petId)
                 .retrieve()
                 .bodyToFlux(VisitDetails.class);
     }
 
     public Mono<VisitDetails> updateVisitForPet(VisitDetails visit) {
-        String url = hostname + "/owners/*/pets/" + visit.getPetId() + "/visits/" + visit.getVisitId();
-        return webClientBuilder.build()
+        return webClient
                 .put()
-                .uri(url)
+                .uri("/owners/*/pets/" + visit.getPetId() + "/visits/" + visit.getVisitId())
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .body(Mono.just(visit), VisitDetails.class)
                 .retrieve()
@@ -107,10 +93,9 @@ public class VisitsServiceClient {
     }
 
     public Mono<VisitDetails> createVisitForPet(VisitDetails visit) {
-        String url = hostname + "/owners/*/pets/" + visit.getPetId() + "/visits";
-        return webClientBuilder.build()
+        return webClient
                 .post()
-                .uri(url)
+                .uri("/owners/*/pets/" + visit.getPetId() + "/visits")
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .body(Mono.just(visit), VisitDetails.class)
                 .retrieve()
@@ -118,9 +103,9 @@ public class VisitsServiceClient {
     }
 
     public Mono<Void> deleteVisitByVisitId(String visitId){
-        return webClientBuilder.build()
+        return webClient
                 .delete()
-                .uri(hostname + "/visits/{visitId}", visitId)
+                .uri("/visits/{visitId}", visitId)
                 .retrieve()
                 .bodyToMono(Void.class);
     }
@@ -129,14 +114,12 @@ public class VisitsServiceClient {
         return petIds.stream().map(Object::toString).collect(joining(","));
     }
 
-    void setHostname(String hostname) {
-        this.hostname = hostname;
-    }
+
     
     public Mono<VisitDetails> getVisitByVisitId(String visitId) {
-        return webClientBuilder.build()
+        return webClient
                 .get()
-                .uri(hostname + "/visit/{visitId}", visitId)
+                .uri("/visit/{visitId}", visitId)
                 .retrieve()
                 .bodyToMono(VisitDetails.class);
     }
