@@ -3,53 +3,62 @@
 <div ng-app="ownerDetails" class="d-flex flex-column">
     <div ng-controller="OwnerDetailsController">
 
-        <h3 class="">Owner Details</h3>
+        <div class="ownerDetailContainer d-flex flex-column p-5 shadow">
 
-        <form action="" class="pt-3">
+            <h3 class="">Owner Details</h3>
 
-            <div class="d-flex" >
-                <div class="d-flex flex-column">
-                    <label>Owner Id</label>
-                    <input value="{{$ctrl.owner.ownerId}}" size="50" readonly/>
-                </div>
-            </div>
+            <form action="" class="pt-3">
 
-            <div class="d-flex flex-row gap-3 pt-1">
+                <div class="d-flex" >
+                    <div class="d-flex flex-column">
 
-                <div class="d-flex flex-column">
-                    <label>First Name</label>
-                    <input value="{{$ctrl.owner.firstName}}" readonly/>
+                        <input class="inputFieldsStyle" value="{{$ctrl.owner.ownerId}}" size="50" readonly/>
+                        <label class="inputLabel">Owner Id</label>
+                    </div>
                 </div>
 
-                <div class="d-flex flex-column ">
-                    <label>Last Name</label>
-                    <input value="{{$ctrl.owner.lastName}}" readonly/>
+                <div class="d-flex flex-row gap-3 pt-1">
+
+                    <div class="d-flex flex-column">
+
+                        <input class="inputFieldsStyle" value="{{$ctrl.owner.firstName}}" readonly/>
+                        <label class="inputLabel">First Name</label>
+                    </div>
+
+                    <div class="d-flex flex-column ">
+
+                        <input class="inputFieldsStyle" value="{{$ctrl.owner.lastName}}" readonly/>
+                        <label class="inputLabel">Last Name</label>
+                    </div>
+
                 </div>
 
-            </div>
+                <div class="d-flex flex-row gap-3 pt-1">
 
-            <div class="d-flex flex-row gap-3 pt-1">
+                    <div class="d-flex flex-column">
 
-                <div class="d-flex flex-column">
-                    <label>Address</label>
-                    <input value="{{$ctrl.owner.address}}" readonly/>
+                        <input class="inputFieldsStyle" value="{{$ctrl.owner.address}}" readonly/>
+                        <label class="inputLabel">Address</label>
+                    </div>
+
+                    <div class="d-flex flex-column">
+
+                        <input class="inputFieldsStyle" value="{{$ctrl.owner.city}}" readonly/>
+                        <label class="inputLabel">City</label>
+                    </div>
+
                 </div>
 
-                <div class="d-flex flex-column">
-                    <label>City</label>
-                    <input value="{{$ctrl.owner.city}}" readonly/>
+                <div class="d-flex pt-1">
+                    <div class="d-flex flex-column">
+                        <input class="inputFieldsStyle" value="{{$ctrl.owner.telephone}}" size="15" readonly/>
+                        <label class="inputLabel">Phone Number</label>
+                    </div>
                 </div>
 
-            </div>
+            </form>
 
-            <div class="d-flex pt-1">
-                <div class="d-flex flex-column">
-                    <label>Phone Number</label>
-                    <input value="{{$ctrl.owner.telephone}}" size="15" readonly/>
-                </div>
-            </div>
-
-        </form>
+        </div>
 
     </div>
 </div>

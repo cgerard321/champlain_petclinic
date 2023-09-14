@@ -1,37 +1,22 @@
-.parent {
-    position: relative;
-    height: 150px;
-    width: 150px;
-    top: 0;
-    left: 100px;
-    z-index: 50;
+.inputFieldsStyle{
+    border-color: rgba(0,0,0,0.1);
+    border-top: 0;
+    border-left: 0;
+    border-right: 0;
+    border-bottom: 1.5px solid rgba(0,0,0,0.1);
+    color: #3c3834;
 }
 
-.image1 {
-    position: relative;
-    top: 0;
-    left: 100px;
-    bottom: 100px;
-    border: 1px solid #000000;
+.ownerDetailContainer {
+    background-Color:white;
+    border-radius: 10px;
+    width: 550px
 }
 
-.image2 {
-    position: relative;
-    left: 100px;
-    bottom: 150px;
-    border: 1px solid #000000;
-}
-
-.fileInput {
-    cursor: pointer;
-    position:absolute;
-    opacity: 0;
-    right: 0;
-    left: 100px;
-    bottom: 0;
-    height:150px;
-    width:150px;
-    z-index: 60;
+.inputLabel{
+    font-size:10px;
+    text-align:left;
+    color:rgba(0,0,0,0.25);
 }
 
 

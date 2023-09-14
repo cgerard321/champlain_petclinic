@@ -9,13 +9,13 @@
 .xd-container {
   margin-top: 40px;
   margin-bottom: 100px;
-  padding-left: 5px;
-  padding-right: 5px;
+  /*padding-left: 5px;
+  padding-right: 5px;*/
 }
 .index-page--subtitle {
   font-size: 16px;
   line-height: 24px;
-  margin: 0 0 30px;
+  /*margin: 0 0 30px;*/
 }
 .form-horizontal button.btn-inverse {
   margin-left: 32px;
@@ -108,15 +108,10 @@ table td.action-column {
   }
 }
 
-<!-- New Css -->
-button#newBtn {
-  font-weight: bold;
-}
-
 a.newBtn:hover, button#newBtn:hover{
-  font-weight: bold;
-  background-color: black;
-  color: white;
+  text-decoration-color: blue;
+  text-decoration: underline;
+  color: blue;
 }
 
 #owner {
@@ -170,16 +165,6 @@ div.pet, div.owner {
 
 div.pet:not(.marg), div.owner:not(.marg){
   background-color: rgba(0, 0, 0, 0.05);
-}
-
-#owner.table>tbody>tr:hover{
-   background-color: darkgray;
-   color: black;
-}
-
-#owner.table>tbody>tr:nth-child(even):hover{
-  background-color: darkgray;
-  color: black;
 }
 
 #owner.table>tbody>tr>td {
