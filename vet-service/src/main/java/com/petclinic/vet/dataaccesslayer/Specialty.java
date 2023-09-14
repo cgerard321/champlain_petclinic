@@ -16,6 +16,7 @@ import lombok.*;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
 public class Specialty {
     private String specialtyId;
     private String name;
