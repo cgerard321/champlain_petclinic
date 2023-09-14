@@ -37,10 +37,10 @@ public class OwnerServiceImpl implements OwnerService {
     @Override
     public Mono<Owner> updateOwner(String ownerId, Mono<Owner> ownerMono) {
         return ownerRepo.findById(ownerId)
-                .flatMap(p -> ownerMono
+                /*.flatMap(p -> ownerMono
                         .doOnNext(e -> e.setId(p.getId()))
                         .doOnNext(e -> e.setPhotoId(p.getPhotoId()))
-                )
+                )*/
                 .flatMap(ownerRepo::save);
     }
 

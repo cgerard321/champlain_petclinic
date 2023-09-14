@@ -153,7 +153,7 @@ class PetServiceImplTest {
                 .address("Test address")
                 .city("test city")
                 .telephone("telephone")
-                .photoId("1")
+                //.photoId("1")
                 .build();
     }
 

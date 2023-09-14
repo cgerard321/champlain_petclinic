@@ -50,11 +50,11 @@ public class CustomersServiceClient {
                 .bodyToFlux(OwnerResponseDTO.class);
     }
 
-    public Mono<OwnerResponseDTO> updateOwner(int ownerId, OwnerResponseDTO od){
+    public Mono<OwnerResponseDTO> updateOwner(int ownerId, OwnerResponseDTO ownerResponseDTO){
 
             return webClientBuilder.build().put()
                     .uri(customersServiceUrl + ownerId)
-                    .body(Mono.just(od), OwnerResponseDTO.class)
+                    .body(Mono.just(ownerResponseDTO), OwnerResponseDTO.class)
                     .retrieve().bodyToMono(OwnerResponseDTO.class);
     }
 
@@ -122,12 +122,12 @@ public class CustomersServiceClient {
                 .retrieve().bodyToMono(String.class);
     }
 
-    public Mono<PhotoDetails> getOwnerPhoto(int id){
+    /*public Mono<PhotoDetails> getOwnerPhoto(int id){
         return webClientBuilder.build().get()
                 .uri(customersServiceUrl +"/photo/" + id)
                 .retrieve()
                 .bodyToMono(PhotoDetails.class);
-    }
+    }*/
 
     public Mono<Void> deleteOwnerPhoto(int photoId) {
         return webClientBuilder.build().delete()

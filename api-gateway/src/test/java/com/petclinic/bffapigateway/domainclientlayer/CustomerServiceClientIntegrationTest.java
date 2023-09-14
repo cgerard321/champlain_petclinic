@@ -75,7 +75,7 @@ public class CustomerServiceClientIntegrationTest {
     }
 
     //TODO
-    @Test
+    /*@Test
     void createOwnerPhoto() throws JsonProcessingException {
 
         customersServiceClient.setOwnerPhoto(TEST_PHOTO, 1);
@@ -90,8 +90,8 @@ public class CustomerServiceClientIntegrationTest {
         assertEquals(TEST_PHOTO.getName(), testPhoto.getName());
         assertEquals(TEST_PHOTO.getType(), testPhoto.getType());
 //        assertEquals(TEST_PHOTO.getPhoto(), testPhoto.getPhoto());
-    }
-    @Test
+    }*/
+    /*@Test
     void getOwnerPhoto() throws JsonProcessingException {
 
         final String body = mapper.writeValueAsString(mapper.convertValue(TEST_PHOTO, PhotoDetails.class));
@@ -106,7 +106,7 @@ public class CustomerServiceClientIntegrationTest {
         assertEquals(TEST_PHOTO.getType(), testPhoto.getType());
 //        assertEquals(TEST_PHOTO.getPhoto(), testPhoto.getPhoto());
 
-    }
+    }*/
     @Test
     void createPetPhoto() throws JsonProcessingException {
 

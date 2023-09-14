@@ -37,7 +37,7 @@ class OwnerServiceImplTest {
             assertEquals(ownerEntity.getAddress(), foundOwner.getAddress());
             assertEquals(ownerEntity.getCity(), foundOwner.getCity());
             assertEquals(ownerEntity.getTelephone(), foundOwner.getTelephone());
-            assertEquals(ownerEntity.getPhotoId(), foundOwner.getPhotoId());
+            //assertEquals(ownerEntity.getPhotoId(), foundOwner.getPhotoId());
         })
                 .verifyComplete();
     }
@@ -108,7 +108,7 @@ class OwnerServiceImplTest {
                 .address("Test address")
                 .city("test city")
                 .telephone("telephone")
-                .photoId("1")
+                //.photoId("1")
                 .build();
     }
 

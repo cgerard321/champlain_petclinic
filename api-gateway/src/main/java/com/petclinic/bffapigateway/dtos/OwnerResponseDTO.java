@@ -28,7 +28,7 @@ public class OwnerResponseDTO {
     private String address;
     private String city;
     private String telephone;
-    private int imageId;
+    //private int imageId;
 
     private final List<PetResponseDTO> pets = new ArrayList<>();
 

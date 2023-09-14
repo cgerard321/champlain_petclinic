@@ -17,6 +17,6 @@ public class Owner {
     private String address;
     private String city;
     private String telephone;
-    private String photoId;
+    //private String photoId;
 
 }

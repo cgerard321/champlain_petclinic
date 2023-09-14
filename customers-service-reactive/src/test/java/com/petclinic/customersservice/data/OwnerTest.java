@@ -16,7 +16,7 @@ class OwnerTest {
         owner.setLastName("Smith");
         owner.setCity("MTL");
         owner.setAddress("9 rue des oiseaux");
-        owner.setPhotoId("0");
+        //owner.setPhotoId("0");
 
         String expected = "Owner(id=1, firstName=John, lastName=Smith, address=9 rue des oiseaux, city=MTL, telephone=1234567890, photoId=0)";
 

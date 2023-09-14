@@ -334,10 +334,10 @@ public class BFFApiGatewayController {
         return customersServiceClient.setOwnerPhoto(photoDetails, ownerId);
     }
 
-    @GetMapping(value = "owners/photo/{ownerId}")
+    /*@GetMapping(value = "owners/photo/{ownerId}")
     public Mono<PhotoDetails> getOwnerPhoto(@PathVariable int ownerId) {
         return customersServiceClient.getOwnerPhoto(ownerId);
-    }
+    }*/
 
     @PostMapping(value = "owners/{ownerId}/pet/photo/{petId}")
     public Mono<String> setPetPhoto(@PathVariable int ownerId, @RequestBody PhotoDetails photoDetails, @PathVariable int petId) {

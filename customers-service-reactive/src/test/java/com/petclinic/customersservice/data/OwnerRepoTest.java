@@ -28,7 +28,7 @@ class OwnerRepoTest {
                     assertEquals(owner.getAddress(), foundOwner.getAddress());
                     assertEquals(owner.getCity(), foundOwner.getCity());
                     assertEquals(owner.getTelephone(), foundOwner.getTelephone());
-                    assertEquals(owner.getPhotoId(), foundOwner.getPhotoId());
+                    //assertEquals(owner.getPhotoId(), foundOwner.getPhotoId());
                 })
                 .verifyComplete();
     }
@@ -55,7 +55,7 @@ class OwnerRepoTest {
                 .address("308 ave de Stanley")
                 .city("Saint-Lambert")
                 .telephone("514-516-1191")
-                .photoId("55")
+                //.photoId("55")
                 .build();
     }
 }
