@@ -74,7 +74,7 @@ public Mono<ProductResponseDTO> addProductToInventory(Mono<ProductRequestDTO> pr
 
     private Mono<Integer> generateUniqueSku() {
         return Mono.defer(() -> {
-            int generatedSku = EntityDTOUtil.generateSKU();
+            String generatedSku = EntityDTOUtil.generateSKU();
             return productRepository.existsBySku(generatedSku)
                     .flatMap(exists -> {
                         // Generating a new SKU since the once generated is not unique

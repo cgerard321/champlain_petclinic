@@ -32,18 +32,17 @@ public class EntityDTOUtil {
         return inventory;
     }
 
-    public static Integer generateSKU() {
-        final int SKU_LENGTH = 9;
-        final String SKU_CHARACTERS = "0123456789";
+    public static String generateSKU() {
+        String SKU_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        int SKU_LENGTH = 9;
         StringBuilder sku = new StringBuilder();
-        // This generates a random 9 digit number
         Random random = new Random();
         for (int i = 0; i < SKU_LENGTH; i++) {
             int index = random.nextInt(SKU_CHARACTERS.length());
-            char randomChar = SKU_CHARACTERS.charAt(index);
-            sku.append(randomChar);
-        }
-        return Integer.parseInt(sku.toString());
+            char character = SKU_CHARACTERS.charAt(index);
+            sku.append(character);
+            }
+            return sku.toString();
         }
 
 }

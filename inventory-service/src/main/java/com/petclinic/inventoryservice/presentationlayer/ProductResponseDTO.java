@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 public class ProductResponseDTO {
     private String id;
     private String inventoryId;
-    private Integer sku;
+    private String sku;
     private String productName;
     private String productDescription;
     private Double productPrice;
