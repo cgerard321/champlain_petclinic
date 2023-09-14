@@ -25,10 +25,10 @@ class ProductRepositoryTest {
                 .verifyComplete();
     }
 
-    private Product buildProduct(String inventoryId, String sku, String productName, String productDescription, Double productPrice, Integer productQuantity) {
+    private Product buildProduct(String inventoryId, String productId, String productName, String productDescription, Double productPrice, Integer productQuantity) {
         return Product.builder()
                 .inventoryId(inventoryId)
-                .sku(sku)
+                .productId(productId)
                 .productName(productName)
                 .productDescription(productDescription)
                 .productPrice(productPrice)

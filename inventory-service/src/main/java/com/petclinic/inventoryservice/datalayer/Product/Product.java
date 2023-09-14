@@ -13,8 +13,8 @@ import org.springframework.data.annotation.Id;
 public class Product {
     @Id
     private String id;
+    private String productId;
     private String inventoryId;
-    private String sku;
     private String productName;
     private String productDescription;
     private Double productPrice;

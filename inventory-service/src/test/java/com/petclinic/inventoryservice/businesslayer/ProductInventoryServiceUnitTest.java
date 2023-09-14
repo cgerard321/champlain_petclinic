@@ -14,6 +14,8 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -33,7 +35,7 @@ class ProductInventoryServiceUnitTest {
     ProductResponseDTO productResponseDTO = ProductResponseDTO.builder()
             .id("1")
             .inventoryId("1")
-            .sku("123F567C9")
+            .productId(UUID.randomUUID().toString())
             .productName("Benzodiazepines")
             .productDescription("Sedative Medication")
             .productPrice(100.00)

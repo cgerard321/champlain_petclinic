@@ -4,5 +4,5 @@ import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import reactor.core.publisher.Mono;
 
 public interface ProductRepository extends ReactiveMongoRepository<Product, String> {
-    Mono<Boolean> existsBySku(String sku);
+    Mono<Boolean> existsByProductId(String productId);
 }

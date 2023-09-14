@@ -9,6 +9,7 @@ import com.petclinic.inventoryservice.presentationlayer.ProductResponseDTO;
 import org.springframework.beans.BeanUtils;
 
 import java.util.Random;
+import java.util.UUID;
 
 public class EntityDTOUtil {
     public static ProductResponseDTO toProductResponseDTO(Product product){
@@ -32,17 +33,7 @@ public class EntityDTOUtil {
         return inventory;
     }
 
-    public static String generateSKU() {
-        String SKU_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-        int SKU_LENGTH = 9;
-        StringBuilder sku = new StringBuilder();
-        Random random = new Random();
-        for (int i = 0; i < SKU_LENGTH; i++) {
-            int index = random.nextInt(SKU_CHARACTERS.length());
-            char character = SKU_CHARACTERS.charAt(index);
-            sku.append(character);
-            }
-            return sku.toString();
-        }
-
+    public static String generateUUID(){
+        return UUID.randomUUID().toString();
+    }
 }

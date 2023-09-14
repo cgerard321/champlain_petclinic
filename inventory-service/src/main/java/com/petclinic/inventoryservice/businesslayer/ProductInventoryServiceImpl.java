@@ -56,34 +56,13 @@ public Mono<ProductResponseDTO> addProductToInventory(Mono<ProductRequestDTO> pr
                         } else if (requestDTO.getProductPrice() < 0 || requestDTO.getProductQuantity() < 0) {
                             return Mono.error(new InvalidInputException("Product price and quantity must be greater than 0."));
                         } else {
-                            return generateUniqueSku()
-                                    .flatMap(sku -> {
-                                        Product productEntity = EntityDTOUtil.toProductEntity(requestDTO);
-                                        productEntity.setSku(sku);
-                                        productEntity.setInventoryId(inventoryId);
-                                        return productRepository.insert(productEntity)
-                                                .map(EntityDTOUtil::toProductResponseDTO);
-                                    });
+                            Product product = EntityDTOUtil.toProductEntity(requestDTO);
+                            product.setInventoryId(inventoryId);
+                            product.setProductId(EntityDTOUtil.generateUUID());
+                            return productRepository.insert(product)
+                                    .map(EntityDTOUtil::toProductResponseDTO);
                         }
                     }))
             .switchIfEmpty(Mono.error(new InvalidInputException("Unable to save product to the repository, an error occurred.")));
 }
-
-
-    private Mono<String> generateUniqueSku() {
-        return Mono.defer(() -> {
-            String generatedSku = EntityDTOUtil.generateSKU();
-            return productRepository.existsBySku(generatedSku)
-                    .flatMap(exists -> {
-                        // Generating a new SKU since the once generated is not unique
-                        if (exists) {
-                            return generateUniqueSku();
-                        } else {
-                            // Return the generated SKU since it is unique
-                            return Mono.just(generatedSku);
-                        }
-                    });
-        });
-    }
-
 }

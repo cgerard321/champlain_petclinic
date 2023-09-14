@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class ProductResponseDTO {
     private String id;
+    private String productId;
     private String inventoryId;
-    private String sku;
     private String productName;
     private String productDescription;
     private Double productPrice;

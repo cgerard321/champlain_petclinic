@@ -41,7 +41,7 @@ class InventoryControllerIntegrationTest {
                 .verifyComplete();
         Publisher<Product> productPublisher = productRepository.save(Product.builder()
                 .inventoryId("1")
-                .sku("123F567C9")
+                .inventoryId("123F567C9")
                 .productName("Benzodiazepines")
                 .productDescription("Sedative Medication")
                 .productPrice(100.00)

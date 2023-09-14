@@ -23,7 +23,7 @@ class InventoryControllerUnitTest {
     ProductResponseDTO productResponseDTO = ProductResponseDTO.builder()
             .id("1")
             .inventoryId("1")
-            .sku("123F567C9")
+            .inventoryId("123F567C9")
             .productName("Benzodiazepines")
             .productDescription("Sedative Medication")
             .productPrice(100.00)

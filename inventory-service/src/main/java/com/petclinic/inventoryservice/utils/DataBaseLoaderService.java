@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.UUID;
+
 @Service
 public class DataBaseLoaderService  implements CommandLineRunner {
     @Autowired
@@ -26,14 +28,14 @@ public class DataBaseLoaderService  implements CommandLineRunner {
                 .build();
         Product product1 = Product.builder()
                 .productName("Benzodiazepines")
-                .sku("123F567C9")
+                .productId(UUID.randomUUID().toString())
                 .productPrice(100.00)
                 .inventoryId("1")
                 .productQuantity(10)
                 .build();
         Product product2 = Product.builder()
                 .productName("Trazodone")
-                .sku("98C6543T1")
+                .productId(UUID.randomUUID().toString())
                 .productPrice(150.00)
                 .inventoryId("1")
                 .productQuantity(10)
