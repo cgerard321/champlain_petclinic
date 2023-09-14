@@ -7,7 +7,7 @@
  *
  */
 CREATE TABLE auth.users_roles(
-    id INT NOT NULL AUTO_INCREMENT,
+    id INT AUTO_INCREMENT,
     user_id INT NOT NULL,
     role_id INT NOT NULL,
     FOREIGN KEY(user_id)

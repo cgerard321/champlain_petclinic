@@ -7,6 +7,7 @@ import com.petclinic.bffapigateway.utils.VetsEntityDtoUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -233,36 +234,36 @@ public class BFFApiGatewayController {
     public Mono<Void> deleteVet(@PathVariable String vetId) {
         return vetsServiceClient.deleteVet(VetsEntityDtoUtil.verifyId(vetId));
     }
-
-
-
-    @PostMapping(value = "users",
-            consumes = "application/json",
-            produces = "application/json")
-    public Mono<UserDetails> createUser(@RequestBody Register model) {
-        return authServiceClient.createUser(model);
-    }
-
-    @DeleteMapping(value = "users/{userId}")
-    public Mono<UserDetails> deleteUser(@RequestHeader(AUTHORIZATION) String auth, final @PathVariable long userId) {
-        return authServiceClient.deleteUser(auth, userId);
-    }
-
-    @GetMapping(value = "users/{userId}")
-    public Mono<UserDetails> getUserDetails(final @PathVariable long userId) {
-        return authServiceClient.getUser(userId);
-    }
-    @GetMapping(value = "users")
-    public Flux<UserDetails> getAll(@RequestHeader(AUTHORIZATION) String auth) {
-        return authServiceClient.getUsers(auth);
-    }
-
-    @PutMapping(value = "users/{userId}",
-            consumes = "application/json",
-            produces = "application/json")
-    public Mono<UserDetails> updateUser(final @PathVariable long userId, @RequestBody Register model) {
-        return authServiceClient.updateUser(userId, model);
-    }
+//
+//
+//
+//    @PostMapping(value = "users",
+//            consumes = "application/json",
+//            produces = "application/json")
+//    public Mono<UserDetails> createUser(@RequestBody Register model) {
+//        return authServiceClient.createUser(model);
+//    }
+//
+//    @DeleteMapping(value = "users/{userId}")
+//    public Mono<UserDetails> deleteUser(@RequestHeader(AUTHORIZATION) String auth, final @PathVariable long userId) {
+//        return authServiceClient.deleteUser(auth, userId);
+//    }
+//
+//    @GetMapping(value = "users/{userId}")
+//    public Mono<UserDetails> getUserDetails(final @PathVariable long userId) {
+//        return authServiceClient.getUser(userId);
+//    }
+//    @GetMapping(value = "users")
+//    public Flux<UserDetails> getAll(@RequestHeader(AUTHORIZATION) String auth) {
+//        return authServiceClient.getUsers(auth);
+//    }
+//
+//    @PutMapping(value = "users/{userId}",
+//            consumes = "application/json",
+//            produces = "application/json")
+//    public Mono<UserDetails> updateUser(final @PathVariable long userId, @RequestBody Register model) {
+//        return authServiceClient.updateUser(userId, model);
+//    }
 
     @GetMapping(value = "admin/roles")
     public Flux<Role> getRoles(@RequestHeader(AUTHORIZATION) String auth) {
@@ -357,18 +358,15 @@ public class BFFApiGatewayController {
      * End of Owner Methods
      * **/
 
-    @GetMapping("/verification/{token}")
-    public Mono<UserDetails> verifyUser(@PathVariable final String token) {
-        return authServiceClient.verifyUser(token);
-    }
+//    @GetMapping("/verification/{token}")
+//    public Mono<UserDetails> verifyUser(@PathVariable final String token) {
+//        return authServiceClient.verifyUser(token);
+//    }
 
     @PostMapping("/users/login")
-    public Mono<ResponseEntity<UserDetails>> login(@RequestBody final Login login) {
-        return authServiceClient.login(login)
-                .map(n -> ResponseEntity.ok()
-                        .header(AUTHORIZATION, n.getT1())
-                        .body(n.getT2())
-                );
+    public ResponseEntity<UserPasswordLessDTO> login(@RequestBody final Login login) throws Exception {
+        log.info("Entered controller /login");
+        return ResponseEntity.status(HttpStatus.CREATED).body(authServiceClient.login(login));
     }
 
     //Start of Bundle Methods

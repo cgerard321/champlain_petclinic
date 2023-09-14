@@ -1,5 +1,5 @@
 plugins {
-	id 'org.springframework.boot' version '2.3.10.RELEASE'
+	id 'org.springframework.boot' version '3.0.2'
 	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
 	id 'java'
 	id "io.freefair.lombok" version "6.0.0-m2"
@@ -9,7 +9,7 @@ plugins {
 
 group = 'com.petclinic.bffapigateway'
 version = '1.0.0-SNAPSHOT'
-sourceCompatibility = '1.8'
+sourceCompatibility = '17'
 
 repositories {
 	mavenCentral()
@@ -17,6 +17,8 @@ repositories {
 
 
 dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 

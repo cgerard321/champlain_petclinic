@@ -6,12 +6,12 @@
  * Ticket: feat(AUTH-CPC-59)
  *
  */
-CREATE TABLE auth.roles(
-        id INT NOT NULL AUTO_INCREMENT,
-        name VARCHAR(2048) NOT NULL UNIQUE,
-        parent_id int NULL,
-        FOREIGN KEY(parent_id) REFERENCES auth.roles(id),
-        PRIMARY KEY(id)
+CREATE TABLE auth.roles (
+                            id INT AUTO_INCREMENT,
+                            name VARCHAR(2048) NOT NULL UNIQUE,
+                            parent_id INT NULL,
+                            PRIMARY KEY (id),
+                            FOREIGN KEY (parent_id) REFERENCES auth.roles (id)
 );
 
-INSERT INTO roles (id, name) VALUES (1, 'ADMIN');
+INSERT INTO auth.roles (id, name) VALUES (1, 'ADMIN');

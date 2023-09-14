@@ -9,9 +9,13 @@
 CREATE SCHEMA IF NOT EXISTS auth;
 
 CREATE TABLE auth.users(
-    id INT NOT NULL AUTO_INCREMENT,
+    id INT AUTO_INCREMENT,
     email VARCHAR(2048) NOT NULL UNIQUE,
     username VARCHAR(2048) NOT NULL,
     password VARCHAR(2048) NOT NULL,
+    verified BOOL,
     PRIMARY KEY(id)
 );
+
+
+

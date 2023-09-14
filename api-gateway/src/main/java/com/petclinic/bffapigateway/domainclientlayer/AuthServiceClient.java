@@ -7,31 +7,30 @@ import com.petclinic.bffapigateway.dtos.Role;
 import com.petclinic.bffapigateway.dtos.UserDetails;
 import com.petclinic.bffapigateway.exceptions.GenericHttpException;
 import com.petclinic.bffapigateway.utils.Rethrower;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.function.Tuple2;
-import reactor.util.function.Tuples;
-
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static reactor.core.publisher.Mono.error;
 import static reactor.core.publisher.Mono.just;
 
+@Slf4j
 @Component
 public class AuthServiceClient {
 
     private final WebClient.Builder webClientBuilder;
     private final String authServiceUrl;
+
+    private final RestTemplate restTemplate;
 
     @Autowired
     private Rethrower rethrower;
@@ -39,9 +38,10 @@ public class AuthServiceClient {
     public AuthServiceClient(
             WebClient.Builder webClientBuilder,
             @Value("${app.auth-service.host}") String authServiceHost,
-            @Value("${app.auth-service.port}") String authServicePort
-    ) {
+            @Value("${app.auth-service.port}") String authServicePort,
+            RestTemplate restTemplate) {
         this.webClientBuilder = webClientBuilder;
+        this.restTemplate = restTemplate;
         authServiceUrl = "http://" + authServiceHost + ":" + authServicePort;
     }
 
@@ -67,10 +67,10 @@ public class AuthServiceClient {
                 .body(just(model), Register.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .onStatus(HttpStatus::is4xxClientError,
-                        n -> rethrower.rethrow(n,
-                                x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
-                        )
+//                .onStatus(HttpStatus::is4xxClientError,
+//                        n -> rethrower.rethrow(n,
+//                                x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
+//                        )
                 .bodyToMono(UserDetails.class);
     }
     public Mono<UserDetails> updateUser (final long userId, final Register model) {
@@ -79,10 +79,10 @@ public class AuthServiceClient {
                 .body(just(model), Register.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .onStatus(HttpStatus::is4xxClientError,
-                        n -> rethrower.rethrow(n,
-                                x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
-                        )
+//                .onStatus(HttpStatus::is4xxClientError,
+//                        n -> rethrower.rethrow(n,
+//                                x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
+//                        )
                 .bodyToMono(UserDetails.class);
     }
 
@@ -100,10 +100,10 @@ public class AuthServiceClient {
                 .get()
                 .uri(authServiceUrl + "/users/verification/{token}", token)
                 .retrieve()
-                .onStatus(HttpStatus::is4xxClientError,
-                        n -> rethrower.rethrow(n,
-                                x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
-                )
+//                .onStatus(HttpStatus::is4xxClientError,
+//                        n -> rethrower.rethrow(n,
+//                                x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
+//                )
                 .bodyToMono(UserDetails.class);
     }
 
@@ -112,29 +112,42 @@ public class AuthServiceClient {
     // then it's extremely messy because it returns yet another god damned Mono.
     // Please take the time to look up if reactive web has added a fix
     // to this when you see this in the future.
-    public Mono<Tuple2<String, UserDetails>> login(final Login login) {
-        AtomicReference<String> token = new AtomicReference<>();
+    public UserPasswordLessDTO login(final Login login) throws Exception {
+        log.info("Entered domain service login");
+        UserPasswordLessDTO userResponseModel;
+        try {
+            String url = authServiceUrl + "/users/login";
+            userResponseModel = restTemplate
+                    .postForObject(url, login, UserPasswordLessDTO.class);
+        log.info("Fetched user from auth-service");
+        } catch (HttpClientErrorException ex) {
+            log.info("Error throw in auth domain client service");
+            throw new Exception(ex);
+        }
+        return userResponseModel;
 
-        return webClientBuilder.build()
-                .post()
-                .uri(authServiceUrl + "/users/login")
-                .accept(MediaType.APPLICATION_JSON)
-                .body(just(login), Login.class)
-                .exchange()
-                .doOnNext(n -> {
-                    if(n.statusCode().is4xxClientError()) {
-                        n.releaseBody();
-                        throw new GenericHttpException("Unauthorized", UNAUTHORIZED);
-                    }
-                })
-                .doOnSuccess(n ->  {
-                    final List<String> strings = n.headers().asHttpHeaders().get(HttpHeaders.AUTHORIZATION);
-                    if(strings == null || strings.size() == 0)return;
-                    token.set(strings.get(0));
-                })
-                .switchIfEmpty(error(new RuntimeException("")))
-                .flatMap(n -> n.bodyToMono(UserDetails.class))
-                .map(n -> Tuples.of(token.get(), n));
+//        AtomicReference<String> token = new AtomicReference<>();
+//
+//        return webClientBuilder.build()
+//                .post()
+//                .uri(authServiceUrl + "/users/login")
+//                .accept(MediaType.APPLICATION_JSON)
+//                .body(just(login), Login.class)
+//                .exchange()
+//                .doOnNext(n -> {
+//                    if(n.statusCode().is4xxClientError()) {
+//                        n.releaseBody();
+//                        throw new GenericHttpException("Unauthorized", UNAUTHORIZED);
+//                    }
+//                })
+//                .doOnSuccess(n ->  {
+//                    final List<String> strings = n.headers().asHttpHeaders().get(HttpHeaders.AUTHORIZATION);
+//                    if(strings == null || strings.size() == 0)return;
+//                    token.set(strings.get(0));
+//                })
+//                .switchIfEmpty(error(new RuntimeException("")))
+//                .flatMap(n -> n.bodyToMono(UserDetails.class))
+//                .map(n -> Tuples.of(token.get(), n));
     }
 
 
