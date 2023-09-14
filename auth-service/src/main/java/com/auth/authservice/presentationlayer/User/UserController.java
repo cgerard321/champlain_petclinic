@@ -141,8 +141,10 @@ public class UserController {
                     .sameSite("Lax").build();
             log.info("In controller before set header");
             response.setHeader(HttpHeaders.SET_COOKIE, token.toString());
+            UserPasswordLessDTO testUser = userMapper.modelToIDLessPasswordLessDTO(loggedInUser);
+            testUser.setEmail(null);
             return ResponseEntity.ok()
-                    .body(userMapper.modelToIDLessPasswordLessDTO(loggedInUser));
+                    .body(testUser);
         } catch (BadCredentialsException ex) {
             log.info("Bad credentials exception");
 
