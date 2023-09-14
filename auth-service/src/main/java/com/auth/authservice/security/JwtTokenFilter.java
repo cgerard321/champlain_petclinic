@@ -29,7 +29,7 @@ import java.util.Optional;
 public class JwtTokenFilter extends OncePerRequestFilter {
     @Autowired
     @Qualifier("handlerExceptionResolver")
-    private final HandlerExceptionResolver resolver;
+    private HandlerExceptionResolver resolver;
     private final JwtTokenUtil jwtTokenUtil;
 
     private final UserRepo userRepo;
