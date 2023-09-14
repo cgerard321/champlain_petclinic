@@ -69,7 +69,7 @@ class ApiGatewayControllerTest {
 
     @Autowired
     private WebTestClient client;
-
+    private OwnerResponseDTO owner;
 
 
     @Test
@@ -415,12 +415,12 @@ class ApiGatewayControllerTest {
     }
     @Test
     void getOwnerDetails_withAvailableVisitsService() {
-        OwnerDetails owner = new OwnerDetails();
-        PetDetails cat = new PetDetails();
+        OwnerResponseDTO owner = new OwnerResponseDTO();
+        PetResponseDTO cat = new PetResponseDTO();
         cat.setId(20);
         cat.setName("Garfield");
         owner.getPets().add(cat);
-        when(customersServiceClient.getOwner(1))
+        when(customersServiceClient.getOwner("ownerId-123"))
                 .thenReturn(Mono.just(owner));
 
         Visits visits = new Visits();
@@ -1237,9 +1237,9 @@ class ApiGatewayControllerTest {
 //    }
     @Test
     void shouldCreateAVisitWithOwnerInfo(){
-        OwnerDetails owner = new OwnerDetails();
+        OwnerResponseDTO owner = new OwnerResponseDTO();
         VisitDetails visit = new VisitDetails();
-        owner.setId(1);
+        owner.setOwnerId("ownerId-123");
         visit.setVisitId(UUID.randomUUID().toString());
         visit.setPetId(1);
         visit.setDate("2021-12-12");
@@ -1252,7 +1252,7 @@ class ApiGatewayControllerTest {
 
 
         client.post()
-                .uri("/api/gateway/visit/owners/{ownerId}/pets/{petId}/visits", owner.getId(), visit.getPetId())
+                .uri("/api/gateway/visit/owners/{ownerId}/pets/{petId}/visits", owner.getOwnerId(), visit.getPetId())
                 .body(Mono.just(visit), VisitDetails.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -1311,8 +1311,8 @@ class ApiGatewayControllerTest {
     @Test
     void shouldUpdateAVisitsById() {
         VisitDetails visit = new VisitDetails();
-        OwnerDetails owner = new OwnerDetails();
-        owner.setId(1);
+        OwnerResponseDTO owner = new OwnerResponseDTO();
+        owner.setOwnerId("ownerId-123");
         visit.setVisitId(UUID.randomUUID().toString());
         visit.setPetId(1);
         visit.setDate("2021-12-12");
@@ -1321,7 +1321,7 @@ class ApiGatewayControllerTest {
         visit.setPractitionerId(1);
 
         VisitDetails visit2 = new VisitDetails();
-        OwnerDetails owner2 = new OwnerDetails();
+        OwnerResponseDTO owner2 = new OwnerResponseDTO();
 
 //    @Test
 //    void shouldUpdateAVisitsById() {
