@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Service
 public class DataBaseLoaderService  implements CommandLineRunner {
@@ -41,7 +42,7 @@ public class DataBaseLoaderService  implements CommandLineRunner {
                 .flatMap(productRepository::insert)
                 .log()
                 .subscribe();
-        Flux.just(inventory1)
+        Mono.just(inventory1)
                 .flatMap(inventoryRepository::insert)
                 .log()
                 .subscribe();
