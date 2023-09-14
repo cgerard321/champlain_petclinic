@@ -196,7 +196,6 @@ services:
       links:
         - mysql4
         - mysql3
-        - mysql1
       restart: always
       ports:
         - 5013:80
