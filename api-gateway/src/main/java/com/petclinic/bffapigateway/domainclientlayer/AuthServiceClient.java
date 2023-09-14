@@ -10,14 +10,19 @@ import com.petclinic.bffapigateway.utils.Rethrower;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.nio.charset.StandardCharsets;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static reactor.core.publisher.Mono.error;
@@ -112,19 +117,21 @@ public class AuthServiceClient {
     // then it's extremely messy because it returns yet another god damned Mono.
     // Please take the time to look up if reactive web has added a fix
     // to this when you see this in the future.
-    public UserPasswordLessDTO login(final Login login) throws Exception {
+    public  HttpEntity<UserPasswordLessDTO> login(final Login login) throws Exception {
         log.info("Entered domain service login");
         UserPasswordLessDTO userResponseModel;
         try {
-            String url = authServiceUrl + "/users/login";
-            userResponseModel = restTemplate
-                    .postForObject(url, login, UserPasswordLessDTO.class);
+            log.info("Email : {}",login.getEmail());
+            HttpEntity<Login> userRequestModelHttpEntity = new HttpEntity<>(login);
+
+            HttpEntity<UserPasswordLessDTO> response = restTemplate.exchange(authServiceUrl + "/users/login", HttpMethod.POST, userRequestModelHttpEntity, UserPasswordLessDTO.class);
         log.info("Fetched user from auth-service");
+            return response;
+
         } catch (HttpClientErrorException ex) {
             log.info("Error throw in auth domain client service");
             throw new Exception(ex);
         }
-        return userResponseModel;
 
 //        AtomicReference<String> token = new AtomicReference<>();
 //

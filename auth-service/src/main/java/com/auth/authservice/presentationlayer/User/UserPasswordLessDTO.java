@@ -26,11 +26,9 @@ public class UserPasswordLessDTO {
 
     private long id;
 
-    @NotEmpty
     private String username;
 
-    @NotEmpty
-    @Email(message = "Email must be valid")
+
     private String email;
 
     private Set<Role> roles;

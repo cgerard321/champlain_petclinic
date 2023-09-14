@@ -33,13 +33,9 @@ import lombok.*;
 @Builder(toBuilder = true)
 public class UserIDLessRoleLessDTO {
 
-    @NotEmpty
     private String username;
 
-    @PasswordStrengthCheck
     private String password;
 
-    @NotEmpty
-    @Email(message = "Email must be valid")
     private String email;
 }

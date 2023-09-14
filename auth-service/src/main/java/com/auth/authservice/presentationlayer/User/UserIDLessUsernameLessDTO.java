@@ -14,11 +14,8 @@ import lombok.*;
 @Builder(toBuilder = true)
 public class UserIDLessUsernameLessDTO {
 
-    @NotEmpty
-    @Email(message = "Email must be valid")
-    @Column(unique = true)
+
     private String email;
 
-    @PasswordStrengthCheck
     private String password;
 }

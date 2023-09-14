@@ -6,7 +6,7 @@ import com.petclinic.bffapigateway.dtos.*;
 import com.petclinic.bffapigateway.utils.VetsEntityDtoUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -356,17 +356,23 @@ public class BFFApiGatewayController {
     
     /**
      * End of Owner Methods
-     * **/
+     **/
 
 //    @GetMapping("/verification/{token}")
 //    public Mono<UserDetails> verifyUser(@PathVariable final String token) {
 //        return authServiceClient.verifyUser(token);
 //    }
 
-    @PostMapping("/users/login")
-    public ResponseEntity<UserPasswordLessDTO> login(@RequestBody final Login login) throws Exception {
+    @PostMapping(value = "/users/login",produces = "application/json;charset=utf-8;", consumes = "application/json")
+
+    public ResponseEntity<UserPasswordLessDTO> login(@RequestBody Login login) throws Exception {
         log.info("Entered controller /login");
-        return ResponseEntity.status(HttpStatus.CREATED).body(authServiceClient.login(login));
+        log.info("Login: " + login.getEmail() + " " + login.getPassword());
+        HttpEntity<UserPasswordLessDTO> reponseFromService = authServiceClient.login(login);
+
+
+        return ResponseEntity.status(HttpStatus.OK).headers(reponseFromService.getHeaders()).body(reponseFromService.getBody());
+
     }
 
     //Start of Bundle Methods

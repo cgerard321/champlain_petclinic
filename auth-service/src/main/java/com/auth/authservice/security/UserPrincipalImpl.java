@@ -28,7 +28,7 @@ public class UserPrincipalImpl implements UserDetails {
 
     @Override
     public String getUsername() {
-        return this.user.get().getUsername();
+        return this.user.get().getEmail();
     }
 
     @Override
