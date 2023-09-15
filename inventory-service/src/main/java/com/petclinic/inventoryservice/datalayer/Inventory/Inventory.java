@@ -13,7 +13,8 @@ import org.springframework.data.annotation.Id;
 public class Inventory {
     @Id
     private String id;
+    private String name;
     private String inventoryId;
-    private String inventoryType;
+    private InventoryType inventoryType;
     private String inventoryDescription;
 }
