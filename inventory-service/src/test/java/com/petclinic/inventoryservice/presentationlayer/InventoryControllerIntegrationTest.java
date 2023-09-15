@@ -2,6 +2,7 @@ package com.petclinic.inventoryservice.presentationlayer;
 
 import com.petclinic.inventoryservice.datalayer.Inventory.Inventory;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryRepository;
+import com.petclinic.inventoryservice.datalayer.Inventory.InventoryType;
 import com.petclinic.inventoryservice.datalayer.Product.Product;
 import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -32,7 +33,7 @@ class InventoryControllerIntegrationTest {
     public void dbSetup(){
         Publisher<Inventory> inventoryPublisher = inventoryRepository.save(Inventory.builder()
                 .inventoryId("1")
-                .inventoryType("Medication")
+                .inventoryType(InventoryType.internal)
                 .inventoryDescription("Medication for procedures")
                 .build());
         StepVerifier
