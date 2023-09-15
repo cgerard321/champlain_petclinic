@@ -2,6 +2,7 @@ package com.petclinic.customersservice.business;
 
 import com.petclinic.customersservice.data.Owner;
 import com.petclinic.customersservice.data.OwnerRepo;
+import com.petclinic.customersservice.presentationlayer.OwnerResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -42,39 +43,39 @@ class OwnerServiceImplTest {
                 .verifyComplete();
     }
 
-     /*@Test
+     @Test
      void getOwnerByOwnerId() {
         Owner ownerEntity = buildOwner();
-        String OWNER_ID = ownerEntity.getId();
-        when(repo.findOwnerById(OWNER_ID)).thenReturn(Mono.just(ownerEntity));
-        Mono<Owner> ownerMono = ownerService.getOwnerByOwnerId(OWNER_ID);
+        String OWNER_ID = ownerEntity.getOwnerId();
+        when(repo.findOwnerByOwnerId(OWNER_ID)).thenReturn(Mono.just(ownerEntity));
+        Mono<OwnerResponseDTO> ownerResponseDTOMono = ownerService.getOwnerByOwnerId(OWNER_ID);
         StepVerifier
-                .create(ownerMono)
+                .create(ownerResponseDTOMono)
                 .consumeNextWith(foundOwner -> {
-                    assertEquals(ownerEntity.getId(), foundOwner.getId());
+                    assertEquals(ownerEntity.getOwnerId(), foundOwner.getOwnerId());
                     assertEquals(ownerEntity.getFirstName(), foundOwner.getFirstName());
                     assertEquals(ownerEntity.getLastName(), foundOwner.getLastName());
                     assertEquals(ownerEntity.getAddress(), foundOwner.getAddress());
                     assertEquals(ownerEntity.getCity(), foundOwner.getCity());
                     assertEquals(ownerEntity.getTelephone(), foundOwner.getTelephone());
-                    assertEquals(ownerEntity.getPhotoId(), foundOwner.getPhotoId());
+                    //assertEquals(ownerEntity.getPhotoId(), foundOwner.getPhotoId());
                 })
                 .verifyComplete();
-     }*/
+     }
 
-     /*@Test
+     @Test
      void getOwnerByOwnerIdNotFound() {
 
          Owner ownerEntity = buildOwner();
          String OWNER_ID = "Not found";
-         when(repo.findOwnerById(OWNER_ID)).thenReturn(Mono.just(ownerEntity));
-         Mono<Owner> ownerMono = ownerService.getOwnerByOwnerId(OWNER_ID);
+         when(repo.findOwnerByOwnerId(OWNER_ID)).thenReturn(Mono.just(ownerEntity));
+         Mono<OwnerResponseDTO> ownerResponseDTOMono = ownerService.getOwnerByOwnerId(OWNER_ID);
          StepVerifier
-                 .create(ownerMono)
+                 .create(ownerResponseDTOMono)
                  .expectNextCount(1)
                  .expectError();
 
-     }*/
+     }
 
      @Test
      void deleteOwnerByOwnerId() {
@@ -103,6 +104,7 @@ class OwnerServiceImplTest {
     private Owner buildOwner() {
         return Owner.builder()
                 .id("55")
+                .ownerId("ownerId-123")
                 .firstName("FirstName")
                 .lastName("LastName")
                 .address("Test address")

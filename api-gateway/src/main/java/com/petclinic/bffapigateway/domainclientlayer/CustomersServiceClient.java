@@ -60,11 +60,10 @@ public class CustomersServiceClient {
 
 
 
-
     public Flux<OwnerResponseDTO> createOwners (){
         return webClientBuilder.build().post()
                 .uri(customersServiceUrl)
-                .accept(MediaType.APPLICATION_JSON)
+               .accept(MediaType.APPLICATION_JSON)
             .retrieve().bodyToFlux(OwnerResponseDTO.class);
 
     }
@@ -92,7 +91,7 @@ public class CustomersServiceClient {
                 .bodyToMono(PetResponseDTO.class);
     }
 
-    public Mono<PetResponseDTO> createPet(PetResponseDTO model, final int ownerId){
+    public Mono<PetResponseDTO> createPet(PetResponseDTO model, final String ownerId){
         return webClientBuilder.build().post()
                 .uri(customersServiceUrl +"{ownerId}/pets", ownerId)
                 .body(just(model), PetResponseDTO.class)
@@ -100,7 +99,7 @@ public class CustomersServiceClient {
                 .retrieve().bodyToMono(PetResponseDTO.class);
     }
 
-    public Mono<PetResponseDTO> deletePet(final int ownerId, final int petId){
+    public Mono<PetResponseDTO> deletePet(final String ownerId, final int petId){
         return webClientBuilder.build().delete()
                 .uri(customersServiceUrl + "{ownerId}/pets/{petId}", ownerId ,petId)
                 .retrieve()
@@ -138,14 +137,14 @@ public class CustomersServiceClient {
 
 
 
-    public Mono<String> setPetPhoto(int ownerId, PhotoDetails file, int id){
+    public Mono<String> setPetPhoto(String ownerId, PhotoDetails file, int id){
         return webClientBuilder.build().post()
                 .uri(customersServiceUrl + ownerId + "/pets/photo/" + id)
                 .body(just(file), PhotoDetails.class)
                 .retrieve().bodyToMono(String.class);
     }
 
-    public Mono<PhotoDetails> getPetPhoto(int ownerId, int id){
+    public Mono<PhotoDetails> getPetPhoto(String ownerId, int id){
         return webClientBuilder.build().get()
                 .uri(customersServiceUrl + ownerId + "/pets/photo/" + id)
                 .retrieve()

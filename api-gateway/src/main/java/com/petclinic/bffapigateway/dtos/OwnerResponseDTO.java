@@ -30,12 +30,12 @@ public class OwnerResponseDTO {
     private String telephone;
     //private int imageId;
 
-    private final List<PetResponseDTO> pets = new ArrayList<>();
+    /*private final List<PetResponseDTO> pets = new ArrayList<>();
 
     @JsonIgnore
     public List<Integer> getPetIds() {
         return pets.stream()
                 .map(PetResponseDTO::getId)
                 .collect(toList());
-    }
+    }*/
 }

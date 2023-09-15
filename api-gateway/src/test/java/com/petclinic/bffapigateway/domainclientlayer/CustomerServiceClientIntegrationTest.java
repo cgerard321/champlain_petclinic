@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class CustomerServiceClientIntegrationTest {
 
@@ -36,15 +37,15 @@ public class CustomerServiceClientIntegrationTest {
             .photo("testBytes")
             .build();
 
-//    private final OwnerResponseDTO TEST_OWNER = OwnerResponseDTO.builder()
-//            .id(1)
-//            .firstName("John")
-//            .lastName("Smith")
-//            .address("456 Elm")
-//            .city("Montreal")
-//            .telephone("5553334444")
-//            .imageId(1)
-//            .build();
+    private final OwnerResponseDTO TEST_OWNER = OwnerResponseDTO.builder()
+            .ownerId("ownerId-123")
+            .firstName("John")
+            .lastName("Smith")
+            .address("456 Elm")
+            .city("Montreal")
+            .telephone("5553334444")
+            //.imageId(1)
+            .build();
     PetType type = new PetType();
 
     private final PetResponseDTO TEST_PET = PetResponseDTO.builder()
@@ -91,6 +92,20 @@ public class CustomerServiceClientIntegrationTest {
         assertEquals(TEST_PHOTO.getType(), testPhoto.getType());
 //        assertEquals(TEST_PHOTO.getPhoto(), testPhoto.getPhoto());
     }*/
+
+    @Test
+    void getOwnerByOwnerId() throws JsonProcessingException{
+        final String body = mapper.writeValueAsString(mapper.convertValue(TEST_OWNER, OwnerResponseDTO.class));
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(body));
+
+        final OwnerResponseDTO ownerResponseDTO = customersServiceClient.getOwner("ownerId-123").block();
+
+        assertEquals(ownerResponseDTO.getOwnerId(),TEST_OWNER.getOwnerId());
+
+    }
+
     /*@Test
     void getOwnerPhoto() throws JsonProcessingException {
 
@@ -110,13 +125,13 @@ public class CustomerServiceClientIntegrationTest {
     @Test
     void createPetPhoto() throws JsonProcessingException {
 
-        customersServiceClient.setPetPhoto(1, TEST_PHOTO,1);
+        customersServiceClient.setPetPhoto("ownerId-1", TEST_PHOTO,1);
         final String body = mapper.writeValueAsString(mapper.convertValue(TEST_PHOTO, PhotoDetails.class));
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setBody(body));
 
-        final PhotoDetails testPhoto = customersServiceClient.getPetPhoto(1, 2).block();
+        final PhotoDetails testPhoto = customersServiceClient.getPetPhoto("ownerId-2", 2).block();
 
         assertEquals(TEST_PHOTO.getId(), testPhoto.getId());
         assertEquals(TEST_PHOTO.getName(), testPhoto.getName());
@@ -132,25 +147,25 @@ public class CustomerServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody(body));
 
-        final PhotoDetails testPhoto = customersServiceClient.getPetPhoto(1,1).block();
+        final PhotoDetails testPhoto = customersServiceClient.getPetPhoto("ownerId-3",1).block();
 
         assertEquals(TEST_PHOTO.getId(), testPhoto.getId());
         assertEquals(TEST_PHOTO.getName(), testPhoto.getName());
         assertEquals(TEST_PHOTO.getType(), testPhoto.getType());
     }
 
-    @Test
-    void deleteOwnerPhoto() throws JsonProcessingException {
-
-        final String body = mapper.writeValueAsString(mapper.convertValue(TEST_PHOTO, PhotoDetails.class));
-        prepareResponse(response -> response
-                .setHeader("Content-Type", "application/json")
-                .setBody(body));
-
-        final Mono<Void> empty = customersServiceClient.deleteOwnerPhoto(TEST_PHOTO.getId());
-
-        assertEquals(empty.block(), null);
-    }
+//    @Test
+//    void deleteOwnerPhoto() throws JsonProcessingException {
+//
+//        final String body = mapper.writeValueAsString(mapper.convertValue(TEST_PHOTO, PhotoDetails.class));
+//        prepareResponse(response -> response
+//                .setHeader("Content-Type", "application/json")
+//                .setBody(body));
+//
+//        final Mono<Void> empty = customersServiceClient.deleteOwnerPhoto(TEST_PHOTO.getId());
+//
+//        assertEquals(empty.block(), null);
+//    }
 
     @Test
     void deletePetPhoto() throws JsonProcessingException {

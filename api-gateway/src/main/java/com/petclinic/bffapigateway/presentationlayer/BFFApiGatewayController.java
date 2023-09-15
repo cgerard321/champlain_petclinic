@@ -106,7 +106,7 @@ public class BFFApiGatewayController {
 
 
     @PostMapping(value = "owners/{ownerId}/pets" , produces = "application/json", consumes = "application/json")
-    public Mono<PetResponseDTO> createPet(@RequestBody PetResponseDTO pet, @PathVariable int ownerId){
+    public Mono<PetResponseDTO> createPet(@RequestBody PetResponseDTO pet, @PathVariable String ownerId){
         return customersServiceClient.createPet(pet, ownerId);
     }
 
@@ -116,7 +116,7 @@ public class BFFApiGatewayController {
     }
 
     @DeleteMapping("owners/{ownerId}/pets/{petId}")
-    public Mono<PetResponseDTO> deletePet(@PathVariable int ownerId, @PathVariable int petId){
+    public Mono<PetResponseDTO> deletePet(@PathVariable String ownerId, @PathVariable int petId){
         return customersServiceClient.deletePet(ownerId,petId);
     }
 
@@ -340,12 +340,12 @@ public class BFFApiGatewayController {
     }*/
 
     @PostMapping(value = "owners/{ownerId}/pet/photo/{petId}")
-    public Mono<String> setPetPhoto(@PathVariable int ownerId, @RequestBody PhotoDetails photoDetails, @PathVariable int petId) {
+    public Mono<String> setPetPhoto(@PathVariable String ownerId, @RequestBody PhotoDetails photoDetails, @PathVariable int petId) {
         return customersServiceClient.setPetPhoto(ownerId, photoDetails, petId);
     }
 
     @GetMapping(value = "owners/{ownerId}/pet/photo/{petId}")
-    public Mono<PhotoDetails> getPetPhoto(@PathVariable int ownerId, @PathVariable int petId) {
+    public Mono<PhotoDetails> getPetPhoto(@PathVariable String ownerId, @PathVariable int petId) {
         return customersServiceClient.getPetPhoto(ownerId, petId);
     }
 

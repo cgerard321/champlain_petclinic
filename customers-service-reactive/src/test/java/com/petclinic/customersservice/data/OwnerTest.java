@@ -11,6 +11,7 @@ class OwnerTest {
         //Arrange
         Owner owner = new Owner();
         owner.setId("1");
+        owner.setOwnerId("ownerId-123");
         owner.setTelephone("1234567890");
         owner.setFirstName("John");
         owner.setLastName("Smith");
@@ -18,7 +19,7 @@ class OwnerTest {
         owner.setAddress("9 rue des oiseaux");
         //owner.setPhotoId("0");
 
-        String expected = "Owner(id=1, firstName=John, lastName=Smith, address=9 rue des oiseaux, city=MTL, telephone=1234567890, photoId=0)";
+        String expected = "Owner(id=1, ownerId=ownerId-123, firstName=John, lastName=Smith, address=9 rue des oiseaux, city=MTL, telephone=1234567890)";
 
         //Act
         String result = owner.toString();
