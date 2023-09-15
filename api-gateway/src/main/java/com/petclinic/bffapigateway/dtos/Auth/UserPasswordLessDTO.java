@@ -5,7 +5,7 @@
  * Date: 09/10/21
  * Ticket: feat(AUTH-CPC-310)
  */
-package com.petclinic.bffapigateway.dtos;
+package com.petclinic.bffapigateway.dtos.Auth;
 
 
 import lombok.AllArgsConstructor;
