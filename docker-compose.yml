@@ -198,7 +198,6 @@ services:
       container_name: PhpMyAdmin
       links:
         - mysql4
-        - mysql3
       restart: always
       ports:
         - 5013:80

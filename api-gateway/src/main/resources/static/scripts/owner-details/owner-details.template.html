@@ -1,68 +1,78 @@
 <link href="/css/ownerdetail.css" rel="stylesheet" type="text/css"/>
 
-<div ng-app="ownerDetails" class="d-flex flex-column">
-    <div ng-controller="OwnerDetailsController">
+    <div class="d-flex justify-content-center mt-5 mb-5">
+        <div ng-app="ownerDetails" class="d-flex flex-column">
+        <div ng-controller="OwnerDetailsController">
 
-        <div class="ownerDetailContainer d-flex flex-column p-5 shadow">
+            <div class="ownerDetailContainer d-flex flex-column p-5 shadow">
 
-            <h3 class="">Owner Details</h3>
+                <h3 class="">Owner Details</h3>
 
-            <form action="" class="pt-3">
-
-                <div class="d-flex" >
-                    <div class="d-flex flex-column">
-
-                        <input class="inputFieldsStyle" value="{{$ctrl.owner.ownerId}}" size="50" readonly/>
-                        <label class="inputLabel">Owner Id</label>
-                    </div>
+                <div class="bg-white shadow-sm mt-3 mb-1" style="width: 75px; height: 75px; border-radius: 50px;">
+                    <img style="width: 100%; height: 100%; border-radius: 50px" src="../../images/default-owner-profile-picture.jpg"/>
                 </div>
 
-                <div class="d-flex flex-row gap-3 pt-1">
+                <form action="" class="pt-3">
 
-                    <div class="d-flex flex-column">
+                    <div class="d-flex" >
+                        <div class="d-flex flex-column">
 
-                        <input class="inputFieldsStyle" value="{{$ctrl.owner.firstName}}" readonly/>
-                        <label class="inputLabel">First Name</label>
+                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.owner.ownerId}}" size="50" readonly disabled/>
+                            <label class="inputLabel">Owner Id</label>
+                        </div>
                     </div>
 
-                    <div class="d-flex flex-column ">
+                    <div class="d-flex flex-row gap-3 pt-1">
 
-                        <input class="inputFieldsStyle" value="{{$ctrl.owner.lastName}}" readonly/>
-                        <label class="inputLabel">Last Name</label>
+                        <div class="d-flex flex-column">
+
+                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.owner.firstName}}" readonly disabled/>
+                            <label class="inputLabel">First Name</label>
+                        </div>
+
+                        <div class="d-flex flex-column ">
+
+                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.owner.lastName}}" readonly disabled/>
+                            <label class="inputLabel">Last Name</label>
+                        </div>
+
                     </div>
 
-                </div>
+                    <div class="d-flex flex-row gap-3 pt-1">
 
-                <div class="d-flex flex-row gap-3 pt-1">
+                        <div class="d-flex flex-column">
 
-                    <div class="d-flex flex-column">
+                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.owner.address}}" readonly disabled/>
+                            <label class="inputLabel">Address</label>
+                        </div>
 
-                        <input class="inputFieldsStyle" value="{{$ctrl.owner.address}}" readonly/>
-                        <label class="inputLabel">Address</label>
+                        <div class="d-flex flex-column">
+                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.owner.city}}" readonly disabled/>
+                            <label class="inputLabel">City</label>
+                        </div>
+
                     </div>
 
-                    <div class="d-flex flex-column">
-
-                        <input class="inputFieldsStyle" value="{{$ctrl.owner.city}}" readonly/>
-                        <label class="inputLabel">City</label>
+                    <div class="d-flex pt-1">
+                        <div class="d-flex flex-column">
+                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.owner.telephone}}" size="15" readonly disabled/>
+                            <label class="inputLabel">Phone Number</label>
+                        </div>
                     </div>
 
-                </div>
-
-                <div class="d-flex pt-1">
-                    <div class="d-flex flex-column">
-                        <input class="inputFieldsStyle" value="{{$ctrl.owner.telephone}}" size="15" readonly/>
-                        <label class="inputLabel">Phone Number</label>
+                    <div class="d-flex justify-content-end">
+                        <div>
+                            <a style="color: rgba(0,0,0,0.5);" class="btn btn-light" ui-sref="ownerEdit({ownerId: $ctrl.owner.ownerId, method: 'edit'})">Edit</a>
+                        </div>
                     </div>
-                </div>
 
-            </form>
+                </form>
+
+            </div>
 
         </div>
-
     </div>
-</div>
-
+    </div>
 
 
 
