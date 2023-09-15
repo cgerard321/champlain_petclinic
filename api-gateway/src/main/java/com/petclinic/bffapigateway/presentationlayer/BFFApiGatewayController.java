@@ -377,30 +377,9 @@ public class BFFApiGatewayController {
 
     }
 
-    //Start of Bundle Methods
-
-    @GetMapping(value = "bundles/{bundleUUID}")
-    public Mono<BundleDetails> getBundle(final @PathVariable String bundleUUID)
-    {
-        return inventoryServiceClient.getBundle(bundleUUID);
+    //Start of Inventory Methods
+    @PostMapping(value = "inventory/{inventoryId}/products")
+    public Mono<ProductResponseDTO> addProductToInventory(@RequestBody ProductRequestDTO model, @PathVariable String inventoryId){
+        return inventoryServiceClient.addProductToInventory(model, inventoryId);
     }
-    @GetMapping(value = "bundles")
-    public Flux<BundleDetails> getAllBundles() {
-        return inventoryServiceClient.getAllBundles();
-    }
-    @GetMapping(value = "bundles/item/{item}")
-    public Flux<BundleDetails> getBundlesByItem(@PathVariable String item) {
-        return inventoryServiceClient.getBundlesByItem(item);
-    }
-    @PostMapping(value = "bundles",
-            consumes = "application/json",
-            produces = "application/json")
-    public Mono<BundleDetails> createBundle(@RequestBody BundleDetails model) {
-        return inventoryServiceClient.createBundle(model);
-    }
-    @DeleteMapping(value = "bundles/{bundleUUID}")
-    public Mono<Void> deleteBundle(final @PathVariable String bundleUUID){
-        return inventoryServiceClient.deleteBundle(bundleUUID);
-    }
-
 }
