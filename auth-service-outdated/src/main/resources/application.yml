@@ -1,0 +1,93 @@
+jwt:
+  expiration: 900000 # 15 minutes
+  secret: thisismyverycoolsecretthatisatleast256byteslong # Must at least be 256 bytes long
+
+gateway:
+  origin: setProductionUrlHere
+  protocol: http
+  subdomain: www
+
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3310/auth
+    username: user
+    password: pwd
+  security:
+    filter:
+      order: 10
+
+  flyway:
+    url: jdbc:mysql://localhost:3310
+    schemas: auth
+    user: root
+    password: rootpwd
+mailer-service:
+  host: localhost
+  port: 8888
+default-admin:
+  username: admin
+  password: admin
+
+---
+spring.profiles: docker
+
+spring:
+  datasource:
+    url: jdbc:mysql://mysql4/auth
+  flyway:
+    url: jdbc:mysql://mysql4
+gateway:
+  origin: localhost:8080/api/gateway
+  protocol: http
+  subdomain:
+mailer-service:
+  host: mailer-service
+  port: 8080
+
+---
+spring.profiles: test
+# recommend setting this to "none" in a production environment
+#spring.jpa.hibernate.ddl-auto: none
+
+gateway:
+  origin: localhost:8080/users
+  protocol: http
+  subdomain:
+
+#for h2
+spring:
+  h2:
+    console:
+      enabled: true
+
+  flyway:
+    url: jdbc:h2:mem:auth;DATABASE_TO_UPPER=false;CASE_INSENSITIVE_IDENTIFIERS=TRUE;DB_CLOSE_DELAY=-1
+    baseline-on-migrate: true
+    user: sa
+    password:
+
+  datasource:
+    platform: h2
+    url: jdbc:h2:mem:auth;DATABASE_TO_UPPER=false;CASE_INSENSITIVE_IDENTIFIERS=TRUE;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+    initialization-mode: never
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+    generate-ddl: false
+
+#for real
+#spring.datasource:
+#  url: jdbc:mysql://localhost/petclinic
+#  username: pc
+#  password: pc
+
+spring.datasource.hikari.initializationFailTimeout: 60000

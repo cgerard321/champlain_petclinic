@@ -5,10 +5,10 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
+@Builder
 @AllArgsConstructor
-@Builder(toBuilder = true)
+@NoArgsConstructor
+@Data
 public class Login {
 
     private String email;
