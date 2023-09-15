@@ -1,4 +1,4 @@
-package com.auth.authservice.Util.Configuration;
+package com.auth.authservice.Util.Configuration.Mail;
 
 import com.auth.authservice.domainclientlayer.Mail.MailServiceCall;
 import org.springframework.beans.factory.annotation.Value;
