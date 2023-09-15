@@ -17,7 +17,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class PetDetails {
+public class PetResponseDTO {
 
     private int id;
 
@@ -29,7 +29,7 @@ public class PetDetails {
 
     private int imageId;
 
-    private final List<VisitDetails> visits = new ArrayList<>();
+    //private final List<VisitDetails> visits = new ArrayList<>();
 
 }
 

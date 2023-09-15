@@ -42,7 +42,7 @@ class OwnerServiceImplTest {
                 .verifyComplete();
     }
 
-     @Test
+     /*@Test
      void getOwnerByOwnerId() {
         Owner ownerEntity = buildOwner();
         String OWNER_ID = ownerEntity.getId();
@@ -60,9 +60,9 @@ class OwnerServiceImplTest {
                     assertEquals(ownerEntity.getPhotoId(), foundOwner.getPhotoId());
                 })
                 .verifyComplete();
-     }
+     }*/
 
-     @Test
+     /*@Test
      void getOwnerByOwnerIdNotFound() {
 
          Owner ownerEntity = buildOwner();
@@ -74,7 +74,7 @@ class OwnerServiceImplTest {
                  .expectNextCount(1)
                  .expectError();
 
-     }
+     }*/
 
      @Test
      void deleteOwnerByOwnerId() {

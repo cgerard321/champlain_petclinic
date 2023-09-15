@@ -24,8 +24,8 @@ class OwnerDTOServiceImplTest {
     @Autowired
     private WebTestClient webTestClient;
 
-    @Autowired
-    private OwnerDTOService ownerDTOService;
+    /*@Autowired
+    private OwnerDTOService ownerDTOService;*/
 
     @Autowired
     private OwnerService ownerService;

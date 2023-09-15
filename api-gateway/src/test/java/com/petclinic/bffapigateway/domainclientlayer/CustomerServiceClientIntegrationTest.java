@@ -2,8 +2,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.bffapigateway.dtos.Owners.OwnerDetails;
-import com.petclinic.bffapigateway.dtos.Pets.PetDetails;
+import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
 import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
 import okhttp3.mockwebserver.MockResponse;
@@ -37,18 +36,18 @@ public class CustomerServiceClientIntegrationTest {
             .photo("testBytes")
             .build();
 
-    private final OwnerDetails TEST_OWNER = OwnerDetails.builder()
-            .id(1)
-            .firstName("John")
-            .lastName("Smith")
-            .address("456 Elm")
-            .city("Montreal")
-            .telephone("5553334444")
-            .imageId(1)
-            .build();
+//    private final OwnerResponseDTO TEST_OWNER = OwnerResponseDTO.builder()
+//            .id(1)
+//            .firstName("John")
+//            .lastName("Smith")
+//            .address("456 Elm")
+//            .city("Montreal")
+//            .telephone("5553334444")
+//            .imageId(1)
+//            .build();
     PetType type = new PetType();
 
-    private final PetDetails TEST_PET = PetDetails.builder()
+    private final PetResponseDTO TEST_PET = PetResponseDTO.builder()
             .name("Cat")
             .id(1)
             .name("Bonkers")
