@@ -3,6 +3,8 @@ package com.petclinic.billing.util;
 
 import com.petclinic.billing.datalayer.Bill;
 import com.petclinic.billing.datalayer.BillDTO;
+import com.petclinic.billing.datalayer.BillRequestDTO;
+import com.petclinic.billing.datalayer.BillResponseDTO;
 import org.springframework.beans.BeanUtils;
 
 import java.util.UUID;
@@ -21,6 +23,20 @@ public class EntityDtoUtil {
         BeanUtils.copyProperties(dto, bill);
         return bill;
     }
+
+    public static BillResponseDTO toBillResponseDto(Bill bill){
+        BillResponseDTO billResponseDTO =new BillResponseDTO();
+        BeanUtils.copyProperties(bill,billResponseDTO);
+        return billResponseDTO;
+    }
+
+    public static Bill toBillEntity(BillRequestDTO billRequestDTO){
+        Bill bill = new Bill();
+        BeanUtils.copyProperties(billRequestDTO,bill);
+        return bill;
+    }
+
+
     public static String generateUUIDString(){
         return UUID.randomUUID().toString();
     }

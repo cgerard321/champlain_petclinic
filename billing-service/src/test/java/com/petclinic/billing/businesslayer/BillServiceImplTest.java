@@ -1,8 +1,6 @@
 package com.petclinic.billing.businesslayer;
 
-import com.petclinic.billing.datalayer.Bill;
-import com.petclinic.billing.datalayer.BillDTO;
-import com.petclinic.billing.datalayer.BillRepository;
+import com.petclinic.billing.datalayer.*;
 import com.petclinic.billing.exceptions.InvalidInputException;
 import com.petclinic.billing.exceptions.NotFoundException;
 import org.assertj.core.api.AssertionsForClassTypes;
@@ -43,6 +41,7 @@ public class BillServiceImplTest {
     public void test_GetBill(){
         Bill billEntity = buildBill();
 
+
         String BILL_ID = billEntity.getBillId();
 
         when(repo.findByBillId(anyString())).thenReturn(Mono.just(billEntity));
@@ -66,7 +65,7 @@ public class BillServiceImplTest {
 
        when(repo.findAll()).thenReturn(Flux.just(billEntity));
 
-       Flux<BillDTO> billDTOFlux = billService.GetAllBills();
+       Flux<BillResponseDTO> billDTOFlux = billService.GetAllBills();
 
        StepVerifier.create(billDTOFlux)
                .consumeNextWith(foundBill -> {
@@ -82,11 +81,11 @@ public class BillServiceImplTest {
         Bill billEntity = buildBill();
 
         Mono<Bill> billMono = Mono.just(billEntity);
-        BillDTO billDTO = buildBillDTO();
+        BillRequestDTO billDTO = buildBillRequestDTO();
 
         when(repo.insert(any(Bill.class))).thenReturn(billMono);
 
-        Mono<BillDTO> returnedBill = billService.CreateBill(Mono.just(billDTO));
+        Mono<BillResponseDTO> returnedBill = billService.CreateBill(Mono.just(billDTO));
 
         StepVerifier.create(returnedBill)
                 .consumeNextWith(monoDTO -> {
@@ -217,6 +216,18 @@ public class BillServiceImplTest {
 
         return BillDTO.builder().billId("BillUUID").customerId(1).vetId("1").visitType("Test Type").date(date).amount(13.37).build();
     }
+
+    private BillRequestDTO buildBillRequestDTO(){
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(2022, Calendar.SEPTEMBER, 25);
+        Date date = calendar.getTime();
+
+
+        return BillRequestDTO.builder().customerId(1).vetId("1").visitType("Test Type").date(date).amount(13.37).build();
+    }
+
+
 
 }
 

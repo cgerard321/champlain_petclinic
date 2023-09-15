@@ -3,6 +3,7 @@ package com.petclinic.billing.presentationlayer;
 import com.petclinic.billing.businesslayer.BillService;
 import com.petclinic.billing.datalayer.Bill;
 import com.petclinic.billing.datalayer.BillDTO;
+import com.petclinic.billing.datalayer.BillResponseDTO;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +30,9 @@ import static reactor.core.publisher.Mono.just;
 class BillResourceUnitTest {
 
     private BillDTO dto = buildBillDTO();
+    private BillResponseDTO responseDTO =buildBillResponseDTO();
     private final String BILL_ID_OK = dto.getBillId();
+
     private final int CUSTOMER_ID_OK = dto.getCustomerId();
     private final String VET_ID_OK = dto.getVetId();
 
@@ -85,7 +88,7 @@ class BillResourceUnitTest {
     @Test
     void findAllBills() {
 
-        when(billService.GetAllBills()).thenReturn(Flux.just(dto));
+        when(billService.GetAllBills()).thenReturn(Flux.just(responseDTO));
 
         client.get()
                 .uri("/bills")
@@ -94,8 +97,8 @@ class BillResourceUnitTest {
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$[0].visitType").isEqualTo(dto.getVisitType())
-                .jsonPath("$[0].customerId").isEqualTo(dto.getCustomerId());
+                .jsonPath("$[0].visitType").isEqualTo(responseDTO.getVisitType())
+                .jsonPath("$[0].customerId").isEqualTo(responseDTO.getCustomerId());
 
         Mockito.verify(billService, times(1)).GetAllBills();
     }
@@ -193,5 +196,15 @@ class BillResourceUnitTest {
 
 
         return BillDTO.builder().billId("BillUUID").customerId(1).vetId("1").visitType("Test Type").date(date).amount(13.37).build();
+    }
+
+    private BillResponseDTO buildBillResponseDTO(){
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(2022, Calendar.SEPTEMBER, 25);
+        Date date = calendar.getTime();
+
+
+        return BillResponseDTO.builder().billId("BillUUID").customerId(1).vetId("1").visitType("Test Type").date(date).amount(13.37).build();
     }
 }
