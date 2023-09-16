@@ -72,6 +72,16 @@ class VetsServiceClientIntegrationTest {
         assertEquals(4.5, rating.getRateScore());
     }
 
+    @Test
+    void getNumberOfRatingsByVetId() throws JsonProcessingException {
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody("5"));
+
+        final Integer numberOfRatings = vetsServiceClient.getNumberOfRatingsByVetId("678910").block();
+        assertEquals(5, numberOfRatings);
+    }
+
 //    @Test
 //    void getRatingsByVetId_ExistingVetNotFound_ShouldThrowException() {
 //        prepareResponse(response -> response

@@ -36,6 +36,13 @@ public class VetController {
         return ratingService.getAllRatingsByVetId(vetId);
     }
 
+    @GetMapping("{vetId}/ratings/count")
+    public Mono<ResponseEntity<Integer>> getNumberOfRatingsByVetId(@PathVariable String vetId){
+        return ratingService.getNumberOfRatingsByVetId(vetId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
     @GetMapping()
     public Flux<VetDTO> getAllVets() {
         return vetService.getAll();

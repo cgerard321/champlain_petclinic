@@ -208,6 +208,14 @@ public class BFFApiGatewayController {
     public Flux<RatingResponseDTO> getRatingsByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getRatingsByVetId(vetId);
     }
+
+    @GetMapping("/vets/{vetId}/ratings/count")
+    public Mono<ResponseEntity<Integer>> getNumberOfRatingsByVetId(@PathVariable String vetId) {
+        return vetsServiceClient.getNumberOfRatingsByVetId(VetsEntityDtoUtil.verifyId(vetId))
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
     @GetMapping("/vets/{vetId}")
     public Mono<ResponseEntity<VetDTO>> getVetByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getVetByVetId(VetsEntityDtoUtil.verifyId(vetId))

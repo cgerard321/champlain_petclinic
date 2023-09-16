@@ -44,6 +44,19 @@ public class VetsServiceClient {
 
         return  ratingResponseDTOFlux;
     }
+
+    public Mono<Integer> getNumberOfRatingsByVetId(String vetId) {
+        Mono<Integer> numberOfRatings =
+                webClientBuilder
+                        .build()
+                        .get()
+                        .uri(vetsServiceUrl + "/{vetId}/ratings/count", vetId)
+                        .retrieve()
+                        .bodyToMono(Integer.class);
+
+        return numberOfRatings;
+    }
+
     public Flux<VetDTO> getVets() {
         Flux<VetDTO> vetDTOFlux =
                webClientBuilder

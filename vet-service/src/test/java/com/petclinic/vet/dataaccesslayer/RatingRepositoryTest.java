@@ -57,5 +57,17 @@ class RatingRepositoryTest {
                 .verifyComplete();
     }
 
+    @Test
+    public void getNumberOfRatingOfAVet_ShouldSucceed(){
+        Publisher<Long> find = ratingRepository.countAllByVetId("1");
+
+        StepVerifier
+                .create(find)
+                .consumeNextWith(foundRating -> {
+                    assertEquals(1, foundRating);
+                })
+                .verifyComplete();
+    }
+
 
 }

@@ -111,6 +111,22 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("This id is not valid");
     }
+
+    @Test
+    void getNumberOfRatingsPerVet_ByVetId() {
+        when(vetsServiceClient.getNumberOfRatingsByVetId(anyString()))
+                .thenReturn(Mono.just(1));
+
+        client
+                .get()
+                .uri("/api/gateway/vets/" + VET_ID + "/ratings/count")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$").isEqualTo(1);
+    }
+
     @Test
     void getAllVets() {
         when(vetsServiceClient.getVets())

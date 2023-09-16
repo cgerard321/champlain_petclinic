@@ -69,6 +69,24 @@ class VetControllerUnitTest {
     }
 
     @Test
+    void getNumberOfRatingsByVetId_ShouldSucceed() {
+        when(ratingService.getNumberOfRatingsByVetId(anyString()))
+                .thenReturn(Mono.just(1));
+
+        client
+                .get()
+                .uri("/vets/" + VET_ID + "/ratings/count")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$").isEqualTo(1);
+
+        Mockito.verify(ratingService, times(1))
+                .getNumberOfRatingsByVetId(VET_ID);
+    }
+
+    @Test
     void getAllVets() {
         when(vetService.getAll())
                 .thenReturn(Flux.just(vetDTO));
