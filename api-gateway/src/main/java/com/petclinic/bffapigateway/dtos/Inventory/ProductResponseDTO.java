@@ -1,4 +1,4 @@
-package com.petclinic.bffapigateway.dtos;
+package com.petclinic.bffapigateway.dtos.Inventory;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,7 +9,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ProductRequestDTO {
+public class ProductResponseDTO {
+    private String id;
+    private String productId;
+    private String inventoryId;
     private String productName;
     private String productDescription;
     private Double productPrice;

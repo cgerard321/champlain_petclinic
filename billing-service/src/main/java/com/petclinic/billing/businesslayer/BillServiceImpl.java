@@ -1,8 +1,6 @@
 package com.petclinic.billing.businesslayer;
 
-import com.petclinic.billing.datalayer.Bill;
-import com.petclinic.billing.datalayer.BillDTO;
-import com.petclinic.billing.datalayer.BillRepository;
+import com.petclinic.billing.datalayer.*;
 import com.petclinic.billing.exceptions.InvalidInputException;
 import com.petclinic.billing.exceptions.NotFoundException;
 import com.petclinic.billing.util.EntityDtoUtil;
@@ -31,20 +29,20 @@ public class BillServiceImpl implements BillService{
     }
 
     @Override
-    public Flux<BillDTO> GetAllBills() {
+    public Flux<BillResponseDTO> GetAllBills() {
 
-        return billRepository.findAll().map(EntityDtoUtil::toDto);
+        return billRepository.findAll().map(EntityDtoUtil::toBillResponseDto);
 
     }
 
     @Override
-    public Mono<BillDTO> CreateBill(Mono<BillDTO> model) {
+    public Mono<BillResponseDTO> CreateBill(Mono<BillRequestDTO> model) {
 
             return model
-                    .map(EntityDtoUtil::toEntity)
+                    .map(EntityDtoUtil::toBillEntity)
                     .doOnNext(e -> e.setBillId(EntityDtoUtil.generateUUIDString()))
                     .flatMap(billRepository::insert)
-                    .map(EntityDtoUtil::toDto);
+                    .map(EntityDtoUtil::toBillResponseDto);
         }
 
 
