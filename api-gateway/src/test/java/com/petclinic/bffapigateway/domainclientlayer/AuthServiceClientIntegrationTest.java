@@ -2,26 +2,21 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.bffapigateway.dtos.*;
-import com.petclinic.bffapigateway.exceptions.GenericHttpException;
-import com.petclinic.bffapigateway.exceptions.HttpErrorInfo;
+import com.petclinic.bffapigateway.dtos.Auth.Register;
+import com.petclinic.bffapigateway.dtos.Auth.Role;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpEntity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-import reactor.util.function.Tuple2;
 
 import java.io.IOException;
-import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 /**
  * Created by IntelliJ IDEA.

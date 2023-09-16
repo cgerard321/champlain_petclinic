@@ -2,9 +2,8 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.bffapigateway.dtos.RatingResponseDTO;
-import com.petclinic.bffapigateway.dtos.VetDTO;
-import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
+import com.petclinic.bffapigateway.dtos.Vets.RatingResponseDTO;
+import com.petclinic.bffapigateway.dtos.Vets.VetDTO;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterEach;
@@ -12,11 +11,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
 import java.io.IOException;
 import java.util.HashSet;

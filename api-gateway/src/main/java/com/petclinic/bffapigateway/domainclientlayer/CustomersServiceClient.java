@@ -1,7 +1,9 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
-import com.petclinic.bffapigateway.dtos.*;
-
+import com.petclinic.bffapigateway.dtos.Owners.OwnerDetails;
+import com.petclinic.bffapigateway.dtos.Pets.PetDetails;
+import com.petclinic.bffapigateway.dtos.Pets.PetType;
+import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
