@@ -1,5 +1,4 @@
-package com.petclinic.visits.visitsservicenew.PresentationLayer;
-
+package com.petclinic.bffapigateway.dtos.Visits;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

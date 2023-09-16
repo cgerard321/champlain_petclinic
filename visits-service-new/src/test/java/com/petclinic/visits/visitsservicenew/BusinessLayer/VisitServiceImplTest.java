@@ -6,9 +6,7 @@ import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -27,19 +25,18 @@ class VisitServiceImplTest {
     @MockBean
     private VisitRepo visitRepo;
 
-    private Visit visit = buildVisit();
+    private final Visit visit = buildVisit();
 
-    private VisitResponseDTO visitResponseDTO = buildVisitResponseDTO();
-    private VisitRequestDTO visitRequestDTO = buildVisitRequestDTO();
-    private int PRAC_ID = visitResponseDTO.getPractitionerId();
-    private int PET_ID = visitResponseDTO.getPetId();
+    private final VisitResponseDTO visitResponseDTO = buildVisitResponseDTO();
+    private final VisitRequestDTO visitRequestDTO = buildVisitRequestDTO();
+    private final int PRAC_ID = visitResponseDTO.getPractitionerId();
+    private final int PET_ID = visitResponseDTO.getPetId();
 
-    private int MONTH = visitResponseDTO.getMonth();
-    private String VISIT_ID = visitResponseDTO.getVisitId();
+    private final int MONTH = visitResponseDTO.getMonth();
+    private final String VISIT_ID = visitResponseDTO.getVisitId();
 
     @Test
     void getVisitByVisitId(){
-
         when(visitRepo.findByVisitId(anyString())).thenReturn(Mono.just(visit));
 
         String visitId = visit.getVisitId();
@@ -60,7 +57,6 @@ class VisitServiceImplTest {
     }
     @Test
     void getVisitsByPractitionerId(){
-
         when(visitRepo.findVisitsByPractitionerId(anyInt())).thenReturn(Flux.just(visit));
 
         Flux<VisitResponseDTO> visitResponseDTOFlux = visitService.getVisitsForPractitioner(PRAC_ID);
@@ -80,7 +76,6 @@ class VisitServiceImplTest {
 
     @Test
     void getVisitsForPet(){
-
         when(visitRepo.findByPetId(anyInt())).thenReturn(Flux.just(visit));
 
         Flux<VisitResponseDTO> visitResponseDTOFlux = visitService.getVisitsForPet(PET_ID);
@@ -100,7 +95,6 @@ class VisitServiceImplTest {
     }
     @Test
     void getVisitsByPractitionerIdAndMonth(){
-
         when(visitRepo.findVisitsByPractitionerIdAndMonth(anyInt(), anyInt())).thenReturn(Flux.just(visit));
 
         Flux<VisitResponseDTO> visitDTOFlux = visitService.getVisitsByPractitionerIdAndMonth(PET_ID, MONTH);
@@ -116,57 +110,46 @@ class VisitServiceImplTest {
                     assertEquals(visit.getPetId(), foundVisit.getPetId());
                     assertEquals(visit.getPractitionerId(), foundVisit.getPractitionerId());
                 }).verifyComplete();
-
     }
     @Test
     void addVisit(){
-
-        visitService.addVisit(Mono.just(visitRequestDTO))
-                .map(visitDTO1 -> {
-
-                    assertEquals(visitDTO1.getVisitId(), visitDTO1.getVisitId());
-                    assertEquals(visitDTO1.getDescription(), visitDTO1.getDescription());
-                    assertEquals(visitDTO1.getPetId(), visitDTO1.getPetId());
-                    assertEquals(visitDTO1.getDay(), visitDTO1.getDay());
-                    assertEquals(visitDTO1.getMonth(), visitDTO1.getMonth());
-                    assertEquals(visitDTO1.getYear(), visitDTO1.getYear());
-                    assertEquals(visitDTO1.getPractitionerId(), visitDTO1.getPractitionerId());
-                    return visitDTO1;
-                });
-
-
+        when(visitRepo.insert(any(Visit.class))).thenReturn(Mono.just(visit));
+        StepVerifier.create(visitService.addVisit(Mono.just(visitRequestDTO)))
+                .consumeNextWith(visitDTO1 -> {
+                    assertEquals(visit.getVisitId(), visitDTO1.getVisitId());
+                    assertEquals(visit.getDescription(), visitDTO1.getDescription());
+                    assertEquals(visit.getPetId(), visitDTO1.getPetId());
+                    assertEquals(visit.getDay(), visitDTO1.getDay());
+                    assertEquals(visit.getMonth(), visitDTO1.getMonth());
+                    assertEquals(visit.getYear(), visitDTO1.getYear());
+                    assertEquals(visit.getPractitionerId(), visitDTO1.getPractitionerId());
+                }).verifyComplete();
     }
     @Test
     void deleteVisit(){
         visitService.deleteVisit(VISIT_ID);
+
         verify(visitRepo, times(1)).deleteVisitByVisitId(VISIT_ID);
 
     }
     @Test
     void updateVisit(){
-
         when(visitRepo.save(any(Visit.class))).thenReturn(Mono.just(visit));
-
         when(visitRepo.findByVisitId(anyString())).thenReturn(Mono.just(visit));
 
-        visitService.updateVisit(VISIT_ID, Mono.just(visitRequestDTO))
-                .map((visitDTO1) -> {
-                    //todo change to proper verification
-                    assertEquals(visitDTO1.getVisitId(), visitDTO1.getVisitId());
-                    assertEquals(visitDTO1.getDescription(), visitDTO1.getDescription());
-                    assertEquals(visitDTO1.getPetId(), visitDTO1.getPetId());
-                    assertEquals(visitDTO1.getDay(), visitDTO1.getDay());
-                    assertEquals(visitDTO1.getMonth(), visitDTO1.getMonth());
-                    assertEquals(visitDTO1.getYear(), visitDTO1.getYear());
-                    assertEquals(visitDTO1.getPractitionerId(), visitDTO1.getPractitionerId());
-                    return visitDTO1;
-                });
-
+        StepVerifier.create(visitService.updateVisit(VISIT_ID, Mono.just(visitRequestDTO)))
+                .consumeNextWith(visitDTO1 -> {
+                    assertEquals(visit.getVisitId(), visitDTO1.getVisitId());
+                    assertEquals(visit.getDescription(), visitDTO1.getDescription());
+                    assertEquals(visit.getPetId(), visitDTO1.getPetId());
+                    assertEquals(visit.getDay(), visitDTO1.getDay());
+                    assertEquals(visit.getMonth(), visitDTO1.getMonth());
+                    assertEquals(visit.getYear(), visitDTO1.getYear());
+                    assertEquals(visit.getPractitionerId(), visitDTO1.getPractitionerId());
+                }).verifyComplete();
     }
 
-
     private Visit buildVisit(){
-
         return Visit.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
                 .year(2022)
@@ -178,7 +161,6 @@ class VisitServiceImplTest {
                 .status(true).build();
     }
     private VisitResponseDTO buildVisitResponseDTO(){
-
         return VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
                 .year(2022)

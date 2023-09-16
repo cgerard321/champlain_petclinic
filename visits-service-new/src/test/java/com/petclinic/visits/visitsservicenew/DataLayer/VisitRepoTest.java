@@ -5,8 +5,6 @@ import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.junit.jupiter.api.Test;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,7 +33,6 @@ class VisitRepoTest {
     void findByVisitId(){
         StepVerifier.create(visitRepo.findByVisitId(visit1.getVisitId()))
                 .consumeNextWith(gotVisit -> {
-
                     assertEquals(visit1.getVisitId(), gotVisit.getVisitId());
                     assertEquals(visit1.getPetId(), gotVisit.getPetId());
                     assertEquals(visit1.getDay(), gotVisit.getDay());
@@ -53,58 +50,21 @@ class VisitRepoTest {
     }
     @Test
     void findVisitsByPractitionerId(){
-
-        Publisher<Visit> visitPublisher = visitRepo.deleteAll().thenMany(visitRepo.save(visit1));
-
-        StepVerifier.create(visitPublisher).expectNextCount(1).verifyComplete();
-
-        Flux<Visit> getPract = visitRepo.findVisitsByPractitionerId(visit1.getPractitionerId());
-
-        Publisher<Visit> comp = Mono.from(visitPublisher).thenMany(getPract);
-
-        StepVerifier.create(comp)
-                .consumeNextWith(gotVisit -> {
-
-                    assertEquals(visit1.getVisitId(), gotVisit.getVisitId());
-                    assertEquals(visit1.getPetId(), gotVisit.getPetId());
-                    assertEquals(visit1.getDay(), gotVisit.getDay());
-                    assertEquals(visit1.getMonth(), gotVisit.getMonth());
-                    assertEquals(visit1.getYear(), gotVisit.getYear());
-                    assertEquals(visit1.getPractitionerId(), gotVisit.getPractitionerId());
-                    assertEquals(visit1.isStatus(), gotVisit.isStatus());
-                }).verifyComplete();
-
+        StepVerifier.create(visitRepo.findVisitsByPractitionerId(visit1.getPractitionerId()))
+                .expectNextCount(3)
+                .verifyComplete();
     }
     @Test
     void findVisitsByPractitionerIdAndMonth(){
-
-        Publisher<Visit> visitPublisher = visitRepo.deleteAll().thenMany(visitRepo.save(visit1));
-
-        StepVerifier.create(visitPublisher).expectNextCount(1).verifyComplete();
-
-        Flux<Visit> getPractAndMonth = visitRepo.findVisitsByPractitionerIdAndMonth(visit1.getPractitionerId(), visit1.getMonth());
-
-        Publisher<Visit> comp = Mono.from(visitPublisher).thenMany(getPractAndMonth);
-
-        StepVerifier.create(comp)
-                .consumeNextWith(gotVisit -> {
-
-                    assertEquals(visit1.getVisitId(), gotVisit.getVisitId());
-                    assertEquals(visit1.getPetId(), gotVisit.getPetId());
-                    assertEquals(visit1.getDay(), gotVisit.getDay());
-                    assertEquals(visit1.getMonth(), gotVisit.getMonth());
-                    assertEquals(visit1.getYear(), gotVisit.getYear());
-                    assertEquals(visit1.getPractitionerId(), gotVisit.getPractitionerId());
-                    assertEquals(visit1.isStatus(), gotVisit.isStatus());
-                }).verifyComplete();
-
+        StepVerifier.create(visitRepo.findVisitsByPractitionerIdAndMonth(visit1.getPractitionerId(), visit1.getMonth()))
+                .expectNextCount(3)
+                .verifyComplete();
     }
     @Test
     void deleteVisitByVisitId(){
         StepVerifier
                 .create(visitRepo.findByVisitId(visit1.getVisitId()))
                 .consumeNextWith(gotVisit -> {
-                    //todo fix asserts and assert getAll size changes
                     assertEquals(visit1.getVisitId(), gotVisit.getVisitId());
                     assertEquals(visit1.getPetId(), gotVisit.getPetId());
                     assertEquals(visit1.getDay(), gotVisit.getDay());

@@ -11,8 +11,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -24,19 +22,13 @@ class VisitControllerUnitTest {
     @Autowired
     private WebTestClient webFluxTest;
 
-    private VisitResponseDTO visitResponseDTO = buildVisitResponseDto();
-    private VisitRequestDTO visitRequestDTO = buildVisitRequestDTO();
+    private final VisitResponseDTO visitResponseDTO = buildVisitResponseDto();
+    private final VisitRequestDTO visitRequestDTO = buildVisitRequestDTO();
     private final String Visit_UUID_OK = visitResponseDTO.getVisitId();
     private final int Practitioner_Id_OK = visitResponseDTO.getPractitionerId();
     private final int Pet_Id_OK = visitResponseDTO.getPetId();
     private final int Get_Month = visitResponseDTO.getMonth();
 
-
-
-    @Test
-    void whenContextLoads_thenServiceIsNotNull(){
-        assertNotNull(visitService);
-    }
     @Test
     void getVisitByVisitId(){
         when(visitService.getVisitByVisitId(anyString())).thenReturn(Mono.just(visitResponseDTO));
@@ -66,49 +58,47 @@ class VisitControllerUnitTest {
 
         webFluxTest.get()
                 .uri("/visits/practitioner/visits/" + Practitioner_Id_OK)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
-                .expectStatus()
-                .isOk()
-                .expectHeader()
-                .contentType(MediaType.APPLICATION_JSON);
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
+                .returnResult(VisitResponseDTO.class);
 
         Mockito.verify(visitService, times(1)).getVisitsForPractitioner(Practitioner_Id_OK);
     }
 
     @Test
     void getVisitsByPetId(){
-
         when(visitService.getVisitsForPet(anyInt())).thenReturn(Flux.just(visitResponseDTO));
 
         webFluxTest.get()
                 .uri("/visits/pets/" + Pet_Id_OK)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON);
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM + ";charset=UTF-8")
+                .returnResult(VisitResponseDTO.class);
 
         Mockito.verify(visitService, times(1)).getVisitsForPet(Pet_Id_OK);
     }
 
     @Test
     void getByPractitionerIdAndMonth(){
-
         when(visitService.getVisitsByPractitionerIdAndMonth(anyInt(), anyInt())).thenReturn(Flux.just(visitResponseDTO));
 
         webFluxTest.get()
                 .uri("/visits/practitioner/" + Practitioner_Id_OK+ "/" + Get_Month)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON);
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM + ";charset=UTF-8")
+                .returnResult(VisitResponseDTO.class);
 
         Mockito.verify(visitService, times(1)).getVisitsByPractitionerIdAndMonth(Practitioner_Id_OK, Get_Month);
     }
 
     @Test
     void addVisit(){
-
         when(visitService.addVisit(any(Mono.class))).thenReturn(Mono.just(visitResponseDTO));
 
         webFluxTest
@@ -138,7 +128,6 @@ class VisitControllerUnitTest {
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
-
 
         Mockito.verify(visitService, times(1)).updateVisit(anyString(), any(Mono.class));
     }

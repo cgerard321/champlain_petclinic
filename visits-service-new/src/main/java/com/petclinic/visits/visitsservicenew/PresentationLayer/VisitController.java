@@ -26,7 +26,7 @@ public class VisitController {
         return visitService.getVisitsForPractitioner(practitionerId);
     }
 
-    @PostMapping
+    @PostMapping("")
     public Mono<VisitResponseDTO> addVisit(@RequestBody Mono<VisitRequestDTO> visitRequestDTOMono){
         return visitService.addVisit(visitRequestDTOMono);
     }

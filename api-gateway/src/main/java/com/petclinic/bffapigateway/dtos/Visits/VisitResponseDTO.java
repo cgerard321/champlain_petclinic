@@ -1,5 +1,4 @@
-package com.petclinic.visits.visitsservicenew.PresentationLayer;
-
+package com.petclinic.bffapigateway.dtos.Visits;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,7 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class VisitRequestDTO {
+public class VisitResponseDTO {
+    private String visitId;
     private int year;
     private int month;
     private int day;
