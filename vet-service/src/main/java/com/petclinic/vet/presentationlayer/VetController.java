@@ -11,10 +11,7 @@ package com.petclinic.vet.presentationlayer;
   * Ticket: feat(VVS-CPC-553): add veterinarian
  */
 
-import com.petclinic.vet.servicelayer.RatingResponseDTO;
-import com.petclinic.vet.servicelayer.RatingService;
-import com.petclinic.vet.servicelayer.VetDTO;
-import com.petclinic.vet.servicelayer.VetService;
+import com.petclinic.vet.servicelayer.*;
 import com.petclinic.vet.util.EntityDtoUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +31,10 @@ public class VetController {
     @GetMapping("{vetId}/ratings")
     public Flux<RatingResponseDTO> getAllRatingsByVetId(@PathVariable String vetId) {
         return ratingService.getAllRatingsByVetId(vetId);
+    }
+    @PostMapping("/{vetId}/ratings")
+    public Mono<RatingResponseDTO> addRatingToVet(@PathVariable String vetId, @RequestBody Mono<RatingRequestDTO> ratingRequest){
+        return ratingService.addRatingToVet(vetId, ratingRequest);
     }
 
     @GetMapping()

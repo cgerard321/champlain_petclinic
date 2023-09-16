@@ -7,10 +7,9 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class RatingResponseDTO {
-    private String ratingId;
+@NoArgsConstructor
+public class RatingRequestDTO {
     private String vetId;
     private Double rateScore;
     private String rateDescription;

@@ -1,5 +1,6 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
+import com.petclinic.bffapigateway.dtos.RatingRequestDTO;
 import com.petclinic.bffapigateway.dtos.RatingResponseDTO;
 import com.petclinic.bffapigateway.dtos.VetDTO;
 import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
@@ -49,6 +50,19 @@ public class VetsServiceClient {
                         .bodyToFlux(RatingResponseDTO.class);
 
         return  ratingResponseDTOFlux;
+    }
+    public Mono<RatingResponseDTO> addRatingToVet(String vetId, Mono<RatingRequestDTO> ratingRequestDTO) {
+        Mono<RatingResponseDTO> ratingResponseDTOMono =
+                webClientBuilder
+                        .build()
+                        .post()
+                        .uri(vetsServiceUrl + "/" + vetId + "/ratings")
+                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .body(ratingRequestDTO, RatingResponseDTO.class)
+                        .retrieve()
+                        .bodyToMono(RatingResponseDTO.class);
+
+        return  ratingResponseDTOMono;
     }
     public Flux<VetDTO> getVets() {
         Flux<VetDTO> vetDTOFlux =
