@@ -19,7 +19,7 @@ class InventoryRepositoryTest {
     @Test
     public void shouldSaveSingleInventory(){
         //arrange
-        Inventory newInventory = buildInventory("inventoryId_3", "inventoryType_3", "inventoryDescription_3");
+        Inventory newInventory = buildInventory("inventoryId_3", "inventoryType_3", InventoryType.sales ,"inventoryDescription_3");
         Publisher<Inventory> setup = inventoryRepository.save(newInventory);
         //act and assert
         StepVerifier
@@ -29,7 +29,7 @@ class InventoryRepositoryTest {
     }
 
 
-    private Inventory buildInventory(String inventoryId, String inventoryType, String inventoryDescription) {
+    private Inventory buildInventory(String inventoryId, String name,  InventoryType inventoryType, String inventoryDescription) {
         return Inventory.builder()
                 .inventoryId(inventoryId)
                 .inventoryType(inventoryType)

@@ -4,6 +4,8 @@ import com.petclinic.inventoryservice.datalayer.Inventory.Inventory;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryRepository;
 import com.petclinic.inventoryservice.datalayer.Product.Product;
 import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
+import com.petclinic.inventoryservice.presentationlayer.InventoryRequestDTO;
+import com.petclinic.inventoryservice.presentationlayer.InventoryResponseDTO;
 import com.petclinic.inventoryservice.presentationlayer.ProductRequestDTO;
 import com.petclinic.inventoryservice.presentationlayer.ProductResponseDTO;
 import com.petclinic.inventoryservice.utils.EntityDTOUtil;
@@ -65,4 +67,39 @@ public Mono<ProductResponseDTO> addProductToInventory(Mono<ProductRequestDTO> pr
                     }))
             .switchIfEmpty(Mono.error(new InvalidInputException("Unable to save product to the repository, an error occurred.")));
 }
+
+
+
+    @Override
+
+    public Mono<InventoryResponseDTO> addInventory(Mono<InventoryRequestDTO> inventoryRequestDTO){
+        return inventoryRequestDTO
+                .map(EntityDTOUtil::toInventoryEntity)
+                .doOnNext(e -> {
+                    if (e.getInventoryType() == null){
+                        throw new InvalidInputException("Invalid input data: inventory type cannot be blank."  );
+                    }
+                    e.setInventoryId(EntityDTOUtil.generateUUID());
+                })
+                .flatMap(inventoryRepository::insert)
+                .map(EntityDTOUtil::toInventoryResponseDTO);
+
+    }
+
+
+    @Override
+    public Mono<InventoryResponseDTO> updateInventory(Mono<InventoryRequestDTO> inventoryRequestDTO, String inventoryId) {
+
+        return inventoryRepository.findInventoryByInventoryId(inventoryId)
+                .flatMap(existingInventory -> inventoryRequestDTO.map(requestDTO -> {
+                    existingInventory.setName(requestDTO.getName());
+                    existingInventory.setInventoryDescription(requestDTO.getInventoryDescription());
+                    existingInventory.setInventoryType(requestDTO.getInventoryType());
+                    return existingInventory;
+
+                }))
+                .flatMap(inventoryRepository::save)
+                .map(EntityDTOUtil::toInventoryResponseDTO);
+
+    }
 }

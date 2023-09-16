@@ -8,6 +8,8 @@ import com.petclinic.bffapigateway.dtos.Auth.UserPasswordLessDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillDetails;
 import com.petclinic.bffapigateway.dtos.Inventory.ProductRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.ProductResponseDTO;
+import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
+import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
 import com.petclinic.bffapigateway.dtos.Owners.OwnerDetails;
 import com.petclinic.bffapigateway.dtos.Pets.PetDetails;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
@@ -394,4 +396,22 @@ public class BFFApiGatewayController {
     public Mono<ProductResponseDTO> addProductToInventory(@RequestBody ProductRequestDTO model, @PathVariable String inventoryId){
         return inventoryServiceClient.addProductToInventory(model, inventoryId);
     }
+
+    @PostMapping(value = "inventory",
+            consumes = "application/json",
+            produces = "application/json")
+    public Mono<InventoryResponseDTO> addInventory(@RequestBody InventoryRequestDTO model){
+        return inventoryServiceClient.addInventory(model);
+    }
+
+
+
+    @PutMapping(value = "inventory/{inventoryId}",consumes = "application/json" ,produces = "application/json")
+    public Mono<InventoryResponseDTO> updateInventory( @RequestBody InventoryRequestDTO model, @PathVariable String inventoryId) {
+        return inventoryServiceClient.updateInventory(model, inventoryId);
+
+    }
+
+
+
 }
