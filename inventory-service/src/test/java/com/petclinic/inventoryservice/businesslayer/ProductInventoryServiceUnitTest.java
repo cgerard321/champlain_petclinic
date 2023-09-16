@@ -2,6 +2,7 @@ package com.petclinic.inventoryservice.businesslayer;
 
 import com.petclinic.inventoryservice.datalayer.Inventory.Inventory;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryRepository;
+import com.petclinic.inventoryservice.datalayer.Inventory.InventoryType;
 import com.petclinic.inventoryservice.datalayer.Product.Product;
 import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
 import com.petclinic.inventoryservice.presentationlayer.InventoryResponseDTO;
@@ -45,7 +46,7 @@ class ProductInventoryServiceUnitTest {
     Inventory inventory = Inventory.builder()
             .id("1")
             .inventoryId("1")
-            .inventoryType("Medication")
+            .inventoryType(InventoryType.internal)
             .inventoryDescription("Medication for procedures")
             .build();
 

@@ -15,10 +15,30 @@ public class InventoryController {
     @Autowired
     private ProductInventoryService productInventoryService;
 
+
+
+
     @PostMapping("/{inventoryId}/products")
     public Mono<ResponseEntity<ProductResponseDTO>> addProductToInventory(@RequestBody Mono<ProductRequestDTO> newProduct, @PathVariable String inventoryId){
         return productInventoryService.addProductToInventory(newProduct, inventoryId)
                 .map(productResponseDTO -> ResponseEntity.status(HttpStatus.CREATED).body(productResponseDTO))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
+
+
+    @PostMapping()
+    public Mono<ResponseEntity<InventoryResponseDTO>> addInventory(@RequestBody Mono<InventoryRequestDTO> inventoryRequestDTO){
+        return productInventoryService.addInventory(inventoryRequestDTO)
+                .map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
+                .defaultIfEmpty(ResponseEntity.unprocessableEntity().build());
+    }
+
+
+    @PutMapping("/{inventoryId}")
+    public Mono<ResponseEntity<InventoryResponseDTO>> updateInventory(@RequestBody Mono<InventoryRequestDTO> inventoryRequestDTO, @PathVariable String inventoryId) {
+        return productInventoryService.updateInventory(inventoryRequestDTO, inventoryId)
+                .map(updatedStudent -> ResponseEntity.status(HttpStatus.OK).body(updatedStudent))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
 }

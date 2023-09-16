@@ -1,12 +1,11 @@
 
 package com.petclinic.bffapigateway.domainclientlayer;
 
-import com.petclinic.bffapigateway.dtos.BundleDetails;
-import com.petclinic.bffapigateway.dtos.ProductRequestDTO;
-import com.petclinic.bffapigateway.dtos.ProductResponseDTO;
+import com.petclinic.bffapigateway.dtos.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -36,6 +35,27 @@ public class InventoryServiceClient {
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve().bodyToMono(ProductResponseDTO.class);
     }
+
+
+    public Mono<InventoryResponseDTO> addInventory(final InventoryRequestDTO model){
+        return webClientBuilder.build().post()
+                .uri(inventoryServiceUrl)
+                .body(Mono.just(model),InventoryRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve().bodyToMono(InventoryResponseDTO.class);
+    }
+
+
+
+    public Mono<InventoryResponseDTO> updateInventory( InventoryRequestDTO model, String inventoryId){
+        return webClientBuilder.build().put()
+                .uri(inventoryServiceUrl + "/{inventoryId}" , inventoryId)
+                .body(Mono.just(model),InventoryRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve().bodyToMono(InventoryResponseDTO.class);
+    }
+
+
 
 //    public Mono<BundleDetails> getBundle(final String bundleUUID) {
 //        return webClientBuilder.build().get()

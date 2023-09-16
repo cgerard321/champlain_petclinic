@@ -1,6 +1,5 @@
-package com.petclinic.inventoryservice.presentationlayer;
+package com.petclinic.bffapigateway.dtos;
 
-import com.petclinic.inventoryservice.datalayer.Inventory.InventoryType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
