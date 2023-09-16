@@ -2,6 +2,8 @@ package com.petclinic.billing.presentationlayer;
 
 import com.petclinic.billing.businesslayer.BillService;
 import com.petclinic.billing.datalayer.BillDTO;
+import com.petclinic.billing.datalayer.BillRequestDTO;
+import com.petclinic.billing.datalayer.BillResponseDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +23,7 @@ public class BillResource {
     // Create Bill //
     @PostMapping("/bills")
     @ResponseStatus(HttpStatus.CREATED)
-    public Mono<BillDTO> createBill(@Valid @RequestBody Mono<BillDTO> billDTO){
+    public Mono<BillResponseDTO> createBill(@Valid @RequestBody Mono<BillRequestDTO> billDTO){
         return SERVICE.CreateBill(billDTO);
     }
 
@@ -32,7 +34,7 @@ public class BillResource {
     }
 
     @GetMapping(value = "/bills")
-    public Flux<BillDTO> findAllBills() {
+    public Flux<BillResponseDTO> findAllBills() {
         return SERVICE.GetAllBills();
     }
 

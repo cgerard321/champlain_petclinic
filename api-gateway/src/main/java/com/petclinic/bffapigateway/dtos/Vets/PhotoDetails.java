@@ -1,4 +1,4 @@
-package com.petclinic.bffapigateway.dtos;
+package com.petclinic.bffapigateway.dtos.Vets;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;

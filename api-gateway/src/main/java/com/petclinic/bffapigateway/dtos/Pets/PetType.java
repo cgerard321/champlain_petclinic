@@ -1,4 +1,4 @@
-package com.petclinic.bffapigateway.dtos;
+package com.petclinic.bffapigateway.dtos.Pets;
 
 import lombok.Data;
 
