@@ -2,7 +2,10 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.bffapigateway.dtos.*;
+import com.petclinic.bffapigateway.dtos.Owners.OwnerDetails;
+import com.petclinic.bffapigateway.dtos.Pets.PetDetails;
+import com.petclinic.bffapigateway.dtos.Pets.PetType;
+import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterEach;

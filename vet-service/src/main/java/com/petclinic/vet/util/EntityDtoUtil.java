@@ -11,9 +11,11 @@ package com.petclinic.vet.util;
   * Ticket: feat(VVS-CPC-553): add veterinarian
  */
 
+import com.petclinic.vet.dataaccesslayer.Rating;
 import com.petclinic.vet.dataaccesslayer.Specialty;
 import com.petclinic.vet.dataaccesslayer.Vet;
 import com.petclinic.vet.exceptions.InvalidInputException;
+import com.petclinic.vet.servicelayer.RatingResponseDTO;
 import com.petclinic.vet.servicelayer.SpecialtyDTO;
 import com.petclinic.vet.servicelayer.VetDTO;
 import lombok.Generated;
@@ -22,6 +24,7 @@ import org.springframework.beans.BeanUtils;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 
 public class EntityDtoUtil {
     @Generated
@@ -77,6 +80,11 @@ public class EntityDtoUtil {
         return specialty;
     }
 
+    public static RatingResponseDTO toDTO(Rating rating) {
+        RatingResponseDTO dto = new RatingResponseDTO();
+        BeanUtils.copyProperties(rating, dto);
+        return dto;
+    }
     public static Set<SpecialtyDTO> toDTOSet(Set<Specialty> specialties) {
         Set<SpecialtyDTO> specialtyDTOS = new HashSet<>();
         for (Specialty specialty:

@@ -19,7 +19,7 @@ import java.util.Date;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port: 27017"})
+@SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port: 0"})
 @AutoConfigureWebTestClient
 class BillResourceIntegrationTest {
 

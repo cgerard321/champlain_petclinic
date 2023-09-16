@@ -11,6 +11,8 @@ package com.petclinic.vet.presentationlayer;
   * Ticket: feat(VVS-CPC-553): add veterinarian
  */
 
+import com.petclinic.vet.servicelayer.RatingResponseDTO;
+import com.petclinic.vet.servicelayer.RatingService;
 import com.petclinic.vet.servicelayer.VetDTO;
 import com.petclinic.vet.servicelayer.VetService;
 import com.petclinic.vet.util.EntityDtoUtil;
@@ -26,6 +28,13 @@ public class VetController {
 
     @Autowired
     VetService vetService;
+
+    @Autowired
+    RatingService ratingService;
+    @GetMapping("{vetId}/ratings")
+    public Flux<RatingResponseDTO> getAllRatingsByVetId(@PathVariable String vetId) {
+        return ratingService.getAllRatingsByVetId(vetId);
+    }
 
     @GetMapping()
     public Flux<VetDTO> getAllVets() {

@@ -2,11 +2,25 @@ package com.petclinic.bffapigateway.presentationlayer;
 
 
 import com.petclinic.bffapigateway.domainclientlayer.*;
-import com.petclinic.bffapigateway.dtos.*;
+import com.petclinic.bffapigateway.dtos.Auth.Login;
+import com.petclinic.bffapigateway.dtos.Auth.Role;
+import com.petclinic.bffapigateway.dtos.Auth.UserPasswordLessDTO;
+import com.petclinic.bffapigateway.dtos.Bills.BillDetails;
+import com.petclinic.bffapigateway.dtos.Inventory.ProductRequestDTO;
+import com.petclinic.bffapigateway.dtos.Inventory.ProductResponseDTO;
+import com.petclinic.bffapigateway.dtos.Owners.OwnerDetails;
+import com.petclinic.bffapigateway.dtos.Pets.PetDetails;
+import com.petclinic.bffapigateway.dtos.Pets.PetType;
+import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
+import com.petclinic.bffapigateway.dtos.Vets.RatingResponseDTO;
+import com.petclinic.bffapigateway.dtos.Vets.VetDTO;
+import com.petclinic.bffapigateway.dtos.Vets.VisitDetails;
+import com.petclinic.bffapigateway.dtos.Visits.Visits;
 import com.petclinic.bffapigateway.utils.VetsEntityDtoUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -185,14 +199,15 @@ public class BFFApiGatewayController {
         return visitsServiceClient.createVisitForPet(visit);
     }
 
-
-
-
     @GetMapping(value = "vets")
     public Flux<VetDTO> getAllVets() {
         return vetsServiceClient.getVets();
     }
 
+    @GetMapping(value = "vets/{vetId}/ratings")
+    public Flux<RatingResponseDTO> getRatingsByVetId(@PathVariable String vetId) {
+        return vetsServiceClient.getRatingsByVetId(vetId);
+    }
     @GetMapping("/vets/{vetId}")
     public Mono<ResponseEntity<VetDTO>> getVetByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getVetByVetId(VetsEntityDtoUtil.verifyId(vetId))
@@ -233,36 +248,36 @@ public class BFFApiGatewayController {
     public Mono<Void> deleteVet(@PathVariable String vetId) {
         return vetsServiceClient.deleteVet(VetsEntityDtoUtil.verifyId(vetId));
     }
-
-
-
-    @PostMapping(value = "users",
-            consumes = "application/json",
-            produces = "application/json")
-    public Mono<UserDetails> createUser(@RequestBody Register model) {
-        return authServiceClient.createUser(model);
-    }
-
-    @DeleteMapping(value = "users/{userId}")
-    public Mono<UserDetails> deleteUser(@RequestHeader(AUTHORIZATION) String auth, final @PathVariable long userId) {
-        return authServiceClient.deleteUser(auth, userId);
-    }
-
-    @GetMapping(value = "users/{userId}")
-    public Mono<UserDetails> getUserDetails(final @PathVariable long userId) {
-        return authServiceClient.getUser(userId);
-    }
-    @GetMapping(value = "users")
-    public Flux<UserDetails> getAll(@RequestHeader(AUTHORIZATION) String auth) {
-        return authServiceClient.getUsers(auth);
-    }
-
-    @PutMapping(value = "users/{userId}",
-            consumes = "application/json",
-            produces = "application/json")
-    public Mono<UserDetails> updateUser(final @PathVariable long userId, @RequestBody Register model) {
-        return authServiceClient.updateUser(userId, model);
-    }
+//
+//
+//
+//    @PostMapping(value = "users",
+//            consumes = "application/json",
+//            produces = "application/json")
+//    public Mono<UserDetails> createUser(@RequestBody Register model) {
+//        return authServiceClient.createUser(model);
+//    }
+//
+//    @DeleteMapping(value = "users/{userId}")
+//    public Mono<UserDetails> deleteUser(@RequestHeader(AUTHORIZATION) String auth, final @PathVariable long userId) {
+//        return authServiceClient.deleteUser(auth, userId);
+//    }
+//
+//    @GetMapping(value = "users/{userId}")
+//    public Mono<UserDetails> getUserDetails(final @PathVariable long userId) {
+//        return authServiceClient.getUser(userId);
+//    }
+//    @GetMapping(value = "users")
+//    public Flux<UserDetails> getAll(@RequestHeader(AUTHORIZATION) String auth) {
+//        return authServiceClient.getUsers(auth);
+//    }
+//
+//    @PutMapping(value = "users/{userId}",
+//            consumes = "application/json",
+//            produces = "application/json")
+//    public Mono<UserDetails> updateUser(final @PathVariable long userId, @RequestBody Register model) {
+//        return authServiceClient.updateUser(userId, model);
+//    }
 
     @GetMapping(value = "admin/roles")
     public Flux<Role> getRoles(@RequestHeader(AUTHORIZATION) String auth) {
@@ -355,46 +370,28 @@ public class BFFApiGatewayController {
     
     /**
      * End of Owner Methods
-     * **/
+     **/
 
-    @GetMapping("/verification/{token}")
-    public Mono<UserDetails> verifyUser(@PathVariable final String token) {
-        return authServiceClient.verifyUser(token);
-    }
+//    @GetMapping("/verification/{token}")
+//    public Mono<UserDetails> verifyUser(@PathVariable final String token) {
+//        return authServiceClient.verifyUser(token);
+//    }
 
-    @PostMapping("/users/login")
-    public Mono<ResponseEntity<UserDetails>> login(@RequestBody final Login login) {
-        return authServiceClient.login(login)
-                .map(n -> ResponseEntity.ok()
-                        .header(AUTHORIZATION, n.getT1())
-                        .body(n.getT2())
-                );
-    }
+    @PostMapping(value = "/users/login",produces = "application/json;charset=utf-8;", consumes = "application/json")
 
-    //Start of Bundle Methods
+    public ResponseEntity<UserPasswordLessDTO> login(@RequestBody Login login) throws Exception {
+        log.info("Entered controller /login");
+        log.info("Login: " + login.getEmail() + " " + login.getPassword());
+        HttpEntity<UserPasswordLessDTO> reponseFromService = authServiceClient.login(login);
 
-    @GetMapping(value = "bundles/{bundleUUID}")
-    public Mono<BundleDetails> getBundle(final @PathVariable String bundleUUID)
-    {
-        return inventoryServiceClient.getBundle(bundleUUID);
-    }
-    @GetMapping(value = "bundles")
-    public Flux<BundleDetails> getAllBundles() {
-        return inventoryServiceClient.getAllBundles();
-    }
-    @GetMapping(value = "bundles/item/{item}")
-    public Flux<BundleDetails> getBundlesByItem(@PathVariable String item) {
-        return inventoryServiceClient.getBundlesByItem(item);
-    }
-    @PostMapping(value = "bundles",
-            consumes = "application/json",
-            produces = "application/json")
-    public Mono<BundleDetails> createBundle(@RequestBody BundleDetails model) {
-        return inventoryServiceClient.createBundle(model);
-    }
-    @DeleteMapping(value = "bundles/{bundleUUID}")
-    public Mono<Void> deleteBundle(final @PathVariable String bundleUUID){
-        return inventoryServiceClient.deleteBundle(bundleUUID);
+
+        return ResponseEntity.status(HttpStatus.OK).headers(reponseFromService.getHeaders()).body(reponseFromService.getBody());
+
     }
 
+    //Start of Inventory Methods
+    @PostMapping(value = "inventory/{inventoryId}/products")
+    public Mono<ProductResponseDTO> addProductToInventory(@RequestBody ProductRequestDTO model, @PathVariable String inventoryId){
+        return inventoryServiceClient.addProductToInventory(model, inventoryId);
+    }
 }

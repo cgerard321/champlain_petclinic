@@ -2,7 +2,8 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.bffapigateway.dtos.VetDTO;
+import com.petclinic.bffapigateway.dtos.Vets.RatingResponseDTO;
+import com.petclinic.bffapigateway.dtos.Vets.VetDTO;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterEach;
@@ -17,8 +18,8 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.function.Consumer;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static io.netty.handler.codec.http.HttpHeaders.setHeader;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 
@@ -54,6 +55,35 @@ class VetsServiceClientIntegrationTest {
     void shutdown() throws IOException {
         server.shutdown();
     }
+
+    @Test
+    void getRatingsByVetId() throws JsonProcessingException {
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody("    {\n" +
+                        "        \"ratingId\": \"123456\",\n" +
+                        "        \"vetId\": \"678910\",\n" +
+                        "        \"rateScore\": 4.5\n" +
+                        "    }"));
+
+        final RatingResponseDTO rating = vetsServiceClient.getRatingsByVetId("678910").blockFirst();
+        assertEquals("123456", rating.getRatingId());
+        assertEquals("678910", rating.getVetId());
+        assertEquals(4.5, rating.getRateScore());
+    }
+
+//    @Test
+//    void getRatingsByVetId_ExistingVetNotFound_ShouldThrowException() {
+//        prepareResponse(response -> response
+//                .setHeader("Content-Type", "application/json")
+//                .setResponseCode(HttpStatus.NOT_FOUND.value())
+//                .setBody("Vet with id 678910 not found."));
+//
+//        StepVerifier.create(vetsServiceClient.getRatingsByVetId("678910"))
+//                .expectErrorMatches(throwable -> throwable instanceof ExistingVetNotFoundException
+//                        && throwable.getMessage().equals("Vet with id 678910 not found."))
+//                .verify();
+//    }
 
     @Test
     void getAllVets() throws JsonProcessingException {

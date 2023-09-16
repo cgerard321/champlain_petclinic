@@ -14,6 +14,11 @@ angular.module('vetDetails')
             self.visitsList = resp.data;
         });
 
+        $http.get('api/gateway/vets/' + $stateParams.vetId + '/ratings').then(function (resp) {
+            console.log(resp.data)
+            self.ratings = resp.data;
+        });
+
         //photo
         $http.get('api/gateway/vets/photo/' + $stateParams.vetId).then(function (resp) {
             self.vetPhoto = resp.data;

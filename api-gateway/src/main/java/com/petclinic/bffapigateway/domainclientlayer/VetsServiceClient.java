@@ -1,6 +1,7 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
-import com.petclinic.bffapigateway.dtos.VetDTO;
+import com.petclinic.bffapigateway.dtos.Vets.RatingResponseDTO;
+import com.petclinic.bffapigateway.dtos.Vets.VetDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -17,7 +18,6 @@ import reactor.core.publisher.Mono;
 @Component
 @Slf4j
 public class VetsServiceClient {
-
     private final WebClient.Builder webClientBuilder;
     private String vetsServiceUrl;
     public void setVetsServiceUrl(String vetsServiceUrl) {
@@ -33,6 +33,17 @@ public class VetsServiceClient {
         vetsServiceUrl = "http://" + vetsServiceHost + ":" + vetsServicePort + "/vets";
     }
 
+    public Flux<RatingResponseDTO> getRatingsByVetId(String vetId) {
+        Flux<RatingResponseDTO> ratingResponseDTOFlux =
+                webClientBuilder
+                        .build()
+                        .get()
+                        .uri(vetsServiceUrl + "/" + vetId + "/ratings")
+                        .retrieve()
+                        .bodyToFlux(RatingResponseDTO.class);
+
+        return  ratingResponseDTOFlux;
+    }
     public Flux<VetDTO> getVets() {
         Flux<VetDTO> vetDTOFlux =
                webClientBuilder

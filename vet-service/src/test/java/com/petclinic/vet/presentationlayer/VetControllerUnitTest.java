@@ -1,6 +1,8 @@
 package com.petclinic.vet.presentationlayer;
 
 import com.petclinic.vet.dataaccesslayer.Vet;
+import com.petclinic.vet.servicelayer.RatingResponseDTO;
+import com.petclinic.vet.servicelayer.RatingService;
 import com.petclinic.vet.servicelayer.VetDTO;
 import com.petclinic.vet.servicelayer.VetService;
 import org.junit.jupiter.api.Test;
@@ -32,14 +34,39 @@ class VetControllerUnitTest {
     @MockBean
     VetService vetService;
 
+    @MockBean
+    RatingService ratingService;
+
     VetDTO vetDTO = buildVetDTO();
     VetDTO vetDTO2 = buildVetDTO2();
+
+    RatingResponseDTO ratingDTO = buildRatingDTO();
     Vet vet = buildVet();
     String VET_ID = vet.getVetId();
     String VET_BILL_ID = vet.getVetBillId();
     String INVALID_VET_ID = "mjbedf";
 
 
+    @Test
+    void getAllRatingForVetByVetId_ShouldSucceed() {
+        when(ratingService.getAllRatingsByVetId(anyString()))
+                .thenReturn(Flux.just(ratingDTO));
+
+        client
+                .get()
+                .uri("/vets/" + VET_ID + "/ratings")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$[0].ratingId").isEqualTo(ratingDTO.getRatingId())
+                .jsonPath("$[0].vetId").isEqualTo(ratingDTO.getVetId())
+                .jsonPath("$[0].rateScore").isEqualTo(ratingDTO.getRateScore());
+
+        Mockito.verify(ratingService, times(1))
+                .getAllRatingsByVetId(VET_ID);
+    }
 
     @Test
     void getAllVets() {
@@ -331,6 +358,14 @@ class VetControllerUnitTest {
                 .workday("Monday")
                 .specialties(new HashSet<>())
                 .active(true)
+                .build();
+    }
+
+    private RatingResponseDTO buildRatingDTO() {
+        return RatingResponseDTO.builder()
+                .ratingId("1")
+                .vetId("1")
+                .rateScore(5.0)
                 .build();
     }
 }

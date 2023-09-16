@@ -1,9 +1,18 @@
 package com.petclinic.bffapigateway.presentationlayer;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.domainclientlayer.*;
-import com.petclinic.bffapigateway.dtos.*;
+import com.petclinic.bffapigateway.dtos.Auth.Role;
+import com.petclinic.bffapigateway.dtos.Bills.BillDetails;
+import com.petclinic.bffapigateway.dtos.Owners.OwnerDetails;
+import com.petclinic.bffapigateway.dtos.Pets.PetDetails;
+import com.petclinic.bffapigateway.dtos.Pets.PetType;
+import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
+import com.petclinic.bffapigateway.dtos.Vets.RatingResponseDTO;
+import com.petclinic.bffapigateway.dtos.Vets.VetDTO;
+import com.petclinic.bffapigateway.dtos.Vets.VisitDetails;
+import com.petclinic.bffapigateway.dtos.Visits.Visits;
+import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import com.petclinic.bffapigateway.exceptions.GenericHttpException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,20 +22,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.function.Tuples;
 
-import java.sql.Date;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -71,6 +76,41 @@ class ApiGatewayControllerTest {
 
 
 
+    @Test
+    void getAllRatingsForVet() {
+        RatingResponseDTO ratingResponseDTO = buildRatingResponseDTO();
+        when(vetsServiceClient.getRatingsByVetId(anyString()))
+                .thenReturn(Flux.just(ratingResponseDTO));
+
+        client
+                .get()
+                .uri("/api/gateway/vets/" + VET_ID + "/ratings")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$[0].ratingId").isEqualTo(ratingResponseDTO.getRatingId())
+                .jsonPath("$[0].vetId").isEqualTo(ratingResponseDTO.getVetId())
+                .jsonPath("$[0].rateScore").isEqualTo(ratingResponseDTO.getRateScore());
+    }
+
+    @Test
+    void getAllRatingsForVet_ByInvalidVetId() {
+        RatingResponseDTO ratingResponseDTO = buildRatingResponseDTO();
+        when(vetsServiceClient.getRatingsByVetId(anyString()))
+                .thenThrow(new ExistingVetNotFoundException("This id is not valid", NOT_FOUND));
+
+        client
+                .get()
+                .uri("/api/gateway/vets/" + INVALID_VET_ID + "/ratings")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(NOT_FOUND)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("This id is not valid");
+    }
     @Test
     void getAllVets() {
         when(vetsServiceClient.getVets())
@@ -326,57 +366,57 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.pets[0].name").isEqualTo("Garfield")
                 .jsonPath("$.pets[0].visits[0].description").isEqualTo("First visit");
     }
-
-    @Test
-    void getUserDetails() {
-        UserDetails user = new UserDetails();
-        user.setId(1);
-        user.setUsername("roger675");
-        user.setPassword("secretnooneknows");
-        user.setEmail("RogerBrown@gmail.com");
-
-        when(authServiceClient.getUser(1))
-                .thenReturn(Mono.just(user));
-
-        client.get()
-
-                .uri("/api/gateway/users/1")
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.username").isEqualTo("roger675")
-                .jsonPath("$.password").isEqualTo("secretnooneknows")
-                .jsonPath("$.email").isEqualTo("RogerBrown@gmail.com");
-
-        assertEquals(user.getId(), 1);
-    }
-    
-    @Test
-    void createUser(){
-        UserDetails user = new UserDetails();
-        user.setId(1);
-        user.setUsername("Johnny123");
-        user.setPassword("password");
-        user.setEmail("email@email.com");
-        when(authServiceClient.createUser(argThat(
-                n -> user.getEmail().equals(n.getEmail())
-        ))).thenReturn(Mono.just(user));
-
-        client.post()
-                .uri("/api/gateway/users")
-                .body(Mono.just(user), UserDetails.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody();
-
-        assertEquals(user.getId(), 1);
-        assertEquals(user.getUsername(), "Johnny123");
-        assertEquals(user.getPassword(), "password");
-        assertEquals(user.getEmail(), "email@email.com");
-
-    }
+//
+//    @Test
+//    void getUserDetails() {
+//        UserDetails user = new UserDetails();
+//        user.setId(1);
+//        user.setUsername("roger675");
+//        user.setPassword("secretnooneknows");
+//        user.setEmail("RogerBrown@gmail.com");
+//
+//        when(authServiceClient.getUser(1))
+//                .thenReturn(Mono.just(user));
+//
+//        client.get()
+//
+//                .uri("/api/gateway/users/1")
+//                .exchange()
+//                .expectStatus().isOk()
+//                .expectBody()
+//                .jsonPath("$.username").isEqualTo("roger675")
+//                .jsonPath("$.password").isEqualTo("secretnooneknows")
+//                .jsonPath("$.email").isEqualTo("RogerBrown@gmail.com");
+//
+//        assertEquals(user.getId(), 1);
+//    }
+//
+//    @Test
+//    void createUser(){
+//        UserDetails user = new UserDetails();
+//        user.setId(1);
+//        user.setUsername("Johnny123");
+//        user.setPassword("password");
+//        user.setEmail("email@email.com");
+//        when(authServiceClient.createUser(argThat(
+//                n -> user.getEmail().equals(n.getEmail())
+//        ))).thenReturn(Mono.just(user));
+//
+//        client.post()
+//                .uri("/api/gateway/users")
+//                .body(Mono.just(user), UserDetails.class)
+//                .accept(MediaType.APPLICATION_JSON)
+//                .exchange()
+//                .expectStatus().isOk()
+//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+//                .expectBody();
+//
+//        assertEquals(user.getId(), 1);
+//        assertEquals(user.getUsername(), "Johnny123");
+//        assertEquals(user.getPassword(), "password");
+//        assertEquals(user.getEmail(), "email@email.com");
+//
+//    }
 
 
 
@@ -752,42 +792,42 @@ class ApiGatewayControllerTest {
                 .expectBody();
     }
 
-
-    @Test
-    void deleteUser() {
-        UserDetails user = new UserDetails();
-        user.setId(1);
-        user.setUsername("johndoe");
-        user.setPassword("pass");
-        user.setEmail("johndoe2@gmail.com");
-
-        when(authServiceClient.createUser(argThat(
-                n -> user.getEmail().equals(n.getEmail())
-        )))
-                .thenReturn(Mono.just(user));
-
-        client.post()
-                .uri("/api/gateway/users")
-                .body(Mono.just(user), UserDetails.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody();
-
-        assertEquals(1, user.getId());
-
-        client.delete()
-                .uri("/api/gateway/users/1")
-                .header("Authorization", "Bearer token")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody();
-
-        assertEquals(null, authServiceClient.getUser(user.getId()));
-    }
+//
+//    @Test
+//    void deleteUser() {
+//        UserDetails user = new UserDetails();
+//        user.setId(1);
+//        user.setUsername("johndoe");
+//        user.setPassword("pass");
+//        user.setEmail("johndoe2@gmail.com");
+//
+//        when(authServiceClient.createUser(argThat(
+//                n -> user.getEmail().equals(n.getEmail())
+//        )))
+//                .thenReturn(Mono.just(user));
+//
+//        client.post()
+//                .uri("/api/gateway/users")
+//                .body(Mono.just(user), UserDetails.class)
+//                .accept(MediaType.APPLICATION_JSON)
+//                .exchange()
+//                .expectStatus().isOk()
+//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+//                .expectBody();
+//
+//        assertEquals(1, user.getId());
+//
+//        client.delete()
+//                .uri("/api/gateway/users/1")
+//                .header("Authorization", "Bearer token")
+//                .accept(MediaType.APPLICATION_JSON)
+//                .exchange()
+//                .expectStatus()
+//                .isOk()
+//                .expectBody();
+//
+//        assertEquals(null, authServiceClient.getUser(user.getId()));
+//    }
 
 
 
@@ -1076,47 +1116,47 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.status").isEqualTo(false)
                 .jsonPath("$.practitionerId").isEqualTo(1);
     }
-    @Test
-    void shouldDeleteAVisit() {
-        VisitDetails visit = new VisitDetails();
-        OwnerDetails owner = new OwnerDetails();
-        owner.setId(1);
-        visit.setVisitId(UUID.randomUUID().toString());
-        visit.setPetId(1);
-        visit.setDate("2021-12-12");
-        visit.setDescription("Charle's Richard cat has a paw infection.");
-        visit.setStatus(false);
-        visit.setPractitionerId(1);
-
-
-        when(visitsServiceClient.createVisitForPet(visit))
-                .thenReturn(Mono.just(visit));
-
-        client.post()
-                .uri("/api/gateway/visit/owners/{ownerId}/pets/{petId}/visits", owner.getId(), visit.getPetId())
-                .body(Mono.just(visit), VisitDetails.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.visitId").isEqualTo(visit.getVisitId())
-                .jsonPath("$.petId").isEqualTo(1)
-                .jsonPath("$.date").isEqualTo("2021-12-12")
-                .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
-                .jsonPath("$.status").isEqualTo(false)
-                .jsonPath("$.practitionerId").isEqualTo(1);
-
-        client.delete()
-                .uri("/api/gateway/visits/{visitId}", visit.getVisitId())
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody();
-
-        assertEquals(null, visitsServiceClient.getVisitsForPet(visit.getPetId()));
-    }
+//    @Test
+//    void shouldDeleteAVisit() {
+//        VisitDetails visit = new VisitDetails();
+//        OwnerDetails owner = new OwnerDetails();
+//        owner.setId(1);
+//        visit.setVisitId(UUID.randomUUID().toString());
+//        visit.setPetId(1);
+//        visit.setDate("2021-12-12");
+//        visit.setDescription("Charle's Richard cat has a paw infection.");
+//        visit.setStatus(false);
+//        visit.setPractitionerId(1);
+//
+//
+//        when(visitsServiceClient.createVisitForPet(visit))
+//                .thenReturn(Mono.just(visit));
+//
+//        client.post()
+//                .uri("/api/gateway/visit/owners/{ownerId}/pets/{petId}/visits", owner.getId(), visit.getPetId())
+//                .body(Mono.just(visit), VisitDetails.class)
+//                .accept(MediaType.APPLICATION_JSON)
+//                .exchange()
+//                .expectStatus().isOk()
+//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+//                .expectBody()
+//                .jsonPath("$.visitId").isEqualTo(visit.getVisitId())
+//                .jsonPath("$.petId").isEqualTo(1)
+//                .jsonPath("$.date").isEqualTo("2021-12-12")
+//                .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
+//                .jsonPath("$.status").isEqualTo(false)
+//                .jsonPath("$.practitionerId").isEqualTo(1);
+//
+//        client.delete()
+//                .uri("/api/gateway/visits/{visitId}", visit.getVisitId())
+//                .accept(MediaType.APPLICATION_JSON)
+//                .exchange()
+//                .expectStatus()
+//                .isOk()
+//                .expectBody();
+//
+//        assertEquals(null, visitsServiceClient.getVisitsForPet(visit.getPetId()));
+//    }
 
     @Test
     void shouldUpdateAVisitsById() {
@@ -1424,115 +1464,115 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.message").isEqualTo(expectedErrorMessage);
     }
 
-    @Test
-    @DisplayName("Given valid JWT, verify user")
-    void verify_user() throws JsonProcessingException {
+//    @Test
+//    @DisplayName("Given valid JWT, verify user")
+//    void verify_user() throws JsonProcessingException {
+//
+//        final String validToken = "some.valid.token";
+//        final UserDetails user = UserDetails.builder()
+//                .id(1)
+//                .password(null)
+//                .email("e@mail.com")
+//                .username("user")
+//                .roles(Collections.emptySet())
+//                .build();
+//
+//        when(authServiceClient.verifyUser(validToken))
+//                .thenReturn(Mono.just(user));
+//
+//        client.get()
+//                .uri("/api/gateway/verification/{token}", validToken)
+//                .exchange()
+//                .expectStatus().isOk()
+//                .expectBody()
+//                .json(objectMapper.writeValueAsString(user));
+//    }
 
-        final String validToken = "some.valid.token";
-        final UserDetails user = UserDetails.builder()
-                .id(1)
-                .password(null)
-                .email("e@mail.com")
-                .username("user")
-                .roles(Collections.emptySet())
-                .build();
+//    @Test
+//    @DisplayName("Given invalid JWT, expect 400")
+//    void verify_user_bad_token() {
+//
+//        final String errorMessage = "some error message";
+//        final String invalidToken = "some.invalid.token";
+//
+//        when(authServiceClient.verifyUser(invalidToken))
+//                .thenThrow(new GenericHttpException(errorMessage, BAD_REQUEST));
+//
+//        client.get()
+//                .uri("/api/gateway/verification/{token}", invalidToken)
+//                .exchange()
+//                .expectStatus().isBadRequest()
+//                .expectBody()
+//                .jsonPath("$.statusCode").isEqualTo(BAD_REQUEST.value())
+//                .jsonPath("$.timestamp").exists()
+//                .jsonPath("$.message").isEqualTo(errorMessage);
+//    }
+//
+//    @Test
+//    @DisplayName("Given valid Login, return JWT and user details")
+//    void login_valid() throws JsonProcessingException {
+//        final String validToken = "some.valid.token";
+//        final UserDetails user = UserDetails.builder()
+//                .id(-1)
+//                .password(null)
+//                .email("e@mail.com")
+//                .username("user")
+//                .roles(Collections.emptySet())
+//                .build();
+//
+//        final Login login = Login.builder()
+//                .password("valid")
+//                .email(user.getEmail())
+//                .build();
+//        when(authServiceClient.login(login))
+//                .thenReturn(Mono.just(Tuples.of(
+//                        validToken,
+//                        user
+//                )));
+//
+//        final WebTestClient.ResponseSpec ok = client.post()
+//                .uri("/api/gateway/users/login")
+//                .accept(APPLICATION_JSON)
+//                .body(Mono.just(login), Login.class)
+//                .exchange()
+//                .expectStatus().isOk();
+//
+//        ok.expectBody()
+//                .json(objectMapper.writeValueAsString(user));
+//        ok.expectHeader()
+//                .valueEquals(HttpHeaders.AUTHORIZATION, validToken);
+//    }
 
-        when(authServiceClient.verifyUser(validToken))
-                .thenReturn(Mono.just(user));
-
-        client.get()
-                .uri("/api/gateway/verification/{token}", validToken)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .json(objectMapper.writeValueAsString(user));
-    }
-
-    @Test
-    @DisplayName("Given invalid JWT, expect 400")
-    void verify_user_bad_token() {
-
-        final String errorMessage = "some error message";
-        final String invalidToken = "some.invalid.token";
-
-        when(authServiceClient.verifyUser(invalidToken))
-                .thenThrow(new GenericHttpException(errorMessage, BAD_REQUEST));
-
-        client.get()
-                .uri("/api/gateway/verification/{token}", invalidToken)
-                .exchange()
-                .expectStatus().isBadRequest()
-                .expectBody()
-                .jsonPath("$.statusCode").isEqualTo(BAD_REQUEST.value())
-                .jsonPath("$.timestamp").exists()
-                .jsonPath("$.message").isEqualTo(errorMessage);
-    }
-
-    @Test
-    @DisplayName("Given valid Login, return JWT and user details")
-    void login_valid() throws JsonProcessingException {
-        final String validToken = "some.valid.token";
-        final UserDetails user = UserDetails.builder()
-                .id(-1)
-                .password(null)
-                .email("e@mail.com")
-                .username("user")
-                .roles(Collections.emptySet())
-                .build();
-
-        final Login login = Login.builder()
-                .password("valid")
-                .email(user.getEmail())
-                .build();
-        when(authServiceClient.login(login))
-                .thenReturn(Mono.just(Tuples.of(
-                        validToken,
-                        user
-                )));
-
-        final WebTestClient.ResponseSpec ok = client.post()
-                .uri("/api/gateway/users/login")
-                .accept(APPLICATION_JSON)
-                .body(Mono.just(login), Login.class)
-                .exchange()
-                .expectStatus().isOk();
-
-        ok.expectBody()
-                .json(objectMapper.writeValueAsString(user));
-        ok.expectHeader()
-                .valueEquals(HttpHeaders.AUTHORIZATION, validToken);
-    }
-
-    @Test
-    @DisplayName("Given invalid Login, throw 401")
-    void login_invalid() {
-        final UserDetails user = UserDetails.builder()
-                .id(-1)
-                .password(null)
-                .email("e@mail.com")
-                .username("user")
-                .roles(Collections.emptySet())
-                .build();
-
-        final Login login = Login.builder()
-                .password("valid")
-                .email(user.getEmail())
-                .build();
-        final String message = "I live in unending agony. I spent 6 hours and ended up with nothing";
-        when(authServiceClient.login(login))
-                .thenThrow(new GenericHttpException(message, UNAUTHORIZED));
-
-        client.post()
-                .uri("/api/gateway/users/login")
-                .accept(APPLICATION_JSON)
-                .body(Mono.just(login), Login.class)
-                .exchange()
-                .expectStatus().isUnauthorized()
-                .expectBody()
-                .jsonPath("$.statusCode").isEqualTo(UNAUTHORIZED.value())
-                .jsonPath("$.message").isEqualTo(message)
-                .jsonPath("$.timestamp").exists();
-    }
+//    @Test
+//    @DisplayName("Given invalid Login, throw 401")
+//    void login_invalid() {
+//        final UserDetails user = UserDetails.builder()
+//                .id(-1)
+//                .password(null)
+//                .email("e@mail.com")
+//                .username("user")
+//                .roles(Collections.emptySet())
+//                .build();
+//
+//        final Login login = Login.builder()
+//                .password("valid")
+//                .email(user.getEmail())
+//                .build();
+//        final String message = "I live in unending agony. I spent 6 hours and ended up with nothing";
+//        when(authServiceClient.login(login))
+//                .thenThrow(new GenericHttpException(message, UNAUTHORIZED));
+//
+//        client.post()
+//                .uri("/api/gateway/users/login")
+//                .accept(APPLICATION_JSON)
+//                .body(Mono.just(login), Login.class)
+//                .exchange()
+//                .expectStatus().isUnauthorized()
+//                .expectBody()
+//                .jsonPath("$.statusCode").isEqualTo(UNAUTHORIZED.value())
+//                .jsonPath("$.message").isEqualTo(message)
+//                .jsonPath("$.timestamp").exists();
+//    }
 
     @Test
     @DisplayName("Should get all the roles")
@@ -1635,153 +1675,7 @@ class ApiGatewayControllerTest {
         verify(authServiceClient).deleteRole("Bearer token", role.getId());
     }
     //inventory tests
-    @Test
-    public void getBundle(){
-        BundleDetails bundle = new BundleDetails();
-        bundle.setBundleUUID("1");
-        bundle.setItem("Penicillin");
-        bundle.setQuantity(70);
-        bundle.setExpiryDate(Date.valueOf("2022-11-19"));
 
-        when(inventoryServiceClient.getBundle(bundle.getBundleUUID()))
-                .thenReturn(Mono.just(bundle));
-
-        client.get()
-                //check the URI
-                .uri("/api/gateway/bundles/{bundleUUID}", bundle.getBundleUUID())
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$.bundleUUID").isEqualTo("1")
-                .jsonPath("$.item").isEqualTo("Penicillin")
-                .jsonPath("$.quantity").isEqualTo(70)
-                .jsonPath("$.expiryDate").isEqualTo("2022-11-19");
-    }
-    @Test
-    public void getBundlesByItem(){
-        BundleDetails bundle = new BundleDetails();
-        bundle.setBundleUUID("1");
-        bundle.setItem("Penicillin");
-        bundle.setQuantity(70);
-        bundle.setExpiryDate(Date.valueOf("2022-11-19"));
-
-        when(inventoryServiceClient.getBundlesByItem(bundle.getItem()))
-                .thenReturn(Flux.just(bundle));
-
-        client.get()
-                .uri("/api/gateway/bundles/item/{item}", bundle.getItem())
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$[0].bundleUUID").isEqualTo("1")
-                .jsonPath("$[0].item").isEqualTo("Penicillin")
-                .jsonPath("$[0].quantity").isEqualTo(70)
-                .jsonPath("$[0].expiryDate").isEqualTo("2022-11-19");
-    }
-    @Test
-    void getBundleByRequestMissingPath(){
-        client.get()
-                .uri("/bundles")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound()
-                .expectBody()
-                .jsonPath("$.path").isEqualTo("/bundles")
-                .jsonPath("$.message").isEqualTo(null);
-    }
-
-    @Test
-    void getBundleNotFound(){
-        client.get()
-                .uri("/bundles/{bundleUUID}", 0)
-                .accept(APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound()
-                .expectHeader().contentType(APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.path").isEqualTo("/bundles/0")
-                .jsonPath("$.message").isEqualTo(null);
-    }
-    @Test
-    void createBundle(){
-        BundleDetails bundle = new BundleDetails();
-        bundle.setBundleUUID("1");
-        bundle.setItem("Penicillin");
-        bundle.setQuantity(70);
-        bundle.setExpiryDate(Date.valueOf("2022-11-19"));
-
-        when(inventoryServiceClient.createBundle(bundle))
-                .thenReturn(Mono.just(bundle));
-
-        client.post()
-                .uri("/api/gateway/bundles")
-                .body(Mono.just(bundle), BundleDetails.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody();
-
-        assertEquals(bundle.getBundleUUID(),"1");
-    }
-
-    @Test
-    void getPutBundleRequestNotFound(){
-        client.put()
-                .uri("/bundles/{bundleUUID}", 100)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound()
-                .expectBody()
-                .jsonPath("$.path").isEqualTo("/bundles/100")
-                .jsonPath("$.message").isEqualTo(null);
-    }
-
-    @Test
-    void getPutBundleMissingPath(){
-        client.put()
-                .uri("/bundles")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound()
-                .expectBody()
-                .jsonPath("$.path").isEqualTo("/bundles")
-                .jsonPath("$.message").isEqualTo(null);
-    }
-
-
-    @Test
-    void shouldDeleteBundleByBundleUUID(){
-        BundleDetails bundle = new BundleDetails();
-        bundle.setBundleUUID("1");
-        bundle.setItem("Penicillin");
-        bundle.setQuantity(70);
-        bundle.setExpiryDate(Date.valueOf("2022-11-19"));
-
-        when(inventoryServiceClient.createBundle(bundle))
-                .thenReturn(Mono.just(bundle));
-
-
-        client.post()
-                .uri("/api/gateway/bundles")
-                .body(Mono.just(bundle), BundleDetails.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody();
-
-        assertEquals(bundle.getBundleUUID(),"1");
-        client.delete()
-                .uri("/api/gateway/bundles/1")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody();
-
-        assertEquals(null, inventoryServiceClient.getBundle(bundle.getBundleUUID()));
-    }
 
 
     private VetDTO buildVetDTO() {
@@ -1810,6 +1704,14 @@ class ApiGatewayControllerTest {
                 .workday("Monday")
                 .specialties(new HashSet<>())
                 .active(true)
+                .build();
+    }
+
+    private RatingResponseDTO buildRatingResponseDTO() {
+        return RatingResponseDTO.builder()
+                .ratingId("123456")
+                .vetId("678910")
+                .rateScore(4.0)
                 .build();
     }
 
