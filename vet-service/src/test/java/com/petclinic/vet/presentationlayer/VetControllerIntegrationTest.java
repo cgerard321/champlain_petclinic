@@ -4,6 +4,7 @@ import com.petclinic.vet.dataaccesslayer.Rating;
 import com.petclinic.vet.dataaccesslayer.RatingRepository;
 import com.petclinic.vet.dataaccesslayer.Vet;
 import com.petclinic.vet.dataaccesslayer.VetRepository;
+import com.petclinic.vet.servicelayer.RatingRequestDTO;
 import com.petclinic.vet.servicelayer.RatingResponseDTO;
 import com.petclinic.vet.servicelayer.VetDTO;
 import org.junit.jupiter.api.Test;
@@ -75,6 +76,34 @@ class VetControllerIntegrationTest {
                     assertEquals(rating2.getRatingId(), list.get(1).getRatingId());
                     assertEquals(rating2.getVetId(), list.get(1).getVetId());
                     assertEquals(rating2.getRateScore(), list.get(1).getRateScore());
+                });
+    }
+
+    @Test
+    void addRatingToAVet_WithValidValues_ShouldSucceed() {
+        RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
+                .vetId(VET_ID)
+                .rateScore(3.5)
+                .rateDescription("The vet was decent but lacked table manners.")
+                .rateDate("16/09/2023")
+                .build();
+
+        client.post()
+                .uri("/vets/" + VET_ID + "/ratings")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(ratingRequestDTO)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(RatingResponseDTO.class)
+                .value(dto -> {
+                    assertNotNull(dto);
+                    assertNotNull(dto.getRatingId());
+                    assertThat(dto.getVetId()).isEqualTo(ratingRequestDTO.getVetId());
+                    assertThat(dto.getRateScore()).isEqualTo(ratingRequestDTO.getRateScore());
+                    assertThat(dto.getRateDescription()).isEqualTo(ratingRequestDTO.getRateDescription());
+                    assertThat(dto.getRateDate()).isEqualTo(ratingRequestDTO.getRateDate());
                 });
     }
 

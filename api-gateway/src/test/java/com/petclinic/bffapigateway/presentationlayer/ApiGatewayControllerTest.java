@@ -107,6 +107,35 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("This id is not valid");
     }
+
+    @Test
+    void addRatingToAVet() {
+        RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
+                .vetId(VET_ID)
+                .rateScore(3.5)
+                .rateDescription("The vet was decent but lacked table manners.")
+                .rateDate("16/09/2023")
+                .build();
+        RatingResponseDTO ratingResponseDTO = RatingResponseDTO.builder()
+                .ratingId("12356789")
+                .vetId(VET_ID)
+                .rateScore(3.5)
+                .rateDescription("The vet was decent but lacked table manners.")
+                .rateDate("16/09/2023")
+                .build();
+        when(vetsServiceClient.addRatingToVet(VET_ID, Mono.just(ratingRequestDTO)))
+                .thenReturn(Mono.just(ratingResponseDTO));
+
+        client.post()
+                .uri("/api/gateway/vets/{vetId}/ratings", ratingRequestDTO.getVetId())
+                .bodyValue(ratingRequestDTO)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+    }
+
     @Test
     void getAllVets() {
         when(vetsServiceClient.getVets())
