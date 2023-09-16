@@ -2,22 +2,23 @@ package com.petclinic.visits.visitsservicenew.Utils;
 
 
 import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
-import com.petclinic.visits.visitsservicenew.DataLayer.VisitDTO;
+import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
+import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
 import org.springframework.beans.BeanUtils;
 
 import java.util.UUID;
 
 public class EntityDtoUtil {
 
-    public static VisitDTO toDTO(Visit visit){
-        VisitDTO dto = new VisitDTO();
-        BeanUtils.copyProperties(visit, dto);
-        return dto;
+    public static VisitResponseDTO toVisitResponseDTO(Visit visit) {
+        VisitResponseDTO visitResponseDTO = new VisitResponseDTO();
+        BeanUtils.copyProperties(visit, visitResponseDTO);
+        return visitResponseDTO;
     }
 
-    public static Visit toEntity(VisitDTO visitDTO){
+    public static Visit toVisitEntity(VisitRequestDTO visitRequestDTO){
         Visit visit = new Visit();
-        BeanUtils.copyProperties(visitDTO, visit);
+        BeanUtils.copyProperties(visitRequestDTO, visit);
         return visit;
     }
 
