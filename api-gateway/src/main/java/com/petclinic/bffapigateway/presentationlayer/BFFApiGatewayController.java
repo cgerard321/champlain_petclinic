@@ -383,16 +383,14 @@ public class BFFApiGatewayController {
         return inventoryServiceClient.addProductToInventory(model, inventoryId);
     }
 
-    @PostMapping(value = "inventory",
-            consumes = "application/json",
-            produces = "application/json")
+    @PostMapping(value = "inventory")
     public Mono<InventoryResponseDTO> addInventory(@RequestBody InventoryRequestDTO model){
         return inventoryServiceClient.addInventory(model);
     }
 
 
 
-    @PutMapping(value = "inventory/{inventoryId}",consumes = "application/json" ,produces = "application/json")
+    @PutMapping(value = "inventory/{inventoryId}")
     public Mono<InventoryResponseDTO> updateInventory( @RequestBody InventoryRequestDTO model, @PathVariable String inventoryId) {
         return inventoryServiceClient.updateInventory(model, inventoryId);
 
