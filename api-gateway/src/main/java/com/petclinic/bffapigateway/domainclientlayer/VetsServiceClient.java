@@ -1,21 +1,15 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
-import com.petclinic.bffapigateway.dtos.RatingResponseDTO;
-import com.petclinic.bffapigateway.dtos.VetDTO;
-import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
-import com.petclinic.bffapigateway.utils.Rethrower;
+import com.petclinic.bffapigateway.dtos.Vets.RatingResponseDTO;
+import com.petclinic.bffapigateway.dtos.Vets.VetDTO;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 /**
  * @author Christine Gerard

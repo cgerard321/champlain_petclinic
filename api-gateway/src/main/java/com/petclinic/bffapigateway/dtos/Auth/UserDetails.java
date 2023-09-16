@@ -1,25 +1,26 @@
-package com.petclinic.bffapigateway.dtos;
+package com.petclinic.bffapigateway.dtos.Auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * Created by IntelliJ IDEA.
- *
- * User: @Fube
- * Date: 2021-10-15
- * Ticket: feat(APIG-CPC-354)
- */
+import java.util.Set;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder(toBuilder = true)
-public class Register {
+public class UserDetails {
+
+    private long id;
+
+    private String username;
+
+    private String password;
 
     private String email;
-    private String username;
-    private String password;
+
+    private Set<Role> roles;
 }
+

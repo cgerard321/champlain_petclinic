@@ -2,7 +2,20 @@ package com.petclinic.bffapigateway.presentationlayer;
 
 
 import com.petclinic.bffapigateway.domainclientlayer.*;
-import com.petclinic.bffapigateway.dtos.*;
+import com.petclinic.bffapigateway.dtos.Auth.Login;
+import com.petclinic.bffapigateway.dtos.Auth.Role;
+import com.petclinic.bffapigateway.dtos.Auth.UserPasswordLessDTO;
+import com.petclinic.bffapigateway.dtos.Bills.BillDetails;
+import com.petclinic.bffapigateway.dtos.Inventory.ProductRequestDTO;
+import com.petclinic.bffapigateway.dtos.Inventory.ProductResponseDTO;
+import com.petclinic.bffapigateway.dtos.Owners.OwnerDetails;
+import com.petclinic.bffapigateway.dtos.Pets.PetDetails;
+import com.petclinic.bffapigateway.dtos.Pets.PetType;
+import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
+import com.petclinic.bffapigateway.dtos.Vets.RatingResponseDTO;
+import com.petclinic.bffapigateway.dtos.Vets.VetDTO;
+import com.petclinic.bffapigateway.dtos.Vets.VisitDetails;
+import com.petclinic.bffapigateway.dtos.Visits.Visits;
 import com.petclinic.bffapigateway.utils.VetsEntityDtoUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +30,6 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static org.apache.commons.lang3.StringUtils.defaultIfEmpty;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 /**
@@ -387,5 +399,10 @@ public class BFFApiGatewayController {
     @PostMapping(value = "inventory/{inventoryId}/products")
     public Mono<ProductResponseDTO> addProductToInventory(@RequestBody ProductRequestDTO model, @PathVariable String inventoryId){
         return inventoryServiceClient.addProductToInventory(model, inventoryId);
+    }
+
+    @DeleteMapping(value = "inventory/{inventoryId}/products/{productId}")
+    public Mono<Void> deleteProductInInventory(@PathVariable String inventoryId, @PathVariable String productId){
+        return inventoryServiceClient.deleteProductInInventory(inventoryId, productId);
     }
 }

@@ -5,7 +5,7 @@
  * Date: 26/09/21
  * Ticket: feat(AUTH-CPC-13)
  */
-package com.auth.authservice.Util.Configuration;
+package com.auth.authservice.Util.Configuration.Security;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;

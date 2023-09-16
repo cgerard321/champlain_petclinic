@@ -1,14 +1,13 @@
 
 package com.petclinic.bffapigateway.domainclientlayer;
 
-import com.petclinic.bffapigateway.dtos.BundleDetails;
-import com.petclinic.bffapigateway.dtos.ProductRequestDTO;
-import com.petclinic.bffapigateway.dtos.ProductResponseDTO;
+import com.petclinic.bffapigateway.dtos.Inventory.ProductRequestDTO;
+import com.petclinic.bffapigateway.dtos.Inventory.ProductResponseDTO;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 
@@ -37,6 +36,12 @@ public class InventoryServiceClient {
                 .retrieve().bodyToMono(ProductResponseDTO.class);
     }
 
+    public Mono<Void> deleteProductInInventory(final String inventoryId, final String productId){
+        return webClientBuilder.build().delete()
+                .uri(inventoryServiceUrl + "/{inventoryId}/products/{productId}", inventoryId, productId)
+                .retrieve()
+                .bodyToMono(Void.class);
+    }
 //    public Mono<BundleDetails> getBundle(final String bundleUUID) {
 //        return webClientBuilder.build().get()
 //                .uri(inventoryServiceUrl + "/{bundleUUID}", bundleUUID)

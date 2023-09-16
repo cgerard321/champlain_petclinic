@@ -1,30 +1,22 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
-import com.petclinic.bffapigateway.dtos.*;
-import com.petclinic.bffapigateway.dtos.Login;
-import com.petclinic.bffapigateway.dtos.Register;
-import com.petclinic.bffapigateway.dtos.Role;
-import com.petclinic.bffapigateway.dtos.UserDetails;
-import com.petclinic.bffapigateway.exceptions.GenericHttpException;
+import com.petclinic.bffapigateway.dtos.Auth.Login;
+import com.petclinic.bffapigateway.dtos.Auth.Role;
+import com.petclinic.bffapigateway.dtos.Auth.UserPasswordLessDTO;
 import com.petclinic.bffapigateway.utils.Rethrower;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.nio.charset.StandardCharsets;
-
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static reactor.core.publisher.Mono.error;
 import static reactor.core.publisher.Mono.just;
 

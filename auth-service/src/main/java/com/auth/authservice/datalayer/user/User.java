@@ -56,6 +56,7 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+
     @NotEmpty
     private String username;
 
