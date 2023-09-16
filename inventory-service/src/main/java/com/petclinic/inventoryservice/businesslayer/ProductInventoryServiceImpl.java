@@ -89,8 +89,8 @@ public Mono<ProductResponseDTO> addProductToInventory(Mono<ProductRequestDTO> pr
 
     @Override
     public Mono<InventoryResponseDTO> updateInventory(Mono<InventoryRequestDTO> inventoryRequestDTO, String inventoryId) {
-
         return inventoryRepository.findInventoryByInventoryId(inventoryId)
+                .switchIfEmpty(Mono.error(new NotFoundException("No inventory with this inventoryId was found" + inventoryId)))
                 .flatMap(existingInventory -> inventoryRequestDTO.map(requestDTO -> {
                     existingInventory.setName(requestDTO.getName());
                     existingInventory.setInventoryDescription(requestDTO.getInventoryDescription());
@@ -99,7 +99,10 @@ public Mono<ProductResponseDTO> addProductToInventory(Mono<ProductRequestDTO> pr
 
                 }))
                 .flatMap(inventoryRepository::save)
+
                 .map(EntityDTOUtil::toInventoryResponseDTO);
 
     }
+
+    
 }
