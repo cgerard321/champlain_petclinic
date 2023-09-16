@@ -1,6 +1,5 @@
 package com.petclinic.visits.visitsservicenew.PresentationLayer;
 import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
-import com.petclinic.visits.visitsservicenew.DataLayer.VisitDTO;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
@@ -15,21 +14,23 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @AutoConfigureWebTestClient
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class VisitsControllerIntegrationTest {
-
+class VisitsControllerIntegrationTest {
     @Autowired
     private WebTestClient client;
 
     @Autowired
-    VisitRepo visitRepo;
+    private VisitRepo visitRepo;
 
-    Visit visit = buildVisit();
-    VisitDTO visitDTO = buildVisitDto();
+    private Visit visit = buildVisit();
+    private VisitResponseDTO visitResponseDTO = buildVisitResponseDto();
+    private VisitRequestDTO visitRequestDTO = buildVisitRequestDto();
 
-    int PRAC_ID = visitDTO.getPractitionerId();
-    int PET_ID = visitDTO.getPetId();
-    int MONTH = visitDTO.getMonth();
-    String VISIT_ID = visitDTO.getVisitId();
+    private int PRAC_ID = visitResponseDTO.getPractitionerId();
+    private int PET_ID = visitResponseDTO.getPetId();
+    private int MONTH = visitResponseDTO.getMonth();
+    private String VISIT_ID = visitResponseDTO.getVisitId();
+
+
 
     @Test
     void getVisitByVisitId(){
@@ -141,13 +142,14 @@ public class VisitsControllerIntegrationTest {
         client
                 .post()
                 .uri("/visits")
-                .body(Mono.just(visit), Visit.class)
+                .body(Mono.just(visitRequestDTO), VisitRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(VisitDTO.class)
+                .expectBody(VisitResponseDTO.class)
                 .value((visitDTO1) -> {
+                    //todo fix this improper test
                     assertEquals(visitDTO1.getVisitId(), visitDTO1.getVisitId());
                     assertEquals(visitDTO1.getDescription(), visitDTO1.getDescription());
                     assertEquals(visitDTO1.getPetId(), visitDTO1.getPetId());
@@ -183,7 +185,7 @@ public class VisitsControllerIntegrationTest {
         client
                 .put()
                 .uri("/visits/visits/"+VISIT_ID)
-                .body(Mono.just(visitDTO), VisitDTO.class)
+                .body(Mono.just(visitResponseDTO), VisitResponseDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -201,7 +203,6 @@ public class VisitsControllerIntegrationTest {
     }
 
     private Visit buildVisit(){
-
         return Visit.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
                 .year(2022)
@@ -212,10 +213,19 @@ public class VisitsControllerIntegrationTest {
                 .practitionerId(2)
                 .status(true).build();
     }
-    private VisitDTO buildVisitDto(){
-
-        return VisitDTO.builder()
+    private VisitResponseDTO buildVisitResponseDto(){
+        return VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
+                .year(2022)
+                .month(11)
+                .day(24)
+                .description("this is a dummy description")
+                .petId(2)
+                .practitionerId(2)
+                .status(true).build();
+    }
+    private VisitRequestDTO buildVisitRequestDto(){
+        return VisitRequestDTO.builder()
                 .year(2022)
                 .month(11)
                 .day(24)

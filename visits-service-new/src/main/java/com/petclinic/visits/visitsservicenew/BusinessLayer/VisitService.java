@@ -1,22 +1,23 @@
 package com.petclinic.visits.visitsservicenew.BusinessLayer;
 
-import com.petclinic.visits.visitsservicenew.DataLayer.VisitDTO;
+import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
+import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface VisitService {
 
-    Mono<VisitDTO> addVisit(Mono<VisitDTO> visit);
+    Mono<VisitResponseDTO> addVisit(Mono<VisitRequestDTO> visitRequestDTOMono);
 
-    Flux<VisitDTO> getVisitsForPet(int petId);
+    Flux<VisitResponseDTO> getVisitsForPet(int petId);
 
-    Mono<VisitDTO> getVisitByVisitId(String visitId);
+    Mono<VisitResponseDTO> getVisitByVisitId(String visitId);
 
     Mono<Void> deleteVisit(String visitId);
 
-    Mono<VisitDTO> updateVisit(String visitId, Mono<VisitDTO> visitDTOMono);
+    Mono<VisitResponseDTO> updateVisit(String visitId, Mono<VisitRequestDTO> visitRequestDTOMono);
 
-    Flux<VisitDTO> getVisitsForPractitioner(int practitionerId);
+    Flux<VisitResponseDTO> getVisitsForPractitioner(int practitionerId);
 
-    Flux<VisitDTO> getVisitsByPractitionerIdAndMonth(int practitionerId, int month);
+    Flux<VisitResponseDTO> getVisitsByPractitionerIdAndMonth(int practitionerId, int month);
 }
