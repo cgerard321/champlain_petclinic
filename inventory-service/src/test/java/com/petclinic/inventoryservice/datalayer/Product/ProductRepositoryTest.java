@@ -25,6 +25,18 @@ class ProductRepositoryTest {
                 .verifyComplete();
     }
 
+    @Test
+    public void ShouldDeleteSingleProduct_byProductId(){
+        //arrange
+        Product product1 = buildProduct("inventoryId_1", "sku_1", "product_1", "product_1", 10.0, 10);
+        Publisher<Void> setup = productRepository.deleteByProductId(product1.getProductId());
+        //act and assert
+        StepVerifier
+                .create(setup)
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
     private Product buildProduct(String inventoryId, String productId, String productName, String productDescription, Double productPrice, Integer productQuantity) {
         return Product.builder()
                 .inventoryId(inventoryId)

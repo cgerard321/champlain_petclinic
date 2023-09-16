@@ -382,4 +382,9 @@ public class BFFApiGatewayController {
     public Mono<ProductResponseDTO> addProductToInventory(@RequestBody ProductRequestDTO model, @PathVariable String inventoryId){
         return inventoryServiceClient.addProductToInventory(model, inventoryId);
     }
+
+    @DeleteMapping(value = "inventory/{inventoryId}/products/{productId}")
+    public Mono<Void> deleteProductInInventory(@PathVariable String inventoryId, @PathVariable String productId){
+        return inventoryServiceClient.deleteProductInInventory(inventoryId, productId);
+    }
 }
