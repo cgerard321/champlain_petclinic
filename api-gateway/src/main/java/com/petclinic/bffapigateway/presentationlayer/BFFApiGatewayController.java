@@ -196,6 +196,12 @@ public class BFFApiGatewayController {
     public Flux<RatingResponseDTO> getRatingsByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getRatingsByVetId(vetId);
     }
+
+    @DeleteMapping(value = "vets/{vetId}/ratings/{ratingId}")
+    public Mono<Void> deleteRatingByRatingId(@PathVariable String vetId,
+                                             @PathVariable String ratingId){
+        return vetsServiceClient.deleteRating(vetId,ratingId);
+    }
     @GetMapping("/vets/{vetId}")
     public Mono<ResponseEntity<VetDTO>> getVetByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getVetByVetId(VetsEntityDtoUtil.verifyId(vetId))

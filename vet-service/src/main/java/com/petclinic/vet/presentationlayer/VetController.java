@@ -35,6 +35,11 @@ public class VetController {
     public Flux<RatingResponseDTO> getAllRatingsByVetId(@PathVariable String vetId) {
         return ratingService.getAllRatingsByVetId(vetId);
     }
+    @DeleteMapping("{vetId}/ratings/{ratingId}")
+    public Mono<Void> deleteRatingByRatingId(@PathVariable String vetId,
+                                             @PathVariable String ratingId){
+        return ratingService.deleteRatingByRatingId(vetId, ratingId);
+    }
 
     @GetMapping()
     public Flux<VetDTO> getAllVets() {
