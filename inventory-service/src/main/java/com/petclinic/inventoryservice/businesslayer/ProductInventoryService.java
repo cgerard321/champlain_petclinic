@@ -6,4 +6,6 @@ import reactor.core.publisher.Mono;
 
 public interface ProductInventoryService {
     Mono<ProductResponseDTO> addProductToInventory(Mono<ProductRequestDTO> productRequestDTOMono, String inventoryId);
+    Mono<ProductResponseDTO> updateProductInInventory(Mono<ProductRequestDTO> productRequestDTOMono, String inventoryId, String productId);
+
 }

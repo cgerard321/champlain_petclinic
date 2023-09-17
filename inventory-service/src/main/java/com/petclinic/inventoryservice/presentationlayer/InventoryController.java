@@ -12,6 +12,7 @@ import reactor.core.publisher.Mono;
 @AllArgsConstructor
 @RequestMapping("/inventory")
 public class InventoryController {
+
     @Autowired
     private ProductInventoryService productInventoryService;
 
@@ -21,4 +22,12 @@ public class InventoryController {
                 .map(productResponseDTO -> ResponseEntity.status(HttpStatus.CREATED).body(productResponseDTO))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
+
+    @PutMapping("/{inventoryId}/products/{productId}")
+    public Mono<ResponseEntity<ProductResponseDTO>> updateProductInInventory(@RequestBody Mono<ProductRequestDTO> productRequestDTOMono, @PathVariable String inventoryId, @PathVariable String productId){
+        return productInventoryService.updateProductInInventory(productRequestDTOMono, inventoryId, productId)
+                .map(productResponseDTO -> ResponseEntity.ok().body(productResponseDTO))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
 }
