@@ -17,7 +17,6 @@ public class InventoryServiceClient {
     private final WebClient.Builder webClientBuilder;
     private String inventoryServiceUrl;
 
-
     public InventoryServiceClient(
             WebClient.Builder webClientBuilder,
             @Value("${app.inventory-service.host}") String inventoryServiceHost,
@@ -32,6 +31,15 @@ public class InventoryServiceClient {
     public Mono<ProductResponseDTO> addProductToInventory(final ProductRequestDTO model, final String inventoryId){
         return webClientBuilder.build().post()
                 .uri(inventoryServiceUrl + "/{inventoryId}/products", inventoryId)
+                .body(Mono.just(model),ProductRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve().bodyToMono(ProductResponseDTO.class);
+    }
+
+    public Mono<ProductResponseDTO> updateProductInInventory(final ProductRequestDTO model, final String inventoryId, final String productId){
+        return webClientBuilder.build()
+                .put()
+                .uri(inventoryServiceUrl + "/{inventoryId}/products/{productId}", inventoryId, productId)
                 .body(Mono.just(model),ProductRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve().bodyToMono(ProductResponseDTO.class);
