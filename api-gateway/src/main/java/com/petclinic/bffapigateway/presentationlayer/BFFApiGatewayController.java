@@ -11,6 +11,7 @@ import com.petclinic.bffapigateway.dtos.Inventory.ProductResponseDTO;
 import com.petclinic.bffapigateway.dtos.Owners.OwnerDetails;
 import com.petclinic.bffapigateway.dtos.Pets.PetDetails;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
+import com.petclinic.bffapigateway.dtos.Vets.RatingRequestDTO;
 import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
 import com.petclinic.bffapigateway.dtos.Vets.RatingResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetDTO;
@@ -207,6 +208,11 @@ public class BFFApiGatewayController {
     @GetMapping(value = "vets/{vetId}/ratings")
     public Flux<RatingResponseDTO> getRatingsByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getRatingsByVetId(vetId);
+    }
+
+    @PostMapping(value = "vets/{vetId}/ratings")
+    public Mono<RatingResponseDTO> addRatingToVet(@PathVariable String vetId, @RequestBody Mono<RatingRequestDTO> ratingRequestDTO) {
+        return vetsServiceClient.addRatingToVet(vetId, ratingRequestDTO);
     }
 
     @DeleteMapping(value = "vets/{vetId}/ratings/{ratingId}")

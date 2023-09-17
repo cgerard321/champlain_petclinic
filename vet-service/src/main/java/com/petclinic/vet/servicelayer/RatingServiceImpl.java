@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.UUID;
+
 @Service
 public class RatingServiceImpl implements RatingService {
     @Autowired
@@ -23,6 +25,15 @@ public class RatingServiceImpl implements RatingService {
         return ratingRepository.findByVetIdAndRatingId(vetId, ratingId)
                 //.switchIfEmpty(Mono.error(new Exception("Rating with id " + ratingId + " not found.")))
                 .flatMap(ratingRepository::delete);
+    }
+
+    @Override
+    public Mono<RatingResponseDTO> addRatingToVet(String vetId, Mono<RatingRequestDTO> ratingRequestDTO) {
+        return ratingRequestDTO
+                .map(EntityDtoUtil::toEntity)
+                .doOnNext(r -> r.setRatingId(UUID.randomUUID().toString()))
+                .flatMap(ratingRepository::insert)
+                .map(EntityDtoUtil::toDTO);
     }
 
 }
