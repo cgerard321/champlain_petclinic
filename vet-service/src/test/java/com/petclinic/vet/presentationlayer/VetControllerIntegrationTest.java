@@ -83,7 +83,7 @@ class VetControllerIntegrationTest {
     void addRatingToAVet_WithValidValues_ShouldSucceed() {
         StepVerifier
                 .create(ratingRepository.deleteAll())
-                .expectNextCount(1)
+                .expectNextCount(0)
                 .verifyComplete();
 
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
@@ -112,6 +112,8 @@ class VetControllerIntegrationTest {
                 });
 
     }
+
+    @Test
     void deleteARatingForVet_WithValidId_ShouldSucceed() {
         Publisher<Rating> setup = ratingRepository.deleteAll().
                 thenMany(ratingRepository.save(rating1));

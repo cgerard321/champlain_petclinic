@@ -1,13 +1,8 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
-<<<<<<< HEAD
 import com.petclinic.bffapigateway.dtos.Vets.RatingRequestDTO;
-import com.petclinic.bffapigateway.dtos.RatingResponseDTO;
-import com.petclinic.bffapigateway.dtos.VetDTO;
-=======
 import com.petclinic.bffapigateway.dtos.Vets.RatingResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetDTO;
->>>>>>> a28215ae5e44b343a13b9d481d1d1e62643c1701
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -50,7 +45,7 @@ public class VetsServiceClient {
 
         return  ratingResponseDTOFlux;
     }
-<<<<<<< HEAD
+
     public Mono<RatingResponseDTO> addRatingToVet(String vetId, Mono<RatingRequestDTO> ratingRequestDTO) {
         Mono<RatingResponseDTO> ratingResponseDTOMono =
                 webClientBuilder
@@ -64,7 +59,7 @@ public class VetsServiceClient {
 
         return  ratingResponseDTOMono;
     }
-=======
+
     public Mono<Void> deleteRating(String vetId, String ratingId){
         Mono<Void> result = webClientBuilder
                 .build()
@@ -75,7 +70,6 @@ public class VetsServiceClient {
         return result;
     }
 
->>>>>>> a28215ae5e44b343a13b9d481d1d1e62643c1701
     public Flux<VetDTO> getVets() {
         Flux<VetDTO> vetDTOFlux =
                webClientBuilder
