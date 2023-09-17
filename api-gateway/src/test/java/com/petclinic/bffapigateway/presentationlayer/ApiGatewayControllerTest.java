@@ -126,6 +126,21 @@ class ApiGatewayControllerTest {
     }
 
     @Test
+    void getNumberOfRatingsPerVet_ByVetId() {
+        when(vetsServiceClient.getNumberOfRatingsByVetId(anyString()))
+                .thenReturn(Mono.just(1));
+
+        client
+                .get()
+                .uri("/api/gateway/vets/" + VET_ID + "/ratings/count")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$").isEqualTo(1);
+    }    
+  
+   @Test
     void addRatingToAVet() {
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
                 .vetId(VET_ID)

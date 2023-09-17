@@ -36,4 +36,10 @@ public class RatingServiceImpl implements RatingService {
                 .map(EntityDtoUtil::toDTO);
     }
 
+    @Override
+    public Mono<Integer> getNumberOfRatingsByVetId(String vetId) {
+        return  ratingRepository.countAllByVetId(vetId)
+                .map(Long::intValue);
+    }
+
 }

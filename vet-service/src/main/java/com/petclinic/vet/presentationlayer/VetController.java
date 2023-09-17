@@ -33,6 +33,13 @@ public class VetController {
         return ratingService.getAllRatingsByVetId(vetId);
     }
 
+    @GetMapping("{vetId}/ratings/count")
+    public Mono<ResponseEntity<Integer>> getNumberOfRatingsByVetId(@PathVariable String vetId){
+        return ratingService.getNumberOfRatingsByVetId(vetId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
     @PostMapping("/{vetId}/ratings")
     public Mono<RatingResponseDTO> addRatingToVet(@PathVariable String vetId, @RequestBody Mono<RatingRequestDTO> ratingRequest) {
         return ratingService.addRatingToVet(vetId, ratingRequest);
@@ -42,6 +49,7 @@ public class VetController {
     public Mono<Void> deleteRatingByRatingId(@PathVariable String vetId,
                                              @PathVariable String ratingId){
         return ratingService.deleteRatingByRatingId(vetId, ratingId);
+
     }
 
     @GetMapping()
