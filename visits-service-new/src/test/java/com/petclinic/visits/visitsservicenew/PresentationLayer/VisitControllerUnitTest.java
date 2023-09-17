@@ -24,8 +24,6 @@ class VisitControllerUnitTest {
     @Autowired
     private WebTestClient webFluxTest;
 
-    private VisitResponseDTO visitResponseDTO = buildVisitResponseDto();
-    private VisitRequestDTO visitRequestDTO = buildVisitRequestDTO();
     private final VisitResponseDTO visitResponseDTO = buildVisitResponseDto();
     private final VisitRequestDTO visitRequestDTO = buildVisitRequestDTO();
     private final String Visit_UUID_OK = visitResponseDTO.getVisitId();
