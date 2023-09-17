@@ -38,20 +38,10 @@ angular.module('vetList')
 
             $scope.vetList = resp.data;
 
-            // Call displayVetRating for each vet to set the rating display flag and update ratings
             angular.forEach($scope.vetList, function(vet) {
-                displayVetRating(vet);
                 getCountOfRatings(vet)
             });
         });
-        function displayVetRating(vet) {
-            console.log("Hello " + vet.vetId);
-            $http.get('api/gateway/vets/' + vet.vetId + "/ratings").then(function (resp) {
-                console.log(resp.data);
-                vet.showRating = true;
-                vet.rating = parseFloat(resp.data.toFixed(1));
-            });
-        }
 
         function getCountOfRatings(vet) {
             $http.get('api/gateway/vets/' + vet.vetId + "/ratings/count").then(function (resp) {

@@ -13,7 +13,6 @@ package com.petclinic.vet.servicelayer;
 
 import com.petclinic.vet.dataaccesslayer.VetRepository;
 import com.petclinic.vet.util.EntityDtoUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -22,8 +21,12 @@ import reactor.core.publisher.Mono;
 @Service
 public class VetServiceImpl implements VetService {
 
-    @Autowired
-    VetRepository vetRepository;
+
+    private final VetRepository vetRepository;
+
+    public VetServiceImpl(VetRepository vetRepository) {
+        this.vetRepository = vetRepository;
+    }
 
     @Override
     public Flux<VetDTO> getAll() {

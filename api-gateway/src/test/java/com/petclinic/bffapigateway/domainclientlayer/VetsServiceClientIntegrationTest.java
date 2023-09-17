@@ -99,19 +99,6 @@ class VetsServiceClientIntegrationTest {
         assertEquals(empty.block(), null);
     }
 
-//    @Test
-//    void getRatingsByVetId_ExistingVetNotFound_ShouldThrowException() {
-//        prepareResponse(response -> response
-//                .setHeader("Content-Type", "application/json")
-//                .setResponseCode(HttpStatus.NOT_FOUND.value())
-//                .setBody("Vet with id 678910 not found."));
-//
-//        StepVerifier.create(vetsServiceClient.getRatingsByVetId("678910"))
-//                .expectErrorMatches(throwable -> throwable instanceof ExistingVetNotFoundException
-//                        && throwable.getMessage().equals("Vet with id 678910 not found."))
-//                .verify();
-//    }
-
     @Test
     void addRatingToVet() throws JsonProcessingException {
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
