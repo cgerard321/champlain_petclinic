@@ -13,4 +13,6 @@ public class RatingResponseDTO {
     private String ratingId;
     private String vetId;
     private Double rateScore;
+    private String rateDescription;
+    private String rateDate;
 }
