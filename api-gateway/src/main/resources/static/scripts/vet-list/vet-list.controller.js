@@ -30,10 +30,6 @@ angular.module('vetList')
             child.classList.add("modalOff");
         }
 
-        /*$http.get('api/gateway/vets').then(function (resp) {
-            self.vetList = resp.data;
-            arr = resp.data;
-        });*/
         $scope.vetList = [];
 
         $http.get('api/gateway/vets').then(function (resp) {
