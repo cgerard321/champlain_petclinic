@@ -141,19 +141,20 @@ class PetServiceImplTest {
                 .petTypeId("5")
                 .photoId("3")
                 .birthDate(date)
-                .ownerId("4")
+                .ownerId("ownerId-1234")
                 .build();
     }
 
     private Owner buildOwner() {
         return Owner.builder()
                 .id("44")
+                .ownerId("ownerId-123")
                 .firstName("FirstName")
                 .lastName("LastName")
                 .address("Test address")
                 .city("test city")
                 .telephone("telephone")
-                .photoId("1")
+                //.photoId("1")
                 .build();
     }
 

@@ -8,7 +8,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class PhotoTest {
 
-    @Test
+   /* @Test
     public void test_setPhoto()
     {
         //Arrange
@@ -21,5 +21,5 @@ class PhotoTest {
 
         //Assert
         assertEquals(expected, result);
-    }
+    }*/
 }

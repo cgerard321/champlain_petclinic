@@ -1,7 +1,7 @@
-package com.petclinic.bffapigateway.dtos.Owners;
+package com.petclinic.bffapigateway.dtos;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.petclinic.bffapigateway.dtos.Pets.PetDetails;
+import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,28 +20,22 @@ import static java.util.stream.Collectors.toList;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class OwnerDetails {
+public class OwnerResponseDTO {
 
-    private int id;
-
+    private String ownerId;
     private String firstName;
-
     private String lastName;
-
     private String address;
-
     private String city;
-
     private String telephone;
+    //private int imageId;
 
-    private int imageId;
-
-    private final List<PetDetails> pets = new ArrayList<>();
+    /*private final List<PetResponseDTO> pets = new ArrayList<>();
 
     @JsonIgnore
     public List<Integer> getPetIds() {
         return pets.stream()
-                .map(PetDetails::getId)
+                .map(PetResponseDTO::getId)
                 .collect(toList());
-    }
+    }*/
 }

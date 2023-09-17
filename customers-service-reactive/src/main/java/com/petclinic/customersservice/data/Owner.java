@@ -11,11 +11,12 @@ public class Owner {
 
     @Id
     private String id;
+    private String ownerId; // public id
     private String firstName;
     private String lastName;
     private String address;
     private String city;
     private String telephone;
-    private String photoId;
+    //private String photoId;
 
 }

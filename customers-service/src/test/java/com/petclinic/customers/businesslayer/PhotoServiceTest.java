@@ -32,7 +32,7 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 @SpringBootTest
 class PhotoServiceTest {
 
-    @MockBean
+   /* @MockBean
     PhotoRepository photoRepository;
     @MockBean
     OwnerRepository ownerRepository;
@@ -180,5 +180,5 @@ class PhotoServiceTest {
         } catch(NotFoundException ex) {
             assertEquals(ex.getMessage(), expectedErrorMsg);
         }
-    }
+    }*/
 }

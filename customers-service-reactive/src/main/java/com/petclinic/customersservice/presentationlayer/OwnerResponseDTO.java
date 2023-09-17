@@ -1,5 +1,6 @@
-package com.petclinic.customersservice.business;
+package com.petclinic.customersservice.presentationlayer;
 
+import com.petclinic.customersservice.business.PetDTO;
 import com.petclinic.customersservice.data.Photo;
 import lombok.*;
 
@@ -9,9 +10,9 @@ import java.util.List;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class OwnerDTO {
+public class OwnerResponseDTO {
 
-    private String id;
+    private String ownerId;
     private String firstName;
     private String lastName;
     private String address;
