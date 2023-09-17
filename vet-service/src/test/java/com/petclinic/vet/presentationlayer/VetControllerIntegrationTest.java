@@ -78,6 +78,25 @@ class VetControllerIntegrationTest {
                 });
     }
 
+    @Test
+    void deleteARatingForVet_WithValidId_ShouldSucceed() {
+        Publisher<Rating> setup = ratingRepository.deleteAll().
+                thenMany(ratingRepository.save(rating1));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        client
+                .delete()
+                .uri("/vets/" + vet.getVetId() + "/ratings/{ratingId}", rating1.getId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody();
+    }
+
 //    @Test
 //    void getAllRatingsForAVet_WithInvalidVetId_ShouldReturnNotFound() {
 //        Publisher<Rating> setup = ratingRepository.deleteAll()

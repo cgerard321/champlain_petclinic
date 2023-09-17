@@ -37,7 +37,6 @@ class VetsServiceClientIntegrationTest {
 
     VetDTO vetDTO = buildVetDTO();
 
-
     @BeforeEach
     void setup() {
 
@@ -70,6 +69,26 @@ class VetsServiceClientIntegrationTest {
         assertEquals("123456", rating.getRatingId());
         assertEquals("678910", rating.getVetId());
         assertEquals(4.5, rating.getRateScore());
+    }
+
+    @Test
+    void deleteRatingsByRatingId() throws JsonProcessingException{
+        final String ratingId = "794ac37f-1e07-43c2-93bc-61839e61d989";
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody("   {\n" +
+                        "        \"ratingId\":\"" + ratingId + "\",\n" +
+                        "        \"vetId\": \"678910\",\n" +
+                        "        \"rateScore\": 4.5\n" +
+                        "    }"));
+
+        final Mono<Void> empty = vetsServiceClient.deleteRating(vetDTO.getVetId(),ratingId);
+
+        assertEquals(empty.block(), null);
+
+
+
     }
 
 //    @Test
