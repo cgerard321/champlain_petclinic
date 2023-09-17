@@ -155,28 +155,6 @@ class VetControllerIntegrationTest {
                 .expectStatus().isOk()
                 .expectBody();
     }
-
-//    @Test
-//    void getAllRatingsForAVet_WithInvalidVetId_ShouldReturnNotFound() {
-//        Publisher<Rating> setup = ratingRepository.deleteAll()
-//                .thenMany(ratingRepository.save(rating1))
-//                .thenMany(ratingRepository.save(rating2));
-//
-//        StepVerifier
-//                .create(setup)
-//                .expectNextCount(1)
-//                .verifyComplete();
-//
-//        client
-//                .get()
-//                .uri("/vets/" + INVALID_VET_ID + "/ratings")
-//                .accept(MediaType.APPLICATION_JSON)
-//                .exchange()
-//                .expectStatus().isNotFound()
-//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-//                .expectBody()
-//                .jsonPath("$.message").isEqualTo("Vet with id " + INVALID_VET_ID + " not found.");
-//    }
     @Test
     void getAllVets() {
         Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet));
