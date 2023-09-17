@@ -123,13 +123,15 @@
                         <div ng-if="$ctrl.ratings.length === 0">
                             This vet has no ratings.
                         </div>
-                        <div ng-repeat="rating in $ctrl.ratings" ng-if="$ctrl.ratings.length > 0">
+                        <div ng-repeat="rating in $ctrl.ratings track by rating.ratingId" ng-if="$ctrl.ratings.length > 0">
                             <div class="rating-item">
                                 <span class="rating-value">{{ rating.rateScore }} / 5</span>
+                                <a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteVetRating(rating.ratingId)">Delete Rating</a>
                             </div>
                         </div>
                     </div>
                 </div>
+
 
             </div>
         </div>

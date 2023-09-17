@@ -44,6 +44,16 @@ public class VetsServiceClient {
 
         return  ratingResponseDTOFlux;
     }
+    public Mono<Void> deleteRating(String vetId, String ratingId){
+        Mono<Void> result = webClientBuilder
+                .build()
+                .delete()
+                .uri(vetsServiceUrl + "/" + vetId + "/ratings" + "/" + ratingId)
+                .retrieve()
+                .bodyToMono(Void.class);
+        return result;
+    }
+
     public Flux<VetDTO> getVets() {
         Flux<VetDTO> vetDTOFlux =
                webClientBuilder

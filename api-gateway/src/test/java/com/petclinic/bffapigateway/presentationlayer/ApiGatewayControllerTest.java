@@ -94,6 +94,22 @@ class ApiGatewayControllerTest {
                 .jsonPath("$[0].vetId").isEqualTo(ratingResponseDTO.getVetId())
                 .jsonPath("$[0].rateScore").isEqualTo(ratingResponseDTO.getRateScore());
     }
+    @Test
+    void deleteVetRating() {
+        RatingResponseDTO ratingResponseDTO = buildRatingResponseDTO();
+        when(vetsServiceClient.deleteRating(VET_ID, ratingResponseDTO.getRatingId()))
+                .thenReturn((Mono.empty()));
+
+        client
+                .delete()
+                .uri("/api/gateway/vets/" + VET_ID + "/ratings/{ratingsId}", ratingResponseDTO.getRatingId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk();
+
+        Mockito.verify(vetsServiceClient, times(1))
+                .deleteRating(VET_ID, ratingResponseDTO.getRatingId());
+    }
 
     @Test
     void getAllRatingsForVet_ByInvalidVetId() {

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -54,6 +55,13 @@ class RatingRepositoryTest {
                     assertEquals(rating1.getVetId(), foundRating.getVetId());
                     assertEquals(rating1.getRateScore(), foundRating.getRateScore());
                 })
+                .verifyComplete();
+    }
+    @Test
+    public void deleteRatingOfVet_ShouldSucceed () {
+        StepVerifier
+                .create(ratingRepository.delete(rating1))
+                .expectNextCount(0)
                 .verifyComplete();
     }
 
