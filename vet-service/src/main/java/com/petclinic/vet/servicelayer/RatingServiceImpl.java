@@ -1,9 +1,7 @@
 package com.petclinic.vet.servicelayer;
 
 import com.petclinic.vet.dataaccesslayer.RatingRepository;
-import com.petclinic.vet.exceptions.ExistingVetNotFoundException;
 import com.petclinic.vet.util.EntityDtoUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -12,8 +10,12 @@ import java.util.UUID;
 
 @Service
 public class RatingServiceImpl implements RatingService {
-    @Autowired
-    RatingRepository ratingRepository;
+
+    private final RatingRepository ratingRepository;
+
+    public RatingServiceImpl(RatingRepository ratingRepository) {
+        this.ratingRepository = ratingRepository;
+    }
 
     @Override
     public Flux<RatingResponseDTO> getAllRatingsByVetId(String vetId) {

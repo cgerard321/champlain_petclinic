@@ -3,11 +3,9 @@ package com.petclinic.vet.servicelayer;
 //import com.petclinic.vet.dataaccesslayer.Photo;
 import com.petclinic.vet.dataaccesslayer.*;
 import com.petclinic.vet.util.EntityDtoUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -17,10 +15,16 @@ import java.util.UUID;
 @Service
 public class DataSetupService implements CommandLineRunner {
 
-    @Autowired
-    private VetRepository vetRepository;
-    @Autowired
-    private RatingRepository ratingRepository;
+
+    private final VetRepository vetRepository;
+
+    private final RatingRepository ratingRepository;
+
+    public DataSetupService(VetRepository vetRepository, RatingRepository ratingRepository) {
+        this.vetRepository = vetRepository;
+        this.ratingRepository = ratingRepository;
+    }
+
     @Override
     public void run(String... args) throws Exception {
         Specialty s1 = new Specialty("100001", "radiology");

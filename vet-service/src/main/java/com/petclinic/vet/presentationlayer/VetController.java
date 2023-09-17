@@ -13,7 +13,6 @@ package com.petclinic.vet.presentationlayer;
 
 import com.petclinic.vet.servicelayer.*;
 import com.petclinic.vet.util.EntityDtoUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -23,11 +22,15 @@ import reactor.core.publisher.Mono;
 @RequestMapping("vets")
 public class VetController {
 
-    @Autowired
-    VetService vetService;
+    private final VetService vetService;
 
-    @Autowired
-    RatingService ratingService;
+    private final RatingService ratingService;
+
+    public VetController(VetService vetService, RatingService ratingService) {
+        this.vetService = vetService;
+        this.ratingService = ratingService;
+    }
+
     @GetMapping("{vetId}/ratings")
     public Flux<RatingResponseDTO> getAllRatingsByVetId(@PathVariable String vetId) {
         return ratingService.getAllRatingsByVetId(vetId);
