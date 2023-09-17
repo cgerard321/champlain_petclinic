@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@ComponentScan("com.petclinic")
 public class BFFApiGatewayApplication {
 
 	public static void main(String[] args) {
