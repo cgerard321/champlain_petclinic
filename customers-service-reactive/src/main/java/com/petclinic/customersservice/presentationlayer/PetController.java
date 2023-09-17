@@ -1,7 +1,5 @@
 package com.petclinic.customersservice.presentationlayer;
 
-import com.petclinic.customersservice.business.PetDTO;
-import com.petclinic.customersservice.business.PetDTOService;
 import com.petclinic.customersservice.business.PetService;
 import com.petclinic.customersservice.data.Pet;
 import org.springframework.beans.factory.annotation.Autowired;
