@@ -20,6 +20,12 @@ public class RatingServiceImpl implements RatingService {
         return ratingRepository.findAllByVetId(vetId)
                 .map(EntityDtoUtil::toDTO);
     }
+    @Override
+    public Mono<Void> deleteRatingByRatingId(String vetId, String ratingId) {
+        return ratingRepository.findByVetIdAndRatingId(vetId, ratingId)
+                //.switchIfEmpty(Mono.error(new Exception("Rating with id " + ratingId + " not found.")))
+                .flatMap(ratingRepository::delete);
+    }
 
     @Override
     public Mono<RatingResponseDTO> addRatingToVet(String vetId, Mono<RatingRequestDTO> ratingRequestDTO) {

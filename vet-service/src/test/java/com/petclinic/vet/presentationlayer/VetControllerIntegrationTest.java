@@ -81,6 +81,11 @@ class VetControllerIntegrationTest {
 
     @Test
     void addRatingToAVet_WithValidValues_ShouldSucceed() {
+        StepVerifier
+                .create(ratingRepository.deleteAll())
+                .expectNextCount(1)
+                .verifyComplete();
+
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
                 .vetId(VET_ID)
                 .rateScore(3.5)
@@ -105,6 +110,24 @@ class VetControllerIntegrationTest {
                     assertThat(dto.getRateDescription()).isEqualTo(ratingRequestDTO.getRateDescription());
                     assertThat(dto.getRateDate()).isEqualTo(ratingRequestDTO.getRateDate());
                 });
+
+    }
+    void deleteARatingForVet_WithValidId_ShouldSucceed() {
+        Publisher<Rating> setup = ratingRepository.deleteAll().
+                thenMany(ratingRepository.save(rating1));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        client
+                .delete()
+                .uri("/vets/" + vet.getVetId() + "/ratings/{ratingId}", rating1.getId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody();
     }
 
 //    @Test

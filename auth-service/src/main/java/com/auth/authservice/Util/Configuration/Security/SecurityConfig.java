@@ -1,4 +1,4 @@
-package com.auth.authservice.Util.Configuration;
+package com.auth.authservice.Util.Configuration.Security;
 
 
 import com.auth.authservice.security.CustomBasicAuthenticationEntryPoint;

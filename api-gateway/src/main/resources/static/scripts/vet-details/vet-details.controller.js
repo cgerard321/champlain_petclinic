@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('vetDetails')
-    .controller('VetDetailsController', ['$http', '$stateParams', function ($http, $stateParams) {
+    .controller('VetDetailsController', ['$http', '$stateParams', '$scope', function ($http, $stateParams, $scope) {
         var self = this;
         //var vetId = $stateParams.vetId || 0;
 
@@ -18,6 +18,30 @@ angular.module('vetDetails')
             console.log(resp.data)
             self.ratings = resp.data;
         });
+        $scope.deleteVetRating = function (ratingId) { //added $scope in this class
+            let varIsConf = confirm('Are you sure you want to delete this ratingId: ' + ratingId + '?');
+            if (varIsConf) {
+
+                $http.delete('api/gateway/vets/' + $stateParams.vetId + '/ratings/' + ratingId)
+                    .then(successCallback, errorCallback)
+
+                function successCallback(response) {
+                    $scope.errors = [];
+                    alert(ratingId + " Deleted Successfully!");
+                    console.log(response, 'res');
+                    //refresh list
+                    $http.get('api/gateway/vets/' + $stateParams.vetId + '/ratings').then(function (resp) {
+                        self.ratings = resp.data;
+                        arr = resp.data;
+                    });
+                }
+
+                function errorCallback(error) {
+                    alert(data.errors);
+                    console.log(error, 'can not get data.');
+                }
+            }
+        };
 
         //photo
         $http.get('api/gateway/vets/photo/' + $stateParams.vetId).then(function (resp) {

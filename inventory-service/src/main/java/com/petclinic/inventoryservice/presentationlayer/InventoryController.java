@@ -21,4 +21,12 @@ public class InventoryController {
                 .map(productResponseDTO -> ResponseEntity.status(HttpStatus.CREATED).body(productResponseDTO))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
+
+    @DeleteMapping("/{inventoryId}/products/{productId}")
+    public Mono<ResponseEntity<Void>> deleteProductToInventory(@PathVariable String inventoryId, @PathVariable String productId){
+        return productInventoryService.deleteProductInInventory(inventoryId, productId)
+                .then(Mono.just(ResponseEntity.noContent().build()));
+    }
+
+
 }

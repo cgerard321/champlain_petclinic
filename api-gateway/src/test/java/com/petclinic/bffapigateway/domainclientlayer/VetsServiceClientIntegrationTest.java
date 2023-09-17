@@ -2,10 +2,9 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.bffapigateway.dtos.RatingRequestDTO;
-import com.petclinic.bffapigateway.dtos.RatingResponseDTO;
-import com.petclinic.bffapigateway.dtos.VetDTO;
-import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
+import com.petclinic.bffapigateway.dtos.Vets.RatingRequestDTO;
+import com.petclinic.bffapigateway.dtos.Vets.RatingResponseDTO;
+import com.petclinic.bffapigateway.dtos.Vets.VetDTO;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterEach;
@@ -13,11 +12,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -41,7 +37,6 @@ class VetsServiceClientIntegrationTest {
     private ObjectMapper mapper;
 
     VetDTO vetDTO = buildVetDTO();
-
 
     @BeforeEach
     void setup() {
@@ -75,6 +70,26 @@ class VetsServiceClientIntegrationTest {
         assertEquals("123456", rating.getRatingId());
         assertEquals("678910", rating.getVetId());
         assertEquals(4.5, rating.getRateScore());
+    }
+
+    @Test
+    void deleteRatingsByRatingId() throws JsonProcessingException{
+        final String ratingId = "794ac37f-1e07-43c2-93bc-61839e61d989";
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody("   {\n" +
+                        "        \"ratingId\":\"" + ratingId + "\",\n" +
+                        "        \"vetId\": \"678910\",\n" +
+                        "        \"rateScore\": 4.5\n" +
+                        "    }"));
+
+        final Mono<Void> empty = vetsServiceClient.deleteRating(vetDTO.getVetId(),ratingId);
+
+        assertEquals(empty.block(), null);
+
+
+
     }
 
 //    @Test
