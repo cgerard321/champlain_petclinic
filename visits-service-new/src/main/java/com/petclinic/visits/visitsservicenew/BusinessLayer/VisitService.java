@@ -7,6 +7,7 @@ import reactor.core.publisher.Mono;
 
 public interface VisitService {
 
+    //Add
     Mono<VisitResponseDTO> addVisit(Mono<VisitRequestDTO> visitRequestDTOMono);
 
     Flux<VisitResponseDTO> getVisitsForPet(int petId);
