@@ -210,6 +210,13 @@ public class BFFApiGatewayController {
         return vetsServiceClient.getRatingsByVetId(vetId);
     }
 
+    @GetMapping("/vets/{vetId}/ratings/count")
+    public Mono<ResponseEntity<Integer>> getNumberOfRatingsByVetId(@PathVariable String vetId) {
+        return vetsServiceClient.getNumberOfRatingsByVetId(VetsEntityDtoUtil.verifyId(vetId))
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
     @PostMapping(value = "vets/{vetId}/ratings")
     public Mono<RatingResponseDTO> addRatingToVet(@PathVariable String vetId, @RequestBody Mono<RatingRequestDTO> ratingRequestDTO) {
         return vetsServiceClient.addRatingToVet(vetId, ratingRequestDTO);
@@ -220,6 +227,7 @@ public class BFFApiGatewayController {
                                              @PathVariable String ratingId){
         return vetsServiceClient.deleteRating(vetId,ratingId);
     }
+  
     @GetMapping("/vets/{vetId}")
     public Mono<ResponseEntity<VetDTO>> getVetByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getVetByVetId(VetsEntityDtoUtil.verifyId(vetId))

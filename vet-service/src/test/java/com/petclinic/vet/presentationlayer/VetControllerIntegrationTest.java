@@ -80,6 +80,30 @@ class VetControllerIntegrationTest {
     }
 
     @Test
+    void getNumberOfRatingsForAVet_WithValidVetId_ShouldSucceed() {
+        Publisher<Rating> setup = ratingRepository.deleteAll()
+                .thenMany(ratingRepository.save(rating1))
+                .thenMany(ratingRepository.save(rating2));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        client
+                .get()
+                .uri("/vets/" + VET_ID + "/ratings/count")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(Integer.class)
+                .value((count) -> {
+                    assertEquals(2, count);
+                });
+    }
+  
+    @Test
     void addRatingToAVet_WithValidValues_ShouldSucceed() {
         StepVerifier
                 .create(ratingRepository.deleteAll())
@@ -113,7 +137,7 @@ class VetControllerIntegrationTest {
 
     }
 
-    @Test
+@Test
     void deleteARatingForVet_WithValidId_ShouldSucceed() {
         Publisher<Rating> setup = ratingRepository.deleteAll().
                 thenMany(ratingRepository.save(rating1));
