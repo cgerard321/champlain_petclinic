@@ -7,7 +7,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Repository
-public interface VisitRepo extends ReactiveMongoRepository<Visit, String> {
+public interface VisitRepo extends ReactiveMongoRepository<Visit, Integer> {
 
     Flux<Visit> findByPetId(int petId);
 
