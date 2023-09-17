@@ -30,10 +30,40 @@ angular.module('vetList')
             child.classList.add("modalOff");
         }
 
+        /*$http.get('api/gateway/vets').then(function (resp) {
+            self.vetList = resp.data;
+            arr = resp.data;
+        });*/
+        $scope.vetList = [];
+
         $http.get('api/gateway/vets').then(function (resp) {
             self.vetList = resp.data;
             arr = resp.data;
+
+            $scope.vetList = resp.data;
+
+            // Call displayVetRating for each vet to set the rating display flag and update ratings
+            angular.forEach($scope.vetList, function(vet) {
+                displayVetRating(vet);
+                getCountOfRatings(vet)
+            });
         });
+        function displayVetRating(vet) {
+            console.log("Hello " + vet.vetId);
+            $http.get('api/gateway/vets/' + vet.vetId + "/ratings").then(function (resp) {
+                console.log(resp.data);
+                vet.showRating = true;
+                vet.rating = parseFloat(resp.data.toFixed(1));
+            });
+        }
+
+        function getCountOfRatings(vet) {
+            $http.get('api/gateway/vets/' + vet.vetId + "/ratings/count").then(function (resp) {
+                console.log(resp.data)
+                vet.count = resp.data;
+            });
+        }
+
         $scope.deleteVet = function (vetId) {
             let varIsConf = confirm('Want to delete vet with vetId:' + vetId + '. Are you sure?');
             if (varIsConf) {
@@ -58,7 +88,6 @@ angular.module('vetList')
                 }
             }
         };
-
         $scope.refreshList = self.vetList;
 
         $scope.ReloadData = function () {
