@@ -72,7 +72,7 @@ class PetDTOServiceImplTest {
                 .petTypeId("5")
                 .photoId("3")
                 .birthDate(date)
-                .ownerId("4")
+                .ownerId("ownerId-123")
                 .build();
     }
 
@@ -84,7 +84,7 @@ class PetDTOServiceImplTest {
                 .birthDate(new SimpleDateFormat( "yyyyMMdd" ).parse( "2000-11-30"))
                 .petType(PetType.builder().id("1").name("TESTPETTYPE").build())
                 .photo(Photo.builder().id("1").photo("1").name("test").type("test").build())
-                .ownerId("1")
+                .ownerId("ownerId-1234")
                 .build();
     }
 

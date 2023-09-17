@@ -5,11 +5,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 
 @SpringBootTest
-class BillingServiceApplicationTests {
-
+class VisitsServiceApplicationTests {
 	@Test
-	void contextLoads(){
-
-	}
+	void contextLoads(){}
 
 }

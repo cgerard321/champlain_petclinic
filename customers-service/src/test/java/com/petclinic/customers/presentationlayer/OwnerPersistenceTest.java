@@ -28,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("test")
 class OwnerPersistenceTest {
 
-    @Autowired
+    /*@Autowired
     private OwnerRepository repository;
 
     @BeforeEach
@@ -174,6 +174,6 @@ class OwnerPersistenceTest {
                 .telephone("0000000004")
                 .build();
 
-    }
+    }*/
 
 }

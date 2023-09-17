@@ -1,13 +1,9 @@
 package com.petclinic.bffapigateway.dtos.Pets;
 
-import com.petclinic.bffapigateway.dtos.Vets.VisitDetails;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Maciej Szarlinski
@@ -17,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class PetDetails {
+public class PetResponseDTO {
 
     private int id;
 
@@ -29,7 +25,7 @@ public class PetDetails {
 
     private int imageId;
 
-    private final List<VisitDetails> visits = new ArrayList<>();
+    //private final List<VisitDetails> visits = new ArrayList<>();
 
 }
 
