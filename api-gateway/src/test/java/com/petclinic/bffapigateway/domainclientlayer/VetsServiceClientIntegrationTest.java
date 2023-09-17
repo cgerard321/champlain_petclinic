@@ -2,6 +2,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.petclinic.bffapigateway.dtos.Vets.RatingRequestDTO;
 import com.petclinic.bffapigateway.dtos.Vets.RatingResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetDTO;
 import okhttp3.mockwebserver.MockResponse;
@@ -37,7 +38,6 @@ class VetsServiceClientIntegrationTest {
 
     VetDTO vetDTO = buildVetDTO();
 
-
     @BeforeEach
     void setup() {
 
@@ -72,6 +72,26 @@ class VetsServiceClientIntegrationTest {
         assertEquals(4.5, rating.getRateScore());
     }
 
+    @Test
+    void deleteRatingsByRatingId() throws JsonProcessingException{
+        final String ratingId = "794ac37f-1e07-43c2-93bc-61839e61d989";
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody("   {\n" +
+                        "        \"ratingId\":\"" + ratingId + "\",\n" +
+                        "        \"vetId\": \"678910\",\n" +
+                        "        \"rateScore\": 4.5\n" +
+                        "    }"));
+
+        final Mono<Void> empty = vetsServiceClient.deleteRating(vetDTO.getVetId(),ratingId);
+
+        assertEquals(empty.block(), null);
+
+
+
+    }
+
 //    @Test
 //    void getRatingsByVetId_ExistingVetNotFound_ShouldThrowException() {
 //        prepareResponse(response -> response
@@ -84,6 +104,32 @@ class VetsServiceClientIntegrationTest {
 //                        && throwable.getMessage().equals("Vet with id 678910 not found."))
 //                .verify();
 //    }
+
+    @Test
+    void addRatingToVet() throws JsonProcessingException {
+        RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
+                .vetId("678910")
+                .rateScore(3.5)
+                .rateDescription("The vet was decent but lacked table manners.")
+                .rateDate("16/09/2023")
+                .build();
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody("    {\n" +
+                        "        \"ratingId\": \"123456\",\n" +
+                        "        \"vetId\": \"678910\",\n" +
+                        "        \"rateScore\": 3.5,\n" +
+                        "        \"rateDescription\": \"The vet was decent but lacked table manners.\",\n" +
+                        "        \"rateDate\": \"16/09/2023\"\n" +
+                        "    }"));
+
+        final RatingResponseDTO rating = vetsServiceClient.addRatingToVet("678910", Mono.just(ratingRequestDTO)).block();
+        assertNotNull(rating.getRatingId());
+        assertEquals(ratingRequestDTO.getVetId(), rating.getVetId());
+        assertEquals(ratingRequestDTO.getRateScore(), rating.getRateScore());
+        assertEquals(ratingRequestDTO.getRateDescription(), rating.getRateDescription());
+        assertEquals(ratingRequestDTO.getRateDate(), rating.getRateDate());
+    }
 
     @Test
     void getAllVets() throws JsonProcessingException {

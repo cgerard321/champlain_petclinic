@@ -1,14 +1,12 @@
 package com.petclinic.vet.presentationlayer;
 
 import com.petclinic.vet.dataaccesslayer.Vet;
-import com.petclinic.vet.servicelayer.RatingResponseDTO;
-import com.petclinic.vet.servicelayer.RatingService;
-import com.petclinic.vet.servicelayer.VetDTO;
-import com.petclinic.vet.servicelayer.VetService;
+import com.petclinic.vet.servicelayer.*;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
@@ -66,6 +64,50 @@ class VetControllerUnitTest {
 
         Mockito.verify(ratingService, times(1))
                 .getAllRatingsByVetId(VET_ID);
+    }
+    @Test
+    void deleteRatingForVetByRatingId_ShouldSucceed() {
+        String ratingId = "794ac37f-1e07-43c2-93bc-61839e61d989";
+        String vetId = "694ac37f-1e07-43c2-93bc-61839e61d989";
+
+        when(ratingService.deleteRatingByRatingId(vetId,ratingId))
+                .thenReturn((Mono.empty()));
+
+        client
+                .delete()
+                .uri("/vets/" + vetId + "/ratings/{ratingId}", ratingId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk();
+
+        Mockito.verify(ratingService, times(1))
+                .deleteRatingByRatingId(vetId,ratingId);
+    }
+
+    @Test
+    void addRatingWithVetId_ValidValues_ShouldSucceed() {
+        RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
+                        .vetId(VET_ID)
+                        .rateScore(3.5)
+                        .rateDescription("The vet was decent but lacked table manners.")
+                        .rateDate("16/09/2023")
+                        .build();
+        RatingResponseDTO rating = buildRatingResponseDTO(ratingRequestDTO.getRateDescription(), ratingRequestDTO.getRateScore());
+
+        when(ratingService.addRatingToVet(VET_ID, Mono.just(ratingRequestDTO)))
+                .thenReturn(Mono.just(rating));
+
+        client.post()
+                .uri("/vets/{vetId}/ratings", VET_ID)
+                .bodyValue(ratingRequestDTO)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+
+        Mockito.verify(ratingService, times(1))
+                .addRatingToVet(anyString(), any(Mono.class));
     }
 
     @Test
@@ -366,6 +408,15 @@ class VetControllerUnitTest {
                 .ratingId("1")
                 .vetId("1")
                 .rateScore(5.0)
+                .build();
+    }
+    private RatingResponseDTO buildRatingResponseDTO(String description, double score) {
+        return RatingResponseDTO.builder()
+                .ratingId("2")
+                .vetId(VET_ID)
+                .rateScore(score)
+                .rateDescription(description)
+                .rateDate("16/09/2023")
                 .build();
     }
 }

@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('vetDetails')
-    .controller('VetDetailsController', ['$http', '$stateParams', function ($http, $stateParams) {
+    .controller('VetDetailsController', ['$http', '$stateParams', '$scope', function ($http, $stateParams, $scope) {
         var self = this;
         //var vetId = $stateParams.vetId || 0;
 
@@ -18,6 +18,30 @@ angular.module('vetDetails')
             console.log(resp.data)
             self.ratings = resp.data;
         });
+        $scope.deleteVetRating = function (ratingId) { //added $scope in this class
+            let varIsConf = confirm('Are you sure you want to delete this ratingId: ' + ratingId + '?');
+            if (varIsConf) {
+
+                $http.delete('api/gateway/vets/' + $stateParams.vetId + '/ratings/' + ratingId)
+                    .then(successCallback, errorCallback)
+
+                function successCallback(response) {
+                    $scope.errors = [];
+                    alert(ratingId + " Deleted Successfully!");
+                    console.log(response, 'res');
+                    //refresh list
+                    $http.get('api/gateway/vets/' + $stateParams.vetId + '/ratings').then(function (resp) {
+                        self.ratings = resp.data;
+                        arr = resp.data;
+                    });
+                }
+
+                function errorCallback(error) {
+                    alert(data.errors);
+                    console.log(error, 'can not get data.');
+                }
+            }
+        };
 
         //photo
         $http.get('api/gateway/vets/photo/' + $stateParams.vetId).then(function (resp) {
@@ -50,6 +74,21 @@ angular.module('vetDetails')
                 self.vetPhoto = resp.data;
             });
         }
+        self.submitRatingForm = function (rating) {
+            rating.vetId = $stateParams.vetId;
+            rating.rateScore = document.getElementById("ratingScore").value;
+            rating.rateDescription = document.getElementById("ratingDescription").value;
+            rating.rateDate = Date.now().toString();
+
+            $http.post("api/gateway/vets/" + $stateParams.vetId + "/ratings", rating).then(function (resp){
+                console.log(resp.data)
+                self.rating = resp.data;
+                alert('Your review was successfully added!');
+            }, function (response) {
+                let error = "Missing rating, please input a rating.";
+                alert(error);
+            });
+        };
         function uuidv4() {
             return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
                 (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)

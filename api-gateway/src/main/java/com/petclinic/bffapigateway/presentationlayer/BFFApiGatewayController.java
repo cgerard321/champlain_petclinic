@@ -11,6 +11,7 @@ import com.petclinic.bffapigateway.dtos.Inventory.ProductResponseDTO;
 import com.petclinic.bffapigateway.dtos.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
+import com.petclinic.bffapigateway.dtos.Vets.RatingRequestDTO;
 import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
 import com.petclinic.bffapigateway.dtos.Vets.RatingResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetDTO;
@@ -209,6 +210,17 @@ public class BFFApiGatewayController {
     public Flux<RatingResponseDTO> getRatingsByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getRatingsByVetId(vetId);
     }
+
+    @PostMapping(value = "vets/{vetId}/ratings")
+    public Mono<RatingResponseDTO> addRatingToVet(@PathVariable String vetId, @RequestBody Mono<RatingRequestDTO> ratingRequestDTO) {
+        return vetsServiceClient.addRatingToVet(vetId, ratingRequestDTO);
+    }
+
+    @DeleteMapping(value = "vets/{vetId}/ratings/{ratingId}")
+    public Mono<Void> deleteRatingByRatingId(@PathVariable String vetId,
+                                             @PathVariable String ratingId){
+        return vetsServiceClient.deleteRating(vetId,ratingId);
+    }
     @GetMapping("/vets/{vetId}")
     public Mono<ResponseEntity<VetDTO>> getVetByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getVetByVetId(VetsEntityDtoUtil.verifyId(vetId))
@@ -397,5 +409,10 @@ public class BFFApiGatewayController {
     @PostMapping(value = "inventory/{inventoryId}/products")
     public Mono<ProductResponseDTO> addProductToInventory(@RequestBody ProductRequestDTO model, @PathVariable String inventoryId){
         return inventoryServiceClient.addProductToInventory(model, inventoryId);
+    }
+
+    @DeleteMapping(value = "inventory/{inventoryId}/products/{productId}")
+    public Mono<Void> deleteProductInInventory(@PathVariable String inventoryId, @PathVariable String productId){
+        return inventoryServiceClient.deleteProductInInventory(inventoryId, productId);
     }
 }
