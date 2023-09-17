@@ -123,14 +123,42 @@
                         <div ng-if="$ctrl.ratings.length === 0">
                             This vet has no ratings.
                         </div>
-                        <div ng-repeat="rating in $ctrl.ratings" ng-if="$ctrl.ratings.length > 0">
+                        <div ng-repeat="rating in $ctrl.ratings track by rating.ratingId" ng-if="$ctrl.ratings.length > 0">
                             <div class="rating-item">
                                 <span class="rating-value">{{ rating.rateScore }} / 5</span>
+                                <a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteVetRating(rating.ratingId)">Delete Rating</a>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <div class="row g-3">
+                    <div class="col-sm-12">
+                        <h4 class="form-label">Add A Rating</h4>
+                        <form enctype="multipart/form-data" id="ratingForm" name="ratingForm">
+                            <div class="row-3">
+                                <div class="col-sm-12">
+                                    <select name="rateScore" id="ratingScore" ng-model="rating.rateScore">
+                                        <option value="1">1/5</option>
+                                        <option value="2">2/5</option>
+                                        <option value="3">3/5</option>
+                                        <option value="4">4/5</option>
+                                        <option value="5">5/5</option>
+                                    </select>
+                                </div>
+                                <div class="col-sm-12">
+                                    <h5 class="form-label">Review Description</h5>
+                                    <textarea class="form-control" id="ratingDescription" maxlength="350" name="description"
+                                              ng-model="rating.rateDescription" pattern="^(.*)" placeholder="Description"
+                                              title="Maximum of 350 characters."></textarea>
+                                </div>
+                                <button class="btn btn-primary" ng-click="$ctrl.submitRatingForm(ratingForm)" type="submit">
+                                    Submit
+                                </button>
+                            </div>
+                        </form>
+                    <div>
+                </div>
             </div>
         </div>
     </div>

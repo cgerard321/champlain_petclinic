@@ -65,4 +65,25 @@ public Mono<ProductResponseDTO> addProductToInventory(Mono<ProductRequestDTO> pr
                     }))
             .switchIfEmpty(Mono.error(new InvalidInputException("Unable to save product to the repository, an error occurred.")));
 }
+
+    @Override
+    public Mono<Void> deleteProductInInventory(String inventoryId, String productId) {
+        return inventoryRepository.existsByInventoryId(inventoryId)
+                .flatMap(invExist -> {
+                    if(!invExist){
+                        return Mono.error(new NotFoundException("Inventory not found, make sure it exists, inventoryId: "+inventoryId));
+                    }
+                    else {
+                        return productRepository.existsByProductId(productId)
+                                .flatMap(prodExist ->{
+                                    if (!prodExist){
+                                        return Mono.error(new NotFoundException("Product not found, make sure it exists, productId: "+productId));
+                                    }
+                                    else {
+                                        return productRepository.deleteByProductId(productId);
+                                    }
+                                });
+                    }
+                });
+    }
 }

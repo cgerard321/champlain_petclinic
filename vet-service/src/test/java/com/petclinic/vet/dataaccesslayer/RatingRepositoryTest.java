@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -53,6 +54,34 @@ class RatingRepositoryTest {
                     assertEquals(rating1.getRatingId(), foundRating.getRatingId());
                     assertEquals(rating1.getVetId(), foundRating.getVetId());
                     assertEquals(rating1.getRateScore(), foundRating.getRateScore());
+                })
+                .verifyComplete();
+    }
+    @Test
+    public void deleteRatingOfVet_ShouldSucceed () {
+        StepVerifier
+                .create(ratingRepository.delete(rating1))
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
+    @Test
+    public void addRatingToAVet_ShouldSucced(){
+        Rating rating = Rating.builder()
+                .ratingId("3")
+                .vetId("1")
+                .rateScore(1.0)
+                .rateDescription("My dog wouldn't stop crying after his appointment")
+                .rateDate("13/09/2023")
+                .build();
+
+        StepVerifier.create(ratingRepository.save(rating))
+                .consumeNextWith(createdRating -> {
+                    assertEquals(rating.getRatingId(), createdRating.getRatingId());
+                    assertEquals(rating.getVetId(), createdRating.getVetId());
+                    assertEquals(rating.getRateScore(), createdRating.getRateScore());
+                    assertEquals(rating.getRateDescription(), createdRating.getRateDescription());
+                    assertEquals(rating.getRateDate(), createdRating.getRateDate());
                 })
                 .verifyComplete();
     }

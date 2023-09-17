@@ -7,10 +7,7 @@ import com.petclinic.bffapigateway.dtos.Bills.BillDetails;
 import com.petclinic.bffapigateway.dtos.Owners.OwnerDetails;
 import com.petclinic.bffapigateway.dtos.Pets.PetDetails;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
-import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
-import com.petclinic.bffapigateway.dtos.Vets.RatingResponseDTO;
-import com.petclinic.bffapigateway.dtos.Vets.VetDTO;
-import com.petclinic.bffapigateway.dtos.Vets.VisitDetails;
+import com.petclinic.bffapigateway.dtos.Vets.*;
 import com.petclinic.bffapigateway.dtos.Visits.Visits;
 import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import com.petclinic.bffapigateway.exceptions.GenericHttpException;
@@ -94,6 +91,22 @@ class ApiGatewayControllerTest {
                 .jsonPath("$[0].vetId").isEqualTo(ratingResponseDTO.getVetId())
                 .jsonPath("$[0].rateScore").isEqualTo(ratingResponseDTO.getRateScore());
     }
+    @Test
+    void deleteVetRating() {
+        RatingResponseDTO ratingResponseDTO = buildRatingResponseDTO();
+        when(vetsServiceClient.deleteRating(VET_ID, ratingResponseDTO.getRatingId()))
+                .thenReturn((Mono.empty()));
+
+        client
+                .delete()
+                .uri("/api/gateway/vets/" + VET_ID + "/ratings/{ratingsId}", ratingResponseDTO.getRatingId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk();
+
+        Mockito.verify(vetsServiceClient, times(1))
+                .deleteRating(VET_ID, ratingResponseDTO.getRatingId());
+    }
 
     @Test
     void getAllRatingsForVet_ByInvalidVetId() {
@@ -125,6 +138,34 @@ class ApiGatewayControllerTest {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$").isEqualTo(1);
+    }    
+  
+   @Test
+    void addRatingToAVet() {
+        RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
+                .vetId(VET_ID)
+                .rateScore(3.5)
+                .rateDescription("The vet was decent but lacked table manners.")
+                .rateDate("16/09/2023")
+                .build();
+        RatingResponseDTO ratingResponseDTO = RatingResponseDTO.builder()
+                .ratingId("12356789")
+                .vetId(VET_ID)
+                .rateScore(3.5)
+                .rateDescription("The vet was decent but lacked table manners.")
+                .rateDate("16/09/2023")
+                .build();
+        when(vetsServiceClient.addRatingToVet(VET_ID, Mono.just(ratingRequestDTO)))
+                .thenReturn(Mono.just(ratingResponseDTO));
+
+        client.post()
+                .uri("/api/gateway/vets/{vetId}/ratings", ratingRequestDTO.getVetId())
+                .bodyValue(ratingRequestDTO)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
     }
 
     @Test

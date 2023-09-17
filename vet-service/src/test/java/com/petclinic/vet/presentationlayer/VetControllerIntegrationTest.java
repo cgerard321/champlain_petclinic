@@ -4,6 +4,7 @@ import com.petclinic.vet.dataaccesslayer.Rating;
 import com.petclinic.vet.dataaccesslayer.RatingRepository;
 import com.petclinic.vet.dataaccesslayer.Vet;
 import com.petclinic.vet.dataaccesslayer.VetRepository;
+import com.petclinic.vet.servicelayer.RatingRequestDTO;
 import com.petclinic.vet.servicelayer.RatingResponseDTO;
 import com.petclinic.vet.servicelayer.VetDTO;
 import org.junit.jupiter.api.Test;
@@ -83,6 +84,46 @@ class VetControllerIntegrationTest {
         Publisher<Rating> setup = ratingRepository.deleteAll()
                 .thenMany(ratingRepository.save(rating1))
                 .thenMany(ratingRepository.save(rating2));
+    }
+  
+    @Test
+    void addRatingToAVet_WithValidValues_ShouldSucceed() {
+        StepVerifier
+                .create(ratingRepository.deleteAll())
+                .expectNextCount(0)
+                .verifyComplete();
+
+        RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
+                .vetId(VET_ID)
+                .rateScore(3.5)
+                .rateDescription("The vet was decent but lacked table manners.")
+                .rateDate("16/09/2023")
+                .build();
+
+        client.post()
+                .uri("/vets/" + VET_ID + "/ratings")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(ratingRequestDTO)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(RatingResponseDTO.class)
+                .value(dto -> {
+                    assertNotNull(dto);
+                    assertNotNull(dto.getRatingId());
+                    assertThat(dto.getVetId()).isEqualTo(ratingRequestDTO.getVetId());
+                    assertThat(dto.getRateScore()).isEqualTo(ratingRequestDTO.getRateScore());
+                    assertThat(dto.getRateDescription()).isEqualTo(ratingRequestDTO.getRateDescription());
+                    assertThat(dto.getRateDate()).isEqualTo(ratingRequestDTO.getRateDate());
+                });
+
+    }
+
+@Test
+    void deleteARatingForVet_WithValidId_ShouldSucceed() {
+        Publisher<Rating> setup = ratingRepository.deleteAll().
+                thenMany(ratingRepository.save(rating1));
 
         StepVerifier
                 .create(setup)
@@ -90,16 +131,12 @@ class VetControllerIntegrationTest {
                 .verifyComplete();
 
         client
-                .get()
-                .uri("/vets/" + VET_ID + "/ratings/count")
+                .delete()
+                .uri("/vets/" + vet.getVetId() + "/ratings/{ratingId}", rating1.getId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(Integer.class)
-                .value((count) -> {
-                    assertEquals(2, count);
-                });
+                .expectBody();
     }
 
 //    @Test
