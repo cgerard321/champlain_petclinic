@@ -1,5 +1,6 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
+import com.petclinic.bffapigateway.dtos.Vets.RatingRequestDTO;
 import com.petclinic.bffapigateway.dtos.Vets.RatingResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetDTO;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +45,21 @@ public class VetsServiceClient {
 
         return  ratingResponseDTOFlux;
     }
+
+    public Mono<RatingResponseDTO> addRatingToVet(String vetId, Mono<RatingRequestDTO> ratingRequestDTO) {
+        Mono<RatingResponseDTO> ratingResponseDTOMono =
+                webClientBuilder
+                        .build()
+                        .post()
+                        .uri(vetsServiceUrl + "/" + vetId + "/ratings")
+                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .body(ratingRequestDTO, RatingResponseDTO.class)
+                        .retrieve()
+                        .bodyToMono(RatingResponseDTO.class);
+
+        return  ratingResponseDTOMono;
+    }
+
     public Mono<Void> deleteRating(String vetId, String ratingId){
         Mono<Void> result = webClientBuilder
                 .build()

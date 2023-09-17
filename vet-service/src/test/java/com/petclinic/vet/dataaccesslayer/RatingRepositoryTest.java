@@ -65,5 +65,26 @@ class RatingRepositoryTest {
                 .verifyComplete();
     }
 
+    @Test
+    public void addRatingToAVet_ShouldSucced(){
+        Rating rating = Rating.builder()
+                .ratingId("3")
+                .vetId("1")
+                .rateScore(1.0)
+                .rateDescription("My dog wouldn't stop crying after his appointment")
+                .rateDate("13/09/2023")
+                .build();
+
+        StepVerifier.create(ratingRepository.save(rating))
+                .consumeNextWith(createdRating -> {
+                    assertEquals(rating.getRatingId(), createdRating.getRatingId());
+                    assertEquals(rating.getVetId(), createdRating.getVetId());
+                    assertEquals(rating.getRateScore(), createdRating.getRateScore());
+                    assertEquals(rating.getRateDescription(), createdRating.getRateDescription());
+                    assertEquals(rating.getRateDate(), createdRating.getRateDate());
+                })
+                .verifyComplete();
+    }
+
 
 }
