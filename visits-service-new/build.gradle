@@ -8,19 +8,14 @@ plugins {
 
 group = 'com.petclinic.visits-service-new'
 version = '1.0.0-SNAPSHOT'
-sourceCompatibility = '1.8'
+sourceCompatibility = '17'
 
-configurations {
-    compileOnly {
-        extendsFrom annotationProcessor
-    }
-}
 
 repositories {
     mavenCentral()
 }
 ext {
-    mapstructVersion = "1.4.1.Final"
+    mapstructVersion = "1.5.5.Final"
 }
 dependencies {
 
@@ -41,7 +36,7 @@ dependencies {
 }
 
 jacoco {
-    toolVersion = "0.8.8"
+    toolVersion = "0.8.10"
 }
 
 jacocoTestReport {
@@ -49,7 +44,7 @@ jacocoTestReport {
     afterEvaluate {
         classDirectories.setFrom(files(classDirectories.files.collect {
             fileTree(dir: it, exclude: [
-                    "com/petclinic/visits/visitsservicenew/VisitsServiceNewApplication.class",
+                    "com/petclinic/visits/visitsservicenew/VisitsServiceNewApplication.class"
             ])
         }))
     }

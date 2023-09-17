@@ -1,4 +1,4 @@
-package com.petclinic.bffapigateway.dtos.Vets;
+package com.petclinic.bffapigateway.dtos.Visits;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
