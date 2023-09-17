@@ -3,7 +3,7 @@
 angular.module('ownerForm')
     .controller('OwnerFormController', ["$http", '$state', '$stateParams', function ($http, $state, $stateParams) {
         var self = this;
-        var ownerId = $stateParams.ownerId || 0;
+        var ownerId = $stateParams.ownerId || "";
         var method = $stateParams.method;
 
         if (!ownerId) {

@@ -1,99 +1,82 @@
 <link href="/css/ownerdetail.css" rel="stylesheet" type="text/css"/>
 
-<div class="bColor"><h2 class="titleOwner form">Owner Information</h2></div>
+    <div class="d-flex justify-content-center mt-5 mb-5">
+        <div ng-app="ownerDetails" class="d-flex flex-column">
+        <div ng-controller="OwnerDetailsController">
 
-<table class="table table-striped">
-    <tr>
-        <td rowspan="5">
-                <div class="parent">
-                    <img alt="Profile picture preview" src="data:image/png;base64, {{$ctrl.ownerPhoto.photo}}" width="150" height="150" class="image1">
-                    <img alt="" src="data:image/png;base64, {{$ctrl.PreviewImage}}" ng-show="$ctrl.PreviewImage != null" width="150" height="150" class="image2"/>
-                    <input type="file" accept="image/jpeg" class="fileInput" id="photoOwner"/>
+            <div class="ownerDetailContainer d-flex flex-column p-5 shadow">
+
+                <h3 class="">Owner Details</h3>
+
+                <div class="bg-white shadow-sm mt-3 mb-1" style="width: 75px; height: 75px; border-radius: 50px;">
+                    <img style="width: 100%; height: 100%; border-radius: 50px" src="../../images/default-owner-profile-picture.jpg"/>
                 </div>
-        </td>
-        <th class="col-sm-3">Name</th>
-        <td id="tableName"><b>{{$ctrl.owner.firstName}} {{$ctrl.owner.lastName}}</b></td>
-    </tr>
-    <tr>
-        <th>Address</th>
-        <td>{{$ctrl.owner.address}}</td>
-    </tr>
-    <tr>
-        <th>City</th>
-        <td>{{$ctrl.owner.city}}</td>
-    </tr>
-    <tr>
-        <th>Telephone</th>
-        <td>{{$ctrl.owner.telephone}}</td>
-    </tr>
 
-    <tr>
-        <td>
-            <a class="newBtn btn-default btn" style="background-color: royalblue; color: white" ui-sref="ownerEdit({ownerId: $ctrl.owner.id, method: 'edit'})">Edit Owner</a>
-            <a class="newBtn btn-default btn btn-danger" style="background-color: #dc3545;" ng-click = "$ctrl.deleteOwner()">Delete Owner</a>
-        </td>
+                <form action="" class="pt-3">
 
-        <td>
-        </td>
-    </tr>
-</table>
+                    <div class="d-flex" >
+                        <div class="d-flex flex-column">
 
-<div class="bColor">
-    <h2 class="titleOwner form">Pets and Visits</h2>
-</div>
+                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.owner.ownerId}}" size="50" readonly disabled/>
+                            <label class="inputLabel">Owner Id</label>
+                        </div>
+                    </div>
 
+                    <div class="d-flex flex-row gap-3 pt-1">
 
+                        <div class="d-flex flex-column">
 
-<table class="table table-striped">
-    <tr ng-repeat="pet in $ctrl.owner.pets track by pet.id">
-        <td valign="top" ng-init="$ctrl.init(pet.id)">
-            <div class="parent">
-                <img alt="Profile picture preview" src="data:image/png;base64, {{$ctrl.petPhoto.photo}}" width="150" height="150" class="image1">
+                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.owner.firstName}}" readonly disabled/>
+                            <label class="inputLabel">First Name</label>
+                        </div>
+
+                        <div class="d-flex flex-column ">
+
+                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.owner.lastName}}" readonly disabled/>
+                            <label class="inputLabel">Last Name</label>
+                        </div>
+
+                    </div>
+
+                    <div class="d-flex flex-row gap-3 pt-1">
+
+                        <div class="d-flex flex-column">
+
+                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.owner.address}}" readonly disabled/>
+                            <label class="inputLabel">Address</label>
+                        </div>
+
+                        <div class="d-flex flex-column">
+                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.owner.city}}" readonly disabled/>
+                            <label class="inputLabel">City</label>
+                        </div>
+
+                    </div>
+
+                    <div class="d-flex pt-1">
+                        <div class="d-flex flex-column">
+                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.owner.telephone}}" size="15" readonly disabled/>
+                            <label class="inputLabel">Phone Number</label>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-row gap-3 justify-content-end">
+                        <div>
+                            <a style="color: rgba(0,0,0,0.5);" class="btn btn-light" ui-sref="ownerEdit({ownerId: $ctrl.owner.ownerId, method: 'edit'})">Edit</a>
+                        </div>
+
+                        <div>
+                            <a style="color: rgba(0,0,0,0.5);" class="btn btn-light" ui-sref="ownerEdit({ownerId: $ctrl.owner.ownerId, method: 'delete'})">Delete</a>
+                        </div>
+                    </div>
+
+                </form>
+
             </div>
-        </td>
-        <td valign="top">
-            <dl class="dl-horizontal">
 
-                <a class="newBtn btn-default btn btn-success" style="background-color: #198754;" ui-sref="visits({ownerId: $ctrl.owner.id, petId: pet.id})">Add Visit</a>
-
-                <dt>Name</dt>
-                <dd>{{pet.name}}</dd>
-                <dt>Birth Date</dt>
-                <dd>{{pet.birthDate | date:'yyyy MMM dd'}}</dd>
-                <dt>Type</dt>
-                <dd>{{pet.type.name}}</dd>
-                <a class="newBtn btn-default btn btn-success" style="background-color: #198754;" ui-sref="addPet({ownerId: $ctrl.owner.id, method: 'new-pet'})">Add Pet</a>
-                <a class="newBtn btn-default btn btn-danger" style="background-color: #dc3545;" ui-sref="deletePet({ownerId: $ctrl.owner.id, petId: pet.id, method: 'delete'})">Delete Pet</a>
-            </dl>
-        </td>
-        <td valign="top">
-            <table class="noColor table-condensed">
-                <thead>
-                <tr>
-                    <th>Visit Date</th>
-                    <th>Description</th>
-                </tr>
-                </thead>
-                <tr ng-repeat="visit in pet.visits track by visit.visitId">
-                    <td>{{visit.date | date:'yyyy MMM dd'}}</td>
-                    <td>{{visit.description}}</td>
-                </tr>
-                <tr>
-                    <td>
-
-                    </td>
-                    <td>
-
-
-                    </td>
-                </tr>
-            </table>
-        </td>
-
-
-    </tr>
-    <td><a href="http://localhost:8080/#!/bills/customerId/{{$ctrl.owner.id}}">Get Bills</a></td>
-</table>
+        </div>
+    </div>
+    </div>
 
 
 

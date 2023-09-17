@@ -1,73 +1,73 @@
-server.port: 7003
-
-server:
-  error:
-    include-message: always
-
-logging:
-  level:
-    root: INFO
-    com.petclinic: DEBUG
-    org.hibernate.SQL: DEBUG
-    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
-
----
-spring.profiles: h2
-
-# recommend setting this to "none" in a production environment
-#spring.jpa.hibernate.ddl-auto: none
-
-#for h2
-spring:
-  h2:
-    console:
-      enabled: true
-
-  datasource:
-    platform: h2
-    url: jdbc:h2:mem:customers-db;DB_CLOSE_DELAY=-1
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-    initialization-mode: always
-
-  jpa:
-    show-sql: true
-    hibernate:
-      ddl-auto: none
-
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.H2Dialect
-
-#for real
-#spring.datasource:
-#  url: jdbc:mysql://localhost/petclinic
-#  username: pc
-#  password: pc
-
-spring.datasource.hikari.initializationFailTimeout: 60000
-
-
-
----
-spring.profiles: docker
-
-spring:
-  datasource:
-    platform: mysql
-    url: jdbc:mysql://mysql3/customers-db
-    username: user
-    password: pwd
-    initialization-mode: always
-
-
-  # recommend setting this to "none" for production environments
-
-  jpa:
-    hibernate:
-      ddl-auto: none
-
-spring.datasource.hikari.initializationFailTimeout: 60000
-
-server.port: 8080
+#server.port: 7003
+#
+#server:
+#  error:
+#    include-message: always
+#
+#logging:
+#  level:
+#    root: INFO
+#    com.petclinic: DEBUG
+#    org.hibernate.SQL: DEBUG
+#    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+#
+#---
+#spring.profiles: h2
+#
+## recommend setting this to "none" in a production environment
+##spring.jpa.hibernate.ddl-auto: none
+#
+##for h2
+#spring:
+#  h2:
+#    console:
+#      enabled: true
+#
+#  datasource:
+#    platform: h2
+#    url: jdbc:h2:mem:customers-db;DB_CLOSE_DELAY=-1
+#    driver-class-name: org.h2.Driver
+#    username: sa
+#    password:
+#    initialization-mode: always
+#
+#  jpa:
+#    show-sql: true
+#    hibernate:
+#      ddl-auto: none
+#
+#    properties:
+#      hibernate:
+#        dialect: org.hibernate.dialect.H2Dialect
+#
+##for real
+##spring.datasource:
+##  url: jdbc:mysql://localhost/petclinic
+##  username: pc
+##  password: pc
+#
+#spring.datasource.hikari.initializationFailTimeout: 60000
+#
+#
+#
+#---
+#spring.profiles: docker
+#
+#spring:
+#  datasource:
+#    platform: mysql
+#    url: jdbc:mysql://mysql3/customers-db
+#    username: user
+#    password: pwd
+#    initialization-mode: always
+#
+#
+#  # recommend setting this to "none" for production environments
+#
+#  jpa:
+#    hibernate:
+#      ddl-auto: none
+#
+#spring.datasource.hikari.initializationFailTimeout: 60000
+#
+#server.port: 8080

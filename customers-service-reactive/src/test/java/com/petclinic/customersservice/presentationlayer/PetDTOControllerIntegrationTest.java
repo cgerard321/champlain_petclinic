@@ -46,7 +46,7 @@ class PetDTOControllerIntegrationTest {
                 .birthDate(new SimpleDateFormat( "yyyyMMdd" ).parse( "2000-11-30"))
                 .petType(PetType.builder().id("1").name("TESTPETTYPE").build())
                 .photo(Photo.builder().id("1").photo("1").name("test").type("test").build())
-                .ownerId("1")
+                .ownerId("ownerId-123")
                 .build();
     }
 

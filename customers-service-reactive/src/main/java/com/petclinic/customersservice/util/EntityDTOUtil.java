@@ -1,9 +1,7 @@
 package com.petclinic.customersservice.util;
 
-import com.petclinic.customersservice.business.OwnerDTO;
+import com.petclinic.customersservice.presentationlayer.OwnerResponseDTO;
 import com.petclinic.customersservice.business.PetDTO;
-import com.petclinic.customersservice.business.PetTypeServiceImpl;
-import com.petclinic.customersservice.business.PhotoServiceImpl;
 import com.petclinic.customersservice.data.Owner;
 import com.petclinic.customersservice.data.Pet;
 import lombok.Generated;
@@ -14,15 +12,15 @@ public class EntityDTOUtil {
     @Generated
     public EntityDTOUtil(){};
 
-    public static OwnerDTO toOwnerDTO(Owner owner) {
-        OwnerDTO ownerDTO = new OwnerDTO();
-        BeanUtils.copyProperties(owner, ownerDTO);
-        return ownerDTO;
+    public static OwnerResponseDTO toOwnerResponseDTO(Owner owner) {
+        OwnerResponseDTO ownerResponseDTO = new OwnerResponseDTO();
+        BeanUtils.copyProperties(owner, ownerResponseDTO);
+        return ownerResponseDTO;
     }
 
-    public static Owner toOwner(OwnerDTO ownerDTO) {
+    public static Owner toOwner(OwnerResponseDTO ownerResponseDTO) {
         Owner owner = new Owner();
-        BeanUtils.copyProperties(ownerDTO, owner);
+        BeanUtils.copyProperties(ownerResponseDTO, owner);
         return owner;
     }
 

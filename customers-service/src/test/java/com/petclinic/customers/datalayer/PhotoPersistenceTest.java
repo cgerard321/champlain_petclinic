@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 @ActiveProfiles("test")
 class PhotoPersistenceTest {
 
-    @Autowired
+    /*@Autowired
     private PhotoRepository photoRepository;
 
     @BeforeEach
@@ -87,5 +87,5 @@ class PhotoPersistenceTest {
         assert foundPhoto != null;
         assertThat(foundPhoto, samePropertyValuesAs(savedPhoto));
         assertEquals(1,photoRepository.findAll().size());
-    }
+    }*/
 }

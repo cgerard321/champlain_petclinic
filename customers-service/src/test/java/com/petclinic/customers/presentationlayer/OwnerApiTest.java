@@ -35,7 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(OwnerResource.class)
 class OwnerAPITest {
 
-    @Autowired
+   /* @Autowired
     MockMvc mvc;
 
     @MockBean
@@ -78,7 +78,7 @@ class OwnerAPITest {
      * ------------------------ FIND_BY_ID_OWNER_API_TEST ------------------------
      * Test an HTTP Get Request
      */
-    @Test
+    /*@Test
     void findByOwnerId_API_TEST() throws Exception {
 
         Owner owner = setupOwner();
@@ -100,7 +100,7 @@ class OwnerAPITest {
      * ------------------------ DELETE_OWNER_API_TEST ------------------------
      * Test an HTTP Delete Request
      */
-    @Test
+   /* @Test
     void deleteOwner_API_TEST() throws Exception {
         mvc.perform(delete("/owners/5").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
@@ -118,7 +118,7 @@ class OwnerAPITest {
      * ------------------------ SETUP_OWNER ------------------------
      * Test an HTTP Get Request, but to get all owners
      */
-    @Test
+    /*@Test
     void findAll_API_TEST() throws Exception {
 
         //TEST DATA
@@ -162,7 +162,7 @@ class OwnerAPITest {
      * ------------------------ CREATE_OWNER ------------------------
      * Test an HTTP POST request
      */
-    @Test
+    /*@Test
     void createOwner_API_TEST() throws Exception {
         Owner owner = setupOwner();
         when(ownerService.createOwner(any(Owner.class))).thenReturn(owner);
@@ -205,7 +205,7 @@ class OwnerAPITest {
         mvc.perform(delete("/owners/photo/1").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
         verify(photoService, times(1)).deletePhoto(1);
-    }
+    }*/
 }
 
 

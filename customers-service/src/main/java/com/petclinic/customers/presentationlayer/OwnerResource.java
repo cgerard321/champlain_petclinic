@@ -22,7 +22,7 @@ import java.util.Optional;
  * Copied from https://github.com/spring-petclinic/spring-petclinic-microservices
  */
 
-@RequestMapping("/owners")
+@RequestMapping("/owner")
 @RestController
 @Timed("petclinic.owner")
 @Slf4j
