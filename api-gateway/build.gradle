@@ -77,9 +77,7 @@ jacocoTestReport {
 	afterEvaluate {
 		classDirectories.setFrom(files(classDirectories.files.collect {
 			fileTree(dir: it, exclude: [
-					"com/petclinic/**/VisitsServiceApplication.class"
-					
-
+					"com/petclinic/**/BFFApiGatewayApplication.class"
 			])
 		}))
 	}
