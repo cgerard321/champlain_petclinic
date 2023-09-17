@@ -32,4 +32,3 @@ public class PetDetails {
     private final List<VisitDetails> visits = new ArrayList<>();
 
 }
-

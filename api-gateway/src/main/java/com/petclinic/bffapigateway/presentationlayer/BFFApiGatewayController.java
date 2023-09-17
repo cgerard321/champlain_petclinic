@@ -15,7 +15,10 @@ import com.petclinic.bffapigateway.dtos.Vets.RatingRequestDTO;
 import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
 import com.petclinic.bffapigateway.dtos.Vets.RatingResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetDTO;
-import com.petclinic.bffapigateway.dtos.Vets.VisitDetails;
+import com.petclinic.bffapigateway.dtos.Visits.Visits;
+import com.petclinic.bffapigateway.dtos.*;
+import com.petclinic.bffapigateway.dtos.Visits.VisitDetails;
+import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.Visits;
 import com.petclinic.bffapigateway.utils.VetsEntityDtoUtil;
 import lombok.RequiredArgsConstructor;
@@ -143,13 +146,13 @@ public class BFFApiGatewayController {
         return visitsServiceClient.deleteVisitByVisitId(visitId);
     }
 
-    @GetMapping(value = "visits/{petId}")
+    @GetMapping(value = "visits/pets/{petId}")
     public Flux<VisitDetails> getVisitsForPet(final @PathVariable int petId){
         return visitsServiceClient.getVisitsForPet(petId);
     }
     
-    @GetMapping(value ="visit/{visitId}")
-    public Mono<VisitDetails> getVisitByVisitId(final @PathVariable String visitId){
+    @GetMapping(value ="visits/{visitId}")
+    public Mono<VisitResponseDTO> getVisitByVisitId(final @PathVariable String visitId){
         return visitsServiceClient.getVisitByVisitId(visitId);
     }
     

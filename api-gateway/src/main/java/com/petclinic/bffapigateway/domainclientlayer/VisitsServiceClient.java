@@ -1,6 +1,7 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
-import com.petclinic.bffapigateway.dtos.Vets.VisitDetails;
+import com.petclinic.bffapigateway.dtos.Visits.VisitDetails;
+import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.Visits;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -116,12 +117,12 @@ public class VisitsServiceClient {
 
 
     
-    public Mono<VisitDetails> getVisitByVisitId(String visitId) {
+    public Mono<VisitResponseDTO> getVisitByVisitId(String visitId) {
         return webClient
                 .get()
                 .uri("/visit/{visitId}", visitId)
                 .retrieve()
-                .bodyToMono(VisitDetails.class);
+                .bodyToMono(VisitResponseDTO.class);
     }
 }
 
