@@ -1,5 +1,6 @@
 package com.petclinic.bffapigateway.presentationlayer;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.Auth.Role;

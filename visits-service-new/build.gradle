@@ -8,22 +8,13 @@ plugins {
 
 group = 'com.petclinic.visits-service-new'
 version = '1.0.0-SNAPSHOT'
-
-java {
-    sourceCompatibility = '17'
-}
-
-//configurations {
-//    compileOnly {
-//        extendsFrom annotationProcessor
-//    }
-//}
+sourceCompatibility = '17'
 
 repositories {
     mavenCentral()
 }
 ext {
-    mapstructVersion = "1.4.1.Final"
+    mapstructVersion = "1.5.5.Final"
 }
 dependencies {
 
@@ -44,7 +35,7 @@ dependencies {
 }
 
 jacoco {
-    toolVersion = "0.8.8"
+    toolVersion = "0.8.10"
 }
 
 jacocoTestReport {
@@ -62,7 +53,7 @@ jacocoTestCoverageVerification {
     violationRules {
         rule {
             limit {
-                minimum = 0.10
+                minimum = 0.90
             }
         }
     }
