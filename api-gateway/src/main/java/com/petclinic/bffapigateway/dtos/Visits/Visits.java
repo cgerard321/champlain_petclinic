@@ -1,6 +1,5 @@
 package com.petclinic.bffapigateway.dtos.Visits;
 
-import com.petclinic.bffapigateway.dtos.Vets.VisitDetails;
 import lombok.Value;
 
 import java.util.ArrayList;

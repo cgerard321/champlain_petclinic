@@ -1,32 +1,21 @@
-package com.petclinic.visits.visitsservicenew.DataLayer;
+package com.petclinic.visits.visitsservicenew.PresentationLayer;
 
-import lombok.*;
-import org.springframework.data.annotation.Id;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-@Builder
 @Data
-@ToString
-@NoArgsConstructor
 @AllArgsConstructor
-public class Visit {
-
-    @Id
-    private String id;
-
+@NoArgsConstructor
+@Builder
+public class VisitResponseDTO {
     private String visitId;
-
     private int year;
-
     private int month;
-
     private int day;
-
     private String description;
-
     private int petId;
-
     private int practitionerId;
-
     private boolean status;
-
 }

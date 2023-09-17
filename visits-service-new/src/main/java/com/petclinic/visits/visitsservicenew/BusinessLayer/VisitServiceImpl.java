@@ -1,40 +1,40 @@
 package com.petclinic.visits.visitsservicenew.BusinessLayer;
 
-import com.petclinic.visits.visitsservicenew.DataLayer.VisitDTO;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
+import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
+import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
 import com.petclinic.visits.visitsservicenew.Utils.EntityDtoUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 
 @Service
+@RequiredArgsConstructor
 public class VisitServiceImpl implements VisitService {
-
-    @Autowired
-    private VisitRepo repo;
+    private final VisitRepo repo;
 
 
     @Override
-    public Mono<VisitDTO> addVisit(Mono<VisitDTO> visitIdLessDTOMono) {
-        return visitIdLessDTOMono
-                .map(EntityDtoUtil::toEntity)
+    public Mono<VisitResponseDTO> addVisit(Mono<VisitRequestDTO> visitRequestDTOMono) {
+        return visitRequestDTOMono
+                .map(EntityDtoUtil::toVisitEntity)
                 .doOnNext(x -> x.setVisitId(EntityDtoUtil.generateVisitIdString()))
-                .flatMap((repo::save))
-                .map(EntityDtoUtil::toDTO);
+                .flatMap((repo::insert))
+                .map(EntityDtoUtil::toVisitResponseDTO);
     }
 
     @Override
-    public Flux<VisitDTO> getVisitsForPet(int petId) {
+    public Flux<VisitResponseDTO> getVisitsForPet(int petId) {
         return repo.findByPetId(petId)
-                .map(EntityDtoUtil::toDTO);
+                .map(EntityDtoUtil::toVisitResponseDTO);
     }
 
     @Override
-    public Mono<VisitDTO> getVisitByVisitId(String visitId) {
+    public Mono<VisitResponseDTO> getVisitByVisitId(String visitId) {
         return repo.findByVisitId(visitId)
-                .map(EntityDtoUtil::toDTO);
+                .map(EntityDtoUtil::toVisitResponseDTO);
     }
 
     @Override
@@ -43,26 +43,26 @@ public class VisitServiceImpl implements VisitService {
     }
 
     @Override
-    public Mono<VisitDTO> updateVisit(String visitId, Mono<VisitDTO> visitDTOMono) {
+    public Mono<VisitResponseDTO> updateVisit(String visitId, Mono<VisitRequestDTO> visitRequestDTOMono) {
         return repo.findByVisitId(visitId)
-                .flatMap(v -> visitDTOMono
-                        .map(EntityDtoUtil::toEntity)
-                        .doOnNext(e->e.setVisitId(e.getVisitId()))
-                        .doOnNext(e->e.setId(e.getId()))
+                .flatMap(v -> visitRequestDTOMono
+                        .map(EntityDtoUtil::toVisitEntity)
+                        .doOnNext(e->e.setVisitId(v.getVisitId()))
+                        .doOnNext(e->e.setId(v.getId()))
                 )
                 .flatMap(repo::save)
-                .map(EntityDtoUtil::toDTO);
+                .map(EntityDtoUtil::toVisitResponseDTO);
     }
 
     @Override
-    public Flux<VisitDTO> getVisitsForPractitioner(int practitionerId) {
+    public Flux<VisitResponseDTO> getVisitsForPractitioner(int practitionerId) {
         return repo.findVisitsByPractitionerId(practitionerId)
-                .map(EntityDtoUtil::toDTO);
+                .map(EntityDtoUtil::toVisitResponseDTO);
     }
 
     @Override
-    public Flux<VisitDTO> getVisitsByPractitionerIdAndMonth(int practitionerId, int month) {
+    public Flux<VisitResponseDTO> getVisitsByPractitionerIdAndMonth(int practitionerId, int month) {
         return repo.findVisitsByPractitionerIdAndMonth(practitionerId, month)
-                .map(EntityDtoUtil::toDTO);
+                .map(EntityDtoUtil::toVisitResponseDTO);
     }
 }

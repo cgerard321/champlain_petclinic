@@ -1,7 +1,7 @@
 package com.petclinic.visits.visitsservicenew.PresentationLayer;
 import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
-import com.petclinic.visits.visitsservicenew.DataLayer.VisitDTO;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,32 +12,35 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @AutoConfigureWebTestClient
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class VisitsControllerIntegrationTest {
-
+class VisitsControllerIntegrationTest {
     @Autowired
     private WebTestClient client;
 
     @Autowired
-    VisitRepo visitRepo;
+    private VisitRepo visitRepo;
 
-    Visit visit = buildVisit();
-    VisitDTO visitDTO = buildVisitDto();
+    private final Visit visit = buildVisit();
+    private final VisitResponseDTO visitResponseDTO = buildVisitResponseDto();
+    private final VisitRequestDTO visitRequestDTO = buildVisitRequestDto();
 
-    int PRAC_ID = visitDTO.getPractitionerId();
-    int PET_ID = visitDTO.getPetId();
-    int MONTH = visitDTO.getMonth();
-    String VISIT_ID = visitDTO.getVisitId();
+    private final int PRAC_ID = visitResponseDTO.getPractitionerId();
+    private final int PET_ID = visitResponseDTO.getPetId();
+    private final int MONTH = visitResponseDTO.getMonth();
+    private final String VISIT_ID = visitResponseDTO.getVisitId();
+    private final int dbSize = 1;
+
+    @BeforeEach
+    void dbSetUp(){
+        Publisher<Visit> visitPublisher = visitRepo.deleteAll().thenMany(visitRepo.save(visit));
+        StepVerifier.create(visitPublisher).expectNextCount(1).verifyComplete();
+    }
 
     @Test
     void getVisitByVisitId(){
-
-        Publisher<Visit> visitPublisher = visitRepo.deleteAll().thenMany(visitRepo.save(visit));
-
-        StepVerifier.create(visitPublisher).expectNextCount(1).verifyComplete();
-
         client
                 .get()
                 .uri("/visits/"+VISIT_ID)
@@ -57,113 +60,96 @@ public class VisitsControllerIntegrationTest {
     }
     @Test
     void getVisitByPractitionerId(){
-
-        Publisher<Visit> visitPublisher = visitRepo.deleteAll().thenMany(visitRepo.save(visit));
-
-        StepVerifier.create(visitPublisher).expectNextCount(1).verifyComplete();
-
         client
                 .get()
                 .uri("/visits/practitioner/visits/"+PRAC_ID)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$[0].visitId").isEqualTo(visit.getVisitId())
-                .jsonPath("$[0].practitionerId").isEqualTo(visit.getPractitionerId())
-                .jsonPath("$[0].petId").isEqualTo(visit.getPetId())
-                .jsonPath("$[0].description").isEqualTo(visit.getDescription())
-                .jsonPath("$[0].day").isEqualTo(visit.getDay())
-                .jsonPath("$[0].year").isEqualTo(visit.getYear())
-                .jsonPath("$[0].month").isEqualTo(visit.getMonth())
-                .jsonPath("$[0].status").isEqualTo(visit.isStatus());
-
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
+                .expectBodyList(VisitResponseDTO.class)
+                .value((list)->{
+                    assertNotNull(list);
+                    assertEquals(dbSize, list.size());
+                    assertEquals(list.get(0).getVisitId(), visit.getVisitId());
+                    assertEquals(list.get(0).getPractitionerId(), visit.getPractitionerId());
+                    assertEquals(list.get(0).getPetId(), visit.getPetId());
+                    assertEquals(list.get(0).getDescription(), visit.getDescription());
+                    assertEquals(list.get(0).getDay(), visit.getDay());
+                    assertEquals(list.get(0).getYear(), visit.getYear());
+                    assertEquals(list.get(0).getMonth(), visit.getMonth());
+                    assertEquals(list.get(0).isStatus(), visit.isStatus());
+                });
     }
 
     @Test
     void getVisitsForPet(){
-
-        Publisher<Visit> visitPublisher = visitRepo.deleteAll().thenMany(visitRepo.save(visit));
-
-        StepVerifier.create(visitPublisher).expectNextCount(1).verifyComplete();
-
         client
                 .get()
                 .uri("/visits/pets/"+PET_ID)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$[0].visitId").isEqualTo(visit.getVisitId())
-                .jsonPath("$[0].practitionerId").isEqualTo(visit.getPractitionerId())
-                .jsonPath("$[0].petId").isEqualTo(visit.getPetId())
-                .jsonPath("$[0].description").isEqualTo(visit.getDescription())
-                .jsonPath("$[0].day").isEqualTo(visit.getDay())
-                .jsonPath("$[0].year").isEqualTo(visit.getYear())
-                .jsonPath("$[0].month").isEqualTo(visit.getMonth())
-                .jsonPath("$[0].status").isEqualTo(visit.isStatus());
-
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
+                .expectBodyList(VisitResponseDTO.class)
+                .value((list)->{
+                    assertNotNull(list);
+                    assertEquals(dbSize, list.size());
+                    assertEquals(list.get(0).getVisitId(), visit.getVisitId());
+                    assertEquals(list.get(0).getPractitionerId(), visit.getPractitionerId());
+                    assertEquals(list.get(0).getPetId(), visit.getPetId());
+                    assertEquals(list.get(0).getDescription(), visit.getDescription());
+                    assertEquals(list.get(0).getDay(), visit.getDay());
+                    assertEquals(list.get(0).getYear(), visit.getYear());
+                    assertEquals(list.get(0).getMonth(), visit.getMonth());
+                    assertEquals(list.get(0).isStatus(), visit.isStatus());
+                });
     }
     @Test
     void getVisitsByPractitionerIdAndMonth(){
-
-        Publisher<Visit> visitPublisher = visitRepo.deleteAll().thenMany(visitRepo.save(visit));
-
-        StepVerifier.create(visitPublisher).expectNextCount(1).verifyComplete();
-
         client
                 .get()
                 .uri("/visits/practitioner/"+PRAC_ID + "/" + MONTH)
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$[0].visitId").isEqualTo(visit.getVisitId())
-                .jsonPath("$[0].practitionerId").isEqualTo(visit.getPractitionerId())
-                .jsonPath("$[0].petId").isEqualTo(visit.getPetId())
-                .jsonPath("$[0].description").isEqualTo(visit.getDescription())
-                .jsonPath("$[0].day").isEqualTo(visit.getDay())
-                .jsonPath("$[0].year").isEqualTo(visit.getYear())
-                .jsonPath("$[0].month").isEqualTo(visit.getMonth())
-                .jsonPath("$[0].status").isEqualTo(visit.isStatus());
-
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
+                .expectBodyList(VisitResponseDTO.class)
+                .value((list)->{
+                    assertNotNull(list);
+                    assertEquals(dbSize, list.size());
+                    assertEquals(list.get(0).getVisitId(), visit.getVisitId());
+                    assertEquals(list.get(0).getPractitionerId(), visit.getPractitionerId());
+                    assertEquals(list.get(0).getPetId(), visit.getPetId());
+                    assertEquals(list.get(0).getDescription(), visit.getDescription());
+                    assertEquals(list.get(0).getDay(), visit.getDay());
+                    assertEquals(list.get(0).getYear(), visit.getYear());
+                    assertEquals(list.get(0).getMonth(), visit.getMonth());
+                    assertEquals(list.get(0).isStatus(), visit.isStatus());
+                });
     }
     @Test
     void addVisit(){
-
-        Publisher<Void> visitPublisher = visitRepo.deleteAll();
-
-        StepVerifier.create(visitPublisher).expectNextCount(0).verifyComplete();
-
         client
                 .post()
                 .uri("/visits")
-                .body(Mono.just(visit), Visit.class)
+                .body(Mono.just(visitRequestDTO), VisitRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(VisitDTO.class)
+                .expectBody(VisitResponseDTO.class)
                 .value((visitDTO1) -> {
-                    assertEquals(visitDTO1.getVisitId(), visitDTO1.getVisitId());
-                    assertEquals(visitDTO1.getDescription(), visitDTO1.getDescription());
-                    assertEquals(visitDTO1.getPetId(), visitDTO1.getPetId());
-                    assertEquals(visitDTO1.getDay(), visitDTO1.getDay());
-                    assertEquals(visitDTO1.getMonth(), visitDTO1.getMonth());
-                    assertEquals(visitDTO1.getYear(), visitDTO1.getYear());
-                    assertEquals(visitDTO1.getPractitionerId(), visitDTO1.getPractitionerId());
+                    assertEquals(visitDTO1.getDescription(), visit.getDescription());
+                    assertEquals(visitDTO1.getPetId(), visit.getPetId());
+                    assertEquals(visitDTO1.getDay(), visit.getDay());
+                    assertEquals(visitDTO1.getMonth(), visit.getMonth());
+                    assertEquals(visitDTO1.getYear(), visit.getYear());
+                    assertEquals(visitDTO1.getPractitionerId(), visit.getPractitionerId());
                 });
     }
     @Test
     void deleteVisit(){
-
-        Publisher<Visit> visitPublisher = visitRepo.deleteAll().thenMany(visitRepo.save(visit));
-
-        StepVerifier.create(visitPublisher).expectNextCount(1).verifyComplete();
-
         client
                 .delete()
                 .uri("/visits/"+VISIT_ID)
@@ -171,19 +157,13 @@ public class VisitsControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody();
-
     }
     @Test
     void updateVisit(){
-
-        Publisher<Visit> visitPublisher = visitRepo.deleteAll().thenMany(visitRepo.save(visit));
-
-        StepVerifier.create(visitPublisher).expectNextCount(1).verifyComplete();
-
         client
                 .put()
                 .uri("/visits/visits/"+VISIT_ID)
-                .body(Mono.just(visitDTO), VisitDTO.class)
+                .body(Mono.just(visitResponseDTO), VisitResponseDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -197,11 +177,9 @@ public class VisitsControllerIntegrationTest {
                 .jsonPath("$.year").isEqualTo(visit.getYear())
                 .jsonPath("$.month").isEqualTo(visit.getMonth())
                 .jsonPath("$.status").isEqualTo(visit.isStatus());
-
     }
 
     private Visit buildVisit(){
-
         return Visit.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
                 .year(2022)
@@ -212,10 +190,19 @@ public class VisitsControllerIntegrationTest {
                 .practitionerId(2)
                 .status(true).build();
     }
-    private VisitDTO buildVisitDto(){
-
-        return VisitDTO.builder()
+    private VisitResponseDTO buildVisitResponseDto(){
+        return VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
+                .year(2022)
+                .month(11)
+                .day(24)
+                .description("this is a dummy description")
+                .petId(2)
+                .practitionerId(2)
+                .status(true).build();
+    }
+    private VisitRequestDTO buildVisitRequestDto(){
+        return VisitRequestDTO.builder()
                 .year(2022)
                 .month(11)
                 .day(24)
