@@ -46,7 +46,7 @@ public class BillServiceImplTest {
 
         when(repo.findByBillId(anyString())).thenReturn(Mono.just(billEntity));
 
-        Mono<BillDTO> billDTOMono = billService.GetBill(BILL_ID);
+        Mono<BillResponseDTO> billDTOMono = billService.GetBill(BILL_ID);
 
         StepVerifier.create(billDTOMono)
                 .consumeNextWith(foundBill -> {
@@ -165,7 +165,7 @@ public class BillServiceImplTest {
 
         when(repo.findByCustomerId(anyInt())).thenReturn(Flux.just(billEntity));
 
-        Flux<BillDTO> billDTOMono = billService.GetBillsByCustomerId(CUSTOMER_ID);
+        Flux<BillResponseDTO> billDTOMono = billService.GetBillsByCustomerId(CUSTOMER_ID);
 
         StepVerifier.create(billDTOMono)
                 .consumeNextWith(foundBill -> {
@@ -185,7 +185,7 @@ public class BillServiceImplTest {
 
         when(repo.findByVetId(anyString())).thenReturn(Flux.just(billEntity));
 
-        Flux<BillDTO> billDTOMono = billService.GetBillsByVetId(VET_ID);
+        Flux<BillResponseDTO> billDTOMono = billService.GetBillsByVetId(VET_ID);
 
         StepVerifier.create(billDTOMono)
                 .consumeNextWith(foundBill -> {
