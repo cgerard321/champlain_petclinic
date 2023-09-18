@@ -5,6 +5,7 @@ angular.module('inventoryProductList', ['ui.router'])
         $stateProvider
             .state('productList', {
                 parent: 'app',
+                //TODO change url to /inventory/:inventoryId/products when the get by inventoryId is implemented
                 //url: '/inventory/:inventoryId/products',
                 url: '/products',
                 template: '<inventory-product-list></inventory-product-list>'
