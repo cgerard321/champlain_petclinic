@@ -1,9 +1,11 @@
 package com.petclinic.customersservice.customersExceptions.http;
 
+import lombok.Getter;
 import org.springframework.http.HttpStatus;
 
 import java.time.ZonedDateTime;
 
+@Getter
 public class HttpErrorInfo {
 
     private final ZonedDateTime timestamp;
@@ -23,22 +25,6 @@ public class HttpErrorInfo {
         this.httpStatus = null;
         this.path = null;
         this.message = null;
-    }
-
-    public ZonedDateTime getTimestamp() {
-        return this.timestamp;
-    }
-
-    public String getPath() {
-        return this.path;
-    }
-
-    public HttpStatus getHttpStatus() {
-        return this.httpStatus;
-    }
-
-    public String getMessage() {
-        return this.message;
     }
 
 }

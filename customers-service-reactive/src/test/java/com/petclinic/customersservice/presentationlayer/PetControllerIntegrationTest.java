@@ -22,7 +22,7 @@ class PetControllerIntegrationTest {
     @Autowired
     private PetRepo repo;
     Pet petEntity = buildPet();
-    String PET_ID = petEntity.getId();
+    String PET_ID = petEntity.getPetId();
 
     @Test
     void deletePetByPetId() {
@@ -63,7 +63,7 @@ class PetControllerIntegrationTest {
                 .exchange().expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.id").isEqualTo(petEntity.getId())
+                .jsonPath("$.petId").isEqualTo(petEntity.getPetId())
                 .jsonPath("$.name").isEqualTo(petEntity.getName())
                 .jsonPath("$.petTypeId").isEqualTo(petEntity.getPetTypeId())
                 .jsonPath("$.ownerId").isEqualTo(petEntity.getOwnerId())
@@ -80,7 +80,7 @@ class PetControllerIntegrationTest {
                 .exchange().expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.id").isEqualTo(petEntity.getId())
+                .jsonPath("$.petId").isEqualTo(petEntity.getPetId())
                 .jsonPath("$.name").isEqualTo(petEntity.getName())
                 .jsonPath("$.petTypeId").isEqualTo(petEntity.getPetTypeId())
                 .jsonPath("$.ownerId").isEqualTo(petEntity.getOwnerId())
@@ -97,7 +97,7 @@ class PetControllerIntegrationTest {
                 .exchange().expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.id").isEqualTo(petEntity.getId())
+                .jsonPath("$.petId").isEqualTo(petEntity.getPetId())
                 .jsonPath("$.name").isEqualTo(petEntity.getName())
                 .jsonPath("$.petTypeId").isEqualTo(petEntity.getPetTypeId())
                 .jsonPath("$.ownerId").isEqualTo(petEntity.getOwnerId())
@@ -108,6 +108,7 @@ class PetControllerIntegrationTest {
     private Pet buildPet() {
         return Pet.builder()
                 .id("abc123")
+                .petId("abc12345")
                 .name("leonardo")
                 .ownerId("111")
                 .petTypeId("111")
