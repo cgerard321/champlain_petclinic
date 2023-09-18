@@ -13,7 +13,6 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ExtendWith(SpringExtension.class)
 @AutoConfigureWebTestClient
-
 class BFFApiGatewayApplicationTests {
 
 	@Test
