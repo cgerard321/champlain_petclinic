@@ -1,7 +1,6 @@
 package com.auth.authservice.Util.Configuration.Security;
 
 
-import com.auth.authservice.security.CustomBasicAuthenticationEntryPoint;
 import com.auth.authservice.security.JwtTokenFilter;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
