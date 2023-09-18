@@ -14,6 +14,10 @@ import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.*;
+import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
+import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
+import com.petclinic.bffapigateway.dtos.Inventory.InventoryType;
+import com.petclinic.bffapigateway.dtos.Inventory.ProductResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
 import com.petclinic.bffapigateway.dtos.Vets.*;
@@ -2093,6 +2097,7 @@ private InventoryResponseDTO buildInventoryDTO(){
                 .updateInventory(any(), eq(buildInventoryDTO().getInventoryId()));
     }
 
+
 //delete all product inventory and delete all inventory
 @Test
 void deleteAllInventory_shouldSucceed() {
@@ -2134,6 +2139,7 @@ void deleteAllInventory_shouldSucceed() {
         verify(inventoryServiceClient, times(1))
                 .deleteAllProductForInventory(eq(inventoryId));
     }
+    //inventory tests
 
     @Test
     void testUpdateProductInInventory() {
@@ -2176,8 +2182,33 @@ void deleteAllInventory_shouldSucceed() {
         verify(inventoryServiceClient, times(1))
                 .updateProductInInventory(eq(requestDTO), eq("sampleInventoryId"), eq("sampleProductId"));
     }
+    public void deleteProductById_insideInventory(){
+        ProductResponseDTO productResponseDTO = buildProductDTO();
+        when(inventoryServiceClient.deleteProductInInventory(productResponseDTO.getInventoryId(), productResponseDTO.getProductId()))
+                .thenReturn((Mono.empty()));
 
+        client.delete()
+                .uri("/api/gateway/inventory/{inventoryId}/products/{productId}",productResponseDTO.getInventoryId()  ,productResponseDTO.getProductId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk();
 
+        Mockito.verify(inventoryServiceClient, times(1))
+                .deleteProductInInventory(productResponseDTO.getInventoryId(), productResponseDTO.getProductId());
+
+    }
+
+    private ProductResponseDTO buildProductDTO(){
+        return ProductResponseDTO.builder()
+                .id("1")
+                .inventoryId("1")
+                .productId(UUID.randomUUID().toString())
+                .productName("Benzodiazepines")
+                .productDescription("Sedative Medication")
+                .productPrice(100.00)
+                .productQuantity(10)
+                .build();
+    }
 
     private VetDTO buildVetDTO() {
         return VetDTO.builder()
