@@ -1,4 +1,4 @@
-//include 'customers-service'
+include 'customers-service'
 include 'customers-service-reactive'
 //include 'vets-service'
 include 'api-gateway'

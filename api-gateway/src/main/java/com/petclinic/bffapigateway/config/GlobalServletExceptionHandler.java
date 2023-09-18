@@ -1,9 +1,7 @@
 package com.petclinic.bffapigateway.config;
 
 
-import com.petclinic.bffapigateway.exceptions.HttpErrorInfo;
-import com.petclinic.bffapigateway.exceptions.InvalidTokenException;
-import com.petclinic.bffapigateway.exceptions.NoTokenFoundException;
+import com.petclinic.bffapigateway.exceptions.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler;
@@ -23,18 +21,22 @@ public class GlobalServletExceptionHandler implements ErrorWebExceptionHandler {
     public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
         HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;
 
-        if (ex instanceof InvalidTokenException) {
-            status = HttpStatus.UNAUTHORIZED;
+        log.debug("Exception type: {}", ex.getClass().getSimpleName());
+
+        switch (ex.getClass().getSimpleName()) {
+            case "InvalidTokenException", "NoTokenFoundException", "GeneralSecurityException" ->
+                    status = HttpStatus.UNAUTHORIZED;
+            case "ExistingVetNotFoundException" -> status = HttpStatus.NOT_FOUND;
+            case "GenericHttpException" -> {
+                GenericHttpException error = (GenericHttpException) ex;
+                status = error.getHttpStatus();
+            }
+            case "RuntimeException" -> status = HttpStatus.BAD_REQUEST;
+            default -> {
+                status = HttpStatus.UNPROCESSABLE_ENTITY;
+            }
+            // Handle any other exception types here
         }
-       else if(ex instanceof NoTokenFoundException){
-            status = HttpStatus.UNAUTHORIZED;
-       }
-       else if(ex instanceof RuntimeException){
-            status = HttpStatus.BAD_REQUEST;
-       }
-       else if(ex instanceof GeneralSecurityException){
-            status = HttpStatus.UNAUTHORIZED;
-       }
 
 
 

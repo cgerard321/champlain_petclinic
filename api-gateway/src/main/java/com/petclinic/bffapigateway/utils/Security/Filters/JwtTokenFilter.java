@@ -10,10 +10,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.annotation.Order;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import org.springframework.stereotype.Component;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
@@ -24,6 +26,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 
@@ -39,10 +42,50 @@ public class JwtTokenFilter implements WebFilter {
 
     private final JwtTokenUtil jwtTokenUtil;
 
+    private static final String[] AUTH_WHITELIST = {
+            // -- Swagger UI v2
+            "/v2/api-docs",
+            "/swagger-resources",
+            "/swagger-resources/**",
+            "/configuration/ui",
+            "/configuration/security",
+            "/swagger-ui.html",
+            "/webjars/**",
+            // -- Swagger UI v3 (OpenAPI)
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
+            "/scripts/**",
+            "/css/**",
+            "/images/**",
+            "/images/*"
+            // other public endpoints of your API may be appended to this array
+    };
+
 
     @SuppressWarnings("NullableProblems")
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+        String path = exchange.getRequest().getURI().getPath();
+
+       for (String whitelisted : AUTH_WHITELIST) {
+           AntPathMatcher antPathMatcher = new AntPathMatcher();
+
+           if (antPathMatcher.match(whitelisted, path)) {
+               log.debug("Request is whitelisted, skipping filters !");
+               exchange.getAttributes().put("whitelisted", true);
+
+               return chain.filter(exchange);
+           }
+       }
+
+        if (Objects.equals(Objects.requireNonNull(exchange.getRequest().getHeaders().get(HttpHeaders.ACCEPT)).get(0), "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8")){
+            log.debug("Request is a browser request, skipping filters !");
+            exchange.getAttributes().put("whitelisted", true);
+
+            return chain.filter(exchange);
+        }
+
+
         HandlerMethod handler = null;
         try {
             handler = (HandlerMethod) requestMappingHandlerMapping.getHandler(exchange).toFuture().get();

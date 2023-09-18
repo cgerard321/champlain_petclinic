@@ -87,6 +87,7 @@ public class JwtTokenUtil implements Serializable {
         log.debug("Entered Util getTokenFromRequest");
         final List<String> cookies = exchange.getRequest().getHeaders().get("Cookie");
 
+
         log.debug("Cookies: {}", cookies);
 
         if (cookies == null) {
@@ -96,14 +97,17 @@ public class JwtTokenUtil implements Serializable {
             throw new NoTokenFoundException("No cookies found");
         }
 
-        String[] allCookies = cookies.get(0).split(",");
+        String[] allCookies = cookies.get(0).split(";");
 
         String token;
+
         token = Arrays.stream(allCookies).filter(cookie -> cookie.contains("Bearer")).findFirst().orElseThrow(() -> new InvalidTokenException("Token is invalid"));
+
 
 
         token = token.replace("Bearer=", "");
         token = token.replace(";", "");
+        token = token.replace(" ", "");
 
         return token;
     }
