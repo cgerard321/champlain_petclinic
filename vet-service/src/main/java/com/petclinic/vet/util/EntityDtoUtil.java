@@ -15,6 +15,7 @@ import com.petclinic.vet.dataaccesslayer.Rating;
 import com.petclinic.vet.dataaccesslayer.Specialty;
 import com.petclinic.vet.dataaccesslayer.Vet;
 import com.petclinic.vet.exceptions.InvalidInputException;
+import com.petclinic.vet.servicelayer.RatingRequestDTO;
 import com.petclinic.vet.servicelayer.RatingResponseDTO;
 import com.petclinic.vet.servicelayer.SpecialtyDTO;
 import com.petclinic.vet.servicelayer.VetDTO;
@@ -85,7 +86,11 @@ public class EntityDtoUtil {
         BeanUtils.copyProperties(rating, dto);
         return dto;
     }
-
+    public static Rating toEntity(RatingRequestDTO ratingRequestDTO) {
+        Rating rating = new Rating();
+        BeanUtils.copyProperties(ratingRequestDTO, rating);
+        return rating;
+    }
 
     public static Set<SpecialtyDTO> toDTOSet(Set<Specialty> specialties) {
         Set<SpecialtyDTO> specialtyDTOS = new HashSet<>();

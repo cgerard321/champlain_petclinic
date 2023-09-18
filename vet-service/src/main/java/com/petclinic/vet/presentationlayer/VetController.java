@@ -51,7 +51,7 @@ public class VetController {
         return ratingService.deleteRatingByRatingId(vetId, ratingId);
 
     }
-    @GetMapping("{vetId}/ratings")
+    @GetMapping("{vetId}/ratings/average")
     public Mono<ResponseEntity<Double>> getAverageRatingByVetId(@PathVariable String vetId){
         return ratingService.getAverageRatingByVetId(vetId)
                 .map(ResponseEntity::ok)

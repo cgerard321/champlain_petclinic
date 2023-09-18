@@ -128,6 +128,37 @@ class VetControllerUnitTest {
                 .getNumberOfRatingsByVetId(VET_ID);
     }
 
+
+    @Test
+    void getAverageRatingForEachVetByVetId_ShouldSucceed(){
+
+        String vetId = "1";
+        Double averageRating = 5.0;
+
+        when(vetService.getVetByVetId(vetId))
+                .thenReturn(Mono.just(vetDTO));
+
+        when(ratingService.getAverageRatingByVetId(vetId))
+                .thenReturn(Mono.just(ratingDTO.getRateScore()));
+
+
+        client.get()
+                .uri("/vets/" + vetId + "/ratings" + "/average")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(Double.class)
+                .value(d ->{
+                    assertEquals(d,averageRating);
+                });
+
+        Mockito.verify(ratingService, times(1))
+                .getAverageRatingByVetId(ratingDTO.getVetId());
+
+    }
+
+
     @Test
     void getAllVets() {
         when(vetService.getAll())

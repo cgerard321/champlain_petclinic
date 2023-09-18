@@ -155,6 +155,45 @@ class VetControllerIntegrationTest {
                 .expectStatus().isOk()
                 .expectBody();
     }
+
+
+
+    @Test
+    void getAverageRatingByVetId_ShouldSucceed(){
+
+        RatingRequestDTO ratingRequestDTO= RatingRequestDTO.builder()
+                .vetId(vet.getVetId())
+                .rateScore(rating1.getRateScore()).build();
+
+
+        client.get()
+                .uri("/vets/" + ratingRequestDTO.getVetId() + "/ratings" + "/average")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(Double.class)
+                .value(resp ->{
+                    assertEquals(rating1.getRateScore(), ratingRequestDTO.getRateScore());
+                });
+    }
+
+    @Test
+    void getAverageRatingByVetId_withInvalidVetId_ShouldThrowNotFound(){
+
+        client
+                .get()
+                .uri("/vets/" + INVALID_VET_ID + "/ratings/average")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Double.class)
+                .value(avg ->{
+                            assertEquals(0.0,avg);
+                        }
+                );
+
+    }
     @Test
     void getAllVets() {
         Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet));

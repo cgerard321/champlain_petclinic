@@ -1,6 +1,7 @@
 package com.petclinic.vet.servicelayer;
 
 import com.petclinic.vet.dataaccesslayer.RatingRepository;
+import com.petclinic.vet.exceptions.NotFoundException;
 import com.petclinic.vet.util.EntityDtoUtil;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -52,6 +53,7 @@ public class RatingServiceImpl implements RatingService {
                         return Mono.just(0.0);
                     } else {
                         return ratingRepository.findAllByVetId(vetId)
+                                .switchIfEmpty(Mono.error(new NotFoundException("vetId is Not Found" + vetId)))
                                 .map(EntityDtoUtil::toDTO)
                                 .reduce(0.0, (acc, rating) -> acc + rating.getRateScore())
                                 .map(sum -> sum / count);
