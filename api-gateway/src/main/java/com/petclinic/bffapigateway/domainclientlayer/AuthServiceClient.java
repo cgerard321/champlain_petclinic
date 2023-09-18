@@ -3,19 +3,21 @@ package com.petclinic.bffapigateway.domainclientlayer;
 import com.petclinic.bffapigateway.dtos.Auth.Login;
 import com.petclinic.bffapigateway.dtos.Auth.Role;
 import com.petclinic.bffapigateway.dtos.Auth.UserPasswordLessDTO;
+import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Rethrower;
+import com.petclinic.bffapigateway.utils.Security.Exceptions.InvalidTokenException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.security.GeneralSecurityException;
 
 import static reactor.core.publisher.Mono.error;
 import static reactor.core.publisher.Mono.just;
@@ -125,6 +127,8 @@ public class AuthServiceClient {
             throw new Exception(ex);
         }
 
+
+
 //        AtomicReference<String> token = new AtomicReference<>();
 //
 //        return webClientBuilder.build()
@@ -176,6 +180,23 @@ public class AuthServiceClient {
                 .header("Authorization", auth)
                 .retrieve()
                 .bodyToMono(Void.class);
+    }
+
+
+
+
+    public Mono<ResponseEntity<Flux<String>>> validateToken(String jwtToken) {
+        // Make a POST request to the auth-service for token validation
+
+        return webClientBuilder.build()
+                .post()
+                .uri(authServiceUrl + "/users/validate-token")
+                .bodyValue(jwtToken)
+                .cookie("Bearer", jwtToken)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> Mono.error(new InvalidTokenException("Invalid token")))
+                .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> Mono.error(new InvalidInputException("Invalid token")))
+                .toEntityFlux(String.class);
     }
 }
 

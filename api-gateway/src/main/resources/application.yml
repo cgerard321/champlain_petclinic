@@ -43,7 +43,7 @@ app:
     host: vet-service
     port: 8080
   customers-service:
-    host: customers-service-reactive
+    host: customers
     port: 8080
   billing-service:
     host: billing
@@ -54,3 +54,9 @@ app:
   inventory-service:
     host: inventory
     port: 8080
+
+---
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
