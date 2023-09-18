@@ -29,7 +29,7 @@ public class BillResource {
 
     // Read Bill //
     @GetMapping(value = "/bills/{billId}")
-    public Mono<BillDTO> findBill(@PathVariable("billId") String billId){
+    public Mono<BillResponseDTO> findBill(@PathVariable("billId") String billId){
         return SERVICE.GetBill(billId);
     }
 
@@ -44,14 +44,14 @@ public class BillResource {
     }
 
     @GetMapping(value = "/bills/customer/{customerId}")
-    public Flux<BillDTO> getBillsByCustomerId(@PathVariable("customerId") int customerId)
+    public Flux<BillResponseDTO> getBillsByCustomerId(@PathVariable("customerId") int customerId)
     {
         return SERVICE.GetBillsByCustomerId(customerId);
     }
 
 
     @GetMapping(value = "/bills/vet/{vetId}")
-    public Flux<BillDTO> getBillsByVetId(@PathVariable("vetId") String vetId)
+    public Flux<BillResponseDTO> getBillsByVetId(@PathVariable("vetId") String vetId)
     {
         return SERVICE.GetBillsByVetId(vetId);
     }
