@@ -53,17 +53,12 @@ class UserControllerIntegrationTest {
                 .bodyValue(token)
                 .exchange()
                 .expectStatus().isOk();
-
-
-
     }
 
 
 
     @Test
     void validateTokenWithInvalidToken_ShouldReturnUnauthorized() {
-
-
         String token = "invalidToken";
 
         webTestClient.post()
@@ -73,16 +68,12 @@ class UserControllerIntegrationTest {
                 .bodyValue(token)
                 .exchange()
                 .expectStatus().isUnauthorized();
-
-
     }
 
 
 
     @Test
     void validateTokenWithCORSViolation_ShouldReturnForbidden() {
-
-
         List<User> users = userRepo.findAll();
 
         User user = users.get(0);
@@ -97,8 +88,6 @@ class UserControllerIntegrationTest {
                 .bodyValue(token)
                 .exchange()
                 .expectStatus().isForbidden();
-
-
     }
 
 }

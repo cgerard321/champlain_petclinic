@@ -19,7 +19,7 @@ public class GlobalServletExceptionHandler implements ErrorWebExceptionHandler {
     @SuppressWarnings("NullableProblems")
     @Override
     public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
-        HttpStatus status = HttpStatus.UNPROCESSABLE_ENTITY;
+        HttpStatus status;
 
         log.debug("Exception type: {}", ex.getClass().getSimpleName());
 
@@ -31,8 +31,8 @@ public class GlobalServletExceptionHandler implements ErrorWebExceptionHandler {
                 GenericHttpException error = (GenericHttpException) ex;
                 status = error.getHttpStatus();
             }
-            case "RuntimeException" -> status = HttpStatus.BAD_REQUEST;
             default -> {
+                log.error("Exception not handled: {}", ex.getClass().getSimpleName());
                 status = HttpStatus.UNPROCESSABLE_ENTITY;
             }
             // Handle any other exception types here

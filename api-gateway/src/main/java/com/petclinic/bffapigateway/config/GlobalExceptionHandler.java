@@ -56,8 +56,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = RuntimeException.class)
     public ResponseEntity<HttpErrorInfo> runtimeException(RuntimeException ex) {
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new HttpErrorInfo(HttpStatus.BAD_REQUEST.value(), ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(new HttpErrorInfo(HttpStatus.UNPROCESSABLE_ENTITY.value(), ex.getMessage()));
     }
 
     @ExceptionHandler(value = NoTokenFoundException.class)

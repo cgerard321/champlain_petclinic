@@ -1,5 +1,6 @@
 package com.auth.authservice.security;
 
+import com.auth.authservice.datalayer.roles.Role;
 import com.auth.authservice.datalayer.user.User;
 import com.auth.authservice.datalayer.user.UserRepo;
 import io.jsonwebtoken.Claims;
@@ -78,8 +79,7 @@ public class JwtTokenUtil implements Serializable {
         claims.put(CLAIM_KEY_USERNAME, user.getUsername());
         claims.put(CLAIM_KEY_CREATED, new Date());
         ArrayList<String> roles = new ArrayList<>();
-        user.getRoles().forEach(role -> roles.add(role.getName()));
-        claims.put(CLAIM_KEY_ROLES,roles.toArray() );
+        claims.put(CLAIM_KEY_ROLES, user.getRoles().stream().map(Role::getName).toArray(String[]::new));
         log.info("Claims are {}", claims.get(CLAIM_KEY_ROLES));
         log.info(user.getAuthorities().toString());
         log.info("Claims are {}", claims);
