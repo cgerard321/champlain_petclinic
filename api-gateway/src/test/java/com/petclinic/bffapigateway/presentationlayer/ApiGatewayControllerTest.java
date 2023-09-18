@@ -143,7 +143,7 @@ class ApiGatewayControllerTest {
 
         RatingRequestDTO rating = RatingRequestDTO.builder()
                 .vetId(VET_ID)
-                .rateScore(3.5)
+                .rateScore(4.0)
                 .build();
 
         when(vetsServiceClient.getAverageRatingByVetId(anyString()))

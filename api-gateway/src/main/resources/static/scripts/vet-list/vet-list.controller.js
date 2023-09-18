@@ -40,8 +40,18 @@ angular.module('vetList')
 
             angular.forEach($scope.vetList, function(vet) {
                 getCountOfRatings(vet)
+                getAverageRating(vet)
             });
         });
+
+        function getAverageRating(vet) {
+            console.log("Hello " + vet.vetId);
+            $http.get('api/gateway/vets/' + vet.vetId + "/ratings/average").then(function (resp) {
+                console.log(resp.data);
+                vet.showRating = true;
+                vet.rating = parseFloat(resp.data.toFixed(1));
+            });
+        }
 
         function getCountOfRatings(vet) {
             $http.get('api/gateway/vets/' + vet.vetId + "/ratings/count").then(function (resp) {
