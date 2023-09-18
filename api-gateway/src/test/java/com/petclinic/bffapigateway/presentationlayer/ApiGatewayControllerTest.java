@@ -5,6 +5,8 @@ import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.*;
 import com.petclinic.bffapigateway.dtos.Auth.Role;
 import com.petclinic.bffapigateway.dtos.Bills.BillDetails;
+import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
+import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
 import com.petclinic.bffapigateway.dtos.Vets.*;
@@ -24,8 +26,8 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.util.*;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.HttpStatus.*;
@@ -985,7 +987,7 @@ class ApiGatewayControllerTest {
 
         //int expectedLength = 1;
 
-        BillDetails entity = new BillDetails();
+        BillResponseDTO entity = new BillResponseDTO();
 
         entity.setBillId("9");
 
@@ -1019,7 +1021,7 @@ class ApiGatewayControllerTest {
 
     @Test
     public void getBillsByOwnerId(){
-        BillDetails bill = new BillDetails();
+        BillResponseDTO bill = new BillResponseDTO();
         bill.setBillId(UUID.randomUUID().toString());
         bill.setCustomerId(1);
         bill.setAmount(499);
@@ -1041,7 +1043,7 @@ class ApiGatewayControllerTest {
 
     @Test
     public void getBillsByVetId(){
-        BillDetails bill = new BillDetails();
+        BillResponseDTO bill = new BillResponseDTO();
         bill.setBillId(UUID.randomUUID().toString());
         bill.setVetId("1");
         bill.setAmount(499);
@@ -1113,24 +1115,29 @@ class ApiGatewayControllerTest {
 
     @Test
     void createBill(){
-        BillDetails bill = new BillDetails();
-        bill.setBillId("9");
-        bill.setDate(null);
-        bill.setAmount(600);
-        bill.setVisitType("Adoption");
-        when(billServiceClient.createBill(bill))
-                .thenReturn(Mono.just(bill));
+        BillResponseDTO billResponseDTO = new BillResponseDTO();
+        billResponseDTO.setBillId("9");
+        billResponseDTO.setDate(null);
+        billResponseDTO.setAmount(600);
+        billResponseDTO.setVisitType("Adoption");
+
+        BillRequestDTO billRequestDTO = new BillRequestDTO();
+        billRequestDTO.setDate(null);
+        billRequestDTO.setAmount(600);
+        billRequestDTO.setVisitType("Adoption");
+        when(billServiceClient.createBill(billRequestDTO))
+                .thenReturn(Mono.just(billResponseDTO));
 
         client.post()
                 .uri("/api/gateway/bills")
-                .body(Mono.just(bill), BillDetails.class)
+                .body(Mono.just(billRequestDTO), BillRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
 
-        assertEquals(bill.getBillId(),"9");
+        assertEquals(billResponseDTO.getBillId(),"9");
     }
 
     @Test
@@ -1160,29 +1167,30 @@ class ApiGatewayControllerTest {
 
     @Test
     void shouldDeleteBillById(){
-            BillDetails bill = new BillDetails();
-            bill.setBillId("9");
+        BillResponseDTO billResponseDTO = new BillResponseDTO();
+        billResponseDTO.setBillId("9");
+        billResponseDTO.setDate(null);
+        billResponseDTO.setAmount(600);
+        billResponseDTO.setVisitType("Adoption");
 
-            bill.setDate(null);
-
-            bill.setAmount(600);
-
-            bill.setVisitType("Adoption");
-
-            when(billServiceClient.createBill(bill))
-                    .thenReturn(Mono.just(bill));
+        BillRequestDTO billRequestDTO = new BillRequestDTO();
+        billRequestDTO.setDate(null);
+        billRequestDTO.setAmount(600);
+        billRequestDTO.setVisitType("Adoption");
+        when(billServiceClient.createBill(billRequestDTO))
+                .thenReturn(Mono.just(billResponseDTO));
 
 
             client.post()
                     .uri("/api/gateway/bills")
-                    .body(Mono.just(bill), BillDetails.class)
+                    .body(Mono.just(billRequestDTO), BillRequestDTO.class)
                     .accept(MediaType.APPLICATION_JSON)
                     .exchange()
                     .expectStatus().isOk()
                     .expectHeader().contentType(MediaType.APPLICATION_JSON)
                     .expectBody();
 
-            assertEquals(bill.getBillId(),"9");
+            assertEquals(billResponseDTO.getBillId(),"9");
         client.delete()
                 .uri("/api/gateway/bills/9")
                 .accept(MediaType.APPLICATION_JSON)
@@ -1191,34 +1199,38 @@ class ApiGatewayControllerTest {
                 .isOk()
                 .expectBody();
 
-        assertEquals(null, billServiceClient.getBilling(bill.getBillId()));
+        assertNull(billServiceClient.getBilling(billResponseDTO.getBillId()));
     }
 
     @Test
-    void shouldDeleteBillByVetId(){
-        BillDetails bill = new BillDetails();
-        bill.setVetId("9");
+    void shouldDeleteBillByVetId() {
+        BillRequestDTO billRequestDTO = new BillRequestDTO();
+        billRequestDTO.setVetId("9");
+        billRequestDTO.setDate(null);
+        billRequestDTO.setAmount(600);
+        billRequestDTO.setVisitType("Adoption");
 
-        bill.setDate(null);
+        BillResponseDTO billResponseDTO = new BillResponseDTO();
+        billResponseDTO.setVetId("9");
+        billResponseDTO.setDate(null);
+        billResponseDTO.setAmount(600);
+        billResponseDTO.setVisitType("Adoption");
 
-        bill.setAmount(600);
-
-        bill.setVisitType("Adoption");
-
-        when(billServiceClient.createBill(bill))
-                .thenReturn(Mono.just(bill));
-
+        when(billServiceClient.createBill(billRequestDTO))
+                .thenReturn(Mono.just(billResponseDTO));
 
         client.post()
                 .uri("/api/gateway/bills")
-                .body(Mono.just(bill), BillDetails.class)
+                .body(Mono.just(billRequestDTO), BillRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
 
-        assertEquals(bill.getVetId(),"9");
+        // Compare the vetId property, not the billId property
+        assertEquals(billResponseDTO.getVetId(), "9");
+
         client.delete()
                 .uri("/api/gateway/bills/vet/9")
                 .accept(MediaType.APPLICATION_JSON)
@@ -1227,8 +1239,9 @@ class ApiGatewayControllerTest {
                 .isOk()
                 .expectBody();
 
-        assertEquals(null, billServiceClient.getBilling(bill.getVetId()));
+        assertNull(billServiceClient.getBilling(billResponseDTO.getBillId()));
     }
+
 
     @Test
     void shouldCreateAVisitWithOwnerInfo(){

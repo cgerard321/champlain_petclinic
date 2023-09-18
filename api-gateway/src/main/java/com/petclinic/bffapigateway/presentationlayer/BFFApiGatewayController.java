@@ -6,6 +6,8 @@ import com.petclinic.bffapigateway.dtos.Auth.Login;
 import com.petclinic.bffapigateway.dtos.Auth.Role;
 import com.petclinic.bffapigateway.dtos.Auth.UserPasswordLessDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillDetails;
+import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
+import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.ProductRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.ProductResponseDTO;
 import com.petclinic.bffapigateway.dtos.OwnerResponseDTO;
@@ -57,7 +59,7 @@ public class BFFApiGatewayController {
     private final InventoryServiceClient inventoryServiceClient;
 
     @GetMapping(value = "bills/{billId}")
-    public Mono<BillDetails> getBillingInfo(final @PathVariable String billId)
+    public Mono<BillResponseDTO> getBillingInfo(final @PathVariable String billId)
     {
         return billServiceClient.getBilling(billId);
     }
@@ -65,23 +67,23 @@ public class BFFApiGatewayController {
     @PostMapping(value = "bills",
             consumes = "application/json",
             produces = "application/json")
-    public Mono<BillDetails> createBill(@RequestBody BillDetails model) {
+    public Mono<BillResponseDTO> createBill(@RequestBody BillRequestDTO model) {
         return billServiceClient.createBill(model);
     }
 
     @GetMapping(value = "bills")
-    public Flux<BillDetails> getAllBilling() {
+    public Flux<BillResponseDTO> getAllBilling() {
         return billServiceClient.getAllBilling();
     }
 
     @GetMapping(value = "bills/customer/{customerId}")
-    public Flux<BillDetails> getBillsByOwnerId(final @PathVariable int customerId)
+    public Flux<BillResponseDTO> getBillsByOwnerId(final @PathVariable int customerId)
     {
         return billServiceClient.getBillsByOwnerId(customerId);
     }
 
     @GetMapping(value = "bills/vet/{vetId}")
-    public Flux<BillDetails> getBillsByVetId(final @PathVariable String vetId)
+    public Flux<BillResponseDTO> getBillsByVetId(final @PathVariable String vetId)
     {
         return billServiceClient.getBillsByVetId(vetId);
     }
