@@ -6,7 +6,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface VisitService {
-
     Flux<VisitResponseDTO> getAllVisits();
     Flux<VisitResponseDTO> getVisitsForPet(int petId);
     Flux<VisitResponseDTO> getVisitsForPractitioner(int practitionerId);

@@ -5,37 +5,23 @@
 angular.module('visitList')
     // .controller('VisitListController', ['$http','$stateParams', '$scope', function ($http, $stateParams, $scope) {
     .controller('VisitListController', ['$http', '$scope', function ($http, $scope) {
-        var self = this;
+        let self = this;
         self.upcomingVisits = [];
-        var eventSource = new EventSource("api/gateway/visits");
+        let eventSource = new EventSource("api/gateway/visits");
         eventSource.addEventListener('message', function (event){
-            // $scope.init(function(){
             $scope.$apply(function(){
-                var data = JSON.parse(event.data);
-                self.upcomingVisits.push(data);
-                console.log(data);
+                self.upcomingVisits.push(JSON.parse(event.data));
             })
-        }, true);
-
-        // $scope.$on('$destroy', function () {
-        //     eventSource.onmessage("ngRepeat:dupes").close();
-        // });
-
-        // $http.get("api/gateway/visits").then(function (resp) {
-        //     self.upcomingVisits = resp.data;
-
-
-            // console.log(resp.data);
-        // });
+        });
+        eventSource.onerror = (error) =>{
+            if(eventSource.readyState === 0){
+                eventSource.close();
+                console.log("EventSource was closed by server successfully."+error);
+            }else{
+                console.log("EventSource error: "+error)
+            }
+        }
     }]);
-        //     var self = this;
-    //
-    //     $http.get("api/gateway/visits").then(function (resp) {
-    //         // self.visits = resp.data;
-    //         self.upcomingVisits = resp.data;
-    //         // self.sortFetchedVisits();
-    //         console.log(resp)
-    //     });
     //     // Lists holding visits for the tables to display
     //     // self.upcomingVisits = [];
     //     // self.previousVisits = [];
