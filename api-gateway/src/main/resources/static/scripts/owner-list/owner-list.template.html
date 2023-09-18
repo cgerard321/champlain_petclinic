@@ -1,30 +1,75 @@
-<h2 class="titleOwner">Current Owners</h2>
 
-<form onsubmit="javascript:void(0)" style="max-width: 20em; margin-top: 2em; margin-bottom: 2em">
-    <div class="form-group">
-        <input type="text" class="form-control" placeholder="Search Filter" ng-model="$ctrl.query" />
-    </div>
-</form>
+<style>
+    h3.titleOwner {
+        color: #2f2b2b;
+        text-align: left;
+    }
 
-<table id="owner" class="table table-striped">
-    <thead>
-    <tr>
-        <th>OwnerID</th>
-        <th>Name</th>
-        <th class="hidden-sm hidden-xs">Address</th>
-        <th>City</th>
-        <th>Telephone</th>
-    </tr>
-    </thead>
-    <tr id="ownerTd" ng-repeat="owner in $ctrl.owners | filter:$ctrl.query track by owner.ownerId">
-        <td>
-            <a class="newBtn btn btn-default" ui-sref="ownerDetails({ ownerId: owner.ownerId })">
-                {{owner.ownerId}}
-            </a>
-        </td>
-        <td>{{owner.firstName}} {{owner.lastName}}</td>
-        <td class="hidden-sm hidden-xs">{{owner.address}}</td>
-        <td>{{owner.city}}</td>
-        <td>{{owner.telephone}}</td>
-    </tr>
-</table>
+    .CurrentOwnersContainer {
+        margin: 20px;
+    }
+
+    .FilterOwnersLabel {
+        color:rgba(0,0,0,0.5);
+    }
+
+    @media (max-width: 576px) {
+        /* Define styles for small screens */
+        .responsive-text {
+            font-size: 13px;
+        }
+    }
+
+    @media (min-width: 577px) and (max-width: 992px) {
+        /* Define styles for medium screens */
+        .responsive-text {
+            font-size: 15px;
+        }
+    }
+
+    @media (min-width: 993px) {
+        /* Define styles for large screens and above */
+        .responsive-text {
+            font-size: 17px;
+        }
+    }
+
+
+</style>
+
+<div class="CurrentOwnersContainer">
+
+    <h3 class="titleOwner">Current Owners</h3>
+
+    <form onsubmit="javascript:void(0)" style="" class="ng-pristine ng-valid py-4">
+        <div class="d-flex flex-row gap-3">
+            <label class="FilterOwnersLabel">Filter Owners : </label>
+
+            <input type="text" class="ng-pristine ng-untouched ng-valid ng-empty ps-2" placeholder="Search Filter" ng-model="$ctrl.query">
+        </div>
+    </form>
+
+    <table id="owner" class="table table-responsive">
+        <thead>
+        <tr>
+            <th class="bg-light text-black ps-3 opacity-50">OwnerID</th>
+            <th class="bg-light text-black opacity-50">Name</th>
+            <th class="d-none d-sm-table-cell d-md-table-cell bg-light text-black opacity-50">Address</th>
+            <th class="d-none d-sm-table-cell d-md-table-cell bg-light text-black opacity-50">City</th>
+            <th class="d-none d-sm-table-cell d-md-table-cell bg-light text-black opacity-50">Telephone</th>
+        </tr>
+        </thead>
+        <tr class="border-bottom-1" id="ownerTd" ng-repeat="owner in $ctrl.owners | filter:$ctrl.query track by owner.ownerId">
+            <td class="border-bottom border-1 border-dark ">
+                <a class="newBtn btn btn-default responsive-text" ui-sref="ownerDetails({ ownerId: owner.ownerId })">
+                    {{owner.ownerId}}
+                </a>
+            </td>
+            <td class="responsive-text border-bottom border-1 border-dark ">{{owner.firstName}} {{owner.lastName}}</td>
+            <td class="d-none d-sm-table-cell d-md-table-cell responsive-text border-bottom border-1 border-dark ">{{owner.address}}</td>
+            <td class="d-none d-sm-table-cell d-md-table-cell responsive-text border-bottom border-1 border-dark ">{{owner.city}}</td>
+            <td class="d-none d-sm-table-cell d-md-table-cell responsive-text border-bottom border-1 border-dark ">{{owner.telephone}}</td>
+        </tr>
+    </table>
+
+</div>

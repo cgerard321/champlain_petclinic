@@ -18,7 +18,7 @@ public class OwnerResponseDTO {
     private String address;
     private String city;
     private String telephone;
-    private String photoId;
-    private Photo photo;
+    //private String photoId;
+    //private Photo photo;
     private List<PetDTO> pets;
 }

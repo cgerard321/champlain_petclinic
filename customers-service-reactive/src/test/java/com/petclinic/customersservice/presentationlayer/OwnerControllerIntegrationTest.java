@@ -32,8 +32,6 @@ class OwnerControllerIntegrationTest {
 
     String OWNER_ID = ownerEntity.getId();
 
-    String OWNER_ID_2 = ownerEntity2.getId();
-
     String PUBLIC_OWNER_ID = ownerEntity.getOwnerId();
 
     @Test
@@ -47,22 +45,27 @@ class OwnerControllerIntegrationTest {
 
     }
 
-//    @Test
-//    void getAllOwners() {
-//        Publisher<Owner> setup = repo.deleteAll().thenMany(repo.save(ownerEntity2));
-//        StepVerifier.create(setup).verifyComplete();
-//        client.get().uri("/owners/")
-//                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
-//                .acceptCharset(StandardCharsets.UTF_8)
-//                .exchange().expectStatus().isOk()
-//                .expectHeader().valueEquals("Content-Type","text/event-stream;charset=UTF-8")
-//                .expectBodyList(Owner.class)
-//                .value((list) -> {
-//                    assertNotNull(list);
-//                    assertEquals(10,list.size());
-//                });
-//
-//    }
+    @Test
+    void getAllOwners() {
+        Publisher<Owner> setup = repo.deleteAll().thenMany(repo.save(ownerEntity2));
+        StepVerifier
+                .create(setup)
+                .expectNext(ownerEntity2)
+                .verifyComplete();
+
+        client.get()
+                .uri("/owners")
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .acceptCharset(StandardCharsets.UTF_8)
+                .exchange().expectStatus().isOk()
+                .expectHeader().valueEquals("Content-Type","text/event-stream;charset=UTF-8")
+                .expectBodyList(OwnerResponseDTO.class)
+                .value((list) -> {
+                    assertNotNull(list);
+                    assertEquals(1,list.size());
+                });
+
+    }
 
     @Test
     void getOwnerByOwnerId() {
@@ -147,7 +150,7 @@ class OwnerControllerIntegrationTest {
 
     private Owner buildOwner2() {
         return Owner.builder()
-                .id("8")
+                .id("67")
                 .ownerId("ownerId-1234")
                 .firstName("FirstName")
                 .lastName("LastName")

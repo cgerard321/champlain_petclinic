@@ -45,8 +45,9 @@ public class OwnerServiceImpl implements OwnerService {
     }
 
     @Override
-    public Flux<Owner> getAllOwners() {
-        return ownerRepo.findAll();
+    public Flux<OwnerResponseDTO> getAllOwners() {
+        return ownerRepo.findAll()
+                .map(EntityDTOUtil::toOwnerResponseDTO);
     }
 
 }

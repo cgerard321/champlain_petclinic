@@ -1,6 +1,6 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
-import com.petclinic.bffapigateway.dtos.OwnerResponseDTO;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
 import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
@@ -43,7 +43,7 @@ public class CustomersServiceClient {
                 .bodyToMono(OwnerResponseDTO.class);
     }
 
-    public Flux<OwnerResponseDTO> getOwners() {
+    public Flux<OwnerResponseDTO> getAllOwners() {
         return webClientBuilder.build().get()
                 .uri(customersServiceUrl)
                 .retrieve()
