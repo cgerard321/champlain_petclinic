@@ -343,7 +343,7 @@ class ApiGatewayControllerTest {
                 .uri("/api/gateway/vets/" + INVALID_VET_ID)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(BAD_REQUEST)
+                .expectStatus().isEqualTo(UNPROCESSABLE_ENTITY)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("This id is not valid");
@@ -360,7 +360,7 @@ class ApiGatewayControllerTest {
                 .body(Mono.just(vetDTO), VetDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(BAD_REQUEST)
+                .expectStatus().isEqualTo(UNPROCESSABLE_ENTITY)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("This id is not valid");
@@ -376,7 +376,7 @@ class ApiGatewayControllerTest {
                 .uri("/api/gateway/vets/" + INVALID_VET_ID)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(BAD_REQUEST)
+                .expectStatus().isEqualTo(UNPROCESSABLE_ENTITY)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("This id is not valid");
@@ -818,7 +818,7 @@ class ApiGatewayControllerTest {
                 .uri("/api/gateway/owners/{ownerId}/pets", od.getOwnerId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(BAD_REQUEST)
+                .expectStatus().isEqualTo(UNPROCESSABLE_ENTITY)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("415 UNSUPPORTED_MEDIA_TYPE \"Content type '' not supported\"");
@@ -845,7 +845,7 @@ class ApiGatewayControllerTest {
                 .body(Mono.just(pet), PetResponseDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(BAD_REQUEST)
+                .expectStatus().isEqualTo(UNPROCESSABLE_ENTITY)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("405 METHOD_NOT_ALLOWED \"Request method 'POST' is not supported.\"");
@@ -951,7 +951,7 @@ class ApiGatewayControllerTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
-                .isEqualTo(BAD_REQUEST)
+                .isEqualTo(UNPROCESSABLE_ENTITY)
                 .expectBody();
     }
 
