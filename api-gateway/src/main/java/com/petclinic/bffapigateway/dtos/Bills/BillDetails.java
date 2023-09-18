@@ -1,6 +1,7 @@
 package com.petclinic.bffapigateway.dtos.Bills;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Builder;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -9,7 +10,7 @@ import java.util.List;
 
 import static java.util.stream.Collectors.toList;
 
-
+@Builder
 @Data
 public class BillDetails {
     private String billId;
