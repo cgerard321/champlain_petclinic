@@ -1,7 +1,7 @@
 'use strict';
 
-angular.module('bundleList')
-    .component('bundleList', {
-        templateUrl: 'scripts/bundle-list/bundle-list.template.html',
-        controller: 'BundleListController'
+angular.module('inventoryProductList')
+    .component('inventoryProductList', {
+        templateUrl: 'scripts/inventory-product-list/inventory-product-list.template.html',
+        controller: 'InventoryProductController'
     });

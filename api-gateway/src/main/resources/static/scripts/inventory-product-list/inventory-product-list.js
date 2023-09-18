@@ -1,16 +1,23 @@
 'use strict';
 
-angular.module('bundleList', ['ui.router'])
+angular.module('inventoryProductList', ['ui.router'])
     .config(['$stateProvider', function ($stateProvider) {
         $stateProvider
-            .state('bundles', {
+            .state('productList', {
                 parent: 'app',
-                url: '/bundles',
-                template: '<bundle-list></bundle-list>'
+                //url: '/inventory/:inventoryId/products',
+                url: '/products',
+                template: '<inventory-product-list></inventory-product-list>'
             })
-            .state('deleteBundle', {
+            .state('updateProduct', {
+                    parent: 'app',
+                    url: '/inventory/:inventoryId/products/:productId',
+                    template: '<inventory-product-item></inventory-product-item>'
+                }
+            )
+            .state('deleteProduct', {
                 parent: 'app',
-                url: '/bundles/:bundleUUID/deleteBundle',
-                template: '<bundle-list></bundle-list>'
+                url: '/inventory/:inventoryId/products/:productId',
+                template: '<inventory-product-item></inventory-product-item>'
             })
     }]);
