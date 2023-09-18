@@ -81,6 +81,27 @@ class VetsServiceClientIntegrationTest {
         final Integer numberOfRatings = vetsServiceClient.getNumberOfRatingsByVetId("678910").block();
         assertEquals(5, numberOfRatings);
     }
+
+    /*
+    @Test
+    void getAverageRatingsByVetId() throws JsonProcessingException{
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody("    {\n" +
+                        "        \"vetId\": \"678910\",\n" +
+                        "        \"rateScore\": 4.5\n" +
+                        "         \"averageScore\": 5.0\n" +
+                        "    }"));
+
+                final Double averageRating=
+                vetsServiceClient.getAverageRatingByVetId("678910").block();
+        assertEquals(4.5, averageRating);
+
+    }
+
+     */
+
+
   
   @Test
     void deleteRatingsByRatingId() throws JsonProcessingException{
