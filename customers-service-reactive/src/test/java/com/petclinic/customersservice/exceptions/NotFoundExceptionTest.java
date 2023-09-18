@@ -27,7 +27,7 @@ class NotFoundExceptionTest {
         NotFoundException notFoundException = assertThrows(NotFoundException.class, ()->{
             throw new NotFoundException();
         });
-        assertEquals(notFoundException.getMessage(), null);
+        assertNull(notFoundException.getMessage());
     }
 
     @Test

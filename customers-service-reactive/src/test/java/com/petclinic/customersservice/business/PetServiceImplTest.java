@@ -16,7 +16,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import java.util.Date;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-@SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port: 27019"})
+@SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port= 27019"})
 @AutoConfigureWebTestClient
 class PetServiceImplTest {
 
@@ -67,7 +67,7 @@ class PetServiceImplTest {
         //Owner owner = buildOwner();
         Pet pet = buildPet();
         String PET_ID = pet.getId();
-        when(repo.findPetById(PET_ID)).thenReturn(Mono.just(pet));
+        when(repo.findPetByPetId(PET_ID)).thenReturn(Mono.just(pet));
         Mono<Pet> petEntity = petService.getPetById(PET_ID);
 
         StepVerifier
@@ -107,7 +107,7 @@ class PetServiceImplTest {
 
         Pet petEntity = buildPet();
         String PET_ID = "Not found";
-        when(repo.findPetById(PET_ID)).thenReturn(Mono.just(petEntity));
+        when(repo.findPetByPetId(PET_ID)).thenReturn(Mono.just(petEntity));
         Mono<Pet> petMono = petService.getPetById(PET_ID);
         StepVerifier
                 .create(petMono)
@@ -137,6 +137,7 @@ class PetServiceImplTest {
     private Pet buildPet() {
         return Pet.builder()
                 .id("55")
+                .petId("petId-123")
                 .name("Test Pet")
                 .petTypeId("5")
                 .photoId("3")
