@@ -44,4 +44,18 @@ public class RatingServiceImpl implements RatingService {
                 .map(Long::intValue);
     }
 
+    @Override
+    public Mono<Double> getAverageRatingByVetId(String vetId) {
+        return ratingRepository.countAllByVetId(vetId)
+                .flatMap(count -> {
+                    if (count == 0) {
+                        return Mono.just(0.0);
+                    } else {
+                        return ratingRepository.findAllByVetId(vetId)
+                                .map(EntityDtoUtil::toDTO)
+                                .reduce(0.0, (acc, rating) -> acc + rating.getRateScore())
+                                .map(sum -> sum / count);
+                    }
+                });
+    }
 }
