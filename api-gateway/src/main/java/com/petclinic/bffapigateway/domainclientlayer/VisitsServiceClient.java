@@ -6,6 +6,8 @@ import com.petclinic.bffapigateway.dtos.Visits.Visits;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -35,6 +37,18 @@ public class VisitsServiceClient {
                 .build();
     }
 
+    public Flux<VisitResponseDTO> getAllVisits(){
+        return this.webClient
+                .get()
+                .uri("/visits")
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error -> {
+//                    HttpStatusCode statusCode = error.statusCode();
+                    return Mono.error(new IllegalArgumentException("Something went wrong and got a 400 error"));
+                })
+                .onStatus(HttpStatusCode::is5xxServerError, error -> Mono.error(new IllegalArgumentException("Something went wrong and we got a 500 error")))
+                .bodyToFlux(VisitResponseDTO.class);
+    }
     public Mono<Visits> getVisitsForPets(final List<Integer> petIds) {
         return this.webClient
                 .get()
@@ -83,6 +97,13 @@ public class VisitsServiceClient {
                 .bodyToFlux(VisitDetails.class);
     }
 
+    public Mono<VisitResponseDTO> getVisitByVisitId(String visitId) {
+        return webClient
+                .get()
+                .uri("/visit/{visitId}", visitId)
+                .retrieve()
+                .bodyToMono(VisitResponseDTO.class);
+    }
     public Mono<VisitDetails> updateVisitForPet(VisitDetails visit) {
         return webClient
                 .put()
@@ -117,12 +138,5 @@ public class VisitsServiceClient {
 
 
 
-    public Mono<VisitResponseDTO> getVisitByVisitId(String visitId) {
-        return webClient
-                .get()
-                .uri("/visit/{visitId}", visitId)
-                .retrieve()
-                .bodyToMono(VisitResponseDTO.class);
-    }
 }
 
