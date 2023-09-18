@@ -1,5 +1,7 @@
 package com.petclinic.bffapigateway.utils.Security.Filters;
 
+import com.petclinic.bffapigateway.exceptions.InvalidTokenException;
+import com.petclinic.bffapigateway.exceptions.NoTokenFoundException;
 import com.petclinic.bffapigateway.utils.Security.Variables.SecurityConst;
 
 import io.jsonwebtoken.Claims;
@@ -78,10 +80,6 @@ public class JwtTokenUtil implements Serializable {
     }
 
 
-    public Boolean isTokenExpired(String token) {
-        final Date expiration = getExpirationDateFromToken(token);
-        return expiration.before(new Date());
-    }
 
 
 
@@ -95,17 +93,14 @@ public class JwtTokenUtil implements Serializable {
             log.debug("No cookies found");
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
 
-            throw new RuntimeException("No cookies found");
+            throw new NoTokenFoundException("No cookies found");
         }
 
         String[] allCookies = cookies.get(0).split(",");
 
         String token;
-        try {
-            token = Arrays.stream(allCookies).filter(cookie -> cookie.contains("Bearer")).findFirst().orElseThrow(() -> new Exception("Token is invalid"));
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        token = Arrays.stream(allCookies).filter(cookie -> cookie.contains("Bearer")).findFirst().orElseThrow(() -> new InvalidTokenException("Token is invalid"));
+
 
         token = token.replace("Bearer=", "");
         token = token.replace(";", "");

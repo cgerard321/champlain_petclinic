@@ -5,7 +5,7 @@ import com.petclinic.bffapigateway.dtos.Auth.Role;
 import com.petclinic.bffapigateway.dtos.Auth.UserPasswordLessDTO;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Rethrower;
-import com.petclinic.bffapigateway.utils.Security.Exceptions.InvalidTokenException;
+import com.petclinic.bffapigateway.exceptions.InvalidTokenException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,8 +16,6 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.security.GeneralSecurityException;
 
 import static reactor.core.publisher.Mono.error;
 import static reactor.core.publisher.Mono.just;

@@ -33,18 +33,12 @@ import java.util.concurrent.ExecutionException;
 @Order(1)
 public class JwtTokenFilter implements WebFilter {
 
-
     private final RequestMappingHandlerMapping requestMappingHandlerMapping;
 
     private final AuthServiceClient authValidationService;
 
     private final JwtTokenUtil jwtTokenUtil;
 
-    List<String> whitelist = List.of(new String[]{
-            "/api/gateway/users/login",
-            "/api/gateway/users/register",
-            "/api/gateway/users/logout"
-    });
 
     @SuppressWarnings("NullableProblems")
     @Override
@@ -71,29 +65,16 @@ public class JwtTokenFilter implements WebFilter {
         exchange.getResponse().getHeaders().add("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS");
 
         if (handler.getMethod().getAnnotation(SecuredEndpoint.class) != null) {
-
-
-
-
-
-        if(Arrays.asList(handler.getMethod().getAnnotation(SecuredEndpoint.class).allowedRoles()).contains(Roles.ANONYMOUS))
-        {
-            log.debug("Anonymous request skipping filters !");
-            exchange.getAttributes().put("whitelisted", true);
-
-            return chain.filter(exchange);
-
-        }
-
-
-
-            if(whitelist.contains(exchange.getRequest().getPath().toString()))
+            if(Arrays.asList(handler.getMethod().getAnnotation(SecuredEndpoint.class).allowedRoles()).contains(Roles.ANONYMOUS))
             {
-                    log.debug("Entered Login/Register");
-                    exchange.getAttributes().put("whitelisted", true);
-                    return chain.filter(exchange);
+                log.debug("Anonymous request skipping filters !");
+                exchange.getAttributes().put("whitelisted", true);
+
+                return chain.filter(exchange);
+
             }
         }
+
 
         String token = jwtTokenUtil.getTokenFromRequest(exchange);
         log.debug("Token: {}", token);
@@ -103,6 +84,7 @@ public class JwtTokenFilter implements WebFilter {
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap("No token provided".getBytes())));
         }
+
 
 
         Mono<ResponseEntity<Flux<String>>> validationResponse = authValidationService.validateToken(token);
@@ -122,5 +104,7 @@ public class JwtTokenFilter implements WebFilter {
 
         }
         });
+
+
     }
 }

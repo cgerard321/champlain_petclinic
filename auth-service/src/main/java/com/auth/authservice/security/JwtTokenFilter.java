@@ -57,6 +57,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
         if (cookies == null) {
             log.info("No cookies found");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             chain.doFilter(request, response);
             return;
         }
@@ -71,6 +72,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
         if (sessionCookie == null) {
             log.info("No token found");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             chain.doFilter(request, response);
             return;
         }
@@ -82,6 +84,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
 
             if (!jwtTokenUtil.validateToken(token)) {
                 log.info("Token is invalid");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 resolver.resolveException(request, response, null, new InvalidBearerTokenException("Token is expired"));
                 return;
             }

@@ -58,7 +58,7 @@ public class BFFApiGatewayController {
 
     private final InventoryServiceClient inventoryServiceClient;
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
+    @SecuredEndpoint(allowedRoles = {Roles.VET})
     @GetMapping(value = "bills/{billId}")
     public Mono<BillDetails> getBillingInfo(final @PathVariable String billId)
     {
@@ -73,6 +73,7 @@ public class BFFApiGatewayController {
         return billServiceClient.createBill(model);
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "bills")
     public Flux<BillDetails> getAllBilling() {
         return billServiceClient.getAllBilling();

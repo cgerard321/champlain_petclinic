@@ -1,7 +1,10 @@
 package com.petclinic.bffapigateway.utils.Security.Variables;
 
 /**
- * Enum for roles
+ * Enum for roles in the application
+ *
+ * @author Dylan Brassard
+ * @since 2023-09-17
  */
 public enum Roles {
     ADMIN ( "ADMIN"),

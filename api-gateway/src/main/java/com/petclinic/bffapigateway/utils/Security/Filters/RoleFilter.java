@@ -20,7 +20,6 @@ import java.util.concurrent.ExecutionException;
 
 @Slf4j
 @Component
-
 @Order(2)
 public class RoleFilter implements WebFilter {
 
@@ -28,42 +27,12 @@ public class RoleFilter implements WebFilter {
 
     private final RequestMappingHandlerMapping requestMappingHandlerMapping;
 
-    ArrayList<String> adminPaths = new ArrayList<>();
-
-
-    ArrayList<String> vetPaths = new ArrayList<>();
-
-
-    ArrayList<String> ownerPaths = new ArrayList<>();
-
-    ArrayList<String> inventoryManagerPaths = new ArrayList<>();
-
-    ArrayList<HttpMethod> ownersHttpMethods = new ArrayList<>();
 
 
     public RoleFilter(JwtTokenUtil jwtTokenUtil, RequestMappingHandlerMapping requestMappingHandlerMapping) {
         this.jwtTokenUtil = jwtTokenUtil;
         this.requestMappingHandlerMapping = requestMappingHandlerMapping;
 
-        ownersHttpMethods.add(HttpMethod.GET);
-        ownersHttpMethods.add(HttpMethod.DELETE);
-
-        vetPaths.add("/api/gateway/vets/**");
-        vetPaths.add("/api/gateway/pets/**");
-        vetPaths.add("/api/gateway/visits/**");
-        vetPaths.add("/api/gateway/bills/**");
-
-        ownerPaths.add("/api/gateway/owners/**");
-        ownerPaths.add("/api/gateway/pets/**");
-        ownerPaths.add("/api/gateway/visits/**");
-        ownerPaths.add("/api/gateway/bills/**");
-
-        inventoryManagerPaths.add("/api/gateway/inventory/**");
-
-        adminPaths.addAll(vetPaths);
-        adminPaths.addAll(ownerPaths);
-        adminPaths.addAll(inventoryManagerPaths);
-        adminPaths.add("/api/gateway/users/**");
     }
 
 
@@ -72,6 +41,7 @@ public class RoleFilter implements WebFilter {
     @SuppressWarnings("NullableProblems")
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+
         HandlerMethod handler = null;
         try {
             handler = (HandlerMethod) requestMappingHandlerMapping.getHandler(exchange).toFuture().get();
@@ -85,9 +55,11 @@ public class RoleFilter implements WebFilter {
             }
         }
 
-        if (handler.getMethod().getAnnotation(SecuredEndpoint.class) == null) {
+        if (handler.getMethod().getAnnotation(SecuredEndpoint.class) == null
+                || handler.getMethod().getAnnotation(SecuredEndpoint.class).allowedRoles()[0] == Roles.ALL) {
             return chain.filter(exchange);
         }
+
 
 
 
@@ -109,7 +81,14 @@ public class RoleFilter implements WebFilter {
         }
 
         for (String role : roles) {
-            if (rolesAllowed.contains(Roles.valueOf(role.replace("[", "").replace("]", "")))) {
+            role = role.replace("[", "")
+                    .replace("]", "")
+                    .replace(",","")
+                    .trim();
+            log.debug("Role: {}", role);
+
+            if (rolesAllowed.contains(Roles.valueOf(role.toUpperCase()))) {
+                log.debug("Role {} is allowed", role);
                 return chain.filter(exchange);
             }
         }

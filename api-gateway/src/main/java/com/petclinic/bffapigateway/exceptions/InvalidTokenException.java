@@ -1,4 +1,4 @@
-package com.petclinic.bffapigateway.utils.Security.Exceptions;
+package com.petclinic.bffapigateway.exceptions;
 
 import lombok.Data;
 

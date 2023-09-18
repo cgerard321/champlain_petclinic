@@ -32,7 +32,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @WebFluxTest(value = VisitsServiceClient.class, excludeFilters = @ComponentScan.Filter(type = FilterType.CUSTOM,
         classes = {JwtTokenFilter.class, RoleFilter.class}), useDefaultFilters = false)
 @AutoConfigureWebTestClient
-@AutoConfigureMockMvc(addFilters = false)
 class VisitsServiceClientIntegrationTest {
     @MockBean
     private VisitsServiceClient visitsServiceClient;
