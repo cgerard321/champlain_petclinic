@@ -1,7 +1,9 @@
-package com.petclinic.customersservice.data;
+package com.petclinic.customersservice.presentationlayer;
 
-import lombok.*;
-import org.springframework.data.annotation.Id;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
@@ -9,11 +11,8 @@ import java.util.Date;
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
-public class Pet {
+public class PetResponseDTO {
 
-    @Id
-    private String id;
-    private String petId; // public id
     private String ownerId;
     private String name;
     private Date birthDate;
