@@ -1,12 +1,12 @@
 'use strict';
 
-angular.module('bundleForm', ['ui.router'])
+angular.module('productForm', ['ui.router'])
     .config(['$stateProvider', function ($stateProvider) {
         $stateProvider
-            .state('bundleNew', {
+            .state('productNew', {
                 parent: 'app',
-                url: '/bundle/new',
-                template: '<bundle-form></bundle-form>'
+                url: '/product/new',
+                template: '<product-form></product-form>'
             })
 
     }]);

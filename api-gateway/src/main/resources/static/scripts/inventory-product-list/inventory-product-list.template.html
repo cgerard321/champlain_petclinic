@@ -12,6 +12,10 @@
         <td>Delete</td>
     </tr>
 
+    <a ui-sref="productNew">
+        <button class="add-bundle-button btn btn-success">Add Product</button>
+    </a>
+
     </thead>
     <tr ng-repeat="product in $ctrl.inventoryProductList | filter:$ctrl.query track by product.productId">
         <td><span>{{product.productName}}</span></td>
