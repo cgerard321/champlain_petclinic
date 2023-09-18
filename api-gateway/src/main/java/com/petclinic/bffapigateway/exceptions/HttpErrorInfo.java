@@ -21,4 +21,13 @@ public class HttpErrorInfo {
     private final int statusCode;
     private String timestamp = ZonedDateTime.now( ZoneOffset.UTC ).format( DateTimeFormatter.ISO_INSTANT );
     private final String message;
+
+
+    public String toJson() {
+        return "{" +
+                "\"statusCode\":" + "\""+statusCode + "\"," +
+                "\"timestamp\":" +"\""+ timestamp + "\"," +
+                "\"message\":" + "\"" +message + '\"' +
+                '}';
+    }
 }

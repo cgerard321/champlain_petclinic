@@ -1,11 +1,12 @@
 package com.petclinic.bffapigateway.config;
 
-import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
-import com.petclinic.bffapigateway.exceptions.GenericHttpException;
-import com.petclinic.bffapigateway.exceptions.HttpErrorInfo;
+import com.petclinic.bffapigateway.exceptions.*;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.security.GeneralSecurityException;
 
 /**
  * Created by IntelliJ IDEA.
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
  * Date: 2021-10-15
  * Ticket: feat(APIG-CPC-354)
  */
+
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -32,4 +34,37 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(ex.getHttpStatus())
                 .body(new HttpErrorInfo(ex.getHttpStatus().value(), ex.getMessage()));
     }
+
+
+    //Exception error handler for security
+    @ExceptionHandler(value = GeneralSecurityException.class)
+    public ResponseEntity<HttpErrorInfo> generalSecurityException(GeneralSecurityException ex) {
+
+        return ResponseEntity.status(401)
+                .body(new HttpErrorInfo(401, ex.getMessage()));
+    }
+
+
+    @ExceptionHandler(value = InvalidTokenException.class)
+    public ResponseEntity<HttpErrorInfo> invalidTokenException(InvalidTokenException ex) {
+
+        return ResponseEntity.status(498)
+                .body(new HttpErrorInfo(498, ex.getMessage()));
+    }
+
+
+    @ExceptionHandler(value = RuntimeException.class)
+    public ResponseEntity<HttpErrorInfo> runtimeException(RuntimeException ex) {
+
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(new HttpErrorInfo(HttpStatus.UNPROCESSABLE_ENTITY.value(), ex.getMessage()));
+    }
+
+    @ExceptionHandler(value = NoTokenFoundException.class)
+    public ResponseEntity<HttpErrorInfo> noTokenFoundException(NoTokenFoundException ex) {
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new HttpErrorInfo(HttpStatus.UNAUTHORIZED.value(), ex.getMessage()));
+    }
+
 }

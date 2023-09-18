@@ -54,3 +54,4 @@ app:
   inventory-service:
     host: inventory
     port: 8080
+
