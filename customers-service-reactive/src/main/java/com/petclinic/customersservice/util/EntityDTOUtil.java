@@ -10,7 +10,7 @@ import org.springframework.beans.BeanUtils;
 public class EntityDTOUtil {
 
     @Generated
-    public EntityDTOUtil(){};
+    public EntityDTOUtil(){}
 
     public static OwnerResponseDTO toOwnerResponseDTO(Owner owner) {
         OwnerResponseDTO ownerResponseDTO = new OwnerResponseDTO();
