@@ -78,7 +78,8 @@ public class JwtTokenFilter implements WebFilter {
            }
        }
 
-        if (Objects.equals(Objects.requireNonNull(exchange.getRequest().getHeaders().get(HttpHeaders.ACCEPT)).get(0), "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8")){
+        if (Objects.equals(Objects.requireNonNull(exchange.getRequest().getHeaders().get(HttpHeaders.ACCEPT)).get(0), "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8")
+                && exchange.getRequest().getPath().toString().equals("/")) {
             log.debug("Request is a browser request, skipping filters !");
             exchange.getAttributes().put("whitelisted", true);
 

@@ -1,6 +1,7 @@
 package com.petclinic.bffapigateway.utils.Security.Filters;
 
 
+import com.petclinic.bffapigateway.exceptions.InvalidTokenException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import lombok.extern.slf4j.Slf4j;
@@ -77,7 +78,7 @@ public class RoleFilter implements WebFilter {
         log.debug("Roles: {}", roles);
 
         if (roles == null) {
-            return Mono.error(new Exception("Unauthorized"));
+            return Mono.error(new InvalidTokenException("Unauthorized, invalid token"));
         }
 
         for (String role : roles) {
@@ -93,6 +94,6 @@ public class RoleFilter implements WebFilter {
             }
         }
 
-        return Mono.error(new Exception("Unauthorized"));
+        return Mono.error(new InvalidTokenException("Unauthorized, invalid token"));
     }
 }

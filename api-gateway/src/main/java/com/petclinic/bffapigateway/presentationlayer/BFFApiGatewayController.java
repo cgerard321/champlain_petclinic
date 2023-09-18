@@ -58,7 +58,7 @@ public class BFFApiGatewayController {
 
     private final InventoryServiceClient inventoryServiceClient;
 
-    @SecuredEndpoint(allowedRoles = {Roles.VET})
+    @SecuredEndpoint(allowedRoles = {Roles.OWNER})
     @GetMapping(value = "bills/{billId}")
     public Mono<BillDetails> getBillingInfo(final @PathVariable String billId)
     {
