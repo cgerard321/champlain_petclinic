@@ -36,6 +36,8 @@ import java.util.concurrent.ExecutionException;
 @Order(1)
 public class JwtTokenFilter implements WebFilter {
 
+    AntPathMatcher antPathMatcher = new AntPathMatcher();
+
     private final RequestMappingHandlerMapping requestMappingHandlerMapping;
 
     private final AuthServiceClient authValidationService;
@@ -68,7 +70,6 @@ public class JwtTokenFilter implements WebFilter {
         String path = exchange.getRequest().getURI().getPath();
 
        for (String whitelisted : AUTH_WHITELIST) {
-           AntPathMatcher antPathMatcher = new AntPathMatcher();
 
            if (antPathMatcher.match(whitelisted, path)) {
                log.debug("Request is whitelisted, skipping filters !");
@@ -79,7 +80,7 @@ public class JwtTokenFilter implements WebFilter {
        }
 
         if (Objects.equals(Objects.requireNonNull(exchange.getRequest().getHeaders().get(HttpHeaders.ACCEPT)).get(0), "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8")
-                && exchange.getRequest().getPath().toString().equals("/")) {
+                && exchange.getRequest().getPath().toString().equals("/") && exchange.getRequest().getMethod().toString().equals("GET")) {
             log.debug("Request is a browser request, skipping filters !");
             exchange.getAttributes().put("whitelisted", true);
 
