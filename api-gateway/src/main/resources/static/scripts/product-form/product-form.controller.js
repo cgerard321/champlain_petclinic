@@ -1,30 +1,28 @@
 'use strict';
 
 angular.module('productForm')
-    .controller('ProductFormController', ["$http", '$state', '$stateParams', function ($http, $state, $stateParams) {
+    .controller('ProductFormController', ["$http", '$state', '$stateParams', function ($http, $state , $scope,  $stateParams) {
         var self = this;
-        var inventoryId = $stateParams.inventoryId;
-        inventoryId = 1 //temporarily hardcoding inventoryId to 1
-
+      //  var inventoryId = $stateParams.inventoryId;
+        var inventoryId = 1 //temporarily hardcoding inventoryId to
+        var product = {}
         // post request to create a new product
         self.submitProductForm = function () {
-            console.log(self.product.productName)
-            console.log(self.product.productDescription)
-            console.log(self.product.productPrice)
-            console.log(self.product.productQuantity)
-            $http.post('/api/gateway/inventory/' + inventoryId + '/products', {
+            var data  = {
                 productName: self.product.productName,
                 productDescription: self.product.productDescription,
                 productPrice: self.product.productPrice,
                 productQuantity: self.product.productQuantity
+            }
 
-                }
+            $http.post('/api/gateway/inventory/' + inventoryId + '/products', data
                 // productName: $scope.product.productName,
                 // productDescription: $scope.product.productDescription,
                 // productPrice: $scope.product.productPrice,
                 // productQuantity: $scope.product.productQuantity
             )
                 .then(function (response) {
+                    console.log(response);
                     $state.go('productList');
                 }, function (response) {
                     var error = response.data;

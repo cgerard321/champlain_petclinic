@@ -1,26 +1,28 @@
-<div class="bColor text-center"><h2 class="titleProduct form" id="title">New Product</h2></div>
+<div class="bColor text-center">
+    <h2 class="titleProduct form" id="title">New Product</h2>
+</div>
 <div class="p-3 formColor m-0">
     <form id="productForm" class="form-horizontal" enctype="multipart/form-data" ng-submit="$ctrl.submitProductForm()">
         <div class="row">
             <div class="col-sm-6 form-group">
                 <label class="control-label" for="item">Product</label>
-                <input class="form-control" id="item" ng-model="$ctrl.product.name" name="product" type="text" placeholder="Please enter product name."/>
+                <input class="form-control" id="item" ng-model="$ctrl.product.productName" name="productName" type="text" placeholder="Please enter product name." />
             </div>
         </div>
-            <div class="col-sm-6 form-group">
-                <label class="control-label" for="description">description</label>
-                <input class="form-control col-sm-4" id="description" ng-model="$ctrl.product.description" name="description" type="text" placeholder="Please enter product description."/>
-            </div>
+        <div class="col-sm-6 form-group">
+            <label class="control-label" for="description">Description</label>
+            <input class="form-control col-sm-4" id="description" ng-model="$ctrl.product.productDescription" name="productDescription" type="text" placeholder="Please enter product description." />
+        </div>
         <div class="row">
             <div class="form-group col-sm-12">
-                <label class="control-label" for="price">price</label>
-                <input class="form-control" id="price" ng-model="$ctrl.product.price" name="price" type="number" placeholder="Please enter a price"/>
+                <label class="control-label" for="price">Price</label>
+                <input class="form-control" id="price" ng-model="$ctrl.product.productPrice" name="productPrice" type="number" placeholder="Please enter a price" />
             </div>
         </div>
         <div class="form-group p-3">
             <div class="bundle marg col-sm-12">
-                <label class="control-label" for="quantity">quantity</label>
-                <input class="form-control" id="quantity" ng-model="$ctrl.product.quantity" name="quantity" type="number" required title="Please enter quantities."/>
+                <label class="control-label" for="quantity">Quantity</label>
+                <input class="form-control" id="quantity" ng-model="$ctrl.product.productQuantity" name="productQuantity" type="number" required title="Please enter quantities." />
             </div>
         </div>
         <div class="form-group formColor">
