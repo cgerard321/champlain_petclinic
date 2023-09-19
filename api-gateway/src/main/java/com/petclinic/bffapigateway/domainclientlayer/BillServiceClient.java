@@ -1,6 +1,8 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.Bills.BillDetails;
+import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
+import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -27,37 +29,37 @@ public class BillServiceClient {
 
     }
 
-    public Mono<BillDetails> getBilling(final String billId) {
+    public Mono<BillResponseDTO> getBilling(final String billId) {
         return webClientBuilder.build().get()
                 .uri(billServiceUrl + "/{billId}", billId)
                 .retrieve()
-                .bodyToMono(BillDetails.class);
+                .bodyToMono(BillResponseDTO.class);
     }
-    public Flux<BillDetails> getBillsByOwnerId(final int customerId) {
+    public Flux<BillResponseDTO> getBillsByOwnerId(final int customerId) {
         return webClientBuilder.build().get()
                 .uri(billServiceUrl + "/customer/{customerId}", customerId)
                 .retrieve()
-                .bodyToFlux(BillDetails.class);
+                .bodyToFlux(BillResponseDTO.class);
     }
-    public Flux<BillDetails> getBillsByVetId(final String vetId) {
+    public Flux<BillResponseDTO> getBillsByVetId(final String vetId) {
         return webClientBuilder.build().get()
                 .uri(billServiceUrl + "/vet/{vetId}", vetId)
                 .retrieve()
-                .bodyToFlux(BillDetails.class);
+                .bodyToFlux(BillResponseDTO.class);
     }
-    public Flux<BillDetails> getAllBilling() {
+    public Flux<BillResponseDTO> getAllBilling() {
         return webClientBuilder.build().get()
                 .uri(billServiceUrl)
                 .retrieve()
-                .bodyToFlux(BillDetails.class);
+                .bodyToFlux(BillResponseDTO.class);
     }
 
-    public Mono<BillDetails> createBill(final BillDetails model){
+    public Mono<BillResponseDTO> createBill(final BillRequestDTO model){
         return webClientBuilder.build().post()
                 .uri(billServiceUrl)
-                .body(Mono.just(model),BillDetails.class)
+                .body(Mono.just(model), BillRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
-                .retrieve().bodyToMono(BillDetails.class);
+                .retrieve().bodyToMono(BillResponseDTO.class);
     }
 
     public Mono<Void> deleteBill(final String billId) {
