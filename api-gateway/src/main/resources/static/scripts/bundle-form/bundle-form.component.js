@@ -2,6 +2,6 @@
 
 angular.module('bundleForm')
     .component('bundleForm', {
-        templateUrl: 'scripts/bundle-form/bundle-form.template.html',
+        templateUrl: 'scripts/bundle-form/product-form.template.html',
         controller: 'BundleFormController'
     });
