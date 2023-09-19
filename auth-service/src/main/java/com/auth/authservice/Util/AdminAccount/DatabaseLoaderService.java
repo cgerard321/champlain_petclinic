@@ -26,9 +26,11 @@ public class DatabaseLoaderService implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         roleRepo.save(Role.builder().name("ADMIN").build());
+        roleRepo.save(Role.builder().name("VET").build());
 
         Set<Role> roles = new HashSet<>();
         roles.add(roleRepo.findById(1L).get());
+        roles.add(roleRepo.findById(2L).get());
         User admin = User.builder()
                 .username("Admin")
                 .roles(roles)
