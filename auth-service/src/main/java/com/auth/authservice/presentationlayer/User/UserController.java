@@ -125,7 +125,7 @@ public class UserController {
         log.info("In controller");
 
         try {
-            Authentication authenticate = authenticationManager
+            authenticationManager
                     .authenticate(
                             new UsernamePasswordAuthenticationToken(
                                     login.getEmail(), login.getPassword()
@@ -133,7 +133,6 @@ public class UserController {
                     );
             log.info("User authenticated");
 
-            UserPrincipalImpl user = (UserPrincipalImpl) authenticate.getPrincipal();
             log.info("User principal retrieved");
 
             User loggedInUser = userService.getUserByEmail(login.getEmail());
@@ -149,7 +148,7 @@ public class UserController {
 
             log.info("In controller before set header");
             response.setHeader(HttpHeaders.SET_COOKIE, token.toString());
-            log.info("Token : {}", token.toString());
+            log.info("Token : {}", token);
             log.info("Token value : {}", token.getValue());
 
             log.info("In controller after set header");

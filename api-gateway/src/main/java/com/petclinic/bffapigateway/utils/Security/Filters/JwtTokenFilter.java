@@ -5,10 +5,7 @@ import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
 
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -52,7 +49,6 @@ public class JwtTokenFilter implements WebFilter {
         this.requestMappingHandlerMapping = requestMappingHandlerMapping;
         this.authValidationService = authValidationService;
         this.jwtTokenUtil = jwtTokenUtil;
-
         //All white listed endpoints
         AUTH_WHITELIST.put("/v2/api-docs","/v2/api-docs");
         AUTH_WHITELIST.put("/swagger-resources","/swagger-resources");
@@ -67,7 +63,6 @@ public class JwtTokenFilter implements WebFilter {
         AUTH_WHITELIST.put("/css/**","/css/**");
         AUTH_WHITELIST.put("/images/**","/images/**");
         AUTH_WHITELIST.put("/images/*","/images/*");
-
     }
 
 
