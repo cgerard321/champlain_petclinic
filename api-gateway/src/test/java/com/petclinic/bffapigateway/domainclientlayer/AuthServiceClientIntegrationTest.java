@@ -10,9 +10,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.io.IOException;
 
@@ -195,7 +197,52 @@ public class AuthServiceClientIntegrationTest {
         assertEquals(role.getName(), aRole.getName());
         assertEquals(role.getParent(), aRole.getParent());
     }
-  
+
+    @Test
+    @DisplayName("Should validate a token")
+    void ShouldValidateToken_ShouldReturnOk(){
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(200);
+
+        server.enqueue(mockResponse);
+
+        final Mono<Void> validatedTokenResponse = authServiceClient.validateToken("token").then();
+
+        // check status response in step verifier
+        StepVerifier.create(validatedTokenResponse)
+                .expectNextCount(0)
+                .verifyComplete();
+
+
+
+
+    }
+
+
+    @Test
+    @DisplayName("Should try to validate a token and fail")
+    void ShouldValidateToken_ShouldReturnUnauthorized(){
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(401);
+
+        server.enqueue(mockResponse);
+
+        final Mono<Void> validatedTokenResponse = authServiceClient.validateToken("inavlidToken").then();
+
+        // check status response in step verifier
+        StepVerifier.create(validatedTokenResponse)
+                .expectNextCount(0)
+                .verifyError();
+
+
+
+
+
+    }
     @Test
     @DisplayName("Should add a role")
     void shouldAddRole() throws JsonProcessingException {

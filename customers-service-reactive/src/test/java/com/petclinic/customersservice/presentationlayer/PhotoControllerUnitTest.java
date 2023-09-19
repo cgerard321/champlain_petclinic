@@ -21,7 +21,7 @@ import static org.mockito.Mockito.when;
 @WebFluxTest(controllers = PhotoController.class)
 class PhotoControllerUnitTest {
 
-    private Photo photo =buildPhoto();
+    private final Photo photo =buildPhoto();
 
     private final String PHOTO_ID = photo.getId();
 
