@@ -4,13 +4,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Auth.Register;
 import com.petclinic.bffapigateway.dtos.Auth.Role;
+import com.petclinic.bffapigateway.utils.Security.Variables.SecurityConst;
+import lombok.RequiredArgsConstructor;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -27,7 +29,10 @@ import static org.junit.jupiter.api.Assertions.*;
  * Date: 2021-10-15
  * Ticket: feat(APIG-CPC-354)
  */
+@RequiredArgsConstructor
 public class AuthServiceClientIntegrationTest {
+
+    private final SecurityConst securityConst;
 
     private AuthServiceClient authServiceClient;
     private MockWebServer server;
@@ -46,7 +51,7 @@ public class AuthServiceClientIntegrationTest {
                 WebClient.builder(),
                 server.getHostName(),
                 String.valueOf(server.getPort()),
-                new RestTemplate());
+                new RestTemplate(), securityConst);
         objectMapper = new ObjectMapper();
     }
 

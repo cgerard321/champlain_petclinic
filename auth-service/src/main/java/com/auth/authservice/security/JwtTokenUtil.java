@@ -2,7 +2,6 @@ package com.auth.authservice.security;
 
 import com.auth.authservice.datalayer.roles.Role;
 import com.auth.authservice.datalayer.user.User;
-import com.auth.authservice.datalayer.user.UserRepo;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -21,10 +20,15 @@ public class JwtTokenUtil implements Serializable {
 
 
 
+    private final SecurityConst securityConst;
+
 
     private static final String CLAIM_KEY_USERNAME = "sub";
     private static final String CLAIM_KEY_CREATED = "created";
     private static final String CLAIM_KEY_ROLES = "roles";
+
+
+
 
     public String getUsernameFromToken(String token) {
         String username;
@@ -55,7 +59,7 @@ public class JwtTokenUtil implements Serializable {
         Claims claims;
         try {
             claims = Jwts.parser()
-                    .setSigningKey(SecurityConst.SECRET)
+                    .setSigningKey(securityConst.getSECRET())
                     .parseClaimsJws(token)
                     .getBody();
         } catch (Exception e) {
@@ -86,12 +90,12 @@ public class JwtTokenUtil implements Serializable {
     }
     
     String generateToken(Map<String, Object> claims) {
-        Date expirationDate = Date.from(ZonedDateTime.now().plusMinutes(SecurityConst.EXPIRATION_TIME_MINUTES).toInstant());
+        Date expirationDate = Date.from(ZonedDateTime.now().plusMinutes(securityConst.getEXPIRATION_TIME_MINUTES()).toInstant());
         log.info("Expiration date is {}", expirationDate);
         return Jwts.builder()
                 .setClaims(claims)
                 .setExpiration(expirationDate)
-                .signWith(SignatureAlgorithm.HS512, SecurityConst.SECRET)
+                .signWith(SignatureAlgorithm.HS512, securityConst.getSECRET())
                 .compact();
     }
 

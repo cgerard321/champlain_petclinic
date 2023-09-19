@@ -55,6 +55,9 @@ import static org.springframework.http.ResponseEntity.ok;
 @RequiredArgsConstructor
 @Validated
 public class UserController {
+
+    private final SecurityConst securityConst;
+
     private final AuthenticationManager authenticationManager;
 
     private final UserService userService;
@@ -136,7 +139,7 @@ public class UserController {
             User loggedInUser = userService.getUserByEmail(login.getEmail());
             log.info("User retrieved from db");
 
-            ResponseCookie token = ResponseCookie.from(SecurityConst.TOKEN_PREFIX, jwtService.generateToken(loggedInUser))
+            ResponseCookie token = ResponseCookie.from(securityConst.getTOKEN_PREFIX(), jwtService.generateToken(loggedInUser))
                     .httpOnly(true)
                     .secure(true)
                     .path("/api/gateway")

@@ -30,6 +30,8 @@ public class AuthServiceClient {
 
     private final RestTemplate restTemplate;
 
+    private final SecurityConst securityConst;
+
     @Autowired
     private Rethrower rethrower;
 
@@ -37,9 +39,10 @@ public class AuthServiceClient {
             WebClient.Builder webClientBuilder,
             @Value("${app.auth-service.host}") String authServiceHost,
             @Value("${app.auth-service.port}") String authServicePort,
-            RestTemplate restTemplate) {
+            RestTemplate restTemplate, SecurityConst securityConst) {
         this.webClientBuilder = webClientBuilder;
         this.restTemplate = restTemplate;
+        this.securityConst = securityConst;
         authServiceUrl = "http://" + authServiceHost + ":" + authServicePort;
     }
 
@@ -191,7 +194,7 @@ public class AuthServiceClient {
                 .post()
                 .uri(authServiceUrl + "/users/validate-token")
                 .bodyValue(jwtToken)
-                .cookie(SecurityConst.TOKEN_PREFIX, jwtToken)
+                .cookie(securityConst.getTOKEN_PREFIX(), jwtToken)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> Mono.error(new InvalidTokenException("Invalid token")))
                 .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> Mono.error(new InvalidInputException("Invalid token")))

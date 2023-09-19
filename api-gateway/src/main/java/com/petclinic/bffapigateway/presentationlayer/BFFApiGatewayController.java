@@ -174,7 +174,8 @@ public class BFFApiGatewayController {
         return visitsServiceClient.getVisitByVisitId(visitId);
     }
 
-    /*private Function<Visits, OwnerResponseDTO> addVisitsToOwner(OwnerResponseDTO owner) {
+    /*
+    private Function<Visits, OwnerResponseDTO> addVisitsToOwner(OwnerResponseDTO owner) {
         return visits -> {
             owner.getPets()
                     .forEach(pet -> pet.getVisits()
@@ -184,7 +185,8 @@ public class BFFApiGatewayController {
                     );
             return owner;
         };
-    }*/
+    }
+    */
 
     @PostMapping(value = "visit/owners/{ownerId}/pets/{petId}/visits", consumes = "application/json", produces = "application/json")
     Mono<VisitDetails> addVisit(@RequestBody VisitDetails visit, @PathVariable String ownerId, @PathVariable String petId) {
@@ -243,14 +245,12 @@ public class BFFApiGatewayController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-
     @GetMapping("/vets/vetBillId/{vetId}")
     public Mono<ResponseEntity<VetDTO>> getVetByVetBillId(@PathVariable String vetBillId) {
         return vetsServiceClient.getVetByVetBillId(VetsEntityDtoUtil.verifyId(vetBillId))
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-
     @GetMapping("/vets/active")
     public Flux<VetDTO> getActiveVets() {
         return vetsServiceClient.getActiveVets();
@@ -320,9 +320,6 @@ public class BFFApiGatewayController {
     public Mono<Role> addRole(@RequestHeader(AUTHORIZATION) String auth, @RequestBody final Role model) {
         return authServiceClient.addRole(auth, model);
     }
-
-
-
     /**
      * Owners Methods
      * **/

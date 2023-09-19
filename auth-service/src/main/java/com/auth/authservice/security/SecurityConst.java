@@ -1,14 +1,24 @@
 package com.auth.authservice.security;
 
+import lombok.Getter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
+@Getter
 public class SecurityConst {
 
 
-    public static long EXPIRATION_TIME_MINUTES = 60;     // 24 hours
-    public static String SECRET = "mkcyetrmjcqLjOkwM08M676tl8LPnkgKHD2HlIpsYcSI8zGIiobE7yZ4N5JElvYMlTE8qqjTJ09JcqAsKdNxVA";     // jwt secret
-    public static String TOKEN_PREFIX = "Bearer";
 
-    // Token prefix
+
+    private long EXPIRATION_TIME_MINUTES;     // 1 hour
+    private String SECRET;     // jwt secret
+    private String TOKEN_PREFIX;     // Bearer
+
+
+    public SecurityConst(@Value("${EXPIRATION_TIME_MINUTES}") long EXPIRATION_TIME_MINUTES, @Value("${SECRET_KEY}") String SECRET, @Value("${TOKEN_PREFIX}") String TOKEN_PREFIX) {
+        this.EXPIRATION_TIME_MINUTES = EXPIRATION_TIME_MINUTES;
+        this.SECRET = SECRET;
+        this.TOKEN_PREFIX = TOKEN_PREFIX;
+    }
 }

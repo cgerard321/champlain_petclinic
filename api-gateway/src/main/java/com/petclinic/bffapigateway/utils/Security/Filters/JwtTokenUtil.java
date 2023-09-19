@@ -22,20 +22,8 @@ public class JwtTokenUtil implements Serializable {
 
 
 
+    private final SecurityConst securityConst;
     private static final String CLAIM_KEY_ROLES = "roles";
-
-    public String getUsernameFromToken(String token) {
-        String username;
-        try {
-            final Claims claims = getClaimsFromToken(token);
-            username = claims.getSubject();
-
-
-        } catch (Exception e) {
-            username = null;
-        }
-        return username;
-    }
 
 
     public List<String> getRolesFromToken(String token) {
@@ -59,7 +47,7 @@ public class JwtTokenUtil implements Serializable {
         Claims claims;
         try {
             claims = Jwts.parser()
-                    .setSigningKey(SecurityConst.SECRET)
+                    .setSigningKey(securityConst.getSECRET())
                     .parseClaimsJws(token)
                     .getBody();
         } catch (Exception e) {
@@ -91,11 +79,11 @@ public class JwtTokenUtil implements Serializable {
 
         String token;
 
-        token = Arrays.stream(allCookies).filter(cookie -> cookie.contains(SecurityConst.TOKEN_PREFIX)).findFirst().orElseThrow(() -> new InvalidTokenException("Token is invalid"));
+        token = Arrays.stream(allCookies).filter(cookie -> cookie.contains(securityConst.getTOKEN_PREFIX())).findFirst().orElseThrow(() -> new InvalidTokenException("Token is invalid"));
 
 
 
-        token = token.replace(SecurityConst.TOKEN_PREFIX+"=", "");
+        token = token.replace(securityConst.getTOKEN_PREFIX()+"=", "");
         token = token.replace(";", "");
         token = token.replace(" ", "");
 

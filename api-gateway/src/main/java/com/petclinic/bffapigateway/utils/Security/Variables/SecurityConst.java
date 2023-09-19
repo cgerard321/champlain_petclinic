@@ -1,15 +1,23 @@
 package com.petclinic.bffapigateway.utils.Security.Variables;
 
+import lombok.Getter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
+@Getter
 public class SecurityConst {
 
 
 
-    public static final long EXPIRATION_TIME_MINUTES = 60;     // 1 hour
-    public static final String SECRET = "mkcyetrmjcqLjOkwM08M676tl8LPnkgKHD2HlIpsYcSI8zGIiobE7yZ4N5JElvYMlTE8qqjTJ09JcqAsKdNxVA";     // jwt secret
-    public static final String TOKEN_PREFIX = "Bearer";
+    private long EXPIRATION_TIME_MINUTES;     // 1 hour
+    private String SECRET;     // jwt secret
+    private String TOKEN_PREFIX;     // Bearer
 
 
+    public SecurityConst(@Value("${EXPIRATION_TIME_MINUTES}") long EXPIRATION_TIME_MINUTES,@Value("${SECRET_KEY}") String SECRET,@Value("${TOKEN_PREFIX}") String TOKEN_PREFIX) {
+        this.EXPIRATION_TIME_MINUTES = EXPIRATION_TIME_MINUTES;
+        this.SECRET = SECRET;
+        this.TOKEN_PREFIX = TOKEN_PREFIX;
+    }
 }

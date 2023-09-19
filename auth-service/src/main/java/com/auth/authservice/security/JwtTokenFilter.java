@@ -30,14 +30,18 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     @Autowired
     @Qualifier("handlerExceptionResolver")
     private HandlerExceptionResolver resolver;
+
+
+    private final SecurityConst securityConst;
     private final JwtTokenUtil jwtTokenUtil;
 
     private final UserRepo userRepo;
     private final ObjectMapper objectMapper;
 
 
-    public JwtTokenFilter(JwtTokenUtil jwtTokenUtil
+    public JwtTokenFilter(SecurityConst securityConst, JwtTokenUtil jwtTokenUtil
             , UserRepo userRepo, ObjectMapper objectMapper) {
+        this.securityConst = securityConst;
         this.jwtTokenUtil = jwtTokenUtil;
         this.userRepo = userRepo;
         this.objectMapper = objectMapper;
@@ -64,7 +68,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         Cookie sessionCookie = null;
         for (Cookie cookie : cookies) {
 
-            if ((SecurityConst.TOKEN_PREFIX).equals(cookie.getName())) {
+            if ((securityConst.getTOKEN_PREFIX()).equals(cookie.getName())) {
                 sessionCookie = cookie;
                 break;
             }
