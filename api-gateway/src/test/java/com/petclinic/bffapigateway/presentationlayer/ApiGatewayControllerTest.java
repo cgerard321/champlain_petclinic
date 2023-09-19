@@ -3,9 +3,9 @@ package com.petclinic.bffapigateway.presentationlayer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.config.GlobalExceptionHandler;
 import com.petclinic.bffapigateway.domainclientlayer.*;
-import com.petclinic.bffapigateway.dtos.*;
 import com.petclinic.bffapigateway.dtos.Auth.Role;
 import com.petclinic.bffapigateway.dtos.Bills.BillDetails;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
 import com.petclinic.bffapigateway.dtos.Vets.*;
@@ -31,6 +31,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static org.assertj.core.util.Lists.list;
@@ -583,6 +585,37 @@ class ApiGatewayControllerTest {
 //        assertEquals(user.getEmail(), "email@email.com");
 //
 //    }
+
+    @Test
+    void getAllOwners_shouldSucceed(){
+        OwnerResponseDTO owner1 = new OwnerResponseDTO();
+        owner1.setOwnerId("ownerId-90");
+        owner1.setFirstName("John");
+        owner1.setLastName("Johnny");
+        owner1.setAddress("111 John St");
+        owner1.setCity("Johnston");
+        owner1.setTelephone("51451545144");
+
+        Flux<OwnerResponseDTO> ownerResponseDTOFlux = Flux.just(owner1);
+
+        when(customersServiceClient.getAllOwners()).thenReturn(ownerResponseDTOFlux);
+
+        client.get()
+                .uri("/api/gateway/owners")
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .acceptCharset(StandardCharsets.UTF_8)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().valueEquals("Content-Type","text/event-stream;charset=UTF-8")
+                .expectBodyList(OwnerResponseDTO.class)
+                .value((list) -> {
+                    assertNotNull(list);
+                    assertEquals(1,list.size());
+                    assertEquals(list.get(0).getOwnerId(),owner1.getOwnerId());
+                    assertEquals(list.get(0).getFirstName(),owner1.getFirstName());
+                });
+
+    }
 
     @Test
     void getOwnerByOwnerId_shouldSucceed(){

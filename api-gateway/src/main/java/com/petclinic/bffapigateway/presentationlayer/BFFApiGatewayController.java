@@ -8,7 +8,7 @@ import com.petclinic.bffapigateway.dtos.Auth.UserPasswordLessDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillDetails;
 import com.petclinic.bffapigateway.dtos.Inventory.ProductRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.ProductResponseDTO;
-import com.petclinic.bffapigateway.dtos.OwnerResponseDTO;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
 import com.petclinic.bffapigateway.dtos.Vets.RatingRequestDTO;
@@ -324,8 +324,8 @@ public class BFFApiGatewayController {
      * **/
 
     @GetMapping(value = "owners")
-    public Flux<OwnerResponseDTO> getOwners() {
-        return customersServiceClient.getOwners();
+    public Flux<OwnerResponseDTO> getAllOwners() {
+        return customersServiceClient.getAllOwners();
                 /*.flatMap(n ->
                         visitsServiceClient.getVisitsForPets(n.getPetIds())
                                 .map(addVisitsToOwner(n))

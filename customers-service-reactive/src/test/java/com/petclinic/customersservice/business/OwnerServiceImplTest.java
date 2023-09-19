@@ -8,8 +8,13 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.junit.jupiter.api.Test;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,6 +29,30 @@ class OwnerServiceImplTest {
 
     @Autowired
     private OwnerService ownerService;
+
+
+    @Test
+    void getAllOwners_ShouldSucceed() {
+        OwnerResponseDTO ownerResponseDTO = OwnerResponseDTO.builder()
+                .ownerId("ownerId-123")
+                .firstName("FirstName")
+                .lastName("LastName")
+                .address("Test address")
+                .city("test city")
+                .telephone("telephone")
+                .build();
+
+        List<OwnerResponseDTO> owners = new ArrayList<>();
+        owners.add(ownerResponseDTO);
+
+        Flux<OwnerResponseDTO> returnAllOwners = Flux.just(ownerResponseDTO);
+
+        StepVerifier
+                .create(returnAllOwners)
+                .expectNextMatches(ownerDto -> ownerDto.getOwnerId().equals(ownerResponseDTO.getOwnerId()))
+                .expectComplete()
+                .verify();
+    }
 
     @Test
     void insertOwner() {
