@@ -40,6 +40,18 @@ class VisitsControllerIntegrationTest {
     }
 
     @Test
+    void getAllVisits(){
+        client
+                .get()
+                .uri("/visits")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
+                .expectBodyList(VisitResponseDTO.class)
+                .value((list)-> assertEquals(list.size(), dbSize));
+    }
+    @Test
     void getVisitByVisitId(){
         client
                 .get()

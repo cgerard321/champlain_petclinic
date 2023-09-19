@@ -6,18 +6,12 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface VisitService {
-
-    Mono<VisitResponseDTO> addVisit(Mono<VisitRequestDTO> visitRequestDTOMono);
-
+    Flux<VisitResponseDTO> getAllVisits();
     Flux<VisitResponseDTO> getVisitsForPet(int petId);
-
-    Mono<VisitResponseDTO> getVisitByVisitId(String visitId);
-
-    Mono<Void> deleteVisit(String visitId);
-
-    Mono<VisitResponseDTO> updateVisit(String visitId, Mono<VisitRequestDTO> visitRequestDTOMono);
-
     Flux<VisitResponseDTO> getVisitsForPractitioner(int practitionerId);
-
     Flux<VisitResponseDTO> getVisitsByPractitionerIdAndMonth(int practitionerId, int month);
+    Mono<VisitResponseDTO> getVisitByVisitId(String visitId);
+    Mono<VisitResponseDTO> addVisit(Mono<VisitRequestDTO> visitRequestDTOMono);
+    Mono<VisitResponseDTO> updateVisit(String visitId, Mono<VisitRequestDTO> visitRequestDTOMono);
+    Mono<Void> deleteVisit(String visitId);
 }

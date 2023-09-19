@@ -30,6 +30,21 @@ class VisitControllerUnitTest {
     private final int Get_Month = visitResponseDTO.getMonth();
 
     @Test
+    void getAllVisits(){
+        when(visitService.getAllVisits()).thenReturn(Flux.just(visitResponseDTO, visitResponseDTO));
+
+        webFluxTest.get()
+                .uri("/visits")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM + ";charset=UTF-8")
+                .returnResult(VisitResponseDTO.class);
+
+        Mockito.verify(visitService, times(1)).getAllVisits();
+    }
+
+    @Test
     void getVisitByVisitId(){
         when(visitService.getVisitByVisitId(anyString())).thenReturn(Mono.just(visitResponseDTO));
 
