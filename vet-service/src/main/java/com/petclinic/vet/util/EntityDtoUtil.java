@@ -91,6 +91,7 @@ public class EntityDtoUtil {
         BeanUtils.copyProperties(ratingRequestDTO, rating);
         return rating;
     }
+
     public static Set<SpecialtyDTO> toDTOSet(Set<Specialty> specialties) {
         Set<SpecialtyDTO> specialtyDTOS = new HashSet<>();
         for (Specialty specialty:
@@ -122,4 +123,6 @@ public class EntityDtoUtil {
         }
         return id;
     }
+
+
 }
