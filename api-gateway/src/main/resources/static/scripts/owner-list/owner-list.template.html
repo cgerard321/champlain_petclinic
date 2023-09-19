@@ -3,6 +3,8 @@
     h3.titleOwner {
         color: #2f2b2b;
         text-align: left;
+        padding-bottom: 20px;
+        padding-top: 20px;
     }
 
     .CurrentOwnersContainer {
@@ -34,6 +36,14 @@
         }
     }
 
+    .ownerTable thead tr th {
+        font-weight: 400;
+        color: gray;
+    }
+
+    input[type="Text"]{
+        font-size: 15px;
+    }
 
 </style>
 
@@ -41,35 +51,57 @@
 
     <h3 class="titleOwner">Current Owners</h3>
 
-    <form onsubmit="javascript:void(0)" style="" class="ng-pristine ng-valid py-4">
+    <!--<form onsubmit="javascript:void(0)" style="" class="ng-pristine ng-valid py-4">
         <div class="d-flex flex-row gap-3">
             <label class="FilterOwnersLabel">Filter Owners : </label>
 
             <input type="text" class="ng-pristine ng-untouched ng-valid ng-empty ps-2" placeholder="Search Filter" ng-model="$ctrl.query">
         </div>
-    </form>
+    </form>-->
 
-    <table id="owner" class="table table-responsive">
-        <thead>
-        <tr>
-            <th class="bg-light text-black ps-3 opacity-50">OwnerID</th>
-            <th class="bg-light text-black opacity-50">Name</th>
-            <th class="d-none d-sm-table-cell d-md-table-cell bg-light text-black opacity-50">Address</th>
-            <th class="d-none d-sm-table-cell d-md-table-cell bg-light text-black opacity-50">City</th>
-            <th class="d-none d-sm-table-cell d-md-table-cell bg-light text-black opacity-50">Telephone</th>
-        </tr>
-        </thead>
-        <tr class="border-bottom-1" id="ownerTd" ng-repeat="owner in $ctrl.owners | filter:$ctrl.query track by owner.ownerId">
-            <td class="border-bottom border-1 border-dark ">
-                <a class="newBtn btn btn-default responsive-text" ui-sref="ownerDetails({ ownerId: owner.ownerId })">
-                    {{owner.ownerId}}
-                </a>
-            </td>
-            <td class="responsive-text border-bottom border-1 border-dark ">{{owner.firstName}} {{owner.lastName}}</td>
-            <td class="d-none d-sm-table-cell d-md-table-cell responsive-text border-bottom border-1 border-dark ">{{owner.address}}</td>
-            <td class="d-none d-sm-table-cell d-md-table-cell responsive-text border-bottom border-1 border-dark ">{{owner.city}}</td>
-            <td class="d-none d-sm-table-cell d-md-table-cell responsive-text border-bottom border-1 border-dark ">{{owner.telephone}}</td>
-        </tr>
-    </table>
+        <table id="owner" class="table table-striped table-responsive ownerTable pb-3">
+            <thead class="bg-white">
+                <tr>
+                    <th class="bg-white border" >Owner ID</th>
+                    <th class="bg-white  border">Full Name</th>
+                    <th class="bg-white d-none d-sm-table-cell d-md-table-cell border">Address</th>
+                    <th class="bg-white d-none d-sm-table-cell d-md-table-cell border">City</th>
+                    <th class="bg-white d-none d-sm-table-cell d-md-table-cell border">Phone Number</th>
+                </tr>
+            </thead>
+
+            <tbody class="border">
+
+                <tr>
+                    <td class="bg-white border" >
+                        <input class="ps-2" style="width:100%" type="text" placeholder="Search Filter...">
+                    </td>
+                    <td class="bg-white border">
+                        <input class="ps-2" type="text" placeholder="Search Filter...">
+                    </td>
+                    <td class="bg-white border d-none d-sm-table-cell d-md-table-cell">
+                        <input class="ps-2" type="text" placeholder="Search Filter...">
+                    </td>
+                    <td class="bg-white border d-none d-sm-table-cell d-md-table-cell">
+                        <input class="ps-2" type="text" size="15" placeholder="Search Filter...">
+                    </td>
+                    <td class="bg-white border d-none d-sm-table-cell d-md-table-cell">
+                        <input class="ps-2" type="text" size="10" placeholder="Search Filter...">
+                    </td>
+                </tr>
+
+                <tr class="" id="ownerTd" ng-repeat="owner in $ctrl.owners | filter:$ctrl.query track by owner.ownerId">
+                    <td>
+                        <a class="btn p-0 responsive-text" style="color: blue" ui-sref="ownerDetails({ ownerId: owner.ownerId })">
+                            {{owner.ownerId}}
+                        </a>
+                    </td>
+                    <td class="responsive-text">{{owner.firstName}} {{owner.lastName}}</td>
+                    <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">{{owner.address}}</td>
+                    <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">{{owner.city}}</td>
+                    <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">{{owner.telephone}}</td>
+                </tr>
+            </tbody>
+        </table>
 
 </div>

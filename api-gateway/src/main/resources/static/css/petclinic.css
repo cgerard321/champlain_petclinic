@@ -111,7 +111,6 @@ table td.action-column {
 a.newBtn:hover, button#newBtn:hover{
   text-decoration-color: blue;
   text-decoration: underline;
-  color: blue;
 }
 
 #owner {
