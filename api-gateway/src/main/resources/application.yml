@@ -55,3 +55,7 @@ app:
     host: inventory
     port: 8080
 
+logging:
+  level:
+    root: INFO
+    com.petclinic: DEBUG

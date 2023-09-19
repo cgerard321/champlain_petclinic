@@ -20,20 +20,26 @@ public class GlobalServletExceptionHandler implements ErrorWebExceptionHandler {
     @Override
     public Mono<Void> handle(ServerWebExchange exchange, Throwable ex) {
         HttpStatus status;
+        try{
+            //get the first 3 digits of the exception message for the error code
+            status = HttpStatus.valueOf((Integer.parseInt(ex.getMessage().substring(0, 3))));
+        }
+        catch (Exception e){
 
-        log.debug("Exception type: {}", ex.getClass().getSimpleName());
+            log.debug("Exception type: {}", ex.getClass().getSimpleName());
 
-        switch (ex.getClass().getSimpleName()) {
-            case "InvalidTokenException", "NoTokenFoundException", "GeneralSecurityException" ->
-                    status = HttpStatus.UNAUTHORIZED;
-            case "ExistingVetNotFoundException" -> status = HttpStatus.NOT_FOUND;
-            case "GenericHttpException" -> {
-                GenericHttpException error = (GenericHttpException) ex;
-                status = error.getHttpStatus();
-            }
-            default -> {
-                log.error("Exception not handled: {}", ex.getClass().getSimpleName());
-                status = HttpStatus.UNPROCESSABLE_ENTITY;
+            switch (ex.getClass().getSimpleName()) {
+                case "InvalidTokenException", "NoTokenFoundException", "GeneralSecurityException" ->
+                        status = HttpStatus.UNAUTHORIZED;
+                case "ExistingVetNotFoundException" -> status = HttpStatus.NOT_FOUND;
+                case "GenericHttpException" -> {
+                    GenericHttpException error = (GenericHttpException) ex;
+                    status = error.getHttpStatus();
+                }
+                default -> {
+                    log.error("Exception not handled: {}", ex.getClass().getSimpleName());
+                    status = HttpStatus.INTERNAL_SERVER_ERROR;
+                }
             }
             // Handle any other exception types here
         }
