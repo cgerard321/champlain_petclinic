@@ -1,6 +1,5 @@
 package com.petclinic.customersservice.presentationlayer;
 
-import com.petclinic.customersservice.business.PetDTO;
 import com.petclinic.customersservice.data.Photo;
 import lombok.*;
 
@@ -18,7 +17,5 @@ public class OwnerResponseDTO {
     private String address;
     private String city;
     private String telephone;
-    //private String photoId;
-    //private Photo photo;
-    private List<PetDTO> pets;
+    private List<PetResponseDTO> pets;
 }

@@ -15,8 +15,10 @@ import com.petclinic.bffapigateway.dtos.Vets.RatingRequestDTO;
 import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
 import com.petclinic.bffapigateway.dtos.Vets.RatingResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetDTO;
+import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.dtos.Visits.VisitDetails;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
+import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import com.petclinic.bffapigateway.utils.VetsEntityDtoUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -56,12 +58,14 @@ public class BFFApiGatewayController {
 
     private final InventoryServiceClient inventoryServiceClient;
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "bills/{billId}")
     public Mono<BillDetails> getBillingInfo(final @PathVariable String billId)
     {
         return billServiceClient.getBilling(billId);
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @PostMapping(value = "bills",
             consumes = "application/json",
             produces = "application/json")
@@ -69,11 +73,14 @@ public class BFFApiGatewayController {
         return billServiceClient.createBill(model);
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "bills")
     public Flux<BillDetails> getAllBilling() {
         return billServiceClient.getAllBilling();
     }
 
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
     @GetMapping(value = "bills/customer/{customerId}")
     public Flux<BillDetails> getBillsByOwnerId(final @PathVariable int customerId)
     {
@@ -398,8 +405,8 @@ public class BFFApiGatewayController {
 //        return authServiceClient.verifyUser(token);
 //    }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @PostMapping(value = "/users/login",produces = "application/json;charset=utf-8;", consumes = "application/json")
-
     public ResponseEntity<UserPasswordLessDTO> login(@RequestBody Login login) throws Exception {
         log.info("Entered controller /login");
         log.info("Login: " + login.getEmail() + " " + login.getPassword());
