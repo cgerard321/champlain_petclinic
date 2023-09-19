@@ -1391,8 +1391,8 @@ class ApiGatewayControllerTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
-                .expectBody()
-                .consumeWith(list -> assertEquals(list.getResponseBody().length,318));
+                .expectBodyList(VisitResponseDTO.class)
+                .value((list)->assertEquals(list.size(),2));
         Mockito.verify(visitsServiceClient,times(1)).getAllVisits();
     }
     @Test
