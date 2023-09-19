@@ -8,11 +8,9 @@ angular.module('loginForm')
             password: $scope.login.password,
         })
             .then(n => {
-                const token = n.headers("Authorization");
                 const { data: { username, email } } = n;
 
                 authProvider.setUser({
-                    token,
                     username,
                     email
                 });

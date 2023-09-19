@@ -15,6 +15,14 @@ import reactor.core.publisher.Mono;
 public class VisitController {
     private final VisitService visitService;
 
+    @GetMapping(value="", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<VisitResponseDTO> getAllVisits(){
+        return visitService.getAllVisits();
+    }
+    @GetMapping(value="/pets/{petId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<VisitResponseDTO> getVisitsForPet(@PathVariable int petId){
+        return visitService.getVisitsForPet(petId);
+    }
     @GetMapping("/{visitId}")
     public Mono<ResponseEntity<VisitResponseDTO>> getVisitByVisitId(@PathVariable String visitId){
         return visitService.getVisitByVisitId(visitId)
@@ -24,6 +32,10 @@ public class VisitController {
     @GetMapping(value="practitioner/visits/{practitionerId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VisitResponseDTO> getVisitByPractitionerId(@PathVariable int practitionerId){
         return visitService.getVisitsForPractitioner(practitionerId);
+    }
+    @GetMapping(value="practitioner/{practitionerId}/{month}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<VisitResponseDTO> getVisitsByPractitionerIdAndMonth(@PathVariable int practitionerId, @PathVariable int month){
+        return visitService.getVisitsByPractitionerIdAndMonth(practitionerId, month);
     }
 
     @PostMapping("")
@@ -41,13 +53,5 @@ public class VisitController {
         return visitService.deleteVisit(visitId);
     }
 
-    @GetMapping(value="practitioner/{practitionerId}/{month}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<VisitResponseDTO> getVisitsByPractitionerIdAndMonth(@PathVariable int practitionerId, @PathVariable int month){
-        return visitService.getVisitsByPractitionerIdAndMonth(practitionerId, month);
-    }
 
-    @GetMapping(value="/pets/{petId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<VisitResponseDTO> getVisitsForPet(@PathVariable int petId){
-        return visitService.getVisitsForPet(petId);
-    }
 }

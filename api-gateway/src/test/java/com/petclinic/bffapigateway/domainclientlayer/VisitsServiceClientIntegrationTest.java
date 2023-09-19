@@ -5,11 +5,17 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Visits.VisitDetails;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.Visits;
+import com.petclinic.bffapigateway.utils.Security.Filters.JwtTokenFilter;
+import com.petclinic.bffapigateway.utils.Security.Filters.RoleFilter;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.*;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import reactor.core.publisher.Flux;
@@ -17,13 +23,16 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.UUID;
 import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@WebFluxTest(VisitsServiceClient.class)
+@WebFluxTest(value = VisitsServiceClient.class, excludeFilters = @ComponentScan.Filter(type = FilterType.CUSTOM,
+        classes = {JwtTokenFilter.class, RoleFilter.class}), useDefaultFilters = false)
+@AutoConfigureWebTestClient
 class VisitsServiceClientIntegrationTest {
     @MockBean
     private VisitsServiceClient visitsServiceClient;
@@ -47,6 +56,19 @@ class VisitsServiceClientIntegrationTest {
         server.shutdown();
     }
 
+    @Test
+    void getAllVisits() throws JsonProcessingException {
+        final VisitResponseDTO visitResponseDTO = new VisitResponseDTO("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee", 2023, 11, 20, "test visit", 1, 1, false);
+        final VisitResponseDTO visitResponseDTO2 = new VisitResponseDTO("73fa7b2-e04e-47b8-98e7-4adf7cfaaee", 2023, 11, 20, "test visit", 1, 1, false);
+        server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(Arrays.asList(visitResponseDTO, visitResponseDTO2))).addHeader("Content-Type", "application/json"));
+
+        Flux<VisitResponseDTO> visitResponseDTOFlux = visitsServiceClient.getAllVisits();
+        StepVerifier.create(visitResponseDTOFlux)
+                .expectNext(visitResponseDTO)
+                .expectNext(visitResponseDTO2)
+                .verifyComplete();
+    }
     @Test
     void getVisitsForPets_withAvailableVisitsService() {
         prepareResponse(response -> response

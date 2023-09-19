@@ -111,7 +111,6 @@ table td.action-column {
 a.newBtn:hover, button#newBtn:hover{
   text-decoration-color: blue;
   text-decoration: underline;
-  color: blue;
 }
 
 #owner {
@@ -121,13 +120,6 @@ a.newBtn:hover, button#newBtn:hover{
 table:not(.noColor) {
   background-color: white;
   color: black;
-}
-
-h2.titleOwner {
-  color: black;
-  font-weight: bold;
-  font-size: xxx-large;
-  text-align: center;
 }
 
 h2.form {
@@ -170,10 +162,6 @@ div.pet:not(.marg), div.owner:not(.marg){
 #owner.table>tbody>tr>td {
   border-style: none;
   font-weight: normal;
-}
-
-#owner.table>thead>tr>th {
-  background-color: black;
 }
 
 #bg {

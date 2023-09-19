@@ -6,6 +6,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface OwnerService {
+    Flux<OwnerResponseDTO> getAllOwners();
 
     Mono<Owner> insertOwner(Mono<Owner> ownerMono);
 
@@ -16,5 +17,5 @@ public interface OwnerService {
 
     Mono<Owner> updateOwner(String ownerId, Mono<Owner> ownerMono);
 
-    Flux<Owner> getAllOwners();
+
 }

@@ -1,8 +1,8 @@
 package com.petclinic.bffapigateway.presentationlayer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.petclinic.bffapigateway.config.GlobalExceptionHandler;
 import com.petclinic.bffapigateway.domainclientlayer.*;
-import com.petclinic.bffapigateway.dtos.*;
 import com.petclinic.bffapigateway.dtos.Auth.Role;
 import com.petclinic.bffapigateway.dtos.Bills.BillDetails;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
@@ -14,32 +14,54 @@ import com.petclinic.bffapigateway.dtos.Visits.VisitDetails;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import com.petclinic.bffapigateway.exceptions.GenericHttpException;
+import com.petclinic.bffapigateway.utils.Security.Filters.JwtTokenFilter;
+import com.petclinic.bffapigateway.utils.Security.Filters.RoleFilter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import static org.junit.Assert.*;
+import static org.assertj.core.util.Lists.list;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
-
-@WebFluxTest(controllers = BFFApiGatewayController.class)
+@RunWith(SpringRunner.class)
+@ContextConfiguration(classes = {
+        GlobalExceptionHandler.class,
+        BFFApiGatewayController.class,
+        AuthServiceClient.class,
+        CustomersServiceClient.class,
+        VisitsServiceClient.class,
+        VetsServiceClient.class,
+        BillServiceClient.class,
+        InventoryServiceClient.class
+})
+@WebFluxTest(controllers = BFFApiGatewayController.class, excludeFilters = @ComponentScan.Filter(type = FilterType.CUSTOM,
+        classes = {JwtTokenFilter.class,RoleFilter.class}),useDefaultFilters = false)
 @AutoConfigureWebTestClient
 class ApiGatewayControllerTest {
     @Autowired private ObjectMapper objectMapper;
     @Autowired private WebTestClient client;
-
     @MockBean private CustomersServiceClient customersServiceClient;
     @MockBean private VisitsServiceClient visitsServiceClient;
     @MockBean private VetsServiceClient vetsServiceClient;
@@ -120,7 +142,34 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$").isEqualTo(1);
     }    
-  
+
+    @Test
+    void getAverageRatingsByVetId(){
+        RatingResponseDTO ratingResponseDTO = buildRatingResponseDTO();
+
+        RatingRequestDTO rating = RatingRequestDTO.builder()
+                .vetId(VET_ID)
+                .rateScore(4.0)
+                .build();
+
+        when(vetsServiceClient.getAverageRatingByVetId(anyString()))
+                .thenReturn(Mono.just(ratingResponseDTO.getRateScore()));
+
+        client
+                .get()
+                .uri("/api/gateway/vets/" + rating.getVetId() + "/ratings/average")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(Double.class)
+                .value(resp->
+                        assertEquals(rating.getRateScore(), ratingResponseDTO.getRateScore()));
+
+    }
+
+
+
    @Test
     void addRatingToAVet() {
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
@@ -210,9 +259,10 @@ class ApiGatewayControllerTest {
                 .get()
                 .uri("/api/gateway/vets/active")
                 .accept(MediaType.APPLICATION_JSON)
+                .header("Content-Type", "application/json;charset=UTF-8")
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentType(APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$[0].vetId").isEqualTo(vetDTO2.getVetId())
                 .jsonPath("$[0].resume").isEqualTo(vetDTO2.getResume())
@@ -539,6 +589,37 @@ class ApiGatewayControllerTest {
 //    }
 
     @Test
+    void getAllOwners_shouldSucceed(){
+        OwnerResponseDTO owner1 = new OwnerResponseDTO();
+        owner1.setOwnerId("ownerId-90");
+        owner1.setFirstName("John");
+        owner1.setLastName("Johnny");
+        owner1.setAddress("111 John St");
+        owner1.setCity("Johnston");
+        owner1.setTelephone("51451545144");
+
+        Flux<OwnerResponseDTO> ownerResponseDTOFlux = Flux.just(owner1);
+
+        when(customersServiceClient.getAllOwners()).thenReturn(ownerResponseDTOFlux);
+
+        client.get()
+                .uri("/api/gateway/owners")
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .acceptCharset(StandardCharsets.UTF_8)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().valueEquals("Content-Type","text/event-stream;charset=UTF-8")
+                .expectBodyList(OwnerResponseDTO.class)
+                .value((list) -> {
+                    assertNotNull(list);
+                    assertEquals(1,list.size());
+                    assertEquals(list.get(0).getOwnerId(),owner1.getOwnerId());
+                    assertEquals(list.get(0).getFirstName(),owner1.getFirstName());
+                });
+
+    }
+
+    @Test
     void getOwnerByOwnerId_shouldSucceed(){
         OwnerResponseDTO owner = new OwnerResponseDTO();
         owner.setOwnerId("ownerId-123");
@@ -567,8 +648,8 @@ class ApiGatewayControllerTest {
 
 
 
-      @Test
-      void createOwner(){
+    @Test
+    void createOwner(){
         OwnerResponseDTO owner = new OwnerResponseDTO();
         owner.setOwnerId("ownerId-123");
         owner.setFirstName("John");
@@ -615,7 +696,7 @@ class ApiGatewayControllerTest {
 
         when(customersServiceClient.createPet(pet,od.getOwnerId()))
 
-        .thenReturn(Mono.just(pet));
+                .thenReturn(Mono.just(pet));
 
         client.post()
                 .uri("/api/gateway/owners/{ownerId}/pets", od.getOwnerId())
@@ -712,39 +793,39 @@ class ApiGatewayControllerTest {
     @Test
     void createPetPhoto(){
 
-            OwnerResponseDTO owner = new OwnerResponseDTO();
-            owner.setOwnerId("ownerId-123");
-            PetResponseDTO pet = new PetResponseDTO();
-            PetType type = new PetType();
-            type.setName("Cat");
-            pet.setId(1);
-            pet.setName("Bonkers");
-            pet.setBirthDate("2015-03-03");
-            pet.setType(type);
-            pet.setImageId(2);
+        OwnerResponseDTO owner = new OwnerResponseDTO();
+        owner.setOwnerId("ownerId-123");
+        PetResponseDTO pet = new PetResponseDTO();
+        PetType type = new PetType();
+        type.setName("Cat");
+        pet.setId(1);
+        pet.setName("Bonkers");
+        pet.setBirthDate("2015-03-03");
+        pet.setType(type);
+        pet.setImageId(2);
 
-            final String test = "Test photo";
-            final byte[] testBytes = test.getBytes();
+        final String test = "Test photo";
+        final byte[] testBytes = test.getBytes();
 
-            PhotoDetails photo = new PhotoDetails();
-            photo.setId(2);
-            photo.setName("photo");
-            photo.setType("jpeg");
-            photo.setPhoto("testBytes");
+        PhotoDetails photo = new PhotoDetails();
+        photo.setId(2);
+        photo.setName("photo");
+        photo.setType("jpeg");
+        photo.setPhoto("testBytes");
 
-            when(customersServiceClient.setPetPhoto(owner.getOwnerId(), photo, pet.getId()))
-                    .thenReturn(Mono.just("Image uploaded successfully: " + photo.getName()));
+        when(customersServiceClient.setPetPhoto(owner.getOwnerId(), photo, pet.getId()))
+                .thenReturn(Mono.just("Image uploaded successfully: " + photo.getName()));
 
-            client.post()
-                    .uri("/api/gateway/owners/1/pet/photo/1")
-                    .body(Mono.just(photo), PhotoDetails.class)
-                    .accept(MediaType.APPLICATION_JSON)
-                    .exchange()
-                    .expectStatus().isOk()
-                    .expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
-                    .expectBody();
-        }
-//
+        client.post()
+                .uri("/api/gateway/owners/1/pet/photo/1")
+                .body(Mono.just(photo), PhotoDetails.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
+                .expectBody();
+    }
+    //
     @Test
     void getPetPhoto(){
 
@@ -780,7 +861,7 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.name").isEqualTo("photo")
                 .jsonPath("$.type").isEqualTo("jpeg");
     }
-//
+    //
 //
     @Test
     void shouldThrowUnsupportedMediaTypeIfBodyDoesNotExist(){
@@ -795,7 +876,7 @@ class ApiGatewayControllerTest {
         pet.setType(type);
 
         when(customersServiceClient.createPet(pet,od.getOwnerId()))
-        .thenReturn(Mono.just(pet));
+                .thenReturn(Mono.just(pet));
 
         client.post()
                 .uri("/api/gateway/owners/{ownerId}/pets", od.getOwnerId())
@@ -804,11 +885,11 @@ class ApiGatewayControllerTest {
                 .expectStatus().isEqualTo(UNSUPPORTED_MEDIA_TYPE)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.path").isEqualTo("/api/gateway/owners/"+od.getOwnerId()+"/pets");
+                .jsonPath("$.message").isEqualTo("Content type '' not supported");
 
 
     }
-//
+    //
     @Test
     void ifOwnerIdIsNotSpecifiedInUrlThrowNotAllowed(){
         OwnerResponseDTO od = new OwnerResponseDTO();
@@ -831,9 +912,9 @@ class ApiGatewayControllerTest {
                 .expectStatus().isEqualTo(METHOD_NOT_ALLOWED)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.path").isEqualTo("/api/gateway/owners/pets");
+                .jsonPath("$.message").isEqualTo("Request method 'POST' is not supported.");
     }
-//
+    //
     @Test
     void shouldCreateThenDeletePet(){
         OwnerResponseDTO od = new OwnerResponseDTO();
@@ -870,7 +951,7 @@ class ApiGatewayControllerTest {
 
 
     }
-//
+    //
     @Test
     void shouldThrowNotFoundWhenOwnerIdIsNotSpecifiedOnDeletePets(){
         OwnerResponseDTO od = new OwnerResponseDTO();
@@ -904,7 +985,7 @@ class ApiGatewayControllerTest {
                 .isNotFound()
                 .expectBody();
     }
-//
+    //
     @Test
     void shouldThrowMethodNotAllowedWhenDeletePetsIsMissingPetId(){
         OwnerResponseDTO od = new OwnerResponseDTO();
@@ -918,7 +999,6 @@ class ApiGatewayControllerTest {
         pet.setType(type);
 
         when(customersServiceClient.createPet(pet,od.getOwnerId()))
-
                 .thenReturn(Mono.just(pet));
 
         client.post()
@@ -1039,7 +1119,7 @@ class ApiGatewayControllerTest {
                 .jsonPath("$[0].customerId").isEqualTo(1)
                 .jsonPath("$[0].amount").isEqualTo(499)
                 .jsonPath("$[0].visitType").isEqualTo("Test");
-        }
+    }
 
     @Test
     public void getBillsByVetId(){
@@ -1075,7 +1155,7 @@ class ApiGatewayControllerTest {
     }
 
     @Test
-     void getBillNotFound(){
+    void getBillNotFound(){
         client.get()
                 .uri("/bills/{billId}", 100)
                 .accept(APPLICATION_JSON)
@@ -1088,7 +1168,7 @@ class ApiGatewayControllerTest {
     }
 
 
-    
+
     @Test
     void getPutRequestNotFound(){
         client.put()
@@ -1167,6 +1247,7 @@ class ApiGatewayControllerTest {
 
     @Test
     void shouldDeleteBillById(){
+
         BillResponseDTO billResponseDTO = new BillResponseDTO();
         billResponseDTO.setBillId("9");
         billResponseDTO.setDate(null);
@@ -1191,6 +1272,29 @@ class ApiGatewayControllerTest {
                     .expectBody();
 
             assertEquals(billResponseDTO.getBillId(),"9");
+        BillDetails bill = new BillDetails();
+        bill.setBillId("9");
+
+        bill.setDate(null);
+
+        bill.setAmount(600);
+
+        bill.setVisitType("Adoption");
+
+        when(billServiceClient.createBill(bill))
+                .thenReturn(Mono.just(bill));
+
+
+        client.post()
+                .uri("/api/gateway/bills")
+                .body(Mono.just(bill), BillDetails.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+
+        assertEquals(bill.getBillId(),"9");
         client.delete()
                 .uri("/api/gateway/bills/9")
                 .accept(MediaType.APPLICATION_JSON)
@@ -1371,10 +1475,23 @@ class ApiGatewayControllerTest {
                 .expectBody();
 
         assertEquals(visitsServiceClient.getVisitsForPet(1), null);
-
-
     }
+    @Test
+    void shouldGetAllVisits() {
+        final VisitResponseDTO visitResponseDTO = new VisitResponseDTO("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee", 2023, 11, 20, "test visit", 1, 1, false);
+        final VisitResponseDTO visitResponseDTO2 = new VisitResponseDTO("73fa7b2-e04e-47b8-98e7-4adf7cfaaee", 2023, 11, 20, "test visit", 1, 1, false);
+        when(visitsServiceClient.getAllVisits()).thenReturn(Flux.just(visitResponseDTO,visitResponseDTO2));
 
+        client.get()
+                .uri("/api/gateway/visits")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
+                .expectBodyList(VisitResponseDTO.class)
+                .value((list)->assertEquals(list.size(),2));
+        Mockito.verify(visitsServiceClient,times(1)).getAllVisits();
+    }
     @Test
     void shouldGetAVisit() {
         VisitDetails visit = new VisitDetails();
@@ -1766,7 +1883,7 @@ class ApiGatewayControllerTest {
                 .jsonPath("$[1].parent").isEqualTo(role2.getParent());
 
     }
-  
+
     @Test
     void shouldAddRole() {
         final Role parentRole = new Role();

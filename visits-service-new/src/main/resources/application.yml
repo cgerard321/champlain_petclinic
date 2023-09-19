@@ -14,9 +14,7 @@ spring:
     mongodb:
       port: 0
       database: visits
-  mongodb:
-    embedded:
-      version: 4.0.21
+de.flapdoodle.mongodb.embedded.version: 5.0.5
 
 ---
 spring:

@@ -1,16 +1,16 @@
 package com.petclinic.customersservice.util;
 
 import com.petclinic.customersservice.presentationlayer.OwnerResponseDTO;
-import com.petclinic.customersservice.business.PetDTO;
 import com.petclinic.customersservice.data.Owner;
 import com.petclinic.customersservice.data.Pet;
+import com.petclinic.customersservice.presentationlayer.PetResponseDTO;
 import lombok.Generated;
 import org.springframework.beans.BeanUtils;
 
 public class EntityDTOUtil {
 
     @Generated
-    public EntityDTOUtil(){};
+    public EntityDTOUtil(){}
 
     public static OwnerResponseDTO toOwnerResponseDTO(Owner owner) {
         OwnerResponseDTO ownerResponseDTO = new OwnerResponseDTO();
@@ -24,15 +24,15 @@ public class EntityDTOUtil {
         return owner;
     }
 
-    public static PetDTO toPetDTO(Pet pet) {
-        PetDTO petDTO = new PetDTO();
+    public static PetResponseDTO toPetResponseDTO(Pet pet) {
+        PetResponseDTO petDTO = new PetResponseDTO();
         BeanUtils.copyProperties(pet, petDTO);
         return petDTO;
     }
 
-    public static Pet toPet(PetDTO petDTO) {
+    public static Pet toPet(PetResponseDTO petResponseDTO) {
         Pet pet = new Pet();
-        BeanUtils.copyProperties(petDTO, pet);
+        BeanUtils.copyProperties(petResponseDTO, pet);
         return pet;
     }
 

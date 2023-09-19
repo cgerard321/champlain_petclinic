@@ -1,37 +1,43 @@
 'use strict';
-
 angular.module('visitList')
-    .controller('VisitListController', ['$http','$stateParams', function ($http) {
-        var self = this;
-        var petIds = $stateParams.petIds || [0,1,2]
-
-        $http.get("api/gateway/visits/"+petIds).then(function (resp) {
-            self.visits = resp.data;
-            self.sortFetchedVisits();
-             console.log(resp)
-        });
+    .controller('VisitListController', ['$http', '$scope', function ($http, $scope) {
+        let self = this
         // Lists holding visits for the tables to display
-        self.upcomingVisits = [];
-        self.previousVisits = [];
+        self.upcomingVisits = []
+        self.previousVisits = []
 
-        self.sortFetchedVisits = function() {
-            let currentDate = getCurrentDate();
-
-            $.each(self.visits, function(i, visit) {
-                let selectedVisitDate = Date.parse(visit.date);
-
-                if(selectedVisitDate >= currentDate) {
-                    self.upcomingVisits.push(visit);
-                } else {
-                    self.previousVisits.push(visit);
-                }
-            });
+        let eventSource = new EventSource("api/gateway/visits")
+        eventSource.addEventListener('message', function (event){
+            $scope.$apply(function(){
+                self.upcomingVisits.push(JSON.parse(event.data))
+            })
+        })
+        eventSource.onerror = (error) =>{
+            if(eventSource.readyState === 0){
+                eventSource.close()
+                console.log("EventSource was closed by server successfully."+error)
+            }else{
+                console.log("EventSource error: "+error)
+            }
         }
-        function getCurrentDate() {
-            let dateObj = new Date();
-            var dd = String(dateObj.getDate()).padStart(2, '0');
-            var mm = String(dateObj.getMonth() + 1).padStart(2, '0');
-            var yyyy = dateObj.getFullYear();
-            return Date.parse(yyyy + '-' + mm + '-' + dd);
-        }
-    }]);
+    }])
+//     // self.sortFetchedVisits = function() {
+    //     //     let currentDate = getCurrentDate()
+    //     //     $.each(self.visits, function(i, visit) {
+    //     //         let selectedVisitDate = Date.parse(visit.date);
+    //     //         if(selectedVisitDate >= currentDate) {
+    //     //             self.upcomingVisits.push(visit)
+    //     //         } else {
+    //     //             self.previousVisits.push(visit)
+    //     //         }
+    //     //     })
+    //     // }
+    //     // function getCurrentDate() {
+    //     //     let dateObj = new Date()
+    //     //     var dd = String(dateObj.getDate()).padStart(2, '0')
+    //     //     var mm = String(dateObj.getMonth() + 1).padStart(2, '0')
+    //     //     var yyyy = dateObj.getFullYear()
+    //     //     return Date.parse(yyyy + '-' + mm + '-' + dd)
+    //     // }
+    // }])
+
