@@ -10,7 +10,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
-@RequestMapping("visits")
+//@RequestMapping("visits")
 @RequiredArgsConstructor
 public class VisitController {
     private final VisitService visitService;
@@ -26,7 +26,7 @@ public class VisitController {
         return visitService.getVisitsForPractitioner(practitionerId);
     }
 
-    @PostMapping("")
+    @PostMapping("/visits")
     public Mono<VisitResponseDTO> addVisit(@RequestBody Mono<VisitRequestDTO> visitRequestDTOMono){
         return visitService.addVisit(visitRequestDTOMono);
     }

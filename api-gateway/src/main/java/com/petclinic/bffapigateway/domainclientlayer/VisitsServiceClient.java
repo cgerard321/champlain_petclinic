@@ -93,10 +93,21 @@ public class VisitsServiceClient {
                 .bodyToMono(VisitDetails.class);
     }
 
+//    public Mono<VisitDetails> createVisitForPet(VisitDetails visit) {
+//        return webClient
+//                .post()
+//                .uri("/owners/*/pets/" + visit.getPetId() + "/visits")
+//                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+//                .body(Mono.just(visit), VisitDetails.class)
+//                .retrieve()
+//                .bodyToMono(VisitDetails.class);
+//    }
+
+
     public Mono<VisitDetails> createVisitForPet(VisitDetails visit) {
         return webClient
                 .post()
-                .uri("/owners/*/pets/" + visit.getPetId() + "/visits")
+                .uri("/visits")
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .body(Mono.just(visit), VisitDetails.class)
                 .retrieve()
