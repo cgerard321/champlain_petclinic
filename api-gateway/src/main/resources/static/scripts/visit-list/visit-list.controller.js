@@ -1,32 +1,29 @@
 'use strict';
-
-
-
 angular.module('visitList')
-    // .controller('VisitListController', ['$http','$stateParams', '$scope', function ($http, $stateParams, $scope) {
     .controller('VisitListController', ['$http', '$scope', function ($http, $scope) {
-        let self = this;
-        self.upcomingVisits = [];
-        let eventSource = new EventSource("api/gateway/visits");
+        let self = this
+        // Lists holding visits for the tables to display
+        self.upcomingVisits = []
+        self.previousVisits = []
+
+        let eventSource = new EventSource("api/gateway/visits")
         eventSource.addEventListener('message', function (event){
             $scope.$apply(function(){
-                self.upcomingVisits.push(JSON.parse(event.data));
+                self.upcomingVisits.push(JSON.parse(event.data))
             })
-        });
+        })
         eventSource.onerror = (error) =>{
             if(eventSource.readyState === 0){
-                eventSource.close();
-                console.log("EventSource was closed by server successfully."+error);
+                eventSource.close()
+                console.log("EventSource was closed by server successfully."+error)
             }else{
                 console.log("EventSource error: "+error)
             }
         }
-    }]);
-    //     // Lists holding visits for the tables to display
-    //     // self.upcomingVisits = [];
-    //     // self.previousVisits = [];
-    //
-    //     // self.sortFetchedVisits = function() {
+    }])
+// .controller('VisitListController', ['$http','$stateParams', '$scope', function ($http, $stateParams, $scope) {
+
+//     // self.sortFetchedVisits = function() {
     //     //     let currentDate = getCurrentDate();
     //     //
     //     //     $.each(self.visits, function(i, visit) {
