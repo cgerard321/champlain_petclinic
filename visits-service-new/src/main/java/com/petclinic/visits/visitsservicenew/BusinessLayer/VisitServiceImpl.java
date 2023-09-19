@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
+
 
 @Service
 @RequiredArgsConstructor
@@ -60,9 +62,11 @@ public class VisitServiceImpl implements VisitService {
                 .map(EntityDtoUtil::toVisitResponseDTO);
     }
 
+    /*
     @Override
-    public Flux<VisitResponseDTO> getVisitsByPractitionerIdAndMonth(int practitionerId, int month) {
-        return repo.findVisitsByPractitionerIdAndMonth(practitionerId, month)
+    public Flux<VisitResponseDTO> getVisitsByPractitionerIdAndVisitDate(int practitionerId, LocalDateTime visitDate) {
+        return repo.findVisitsByPractitionerIdAndVisitDate(practitionerId, visitDate)
                 .map(EntityDtoUtil::toVisitResponseDTO);
     }
+     */
 }

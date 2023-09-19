@@ -123,8 +123,9 @@ public class BFFApiGatewayController {
         return customersServiceClient.getPetTypes();
     }
 
-
-
+    /**
+     * Visits Methods
+     * **/
     @PutMapping(
             value = "owners/*/pets/{petId}/visits/{visitId}",
             consumes = "application/json",
@@ -167,6 +168,7 @@ public class BFFApiGatewayController {
         return visitsServiceClient.getVisitForPractitioner(practitionerId);
     }
 
+/*
     @GetMapping(value = "visits/calendar/{practitionerId}")
     public Flux<VisitDetails> getVisitsByPractitionerIdAndMonth(@PathVariable("practitionerId") int practitionerId,
                                                                 @RequestParam("dates") List<String> dates) {
@@ -186,7 +188,9 @@ public class BFFApiGatewayController {
                     );
             return owner;
         };
-    }*/
+    }
+    */
+
 
     @PostMapping(
             value = "visit/owners/{ownerId}/pets/{petId}/visits",

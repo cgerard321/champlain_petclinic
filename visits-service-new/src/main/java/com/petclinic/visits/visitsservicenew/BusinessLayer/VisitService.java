@@ -5,6 +5,8 @@ import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
+
 public interface VisitService {
 
     Mono<VisitResponseDTO> addVisit(Mono<VisitRequestDTO> visitRequestDTOMono);
@@ -19,5 +21,6 @@ public interface VisitService {
 
     Flux<VisitResponseDTO> getVisitsForPractitioner(int practitionerId);
 
-    Flux<VisitResponseDTO> getVisitsByPractitionerIdAndMonth(int practitionerId, int month);
+
+    //Flux<VisitResponseDTO> getVisitsByPractitionerIdAndVisitDate(int practitionerId, LocalDateTime visitDate); replace with query params
 }

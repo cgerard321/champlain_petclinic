@@ -7,10 +7,15 @@ import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.expression.ParseException;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -29,7 +34,6 @@ class VisitsControllerIntegrationTest {
 
     private final int PRAC_ID = visitResponseDTO.getPractitionerId();
     private final int PET_ID = visitResponseDTO.getPetId();
-    private final int MONTH = visitResponseDTO.getMonth();
     private final String VISIT_ID = visitResponseDTO.getVisitId();
     private final int dbSize = 1;
 
@@ -40,7 +44,7 @@ class VisitsControllerIntegrationTest {
     }
 
     @Test
-    void getVisitByVisitId(){
+    void getVisitByVisitId() throws ParseException{
         client
                 .get()
                 .uri("/visits/"+VISIT_ID)
@@ -53,9 +57,7 @@ class VisitsControllerIntegrationTest {
                 .jsonPath("$.practitionerId").isEqualTo(visit.getPractitionerId())
                 .jsonPath("$.petId").isEqualTo(visit.getPetId())
                 .jsonPath("$.description").isEqualTo(visit.getDescription())
-                .jsonPath("$.day").isEqualTo(visit.getDay())
-                .jsonPath("$.year").isEqualTo(visit.getYear())
-                .jsonPath("$.month").isEqualTo(visit.getMonth())
+                .jsonPath("$.visitDate").isEqualTo("2022-11-25T13:45:00")
                 .jsonPath("$.status").isEqualTo(visit.isStatus());
     }
     @Test
@@ -75,9 +77,7 @@ class VisitsControllerIntegrationTest {
                     assertEquals(list.get(0).getPractitionerId(), visit.getPractitionerId());
                     assertEquals(list.get(0).getPetId(), visit.getPetId());
                     assertEquals(list.get(0).getDescription(), visit.getDescription());
-                    assertEquals(list.get(0).getDay(), visit.getDay());
-                    assertEquals(list.get(0).getYear(), visit.getYear());
-                    assertEquals(list.get(0).getMonth(), visit.getMonth());
+                    assertEquals(list.get(0).getVisitDate(), visit.getVisitDate());
                     assertEquals(list.get(0).isStatus(), visit.isStatus());
                 });
     }
@@ -99,12 +99,11 @@ class VisitsControllerIntegrationTest {
                     assertEquals(list.get(0).getPractitionerId(), visit.getPractitionerId());
                     assertEquals(list.get(0).getPetId(), visit.getPetId());
                     assertEquals(list.get(0).getDescription(), visit.getDescription());
-                    assertEquals(list.get(0).getDay(), visit.getDay());
-                    assertEquals(list.get(0).getYear(), visit.getYear());
-                    assertEquals(list.get(0).getMonth(), visit.getMonth());
+                    assertEquals(list.get(0).getVisitDate(), visit.getVisitDate());
                     assertEquals(list.get(0).isStatus(), visit.isStatus());
                 });
     }
+    /*
     @Test
     void getVisitsByPractitionerIdAndMonth(){
         client
@@ -128,6 +127,8 @@ class VisitsControllerIntegrationTest {
                     assertEquals(list.get(0).isStatus(), visit.isStatus());
                 });
     }
+     */
+
     @Test
     void addVisit(){
         client
@@ -142,9 +143,7 @@ class VisitsControllerIntegrationTest {
                 .value((visitDTO1) -> {
                     assertEquals(visitDTO1.getDescription(), visit.getDescription());
                     assertEquals(visitDTO1.getPetId(), visit.getPetId());
-                    assertEquals(visitDTO1.getDay(), visit.getDay());
-                    assertEquals(visitDTO1.getMonth(), visit.getMonth());
-                    assertEquals(visitDTO1.getYear(), visit.getYear());
+                    assertEquals(visitDTO1.getVisitDate(), visit.getVisitDate());
                     assertEquals(visitDTO1.getPractitionerId(), visit.getPractitionerId());
                 });
     }
@@ -159,7 +158,7 @@ class VisitsControllerIntegrationTest {
                 .expectBody();
     }
     @Test
-    void updateVisit(){
+    void updateVisit() throws ParseException {
         client
                 .put()
                 .uri("/visits/visits/"+VISIT_ID)
@@ -173,39 +172,35 @@ class VisitsControllerIntegrationTest {
                 .jsonPath("$.practitionerId").isEqualTo(visit.getPractitionerId())
                 .jsonPath("$.petId").isEqualTo(visit.getPetId())
                 .jsonPath("$.description").isEqualTo(visit.getDescription())
-                .jsonPath("$.day").isEqualTo(visit.getDay())
-                .jsonPath("$.year").isEqualTo(visit.getYear())
-                .jsonPath("$.month").isEqualTo(visit.getMonth())
+                .jsonPath("$.visitDate").isEqualTo("2022-11-25T13:45:00")
                 .jsonPath("$.status").isEqualTo(visit.isStatus());
     }
 
     private Visit buildVisit(){
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         return Visit.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
-                .year(2022)
-                .month(11)
-                .day(24)
+                .visitDate(LocalDateTime.parse("2022-11-25T13:45:00", dtf))
                 .description("this is a dummy description")
                 .petId(2)
                 .practitionerId(2)
                 .status(true).build();
     }
+
     private VisitResponseDTO buildVisitResponseDto(){
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         return VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
-                .year(2022)
-                .month(11)
-                .day(24)
+                .visitDate(LocalDateTime.parse("2022-11-25T13:45:00", dtf))
                 .description("this is a dummy description")
                 .petId(2)
                 .practitionerId(2)
                 .status(true).build();
     }
     private VisitRequestDTO buildVisitRequestDto(){
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         return VisitRequestDTO.builder()
-                .year(2022)
-                .month(11)
-                .day(24)
+                .visitDate(LocalDateTime.parse("2022-11-25T13:45:00", dtf))
                 .description("this is a dummy description")
                 .petId(2)
                 .practitionerId(2)

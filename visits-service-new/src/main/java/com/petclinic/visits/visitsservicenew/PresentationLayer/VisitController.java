@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
+
 @RestController
 @RequestMapping("visits")
 @RequiredArgsConstructor
@@ -41,10 +43,12 @@ public class VisitController {
         return visitService.deleteVisit(visitId);
     }
 
+    /*
     @GetMapping(value="practitioner/{practitionerId}/{month}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<VisitResponseDTO> getVisitsByPractitionerIdAndMonth(@PathVariable int practitionerId, @PathVariable int month){
-        return visitService.getVisitsByPractitionerIdAndMonth(practitionerId, month);
+    public Flux<VisitResponseDTO> getVisitsByPractitionerIdAndMonth(@PathVariable int practitionerId, @PathVariable LocalDateTime visitDate){
+        return visitService.getVisitsByPractitionerIdAndVisitDate(practitionerId, visitDate);
     }
+     */
 
     @GetMapping(value="/pets/{petId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VisitResponseDTO> getVisitsForPet(@PathVariable int petId){

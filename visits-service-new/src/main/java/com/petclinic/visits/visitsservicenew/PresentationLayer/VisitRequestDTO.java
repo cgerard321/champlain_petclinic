@@ -6,14 +6,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class VisitRequestDTO {
-    private int year;
-    private int month;
-    private int day;
+
+    private LocalDateTime visitDate;
     private String description;
     private int petId;
     private int practitionerId;

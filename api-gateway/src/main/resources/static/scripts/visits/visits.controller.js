@@ -77,6 +77,7 @@ angular.module('visits')
             });
         }
 
+        /*
         self.getVisitsForPractitionerIdAndMonth = function() {
             let pIdAndMonth = localStorage.getItem("practitionerIdAndMonth");
 
@@ -111,6 +112,7 @@ angular.module('visits')
         $http.get(vetsUrl).then(function (resp) {
             self.vets = resp.data;
         });
+        */
 
         self.loadVetInfo = function() {
             let selectedVetsId = $("#selectedVet").val();

@@ -67,6 +67,7 @@ public class VisitsServiceClient {
                 .bodyToFlux(VisitDetails.class);
     }
 
+    /*
     public Flux<VisitDetails> getVisitsByPractitionerIdAndMonth(final int practitionerId, final String startDate, final String endDate) {
         return webClient
                 .get()
@@ -74,6 +75,7 @@ public class VisitsServiceClient {
                 .retrieve()
                 .bodyToFlux(VisitDetails.class);
     }
+     */
 
     public Flux<VisitDetails> getScheduledVisitsForPet(final int petId) {
         return webClient

@@ -3,6 +3,8 @@ package com.petclinic.visits.visitsservicenew.DataLayer;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 
+import java.time.LocalDateTime;
+
 @Builder
 @Data
 @ToString
@@ -15,11 +17,7 @@ public class Visit {
 
     private String visitId;
 
-    private int year;
-
-    private int month;
-
-    private int day;
+    LocalDateTime visitDate;
 
     private String description;
 

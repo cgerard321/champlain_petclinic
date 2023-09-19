@@ -52,6 +52,11 @@ dependencies {
 	implementation 'io.springfox:springfox-boot-starter:3.0.0'
 
 
+	//for serializing and deserializing java.time.LocalDateTime
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
+
+
 
 
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
