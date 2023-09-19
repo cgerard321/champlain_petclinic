@@ -8,5 +8,7 @@ public interface RatingService {
     Mono<Integer> getNumberOfRatingsByVetId(String vetId);
     Mono<RatingResponseDTO> addRatingToVet(String vetId, Mono<RatingRequestDTO> ratingRequestDTO);
     Mono<Void> deleteRatingByRatingId(String vetId, String ratingId);
+    Mono<Double> getAverageRatingByVetId(String vetId);
+
 
 }

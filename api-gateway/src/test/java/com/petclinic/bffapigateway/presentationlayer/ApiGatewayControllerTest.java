@@ -135,9 +135,36 @@ class ApiGatewayControllerTest {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$").isEqualTo(1);
-    }
+    }    
 
     @Test
+    void getAverageRatingsByVetId(){
+        RatingResponseDTO ratingResponseDTO = buildRatingResponseDTO();
+
+        RatingRequestDTO rating = RatingRequestDTO.builder()
+                .vetId(VET_ID)
+                .rateScore(4.0)
+                .build();
+
+        when(vetsServiceClient.getAverageRatingByVetId(anyString()))
+                .thenReturn(Mono.just(ratingResponseDTO.getRateScore()));
+
+        client
+                .get()
+                .uri("/api/gateway/vets/" + rating.getVetId() + "/ratings/average")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(Double.class)
+                .value(resp->
+                        assertEquals(rating.getRateScore(), ratingResponseDTO.getRateScore()));
+
+    }
+
+
+
+   @Test
     void addRatingToAVet() {
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
                 .vetId(VET_ID)
@@ -650,7 +677,7 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.type").isEqualTo(pet.getType());
 
     }
-    //
+//
 //
 ////TODO
 //    @Test
@@ -1873,3 +1900,5 @@ class ApiGatewayControllerTest {
     }
 
 }
+
+
