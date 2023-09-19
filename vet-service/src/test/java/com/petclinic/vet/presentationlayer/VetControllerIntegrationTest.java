@@ -180,7 +180,6 @@ class VetControllerIntegrationTest {
 
     @Test
     void getAverageRatingByVetId_withInvalidVetId_ShouldThrowNotFound(){
-
         client
                 .get()
                 .uri("/vets/" + INVALID_VET_ID + "/ratings/average")
@@ -192,7 +191,6 @@ class VetControllerIntegrationTest {
                             assertEquals(0.0,avg);
                         }
                 );
-
     }
     @Test
     void getAllVets() {
