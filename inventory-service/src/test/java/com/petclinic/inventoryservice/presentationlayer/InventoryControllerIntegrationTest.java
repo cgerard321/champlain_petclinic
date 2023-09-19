@@ -88,7 +88,7 @@ class InventoryControllerIntegrationTest {
                 .build();
 
         webTestClient.put()
-                .uri("/inventories/{inventoryId}/products/{productId}", "1", "1")
+                .uri("/inventories/{inventoryId}/products/{productId}", inventoryId, productId)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(productRequestDTO)
