@@ -38,6 +38,7 @@
         <th class="vet_phone">Phone</th>
         <th class="vet_email">Email</th>
         <th class="vet_speciality">Specialties</th>
+        <th class="getAverageRating">Average Rating</th>
         <th class="getCountOfRatings">Number of Ratings</th>
         <th>Delete</th>
     </tr>
@@ -52,6 +53,7 @@
 
         <td class="vet_email"><span>{{vet.email}}</span></td>
         <td class="vet_speciality"><span ng-repeat="specialty in vet.specialties">{{specialty.name + ' '}}</span></td>
+        <td class="vet-rating v{{vet.vetId}} centered-count"><span>{{vet.rating}}</span></td>
         <td class="vet-rating v{{vet.vetId}} centered-count"><span>{{vet.count}}</span></td>
         <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteVet(vet.vetId)">Delete Vet</a></td>
     </tr>

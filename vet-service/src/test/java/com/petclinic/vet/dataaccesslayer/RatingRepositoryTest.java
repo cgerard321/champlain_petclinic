@@ -98,5 +98,36 @@ class RatingRepositoryTest {
                 .verifyComplete();
     }
 
+    @Test
+    public void getAverageRatingOfAVet_ShouldSucceed() {
+        Publisher<Rating> setup = ratingRepository.deleteAll()
+                .thenMany(ratingRepository.save(rating1))
+                .thenMany(ratingRepository.save(rating2));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        Rating rating = Rating.builder()
+                .ratingId("1")
+                .vetId("1")
+                .rateScore(5.0)
+                .build();
+
+        Mono<Long> findRatings = ratingRepository.countAllByVetId(rating.getVetId());
+        Publisher<Long> composite = Mono
+                .from(setup)
+                .then(findRatings);
+
+        StepVerifier
+                .create(composite)
+                .consumeNextWith(foundRating -> {
+                    assertEquals(1, foundRating);
+                })
+                .verifyComplete();
+    }
+
+
 
 }

@@ -223,6 +223,13 @@ public class BFFApiGatewayController {
                                              @PathVariable String ratingId){
         return vetsServiceClient.deleteRating(vetId,ratingId);
     }
+
+    @GetMapping(value = "vets/{vetId}/ratings/average")
+    public Mono<ResponseEntity<Double>> getAverageRatingByVetId(@PathVariable String vetId){
+        return vetsServiceClient.getAverageRatingByVetId(VetsEntityDtoUtil.verifyId(vetId))
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
   
     @GetMapping("/vets/{vetId}")
     public Mono<ResponseEntity<VetDTO>> getVetByVetId(@PathVariable String vetId) {
