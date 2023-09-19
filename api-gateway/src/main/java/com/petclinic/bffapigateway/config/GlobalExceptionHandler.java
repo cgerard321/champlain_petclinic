@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.webjars.NotFoundException;
 
 import java.security.GeneralSecurityException;
 
@@ -53,12 +54,15 @@ public class GlobalExceptionHandler {
     }
 
 
-    @ExceptionHandler(value = RuntimeException.class)
+    @ExceptionHandler(value = NotFoundException.class)
     public ResponseEntity<HttpErrorInfo> runtimeException(RuntimeException ex) {
 
-        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
-                .body(new HttpErrorInfo(HttpStatus.UNPROCESSABLE_ENTITY.value(), ex.getMessage()));
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new HttpErrorInfo(HttpStatus.NOT_FOUND.value(), ex.getMessage()));
     }
+
+
+  
 
     @ExceptionHandler(value = NoTokenFoundException.class)
     public ResponseEntity<HttpErrorInfo> noTokenFoundException(NoTokenFoundException ex) {

@@ -18,22 +18,19 @@ var petClinicApp = angular.module('petClinicApp', [
 petClinicApp.factory("authProvider", ["$window", function ($window) {
 
     return {
-        setUser: ({ token, username, email }) => {
-            $window.localStorage.setItem("token", token)
+        setUser: ({ username, email }) => {
             $window.localStorage.setItem("username", username)
             $window.localStorage.setItem("email", email)
         },
         getUser: () => ({
-            token: $window.localStorage.getItem("token"),
             username: $window.localStorage.getItem("username"),
             email: $window.localStorage.getItem("email"),
         }),
         purgeUser: () => {
-            $window.localStorage.removeItem("token")
             $window.localStorage.removeItem("username")
             $window.localStorage.removeItem("email")
         },
-        isLoggedIn: () => !!$window.localStorage.getItem("token")
+        isLoggedIn: () => !!$window.localStorage.getItem("email")
     }
 }]);
 
