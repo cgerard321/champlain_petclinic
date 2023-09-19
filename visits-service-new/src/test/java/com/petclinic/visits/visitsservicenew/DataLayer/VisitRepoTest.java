@@ -38,7 +38,7 @@ class VisitRepoTest {
                     assertEquals(visit1.getMonth(), gotVisit.getMonth());
                     assertEquals(visit1.getYear(), gotVisit.getYear());
                     assertEquals(visit1.getPractitionerId(), gotVisit.getPractitionerId());
-                    assertEquals(visit1.isStatus(), gotVisit.isStatus());
+                    assertEquals(visit1.getStatus(), gotVisit.getStatus());
                 }).verifyComplete();
     }
     @Test
@@ -70,7 +70,7 @@ class VisitRepoTest {
                     assertEquals(visit1.getMonth(), gotVisit.getMonth());
                     assertEquals(visit1.getYear(), gotVisit.getYear());
                     assertEquals(visit1.getPractitionerId(), gotVisit.getPractitionerId());
-                    assertEquals(visit1.isStatus(), gotVisit.isStatus());
+                    assertEquals(visit1.getStatus(), gotVisit.getStatus());
                 }).then(this::deleteVisitByVisitId).verifyComplete();
     }
 
@@ -83,6 +83,6 @@ class VisitRepoTest {
                 .description("this is a dummy description")
                 .petId(petId)
                 .practitionerId(2)
-                .status(true).build();
+                .status(Status.REQUESTED).build();
     }
 }

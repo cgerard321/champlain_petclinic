@@ -1,5 +1,6 @@
 package com.petclinic.visits.visitsservicenew.BusinessLayer;
 
+import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
@@ -56,6 +57,7 @@ class VisitServiceImplTest {
                     assertEquals(visit.getDescription(), foundVisit.getDescription());
                     assertEquals(visit.getPetId(), foundVisit.getPetId());
                     assertEquals(visit.getPractitionerId(), foundVisit.getPractitionerId());
+                    assertEquals(visit.getStatus(), visit.getStatus());
                 }).verifyComplete();
     }
     @Test
@@ -74,6 +76,7 @@ class VisitServiceImplTest {
                     assertEquals(visit.getDescription(), foundVisit.getDescription());
                     assertEquals(visit.getPetId(), foundVisit.getPetId());
                     assertEquals(visit.getPractitionerId(), foundVisit.getPractitionerId());
+                    assertEquals(visit.getStatus(), visit.getStatus());
                 }).verifyComplete();
     }
 
@@ -93,6 +96,7 @@ class VisitServiceImplTest {
                     assertEquals(visit.getDescription(), foundVisit.getDescription());
                     assertEquals(visit.getPetId(), foundVisit.getPetId());
                     assertEquals(visit.getPractitionerId(), foundVisit.getPractitionerId());
+                    assertEquals(visit.getStatus(), visit.getStatus());
                 }).verifyComplete();
     }
     @Test
@@ -111,6 +115,7 @@ class VisitServiceImplTest {
                     assertEquals(visit.getDescription(), foundVisit.getDescription());
                     assertEquals(visit.getPetId(), foundVisit.getPetId());
                     assertEquals(visit.getPractitionerId(), foundVisit.getPractitionerId());
+                    assertEquals(visit.getStatus(), visit.getStatus());
                 }).verifyComplete();
     }
     @Test
@@ -125,6 +130,7 @@ class VisitServiceImplTest {
                     assertEquals(visit.getMonth(), visitDTO1.getMonth());
                     assertEquals(visit.getYear(), visitDTO1.getYear());
                     assertEquals(visit.getPractitionerId(), visitDTO1.getPractitionerId());
+                    assertEquals(visit.getStatus(), visit.getStatus());
                 }).verifyComplete();
     }
     @Test
@@ -147,6 +153,7 @@ class VisitServiceImplTest {
                     assertEquals(visit.getMonth(), visitDTO1.getMonth());
                     assertEquals(visit.getYear(), visitDTO1.getYear());
                     assertEquals(visit.getPractitionerId(), visitDTO1.getPractitionerId());
+                    assertEquals(visit.getStatus(), visit.getStatus());
                 }).verifyComplete();
     }
 
@@ -161,7 +168,7 @@ class VisitServiceImplTest {
                 .description("this is a dummy description")
                 .petId(2)
                 .practitionerId(2)
-                .status(true).build();
+                .status(Status.REQUESTED).build();
     }
     private VisitResponseDTO buildVisitResponseDTO(){
         return VisitResponseDTO.builder()
@@ -172,7 +179,7 @@ class VisitServiceImplTest {
                 .description("this is a dummy description")
                 .petId(2)
                 .practitionerId(2)
-                .status(true).build();
+                .status(Status.REQUESTED).build();
     }
     private VisitRequestDTO buildVisitRequestDTO() {
         return VisitRequestDTO.builder()
@@ -182,7 +189,7 @@ class VisitServiceImplTest {
                 .description("this is a dummy description")
                 .petId(2)
                 .practitionerId(2)
-                .status(true)
+                .status(Status.REQUESTED)
                 .build();
     }
 

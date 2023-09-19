@@ -1,4 +1,5 @@
 package com.petclinic.visits.visitsservicenew.PresentationLayer;
+import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
 import org.junit.jupiter.api.BeforeEach;
@@ -56,7 +57,7 @@ class VisitsControllerIntegrationTest {
                 .jsonPath("$.day").isEqualTo(visit.getDay())
                 .jsonPath("$.year").isEqualTo(visit.getYear())
                 .jsonPath("$.month").isEqualTo(visit.getMonth())
-                .jsonPath("$.status").isEqualTo(visit.isStatus());
+                .jsonPath("$.status").isEqualTo(visit.getStatus());
     }
     @Test
     void getVisitByPractitionerId(){
@@ -78,7 +79,7 @@ class VisitsControllerIntegrationTest {
                     assertEquals(list.get(0).getDay(), visit.getDay());
                     assertEquals(list.get(0).getYear(), visit.getYear());
                     assertEquals(list.get(0).getMonth(), visit.getMonth());
-                    assertEquals(list.get(0).isStatus(), visit.isStatus());
+                    assertEquals(list.get(0).getStatus(), visit.getStatus());
                 });
     }
 
@@ -102,7 +103,7 @@ class VisitsControllerIntegrationTest {
                     assertEquals(list.get(0).getDay(), visit.getDay());
                     assertEquals(list.get(0).getYear(), visit.getYear());
                     assertEquals(list.get(0).getMonth(), visit.getMonth());
-                    assertEquals(list.get(0).isStatus(), visit.isStatus());
+                    assertEquals(list.get(0).getStatus(), visit.getStatus());
                 });
     }
     @Test
@@ -125,7 +126,7 @@ class VisitsControllerIntegrationTest {
                     assertEquals(list.get(0).getDay(), visit.getDay());
                     assertEquals(list.get(0).getYear(), visit.getYear());
                     assertEquals(list.get(0).getMonth(), visit.getMonth());
-                    assertEquals(list.get(0).isStatus(), visit.isStatus());
+                    assertEquals(list.get(0).getStatus(), visit.getStatus());
                 });
     }
     @Test
@@ -176,7 +177,7 @@ class VisitsControllerIntegrationTest {
                 .jsonPath("$.day").isEqualTo(visit.getDay())
                 .jsonPath("$.year").isEqualTo(visit.getYear())
                 .jsonPath("$.month").isEqualTo(visit.getMonth())
-                .jsonPath("$.status").isEqualTo(visit.isStatus());
+                .jsonPath("$.status").isEqualTo(visit.getStatus());
     }
 
     private Visit buildVisit(){
@@ -188,7 +189,7 @@ class VisitsControllerIntegrationTest {
                 .description("this is a dummy description")
                 .petId(2)
                 .practitionerId(2)
-                .status(true).build();
+                .status(Status.REQUESTED).build();
     }
     private VisitResponseDTO buildVisitResponseDto(){
         return VisitResponseDTO.builder()
@@ -199,7 +200,7 @@ class VisitsControllerIntegrationTest {
                 .description("this is a dummy description")
                 .petId(2)
                 .practitionerId(2)
-                .status(true).build();
+                .status(Status.REQUESTED).build();
     }
     private VisitRequestDTO buildVisitRequestDto(){
         return VisitRequestDTO.builder()
@@ -209,6 +210,6 @@ class VisitsControllerIntegrationTest {
                 .description("this is a dummy description")
                 .petId(2)
                 .practitionerId(2)
-                .status(true).build();
+                .status(Status.REQUESTED).build();
     }
 }

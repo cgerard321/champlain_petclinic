@@ -27,6 +27,6 @@ public class Visit {
 
     private int practitionerId;
 
-    private boolean status;
+    private Status status;
 
 }

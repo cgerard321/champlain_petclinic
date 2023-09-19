@@ -2,6 +2,7 @@ package com.petclinic.visits.visitsservicenew.PresentationLayer;
 
 
 import com.petclinic.visits.visitsservicenew.BusinessLayer.VisitService;
+import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +48,7 @@ class VisitControllerUnitTest {
                 .jsonPath("$.description").isEqualTo(visitResponseDTO.getDescription())
                 .jsonPath("$.petId").isEqualTo(visitResponseDTO.getPetId())
                 .jsonPath("$.practitionerId").isEqualTo(visitResponseDTO.getPractitionerId())
-                .jsonPath("$.status").isEqualTo(visitResponseDTO.isStatus());
+                .jsonPath("$.status").isEqualTo(visitResponseDTO.getStatus());
 
         Mockito.verify(visitService, times(1)).getVisitByVisitId(Visit_UUID_OK);
     }
@@ -150,7 +151,7 @@ class VisitControllerUnitTest {
                 .description("this is a dummy description")
                 .petId(2)
                 .practitionerId(2)
-                .status(true).build();
+                .status(Status.REQUESTED).build();
     }
     private VisitRequestDTO buildVisitRequestDTO(){
         return VisitRequestDTO.builder()
@@ -160,6 +161,6 @@ class VisitControllerUnitTest {
                 .description("this is a dummy description")
                 .petId(2)
                 .practitionerId(2)
-                .status(true).build();
+                .status(Status.REQUESTED).build();
     }
 }
