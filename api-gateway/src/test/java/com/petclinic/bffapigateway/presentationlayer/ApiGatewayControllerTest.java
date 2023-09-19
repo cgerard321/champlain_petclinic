@@ -34,6 +34,8 @@ import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+
+import static org.assertj.core.util.Lists.list;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -1436,10 +1438,23 @@ class ApiGatewayControllerTest {
                 .expectBody();
 
         assertEquals(visitsServiceClient.getVisitsForPet(1), null);
-
-
     }
+    @Test
+    void shouldGetAllVisits() {
+        final VisitResponseDTO visitResponseDTO = new VisitResponseDTO("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee", 2023, 11, 20, "test visit", 1, 1, false);
+        final VisitResponseDTO visitResponseDTO2 = new VisitResponseDTO("73fa7b2-e04e-47b8-98e7-4adf7cfaaee", 2023, 11, 20, "test visit", 1, 1, false);
+        when(visitsServiceClient.getAllVisits()).thenReturn(Flux.just(visitResponseDTO,visitResponseDTO2));
 
+        client.get()
+                .uri("/api/gateway/visits")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
+                .expectBodyList(VisitResponseDTO.class)
+                .value((list)->assertEquals(list.size(),2));
+        Mockito.verify(visitsServiceClient,times(1)).getAllVisits();
+    }
     @Test
     void shouldGetAVisit() {
         VisitDetails visit = new VisitDetails();

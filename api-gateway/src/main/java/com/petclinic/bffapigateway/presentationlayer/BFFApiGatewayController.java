@@ -24,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -132,32 +133,9 @@ public class BFFApiGatewayController {
 
 
 
-    @PutMapping(
-            value = "owners/*/pets/{petId}/visits/{visitId}",
-            consumes = "application/json",
-            produces = "application/json"
-    )
-    Mono<VisitDetails> updateVisit(@RequestBody VisitDetails visit, @PathVariable int petId, @PathVariable String visitId) {
-        visit.setPetId(petId);
-        visit.setVisitId(visitId);
-        return visitsServiceClient.updateVisitForPet(visit);
-    }
 
-    @DeleteMapping (value = "visits/{visitId}")
-    public Mono<Void> deleteVisitsByVisitId(final @PathVariable String visitId){
-        return visitsServiceClient.deleteVisitByVisitId(visitId);
-    }
-
-    @GetMapping(value = "visits/pets/{petId}")
-    public Flux<VisitDetails> getVisitsForPet(final @PathVariable int petId){
-        return visitsServiceClient.getVisitsForPet(petId);
-    }
-
-    @GetMapping(value ="visits/{visitId}")
-    public Mono<VisitResponseDTO>  getVisitByVisitId(final @PathVariable String visitId){
-        return visitsServiceClient.getVisitByVisitId(visitId);
-    }
-    
+    @GetMapping(value = "visits", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<VisitResponseDTO> getAllVisits() {return visitsServiceClient.getAllVisits();}
     @GetMapping(value = "visits/previous/{petId}")
     public Flux<VisitDetails> getPreviousVisitsForPet(@PathVariable final int petId) {
         return visitsServiceClient.getPreviousVisitsForPet(petId);
@@ -166,9 +144,8 @@ public class BFFApiGatewayController {
     @GetMapping(value = "visits/scheduled/{petId}")
     public Flux<VisitDetails> getScheduledVisitsForPet(@PathVariable final int petId) {
         return visitsServiceClient.getScheduledVisitsForPet(petId);
-
     }
-    
+
     @GetMapping(value = "visits/vets/{practitionerId}")
     public Flux<VisitDetails> getVisitForPractitioner(@PathVariable int practitionerId){
         return visitsServiceClient.getVisitForPractitioner(practitionerId);
@@ -179,8 +156,16 @@ public class BFFApiGatewayController {
                                                                 @RequestParam("dates") List<String> dates) {
         String startDate = dates.get(0);
         String endDate = dates.get(1);
-
         return visitsServiceClient.getVisitsByPractitionerIdAndMonth(practitionerId, startDate, endDate);
+    }
+    @GetMapping(value = "visits/pets/{petId}")
+    public Flux<VisitDetails> getVisitsForPet(final @PathVariable int petId){
+        return visitsServiceClient.getVisitsForPet(petId);
+    }
+
+    @GetMapping(value ="visits/{visitId}")
+    public Mono<VisitResponseDTO>  getVisitByVisitId(final @PathVariable String visitId){
+        return visitsServiceClient.getVisitByVisitId(visitId);
     }
 
     /*private Function<Visits, OwnerResponseDTO> addVisitsToOwner(OwnerResponseDTO owner) {
@@ -195,14 +180,20 @@ public class BFFApiGatewayController {
         };
     }*/
 
-    @PostMapping(
-            value = "visit/owners/{ownerId}/pets/{petId}/visits",
-            consumes = "application/json",
-            produces = "application/json"
-    )
+    @PostMapping(value = "visit/owners/{ownerId}/pets/{petId}/visits", consumes = "application/json", produces = "application/json")
     Mono<VisitDetails> addVisit(@RequestBody VisitDetails visit, @PathVariable String ownerId, @PathVariable String petId) {
         visit.setPetId(Integer.parseInt(petId));
         return visitsServiceClient.createVisitForPet(visit);
+    }
+    @PutMapping(value = "owners/*/pets/{petId}/visits/{visitId}", consumes = "application/json", produces = "application/json")
+    Mono<VisitDetails> updateVisit(@RequestBody VisitDetails visit, @PathVariable int petId, @PathVariable String visitId) {
+        visit.setPetId(petId);
+        visit.setVisitId(visitId);
+        return visitsServiceClient.updateVisitForPet(visit);
+    }
+    @DeleteMapping (value = "visits/{visitId}")
+    public Mono<Void> deleteVisitsByVisitId(final @PathVariable String visitId){
+        return visitsServiceClient.deleteVisitByVisitId(visitId);
     }
 
     @GetMapping(value = "vets")
