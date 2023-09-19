@@ -8,8 +8,10 @@ import com.petclinic.inventoryservice.presentationlayer.InventoryResponseDTO;
 import com.petclinic.inventoryservice.presentationlayer.ProductRequestDTO;
 import com.petclinic.inventoryservice.presentationlayer.ProductResponseDTO;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -26,9 +28,9 @@ import static org.mockito.Mockito.when;
 class ProductInventoryServiceUnitTest {
     @Autowired
     ProductInventoryService productInventoryService;
-    @Autowired
+    @MockBean
     ProductRepository productRepository;
-    @Autowired
+    @MockBean
     InventoryRepository inventoryRepository;
 
 
@@ -89,6 +91,63 @@ class ProductInventoryServiceUnitTest {
 //                })
 //                .verifyComplete();
 //    }
+
+    @Test
+    void updateProductInInventory_ValidRequest_ShouldUpdateAndReturnProduct() {
+        // Arrange
+        String inventoryId = "1";
+        String productId = UUID.randomUUID().toString();
+
+        ProductRequestDTO productRequestDTO = ProductRequestDTO.builder()
+                .productName("Updated Product Name")
+                .productPrice(99.99)
+                .productQuantity(20)
+                .build();
+
+        Inventory inventory = Inventory.builder()
+                .id("1")
+                .inventoryId("1")
+                .inventoryType("Medication")
+                .inventoryDescription("Medication for procedures")
+                .build();
+
+        Product existingProduct = Product.builder()
+                .id("1")
+                .inventoryId(inventoryId)
+                .productId(productId)
+                .productName("Original Product Name")
+                .productPrice(50.0)
+                .productQuantity(10)
+                .build();
+
+        Product updatedProduct = Product.builder()
+                .id("1")
+                .inventoryId(inventoryId)
+                .productId(productId)
+                .productName("Updated Product Name")
+                .productPrice(99.99)
+                .productQuantity(20)
+                .build();
+
+        when(inventoryRepository.findInventoryByInventoryId(anyString())).thenReturn(Mono.just(inventory));
+
+        when(productRepository.findProductByProductId(anyString())).thenReturn(Mono.just(existingProduct));
+
+        when(productRepository.save(any(Product.class))).thenReturn(Mono.just(updatedProduct));
+
+        // Act and Assert
+        StepVerifier
+                .create(productInventoryService.updateProductInInventory(Mono.just(productRequestDTO), inventoryId, productId))
+                .expectNextMatches(responseDTO -> {
+                    assertNotNull(responseDTO);
+                    assertEquals(productId, responseDTO.getProductId());
+                    assertEquals("Updated Product Name", responseDTO.getProductName());
+                    assertEquals(99.99, responseDTO.getProductPrice());
+                    assertEquals(20, responseDTO.getProductQuantity());
+                    return true;
+                })
+                .verifyComplete();
+    }
 
 
 
