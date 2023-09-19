@@ -21,27 +21,23 @@ angular.module('visitList')
             }
         }
     }])
-// .controller('VisitListController', ['$http','$stateParams', '$scope', function ($http, $stateParams, $scope) {
-
 //     // self.sortFetchedVisits = function() {
-    //     //     let currentDate = getCurrentDate();
-    //     //
+    //     //     let currentDate = getCurrentDate()
     //     //     $.each(self.visits, function(i, visit) {
     //     //         let selectedVisitDate = Date.parse(visit.date);
-    //     //
     //     //         if(selectedVisitDate >= currentDate) {
-    //     //             self.upcomingVisits.push(visit);
+    //     //             self.upcomingVisits.push(visit)
     //     //         } else {
-    //     //             self.previousVisits.push(visit);
+    //     //             self.previousVisits.push(visit)
     //     //         }
-    //     //     });
+    //     //     })
     //     // }
     //     // function getCurrentDate() {
-    //     //     let dateObj = new Date();
-    //     //     var dd = String(dateObj.getDate()).padStart(2, '0');
-    //     //     var mm = String(dateObj.getMonth() + 1).padStart(2, '0');
-    //     //     var yyyy = dateObj.getFullYear();
-    //     //     return Date.parse(yyyy + '-' + mm + '-' + dd);
+    //     //     let dateObj = new Date()
+    //     //     var dd = String(dateObj.getDate()).padStart(2, '0')
+    //     //     var mm = String(dateObj.getMonth() + 1).padStart(2, '0')
+    //     //     var yyyy = dateObj.getFullYear()
+    //     //     return Date.parse(yyyy + '-' + mm + '-' + dd)
     //     // }
-    // }]);
+    // }])
 
