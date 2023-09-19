@@ -8,7 +8,22 @@ angular.module('productForm')
 
         // post request to create a new product
         self.submitProductForm = function () {
-            $http.post('api/gateway/inventory/' + inventoryId + '/products', self.product)
+            console.log(self.product.productName)
+            console.log(self.product.productDescription)
+            console.log(self.product.productPrice)
+            console.log(self.product.productQuantity)
+            $http.post('/api/gateway/inventory/' + inventoryId + '/products', {
+                productName: self.product.productName,
+                productDescription: self.product.productDescription,
+                productPrice: self.product.productPrice,
+                productQuantity: self.product.productQuantity
+
+                }
+                // productName: $scope.product.productName,
+                // productDescription: $scope.product.productDescription,
+                // productPrice: $scope.product.productPrice,
+                // productQuantity: $scope.product.productQuantity
+            )
                 .then(function (response) {
                     $state.go('productList');
                 }, function (response) {
