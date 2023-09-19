@@ -7,6 +7,7 @@ import com.petclinic.bffapigateway.dtos.Auth.Role;
 import com.petclinic.bffapigateway.dtos.Bills.BillDetails;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
 import com.petclinic.bffapigateway.dtos.Vets.*;
@@ -1272,29 +1273,8 @@ class ApiGatewayControllerTest {
                     .expectBody();
 
             assertEquals(billResponseDTO.getBillId(),"9");
-        BillDetails bill = new BillDetails();
-        bill.setBillId("9");
-
-        bill.setDate(null);
-
-        bill.setAmount(600);
-
-        bill.setVisitType("Adoption");
-
-        when(billServiceClient.createBill(bill))
-                .thenReturn(Mono.just(bill));
 
 
-        client.post()
-                .uri("/api/gateway/bills")
-                .body(Mono.just(bill), BillDetails.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody();
-
-        assertEquals(bill.getBillId(),"9");
         client.delete()
                 .uri("/api/gateway/bills/9")
                 .accept(MediaType.APPLICATION_JSON)
