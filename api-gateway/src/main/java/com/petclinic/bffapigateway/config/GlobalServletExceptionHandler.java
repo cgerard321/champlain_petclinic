@@ -38,7 +38,7 @@ public class GlobalServletExceptionHandler implements ErrorWebExceptionHandler {
                 }
                 default -> {
                     log.error("Exception not handled: {}", ex.getClass().getSimpleName());
-                    status = HttpStatus.INTERNAL_SERVER_ERROR;
+                    status = HttpStatus.UNPROCESSABLE_ENTITY;
                 }
             }
             // Handle any other exception types here

@@ -36,9 +36,6 @@ public class RoleFilter implements WebFilter {
 
     }
 
-
-
-
     @SuppressWarnings("NullableProblems")
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
@@ -75,11 +72,20 @@ public class RoleFilter implements WebFilter {
 
         List<String> roles = jwtTokenUtil.getRolesFromToken(token);
 
+
         log.debug("Roles: {}", roles);
+
 
         if (roles == null) {
             return Mono.error(new InvalidTokenException("Unauthorized, invalid token"));
         }
+
+
+        if (roles.contains(Roles.ADMIN.toString())) {
+            return chain.filter(exchange);
+        }
+
+
 
         for (String role : roles) {
             role = role.replace("[", "")

@@ -6,6 +6,7 @@ import com.petclinic.bffapigateway.dtos.Auth.UserPasswordLessDTO;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Rethrower;
 import com.petclinic.bffapigateway.exceptions.InvalidTokenException;
+import com.petclinic.bffapigateway.utils.Security.Variables.SecurityConst;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -190,7 +191,7 @@ public class AuthServiceClient {
                 .post()
                 .uri(authServiceUrl + "/users/validate-token")
                 .bodyValue(jwtToken)
-                .cookie("Bearer", jwtToken)
+                .cookie(SecurityConst.TOKEN_PREFIX, jwtToken)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> Mono.error(new InvalidTokenException("Invalid token")))
                 .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> Mono.error(new InvalidInputException("Invalid token")))

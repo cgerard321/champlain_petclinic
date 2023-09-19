@@ -19,9 +19,8 @@ import java.util.*;
 @RequiredArgsConstructor
 public class JwtTokenUtil implements Serializable {
 
-    private final UserRepo userRepo;
 
-    private static final long serialVersionUID = -5625635588908941275L;
+
 
     private static final String CLAIM_KEY_USERNAME = "sub";
     private static final String CLAIM_KEY_CREATED = "created";
@@ -78,7 +77,6 @@ public class JwtTokenUtil implements Serializable {
         Map<String, Object> claims = new HashMap<>();
         claims.put(CLAIM_KEY_USERNAME, user.getUsername());
         claims.put(CLAIM_KEY_CREATED, new Date());
-        ArrayList<String> roles = new ArrayList<>();
         claims.put(CLAIM_KEY_ROLES, user.getRoles().stream().map(Role::getName).toArray(String[]::new));
         log.info("Claims are {}", claims.get(CLAIM_KEY_ROLES));
         log.info(user.getAuthorities().toString());
@@ -88,7 +86,7 @@ public class JwtTokenUtil implements Serializable {
     }
     
     String generateToken(Map<String, Object> claims) {
-        Date expirationDate = Date.from(ZonedDateTime.now().plusMinutes(60).toInstant());
+        Date expirationDate = Date.from(ZonedDateTime.now().plusMinutes(SecurityConst.EXPIRATION_TIME_MINUTES).toInstant());
         log.info("Expiration date is {}", expirationDate);
         return Jwts.builder()
                 .setClaims(claims)

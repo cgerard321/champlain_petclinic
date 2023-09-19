@@ -1,9 +1,14 @@
 package com.auth.authservice.security;
 
+import org.springframework.stereotype.Component;
+
+@Component
 public class SecurityConst {
 
-    public static final long EXPIRATION_TIME = 60 * 60 * 1000;     // 24 hours
-    public static final String SECRET = "mkcyetrmjcqLjOkwM08M676tl8LPnkgKHD2HlIpsYcSI8zGIiobE7yZ4N5JElvYMlTE8qqjTJ09JcqAsKdNxVA";     // jwt secret
-    public static final String TOKEN_PREFIX = "Bearer";         // Token prefix
-    public static final String HEADER_STRING = "Authorization"; // header key
+
+    public static long EXPIRATION_TIME_MINUTES = 60;     // 24 hours
+    public static String SECRET = "mkcyetrmjcqLjOkwM08M676tl8LPnkgKHD2HlIpsYcSI8zGIiobE7yZ4N5JElvYMlTE8qqjTJ09JcqAsKdNxVA";     // jwt secret
+    public static String TOKEN_PREFIX = "Bearer";
+
+    // Token prefix
 }

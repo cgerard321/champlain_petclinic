@@ -54,16 +54,6 @@ public class JwtTokenUtil implements Serializable {
 
 
 
-    public Date getExpirationDateFromToken(String token) {
-        Date expiration;
-        try {
-            final Claims claims = getClaimsFromToken(token);
-            expiration = claims.getExpiration();
-        } catch (Exception e) {
-            expiration = null;
-        }
-        return expiration;
-    }
 
     private Claims getClaimsFromToken(String token) {
         Claims claims;
@@ -101,11 +91,11 @@ public class JwtTokenUtil implements Serializable {
 
         String token;
 
-        token = Arrays.stream(allCookies).filter(cookie -> cookie.contains("Bearer")).findFirst().orElseThrow(() -> new InvalidTokenException("Token is invalid"));
+        token = Arrays.stream(allCookies).filter(cookie -> cookie.contains(SecurityConst.TOKEN_PREFIX)).findFirst().orElseThrow(() -> new InvalidTokenException("Token is invalid"));
 
 
 
-        token = token.replace("Bearer=", "");
+        token = token.replace(SecurityConst.TOKEN_PREFIX+"=", "");
         token = token.replace(";", "");
         token = token.replace(" ", "");
 

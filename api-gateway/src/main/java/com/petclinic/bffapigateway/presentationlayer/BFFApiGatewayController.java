@@ -83,6 +83,7 @@ public class BFFApiGatewayController {
     }
 
 
+
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
     @GetMapping(value = "bills/customer/{customerId}")
     public Flux<BillResponseDTO> getBillsByOwnerId(final @PathVariable int customerId)
@@ -276,9 +277,7 @@ public class BFFApiGatewayController {
     public Mono<Void> deleteVet(@PathVariable String vetId) {
         return vetsServiceClient.deleteVet(VetsEntityDtoUtil.verifyId(vetId));
     }
-//
-//
-//
+
 //    @PostMapping(value = "users",
 //            consumes = "application/json",
 //            produces = "application/json")
@@ -407,6 +406,7 @@ public class BFFApiGatewayController {
 //    public Mono<UserDetails> verifyUser(@PathVariable final String token) {
 //        return authServiceClient.verifyUser(token);
 //    }
+
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @PostMapping(value = "/users/login",produces = "application/json;charset=utf-8;", consumes = "application/json")

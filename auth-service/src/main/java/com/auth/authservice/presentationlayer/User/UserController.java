@@ -22,6 +22,7 @@ import com.auth.authservice.datalayer.user.User;
 import com.auth.authservice.datamapperlayer.UserMapper;
 
 import com.auth.authservice.security.JwtTokenUtil;
+import com.auth.authservice.security.SecurityConst;
 import com.auth.authservice.security.UserPrincipalImpl;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -135,7 +136,7 @@ public class UserController {
             User loggedInUser = userService.getUserByEmail(login.getEmail());
             log.info("User retrieved from db");
 
-            ResponseCookie token = ResponseCookie.from("Bearer", jwtService.generateToken(loggedInUser))
+            ResponseCookie token = ResponseCookie.from(SecurityConst.TOKEN_PREFIX, jwtService.generateToken(loggedInUser))
                     .httpOnly(true)
                     .secure(true)
                     .path("/api/gateway")
