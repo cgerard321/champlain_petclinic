@@ -40,9 +40,12 @@ public class BillServiceImpl implements BillService{
     }
 
     @Override
-    public Mono<BillResponseDTO> CreateBill(Mono<BillRequestDTO> model) {
+    public Mono<BillResponseDTO> CreateBill(Mono<BillRequestDTO> billRequestDTO) {
 
-            return model
+            return billRequestDTO
+//                    .map(RequestContextAdd::new)
+//                    .flatMap(this::vetRequestResponse)
+//                    .flatMap(this::ownerRequestResponse)
                     .map(EntityDtoUtil::toBillEntity)
                     .doOnNext(e -> e.setBillId(EntityDtoUtil.generateUUIDString()))
                     .flatMap(billRepository::insert)
