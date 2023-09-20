@@ -10,16 +10,23 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.UUID;
+
 @Service
 public class OwnerServiceImpl implements OwnerService {
 
     @Autowired
     OwnerRepo ownerRepo;
 
+    // insertOwner has been updated, now sets a UUID for ownerId rather than leave null
     @Override
     public Mono<Owner> insertOwner(Mono<Owner> ownerMono) {
-        return ownerMono.flatMap(ownerRepo::insert);
+        return ownerMono.map(owner -> {
+            owner.setOwnerId(UUID.randomUUID().toString());
+            return owner;
+        }).flatMap(ownerRepo::insert);
     }
+
 
     // get owner by ownerId has been updated and now return
     @Override
