@@ -56,7 +56,7 @@
     <tbody>
     <tr id="visitId" ng-repeat="v in $ctrl.upcomingVisits | filter:$ctrl.query track by v.visitId" data-table-name="upcomingVisits">
         <td class="col-sm-2">{{v.visitId}}</td>
-        <td class="col-sm-2">{{v.month}}-{{v.day}}-{{v.year}}</td>
+        <td class="col-sm-2">{{v.visitDate | date:'yyyy-MM-ddTHH:mm:ss'}}</td>
         <td style="white-space: pre-line">{{v.description}}</td>
 <!--        <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>-->
         <td style="white-space: pre-line">{{v.practitionerId}}</td>
@@ -87,7 +87,7 @@
     <tbody>
     <tr id="v2visitId" ng-repeat="v in $ctrl.previousVisits | filter:$ctrl.query track by v.visitId" data-table-name="previousVisits">
         <td class="col-sm-2">{{v.visitId}}</td>
-        <td class="col-sm-2">{{v.month}}-{{v.day}}-{{v.year}}</td>
+        <td class="col-sm-2">{{v.visitDate | date:'yyyy-MM-ddTHH:mm:ss'}}</td>
         <td style="white-space: pre-line">{{v.description}}</td>
         <!--        <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>-->
         <td style="white-space: pre-line">{{v.practitionerId}}</td>
