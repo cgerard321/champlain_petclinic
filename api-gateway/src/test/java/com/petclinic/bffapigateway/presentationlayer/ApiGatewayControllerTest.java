@@ -177,7 +177,7 @@ class ApiGatewayControllerTest {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$").isEqualTo(1);
-    }    
+    }
 
     @Test
     void getAverageRatingsByVetId(){
