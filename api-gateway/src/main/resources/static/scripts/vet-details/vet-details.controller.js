@@ -84,10 +84,18 @@ angular.module('vetDetails')
                 console.log(resp.data)
                 self.rating = resp.data;
                 alert('Your review was successfully added!');
+
+                document.getElementById("ratingScore").value = ""
+                document.getElementById("ratingDescription").value = ""
+                //refresh list
+                $http.get('api/gateway/vets/' + $stateParams.vetId + '/ratings').then(function (resp) {
+                    self.ratings = resp.data;
+                    arr = resp.data;
+                });
             }, function (response) {
                 let error = "Missing rating, please input a rating.";
                 alert(error);
-            });
+            })
         };
         function uuidv4() {
             return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
