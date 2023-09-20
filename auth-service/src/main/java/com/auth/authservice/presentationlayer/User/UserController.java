@@ -44,6 +44,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
@@ -125,31 +126,12 @@ public class UserController {
         log.info("In controller");
 
         try {
-            authenticationManager
-                    .authenticate(
-                            new UsernamePasswordAuthenticationToken(
-                                    login.getEmail(), login.getPassword()
-                            )
-                    );
-            log.info("User authenticated");
 
-            log.info("User principal retrieved");
-
-            User loggedInUser = userService.getUserByEmail(login.getEmail());
-            log.info("User retrieved from db");
-
-            ResponseCookie token = ResponseCookie.from(securityConst.getTOKEN_PREFIX(), jwtService.generateToken(loggedInUser))
-                    .httpOnly(true)
-                    .secure(true)
-                    .path("/api/gateway")
-                    .maxAge(Duration.ofHours(1))
-                    .sameSite("Lax").build();
-
-
-            log.info("In controller before set header");
-            response.setHeader(HttpHeaders.SET_COOKIE, token.toString());
-            log.info("Token : {}", token);
-            log.info("Token value : {}", token.getValue());
+            HashMap<String, Object> userAndToken = userService.login(login);
+            ResponseCookie token = (ResponseCookie) userAndToken.get("token");
+            User loggedInUser = (User) userAndToken.get("user");
+            response.setHeader(HttpHeaders.COOKIE, token.toString());
+            log.info("Token : {}", token.getValue());
 
             log.info("In controller after set header");
             UserPasswordLessDTO testUser = userMapper.modelToIDLessPasswordLessDTO(loggedInUser);
@@ -157,7 +139,6 @@ public class UserController {
                     .body(testUser);
         } catch (BadCredentialsException ex) {
             log.info("Bad credentials exception");
-
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }

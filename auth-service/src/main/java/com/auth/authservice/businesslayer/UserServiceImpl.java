@@ -22,6 +22,7 @@ import com.auth.authservice.presentationlayer.User.UserIDLessRoleLessDTO;
 import com.auth.authservice.presentationlayer.User.UserPasswordLessDTO;
 import com.auth.authservice.presentationlayer.User.UserTokenPair;
 import com.auth.authservice.security.JwtTokenUtil;
+import com.auth.authservice.security.SecurityConst;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -38,6 +40,7 @@ import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
 import java.nio.file.attribute.UserPrincipal;
+import java.time.Duration;
 import java.util.*;
 
 import static java.lang.String.format;
@@ -47,6 +50,7 @@ import static java.lang.String.format;
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
+    private final SecurityConst securityConst;
     private final UserRepo userRepo;
     //private final RoleRepo roleRepo;
     private final UserMapper userMapper;
@@ -123,7 +127,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void deleteUser(long userId) {
+    public void deleteUser
+            (long userId) {
         log.info("deleteUser: trying to delete entity with userId: {}", userId);
         userRepo.findById(userId).ifPresent(userRepo::delete);
     }
@@ -158,24 +163,43 @@ public class UserServiceImpl implements UserService {
     }
 
 
-//    @Override
-//    public UserPrincipal login(UserIDLessRoleLessDTO login) throws IncorrectPasswordException {
-//        try {
-//            Authentication authenticate = authenticationManager
-//                    .authenticate(
-//                            new UsernamePasswordAuthenticationToken(
-//                                    login.getEmail(), login.getPassword()
-//                            )
-//                    );
-//
-//            UserPrincipal user = (UserPrincipal) authenticate.getPrincipal();
-//
-//            return user;
-//
-//        } catch (BadCredentialsException ex) {
-//            throw ex;
-//        }
-//    }
+    @Override
+    public HashMap<String,Object> login(UserIDLessRoleLessDTO login) throws IncorrectPasswordException {
+
+
+        try {
+            authenticationManager
+                    .authenticate(
+                            new UsernamePasswordAuthenticationToken(
+                                    login.getEmail(), login.getPassword()
+                            )
+                    );
+            log.info("User authenticated");
+
+            log.info("User principal retrieved");
+
+            User loggedInUser = getUserByEmail(login.getEmail());
+            log.info("User retrieved from db");
+
+            ResponseCookie token = ResponseCookie.from(securityConst.getTOKEN_PREFIX(), jwtService.generateToken(loggedInUser))
+                    .httpOnly(true)
+                    .secure(true)
+                    .path("/api/gateway")
+                    .maxAge(Duration.ofHours(1))
+                    .sameSite("Lax").build();
+
+
+            log.info("In controller before set header");
+
+            return new HashMap<>() {{
+                put("token", token);
+                put("user", loggedInUser);
+            }};
+        }
+        catch (BadCredentialsException e){
+            throw new IncorrectPasswordException("Incorrect password for user with email: " + login.getEmail());
+        }
+    }
 
     @Override
     public User getUserByEmail(String email) throws NotFoundException {

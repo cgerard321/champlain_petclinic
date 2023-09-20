@@ -3,7 +3,6 @@ package com.petclinic.bffapigateway.presentationlayer;
 
 import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.Auth.Login;
-import com.petclinic.bffapigateway.dtos.Auth.Role;
 import com.petclinic.bffapigateway.dtos.Auth.UserPasswordLessDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillDetails;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
@@ -34,8 +33,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
-import static org.springframework.http.HttpHeaders.AUTHORIZATION;
-
 /**
  * @author Maciej Szarlinski
  * @author Christine Gerard
@@ -61,7 +58,7 @@ public class BFFApiGatewayController {
 
     private final InventoryServiceClient inventoryServiceClient;
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
     @GetMapping(value = "bills/{billId}")
     public Mono<BillResponseDTO> getBillingInfo(final @PathVariable String billId)
     {
@@ -306,20 +303,6 @@ public class BFFApiGatewayController {
 //        return authServiceClient.updateUser(userId, model);
 //    }
 
-    @GetMapping(value = "admin/roles")
-    public Flux<Role> getRoles(@RequestHeader(AUTHORIZATION) String auth) {
-        return authServiceClient.getRoles(auth);
-    }
-
-    @DeleteMapping(value = "admin/roles/{id}")
-    public Mono<Void> deleteRole(@RequestHeader(AUTHORIZATION) String auth, @PathVariable int id) {
-        return authServiceClient.deleteRole(auth, id);
-    }
-
-    @PostMapping(value = "admin/roles")
-    public Mono<Role> addRole(@RequestHeader(AUTHORIZATION) String auth, @RequestBody final Role model) {
-        return authServiceClient.addRole(auth, model);
-    }
     /**
      * Owners Methods
      * **/
@@ -407,15 +390,15 @@ public class BFFApiGatewayController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @PostMapping(value = "/users/login",produces = "application/json;charset=utf-8;", consumes = "application/json")
-    public ResponseEntity<UserPasswordLessDTO> login(@RequestBody Login login) throws Exception {
-        log.info("Entered controller /login");
-        log.info("Login: " + login.getEmail() + " " + login.getPassword());
-        HttpEntity<UserPasswordLessDTO> reponseFromService = authServiceClient.login(login);
-
-
-        return ResponseEntity.status(HttpStatus.OK).headers(reponseFromService.getHeaders()).body(reponseFromService.getBody());
-
+    public Mono<ResponseEntity<HttpEntity<UserPasswordLessDTO>>> login(@RequestBody Login login) throws Exception {
+        log.info("In controller");
+       return  authServiceClient.login(login)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).build());
     }
+
+
+
 
     //Start of Inventory Methods
     @PostMapping(value = "inventory/{inventoryId}/products")

@@ -2,8 +2,10 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.petclinic.bffapigateway.dtos.Auth.Login;
 import com.petclinic.bffapigateway.dtos.Auth.Register;
 import com.petclinic.bffapigateway.dtos.Auth.Role;
+import com.petclinic.bffapigateway.dtos.Auth.UserPasswordLessDTO;
 import com.petclinic.bffapigateway.utils.Security.Variables.SecurityConst;
 import lombok.RequiredArgsConstructor;
 import okhttp3.mockwebserver.MockResponse;
@@ -13,6 +15,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpEntity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -21,6 +26,7 @@ import reactor.test.StepVerifier;
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 /**
  * Created by IntelliJ IDEA.
@@ -32,7 +38,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @RequiredArgsConstructor
 public class AuthServiceClientIntegrationTest {
 
-    private final SecurityConst securityConst;
+    private final SecurityConst securityConst = new SecurityConst(60
+            ,"MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDTnkqggdMFu5O58pB8U0f8D4pab_7j5T8jNZfEep23DbvoMCjR6X1cFe4qCsvaY4aDF6d6Vn3TVY2INHMuyOTXqe5vhBWiRgaI3TIPkGjgHZ1f6Up_ZPQFJCGTo2b3OiXBq3LTK7PXvMj2EIQPJrHuX099ACDvO"
+            ,"Bearer");
 
     private AuthServiceClient authServiceClient;
     private MockWebServer server;
@@ -175,33 +183,6 @@ public class AuthServiceClientIntegrationTest {
 //        assertEquals(errorMessage, ex.getMessage());
 //    }
 
-    @Test
-    @DisplayName("Should get all roles")
-    void shouldGetRoles() throws JsonProcessingException {
-        final Role parentRole = new Role();
-        parentRole.setId(1);
-        parentRole.setName("admin");
-
-        final Role role = new Role();
-        role.setId(2);
-        role.setName("vet");
-        role.setParent(parentRole);
-
-        final String body = objectMapper.writeValueAsString(objectMapper.convertValue(role, Role.class));
-
-        final MockResponse mockResponse = new MockResponse();
-        mockResponse
-                .setHeader("Content-Type", "application/json")
-                .setBody(body);
-
-        server.enqueue(mockResponse);
-
-        final Role aRole = authServiceClient.getRoles("Bearer token").blockFirst();
-
-        assertEquals(role.getId(), aRole.getId());
-        assertEquals(role.getName(), aRole.getName());
-        assertEquals(role.getParent(), aRole.getParent());
-    }
 
     @Test
     @DisplayName("Should validate a token")
@@ -242,62 +223,30 @@ public class AuthServiceClientIntegrationTest {
         StepVerifier.create(validatedTokenResponse)
                 .expectNextCount(0)
                 .verifyError();
-
-
-
-
-
     }
+
+
+
     @Test
-    @DisplayName("Should add a role")
-    void shouldAddRole() throws JsonProcessingException {
-        final Role parentRole = new Role();
-        parentRole.setId(1);
-        parentRole.setName("admin");
-
-        final Role role = new Role();
-        role.setId(2);
-        role.setName("vet");
-        role.setParent(parentRole);
-
-        final String body = objectMapper.writeValueAsString(objectMapper.convertValue(role, Role.class));
-
+    @DisplayName("Should login a user")
+    void ShouldLoginUser_ShouldReturnOk() throws Exception {
         final MockResponse mockResponse = new MockResponse();
         mockResponse
                 .setHeader("Content-Type", "application/json")
-                .setBody(body);
+                .setResponseCode(200);
 
         server.enqueue(mockResponse);
 
-        final Role block = authServiceClient.addRole("Bearer token", role).block();
+        Login login = Login.builder()
+                .email("email")
+                .password("password")
+                .build();
 
-        assertEquals(role.getId(), block.getId());
-        assertEquals(role.getName(), block.getName());
-        assertEquals(role.getParent(), block.getParent());
-    }
+        final Mono<HttpEntity<UserPasswordLessDTO>> validatedTokenResponse = authServiceClient.login(login);
 
-    @Test
-    @DisplayName("Should delete a role")
-    void shouldDeleteRole() throws JsonProcessingException {
-        final Role parentRole = new Role();
-        parentRole.setId(1);
-        parentRole.setName("admin");
-
-        final Role role = new Role();
-        role.setId(2);
-        role.setName("vet");
-        role.setParent(parentRole);
-
-        final String body = objectMapper.writeValueAsString(objectMapper.convertValue(role, Role.class));
-
-        final MockResponse mockResponse = new MockResponse();
-        mockResponse
-                .setHeader("Content-Type", "application/json")
-                .setBody(body);
-
-        server.enqueue(mockResponse);
-
-        final Mono<Void> empty = authServiceClient.deleteRole("Bearer token", role.getId());
-        assertEquals(empty.block(), null);
-    }
+        // check status response in step verifier
+        StepVerifier.create(validatedTokenResponse)
+                .expectNextCount(1)
+                .verifyComplete();
+        }
 }

@@ -58,7 +58,22 @@ public class JwtTokenUtil implements Serializable {
     }
 
 
+    public String getTokenFromRequest(List<String> cookies){
 
+        String[] allCookies = cookies.get(0).split(";");
+
+        String token;
+
+        token = Arrays.stream(allCookies).filter(cookie -> cookie.contains(securityConst.getTOKEN_PREFIX())).findFirst().orElseThrow(() -> new InvalidTokenException("Token is invalid"));
+
+
+
+        token = token.replace(securityConst.getTOKEN_PREFIX()+"=", "");
+        token = token.replace(";", "");
+        token = token.replace(" ", "");
+
+        return token;
+    }
 
 
     public String getTokenFromRequest(ServerWebExchange exchange){
