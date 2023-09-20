@@ -68,6 +68,7 @@ public Mono<ProductResponseDTO> addProductToInventory(Mono<ProductRequestDTO> pr
 
     @Override
     public Mono<ProductResponseDTO> updateProductInInventory(Mono<ProductRequestDTO> productRequestDTOMono, String inventoryId, String productId) {
+
         return productRequestDTOMono
                 .publishOn(Schedulers.boundedElastic())
                 .flatMap(requestDTO -> inventoryRepository.findInventoryByInventoryId(inventoryId)
@@ -80,9 +81,6 @@ public Mono<ProductResponseDTO> addProductToInventory(Mono<ProductRequestDTO> pr
                             } else {
                                 return productRepository.findProductByProductId(productId)
                                         .flatMap(existingProduct -> {
-                                            if (!existingProduct.getInventoryId().equals(inventoryId)) {
-                                                return Mono.error(new NotFoundException("Product not found in the specified inventory."));
-                                            }
                                             Product updatedProduct = EntityDTOUtil.toProductEntity(requestDTO);
                                             updatedProduct.setProductId(existingProduct.getProductId());
                                             updatedProduct.setInventoryId(existingProduct.getInventoryId());
@@ -95,5 +93,7 @@ public Mono<ProductResponseDTO> addProductToInventory(Mono<ProductRequestDTO> pr
                         }))
                 .switchIfEmpty(Mono.error(new InvalidInputException("Unable to update product in the repository, an error occurred.")));
     }
+
+
 
 }

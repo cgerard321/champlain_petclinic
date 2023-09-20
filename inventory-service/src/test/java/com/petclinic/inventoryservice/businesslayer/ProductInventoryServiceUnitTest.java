@@ -7,6 +7,8 @@ import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
 import com.petclinic.inventoryservice.presentationlayer.InventoryResponseDTO;
 import com.petclinic.inventoryservice.presentationlayer.ProductRequestDTO;
 import com.petclinic.inventoryservice.presentationlayer.ProductResponseDTO;
+import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
+import com.petclinic.inventoryservice.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -149,6 +151,28 @@ class ProductInventoryServiceUnitTest {
                 .verifyComplete();
     }
 
+    @Test
+    void updateProductInInventory_ProductNotFound_ShouldThrowNotFoundException() {
+        // Arrange
+        String inventoryId = "1";
+        String productId = UUID.randomUUID().toString();
 
+        ProductRequestDTO productRequestDTO = ProductRequestDTO.builder()
+                .productName("Updated Product Name")
+                .productPrice(99.99)
+                .productQuantity(20)
+                .build();
+
+        when(inventoryRepository.findInventoryByInventoryId(anyString())).thenReturn(Mono.empty());
+
+        // Act and Assert
+        StepVerifier
+                .create(productInventoryService.updateProductInInventory(Mono.just(productRequestDTO), inventoryId, productId))
+                .expectErrorMatches(throwable -> {
+                    assertEquals("Inventory not found with id: " + inventoryId, throwable.getMessage());
+                    return throwable instanceof NotFoundException;
+                })
+                .verify();
+    }
 
 }

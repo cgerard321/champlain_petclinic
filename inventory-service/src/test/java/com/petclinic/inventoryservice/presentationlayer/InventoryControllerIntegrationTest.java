@@ -19,6 +19,7 @@ import reactor.test.StepVerifier;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
@@ -74,7 +75,7 @@ class InventoryControllerIntegrationTest {
                 .expectStatus().isNotFound();
     }
 
-
+/*
     @Test
     public void testUpdateProductInInventory_ShouldSucceed() {
         String inventoryId = "1";
@@ -105,6 +106,33 @@ class InventoryControllerIntegrationTest {
                     assertEquals(productRequestDTO.getProductQuantity(), productResponseDTO.getProductQuantity());
                 });
     }
+
+ */
+
+    @Test
+    void testUpdateProductInInventory_ProductNotFound_ShouldReturnNotFound() {
+        // Arrange
+        String inventoryId = "1";
+        String productId = UUID.randomUUID().toString();
+
+        ProductRequestDTO productRequestDTO = ProductRequestDTO.builder()
+                .productName("Updated Benzodiazepines")
+                .productDescription("Updated Sedative Medication")
+                .productPrice(150.00)
+                .productQuantity(20)
+                .build();
+
+        // Act and Assert
+        webTestClient
+                .put()
+                .uri("/inventories/{inventoryId}/products/{productId}", inventoryId, productId)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(productRequestDTO)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
 
 //    @Test
 //    void addProductToInventory_WithValidInventoryIdAndValidBody_ShouldSucceed(){

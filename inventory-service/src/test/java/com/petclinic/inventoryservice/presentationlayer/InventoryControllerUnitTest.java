@@ -1,6 +1,8 @@
 package com.petclinic.inventoryservice.presentationlayer;
 
 import com.petclinic.inventoryservice.businesslayer.ProductInventoryService;
+import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
+import com.petclinic.inventoryservice.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
@@ -13,6 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
+import static org.springframework.web.reactive.function.BodyInserters.fromValue;
 
 @WebFluxTest(controllers = InventoryController.class)
 class InventoryControllerUnitTest {
@@ -86,9 +89,6 @@ class InventoryControllerUnitTest {
         when(productInventoryService.updateProductInInventory(any(), eq(inventoryId), eq(productId)))
                 .thenReturn(Mono.just(responseDTO));
 
-        //when(productInventoryService.updateProductInInventory(Mono.just(requestDTO), inventoryId, productId))
-        //        .thenReturn(Mono.just(responseDTO));
-
         // Act and Assert
         webTestClient
                 .put()
@@ -107,6 +107,66 @@ class InventoryControllerUnitTest {
                     assertEquals(responseDTO.getProductPrice(), dto.getProductPrice());
                     assertEquals(responseDTO.getProductQuantity(), dto.getProductQuantity());
                 });
+
+        verify(productInventoryService, times(1))
+                .updateProductInInventory(any(), eq(inventoryId), eq(productId));
+    }
+
+    @Test
+    void updateProductInInventory_ProductNotFound_ShouldReturnNotFound() {
+        // Arrange
+        String inventoryId = "123";
+        String productId = "456";
+        ProductRequestDTO requestDTO = ProductRequestDTO.builder()
+                .productName("Updated Product")
+                .productDescription("Updated Description")
+                .productPrice(200.00)
+                .productQuantity(20)
+                .build();
+
+                when(productInventoryService.updateProductInInventory(any(), eq(inventoryId), eq(productId)))
+                        .thenReturn(Mono.error(new NotFoundException("Product not found")));
+
+        // Act and Assert
+        webTestClient
+                .put()
+                .uri("/inventory/{inventoryId}/products/{productId}", inventoryId, productId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(fromValue(requestDTO))
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message", "Product not found");
+
+        verify(productInventoryService, times(1))
+                .updateProductInInventory(any(), eq(inventoryId), eq(productId));
+    }
+
+    @Test
+    void updateProductInInventory_InvalidInput_ShouldReturnBadRequest() {
+        // Arrange
+        String inventoryId = "123";
+        String productId = "456";
+        ProductRequestDTO requestDTO = ProductRequestDTO.builder()
+                .productName("Updated Product")
+                .productDescription("Updated Description")
+                .productPrice(200.00)
+                .productQuantity(20)
+                .build();
+
+                when(productInventoryService.updateProductInInventory(any(), eq(inventoryId), eq(productId)))
+                        .thenReturn(Mono.error(new InvalidInputException("Invalid input")));
+
+        // Act and Assert
+        webTestClient
+                .put()
+                .uri("/inventory/{inventoryId}/products/{productId}", inventoryId, productId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(fromValue(requestDTO))
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.message", "Invalid input");
 
         verify(productInventoryService, times(1))
                 .updateProductInInventory(any(), eq(inventoryId), eq(productId));
