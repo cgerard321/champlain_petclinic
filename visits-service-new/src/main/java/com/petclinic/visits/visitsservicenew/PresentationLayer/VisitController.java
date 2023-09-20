@@ -33,10 +33,12 @@ public class VisitController {
     public Flux<VisitResponseDTO> getVisitByPractitionerId(@PathVariable int practitionerId){
         return visitService.getVisitsForPractitioner(practitionerId);
     }
+    /*
     @GetMapping(value="practitioner/{practitionerId}/{month}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VisitResponseDTO> getVisitsByPractitionerIdAndMonth(@PathVariable int practitionerId, @PathVariable int month){
         return visitService.getVisitsByPractitionerIdAndMonth(practitionerId, month);
     }
+     */
 
     @PostMapping("")
     public Mono<VisitResponseDTO> addVisit(@RequestBody Mono<VisitRequestDTO> visitRequestDTOMono){

@@ -132,8 +132,9 @@ public class BFFApiGatewayController {
     }
 
 
-
-
+    /**
+     * Visits Methods
+     * **/
     @GetMapping(value = "visits", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VisitResponseDTO> getAllVisits() {return visitsServiceClient.getAllVisits();}
     @GetMapping(value = "visits/previous/{petId}")
@@ -151,6 +152,7 @@ public class BFFApiGatewayController {
         return visitsServiceClient.getVisitForPractitioner(practitionerId);
     }
 
+    /*
     @GetMapping(value = "visits/calendar/{practitionerId}")
     public Flux<VisitDetails> getVisitsByPractitionerIdAndMonth(@PathVariable("practitionerId") int practitionerId,
                                                                 @RequestParam("dates") List<String> dates) {
@@ -158,6 +160,7 @@ public class BFFApiGatewayController {
         String endDate = dates.get(1);
         return visitsServiceClient.getVisitsByPractitionerIdAndMonth(practitionerId, startDate, endDate);
     }
+     */
     @GetMapping(value = "visits/pets/{petId}")
     public Flux<VisitDetails> getVisitsForPet(final @PathVariable int petId){
         return visitsServiceClient.getVisitsForPet(petId);
