@@ -1,6 +1,7 @@
 package com.petclinic.billing.businesslayer;
 
 import com.petclinic.billing.datalayer.*;
+import com.petclinic.billing.domainclientlayer.OwnerClient;
 import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.exceptions.InvalidInputException;
 import com.petclinic.billing.exceptions.NotFoundException;
@@ -20,6 +21,7 @@ public class BillServiceImpl implements BillService{
 
     private final BillRepository billRepository;
 //    private final VetClient vetClient;
+//    private final OwnerClient ownerClient;
 
     public BillServiceImpl(BillRepository billRepository) {
         this.billRepository = billRepository;
@@ -112,6 +114,12 @@ public class BillServiceImpl implements BillService{
 //        return
 //                this.vetClient.getVetByVetId(rc.getVetDTO().getVetId())
 //                        .doOnNext(rc::setVetDTO)
+//                        .thenReturn(rc);
+//    }
+//    private Mono<RequestContextAdd> ownerRequestResponse(RequestContextAdd rc) {
+//        return
+//                this.ownerClient.getOwnerByOwnerId(rc.getOwnerResponseDTO().getOwnerId())
+//                        .doOnNext(rc::setOwnerResponseDTO)
 //                        .thenReturn(rc);
 //    }
 }
