@@ -17,6 +17,8 @@ angular.module('billHistory')
             });
         }
 */
+
+
         $scope.deleteBill = function (billId) {
             let varIsConf = confirm('You are about to delete billId ' + billId + '. Is it what you want to do ? ');
             if (varIsConf) {
