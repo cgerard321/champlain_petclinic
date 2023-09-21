@@ -1,6 +1,7 @@
 package com.petclinic.bffapigateway.utils.Security.Filters;
 
 
+import com.petclinic.bffapigateway.exceptions.HandlerIsNullException;
 import com.petclinic.bffapigateway.exceptions.InvalidTokenException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
@@ -36,19 +37,11 @@ public class RoleFilter implements WebFilter {
 
     }
 
-
-
-
     @SuppressWarnings("NullableProblems")
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
 
-        HandlerMethod handler = null;
-        try {
-            handler = (HandlerMethod) requestMappingHandlerMapping.getHandler(exchange).toFuture().get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
-        }
+
 
         if (exchange.getAttribute("whitelisted") != null && exchange.getAttribute("whitelisted") instanceof Boolean) {
             if((boolean) exchange.getAttribute("whitelisted")) {
@@ -56,10 +49,27 @@ public class RoleFilter implements WebFilter {
             }
         }
 
+
+
+        HandlerMethod handler;
+        try {
+            handler = (HandlerMethod) requestMappingHandlerMapping.getHandler(exchange).toFuture().get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new HandlerIsNullException(e.getMessage());
+        }
+
+        if (handler == null) {
+            throw new HandlerIsNullException("Handler is null, check if the endpoint is valid");
+        }
+
+
+
         if (handler.getMethod().getAnnotation(SecuredEndpoint.class) == null
                 || handler.getMethod().getAnnotation(SecuredEndpoint.class).allowedRoles()[0] == Roles.ALL) {
             return chain.filter(exchange);
         }
+
+
 
 
 
@@ -75,11 +85,20 @@ public class RoleFilter implements WebFilter {
 
         List<String> roles = jwtTokenUtil.getRolesFromToken(token);
 
+
         log.debug("Roles: {}", roles);
+
 
         if (roles == null) {
             return Mono.error(new InvalidTokenException("Unauthorized, invalid token"));
         }
+
+
+        if (roles.contains(Roles.ADMIN.toString())) {
+            return chain.filter(exchange);
+        }
+
+
 
         for (String role : roles) {
             role = role.replace("[", "")
