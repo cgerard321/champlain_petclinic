@@ -78,6 +78,9 @@ spring:
       platform: mysql
       mode: always
 
+mailer-service:
+  host: mailer-service
+  port: 8080
 
 server.port: 8080
 

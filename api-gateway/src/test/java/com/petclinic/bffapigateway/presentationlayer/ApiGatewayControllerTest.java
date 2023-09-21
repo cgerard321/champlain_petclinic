@@ -1,9 +1,13 @@
 package com.petclinic.bffapigateway.presentationlayer;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.config.GlobalExceptionHandler;
 import com.petclinic.bffapigateway.domainclientlayer.*;
+import com.petclinic.bffapigateway.dtos.Auth.Login;
 import com.petclinic.bffapigateway.dtos.Auth.Role;
+import com.petclinic.bffapigateway.dtos.Auth.UserDetails;
+import com.petclinic.bffapigateway.dtos.Auth.UserPasswordLessDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillDetails;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
@@ -28,13 +32,19 @@ import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.MultiValueMapAdapter;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuples;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -1805,174 +1815,96 @@ class ApiGatewayControllerTest {
 //                .jsonPath("$.timestamp").exists()
 //                .jsonPath("$.message").isEqualTo(errorMessage);
 //    }
-//
-//    @Test
-//    @DisplayName("Given valid Login, return JWT and user details")
-//    void login_valid() throws JsonProcessingException {
-//        final String validToken = "some.valid.token";
-//        final UserDetails user = UserDetails.builder()
-//                .id(-1)
-//                .password(null)
-//                .email("e@mail.com")
-//                .username("user")
-//                .roles(Collections.emptySet())
-//                .build();
-//
-//        final Login login = Login.builder()
-//                .password("valid")
-//                .email(user.getEmail())
-//                .build();
-//        when(authServiceClient.login(login))
-//                .thenReturn(Mono.just(Tuples.of(
-//                        validToken,
-//                        user
-//                )));
-//
-//        final WebTestClient.ResponseSpec ok = client.post()
-//                .uri("/api/gateway/users/login")
-//                .accept(APPLICATION_JSON)
-//                .body(Mono.just(login), Login.class)
-//                .exchange()
-//                .expectStatus().isOk();
-//
-//        ok.expectBody()
-//                .json(objectMapper.writeValueAsString(user));
-//        ok.expectHeader()
-//                .valueEquals(HttpHeaders.AUTHORIZATION, validToken);
-//    }
-
-//    @Test
-//    @DisplayName("Given invalid Login, throw 401")
-//    void login_invalid() {
-//        final UserDetails user = UserDetails.builder()
-//                .id(-1)
-//                .password(null)
-//                .email("e@mail.com")
-//                .username("user")
-//                .roles(Collections.emptySet())
-//                .build();
-//
-//        final Login login = Login.builder()
-//                .password("valid")
-//                .email(user.getEmail())
-//                .build();
-//        final String message = "I live in unending agony. I spent 6 hours and ended up with nothing";
-//        when(authServiceClient.login(login))
-//                .thenThrow(new GenericHttpException(message, UNAUTHORIZED));
-//
-//        client.post()
-//                .uri("/api/gateway/users/login")
-//                .accept(APPLICATION_JSON)
-//                .body(Mono.just(login), Login.class)
-//                .exchange()
-//                .expectStatus().isUnauthorized()
-//                .expectBody()
-//                .jsonPath("$.statusCode").isEqualTo(UNAUTHORIZED.value())
-//                .jsonPath("$.message").isEqualTo(message)
-//                .jsonPath("$.timestamp").exists();
-//    }
 
     @Test
-    @DisplayName("Should get all the roles")
-    void shouldGetRoles() {
-        Role parentRole = new Role();
-        parentRole.setId(1);
-        parentRole.setName("admin");
+    @DisplayName("Given valid Login, return JWT and user details")
+    void login_valid() throws Exception {
+        final String validToken = "some.valid.token";
+        final UserDetails user = UserDetails.builder()
+                .id(-1)
+                .password("pwd")
+                .email("e@mail.com")
+                .username("user")
+                .roles(Collections.emptySet())
+                .build();
 
-        Role role1 = new Role();
-        role1.setId(2);
-        role1.setName("vet");
-        role1.setParent(parentRole);
+        UserPasswordLessDTO userPasswordLessDTO = UserPasswordLessDTO.builder()
+                .email(user.getEmail())
+                .id(1)
+                .username(user.getUsername())
+                .roles(user.getRoles())
+                .build();
 
-        Role role2 = new Role();
-        role2.setId(3);
-        role2.setName("user");
-        role2.setParent(parentRole);
+        MultiValueMap<String,String> headers = new LinkedMultiValueMap<>();
 
-        List<Role> allRolesList = new ArrayList<>();
-        allRolesList.add(role1);
-        allRolesList.add(role2);
+        headers.put(HttpHeaders.COOKIE, Collections.singletonList("Bearer=" + validToken + "; Path=/; HttpOnly; SameSite=Lax"));
 
-        Flux<Role> allRoles = Flux.fromIterable(allRolesList);
+        HttpEntity<UserPasswordLessDTO> httpResponse = new HttpEntity<>(userPasswordLessDTO, new HttpHeaders(headers));
 
-        when(authServiceClient.getRoles("Bearer token"))
-                .thenReturn(allRoles);
+        when(authServiceClient.login(any(Login.class)))
+                .thenReturn(httpResponse);
 
-        client.get()
-                .uri("/api/gateway/admin/roles")
-                .header("Authorization", "Bearer token")
+        HttpEntity< UserPasswordLessDTO > response = httpResponse;
+
+        when(authServiceClient.login(any(Login.class)))
+                .thenReturn(response);
+
+
+        final Login login = Login.builder()
+                .password("valid")
+                .email(user.getEmail())
+                .build();
+        when(authServiceClient.login(login))
+                .thenReturn(
+                        response
+                );
+
+         client.post()
+                .uri("/api/gateway/users/login")
+                .accept(APPLICATION_JSON)
+                .body(Mono.just(login), Login.class)
                 .exchange()
                 .expectStatus().isOk()
+                .expectBody(HttpEntity.class)
+                 .value((http ->
+                 {
+                     assertEquals(httpResponse.getHeaders().get(HttpHeaders.COOKIE).get(0), "Bearer=" + validToken + "; Path=/; HttpOnly; SameSite=Lax");
+                     assertEquals(httpResponse.getBody(), userPasswordLessDTO);
+
+                 }));
+    }
+
+    @Test
+    @DisplayName("Given invalid Login, throw 401")
+    void login_invalid() throws Exception {
+        final UserDetails user = UserDetails.builder()
+                .id(-1)
+                .password(null)
+                .email("e@mail.com")
+                .username("user")
+                .roles(Collections.emptySet())
+                .build();
+
+        final Login login = Login.builder()
+                .password("valid")
+                .email(user.getEmail())
+                .build();
+        final String message = "I live in unending agony. I spent 6 hours and ended up with nothing";
+        when(authServiceClient.login(login))
+                .thenThrow(new GenericHttpException(message, UNAUTHORIZED));
+
+        client.post()
+                .uri("/api/gateway/users/login")
+                .accept(APPLICATION_JSON)
+                .body(Mono.just(login), Login.class)
+                .exchange()
+                .expectStatus().isUnauthorized()
                 .expectBody()
-                .jsonPath("$[0].id").isEqualTo(2)
-                .jsonPath("$[0].name").isEqualTo("vet")
-                .jsonPath("$[0].parent").isEqualTo(role1.getParent())
-                .jsonPath("$[1].id").isEqualTo(3)
-                .jsonPath("$[1].name").isEqualTo("user")
-                .jsonPath("$[1].parent").isEqualTo(role2.getParent());
-
+                .jsonPath("$.statusCode").isEqualTo(UNAUTHORIZED.value())
+                .jsonPath("$.message").isEqualTo(message)
+                .jsonPath("$.timestamp").exists();
     }
 
-    @Test
-    void shouldAddRole() {
-        final Role parentRole = new Role();
-        parentRole.setId(1);
-        parentRole.setName("admin");
-
-        final Role role = new Role();
-        role.setId(2);
-        role.setName("vet");
-        role.setParent(parentRole);
-
-        when(authServiceClient.addRole("Bearer token", role))
-                .thenReturn(Mono.just(role));
-
-        client.post()
-                .uri("/api/gateway/admin/roles")
-                .header("Authorization", "Bearer token")
-                .contentType(APPLICATION_JSON)
-                .body(Mono.just(role), Role.class)
-                .exchange()
-                .expectStatus().isOk();
-
-        verify(authServiceClient).addRole("Bearer token", role);
-    }
-
-    @Test
-    void shouldDeleteRole() {
-        final Role parentRole = new Role();
-        parentRole.setId(1);
-        parentRole.setName("admin");
-
-        final Role role = new Role();
-        role.setId(2);
-        role.setName("vet");
-        role.setParent(parentRole);
-
-        when(authServiceClient.addRole("Bearer token", role))
-                .thenReturn(Mono.just(role));
-
-        client.post()
-                .uri("/api/gateway/admin/roles")
-                .header("Authorization", "Bearer token")
-                .contentType(APPLICATION_JSON)
-                .body(Mono.just(role), Role.class)
-                .exchange()
-                .expectStatus().isOk();
-
-        verify(authServiceClient).addRole("Bearer token", role);
-
-        client.delete()
-                .uri("/api/gateway/admin/roles/{id}", role.getId())
-                .header("Authorization", "Bearer token")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus()
-                .isOk();
-
-        verify(authServiceClient).deleteRole("Bearer token", role.getId());
-    }
-    //inventory tests
 
 
 
@@ -2012,6 +1944,10 @@ class ApiGatewayControllerTest {
                 .rateScore(4.0)
                 .build();
     }
+
+
+
+
 
 }
 

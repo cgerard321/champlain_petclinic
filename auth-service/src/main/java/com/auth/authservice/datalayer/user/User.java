@@ -69,18 +69,6 @@ public class User implements UserDetails {
 
     private boolean verified;
 
-    public User(String username, String password, String email) {
-        this.username = username;
-        this.password = password;
-        this.email = email;
-    }
-
-    public User(String username, String password, String email, Set<Role> roles) {
-        this.username = username;
-        this.password = password;
-        this.email = email;
-        this.roles = roles;
-    }
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
