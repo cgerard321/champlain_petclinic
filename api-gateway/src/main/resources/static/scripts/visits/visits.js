@@ -8,4 +8,10 @@ angular.module('visits', ['ui.router'])
                 url: '/visits/new',
                 template: '<visits></visits>'
             })
+<<<<<<< HEAD
     }]);
+=======
+    }]);
+
+//url: '/owners/:ownerId/pets/:petId/visits',
+>>>>>>> 83dda6a9 (Double Check)
