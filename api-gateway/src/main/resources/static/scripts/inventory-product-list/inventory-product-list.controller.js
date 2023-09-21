@@ -11,16 +11,16 @@ angular.module('inventoryProductList')
 
 
                 });
-                $scope.deleteBundle = function (bundleUUID) {
-                    let varIsConf = confirm('Want to delete Bundle with Bundle Id:' + bundleUUID + '. Are you sure?');
+                $scope.deleteProduct = function (inventoryId, productId) {
+                    let varIsConf = confirm('Are you sure you want to delete this product?');
                     if (varIsConf) {
 
-                        $http.delete('api/gateway/bundles/' + bundleUUID)
+                        $http.delete('api/gateway/inventory/' + inventoryId + '/products/' + productId)
                             .then(successCallback, errorCallback)
 
                         function successCallback(response) {
                             $scope.errors = [];
-                            alert(bundleUUID + " Deleted Successfully!");
+                            alert(productId + " Deleted Successfully!");
                             console.log(response, 'res');
                             //refresh list
                             $http.get('api/gateway/inventory/' + inventoryId + '/products').then(function (resp) {
