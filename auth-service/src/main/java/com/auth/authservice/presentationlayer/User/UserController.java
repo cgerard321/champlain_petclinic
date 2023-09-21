@@ -115,6 +115,7 @@ public class UserController {
         return userService.verifyEmailFromToken(new String(Base64.getDecoder().decode(base64EncodedToken)));
     }
 
+
     @PostMapping("/login")
     public ResponseEntity<UserPasswordLessDTO> login(@RequestBody UserIDLessRoleLessDTO login, HttpServletResponse response) throws IncorrectPasswordException {
         log.info("In controller");
@@ -134,13 +135,20 @@ public class UserController {
             User loggedInUser = userService.getUserByEmail(login.getEmail());
             log.info("User retrieved from db");
 
-            ResponseCookie token = ResponseCookie.from("Bearer", jwtService.generateToken(user))
+            ResponseCookie token = ResponseCookie.from("Bearer", jwtService.generateToken(loggedInUser))
                     .httpOnly(true)
                     .secure(true)
+                    .path("/api/gateway")
                     .maxAge(Duration.ofHours(1))
                     .sameSite("Lax").build();
+
+
             log.info("In controller before set header");
             response.setHeader(HttpHeaders.SET_COOKIE, token.toString());
+            log.info("Token : {}", token.toString());
+            log.info("Token value : {}", token.getValue());
+
+            log.info("In controller after set header");
             UserPasswordLessDTO testUser = userMapper.modelToIDLessPasswordLessDTO(loggedInUser);
             return ResponseEntity.ok()
                     .body(testUser);
@@ -151,8 +159,22 @@ public class UserController {
         }
     }
 
+    @PostMapping("/validate-token")
+    public ResponseEntity<String> validateToken(@RequestBody String token) {
+        log.info("Validating token");
+        if (jwtService.validateToken(token)) {
+            log.info("Token is valid");
+            return ResponseEntity.ok().build();
+        } else {
+            log.info("Token is invalid");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+
     @RequestMapping(method = RequestMethod.HEAD)
     public void preflight() {
         log.info("Preflight request received and accepted");
     }
+
+
 }

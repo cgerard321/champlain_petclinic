@@ -1,7 +1,10 @@
 package com.petclinic.customersservice.data;
 
+import com.petclinic.customersservice.presentationlayer.OwnerResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import static org.junit.jupiter.api.Assertions.*;
 import org.reactivestreams.Publisher;
@@ -12,6 +15,22 @@ class OwnerRepoTest {
 
     @Autowired
     OwnerRepo repo;
+
+    @Test
+    void getAllOwners_shouldSucceed() {
+        Owner owner = buildOwner();
+
+        Publisher<Owner> setup = repo.deleteAll().thenMany(repo.save(owner));
+
+        StepVerifier
+                .create(setup)
+                .expectNext(owner)
+                .verifyComplete();
+        StepVerifier
+                .create(repo.findAll())
+                .expectNextCount(1)
+                .verifyComplete();
+    }
 
     @Test
     void insertOwner() {
@@ -50,6 +69,7 @@ class OwnerRepoTest {
     private Owner buildOwner() {
         return Owner.builder()
                 .id("55")
+                .ownerId("ownerId-123")
                 .firstName("Felix")
                 .lastName("Labrie")
                 .address("308 ave de Stanley")

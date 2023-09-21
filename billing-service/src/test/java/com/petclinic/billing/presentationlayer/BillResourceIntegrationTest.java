@@ -13,6 +13,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.test.StepVerifier;
 import static reactor.core.publisher.Mono.just;
+
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -277,9 +280,11 @@ class BillResourceIntegrationTest {
 
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);
-        Date date = calendar.getTime();
+        LocalDate date = calendar.getTime().toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();;
 
 
-        return Bill.builder().id("Id").billId("BillUUID").customerId(1).vetId("1").visitType("Test Type").visitDate(date).amount(13.37).build();
+        return Bill.builder().id("Id").billId("BillUUID").customerId(1).vetId("1").visitType("Test Type").date(date).amount(13.37).build();
     }
 }

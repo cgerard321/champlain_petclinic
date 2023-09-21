@@ -15,7 +15,32 @@ import reactor.core.publisher.Mono;
 public class VisitServiceImpl implements VisitService {
     private final VisitRepo repo;
 
-
+    @Override
+    public Flux<VisitResponseDTO> getAllVisits(){
+        return repo.findAll().map(EntityDtoUtil::toVisitResponseDTO);
+    }
+    @Override
+    public Flux<VisitResponseDTO> getVisitsForPet(int petId) {
+        return repo.findByPetId(petId)
+                .map(EntityDtoUtil::toVisitResponseDTO);
+    }
+    @Override
+    public Flux<VisitResponseDTO> getVisitsForPractitioner(int practitionerId) {
+        return repo.findVisitsByPractitionerId(practitionerId)
+                .map(EntityDtoUtil::toVisitResponseDTO);
+    }
+    /*
+    @Override
+    public Flux<VisitResponseDTO> getVisitsByPractitionerIdAndMonth(int practitionerId, int month) {
+        return repo.findVisitsByPractitionerIdAndMonth(practitionerId, month)
+                .map(EntityDtoUtil::toVisitResponseDTO);
+    }
+     */
+    @Override
+    public Mono<VisitResponseDTO> getVisitByVisitId(String visitId) {
+        return repo.findByVisitId(visitId)
+                .map(EntityDtoUtil::toVisitResponseDTO);
+    }
     @Override
     public Mono<VisitResponseDTO> addVisit(Mono<VisitRequestDTO> visitRequestDTOMono) {
         return visitRequestDTOMono
@@ -24,24 +49,10 @@ public class VisitServiceImpl implements VisitService {
                 .flatMap((repo::insert))
                 .map(EntityDtoUtil::toVisitResponseDTO);
     }
-
-    @Override
-    public Flux<VisitResponseDTO> getVisitsForPet(int petId) {
-        return repo.findByPetId(petId)
-                .map(EntityDtoUtil::toVisitResponseDTO);
-    }
-
-    @Override
-    public Mono<VisitResponseDTO> getVisitByVisitId(String visitId) {
-        return repo.findByVisitId(visitId)
-                .map(EntityDtoUtil::toVisitResponseDTO);
-    }
-
     @Override
     public Mono<Void> deleteVisit(String visitId) {
         return repo.deleteVisitByVisitId(visitId);
     }
-
     @Override
     public Mono<VisitResponseDTO> updateVisit(String visitId, Mono<VisitRequestDTO> visitRequestDTOMono) {
         return repo.findByVisitId(visitId)
@@ -54,15 +65,5 @@ public class VisitServiceImpl implements VisitService {
                 .map(EntityDtoUtil::toVisitResponseDTO);
     }
 
-    @Override
-    public Flux<VisitResponseDTO> getVisitsForPractitioner(int practitionerId) {
-        return repo.findVisitsByPractitionerId(practitionerId)
-                .map(EntityDtoUtil::toVisitResponseDTO);
-    }
 
-    @Override
-    public Flux<VisitResponseDTO> getVisitsByPractitionerIdAndMonth(int practitionerId, int month) {
-        return repo.findVisitsByPractitionerIdAndMonth(practitionerId, month)
-                .map(EntityDtoUtil::toVisitResponseDTO);
-    }
 }

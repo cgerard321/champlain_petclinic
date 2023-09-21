@@ -1,8 +1,8 @@
 plugins {
-	id 'org.springframework.boot' version '3.0.4'
-	id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+	id 'org.springframework.boot' version '3.1.3'
+	id 'io.spring.dependency-management' version '1.1.3'
 	id 'java'
-	id "io.freefair.lombok" version "6.0.0-m2"
+	id "io.freefair.lombok" version "6.6.1"
 	//id "com.bertramlabs.asset-pipeline" version "3.4.4"
 	id 'jacoco'
 }
@@ -21,54 +21,42 @@ repositories {
 
 
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-validation'
 
+
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.2'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.2'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.2'
+
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+	implementation 'org.yaml:snakeyaml:2.2'
 
-	// https://mvnrepository.com/artifact/org.webjars/bootstrap
-	implementation 'org.webjars:bootstrap:5.1.0'
-	// https://mvnrepository.com/artifact/org.webjars/jquery
-	implementation 'org.webjars:jquery:3.6.0'
-// https://mvnrepository.com/artifact/org.webjars/angularjs
-	implementation 'org.webjars:angularjs:2.0.0-alpha.22'
-// https://mvnrepository.com/artifact/org.webjars.bower/angular-ui-router
-	implementation 'org.webjars.bower:angular-ui-router:1.0.28'
-// https://mvnrepository.com/artifact/org.webjars/webjars-locator-core
-	implementation 'org.webjars:webjars-locator-core:0.47'
-
-	// https://mvnrepository.com/artifact/ro.isdc.wro4j/wro4j-core
-	implementation 'ro.isdc.wro4j:wro4j-core:1.10.1'
-
-// https://mvnrepository.com/artifact/com.github.houbie/lesscss-gradle-plugin
-	implementation 'com.github.houbie:lesscss-gradle-plugin:1.0.3-less-1.7.0'
-
-// https://mvnrepository.com/artifact/com.github.houbie/lesscss-gradle-plugin
-	implementation 'com.github.houbie:lesscss-gradle-plugin:1.0.3-less-1.7.0'
-
-	// https://mvnrepository.com/artifact/org.jolokia/jolokia-core
-	implementation 'org.jolokia:jolokia-core:1.7.0'
-
+	implementation 'org.webjars:bootstrap:5.1.0' // https://mvnrepository.com/artifact/org.webjars/bootstrap
+	implementation 'org.webjars:jquery:3.6.0' // https://mvnrepository.com/artifact/org.webjars/jquery
+	implementation 'org.webjars:angularjs:2.0.0-alpha.22' // https://mvnrepository.com/artifact/org.webjars/angularjs
+	implementation 'org.webjars.bower:angular-ui-router:1.0.28' // https://mvnrepository.com/artifact/org.webjars.bower/angular-ui-router
+	implementation 'org.webjars:webjars-locator-core:0.47' // https://mvnrepository.com/artifact/org.webjars/webjars-locator-core
+	implementation 'ro.isdc.wro4j:wro4j-core:1.10.1' // https://mvnrepository.com/artifact/ro.isdc.wro4j/wro4j-core
+	implementation 'com.github.houbie:lesscss-gradle-plugin:1.0.3-less-1.7.0' // https://mvnrepository.com/artifact/com.github.houbie/lesscss-gradle-plugin
+	implementation 'com.github.houbie:lesscss-gradle-plugin:1.0.3-less-1.7.0' // https://mvnrepository.com/artifact/com.github.houbie/lesscss-gradle-plugin
+	implementation 'org.jolokia:jolokia-core:1.7.0' // https://mvnrepository.com/artifact/org.jolokia/jolokia-core
 	implementation 'io.springfox:springfox-boot-starter:3.0.0'
-
-
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'	//for serializing and deserializing java.time.LocalDateTime
 
 
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
 	testImplementation 'io.projectreactor:reactor-test'
-
-	testImplementation("com.squareup.okhttp3:mockwebserver:4.9.0") {
-		exclude group: 'com.squareup.okhttp3', module: 'okhttp'
-	}
-	testImplementation("com.squareup.okhttp3:okhttp:4.9.0")
+	testImplementation 'com.squareup.okhttp3:okhttp:4.11.0'
+	testImplementation 'com.squareup.okhttp3:mockwebserver:4.11.0'
 
 
 }
 
 jacoco {
-	toolVersion = "0.8.8"
+	toolVersion = "0.8.10"
 }
 
 jacocoTestReport {
@@ -94,8 +82,6 @@ jacocoTestCoverageVerification {
 }
 
 test.finalizedBy jacocoTestReport
-
-
 
 test {
 	useJUnitPlatform()

@@ -2,16 +2,18 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.bffapigateway.dtos.OwnerResponseDTO;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
 import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
+import okhttp3.Response;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
@@ -125,6 +127,21 @@ public class CustomerServiceClientIntegrationTest {
 
         assertEquals(ownerResponseDTO.getOwnerId(),TEST_OWNER.getOwnerId());
 
+    }
+
+    @Test
+    void getAllOwners() throws JsonProcessingException {
+        Flux<OwnerResponseDTO> owners = Flux.just(TEST_OWNER);
+
+        final String body = mapper.writeValueAsString(owners.collectList().block());
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(body));
+
+        final OwnerResponseDTO firstOwnerFromFlux = customersServiceClient.getAllOwners().blockFirst();
+
+        assertEquals(firstOwnerFromFlux.getOwnerId(), TEST_OWNER.getOwnerId());
     }
 
     /*@Test

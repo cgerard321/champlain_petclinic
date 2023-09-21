@@ -23,9 +23,9 @@ public class BillServiceImpl implements BillService{
         this.billRepository = billRepository;
     }
     @Override
-    public Mono<BillDTO> GetBill(String billUUID) {
+    public Mono<BillResponseDTO> GetBill(String billUUID) {
 
-        return billRepository.findByBillId(billUUID).map(EntityDtoUtil::toDto);
+        return billRepository.findByBillId(billUUID).map(EntityDtoUtil::toBillResponseDto);
     }
 
     @Override
@@ -71,16 +71,16 @@ public class BillServiceImpl implements BillService{
     }
 
     @Override
-    public Flux<BillDTO> GetBillsByCustomerId(int customerId) {
+    public Flux<BillResponseDTO> GetBillsByCustomerId(int customerId) {
 /**/
-        return billRepository.findByCustomerId(customerId).map(EntityDtoUtil::toDto);
+        return billRepository.findByCustomerId(customerId).map(EntityDtoUtil::toBillResponseDto);
     }
 
 
 
     @Override
-    public Flux<BillDTO> GetBillsByVetId(String vetId) {
-        return billRepository.findByVetId(vetId).map(EntityDtoUtil::toDto);
+    public Flux<BillResponseDTO> GetBillsByVetId(String vetId) {
+        return billRepository.findByVetId(vetId).map(EntityDtoUtil::toBillResponseDto);
     }
 
 

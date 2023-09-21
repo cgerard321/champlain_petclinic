@@ -1,4 +1,4 @@
-package com.petclinic.bffapigateway.dtos;
+package com.petclinic.bffapigateway.dtos.CustomerDTOs;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;

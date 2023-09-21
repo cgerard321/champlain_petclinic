@@ -4,6 +4,7 @@ import com.petclinic.customersservice.data.Pet;
 import com.petclinic.customersservice.data.PetRepo;
 import com.petclinic.customersservice.data.PetType;
 import com.petclinic.customersservice.data.Photo;
+import com.petclinic.customersservice.presentationlayer.PetResponseDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -28,7 +29,7 @@ class PetDTOServiceImplTest {
     private PetRepo repo;
 
     @Autowired
-    private PetDTOService petDTOService;
+    private PetService petDTOService;
 
     Date date = new Date(20221010);
 
@@ -76,14 +77,13 @@ class PetDTOServiceImplTest {
                 .build();
     }
 
-    private PetDTO petDTObuilder() throws ParseException {
-        return PetDTO.builder()
-                .id("1")
+    private PetResponseDTO petDTObuilder() throws ParseException {
+        return PetResponseDTO.builder()
                 .name("felix")
                 .petTypeId("1")
                 .birthDate(new SimpleDateFormat( "yyyyMMdd" ).parse( "2000-11-30"))
-                .petType(PetType.builder().id("1").name("TESTPETTYPE").build())
-                .photo(Photo.builder().id("1").photo("1").name("test").type("test").build())
+                .petTypeId(PetType.builder().id("1").name("TESTPETTYPE").build().toString())
+                .photoId(Photo.builder().id("1").photo("1").name("test").type("test").build().toString())
                 .ownerId("ownerId-1234")
                 .build();
     }
