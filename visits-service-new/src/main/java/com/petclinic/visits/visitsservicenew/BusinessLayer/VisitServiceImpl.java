@@ -3,7 +3,6 @@ package com.petclinic.visits.visitsservicenew.BusinessLayer;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.PetsClient;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetsClient;
-
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
 import com.petclinic.visits.visitsservicenew.Utils.EntityDtoUtil;
