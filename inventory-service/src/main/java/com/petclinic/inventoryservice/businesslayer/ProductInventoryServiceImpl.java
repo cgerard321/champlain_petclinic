@@ -73,6 +73,7 @@ public Mono<ProductResponseDTO> addProductToInventory(Mono<ProductRequestDTO> pr
                     if(!invExist){
                         return Mono.error(new NotFoundException("Inventory not found, make sure it exists, inventoryId: "+inventoryId));
                     }
+
                     else {
                         return productRepository.existsByProductId(productId)
                                 .flatMap(prodExist ->{
@@ -84,6 +85,29 @@ public Mono<ProductResponseDTO> addProductToInventory(Mono<ProductRequestDTO> pr
                                     }
                                 });
                     }
-                });
+
+                    e.setInventoryId(EntityDTOUtil.generateUUID());
+                })
+                .flatMap(inventoryRepository::insert)
+                .map(EntityDTOUtil::toInventoryResponseDTO);
+
+    }
+
+
+    @Override
+    public Mono<InventoryResponseDTO> updateInventory(Mono<InventoryRequestDTO> inventoryRequestDTO, String inventoryId) {
+
+        return inventoryRepository.findInventoryByInventoryId(inventoryId)
+                .flatMap(existingInventory -> inventoryRequestDTO.map(requestDTO -> {
+                    existingInventory.setName(requestDTO.getInventoryName());
+                    existingInventory.setInventoryType(requestDTO.getInventoryType());
+                    existingInventory.setInventoryDescription(requestDTO.getInventoryDescription());
+                    return existingInventory;
+
+                }))
+                .flatMap(inventoryRepository::save)
+                .map(EntityDTOUtil::toInventoryResponseDTO);
+
+
     }
 }

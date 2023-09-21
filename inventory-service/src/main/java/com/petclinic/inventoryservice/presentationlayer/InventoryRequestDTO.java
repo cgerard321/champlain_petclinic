@@ -10,6 +10,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class InventoryRequestDTO {
+
     private String inventoryType;
+
+    private String inventoryName;
+    private InventoryType inventoryType;
+
     private String inventoryDescription;
 }
