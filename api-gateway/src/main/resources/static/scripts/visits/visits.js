@@ -5,8 +5,9 @@ angular.module('visits', ['ui.router'])
         $stateProvider
             .state('visitsNew', {
                 parent: 'app',
-                url: '/owners/:ownerId/pets/:petId/visits',
+                url: '/visits/new',
                 template: '<visits></visits>'
             })
     }]);
 
+//url: '/owners/:ownerId/pets/:petId/visits',
