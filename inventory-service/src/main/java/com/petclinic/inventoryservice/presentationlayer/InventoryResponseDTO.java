@@ -1,5 +1,6 @@
 package com.petclinic.inventoryservice.presentationlayer;
 
+import com.petclinic.inventoryservice.datalayer.Inventory.InventoryType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,10 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class InventoryResponseDTO {
     private String inventoryId;
-    private InventoryType inventoryType;
-
    private String  inventoryName;
-
-
+    private InventoryType inventoryType;
     private String inventoryDescription;
 }
