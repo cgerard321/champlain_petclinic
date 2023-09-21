@@ -1,5 +1,6 @@
 package com.petclinic.visits.visitsservicenew.DomainClientLayer;
 
+
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -14,8 +15,9 @@ public class PetsClient {
     private final WebClient webClient;
     private final String petClientServiceBaseURL;
 
+
     public PetsClient(@Value("${app.customers-service.host}") String petsServiceHost,
-                      @Value("${app.customers-service.port}") String petsServicePort){
+                      @Value("${app.customers-service.port}") String petsServicePort) {
 
         petClientServiceBaseURL = "http://" + petsServiceHost + ":" + petsServicePort + "/pet";
 
@@ -25,14 +27,14 @@ public class PetsClient {
 
     }
 
-    public Mono<PetResponseDTO> getPetById(final int petId){
+    public Mono<PetResponseDTO> getPetById(final int petId) {
         return webClient
                 .get()
                 .uri(petClientServiceBaseURL + "/pets/" + petId)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, error -> {
                     HttpStatusCode statusCode = error.statusCode();
-                    if(statusCode.equals(HttpStatus.NOT_FOUND))
+                    if (statusCode.equals(HttpStatus.NOT_FOUND))
                         return Mono.error(new NotFoundException("No pet was found with petId: " + petId));
                     return Mono.error(new IllegalArgumentException("Something went wrong"));
                 })
@@ -41,6 +43,6 @@ public class PetsClient {
                 )
                 .bodyToMono(PetResponseDTO.class);
     }
-
-    
 }
+    
+
