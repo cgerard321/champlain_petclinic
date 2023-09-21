@@ -19,6 +19,7 @@ import com.auth.authservice.datamapperlayer.UserMapper;
 import com.auth.authservice.domainclientlayer.Mail.Mail;
 import com.auth.authservice.domainclientlayer.Mail.MailService;
 import com.auth.authservice.presentationlayer.User.UserIDLessRoleLessDTO;
+import com.auth.authservice.presentationlayer.User.UserIDLessUsernameLessDTO;
 import com.auth.authservice.presentationlayer.User.UserPasswordLessDTO;
 import com.auth.authservice.presentationlayer.User.UserTokenPair;
 import com.auth.authservice.security.JwtTokenUtil;
@@ -164,7 +165,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public HashMap<String,Object> login(UserIDLessRoleLessDTO login) throws IncorrectPasswordException {
+    public HashMap<String,Object> login(UserIDLessUsernameLessDTO login) throws IncorrectPasswordException {
 
 
         try {

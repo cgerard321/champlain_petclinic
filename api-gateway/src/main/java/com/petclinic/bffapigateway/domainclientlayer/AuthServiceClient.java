@@ -108,7 +108,6 @@ public class AuthServiceClient {
 //                .bodyToMono(UserDetails.class);
 //    }
 
-    //HMMMMMM <> magic gotta love it
     public  HttpEntity<UserPasswordLessDTO> login(final Login login) throws Exception {
         log.info("Entered domain service login");
         UserPasswordLessDTO userResponseModel;

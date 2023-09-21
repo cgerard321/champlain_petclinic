@@ -11,7 +11,8 @@ import java.lang.annotation.*;
  * Annotation for securing an endpoint with a list of roles.
  *
  *
- * <p>Note : If All is specified, the endpoint will be accessible by all roles.
+ * <p>
+ * Note : If All is specified, the endpoint will be accessible by all roles.
  * And if Anonymous is specified, the endpoint will be accessible by all roles and all non authenticated users.
  * Also if anonymous is specified, all other roles will be ignored everyone is allowed.
  *</p>

@@ -122,7 +122,7 @@ public class UserController {
 
 
     @PostMapping("/login")
-    public ResponseEntity<UserPasswordLessDTO> login(@RequestBody UserIDLessRoleLessDTO login, HttpServletResponse response) throws IncorrectPasswordException {
+    public ResponseEntity<UserPasswordLessDTO> login(@RequestBody UserIDLessUsernameLessDTO login, HttpServletResponse response) throws IncorrectPasswordException {
         log.info("In controller");
 
         try {
