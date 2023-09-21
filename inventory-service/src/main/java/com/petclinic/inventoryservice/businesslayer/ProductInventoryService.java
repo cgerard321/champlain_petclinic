@@ -1,5 +1,6 @@
 package com.petclinic.inventoryservice.businesslayer;
 
+import com.petclinic.inventoryservice.presentationlayer.InventoryResponseDTO;
 import com.petclinic.inventoryservice.presentationlayer.InventoryRequestDTO;
 import com.petclinic.inventoryservice.presentationlayer.InventoryResponseDTO;
 import com.petclinic.inventoryservice.presentationlayer.InventoryResponseDTO;
