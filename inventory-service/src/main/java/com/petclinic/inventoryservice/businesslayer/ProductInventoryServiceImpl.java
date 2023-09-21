@@ -4,6 +4,7 @@ import com.petclinic.inventoryservice.datalayer.Inventory.Inventory;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryRepository;
 import com.petclinic.inventoryservice.datalayer.Product.Product;
 import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
+import com.petclinic.inventoryservice.presentationlayer.InventoryResponseDTO;
 import com.petclinic.inventoryservice.presentationlayer.ProductRequestDTO;
 import com.petclinic.inventoryservice.presentationlayer.ProductResponseDTO;
 import com.petclinic.inventoryservice.utils.EntityDTOUtil;
@@ -11,6 +12,7 @@ import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
 import com.petclinic.inventoryservice.utils.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 
@@ -85,5 +87,56 @@ public Mono<ProductResponseDTO> addProductToInventory(Mono<ProductRequestDTO> pr
                                 });
                     }
                 });
+    }
+    @Override
+    public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductsField(String inventoryId, String productName, Double productPrice, Integer productQuantity) {
+
+        if (productName != null && productPrice != null && productQuantity != null){
+            return  productRepository
+                    .findAllProductsByInventoryIdAndProductNameAndProductPriceAndProductQuantity(inventoryId,
+                            productName, productPrice, productQuantity)
+                    .map(EntityDTOUtil::toProductResponseDTO)
+                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
+                            "\nOr ProductName: " + productName + "\nOr ProductPrice: " + productPrice + "\nOr ProductQuantity: " + productQuantity)));
+        }
+        if (productPrice != null && productQuantity != null){
+            return productRepository
+                    .findAllProductsByInventoryIdAndProductPriceAndProductQuantity(inventoryId, productPrice, productQuantity)
+                    .map(EntityDTOUtil::toProductResponseDTO)
+                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
+                            "\nOr ProductPrice: " + productPrice + "\nOr ProductQuantity: " + productQuantity)));
+        }
+        if (productPrice != null){
+            return productRepository
+                    .findAllProductsByInventoryIdAndProductPrice(inventoryId, productPrice)
+                    .map(EntityDTOUtil::toProductResponseDTO)
+                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
+                            "\nOr ProductPrice: " + productPrice)));
+        }
+        if (productQuantity != null){
+            return productRepository
+                    .findAllProductsByInventoryIdAndProductQuantity(inventoryId, productQuantity)
+                    .map(EntityDTOUtil::toProductResponseDTO)
+                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
+                            "\nOr ProductQuantity: " + productQuantity)));
+        }
+        if (productName != null){
+            return productRepository
+                    .findAllProductsByInventoryIdAndProductName(inventoryId, productName)
+                    .map(EntityDTOUtil::toProductResponseDTO)
+                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
+                            "\nOr ProductName: " + productName)));
+        }
+
+        return productRepository
+                .findAllProductsByInventoryId(inventoryId)
+                .map(EntityDTOUtil::toProductResponseDTO)
+                .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId)));
+    }
+
+    @Override
+    public Flux<InventoryResponseDTO> getAllInventory() {
+        return inventoryRepository.findAll()
+                .map(EntityDTOUtil::toInventoryResponseDTO);
     }
 }

@@ -6,6 +6,7 @@ import com.petclinic.bffapigateway.dtos.Auth.Login;
 import com.petclinic.bffapigateway.dtos.Auth.UserPasswordLessDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
+import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.ProductRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.ProductResponseDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
@@ -416,5 +417,18 @@ public class BFFApiGatewayController {
     @DeleteMapping(value = "inventory/{inventoryId}/products/{productId}")
     public Mono<Void> deleteProductInInventory(@PathVariable String inventoryId, @PathVariable String productId){
         return inventoryServiceClient.deleteProductInInventory(inventoryId, productId);
+    }
+
+    @GetMapping(value = "inventory/{inventoryId}/products")
+    public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndFields(@PathVariable String inventoryId,
+                                                                                 @RequestParam(required = false) String productName,
+                                                                                 @RequestParam(required = false) Double productPrice,
+                                                                                 @RequestParam(required = false) Integer productQuantity){
+        return inventoryServiceClient.getProductsInInventoryByInventoryIdAndProductsField(inventoryId, productName, productPrice, productQuantity);
+    }
+
+    @GetMapping(value = "inventory")
+    public Flux<InventoryResponseDTO> getAllInventory(){
+        return inventoryServiceClient.getAllInventory();
     }
 }
