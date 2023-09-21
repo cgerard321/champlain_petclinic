@@ -3,6 +3,7 @@ package com.petclinic.bffapigateway.utils.Security.Filters;
 
 import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
 
+import com.petclinic.bffapigateway.exceptions.HandlerIsNullException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import lombok.extern.slf4j.Slf4j;
@@ -90,23 +91,17 @@ public class JwtTokenFilter implements WebFilter {
         }
 
 
-        HandlerMethod handler = null;
+        HandlerMethod handler;
         try {
             handler = (HandlerMethod) requestMappingHandlerMapping.getHandler(exchange).toFuture().get();
         } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(e.getMessage());
         }
 
 
-        //todo : remove this and replace with null check only for prod
-        if(handler != null)
+        if(handler == null)
         {
-            log.debug("Handler: {}", handler.getMethod().getName());
-        }
-        else
-        {
-            log.debug("Handler is null");
-            throw new RuntimeException("Handler is null");
+            throw new HandlerIsNullException("Handler is null, this probably means that the endpoint does not exist : " + path);
         }
 
 

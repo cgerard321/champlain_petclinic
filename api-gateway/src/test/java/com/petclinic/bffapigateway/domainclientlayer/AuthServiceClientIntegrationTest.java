@@ -242,10 +242,10 @@ public class AuthServiceClientIntegrationTest {
                 .password("password")
                 .build();
 
-        final Mono<HttpEntity<UserPasswordLessDTO>> validatedTokenResponse = authServiceClient.login(login);
+        final HttpEntity<UserPasswordLessDTO> validatedTokenResponse = authServiceClient.login(login);
 
         // check status response in step verifier
-        StepVerifier.create(validatedTokenResponse)
+        StepVerifier.create(Mono.just(validatedTokenResponse))
                 .expectNextCount(1)
                 .verifyComplete();
         }

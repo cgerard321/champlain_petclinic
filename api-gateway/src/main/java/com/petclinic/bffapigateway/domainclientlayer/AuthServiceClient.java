@@ -109,7 +109,7 @@ public class AuthServiceClient {
 //    }
 
     //HMMMMMM <> magic gotta love it
-    public  Mono<HttpEntity<UserPasswordLessDTO>> login(final Login login) throws Exception {
+    public  HttpEntity<UserPasswordLessDTO> login(final Login login) throws Exception {
         log.info("Entered domain service login");
         UserPasswordLessDTO userResponseModel;
         try {
@@ -118,10 +118,7 @@ public class AuthServiceClient {
 
             HttpEntity<UserPasswordLessDTO> response = restTemplate.exchange(authServiceUrl + "/users/login", HttpMethod.POST, userRequestModelHttpEntity, UserPasswordLessDTO.class);
             log.info("Fetched user from auth-service");
-
-
-
-            return Mono.just(response);
+            return response;
 
         } catch (HttpClientErrorException ex) {
             log.info("Error throw in auth domain client service");

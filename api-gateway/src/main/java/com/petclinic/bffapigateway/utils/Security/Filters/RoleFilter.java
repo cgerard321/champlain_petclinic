@@ -1,6 +1,7 @@
 package com.petclinic.bffapigateway.utils.Security.Filters;
 
 
+import com.petclinic.bffapigateway.exceptions.HandlerIsNullException;
 import com.petclinic.bffapigateway.exceptions.InvalidTokenException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
@@ -44,8 +45,13 @@ public class RoleFilter implements WebFilter {
         try {
             handler = (HandlerMethod) requestMappingHandlerMapping.getHandler(exchange).toFuture().get();
         } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
+            throw new HandlerIsNullException(e.getMessage());
         }
+
+        if (handler == null) {
+            throw new HandlerIsNullException("Handler is null, check if the endpoint is valid");
+        }
+
 
         if (exchange.getAttribute("whitelisted") != null && exchange.getAttribute("whitelisted") instanceof Boolean) {
             if((boolean) exchange.getAttribute("whitelisted")) {

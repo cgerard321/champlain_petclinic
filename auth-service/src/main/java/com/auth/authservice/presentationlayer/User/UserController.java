@@ -130,7 +130,7 @@ public class UserController {
             HashMap<String, Object> userAndToken = userService.login(login);
             ResponseCookie token = (ResponseCookie) userAndToken.get("token");
             User loggedInUser = (User) userAndToken.get("user");
-            response.setHeader(HttpHeaders.COOKIE, token.toString());
+            response.setHeader(HttpHeaders.SET_COOKIE, token.toString());
             log.info("Token : {}", token.getValue());
 
             log.info("In controller after set header");
