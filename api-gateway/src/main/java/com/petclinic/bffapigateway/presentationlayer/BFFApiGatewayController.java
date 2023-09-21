@@ -382,18 +382,10 @@ public class BFFApiGatewayController {
 
 
 
-    @PostMapping(value = "inventory")
-    public Mono<InventoryResponseDTO> addInventory(@RequestBody InventoryRequestDTO model){
-        return inventoryServiceClient.addInventory(model);
-    }
 
 
 
-    @PutMapping(value = "inventory/{inventoryId}")
-    public Mono<InventoryResponseDTO> updateInventory( @RequestBody InventoryRequestDTO model, @PathVariable String inventoryId) {
-        return inventoryServiceClient.updateInventory(model, inventoryId);
 
-    }
 
     @DeleteMapping(value = "owners/{ownerId}")
     public Mono<OwnerResponseDTO> deleteOwner(@PathVariable int ownerId){
@@ -428,6 +420,24 @@ public class BFFApiGatewayController {
     @PostMapping(value = "inventory/{inventoryId}/products")
     public Mono<ProductResponseDTO> addProductToInventory(@RequestBody ProductRequestDTO model, @PathVariable String inventoryId){
         return inventoryServiceClient.addProductToInventory(model, inventoryId);
+    }
+
+
+    @PostMapping(value = "inventory")
+    public Mono<ResponseEntity<InventoryResponseDTO>> addInventory(@RequestBody InventoryRequestDTO model){
+        return inventoryServiceClient.addInventory(model)
+                .map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+
+    }
+
+
+    @PutMapping(value = "inventory/{inventoryId}")
+    public Mono<ResponseEntity<InventoryResponseDTO>> updateInventory( @RequestBody InventoryRequestDTO model, @PathVariable String inventoryId) {
+        return inventoryServiceClient.updateInventory(model, inventoryId)
+                .map(updatedStudent -> ResponseEntity.status(HttpStatus.OK).body(updatedStudent))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+
     }
 
 

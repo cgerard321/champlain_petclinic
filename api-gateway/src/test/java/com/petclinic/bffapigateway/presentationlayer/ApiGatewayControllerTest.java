@@ -12,6 +12,9 @@ import com.petclinic.bffapigateway.dtos.Bills.BillDetails;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
+import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
+import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
+import com.petclinic.bffapigateway.dtos.Inventory.InventoryType;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
 import com.petclinic.bffapigateway.dtos.Vets.*;
@@ -49,6 +52,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static com.petclinic.bffapigateway.dtos.Inventory.InventoryType.internal;
 import static org.junit.Assert.*;
 import static org.assertj.core.util.Lists.list;
 
@@ -1864,6 +1868,76 @@ class ApiGatewayControllerTest {
     }
 
 
+
+private InventoryResponseDTO buildInventoryDTO(){
+        return InventoryResponseDTO.builder()
+                .inventoryId("1")
+                .inventoryName("invt1")
+                .inventoryType(internal)
+                .inventoryDescription("invtone")
+                .build();
+}
+    @Test
+    void addInventory_withValidValue_shouldSucceed() {
+
+        InventoryRequestDTO requestDTO = new InventoryRequestDTO("internal", internal, "invt1");
+
+        InventoryResponseDTO inventoryResponseDTO = buildInventoryDTO();
+
+        when(inventoryServiceClient.addInventory(any()))
+                .thenReturn(Mono.just(inventoryResponseDTO));
+
+        client.post()
+                .uri("/api/gateway/inventory")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.inventoryId").isEqualTo(inventoryResponseDTO.getInventoryId())
+                .jsonPath("$.inventoryName").isEqualTo(inventoryResponseDTO.getInventoryName())
+                .jsonPath("$.inventoryType").isEqualTo("internal")
+                .jsonPath("$.inventoryDescription").isEqualTo("invtone");
+
+
+        verify(inventoryServiceClient, times(1))
+                .addInventory(any());
+    }
+
+
+
+    @Test
+    void updateInventory_withValidValue_shouldSucceed() {
+        InventoryRequestDTO requestDTO = new InventoryRequestDTO("internal", internal, "newDescription");
+
+        InventoryResponseDTO expectedResponse = InventoryResponseDTO.builder()
+                .inventoryId("1")
+                .inventoryName("newName")
+                .inventoryType(internal)
+                .inventoryDescription("newDescription")
+                .build();
+
+        when(inventoryServiceClient.updateInventory(any(), eq(buildInventoryDTO().getInventoryId())))
+                .thenReturn(Mono.just(expectedResponse));
+
+
+        client.put()
+                .uri("/api/gateway/inventory/{inventoryId}", buildInventoryDTO().getInventoryId()) // Use the appropriate URI
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.inventoryId").isEqualTo(expectedResponse.getInventoryId())
+                .jsonPath("$.inventoryName").isEqualTo(expectedResponse.getInventoryName())
+                .jsonPath("$.inventoryType").isEqualTo("internal")
+                .jsonPath("$.inventoryDescription").isEqualTo(expectedResponse.getInventoryDescription());
+
+        verify(inventoryServiceClient, times(1))
+                .updateInventory(any(), eq(buildInventoryDTO().getInventoryId()));
+    }
 
 
     private VetDTO buildVetDTO() {
