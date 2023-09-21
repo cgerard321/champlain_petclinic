@@ -125,8 +125,8 @@ class UserControllerIntegrationTest {
                 .bodyValue(userDTO)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().exists(HttpHeaders.COOKIE)
-                .expectHeader().value(HttpHeaders.COOKIE,s -> {
+                .expectHeader().exists(HttpHeaders.SET_COOKIE)
+                .expectHeader().value(HttpHeaders.SET_COOKIE,s -> {
                     assert s.contains("Bearer");
                 })
                 .expectBody(UserPasswordLessDTO.class)
