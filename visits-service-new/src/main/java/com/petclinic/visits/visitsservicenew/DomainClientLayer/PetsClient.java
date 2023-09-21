@@ -19,7 +19,7 @@ public class PetsClient {
     public PetsClient(@Value("${app.customers-service-reactive.host}") String petsServiceHost,
                       @Value("${app.customers-service-reactive.port}") String petsServicePort){
 
-        petClientServiceBaseURL = "http://" + petsServiceHost + ":" + petsServicePort + "/vets";
+        petClientServiceBaseURL = "http://" + petsServiceHost + ":" + petsServicePort + "/pet";
 
         this.webClient = WebClient.builder()
                 .baseUrl(petClientServiceBaseURL)
@@ -30,7 +30,7 @@ public class PetsClient {
     public Mono<PetResponseDTO> getPetById(final int petId) {
         return webClient
                 .get()
-                .uri(petClientServiceBaseURL + "/pets/" + petId)
+                .uri(petClientServiceBaseURL + "/" + petId)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, error -> {
                     HttpStatusCode statusCode = error.statusCode();
@@ -44,4 +44,4 @@ public class PetsClient {
                 .bodyToMono(PetResponseDTO.class);
     }
 }
-    
+
