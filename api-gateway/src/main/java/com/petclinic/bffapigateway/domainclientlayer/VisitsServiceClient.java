@@ -124,7 +124,6 @@ public class VisitsServiceClient {
                 .body(Mono.just(visit), VisitDetails.class)
                 .retrieve()
                 .bodyToMono(VisitDetails.class);
-                       // .uri("/owners/*/pets/" + visit.getPetId() + "/visits")
     }
 
     public Mono<Void> deleteVisitByVisitId(String visitId){
