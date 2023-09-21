@@ -249,4 +249,6 @@ public class AuthServiceClientIntegrationTest {
                 .expectNextCount(1)
                 .verifyComplete();
         }
+
+
 }

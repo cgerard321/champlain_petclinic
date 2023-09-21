@@ -41,7 +41,17 @@ public class RoleFilter implements WebFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
 
-        HandlerMethod handler = null;
+
+
+        if (exchange.getAttribute("whitelisted") != null && exchange.getAttribute("whitelisted") instanceof Boolean) {
+            if((boolean) exchange.getAttribute("whitelisted")) {
+                return chain.filter(exchange);
+            }
+        }
+
+
+
+        HandlerMethod handler;
         try {
             handler = (HandlerMethod) requestMappingHandlerMapping.getHandler(exchange).toFuture().get();
         } catch (InterruptedException | ExecutionException e) {
@@ -53,16 +63,13 @@ public class RoleFilter implements WebFilter {
         }
 
 
-        if (exchange.getAttribute("whitelisted") != null && exchange.getAttribute("whitelisted") instanceof Boolean) {
-            if((boolean) exchange.getAttribute("whitelisted")) {
-                return chain.filter(exchange);
-            }
-        }
 
         if (handler.getMethod().getAnnotation(SecuredEndpoint.class) == null
                 || handler.getMethod().getAnnotation(SecuredEndpoint.class).allowedRoles()[0] == Roles.ALL) {
             return chain.filter(exchange);
         }
+
+
 
 
 
