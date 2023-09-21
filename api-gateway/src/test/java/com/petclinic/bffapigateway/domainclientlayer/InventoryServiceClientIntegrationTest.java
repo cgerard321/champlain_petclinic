@@ -69,15 +69,4 @@ class InventoryServiceClientIntegrationTest {
                 .expectNextCount(1)
                 .verifyComplete();
     }
-
-    @Test
-    void getAllInventory(){
-        InventoryResponseDTO inventoryResponseDTO = new InventoryResponseDTO(
-                "inventoryId",
-                "type",
-                "desc"
-        );
-
-
-    }
 }

@@ -11,11 +11,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
 import java.util.Arrays;
 import java.util.List;
+
 import static com.petclinic.inventoryservice.datalayer.Inventory.InventoryType.internal;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @WebFluxTest(controllers = InventoryController.class)
@@ -196,7 +199,6 @@ class InventoryControllerUnitTest {
 
 
 
-
     @Test
     void updateInventory_ValidRequest_ShouldReturnOk() {
         // Arrange
@@ -275,6 +277,9 @@ class InventoryControllerUnitTest {
         verify(productInventoryService, times(1))
                 .addInventory(any());
     }
+
+
+
 
     @Test
     void addInventory_InvalidType_ShouldReturnError() {

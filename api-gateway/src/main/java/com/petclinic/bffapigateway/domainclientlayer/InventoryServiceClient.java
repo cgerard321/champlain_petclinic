@@ -1,8 +1,6 @@
 
 package com.petclinic.bffapigateway.domainclientlayer;
 
-import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
-import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.ProductRequestDTO;
@@ -90,39 +88,4 @@ public class InventoryServiceClient {
                 .retrieve()
                 .bodyToFlux(InventoryResponseDTO.class);
     }
-//    public Mono<BundleDetails> getBundle(final String bundleUUID) {
-//        return webClientBuilder.build().get()
-//                .uri(inventoryServiceUrl + "/{bundleUUID}", bundleUUID)
-//                .retrieve()
-//                .bodyToMono(BundleDetails.class);
-//    }
-//    public Flux<BundleDetails> getBundlesByItem(final String item) {
-//        return webClientBuilder.build().get()
-//                .uri(inventoryServiceUrl +"/item"+ "/{item}", item)
-//                .retrieve()
-//                .bodyToFlux(BundleDetails.class);
-//    }
-//    public Flux<BundleDetails> getAllBundles() {
-//        return webClientBuilder.build().get()
-//                .uri(inventoryServiceUrl)
-//                .retrieve()
-//                .bodyToFlux(BundleDetails.class);
-//    }
-//
-//    public Mono<BundleDetails> createBundle(final BundleDetails model){
-//        return webClientBuilder.build().post()
-//                .uri(inventoryServiceUrl)
-//                .body(Mono.just(model),BundleDetails.class)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .retrieve().bodyToMono(BundleDetails.class);
-//    }
-//
-//    public Mono<Void> deleteBundle(final String bundleUUID) {
-//        return webClientBuilder.build()
-//                .delete()
-//                .uri(inventoryServiceUrl + "/{bundleUUID}", bundleUUID)
-//                .retrieve()
-//                .bodyToMono(Void.class);
-//    }
-
 }

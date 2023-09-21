@@ -15,13 +15,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-
 import static com.petclinic.inventoryservice.datalayer.Inventory.InventoryType.internal;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port: 0"})
 @AutoConfigureWebTestClient
@@ -93,7 +90,6 @@ class InventoryControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isNotFound();
     }
-
 
     @Test
     void getAllProductsInInventoryByInventoryId_withValidInventoryId_shouldSucceed(){
@@ -324,8 +320,6 @@ class InventoryControllerIntegrationTest {
                     assertEquals(10, list.size());
                 });
     }
-
-
 
 
 
