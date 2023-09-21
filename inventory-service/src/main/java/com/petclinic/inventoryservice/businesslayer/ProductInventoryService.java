@@ -4,6 +4,7 @@ import com.petclinic.inventoryservice.presentationlayer.InventoryRequestDTO;
 import com.petclinic.inventoryservice.presentationlayer.InventoryResponseDTO;
 import com.petclinic.inventoryservice.presentationlayer.ProductRequestDTO;
 import com.petclinic.inventoryservice.presentationlayer.ProductResponseDTO;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface ProductInventoryService {
@@ -12,4 +13,8 @@ public interface ProductInventoryService {
 
     Mono<InventoryResponseDTO> updateInventory(Mono<InventoryRequestDTO> inventoryRequestDTO, String inventoryId);
     Mono<Void> deleteProductInInventory(String inventoryId, String productId);
+
+    Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductsField(String inventoryId, String productName, Double productPrice, Integer productQuantity);
+    Flux<InventoryResponseDTO> getAllInventory();
+
 }
