@@ -646,8 +646,21 @@
     </thead>
     <tbody>
         <tr ng-repeat="v in $ctrl.previousVisits" data-index="{{$index}}" data-table-name="previousVisits">
+<<<<<<< HEAD
             <script> console.log("V Date:" + v.date)</script>
+<<<<<<< HEAD
           <td style="white-space: pre-line">{{v.description}}</td>
+=======
+            <td class="col-sm-2">{{v.date | date:'MM-dd-yyyy'}}</td>
+=======
+<<<<<<< HEAD
+            <td class="col-sm-2"> {{selectedDate | date:'yyyy-MM-dd'}}></td>
+=======
+            <td class="col-sm-2">{{v.date | date:'yyyy-MM-dd'}}</td>
+>>>>>>> 0d5c194a (Fixed rouuting issue with create visit button)
+>>>>>>> cd64724e (Fixed rouuting issue with create visit button)
+            <td style="white-space: pre-line">{{v.description}}</td>
+>>>>>>> f0d70339 (Fixed rouuting issue with create visit button)
             <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>
             <td class="status-text" style="white-space: pre-line">{{$ctrl.getStatus(v.status)}}</td>
             <td style="text-align:center; vertical-align:middle"><button class="btn btn-default" style="background-color: royalblue; color: white" ng-click="$ctrl.switchToUpdateForm($event, v.practitionerId, v.date, v.description, v.visitId, v.status)">Edit Visit</button></td>
