@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -32,6 +33,20 @@ public class InventoryController {
         return productInventoryService.addInventory(inventoryRequestDTO)
                 .map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
                 .defaultIfEmpty(ResponseEntity.unprocessableEntity().build());
+    }
+
+    @GetMapping("/{inventoryId}/products")
+    public Flux<ProductResponseDTO>
+    getProductsInInventoryByInventoryIdAndProductField(@PathVariable String inventoryId,
+                                                       @RequestParam(required = false) String productName,
+                                                       @RequestParam(required = false) Double productPrice,
+                                                       @RequestParam(required = false) Integer productQuantity){
+        return productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(inventoryId, productName, productPrice, productQuantity);
+    }
+
+    @GetMapping()
+    public Flux<InventoryResponseDTO> getAllInventory(){
+        return productInventoryService.getAllInventory();
     }
 
 
