@@ -13,7 +13,9 @@ import lombok.NoArgsConstructor;
 public class InventoryRequestDTO {
 
 
+
     private String inventoryName;
+
 
     private InventoryType inventoryType;
 

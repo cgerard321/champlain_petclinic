@@ -91,7 +91,11 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
 
         return inventoryRepository.findInventoryByInventoryId(inventoryId)
                 .flatMap(existingInventory -> inventoryRequestDTO.map(requestDTO -> {
+
                     existingInventory.setInventoryName(requestDTO.getInventoryName());
+
+
+
                     existingInventory.setInventoryType(requestDTO.getInventoryType());
                     existingInventory.setInventoryDescription(requestDTO.getInventoryDescription());
                     return existingInventory;

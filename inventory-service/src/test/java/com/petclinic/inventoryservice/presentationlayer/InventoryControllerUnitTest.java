@@ -42,6 +42,7 @@ class InventoryControllerUnitTest {
             .build();
 
 
+
     @Test
     void updateInventory_ValidRequest_ShouldReturnOk() {
         // Arrange
@@ -172,6 +173,44 @@ class InventoryControllerUnitTest {
                 .exchange()
                 .expectStatus().isBadRequest();
     }
+
+
+
+
+   /*@Test
+   void addProductToInventory_validProduct_ShouldSucceed(){
+       Arrange
+       when(productInventoryService.addProductToInventory(Mono.just(inventoryRequestDTO), inventoryResponseDTO.getInventoryId()))
+               .thenReturn(Mono.just(inventoryResponseDTO));
+       //Act and assert
+       webTestClient
+               .post()
+               .uri("/inventory/{inventoryId}/products", inventoryResponseDTO.getInventoryId())
+               .bodyValue(inventoryRequestDTO)
+               .exchange()
+               .expectStatus().isCreated()
+               .expectBody(ProductResponseDTO.class)
+               .value(dto -> {
+                   assertNotNull(dto);
+                   assertEquals(inventoryResponseDTO.getId(), dto.getId());
+                   assertEquals(inventoryResponseDTO.getInventoryId(), dto.getInventoryId());
+                   assertEquals(inventoryResponseDTO.getSku(), dto.getSku());
+                   assertEquals(inventoryResponseDTO.getProductName(), dto.getProductName());
+                   assertEquals(inventoryResponseDTO.getProductDescription(), dto.getProductDescription());
+                   assertEquals(inventoryResponseDTO.getProductPrice(), dto.getProductPrice());
+                   assertEquals(inventoryResponseDTO.getProductQuantity(), dto.getProductQuantity());
+               });
+       verify(productInventoryService).addProductToInventory(Mono.just(inventoryRequestDTO), inventoryResponseDTO.getInventoryId());
+   }
+
+
+
+ */
+
+
+
+
+
 
 
 
