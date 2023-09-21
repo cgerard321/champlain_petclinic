@@ -8,4 +8,13 @@ angular.module('visits', ['ui.router'])
                 url: '/visits/new',
                 template: '<visits></visits>'
             })
+<<<<<<< HEAD
     }]);
+=======
+    }]);
+<<<<<<< HEAD
+
+=======
+>>>>>>> 791dfa3d (Fixed rouuting issue with create visit button)
+//url: '/owners/:ownerId/pets/:petId/visits',
+>>>>>>> 14b745cd (Fixed rouuting issue with create visit button)
