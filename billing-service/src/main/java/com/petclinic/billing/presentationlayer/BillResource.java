@@ -6,6 +6,7 @@ import com.petclinic.billing.datalayer.BillRequestDTO;
 import com.petclinic.billing.datalayer.BillResponseDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -33,7 +34,7 @@ public class BillResource {
         return SERVICE.GetBill(billId);
     }
 
-    @GetMapping(value = "/bills")
+    @GetMapping(value = "/bills", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> findAllBills() {
         return SERVICE.GetAllBills();
     }
@@ -43,14 +44,14 @@ public class BillResource {
         return SERVICE.updateBill(billId, billDTOMono);
     }
 
-    @GetMapping(value = "/bills/customer/{customerId}")
+    @GetMapping(value = "/bills/customer/{customerId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getBillsByCustomerId(@PathVariable("customerId") int customerId)
     {
         return SERVICE.GetBillsByCustomerId(customerId);
     }
 
 
-    @GetMapping(value = "/bills/vet/{vetId}")
+    @GetMapping(value = "/bills/vet/{vetId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getBillsByVetId(@PathVariable("vetId") String vetId)
     {
         return SERVICE.GetBillsByVetId(vetId);

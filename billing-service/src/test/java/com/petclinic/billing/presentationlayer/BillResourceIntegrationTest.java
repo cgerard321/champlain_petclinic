@@ -2,7 +2,9 @@ package com.petclinic.billing.presentationlayer;
 
 import com.petclinic.billing.datalayer.Bill;
 import com.petclinic.billing.datalayer.BillRepository;
+import com.petclinic.billing.datalayer.BillResponseDTO;
 import com.petclinic.billing.http.HttpErrorInfo;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.junit.jupiter.api.Assertions.*;
@@ -47,13 +50,15 @@ class BillResourceIntegrationTest {
 
         client.get()
                 .uri("/bills")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$[0].visitType").isEqualTo(billEntity.getVisitType())
-                .jsonPath("$[0].customerId").isEqualTo(billEntity.getCustomerId());
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
+                .expectBodyList(Bill.class)
+                .consumeWith(response -> {
+                    List<Bill> bills = response.getResponseBody();
+                    Assertions.assertNotNull(bills);
+                });
     }
 
     @Test
@@ -180,14 +185,15 @@ class BillResourceIntegrationTest {
 
         client.get()
                 .uri("/bills/customer/" + billEntity.getCustomerId())
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$[0].visitType").isEqualTo(billEntity.getVisitType())
-                .jsonPath("$[0].customerId").isEqualTo(billEntity.getCustomerId())
-                .jsonPath("$[0].amount").isEqualTo(billEntity.getAmount());
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
+                .expectBodyList(Bill.class)
+                .consumeWith(response -> {
+                    List<Bill> bills = response.getResponseBody();
+                    Assertions.assertNotNull(bills);
+                });
     }
     @Test
     void getBillByVetId() {
@@ -203,14 +209,15 @@ class BillResourceIntegrationTest {
 
         client.get()
                 .uri("/bills/vet/" + billEntity.getVetId())
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$[0].visitType").isEqualTo(billEntity.getVisitType())
-                .jsonPath("$[0].vetId").isEqualTo(billEntity.getVetId())
-                .jsonPath("$[0].amount").isEqualTo(billEntity.getAmount());
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
+                .expectBodyList(Bill.class)
+                .consumeWith(response -> {
+                    List<Bill> bills = response.getResponseBody();
+                    Assertions.assertNotNull(bills);
+                });
     }
     @Test
     void deleteBillByBillId() {

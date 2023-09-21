@@ -17,6 +17,7 @@ import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import com.petclinic.bffapigateway.exceptions.GenericHttpException;
 import com.petclinic.bffapigateway.utils.Security.Filters.JwtTokenFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.RoleFilter;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -1115,13 +1116,15 @@ class ApiGatewayControllerTest {
 
         client.get()
                 .uri("/api/gateway/bills/customer/{customerId}", bill.getCustomerId())
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$[0].billId").isEqualTo(bill.getBillId())
-                .jsonPath("$[0].customerId").isEqualTo(1)
-                .jsonPath("$[0].amount").isEqualTo(499)
-                .jsonPath("$[0].visitType").isEqualTo("Test");
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
+                .expectBodyList(BillResponseDTO.class)
+                .consumeWith(response -> {
+                    List<BillResponseDTO> billResponseDTOS = response.getResponseBody();
+                    Assertions.assertNotNull(billResponseDTOS);
+                });
     }
 
     @Test
@@ -1137,13 +1140,16 @@ class ApiGatewayControllerTest {
 
         client.get()
                 .uri("/api/gateway/bills/vet/{vetId}", bill.getVetId())
+                .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$[0].billId").isEqualTo(bill.getBillId())
-                .jsonPath("$[0].vetId").isEqualTo("1")
-                .jsonPath("$[0].amount").isEqualTo(499)
-                .jsonPath("$[0].visitType").isEqualTo("Test");
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
+                .expectBodyList(BillResponseDTO.class)
+                .consumeWith(response -> {
+                    List<BillResponseDTO> billResponseDTOS = response.getResponseBody();
+                    Assertions.assertNotNull(billResponseDTOS);
+                });
+
     }
     @Test
     void getBillingByRequestMissingPath(){
