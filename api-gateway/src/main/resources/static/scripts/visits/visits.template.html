@@ -518,6 +518,7 @@
 
         renderCalendar();
     });
+    console.log(this.previousVisits)
 </script>
 
 <h2>Visits</h2>
@@ -581,7 +582,7 @@
 
     <div class="form-group" style="margin-top: 4px">
         <label for="date_input">Date</label>
-        <input id="date_input" type="date" class="form-control" ng-model='$ctrl.date' required disabled/>
+        <input id="date_input" type="date" class="form-control" ng-model='$ctrl.selectedDate' required disabled/>
     </div>
 
     <div class="form-group">
@@ -639,7 +640,11 @@
     </thead>
     <tbody>
         <tr ng-repeat="v in $ctrl.previousVisits" data-index="{{$index}}" data-table-name="previousVisits">
+<<<<<<< HEAD
             <td class="col-sm-2"> {{selectedDate | date:'yyyy-MM-dd'}}></td>
+=======
+            <td class="col-sm-2">{{v.date | date:'yyyy-MM-dd'}}</td>
+>>>>>>> 0d5c194a (Fixed rouuting issue with create visit button)
             <td style="white-space: pre-line">{{v.description}}</td>
             <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>
             <td class="status-text" style="white-space: pre-line">{{$ctrl.getStatus(v.status)}}</td>
