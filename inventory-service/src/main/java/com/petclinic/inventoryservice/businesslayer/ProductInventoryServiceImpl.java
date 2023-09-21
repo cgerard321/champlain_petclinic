@@ -4,6 +4,7 @@ import com.petclinic.inventoryservice.datalayer.Inventory.Inventory;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryRepository;
 import com.petclinic.inventoryservice.datalayer.Product.Product;
 import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
+import com.petclinic.inventoryservice.presentationlayer.InventoryResponseDTO;
 import com.petclinic.inventoryservice.presentationlayer.InventoryRequestDTO;
 import com.petclinic.inventoryservice.presentationlayer.InventoryResponseDTO;
 import com.petclinic.inventoryservice.presentationlayer.InventoryResponseDTO;
