@@ -1,4 +1,5 @@
 package com.petclinic.visits.visitsservicenew.PresentationLayer;
+import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 
 
 @AutoConfigureWebTestClient
@@ -35,6 +35,7 @@ class VisitsControllerIntegrationTest {
     private final int PRAC_ID = visitResponseDTO.getPractitionerId();
     private final int PET_ID = visitResponseDTO.getPetId();
     private final String VISIT_ID = visitResponseDTO.getVisitId();
+    private final String STATUS = "COMPLETED";
     private final int dbSize = 1;
     //private final LocalDateTime visitDate = visitResponseDTO.getVisitDate().withSecond(0);
 
@@ -72,7 +73,7 @@ class VisitsControllerIntegrationTest {
                 .jsonPath("$.petId").isEqualTo(visit.getPetId())
                 .jsonPath("$.description").isEqualTo(visit.getDescription())
                 .jsonPath("$.visitDate").isEqualTo("2022-11-25T13:45:00")
-                .jsonPath("$.status").isEqualTo(visit.isStatus());
+                .jsonPath("$.status").isEqualTo(visit.getStatus());
     }
     @Test
     void getVisitByPractitionerId(){
@@ -92,7 +93,29 @@ class VisitsControllerIntegrationTest {
                     assertEquals(list.get(0).getPetId(), visit.getPetId());
                     assertEquals(list.get(0).getDescription(), visit.getDescription());
                     assertEquals(list.get(0).getVisitDate(), visit.getVisitDate());
-                    assertEquals(list.get(0).isStatus(), visit.isStatus());
+                    assertEquals(list.get(0).getStatus(), visit.getStatus());
+                });
+    }
+
+    @Test
+    void getVisitsForStatus(){
+        client
+                .get()
+                .uri("/visits/status/"+STATUS)
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
+                .expectBodyList(VisitResponseDTO.class)
+                .value((list)->{
+                    assertNotNull(list);
+                    assertEquals(dbSize, list.size());
+                    assertEquals(list.get(0).getVisitId(), visit.getVisitId());
+                    assertEquals(list.get(0).getPractitionerId(), visit.getPractitionerId());
+                    assertEquals(list.get(0).getPetId(), visit.getPetId());
+                    assertEquals(list.get(0).getDescription(), visit.getDescription());
+                    assertEquals(list.get(0).getVisitDate(), visit.getVisitDate());
+                    assertEquals(list.get(0).getStatus(), visit.getStatus());
                 });
     }
 
@@ -114,7 +137,7 @@ class VisitsControllerIntegrationTest {
                     assertEquals(list.get(0).getPetId(), visit.getPetId());
                     assertEquals(list.get(0).getDescription(), visit.getDescription());
                     assertEquals(list.get(0).getVisitDate(), visit.getVisitDate());
-                    assertEquals(list.get(0).isStatus(), visit.isStatus());
+                    assertEquals(list.get(0).getStatus(), visit.getStatus());
                 });
     }
     /*
@@ -187,7 +210,7 @@ class VisitsControllerIntegrationTest {
                 .jsonPath("$.petId").isEqualTo(visit.getPetId())
                 .jsonPath("$.description").isEqualTo(visit.getDescription())
                 .jsonPath("$.visitDate").isEqualTo("2022-11-25T13:45:00")
-                .jsonPath("$.status").isEqualTo(visit.isStatus());
+                .jsonPath("$.status").isEqualTo(visit.getStatus());
     }
 
     private Visit buildVisit(){
@@ -198,7 +221,7 @@ class VisitsControllerIntegrationTest {
                 .description("this is a dummy description")
                 .petId(2)
                 .practitionerId(2)
-                .status(true).build();
+                .status(Status.COMPLETED).build();
     }
 
     private VisitResponseDTO buildVisitResponseDto(){
@@ -209,7 +232,7 @@ class VisitsControllerIntegrationTest {
                 .description("this is a dummy description")
                 .petId(2)
                 .practitionerId(2)
-                .status(true).build();
+                .status(Status.COMPLETED).build();
     }
     private VisitRequestDTO buildVisitRequestDto(){
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
@@ -218,6 +241,6 @@ class VisitsControllerIntegrationTest {
                 .description("this is a dummy description")
                 .petId(2)
                 .practitionerId(2)
-                .status(true).build();
+                .status(Status.COMPLETED).build();
     }
 }

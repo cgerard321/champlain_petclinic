@@ -1,5 +1,6 @@
 package com.petclinic.visits.visitsservicenew.BusinessLayer;
 
+import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
@@ -24,6 +25,37 @@ public class VisitServiceImpl implements VisitService {
         return repo.findByPetId(petId)
                 .map(EntityDtoUtil::toVisitResponseDTO);
     }
+
+    @Override
+    public Flux<VisitResponseDTO> getVisitsForStatus(String statusString) {
+        Status status;
+        switch (statusString){
+
+            case("UPCOMING"):
+                status = Status.UPCOMING;
+
+            case("REQUESTED"):
+                status = Status.REQUESTED;
+
+            case("CONFIRMED"):
+                status = Status.CONFIRMED;
+
+            case("CANCELLED"):
+                status = Status.CANCELLED;
+
+            case("IN_PROGRESS"):
+                status = Status.IN_PROGRESS;
+
+            case("COMPLETED"):
+                status = Status.COMPLETED;
+
+            default:
+                status = Status.CONFIRMED;
+        }
+        return repo.findAllByStatus(statusString)
+                .map(EntityDtoUtil::toVisitResponseDTO);
+    }
+
     @Override
     public Flux<VisitResponseDTO> getVisitsForPractitioner(int practitionerId) {
         return repo.findVisitsByPractitionerId(practitionerId)

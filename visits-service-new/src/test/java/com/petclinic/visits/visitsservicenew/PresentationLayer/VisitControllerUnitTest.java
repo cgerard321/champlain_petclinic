@@ -2,6 +2,7 @@ package com.petclinic.visits.visitsservicenew.PresentationLayer;
 
 
 import com.petclinic.visits.visitsservicenew.BusinessLayer.VisitService;
+import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +18,6 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 
 @WebFluxTest(VisitController.class)
 class VisitControllerUnitTest {
@@ -31,6 +31,8 @@ class VisitControllerUnitTest {
     private final String Visit_UUID_OK = visitResponseDTO.getVisitId();
     private final int Practitioner_Id_OK = visitResponseDTO.getPractitionerId();
     private final int Pet_Id_OK = visitResponseDTO.getPetId();
+
+    private final String STATUS = "COMPLETED";
     //private final LocalDateTime visitDate = visitResponseDTO.getVisitDate().withSecond(0);
     @Test
     void getAllVisits(){
@@ -63,7 +65,7 @@ class VisitControllerUnitTest {
                 .jsonPath("$.description").isEqualTo(visitResponseDTO.getDescription())
                 .jsonPath("$.petId").isEqualTo(visitResponseDTO.getPetId())
                 .jsonPath("$.practitionerId").isEqualTo(visitResponseDTO.getPractitionerId())
-                .jsonPath("$.status").isEqualTo(visitResponseDTO.isStatus());
+                .jsonPath("$.status").isEqualTo(visitResponseDTO.getStatus());
 
         Mockito.verify(visitService, times(1)).getVisitByVisitId(Visit_UUID_OK);
     }
@@ -96,6 +98,21 @@ class VisitControllerUnitTest {
                 .returnResult(VisitResponseDTO.class);
 
         Mockito.verify(visitService, times(1)).getVisitsForPet(Pet_Id_OK);
+    }
+
+    @Test
+    void getVisitsForStatus(){
+        when(visitService.getVisitsForStatus(anyString())).thenReturn(Flux.just(visitResponseDTO));
+
+        webFluxTest.get()
+                .uri("/visits/status/" + STATUS)
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM + ";charset=UTF-8")
+                .returnResult(VisitResponseDTO.class);
+
+        Mockito.verify(visitService, times(1)).getVisitsForStatus(STATUS);
     }
 
     /*
@@ -167,7 +184,7 @@ class VisitControllerUnitTest {
                 .description("this is a dummy description")
                 .petId(2)
                 .practitionerId(2)
-                .status(true).build();
+                .status(Status.COMPLETED).build();
     }
     private VisitRequestDTO buildVisitRequestDTO(){
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
@@ -176,6 +193,6 @@ class VisitControllerUnitTest {
                 .description("this is a dummy description")
                 .petId(2)
                 .practitionerId(2)
-                .status(true).build();
+                .status(Status.COMPLETED).build();
     }
 }

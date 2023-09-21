@@ -23,6 +23,10 @@ public class VisitController {
     public Flux<VisitResponseDTO> getVisitsForPet(@PathVariable int petId){
         return visitService.getVisitsForPet(petId);
     }
+    @GetMapping(value = "/status/{status}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<VisitResponseDTO> getVisitsForStatus(@PathVariable String status){
+        return visitService.getVisitsForStatus(status);
+    }
     @GetMapping("/{visitId}")
     public Mono<ResponseEntity<VisitResponseDTO>> getVisitByVisitId(@PathVariable String visitId){
         return visitService.getVisitByVisitId(visitId)

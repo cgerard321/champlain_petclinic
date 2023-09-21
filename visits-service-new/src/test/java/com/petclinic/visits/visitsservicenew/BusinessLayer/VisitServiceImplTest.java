@@ -1,14 +1,13 @@
 package com.petclinic.visits.visitsservicenew.BusinessLayer;
 
+import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -90,6 +89,25 @@ class VisitServiceImplTest {
                     assertEquals(visit.getPractitionerId(), foundVisit.getPractitionerId());
                 }).verifyComplete();
     }
+
+    @Test
+    void getVisitsForStatus(){
+        when(visitRepo.findAllByStatus(anyString())).thenReturn(Flux.just(visit));
+
+        Flux<VisitResponseDTO> visitResponseDTOFlux = visitService.getVisitsForStatus(anyString());
+
+        StepVerifier
+                .create(visitResponseDTOFlux)
+                .consumeNextWith(foundVisit -> {
+                    assertEquals(visit.getVisitId(), foundVisit.getVisitId());
+                    assertEquals(visit.getVisitDate(), foundVisit.getVisitDate());
+                    assertEquals(visit.getDescription(), foundVisit.getDescription());
+                    assertEquals(visit.getPetId(), foundVisit.getPetId());
+                    assertEquals(visit.getPractitionerId(), foundVisit.getPractitionerId());
+                    assertEquals(visit.getStatus(), foundVisit.getStatus());
+                }).verifyComplete();
+    }
+
     /*
     @Test
     void getVisitsByPractitionerIdAndMonth(){
@@ -153,7 +171,7 @@ class VisitServiceImplTest {
                 .description("this is a dummy description")
                 .petId(2)
                 .practitionerId(2)
-                .status(true).build();
+                .status(Status.COMPLETED).build();
     }
     private VisitResponseDTO buildVisitResponseDTO(){
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
@@ -163,7 +181,7 @@ class VisitServiceImplTest {
                 .description("this is a dummy description")
                 .petId(2)
                 .practitionerId(2)
-                .status(true).build();
+                .status(Status.COMPLETED).build();
     }
     private VisitRequestDTO buildVisitRequestDTO() {
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
@@ -172,7 +190,7 @@ class VisitServiceImplTest {
                     .description("this is a dummy description")
                     .petId(2)
                     .practitionerId(2)
-                    .status(true).build();
+                    .status(Status.COMPLETED).build();
         }
 
 }

@@ -17,5 +17,5 @@ public class VisitRequestDTO {
     private String description;
     private int petId;
     private int practitionerId;
-    private boolean status;
+    private Status status;
 }

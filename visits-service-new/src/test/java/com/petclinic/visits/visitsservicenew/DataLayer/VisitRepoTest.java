@@ -39,7 +39,7 @@ class VisitRepoTest {
                     assertEquals(visit1.getPetId(), gotVisit.getPetId());
                     assertEquals(visit1.getVisitDate(), gotVisit.getVisitDate());
                     assertEquals(visit1.getPractitionerId(), gotVisit.getPractitionerId());
-                    assertEquals(visit1.isStatus(), gotVisit.isStatus());
+                    assertEquals(visit1.getStatus(), gotVisit.getStatus());
                 }).verifyComplete();
     }
     @Test
@@ -72,7 +72,7 @@ class VisitRepoTest {
                     assertEquals(visit1.getPetId(), gotVisit.getPetId());
                     assertEquals(visit1.getVisitDate(), gotVisit.getVisitDate());
                     assertEquals(visit1.getPractitionerId(), gotVisit.getPractitionerId());
-                    assertEquals(visit1.isStatus(), gotVisit.isStatus());
+                    assertEquals(visit1.getStatus(), gotVisit.getStatus());
                 }).then(this::deleteVisitByVisitId).verifyComplete();
     }
 
@@ -84,6 +84,6 @@ class VisitRepoTest {
                 .description("this is a dummy description")
                 .petId(petId)
                 .practitionerId(2)
-                .status(true).build();
+                .status(Status.COMPLETED).build();
     }
 }

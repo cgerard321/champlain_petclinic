@@ -4,13 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.config.GlobalExceptionHandler;
 import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.Auth.Role;
-import com.petclinic.bffapigateway.dtos.Bills.BillDetails;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
 import com.petclinic.bffapigateway.dtos.Vets.*;
+import com.petclinic.bffapigateway.dtos.Visits.Status;
 import com.petclinic.bffapigateway.dtos.Visits.VisitDetails;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
@@ -39,7 +39,6 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static org.junit.Assert.*;
-import static org.assertj.core.util.Lists.list;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -1341,7 +1340,7 @@ class ApiGatewayControllerTest {
         visit.setPetId(1);
         visit.setVisitDate(LocalDateTime.parse("2021-12-12T14:00:00"));
         visit.setDescription("Charle's Richard cat has a paw infection.");
-        visit.setStatus(false);
+        visit.setStatus(Status.REQUESTED);
         visit.setPractitionerId(1);
 
         when(visitsServiceClient.createVisitForPet(visit))
@@ -1414,7 +1413,7 @@ class ApiGatewayControllerTest {
         visit.setPetId(1);
         visit.setVisitDate(LocalDateTime.parse("2021-12-12T14:00:00"));
         visit.setDescription("Charle's Richard cat has a paw infection.");
-        visit.setStatus(false);
+        visit.setStatus(Status.REQUESTED);
         visit.setPractitionerId(1);
 
         VisitDetails visit2 = new VisitDetails();
@@ -1425,7 +1424,7 @@ class ApiGatewayControllerTest {
         visit2.setPetId(2);
         visit2.setVisitDate(LocalDateTime.parse("2021-12-12T14:00:00"));
         visit2.setDescription("Charle's Richard dog has a paw infection.");
-        visit2.setStatus(false);
+        visit2.setStatus(Status.REQUESTED);
         visit2.setPractitionerId(2);
 
 
@@ -1463,8 +1462,8 @@ class ApiGatewayControllerTest {
     }
     @Test
     void shouldGetAllVisits() {
-        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25T13:45:00"), "this is a dummy description", 2, 2, true);
-        VisitResponseDTO visitResponseDTO2 = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25T13:45:00"), "this is a dummy description", 2, 2, true);
+        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25T13:45:00"), "this is a dummy description", 2, 2, Status.REQUESTED);
+        VisitResponseDTO visitResponseDTO2 = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25T13:45:00"), "this is a dummy description", 2, 2, Status.REQUESTED);
         when(visitsServiceClient.getAllVisits()).thenReturn(Flux.just(visitResponseDTO,visitResponseDTO2));
 
         client.get()
@@ -1484,7 +1483,7 @@ class ApiGatewayControllerTest {
         visit.setPetId(1);
         visit.setVisitDate(LocalDateTime.parse("2021-12-12T14:00:00"));
         visit.setDescription("Charle's Richard cat has a paw infection.");
-        visit.setStatus(false);
+        visit.setStatus(Status.REQUESTED);
         visit.setPractitionerId(1);
 
         when(visitsServiceClient.getVisitsForPet(visit.getPetId()))
@@ -1509,7 +1508,7 @@ class ApiGatewayControllerTest {
         visit.setPetId(1);
         visit.setVisitDate(LocalDateTime.parse("2021-12-12T14:00:00"));
         visit.setDescription("Charle's Richard cat has a paw infection.");
-        visit.setStatus(false);
+        visit.setStatus(Status.REQUESTED);
         visit.setPractitionerId(1);
 
         when(visitsServiceClient.getVisitForPractitioner(visit.getPetId()))
@@ -1556,7 +1555,7 @@ class ApiGatewayControllerTest {
 
     @Test
     void getSingleVisit_Valid() {
-        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25T13:45:00"), "this is a dummy description", 2, 2, true);
+        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25T13:45:00"), "this is a dummy description", 2, 2, Status.REQUESTED);
         when(visitsServiceClient.getVisitByVisitId(anyString())).thenReturn(Mono.just(visitResponseDTO));
 
         client.get()
@@ -1568,7 +1567,8 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.petId").isEqualTo(visitResponseDTO.getPetId())
                 .jsonPath("$.visitDate").isEqualTo("2022-11-25T13:45:00")
                 .jsonPath("$.description").isEqualTo(visitResponseDTO.getDescription())
-                .jsonPath("$.practitionerId").isEqualTo(visitResponseDTO.getPractitionerId());
+                .jsonPath("$.practitionerId").isEqualTo(visitResponseDTO.getPractitionerId())
+                .jsonPath("$.status").isEqualTo(visitResponseDTO.getStatus());
     }
 
 //    @Test
@@ -1598,13 +1598,13 @@ class ApiGatewayControllerTest {
         visit1.setPetId(21);
         visit1.setVisitDate(LocalDateTime.parse("2021-12-07T14:00:00"));
         visit1.setDescription("John Smith's cat has a paw infection.");
-        visit1.setStatus(false);
+        visit1.setStatus(Status.COMPLETED);
         visit1.setPractitionerId(2);
         visit2.setVisitId(UUID.randomUUID().toString());
         visit2.setPetId(21);
         visit2.setVisitDate(LocalDateTime.parse("2021-12-08T15:00:00"));
         visit2.setDescription("John Smith's dog has a paw infection.");
-        visit2.setStatus(false);
+        visit2.setStatus(Status.COMPLETED);
         visit2.setPractitionerId(2);
 
         List<VisitDetails> previousVisitsList = new ArrayList<>();
@@ -1663,13 +1663,13 @@ class ApiGatewayControllerTest {
         visit1.setPetId(21);
         visit1.setVisitDate(LocalDateTime.parse("2021-12-07T14:00:00"));
         visit1.setDescription("John Smith's cat has a paw infection.");
-        visit1.setStatus(true);
+        visit1.setStatus(Status.CONFIRMED);
         visit1.setPractitionerId(2);
         visit2.setVisitId(UUID.randomUUID().toString());
         visit2.setPetId(21);
         visit2.setVisitDate(LocalDateTime.parse("2021-12-08T15:00"));
         visit2.setDescription("John Smith's dog has a paw infection.");
-        visit2.setStatus(true);
+        visit2.setStatus(Status.CONFIRMED);
         visit2.setPractitionerId(2);
 
         List<VisitDetails> scheduledVisitsList = new ArrayList<>();
