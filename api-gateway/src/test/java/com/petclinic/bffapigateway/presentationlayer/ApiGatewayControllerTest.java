@@ -1800,9 +1800,9 @@ class ApiGatewayControllerTest {
         HttpEntity<UserPasswordLessDTO> httpResponse = new HttpEntity<>(userPasswordLessDTO, new HttpHeaders(headers));
 
         when(authServiceClient.login(any(Login.class)))
-                .thenReturn(Mono.just(httpResponse));
+                .thenReturn(httpResponse);
 
-        Mono<HttpEntity< UserPasswordLessDTO >> response = Mono.just(httpResponse);
+        HttpEntity< UserPasswordLessDTO > response = httpResponse;
 
         when(authServiceClient.login(any(Login.class)))
                 .thenReturn(response);
