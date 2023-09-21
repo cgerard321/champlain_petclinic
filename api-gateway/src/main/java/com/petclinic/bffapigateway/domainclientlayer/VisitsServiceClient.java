@@ -126,6 +126,7 @@ public class VisitsServiceClient {
                 .retrieve()
                 .bodyToMono(VisitDetails.class);
 <<<<<<< HEAD
+<<<<<<< HEAD
     }*/
 public Mono<VisitResponseDTO> createVisitForPet(VisitRequestDTO visit) {
     return webClient
@@ -136,6 +137,9 @@ public Mono<VisitResponseDTO> createVisitForPet(VisitRequestDTO visit) {
             .retrieve()
             .bodyToMono(VisitResponseDTO.class);
 }
+=======
+    }
+>>>>>>> d1d4ca54 (feat/(VIST-CPC-762) User can now navigate to create new visit page (#415))
 
     public Mono<Void> deleteVisitByVisitId(String visitId){
         return webClient
