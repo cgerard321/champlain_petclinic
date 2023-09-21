@@ -19,7 +19,7 @@ public class PetsClient {
     public PetsClient(@Value("${app.customers-service-reactive.host}") String petsServiceHost,
                       @Value("${app.customers-service-reactive.port}") String petsServicePort){
 
-        petClientServiceBaseURL = "http://" + petsServiceHost + ":" + petsServicePort + "/vets";
+        petClientServiceBaseURL = "http://" + petsServiceHost + ":" + petsServicePort + "/pet";
 
         this.webClient = WebClient.builder()
                 .baseUrl(petClientServiceBaseURL)
@@ -45,5 +45,5 @@ public class PetsClient {
                     .bodyToMono(PetResponseDTO.class);
         }
     }
-
+    
 
