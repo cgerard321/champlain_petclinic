@@ -1,5 +1,6 @@
 package com.petclinic.visits.visitsservicenew.DomainClientLayer;
 
+
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -46,6 +47,4 @@ public class VetsClient {
         return vetDTOMono;
     }
 
-
-    }
-
+}
