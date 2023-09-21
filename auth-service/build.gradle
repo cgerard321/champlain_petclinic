@@ -42,7 +42,7 @@ dependencies {
 
     implementation group: 'org.projectlombok', name: 'lombok-mapstruct-binding', version: '0.2.0'
 
-    implementation("org.mapstruct:mapstruct:1.4.1.Final")
+    implementation('org.mapstruct:mapstruct:1.5.3.Final')
     compileOnly "org.mapstruct:mapstruct-processor:${mapstructVersion}"
     annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
     testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
