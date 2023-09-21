@@ -15,7 +15,6 @@ public class PetsClient {
     private final WebClient webClient;
     private final String petClientServiceBaseURL;
 
-
     public PetsClient(@Value("${app.customers-service-reactive.host}") String petsServiceHost,
                       @Value("${app.customers-service-reactive.port}") String petsServicePort){
 
