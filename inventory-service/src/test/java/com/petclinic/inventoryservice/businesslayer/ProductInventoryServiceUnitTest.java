@@ -43,6 +43,7 @@ class ProductInventoryServiceUnitTest {
             .productPrice(100.00)
             .productQuantity(10)
             .build();
+
     Product product = Product.builder()
             .productId("12345")
             .inventoryId("1")
@@ -51,37 +52,13 @@ class ProductInventoryServiceUnitTest {
             .productPrice(100.00)
             .productQuantity(10)
             .build();
+
     Inventory inventory = Inventory.builder()
             .id("1")
             .inventoryId("1")
             .inventoryType(InventoryType.internal)
             .inventoryDescription("Medication for procedures")
             .build();
-
-   /* @Test
-    void getAllProductsByInventoryId_withValidFields_shouldSucceed(){
-        String inventoryId = "1";
-
-        when(productRepository
-                .findAllProductsByInventoryIdAndProductNameAndProductPriceAndProductQuantity(
-                        inventoryId,
-                        null,
-                        null,
-                        null))
-                .thenReturn(Flux.just(product));
-
-        Flux<ProductResponseDTO> productResponseDTOFlux = productInventoryService
-                .getProductsInInventoryByInventoryIdAndProductsField(
-                        inventoryId,
-                        null,
-                        null,
-                        null);
-
-        StepVerifier
-                .create(productResponseDTOFlux)
-                .expectNextCount(2)
-                .verifyComplete();
-    }*/
 
     @Test
     void getAllProductsByInventoryId_andProductName_andProductPrice_andProductQuantity_withValidFields_shouldSucceed(){
@@ -316,48 +293,5 @@ class ProductInventoryServiceUnitTest {
                 .expectError(NotFoundException.class)
                 .verify();
     }
-
-
-//    @Test
-//    void createProduct_validProduct_ShouldSucceed(){
-//        // Arrange
-//        ProductRequestDTO productRequestDTO = ProductRequestDTO.builder()
-//                .productName("Benzodiazepines")
-//                .productDescription("Sedative Medication")
-//                .productPrice(100.00)
-//                .productQuantity(10)
-//                .build();
-//        Product product = Product.builder()
-//                .productName("Benzodiazepines")
-//                .productDescription("Sedative Medication") // Fix the field name here
-//                .productPrice(100.00)
-//                .productQuantity(10)
-//                .sku("123F567C9")
-//                .inventoryId("1")
-//                .id("1")
-//                .build();
-//        when(productRepository.save(any(Product.class))).thenReturn(Mono.just(product));
-//        // Verify that the save method was called with any Product instance
-//        verify(productRepository).save(any(Product.class));
-//
-//        //act
-//        Mono<ProductResponseDTO> productResponseDTOMono = productInventoryService.addProductToInventory(Mono.just(productRequestDTO), "1");
-//        //assert
-//        StepVerifier
-//                .create(productResponseDTOMono)
-//                .consumeNextWith(productResponseDTO -> {
-//                    assertNotNull(productResponseDTO);
-//                    assertEquals("1", productResponseDTO.getId());
-//                    assertEquals("1", productResponseDTO.getInventoryId());
-//                    assertEquals("123F567C9", productResponseDTO.getSku());
-//                    assertEquals("Benzodiazepines", productResponseDTO.getProductName());
-//                    assertEquals("Sedative Medication", productResponseDTO.getProductDescription());
-//                    assertEquals(100.00, productResponseDTO.getProductPrice());
-//                    assertEquals(10, productResponseDTO.getProductQuantity());
-//                })
-//                .verifyComplete();
-//    }
-
-
 
 }

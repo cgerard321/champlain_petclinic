@@ -48,8 +48,6 @@ public class InventoryController {
     public Flux<InventoryResponseDTO> getAllInventory(){
         return productInventoryService.getAllInventory();
     }
-
-
     @PutMapping("/{inventoryId}")
     public Mono<ResponseEntity<InventoryResponseDTO>> updateInventory(@RequestBody Mono<InventoryRequestDTO> inventoryRequestDTO, @PathVariable String inventoryId) {
         return productInventoryService.updateInventory(inventoryRequestDTO, inventoryId)

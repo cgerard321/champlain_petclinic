@@ -12,6 +12,9 @@ import lombok.NoArgsConstructor;
 public class InventoryResponseDTO {
     private String inventoryId;
     private String inventoryType;
+<<<<<<< HEAD
    private String  inventoryName;
+=======
+>>>>>>> 97ecf498 (MoveCodeToNewBranch)
     private String inventoryDescription;
 }
