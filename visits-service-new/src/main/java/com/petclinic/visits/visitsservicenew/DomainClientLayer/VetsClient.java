@@ -9,6 +9,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 
+
 @Service
 public class VetsClient {
 
@@ -46,5 +47,6 @@ public class VetsClient {
 
         return vetDTOMono;
     }
+
 
 }
