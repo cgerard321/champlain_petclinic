@@ -1,5 +1,6 @@
 package com.petclinic.visits.visitsservicenew.DomainClientLayer;
 
+
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -17,7 +18,6 @@ public class PetsClient {
 
     public PetsClient(@Value("${app.customers-service-reactive.host}") String petsServiceHost,
                       @Value("${app.customers-service-reactive.port}") String petsServicePort){
-
 
         petClientServiceBaseURL = "http://" + petsServiceHost + ":" + petsServicePort + "/pet";
 
