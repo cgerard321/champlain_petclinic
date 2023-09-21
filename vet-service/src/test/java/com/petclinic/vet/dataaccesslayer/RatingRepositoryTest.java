@@ -87,6 +87,17 @@ class RatingRepositoryTest {
     }
 
     @Test
+    public void updateRatingOfVet_ShouldSucceed(){
+        Rating rating = Rating.builder()
+                .ratingId("2")
+                .vetId("2")
+                .rateScore(1.0)
+                .rateDescription("My dog wouldn't stop crying after his appointment")
+                .rateDate("13/09/2023")
+                .build();
+    }
+
+    @Test
     public void getNumberOfRatingOfAVet_ShouldSucceed(){
         Publisher<Long> find = ratingRepository.countAllByVetId("1");
 

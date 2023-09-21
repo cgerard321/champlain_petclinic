@@ -20,15 +20,14 @@ import java.util.HashSet;
 import java.util.function.Consumer;
 
 import static io.netty.handler.codec.http.HttpHeaders.setHeader;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-
 
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @AutoConfigureWebTestClient
 class VetsServiceClientIntegrationTest {
-
 
     private VetsServiceClient vetsServiceClient;
 
@@ -84,24 +83,21 @@ class VetsServiceClientIntegrationTest {
 
 
     @Test
-    void getAverageRatingsByVetId() throws JsonProcessingException{
+    void getAverageRatingsByVetId() throws JsonProcessingException {
 
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setBody("4.5"));
 
-                final Double averageRating=
+        final Double averageRating =
                 vetsServiceClient.getAverageRatingByVetId(vetDTO.getVetId()).block();
         assertEquals(4.5, averageRating);
 
     }
 
 
-
-
-  
-  @Test
-    void deleteRatingsByRatingId() throws JsonProcessingException{
+    @Test
+    void deleteRatingsByRatingId() throws JsonProcessingException {
         final String ratingId = "794ac37f-1e07-43c2-93bc-61839e61d989";
 
         prepareResponse(response -> response
@@ -112,7 +108,7 @@ class VetsServiceClientIntegrationTest {
                         "        \"rateScore\": 4.5\n" +
                         "    }"));
 
-        final Mono<Void> empty = vetsServiceClient.deleteRating(vetDTO.getVetId(),ratingId);
+        final Mono<Void> empty = vetsServiceClient.deleteRating(vetDTO.getVetId(), ratingId);
 
         assertEquals(empty.block(), null);
     }
@@ -141,6 +137,34 @@ class VetsServiceClientIntegrationTest {
         assertEquals(ratingRequestDTO.getRateScore(), rating.getRateScore());
         assertEquals(ratingRequestDTO.getRateDescription(), rating.getRateDescription());
         assertEquals(ratingRequestDTO.getRateDate(), rating.getRateDate());
+    }
+
+    @Test
+    void updateRatingByVetIdAndRatingId() throws JsonProcessingException {
+        RatingRequestDTO updatedRating = RatingRequestDTO.builder()
+                .rateScore(2.0)
+                .vetId("678910")
+                .rateDescription("Vet cancelled last minute.")
+                .rateDate("20/09/2023")
+                .build();
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody("    {\n" +
+                        "        \"ratingId\": \"123456\",\n" +
+                        "        \"vetId\": \"678910\",\n" +
+                        "        \"rateScore\": 2.0,\n" +
+                        "        \"rateDescription\": \"Vet cancelled last minute.\",\n" +
+                        "        \"rateDate\": \"20/09/2023\"\n" +
+                        "    }"));
+
+        final RatingResponseDTO ratingResponseDTO = vetsServiceClient.updateRatingByVetIdAndByRatingId("678910","123456", Mono.just(updatedRating)).block();
+        assertNotNull(ratingResponseDTO);
+        assertNotNull(ratingResponseDTO.getRatingId());
+        assertThat(ratingResponseDTO.getVetId()).isEqualTo(updatedRating.getVetId());
+        assertThat(ratingResponseDTO.getRateScore()).isEqualTo(updatedRating.getRateScore());
+        assertThat(ratingResponseDTO.getRateDescription()).isEqualTo(updatedRating.getRateDescription());
+        assertThat(ratingResponseDTO.getRateDate()).isEqualTo(updatedRating.getRateDate());
     }
 
     @Test

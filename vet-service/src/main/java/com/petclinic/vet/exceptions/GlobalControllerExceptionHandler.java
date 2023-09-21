@@ -31,6 +31,12 @@ public class GlobalControllerExceptionHandler {
         return createHttpErrorInfo(UNPROCESSABLE_ENTITY, request, ex);
     }
 
+    @ResponseStatus(NOT_FOUND)
+    @ExceptionHandler(NotFoundException.class)
+    public HttpErrorInfo handleNotFoundException(ServerHttpRequest request, Exception ex){
+        return createHttpErrorInfo(NOT_FOUND, request, ex);
+    }
+
 //    @ResponseStatus(NOT_FOUND)
 //    @ExceptionHandler(ExistingVetNotFoundException.class)
 //    public HttpErrorInfo handleExistingVetNotFoundException(ServerHttpRequest request, Exception ex){
