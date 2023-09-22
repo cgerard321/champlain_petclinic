@@ -3,6 +3,7 @@ package com.petclinic.bffapigateway.presentationlayer;
 
 import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.Auth.Login;
+import com.petclinic.bffapigateway.dtos.Auth.UserPasswordAndTokenRequestModel;
 import com.petclinic.bffapigateway.dtos.Auth.UserPasswordLessDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
@@ -456,6 +457,35 @@ public class BFFApiGatewayController {
         return Mono.just(ResponseEntity.status(HttpStatus.OK).headers(responseFromService.getHeaders()).body(responseFromService.getBody()));
 
     }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @GetMapping("/users/forgot_password")
+    public String showForgotPasswordForm() {
+        return authServiceClient.userForgotPassword();
+    }
+
+
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @PostMapping("/users/forgot_password")
+    public String processForgotPassword(ServerWebExchange exchange, @RequestBody String email) {
+        return authServiceClient.sendForgottenEmail(exchange.getRequest(),email);
+
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @GetMapping("/users/reset_password")
+    public String showResetPasswordForm(@RequestParam(value = "token") String token) throws IllegalAccessException {
+        if(token == null)
+            throw new IllegalAccessException("An error as occurred");
+        return authServiceClient.userShowResetPage(token);
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @PostMapping("/users/reset_password")
+    public String processResetPassword(ServerWebExchange resetExchange, @RequestBody UserPasswordAndTokenRequestModel resetRequest) {
+        return authServiceClient.changePassword(resetExchange.getRequest(),resetRequest);
+    }
+
 
     //Start of Inventory Methods
     @PostMapping(value = "inventory/{inventoryId}/products")
