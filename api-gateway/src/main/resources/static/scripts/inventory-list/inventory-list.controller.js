@@ -1,14 +1,15 @@
 'use strict';
 
-angular.module('bundleList')
-    .controller('BundleListController', ['$http', '$scope', function ($http, $scope) {
+angular.module('inventoryList')
+    .controller('InventoryListController', ['$http', '$scope', function ($http, $scope) {
         var self = this;
 
-                $http.get('api/gateway/bundles').then(function (resp) {
-                    self.bundleList = resp.data;
-
+                $http.get('api/gateway/inventory').then(function (resp) {
+                    self.inventoryList = resp.data;
+                    console.log("Resp data: " + resp.data)
+                    console.log("inventory list: " + self.inventoryList)
                 });
-                $scope.deleteBundle = function (bundleUUID) {
+                /*$scope.deleteBundle = function (bundleUUID) {
                     let varIsConf = confirm('Want to delete Bundle with Bundle Id:' + bundleUUID + '. Are you sure?');
                     if (varIsConf) {
 
@@ -31,5 +32,5 @@ angular.module('bundleList')
                             console.log(error, 'can not get data.');
                         }
                     }
-                };
+                }*/
             }]);
