@@ -14,6 +14,7 @@ package com.petclinic.vet.presentationlayer;
 import com.petclinic.vet.servicelayer.*;
 import com.petclinic.vet.util.EntityDtoUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -57,6 +58,19 @@ public class VetController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
+    @PutMapping("{vetId}/ratings/{ratingId}")
+    public Mono<ResponseEntity<RatingResponseDTO>> updateRatingByVetIdAndRatingId(@PathVariable String vetId, @PathVariable String ratingId, @RequestBody Mono<RatingRequestDTO> ratingRequestDTOMono){
+        return ratingService.updateRatingByVetIdAndRatingId(vetId, ratingId, ratingRequestDTOMono)
+                .map(r->ResponseEntity.status(HttpStatus.OK).body(r))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    /*@PutMapping("{vetId}/ratings/{ratingId}")
+    public Mono<RatingResponseDTO> updateRatingByVetIdAndRatingId(@PathVariable String vetId, @PathVariable String ratingId, @RequestBody Mono<RatingRequestDTO> ratingRequestDTOMono){
+        return ratingService.updateRating(vetId, ratingId, ratingRequestDTOMono);
+    }*/
+
     @GetMapping()
     public Flux<VetDTO> getAllVets() {
         return vetService.getAll();

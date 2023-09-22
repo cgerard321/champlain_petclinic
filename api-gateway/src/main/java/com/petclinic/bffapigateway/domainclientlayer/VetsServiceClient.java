@@ -72,6 +72,19 @@ public class VetsServiceClient {
 
         return ratingResponseDTOMono;
     }
+    public Mono<RatingResponseDTO> updateRatingByVetIdAndByRatingId(String vetId, String ratingId, Mono<RatingRequestDTO> ratingRequestDTOMono){
+        Mono<RatingResponseDTO> ratingResponseDTOMono =
+                webClientBuilder
+                        .build()
+                        .put()
+                        .uri(vetsServiceUrl+"/"+vetId+"/ratings/"+ratingId)
+                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .body(ratingRequestDTOMono, RatingResponseDTO.class)
+                        .retrieve()
+                        .bodyToMono(RatingResponseDTO.class);
+
+        return ratingResponseDTOMono;
+    }
 
     public Mono<Void> deleteRating(String vetId, String ratingId) {
         Mono<Void> result = webClientBuilder
@@ -93,6 +106,7 @@ public class VetsServiceClient {
                         .bodyToMono(Double.class);
         return averageRating;
     }
+
 
 
 
