@@ -70,14 +70,5 @@ class InventoryServiceClientIntegrationTest {
                 .verifyComplete();
     }
 
-    @Test
-    void getAllInventory(){
-        InventoryResponseDTO inventoryResponseDTO = new InventoryResponseDTO(
-                "inventoryId",
-                "type",
-                "desc"
-        );
 
-
-    }
 }
