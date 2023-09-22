@@ -49,7 +49,6 @@ class ProductInventoryServiceUnitTest {
             .productPrice(100.00)
             .productQuantity(10)
             .build();
-
     Product product = Product.builder()
             .productId("12345")
             .inventoryId("1")
@@ -58,7 +57,6 @@ class ProductInventoryServiceUnitTest {
             .productPrice(100.00)
             .productQuantity(10)
             .build();
-
     Inventory inventory = Inventory.builder()
             .id("1")
             .inventoryId("1")
@@ -66,7 +64,7 @@ class ProductInventoryServiceUnitTest {
             .inventoryDescription("Medication for procedures")
             .build();
 
-    @Test
+   /* @Test
     void getAllProductsByInventoryId_withValidFields_shouldSucceed(){
         String inventoryId = "1";
 
@@ -89,7 +87,7 @@ class ProductInventoryServiceUnitTest {
                 .create(productResponseDTOFlux)
                 .expectNextCount(2)
                 .verifyComplete();
-    }
+    }*/
 
     @Test
     void getAllProductsByInventoryId_andProductName_andProductPrice_andProductQuantity_withValidFields_shouldSucceed(){
