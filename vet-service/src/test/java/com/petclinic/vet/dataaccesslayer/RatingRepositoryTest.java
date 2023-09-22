@@ -92,8 +92,17 @@ class RatingRepositoryTest {
 
     @Test
     public void updateRatingOfVet_ShouldSucceed(){
+        String existingRatingId="2";
+
+        Publisher<Rating> exisingRating = ratingRepository.findByRatingId(existingRatingId);
+
+        StepVerifier
+                .create(exisingRating)
+                .expectNextCount(1)
+                .verifyComplete();
+
         Rating rating = Rating.builder()
-                .ratingId("2")
+                .ratingId(existingRatingId)
                 .vetId("2")
                 .rateScore(2.0)
                 .rateDescription("Vet cancelled last minute.")
