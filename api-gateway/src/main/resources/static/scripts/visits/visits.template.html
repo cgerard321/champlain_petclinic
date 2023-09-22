@@ -646,11 +646,30 @@
     </thead>
     <tbody>
         <tr ng-repeat="v in $ctrl.previousVisits" data-index="{{$index}}" data-table-name="previousVisits">
+<<<<<<< HEAD
             <script> console.log("V Date:" + v.date)</script>
 <<<<<<< HEAD
           <td style="white-space: pre-line">{{v.description}}</td>
 =======
             <td class="col-sm-2">{{v.date | date:'MM-dd-yyyy'}}</td>
+=======
+<<<<<<< HEAD
+            <td class="col-sm-2">{{v.date | date:'yyyy-MM-dd'}}</td>
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+            <td class="col-sm-2"> {{selectedDate | date:'yyyy-MM-dd'}}></td>
+=======
+            <td class="col-sm-2">{{v.date | date:'yyyy-MM-dd'}}</td>
+>>>>>>> 0d5c194a (Fixed rouuting issue with create visit button)
+=======
+            <td class="col-sm-2">{{v.date | date:'yyyy-MM-dd'}}</td>
+=======
+            <td class="col-sm-2">{{$ctrl.getVisitDate(v.visitId)}}</td>
+>>>>>>> 979fa780 (Working on displaying date for a visit)
+>>>>>>> 94cd137f (Working on displaying date for a visit)
+>>>>>>> d0584629 (Working on displaying date for a visit)
+>>>>>>> ff0682ba (Working on displaying date for a visit)
             <td style="white-space: pre-line">{{v.description}}</td>
 >>>>>>> f0d70339 (Fixed rouuting issue with create visit button)
             <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>
