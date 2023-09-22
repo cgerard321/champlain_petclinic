@@ -38,6 +38,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -46,10 +48,10 @@ import java.time.Duration;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.ResponseEntity.ok;
-
 @RestController
 @RequestMapping("/users")
 @Slf4j
@@ -154,6 +156,38 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
+
+
+
+    @GetMapping("/forgot_password")
+    public String showForgotPasswordForm() {
+        return "forgot_password_form";
+    }
+
+    @PostMapping("/forgot_password")
+    public String processForgotPassword(@RequestBody UserResetPwdRequestModel userResetPwdRequestModel, Model model) {
+        model = userService.processForgotPassword(userResetPwdRequestModel, model);
+        return "forgot_password_form";
+
+    }
+
+
+
+    @GetMapping("/reset_password")
+    public String showResetPasswordForm(@RequestParam Map<String, String> querryParams, Model model) {
+        model = userService.showResetPasswordForm(querryParams, model);
+
+        return "reset_password_form";
+
+    }
+
+    @PostMapping("/reset_password")
+    public String processResetPassword(@RequestBody UserResetPwdWithTokenRequestModel resetRequest, Model model) {
+        model = userService.processResetPassword(resetRequest, model);
+
+        return "message";
+    }
+
 
     @RequestMapping(method = RequestMethod.HEAD)
     public void preflight() {

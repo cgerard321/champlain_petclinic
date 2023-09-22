@@ -1,20 +1,21 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
-import com.petclinic.bffapigateway.dtos.Auth.Login;
-import com.petclinic.bffapigateway.dtos.Auth.Role;
-import com.petclinic.bffapigateway.dtos.Auth.UserPasswordLessDTO;
+import com.petclinic.bffapigateway.dtos.Auth.*;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Rethrower;
 import com.petclinic.bffapigateway.exceptions.InvalidTokenException;
 import com.petclinic.bffapigateway.utils.Security.Variables.SecurityConst;
+import com.petclinic.bffapigateway.utils.Utility;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -125,6 +126,66 @@ public class AuthServiceClient {
         }
     }
 
+    public String userForgotPassword() {
+        String form;
+        try {
+            String url = authServiceUrl + "/users/forgot_password";
+            form = restTemplate
+                    .getForObject(url, String.class);
+
+        } catch (HttpClientErrorException ex) {
+            throw new InvalidInputException(ex.getMessage());
+        }
+        return form;
+    }
+
+    public String sendForgottenEmail(ServerHttpRequest request, String email) {
+
+        UserResetPwdRequestModel userResetPwdRequestModel = UserResetPwdRequestModel.builder().email(email).url(Utility.getSiteURL(request)).build();
+
+        String formPage;
+        try {
+            String url = authServiceUrl+"/users/forgot_password";
+            formPage = restTemplate
+                    .postForObject(url, userResetPwdRequestModel, String.class);
+
+        } catch (HttpClientErrorException ex) {
+            throw new InvalidInputException(ex.getMessage());
+        }
+        return formPage;
+    }
+    public String userShowResetPage(String token) {
+        String form;
+        try {
+            String url = authServiceUrl + "/users/reset_password";
+            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url);
+            builder.queryParam("token",token);
+            url = builder.toUriString();
+
+            form = restTemplate
+                    .getForObject(url, String.class);
+
+        } catch (HttpClientErrorException ex) {
+            throw new InvalidInputException(ex.getMessage());
+        }
+        return form;
+    }
+    public String changePassword(ServerHttpRequest request,UserPasswordAndTokenRequestModel pwdChange) {
+
+        UserResetPwdWithTokenRequestModel userResetPwdWithTokenRequestModel = UserResetPwdWithTokenRequestModel.builder().token(pwdChange.getToken()).password(pwdChange.getPassword()).build();
+
+        String formPage;
+        try {
+            String url = authServiceUrl+"/users/reset_password";
+            formPage = restTemplate
+                    .postForObject(url, userResetPwdWithTokenRequestModel, String.class);
+
+        } catch (HttpClientErrorException ex) {
+            throw new InvalidInputException(ex.getMessage());
+        }
+        return formPage;
+    }
+
 
     public Mono<ResponseEntity<Flux<String>>> validateToken(String jwtToken) {
         // Make a POST request to the auth-service for token validation
@@ -133,11 +194,12 @@ public class AuthServiceClient {
                 .post()
                 .uri(authServiceUrl + "/users/validate-token")
                 .bodyValue(jwtToken)
-                .cookie(securityConst.getTOKEN_PREFIX(), jwtToken)
+                .cookie("Bearer", jwtToken)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> Mono.error(new InvalidTokenException("Invalid token")))
                 .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> Mono.error(new InvalidInputException("Invalid token")))
                 .toEntityFlux(String.class);
     }
+
 }
 
