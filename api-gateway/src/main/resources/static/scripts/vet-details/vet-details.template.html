@@ -127,6 +127,26 @@
                             <div class="rating-item">
                                 <span class="rating-value">{{ rating.rateScore }} / 5</span>
                                 <a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteVetRating(rating.ratingId)">Delete Rating</a>
+
+                                <form enctype="multipart/form-data" id="updateForm" name="updateForm">
+                                    <button class="update-vet-button btn btn-success" id="updateRatingBtn" ng-click="$ctrl.updateRating(rating.ratingId, updateForm)">
+                                        Update
+                                    </button>
+
+                                    <div class="col-sm-12" name="ratingUpdate" id="ratingUpdate" style="display: none">
+                                        <select name="ratingOptions" id="ratingOptions">
+                                            <option value="1">1</option>
+                                            <option value="2">2</option>
+                                            <option value="3">3</option>
+                                            <option value="4">4</option>
+                                            <option value="5">5</option>
+                                        </select>
+                                        <h5 class="form-label">Review Description</h5>
+                                        <textarea class="form-control" id="updateDescription" maxlength="350" name="updateDescription"
+                                                  ng-model="rating.rateDescription" pattern="^(.*)" placeholder="Update Description"
+                                                  title="Maximum of 350 characters."></textarea>
+                                    </div>
+                                </form>
                             </div>
                         </div>
                     </div>
@@ -157,7 +177,7 @@
                                 </button>
                             </div>
                         </form>
-                    <div>
+                    </div>
                 </div>
             </div>
         </div>

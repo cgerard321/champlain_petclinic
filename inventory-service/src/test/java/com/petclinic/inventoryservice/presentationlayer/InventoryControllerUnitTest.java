@@ -9,7 +9,11 @@ import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Arrays;
+import java.util.List;
 
 import static com.petclinic.inventoryservice.datalayer.Inventory.InventoryType.internal;
 import static org.junit.jupiter.api.Assertions.*;
@@ -34,15 +38,32 @@ class InventoryControllerUnitTest {
             .productPrice(100.00)
             .productQuantity(10)
             .build();
+    List<ProductResponseDTO> productResponseDTOS = Arrays.asList(
+            ProductResponseDTO.builder()
+                    .id("1")
+                    .inventoryId("1")
+                    .inventoryId("123F567C9")
+                    .productName("Benzodiazepines")
+                    .productDescription("Sedative Medication")
+                    .productPrice(100.00)
+                    .productQuantity(10)
+                    .build(),
+            ProductResponseDTO.builder()
+                    .id("1")
+                    .inventoryId("1")
+                    .inventoryId("123F567C9")
+                    .productName("Benzodiazepines")
+                    .productDescription("Sedative Medication")
+                    .productPrice(100.00)
+                    .productQuantity(10)
+                    .build()
+    );
     ProductRequestDTO productRequestDTO = ProductRequestDTO.builder()
             .productName("Benzodiazepines")
             .productDescription("Sedative Medication")
             .productPrice(100.00)
             .productQuantity(10)
             .build();
-
-
-
     @Test
     void updateInventory_ValidRequest_ShouldReturnOk() {
         // Arrange
@@ -127,6 +148,138 @@ class InventoryControllerUnitTest {
 
 
     @Test
+    void getProductsInInventory_withValidId_shouldSucceed(){
+        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), null, null, null))
+                .thenReturn(Flux.fromIterable(productResponseDTOS));
+
+        webTestClient.get()
+                .uri("/inventory/{inventoryId}/products", productResponseDTOS.get(1).getInventoryId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(ProductResponseDTO.class)
+                .value(responseDTOs ->{
+                    assertNotNull(responseDTOs);
+                    assertEquals(productResponseDTOS.size(), responseDTOs.size());
+                });
+    }
+
+    @Test
+    void getProductsInInventory_withValidId_andValidProductName_andValidProductPrice_andValidProductQuantity_shouldSucceed(){
+        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), "Benzodiazepines", 100.00, 10))
+                .thenReturn(Flux.fromIterable(productResponseDTOS));
+
+        webTestClient.get()
+                .uri("/inventory/{inventoryId}/products?productName={productName}&productPrice={productPrice}&productQuantity={productQuantity}",
+                        productResponseDTOS.get(1).getInventoryId(), "Benzodiazepines", 100.00, 10)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(ProductResponseDTO.class)
+                .value(responseDTOs ->{
+                    assertNotNull(responseDTOs);
+                    assertEquals(productResponseDTOS.size(), responseDTOs.size());
+                });
+    }
+
+    @Test
+    void getProductsInInventory_withValidId_andValidProductName_andValidProductPrice_shouldSucceed(){
+        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), "Benzodiazepines", 100.00, null))
+                .thenReturn(Flux.fromIterable(productResponseDTOS));
+
+        webTestClient.get()
+                .uri("/inventory/{inventoryId}/products?productName={productName}&productPrice={productPrice}",
+                        productResponseDTOS.get(1).getInventoryId(), "Benzodiazepines", 100.00)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(ProductResponseDTO.class)
+                .value(responseDTOs ->{
+                    assertNotNull(responseDTOs);
+                    assertEquals(productResponseDTOS.size(), responseDTOs.size());
+                });
+    }
+
+    @Test
+    void getProductsInInventory_withValidId_andValidProductName_shouldSucceed(){
+        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), "Benzodiazepines", null, null))
+                .thenReturn(Flux.fromIterable(productResponseDTOS));
+
+        webTestClient.get()
+                .uri("/inventory/{inventoryId}/products?productName={productName}",
+                        productResponseDTOS.get(1).getInventoryId(), "Benzodiazepines")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(ProductResponseDTO.class)
+                .value(responseDTOs ->{
+                    assertNotNull(responseDTOs);
+                    assertEquals(productResponseDTOS.size(), responseDTOs.size());
+                });
+    }
+
+    @Test
+    void getProductsInInventory_withValidId_andValidProductPrice_andValidProductQuantity_shouldSucceed(){
+        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), null, 100.00, 10))
+                .thenReturn(Flux.fromIterable(productResponseDTOS));
+
+        webTestClient.get()
+                .uri("/inventory/{inventoryId}/products?productPrice={productPrice}&productQuantity={productQuantity}",
+                        productResponseDTOS.get(1).getInventoryId(), 100.00, 10)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(ProductResponseDTO.class)
+                .value(responseDTOs ->{
+                    assertNotNull(responseDTOs);
+                    assertEquals(productResponseDTOS.size(), responseDTOs.size());
+                });
+    }
+
+    @Test
+    void getProductsInInventory_withValidId_andValidProductQuantity_shouldSucceed(){
+        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), null, null, 10))
+                .thenReturn(Flux.fromIterable(productResponseDTOS));
+
+        webTestClient.get()
+                .uri("/inventory/{inventoryId}/products?productQuantity={productQuantity}",
+                        productResponseDTOS.get(1).getInventoryId(), 10)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(ProductResponseDTO.class)
+                .value(responseDTOs ->{
+                    assertNotNull(responseDTOs);
+                    assertEquals(productResponseDTOS.size(), responseDTOs.size());
+                });
+    }
+
+    @Test
+    void getProductsInInventory_withValidId_andValidProductPrice_shouldSucceed(){
+        when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), null, 100.00, null))
+                .thenReturn(Flux.fromIterable(productResponseDTOS));
+
+        webTestClient.get()
+                .uri("/inventory/{inventoryId}/products?productPrice={productPrice}",
+                        productResponseDTOS.get(1).getInventoryId(),  100.00)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(ProductResponseDTO.class)
+                .value(responseDTOs ->{
+                    assertNotNull(responseDTOs);
+                    assertEquals(productResponseDTOS.size(), responseDTOs.size());
+                });
+    }
+
+    @Test
     void updateInventory_InvalidId_ShouldReturnError() {
         // Arrange
         String invalidInventoryId = "invalid_id";
@@ -174,75 +327,5 @@ class InventoryControllerUnitTest {
                 .expectStatus().isBadRequest();
     }
 
-
-
-
-   /*@Test
-   void addProductToInventory_validProduct_ShouldSucceed(){
-       Arrange
-       when(productInventoryService.addProductToInventory(Mono.just(inventoryRequestDTO), inventoryResponseDTO.getInventoryId()))
-               .thenReturn(Mono.just(inventoryResponseDTO));
-       //Act and assert
-       webTestClient
-               .post()
-               .uri("/inventory/{inventoryId}/products", inventoryResponseDTO.getInventoryId())
-               .bodyValue(inventoryRequestDTO)
-               .exchange()
-               .expectStatus().isCreated()
-               .expectBody(ProductResponseDTO.class)
-               .value(dto -> {
-                   assertNotNull(dto);
-                   assertEquals(inventoryResponseDTO.getId(), dto.getId());
-                   assertEquals(inventoryResponseDTO.getInventoryId(), dto.getInventoryId());
-                   assertEquals(inventoryResponseDTO.getSku(), dto.getSku());
-                   assertEquals(inventoryResponseDTO.getProductName(), dto.getProductName());
-                   assertEquals(inventoryResponseDTO.getProductDescription(), dto.getProductDescription());
-                   assertEquals(inventoryResponseDTO.getProductPrice(), dto.getProductPrice());
-                   assertEquals(inventoryResponseDTO.getProductQuantity(), dto.getProductQuantity());
-               });
-       verify(productInventoryService).addProductToInventory(Mono.just(inventoryRequestDTO), inventoryResponseDTO.getInventoryId());
-   }
-
-
-
- */
-
-
-
-
-
-
-
-
-
-   /*@Test
-   void addProductToInventory_validProduct_ShouldSucceed(){
-       Arrange
-       when(productInventoryService.addProductToInventory(Mono.just(inventoryRequestDTO), inventoryResponseDTO.getInventoryId()))
-               .thenReturn(Mono.just(inventoryResponseDTO));
-       //Act and assert
-       webTestClient
-               .post()
-               .uri("/inventory/{inventoryId}/products", inventoryResponseDTO.getInventoryId())
-               .bodyValue(inventoryRequestDTO)
-               .exchange()
-               .expectStatus().isCreated()
-               .expectBody(ProductResponseDTO.class)
-               .value(dto -> {
-                   assertNotNull(dto);
-                   assertEquals(inventoryResponseDTO.getId(), dto.getId());
-                   assertEquals(inventoryResponseDTO.getInventoryId(), dto.getInventoryId());
-                   assertEquals(inventoryResponseDTO.getSku(), dto.getSku());
-                   assertEquals(inventoryResponseDTO.getProductName(), dto.getProductName());
-                   assertEquals(inventoryResponseDTO.getProductDescription(), dto.getProductDescription());
-                   assertEquals(inventoryResponseDTO.getProductPrice(), dto.getProductPrice());
-                   assertEquals(inventoryResponseDTO.getProductQuantity(), dto.getProductQuantity());
-               });
-       verify(productInventoryService).addProductToInventory(Mono.just(inventoryRequestDTO), inventoryResponseDTO.getInventoryId());
-   }
-
-
-
- */
 
 }
