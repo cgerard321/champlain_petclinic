@@ -136,44 +136,11 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     }
 
 
-    @Override
-
-    public Mono<InventoryResponseDTO> addInventory(Mono<InventoryRequestDTO> inventoryRequestDTO) {
-        return inventoryRequestDTO
-                .map(EntityDTOUtil::toInventoryEntity)
-                .doOnNext(e -> {
-                    if (e.getInventoryType() == null) {
-                        throw new InvalidInputException("Invalid input data: inventory type cannot be blank.");
-                    }
-                    e.setInventoryId(EntityDTOUtil.generateUUID());
-                })
-                .flatMap(inventoryRepository::insert)
-                .map(EntityDTOUtil::toInventoryResponseDTO);
-
-    }
 
 
 
-    @Override
-    public Mono<InventoryResponseDTO> updateInventory(Mono<InventoryRequestDTO> inventoryRequestDTO, String inventoryId) {
-
-        return inventoryRepository.findInventoryByInventoryId(inventoryId)
-                .flatMap(existingInventory -> inventoryRequestDTO.map(requestDTO -> {
-
-                    existingInventory.setInventoryName(requestDTO.getInventoryName());
 
 
-
-                    existingInventory.setInventoryType(requestDTO.getInventoryType());
-                    existingInventory.setInventoryDescription(requestDTO.getInventoryDescription());
-                    return existingInventory;
-
-                }))
-                .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with id: " + inventoryId)))
-                .flatMap(inventoryRepository::save)
-                .map(EntityDTOUtil::toInventoryResponseDTO);
-
-    }
 
     @Override
     public Mono<Void> deleteProductInInventory(String inventoryId, String productId) {
