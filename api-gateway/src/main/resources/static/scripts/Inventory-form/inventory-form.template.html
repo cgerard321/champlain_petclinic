@@ -1,20 +1,20 @@
 <div class="bColor text-center"><h2 class="titleBundle form" id="title">New Bundle</h2></div>
 <div class="p-3 formColor m-0">
-    <form id="bundleForm" class="form-horizontal" enctype="multipart/form-data" ng-submit="$ctrl.submitBundleForm()">
+    <form id="inventoryForm" class="form-horizontal" enctype="multipart/form-data" ng-submit="$ctrl.submitBundleForm()">
         <div class="row">
             <div class="col-sm-6 form-group">
                 <label class="control-label" for="item">Item</label>
-                <input class="form-control" id="item" ng-model="$ctrl.bundle.item" name="item" type="text" required title="Please select a date."/>
+                <input class="form-control" id="item" ng-model="$ctrl.inventory.item" name="item" type="text" required title="Please select a date."/>
             </div>
         </div>
             <div class="col-sm-6 form-group">
                 <label class="control-label" for="quantity">Quantity</label>
-                <input class="form-control col-sm-4" id="quantity" ng-model="$ctrl.bundle.quantity" name="quantity" type="text" placeholder="0" required title="Please enter the bill amount."/>
+                <input class="form-control col-sm-4" id="quantity" ng-model="$ctrl.inventory.quantity" name="quantity" type="text" placeholder="0" required title="Please enter the bill amount."/>
             </div>
         <div class="row">
             <div class="form-group col-sm-12">
                 <label class="control-label text-center" for="expiryDate">expiry Date</label>
-                <input class="form-control" id="expiryDate" ng-model="$ctrl.bundle.expiryDate" name="expiryDate" type="date" required title="Please select a date."/>
+                <input class="form-control" id="expiryDate" ng-model="$ctrl.inventory.expiryDate" name="expiryDate" type="date" required title="Please select a date."/>
             </div>
         </div>
         <div class="form-group p-3">
