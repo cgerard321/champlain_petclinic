@@ -136,6 +136,10 @@ public Mono<VisitResponseDTO> createVisitForPet(VisitRequestDTO visit) {
             .retrieve()
             .bodyToMono(VisitResponseDTO.class);
 }
+=======
+                       // .uri("/owners/*/pets/" + visit.getPetId() + "/visits")
+    }
+>>>>>>> 4237d248 (Working on Post)
 
     public Mono<Void> deleteVisitByVisitId(String visitId){
         return webClient

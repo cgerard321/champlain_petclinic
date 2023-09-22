@@ -12,10 +12,17 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 public class VisitRequestDTO {
+<<<<<<< HEAD
     private LocalDateTime visitDate;
 /*    private int year;
     private int month;
     private int day;*/
+=======
+    //private LocalDateTime visitDate;
+    private int year;
+    private int month;
+    private int day;
+>>>>>>> 4237d248 (Working on Post)
     private String description;
     private String petId;
     private String practitionerId;
