@@ -88,4 +88,5 @@ public class InventoryServiceClient {
                 .retrieve()
                 .bodyToFlux(InventoryResponseDTO.class);
     }
+
 }

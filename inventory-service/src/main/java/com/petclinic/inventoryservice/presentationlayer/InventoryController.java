@@ -54,4 +54,5 @@ public class InventoryController {
                 .map(updatedStudent -> ResponseEntity.status(HttpStatus.OK).body(updatedStudent))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
 }

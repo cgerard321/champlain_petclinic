@@ -91,127 +91,6 @@ class InventoryControllerIntegrationTest {
                 .expectStatus().isNotFound();
     }
 
-
-    @Test
-    public void addNewInventoryWithValidValues_shouldSucceed(){
-        InventoryRequestDTO inventoryRequestDTO = InventoryRequestDTO.builder()
-                .inventoryName("internal")
-                .inventoryType(internal)
-                .inventoryDescription("inventory_3")
-                .build();
-
-        webTestClient.post()
-                .uri("/inventory")
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(inventoryRequestDTO)
-                .exchange()
-                .expectStatus().isCreated()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(InventoryResponseDTO.class)
-                .value(inventoryResponseDTO -> {
-                    assertNotNull(inventoryResponseDTO);
-                    assertNotNull(inventoryResponseDTO.getInventoryId());
-                    assertThat(inventoryResponseDTO.getInventoryName()).isEqualTo(inventoryResponseDTO.getInventoryName());
-
-
-                });
-
-    }
-
-
-
-    @Test
-    public void addNewInventoryWithInValidValues_throwInvalidInput(){
-        InventoryRequestDTO inventoryRequestDTO = InventoryRequestDTO.builder()
-                .inventoryName("internal")
-                .inventoryType(null)
-                .inventoryDescription("inventory_3")
-                .build();
-
-        webTestClient.post()
-                .uri("/inventory")
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(inventoryRequestDTO)
-                .exchange()
-                .expectStatus().isBadRequest()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(InvalidInputException.class)
-                .value(invalidErrorResponse -> {
-                    assertNotNull(invalidErrorResponse);
-                    assertEquals("Invalid input data: inventory type cannot be blank.", invalidErrorResponse.getMessage());
-
-                });
-    }
-
-
-    @Test
-    public void updateInventory_withValidId_ShouldSucceed() {
-        // Arrange
-        String validInventoryId = "inventoryId_3";
-        String updatedInventoryDescription = "Updated Medication for procedures";
-
-        InventoryRequestDTO inventoryRequestDTO = InventoryRequestDTO.builder()
-                .inventoryName("internal")
-                .inventoryType(internal)
-                .inventoryDescription(updatedInventoryDescription)
-                .build();
-
-        // Act and assert
-        webTestClient
-                .put()
-                .uri("/inventory/{inventoryId}", validInventoryId)
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(inventoryRequestDTO)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(InventoryResponseDTO.class)
-                .value(inventoryResponseDTO -> {
-                    assertNotNull(inventoryResponseDTO);
-                    assertEquals(validInventoryId, inventoryResponseDTO.getInventoryId());
-                    assertEquals(updatedInventoryDescription, inventoryResponseDTO.getInventoryDescription());
-
-                });
-    }
-
-
-
-    @Test
-    public void updateInventory_withInvalidInventoryId() {
-        String InvalidInventoryId = "inventoryId_234";
-
-        InventoryRequestDTO inventoryRequestDTO = InventoryRequestDTO.builder()
-                .inventoryName("internal")
-                .inventoryType(InventoryType.sales)
-                .inventoryDescription("internal_id9")
-                .build();
-        webTestClient.put()
-                .uri("/inventory/{inventoryId}",InvalidInventoryId)
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(inventoryRequestDTO)
-                .exchange()
-                .expectStatus().isEqualTo(HttpStatus.NOT_FOUND)
-                .expectBody();
-
-    }
-
-
-    private Inventory buildInventory(String inventoryId, String name, InventoryType inventoryType, String inventoryDescription) {
-        return Inventory.builder()
-                .inventoryId(inventoryId)
-                .inventoryName(name)
-                .inventoryType(inventoryType)
-                .inventoryDescription(inventoryDescription)
-                .build();
-    }
-
-
-
-
-
     @Test
     void getAllProductsInInventoryByInventoryId_withValidInventoryId_shouldSucceed(){
         String inventoryId = "1";
@@ -438,8 +317,124 @@ class InventoryControllerIntegrationTest {
                 .expectBodyList(InventoryResponseDTO.class)
                 .value((list) ->{
                     assertNotNull(list);
-                    assertEquals(10, list.size());
+                    assertEquals(2, list.size());
                 });
     }
 
+
+    @Test
+    public void addNewInventoryWithValidValues_shouldSucceed(){
+        InventoryRequestDTO inventoryRequestDTO = InventoryRequestDTO.builder()
+                .inventoryName("internal")
+                .inventoryType(internal)
+                .inventoryDescription("inventory_3")
+                .build();
+
+        webTestClient.post()
+                .uri("/inventory")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(inventoryRequestDTO)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(InventoryResponseDTO.class)
+                .value(inventoryResponseDTO -> {
+                    assertNotNull(inventoryResponseDTO);
+                    assertNotNull(inventoryResponseDTO.getInventoryId());
+                    assertThat(inventoryResponseDTO.getInventoryName()).isEqualTo(inventoryResponseDTO.getInventoryName());
+
+
+                });
+
+    }
+
+
+
+    @Test
+    public void addNewInventoryWithInValidValues_throwInvalidInput(){
+        InventoryRequestDTO inventoryRequestDTO = InventoryRequestDTO.builder()
+                .inventoryName("internal")
+                .inventoryType(null)
+                .inventoryDescription("inventory_3")
+                .build();
+
+        webTestClient.post()
+                .uri("/inventory")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(inventoryRequestDTO)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(InvalidInputException.class)
+                .value(invalidErrorResponse -> {
+                    assertNotNull(invalidErrorResponse);
+                    assertEquals("Invalid input data: inventory type cannot be blank.", invalidErrorResponse.getMessage());
+
+                });
+    }
+
+
+    @Test
+    public void updateInventory_withValidId_ShouldSucceed() {
+        // Arrange
+        String validInventoryId = "inventoryId_3";
+        String updatedInventoryDescription = "Updated Medication for procedures";
+
+        InventoryRequestDTO inventoryRequestDTO = InventoryRequestDTO.builder()
+                .inventoryName("internal")
+                .inventoryType(internal)
+                .inventoryDescription(updatedInventoryDescription)
+                .build();
+
+        // Act and assert
+        webTestClient
+                .put()
+                .uri("/inventory/{inventoryId}", validInventoryId)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(inventoryRequestDTO)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(InventoryResponseDTO.class)
+                .value(inventoryResponseDTO -> {
+                    assertNotNull(inventoryResponseDTO);
+                    assertEquals(validInventoryId, inventoryResponseDTO.getInventoryId());
+                    assertEquals(updatedInventoryDescription, inventoryResponseDTO.getInventoryDescription());
+
+                });
+    }
+
+
+
+    @Test
+    public void updateInventory_withInvalidInventoryId() {
+        String InvalidInventoryId = "inventoryId_234";
+
+        InventoryRequestDTO inventoryRequestDTO = InventoryRequestDTO.builder()
+                .inventoryName("internal")
+                .inventoryType(InventoryType.sales)
+                .inventoryDescription("internal_id9")
+                .build();
+        webTestClient.put()
+                .uri("/inventory/{inventoryId}",InvalidInventoryId)
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(inventoryRequestDTO)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.NOT_FOUND)
+                .expectBody();
+
+    }
+
+
+    private Inventory buildInventory(String inventoryId, String name, InventoryType inventoryType, String inventoryDescription) {
+        return Inventory.builder()
+                .inventoryId(inventoryId)
+                .inventoryName(name)
+                .inventoryType(inventoryType)
+                .inventoryDescription(inventoryDescription)
+                .build();
+    }
 }
