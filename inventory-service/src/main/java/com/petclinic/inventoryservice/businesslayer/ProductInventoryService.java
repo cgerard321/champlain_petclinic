@@ -1,7 +1,7 @@
 package com.petclinic.inventoryservice.businesslayer;
 
-import com.petclinic.inventoryservice.presentationlayer.InventoryResponseDTO;
 import com.petclinic.inventoryservice.presentationlayer.InventoryRequestDTO;
+import com.petclinic.inventoryservice.presentationlayer.InventoryResponseDTO;
 import com.petclinic.inventoryservice.presentationlayer.ProductRequestDTO;
 import com.petclinic.inventoryservice.presentationlayer.ProductResponseDTO;
 import reactor.core.publisher.Flux;

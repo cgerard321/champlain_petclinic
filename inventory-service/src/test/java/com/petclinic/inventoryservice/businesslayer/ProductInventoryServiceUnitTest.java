@@ -202,9 +202,6 @@ class ProductInventoryServiceUnitTest {
                 .inventoryType(InventoryType.internal)
                 .inventoryDescription("inventory_id1")
                 .build();
-
-
-
         assertNotNull(inventoryEntity);
 
 
@@ -293,5 +290,9 @@ class ProductInventoryServiceUnitTest {
                 .expectError(NotFoundException.class)
                 .verify();
     }
+
+
+
+
 
 }

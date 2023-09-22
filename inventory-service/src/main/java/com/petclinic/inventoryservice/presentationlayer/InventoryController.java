@@ -55,4 +55,11 @@ public class InventoryController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @PutMapping("/{inventoryId}")
+    public Mono<ResponseEntity<InventoryResponseDTO>> updateInventory(@RequestBody Mono<InventoryRequestDTO> inventoryRequestDTO, @PathVariable String inventoryId) {
+        return productInventoryService.updateInventory(inventoryRequestDTO, inventoryId)
+                .map(updatedStudent -> ResponseEntity.status(HttpStatus.OK).body(updatedStudent))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
 }

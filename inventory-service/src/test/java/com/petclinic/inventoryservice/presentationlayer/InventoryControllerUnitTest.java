@@ -276,9 +276,27 @@ class InventoryControllerUnitTest {
                 .addInventory(any());
     }
 
+    @Test
+    void addInventory_InvalidType_ShouldReturnError() {
+        // Arrange
 
+        InventoryRequestDTO inventoryRequestDTO = InventoryRequestDTO.builder()
+                .inventoryName("Updated Internal")
+                .inventoryType(null)
+                .inventoryDescription("Updated inventory_3")
+                .build();
 
+        when(productInventoryService.addInventory(any()))
+                .thenReturn(Mono.error(new InvalidInputException("Invalid input data: inventory type cannot be blank.")));
 
+        webTestClient
+                .post()
+                .uri("/inventory")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(inventoryRequestDTO)
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
 
     @Test
     void updateInventory_InvalidId_ShouldReturnError() {
@@ -303,29 +321,4 @@ class InventoryControllerUnitTest {
                 .exchange()
                 .expectStatus().isNotFound();
     }
-
-
-
-    @Test
-    void addInventory_InvalidType_ShouldReturnError() {
-        // Arrange
-
-        InventoryRequestDTO inventoryRequestDTO = InventoryRequestDTO.builder()
-                .inventoryName("Updated Internal")
-                .inventoryType(null)
-                .inventoryDescription("Updated inventory_3")
-                .build();
-
-        when(productInventoryService.addInventory(any()))
-                .thenReturn(Mono.error(new InvalidInputException("Invalid input data: inventory type cannot be blank.")));
-
-        webTestClient
-                .post()
-                .uri("/inventory")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(inventoryRequestDTO)
-                .exchange()
-                .expectStatus().isBadRequest();
-    }
-
 }

@@ -94,6 +94,7 @@ class InventoryControllerIntegrationTest {
                 .expectStatus().isNotFound();
     }
 
+
     @Test
     void getAllProductsInInventoryByInventoryId_withValidInventoryId_shouldSucceed(){
         String inventoryId = "1";

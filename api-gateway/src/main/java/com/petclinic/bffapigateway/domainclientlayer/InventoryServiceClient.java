@@ -1,6 +1,8 @@
 
 package com.petclinic.bffapigateway.domainclientlayer;
 
+import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
+import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.ProductRequestDTO;
