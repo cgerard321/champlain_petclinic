@@ -1,5 +1,7 @@
 'use strict';
 
+
+
 angular.module('ownerForm')
     .controller('OwnerFormController', ["$http", '$state', '$stateParams', function ($http, $state, $stateParams) {
         var self = this;
@@ -20,7 +22,7 @@ angular.module('ownerForm')
         }
 
         self.submitOwnerForm = function () {
-            var id = self.owner.id;
+            var id = self.owner.ownerId;
             console.log(self.owner);
             var req;
             if (id){
@@ -43,3 +45,5 @@ angular.module('ownerForm')
             });
         };
     }]);
+
+

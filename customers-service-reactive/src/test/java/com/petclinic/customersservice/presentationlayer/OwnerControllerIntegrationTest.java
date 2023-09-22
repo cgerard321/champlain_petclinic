@@ -34,6 +34,10 @@ class OwnerControllerIntegrationTest {
 
     String PUBLIC_OWNER_ID = ownerEntity.getOwnerId();
 
+    Owner owner1 = buildOwner3("Billy","ownerId_1");
+
+
+
     @Test
     void deleteOwnerByOwnerId() {
         repo.save(ownerEntity);
@@ -62,7 +66,7 @@ class OwnerControllerIntegrationTest {
                 .expectBodyList(OwnerResponseDTO.class)
                 .value((list) -> {
                     assertNotNull(list);
-                    assertEquals(1,list.size());
+                    assertEquals(11,list.size());
                 });
 
     }
@@ -135,7 +139,9 @@ class OwnerControllerIntegrationTest {
 
 
 
-    private Owner buildOwner() {
+
+
+        private Owner buildOwner() {
         return Owner.builder()
                 .id("9")
                 .ownerId("ownerId-123")
@@ -160,5 +166,19 @@ class OwnerControllerIntegrationTest {
                 //.photoId("1")
                 .build();
     }
+
+    private Owner buildOwner3(String firstName, String ownerId) {
+        return Owner.builder()
+                .ownerId("ownerId-1234")
+                .firstName("FirstName")
+                .lastName("LastName")
+                .address("Test address")
+                .city("test city")
+                .telephone("telephone")
+                //.photoId("1")
+                .build();
+    }
+
+
 
 }
