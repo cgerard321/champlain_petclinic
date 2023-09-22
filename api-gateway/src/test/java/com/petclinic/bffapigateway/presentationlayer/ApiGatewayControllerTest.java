@@ -1998,6 +1998,50 @@ private InventoryResponseDTO buildInventoryDTO(){
                 .updateInventory(any(), eq(buildInventoryDTO().getInventoryId()));
     }
 
+//delete all product inventory and delete all inventory
+@Test
+void deleteAllInventory_shouldSucceed() {
+    // Mock the service call to simulate the successful deletion of all inventories.
+    // Assuming your service client has a method called `deleteAllInventories`.
+    when(inventoryServiceClient.deleteAllInventories())
+            .thenReturn(Mono.empty());  // Using Mono.empty() to simulate a void return (successful deletion without a return value).
+
+    // Make the DELETE request to the API.
+    client.delete()
+            .uri("/api/gateway/inventory")  // Assuming the endpoint for deleting all inventories is the same without an ID.
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody().isEmpty();
+
+    // Verify that the deleteAllInventories method on the service client was called exactly once.
+    verify(inventoryServiceClient, times(1))
+            .deleteAllInventories();
+}
+
+    @Test
+    void deleteAllProductInventory_shouldSucceed() {
+        // Assuming you want to test for a specific inventoryId
+        String inventoryId = "someInventoryId";
+
+        // Mock the service call to simulate the successful deletion of all product inventories for a specific inventoryId.
+        // Adjust the method name if `deleteAllProductInventoriesForInventory` is not the correct name.
+        when(inventoryServiceClient.deleteAllProductForInventory(eq(inventoryId)))
+                .thenReturn(Mono.empty());  // Using Mono.empty() to simulate a void return (successful deletion without a return value).
+
+        // Make the DELETE request to the API for a specific inventoryId.
+        client.delete()
+                .uri("/api/gateway/inventory/{inventoryId}/products", inventoryId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody().isEmpty();
+
+        // Verify that the deleteAllProductInventoriesForInventory method on the service client was called exactly once with the specific inventoryId.
+        verify(inventoryServiceClient, times(1))
+                .deleteAllProductForInventory(eq(inventoryId));
+    }
+
+
+
 
     private VetDTO buildVetDTO() {
         return VetDTO.builder()
