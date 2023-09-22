@@ -101,6 +101,13 @@ public class BFFApiGatewayController {
         return billServiceClient.getBillsByVetId(vetId);
     }
 
+    @PutMapping("/bills/{billId}")
+    public Mono<ResponseEntity<BillResponseDTO>> updateBill(@PathVariable String billId, @RequestBody Mono<BillRequestDTO> billRequestDTO){
+        return billServiceClient.updateBill(billId, billRequestDTO)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
     @DeleteMapping(value = "bills/{billId}")
     public Mono<Void> deleteBill(final @PathVariable String billId){
         return billServiceClient.deleteBill(billId);
