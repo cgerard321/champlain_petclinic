@@ -31,7 +31,8 @@ public class VetController {
     RatingService ratingService;
     @GetMapping("{vetId}/ratings")
     public Flux<RatingResponseDTO> getAllRatingsByVetId(@PathVariable String vetId) {
-        return ratingService.getAllRatingsByVetId(vetId);
+        return ratingService.getAllRatingsByVetId(EntityDtoUtil.verifyId(vetId));
+
     }
 
     @GetMapping("{vetId}/ratings/count")
@@ -70,6 +71,13 @@ public class VetController {
     public Mono<RatingResponseDTO> updateRatingByVetIdAndRatingId(@PathVariable String vetId, @PathVariable String ratingId, @RequestBody Mono<RatingRequestDTO> ratingRequestDTOMono){
         return ratingService.updateRating(vetId, ratingId, ratingRequestDTOMono);
     }*/
+
+    @GetMapping("{vetId}/ratings/percentages")
+    public Mono<ResponseEntity<String>> getPercentageOfRatingsByVetId(@PathVariable String vetId){
+        return ratingService.getRatingPercentagesByVetId(EntityDtoUtil.verifyId(vetId))
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 
     @GetMapping()
     public Flux<VetDTO> getAllVets() {

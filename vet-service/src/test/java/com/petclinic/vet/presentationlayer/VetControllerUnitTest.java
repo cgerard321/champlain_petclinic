@@ -199,6 +199,23 @@ class VetControllerUnitTest {
 
     }
 
+    @Test
+    void getPercentageOfRatingsByVetId_ShouldSucceed() {
+        when(ratingService.getRatingPercentagesByVetId(anyString()))
+                .thenReturn(Mono.just("{\"1.0\":0.0,\"2.0\":0.0,\"4.0\":0.0,\"5.0\":1.0,\"3.0\":0.0}"));
+        client
+                .get()
+                .uri("/vets/" + VET_ID + "/ratings/percentages")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(String.class)
+                .value(string -> {
+                    assertEquals("{\"1.0\":0.0,\"2.0\":0.0,\"4.0\":0.0,\"5.0\":1.0,\"3.0\":0.0}", string);
+                });
+        Mockito.verify(ratingService, times(1))
+                .getRatingPercentagesByVetId(VET_ID);
+    }
 
     @Test
     void getAllVets() {

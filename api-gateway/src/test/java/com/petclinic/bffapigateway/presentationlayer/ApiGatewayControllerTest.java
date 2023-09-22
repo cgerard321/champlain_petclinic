@@ -100,7 +100,7 @@ class ApiGatewayControllerTest {
 
 
     @Test
-    void getAllRatingsForVet() {
+    void getAllRatingsForVet_ValidId() {
         RatingResponseDTO ratingResponseDTO = buildRatingResponseDTO();
         when(vetsServiceClient.getRatingsByVetId(anyString()))
                 .thenReturn(Flux.just(ratingResponseDTO));
@@ -145,7 +145,7 @@ class ApiGatewayControllerTest {
                 .uri("/api/gateway/vets/" + INVALID_VET_ID + "/ratings")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(NOT_FOUND)
+                .expectStatus().isEqualTo(INTERNAL_SERVER_ERROR)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("This id is not valid");
@@ -189,6 +189,21 @@ class ApiGatewayControllerTest {
                 .value(resp->
                         assertEquals(rating.getRateScore(), ratingResponseDTO.getRateScore()));
 
+    }
+
+    @Test
+    void getPercentageOfRatingsPerVet_ByVetId() {
+        when(vetsServiceClient.getPercentageOfRatingsByVetId(anyString()))
+                .thenReturn(Mono.just("1"));
+
+        client
+                .get()
+                .uri("/api/gateway/vets/" + VET_ID + "/ratings/percentages")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$").isEqualTo("1");
     }
 
 

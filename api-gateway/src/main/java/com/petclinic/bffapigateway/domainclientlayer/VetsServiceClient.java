@@ -59,6 +59,17 @@ public class VetsServiceClient {
         return numberOfRatings;
     }
 
+    public Mono<String> getPercentageOfRatingsByVetId(String vetId) {
+        Mono<String> percentageOfRatings =
+                webClientBuilder
+                        .build()
+                        .get()
+                        .uri(vetsServiceUrl + "/{vetId}/ratings/percentages", vetId)
+                        .retrieve()
+                        .bodyToMono(String.class);
+        return percentageOfRatings;
+    }
+
     public Mono<RatingResponseDTO> addRatingToVet(String vetId, Mono<RatingRequestDTO> ratingRequestDTO) {
         Mono<RatingResponseDTO> ratingResponseDTOMono =
                 webClientBuilder

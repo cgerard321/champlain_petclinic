@@ -286,6 +286,28 @@ class VetControllerIntegrationTest {
     }
 
     @Test
+    void getPercentageOfRatingsByVetId_ShouldSucceed(){
+        Publisher<Rating> setup = ratingRepository.deleteAll()
+                .thenMany(ratingRepository.save(rating1))
+                .thenMany(ratingRepository.save(rating2));
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        client.get()
+                .uri("/vets/" + VET_ID + "/ratings" + "/percentages")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
+                .expectBody(String.class)
+                .value(resp ->{
+                    assertEquals("{\"1.0\":0.0,\"2.0\":0.0,\"3.0\":0.0,\"4.0\":0.5,\"5.0\":0.5}", resp);
+                });
+    }
+
+    @Test
     void getAllVets() {
         Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet));
 

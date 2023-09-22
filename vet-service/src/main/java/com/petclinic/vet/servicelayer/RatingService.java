@@ -10,4 +10,5 @@ public interface RatingService {
     Mono<RatingResponseDTO> updateRatingByVetIdAndRatingId(String vetId, String ratingId, Mono<RatingRequestDTO> ratingRequestDTOMono);
     Mono<Void> deleteRatingByRatingId(String vetId, String ratingId);
     Mono<Double> getAverageRatingByVetId(String vetId);
+    Mono<String> getRatingPercentagesByVetId(String vetId);
 }

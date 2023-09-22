@@ -19,6 +19,22 @@ angular.module('vetDetails')
             self.ratings = resp.data;
         });
 
+        $http.get('api/gateway/vets/' + $stateParams.vetId + '/ratings/percentages')
+            .then(function (resp) {
+                const ratingsData = resp.data;
+                const ratingsContainer = document.getElementById('ratings-list');
+                let html = '';
+                for (const key in ratingsData) {
+                    if (ratingsData.hasOwnProperty(key)) {
+                        const percentage = ratingsData[key] * 100; // Convert fraction to percentage
+                        html += key + ' stars - ' + percentage.toFixed(0) + '%';
+                        html += '<br>';
+                    }
+                }
+                ratingsContainer.innerHTML = html.slice(0, -2);
+            });
+
+
         $scope.deleteVetRating = function (ratingId) { //added $scope in this class
             let varIsConf = confirm('Are you sure you want to delete this ratingId: ' + ratingId + '?');
             if (varIsConf) {
@@ -35,6 +51,8 @@ angular.module('vetDetails')
                         self.ratings = resp.data;
                         arr = resp.data;
                     });
+                    //refresh percentages
+                    percentageOfRatings();
                 }
 
                 function errorCallback(error) {
@@ -68,11 +86,14 @@ angular.module('vetDetails')
                     console.log(resp.data)
                     self.rating = resp.data;
                     alert('Your review was successfully updated!');
+                    //refresh list
                     $http.get('api/gateway/vets/' + $stateParams.vetId + '/ratings').then(function (resp) {
                         console.log(resp.data)
                         self.ratings = resp.data;
                         arr = resp.data;
                     });
+                    //refresh percentages
+                    percentageOfRatings();
                 });
             }
         }
@@ -118,6 +139,14 @@ angular.module('vetDetails')
                 console.log(resp.data)
                 self.rating = resp.data;
                 alert('Your review was successfully added!');
+                //refresh list
+                $http.get('api/gateway/vets/' + $stateParams.vetId + '/ratings').then(function (resp) {
+                    console.log(resp.data)
+                    self.ratings = resp.data;
+                    arr = resp.data;
+                });
+                //refresh percentages
+                percentageOfRatings();
             }, function (response) {
                 let error = "Missing rating, please input a rating.";
                 alert(error);
@@ -128,4 +157,26 @@ angular.module('vetDetails')
                 (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
             );
         };
+
+        function percentageOfRatings() {
+            $http.get('api/gateway/vets/' + $stateParams.vetId + '/ratings/percentages')
+                .then(function (resp) {
+                    const ratingsData = resp.data;
+                    const ratingsContainer = document.getElementById('ratings-list');
+                    let html = '';
+                    const ratingsArray = [];
+                    for (const key in ratingsData) {
+                        if (ratingsData.hasOwnProperty(key)) {
+                            const percentage = ratingsData[key] * 100;
+                            ratingsArray.push({ rating: parseFloat(key), percentage });
+                        }
+                    }
+                    for (const ratingObj of ratingsArray) {
+                        console.log("RATING" + ratingObj.percentage);
+                        html += ratingObj.rating + ' stars - ' + ratingObj.percentage.toFixed(0) + '%';
+                        html += '<br>';
+                    }
+                    ratingsContainer.innerHTML = html.slice(0, -2);
+                });
+        }
     }]);
