@@ -3,8 +3,8 @@
 angular.module('productForm')
     .controller('ProductFormController', ["$http", '$state', '$stateParams', function ($http, $state , $scope,  $stateParams) {
         var self = this;
-      //  var inventoryId = $stateParams.inventoryId;
-        var inventoryId = 1 //temporarily hardcoding inventoryId to
+        var inventoryId = $stateParams.inventoryId;
+       // var inventoryId = 1 //temporarily hardcoding inventoryId to
         var product = {}
         // post request to create a new product
         self.submitProductForm = function () {
