@@ -215,7 +215,7 @@ public class BFFApiGatewayController {
 
     @GetMapping(value = "vets/{vetId}/ratings")
     public Flux<RatingResponseDTO> getRatingsByVetId(@PathVariable String vetId) {
-        return vetsServiceClient.getRatingsByVetId(vetId);
+        return vetsServiceClient.getRatingsByVetId(VetsEntityDtoUtil.verifyId(vetId));
     }
 
     @GetMapping("/vets/{vetId}/ratings/count")
@@ -248,6 +248,13 @@ public class BFFApiGatewayController {
         return vetsServiceClient.updateRatingByVetIdAndByRatingId(vetId, ratingId, ratingRequestDTOMono)
                 .map(r->ResponseEntity.status(HttpStatus.OK).body(r))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    @GetMapping("/vets/{vetId}/ratings/percentages")
+    public Mono<ResponseEntity<String>> getPercentageOfRatingsByVetId(@PathVariable String vetId) {
+        return vetsServiceClient.getPercentageOfRatingsByVetId(VetsEntityDtoUtil.verifyId(vetId))
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/vets/{vetId}")

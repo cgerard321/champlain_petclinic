@@ -56,7 +56,7 @@ class VetsServiceClientIntegrationTest {
     }
 
     @Test
-    void getRatingsByVetId() throws JsonProcessingException {
+    void getAllRatingsByVetId_ValidId() throws JsonProcessingException {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setBody("    {\n" +
@@ -97,7 +97,19 @@ class VetsServiceClientIntegrationTest {
 
 
     @Test
-    void deleteRatingsByRatingId() throws JsonProcessingException {
+    void getRatingPercentagesByVetId() throws JsonProcessingException {
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody("{\"1.0\":0.0,\"2.0\":0.0,\"4.0\":0.0,\"5.0\":1.0,\"3.0\":0.0}"));
+
+        final String ratingPercentages = vetsServiceClient.getPercentageOfRatingsByVetId("678910").block();
+        assertEquals("{\"1.0\":0.0,\"2.0\":0.0,\"4.0\":0.0,\"5.0\":1.0,\"3.0\":0.0}", ratingPercentages);
+    }
+
+
+  
+  @Test
+    void deleteRatingsByRatingId() throws JsonProcessingException{
         final String ratingId = "794ac37f-1e07-43c2-93bc-61839e61d989";
 
         prepareResponse(response -> response
