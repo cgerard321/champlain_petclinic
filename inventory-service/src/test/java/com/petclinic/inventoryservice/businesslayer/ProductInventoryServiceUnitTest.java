@@ -1,4 +1,5 @@
 package com.petclinic.inventoryservice.businesslayer;
+
 import com.petclinic.inventoryservice.datalayer.Inventory.Inventory;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryRepository;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryType;
@@ -6,6 +7,7 @@ import com.petclinic.inventoryservice.datalayer.Product.Product;
 import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
 import com.petclinic.inventoryservice.presentationlayer.InventoryRequestDTO;
 import com.petclinic.inventoryservice.presentationlayer.InventoryResponseDTO;
+import com.petclinic.inventoryservice.presentationlayer.ProductRequestDTO;
 import com.petclinic.inventoryservice.presentationlayer.ProductResponseDTO;
 import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
 import com.petclinic.inventoryservice.utils.exceptions.NotFoundException;
@@ -45,7 +47,6 @@ class ProductInventoryServiceUnitTest {
             .productPrice(100.00)
             .productQuantity(10)
             .build();
-
     Product product = Product.builder()
             .productId("12345")
             .inventoryId("1")
