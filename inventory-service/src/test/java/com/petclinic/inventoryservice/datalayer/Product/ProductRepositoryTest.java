@@ -1,5 +1,6 @@
 package com.petclinic.inventoryservice.datalayer.Product;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,29 @@ import static org.junit.jupiter.api.Assertions.*;
 class ProductRepositoryTest {
     @Autowired
     ProductRepository productRepository;
+
+    Product product1;
+    Product product2;
+
+    @BeforeEach
+    public void setupDB() {
+        product1 = buildProduct("inventoryId_4", "productId_1", "Desc", "name", 100.00, 10);
+        product2 = buildProduct("inventoryId_4", "productId_2", "Desc", "name", 100.00, 10);
+
+        Publisher<Product> setup1 = productRepository.deleteAll()
+                .then(productRepository.save(product1));
+
+        Publisher<Product> setup2 = productRepository.save(product2);
+
+        StepVerifier
+                .create(setup1)
+                .expectNextCount(1)
+                .verifyComplete();
+        StepVerifier
+                .create(setup2)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
 
     @Test
     public void ShouldSaveSingleProduct(){
@@ -34,6 +58,51 @@ class ProductRepositoryTest {
         StepVerifier
                 .create(setup)
                 .expectNextCount(0)
+                .verifyComplete();
+    }
+
+    @Test
+    public void shouldGetTwoProductsByInventoryIdAndProductPriceAndProductQuantity(){
+        StepVerifier
+                .create(productRepository.findAllProductsByInventoryIdAndProductPriceAndProductQuantity(
+                        product1.getInventoryId(),
+                        product1.getProductPrice(),
+                        product1.getProductQuantity()
+                ))
+                .expectNextCount(2)
+                .verifyComplete();
+    }
+
+    @Test
+    public void shouldGetTwoProductsByInventoryIdAndProductPrice(){
+        StepVerifier
+                .create(productRepository.findAllProductsByInventoryIdAndProductPrice(
+                        product1.getInventoryId(),
+                        product1.getProductPrice()
+                ))
+                .expectNextCount(2)
+                .verifyComplete();
+    }
+
+    @Test
+    public void shouldGetTwoProductsByInventoryIdAndProductQuantity(){
+        StepVerifier
+                .create(productRepository.findAllProductsByInventoryIdAndProductQuantity(
+                        product1.getInventoryId(),
+                        product1.getProductQuantity()
+                ))
+                .expectNextCount(2)
+                .verifyComplete();
+    }
+
+    @Test
+    public void shouldGetTwoProductsByInventoryIdAndProductName(){
+        StepVerifier
+                .create(productRepository.findAllProductsByInventoryIdAndProductName(
+                        product1.getInventoryId(),
+                        product1.getProductName()
+                ))
+                .expectNextCount(2)
                 .verifyComplete();
     }
 
