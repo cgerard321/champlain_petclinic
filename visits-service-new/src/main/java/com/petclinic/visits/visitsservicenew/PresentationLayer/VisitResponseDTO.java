@@ -16,6 +16,6 @@ public class VisitResponseDTO {
     private LocalDateTime visitDate;
     private String description;
     private int petId;
-    private int practitionerId;
+    private String practitionerId;
     private boolean status;
 }
