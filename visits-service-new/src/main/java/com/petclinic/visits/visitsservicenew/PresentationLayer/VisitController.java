@@ -58,13 +58,13 @@ public class VisitController {
     }
 
 
-    @GetMapping("/pets/{petId}")
-    public Mono<PetResponseDTO> getPetByIdTest(@PathVariable int petId){
-       return visitService.testingGetPetDTO(petId);
-    }
-
-    @GetMapping("/vets/{vetId}")
-    public Mono<VetDTO> getVetByIdTest(@PathVariable String vetId){
-        return visitService.testingGetVetDTO(vetId);
-    }
+//    @GetMapping("/pets/{petId}")
+//    public Mono<PetResponseDTO> getPetByIdTest(@PathVariable int petId){
+//       return visitService.testingGetPetDTO(petId);
+//    }
+//
+//    @GetMapping("/vets/{vetId}")
+//    public Mono<VetDTO> getVetByIdTest(@PathVariable String vetId){
+//        return visitService.testingGetVetDTO(vetId);
+//    }
 }
