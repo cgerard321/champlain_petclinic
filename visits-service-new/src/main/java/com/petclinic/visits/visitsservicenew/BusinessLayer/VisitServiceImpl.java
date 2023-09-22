@@ -60,16 +60,16 @@ public class VisitServiceImpl implements VisitService {
         return repo.deleteVisitByVisitId(visitId);
     }
 
-//    @Override
-//    public Mono<VetDTO> testingGetVetDTO(String vetId) {
-//        return vetsClient.getVetByVetId(vetId);
-//    }
-//
-//    @Override
-//    public Mono<PetResponseDTO> testingGetPetDTO(int petId) {
-//        return petsClient.getPetById(petId);
-//    }
-//
+    @Override
+    public Mono<VetDTO> testingGetVetDTO(String vetId) {
+        return vetsClient.getVetByVetId(vetId);
+    }
+
+    @Override
+    public Mono<PetResponseDTO> testingGetPetDTO(int petId) {
+        return petsClient.getPetById(petId);
+    }
+
 
     @Override
     public Mono<VisitResponseDTO> updateVisit(String visitId, Mono<VisitRequestDTO> visitRequestDTOMono) {
