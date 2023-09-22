@@ -130,6 +130,7 @@ class ProductRepositoryTest {
 
     }
 
+    @Test
     public void testFindProductByProductId() {
         // Arrange
         String productIdToFind = "productId";
