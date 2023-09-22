@@ -148,6 +148,7 @@ angular.module('vetDetails')
                 self.rating = resp.data;
                 alert('Your review was successfully added!');
 
+
                 //refresh list
                 $http.get('api/gateway/vets/' + $stateParams.vetId + '/ratings').then(function (resp) {
                     console.log(resp.data)
