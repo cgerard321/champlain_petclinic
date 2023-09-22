@@ -65,5 +65,4 @@ public class VisitController {
 //    public Mono<VetDTO> getVetByIdTest(@PathVariable String vetId){
 //        return visitService.testingGetVetDTO(vetId);
 //    }
-
 }
