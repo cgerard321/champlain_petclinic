@@ -25,11 +25,7 @@ public class VisitDetails {
     private Integer practitionerId = null;
 
     private String date = null;
-<<<<<<< HEAD
     private LocalDateTime visitDate = null;
-=======
-    //private LocalDateTime visitDate = null;
->>>>>>> 4237d248 (Working on Post)
 
     private String description = null;
 

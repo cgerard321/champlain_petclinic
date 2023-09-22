@@ -646,8 +646,12 @@
     </thead>
     <tbody>
         <tr ng-repeat="v in $ctrl.previousVisits" data-index="{{$index}}" data-table-name="previousVisits">
+<<<<<<< HEAD
             <script> console.log("V Date:" + v.date)</script>
             <td class="col-sm-2">{{v.date | date:'MM-dd-yyyy'}}</td>
+=======
+            <td class="col-sm-2">{{$ctrl.getVisitDate(v.visitId)}}</td>
+>>>>>>> 8298e364 (Working on displaying date for a visit)
             <td style="white-space: pre-line">{{v.description}}</td>
             <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>
             <td class="status-text" style="white-space: pre-line">{{$ctrl.getStatus(v.status)}}</td>
