@@ -75,7 +75,21 @@ class InventoryControllerIntegrationTest {
                 .create(productPublisher)
                 .expectNextCount(1)
                 .verifyComplete();
+
+        Publisher<Product> productPublisher1 = productRepository.save(Product.builder()
+                .productId("1")
+                .inventoryId("inventoryId_3")
+                .productName("Benzodiazepines")
+                .productDescription("Sedative Medication")
+                .productPrice(100.00)
+                .productQuantity(10)
+                .build());
+        StepVerifier
+                .create(productPublisher1)
+                .expectNextCount(1)
+                .verifyComplete();
     }
+
     @Test
     void addProductToInventory_WithInvalidInventoryIdAndValidBody_ShouldThrowNotFoundException(){
         // Arrange
@@ -458,10 +472,10 @@ class InventoryControllerIntegrationTest {
 
 
     @Test
-    void testUpdateProductInInventory_ProductNotFound_ShouldReturnNotFound() {
+    void testUpdateProductInInventory_WithNonExistantProductId_ShouldReturnNotFound() {
         // Arrange
         String inventoryId = "1";
-        String productId = UUID.randomUUID().toString();
+        String productId = "test";
 
         ProductRequestDTO productRequestDTO = ProductRequestDTO.builder()
                 .productName("Updated Benzodiazepines")
@@ -473,20 +487,16 @@ class InventoryControllerIntegrationTest {
         // Act and Assert
         webTestClient
                 .put()
-                .uri("/inventories/{inventoryId}/products/{productId}", inventoryId, productId)
+                .uri("/inventory/"+ inventoryId+ "/products/" + productId)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(productRequestDTO)
                 .exchange()
                 .expectStatus().isNotFound();
     }
-
-
-    /*
     @Test
     public void testUpdateProductInInventory_ShouldSucceed() {
-        String inventoryId = "1";
-        String productId = UUID.randomUUID().toString();
+        String productId = "1";
         ProductRequestDTO productRequestDTO = ProductRequestDTO.builder()
                 .productName("Updated Benzodiazepines")
                 .productDescription("Updated Sedative Medication")
@@ -494,7 +504,7 @@ class InventoryControllerIntegrationTest {
                 .productQuantity(20)
                 .build();
         webTestClient.put()
-                .uri("/inventories/{inventoryId}/products/{productId}", inventoryId, productId)
+                .uri("/inventory/" + inventory1.getInventoryId() + "/products/" + productId)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(productRequestDTO)
@@ -511,7 +521,7 @@ class InventoryControllerIntegrationTest {
                     assertEquals(productRequestDTO.getProductQuantity(), productResponseDTO.getProductQuantity());
                 });
     }
- */
+
 
 
 
