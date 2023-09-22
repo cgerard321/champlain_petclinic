@@ -17,7 +17,6 @@ public interface VisitService {
     Mono<VisitResponseDTO> updateVisit(String visitId, Mono<VisitRequestDTO> visitRequestDTOMono);
     Mono<Void> deleteVisit(String visitId);
 
-
 //    Mono<VetDTO> testingGetVetDTO(String vetId);
 //    Mono<PetResponseDTO> testingGetPetDTO(int petId);
 
