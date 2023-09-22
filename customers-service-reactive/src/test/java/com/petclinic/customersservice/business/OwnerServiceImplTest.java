@@ -2,6 +2,7 @@ package com.petclinic.customersservice.business;
 
 import com.petclinic.customersservice.data.Owner;
 import com.petclinic.customersservice.data.OwnerRepo;
+import com.petclinic.customersservice.presentationlayer.OwnerRequestDTO;
 import com.petclinic.customersservice.presentationlayer.OwnerResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -141,6 +143,54 @@ class OwnerServiceImplTest {
                 .telephone("telephone")
                 //.photoId("1")
                 .build();
+    }
+
+
+
+    @Test
+    void updateOwner_ShouldSucceed() {
+        // Define input data
+        String ownerId = "ownerId-123";
+        OwnerRequestDTO ownerRequestDTO = new OwnerRequestDTO();
+        ownerRequestDTO.setFirstName("Updated First Name");
+        ownerRequestDTO.setLastName("Updated Last Name");
+        ownerRequestDTO.setAddress("Updated Address");
+        ownerRequestDTO.setCity("Updated City");
+        ownerRequestDTO.setTelephone("5555555555");
+
+        // Create a mock for an existing owner in the repository
+        Owner existingOwner = new Owner();
+        existingOwner.setOwnerId(ownerId);
+        existingOwner.setFirstName("Original First Name");
+        existingOwner.setLastName("Original Last Name");
+        existingOwner.setAddress("Original Address");
+        existingOwner.setCity("Original City");
+        existingOwner.setTelephone("1234567890");
+
+        // Mock the repository behavior
+        when(repo.findOwnerByOwnerId(ownerId)).thenReturn(Mono.just(existingOwner));
+        when(repo.save(any(Owner.class))).thenAnswer(invocation -> Mono.just(invocation.getArgument(0))); // Return the saved owner
+
+        // Invoke the service method
+        Mono<OwnerResponseDTO> updatedOwnerMono = ownerService.updateOwner(Mono.just(ownerRequestDTO), ownerId);
+
+        // Verify the result
+        StepVerifier.create(updatedOwnerMono)
+                .expectNextMatches(updatedOwner -> {
+                    assertEquals(ownerId, updatedOwner.getOwnerId());
+                    assertEquals(ownerRequestDTO.getFirstName(), updatedOwner.getFirstName());
+                    assertEquals(ownerRequestDTO.getLastName(), updatedOwner.getLastName());
+                    assertEquals(ownerRequestDTO.getAddress(), updatedOwner.getAddress());
+                    assertEquals(ownerRequestDTO.getCity(), updatedOwner.getCity());
+                    assertEquals(ownerRequestDTO.getTelephone(), updatedOwner.getTelephone());
+                    return true;
+                })
+                .expectComplete()
+                .verify();
+
+        // Verify that the repository methods were called as expected
+        verify(repo).findOwnerByOwnerId(ownerId);
+        verify(repo).save(existingOwner);
     }
 
 }

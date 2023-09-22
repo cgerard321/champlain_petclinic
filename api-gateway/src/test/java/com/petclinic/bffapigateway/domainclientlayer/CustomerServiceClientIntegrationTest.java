@@ -2,6 +2,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
@@ -122,6 +123,32 @@ public class CustomerServiceClientIntegrationTest {
         final OwnerResponseDTO firstOwnerFromFlux = customersServiceClient.getAllOwners().blockFirst();
 
         assertEquals(firstOwnerFromFlux.getOwnerId(), TEST_OWNER.getOwnerId());
+    }
+
+    @Test
+    void testUpdateOwner() throws Exception {
+        // Mock the external service's response when updating the owner
+        OwnerRequestDTO requestDTO = new OwnerRequestDTO();
+        requestDTO.setFirstName("UpdatedFirstName");
+        requestDTO.setLastName("UpdatedLastName");
+
+        OwnerResponseDTO updatedOwnerResponse = new OwnerResponseDTO();
+        updatedOwnerResponse.setOwnerId("ownerId-123");
+        updatedOwnerResponse.setFirstName("UpdatedFirstName");
+        updatedOwnerResponse.setLastName("UpdatedLastName");
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader("Content-Type", "application/json")
+                .setBody(mapper.writeValueAsString(updatedOwnerResponse)));
+
+        Mono<OwnerResponseDTO> responseMono = customersServiceClient.updateOwner("ownerId-123", Mono.just(requestDTO));
+
+        OwnerResponseDTO responseDTO = responseMono.block(); // Blocking for simplicity
+
+        assertEquals(updatedOwnerResponse.getOwnerId(), responseDTO.getOwnerId());
+        assertEquals(updatedOwnerResponse.getFirstName(), responseDTO.getFirstName());
+        assertEquals(updatedOwnerResponse.getLastName(), responseDTO.getLastName());
     }
 
     /*@Test
