@@ -427,6 +427,31 @@ class InventoryControllerIntegrationTest {
                 .expectBody();
 
     }
+    //delete all
+
+    @Test
+    void deleteProductInventory_WithValidInventoryId_ShouldDeleteAllProducts() {
+        // Act
+        webTestClient
+                .delete()
+                .uri("/inventories" +
+                        "/{inventoryId}/products", "1")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound(); // Expecting 204 NO CONTENT status.
+    }
+
+    @Test
+    void deleteAllInventories_ShouldDeleteAllInventoriesAndAssociatedProducts() {
+        // Act
+        webTestClient
+                .delete()
+                .uri("/inventory")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent(); // Expecting 204 NO CONTENT status.
+    }
+
 
 
     private Inventory buildInventory(String inventoryId, String name, InventoryType inventoryType, String inventoryDescription) {

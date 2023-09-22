@@ -15,4 +15,7 @@ public interface ProductInventoryService {
     Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductsField(String inventoryId, String productName, Double productPrice, Integer productQuantity);
     Flux<InventoryResponseDTO> getAllInventory();
 
+    Mono<Void> deleteAllProductInventory(String inventoryId);
+    Mono<Void> deleteAllInventory();
+
 }
