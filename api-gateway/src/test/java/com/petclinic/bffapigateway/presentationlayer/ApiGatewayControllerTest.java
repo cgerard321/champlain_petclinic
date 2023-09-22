@@ -1917,7 +1917,7 @@ private InventoryResponseDTO buildInventoryDTO(){
         return InventoryResponseDTO.builder()
                 .inventoryId("1")
                 .inventoryName("invt1")
-                .inventoryType(String.valueOf(internal))
+                .inventoryType(internal)
                 .inventoryDescription("invtone")
                 .build();
 }
@@ -1958,7 +1958,7 @@ private InventoryResponseDTO buildInventoryDTO(){
         InventoryResponseDTO expectedResponse = InventoryResponseDTO.builder()
                 .inventoryId("1")
                 .inventoryName("newName")
-                .inventoryType(String.valueOf(internal))
+                .inventoryType(internal)
                 .inventoryDescription("newDescription")
                 .build();
 
