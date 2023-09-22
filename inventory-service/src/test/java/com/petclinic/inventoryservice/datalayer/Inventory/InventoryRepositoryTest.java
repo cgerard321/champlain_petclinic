@@ -46,7 +46,21 @@ class InventoryRepositoryTest {
     }
 
 
+    @Test
+    public void shouldDeleteInventory() {
+        // Arrange
+        Inventory inventoryToBeDeleted = buildInventory("inventoryId_4", "inventoryType_4", InventoryType.internal ,"inventoryDescription_4");
+        inventoryRepository.save(inventoryToBeDeleted).block();
 
+        // Act
+        inventoryRepository.deleteById(inventoryToBeDeleted.getInventoryId()).block();
+
+        // Assert
+        StepVerifier
+                .create(inventoryRepository.findById(inventoryToBeDeleted.getInventoryId()))
+                .expectNextCount(0)  // No inventory should be found
+                .verifyComplete();
+    }
     private Inventory buildInventory(String inventoryId, String inventoryName, InventoryType inventoryType, String inventoryDescription) {
         return Inventory.builder()
                 .inventoryName(inventoryName)

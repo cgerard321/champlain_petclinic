@@ -105,6 +105,29 @@ class ProductRepositoryTest {
                 .expectNextCount(2)
                 .verifyComplete();
     }
+    @Test
+    public void ShouldDeleteAllProducts() {
+        // Arrange
+        Product product1 = buildProduct("inventoryId_1", "sku_1", "product_1", "product_1_desc", 10.0, 10);
+        Product product2 = buildProduct("inventoryId_2", "sku_2", "product_2", "product_2_desc", 15.0, 5);
+
+        productRepository.save(product1).block();
+        productRepository.save(product2).block();
+
+        // Act
+        Publisher<Void> deleteAllOperation = productRepository.deleteAll();
+
+        // Assert
+        StepVerifier
+                .create(deleteAllOperation)
+                .verifyComplete();
+
+        // Check that there are no products in the repository anymore
+        StepVerifier
+                .create(productRepository.findAll())
+                .expectNextCount(0)
+                .verifyComplete();
+    }
 
     private Product buildProduct(String inventoryId, String productId, String productName, String productDescription, Double productPrice, Integer productQuantity) {
         return Product.builder()
