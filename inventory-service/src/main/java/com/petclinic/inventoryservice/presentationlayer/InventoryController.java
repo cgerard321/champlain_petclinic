@@ -28,6 +28,12 @@ public class InventoryController {
         return productInventoryService.deleteProductInInventory(inventoryId, productId)
                 .then(Mono.just(ResponseEntity.noContent().build()));
     }
+    @PostMapping()
+    public Mono<ResponseEntity<InventoryResponseDTO>> addInventory(@RequestBody Mono<InventoryRequestDTO> inventoryRequestDTO){
+        return productInventoryService.addInventory(inventoryRequestDTO)
+                .map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
+                .defaultIfEmpty(ResponseEntity.unprocessableEntity().build());
+    }
 
     @GetMapping("/{inventoryId}/products")
     public Flux<ProductResponseDTO>
@@ -43,5 +49,12 @@ public class InventoryController {
         return productInventoryService.getAllInventory();
     }
 
+
+    @PutMapping("/{inventoryId}")
+    public Mono<ResponseEntity<InventoryResponseDTO>> updateInventory(@RequestBody Mono<InventoryRequestDTO> inventoryRequestDTO, @PathVariable String inventoryId) {
+        return productInventoryService.updateInventory(inventoryRequestDTO, inventoryId)
+                .map(updatedStudent -> ResponseEntity.status(HttpStatus.OK).body(updatedStudent))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 
 }
