@@ -5,9 +5,15 @@ app:
   vet-service:
     host: localhost
     port: 7002
+<<<<<<< HEAD
   customers-service-reactive:
     host: localhost
     port: 8090
+=======
+  customers-service:
+      host: localhost
+      port: 7003
+>>>>>>> 64770df5 (Implemented Domain Client, need to put service in exposed port in order to test)
 
 logging:
   level:
@@ -61,7 +67,11 @@ app:
   vet-service:
     host: vet-service
     port: 8080
+<<<<<<< HEAD
   customers-service-reactive:
+=======
+  customers-service:
+>>>>>>> 64770df5 (Implemented Domain Client, need to put service in exposed port in order to test)
     host: customers-service-reactive
     port: 8080
 
