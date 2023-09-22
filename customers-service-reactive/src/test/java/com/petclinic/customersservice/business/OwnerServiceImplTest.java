@@ -74,6 +74,25 @@ class OwnerServiceImplTest {
                 .verifyComplete();
     }
 
+    // This new test uses ownerEntity.getOwnerId() rather than getId()
+    @Test
+    void newInsertOwner() {
+        Owner ownerEntity = buildOwner();
+        Mono<Owner> ownerMono = Mono.just(ownerEntity);
+        when(repo.insert(any(Owner.class))).thenReturn(ownerMono);
+        Mono<Owner> returnedOwner = ownerService.insertOwner(ownerMono);
+        StepVerifier.create(returnedOwner)
+                .consumeNextWith(foundOwner -> {
+                    assertEquals(ownerEntity.getOwnerId(), foundOwner.getOwnerId());
+                    assertEquals(ownerEntity.getFirstName(), foundOwner.getFirstName());
+                    assertEquals(ownerEntity.getLastName(), foundOwner.getLastName());
+                    assertEquals(ownerEntity.getAddress(), foundOwner.getAddress());
+                    assertEquals(ownerEntity.getCity(), foundOwner.getCity());
+                    assertEquals(ownerEntity.getTelephone(), foundOwner.getTelephone());
+                })
+                .verifyComplete();
+    }
+
      @Test
      void getOwnerByOwnerId() {
         Owner ownerEntity = buildOwner();
