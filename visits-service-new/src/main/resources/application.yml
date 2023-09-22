@@ -5,9 +5,9 @@ app:
   vet-service:
     host: localhost
     port: 7002
-  customers-service:
-      host: localhost
-      port: 7003
+  customers-service-reactive:
+    host: localhost
+    port: 8090
 
 logging:
   level:
@@ -61,7 +61,7 @@ app:
   vet-service:
     host: vet-service
     port: 8080
-  customers-service:
+  customers-service-reactive:
     host: customers-service-reactive
     port: 8080
 
