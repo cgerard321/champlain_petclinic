@@ -30,7 +30,7 @@ public class VisitController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
     @GetMapping(value="practitioner/visits/{practitionerId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<VisitResponseDTO> getVisitByPractitionerId(@PathVariable int practitionerId){
+    public Flux<VisitResponseDTO> getVisitByPractitionerId(@PathVariable String practitionerId){
         return visitService.getVisitsForPractitioner(practitionerId);
     }
     /*
@@ -45,7 +45,7 @@ public class VisitController {
         return visitService.addVisit(visitRequestDTOMono);
     }
 
-    @PutMapping(value = "visits/{visitId}", consumes = "application/json", produces = "application/json")
+    @PutMapping(value = "/{visitId}", consumes = "application/json", produces = "application/json")
     public Mono<VisitResponseDTO> updateVisitByVisitId(@PathVariable String visitId, @RequestBody Mono<VisitRequestDTO> visitRequestDTOMono){
         return visitService.updateVisit(visitId, visitRequestDTOMono);
     }
