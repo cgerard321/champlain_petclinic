@@ -9,7 +9,7 @@ const whiteList = new Set([
 var petClinicApp = angular.module('petClinicApp', [
     'ui.router', 'layoutNav', 'layoutFooter', 'layoutWelcome', 'ownerList', 'ownerDetails', 'ownerForm', 'petForm'
     , 'visits', 'vetList','vetForm','vetDetails', 'visitList', 'billForm', 'loginForm', 'rolesDetails', 'signupForm',
-    'billDetails', 'billsByOwnerId', 'billHistory','billsByVetId','bundleList','bundleForm'
+    'billDetails', 'billsByOwnerId', 'billHistory','billsByVetId','bundleList','productForm','inventoryProductList','bundleForm'
     , 'verification' , 'adminPanel']);
 
 
@@ -18,22 +18,19 @@ var petClinicApp = angular.module('petClinicApp', [
 petClinicApp.factory("authProvider", ["$window", function ($window) {
 
     return {
-        setUser: ({ token, username, email }) => {
-            $window.localStorage.setItem("token", token)
+        setUser: ({ username, email }) => {
             $window.localStorage.setItem("username", username)
             $window.localStorage.setItem("email", email)
         },
         getUser: () => ({
-            token: $window.localStorage.getItem("token"),
             username: $window.localStorage.getItem("username"),
             email: $window.localStorage.getItem("email"),
         }),
         purgeUser: () => {
-            $window.localStorage.removeItem("token")
             $window.localStorage.removeItem("username")
             $window.localStorage.removeItem("email")
         },
-        isLoggedIn: () => !!$window.localStorage.getItem("token")
+        isLoggedIn: () => !!$window.localStorage.getItem("email")
     }
 }]);
 
@@ -56,18 +53,18 @@ petClinicApp.factory("httpErrorInterceptor", ["$q", "$location", "authProvider",
 petClinicApp.run(['$rootScope', '$location', 'authProvider', function ($rootScope, $location, authProvider) {
     $rootScope.$on('$locationChangeSuccess', function (event) {
 
-        // if(whiteList.has($location.path().substring(1))) {
-        //     return console.log("WHITE LISTED: Ignoring");
-        // }
-        //
-        // if (!authProvider.isLoggedIn()) {
-        //     console.log('DENY : Redirecting to Login');
-        //     event.preventDefault();
-        //     $location.path('/login');
-        // }
-        // else {
-        //     console.log('ALLOW');
-        // }
+        if(whiteList.has($location.path().substring(1))) {
+            return console.log("WHITE LISTED: Ignoring");
+        }
+
+        if (!authProvider.isLoggedIn()) {
+            console.log('DENY : Redirecting to Login');
+            event.preventDefault();
+            $location.path('/login');
+        }
+        else {
+            console.log('ALLOW');
+        }
     });
 }])
 

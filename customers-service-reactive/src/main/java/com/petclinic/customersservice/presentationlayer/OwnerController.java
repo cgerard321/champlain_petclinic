@@ -16,7 +16,10 @@ import reactor.core.publisher.Mono;
 public class OwnerController {
 
     private final OwnerService ownerService;
-
+    @GetMapping()
+    public Flux<OwnerResponseDTO> getAllOwners() {
+        return ownerService.getAllOwners();
+    }
     @GetMapping("/{ownerId}")
     public Mono<ResponseEntity<OwnerResponseDTO>> getOwnerByOwnerId(@PathVariable String ownerId) {
         return ownerService.getOwnerByOwnerId(ownerId)
@@ -39,9 +42,6 @@ public class OwnerController {
         return ownerService.updateOwner(ownerId, ownerMono);
     }
 
-    @GetMapping()
-    public Flux<Owner> getAllOwners() {
-        return ownerService.getAllOwners();
-    }
+
 
 }

@@ -3,14 +3,33 @@
 angular.module('billsByVetId')
 .controller('BillsByVetIdController', ['$http', '$stateParams', '$scope',
     function ($http, $stateParams, $scope) {
-        var self = this;
-        $http.get("api/gateway/bills/vet/" + ($stateParams.vetId)).then(function (resp) {
-            self.billsByVetId = resp.data;
-        });
+        let self = this;
+        self.billsByVetId = []
 
-        $http.get("api/gateway/vets/" +($stateParams.vetId)).then(function(resp){
-            self.vet = resp.data;
-        });
+        let eventSource = new EventSource("api/gateway/bills/vet/"  + $stateParams.vetId)
+        eventSource.addEventListener('message',function (event){
+            $scope.$apply(function (){
+                self.billsByVetId.push(JSON.parse(event.data))
+            })
+        })
+        eventSource.onerror = (error)=>{
+            if(eventSource.readyState === 0){
+                eventSource.close()
+                console.log("Event source was closed by server succesfully. " + error)
+            }else{
+                console.log("EventSource error: "+error)
+            }
+        }
+
+
+
+        // $http.get("api/gateway/bills/vet/" + ($stateParams.vetId)).then(function (resp) {
+        //     self.billsByVetId = resp.data;
+        // });
+        //
+        // $http.get("api/gateway/vets/" +($stateParams.vetId)).then(function(resp){
+        //     self.vet = resp.data;
+        // });
         $scope.deleteBillsByVetId = function (vetId) {
             let varIsConf = confirm('You are about to all bills by vet ' + vetId + '. Is it what you want to do ? ');
             if (varIsConf) {

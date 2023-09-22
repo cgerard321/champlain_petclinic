@@ -1,10 +1,20 @@
 package com.petclinic.bffapigateway.presentationlayer;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.petclinic.bffapigateway.config.GlobalExceptionHandler;
 import com.petclinic.bffapigateway.domainclientlayer.*;
-import com.petclinic.bffapigateway.dtos.*;
+import com.petclinic.bffapigateway.dtos.Auth.Login;
 import com.petclinic.bffapigateway.dtos.Auth.Role;
+import com.petclinic.bffapigateway.dtos.Auth.UserDetails;
+import com.petclinic.bffapigateway.dtos.Auth.UserPasswordLessDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillDetails;
+import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
+import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
+import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
+import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
+import com.petclinic.bffapigateway.dtos.Inventory.InventoryType;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
 import com.petclinic.bffapigateway.dtos.Vets.*;
@@ -12,18 +22,40 @@ import com.petclinic.bffapigateway.dtos.Visits.VisitDetails;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import com.petclinic.bffapigateway.exceptions.GenericHttpException;
+import com.petclinic.bffapigateway.utils.Security.Filters.JwtTokenFilter;
+import com.petclinic.bffapigateway.utils.Security.Filters.RoleFilter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.MultiValueMapAdapter;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuples;
+
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.util.*;
+
+import static com.petclinic.bffapigateway.dtos.Inventory.InventoryType.internal;
+import static org.junit.Assert.*;
+import static org.assertj.core.util.Lists.list;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -31,13 +63,23 @@ import static org.mockito.Mockito.*;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
 
-
-@WebFluxTest(controllers = BFFApiGatewayController.class)
+@RunWith(SpringRunner.class)
+@ContextConfiguration(classes = {
+        GlobalExceptionHandler.class,
+        BFFApiGatewayController.class,
+        AuthServiceClient.class,
+        CustomersServiceClient.class,
+        VisitsServiceClient.class,
+        VetsServiceClient.class,
+        BillServiceClient.class,
+        InventoryServiceClient.class
+})
+@WebFluxTest(controllers = BFFApiGatewayController.class, excludeFilters = @ComponentScan.Filter(type = FilterType.CUSTOM,
+        classes = {JwtTokenFilter.class,RoleFilter.class}),useDefaultFilters = false)
 @AutoConfigureWebTestClient
 class ApiGatewayControllerTest {
     @Autowired private ObjectMapper objectMapper;
     @Autowired private WebTestClient client;
-
     @MockBean private CustomersServiceClient customersServiceClient;
     @MockBean private VisitsServiceClient visitsServiceClient;
     @MockBean private VetsServiceClient vetsServiceClient;
@@ -118,7 +160,34 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$").isEqualTo(1);
     }    
-  
+
+    @Test
+    void getAverageRatingsByVetId(){
+        RatingResponseDTO ratingResponseDTO = buildRatingResponseDTO();
+
+        RatingRequestDTO rating = RatingRequestDTO.builder()
+                .vetId(VET_ID)
+                .rateScore(4.0)
+                .build();
+
+        when(vetsServiceClient.getAverageRatingByVetId(anyString()))
+                .thenReturn(Mono.just(ratingResponseDTO.getRateScore()));
+
+        client
+                .get()
+                .uri("/api/gateway/vets/" + rating.getVetId() + "/ratings/average")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(Double.class)
+                .value(resp->
+                        assertEquals(rating.getRateScore(), ratingResponseDTO.getRateScore()));
+
+    }
+
+
+
    @Test
     void addRatingToAVet() {
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
@@ -208,9 +277,10 @@ class ApiGatewayControllerTest {
                 .get()
                 .uri("/api/gateway/vets/active")
                 .accept(MediaType.APPLICATION_JSON)
+                .header("Content-Type", "application/json;charset=UTF-8")
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectHeader().contentType(APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$[0].vetId").isEqualTo(vetDTO2.getVetId())
                 .jsonPath("$[0].resume").isEqualTo(vetDTO2.getResume())
@@ -537,6 +607,37 @@ class ApiGatewayControllerTest {
 //    }
 
     @Test
+    void getAllOwners_shouldSucceed(){
+        OwnerResponseDTO owner1 = new OwnerResponseDTO();
+        owner1.setOwnerId("ownerId-90");
+        owner1.setFirstName("John");
+        owner1.setLastName("Johnny");
+        owner1.setAddress("111 John St");
+        owner1.setCity("Johnston");
+        owner1.setTelephone("51451545144");
+
+        Flux<OwnerResponseDTO> ownerResponseDTOFlux = Flux.just(owner1);
+
+        when(customersServiceClient.getAllOwners()).thenReturn(ownerResponseDTOFlux);
+
+        client.get()
+                .uri("/api/gateway/owners")
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .acceptCharset(StandardCharsets.UTF_8)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().valueEquals("Content-Type","text/event-stream;charset=UTF-8")
+                .expectBodyList(OwnerResponseDTO.class)
+                .value((list) -> {
+                    assertNotNull(list);
+                    assertEquals(1,list.size());
+                    assertEquals(list.get(0).getOwnerId(),owner1.getOwnerId());
+                    assertEquals(list.get(0).getFirstName(),owner1.getFirstName());
+                });
+
+    }
+
+    @Test
     void getOwnerByOwnerId_shouldSucceed(){
         OwnerResponseDTO owner = new OwnerResponseDTO();
         owner.setOwnerId("ownerId-123");
@@ -565,8 +666,8 @@ class ApiGatewayControllerTest {
 
 
 
-      @Test
-      void createOwner(){
+    @Test
+    void createOwner(){
         OwnerResponseDTO owner = new OwnerResponseDTO();
         owner.setOwnerId("ownerId-123");
         owner.setFirstName("John");
@@ -613,7 +714,7 @@ class ApiGatewayControllerTest {
 
         when(customersServiceClient.createPet(pet,od.getOwnerId()))
 
-        .thenReturn(Mono.just(pet));
+                .thenReturn(Mono.just(pet));
 
         client.post()
                 .uri("/api/gateway/owners/{ownerId}/pets", od.getOwnerId())
@@ -710,39 +811,39 @@ class ApiGatewayControllerTest {
     @Test
     void createPetPhoto(){
 
-            OwnerResponseDTO owner = new OwnerResponseDTO();
-            owner.setOwnerId("ownerId-123");
-            PetResponseDTO pet = new PetResponseDTO();
-            PetType type = new PetType();
-            type.setName("Cat");
-            pet.setId(1);
-            pet.setName("Bonkers");
-            pet.setBirthDate("2015-03-03");
-            pet.setType(type);
-            pet.setImageId(2);
+        OwnerResponseDTO owner = new OwnerResponseDTO();
+        owner.setOwnerId("ownerId-123");
+        PetResponseDTO pet = new PetResponseDTO();
+        PetType type = new PetType();
+        type.setName("Cat");
+        pet.setId(1);
+        pet.setName("Bonkers");
+        pet.setBirthDate("2015-03-03");
+        pet.setType(type);
+        pet.setImageId(2);
 
-            final String test = "Test photo";
-            final byte[] testBytes = test.getBytes();
+        final String test = "Test photo";
+        final byte[] testBytes = test.getBytes();
 
-            PhotoDetails photo = new PhotoDetails();
-            photo.setId(2);
-            photo.setName("photo");
-            photo.setType("jpeg");
-            photo.setPhoto("testBytes");
+        PhotoDetails photo = new PhotoDetails();
+        photo.setId(2);
+        photo.setName("photo");
+        photo.setType("jpeg");
+        photo.setPhoto("testBytes");
 
-            when(customersServiceClient.setPetPhoto(owner.getOwnerId(), photo, pet.getId()))
-                    .thenReturn(Mono.just("Image uploaded successfully: " + photo.getName()));
+        when(customersServiceClient.setPetPhoto(owner.getOwnerId(), photo, pet.getId()))
+                .thenReturn(Mono.just("Image uploaded successfully: " + photo.getName()));
 
-            client.post()
-                    .uri("/api/gateway/owners/1/pet/photo/1")
-                    .body(Mono.just(photo), PhotoDetails.class)
-                    .accept(MediaType.APPLICATION_JSON)
-                    .exchange()
-                    .expectStatus().isOk()
-                    .expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
-                    .expectBody();
-        }
-//
+        client.post()
+                .uri("/api/gateway/owners/1/pet/photo/1")
+                .body(Mono.just(photo), PhotoDetails.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
+                .expectBody();
+    }
+    //
     @Test
     void getPetPhoto(){
 
@@ -778,7 +879,7 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.name").isEqualTo("photo")
                 .jsonPath("$.type").isEqualTo("jpeg");
     }
-//
+    //
 //
     @Test
     void shouldThrowUnsupportedMediaTypeIfBodyDoesNotExist(){
@@ -793,7 +894,7 @@ class ApiGatewayControllerTest {
         pet.setType(type);
 
         when(customersServiceClient.createPet(pet,od.getOwnerId()))
-        .thenReturn(Mono.just(pet));
+                .thenReturn(Mono.just(pet));
 
         client.post()
                 .uri("/api/gateway/owners/{ownerId}/pets", od.getOwnerId())
@@ -802,11 +903,11 @@ class ApiGatewayControllerTest {
                 .expectStatus().isEqualTo(UNSUPPORTED_MEDIA_TYPE)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.path").isEqualTo("/api/gateway/owners/"+od.getOwnerId()+"/pets");
+                .jsonPath("$.message").isEqualTo("Content type '' not supported");
 
 
     }
-//
+    //
     @Test
     void ifOwnerIdIsNotSpecifiedInUrlThrowNotAllowed(){
         OwnerResponseDTO od = new OwnerResponseDTO();
@@ -829,9 +930,9 @@ class ApiGatewayControllerTest {
                 .expectStatus().isEqualTo(METHOD_NOT_ALLOWED)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.path").isEqualTo("/api/gateway/owners/pets");
+                .jsonPath("$.message").isEqualTo("Request method 'POST' is not supported.");
     }
-//
+    //
     @Test
     void shouldCreateThenDeletePet(){
         OwnerResponseDTO od = new OwnerResponseDTO();
@@ -868,7 +969,7 @@ class ApiGatewayControllerTest {
 
 
     }
-//
+    //
     @Test
     void shouldThrowNotFoundWhenOwnerIdIsNotSpecifiedOnDeletePets(){
         OwnerResponseDTO od = new OwnerResponseDTO();
@@ -902,7 +1003,7 @@ class ApiGatewayControllerTest {
                 .isNotFound()
                 .expectBody();
     }
-//
+    //
     @Test
     void shouldThrowMethodNotAllowedWhenDeletePetsIsMissingPetId(){
         OwnerResponseDTO od = new OwnerResponseDTO();
@@ -916,7 +1017,6 @@ class ApiGatewayControllerTest {
         pet.setType(type);
 
         when(customersServiceClient.createPet(pet,od.getOwnerId()))
-
                 .thenReturn(Mono.just(pet));
 
         client.post()
@@ -985,7 +1085,7 @@ class ApiGatewayControllerTest {
 
         //int expectedLength = 1;
 
-        BillDetails entity = new BillDetails();
+        BillResponseDTO entity = new BillResponseDTO();
 
         entity.setBillId("9");
 
@@ -1019,7 +1119,7 @@ class ApiGatewayControllerTest {
 
     @Test
     public void getBillsByOwnerId(){
-        BillDetails bill = new BillDetails();
+        BillResponseDTO bill = new BillResponseDTO();
         bill.setBillId(UUID.randomUUID().toString());
         bill.setCustomerId(1);
         bill.setAmount(499);
@@ -1037,11 +1137,11 @@ class ApiGatewayControllerTest {
                 .jsonPath("$[0].customerId").isEqualTo(1)
                 .jsonPath("$[0].amount").isEqualTo(499)
                 .jsonPath("$[0].visitType").isEqualTo("Test");
-        }
+    }
 
     @Test
     public void getBillsByVetId(){
-        BillDetails bill = new BillDetails();
+        BillResponseDTO bill = new BillResponseDTO();
         bill.setBillId(UUID.randomUUID().toString());
         bill.setVetId("1");
         bill.setAmount(499);
@@ -1073,7 +1173,7 @@ class ApiGatewayControllerTest {
     }
 
     @Test
-     void getBillNotFound(){
+    void getBillNotFound(){
         client.get()
                 .uri("/bills/{billId}", 100)
                 .accept(APPLICATION_JSON)
@@ -1086,7 +1186,7 @@ class ApiGatewayControllerTest {
     }
 
 
-    
+
     @Test
     void getPutRequestNotFound(){
         client.put()
@@ -1113,24 +1213,29 @@ class ApiGatewayControllerTest {
 
     @Test
     void createBill(){
-        BillDetails bill = new BillDetails();
-        bill.setBillId("9");
-        bill.setDate(null);
-        bill.setAmount(600);
-        bill.setVisitType("Adoption");
-        when(billServiceClient.createBill(bill))
-                .thenReturn(Mono.just(bill));
+        BillResponseDTO billResponseDTO = new BillResponseDTO();
+        billResponseDTO.setBillId("9");
+        billResponseDTO.setDate(null);
+        billResponseDTO.setAmount(600);
+        billResponseDTO.setVisitType("Adoption");
+
+        BillRequestDTO billRequestDTO = new BillRequestDTO();
+        billRequestDTO.setDate(null);
+        billRequestDTO.setAmount(600);
+        billRequestDTO.setVisitType("Adoption");
+        when(billServiceClient.createBill(billRequestDTO))
+                .thenReturn(Mono.just(billResponseDTO));
 
         client.post()
                 .uri("/api/gateway/bills")
-                .body(Mono.just(bill), BillDetails.class)
+                .body(Mono.just(billRequestDTO), BillRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
 
-        assertEquals(bill.getBillId(),"9");
+        assertEquals(billResponseDTO.getBillId(),"9");
     }
 
     @Test
@@ -1160,29 +1265,33 @@ class ApiGatewayControllerTest {
 
     @Test
     void shouldDeleteBillById(){
-            BillDetails bill = new BillDetails();
-            bill.setBillId("9");
 
-            bill.setDate(null);
+        BillResponseDTO billResponseDTO = new BillResponseDTO();
+        billResponseDTO.setBillId("9");
+        billResponseDTO.setDate(null);
+        billResponseDTO.setAmount(600);
+        billResponseDTO.setVisitType("Adoption");
 
-            bill.setAmount(600);
-
-            bill.setVisitType("Adoption");
-
-            when(billServiceClient.createBill(bill))
-                    .thenReturn(Mono.just(bill));
+        BillRequestDTO billRequestDTO = new BillRequestDTO();
+        billRequestDTO.setDate(null);
+        billRequestDTO.setAmount(600);
+        billRequestDTO.setVisitType("Adoption");
+        when(billServiceClient.createBill(billRequestDTO))
+                .thenReturn(Mono.just(billResponseDTO));
 
 
             client.post()
                     .uri("/api/gateway/bills")
-                    .body(Mono.just(bill), BillDetails.class)
+                    .body(Mono.just(billRequestDTO), BillRequestDTO.class)
                     .accept(MediaType.APPLICATION_JSON)
                     .exchange()
                     .expectStatus().isOk()
                     .expectHeader().contentType(MediaType.APPLICATION_JSON)
                     .expectBody();
 
-            assertEquals(bill.getBillId(),"9");
+            assertEquals(billResponseDTO.getBillId(),"9");
+
+
         client.delete()
                 .uri("/api/gateway/bills/9")
                 .accept(MediaType.APPLICATION_JSON)
@@ -1191,34 +1300,38 @@ class ApiGatewayControllerTest {
                 .isOk()
                 .expectBody();
 
-        assertEquals(null, billServiceClient.getBilling(bill.getBillId()));
+        assertNull(billServiceClient.getBilling(billResponseDTO.getBillId()));
     }
 
     @Test
-    void shouldDeleteBillByVetId(){
-        BillDetails bill = new BillDetails();
-        bill.setVetId("9");
+    void shouldDeleteBillByVetId() {
+        BillRequestDTO billRequestDTO = new BillRequestDTO();
+        billRequestDTO.setVetId("9");
+        billRequestDTO.setDate(null);
+        billRequestDTO.setAmount(600);
+        billRequestDTO.setVisitType("Adoption");
 
-        bill.setDate(null);
+        BillResponseDTO billResponseDTO = new BillResponseDTO();
+        billResponseDTO.setVetId("9");
+        billResponseDTO.setDate(null);
+        billResponseDTO.setAmount(600);
+        billResponseDTO.setVisitType("Adoption");
 
-        bill.setAmount(600);
-
-        bill.setVisitType("Adoption");
-
-        when(billServiceClient.createBill(bill))
-                .thenReturn(Mono.just(bill));
-
+        when(billServiceClient.createBill(billRequestDTO))
+                .thenReturn(Mono.just(billResponseDTO));
 
         client.post()
                 .uri("/api/gateway/bills")
-                .body(Mono.just(bill), BillDetails.class)
+                .body(Mono.just(billRequestDTO), BillRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
 
-        assertEquals(bill.getVetId(),"9");
+        // Compare the vetId property, not the billId property
+        assertEquals(billResponseDTO.getVetId(), "9");
+
         client.delete()
                 .uri("/api/gateway/bills/vet/9")
                 .accept(MediaType.APPLICATION_JSON)
@@ -1227,9 +1340,13 @@ class ApiGatewayControllerTest {
                 .isOk()
                 .expectBody();
 
-        assertEquals(null, billServiceClient.getBilling(bill.getVetId()));
+        assertNull(billServiceClient.getBilling(billResponseDTO.getBillId()));
     }
 
+
+    /**
+     * Visits Methods
+     * **/
     @Test
     void shouldCreateAVisitWithOwnerInfo(){
         OwnerResponseDTO owner = new OwnerResponseDTO();
@@ -1237,7 +1354,7 @@ class ApiGatewayControllerTest {
         owner.setOwnerId("ownerId-123");
         visit.setVisitId(UUID.randomUUID().toString());
         visit.setPetId(1);
-        visit.setDate("2021-12-12");
+        visit.setVisitDate(LocalDateTime.parse("2021-12-12T14:00:00"));
         visit.setDescription("Charle's Richard cat has a paw infection.");
         visit.setStatus(false);
         visit.setPractitionerId(1);
@@ -1256,7 +1373,7 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$.visitId").isEqualTo(visit.getVisitId())
                 .jsonPath("$.petId").isEqualTo(1)
-                .jsonPath("$.date").isEqualTo("2021-12-12")
+                .jsonPath("$.visitDate").isEqualTo("2021-12-12T14:00:00")
                 .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$.status").isEqualTo(false)
                 .jsonPath("$.practitionerId").isEqualTo(1);
@@ -1310,7 +1427,7 @@ class ApiGatewayControllerTest {
         owner.setOwnerId("ownerId-90");
         visit.setVisitId(UUID.randomUUID().toString());
         visit.setPetId(1);
-        visit.setDate("2021-12-12");
+        visit.setVisitDate(LocalDateTime.parse("2021-12-12T14:00:00"));
         visit.setDescription("Charle's Richard cat has a paw infection.");
         visit.setStatus(false);
         visit.setPractitionerId(1);
@@ -1321,7 +1438,7 @@ class ApiGatewayControllerTest {
         owner2.setOwnerId("ownerId-12");
         visit2.setVisitId(UUID.randomUUID().toString());
         visit2.setPetId(2);
-        visit2.setDate("2034-12-12");
+        visit2.setVisitDate(LocalDateTime.parse("2021-12-12T14:00:00"));
         visit2.setDescription("Charle's Richard dog has a paw infection.");
         visit2.setStatus(false);
         visit2.setPractitionerId(2);
@@ -1340,7 +1457,7 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$.visitId").isEqualTo(visit.getVisitId())
                 .jsonPath("$.petId").isEqualTo(1)
-                .jsonPath("$.date").isEqualTo("2021-12-12")
+                .jsonPath("$.visitDate").isEqualTo("2021-12-12T14:00:00")
                 .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$.status").isEqualTo(false)
                 .jsonPath("$.practitionerId").isEqualTo(1);
@@ -1358,16 +1475,29 @@ class ApiGatewayControllerTest {
                 .expectBody();
 
         assertEquals(visitsServiceClient.getVisitsForPet(1), null);
-
-
     }
+    @Test
+    void shouldGetAllVisits() {
+        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25T13:45:00"), "this is a dummy description", 2, 2, true);
+        VisitResponseDTO visitResponseDTO2 = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25T13:45:00"), "this is a dummy description", 2, 2, true);
+        when(visitsServiceClient.getAllVisits()).thenReturn(Flux.just(visitResponseDTO,visitResponseDTO2));
 
+        client.get()
+                .uri("/api/gateway/visits")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
+                .expectBodyList(VisitResponseDTO.class)
+                .value((list)->assertEquals(list.size(),2));
+        Mockito.verify(visitsServiceClient,times(1)).getAllVisits();
+    }
     @Test
     void shouldGetAVisit() {
         VisitDetails visit = new VisitDetails();
         visit.setVisitId(UUID.randomUUID().toString());
         visit.setPetId(1);
-        visit.setDate("2021-12-12");
+        visit.setVisitDate(LocalDateTime.parse("2021-12-12T14:00:00"));
         visit.setDescription("Charle's Richard cat has a paw infection.");
         visit.setStatus(false);
         visit.setPractitionerId(1);
@@ -1382,7 +1512,7 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$[0].visitId").isEqualTo(visit.getVisitId())
                 .jsonPath("$[0].petId").isEqualTo(1)
-                .jsonPath("$[0].date").isEqualTo("2021-12-12")
+                .jsonPath("$[0].visitDate").isEqualTo("2021-12-12T14:00:00")
                 .jsonPath("$[0].description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$[0].practitionerId").isEqualTo(1);
     }
@@ -1392,7 +1522,7 @@ class ApiGatewayControllerTest {
         VisitDetails visit = new VisitDetails();
         visit.setVisitId(UUID.randomUUID().toString());
         visit.setPetId(1);
-        visit.setDate("2021-12-12");
+        visit.setVisitDate(LocalDateTime.parse("2021-12-12T14:00:00"));
         visit.setDescription("Charle's Richard cat has a paw infection.");
         visit.setStatus(false);
         visit.setPractitionerId(1);
@@ -1407,11 +1537,12 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$[0].visitId").isEqualTo(visit.getVisitId())
                 .jsonPath("$[0].petId").isEqualTo(1)
-                .jsonPath("$[0].date").isEqualTo("2021-12-12")
+                .jsonPath("$[0].visitDate").isEqualTo("2021-12-12T14:00:00")
                 .jsonPath("$[0].description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$[0].practitionerId").isEqualTo(1);
     }
 
+    /*
     @Test
     void shouldGetAVisitByPractitionerIdAndMonth(){
         VisitDetails visit = new VisitDetails();
@@ -1436,11 +1567,11 @@ class ApiGatewayControllerTest {
                 .jsonPath("$[0].description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$[0].practitionerId").isEqualTo(1);
     }
+     */
 
     @Test
     void getSingleVisit_Valid() {
-        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee", 2023, 11, 20, "test visit", 1, 1, false);
-
+        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25T13:45:00"), "this is a dummy description", 2, 2, true);
         when(visitsServiceClient.getVisitByVisitId(anyString())).thenReturn(Mono.just(visitResponseDTO));
 
         client.get()
@@ -1450,7 +1581,7 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$.visitId").isEqualTo(visitResponseDTO.getVisitId())
                 .jsonPath("$.petId").isEqualTo(visitResponseDTO.getPetId())
-//                .jsonPath("$.date").isEqualTo(visitResponseDTO.getDate())
+                .jsonPath("$.visitDate").isEqualTo("2022-11-25T13:45:00")
                 .jsonPath("$.description").isEqualTo(visitResponseDTO.getDescription())
                 .jsonPath("$.practitionerId").isEqualTo(visitResponseDTO.getPractitionerId());
     }
@@ -1480,13 +1611,13 @@ class ApiGatewayControllerTest {
         VisitDetails visit2 = new VisitDetails();
         visit1.setVisitId(UUID.randomUUID().toString());
         visit1.setPetId(21);
-        visit1.setDate("2021-12-7");
+        visit1.setVisitDate(LocalDateTime.parse("2021-12-07T14:00:00"));
         visit1.setDescription("John Smith's cat has a paw infection.");
         visit1.setStatus(false);
         visit1.setPractitionerId(2);
         visit2.setVisitId(UUID.randomUUID().toString());
         visit2.setPetId(21);
-        visit2.setDate("2021-12-8");
+        visit2.setVisitDate(LocalDateTime.parse("2021-12-08T15:00:00"));
         visit2.setDescription("John Smith's dog has a paw infection.");
         visit2.setStatus(false);
         visit2.setPractitionerId(2);
@@ -1507,13 +1638,13 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$[0].visitId").isEqualTo(visit1.getVisitId())
                 .jsonPath("$[0].petId").isEqualTo(21)
-                .jsonPath("$[0].date").isEqualTo("2021-12-7")
+                .jsonPath("$[0].visitDate").isEqualTo("2021-12-07T14:00:00")
                 .jsonPath("$[0].description").isEqualTo("John Smith's cat has a paw infection.")
                 .jsonPath("$[0].status").isEqualTo(false)
                 .jsonPath("$[0].practitionerId").isEqualTo(2)
                 .jsonPath("$[1].visitId").isEqualTo(visit2.getVisitId())
                 .jsonPath("$[1].petId").isEqualTo(21)
-                .jsonPath("$[1].date").isEqualTo("2021-12-8")
+                .jsonPath("$[1].visitDate").isEqualTo("2021-12-08T15:00:00")
                 .jsonPath("$[1].description").isEqualTo("John Smith's dog has a paw infection.")
                 .jsonPath("$[1].status").isEqualTo(false)
                 .jsonPath("$[1].practitionerId").isEqualTo(2);
@@ -1545,13 +1676,13 @@ class ApiGatewayControllerTest {
         VisitDetails visit2 = new VisitDetails();
         visit1.setVisitId(UUID.randomUUID().toString());
         visit1.setPetId(21);
-        visit1.setDate("2021-12-7");
+        visit1.setVisitDate(LocalDateTime.parse("2021-12-07T14:00:00"));
         visit1.setDescription("John Smith's cat has a paw infection.");
         visit1.setStatus(true);
         visit1.setPractitionerId(2);
         visit2.setVisitId(UUID.randomUUID().toString());
         visit2.setPetId(21);
-        visit2.setDate("2021-12-8");
+        visit2.setVisitDate(LocalDateTime.parse("2021-12-08T15:00"));
         visit2.setDescription("John Smith's dog has a paw infection.");
         visit2.setStatus(true);
         visit2.setPractitionerId(2);
@@ -1572,13 +1703,13 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$[0].visitId").isEqualTo(visit1.getVisitId())
                 .jsonPath("$[0].petId").isEqualTo(21)
-                .jsonPath("$[0].date").isEqualTo("2021-12-7")
+                .jsonPath("$[0].visitDate").isEqualTo("2021-12-07T14:00:00")
                 .jsonPath("$[0].description").isEqualTo("John Smith's cat has a paw infection.")
                 .jsonPath("$[0].status").isEqualTo(true)
                 .jsonPath("$[0].practitionerId").isEqualTo(2)
                 .jsonPath("$[1].visitId").isEqualTo(visit2.getVisitId())
                 .jsonPath("$[1].petId").isEqualTo(21)
-                .jsonPath("$[1].date").isEqualTo("2021-12-8")
+                .jsonPath("$[1].visitDate").isEqualTo("2021-12-08T15:00:00")
                 .jsonPath("$[1].description").isEqualTo("John Smith's dog has a paw infection.")
                 .jsonPath("$[1].status").isEqualTo(true)
                 .jsonPath("$[1].practitionerId").isEqualTo(2);
@@ -1646,175 +1777,167 @@ class ApiGatewayControllerTest {
 //                .jsonPath("$.timestamp").exists()
 //                .jsonPath("$.message").isEqualTo(errorMessage);
 //    }
-//
-//    @Test
-//    @DisplayName("Given valid Login, return JWT and user details")
-//    void login_valid() throws JsonProcessingException {
-//        final String validToken = "some.valid.token";
-//        final UserDetails user = UserDetails.builder()
-//                .id(-1)
-//                .password(null)
-//                .email("e@mail.com")
-//                .username("user")
-//                .roles(Collections.emptySet())
-//                .build();
-//
-//        final Login login = Login.builder()
-//                .password("valid")
-//                .email(user.getEmail())
-//                .build();
-//        when(authServiceClient.login(login))
-//                .thenReturn(Mono.just(Tuples.of(
-//                        validToken,
-//                        user
-//                )));
-//
-//        final WebTestClient.ResponseSpec ok = client.post()
-//                .uri("/api/gateway/users/login")
-//                .accept(APPLICATION_JSON)
-//                .body(Mono.just(login), Login.class)
-//                .exchange()
-//                .expectStatus().isOk();
-//
-//        ok.expectBody()
-//                .json(objectMapper.writeValueAsString(user));
-//        ok.expectHeader()
-//                .valueEquals(HttpHeaders.AUTHORIZATION, validToken);
-//    }
-
-//    @Test
-//    @DisplayName("Given invalid Login, throw 401")
-//    void login_invalid() {
-//        final UserDetails user = UserDetails.builder()
-//                .id(-1)
-//                .password(null)
-//                .email("e@mail.com")
-//                .username("user")
-//                .roles(Collections.emptySet())
-//                .build();
-//
-//        final Login login = Login.builder()
-//                .password("valid")
-//                .email(user.getEmail())
-//                .build();
-//        final String message = "I live in unending agony. I spent 6 hours and ended up with nothing";
-//        when(authServiceClient.login(login))
-//                .thenThrow(new GenericHttpException(message, UNAUTHORIZED));
-//
-//        client.post()
-//                .uri("/api/gateway/users/login")
-//                .accept(APPLICATION_JSON)
-//                .body(Mono.just(login), Login.class)
-//                .exchange()
-//                .expectStatus().isUnauthorized()
-//                .expectBody()
-//                .jsonPath("$.statusCode").isEqualTo(UNAUTHORIZED.value())
-//                .jsonPath("$.message").isEqualTo(message)
-//                .jsonPath("$.timestamp").exists();
-//    }
 
     @Test
-    @DisplayName("Should get all the roles")
-    void shouldGetRoles() {
-        Role parentRole = new Role();
-        parentRole.setId(1);
-        parentRole.setName("admin");
+    @DisplayName("Given valid Login, return JWT and user details")
+    void login_valid() throws Exception {
+        final String validToken = "some.valid.token";
+        final UserDetails user = UserDetails.builder()
+                .id(-1)
+                .password("pwd")
+                .email("e@mail.com")
+                .username("user")
+                .roles(Collections.emptySet())
+                .build();
 
-        Role role1 = new Role();
-        role1.setId(2);
-        role1.setName("vet");
-        role1.setParent(parentRole);
+        UserPasswordLessDTO userPasswordLessDTO = UserPasswordLessDTO.builder()
+                .email(user.getEmail())
+                .id(1)
+                .username(user.getUsername())
+                .roles(user.getRoles())
+                .build();
 
-        Role role2 = new Role();
-        role2.setId(3);
-        role2.setName("user");
-        role2.setParent(parentRole);
+        MultiValueMap<String,String> headers = new LinkedMultiValueMap<>();
 
-        List<Role> allRolesList = new ArrayList<>();
-        allRolesList.add(role1);
-        allRolesList.add(role2);
+        headers.put(HttpHeaders.COOKIE, Collections.singletonList("Bearer=" + validToken + "; Path=/; HttpOnly; SameSite=Lax"));
 
-        Flux<Role> allRoles = Flux.fromIterable(allRolesList);
+        HttpEntity<UserPasswordLessDTO> httpResponse = new HttpEntity<>(userPasswordLessDTO, new HttpHeaders(headers));
 
-        when(authServiceClient.getRoles("Bearer token"))
-                .thenReturn(allRoles);
+        when(authServiceClient.login(any(Login.class)))
+                .thenReturn(httpResponse);
 
-        client.get()
-                .uri("/api/gateway/admin/roles")
-                .header("Authorization", "Bearer token")
+        HttpEntity< UserPasswordLessDTO > response = httpResponse;
+
+        when(authServiceClient.login(any(Login.class)))
+                .thenReturn(response);
+
+
+        final Login login = Login.builder()
+                .password("valid")
+                .email(user.getEmail())
+                .build();
+        when(authServiceClient.login(login))
+                .thenReturn(
+                        response
+                );
+
+         client.post()
+                .uri("/api/gateway/users/login")
+                .accept(APPLICATION_JSON)
+                .body(Mono.just(login), Login.class)
                 .exchange()
                 .expectStatus().isOk()
+                .expectBody(HttpEntity.class)
+                 .value((http ->
+                 {
+                     assertEquals(httpResponse.getHeaders().get(HttpHeaders.COOKIE).get(0), "Bearer=" + validToken + "; Path=/; HttpOnly; SameSite=Lax");
+                     assertEquals(httpResponse.getBody(), userPasswordLessDTO);
+
+                 }));
+    }
+
+    @Test
+    @DisplayName("Given invalid Login, throw 401")
+    void login_invalid() throws Exception {
+        final UserDetails user = UserDetails.builder()
+                .id(-1)
+                .password(null)
+                .email("e@mail.com")
+                .username("user")
+                .roles(Collections.emptySet())
+                .build();
+
+        final Login login = Login.builder()
+                .password("valid")
+                .email(user.getEmail())
+                .build();
+        final String message = "I live in unending agony. I spent 6 hours and ended up with nothing";
+        when(authServiceClient.login(login))
+                .thenThrow(new GenericHttpException(message, UNAUTHORIZED));
+
+        client.post()
+                .uri("/api/gateway/users/login")
+                .accept(APPLICATION_JSON)
+                .body(Mono.just(login), Login.class)
+                .exchange()
+                .expectStatus().isUnauthorized()
                 .expectBody()
-                .jsonPath("$[0].id").isEqualTo(2)
-                .jsonPath("$[0].name").isEqualTo("vet")
-                .jsonPath("$[0].parent").isEqualTo(role1.getParent())
-                .jsonPath("$[1].id").isEqualTo(3)
-                .jsonPath("$[1].name").isEqualTo("user")
-                .jsonPath("$[1].parent").isEqualTo(role2.getParent());
-
+                .jsonPath("$.statusCode").isEqualTo(UNAUTHORIZED.value())
+                .jsonPath("$.message").isEqualTo(message)
+                .jsonPath("$.timestamp").exists();
     }
-  
+
+
+
+private InventoryResponseDTO buildInventoryDTO(){
+        return InventoryResponseDTO.builder()
+                .inventoryId("1")
+                .inventoryName("invt1")
+                .inventoryType(internal)
+                .inventoryDescription("invtone")
+                .build();
+}
     @Test
-    void shouldAddRole() {
-        final Role parentRole = new Role();
-        parentRole.setId(1);
-        parentRole.setName("admin");
+    void addInventory_withValidValue_shouldSucceed() {
 
-        final Role role = new Role();
-        role.setId(2);
-        role.setName("vet");
-        role.setParent(parentRole);
+        InventoryRequestDTO requestDTO = new InventoryRequestDTO("internal", internal, "invt1");
 
-        when(authServiceClient.addRole("Bearer token", role))
-                .thenReturn(Mono.just(role));
+        InventoryResponseDTO inventoryResponseDTO = buildInventoryDTO();
+
+        when(inventoryServiceClient.addInventory(any()))
+                .thenReturn(Mono.just(inventoryResponseDTO));
 
         client.post()
-                .uri("/api/gateway/admin/roles")
-                .header("Authorization", "Bearer token")
-                .contentType(APPLICATION_JSON)
-                .body(Mono.just(role), Role.class)
+                .uri("/api/gateway/inventory")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
                 .exchange()
-                .expectStatus().isOk();
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.inventoryId").isEqualTo(inventoryResponseDTO.getInventoryId())
+                .jsonPath("$.inventoryName").isEqualTo(inventoryResponseDTO.getInventoryName())
+                .jsonPath("$.inventoryType").isEqualTo("internal")
+                .jsonPath("$.inventoryDescription").isEqualTo("invtone");
 
-        verify(authServiceClient).addRole("Bearer token", role);
+
+        verify(inventoryServiceClient, times(1))
+                .addInventory(any());
     }
+
+
 
     @Test
-    void shouldDeleteRole() {
-        final Role parentRole = new Role();
-        parentRole.setId(1);
-        parentRole.setName("admin");
+    void updateInventory_withValidValue_shouldSucceed() {
+        InventoryRequestDTO requestDTO = new InventoryRequestDTO("internal", internal, "newDescription");
 
-        final Role role = new Role();
-        role.setId(2);
-        role.setName("vet");
-        role.setParent(parentRole);
+        InventoryResponseDTO expectedResponse = InventoryResponseDTO.builder()
+                .inventoryId("1")
+                .inventoryName("newName")
+                .inventoryType(internal)
+                .inventoryDescription("newDescription")
+                .build();
 
-        when(authServiceClient.addRole("Bearer token", role))
-                .thenReturn(Mono.just(role));
+        when(inventoryServiceClient.updateInventory(any(), eq(buildInventoryDTO().getInventoryId())))
+                .thenReturn(Mono.just(expectedResponse));
 
-        client.post()
-                .uri("/api/gateway/admin/roles")
-                .header("Authorization", "Bearer token")
-                .contentType(APPLICATION_JSON)
-                .body(Mono.just(role), Role.class)
+
+        client.put()
+                .uri("/api/gateway/inventory/{inventoryId}", buildInventoryDTO().getInventoryId()) // Use the appropriate URI
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
                 .exchange()
-                .expectStatus().isOk();
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.inventoryId").isEqualTo(expectedResponse.getInventoryId())
+                .jsonPath("$.inventoryName").isEqualTo(expectedResponse.getInventoryName())
+                .jsonPath("$.inventoryType").isEqualTo("internal")
+                .jsonPath("$.inventoryDescription").isEqualTo(expectedResponse.getInventoryDescription());
 
-        verify(authServiceClient).addRole("Bearer token", role);
-
-        client.delete()
-                .uri("/api/gateway/admin/roles/{id}", role.getId())
-                .header("Authorization", "Bearer token")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus()
-                .isOk();
-
-        verify(authServiceClient).deleteRole("Bearer token", role.getId());
+        verify(inventoryServiceClient, times(1))
+                .updateInventory(any(), eq(buildInventoryDTO().getInventoryId()));
     }
-    //inventory tests
-
 
 
     private VetDTO buildVetDTO() {
@@ -1853,6 +1976,10 @@ class ApiGatewayControllerTest {
                 .rateScore(4.0)
                 .build();
     }
+
+
+
+
 
 }
 

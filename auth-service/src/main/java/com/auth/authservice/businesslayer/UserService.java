@@ -24,15 +24,20 @@
 
 package com.auth.authservice.businesslayer;
 
+import com.auth.authservice.Util.Exceptions.IncorrectPasswordException;
 import com.auth.authservice.Util.Exceptions.NotFoundException;
 import com.auth.authservice.datalayer.user.User;
 import com.auth.authservice.domainclientlayer.Mail.Mail;
 import com.auth.authservice.presentationlayer.User.UserIDLessRoleLessDTO;
+import com.auth.authservice.presentationlayer.User.UserIDLessUsernameLessDTO;
 import com.auth.authservice.presentationlayer.User.UserPasswordLessDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 
+import java.nio.file.attribute.UserPrincipal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 
 public interface UserService {
 
@@ -53,7 +58,7 @@ public interface UserService {
 
     UserPasswordLessDTO verifyEmailFromToken(String token);
 
-    //UserPrincipal login(UserIDLessRoleLessDTO user) throws IncorrectPasswordException;
+    HashMap<String, Object> login(UserIDLessUsernameLessDTO user) throws IncorrectPasswordException;
 
 
     User getUserByEmail(String email) throws NotFoundException;

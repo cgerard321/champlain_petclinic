@@ -1,0 +1,33 @@
+<h2>Inventory Products</h2>
+
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <td>Name</td>
+        <td>Id</td>
+        <td>Quantity</td>
+        <td>Price</td>
+        <td>Description</td>
+        <td>Update</td>
+        <td>Delete</td>
+    </tr>
+
+
+
+    </thead>
+    <tr ng-repeat="product in $ctrl.inventoryProductList | filter:$ctrl.query track by product.productId">
+        <td><span>{{product.productName}}</span></td>
+        <td><span>{{product.productId}}</span></td>
+        <td><span>{{product.productQuantity}}</span></td>
+        <td><span>{{product.productPrice}}</span></td>
+        <td><span>{{product.productDescription}}</span></td>
+        <td><a class="btn btn-warning" href="javascript:void(0)" ng-click="">Edit</a></td>
+        <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteBundle(bundle.bundleUUID)">Delete</a></td>
+    </tr>
+</table>
+<a ui-sref="productNew">
+    <button class="add-bundle-button btn btn-success">Add Product</button>
+</a>
+<a ui-sref="bundleNew">
+    <button class="add-bundle-button btn btn-success">Add Bundle</button>
+</a>

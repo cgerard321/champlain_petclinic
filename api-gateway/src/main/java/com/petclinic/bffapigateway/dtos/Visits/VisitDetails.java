@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 /**
  * @author Maciej Szarlinski
  * Copied from https://github.com/spring-petclinic/spring-petclinic-microservices
@@ -22,7 +24,7 @@ public class VisitDetails {
 
     private Integer practitionerId = null;
 
-    private String date = null;
+    private LocalDateTime visitDate = null;
 
     private String description = null;
 

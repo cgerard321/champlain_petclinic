@@ -19,6 +19,9 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -68,7 +71,7 @@ class BillResourceUnitTest {
     @Test
     void findBill() {
 
-        when(billService.GetBill(anyString())).thenReturn(Mono.just(dto));
+        when(billService.GetBill(anyString())).thenReturn(Mono.just(responseDTO));
 
         client.get()
                 .uri("/bills/" + BILL_ID_OK)
@@ -77,9 +80,9 @@ class BillResourceUnitTest {
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.visitType").isEqualTo(dto.getVisitType())
-                .jsonPath("$.customerId").isEqualTo(dto.getCustomerId())
-                .jsonPath("$.amount").isEqualTo(dto.getAmount());
+                .jsonPath("$.visitType").isEqualTo(responseDTO.getVisitType())
+                .jsonPath("$.customerId").isEqualTo(responseDTO.getCustomerId())
+                .jsonPath("$.amount").isEqualTo(responseDTO.getAmount());
 
         Mockito.verify(billService, times(1)).GetBill(BILL_ID_OK);
 
@@ -106,18 +109,18 @@ class BillResourceUnitTest {
     @Test
     void getBillByCustomerId() {
 
-        when(billService.GetBillsByCustomerId(anyInt())).thenReturn(Flux.just(dto));
+        when(billService.GetBillsByCustomerId(anyInt())).thenReturn(Flux.just(responseDTO));
 
         client.get()
-                .uri("/bills/customer/" + dto.getCustomerId())
+                .uri("/bills/customer/" + responseDTO.getCustomerId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$[0].visitType").isEqualTo(dto.getVisitType())
-                .jsonPath("$[0].customerId").isEqualTo(dto.getCustomerId())
-                .jsonPath("$[0].amount").isEqualTo(dto.getAmount());
+                .jsonPath("$[0].visitType").isEqualTo(responseDTO.getVisitType())
+                .jsonPath("$[0].customerId").isEqualTo(responseDTO.getCustomerId())
+                .jsonPath("$[0].amount").isEqualTo(responseDTO.getAmount());
 
         Mockito.verify(billService, times(1)).GetBillsByCustomerId(CUSTOMER_ID_OK);
 
@@ -126,18 +129,18 @@ class BillResourceUnitTest {
     @Test
     void getBillByVetId() {
 
-        when(billService.GetBillsByVetId(anyString())).thenReturn(Flux.just(dto));
+        when(billService.GetBillsByVetId(anyString())).thenReturn(Flux.just(responseDTO));
 
         client.get()
-                .uri("/bills/vet/" + dto.getVetId())
+                .uri("/bills/vet/" + responseDTO.getVetId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$[0].visitType").isEqualTo(dto.getVisitType())
-                .jsonPath("$[0].vetId").isEqualTo(dto.getVetId())
-                .jsonPath("$[0].amount").isEqualTo(dto.getAmount());
+                .jsonPath("$[0].visitType").isEqualTo(responseDTO.getVisitType())
+                .jsonPath("$[0].vetId").isEqualTo(responseDTO.getVetId())
+                .jsonPath("$[0].amount").isEqualTo(responseDTO.getAmount());
 
         Mockito.verify(billService, times(1)).GetBillsByVetId(VET_ID_OK);
 
@@ -192,7 +195,9 @@ class BillResourceUnitTest {
 
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);
-        Date date = calendar.getTime();
+        LocalDate date = calendar.getTime().toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();;
 
 
         return BillDTO.builder().billId("BillUUID").customerId(1).vetId("1").visitType("Test Type").date(date).amount(13.37).build();
@@ -202,7 +207,9 @@ class BillResourceUnitTest {
 
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);
-        Date date = calendar.getTime();
+        LocalDate date = calendar.getTime().toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();;
 
 
         return BillResponseDTO.builder().billId("BillUUID").customerId(1).vetId("1").visitType("Test Type").date(date).amount(13.37).build();

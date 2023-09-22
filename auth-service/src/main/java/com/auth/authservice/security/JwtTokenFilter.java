@@ -9,6 +9,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -30,14 +31,18 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     @Autowired
     @Qualifier("handlerExceptionResolver")
     private HandlerExceptionResolver resolver;
+
+
+    private final SecurityConst securityConst;
     private final JwtTokenUtil jwtTokenUtil;
 
     private final UserRepo userRepo;
     private final ObjectMapper objectMapper;
 
 
-    public JwtTokenFilter(JwtTokenUtil jwtTokenUtil
+    public JwtTokenFilter(SecurityConst securityConst, JwtTokenUtil jwtTokenUtil
             , UserRepo userRepo, ObjectMapper objectMapper) {
+        this.securityConst = securityConst;
         this.jwtTokenUtil = jwtTokenUtil;
         this.userRepo = userRepo;
         this.objectMapper = objectMapper;
@@ -46,41 +51,50 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
-                                    FilterChain chain)
+                                    @NotNull FilterChain chain)
             throws ServletException, IOException {
 
-        response.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
+
+        response.setHeader("Access-Control-Allow-Origin", "http://localhost:8080");
         log.warn("Entered Filter");
         // Get authorization header and validate
         final Cookie[] cookies = request.getCookies();
 
         if (cookies == null) {
+            log.info("No cookies found");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             chain.doFilter(request, response);
             return;
         }
         Cookie sessionCookie = null;
         for (Cookie cookie : cookies) {
-            if (("Bearer").equals(cookie.getName())) {
+
+            if ((securityConst.getTOKEN_PREFIX()).equals(cookie.getName())) {
                 sessionCookie = cookie;
                 break;
             }
         }
 
         if (sessionCookie == null) {
+            log.info("No token found");
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             chain.doFilter(request, response);
             return;
         }
 
         final String token = sessionCookie.getValue();
-
+        log.info("Token: {}", token);
 
         try {
 
             if (!jwtTokenUtil.validateToken(token)) {
+                log.info("Token is invalid");
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 resolver.resolveException(request, response, null, new InvalidBearerTokenException("Token is expired"));
                 return;
             }
 
+            log.info("Token is valid");
             Optional<User> userResponseModel = userRepo
                     .findByEmail(jwtTokenUtil.getUsernameFromToken(token));
 
@@ -92,10 +106,11 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                     userDetails, null,
                     userDetails.getAuthorities()
             );
-
+            log.info("User details: {}",userDetails);
             authentication.setDetails(
                     new WebAuthenticationDetailsSource().buildDetails(request)
             );
+            log.info("User authenticated");
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
             chain.doFilter(request, response);

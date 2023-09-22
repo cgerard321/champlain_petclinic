@@ -21,6 +21,7 @@ import reactor.core.publisher.Mono;
 public class VetsServiceClient {
     private final WebClient.Builder webClientBuilder;
     private String vetsServiceUrl;
+
     public void setVetsServiceUrl(String vetsServiceUrl) {
         this.vetsServiceUrl = vetsServiceUrl;
     }
@@ -43,7 +44,7 @@ public class VetsServiceClient {
                         .retrieve()
                         .bodyToFlux(RatingResponseDTO.class);
 
-        return  ratingResponseDTOFlux;
+        return ratingResponseDTOFlux;
     }
 
     public Mono<Integer> getNumberOfRatingsByVetId(String vetId) {
@@ -57,7 +58,7 @@ public class VetsServiceClient {
 
         return numberOfRatings;
     }
-  
+
     public Mono<RatingResponseDTO> addRatingToVet(String vetId, Mono<RatingRequestDTO> ratingRequestDTO) {
         Mono<RatingResponseDTO> ratingResponseDTOMono =
                 webClientBuilder
@@ -69,10 +70,10 @@ public class VetsServiceClient {
                         .retrieve()
                         .bodyToMono(RatingResponseDTO.class);
 
-        return  ratingResponseDTOMono;
+        return ratingResponseDTOMono;
     }
 
-    public Mono<Void> deleteRating(String vetId, String ratingId){
+    public Mono<Void> deleteRating(String vetId, String ratingId) {
         Mono<Void> result = webClientBuilder
                 .build()
                 .delete()
@@ -81,6 +82,20 @@ public class VetsServiceClient {
                 .bodyToMono(Void.class);
         return result;
     }
+
+    public Mono<Double> getAverageRatingByVetId(String vetId) {
+        Mono<Double> averageRating =
+                webClientBuilder
+                        .build()
+                        .get()
+                        .uri(vetsServiceUrl + "/" + vetId + "/ratings" + "/average")
+                        .retrieve()
+                        .bodyToMono(Double.class);
+        return averageRating;
+    }
+
+
+
 
     public Flux<VetDTO> getVets() {
         Flux<VetDTO> vetDTOFlux =
