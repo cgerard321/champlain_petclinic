@@ -302,6 +302,8 @@ class ProductInventoryServiceUnitTest {
         String inventoryId = "1";
         String productId = UUID.randomUUID().toString();
 
+
+
         ProductRequestDTO productRequestDTO = ProductRequestDTO.builder()
                 .productName("Updated Product Name")
                 .productPrice(99.99)
@@ -407,7 +409,6 @@ class ProductInventoryServiceUnitTest {
         // Assert
         assertTrue(exception.getMessage().contains("Product price and quantity must be greater than 0."));
     }
-
 
 
     //delete
