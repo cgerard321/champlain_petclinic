@@ -6,6 +6,8 @@ import com.petclinic.bffapigateway.dtos.Auth.Login;
 import com.petclinic.bffapigateway.dtos.Auth.UserPasswordLessDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
+import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
+import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.ProductRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.ProductResponseDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
@@ -385,6 +387,13 @@ public class BFFApiGatewayController {
                                 .map(addVisitsToOwner(owner)));*/
     }
 
+
+
+
+
+
+
+
     @DeleteMapping(value = "owners/{ownerId}")
     public Mono<OwnerResponseDTO> deleteOwner(@PathVariable int ownerId){
         return customersServiceClient.deleteOwner(ownerId);
@@ -419,6 +428,26 @@ public class BFFApiGatewayController {
     public Mono<ProductResponseDTO> addProductToInventory(@RequestBody ProductRequestDTO model, @PathVariable String inventoryId){
         return inventoryServiceClient.addProductToInventory(model, inventoryId);
     }
+
+
+    @PostMapping(value = "inventory")
+    public Mono<ResponseEntity<InventoryResponseDTO>> addInventory(@RequestBody InventoryRequestDTO model){
+        return inventoryServiceClient.addInventory(model)
+                .map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+
+    }
+
+
+    @PutMapping(value = "inventory/{inventoryId}")
+    public Mono<ResponseEntity<InventoryResponseDTO>> updateInventory( @RequestBody InventoryRequestDTO model, @PathVariable String inventoryId) {
+        return inventoryServiceClient.updateInventory(model, inventoryId)
+                .map(updatedStudent -> ResponseEntity.status(HttpStatus.OK).body(updatedStudent))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+
+    }
+
+
 
     @DeleteMapping(value = "inventory/{inventoryId}/products/{productId}")
     public Mono<Void> deleteProductInInventory(@PathVariable String inventoryId, @PathVariable String productId){
