@@ -24,6 +24,7 @@ import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import com.petclinic.bffapigateway.exceptions.GenericHttpException;
 import com.petclinic.bffapigateway.utils.Security.Filters.JwtTokenFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.RoleFilter;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -34,8 +35,10 @@ import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
@@ -52,7 +55,9 @@ import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static com.petclinic.bffapigateway.dtos.Inventory.InventoryType.internal;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.*;
 import static org.assertj.core.util.Lists.list;
 
@@ -214,6 +219,46 @@ class ApiGatewayControllerTest {
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
+    }
+
+    @Test
+    void updateRatingForVet(){
+        RatingRequestDTO updatedRating = RatingRequestDTO.builder()
+                .rateScore(2.0)
+                .vetId(VET_ID)
+                .rateDescription("Vet cancelled last minute.")
+                .rateDate("20/09/2023")
+                .build();
+
+        RatingResponseDTO ratingResponseDTO = RatingResponseDTO.builder()
+                .ratingId("12356789")
+                .vetId(VET_ID)
+                .rateScore(2.0)
+                .rateDescription("Vet cancelled last minute.")
+                .rateDate("20/09/2023")
+                .build();
+
+        when(vetsServiceClient.updateRatingByVetIdAndByRatingId(anyString(), anyString(), any(Mono.class)))
+                .thenReturn(Mono.just(ratingResponseDTO));
+
+        client.put()
+                .uri("/api/gateway/vets/"+VET_ID+"/ratings/"+ratingResponseDTO.getRatingId())
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedRating)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(RatingResponseDTO.class)
+                .value(responseDTO -> {
+                    Assertions.assertNotNull(responseDTO);
+                    Assertions.assertNotNull(responseDTO.getRatingId());
+                    assertThat(responseDTO.getRatingId()).isEqualTo(ratingResponseDTO.getRatingId());
+                    assertThat(responseDTO.getVetId()).isEqualTo(updatedRating.getVetId());
+                    assertThat(responseDTO.getRateScore()).isEqualTo(updatedRating.getRateScore());
+                    assertThat(responseDTO.getRateDescription()).isEqualTo(updatedRating.getRateDescription());
+                    assertThat(responseDTO.getRateDate()).isEqualTo(updatedRating.getRateDate());
+                });
     }
 
     @Test

@@ -18,6 +18,7 @@ angular.module('vetDetails')
             console.log(resp.data)
             self.ratings = resp.data;
         });
+
         $scope.deleteVetRating = function (ratingId) { //added $scope in this class
             let varIsConf = confirm('Are you sure you want to delete this ratingId: ' + ratingId + '?');
             if (varIsConf) {
@@ -42,6 +43,39 @@ angular.module('vetDetails')
                 }
             }
         };
+
+        self.updateRating = function (ratingId, rating) {
+            const btn = document.getElementById("updateRatingBtn");
+
+            const updateContainer=document.getElementById("ratingUpdate")
+            const selectedValue=parseInt(document.getElementById("ratingOptions").value)
+            const updatedDescription= document.getElementById("updateDescription").value
+
+            if(updateContainer.style.display=="none"){
+                updateContainer.style.display="block"
+                btn.textContent="Save"
+            }
+            else if(btn.textContent=="Save"){
+                rating.rateScore=selectedValue
+                rating.vetId=$stateParams.vetId
+                rating.rateDescription=updatedDescription
+                rating.rateDate = Date.now().toString()
+                console.log(rating.rateScore);
+                updateContainer.style.display="none"
+                btn.textContent="Update"
+
+                $http.put("api/gateway/vets/" + $stateParams.vetId + "/ratings/"+ratingId, rating).then(function (resp){
+                    console.log(resp.data)
+                    self.rating = resp.data;
+                    alert('Your review was successfully updated!');
+                    $http.get('api/gateway/vets/' + $stateParams.vetId + '/ratings').then(function (resp) {
+                        console.log(resp.data)
+                        self.ratings = resp.data;
+                        arr = resp.data;
+                    });
+                });
+            }
+        }
 
         //photo
         $http.get('api/gateway/vets/photo/' + $stateParams.vetId).then(function (resp) {

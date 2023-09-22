@@ -2,6 +2,9 @@ package com.petclinic.vet.servicelayer;
 
 import com.petclinic.vet.dataaccesslayer.RatingRepository;
 import com.petclinic.vet.exceptions.NotFoundException;
+
+import com.petclinic.vet.exceptions.InvalidInputException;
+
 import com.petclinic.vet.util.EntityDtoUtil;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -59,5 +62,22 @@ public class RatingServiceImpl implements RatingService {
                                 .map(sum -> sum / count);
                     }
                 });
+    }
+
+    @Override
+    public Mono<RatingResponseDTO> updateRatingByVetIdAndRatingId(String vetId, String ratingId, Mono<RatingRequestDTO> ratingRequestDTOMono) {
+        return this.ratingRepository.findByRatingId(ratingId)
+                .switchIfEmpty(Mono.error(new NotFoundException("Rating with id " + ratingId + " not found.")))
+                .flatMap(rating -> ratingRequestDTOMono
+                        .flatMap(r->{
+                            if (r.getRateScore()<1||r.getRateScore()>5)
+                                return Mono.error(new InvalidInputException("rateScore should be between 1 and 5" + r.getRateScore()));
+                            return Mono.just(r);
+                        })
+                        .map(EntityDtoUtil::toEntity)
+                        .doOnNext(e -> e.setId(rating.getId()))
+                        .doOnNext(e -> e.setRatingId(rating.getRatingId()))
+                        .flatMap(ratingRepository::save)
+                        .map(EntityDtoUtil::toDTO));
     }
 }
