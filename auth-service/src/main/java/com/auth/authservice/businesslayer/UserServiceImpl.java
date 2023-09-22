@@ -211,6 +211,7 @@ public class UserServiceImpl implements UserService {
         String token = UUID.randomUUID().toString();
         log.info("Generated token: " + token);
         try {
+            log.info("Line 214");
             getUserByEmail(email);
         }
         catch(RuntimeException e){
@@ -344,7 +345,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserByEmail(String email) throws NotFoundException {
-
+        log.info("getUserByEmail: trying to find user with email: {}", email);
         return userRepo.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("No account found for email: " + email));
     }

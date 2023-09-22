@@ -3,7 +3,7 @@ package com.petclinic.bffapigateway.presentationlayer;
 
 import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.Auth.Login;
-import com.petclinic.bffapigateway.dtos.Auth.UserPasswordAndTokenRequestModel;
+import com.petclinic.bffapigateway.dtos.Auth.*;
 import com.petclinic.bffapigateway.dtos.Auth.UserPasswordLessDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
@@ -466,9 +466,9 @@ public class BFFApiGatewayController {
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
-    @PostMapping("/users/forgot_password")
-    public String processForgotPassword(ServerWebExchange exchange, @RequestBody String email) {
-        return authServiceClient.sendForgottenEmail(exchange.getRequest(),email);
+    @PostMapping(value = "/users/forgot_password")
+    public ResponseEntity<String> processForgotPassword(ServerWebExchange exchange, @RequestBody UserEmailRequestDTO email) {
+        return ResponseEntity.ok().body(authServiceClient.sendForgottenEmail(exchange.getRequest(),email.getEmail()));
 
     }
 
