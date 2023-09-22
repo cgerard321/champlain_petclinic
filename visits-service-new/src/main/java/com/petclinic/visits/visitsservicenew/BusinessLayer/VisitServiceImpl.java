@@ -69,8 +69,6 @@ public class VisitServiceImpl implements VisitService {
 //        return petsClient.getPetById(petId);
 //    }
 //
-
-
     @Override
     public Mono<VisitResponseDTO> updateVisit(String visitId, Mono<VisitRequestDTO> visitRequestDTOMono) {
         return repo.findByVisitId(visitId)
