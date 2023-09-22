@@ -167,6 +167,21 @@ angular.module('visits')
             return practitionerName;
         };
 
+        self.getVisitDate = function (id) {
+            console.log("Getting date for visitId:", id);
+            var visitDate = null;
+            $.each(self.visits, function (i, visit) {
+                if (visit.visitId == id) {
+                    visitDate = visit.visitDate;
+                    console.log("Found date:", visitDate);
+                    return false;
+                }
+            });
+            return visitDate;
+        };
+
+
+
         self.showConfirmationModal = function(e, visitId = 0, status = 0, practitionerId = 0, date = null, description = "") {
             // Get the name of button sender
             let buttonText = $(e.target).text();
@@ -189,7 +204,7 @@ angular.module('visits')
             let modalConfirmButton = $('#confirmationModalConfirmButton');
 
             // Check if the sender was the Add New Visit Button
-            if(buttonText !== "Add New Visit") {
+            if(buttonText !== "Create Visit") {
                 // Set the targeted visit data attribute to the visit's id
                 modalConfirmButton.data("targetVisit", visitId);
 
@@ -339,7 +354,7 @@ angular.module('visits')
             $('#visitForm')[0].reset();
 
             // Restore default button name
-            $('#submit_button').text("Add New Visit");
+            $('#submit_button').text("Create Visit");
 
             // Hide the cancel button
             $('#cancel_button').css("visibility", "hidden");
