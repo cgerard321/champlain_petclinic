@@ -69,4 +69,6 @@ class InventoryServiceClientIntegrationTest {
                 .expectNextCount(1)
                 .verifyComplete();
     }
+
+
 }

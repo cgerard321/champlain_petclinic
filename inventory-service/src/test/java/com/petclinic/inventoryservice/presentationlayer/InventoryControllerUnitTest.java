@@ -64,6 +64,88 @@ class InventoryControllerUnitTest {
             .productPrice(100.00)
             .productQuantity(10)
             .build();
+    @Test
+    void updateInventory_ValidRequest_ShouldReturnOk() {
+        // Arrange
+        String validInventoryId = "123";
+        InventoryRequestDTO inventoryRequestDTO = InventoryRequestDTO.builder()
+                .inventoryName("Updated Internal")
+                .inventoryType(internal)
+                .inventoryDescription("Updated inventory_3")
+                .build();
+
+        InventoryResponseDTO inventoryResponseDTO = InventoryResponseDTO.builder()
+                .inventoryId(validInventoryId)
+                .inventoryName("Updated Internal")
+                .inventoryType(internal)
+                .inventoryDescription("Updated inventory_3")
+                .build();
+
+        when(productInventoryService.updateInventory(any(), eq(validInventoryId)))
+                .thenReturn(Mono.just(inventoryResponseDTO));
+
+        // Act and Assert
+        webTestClient
+                .put()
+                .uri("/inventory/{inventoryId}", validInventoryId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(inventoryRequestDTO)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(InventoryResponseDTO.class)
+                .value(dto -> {
+                    assertNotNull(dto);
+                    assertEquals(inventoryResponseDTO.getInventoryName(), dto.getInventoryName());
+                    assertEquals(inventoryResponseDTO.getInventoryDescription(), dto.getInventoryDescription());
+                });
+
+        // Verify that the productInventoryService's updateInventory method was called with the correct arguments
+        verify(productInventoryService, times(1))
+                .updateInventory(any(), eq(validInventoryId));
+    }
+
+
+    @Test
+    void addInventory_ValidRequest_ShouldReturnCreated() {
+        InventoryRequestDTO inventoryRequestDTO = InventoryRequestDTO.builder()
+                .inventoryName("New Internal")
+                .inventoryType(internal)
+                .inventoryDescription("New inventory_4")
+                .build();
+
+        InventoryResponseDTO inventoryResponseDTO = InventoryResponseDTO.builder()
+                .inventoryId("inventoryid1")
+                .inventoryName("New Internal")
+                .inventoryType(internal)
+                .inventoryDescription("New inventory_4")
+                .build();
+
+        when(productInventoryService.addInventory(any()))
+                .thenReturn(Mono.just(inventoryResponseDTO));
+
+        // Act and Assert
+        webTestClient
+                .post()
+                .uri("/inventory")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(inventoryRequestDTO)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(InventoryResponseDTO.class)
+                .value(dto -> {
+                    assertNotNull(dto);
+                    assertEquals(inventoryResponseDTO.getInventoryName(), dto.getInventoryName());
+                    assertEquals(inventoryResponseDTO.getInventoryDescription(), dto.getInventoryDescription());
+                });
+
+
+        verify(productInventoryService, times(1))
+                .addInventory(any());
+    }
+
+
+
+
 
     @Test
     void getProductsInInventory_withValidId_shouldSucceed(){
@@ -197,87 +279,29 @@ class InventoryControllerUnitTest {
                 });
     }
 
-
-
     @Test
-    void updateInventory_ValidRequest_ShouldReturnOk() {
+    void updateInventory_InvalidId_ShouldReturnError() {
         // Arrange
-        String validInventoryId = "123";
+        String invalidInventoryId = "invalid_id";
         InventoryRequestDTO inventoryRequestDTO = InventoryRequestDTO.builder()
                 .inventoryName("Updated Internal")
                 .inventoryType(internal)
                 .inventoryDescription("Updated inventory_3")
                 .build();
 
-        InventoryResponseDTO inventoryResponseDTO = InventoryResponseDTO.builder()
-                .inventoryId(validInventoryId)
-                .inventoryName("Updated Internal")
-                .inventoryType(internal)
-                .inventoryDescription("Updated inventory_3")
-                .build();
 
-        when(productInventoryService.updateInventory(any(), eq(validInventoryId)))
-                .thenReturn(Mono.just(inventoryResponseDTO));
+        when(productInventoryService.updateInventory(any(), eq(invalidInventoryId)))
+                .thenReturn(Mono.error(new NotFoundException("Inventory not found with id: " + invalidInventoryId)));
 
-        // Act and Assert
+
         webTestClient
                 .put()
-                .uri("/inventory/{inventoryId}", validInventoryId)
+                .uri("/inventory/{inventoryId}", invalidInventoryId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(inventoryRequestDTO)
                 .exchange()
-                .expectStatus().isOk()
-                .expectBody(InventoryResponseDTO.class)
-                .value(dto -> {
-                    assertNotNull(dto);
-                    assertEquals(inventoryResponseDTO.getInventoryName(), dto.getInventoryName());
-                    assertEquals(inventoryResponseDTO.getInventoryDescription(), dto.getInventoryDescription());
-                });
-
-        // Verify that the productInventoryService's updateInventory method was called with the correct arguments
-        verify(productInventoryService, times(1))
-                .updateInventory(any(), eq(validInventoryId));
+                .expectStatus().isNotFound();
     }
-
-
-    @Test
-    void addInventory_ValidRequest_ShouldReturnCreated() {
-        InventoryRequestDTO inventoryRequestDTO = InventoryRequestDTO.builder()
-                .inventoryName("New Internal")
-                .inventoryType(internal)
-                .inventoryDescription("New inventory_4")
-                .build();
-
-        InventoryResponseDTO inventoryResponseDTO = InventoryResponseDTO.builder()
-                .inventoryId("inventoryid1")
-                .inventoryName("New Internal")
-                .inventoryType(internal)
-                .inventoryDescription("New inventory_4")
-                .build();
-
-        when(productInventoryService.addInventory(any()))
-                .thenReturn(Mono.just(inventoryResponseDTO));
-
-        // Act and Assert
-        webTestClient
-                .post()
-                .uri("/inventory")
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(inventoryRequestDTO)
-                .exchange()
-                .expectStatus().isCreated()
-                .expectBody(InventoryResponseDTO.class)
-                .value(dto -> {
-                    assertNotNull(dto);
-                    assertEquals(inventoryResponseDTO.getInventoryName(), dto.getInventoryName());
-                    assertEquals(inventoryResponseDTO.getInventoryDescription(), dto.getInventoryDescription());
-                });
-
-
-        verify(productInventoryService, times(1))
-                .addInventory(any());
-    }
-
 
 
 
@@ -303,27 +327,5 @@ class InventoryControllerUnitTest {
                 .expectStatus().isBadRequest();
     }
 
-    @Test
-    void updateInventory_InvalidId_ShouldReturnError() {
-        // Arrange
-        String invalidInventoryId = "invalid_id";
-        InventoryRequestDTO inventoryRequestDTO = InventoryRequestDTO.builder()
-                .inventoryName("Updated Internal")
-                .inventoryType(internal)
-                .inventoryDescription("Updated inventory_3")
-                .build();
 
-
-        when(productInventoryService.updateInventory(any(), eq(invalidInventoryId)))
-                .thenReturn(Mono.error(new NotFoundException("Inventory not found with id: " + invalidInventoryId)));
-
-
-        webTestClient
-                .put()
-                .uri("/inventory/{inventoryId}", invalidInventoryId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(inventoryRequestDTO)
-                .exchange()
-                .expectStatus().isNotFound();
-    }
 }
