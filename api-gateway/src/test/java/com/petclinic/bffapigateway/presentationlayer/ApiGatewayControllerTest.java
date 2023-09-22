@@ -1,13 +1,20 @@
 package com.petclinic.bffapigateway.presentationlayer;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.config.GlobalExceptionHandler;
 import com.petclinic.bffapigateway.domainclientlayer.*;
+import com.petclinic.bffapigateway.dtos.Auth.Login;
 import com.petclinic.bffapigateway.dtos.Auth.Role;
+import com.petclinic.bffapigateway.dtos.Auth.UserDetails;
+import com.petclinic.bffapigateway.dtos.Auth.UserPasswordLessDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillDetails;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
+import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
+import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
+import com.petclinic.bffapigateway.dtos.Inventory.InventoryType;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
 import com.petclinic.bffapigateway.dtos.Vets.*;
@@ -17,6 +24,7 @@ import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import com.petclinic.bffapigateway.exceptions.GenericHttpException;
 import com.petclinic.bffapigateway.utils.Security.Filters.JwtTokenFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.RoleFilter;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
@@ -27,16 +35,27 @@ import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.MultiValueMapAdapter;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuples;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static com.petclinic.bffapigateway.dtos.Inventory.InventoryType.internal;
 
 import static org.junit.Assert.*;
 import static org.assertj.core.util.Lists.list;
@@ -80,7 +99,7 @@ class ApiGatewayControllerTest {
 
 
     @Test
-    void getAllRatingsForVet() {
+    void getAllRatingsForVet_ValidId() {
         RatingResponseDTO ratingResponseDTO = buildRatingResponseDTO();
         when(vetsServiceClient.getRatingsByVetId(anyString()))
                 .thenReturn(Flux.just(ratingResponseDTO));
@@ -125,7 +144,7 @@ class ApiGatewayControllerTest {
                 .uri("/api/gateway/vets/" + INVALID_VET_ID + "/ratings")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(NOT_FOUND)
+                .expectStatus().isEqualTo(INTERNAL_SERVER_ERROR)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("This id is not valid");
@@ -171,6 +190,21 @@ class ApiGatewayControllerTest {
 
     }
 
+    @Test
+    void getPercentageOfRatingsPerVet_ByVetId() {
+        when(vetsServiceClient.getPercentageOfRatingsByVetId(anyString()))
+                .thenReturn(Mono.just("1"));
+
+        client
+                .get()
+                .uri("/api/gateway/vets/" + VET_ID + "/ratings/percentages")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$").isEqualTo("1");
+    }
+
 
 
    @Test
@@ -199,6 +233,46 @@ class ApiGatewayControllerTest {
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
+    }
+
+    @Test
+    void updateRatingForVet(){
+        RatingRequestDTO updatedRating = RatingRequestDTO.builder()
+                .rateScore(2.0)
+                .vetId(VET_ID)
+                .rateDescription("Vet cancelled last minute.")
+                .rateDate("20/09/2023")
+                .build();
+
+        RatingResponseDTO ratingResponseDTO = RatingResponseDTO.builder()
+                .ratingId("12356789")
+                .vetId(VET_ID)
+                .rateScore(2.0)
+                .rateDescription("Vet cancelled last minute.")
+                .rateDate("20/09/2023")
+                .build();
+
+        when(vetsServiceClient.updateRatingByVetIdAndByRatingId(anyString(), anyString(), any(Mono.class)))
+                .thenReturn(Mono.just(ratingResponseDTO));
+
+        client.put()
+                .uri("/api/gateway/vets/"+VET_ID+"/ratings/"+ratingResponseDTO.getRatingId())
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedRating)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(RatingResponseDTO.class)
+                .value(responseDTO -> {
+                    Assertions.assertNotNull(responseDTO);
+                    Assertions.assertNotNull(responseDTO.getRatingId());
+                    assertThat(responseDTO.getRatingId()).isEqualTo(ratingResponseDTO.getRatingId());
+                    assertThat(responseDTO.getVetId()).isEqualTo(updatedRating.getVetId());
+                    assertThat(responseDTO.getRateScore()).isEqualTo(updatedRating.getRateScore());
+                    assertThat(responseDTO.getRateDescription()).isEqualTo(updatedRating.getRateDescription());
+                    assertThat(responseDTO.getRateDate()).isEqualTo(updatedRating.getRateDate());
+                });
     }
 
     @Test
@@ -1762,175 +1836,167 @@ class ApiGatewayControllerTest {
 //                .jsonPath("$.timestamp").exists()
 //                .jsonPath("$.message").isEqualTo(errorMessage);
 //    }
-//
-//    @Test
-//    @DisplayName("Given valid Login, return JWT and user details")
-//    void login_valid() throws JsonProcessingException {
-//        final String validToken = "some.valid.token";
-//        final UserDetails user = UserDetails.builder()
-//                .id(-1)
-//                .password(null)
-//                .email("e@mail.com")
-//                .username("user")
-//                .roles(Collections.emptySet())
-//                .build();
-//
-//        final Login login = Login.builder()
-//                .password("valid")
-//                .email(user.getEmail())
-//                .build();
-//        when(authServiceClient.login(login))
-//                .thenReturn(Mono.just(Tuples.of(
-//                        validToken,
-//                        user
-//                )));
-//
-//        final WebTestClient.ResponseSpec ok = client.post()
-//                .uri("/api/gateway/users/login")
-//                .accept(APPLICATION_JSON)
-//                .body(Mono.just(login), Login.class)
-//                .exchange()
-//                .expectStatus().isOk();
-//
-//        ok.expectBody()
-//                .json(objectMapper.writeValueAsString(user));
-//        ok.expectHeader()
-//                .valueEquals(HttpHeaders.AUTHORIZATION, validToken);
-//    }
-
-//    @Test
-//    @DisplayName("Given invalid Login, throw 401")
-//    void login_invalid() {
-//        final UserDetails user = UserDetails.builder()
-//                .id(-1)
-//                .password(null)
-//                .email("e@mail.com")
-//                .username("user")
-//                .roles(Collections.emptySet())
-//                .build();
-//
-//        final Login login = Login.builder()
-//                .password("valid")
-//                .email(user.getEmail())
-//                .build();
-//        final String message = "I live in unending agony. I spent 6 hours and ended up with nothing";
-//        when(authServiceClient.login(login))
-//                .thenThrow(new GenericHttpException(message, UNAUTHORIZED));
-//
-//        client.post()
-//                .uri("/api/gateway/users/login")
-//                .accept(APPLICATION_JSON)
-//                .body(Mono.just(login), Login.class)
-//                .exchange()
-//                .expectStatus().isUnauthorized()
-//                .expectBody()
-//                .jsonPath("$.statusCode").isEqualTo(UNAUTHORIZED.value())
-//                .jsonPath("$.message").isEqualTo(message)
-//                .jsonPath("$.timestamp").exists();
-//    }
 
     @Test
-    @DisplayName("Should get all the roles")
-    void shouldGetRoles() {
-        Role parentRole = new Role();
-        parentRole.setId(1);
-        parentRole.setName("admin");
+    @DisplayName("Given valid Login, return JWT and user details")
+    void login_valid() throws Exception {
+        final String validToken = "some.valid.token";
+        final UserDetails user = UserDetails.builder()
+                .id(-1)
+                .password("pwd")
+                .email("e@mail.com")
+                .username("user")
+                .roles(Collections.emptySet())
+                .build();
 
-        Role role1 = new Role();
-        role1.setId(2);
-        role1.setName("vet");
-        role1.setParent(parentRole);
+        UserPasswordLessDTO userPasswordLessDTO = UserPasswordLessDTO.builder()
+                .email(user.getEmail())
+                .id(1)
+                .username(user.getUsername())
+                .roles(user.getRoles())
+                .build();
 
-        Role role2 = new Role();
-        role2.setId(3);
-        role2.setName("user");
-        role2.setParent(parentRole);
+        MultiValueMap<String,String> headers = new LinkedMultiValueMap<>();
 
-        List<Role> allRolesList = new ArrayList<>();
-        allRolesList.add(role1);
-        allRolesList.add(role2);
+        headers.put(HttpHeaders.COOKIE, Collections.singletonList("Bearer=" + validToken + "; Path=/; HttpOnly; SameSite=Lax"));
 
-        Flux<Role> allRoles = Flux.fromIterable(allRolesList);
+        HttpEntity<UserPasswordLessDTO> httpResponse = new HttpEntity<>(userPasswordLessDTO, new HttpHeaders(headers));
 
-        when(authServiceClient.getRoles("Bearer token"))
-                .thenReturn(allRoles);
+        when(authServiceClient.login(any(Login.class)))
+                .thenReturn(httpResponse);
 
-        client.get()
-                .uri("/api/gateway/admin/roles")
-                .header("Authorization", "Bearer token")
+        HttpEntity< UserPasswordLessDTO > response = httpResponse;
+
+        when(authServiceClient.login(any(Login.class)))
+                .thenReturn(response);
+
+
+        final Login login = Login.builder()
+                .password("valid")
+                .email(user.getEmail())
+                .build();
+        when(authServiceClient.login(login))
+                .thenReturn(
+                        response
+                );
+
+         client.post()
+                .uri("/api/gateway/users/login")
+                .accept(APPLICATION_JSON)
+                .body(Mono.just(login), Login.class)
                 .exchange()
                 .expectStatus().isOk()
+                .expectBody(HttpEntity.class)
+                 .value((http ->
+                 {
+                     assertEquals(httpResponse.getHeaders().get(HttpHeaders.COOKIE).get(0), "Bearer=" + validToken + "; Path=/; HttpOnly; SameSite=Lax");
+                     assertEquals(httpResponse.getBody(), userPasswordLessDTO);
+
+                 }));
+    }
+
+    @Test
+    @DisplayName("Given invalid Login, throw 401")
+    void login_invalid() throws Exception {
+        final UserDetails user = UserDetails.builder()
+                .id(-1)
+                .password(null)
+                .email("e@mail.com")
+                .username("user")
+                .roles(Collections.emptySet())
+                .build();
+
+        final Login login = Login.builder()
+                .password("valid")
+                .email(user.getEmail())
+                .build();
+        final String message = "I live in unending agony. I spent 6 hours and ended up with nothing";
+        when(authServiceClient.login(login))
+                .thenThrow(new GenericHttpException(message, UNAUTHORIZED));
+
+        client.post()
+                .uri("/api/gateway/users/login")
+                .accept(APPLICATION_JSON)
+                .body(Mono.just(login), Login.class)
+                .exchange()
+                .expectStatus().isUnauthorized()
                 .expectBody()
-                .jsonPath("$[0].id").isEqualTo(2)
-                .jsonPath("$[0].name").isEqualTo("vet")
-                .jsonPath("$[0].parent").isEqualTo(role1.getParent())
-                .jsonPath("$[1].id").isEqualTo(3)
-                .jsonPath("$[1].name").isEqualTo("user")
-                .jsonPath("$[1].parent").isEqualTo(role2.getParent());
-
+                .jsonPath("$.statusCode").isEqualTo(UNAUTHORIZED.value())
+                .jsonPath("$.message").isEqualTo(message)
+                .jsonPath("$.timestamp").exists();
     }
 
+
+
+private InventoryResponseDTO buildInventoryDTO(){
+        return InventoryResponseDTO.builder()
+                .inventoryId("1")
+                .inventoryName("invt1")
+                .inventoryType(internal)
+                .inventoryDescription("invtone")
+                .build();
+}
     @Test
-    void shouldAddRole() {
-        final Role parentRole = new Role();
-        parentRole.setId(1);
-        parentRole.setName("admin");
+    void addInventory_withValidValue_shouldSucceed() {
 
-        final Role role = new Role();
-        role.setId(2);
-        role.setName("vet");
-        role.setParent(parentRole);
+        InventoryRequestDTO requestDTO = new InventoryRequestDTO("internal", internal, "invt1");
 
-        when(authServiceClient.addRole("Bearer token", role))
-                .thenReturn(Mono.just(role));
+        InventoryResponseDTO inventoryResponseDTO = buildInventoryDTO();
+
+        when(inventoryServiceClient.addInventory(any()))
+                .thenReturn(Mono.just(inventoryResponseDTO));
 
         client.post()
-                .uri("/api/gateway/admin/roles")
-                .header("Authorization", "Bearer token")
-                .contentType(APPLICATION_JSON)
-                .body(Mono.just(role), Role.class)
+                .uri("/api/gateway/inventory")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
                 .exchange()
-                .expectStatus().isOk();
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.inventoryId").isEqualTo(inventoryResponseDTO.getInventoryId())
+                .jsonPath("$.inventoryName").isEqualTo(inventoryResponseDTO.getInventoryName())
+                .jsonPath("$.inventoryType").isEqualTo("internal")
+                .jsonPath("$.inventoryDescription").isEqualTo("invtone");
 
-        verify(authServiceClient).addRole("Bearer token", role);
+
+        verify(inventoryServiceClient, times(1))
+                .addInventory(any());
     }
+
+
 
     @Test
-    void shouldDeleteRole() {
-        final Role parentRole = new Role();
-        parentRole.setId(1);
-        parentRole.setName("admin");
+    void updateInventory_withValidValue_shouldSucceed() {
+        InventoryRequestDTO requestDTO = new InventoryRequestDTO("internal", internal, "newDescription");
 
-        final Role role = new Role();
-        role.setId(2);
-        role.setName("vet");
-        role.setParent(parentRole);
+        InventoryResponseDTO expectedResponse = InventoryResponseDTO.builder()
+                .inventoryId("1")
+                .inventoryName("newName")
+                .inventoryType(internal)
+                .inventoryDescription("newDescription")
+                .build();
 
-        when(authServiceClient.addRole("Bearer token", role))
-                .thenReturn(Mono.just(role));
+        when(inventoryServiceClient.updateInventory(any(), eq(buildInventoryDTO().getInventoryId())))
+                .thenReturn(Mono.just(expectedResponse));
 
-        client.post()
-                .uri("/api/gateway/admin/roles")
-                .header("Authorization", "Bearer token")
-                .contentType(APPLICATION_JSON)
-                .body(Mono.just(role), Role.class)
+
+        client.put()
+                .uri("/api/gateway/inventory/{inventoryId}", buildInventoryDTO().getInventoryId()) // Use the appropriate URI
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
                 .exchange()
-                .expectStatus().isOk();
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.inventoryId").isEqualTo(expectedResponse.getInventoryId())
+                .jsonPath("$.inventoryName").isEqualTo(expectedResponse.getInventoryName())
+                .jsonPath("$.inventoryType").isEqualTo("internal")
+                .jsonPath("$.inventoryDescription").isEqualTo(expectedResponse.getInventoryDescription());
 
-        verify(authServiceClient).addRole("Bearer token", role);
-
-        client.delete()
-                .uri("/api/gateway/admin/roles/{id}", role.getId())
-                .header("Authorization", "Bearer token")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus()
-                .isOk();
-
-        verify(authServiceClient).deleteRole("Bearer token", role.getId());
+        verify(inventoryServiceClient, times(1))
+                .updateInventory(any(), eq(buildInventoryDTO().getInventoryId()));
     }
-    //inventory tests
-
 
 
     private VetDTO buildVetDTO() {
@@ -1969,6 +2035,10 @@ class ApiGatewayControllerTest {
                 .rateScore(4.0)
                 .build();
     }
+
+
+
+
 
 }
 

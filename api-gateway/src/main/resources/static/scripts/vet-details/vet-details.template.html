@@ -3,6 +3,7 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet">
 <link href="form.css" rel="stylesheet" type="text/css"/>
 <link href="/css/ownerdetail.css" rel="stylesheet" type="text/css"/>
+<link href="/css/vets/ratings.css" rel="stylesheet" type="text/css"/>
 
 
 
@@ -119,14 +120,33 @@
 
                 <div class="row g-3">
                     <div class="col-sm-12">
-                        <h5 class="form-label">Ratings</h5>
-                        <div ng-if="$ctrl.ratings.length === 0">
+                        <h3 class="form-label-rating text-center">Ratings</h3>
+                        <div ng-if="$ctrl.ratings.length === 0" style="text-align: center">
                             This vet has no ratings.
                         </div>
                         <div ng-repeat="rating in $ctrl.ratings track by rating.ratingId" ng-if="$ctrl.ratings.length > 0">
-                            <div class="rating-item">
+                            <div class="rating-item d-flex justify-content-center align-items-center">
                                 <span class="rating-value">{{ rating.rateScore }} / 5</span>
-                                <a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteVetRating(rating.ratingId)">Delete Rating</a>
+                                <form enctype="multipart/form-data" id="updateForm" name="updateForm">
+                                    <div class="col-sm-12" name="ratingUpdate" id="ratingUpdate" style="display: none">
+                                        <select name="ratingOptions" id="ratingOptions">
+                                            <option value="1">1/5</option>
+                                            <option value="2">2/5</option>
+                                            <option value="3">3/5</option>
+                                            <option value="4">4/5</option>
+                                            <option value="5">5/5</option>
+                                        </select>
+                                        <br/>
+                                        <h5 class="form-label">Review Description</h5>
+                                        <textarea class="form-control" id="updateDescription" maxlength="350" name="updateDescription"
+                                                  ng-model="rating.rateDescription" pattern="^(.*)" placeholder="Update Description"
+                                                  title="Maximum of 350 characters."></textarea>
+                                    </div>
+                                </form>
+                                <button class="update-vet-button btn btn-success" id="updateRatingBtn" ng-click="$ctrl.updateRating(rating.ratingId, updateForm)">
+                                    Update
+                                </button>
+                                <a class="btn btn-danger ratingButton" href="javascript:void(0)" ng-click="deleteVetRating(rating.ratingId)">Delete Rating</a>
                             </div>
                         </div>
                     </div>
@@ -134,10 +154,10 @@
 
                 <div class="row g-3">
                     <div class="col-sm-12">
-                        <h4 class="form-label">Add A Rating</h4>
+                        <h3 class="form-label-rating">Add A Rating</h3>
                         <form enctype="multipart/form-data" id="ratingForm" name="ratingForm">
                             <div class="row-3">
-                                <div class="col-sm-12">
+                                <div class="col-sm-12 form-label-rating">
                                     <select name="rateScore" id="ratingScore" ng-model="rating.rateScore">
                                         <option value="1">1/5</option>
                                         <option value="2">2/5</option>
@@ -152,12 +172,19 @@
                                               ng-model="rating.rateDescription" pattern="^(.*)" placeholder="Description"
                                               title="Maximum of 350 characters."></textarea>
                                 </div>
-                                <button class="btn btn-primary" ng-click="$ctrl.submitRatingForm(ratingForm)" type="submit">
+                                <br/>
+                                <button class="btn btn-primary ratingButton" ng-click="$ctrl.submitRatingForm(ratingForm)" type="submit">
                                     Submit
                                 </button>
                             </div>
                         </form>
-                    <div>
+                    </div>
+                    <div class="row g-3" ng-if="$ctrl.ratings.length > 0">
+                        <div class="col-sm-12">
+                            <h3 class="form-label-rating">Percentages of ratings:</h3>
+                            <div id="ratings-list"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
