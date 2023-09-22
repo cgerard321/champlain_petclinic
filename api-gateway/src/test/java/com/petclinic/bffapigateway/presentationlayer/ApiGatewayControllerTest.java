@@ -54,7 +54,7 @@ import reactor.util.function.Tuples;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.*;
-
+import static org.assertj.core.api.Assertions.assertThat;
 import static com.petclinic.bffapigateway.dtos.Inventory.InventoryType.internal;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.*;
