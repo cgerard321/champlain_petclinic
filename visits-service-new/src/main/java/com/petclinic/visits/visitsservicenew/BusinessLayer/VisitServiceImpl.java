@@ -1,6 +1,10 @@
 package com.petclinic.visits.visitsservicenew.BusinessLayer;
 
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.PetResponseDTO;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.PetsClient;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetDTO;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetsClient;
 import com.petclinic.visits.visitsservicenew.Exceptions.InvalidInputException;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
@@ -15,6 +19,8 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class VisitServiceImpl implements VisitService {
     private final VisitRepo repo;
+    private final VetsClient vetsClient;
+    private final PetsClient petsClient;
 
     @Override
     public Flux<VisitResponseDTO> getAllVisits(){
@@ -54,6 +60,18 @@ public class VisitServiceImpl implements VisitService {
     public Mono<Void> deleteVisit(String visitId) {
         return repo.deleteVisitByVisitId(visitId);
     }
+
+    @Override
+    public Mono<VetDTO> testingGetVetDTO(String vetId) {
+        return vetsClient.getVetByVetId(vetId);
+    }
+
+    @Override
+    public Mono<PetResponseDTO> testingGetPetDTO(int petId) {
+        return petsClient.getPetById(petId);
+    }
+
+
     @Override
     public Mono<VisitResponseDTO> updateVisit(String visitId, Mono<VisitRequestDTO> visitRequestDTOMono) {
         return repo.findByVisitId(visitId)
@@ -65,6 +83,7 @@ public class VisitServiceImpl implements VisitService {
                 .flatMap(repo::save)
                 .map(EntityDtoUtil::toVisitResponseDTO);
     }
+
 
 
 }
