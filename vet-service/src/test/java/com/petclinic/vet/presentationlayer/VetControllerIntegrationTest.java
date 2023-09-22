@@ -48,6 +48,12 @@ class VetControllerIntegrationTest {
     String VET_ID = vet.getVetId();
     String VET_BILL_ID = vet.getVetBillId();
     String INVALID_VET_ID = "mjbedf";
+    RatingRequestDTO updatedRating = RatingRequestDTO.builder()
+            .rateScore(2.0)
+            .vetId(vet.getVetId())
+            .rateDescription("Vet cancelled last minute.")
+            .rateDate("20/09/2023")
+            .build();
 
     @Test
     void getAllRatingsForAVet_WithValidVetId_ShouldSucceed() {
@@ -102,7 +108,7 @@ class VetControllerIntegrationTest {
                     assertEquals(2, count);
                 });
     }
-  
+
     @Test
     void addRatingToAVet_WithValidValues_ShouldSucceed() {
         StepVerifier
@@ -137,7 +143,94 @@ class VetControllerIntegrationTest {
 
     }
 
-@Test
+    @Test
+    void updateRating_withValidVetIdAndValidRatingId_shouldSucceed() {
+        Publisher<Rating> setup = ratingRepository.deleteAll()
+                .thenMany(ratingRepository.save(rating1));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        String existingRatingId = rating1.getRatingId();
+
+        client.put()
+                .uri("/vets/" + VET_ID + "/ratings/" + existingRatingId)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedRating)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(RatingResponseDTO.class)
+                .value(ratingResponseDTO -> {
+                    assertNotNull(ratingResponseDTO);
+                    assertNotNull(ratingResponseDTO.getRatingId());
+                    assertThat(ratingResponseDTO.getRatingId()).isEqualTo(existingRatingId);
+                    assertThat(ratingResponseDTO.getVetId()).isEqualTo(updatedRating.getVetId());
+                    assertThat(ratingResponseDTO.getRateScore()).isEqualTo(updatedRating.getRateScore());
+                    assertThat(ratingResponseDTO.getRateDescription()).isEqualTo(updatedRating.getRateDescription());
+                    assertThat(ratingResponseDTO.getRateDate()).isEqualTo(updatedRating.getRateDate());
+                });
+    }
+
+    @Test
+    void updateRating_withValidVetIdAndInvalidRatingId_shouldNotSucceed() {
+        Publisher<Rating> setup = ratingRepository.deleteAll()
+                .thenMany(ratingRepository.save(rating1));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        String invalidRatingId = "123";
+
+        client.put()
+                .uri("/vets/" + VET_ID + "/ratings/" + invalidRatingId)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedRating)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Rating with id " + invalidRatingId + " not found.");
+    }
+
+    @Test
+    void updateRating_withInvalidValues_shouldNotSucceed() {
+        Publisher<Rating> setup = ratingRepository.deleteAll()
+                .thenMany(ratingRepository.save(rating1));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        Double invalidRateScore=9.0;
+
+        RatingRequestDTO invalidRating = RatingRequestDTO.builder()
+                .rateScore(invalidRateScore)
+                .vetId(vet.getVetId())
+                .rateDescription("Vet cancelled last minute.")
+                .rateDate("20/09/2023")
+                .build();
+
+        client.put()
+                .uri("/vets/" + VET_ID + "/ratings/" + rating1.getRatingId())
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(invalidRating)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("rateScore should be between 1 and 5" + invalidRateScore);
+    }
+
+    @Test
     void deleteARatingForVet_WithValidId_ShouldSucceed() {
         Publisher<Rating> setup = ratingRepository.deleteAll().
                 thenMany(ratingRepository.save(rating1));
@@ -157,11 +250,10 @@ class VetControllerIntegrationTest {
     }
 
 
-
     @Test
-    void getAverageRatingByVetId_ShouldSucceed(){
+    void getAverageRatingByVetId_ShouldSucceed() {
 
-        RatingRequestDTO ratingRequestDTO= RatingRequestDTO.builder()
+        RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
                 .vetId(vet.getVetId())
                 .rateScore(rating1.getRateScore()).build();
 
@@ -173,13 +265,13 @@ class VetControllerIntegrationTest {
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody(Double.class)
-                .value(resp ->{
+                .value(resp -> {
                     assertEquals(rating1.getRateScore(), ratingRequestDTO.getRateScore());
                 });
     }
 
     @Test
-    void getAverageRatingByVetId_withInvalidVetId_ShouldThrowNotFound(){
+    void getAverageRatingByVetId_withInvalidVetId_ShouldThrowNotFound() {
         client
                 .get()
                 .uri("/vets/" + INVALID_VET_ID + "/ratings/average")
@@ -187,11 +279,12 @@ class VetControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(Double.class)
-                .value(avg ->{
-                            assertEquals(0.0,avg);
+                .value(avg -> {
+                            assertEquals(0.0, avg);
                         }
                 );
     }
+
     @Test
     void getAllVets() {
         Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet));
@@ -303,7 +396,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.active").isEqualTo(vetDTO.isActive())
                 .jsonPath("$.workday").isEqualTo(vetDTO.getWorkday());
 
-}
+    }
 
     @Test
     void getVetIsActive() {
@@ -379,15 +472,15 @@ class VetControllerIntegrationTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody(VetDTO.class)
                 .value((dto) -> {
-                assertThat(dto.getFirstName()).isEqualTo(vet.getFirstName());
-                assertThat(dto.getLastName()).isEqualTo(vet.getLastName());
-                assertThat(dto.getPhoneNumber()).isEqualTo(vet.getPhoneNumber());
-                assertThat(dto.getResume()).isEqualTo(vet.getResume());
-                assertThat(dto.getEmail()).isEqualTo(vet.getEmail());
-                assertThat(dto.getWorkday()).isEqualTo(vet.getWorkday());
-                assertThat(dto.getImageId()).isEqualTo(vet.getImageId());
-                assertThat(dto.isActive()).isEqualTo(vet.isActive());
-                assertThat(dto.getSpecialties()).isEqualTo(vet.getSpecialties());
+                    assertThat(dto.getFirstName()).isEqualTo(vet.getFirstName());
+                    assertThat(dto.getLastName()).isEqualTo(vet.getLastName());
+                    assertThat(dto.getPhoneNumber()).isEqualTo(vet.getPhoneNumber());
+                    assertThat(dto.getResume()).isEqualTo(vet.getResume());
+                    assertThat(dto.getEmail()).isEqualTo(vet.getEmail());
+                    assertThat(dto.getWorkday()).isEqualTo(vet.getWorkday());
+                    assertThat(dto.getImageId()).isEqualTo(vet.getImageId());
+                    assertThat(dto.isActive()).isEqualTo(vet.isActive());
+                    assertThat(dto.getSpecialties()).isEqualTo(vet.getSpecialties());
                 });
     }
 
@@ -437,6 +530,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.message").isEqualTo("This id is not valid");
 
     }
+
     @Test
     void updateByVetId_Invalid() {
         Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet));
@@ -496,6 +590,7 @@ class VetControllerIntegrationTest {
                 .active(false)
                 .build();
     }
+
     private Vet buildVet2() {
         return Vet.builder()
                 .vetId("678910")
@@ -519,6 +614,7 @@ class VetControllerIntegrationTest {
                 .rateScore(rateScore)
                 .build();
     }
+
     private VetDTO buildVetDTO() {
         return VetDTO.builder()
                 .vetId("678910")
@@ -534,7 +630,6 @@ class VetControllerIntegrationTest {
                 .active(false)
                 .build();
     }
-
 
 
 }
