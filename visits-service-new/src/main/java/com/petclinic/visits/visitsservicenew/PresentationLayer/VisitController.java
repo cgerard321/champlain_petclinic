@@ -2,6 +2,8 @@ package com.petclinic.visits.visitsservicenew.PresentationLayer;
 
 
 import com.petclinic.visits.visitsservicenew.BusinessLayer.VisitService;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.PetResponseDTO;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -56,4 +58,13 @@ public class VisitController {
     }
 
 
+    @GetMapping("/pets/{petId}")
+    public Mono<PetResponseDTO> getPetByIdTest(@PathVariable int petId){
+       return visitService.testingGetPetDTO(petId);
+    }
+
+    @GetMapping("/vets/{vetId}")
+    public Mono<VetDTO> getVetByIdTest(@PathVariable String vetId){
+        return visitService.testingGetVetDTO(vetId);
+    }
 }
