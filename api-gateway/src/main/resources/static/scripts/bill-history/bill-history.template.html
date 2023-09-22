@@ -3,11 +3,17 @@
 <form>
     <div>
         <input type="text" placeholder="Search Filter..." class="form-control" ng-model="$ctrl.query">
+        <br>
     </div>
 </form>
 <a ui-sref="billNew">
     <button class="add-bill-button btn btn-success">Add Bill</button>
-</a>
+</a><br><br>
+
+
+<input ng-model="search.customerId" placeholder="Filter by Owner ID">
+<input ng-model="search.vetId" placeholder="Filter by Vet ID">
+
 <table class="table table-striped">
     <thead>
         <tr>
@@ -20,10 +26,12 @@
             <td>Date</td>
             <td>Details</td>
             <td>Delete</td>
+
         </tr>
     </thead>
 
     <tr id="billId" ng-repeat="bill in $ctrl.billHistory | filter:$ctrl.query track by bill.billId">
+    <tr ng-repeat="bill in $ctrl.billHistory | filter:search:strict">
         <td>{{bill.billId}}</td>
         <td>{{bill.customerId}}</td>
         <td><a href="http://localhost:8080/#!/owners/details/{{bill.customerId}}">Owner details</a></td>

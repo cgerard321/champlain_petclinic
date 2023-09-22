@@ -97,6 +97,26 @@ public class CustomerServiceClientIntegrationTest {
     }*/
 
     @Test
+    void insertOwner() throws JsonProcessingException {
+
+        final String body = mapper.writeValueAsString(mapper.convertValue(TEST_OWNER, OwnerResponseDTO.class));
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(body));
+
+        final OwnerResponseDTO ownerResponseDTO = customersServiceClient.createOwner(TEST_OWNER).block();
+
+        assertEquals(ownerResponseDTO.getOwnerId(),TEST_OWNER.getOwnerId());
+        assertEquals(ownerResponseDTO.getFirstName(),TEST_OWNER.getFirstName());
+        assertEquals(ownerResponseDTO.getLastName(),TEST_OWNER.getLastName());
+        assertEquals(ownerResponseDTO.getAddress(),TEST_OWNER.getAddress());
+        assertEquals(ownerResponseDTO.getCity(),TEST_OWNER.getCity());
+        assertEquals(ownerResponseDTO.getTelephone(),TEST_OWNER.getTelephone());
+        //assertEquals(ownerResponseDTO.getImageId(),TEST_OWNER.getImageId());
+    }
+
+
+    @Test
     void getOwnerByOwnerId() throws JsonProcessingException{
         final String body = mapper.writeValueAsString(mapper.convertValue(TEST_OWNER, OwnerResponseDTO.class));
         prepareResponse(response -> response

@@ -43,7 +43,6 @@ public class GlobalControllerExceptionHandler {
 //        return createHttpErrorInfo(NOT_FOUND, request, ex);
 //    }
 
-
     private HttpErrorInfo createHttpErrorInfo(HttpStatus httpStatus, ServerHttpRequest request, Exception ex) {
         final String path = request.getPath().pathWithinApplication().value();
         final String message = ex.getMessage();

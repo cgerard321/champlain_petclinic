@@ -1,5 +1,8 @@
 package com.petclinic.vet.servicelayer;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.petclinic.vet.dataaccesslayer.Rating;
 import com.petclinic.vet.dataaccesslayer.RatingRepository;
 import com.petclinic.vet.exceptions.NotFoundException;
 
@@ -10,15 +13,20 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
 public class RatingServiceImpl implements RatingService {
 
     private final RatingRepository ratingRepository;
+    private final ObjectMapper objectMapper;
 
-    public RatingServiceImpl(RatingRepository ratingRepository) {
+    public RatingServiceImpl(RatingRepository ratingRepository, ObjectMapper objectMapper) {
         this.ratingRepository = ratingRepository;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -69,8 +77,8 @@ public class RatingServiceImpl implements RatingService {
         return this.ratingRepository.findByRatingId(ratingId)
                 .switchIfEmpty(Mono.error(new NotFoundException("Rating with id " + ratingId + " not found.")))
                 .flatMap(rating -> ratingRequestDTOMono
-                        .flatMap(r->{
-                            if (r.getRateScore()<1||r.getRateScore()>5)
+                        .flatMap(r -> {
+                            if (r.getRateScore() < 1 || r.getRateScore() > 5)
                                 return Mono.error(new InvalidInputException("rateScore should be between 1 and 5" + r.getRateScore()));
                             return Mono.just(r);
                         })
@@ -79,5 +87,31 @@ public class RatingServiceImpl implements RatingService {
                         .doOnNext(e -> e.setRatingId(rating.getRatingId()))
                         .flatMap(ratingRepository::save)
                         .map(EntityDtoUtil::toDTO));
+    }
+
+    @Override
+    public Mono<String> getRatingPercentagesByVetId(String vetId) {
+        Flux<Rating> ratingFlux = ratingRepository.findAllByVetId(vetId);
+        Map<Double, Integer> ratingCount = new HashMap<>();
+        for(double i = 1.0; i <= 5.0; i += 1.0) {
+            ratingCount.put(i, 0);
+        }
+        return ratingFlux
+                .map(EntityDtoUtil::toDTO)
+                .map(RatingResponseDTO::getRateScore)
+                .doOnNext(rating -> ratingCount.put(rating, ratingCount.get(rating) + 1))
+                .then(Mono.just(ratingCount))
+                .map(ratingCountMap -> {
+                    Map<Double, Double> ratingPercentages = new LinkedHashMap<>();
+                    for(double i = 1.0; i <= 5.0; i += 1.0) {
+                        ratingPercentages.put(i, ratingCountMap.get(i) / (double) ratingCountMap.values().stream().mapToInt(Integer::intValue).sum());
+                    }
+                    try {
+                       String ratingPercentageJson = objectMapper.writeValueAsString(ratingPercentages);
+                        return ratingPercentageJson;
+                    } catch (JsonProcessingException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
     }
 }
