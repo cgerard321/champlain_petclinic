@@ -61,6 +61,16 @@ public class InventoryServiceClient {
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve().bodyToMono(InventoryResponseDTO.class);
     }
+
+    public Mono<ProductResponseDTO> updateProductInInventory(final ProductRequestDTO model, final String inventoryId, final String productId){
+        return webClientBuilder.build()
+                .put()
+                .uri(inventoryServiceUrl + "/{inventoryId}/products/{productId}", inventoryId, productId)
+                .body(Mono.just(model),ProductRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve().bodyToMono(ProductResponseDTO.class);
+    }
+
     public Mono<Void> deleteProductInInventory(final String inventoryId, final String productId){
         return webClient.delete()
                 .uri(inventoryServiceUrl + "/{inventoryId}/products/{productId}", inventoryId, productId)

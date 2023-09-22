@@ -56,6 +56,7 @@ public class InventoryController {
     }
 
 
+
     //delete all products and delete all inventory
     @DeleteMapping("/{inventoryId}/products")
     public Mono<ResponseEntity<Void>> deleteProductInventory(@PathVariable String inventoryId) {
@@ -72,4 +73,14 @@ public class InventoryController {
     }
 
 
+
+
+    @PutMapping("/{inventoryId}/products/{productId}")
+    public Mono<ResponseEntity<ProductResponseDTO>> updateProductInInventory(@RequestBody Mono<ProductRequestDTO> productRequestDTOMono, @PathVariable String inventoryId, @PathVariable String productId){
+        return productInventoryService.updateProductInInventory(productRequestDTOMono, inventoryId, productId)
+                .map(productResponseDTO -> ResponseEntity.ok().body(productResponseDTO))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
 }
+

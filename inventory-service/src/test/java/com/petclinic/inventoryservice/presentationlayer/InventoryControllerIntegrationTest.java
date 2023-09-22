@@ -16,6 +16,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.test.StepVerifier;
+
+
+import java.util.UUID;
+
 import static com.petclinic.inventoryservice.datalayer.Inventory.InventoryType.internal;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -452,6 +456,62 @@ class InventoryControllerIntegrationTest {
                 .expectStatus().isNoContent(); // Expecting 204 NO CONTENT status.
     }
 
+
+    @Test
+    void testUpdateProductInInventory_ProductNotFound_ShouldReturnNotFound() {
+        // Arrange
+        String inventoryId = "1";
+        String productId = UUID.randomUUID().toString();
+
+        ProductRequestDTO productRequestDTO = ProductRequestDTO.builder()
+                .productName("Updated Benzodiazepines")
+                .productDescription("Updated Sedative Medication")
+                .productPrice(150.00)
+                .productQuantity(20)
+                .build();
+
+        // Act and Assert
+        webTestClient
+                .put()
+                .uri("/inventories/{inventoryId}/products/{productId}", inventoryId, productId)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(productRequestDTO)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+
+    /*
+    @Test
+    public void testUpdateProductInInventory_ShouldSucceed() {
+        String inventoryId = "1";
+        String productId = UUID.randomUUID().toString();
+        ProductRequestDTO productRequestDTO = ProductRequestDTO.builder()
+                .productName("Updated Benzodiazepines")
+                .productDescription("Updated Sedative Medication")
+                .productPrice(150.00)
+                .productQuantity(20)
+                .build();
+        webTestClient.put()
+                .uri("/inventories/{inventoryId}/products/{productId}", inventoryId, productId)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(productRequestDTO)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(ProductResponseDTO.class)
+                .value(productResponseDTO -> {
+                    assertNotNull(productResponseDTO);
+                    assertEquals(productId, productResponseDTO.getProductId());
+                    assertEquals(productRequestDTO.getProductName(), productResponseDTO.getProductName());
+                    assertEquals(productRequestDTO.getProductDescription(), productResponseDTO.getProductDescription());
+                    assertEquals(productRequestDTO.getProductPrice(), productResponseDTO.getProductPrice());
+                    assertEquals(productRequestDTO.getProductQuantity(), productResponseDTO.getProductQuantity());
+                });
+    }
+ */
 
 
     private Inventory buildInventory(String inventoryId, String name, InventoryType inventoryType, String inventoryDescription) {

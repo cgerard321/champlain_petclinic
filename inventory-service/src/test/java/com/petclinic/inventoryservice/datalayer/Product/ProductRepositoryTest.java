@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -125,7 +126,27 @@ class ProductRepositoryTest {
         // Check that there are no products in the repository anymore
         StepVerifier
                 .create(productRepository.findAll())
-                .expectNextCount(0)
+                .expectNextCount(0);
+
+    }
+
+    public void testFindProductByProductId() {
+        // Arrange
+        String productIdToFind = "productId";
+        Product newProduct = buildProduct("inventoryId_1", productIdToFind, "product_1", "product_1", 10.0, 10);
+
+        productRepository.save(newProduct).block();
+
+        // Act
+        Mono<Product> productMono = productRepository.findProductByProductId(productIdToFind);
+
+        // Assert
+        StepVerifier.create(productMono)
+                .expectNextMatches(product -> {
+                    assertNotNull(product);
+                    assertEquals(productIdToFind, product.getProductId());
+                    return true;
+                })
                 .verifyComplete();
     }
 

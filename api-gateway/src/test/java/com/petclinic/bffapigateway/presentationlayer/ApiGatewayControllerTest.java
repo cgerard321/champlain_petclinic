@@ -13,9 +13,7 @@ import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
-import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
-import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
-import com.petclinic.bffapigateway.dtos.Inventory.InventoryType;
+import com.petclinic.bffapigateway.dtos.Inventory.*;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
 import com.petclinic.bffapigateway.dtos.Vets.*;
@@ -2044,6 +2042,7 @@ private InventoryResponseDTO buildInventoryDTO(){
                 .updateInventory(any(), eq(buildInventoryDTO().getInventoryId()));
     }
 
+<<<<<<< HEAD
 //delete all product inventory and delete all inventory
 @Test
 void deleteAllInventory_shouldSucceed() {
@@ -2088,6 +2087,50 @@ void deleteAllInventory_shouldSucceed() {
 
 
 
+=======
+    @Test
+    void testUpdateProductInInventory() {
+        // Create a sample ProductRequestDTO
+        ProductRequestDTO requestDTO = new ProductRequestDTO("Sample Product", "Sample Description", 10.0, 100);
+
+        // Define the expected response
+        ProductResponseDTO expectedResponse = ProductResponseDTO.builder()
+                .id("sampleId")
+                .productId("sampleProductId")
+                .inventoryId("sampleInventoryId")
+                .productName(requestDTO.getProductName())
+                .productDescription(requestDTO.getProductDescription())
+                .productPrice(requestDTO.getProductPrice())
+                .productQuantity(requestDTO.getProductQuantity())
+                .build();
+
+        // Mock the behavior of the inventoryServiceClient
+        when(inventoryServiceClient.updateProductInInventory(any(), anyString(), anyString()))
+                .thenReturn(Mono.just(expectedResponse));
+
+        // Perform the PUT request
+        client.put()
+                .uri("/api/gateway/inventory/{inventoryId}/products/{productId}", "sampleInventoryId", "sampleProductId")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.id").isEqualTo(expectedResponse.getId())
+                .jsonPath("$.productId").isEqualTo(expectedResponse.getProductId())
+                .jsonPath("$.inventoryId").isEqualTo(expectedResponse.getInventoryId())
+                .jsonPath("$.productName").isEqualTo(expectedResponse.getProductName())
+                .jsonPath("$.productDescription").isEqualTo(expectedResponse.getProductDescription())
+                .jsonPath("$.productPrice").isEqualTo(expectedResponse.getProductPrice())
+                .jsonPath("$.productQuantity").isEqualTo(expectedResponse.getProductQuantity());
+
+        // Verify that the inventoryServiceClient method was called
+        verify(inventoryServiceClient, times(1))
+                .updateProductInInventory(eq(requestDTO), eq("sampleInventoryId"), eq("sampleProductId"));
+    }
+
+>>>>>>> f1981441 (Backend fully finished for the UpdateProductsInInventory Story (Other commits in my other broken branch) -Alexei Timbro)
 
     private VetDTO buildVetDTO() {
         return VetDTO.builder()
