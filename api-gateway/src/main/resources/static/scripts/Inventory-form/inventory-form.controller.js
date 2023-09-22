@@ -1,10 +1,10 @@
 'use strict';
 
 angular.module('inventoryForm')
-    .controller('inventoryFormController', ["$http", '$state', '$stateParams', function ($http, $state, $stateParams) {
+    .controller('InventoryFormController', ["$http", '$state', '$stateParams', function ($http, $state, $stateParams) {
         var self = this;
 
-        self.submitBundleForm = function () {
+        self.submitInventoryForm = function () {
             var req;
             req = $http.post("api/gateway/inventory", self.inventory);
 

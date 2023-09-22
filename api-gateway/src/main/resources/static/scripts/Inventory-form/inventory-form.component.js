@@ -2,6 +2,6 @@
 
 angular.module('inventoryForm')
     .component('inventoryForm', {
-        templateUrl: 'scripts/inventory-form/product-form.template.html',
+        templateUrl: 'scripts/Inventory-form/inventory-form.template.html',
         controller: 'InventoryFormController'
     });

@@ -1,20 +1,26 @@
-<div class="bColor text-center"><h2 class="titleBundle form" id="title">New Bundle</h2></div>
+<div class="bColor text-center"><h2 class="titleBundle form" id="title">New Inventory</h2></div>
 <div class="p-3 formColor m-0">
-    <form id="inventoryForm" class="form-horizontal" enctype="multipart/form-data" ng-submit="$ctrl.submitBundleForm()">
+    <form id="inventoryForm" class="form-horizontal" enctype="multipart/form-data" ng-submit="$ctrl.submitInventoryForm()">
         <div class="row">
             <div class="col-sm-6 form-group">
-                <label class="control-label" for="item">Item</label>
-                <input class="form-control" id="item" ng-model="$ctrl.inventory.item" name="item" type="text" required title="Please select a date."/>
+                <label class="control-label" for="inventoryName">Inventory name</label>
+                <input class="form-control" id="inventoryName" ng-model="$ctrl.inventory.inventoryName" name="inventoryName" type="text" required title="Please select a type of inventory."/>
             </div>
         </div>
             <div class="col-sm-6 form-group">
-                <label class="control-label" for="quantity">Quantity</label>
-                <input class="form-control col-sm-4" id="quantity" ng-model="$ctrl.inventory.quantity" name="quantity" type="text" placeholder="0" required title="Please enter the bill amount."/>
+                <label class="control-label" for="inventoryType"> Inventory Type</label>
+                <select class="form-control col-sm-4" id="inventoryType" ng-model="$ctrl.inventory.inventoryType" name="inventoryType" required title="Please select the inventory type.">
+                    <option value="internal">internal</option>
+                    <option value="sales">sales</option>
+                </select>
+
+
+
             </div>
         <div class="row">
             <div class="form-group col-sm-12">
-                <label class="control-label text-center" for="expiryDate">expiry Date</label>
-                <input class="form-control" id="expiryDate" ng-model="$ctrl.inventory.expiryDate" name="expiryDate" type="date" required title="Please select a date."/>
+                <label class="control-label text-center" for="invDesc">Inventory Description</label>
+                <input class="form-control" id="invDesc" ng-model="$ctrl.inventory.inventoryDescription" name="inventoryDescription" type="text" required title="Please select a date."/>
             </div>
         </div>
         <div class="form-group p-3">
