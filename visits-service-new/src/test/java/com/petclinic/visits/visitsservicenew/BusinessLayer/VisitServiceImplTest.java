@@ -20,6 +20,7 @@ import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 
 
 @WebFluxTest(VisitService.class)
@@ -35,7 +36,7 @@ class VisitServiceImplTest {
 
     private final VisitResponseDTO visitResponseDTO = buildVisitResponseDTO();
     private final VisitRequestDTO visitRequestDTO = buildVisitRequestDTO();
-    private final int PRAC_ID = visitResponseDTO.getPractitionerId();
+    private final String PRAC_ID = visitResponseDTO.getPractitionerId();
     private final int PET_ID = visitResponseDTO.getPetId();
     private final String VISIT_ID = visitResponseDTO.getVisitId();
 
@@ -59,7 +60,7 @@ class VisitServiceImplTest {
     }
     @Test
     void getVisitsByPractitionerId(){
-        when(visitRepo.findVisitsByPractitionerId(anyInt())).thenReturn(Flux.just(visit));
+        when(visitRepo.findVisitsByPractitionerId(anyString())).thenReturn(Flux.just(visit));
 
         Flux<VisitResponseDTO> visitResponseDTOFlux = visitService.getVisitsForPractitioner(PRAC_ID);
 
@@ -162,7 +163,7 @@ class VisitServiceImplTest {
                 .visitDate(LocalDateTime.parse("2022-11-25T13:45:00", dtf))
                 .description("this is a dummy description")
                 .petId(2)
-                .practitionerId(2)
+                .practitionerId(UUID.randomUUID().toString())
                 .status(true).build();
     }
     private VisitRequestDTO buildVisitRequestDTO() {
@@ -171,7 +172,7 @@ class VisitServiceImplTest {
                     .visitDate(LocalDateTime.parse("2022-11-25T13:45:00", dtf))
                     .description("this is a dummy description")
                     .petId(2)
-                    .practitionerId(2)
+                    .practitionerId(UUID.randomUUID().toString())
                     .status(true).build();
         }
 

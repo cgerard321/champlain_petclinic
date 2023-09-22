@@ -18,6 +18,7 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.UUID;
 
 @WebFluxTest(VisitController.class)
 class VisitControllerUnitTest {
@@ -29,7 +30,7 @@ class VisitControllerUnitTest {
     private final VisitResponseDTO visitResponseDTO = buildVisitResponseDto();
     private final VisitRequestDTO visitRequestDTO = buildVisitRequestDTO();
     private final String Visit_UUID_OK = visitResponseDTO.getVisitId();
-    private final int Practitioner_Id_OK = visitResponseDTO.getPractitionerId();
+    private final String Practitioner_Id_OK = visitResponseDTO.getPractitionerId();
     private final int Pet_Id_OK = visitResponseDTO.getPetId();
     //private final LocalDateTime visitDate = visitResponseDTO.getVisitDate().withSecond(0);
     @Test
@@ -70,7 +71,7 @@ class VisitControllerUnitTest {
 
     @Test
     void getVisitByPractitionerId(){
-        when(visitService.getVisitsForPractitioner(anyInt())).thenReturn(Flux.just(visitResponseDTO));
+        when(visitService.getVisitsForPractitioner(anyString())).thenReturn(Flux.just(visitResponseDTO));
 
         webFluxTest.get()
                 .uri("/visits/practitioner/visits/" + Practitioner_Id_OK)
@@ -166,7 +167,7 @@ class VisitControllerUnitTest {
                 .visitDate(LocalDateTime.parse("2022-11-25T13:45:00", dtf))
                 .description("this is a dummy description")
                 .petId(2)
-                .practitionerId(2)
+                .practitionerId(UUID.randomUUID().toString())
                 .status(true).build();
     }
     private VisitRequestDTO buildVisitRequestDTO(){
@@ -175,7 +176,7 @@ class VisitControllerUnitTest {
                 .visitDate(LocalDateTime.parse("2022-11-25T13:45:00", dtf))
                 .description("this is a dummy description")
                 .petId(2)
-                .practitionerId(2)
+                .practitionerId(UUID.randomUUID().toString())
                 .status(true).build();
     }
 }
