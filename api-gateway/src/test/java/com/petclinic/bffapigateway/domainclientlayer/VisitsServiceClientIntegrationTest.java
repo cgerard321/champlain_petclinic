@@ -43,6 +43,8 @@ class VisitsServiceClientIntegrationTest {
 
     private static final Integer PET_ID = 1;
 
+    private static final String STATUS = "REQUESTED";
+
 
     @BeforeAll
     static void beforeAllSetUp() throws IOException{
@@ -91,11 +93,26 @@ class VisitsServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody("{\"visitId\":\"773fa7b2-e04e-47b8-98e7-4adf7cfaaeee\"," +
                         "\"date\":\"2018-11-15\",\"description\":\"test visit\",\"petId\":1," +
-                        " \"practitionerId\":1,\"status\":false}"));
+                        " \"practitionerId\":1}"));
 
         Flux<VisitDetails> visits = visitsServiceClient.getVisitsForPet(1);
 
         assertVisitDescriptionEq(visits.blockFirst(), PET_ID,"test visit");
+    }
+
+    @Test
+    void getVisitsForStatus() {
+        VisitDetails visitDetails = new VisitDetails("73b5c112-5703-4fb7-b7bc-ac8186811ae1", 2, 2, LocalDateTime.parse("2022-11-25T13:45:00"),  "This is a dummy description", Status.REQUESTED);
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody("{\"visitId\":\"73b5c112-5703-4fb7-b7bc-ac8186811ae1\"," +
+                        "\"visitDate\":\"2022-11-25T13:45:00\",\"description\":\"This is a dummy description\",\"petId\":2," +
+                        " \"practitionerId\":2,\"status\":\"REQUESTED\"}"));
+
+        Flux<VisitDetails> visitDetailsFlux = visitsServiceClient.getVisitsForStatus(STATUS);
+        StepVerifier.create(visitDetailsFlux)
+                .expectNext(visitDetails)
+                .verifyComplete();
     }
 
     @Test

@@ -64,6 +64,14 @@ public class VisitsServiceClient {
                 .bodyToFlux(VisitDetails.class);
     }
 
+    public Flux<VisitDetails> getVisitsForStatus(final String status){
+        return webClient
+                .get()
+                .uri("/visits/status/{status}", status)
+                .retrieve()
+                .bodyToFlux(VisitDetails.class);
+    }
+
     public Flux<VisitDetails> getPreviousVisitsForPet(final int petId) {
         return webClient
                 .get()

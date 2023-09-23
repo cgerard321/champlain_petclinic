@@ -167,7 +167,7 @@ angular.module('visits')
             return practitionerName;
         };
 
-        self.showConfirmationModal = function(e, visitId = 0, status = 0, practitionerId = 0, date = null, description = "") {
+        self.showConfirmationModal = function(e, visitId = 0, status = "", practitionerId = 0, date = null, description = "") {
             // Get the name of button sender
             let buttonText = $(e.target).text();
 
@@ -728,11 +728,13 @@ angular.module('visits')
         self.setCancelButtonText = function (visitStatus){
             var cancelText = "";
 
-            if (visitStatus){
+            if (visitStatus.status === "CANCELLED"){
                 cancelText = "Cancel";
+                visitStatus.status = "REQUESTED"
             }
             else {
                 cancelText = "Revert Cancel";
+                visitStatus.status = "CANCELLED"
             }
 
             return cancelText;

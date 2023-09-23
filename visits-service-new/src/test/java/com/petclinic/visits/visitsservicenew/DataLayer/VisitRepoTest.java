@@ -49,6 +49,12 @@ class VisitRepoTest {
                 .verifyComplete();
     }
     @Test
+    void findVisitsByStatus(){
+        StepVerifier.create(visitRepo.findAllByStatus(visit1.getStatus().toString()))
+                .expectNextCount(3)
+                .verifyComplete();
+    }
+    @Test
     void findVisitsByPractitionerId(){
         StepVerifier.create(visitRepo.findVisitsByPractitionerId(visit1.getPractitionerId()))
                 .expectNextCount(3)

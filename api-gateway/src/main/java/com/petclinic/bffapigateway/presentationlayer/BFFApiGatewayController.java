@@ -5,7 +5,6 @@ import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.Auth.Login;
 import com.petclinic.bffapigateway.dtos.Auth.Role;
 import com.petclinic.bffapigateway.dtos.Auth.UserPasswordLessDTO;
-import com.petclinic.bffapigateway.dtos.Bills.BillDetails;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.ProductRequestDTO;
@@ -166,6 +165,11 @@ public class BFFApiGatewayController {
     @GetMapping(value = "visits/pets/{petId}")
     public Flux<VisitDetails> getVisitsForPet(final @PathVariable int petId){
         return visitsServiceClient.getVisitsForPet(petId);
+    }
+
+    @GetMapping(value = "visits/status/{status}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<VisitDetails> getVisitsForStatus(final @PathVariable String status){
+        return visitsServiceClient.getVisitsForStatus(status);
     }
 
     @GetMapping(value ="visits/{visitId}")
