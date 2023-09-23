@@ -2,6 +2,8 @@ package com.petclinic.visits.visitsservicenew.PresentationLayer;
 
 
 import com.petclinic.visits.visitsservicenew.BusinessLayer.VisitService;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.PetResponseDTO;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +31,8 @@ public class VisitController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-    @GetMapping(value="practitioner/visits/{practitionerId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+
+    @GetMapping(value="practitioner/{practitionerId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VisitResponseDTO> getVisitByPractitionerId(@PathVariable String practitionerId){
         return visitService.getVisitsForPractitioner(practitionerId);
     }

@@ -118,8 +118,10 @@ class VisitServiceImplTest {
     }
     @Test
     void getVisitsByPractitionerId(){
+
         when(visitRepo.findVisitsByPractitionerId(anyString())).thenReturn(Flux.just(visit1));
         when(vetsClient.getVetByVetId(anyString())).thenReturn(Mono.just(vet));
+
         Flux<VisitResponseDTO> visitResponseDTOFlux = visitService.getVisitsForPractitioner(PRAC_ID);
 
         StepVerifier
