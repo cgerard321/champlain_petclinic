@@ -21,15 +21,12 @@ angular.module('inventoryForm')
             });
         };
 
-
-        self.updateInventory = function () {
+        self.updateInventory = function (inventoryId) {
             var req;
-            var inventoryUUID = self.inventory.uuid; // Assuming you have an inventory UUID
-
-            var varIsConf = confirm('Want to update inventory with Inventory Id: ' + inventoryUUID + '. Are you sure?');
+            var varIsConf = confirm('Want to update inventory with Inventory Id: ' + inventoryId + '. Are you sure?');
 
             if (varIsConf) {
-                req = $http.put('api/gateway/inventory/' + inventoryUUID, self.inventory);
+                req = $http.put('api/gateway/inventory/' + inventoryId, self.inventory);
 
                 req.then(function () {
                     // Handle success, e.g., show a success message and navigate to a new page
@@ -41,4 +38,10 @@ angular.module('inventoryForm')
                 });
             }
         };
+
+
+
+
+
+
     }]);

@@ -10,12 +10,6 @@ angular.module('inventoryList', ['ui.router'])
             })
 
 
-            .state('updateInventory', {
-                    parent: 'app',
-                    url: '/inventory/:inventoryId/',
-                    template: '<inventory-list></inventory-list>'
-                }
-            )
             /*.state('deleteBundle', {
                 parent: 'app',
                 url: '/bundles/:bundleUUID/deleteBundle',
