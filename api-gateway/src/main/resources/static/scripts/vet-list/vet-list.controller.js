@@ -97,6 +97,13 @@ angular.module('vetList')
             $http.get(url).then(function (resp) {
                 self.vetList = resp.data;
                 arr = resp.data;
+                angular.forEach(self.vetList, function(vet) {
+                    getAverageRating(vet)
+                    getCountOfRatings(vet)
             });
+
+            });
+
         }
+
     }]);
