@@ -50,5 +50,8 @@ public class DatabaseLoaderService implements CommandLineRunner {
                 .password(passwordEncoder.encode("pwd"))
                 .verified(true)
                 .build();
+
+
+        userRepo.save(vet);
     }
 }

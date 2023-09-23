@@ -1,0 +1,27 @@
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <title>Reset Password</title>
+</head>
+<div>
+    <h2 class="text-center">Forgot Password</h2>
+</div>
+
+<form ng-submit="$ctrl.forgotPwdPost()" method="post" style="max-width: 420px; margin: 0 auto;">
+    <div class="border border-secondary rounded p-3">
+        <div>
+            <p>We will be sending a reset password link to your email.</p>
+        </div>
+        <div>
+            <p>
+
+                <label>
+                    <input id="email" type="email" class="form-control" ng-model="forgotPwdPost.email" name="email" required/>
+                </label>
+            </p>
+            <p class="text-center">
+                <input type="submit" value="Send" class="btn btn-primary" />
+            </p>
+        </div>
+    </div>
+</form>
