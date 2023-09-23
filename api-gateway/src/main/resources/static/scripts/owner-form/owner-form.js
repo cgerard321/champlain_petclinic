@@ -1,5 +1,6 @@
 'use strict';
 
+
 angular.module('ownerForm', ['ui.router'])
     .config(['$stateProvider', function ($stateProvider) {
         $stateProvider
@@ -14,3 +15,4 @@ angular.module('ownerForm', ['ui.router'])
                 template: '<owner-form></owner-form>'
             })
     }]);
+
