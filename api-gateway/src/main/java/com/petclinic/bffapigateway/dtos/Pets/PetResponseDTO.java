@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 @Data
 public class PetResponseDTO {
 
-    private int id;
+    private String petId;
 
     private String name;
 
