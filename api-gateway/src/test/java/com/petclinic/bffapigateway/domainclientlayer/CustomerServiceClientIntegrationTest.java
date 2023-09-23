@@ -2,6 +2,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
@@ -97,6 +98,26 @@ public class CustomerServiceClientIntegrationTest {
     }*/
 
     @Test
+    void insertOwner() throws JsonProcessingException {
+
+        final String body = mapper.writeValueAsString(mapper.convertValue(TEST_OWNER, OwnerResponseDTO.class));
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(body));
+
+        final OwnerResponseDTO ownerResponseDTO = customersServiceClient.createOwner(TEST_OWNER).block();
+
+        assertEquals(ownerResponseDTO.getOwnerId(),TEST_OWNER.getOwnerId());
+        assertEquals(ownerResponseDTO.getFirstName(),TEST_OWNER.getFirstName());
+        assertEquals(ownerResponseDTO.getLastName(),TEST_OWNER.getLastName());
+        assertEquals(ownerResponseDTO.getAddress(),TEST_OWNER.getAddress());
+        assertEquals(ownerResponseDTO.getCity(),TEST_OWNER.getCity());
+        assertEquals(ownerResponseDTO.getTelephone(),TEST_OWNER.getTelephone());
+        //assertEquals(ownerResponseDTO.getImageId(),TEST_OWNER.getImageId());
+    }
+
+
+    @Test
     void getOwnerByOwnerId() throws JsonProcessingException{
         final String body = mapper.writeValueAsString(mapper.convertValue(TEST_OWNER, OwnerResponseDTO.class));
         prepareResponse(response -> response
@@ -122,6 +143,32 @@ public class CustomerServiceClientIntegrationTest {
         final OwnerResponseDTO firstOwnerFromFlux = customersServiceClient.getAllOwners().blockFirst();
 
         assertEquals(firstOwnerFromFlux.getOwnerId(), TEST_OWNER.getOwnerId());
+    }
+
+    @Test
+    void testUpdateOwner() throws Exception {
+        // Mock the external service's response when updating the owner
+        OwnerRequestDTO requestDTO = new OwnerRequestDTO();
+        requestDTO.setFirstName("UpdatedFirstName");
+        requestDTO.setLastName("UpdatedLastName");
+
+        OwnerResponseDTO updatedOwnerResponse = new OwnerResponseDTO();
+        updatedOwnerResponse.setOwnerId("ownerId-123");
+        updatedOwnerResponse.setFirstName("UpdatedFirstName");
+        updatedOwnerResponse.setLastName("UpdatedLastName");
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader("Content-Type", "application/json")
+                .setBody(mapper.writeValueAsString(updatedOwnerResponse)));
+
+        Mono<OwnerResponseDTO> responseMono = customersServiceClient.updateOwner("ownerId-123", Mono.just(requestDTO));
+
+        OwnerResponseDTO responseDTO = responseMono.block(); // Blocking for simplicity
+
+        assertEquals(updatedOwnerResponse.getOwnerId(), responseDTO.getOwnerId());
+        assertEquals(updatedOwnerResponse.getFirstName(), responseDTO.getFirstName());
+        assertEquals(updatedOwnerResponse.getLastName(), responseDTO.getLastName());
     }
 
     /*@Test

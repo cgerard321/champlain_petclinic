@@ -326,6 +326,36 @@ class InventoryControllerUnitTest {
                 .exchange()
                 .expectStatus().isBadRequest();
     }
+    //delete all
+    @Test
+    void deleteProductInventory_ValidInventoryId_ShouldCallServiceDelete() {
+        // Arrange
+        String inventoryId = "1";
+        when(productInventoryService.deleteAllProductInventory(inventoryId)).thenReturn(Mono.empty());
 
+        // Act & Assert
+        webTestClient
+                .delete()
+                .uri("/inventory/{inventoryId}/products", inventoryId)
+                .exchange()
+                .expectStatus().isNoContent();  // Expecting 204 NO CONTENT status.
+
+        verify(productInventoryService, times(1)).deleteAllProductInventory(inventoryId);
+    }
+
+    @Test
+    void deleteAllInventories_ShouldCallServiceDeleteAll() {
+        // Arrange
+        when(productInventoryService.deleteAllInventory()).thenReturn(Mono.empty());
+
+        // Act & Assert
+        webTestClient
+                .delete()
+                .uri("/inventory")
+                .exchange()
+                .expectStatus().isNoContent();  // Expecting 204 NO CONTENT status.
+
+        verify(productInventoryService, times(1)).deleteAllInventory();
+    }
 
 }

@@ -10,6 +10,7 @@ import com.petclinic.inventoryservice.presentationlayer.ProductResponseDTO;
 import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
 import com.petclinic.inventoryservice.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -294,7 +295,56 @@ class ProductInventoryServiceUnitTest {
     }
 
 
+    //delete
+    @Test
+    void deleteAllProductInventory_ValidInventoryId_ShouldDeleteAllProducts() {
+        // Arrange
+        String inventoryId = "1";
+
+        // Mock returning an inventory when searched by the inventoryId
+        Mockito.when(inventoryRepository.findInventoryByInventoryId(inventoryId))
+                .thenReturn(Mono.just(inventory));
+
+        // Mock the behavior of deleting all products by inventoryId
+        Mockito.when(productRepository.deleteByInventoryId(inventoryId))
+                .thenReturn(Mono.empty());
+
+        // Act
+        Mono<Void> result = productInventoryService.deleteAllProductInventory(inventoryId);
+
+        // Assert
+        StepVerifier.create(result)
+                .verifyComplete();
+
+        Mockito.verify(productRepository, Mockito.times(1)).deleteByInventoryId(inventoryId);
+    }
 
 
+    @Test
+    void deleteAllProductInventory_InvalidInventoryId_ShouldThrowException() {
+        // Arrange
+        String inventoryId = "1";
+        Mockito.when(inventoryRepository.findInventoryByInventoryId(inventoryId))
+                .thenReturn(Mono.empty());
 
+        // Act and Assert
+        Mono<Void> result = productInventoryService.deleteAllProductInventory(inventoryId);
+        StepVerifier.create(result)
+                .expectError(RuntimeException.class)
+                .verify();
+    }
+
+    @Test
+    void deleteAllInventory_ShouldDeleteAllInventories() {
+        // Arrange
+        Mockito.when(inventoryRepository.deleteAll()).thenReturn(Mono.empty());
+
+        // Act
+        Mono<Void> result = productInventoryService.deleteAllInventory();
+
+        // Assert
+        StepVerifier.create(result)
+                .verifyComplete();
+        Mockito.verify(inventoryRepository, Mockito.times(1)).deleteAll();
+    }
 }

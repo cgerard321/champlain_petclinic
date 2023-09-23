@@ -156,4 +156,31 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
         return inventoryRepository.findAll()
                 .map(EntityDTOUtil::toInventoryResponseDTO);
     }
+    //delete all products and delete all inventory
+  /*  @Override
+    public Mono<Void> deleteAllProductInventory(String inventoryId) {
+        return inventoryRepository.findInventoryByInventoryId(inventoryId)
+                .flatMap(inventory -> {
+                    return productRepository.deleteByInventoryId(inventoryId);
+                })
+                .switchIfEmpty(Mono.error(new RuntimeException("Inventory not found")))
+                .then();
+    }
+*/
+    //delete all products and delete all inventory
+    @Override
+    public Mono<Void> deleteAllProductInventory (String inventoryId){
+        return inventoryRepository.findInventoryByInventoryId(inventoryId)
+                .switchIfEmpty(Mono.error(new RuntimeException("Invalid Inventory Id")))
+                .flatMapMany(inv -> productRepository.deleteByInventoryId(inventoryId))
+                .then();
+    }
+
+    @Override
+    public Mono<Void> deleteAllInventory () {
+        return inventoryRepository.deleteAll();
+
+
+    }
 }
+

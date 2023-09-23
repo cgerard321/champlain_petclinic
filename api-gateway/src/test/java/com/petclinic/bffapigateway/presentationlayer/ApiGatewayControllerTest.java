@@ -11,6 +11,7 @@ import com.petclinic.bffapigateway.dtos.Auth.UserPasswordLessDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillDetails;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
@@ -44,9 +45,15 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.MultiValueMapAdapter;
+
+import org.springframework.web.reactive.function.BodyInserters;
+
+
+
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
@@ -723,6 +730,42 @@ class ApiGatewayControllerTest {
 
     }
 
+    @Test
+    void updateOwner_shouldSucceed() {
+        // Define the owner ID and updated owner data
+        String ownerId = "ownerId-123";
+        OwnerRequestDTO updatedOwnerData = new OwnerRequestDTO();
+        updatedOwnerData.setFirstName("UpdatedFirstName");
+        updatedOwnerData.setLastName("UpdatedLastName");
+
+        // Mock the behavior of customersServiceClient.updateOwner
+        OwnerResponseDTO updatedOwner = new OwnerResponseDTO();
+        updatedOwner.setOwnerId(ownerId);
+        updatedOwner.setFirstName(updatedOwnerData.getFirstName());
+        updatedOwner.setLastName(updatedOwnerData.getLastName());
+        when(customersServiceClient.updateOwner(eq(ownerId), any(Mono.class)))
+                .thenReturn(Mono.just(updatedOwner));
+
+        // Perform the PUT request to update the owner
+        client.put()
+                .uri("/api/gateway/owners/{ownerId}", ownerId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(updatedOwnerData))
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(OwnerResponseDTO.class)
+                .value(updatedOwnerResponseDTO -> {
+                    // Assertions
+                    assertNotNull(updatedOwnerResponseDTO);
+                    assertEquals(updatedOwnerResponseDTO.getOwnerId(), ownerId);
+                    assertEquals(updatedOwnerResponseDTO.getFirstName(), updatedOwnerData.getFirstName());
+                    assertEquals(updatedOwnerResponseDTO.getLastName(), updatedOwnerData.getLastName());
+                    // Add more assertions if needed
+                });
+    }
+
+
 
 
     @Test
@@ -756,6 +799,13 @@ class ApiGatewayControllerTest {
         assertEquals(owner.getCity(),"Johnston");
         assertEquals(owner.getTelephone(),"51451545144");
     }
+
+
+
+
+
+
+
 
     @Test
 
@@ -1997,6 +2047,50 @@ private InventoryResponseDTO buildInventoryDTO(){
         verify(inventoryServiceClient, times(1))
                 .updateInventory(any(), eq(buildInventoryDTO().getInventoryId()));
     }
+
+//delete all product inventory and delete all inventory
+@Test
+void deleteAllInventory_shouldSucceed() {
+    // Mock the service call to simulate the successful deletion of all inventories.
+    // Assuming your service client has a method called `deleteAllInventories`.
+    when(inventoryServiceClient.deleteAllInventories())
+            .thenReturn(Mono.empty());  // Using Mono.empty() to simulate a void return (successful deletion without a return value).
+
+    // Make the DELETE request to the API.
+    client.delete()
+            .uri("/api/gateway/inventory")  // Assuming the endpoint for deleting all inventories is the same without an ID.
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody().isEmpty();
+
+    // Verify that the deleteAllInventories method on the service client was called exactly once.
+    verify(inventoryServiceClient, times(1))
+            .deleteAllInventories();
+}
+
+    @Test
+    void deleteAllProductInventory_shouldSucceed() {
+        // Assuming you want to test for a specific inventoryId
+        String inventoryId = "someInventoryId";
+
+        // Mock the service call to simulate the successful deletion of all product inventories for a specific inventoryId.
+        // Adjust the method name if `deleteAllProductInventoriesForInventory` is not the correct name.
+        when(inventoryServiceClient.deleteAllProductForInventory(eq(inventoryId)))
+                .thenReturn(Mono.empty());  // Using Mono.empty() to simulate a void return (successful deletion without a return value).
+
+        // Make the DELETE request to the API for a specific inventoryId.
+        client.delete()
+                .uri("/api/gateway/inventory/{inventoryId}/products", inventoryId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody().isEmpty();
+
+        // Verify that the deleteAllProductInventoriesForInventory method on the service client was called exactly once with the specific inventoryId.
+        verify(inventoryServiceClient, times(1))
+                .deleteAllProductForInventory(eq(inventoryId));
+    }
+
+
 
 
     private VetDTO buildVetDTO() {
