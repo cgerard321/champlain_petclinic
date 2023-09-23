@@ -352,12 +352,12 @@ public class BFFApiGatewayController {
     }*/
 
     @PostMapping(value = "owners/{ownerId}/pet/photo/{petId}")
-    public Mono<String> setPetPhoto(@PathVariable String ownerId, @RequestBody PhotoDetails photoDetails, @PathVariable int petId) {
+    public Mono<String> setPetPhoto(@PathVariable String ownerId, @RequestBody PhotoDetails photoDetails, @PathVariable String petId) {
         return customersServiceClient.setPetPhoto(ownerId, photoDetails, petId);
     }
 
     @GetMapping(value = "owners/{ownerId}/pet/photo/{petId}")
-    public Mono<PhotoDetails> getPetPhoto(@PathVariable String ownerId, @PathVariable int petId) {
+    public Mono<PhotoDetails> getPetPhoto(@PathVariable String ownerId, @PathVariable String petId) {
         return customersServiceClient.getPetPhoto(ownerId, petId);
     }
 

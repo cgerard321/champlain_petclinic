@@ -144,16 +144,16 @@ public class CustomersServiceClient {
 
 
 
-    public Mono<String> setPetPhoto(String ownerId, PhotoDetails file, int id){
+    public Mono<String> setPetPhoto(String ownerId, PhotoDetails file, String petId){
         return webClientBuilder.build().post()
-                .uri(customersServiceUrl + ownerId + "/pets/photo/" + id)
+                .uri(customersServiceUrl + ownerId + "/pets/photo/" + petId)
                 .body(just(file), PhotoDetails.class)
                 .retrieve().bodyToMono(String.class);
     }
 
-    public Mono<PhotoDetails> getPetPhoto(String ownerId, int id){
+    public Mono<PhotoDetails> getPetPhoto(String ownerId, String petId){
         return webClientBuilder.build().get()
-                .uri(customersServiceUrl + ownerId + "/pets/photo/" + id)
+                .uri(customersServiceUrl + ownerId + "/pets/photo/" + petId)
                 .retrieve()
                 .bodyToMono(PhotoDetails.class);
     }
