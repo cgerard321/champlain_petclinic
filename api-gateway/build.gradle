@@ -42,6 +42,7 @@ dependencies {
 	implementation 'com.github.houbie:lesscss-gradle-plugin:1.0.3-less-1.7.0' // https://mvnrepository.com/artifact/com.github.houbie/lesscss-gradle-plugin
 	implementation 'org.jolokia:jolokia-core:1.7.0' // https://mvnrepository.com/artifact/org.jolokia/jolokia-core
 	implementation 'io.springfox:springfox-boot-starter:3.0.0'
+	implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'	//for serializing and deserializing java.time.LocalDateTime
 
 
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {

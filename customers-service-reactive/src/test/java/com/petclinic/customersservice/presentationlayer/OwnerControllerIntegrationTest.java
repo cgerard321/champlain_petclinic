@@ -51,9 +51,8 @@ class OwnerControllerIntegrationTest {
 
     @Test
     void getAllOwners() {
-        Publisher<Owner> setup = repo.deleteAll().thenMany(repo.save(ownerEntity2));
         StepVerifier
-                .create(setup)
+                .create(repo.save(ownerEntity2))
                 .expectNext(ownerEntity2)
                 .verifyComplete();
 

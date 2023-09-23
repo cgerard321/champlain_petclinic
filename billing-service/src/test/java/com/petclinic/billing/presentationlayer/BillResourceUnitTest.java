@@ -19,6 +19,9 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
+
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -192,7 +195,9 @@ class BillResourceUnitTest {
 
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);
-        Date date = calendar.getTime();
+        LocalDate date = calendar.getTime().toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();;
 
 
         return BillDTO.builder().billId("BillUUID").customerId(1).vetId("1").visitType("Test Type").date(date).amount(13.37).build();
@@ -202,7 +207,9 @@ class BillResourceUnitTest {
 
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);
-        Date date = calendar.getTime();
+        LocalDate date = calendar.getTime().toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();;
 
 
         return BillResponseDTO.builder().billId("BillUUID").customerId(1).vetId("1").visitType("Test Type").date(date).amount(13.37).build();

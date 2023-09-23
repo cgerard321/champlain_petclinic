@@ -28,7 +28,6 @@ public class UserPasswordLessDTO {
 
     private String username;
 
-
     private String email;
 
     private Set<Role> roles;

@@ -2,7 +2,6 @@ package com.auth.authservice.security;
 
 import com.auth.authservice.datalayer.roles.Role;
 import com.auth.authservice.datalayer.user.User;
-import com.auth.authservice.datalayer.user.UserRepo;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -19,13 +18,17 @@ import java.util.*;
 @RequiredArgsConstructor
 public class JwtTokenUtil implements Serializable {
 
-    private final UserRepo userRepo;
 
-    private static final long serialVersionUID = -5625635588908941275L;
+
+    private final SecurityConst securityConst;
+
 
     private static final String CLAIM_KEY_USERNAME = "sub";
     private static final String CLAIM_KEY_CREATED = "created";
     private static final String CLAIM_KEY_ROLES = "roles";
+
+
+
 
     public String getUsernameFromToken(String token) {
         String username;
@@ -56,7 +59,7 @@ public class JwtTokenUtil implements Serializable {
         Claims claims;
         try {
             claims = Jwts.parser()
-                    .setSigningKey(SecurityConst.SECRET)
+                    .setSigningKey(securityConst.getSECRET())
                     .parseClaimsJws(token)
                     .getBody();
         } catch (Exception e) {
@@ -78,7 +81,6 @@ public class JwtTokenUtil implements Serializable {
         Map<String, Object> claims = new HashMap<>();
         claims.put(CLAIM_KEY_USERNAME, user.getUsername());
         claims.put(CLAIM_KEY_CREATED, new Date());
-        ArrayList<String> roles = new ArrayList<>();
         claims.put(CLAIM_KEY_ROLES, user.getRoles().stream().map(Role::getName).toArray(String[]::new));
         log.info("Claims are {}", claims.get(CLAIM_KEY_ROLES));
         log.info(user.getAuthorities().toString());
@@ -88,12 +90,12 @@ public class JwtTokenUtil implements Serializable {
     }
     
     String generateToken(Map<String, Object> claims) {
-        Date expirationDate = Date.from(ZonedDateTime.now().plusMinutes(60).toInstant());
+        Date expirationDate = Date.from(ZonedDateTime.now().plusMinutes(securityConst.getEXPIRATION_TIME_MINUTES()).toInstant());
         log.info("Expiration date is {}", expirationDate);
         return Jwts.builder()
                 .setClaims(claims)
                 .setExpiration(expirationDate)
-                .signWith(SignatureAlgorithm.HS512, SecurityConst.SECRET)
+                .signWith(SignatureAlgorithm.HS512, securityConst.getSECRET())
                 .compact();
     }
 

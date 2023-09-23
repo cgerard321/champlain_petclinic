@@ -29,11 +29,13 @@ public class VisitServiceImpl implements VisitService {
         return repo.findVisitsByPractitionerId(practitionerId)
                 .map(EntityDtoUtil::toVisitResponseDTO);
     }
+    /*
     @Override
     public Flux<VisitResponseDTO> getVisitsByPractitionerIdAndMonth(int practitionerId, int month) {
         return repo.findVisitsByPractitionerIdAndMonth(practitionerId, month)
                 .map(EntityDtoUtil::toVisitResponseDTO);
     }
+     */
     @Override
     public Mono<VisitResponseDTO> getVisitByVisitId(String visitId) {
         return repo.findByVisitId(visitId)

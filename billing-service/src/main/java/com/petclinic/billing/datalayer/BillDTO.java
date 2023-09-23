@@ -3,6 +3,7 @@ package com.petclinic.billing.datalayer;
 import lombok.*;
 import org.springframework.lang.Nullable;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Data
@@ -16,10 +17,10 @@ public class BillDTO {
     private int customerId;
     private String visitType;
     private String vetId;
-    private Date date;
+    private LocalDate date;
     private double amount;
 
-    public BillDTO(int customerId, String visitType, String vetId, Date date, double amount) {
+    public BillDTO(int customerId, String visitType, String vetId, LocalDate date, double amount) {
         this.customerId = customerId;
         this.visitType = visitType;
         this.vetId = vetId;

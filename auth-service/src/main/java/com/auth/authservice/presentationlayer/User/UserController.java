@@ -22,6 +22,7 @@ import com.auth.authservice.datalayer.user.User;
 import com.auth.authservice.datamapperlayer.UserMapper;
 
 import com.auth.authservice.security.JwtTokenUtil;
+import com.auth.authservice.security.SecurityConst;
 import com.auth.authservice.security.UserPrincipalImpl;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -43,6 +44,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.Duration;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
@@ -54,6 +56,9 @@ import static org.springframework.http.ResponseEntity.ok;
 @RequiredArgsConstructor
 @Validated
 public class UserController {
+
+    private final SecurityConst securityConst;
+
     private final AuthenticationManager authenticationManager;
 
     private final UserService userService;
@@ -117,36 +122,16 @@ public class UserController {
 
 
     @PostMapping("/login")
-    public ResponseEntity<UserPasswordLessDTO> login(@RequestBody UserIDLessRoleLessDTO login, HttpServletResponse response) throws IncorrectPasswordException {
+    public ResponseEntity<UserPasswordLessDTO> login(@RequestBody UserIDLessUsernameLessDTO login, HttpServletResponse response) throws IncorrectPasswordException {
         log.info("In controller");
 
         try {
-            Authentication authenticate = authenticationManager
-                    .authenticate(
-                            new UsernamePasswordAuthenticationToken(
-                                    login.getEmail(), login.getPassword()
-                            )
-                    );
-            log.info("User authenticated");
 
-            UserPrincipalImpl user = (UserPrincipalImpl) authenticate.getPrincipal();
-            log.info("User principal retrieved");
-
-            User loggedInUser = userService.getUserByEmail(login.getEmail());
-            log.info("User retrieved from db");
-
-            ResponseCookie token = ResponseCookie.from("Bearer", jwtService.generateToken(loggedInUser))
-                    .httpOnly(true)
-                    .secure(true)
-                    .path("/api/gateway")
-                    .maxAge(Duration.ofHours(1))
-                    .sameSite("Lax").build();
-
-
-            log.info("In controller before set header");
+            HashMap<String, Object> userAndToken = userService.login(login);
+            ResponseCookie token = (ResponseCookie) userAndToken.get("token");
+            User loggedInUser = (User) userAndToken.get("user");
             response.setHeader(HttpHeaders.SET_COOKIE, token.toString());
-            log.info("Token : {}", token.toString());
-            log.info("Token value : {}", token.getValue());
+            log.info("Token : {}", token.getValue());
 
             log.info("In controller after set header");
             UserPasswordLessDTO testUser = userMapper.modelToIDLessPasswordLessDTO(loggedInUser);
@@ -154,7 +139,6 @@ public class UserController {
                     .body(testUser);
         } catch (BadCredentialsException ex) {
             log.info("Bad credentials exception");
-
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
