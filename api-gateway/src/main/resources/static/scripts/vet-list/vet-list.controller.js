@@ -101,5 +101,9 @@ angular.module('vetList')
                     getAverageRating(vet)
                     getCountOfRatings(vet)
             });
+
+            });
+
         }
+
     }]);
