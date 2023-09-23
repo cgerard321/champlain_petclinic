@@ -1,9 +1,7 @@
 'use strict';
 
-
-
-angular.module('ownerForm')
-    .controller('OwnerFormController', ["$http", '$state', '$stateParams', function ($http, $state, $stateParams) {
+angular.module('ownerRegister')
+    .controller('OwnerRegisterController', ["$http", '$state', '$stateParams', function ($http, $state, $stateParams) {
         var self = this;
         var ownerId = $stateParams.ownerId || "";
         var method = $stateParams.method;
@@ -22,17 +20,11 @@ angular.module('ownerForm')
         }
 
         self.submitOwnerForm = function () {
-            var id = self.owner.ownerId;
+            var id = self.owner.id;
             console.log(self.owner);
             var req;
-            if (id){
-                if(method == 'edit')
-                    req = $http.put("api/gateway/owners/" + id, self.owner);
-                else
-                    req = $http.delete("api/gateway/owners/" + id, self.owner)
-            }
-            else
-                req = $http.post("api/gateway/owners", self.owner);
+
+            req = $http.post("api/gateway/owners", self.owner);
 
             req.then(function () {
                 $state.go('owners');
@@ -45,5 +37,4 @@ angular.module('ownerForm')
             });
         };
     }]);
-
 

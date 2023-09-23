@@ -8,11 +8,31 @@
         <td>Quantity</td>
         <td>Price</td>
         <td>Description</td>
-        <td>Update</td>
-        <td>Delete</td>
     </tr>
-
-
+    <tr>
+        <td>
+            <span>
+                <input type="text" ng-model="productName">
+            </span>
+        </td>
+        <td></td>
+        <td>
+            <span>
+                <input type="number" min="0" ng-model="productQuantity">
+            </span>
+        </td>
+        <td>
+            <span>
+                <input type="number" step="0.01" min="0" ng-model="productPrice">
+            </span>
+        </td>
+        <td></td>
+        <td>
+            <span>
+                <input type="button" value="Search" ng-click="searchProduct(productName, productQuantity, productPrice)"">
+            </span>
+        </td>
+    </tr>
 
     </thead>
     <tr ng-repeat="product in $ctrl.inventoryProductList | filter:$ctrl.query track by product.productId">
@@ -30,4 +50,7 @@
 </a>
 <a ui-sref="bundleNew">
     <button class="add-bundle-button btn btn-success">Add Bundle</button>
+</a>
+<a ui-sref="inventories">
+    <button class="btn btn-success">Back</button>
 </a>

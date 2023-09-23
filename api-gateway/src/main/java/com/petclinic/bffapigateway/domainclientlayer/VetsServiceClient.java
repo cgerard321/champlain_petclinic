@@ -59,6 +59,17 @@ public class VetsServiceClient {
         return numberOfRatings;
     }
 
+    public Mono<String> getPercentageOfRatingsByVetId(String vetId) {
+        Mono<String> percentageOfRatings =
+                webClientBuilder
+                        .build()
+                        .get()
+                        .uri(vetsServiceUrl + "/{vetId}/ratings/percentages", vetId)
+                        .retrieve()
+                        .bodyToMono(String.class);
+        return percentageOfRatings;
+    }
+
     public Mono<RatingResponseDTO> addRatingToVet(String vetId, Mono<RatingRequestDTO> ratingRequestDTO) {
         Mono<RatingResponseDTO> ratingResponseDTOMono =
                 webClientBuilder
@@ -67,6 +78,19 @@ public class VetsServiceClient {
                         .uri(vetsServiceUrl + "/" + vetId + "/ratings")
                         .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                         .body(ratingRequestDTO, RatingResponseDTO.class)
+                        .retrieve()
+                        .bodyToMono(RatingResponseDTO.class);
+
+        return ratingResponseDTOMono;
+    }
+    public Mono<RatingResponseDTO> updateRatingByVetIdAndByRatingId(String vetId, String ratingId, Mono<RatingRequestDTO> ratingRequestDTOMono){
+        Mono<RatingResponseDTO> ratingResponseDTOMono =
+                webClientBuilder
+                        .build()
+                        .put()
+                        .uri(vetsServiceUrl+"/"+vetId+"/ratings/"+ratingId)
+                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .body(ratingRequestDTOMono, RatingResponseDTO.class)
                         .retrieve()
                         .bodyToMono(RatingResponseDTO.class);
 
@@ -93,6 +117,7 @@ public class VetsServiceClient {
                         .bodyToMono(Double.class);
         return averageRating;
     }
+
 
 
 

@@ -11,10 +11,9 @@ import com.petclinic.bffapigateway.dtos.Auth.UserPasswordLessDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillDetails;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
-import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
-import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
-import com.petclinic.bffapigateway.dtos.Inventory.InventoryType;
+import com.petclinic.bffapigateway.dtos.Inventory.*;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
 import com.petclinic.bffapigateway.dtos.Vets.*;
@@ -24,9 +23,11 @@ import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import com.petclinic.bffapigateway.exceptions.GenericHttpException;
 import com.petclinic.bffapigateway.utils.Security.Filters.JwtTokenFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.RoleFilter;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -34,25 +35,38 @@ import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
+
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.util.MultiValueMapAdapter;
+
+
+import org.springframework.web.reactive.function.BodyInserters;
+
+
+
+
+import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
-
+import static org.assertj.core.api.Assertions.assertThat;
 import static com.petclinic.bffapigateway.dtos.Inventory.InventoryType.internal;
+
 import static org.junit.Assert.*;
 import static org.assertj.core.util.Lists.list;
 
@@ -95,7 +109,7 @@ class ApiGatewayControllerTest {
 
 
     @Test
-    void getAllRatingsForVet() {
+    void getAllRatingsForVet_ValidId() {
         RatingResponseDTO ratingResponseDTO = buildRatingResponseDTO();
         when(vetsServiceClient.getRatingsByVetId(anyString()))
                 .thenReturn(Flux.just(ratingResponseDTO));
@@ -140,7 +154,7 @@ class ApiGatewayControllerTest {
                 .uri("/api/gateway/vets/" + INVALID_VET_ID + "/ratings")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(NOT_FOUND)
+                .expectStatus().isEqualTo(INTERNAL_SERVER_ERROR)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("This id is not valid");
@@ -186,6 +200,21 @@ class ApiGatewayControllerTest {
 
     }
 
+    @Test
+    void getPercentageOfRatingsPerVet_ByVetId() {
+        when(vetsServiceClient.getPercentageOfRatingsByVetId(anyString()))
+                .thenReturn(Mono.just("1"));
+
+        client
+                .get()
+                .uri("/api/gateway/vets/" + VET_ID + "/ratings/percentages")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$").isEqualTo("1");
+    }
+
 
 
    @Test
@@ -214,6 +243,46 @@ class ApiGatewayControllerTest {
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
+    }
+
+    @Test
+    void updateRatingForVet(){
+        RatingRequestDTO updatedRating = RatingRequestDTO.builder()
+                .rateScore(2.0)
+                .vetId(VET_ID)
+                .rateDescription("Vet cancelled last minute.")
+                .rateDate("20/09/2023")
+                .build();
+
+        RatingResponseDTO ratingResponseDTO = RatingResponseDTO.builder()
+                .ratingId("12356789")
+                .vetId(VET_ID)
+                .rateScore(2.0)
+                .rateDescription("Vet cancelled last minute.")
+                .rateDate("20/09/2023")
+                .build();
+
+        when(vetsServiceClient.updateRatingByVetIdAndByRatingId(anyString(), anyString(), any(Mono.class)))
+                .thenReturn(Mono.just(ratingResponseDTO));
+
+        client.put()
+                .uri("/api/gateway/vets/"+VET_ID+"/ratings/"+ratingResponseDTO.getRatingId())
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedRating)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(RatingResponseDTO.class)
+                .value(responseDTO -> {
+                    Assertions.assertNotNull(responseDTO);
+                    Assertions.assertNotNull(responseDTO.getRatingId());
+                    assertThat(responseDTO.getRatingId()).isEqualTo(ratingResponseDTO.getRatingId());
+                    assertThat(responseDTO.getVetId()).isEqualTo(updatedRating.getVetId());
+                    assertThat(responseDTO.getRateScore()).isEqualTo(updatedRating.getRateScore());
+                    assertThat(responseDTO.getRateDescription()).isEqualTo(updatedRating.getRateDescription());
+                    assertThat(responseDTO.getRateDate()).isEqualTo(updatedRating.getRateDate());
+                });
     }
 
     @Test
@@ -666,6 +735,9 @@ class ApiGatewayControllerTest {
 
 
 
+
+
+
     @Test
     void createOwner(){
         OwnerResponseDTO owner = new OwnerResponseDTO();
@@ -697,6 +769,13 @@ class ApiGatewayControllerTest {
         assertEquals(owner.getCity(),"Johnston");
         assertEquals(owner.getTelephone(),"51451545144");
     }
+
+
+
+
+
+
+
 
     @Test
 
@@ -1349,6 +1428,11 @@ class ApiGatewayControllerTest {
     /**
      * Visits Methods
      * **/
+
+    String VISIT_ID = buildVisitResponseDTO().getVisitId();
+
+
+
     @Test
     void shouldCreateAVisitWithOwnerInfo(){
         OwnerResponseDTO owner = new OwnerResponseDTO();
@@ -1543,7 +1627,6 @@ class ApiGatewayControllerTest {
                 .jsonPath("$[0].description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$[0].practitionerId").isEqualTo(1);
     }
-
     /*
     @Test
     void shouldGetAVisitByPractitionerIdAndMonth(){
@@ -1718,6 +1801,42 @@ class ApiGatewayControllerTest {
     }
 
     @Test
+    public void updateOwner_shouldSucceed() {
+        // Define the owner ID and updated owner data
+        String ownerId = "ownerId-123";
+        OwnerRequestDTO updatedOwnerData = new OwnerRequestDTO();
+        updatedOwnerData.setFirstName("UpdatedFirstName");
+        updatedOwnerData.setLastName("UpdatedLastName");
+
+        // Mock the behavior of customersServiceClient.updateOwner
+        OwnerResponseDTO updatedOwner = new OwnerResponseDTO();
+        updatedOwner.setOwnerId(ownerId);
+        updatedOwner.setFirstName(updatedOwnerData.getFirstName());
+        updatedOwner.setLastName(updatedOwnerData.getLastName());
+        when(customersServiceClient.updateOwner(eq(ownerId), any(Mono.class)))
+                .thenReturn(Mono.just(updatedOwner));
+
+        // Perform the PUT request to update the owner
+        client.put()
+                .uri("/api/gateway/owners/{ownerId}", ownerId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(updatedOwnerData))
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(OwnerResponseDTO.class)
+                .value(updatedOwnerResponseDTO -> {
+                    // Assertions
+                    assertNotNull(updatedOwnerResponseDTO);
+                    assertEquals(updatedOwnerResponseDTO.getOwnerId(), ownerId);
+                    assertEquals(updatedOwnerResponseDTO.getFirstName(), updatedOwnerData.getFirstName());
+                    assertEquals(updatedOwnerResponseDTO.getLastName(), updatedOwnerData.getLastName());
+                    // Add more assertions if needed
+                });
+    }
+
+
+    @Test
     @DisplayName("Should return a bad request if the petId is invalid when trying to get the scheduled visits of a pet")
     void shouldGetBadRequestWhenInvalidPetIdToRetrieveScheduledVisits() {
         final int invalidPetId = -1;
@@ -1735,6 +1854,39 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.timestamp").exists()
                 .jsonPath("$.message").isEqualTo(expectedErrorMessage);
     }
+
+    @Test
+    void deleteVisitById_visitId_shouldSucceed(){
+        when(visitsServiceClient.deleteVisitByVisitId(VISIT_ID)).thenReturn(Mono.empty());
+        client.delete()
+                .uri("/api/gateway/visits/" + VISIT_ID)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk();
+
+        Mockito.verify(visitsServiceClient, times(1))
+                .deleteVisitByVisitId(VISIT_ID);
+
+    }
+
+    @Test
+    void deleteVisitById_visitId_shouldFailWithNotFoundException(){
+        // Mocking visitsServiceClient to throw a NotFoundException
+        String invalidId = "fakeId";
+        when(visitsServiceClient.deleteVisitByVisitId(invalidId)).thenReturn(Mono.error(new NotFoundException("Visit not found")));
+
+        client.delete()
+                .uri("/api/gateway/visits/" + invalidId)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound(); // Expecting a 404 status code
+
+        Mockito.verify(visitsServiceClient, times(1))
+                .deleteVisitByVisitId(invalidId);
+    }
+
+
+
 
 //    @Test
 //    @DisplayName("Given valid JWT, verify user")
@@ -1941,6 +2093,91 @@ private InventoryResponseDTO buildInventoryDTO(){
                 .updateInventory(any(), eq(buildInventoryDTO().getInventoryId()));
     }
 
+//delete all product inventory and delete all inventory
+@Test
+void deleteAllInventory_shouldSucceed() {
+    // Mock the service call to simulate the successful deletion of all inventories.
+    // Assuming your service client has a method called `deleteAllInventories`.
+    when(inventoryServiceClient.deleteAllInventories())
+            .thenReturn(Mono.empty());  // Using Mono.empty() to simulate a void return (successful deletion without a return value).
+
+    // Make the DELETE request to the API.
+    client.delete()
+            .uri("/api/gateway/inventory")  // Assuming the endpoint for deleting all inventories is the same without an ID.
+            .exchange()
+            .expectStatus().isOk()
+            .expectBody().isEmpty();
+
+    // Verify that the deleteAllInventories method on the service client was called exactly once.
+    verify(inventoryServiceClient, times(1))
+            .deleteAllInventories();
+}
+
+    @Test
+    void deleteAllProductInventory_shouldSucceed() {
+        // Assuming you want to test for a specific inventoryId
+        String inventoryId = "someInventoryId";
+
+        // Mock the service call to simulate the successful deletion of all product inventories for a specific inventoryId.
+        // Adjust the method name if `deleteAllProductInventoriesForInventory` is not the correct name.
+        when(inventoryServiceClient.deleteAllProductForInventory(eq(inventoryId)))
+                .thenReturn(Mono.empty());  // Using Mono.empty() to simulate a void return (successful deletion without a return value).
+
+        // Make the DELETE request to the API for a specific inventoryId.
+        client.delete()
+                .uri("/api/gateway/inventory/{inventoryId}/products", inventoryId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody().isEmpty();
+
+        // Verify that the deleteAllProductInventoriesForInventory method on the service client was called exactly once with the specific inventoryId.
+        verify(inventoryServiceClient, times(1))
+                .deleteAllProductForInventory(eq(inventoryId));
+    }
+
+    @Test
+    void testUpdateProductInInventory() {
+        // Create a sample ProductRequestDTO
+        ProductRequestDTO requestDTO = new ProductRequestDTO("Sample Product", "Sample Description", 10.0, 100);
+
+        // Define the expected response
+        ProductResponseDTO expectedResponse = ProductResponseDTO.builder()
+                .id("sampleId")
+                .productId("sampleProductId")
+                .inventoryId("sampleInventoryId")
+                .productName(requestDTO.getProductName())
+                .productDescription(requestDTO.getProductDescription())
+                .productPrice(requestDTO.getProductPrice())
+                .productQuantity(requestDTO.getProductQuantity())
+                .build();
+
+        // Mock the behavior of the inventoryServiceClient
+        when(inventoryServiceClient.updateProductInInventory(any(), anyString(), anyString()))
+                .thenReturn(Mono.just(expectedResponse));
+
+        // Perform the PUT request
+        client.put()
+                .uri("/api/gateway/inventory/{inventoryId}/products/{productId}", "sampleInventoryId", "sampleProductId")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(ProductResponseDTO.class)
+                .value(dto ->{
+                    assertNotNull(dto);
+                    assertEquals(requestDTO.getProductName(),dto.getProductName());
+                    assertEquals(requestDTO.getProductDescription(),dto.getProductDescription());
+                    assertEquals(requestDTO.getProductPrice(),dto.getProductPrice());
+                    assertEquals(requestDTO.getProductQuantity(),dto.getProductQuantity());
+                });
+
+        // Verify that the inventoryServiceClient method was called
+        verify(inventoryServiceClient, times(1))
+                .updateProductInInventory(eq(requestDTO), eq("sampleInventoryId"), eq("sampleProductId"));
+    }
+
+
 
     private VetDTO buildVetDTO() {
         return VetDTO.builder()
@@ -1979,8 +2216,20 @@ private InventoryResponseDTO buildInventoryDTO(){
                 .build();
     }
 
+    private VisitResponseDTO buildVisitResponseDTO(){
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+        String visitId = UUID.randomUUID().toString();
+        return VisitResponseDTO.builder()
+                .visitId(visitId)
+                .visitDate(LocalDateTime.parse("2023-01-21T21:00:00", dtf))
+                .description("delete this desc")
+                .petId(2)
+                .practitionerId(2)
+                .status(true)
+                .build();
 
 
+    }
 
 
 }

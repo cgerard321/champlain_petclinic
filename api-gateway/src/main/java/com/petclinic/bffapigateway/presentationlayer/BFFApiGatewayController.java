@@ -6,8 +6,10 @@ import com.petclinic.bffapigateway.dtos.Auth.Login;
 import com.petclinic.bffapigateway.dtos.Auth.UserPasswordLessDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.ProductRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.ProductResponseDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
@@ -206,6 +208,9 @@ public class BFFApiGatewayController {
     public Mono<Void> deleteVisitsByVisitId(final @PathVariable String visitId){
         return visitsServiceClient.deleteVisitByVisitId(visitId);
     }
+    /**
+     * End of Visit Methods
+     **/
 
     @GetMapping(value = "vets")
     public Flux<VetDTO> getAllVets() {
@@ -214,7 +219,7 @@ public class BFFApiGatewayController {
 
     @GetMapping(value = "vets/{vetId}/ratings")
     public Flux<RatingResponseDTO> getRatingsByVetId(@PathVariable String vetId) {
-        return vetsServiceClient.getRatingsByVetId(vetId);
+        return vetsServiceClient.getRatingsByVetId(VetsEntityDtoUtil.verifyId(vetId));
     }
 
     @GetMapping("/vets/{vetId}/ratings/count")
@@ -241,7 +246,21 @@ public class BFFApiGatewayController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-  
+
+    @PutMapping(value="vets/{vetId}/ratings/{ratingId}")
+    public Mono<ResponseEntity<RatingResponseDTO>> updateRatingByVetIdAndRatingId(@PathVariable String vetId, @PathVariable String ratingId, @RequestBody Mono<RatingRequestDTO> ratingRequestDTOMono){
+        return vetsServiceClient.updateRatingByVetIdAndByRatingId(vetId, ratingId, ratingRequestDTOMono)
+                .map(r->ResponseEntity.status(HttpStatus.OK).body(r))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    @GetMapping("/vets/{vetId}/ratings/percentages")
+    public Mono<ResponseEntity<String>> getPercentageOfRatingsByVetId(@PathVariable String vetId) {
+        return vetsServiceClient.getPercentageOfRatingsByVetId(VetsEntityDtoUtil.verifyId(vetId))
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
     @GetMapping("/vets/{vetId}")
     public Mono<ResponseEntity<VetDTO>> getVetByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getVetByVetId(VetsEntityDtoUtil.verifyId(vetId))
@@ -322,6 +341,7 @@ public class BFFApiGatewayController {
                 );*/
     }
 
+
     @GetMapping(value = "owners/{ownerId}")
     public Mono<ResponseEntity<OwnerResponseDTO>> getOwnerDetails(final @PathVariable String ownerId) {
         return customersServiceClient.getOwner(ownerId)
@@ -333,6 +353,7 @@ public class BFFApiGatewayController {
                                 .map(addVisitsToOwner(owner))
                 );*/
     }
+
 
     @PostMapping(value = "owners",
             consumes = "application/json",
@@ -371,13 +392,36 @@ public class BFFApiGatewayController {
         return customersServiceClient.deletePetPhoto(ownerId, photoId);
     }
 
-    @PutMapping(value = "owners/{ownerId}",consumes = "application/json" ,produces = "application/json")
-    public Mono<OwnerResponseDTO> updateOwnerDetails(@PathVariable int ownerId, @RequestBody OwnerResponseDTO od) {
-        return customersServiceClient.updateOwner(ownerId, od);
-                /*.flatMap(owner ->
-                        visitsServiceClient.getVisitsForPets(owner.getPetIds())
-                                .map(addVisitsToOwner(owner)));*/
+
+
+
+
+    /*
+
+    // Endpoint to update an owner
+    @PutMapping("owners/{ownerId}")
+    public Mono<ResponseEntity<OwnerResponseDTO>> updateOwner(
+            @PathVariable String ownerId,
+            @RequestBody OwnerRequestDTO ownerRequestDTO) {
+        return customersServiceClient.updateOwner(ownerId, ownerRequestDTO)
+                .map(updatedOwner -> ResponseEntity.ok().body(updatedOwner))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
+
+     */
+
+    @PutMapping("owners/{ownerId}")
+    public Mono<ResponseEntity<OwnerResponseDTO>> updateOwner(
+            @PathVariable String ownerId,
+            @RequestBody Mono<OwnerRequestDTO> ownerRequestMono) {
+        return ownerRequestMono.flatMap(ownerRequestDTO ->
+                customersServiceClient.updateOwner(ownerId, Mono.just(ownerRequestDTO))
+                        .map(updatedOwner -> ResponseEntity.ok().body(updatedOwner))
+                        .defaultIfEmpty(ResponseEntity.notFound().build())
+        );
+    }
+
 
 
 
@@ -439,10 +483,36 @@ public class BFFApiGatewayController {
 
     }
 
-
-
+    @PutMapping(value = "inventory/{inventoryId}/products/{productId}")
+    public Mono<ProductResponseDTO> updateProductInInventory(@RequestBody ProductRequestDTO model, @PathVariable String inventoryId, @PathVariable String productId){
+        return inventoryServiceClient.updateProductInInventory(model, inventoryId, productId);
+    }
+    
     @DeleteMapping(value = "inventory/{inventoryId}/products/{productId}")
     public Mono<Void> deleteProductInInventory(@PathVariable String inventoryId, @PathVariable String productId){
         return inventoryServiceClient.deleteProductInInventory(inventoryId, productId);
     }
+
+    @GetMapping(value = "inventory/{inventoryId}/products")
+    public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndFields(@PathVariable String inventoryId,
+                                                                                 @RequestParam(required = false) String productName,
+                                                                                 @RequestParam(required = false) Double productPrice,
+                                                                                 @RequestParam(required = false) Integer productQuantity){
+        return inventoryServiceClient.getProductsInInventoryByInventoryIdAndProductsField(inventoryId, productName, productPrice, productQuantity);
+    }
+
+    @GetMapping(value = "inventory")
+    public Flux<InventoryResponseDTO> getAllInventory(){
+        return inventoryServiceClient.getAllInventory();
+    }
+
+    @DeleteMapping(value = "inventory/{inventoryId}/products")
+    public Mono<Void> deleteAllProductsFromInventory(@PathVariable String inventoryId) {
+        return inventoryServiceClient.deleteAllProductForInventory(inventoryId);
+    }
+    @DeleteMapping(value = "inventory")
+    public Mono<Void> deleteAllInventories() {
+        return inventoryServiceClient.deleteAllInventories();
+    }
+
 }
