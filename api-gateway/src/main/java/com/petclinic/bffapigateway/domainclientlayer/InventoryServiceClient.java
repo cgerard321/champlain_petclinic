@@ -63,7 +63,7 @@ public class InventoryServiceClient {
     }
 
     public Mono<ProductResponseDTO> updateProductInInventory(final ProductRequestDTO model, final String inventoryId, final String productId){
-        return webClientBuilder.build()
+        return webClient
                 .put()
                 .uri(inventoryServiceUrl + "/{inventoryId}/products/{productId}", inventoryId, productId)
                 .body(Mono.just(model),ProductRequestDTO.class)
