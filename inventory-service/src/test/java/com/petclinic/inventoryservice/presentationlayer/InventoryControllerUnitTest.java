@@ -343,6 +343,114 @@ class InventoryControllerUnitTest {
         verify(productInventoryService, times(1)).deleteAllProductInventory(inventoryId);
     }
 
+
+    @Test
+    void updateProductInInventory_ValidRequest_ShouldSucceed() {
+        // Arrange
+        String inventoryId = "123";
+        String productId = "456";
+        ProductRequestDTO requestDTO = ProductRequestDTO.builder()
+                .productName("Updated Product")
+                .productDescription("Updated Description")
+                .productPrice(200.00)
+                .productQuantity(20)
+                .build();
+
+        ProductResponseDTO responseDTO = ProductResponseDTO.builder()
+                .id(productId)
+                .inventoryId(inventoryId)
+                .productName("Updated Product")
+                .productDescription("Updated Description")
+                .productPrice(200.00)
+                .productQuantity(20)
+                .build();
+
+        when(productInventoryService.updateProductInInventory(any(), eq(inventoryId), eq(productId)))
+                .thenReturn(Mono.just(responseDTO));
+
+        // Act and Assert
+        webTestClient
+                .put()
+                .uri("/inventory/{inventoryId}/products/{productId}", inventoryId, productId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(ProductResponseDTO.class)
+                .value(dto -> {
+                    assertNotNull(dto);
+                    assertEquals(responseDTO.getId(), dto.getId());
+                    assertEquals(responseDTO.getInventoryId(), dto.getInventoryId());
+                    assertEquals(responseDTO.getProductName(), dto.getProductName());
+                    assertEquals(responseDTO.getProductDescription(), dto.getProductDescription());
+                    assertEquals(responseDTO.getProductPrice(), dto.getProductPrice());
+                    assertEquals(responseDTO.getProductQuantity(), dto.getProductQuantity());
+                });
+
+        verify(productInventoryService, times(1))
+                .updateProductInInventory(any(), eq(inventoryId), eq(productId));
+    }
+
+    @Test
+    void updateProductInInventory_ProductNotFound_ShouldReturnNotFound() {
+        // Arrange
+        String inventoryId = "123";
+        String productId = "456";
+        ProductRequestDTO requestDTO = ProductRequestDTO.builder()
+                .productName("Updated Product")
+                .productDescription("Updated Description")
+                .productPrice(200.00)
+                .productQuantity(20)
+                .build();
+
+        when(productInventoryService.updateProductInInventory(any(), eq(inventoryId), eq(productId)))
+                .thenReturn(Mono.error(new NotFoundException("Product not found")));
+
+        // Act and Assert
+        webTestClient
+                .put()
+                .uri("/inventory/{inventoryId}/products/{productId}", inventoryId, productId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message", "Product not found");
+
+        verify(productInventoryService, times(1))
+                .updateProductInInventory(any(), eq(inventoryId), eq(productId));
+    }
+
+    @Test
+    void updateProductInInventory_InvalidInput_ShouldReturnBadRequest() {
+        // Arrange
+        String inventoryId = "123";
+        String productId = "456";
+        ProductRequestDTO requestDTO = ProductRequestDTO.builder()
+                .productName("Updated Product")
+                .productDescription("Updated Description")
+                .productPrice(200.00)
+                .productQuantity(20)
+                .build();
+
+        when(productInventoryService.updateProductInInventory(any(), eq(inventoryId), eq(productId)))
+                .thenReturn(Mono.error(new InvalidInputException("Invalid input")));
+
+        // Act and Assert
+        webTestClient
+                .put()
+                .uri("/inventory/{inventoryId}/products/{productId}", inventoryId, productId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.message", "Invalid input");
+
+        verify(productInventoryService, times(1))
+                .updateProductInInventory(any(), eq(inventoryId), eq(productId));
+    }
+
     @Test
     void deleteAllInventories_ShouldCallServiceDeleteAll() {
         // Arrange
