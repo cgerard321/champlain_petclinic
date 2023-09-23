@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -54,12 +55,14 @@ import org.springframework.web.reactive.function.BodyInserters;
 
 
 
+import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuples;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static com.petclinic.bffapigateway.dtos.Inventory.InventoryType.internal;
@@ -1423,6 +1426,11 @@ class ApiGatewayControllerTest {
     /**
      * Visits Methods
      * **/
+
+    String VISIT_ID = buildVisitResponseDTO().getVisitId();
+
+
+
     @Test
     void shouldCreateAVisitWithOwnerInfo(){
         OwnerResponseDTO owner = new OwnerResponseDTO();
@@ -1617,7 +1625,6 @@ class ApiGatewayControllerTest {
                 .jsonPath("$[0].description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$[0].practitionerId").isEqualTo(1);
     }
-
     /*
     @Test
     void shouldGetAVisitByPractitionerIdAndMonth(){
@@ -1845,6 +1852,39 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.timestamp").exists()
                 .jsonPath("$.message").isEqualTo(expectedErrorMessage);
     }
+
+    @Test
+    void deleteVisitById_visitId_shouldSucceed(){
+        when(visitsServiceClient.deleteVisitByVisitId(VISIT_ID)).thenReturn(Mono.empty());
+        client.delete()
+                .uri("/api/gateway/visits/" + VISIT_ID)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk();
+
+        Mockito.verify(visitsServiceClient, times(1))
+                .deleteVisitByVisitId(VISIT_ID);
+
+    }
+
+    @Test
+    void deleteVisitById_visitId_shouldFailWithNotFoundException(){
+        // Mocking visitsServiceClient to throw a NotFoundException
+        String invalidId = "fakeId";
+        when(visitsServiceClient.deleteVisitByVisitId(invalidId)).thenReturn(Mono.error(new NotFoundException("Visit not found")));
+
+        client.delete()
+                .uri("/api/gateway/visits/" + invalidId)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound(); // Expecting a 404 status code
+
+        Mockito.verify(visitsServiceClient, times(1))
+                .deleteVisitByVisitId(invalidId);
+    }
+
+
+
 
 //    @Test
 //    @DisplayName("Given valid JWT, verify user")
@@ -2174,8 +2214,20 @@ void deleteAllInventory_shouldSucceed() {
                 .build();
     }
 
+    private VisitResponseDTO buildVisitResponseDTO(){
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+        String visitId = UUID.randomUUID().toString();
+        return VisitResponseDTO.builder()
+                .visitId(visitId)
+                .visitDate(LocalDateTime.parse("2023-01-21T21:00:00", dtf))
+                .description("delete this desc")
+                .petId(2)
+                .practitionerId(2)
+                .status(true)
+                .build();
 
 
+    }
 
 
 }
