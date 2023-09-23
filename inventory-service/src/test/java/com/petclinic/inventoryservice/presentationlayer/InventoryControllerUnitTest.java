@@ -479,66 +479,6 @@ class InventoryControllerUnitTest {
     }
 
 
-   /*@Test
-   void addProductToInventory_validProduct_ShouldSucceed(){
-       Arrange
-       when(productInventoryService.addProductToInventory(Mono.just(inventoryRequestDTO), inventoryResponseDTO.getInventoryId()))
-               .thenReturn(Mono.just(inventoryResponseDTO));
-       //Act and assert
-       webTestClient
-               .post()
-               .uri("/inventory/{inventoryId}/products", inventoryResponseDTO.getInventoryId())
-               .bodyValue(inventoryRequestDTO)
-               .exchange()
-               .expectStatus().isCreated()
-               .expectBody(ProductResponseDTO.class)
-               .value(dto -> {
-                   assertNotNull(dto);
-                   assertEquals(inventoryResponseDTO.getId(), dto.getId());
-                   assertEquals(inventoryResponseDTO.getInventoryId(), dto.getInventoryId());
-                   assertEquals(inventoryResponseDTO.getSku(), dto.getSku());
-                   assertEquals(inventoryResponseDTO.getProductName(), dto.getProductName());
-                   assertEquals(inventoryResponseDTO.getProductDescription(), dto.getProductDescription());
-                   assertEquals(inventoryResponseDTO.getProductPrice(), dto.getProductPrice());
-                   assertEquals(inventoryResponseDTO.getProductQuantity(), dto.getProductQuantity());
-               });
-       verify(productInventoryService).addProductToInventory(Mono.just(inventoryRequestDTO), inventoryResponseDTO.getInventoryId());
-   }
-
-
-
- */
-   /*@Test
-   void addProductToInventory_validProduct_ShouldSucceed(){
-       Arrange
-       when(productInventoryService.addProductToInventory(Mono.just(inventoryRequestDTO), inventoryResponseDTO.getInventoryId()))
-               .thenReturn(Mono.just(inventoryResponseDTO));
-       //Act and assert
-       webTestClient
-               .post()
-               .uri("/inventory/{inventoryId}/products", inventoryResponseDTO.getInventoryId())
-               .bodyValue(inventoryRequestDTO)
-               .exchange()
-               .expectStatus().isCreated()
-               .expectBody(ProductResponseDTO.class)
-               .value(dto -> {
-                   assertNotNull(dto);
-                   assertEquals(inventoryResponseDTO.getId(), dto.getId());
-                   assertEquals(inventoryResponseDTO.getInventoryId(), dto.getInventoryId());
-                   assertEquals(inventoryResponseDTO.getSku(), dto.getSku());
-                   assertEquals(inventoryResponseDTO.getProductName(), dto.getProductName());
-                   assertEquals(inventoryResponseDTO.getProductDescription(), dto.getProductDescription());
-                   assertEquals(inventoryResponseDTO.getProductPrice(), dto.getProductPrice());
-                   assertEquals(inventoryResponseDTO.getProductQuantity(), dto.getProductQuantity());
-               });
-       verify(productInventoryService).addProductToInventory(Mono.just(inventoryRequestDTO), inventoryResponseDTO.getInventoryId());
-   }
-
-
-
- */
-
-
     @Test
     public void deleteProductInInventory_byInvalidProductId_shouldNotFound(){
         //arrange
@@ -571,32 +511,5 @@ class InventoryControllerUnitTest {
                 .expectBody()
                 .jsonPath("$.message","Inventory not found, make sure it exists, inventoryId: "+invalidInventoryId);
     }
-
-
-//    @Test
-//    void addProductToInventory_validProduct_ShouldSucceed(){
-//        // Arrange
-//        when(productInventoryService.addProductToInventory(Mono.just(productRequestDTO), productResponseDTO.getInventoryId()))
-//                .thenReturn(Mono.just(productResponseDTO));
-//        //Act and assert
-//        webTestClient
-//                .post()
-//                .uri("/inventory/{inventoryId}/products", productResponseDTO.getInventoryId())
-//                .bodyValue(productRequestDTO)
-//                .exchange()
-//                .expectStatus().isCreated()
-//                .expectBody(ProductResponseDTO.class)
-//                .value(dto -> {
-//                    assertNotNull(dto);
-//                    assertEquals(productResponseDTO.getId(), dto.getId());
-//                    assertEquals(productResponseDTO.getInventoryId(), dto.getInventoryId());
-//                    assertEquals(productResponseDTO.getSku(), dto.getSku());
-//                    assertEquals(productResponseDTO.getProductName(), dto.getProductName());
-//                    assertEquals(productResponseDTO.getProductDescription(), dto.getProductDescription());
-//                    assertEquals(productResponseDTO.getProductPrice(), dto.getProductPrice());
-//                    assertEquals(productResponseDTO.getProductQuantity(), dto.getProductQuantity());
-//                });
-//        verify(productInventoryService).addProductToInventory(Mono.just(productRequestDTO), productResponseDTO.getInventoryId());
-//    }
 }
 
