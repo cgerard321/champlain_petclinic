@@ -23,14 +23,8 @@ angular.module('ownerRegister')
             var id = self.owner.id;
             console.log(self.owner);
             var req;
-            if (id){
-                if(method == 'edit')
-                    req = $http.put("api/gateway/owners/" + id, self.owner);
-                else
-                    req = $http.delete("api/gateway/owners/" + id, self.owner)
-            }
-            else
-                req = $http.post("api/gateway/owners", self.owner);
+
+            req = $http.post("api/gateway/owners", self.owner);
 
             req.then(function () {
                 $state.go('owners');
