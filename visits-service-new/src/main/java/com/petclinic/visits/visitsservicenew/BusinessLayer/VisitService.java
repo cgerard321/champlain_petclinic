@@ -21,10 +21,4 @@ public interface VisitService {
 //    Mono<VetDTO> testingGetVetDTO(String vetId);
 //    Mono<PetResponseDTO> testingGetPetDTO(int petId);
 
-<<<<<<< HEAD
-=======
-//    Mono<VetDTO> testingGetVetDTO(String vetId);
-//    Mono<PetResponseDTO> testingGetPetDTO(int petId);
-
->>>>>>> c8f27c2a4b8a4858b9d173b581262a09216dda73
 }

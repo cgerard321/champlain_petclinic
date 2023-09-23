@@ -45,10 +45,5 @@ public class VetsClient {
 
         return vetDTOMono;
     }
-
-<<<<<<< HEAD
     
-=======
-
->>>>>>> c8f27c2a4b8a4858b9d173b581262a09216dda73
 }
