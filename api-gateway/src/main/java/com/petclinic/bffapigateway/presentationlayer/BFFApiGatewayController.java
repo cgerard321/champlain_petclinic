@@ -209,6 +209,9 @@ public class BFFApiGatewayController {
     public Mono<Void> deleteVisitsByVisitId(final @PathVariable String visitId){
         return visitsServiceClient.deleteVisitByVisitId(visitId);
     }
+    /**
+     * End of Visit Methods
+     **/
 
     @GetMapping(value = "vets")
     public Flux<VetDTO> getAllVets() {
