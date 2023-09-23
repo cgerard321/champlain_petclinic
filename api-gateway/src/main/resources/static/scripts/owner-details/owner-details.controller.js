@@ -6,6 +6,7 @@ angular.module('ownerDetails')
 
 
         $http.get('api/gateway/owners/' + $stateParams.ownerId).then(function (resp) {
+            console.log("Owner id is " + $stateParams.ownerId)
             console.log(resp.data)
             self.owner = resp.data;
         });
