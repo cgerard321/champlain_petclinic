@@ -45,19 +45,18 @@ public class OwnerServiceImpl implements OwnerService {
     @Override
     public Mono<OwnerResponseDTO> updateOwner(Mono<OwnerRequestDTO> ownerRequestDTO, String ownerId) {
 
-            return ownerRepo.findOwnerByOwnerId(ownerId)
-                    .flatMap(existingOwner -> ownerRequestDTO.map(requestDTO -> {
-                        existingOwner.setFirstName(requestDTO.getFirstName());
-                        existingOwner.setLastName(requestDTO.getLastName());
-                        existingOwner.setAddress(requestDTO.getAddress());
-                        existingOwner.setCity(requestDTO.getCity());
-                        existingOwner.setTelephone(requestDTO.getTelephone());
-                        return existingOwner;
-                    } ))
-                    .flatMap(ownerRepo::save)
-                    .map(EntityDTOUtil::toOwnerResponseDTO);
-        }
-
+        return ownerRepo.findOwnerByOwnerId(ownerId)
+                .flatMap(existingOwner -> ownerRequestDTO.map(requestDTO -> {
+                    existingOwner.setFirstName(requestDTO.getFirstName());
+                    existingOwner.setLastName(requestDTO.getLastName());
+                    existingOwner.setAddress(requestDTO.getAddress());
+                    existingOwner.setCity(requestDTO.getCity());
+                    existingOwner.setTelephone(requestDTO.getTelephone());
+                    return existingOwner;
+                }))
+                .flatMap(ownerRepo::save)
+                .map(EntityDTOUtil::toOwnerResponseDTO);
+    }
 
 
     @Override
@@ -67,3 +66,5 @@ public class OwnerServiceImpl implements OwnerService {
     }
 
 }
+
+

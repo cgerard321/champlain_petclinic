@@ -794,6 +794,53 @@ class ApiGatewayControllerTest {
         assertEquals(owner.getCity(),"Johnston");
         assertEquals(owner.getTelephone(),"51451545144");
     }
+    @Test
+    void updateOwnerTest() {
+        // Create a sample OwnerResponseDTO representing the updated owner data
+        OwnerResponseDTO updatedOwner = new OwnerResponseDTO();
+        updatedOwner.setOwnerId("ownerId-123");
+        updatedOwner.setFirstName("UpdatedJohn");
+        updatedOwner.setLastName("UpdatedJohnny");
+        updatedOwner.setAddress("Updated Address");
+        updatedOwner.setCity("Updated Johnston");
+        updatedOwner.setTelephone("51451545145");
+
+        // Mock the behavior of the customersServiceClient.updateOwner method
+        when(customersServiceClient.updateOwner(anyString(), any(Mono.class)))
+                .thenReturn(Mono.just(updatedOwner));
+
+        // Create an OwnerRequestDTO with the updated data
+        OwnerRequestDTO updatedRequestDTO = new OwnerRequestDTO();
+        updatedRequestDTO.setFirstName("UpdatedJohn");
+        updatedRequestDTO.setLastName("UpdatedJohnny");
+        updatedRequestDTO.setAddress("Updated Address");
+        updatedRequestDTO.setCity("Updated Johnston");
+        updatedRequestDTO.setTelephone("51451545145");
+
+        // Call the updateOwner method
+        client.put()
+                .uri("/api/gateway/owners/{ownerId}", "ownerId-123") // Replace with the actual owner ID
+                .contentType(APPLICATION_JSON)
+                .body(Mono.just(updatedRequestDTO), OwnerRequestDTO.class)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.ownerId").isEqualTo(updatedOwner.getOwnerId())
+                .jsonPath("$.firstName").isEqualTo(updatedOwner.getFirstName())
+                .jsonPath("$.lastName").isEqualTo(updatedOwner.getLastName())
+                .jsonPath("$.address").isEqualTo(updatedOwner.getAddress())
+                .jsonPath("$.city").isEqualTo(updatedOwner.getCity())
+                .jsonPath("$.telephone").isEqualTo(updatedOwner.getTelephone());
+
+        // Verify that the customersServiceClient.updateOwner method was called with the expected arguments
+        verify(customersServiceClient, times(1)).updateOwner(eq("ownerId-123"), any(Mono.class));
+    }
+
+
+
+
 
 
 

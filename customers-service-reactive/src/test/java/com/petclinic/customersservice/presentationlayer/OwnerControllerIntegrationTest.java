@@ -97,25 +97,63 @@ class OwnerControllerIntegrationTest {
 //                //.jsonPath("$.photoId").isEqualTo(ownerEntity.getPhotoId());
     }
 
-//    @Test
-//    void updateOwnerByOwnerId() {
-//        Publisher<Owner> setup = repo.deleteAll().thenMany(repo.save(ownerEntity));
-//        StepVerifier.create(setup).expectNextCount(1).verifyComplete();
-//        client.put().uri("/owners/" + OWNER_ID)
-//                .body(Mono.just(ownerEntity), Owner.class)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .exchange().expectStatus().isOk()
-//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-//                .expectBody()
-//                .jsonPath("$.id").isEqualTo(ownerEntity.getId())
-//                .jsonPath("$.firstName").isEqualTo(ownerEntity.getFirstName())
-//                .jsonPath("$.lastName").isEqualTo(ownerEntity.getLastName())
-//                .jsonPath("$.address").isEqualTo(ownerEntity.getAddress())
-//                .jsonPath("$.city").isEqualTo(ownerEntity.getCity())
-//                .jsonPath("$.telephone").isEqualTo(ownerEntity.getTelephone());
-//                //.jsonPath("$.photoId").isEqualTo(ownerEntity.getPhotoId());
-//
-//    }
+    /*
+    @Test
+    void updateOwnerByOwnerId() {
+        Publisher<Owner> setup = repo.deleteAll().thenMany(repo.save(ownerEntity));
+        StepVerifier.create(setup).expectNextCount(1).verifyComplete();
+        client.put().uri("/owners/" + OWNER_ID)
+                .body(Mono.just(ownerEntity), Owner.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange().expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.id").isEqualTo(ownerEntity.getId())
+                .jsonPath("$.firstName").isEqualTo(ownerEntity.getFirstName())
+                .jsonPath("$.lastName").isEqualTo(ownerEntity.getLastName())
+                .jsonPath("$.address").isEqualTo(ownerEntity.getAddress())
+                .jsonPath("$.city").isEqualTo(ownerEntity.getCity())
+                .jsonPath("$.telephone").isEqualTo(ownerEntity.getTelephone());
+                //.jsonPath("$.photoId").isEqualTo(ownerEntity.getPhotoId());
+
+    }
+
+     */
+
+    @Test
+    void updateOwnerByOwnerId() {
+        // Ensure that an owner with valid data exists in the repository
+        repo.save(ownerEntity).block();
+
+        // Create an updated owner object
+        Owner updatedOwner = Owner.builder()
+                .ownerId(ownerEntity.getOwnerId()) // Set the same ownerId
+                .firstName("UpdatedFirstName")
+                .lastName("UpdatedLastName")
+                .address("Updated Address")
+                .city("Updated City")
+                .telephone("Updated Telephone")
+                //.photoId("Updated PhotoId")
+                .build();
+
+        // Send a PUT request to update the owner
+        client.put()
+                .uri("/owners/" + ownerEntity.getOwnerId()) // Use the ownerId for the update
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedOwner)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.ownerId").isEqualTo(updatedOwner.getOwnerId()) // Verify the updated ID
+                .jsonPath("$.firstName").isEqualTo(updatedOwner.getFirstName())
+                .jsonPath("$.lastName").isEqualTo(updatedOwner.getLastName())
+                .jsonPath("$.address").isEqualTo(updatedOwner.getAddress())
+                .jsonPath("$.city").isEqualTo(updatedOwner.getCity())
+                .jsonPath("$.telephone").isEqualTo(updatedOwner.getTelephone());
+        //.jsonPath("$.photoId").isEqualTo(updatedOwner.getPhotoId());
+    }
+
 
     @Test
     void insertOwner() {
@@ -135,6 +173,9 @@ class OwnerControllerIntegrationTest {
                 .jsonPath("$.telephone").isEqualTo(ownerEntity.getTelephone());
                 //.jsonPath("$.photoId").isEqualTo(ownerEntity.getPhotoId());
     }
+
+
+
 
 
 
