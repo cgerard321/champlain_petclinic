@@ -34,6 +34,10 @@ class OwnerControllerIntegrationTest {
 
     String PUBLIC_OWNER_ID = ownerEntity.getOwnerId();
 
+    Owner owner1 = buildOwner3("Billy","ownerId_1");
+
+
+
     @Test
     void deleteOwnerByOwnerId() {
         repo.save(ownerEntity);
@@ -114,6 +118,40 @@ class OwnerControllerIntegrationTest {
 //    }
 
     @Test
+    void updateOwnerByOwnerId() {
+        // Ensure that an owner with valid data exists in the repository
+        repo.save(ownerEntity).block();
+
+        // Create an updated owner object
+        Owner updatedOwner = Owner.builder()
+                .ownerId(ownerEntity.getOwnerId()) // Set the same ownerId
+                .firstName("UpdatedFirstName")
+                .lastName("UpdatedLastName")
+                .address("Updated Address")
+                .city("Updated City")
+                .telephone("Updated Telephone")
+                //.photoId("Updated PhotoId")
+                .build();
+
+        // Send a PUT request to update the owner
+        client.put()
+                .uri("/owners/" + ownerEntity.getOwnerId()) // Use the ownerId for the update
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedOwner)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.ownerId").isEqualTo(updatedOwner.getOwnerId()) // Verify the updated ID
+                .jsonPath("$.firstName").isEqualTo(updatedOwner.getFirstName())
+                .jsonPath("$.lastName").isEqualTo(updatedOwner.getLastName())
+                .jsonPath("$.address").isEqualTo(updatedOwner.getAddress())
+                .jsonPath("$.city").isEqualTo(updatedOwner.getCity())
+                .jsonPath("$.telephone").isEqualTo(updatedOwner.getTelephone());
+        //.jsonPath("$.photoId").isEqualTo(updatedOwner.getPhotoId());
+    }
+
+    @Test
     void insertOwner() {
         Publisher<Void> setup = repo.deleteAll();
         StepVerifier.create(setup).expectNextCount(0).verifyComplete();
@@ -134,7 +172,16 @@ class OwnerControllerIntegrationTest {
 
 
 
-    private Owner buildOwner() {
+
+
+
+
+
+
+
+
+
+        private Owner buildOwner() {
         return Owner.builder()
                 .id("9")
                 .ownerId("ownerId-123")
@@ -159,5 +206,19 @@ class OwnerControllerIntegrationTest {
                 //.photoId("1")
                 .build();
     }
+
+    private Owner buildOwner3(String firstName, String ownerId) {
+        return Owner.builder()
+                .ownerId("ownerId-1234")
+                .firstName("FirstName")
+                .lastName("LastName")
+                .address("Test address")
+                .city("test city")
+                .telephone("telephone")
+                //.photoId("1")
+                .build();
+    }
+
+
 
 }
