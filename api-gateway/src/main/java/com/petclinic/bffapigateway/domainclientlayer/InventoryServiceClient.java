@@ -88,5 +88,24 @@ public class InventoryServiceClient {
                 .retrieve()
                 .bodyToFlux(InventoryResponseDTO.class);
     }
+    //delete all
+
+    public Mono<Void> deleteAllProductForInventory(final String inventoryId) {
+        return webClient.delete()
+                .uri(inventoryServiceUrl + "/{inventoryId}/products", inventoryId)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(Void.class);
+    }
+    public Mono<Void> deleteAllInventories() {
+        return webClient.delete()
+                .uri(inventoryServiceUrl)  // Notice that we don't append any specific path
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(Void.class);
+    }
+
+
+
 
 }

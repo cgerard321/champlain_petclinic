@@ -497,4 +497,14 @@ public class BFFApiGatewayController {
     public Flux<InventoryResponseDTO> getAllInventory(){
         return inventoryServiceClient.getAllInventory();
     }
+
+    @DeleteMapping(value = "inventory/{inventoryId}/products")
+    public Mono<Void> deleteAllProductsFromInventory(@PathVariable String inventoryId) {
+        return inventoryServiceClient.deleteAllProductForInventory(inventoryId);
+    }
+    @DeleteMapping(value = "inventory")
+    public Mono<Void> deleteAllInventories() {
+        return inventoryServiceClient.deleteAllInventories();
+    }
+
 }
