@@ -50,9 +50,9 @@
                 class="info v{{vet.vetId}}" ng-mouseenter="$ctrl.show($event,vet.vetId)"
                 ng-mouseleave="$ctrl.hide($event,vet.vetId)">{{vet.firstName}} {{vet.lastName}}</span></a></td>
         <td class="vet_phone"><span>{{vet.phoneNumber}}</span></td>
-
         <td class="vet_email"><span>{{vet.email}}</span></td>
         <td class="vet_speciality"><span ng-repeat="specialty in vet.specialties">{{specialty.name + ' '}}</span></td>
+
         <td class="vet-rating v{{vet.vetId}} centered-count"><span>{{vet.rating}}</span></td>
         <td class="vet-rating v{{vet.vetId}} centered-count"><span>{{vet.count}}</span></td>
         <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteVet(vet.vetId)">Delete Vet</a></td>
