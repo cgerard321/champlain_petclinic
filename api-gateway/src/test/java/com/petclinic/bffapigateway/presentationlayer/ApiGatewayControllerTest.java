@@ -2042,8 +2042,6 @@ private InventoryResponseDTO buildInventoryDTO(){
                 .updateInventory(any(), eq(buildInventoryDTO().getInventoryId()));
     }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 //delete all product inventory and delete all inventory
 @Test
 void deleteAllInventory_shouldSucceed() {
@@ -2086,11 +2084,6 @@ void deleteAllInventory_shouldSucceed() {
                 .deleteAllProductForInventory(eq(inventoryId));
     }
 
-
-
-=======
-=======
->>>>>>> 9249d42a (Backend fully finished for the UpdateProductsInInventory Story (Other commits in my other broken branch) -Alexei Timbro)
     @Test
     void testUpdateProductInInventory() {
         // Create a sample ProductRequestDTO
@@ -2132,11 +2125,6 @@ void deleteAllInventory_shouldSucceed() {
         verify(inventoryServiceClient, times(1))
                 .updateProductInInventory(eq(requestDTO), eq("sampleInventoryId"), eq("sampleProductId"));
     }
-
-<<<<<<< HEAD
->>>>>>> f1981441 (Backend fully finished for the UpdateProductsInInventory Story (Other commits in my other broken branch) -Alexei Timbro)
-=======
->>>>>>> 9249d42a (Backend fully finished for the UpdateProductsInInventory Story (Other commits in my other broken branch) -Alexei Timbro)
 
     private VetDTO buildVetDTO() {
         return VetDTO.builder()
