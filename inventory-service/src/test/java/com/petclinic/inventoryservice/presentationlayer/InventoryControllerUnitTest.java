@@ -451,52 +451,6 @@ class InventoryControllerUnitTest {
                 .updateProductInInventory(any(), eq(inventoryId), eq(productId));
     }
 
-
-
-
-
-
-
-/*
-    @Test
-    void updateProductInInventory_InvalidInput_ShouldReturnBadRequest() {
-        // Arrange
-        String inventoryId = "123";
-        String productId = "456";
-        ProductRequestDTO requestDTO = ProductRequestDTO.builder()
-                .productName("Updated Product")
-                .productDescription("Updated Description")
-                .productPrice(200.00)
-                .productQuantity(20)
-                .build();
-
-        when(productInventoryService.updateProductInInventory(any(), eq(inventoryId), eq(productId)))
-                .thenReturn(Mono.error(new InvalidInputException("Invalid input")));
-
-        // Act and Assert
-        webTestClient
-                .put()
-                .uri("/inventory/{inventoryId}/products/{productId}", inventoryId, productId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(requestDTO)
-                .exchange()
-                .expectStatus().isBadRequest()
-                .expectBody()
-                .jsonPath("$.message", "Invalid input");
-
-        verify(productInventoryService, times(1))
-                .updateProductInInventory(any(), eq(inventoryId), eq(productId));
-
-        verify(productInventoryService, times(1)).deleteAllProductInventory(inventoryId);
-
-    }
-    
- */
-
-
-
-
-
     @Test
     void deleteAllInventories_ShouldCallServiceDeleteAll() {
         // Arrange

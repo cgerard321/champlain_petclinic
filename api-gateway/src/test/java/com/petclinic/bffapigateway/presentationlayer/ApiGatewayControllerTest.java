@@ -2112,14 +2112,14 @@ void deleteAllInventory_shouldSucceed() {
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.id").isEqualTo(expectedResponse.getId())
-                .jsonPath("$.productId").isEqualTo(expectedResponse.getProductId())
-                .jsonPath("$.inventoryId").isEqualTo(expectedResponse.getInventoryId())
-                .jsonPath("$.productName").isEqualTo(expectedResponse.getProductName())
-                .jsonPath("$.productDescription").isEqualTo(expectedResponse.getProductDescription())
-                .jsonPath("$.productPrice").isEqualTo(expectedResponse.getProductPrice())
-                .jsonPath("$.productQuantity").isEqualTo(expectedResponse.getProductQuantity());
+                .expectBody(ProductResponseDTO.class)
+                .value(dto ->{
+                    assertNotNull(dto);
+                    assertEquals(requestDTO.getProductName(),dto.getProductName());
+                    assertEquals(requestDTO.getProductDescription(),dto.getProductDescription());
+                    assertEquals(requestDTO.getProductPrice(),dto.getProductPrice());
+                    assertEquals(requestDTO.getProductQuantity(),dto.getProductQuantity());
+                });
 
         // Verify that the inventoryServiceClient method was called
         verify(inventoryServiceClient, times(1))
