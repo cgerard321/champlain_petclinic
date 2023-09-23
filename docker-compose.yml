@@ -36,6 +36,8 @@ services:
 
     vet-service:
         build: vet-service
+        ports:
+          - "7002:8080"
         environment:
             - SPRING_PROFILES_ACTIVE=docker
         depends_on:

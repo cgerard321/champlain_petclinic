@@ -5,27 +5,10 @@ app:
   vet-service:
     host: localhost
     port: 7002
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
   customers-service-reactive:
     host: localhost
     port: 8090
-=======
-  customers-service:
-      host: localhost
-      port: 7003
->>>>>>> 64770df5 (Implemented Domain Client, need to put service in exposed port in order to test)
-=======
-  customers-service-reactive:
-    host: localhost
-    port: 8090
->>>>>>> 13e046ef (Testing Done. Ready to merge to main)
-=======
-  customers-service-reactive:
-    host: localhost
-    port: 8090
->>>>>>> 21d04094c8822683170917adb85383ee0720e72a
+
 
 logging:
   level:
@@ -79,19 +62,7 @@ app:
   vet-service:
     host: vet-service
     port: 8080
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
   customers-service-reactive:
-=======
-  customers-service:
->>>>>>> 64770df5 (Implemented Domain Client, need to put service in exposed port in order to test)
-=======
-  customers-service-reactive:
->>>>>>> 13e046ef (Testing Done. Ready to merge to main)
-=======
-  customers-service-reactive:
->>>>>>> 21d04094c8822683170917adb85383ee0720e72a
     host: customers-service-reactive
     port: 8080
 
