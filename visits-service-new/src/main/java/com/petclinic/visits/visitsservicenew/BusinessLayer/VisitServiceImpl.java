@@ -1,7 +1,10 @@
 package com.petclinic.visits.visitsservicenew.BusinessLayer;
 
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
+<<<<<<< HEAD
 
+=======
+>>>>>>> c8f27c2a4b8a4858b9d173b581262a09216dda73
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.PetResponseDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.PetsClient;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetDTO;
@@ -76,7 +79,10 @@ public class VisitServiceImpl implements VisitService {
 //        return petsClient.getPetById(petId);
 //    }
 //
+<<<<<<< HEAD
 
+=======
+>>>>>>> c8f27c2a4b8a4858b9d173b581262a09216dda73
     @Override
     public Mono<VisitResponseDTO> updateVisit(String visitId, Mono<VisitRequestDTO> visitRequestDTOMono) {
         return repo.findByVisitId(visitId)
