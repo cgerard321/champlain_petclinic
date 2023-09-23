@@ -62,7 +62,7 @@ public class VisitServiceImpl implements VisitService {
 
     @Override
     public Mono<Void> deleteVisit(String visitId) {
-        return repo.deleteVisitByVisitId(visitId);
+        return repo.deleteByVisitId(visitId);
     }
 
 

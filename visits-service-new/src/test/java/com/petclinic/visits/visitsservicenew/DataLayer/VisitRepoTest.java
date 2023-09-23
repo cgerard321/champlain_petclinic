@@ -9,6 +9,7 @@ import reactor.test.StepVerifier;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -51,7 +52,7 @@ class VisitRepoTest {
     @Test
     void findVisitsByPractitionerId(){
         StepVerifier.create(visitRepo.findVisitsByPractitionerId(visit1.getPractitionerId()))
-                .expectNextCount(3)
+                .expectNextCount(1)
                 .verifyComplete();
     }
     /*
@@ -83,7 +84,7 @@ class VisitRepoTest {
                 .visitDate(LocalDateTime.parse("2022-11-25T13:45:00"))
                 .description("this is a dummy description")
                 .petId(petId)
-                .practitionerId(2)
+                .practitionerId(UUID.randomUUID().toString())
                 .status(true).build();
     }
 }
