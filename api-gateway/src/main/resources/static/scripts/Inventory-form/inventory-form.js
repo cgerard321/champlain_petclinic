@@ -9,4 +9,6 @@ angular.module('inventoryForm', ['ui.router'])
                 template: '<inventory-form></inventory-form>'
             })
 
+
+
     }]);

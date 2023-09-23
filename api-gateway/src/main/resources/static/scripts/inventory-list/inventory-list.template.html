@@ -7,6 +7,7 @@
         <td>Name</td>
         <td>Type</td>
         <td>Description</td>
+        <td>Update</td>
     </tr>
     </thead>
 
@@ -19,6 +20,11 @@
         </td>
         <td><span>{{inventory.inventoryType}}</span></td>
         <td><span>{{inventory.inventoryDescription}}</span></td>
+        <td>
+            <a class="btn btn-warning" href="javascript:void(0)" ng-click="updateInventory">Edit</a>
+
+        </td>
+
         <!--<td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteBundle(bundle.bundleUUID)">Delete Bundle</a></td>-->
     </tr>
 </table>
