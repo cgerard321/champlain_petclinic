@@ -730,40 +730,7 @@ class ApiGatewayControllerTest {
 
     }
 
-    @Test
-    void updateOwner_shouldSucceed() {
-        // Define the owner ID and updated owner data
-        String ownerId = "ownerId-123";
-        OwnerRequestDTO updatedOwnerData = new OwnerRequestDTO();
-        updatedOwnerData.setFirstName("UpdatedFirstName");
-        updatedOwnerData.setLastName("UpdatedLastName");
 
-        // Mock the behavior of customersServiceClient.updateOwner
-        OwnerResponseDTO updatedOwner = new OwnerResponseDTO();
-        updatedOwner.setOwnerId(ownerId);
-        updatedOwner.setFirstName(updatedOwnerData.getFirstName());
-        updatedOwner.setLastName(updatedOwnerData.getLastName());
-        when(customersServiceClient.updateOwner(eq(ownerId), any(Mono.class)))
-                .thenReturn(Mono.just(updatedOwner));
-
-        // Perform the PUT request to update the owner
-        client.put()
-                .uri("/api/gateway/owners/{ownerId}", ownerId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(BodyInserters.fromValue(updatedOwnerData))
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(OwnerResponseDTO.class)
-                .value(updatedOwnerResponseDTO -> {
-                    // Assertions
-                    assertNotNull(updatedOwnerResponseDTO);
-                    assertEquals(updatedOwnerResponseDTO.getOwnerId(), ownerId);
-                    assertEquals(updatedOwnerResponseDTO.getFirstName(), updatedOwnerData.getFirstName());
-                    assertEquals(updatedOwnerResponseDTO.getLastName(), updatedOwnerData.getLastName());
-                    // Add more assertions if needed
-                });
-    }
 
 
 
@@ -1825,6 +1792,42 @@ class ApiGatewayControllerTest {
     }
 
     @Test
+    public void updateOwner_shouldSucceed() {
+        // Define the owner ID and updated owner data
+        String ownerId = "ownerId-123";
+        OwnerRequestDTO updatedOwnerData = new OwnerRequestDTO();
+        updatedOwnerData.setFirstName("UpdatedFirstName");
+        updatedOwnerData.setLastName("UpdatedLastName");
+
+        // Mock the behavior of customersServiceClient.updateOwner
+        OwnerResponseDTO updatedOwner = new OwnerResponseDTO();
+        updatedOwner.setOwnerId(ownerId);
+        updatedOwner.setFirstName(updatedOwnerData.getFirstName());
+        updatedOwner.setLastName(updatedOwnerData.getLastName());
+        when(customersServiceClient.updateOwner(eq(ownerId), any(Mono.class)))
+                .thenReturn(Mono.just(updatedOwner));
+
+        // Perform the PUT request to update the owner
+        client.put()
+                .uri("/api/gateway/owners/{ownerId}", ownerId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromValue(updatedOwnerData))
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(OwnerResponseDTO.class)
+                .value(updatedOwnerResponseDTO -> {
+                    // Assertions
+                    assertNotNull(updatedOwnerResponseDTO);
+                    assertEquals(updatedOwnerResponseDTO.getOwnerId(), ownerId);
+                    assertEquals(updatedOwnerResponseDTO.getFirstName(), updatedOwnerData.getFirstName());
+                    assertEquals(updatedOwnerResponseDTO.getLastName(), updatedOwnerData.getLastName());
+                    // Add more assertions if needed
+                });
+    }
+
+
+    @Test
     @DisplayName("Should return a bad request if the petId is invalid when trying to get the scheduled visits of a pet")
     void shouldGetBadRequestWhenInvalidPetIdToRetrieveScheduledVisits() {
         final int invalidPetId = -1;
@@ -2089,6 +2092,8 @@ void deleteAllInventory_shouldSucceed() {
         verify(inventoryServiceClient, times(1))
                 .deleteAllProductForInventory(eq(inventoryId));
     }
+
+
 
 
 
