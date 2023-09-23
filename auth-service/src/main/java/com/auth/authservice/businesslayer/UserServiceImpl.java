@@ -192,7 +192,6 @@ public class UserServiceImpl implements UserService {
                     .sameSite("Lax").build();
 
 
-            log.info("In controller before set header");
 
             return new HashMap<>() {{
                 put("token", token);
@@ -220,12 +219,12 @@ public class UserServiceImpl implements UserService {
         }
 
         try {
-
+            log.info("Line 223");
             updateResetPasswordToken( token, email);
-            log.info("Line 155");
+            log.info("Line 225");
 
 
-            String resetPasswordLink =  userResetPwdRequestModel.getUrl()+ "/api/v1/users/reset_password?token=" + token;
+            String resetPasswordLink =  "http://localhost:8080/#!/reset_password/" + token;
             sendEmail(email, resetPasswordLink);
             model.addAttribute("message", "We have sent a reset password link to your email. Please check.");
         } catch (Exception ex) {
@@ -236,14 +235,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updateResetPasswordToken(String token, String email) {
+        log.info("In updateResetPasswordToken()");
         Optional<User> user = userRepo.findByEmail(email);
+        log.info("User: " + user);
         if (user.isPresent()) {
             if(tokenRepository.findResetPasswordTokenByUserIdentifier(user.get().getId()) != null){
+                log.info("Token already exists");
                 tokenRepository.delete(tokenRepository.findResetPasswordTokenByUserIdentifier(user.get().getId()));
             }
+
             //Hash the tokens
             ResetPasswordToken resetPasswordToken = new ResetPasswordToken(user.get().getId(), BCrypt.hashpw(token,salt));
+            log.info("ResetPasswordToken: " + resetPasswordToken);
             tokenRepository.save(resetPasswordToken);
+            log.info("Token saved");
         } else {
             throw new IllegalArgumentException("Could not find any customer with the email " + email);
         }
@@ -252,7 +257,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserPasswordLessDTO getByResetPasswordToken(String token) {
         log.info("Token: " + token);
-        log.info("Line 187");
+        log.info("Line 255");
         String hashedToken = BCrypt.hashpw(token, salt);
         log.info("Hashed token: " + hashedToken);
         ResetPasswordToken resetPasswordToken = tokenRepository.findResetPasswordTokenByToken(hashedToken);
@@ -269,7 +274,7 @@ public class UserServiceImpl implements UserService {
     public void updatePassword(String newPassword, String token) {
 
         final Calendar cal = Calendar.getInstance();
-        log.info("line 201");
+        log.info("line 272");
         ResetPasswordToken resetPasswordToken = tokenRepository.findResetPasswordTokenByToken(BCrypt.hashpw(token, salt));
         if(resetPasswordToken.getExpiryDate().before(cal.getTime())){
             throw new IllegalArgumentException("Token expired");
@@ -312,7 +317,8 @@ public class UserServiceImpl implements UserService {
     public Model processResetPassword(UserResetPwdWithTokenRequestModel resetRequest, Model model) {
         String token = resetRequest.getToken();
         String password = resetRequest.getPassword();
-
+        log.info("Token: " + token);
+        log.info("Password: " + password);
 
 
         //Hash token

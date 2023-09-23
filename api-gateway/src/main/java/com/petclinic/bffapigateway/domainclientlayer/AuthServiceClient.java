@@ -174,6 +174,8 @@ public class AuthServiceClient {
 
         UserResetPwdWithTokenRequestModel userResetPwdWithTokenRequestModel = UserResetPwdWithTokenRequestModel.builder().token(pwdChange.getToken()).password(pwdChange.getPassword()).build();
 
+        log.info("Token : {}",pwdChange.getToken());
+        log.info("Password : {}",pwdChange.getPassword());
         String formPage;
         try {
             String url = authServiceUrl+"/users/reset_password";

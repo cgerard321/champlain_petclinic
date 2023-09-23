@@ -23,7 +23,6 @@ import com.auth.authservice.datamapperlayer.UserMapper;
 
 import com.auth.authservice.security.JwtTokenUtil;
 import com.auth.authservice.security.SecurityConst;
-import com.auth.authservice.security.UserPrincipalImpl;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -36,9 +35,6 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
@@ -159,10 +155,6 @@ public class UserController {
 
 
 
-    @GetMapping("/forgot_password")
-    public String showForgotPasswordForm() {
-        return "forgot_password_form";
-    }
 
     @PostMapping("/forgot_password")
     public String processForgotPassword(@RequestBody UserResetPwdRequestModel userResetPwdRequestModel, Model model) {
@@ -172,14 +164,6 @@ public class UserController {
     }
 
 
-
-    @GetMapping("/reset_password")
-    public String showResetPasswordForm(@RequestParam Map<String, String> querryParams, Model model) {
-        model = userService.showResetPasswordForm(querryParams, model);
-
-        return "reset_password_form";
-
-    }
 
     @PostMapping("/reset_password")
     public String processResetPassword(@RequestBody UserResetPwdWithTokenRequestModel resetRequest, Model model) {
