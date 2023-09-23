@@ -50,8 +50,7 @@
         <td><span>{{product.productPrice}}</span></td>
         <td><span>{{product.productDescription}}</span></td>
         <td><a class="btn btn-warning" href="javascript:void(0)" ng-click="">Edit</a></td>
-        <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteProduct(product.inventoryId, product.productId)">
-            <img src="/images/icons8-trash-32.png" alt="Trash Icon"/></a></td>
+        <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteProduct(product)">Delete</a></td>
     </tr>
 </table>
 <a ui-sref="productNew">
