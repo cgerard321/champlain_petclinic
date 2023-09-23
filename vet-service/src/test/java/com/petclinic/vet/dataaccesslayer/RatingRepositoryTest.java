@@ -19,12 +19,16 @@ class RatingRepositoryTest {
             .ratingId("1")
             .vetId("1")
             .rateScore(5.0)
+            .rateDate("21/09/2023")
+            .rateDescription("Vet was very gentle with my hamster.")
             .build();
 
     Rating rating2 = Rating.builder()
             .ratingId("2")
             .vetId("2")
             .rateScore(4.0)
+            .rateDate("10/09/2023")
+            .rateDescription("Vet very kind, but a bit slow.")
             .build();
     @BeforeEach
     void setUp() {
@@ -82,6 +86,36 @@ class RatingRepositoryTest {
                     assertEquals(rating.getRateScore(), createdRating.getRateScore());
                     assertEquals(rating.getRateDescription(), createdRating.getRateDescription());
                     assertEquals(rating.getRateDate(), createdRating.getRateDate());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    public void updateRatingOfVet_ShouldSucceed(){
+        String existingRatingId="2";
+
+        Publisher<Rating> exisingRating = ratingRepository.findByRatingId(existingRatingId);
+
+        StepVerifier
+                .create(exisingRating)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        Rating rating = Rating.builder()
+                .ratingId(existingRatingId)
+                .vetId("2")
+                .rateScore(2.0)
+                .rateDescription("Vet cancelled last minute.")
+                .rateDate("20/09/2023")
+                .build();
+
+        StepVerifier.create(ratingRepository.save(rating))
+                .consumeNextWith(updatedRating -> {
+                    assertEquals(rating.getRatingId(), updatedRating.getRatingId());
+                    assertEquals(rating.getVetId(), updatedRating.getVetId());
+                    assertEquals(rating.getRateScore(), updatedRating.getRateScore());
+                    assertEquals(rating.getRateDescription(), updatedRating.getRateDescription());
+                    assertEquals(rating.getRateDate(), updatedRating.getRateDate());
                 })
                 .verifyComplete();
     }

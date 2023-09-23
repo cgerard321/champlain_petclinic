@@ -3,7 +3,6 @@ package com.petclinic.bffapigateway.config;
 
 import com.petclinic.bffapigateway.exceptions.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -28,18 +27,18 @@ public class GlobalServletExceptionHandler implements ErrorWebExceptionHandler {
 
             log.debug("Exception type: {}", ex.getClass().getSimpleName());
 
-            switch (ex.getClass().getSimpleName()) {
-                case "InvalidTokenException", "NoTokenFoundException", "GeneralSecurityException" ->
-                        status = HttpStatus.UNAUTHORIZED;
-                case "ExistingVetNotFoundException" -> status = HttpStatus.NOT_FOUND;
-                case "GenericHttpException" -> {
-                    GenericHttpException error = (GenericHttpException) ex;
-                    status = error.getHttpStatus();
-                }
-                default -> {
-                    log.error("Exception not handled: {}", ex.getClass().getSimpleName());
-                    status = HttpStatus.INTERNAL_SERVER_ERROR;
-                }
+            Class<? extends Throwable> exClass = ex.getClass();
+
+            if (exClass.equals(InvalidTokenException.class) || exClass.equals(NoTokenFoundException.class) || exClass.equals(GeneralSecurityException.class)) {
+                status = HttpStatus.UNAUTHORIZED;
+            } else if (exClass.equals(ExistingVetNotFoundException.class) || exClass.equals(HandlerIsNullException.class)) {
+                status = HttpStatus.NOT_FOUND;
+            } else if (exClass.equals(GenericHttpException.class)) {
+                GenericHttpException error = (GenericHttpException) ex;
+                status = error.getHttpStatus();
+            } else {
+                log.error("Exception not handled: {}", exClass.getSimpleName());
+                status = HttpStatus.UNPROCESSABLE_ENTITY;
             }
             // Handle any other exception types here
         }

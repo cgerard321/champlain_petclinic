@@ -4,9 +4,7 @@ import com.petclinic.vet.dataaccesslayer.Vet;
 import com.petclinic.vet.servicelayer.*;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
@@ -14,10 +12,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.test.StepVerifier;
 
 import java.util.HashSet;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.times;
@@ -38,7 +36,7 @@ class VetControllerUnitTest {
     VetDTO vetDTO = buildVetDTO();
     VetDTO vetDTO2 = buildVetDTO2();
 
-    RatingResponseDTO ratingDTO = buildRatingDTO();
+    RatingResponseDTO ratingDTO = buildRatingResponseDTO("Vet was super calming with my pet",5.0);
     Vet vet = buildVet();
     String VET_ID = vet.getVetId();
     String VET_BILL_ID = vet.getVetBillId();
@@ -111,6 +109,49 @@ class VetControllerUnitTest {
     }
 
     @Test
+    void updateRatingWithValidVetIdAndValidRatingId_withValidValues_shouldSucceed(){
+        RatingRequestDTO updatedRating = RatingRequestDTO.builder()
+                .rateScore(2.0)
+                .vetId(VET_ID)
+                .rateDescription("Vet cancelled last minute.")
+                .rateDate("20/09/2023")
+                .build();
+
+        RatingResponseDTO ratingResponse = RatingResponseDTO.builder()
+                .ratingId("2")
+                .rateScore(2.0)
+                .vetId(VET_ID)
+                .rateDescription("Vet cancelled last minute.")
+                .rateDate("20/09/2023")
+                .build();
+
+        when(ratingService.updateRatingByVetIdAndRatingId(anyString(), anyString(), any(Mono.class)))
+                .thenReturn(Mono.just(ratingResponse));
+
+        client.put()
+                .uri("/vets/"+VET_ID+"/ratings/"+ratingResponse.getRatingId())
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedRating)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(RatingResponseDTO.class)
+                .value(ratingResponseDTO -> {
+                    assertNotNull(ratingResponseDTO);
+                    assertNotNull(ratingResponseDTO.getRatingId());
+                    assertThat(ratingResponseDTO.getRatingId()).isEqualTo(ratingResponse.getRatingId());
+                    assertThat(ratingResponseDTO.getVetId()).isEqualTo(updatedRating.getVetId());
+                    assertThat(ratingResponseDTO.getRateScore()).isEqualTo(updatedRating.getRateScore());
+                    assertThat(ratingResponseDTO.getRateDescription()).isEqualTo(updatedRating.getRateDescription());
+                    assertThat(ratingResponseDTO.getRateDate()).isEqualTo(updatedRating.getRateDate());
+                });
+
+        Mockito.verify(ratingService, times(1))
+                .updateRatingByVetIdAndRatingId(anyString(), anyString(), any(Mono.class));
+    }
+
+    @Test
     void getNumberOfRatingsByVetId_ShouldSucceed() {
         when(ratingService.getNumberOfRatingsByVetId(anyString()))
                 .thenReturn(Mono.just(1));
@@ -132,7 +173,7 @@ class VetControllerUnitTest {
     @Test
     void getAverageRatingForEachVetByVetId_ShouldSucceed(){
 
-        String vetId = "1";
+        String vetId = "678910";
         Double averageRating = 5.0;
 
         when(vetService.getVetByVetId(vetId))
@@ -158,6 +199,23 @@ class VetControllerUnitTest {
 
     }
 
+    @Test
+    void getPercentageOfRatingsByVetId_ShouldSucceed() {
+        when(ratingService.getRatingPercentagesByVetId(anyString()))
+                .thenReturn(Mono.just("{\"1.0\":0.0,\"2.0\":0.0,\"4.0\":0.0,\"5.0\":1.0,\"3.0\":0.0}"));
+        client
+                .get()
+                .uri("/vets/" + VET_ID + "/ratings/percentages")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(String.class)
+                .value(string -> {
+                    assertEquals("{\"1.0\":0.0,\"2.0\":0.0,\"4.0\":0.0,\"5.0\":1.0,\"3.0\":0.0}", string);
+                });
+        Mockito.verify(ratingService, times(1))
+                .getRatingPercentagesByVetId(VET_ID);
+    }
 
     @Test
     void getAllVets() {
@@ -452,17 +510,10 @@ class VetControllerUnitTest {
                 .build();
     }
 
-    private RatingResponseDTO buildRatingDTO() {
-        return RatingResponseDTO.builder()
-                .ratingId("1")
-                .vetId("1")
-                .rateScore(5.0)
-                .build();
-    }
     private RatingResponseDTO buildRatingResponseDTO(String description, double score) {
         return RatingResponseDTO.builder()
                 .ratingId("2")
-                .vetId(VET_ID)
+                .vetId("678910")
                 .rateScore(score)
                 .rateDescription(description)
                 .rateDate("16/09/2023")

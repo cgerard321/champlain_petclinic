@@ -22,20 +22,8 @@ public class JwtTokenUtil implements Serializable {
 
 
 
+    private final SecurityConst securityConst;
     private static final String CLAIM_KEY_ROLES = "roles";
-
-    public String getUsernameFromToken(String token) {
-        String username;
-        try {
-            final Claims claims = getClaimsFromToken(token);
-            username = claims.getSubject();
-
-
-        } catch (Exception e) {
-            username = null;
-        }
-        return username;
-    }
 
 
     public List<String> getRolesFromToken(String token) {
@@ -54,22 +42,12 @@ public class JwtTokenUtil implements Serializable {
 
 
 
-    public Date getExpirationDateFromToken(String token) {
-        Date expiration;
-        try {
-            final Claims claims = getClaimsFromToken(token);
-            expiration = claims.getExpiration();
-        } catch (Exception e) {
-            expiration = null;
-        }
-        return expiration;
-    }
 
     private Claims getClaimsFromToken(String token) {
         Claims claims;
         try {
             claims = Jwts.parser()
-                    .setSigningKey(SecurityConst.SECRET)
+                    .setSigningKey(securityConst.getSECRET())
                     .parseClaimsJws(token)
                     .getBody();
         } catch (Exception e) {
@@ -80,7 +58,22 @@ public class JwtTokenUtil implements Serializable {
     }
 
 
+    public String getTokenFromRequest(List<String> cookies){
 
+        String[] allCookies = cookies.get(0).split(";");
+
+        String token;
+
+        token = Arrays.stream(allCookies).filter(cookie -> cookie.contains(securityConst.getTOKEN_PREFIX())).findFirst().orElseThrow(() -> new InvalidTokenException("Token is invalid"));
+
+
+
+        token = token.replace(securityConst.getTOKEN_PREFIX()+"=", "");
+        token = token.replace(";", "");
+        token = token.replace(" ", "");
+
+        return token;
+    }
 
 
     public String getTokenFromRequest(ServerWebExchange exchange){
@@ -101,11 +94,11 @@ public class JwtTokenUtil implements Serializable {
 
         String token;
 
-        token = Arrays.stream(allCookies).filter(cookie -> cookie.contains("Bearer")).findFirst().orElseThrow(() -> new InvalidTokenException("Token is invalid"));
+        token = Arrays.stream(allCookies).filter(cookie -> cookie.contains(securityConst.getTOKEN_PREFIX())).findFirst().orElseThrow(() -> new InvalidTokenException("Token is invalid"));
 
 
 
-        token = token.replace("Bearer=", "");
+        token = token.replace(securityConst.getTOKEN_PREFIX()+"=", "");
         token = token.replace(";", "");
         token = token.replace(" ", "");
 
