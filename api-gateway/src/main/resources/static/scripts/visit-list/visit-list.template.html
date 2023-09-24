@@ -1,4 +1,43 @@
-<h3 style="margin-top: 18px">Upcoming Visits</h3>
+<style>
+
+    .container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;             /* This aligns items vertically */
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .original-button {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        line-height: 1;
+        text-decoration: none;
+        color: #ffffff;
+        font-size: 18px;
+        border-radius: 5px;
+        width: 200px;
+        height: 40px;
+        font-weight: bold;
+        border-bottom: 4px solid #179e43;
+        transition: 0.3s;
+        box-shadow: 0px 3px 5px 0px rgba(0, 0, 0, 0.4);
+        background-color: #19d256;
+    }
+
+    .original-button:hover {
+        box-shadow: 0 0 rgba(0, 0, 0, 0.4);
+        border-bottom-width: 2px;
+        transform: translateY(2px);
+    }
+</style>
+<div class="container">
+    <h3 style="margin: 0;">Upcoming Visits</h3>
+    <a ui-sref="visitsNew">
+        <button class="original-button" id="addBtn">Create Visit</button>
+    </a>
+</div>
 <table class="table">
     <thead>
     <tr>
@@ -17,7 +56,7 @@
     <tbody>
     <tr id="visitId" ng-repeat="v in $ctrl.upcomingVisits | filter:$ctrl.query track by v.visitId" data-table-name="upcomingVisits">
         <td class="col-sm-2">{{v.visitId}}</td>
-        <td class="col-sm-2">{{v.month}}-{{v.day}}-{{v.year}}</td>
+        <td class="col-sm-2">{{v.visitDate | date:'yyyy-MM-ddTHH:mm:ss'}}</td>
         <td style="white-space: pre-line">{{v.description}}</td>
 <!--        <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>-->
         <td style="white-space: pre-line">{{v.practitionerId}}</td>
@@ -26,10 +65,16 @@
         <td class="status-text" style="white-space: pre-line"></td>
         <td style="text-align:center; vertical-align:middle"><button class="btn btn-default cancel-button" type="button" style="background-color: orangered; color: white" ng-click="$ctrl.showConfirmationModal($event, v.visitId, v.status, v.practitionerId, v.description)">{{$ctrl.setCancelButtonText(v.status)}}</button></td>
         <td style="text-align:center; vertical-align:middle"><button class="btn btn-default" type="button" style="background-color: royalblue; color: white" ng-click="$ctrl.switchToUpdateForm($event, v.practitionerId, v.description, v.visitId, v.status)">Edit Visit</button></td>
-        <td style="text-align:center; vertical-align:middle"><button class="btn btn-danger" type="button" ng-click="$ctrl.showConfirmationModal($event, v.visitId)">Delete visit</button></td>
+        <!--<td style="text-align:center; vertical-align:middle"><button class="btn btn-danger" href="javascript:void(0)" ng-click="deleteVisit(v.visitId)">Delete visit</button></td> -->
+        <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteVisit(v.visitId)">Delete Visit</a></td>
+
+
     </tr>
     </tbody>
 </table><h3 style="margin-top: 6px">Previous Visits</h3>
+
+<div id="loadingIndicator" style="display: none;">Loading...</div> <!--Page loading message-->
+
 <table class="table">
     <thead>
     <tr>
@@ -48,7 +93,7 @@
     <tbody>
     <tr id="v2visitId" ng-repeat="v in $ctrl.previousVisits | filter:$ctrl.query track by v.visitId" data-table-name="previousVisits">
         <td class="col-sm-2">{{v.visitId}}</td>
-        <td class="col-sm-2">{{v.month}}-{{v.day}}-{{v.year}}</td>
+        <td class="col-sm-2">{{v.visitDate | date:'yyyy-MM-ddTHH:mm:ss'}}</td>
         <td style="white-space: pre-line">{{v.description}}</td>
         <!--        <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>-->
         <td style="white-space: pre-line">{{v.practitionerId}}</td>

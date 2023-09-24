@@ -24,6 +24,7 @@ import static java.util.stream.Collectors.joining;
 
 @Component
 public class VisitsServiceClient {
+
     private final WebClient webClient;
 
     @Autowired
@@ -80,6 +81,7 @@ public class VisitsServiceClient {
                 .bodyToFlux(VisitDetails.class);
     }
 
+    /*
     public Flux<VisitDetails> getVisitsByPractitionerIdAndMonth(final int practitionerId, final String startDate, final String endDate) {
         return webClient
                 .get()
@@ -87,6 +89,7 @@ public class VisitsServiceClient {
                 .retrieve()
                 .bodyToFlux(VisitDetails.class);
     }
+     */
 
     public Flux<VisitDetails> getScheduledVisitsForPet(final int petId) {
         return webClient
@@ -130,6 +133,10 @@ public class VisitsServiceClient {
                 .retrieve()
                 .bodyToMono(Void.class);
     }
+
+
+
+
 
     private String joinIds(List<Integer> petIds) {
         return petIds.stream().map(Object::toString).collect(joining(","));

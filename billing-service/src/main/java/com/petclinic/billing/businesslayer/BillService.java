@@ -10,15 +10,15 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface BillService {
-    Mono<BillDTO> GetBill(@RequestParam(value = "billId", required = true) String billId);
+    Mono<BillResponseDTO> GetBill(@RequestParam(value = "billId", required = true) String billId);
     Flux<BillResponseDTO> GetAllBills();
 
     Mono<BillResponseDTO> CreateBill(@RequestBody Mono<BillRequestDTO> model);
 
     Mono<Void> DeleteBill(@RequestParam(value = "billId", required = true) String billId);
 
-    Flux<BillDTO> GetBillsByCustomerId(@RequestParam(value = "customerId", required = true) int customerId);
-    Flux<BillDTO> GetBillsByVetId(@RequestParam(value = "vetId", required = true) String vetId);
+    Flux<BillResponseDTO> GetBillsByCustomerId(@RequestParam(value = "customerId", required = true) int customerId);
+    Flux<BillResponseDTO> GetBillsByVetId(@RequestParam(value = "vetId", required = true) String vetId);
 
     Flux<Void> DeleteBillsByVetId(@RequestParam(value="vetId", required = true) String vetId);
     Flux<Void> DeleteBillsByCustomerId(@RequestParam(value="customerId", required = true)int customerId);

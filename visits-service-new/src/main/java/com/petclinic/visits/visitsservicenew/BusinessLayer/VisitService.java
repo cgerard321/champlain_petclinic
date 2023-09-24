@@ -9,7 +9,7 @@ public interface VisitService {
     Flux<VisitResponseDTO> getAllVisits();
     Flux<VisitResponseDTO> getVisitsForPet(int petId);
     Flux<VisitResponseDTO> getVisitsForPractitioner(int practitionerId);
-    Flux<VisitResponseDTO> getVisitsByPractitionerIdAndMonth(int practitionerId, int month);
+    //Flux<VisitResponseDTO> getVisitsByPractitionerIdAndMonth(int practitionerId, int month);
     Mono<VisitResponseDTO> getVisitByVisitId(String visitId);
     Mono<VisitResponseDTO> addVisit(Mono<VisitRequestDTO> visitRequestDTOMono);
     Mono<VisitResponseDTO> updateVisit(String visitId, Mono<VisitRequestDTO> visitRequestDTOMono);

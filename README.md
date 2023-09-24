@@ -270,7 +270,10 @@ git push -f
 
 - This is just shorthand for `git push --force`
 
-- If you don't force push you'll get a bunch of red and yellow text, which looks like you messed up, but it's fine. It didn't actually do anything just redo the command but with the `-f`
+- **If you don't force push you'll get a bunch of red and yellow text like in the image below, which looks like you messed up, but it's fine. It didn't actually do anything just redo the command but with the `-f`**
+
+![image](https://github.com/cgerard321/champlain_petclinic/assets/57333167/a0110160-7072-4ea7-952b-1d63b5df2947)
+
 
 - At this point, if you go back to your pull request, you should be able to automatically merge the branch.
 

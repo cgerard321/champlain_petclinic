@@ -1,7 +1,7 @@
 'use strict';
 angular.module('visitList')
     .controller('VisitListController', ['$http', '$scope', function ($http, $scope) {
-        let self = this
+        let self = this;
         // Lists holding visits for the tables to display
         self.upcomingVisits = []
         self.previousVisits = []
@@ -20,7 +20,37 @@ angular.module('visitList')
                 console.log("EventSource error: "+error)
             }
         }
-    }])
+
+        $scope.deleteVisit = function (visitId) {
+            let varIsConf = confirm('You are about to delete visit ' + visitId + '. Is this what you want to do ? ');
+            if (varIsConf) {
+
+                $http.delete('api/gateway/visits/' + visitId)
+                    .then(successCallback, errorCallback)
+
+                function successCallback(response) {
+                    $scope.errors = [];
+                    alert(visitId + " visit was deleted successfully");
+                    console.log(response, 'res');
+                    delayedReload();
+                }
+
+                function errorCallback(error) {
+                    alert(data.errors);
+                    console.log(error, 'Could not receive data');
+                }
+            }
+
+            function delayedReload() {
+                var loadingIndicator = document.getElementById('loadingIndicator');
+                loadingIndicator.style.display = 'block';
+                setTimeout(function() {
+                    location.reload();
+                }, 1000); //delay by 1 second
+            }
+        };
+    }]);
+
 //     // self.sortFetchedVisits = function() {
     //     //     let currentDate = getCurrentDate()
     //     //     $.each(self.visits, function(i, visit) {

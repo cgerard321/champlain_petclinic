@@ -3,12 +3,10 @@ package com.petclinic.bffapigateway.utils.Security.Filters;
 
 import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
 
+import com.petclinic.bffapigateway.exceptions.HandlerIsNullException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -25,6 +23,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ExecutionException;
@@ -32,7 +31,6 @@ import java.util.concurrent.ExecutionException;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 @Order(1)
 public class JwtTokenFilter implements WebFilter {
 
@@ -44,24 +42,30 @@ public class JwtTokenFilter implements WebFilter {
 
     private final JwtTokenUtil jwtTokenUtil;
 
-    private static final String[] AUTH_WHITELIST = {
-            // -- Swagger UI v2
-            "/v2/api-docs",
-            "/swagger-resources",
-            "/swagger-resources/**",
-            "/configuration/ui",
-            "/configuration/security",
-            "/swagger-ui.html",
-            "/webjars/**",
-            // -- Swagger UI v3 (OpenAPI)
-            "/v3/api-docs/**",
-            "/swagger-ui/**",
-            "/scripts/**",
-            "/css/**",
-            "/images/**",
-            "/images/*"
-            // other public endpoints of your API may be appended to this array
-    };
+    private final HashMap<String, String> AUTH_WHITELIST = new HashMap<>();
+    //fill up the hashmap with the endpoints that are whitelisted
+
+
+    public JwtTokenFilter(RequestMappingHandlerMapping requestMappingHandlerMapping, AuthServiceClient authValidationService, JwtTokenUtil jwtTokenUtil) {
+        this.requestMappingHandlerMapping = requestMappingHandlerMapping;
+        this.authValidationService = authValidationService;
+        this.jwtTokenUtil = jwtTokenUtil;
+        //All white listed endpoints
+        AUTH_WHITELIST.put("/v2/api-docs","/v2/api-docs");
+        AUTH_WHITELIST.put("/swagger-resources","/swagger-resources");
+        AUTH_WHITELIST.put("/swagger-resources/**","/swagger-resources/**");
+        AUTH_WHITELIST.put("/configuration/ui","/configuration/ui");
+        AUTH_WHITELIST.put("/configuration/security","/configuration/security");
+        AUTH_WHITELIST.put("/swagger-ui.html","/swagger-ui.html");
+        AUTH_WHITELIST.put("/webjars/**","/webjars/**");
+        AUTH_WHITELIST.put("/v3/api-docs/**","/v3/api-docs/**");
+        AUTH_WHITELIST.put("/swagger-ui/**","/swagger-ui/**");
+        AUTH_WHITELIST.put("/scripts/**","/scripts/**");
+        AUTH_WHITELIST.put("/css/**","/css/**");
+        AUTH_WHITELIST.put("/images/**","/images/**");
+        AUTH_WHITELIST.put("/images/*","/images/*");
+    }
+
 
 
     @SuppressWarnings("NullableProblems")
@@ -69,17 +73,17 @@ public class JwtTokenFilter implements WebFilter {
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         String path = exchange.getRequest().getURI().getPath();
 
-       for (String whitelisted : AUTH_WHITELIST) {
+        //todo optimize this
+       if (AUTH_WHITELIST.keySet().stream().anyMatch(pattern -> antPathMatcher.match(pattern, path))) {
+            log.debug("Request is a whitelisted endpoint, skipping filters !");
+            exchange.getAttributes().put("whitelisted", true);
 
-           if (antPathMatcher.match(whitelisted, path)) {
-               log.debug("Request is whitelisted, skipping filters !");
-               exchange.getAttributes().put("whitelisted", true);
+            return chain.filter(exchange);
+        }
 
-               return chain.filter(exchange);
-           }
-       }
-
-        if (Objects.requireNonNull(exchange.getRequest().getHeaders().get(HttpHeaders.ACCEPT)).get(0).contains("html") && exchange.getRequest().getPath().toString().equals("/") && exchange.getRequest().getMethod().toString().equals("GET")) {
+        if (Objects.requireNonNull(exchange.getRequest().getHeaders().get(HttpHeaders.ACCEPT)).get(0).contains("html")
+                && path.equals("/")
+                && exchange.getRequest().getMethod().toString().equals("GET")) {
             log.debug("Request is a browser request, skipping filters !");
             exchange.getAttributes().put("whitelisted", true);
 
@@ -87,23 +91,20 @@ public class JwtTokenFilter implements WebFilter {
         }
 
 
-        HandlerMethod handler = null;
+        HandlerMethod handler;
         try {
             handler = (HandlerMethod) requestMappingHandlerMapping.getHandler(exchange).toFuture().get();
         } catch (InterruptedException | ExecutionException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException(e.getMessage());
         }
 
 
-        if(handler != null)
+        if(handler == null)
         {
-            log.debug("Handler: {}", handler.getMethod().getName());
+            throw new HandlerIsNullException("Handler is null, this probably means that the endpoint does not exist : " + path);
         }
-        else
-        {
-            log.debug("Handler is null");
-            throw new RuntimeException("Handler is null");
-        }
+
+
         exchange.getResponse().getHeaders().add("Access-Control-Allow-Origin", "*");
 
         exchange.getResponse().getHeaders().add("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS");
@@ -115,7 +116,6 @@ public class JwtTokenFilter implements WebFilter {
                 exchange.getAttributes().put("whitelisted", true);
 
                 return chain.filter(exchange);
-
             }
         }
 
