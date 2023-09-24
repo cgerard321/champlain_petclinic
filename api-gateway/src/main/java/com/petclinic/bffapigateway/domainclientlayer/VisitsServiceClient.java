@@ -24,6 +24,7 @@ import static java.util.stream.Collectors.joining;
 
 @Component
 public class VisitsServiceClient {
+
     private final WebClient webClient;
 
     @Autowired
@@ -132,6 +133,10 @@ public class VisitsServiceClient {
                 .retrieve()
                 .bodyToMono(Void.class);
     }
+
+
+
+
 
     private String joinIds(List<Integer> petIds) {
         return petIds.stream().map(Object::toString).collect(joining(","));
