@@ -230,14 +230,18 @@ public class BFFApiGatewayController {
     }
 
     @PostMapping(value = "vets/{vetId}/ratings")
-    public Mono<RatingResponseDTO> addRatingToVet(@PathVariable String vetId, @RequestBody Mono<RatingRequestDTO> ratingRequestDTO) {
-        return vetsServiceClient.addRatingToVet(vetId, ratingRequestDTO);
+    public Mono<ResponseEntity<RatingResponseDTO>> addRatingToVet(@PathVariable String vetId, @RequestBody Mono<RatingRequestDTO> ratingRequestDTO) {
+        return vetsServiceClient.addRatingToVet(vetId, ratingRequestDTO)
+                .map(r->ResponseEntity.status(HttpStatus.CREATED).body(r))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
     @DeleteMapping(value = "vets/{vetId}/ratings/{ratingId}")
-    public Mono<Void> deleteRatingByRatingId(@PathVariable String vetId,
+    public Mono<ResponseEntity<Void>> deleteRatingByRatingId(@PathVariable String vetId,
                                              @PathVariable String ratingId){
-        return vetsServiceClient.deleteRating(vetId,ratingId);
+        return vetsServiceClient.deleteRating(vetId,ratingId)
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @GetMapping(value = "vets/{vetId}/ratings/average")
@@ -284,8 +288,10 @@ public class BFFApiGatewayController {
     }
 
     @PostMapping(value = "/vets",consumes = "application/json",produces = "application/json")
-    public Mono<VetDTO> insertVet(@RequestBody Mono<VetDTO> vetDTOMono) {
-        return vetsServiceClient.createVet(vetDTOMono);
+    public Mono<ResponseEntity<VetDTO>> insertVet(@RequestBody Mono<VetDTO> vetDTOMono) {
+        return vetsServiceClient.createVet(vetDTOMono)
+                .map(v->ResponseEntity.status(HttpStatus.CREATED).body(v))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
     @PutMapping(value = "/vets/{vetId}",consumes = "application/json",produces = "application/json")
@@ -296,8 +302,10 @@ public class BFFApiGatewayController {
     }
 
     @DeleteMapping(value = "/vets/{vetId}")
-    public Mono<Void> deleteVet(@PathVariable String vetId) {
-        return vetsServiceClient.deleteVet(VetsEntityDtoUtil.verifyId(vetId));
+    public Mono<ResponseEntity<Void>> deleteVet(@PathVariable String vetId) {
+        return vetsServiceClient.deleteVet(VetsEntityDtoUtil.verifyId(vetId))
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
 //    @PostMapping(value = "users",
