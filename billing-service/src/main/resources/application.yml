@@ -50,7 +50,19 @@ spring:
       username: root
       password: password
       authentication-database: admin
-
+#server.port: 8080
+#app:
+#  vet-service:
+#    host: localhost
+#    port: 8080
+#  customers-service:
+#    host: localhost
+#    port: 8080
+#
+#logging:
+#  level:
+#    root: INFO
+#    com.petclinic: DEBUG
 
 #server:
 #  error:
