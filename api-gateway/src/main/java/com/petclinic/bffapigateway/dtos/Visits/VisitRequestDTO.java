@@ -13,7 +13,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 public class VisitRequestDTO {
+<<<<<<< HEAD
 
+=======
+>>>>>>> e9c63508 (Trying to parse to date)
     private LocalDateTime visitDate;
 /*   private int year;
     private int month;
