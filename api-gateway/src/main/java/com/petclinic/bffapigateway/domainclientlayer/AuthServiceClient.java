@@ -1,6 +1,7 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.Auth.*;
+import com.petclinic.bffapigateway.exceptions.InvalidCredentialsException;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Rethrower;
 import com.petclinic.bffapigateway.exceptions.InvalidTokenException;
@@ -109,68 +110,54 @@ public class AuthServiceClient {
 //                .bodyToMono(UserDetails.class);
 //    }
 
-    public  HttpEntity<UserPasswordLessDTO> login(final Login login) throws Exception {
+    public  Mono<ResponseEntity<UserPasswordLessDTO>> login(final Login login) throws Exception {
         log.info("Entered domain service login");
         UserPasswordLessDTO userResponseModel;
         try {
             log.info("Email : {}",login.getEmail());
-            HttpEntity<Login> userRequestModelHttpEntity = new HttpEntity<>(login);
+            return webClientBuilder.build()
+                    .post()
+                    .uri(authServiceUrl+"/users/login")
+                    .bodyValue(login)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> Mono.error(new InvalidCredentialsException("Invalid token")))
+                    .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> Mono.error(new InvalidInputException("Invalid token")))
+                    .toEntity(UserPasswordLessDTO.class);
 
-            HttpEntity<UserPasswordLessDTO> response = restTemplate.exchange(authServiceUrl + "/users/login", HttpMethod.POST, userRequestModelHttpEntity, UserPasswordLessDTO.class);
-            log.info("Fetched user from auth-service");
-            return response;
-
+//            HttpEntity<Login> userRequestModelHttpEntity = new HttpEntity<>(login);
+//
+//            HttpEntity<UserPasswordLessDTO> response = restTemplate.exchange(authServiceUrl + "/users/login", HttpMethod.POST, userRequestModelHttpEntity, UserPasswordLessDTO.class);
+//            log.info("Fetched user from auth-service");
+//            return Mono.just(response);
         } catch (HttpClientErrorException ex) {
             log.info("Error throw in auth domain client service");
-            throw new Exception(ex);
-        }
-    }
-
-    public String userForgotPassword() {
-        String form;
-        try {
-            String url = authServiceUrl + "/users/forgot_password";
-            form = restTemplate
-                    .getForObject(url, String.class);
-
-        } catch (HttpClientErrorException ex) {
             throw new InvalidInputException(ex.getMessage());
         }
-        return form;
     }
 
-    public String sendForgottenEmail(ServerHttpRequest request, String email) {
+
+    public Mono<ResponseEntity<Void>> sendForgottenEmail(ServerHttpRequest request, String email) {
 
         UserResetPwdRequestModel userResetPwdRequestModel = UserResetPwdRequestModel.builder().email(email).url(Utility.getSiteURL(request)).build();
 
-        String formPage;
         try {
             String url = authServiceUrl+"/users/forgot_password";
-            formPage = restTemplate
-                    .postForObject(url, userResetPwdRequestModel, String.class);
+
+            return webClientBuilder.build()
+                    .post()
+                    .uri(url)
+                    .bodyValue(userResetPwdRequestModel)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> Mono.error(new InvalidInputException("Unexpected error")))
+                    .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> Mono.error(new InvalidInputException("Unexpected error")))
+                    .toEntity(Void.class);
 
         } catch (HttpClientErrorException ex) {
             throw new InvalidInputException(ex.getMessage());
         }
-        return formPage;
     }
-    public String userShowResetPage(String token) {
-        String form;
-        try {
-            String url = authServiceUrl + "/users/reset_password";
-            UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(url);
-            builder.queryParam("token",token);
-            url = builder.toUriString();
 
-            form = restTemplate
-                    .getForObject(url, String.class);
-
-        } catch (HttpClientErrorException ex) {
-            throw new InvalidInputException(ex.getMessage());
-        }
-        return form;
-    }
-    public String changePassword(ServerHttpRequest request,UserPasswordAndTokenRequestModel pwdChange) {
+    public Mono<ResponseEntity<Void>> changePassword(UserPasswordAndTokenRequestModel pwdChange) {
 
         UserResetPwdWithTokenRequestModel userResetPwdWithTokenRequestModel = UserResetPwdWithTokenRequestModel.builder().token(pwdChange.getToken()).password(pwdChange.getPassword()).build();
 
@@ -179,13 +166,20 @@ public class AuthServiceClient {
         String formPage;
         try {
             String url = authServiceUrl+"/users/reset_password";
-            formPage = restTemplate
-                    .postForObject(url, userResetPwdWithTokenRequestModel, String.class);
+
+            return webClientBuilder.build()
+                            .post().uri(url)
+                            .bodyValue(userResetPwdWithTokenRequestModel)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> Mono.error(new InvalidInputException("Unexpected error")))
+                    .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> Mono.error(new InvalidInputException("Unexpected error")))
+                    .toEntity(Void.class);
+
+
 
         } catch (HttpClientErrorException ex) {
             throw new InvalidInputException(ex.getMessage());
         }
-        return formPage;
     }
 
 

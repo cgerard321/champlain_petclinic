@@ -157,19 +157,18 @@ public class UserController {
 
 
     @PostMapping("/forgot_password")
-    public String processForgotPassword(@RequestBody UserResetPwdRequestModel userResetPwdRequestModel, Model model) {
-        model = userService.processForgotPassword(userResetPwdRequestModel, model);
-        return "forgot_password_form";
-
+    public ResponseEntity<Void> processForgotPassword(@RequestBody UserResetPwdRequestModel userResetPwdRequestModel) {
+        userService.processForgotPassword(userResetPwdRequestModel);
+        return ResponseEntity.ok().build();
     }
 
 
 
     @PostMapping("/reset_password")
-    public String processResetPassword(@RequestBody UserResetPwdWithTokenRequestModel resetRequest, Model model) {
-        model = userService.processResetPassword(resetRequest, model);
+    public ResponseEntity<Void> processResetPassword(@RequestBody UserResetPwdWithTokenRequestModel resetRequest, Model model) {
+        userService.processResetPassword(resetRequest);
 
-        return "message";
+        return ResponseEntity.ok().build();
     }
 
 

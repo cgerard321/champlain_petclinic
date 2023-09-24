@@ -3,12 +3,15 @@
 angular.module('resetPwdForm')
     .controller('resetPwdFormController', ["$http",'$stateParams', '$location', "$scope", function ($http,$stateParams,$location, $scope) {
 
+
         this.resetPwdForm = () => $http.post("/api/gateway/users/reset_password", {
             token: $stateParams.token,
             password: $scope.resetPwdForm.password,
         })
             .then(n => {
-             alert("Password was reset !")
+                alert("Password was reset !")
+                $location.path("/login")
+
             })
             .catch(n => {
                 console.log(n)

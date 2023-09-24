@@ -64,7 +64,7 @@ public interface UserService {
     User getUserByEmail(String email) throws NotFoundException;
 
 
-    Model processForgotPassword(UserResetPwdRequestModel userResetPwdWithTokenRequestModel, Model model);
+    void processForgotPassword(UserResetPwdRequestModel userResetPwdWithTokenRequestModel);
 
     void updateResetPasswordToken(String token, String email);
 
@@ -72,7 +72,5 @@ public interface UserService {
 
     void updatePassword(String newPassword, String token);
 
-    Model showResetPasswordForm(Map<String, String> querryParams, Model model);
-
-    Model processResetPassword(UserResetPwdWithTokenRequestModel resetRequest, Model model);
+    void processResetPassword(UserResetPwdWithTokenRequestModel resetRequest);
 }

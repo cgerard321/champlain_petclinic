@@ -37,7 +37,9 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
+import org.w3c.dom.Text;
 
+import javax.swing.text.html.HTMLDocument;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
@@ -205,7 +207,7 @@ public class UserServiceImpl implements UserService {
 
 
     @Override
-    public Model processForgotPassword(UserResetPwdRequestModel userResetPwdRequestModel, Model model) {
+    public void processForgotPassword(UserResetPwdRequestModel userResetPwdRequestModel) {
         String email = userResetPwdRequestModel.getEmail();
         String token = UUID.randomUUID().toString();
         log.info("Generated token: " + token);
@@ -214,8 +216,7 @@ public class UserServiceImpl implements UserService {
             getUserByEmail(email);
         }
         catch(RuntimeException e){
-            model.addAttribute("message", "This Email is not registered to any account !");
-            return model;
+            throw new NotFoundException("Could not find any customer with the email " + email);
         }
 
         try {
@@ -225,12 +226,10 @@ public class UserServiceImpl implements UserService {
 
 
             String resetPasswordLink =  "http://localhost:8080/#!/reset_password/" + token;
-            sendEmail(email, resetPasswordLink);
-            model.addAttribute("message", "We have sent a reset password link to your email. Please check.");
+            sendEmailForgotPassword(email, resetPasswordLink);
         } catch (Exception ex) {
-            model.addAttribute("error", ex.getMessage());
+            throw new InvalidInputException(ex.getMessage());
         }
-        return model;
     }
 
     @Override
@@ -267,7 +266,8 @@ public class UserServiceImpl implements UserService {
         if(resetPasswordToken.getExpiryDate().after(cal.getTime()) && user.isPresent())
             return userMapper.modelToPasswordLessDTO(user.get());
         else
-            throw new IllegalArgumentException("Token is expired (in getByResetPasswordToken()");    }
+            throw new IllegalArgumentException("Token is expired (in getByResetPasswordToken()");
+    }
 
 
     @Override
@@ -297,24 +297,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Model showResetPasswordForm(Map<String, String> querryParams, Model model) {
-        String token = querryParams.get("token");
-
-
-        UserPasswordLessDTO userResponseModel = getByResetPasswordToken(token);
-        model.addAttribute("token", token);
-
-        if (userResponseModel == null) {
-            model.addAttribute("message", "Invalid Token");
-        }
-        else{
-            model.addAttribute("message", "You have successfully changed your password.");
-        }
-        return model;
-    }
-
-    @Override
-    public Model processResetPassword(UserResetPwdWithTokenRequestModel resetRequest, Model model) {
+    public void processResetPassword(UserResetPwdWithTokenRequestModel resetRequest) {
         String token = resetRequest.getToken();
         String password = resetRequest.getPassword();
         log.info("Token: " + token);
@@ -326,16 +309,77 @@ public class UserServiceImpl implements UserService {
 
 
 
-        model.addAttribute("title", "Reset your password");
 
         if (userResponseModel == null) {
-            model.addAttribute("message", "Invalid Token");
+            throw new InvalidInputException("Invalid token");
         } else {
             updatePassword(password, token);
-
-            model.addAttribute("message", "You have successfully changed your password.");
         }
-        return model;
+    }
+
+
+    public void sendEmailForgotPassword(String recipientEmail, String link){
+
+
+        // Initialize an empty HTMLDocument object instance
+             String email = format("""
+                     <!DOCTYPE html>
+                     <html lang="en">
+                     <head>
+                         <meta charset="UTF-8">
+                         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                         <title>Password Reset</title>
+                         <style>
+                             body {
+                                 font-family: Arial, sans-serif;
+                                 background-color: #f4f4f4;
+                                 margin: 0;
+                                 padding: 0;
+                             }
+                             .container {
+                                 max-width: 600px;
+                                 margin: 0 auto;
+                                 padding: 20px;
+                                 background-color: #fff;
+                                 border-radius: 5px;
+                                 box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                             }
+                             h1 {
+                                 color: #333;
+                             }
+                             p {
+                                 color: #555;
+                             }
+                             a {
+                                 color: #007BFF;
+                             }
+                         </style>
+                     </head>
+                     <body>
+                         <div class="container">
+                             <h1>Reset Your Password - Verification Code</h1>
+                             <h3>We have received a request to reset your password for your Pet Clinic account. To ensure the security of your account, please follow the instructions below to reset your password.</h3>
+                            \s
+                             <ol>
+                                 <li>Click on the following link to access the password reset page: <a href="%s">Reset Password</a></li>
+                                 <li>Follow the on-screen instructions to create a new password for your account.</li>
+                             </ol>
+                            \s
+                             <p>If you did not request this password reset, please disregard this email. Your account security is important to us, and no changes will be made without your verification.</p>
+                            \s
+                             <p>Thank you for choosing Pet Clinic.</p>
+                         </div>
+                     </body>
+                     </html>
+                     """, link);
+
+        Mail mail = Mail.builder()
+                .message(email)
+                .subject("PetClinic forgot password")
+                .to(recipientEmail)
+                .build();
+
+        mailService.sendMail(mail);
     }
 
 
