@@ -646,7 +646,37 @@
     </thead>
     <tbody>
         <tr ng-repeat="v in $ctrl.previousVisits" data-index="{{$index}}" data-table-name="previousVisits">
+<<<<<<< HEAD
             <td class="col-sm-2">{{v.date | date:'MM-dd-yyyy'}}</td>
+=======
+<<<<<<< HEAD
+            <td class="col-sm-2">{{v.date | date:'yyyy-MM-dd'}}</td>
+=======
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+<<<<<<< HEAD
+            <td class="col-sm-2"> {{selectedDate | date:'yyyy-MM-dd'}}></td>
+=======
+            <td class="col-sm-2">{{v.date | date:'yyyy-MM-dd'}}</td>
+>>>>>>> 0d5c194a (Fixed rouuting issue with create visit button)
+=======
+            <td class="col-sm-2">{{v.date | date:'yyyy-MM-dd'}}</td>
+=======
+            <td class="col-sm-2">{{$ctrl.getVisitDate(v.visitId)}}</td>
+>>>>>>> 979fa780 (Working on displaying date for a visit)
+>>>>>>> 94cd137f (Working on displaying date for a visit)
+=======
+            <td class="col-sm-2">{{v.date | date:'yyyy-MM-dd'}}</td>
+>>>>>>> cb2efdd1 (Trying to fix date)
+=======
+            <td class="col-sm-2">{{v.date | date:'yyyy-MM-dd'}}</td>
+=======
+            <td class="col-sm-2"> {{selectedDate | date:'yyyy-MM-dd'}}></td>
+>>>>>>> 46edfaed (Trying to fix date)
+>>>>>>> 929f209d (Trying to fix date)
+>>>>>>> 732572b2 (Trying to fix date)
+>>>>>>> d63d5b83 (Trying to fix date)
             <td style="white-space: pre-line">{{v.description}}</td>
             <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>
             <td class="status-text" style="white-space: pre-line">{{$ctrl.getStatus(v.status)}}</td>
