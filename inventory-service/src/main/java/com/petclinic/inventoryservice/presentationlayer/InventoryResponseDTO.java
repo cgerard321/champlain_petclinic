@@ -1,15 +1,13 @@
 package com.petclinic.inventoryservice.presentationlayer;
 
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryType;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@EqualsAndHashCode
 public class InventoryResponseDTO {
     private String inventoryId;
    private String  inventoryName;

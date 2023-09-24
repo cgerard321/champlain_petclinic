@@ -16,11 +16,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.test.StepVerifier;
+
+
+import java.util.UUID;
+
 import static com.petclinic.inventoryservice.datalayer.Inventory.InventoryType.internal;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-@SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port=0"})
+@SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port:0"})
 @AutoConfigureWebTestClient
 class InventoryControllerIntegrationTest {
     @Autowired
@@ -37,6 +41,7 @@ class InventoryControllerIntegrationTest {
 
     Inventory inventory2 = buildInventory("inventoryId_4", "sales", InventoryType.sales ,"inventoryDescription_4");
 
+    Product product1 = buildProduct("productId_1","inventoryId_3","productName","productDescription",10.99, 100);
 
 
     @BeforeEach
@@ -50,6 +55,7 @@ class InventoryControllerIntegrationTest {
                 .create(inventoryPublisher)
                 .expectNextCount(1)
                 .verifyComplete();
+
         Publisher<Product> productPublisher = productRepository.deleteAll()
                 .thenMany(productRepository.save(Product.builder()
                         .inventoryId("1")
@@ -67,11 +73,26 @@ class InventoryControllerIntegrationTest {
                         .productPrice(100.00)
                         .productQuantity(10)
                         .build()));
+
         StepVerifier
                 .create(productPublisher)
                 .expectNextCount(1)
                 .verifyComplete();
+
+        Publisher<Product> productPublisher1 = productRepository.save(Product.builder()
+                .productId("productId_1")
+                .inventoryId("inventoryId_3")
+                .productName("Benzodiazepines")
+                .productDescription("Sedative Medication")
+                .productPrice(100.00)
+                .productQuantity(10)
+                .build());
+        StepVerifier
+                .create(productPublisher1)
+                .expectNextCount(1)
+                .verifyComplete();
     }
+
     @Test
     void addProductToInventory_WithInvalidInventoryIdAndValidBody_ShouldThrowNotFoundException(){
         // Arrange
@@ -320,8 +341,6 @@ class InventoryControllerIntegrationTest {
                     assertEquals(2, list.size());
                 });
     }
-
-
     @Test
     public void addNewInventoryWithValidValues_shouldSucceed(){
         InventoryRequestDTO inventoryRequestDTO = InventoryRequestDTO.builder()
@@ -407,8 +426,6 @@ class InventoryControllerIntegrationTest {
                 });
     }
 
-
-
     @Test
     public void updateInventory_withInvalidInventoryId() {
         String InvalidInventoryId = "inventoryId_234";
@@ -427,8 +444,55 @@ class InventoryControllerIntegrationTest {
                 .expectBody();
 
     }
+    //delete all
+
+    @Test
+    void deleteProductInventory_WithValidInventoryId_ShouldDeleteAllProducts() {
+        // Act
+        webTestClient
+                .delete()
+                .uri("/inventories" +
+                        "/{inventoryId}/products", "1")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound(); // Expecting 204 NO CONTENT status.
+    }
+
+    @Test
+    void deleteAllInventories_ShouldDeleteAllInventoriesAndAssociatedProducts() {
+        // Act
+        webTestClient
+                .delete()
+                .uri("/inventory")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent(); // Expecting 204 NO CONTENT status.
+    }
 
 
+    @Test
+    void testUpdateProductInInventory_WithNonExistentProductId_ShouldReturnNotFound() {
+        // Arrange
+        String inventoryId = "1";
+        String productId = "test";
+
+        ProductRequestDTO productRequestDTO = ProductRequestDTO.builder()
+                .productName("Updated Benzodiazepines")
+                .productDescription("Updated Sedative Medication")
+                .productPrice(150.00)
+                .productQuantity(20)
+                .build();
+
+        // Act and Assert
+        webTestClient
+                .put()
+                .uri("/inventory/"+ inventoryId+ "/products/" + productId)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(productRequestDTO)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
     private Inventory buildInventory(String inventoryId, String name, InventoryType inventoryType, String inventoryDescription) {
         return Inventory.builder()
                 .inventoryId(inventoryId)
@@ -436,5 +500,48 @@ class InventoryControllerIntegrationTest {
                 .inventoryType(inventoryType)
                 .inventoryDescription(inventoryDescription)
                 .build();
+    }
+
+    private Product buildProduct(String productId,String inventoryId, String productName, String productDescription, Double productPrice, Integer productQuantity) {
+        return Product.builder()
+                .productId(productId)
+                .inventoryId(inventoryId)
+                .productName(productName)
+                .productDescription(productDescription)
+                .productPrice(productPrice)
+                .productQuantity(productQuantity)
+                .build();
+    }
+    @Test
+    public void deleteProductInInventory_byProductId_ShouldSucceed(){
+        webTestClient.delete()
+                .uri("/inventory/{inventoryId}/products/{productId}", "inventoryId_3","123F567C9")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent();
+    }
+
+    @Test
+    public void deleteProductInInventory_byInvalidProductId_shouldNotFound(){
+        String invalidProduct = "invalid";
+        webTestClient.delete()
+                .uri("/inventory/{inventory}/products/{productId}","inventoryId_3",invalidProduct)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Product not found, make sure it exists, productId: "+invalidProduct);
+    }
+
+    @Test
+    public void deleteProductInInventory_byInvalidInventoryId_shouldNotFound(){
+        String invalidInventory = "invalid";
+        webTestClient.delete()
+                .uri("/inventory/{inventory}/products/{productId}",invalidInventory,"123F567C9")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Inventory not found, make sure it exists, inventoryId: "+invalidInventory);
     }
 }

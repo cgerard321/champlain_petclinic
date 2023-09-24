@@ -55,4 +55,32 @@ public class InventoryController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+
+
+    //delete all products and delete all inventory
+    @DeleteMapping("/{inventoryId}/products")
+    public Mono<ResponseEntity<Void>> deleteProductInventory(@PathVariable String inventoryId) {
+        return productInventoryService.deleteAllProductInventory(inventoryId)
+                .then(Mono.just(new ResponseEntity<Void>(HttpStatus.NO_CONTENT)))
+                .defaultIfEmpty(new ResponseEntity<Void>(HttpStatus.NOT_FOUND));
+    }
+
+    @DeleteMapping()
+    public Mono<ResponseEntity<Void>> deleteAllInventories() {
+        return productInventoryService.deleteAllInventory()
+                .then(Mono.just(new ResponseEntity<Void>(HttpStatus.NO_CONTENT)))
+                .defaultIfEmpty(new ResponseEntity<Void>(HttpStatus.BAD_REQUEST));
+    }
+
+
+
+
+    @PutMapping("/{inventoryId}/products/{productId}")
+    public Mono<ResponseEntity<ProductResponseDTO>> updateProductInInventory(@RequestBody Mono<ProductRequestDTO> productRequestDTOMono, @PathVariable String inventoryId, @PathVariable String productId){
+        return productInventoryService.updateProductInInventory(productRequestDTOMono, inventoryId, productId)
+                .map(productResponseDTO -> ResponseEntity.ok().body(productResponseDTO))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
 }
+

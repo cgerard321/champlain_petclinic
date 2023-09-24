@@ -1,12 +1,16 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
 import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
+import com.petclinic.bffapigateway.dtos.Vets.VetDTO;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -50,13 +54,40 @@ public class CustomersServiceClient {
                 .bodyToFlux(OwnerResponseDTO.class);
     }
 
-    public Mono<OwnerResponseDTO> updateOwner(int ownerId, OwnerResponseDTO ownerResponseDTO){
+    /*
+    public Mono<OwnerResponseDTO> updateOwner(Mono<OwnerRequestDTO> ownerRequestDTOMono , String ownerId){
 
             return webClientBuilder.build().put()
                     .uri(customersServiceUrl + ownerId)
-                    .body(Mono.just(ownerResponseDTO), OwnerResponseDTO.class)
+                    .body(Mono.just(ownerRequestDTOMono), OwnerRequestDTO.class)
                     .retrieve().bodyToMono(OwnerResponseDTO.class);
     }
+
+     */
+/*
+    public Mono<OwnerResponseDTO> updateOwner(String ownerId, OwnerRequestDTO ownerRequest) {
+        return webClientBuilder.build()
+                .put()
+                .uri(customersServiceUrl + ownerId)
+                .body(BodyInserters.fromValue(ownerRequest))
+                .retrieve()
+                .bodyToMono(OwnerResponseDTO.class);
+    }
+
+ */
+
+    public Mono<OwnerResponseDTO> updateOwner(String ownerId, Mono<OwnerRequestDTO> ownerRequestDTO) {
+        return ownerRequestDTO.flatMap(requestDTO ->
+                webClientBuilder.build()
+                        .put()
+                        .uri(customersServiceUrl + ownerId)
+                        .body(BodyInserters.fromValue(requestDTO))
+                        .retrieve()
+                        .bodyToMono(OwnerResponseDTO.class)
+        );
+    }
+
+
 
 
 
@@ -89,6 +120,13 @@ public class CustomersServiceClient {
                 .uri(customersServiceUrl + ownerId + "/pets/" + petId)
                 .retrieve()
                 .bodyToMono(PetResponseDTO.class);
+    }
+
+    public Flux<PetResponseDTO> getPetsByOwnerId(final String ownerId){
+        return webClientBuilder.build().get()
+                .uri(customersServiceUrl + ownerId + "/pets")
+                .retrieve()
+                .bodyToFlux(PetResponseDTO.class);
     }
 
     public Mono<PetResponseDTO> createPet(PetResponseDTO model, final String ownerId){
@@ -137,16 +175,16 @@ public class CustomersServiceClient {
 
 
 
-    public Mono<String> setPetPhoto(String ownerId, PhotoDetails file, int id){
+    public Mono<String> setPetPhoto(String ownerId, PhotoDetails file, String petId){
         return webClientBuilder.build().post()
-                .uri(customersServiceUrl + ownerId + "/pets/photo/" + id)
+                .uri(customersServiceUrl + ownerId + "/pets/photo/" + petId)
                 .body(just(file), PhotoDetails.class)
                 .retrieve().bodyToMono(String.class);
     }
 
-    public Mono<PhotoDetails> getPetPhoto(String ownerId, int id){
+    public Mono<PhotoDetails> getPetPhoto(String ownerId, String petId){
         return webClientBuilder.build().get()
-                .uri(customersServiceUrl + ownerId + "/pets/photo/" + id)
+                .uri(customersServiceUrl + ownerId + "/pets/photo/" + petId)
                 .retrieve()
                 .bodyToMono(PhotoDetails.class);
     }
@@ -157,4 +195,6 @@ public class CustomersServiceClient {
                 .retrieve()
                 .bodyToMono(Void.class);
     }
+
+
 }

@@ -61,6 +61,16 @@ public class InventoryServiceClient {
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve().bodyToMono(InventoryResponseDTO.class);
     }
+
+    public Mono<ProductResponseDTO> updateProductInInventory(final ProductRequestDTO model, final String inventoryId, final String productId){
+        return webClient
+                .put()
+                .uri(inventoryServiceUrl + "/{inventoryId}/products/{productId}", inventoryId, productId)
+                .body(Mono.just(model),ProductRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve().bodyToMono(ProductResponseDTO.class);
+    }
+
     public Mono<Void> deleteProductInInventory(final String inventoryId, final String productId){
         return webClient.delete()
                 .uri(inventoryServiceUrl + "/{inventoryId}/products/{productId}", inventoryId, productId)
@@ -68,9 +78,9 @@ public class InventoryServiceClient {
                 .bodyToMono(Void.class);
     }
 
-    public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductsField(final String inventoryId, final String inventoryName, final Double productPrice, final Integer productQuantity){
+    public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductsField(final String inventoryId, final String productName, final Double productPrice, final Integer productQuantity){
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(inventoryServiceUrl + "/{inventoryType}/products")
-                .queryParamIfPresent("productName", Optional.ofNullable(inventoryName))
+                .queryParamIfPresent("productName", Optional.ofNullable(productName))
                 .queryParamIfPresent("productPrice", Optional.ofNullable(productPrice))
                 .queryParamIfPresent("productQuantity", Optional.ofNullable(productQuantity));
 
@@ -88,5 +98,24 @@ public class InventoryServiceClient {
                 .retrieve()
                 .bodyToFlux(InventoryResponseDTO.class);
     }
+    //delete all
+
+    public Mono<Void> deleteAllProductForInventory(final String inventoryId) {
+        return webClient.delete()
+                .uri(inventoryServiceUrl + "/{inventoryId}/products", inventoryId)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(Void.class);
+    }
+    public Mono<Void> deleteAllInventories() {
+        return webClient.delete()
+                .uri(inventoryServiceUrl)  // Notice that we don't append any specific path
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(Void.class);
+    }
+
+
+
 
 }

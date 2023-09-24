@@ -133,12 +133,22 @@ angular.module('vetDetails')
             rating.vetId = $stateParams.vetId;
             rating.rateScore = document.getElementById("ratingScore").value;
             rating.rateDescription = document.getElementById("ratingDescription").value;
-            rating.rateDate = Date.now().toString();
+            var currentDate = new Date();
+            var readableDate = currentDate.toLocaleDateString();
+            rating.rateDate = readableDate;
+
+            if(!rating.rateScore){
+                alert("Please select a rating score")
+                return;
+            }
+            else {
 
             $http.post("api/gateway/vets/" + $stateParams.vetId + "/ratings", rating).then(function (resp){
                 console.log(resp.data)
                 self.rating = resp.data;
                 alert('Your review was successfully added!');
+
+
                 //refresh list
                 $http.get('api/gateway/vets/' + $stateParams.vetId + '/ratings').then(function (resp) {
                     console.log(resp.data)
@@ -147,11 +157,20 @@ angular.module('vetDetails')
                 });
                 //refresh percentages
                 percentageOfRatings();
+
+
+                document.getElementById("ratingScore").value = ""
+                document.getElementById("ratingDescription").value = ""
+                //refresh list
+                $http.get('api/gateway/vets/' + $stateParams.vetId + '/ratings').then(function (resp) {
+                    self.ratings = resp.data;
+                    arr = resp.data;
+                });
             }, function (response) {
                 let error = "Missing rating, please input a rating.";
                 alert(error);
-            });
-        };
+            })
+        }};
         function uuidv4() {
             return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
                 (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)

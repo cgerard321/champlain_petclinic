@@ -1,0 +1,44 @@
+<link href="/css/ownerdetail.css" rel="stylesheet" type="text/css"/>
+
+
+        <div ng-app="petOwnerDetails" class="d-flex flex-column">
+            <div ng-controller="PetOwnerDetailsController">
+
+                <div class="ownerDetailContainer d-flex flex-column p-5 shadow">
+
+                    <div class="d-flex justify-content-between">
+                        <h3 class="">Pet Details</h3>
+
+                        <div class="border-5 rounded">
+                            <a style="color: rgba(0,0,0,0.5);" class="btn btn-light" ui-sref="ownerEdit({ownerId: $ctrl.owner.ownerId, method: 'edit'})">Toggle Pet Status</a>
+                        </div>
+
+                        <div class="border-5 rounded">
+                            <a style="color: rgba(0,0,0,0.5);" class="btn btn-light" ui-sref="ownerEdit({ownerId: $ctrl.owner.ownerId, method: 'edit'})">Add Pet</a>
+                        </div>
+                    </div>
+
+                    <div class="bg-white shadow-sm mt-3 mb-1" style="width: 75px; height: 75px; border-radius: 50px;">
+                        <img style="width: 100%; height: 100%; border-radius: 50px" src="../../images/default-owner-profile-picture.jpg">
+                    </div>
+
+                    <p>{{owner.firstName}}</p>
+                    <tbody class="border">
+                    <tr class="" id="petId"> <!--ng-repeat="pet in $ctrl.owners| filter:$ctrl.query track by pet.petId" -->
+
+                        <td class="responsive-text">{{owner.firstName}} {{owner.lastName}}</td>
+                        <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">{{owner.address}}</td>
+                        <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">{{owner.city}}</td>
+                        <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">{{owner.telephone}}</td>
+                    </tr>
+                    </tbody>
+
+
+                </div>
+            </div>
+
+    </div>
+
+
+
+
