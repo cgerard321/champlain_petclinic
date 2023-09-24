@@ -63,38 +63,40 @@ angular.module('vetDetails')
         };
 
         self.updateRating = function (ratingId, rating) {
-            const btn = document.getElementById("updateRatingBtn");
+            const btn = document.getElementById("updateRatingBtn"+ratingId);
 
-            const updateContainer=document.getElementById("ratingUpdate")
-            const selectedValue=parseInt(document.getElementById("ratingOptions").value)
-            const updatedDescription= document.getElementById("updateDescription").value
+            const updateContainer=document.getElementById("ratingUpdate"+ratingId)
+            const selectedValue=parseInt(document.getElementById("ratingOptions"+ratingId).value)
+            const updatedDescription= document.getElementById("updateDescription"+ratingId).value
 
             if(updateContainer.style.display=="none"){
                 updateContainer.style.display="block"
                 btn.textContent="Save"
             }
             else if(btn.textContent=="Save"){
-                rating.rateScore=selectedValue
-                rating.vetId=$stateParams.vetId
-                rating.rateDescription=updatedDescription
-                rating.rateDate = Date.now().toString()
-                console.log(rating.rateScore);
-                updateContainer.style.display="none"
-                btn.textContent="Update"
+                const updatedRating = {
+                    rateScore: selectedValue,
+                    vetId: $stateParams.vetId,
+                    rateDescription: updatedDescription,
+                    rateDate: Date.now().toString()
+                };
+                console.log(updatedRating.rateScore)
 
-                $http.put("api/gateway/vets/" + $stateParams.vetId + "/ratings/"+ratingId, rating).then(function (resp){
+                $http.put("api/gateway/vets/" + $stateParams.vetId + "/ratings/" + ratingId, updatedRating).then(function (resp) {
                     console.log(resp.data)
-                    self.rating = resp.data;
+                    rating = resp.data;
                     alert('Your review was successfully updated!');
                     //refresh list
                     $http.get('api/gateway/vets/' + $stateParams.vetId + '/ratings').then(function (resp) {
                         console.log(resp.data)
                         self.ratings = resp.data;
-                        arr = resp.data;
                     });
                     //refresh percentages
                     percentageOfRatings();
                 });
+
+                updateContainer.style.display="none"
+                btn.textContent="Update"
             }
         }
 
