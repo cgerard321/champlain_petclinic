@@ -2257,6 +2257,7 @@ void deleteAllInventory_shouldSucceed() {
                 .practitionerId(2)
                 .status(true)
                 .build();
+        }
 
     @Test
     void sendForgottenEmail_ShouldSucceed(){
@@ -2334,6 +2335,6 @@ void deleteAllInventory_shouldSucceed() {
     }
 
 
-}
+
 
 
