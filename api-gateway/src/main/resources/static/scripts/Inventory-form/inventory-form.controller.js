@@ -21,7 +21,7 @@ angular.module('inventoryForm')
             });
         };
 
-        /*self.updateInventory = function (inventoryId) {
+        self.updateInventory = function (inventoryId) {
             var req;
             var varIsConf = confirm('Want to update inventory with Inventory Id: ' + inventoryId + '. Are you sure?');
 
@@ -39,7 +39,7 @@ angular.module('inventoryForm')
             }
         };
 
-*/
+
 
 
 
