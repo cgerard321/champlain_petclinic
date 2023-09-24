@@ -72,7 +72,7 @@ public class BFFApiGatewayController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "bills")
+    @GetMapping(value = "bills", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getAllBilling() {
         return billServiceClient.getAllBilling();
     }
@@ -80,13 +80,13 @@ public class BFFApiGatewayController {
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
-    @GetMapping(value = "bills/customer/{customerId}")
+    @GetMapping(value = "bills/customer/{customerId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getBillsByOwnerId(final @PathVariable int customerId)
     {
         return billServiceClient.getBillsByOwnerId(customerId);
     }
 
-    @GetMapping(value = "bills/vet/{vetId}")
+    @GetMapping(value = "bills/vet/{vetId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getBillsByVetId(final @PathVariable String vetId)
     {
         return billServiceClient.getBillsByVetId(vetId);

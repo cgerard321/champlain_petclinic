@@ -3,6 +3,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Bills.BillDetails;
+import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitDetails;
@@ -188,6 +189,41 @@ class BillServiceClientIntegrationTest {
                 .expectComplete()
                 .verify();
     }
+
+    @Test
+    void createBill() throws JsonProcessingException {
+        // Create a sample BillRequestDTO object to send in the request
+        BillRequestDTO billRequest = new BillRequestDTO();
+        billRequest.setVetId("1");
+        billRequest.setCustomerId(1);
+        billRequest.setDate(null);
+        billRequest.setAmount(100.0);
+        billRequest.setVisitType("Check up");
+
+        // Serialize the BillRequestDTO object to JSON
+        String requestJson = mapper.writeValueAsString(billRequest);
+
+        // Prepare a MockResponse for the createBill request
+        prepareResponse(response -> response
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(requestJson)
+        );
+
+        // Send a request to create the bill
+        Mono<BillResponseDTO> createdBillMono = billServiceClient.createBill(billRequest);
+
+        // Verify the response
+        StepVerifier.create(createdBillMono)
+                .expectNextMatches(createdBill -> {
+                    assertNotNull(createdBill);
+                    assertEquals("1", createdBill.getVetId());
+                    assertEquals(100.0, createdBill.getAmount());
+                    assertEquals("Check up", createdBill.getVisitType());
+                    return true;
+                })
+                .verifyComplete();
+    }
+
 
     @Test
     void getAllBills() throws JsonProcessingException {
