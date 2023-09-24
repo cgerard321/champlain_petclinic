@@ -26,6 +26,8 @@ angular.module('visits')
             return Date.parse(yyyy + '-' + mm + '-' + dd);
         }
 
+        //TODO: make a function to parse the date to localDate
+        //----------------------------------------------------
         // Container div for all alerts
         let alertsContainer = $('#alertsContainer');
 
