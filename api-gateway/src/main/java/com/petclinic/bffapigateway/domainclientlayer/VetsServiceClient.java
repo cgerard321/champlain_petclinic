@@ -50,7 +50,6 @@ public class VetsServiceClient {
                         .get()
                         .uri(vetsServiceUrl + "/" + vetId + "/ratings")
                         .retrieve()
-
                         .onStatus(HttpStatusCode::is4xxClientError, error->{
                             HttpStatusCode statusCode = error.statusCode();
                             if(statusCode.equals(HttpStatus.NOT_FOUND))
