@@ -32,7 +32,7 @@ class InventoryControllerUnitTest {
     ProductResponseDTO productResponseDTO = ProductResponseDTO.builder()
             .id("1")
             .inventoryId("1")
-            .inventoryId("123F567C9")
+            .productId("123F567C9")
             .productName("Benzodiazepines")
             .productDescription("Sedative Medication")
             .productPrice(100.00)
@@ -102,6 +102,18 @@ class InventoryControllerUnitTest {
         // Verify that the productInventoryService's updateInventory method was called with the correct arguments
         verify(productInventoryService, times(1))
                 .updateInventory(any(), eq(validInventoryId));
+    }
+    @Test
+    public void deleteProductInInventory_byProductId_shouldSucceed(){
+        //arrange
+        when(productInventoryService.deleteProductInInventory(productResponseDTO.getInventoryId(), productResponseDTO.getProductId()))
+                .thenReturn(Mono.empty());
+        //act and assert
+        webTestClient.delete()
+                .uri("/inventory/{inventoryId}/products/{productId}", productResponseDTO.getInventoryId(), productResponseDTO.getProductId())
+                .exchange()
+                .expectStatus().isNoContent();
+
     }
 
 
@@ -466,4 +478,38 @@ class InventoryControllerUnitTest {
         verify(productInventoryService, times(1)).deleteAllInventory();
     }
 
+
+    @Test
+    public void deleteProductInInventory_byInvalidProductId_shouldNotFound(){
+        //arrange
+        String invalidProductId = "invalid";
+
+        when(productInventoryService.deleteProductInInventory(productResponseDTO.getInventoryId(), invalidProductId))
+                .thenReturn(Mono.error(new NotFoundException()));
+
+        //act and assert
+        webTestClient.delete()
+                .uri("/inventory/{inventoryId}/products/{productId}", productResponseDTO.getInventoryId(), invalidProductId)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message","Product not found, make sure it exists, productId: "+invalidProductId);
+    }
+    @Test
+    public void deleteProductInInventory_byInvalidInventoryId_shouldNotFound(){
+        //arrange
+        String invalidInventoryId = "invalid";
+
+        when(productInventoryService.deleteProductInInventory(invalidInventoryId, productResponseDTO.getProductId()))
+                .thenReturn(Mono.error(new NotFoundException()));
+
+        //act and assert
+        webTestClient.delete()
+                .uri("/inventory/{inventoryId}/products/{productId}", invalidInventoryId, productResponseDTO.getProductId())
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message","Inventory not found, make sure it exists, inventoryId: "+invalidInventoryId);
+    }
 }
+

@@ -1,3 +1,11 @@
+<style>
+    .btn-danger:hover {
+        transform: translateY(2px);
+        box-shadow: 0 0 rgba(0, 0, 0, 2);
+        border-bottom-width: 1px;
+    }
+</style>
+
 <h2>Inventory Products</h2>
 
 <table class="table table-striped">
@@ -29,9 +37,12 @@
         <td></td>
         <td>
             <span>
-                <input type="button" value="Search" ng-click="searchProduct(productName, productQuantity, productPrice)"">
+                <input type="button" value="Search" ng-click="searchProduct(productName, productQuantity, productPrice)">
             </span>
         </td>
+        <!--to fill up black bar above buttons-->
+        <td></td>
+        <td></td>
     </tr>
 
     </thead>
@@ -42,7 +53,8 @@
         <td><span>{{product.productPrice}}</span></td>
         <td><span>{{product.productDescription}}</span></td>
         <td><a class="btn btn-warning" href="javascript:void(0)" ng-click="">Edit</a></td>
-        <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteBundle(bundle.bundleUUID)">Delete</a></td>
+        <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteProduct(product)">Delete</a></td>
+        <td></td>
     </tr>
 </table>
 <a ui-sref="productNew">
