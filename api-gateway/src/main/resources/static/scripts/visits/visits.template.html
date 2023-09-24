@@ -640,22 +640,7 @@
     </thead>
     <tbody>
         <tr ng-repeat="v in $ctrl.previousVisits" data-index="{{$index}}" data-table-name="previousVisits">
-<<<<<<< HEAD
             <td class="col-sm-2">{{v.date | date:'yyyy-MM-dd'}}</td>
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
-            <td class="col-sm-2"> {{selectedDate | date:'yyyy-MM-dd'}}></td>
-=======
-            <td class="col-sm-2">{{v.date | date:'yyyy-MM-dd'}}</td>
->>>>>>> 0d5c194a (Fixed rouuting issue with create visit button)
-=======
-            <td class="col-sm-2">{{v.date | date:'yyyy-MM-dd'}}</td>
-=======
-            <td class="col-sm-2">{{$ctrl.getVisitDate(v.visitId)}}</td>
->>>>>>> 979fa780 (Working on displaying date for a visit)
->>>>>>> 94cd137f (Working on displaying date for a visit)
->>>>>>> d0584629 (Working on displaying date for a visit)
             <td style="white-space: pre-line">{{v.description}}</td>
             <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>
             <td class="status-text" style="white-space: pre-line">{{$ctrl.getStatus(v.status)}}</td>
