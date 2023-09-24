@@ -4,10 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.config.GlobalExceptionHandler;
 import com.petclinic.bffapigateway.domainclientlayer.*;
-import com.petclinic.bffapigateway.dtos.Auth.Login;
-import com.petclinic.bffapigateway.dtos.Auth.Role;
-import com.petclinic.bffapigateway.dtos.Auth.UserDetails;
-import com.petclinic.bffapigateway.dtos.Auth.UserPasswordLessDTO;
+import com.petclinic.bffapigateway.dtos.Auth.*;
 import com.petclinic.bffapigateway.dtos.Bills.BillDetails;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
@@ -25,6 +22,7 @@ import com.petclinic.bffapigateway.dtos.Visits.VisitDetails;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import com.petclinic.bffapigateway.exceptions.GenericHttpException;
+import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Filters.JwtTokenFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.RoleFilter;
 import org.junit.jupiter.api.Assertions;
@@ -40,11 +38,10 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
+import org.springframework.http.*;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -1964,15 +1961,13 @@ class ApiGatewayControllerTest {
 
         headers.put(HttpHeaders.COOKIE, Collections.singletonList("Bearer=" + validToken + "; Path=/; HttpOnly; SameSite=Lax"));
 
-        HttpEntity<UserPasswordLessDTO> httpResponse = new HttpEntity<>(userPasswordLessDTO, new HttpHeaders(headers));
+        Mono<ResponseEntity<UserPasswordLessDTO>> httpResponse = Mono.just(ResponseEntity.ok().headers(HttpHeaders.readOnlyHttpHeaders(headers)).body(userPasswordLessDTO));
 
         when(authServiceClient.login(any(Login.class)))
                 .thenReturn(httpResponse);
 
-        HttpEntity< UserPasswordLessDTO > response = httpResponse;
-
         when(authServiceClient.login(any(Login.class)))
-                .thenReturn(response);
+                .thenReturn(httpResponse);
 
 
         final Login login = Login.builder()
@@ -1981,7 +1976,7 @@ class ApiGatewayControllerTest {
                 .build();
         when(authServiceClient.login(login))
                 .thenReturn(
-                        response
+                        httpResponse
                 );
 
          client.post()
@@ -1990,12 +1985,11 @@ class ApiGatewayControllerTest {
                 .body(Mono.just(login), Login.class)
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody(HttpEntity.class)
-                 .value((http ->
+                .expectBody(UserPasswordLessDTO.class)
+                 .value((res ->
                  {
-                     assertEquals(httpResponse.getHeaders().get(HttpHeaders.COOKIE).get(0), "Bearer=" + validToken + "; Path=/; HttpOnly; SameSite=Lax");
-                     assertEquals(httpResponse.getBody(), userPasswordLessDTO);
-
+                  assertEquals(res.getEmail(),userPasswordLessDTO.getEmail());
+                  
                  }));
     }
 
@@ -2263,11 +2257,84 @@ void deleteAllInventory_shouldSucceed() {
                 .practitionerId(2)
                 .status(true)
                 .build();
+        }
+
+    @Test
+    void sendForgottenEmail_ShouldSucceed(){
+        final UserEmailRequestDTO dto = UserEmailRequestDTO.builder()
+                .email("email")
+                .build();
+
+        ServerHttpRequest request = MockServerHttpRequest.post("http://localhost:8080").build();
+
+        when(authServiceClient.sendForgottenEmail(request,dto.getEmail()))
+                .thenReturn(Mono.just(ResponseEntity.ok().build()));
+
+
+        client.post()
+                .uri("/api/gateway/users/forgot_password")
+                .body(Mono.just(dto), UserEmailRequestDTO.class)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody();
+
+        verify(authServiceClient, times(1)).sendForgottenEmail(any(ServerHttpRequest.class),anyString());
+    }
+
+
+    @Test
+    void sendForgottenEmail_ShouldFail(){
+        final UserEmailRequestDTO dto = UserEmailRequestDTO.builder()
+                .email("email")
+                .build();
+
+        ServerHttpRequest request = MockServerHttpRequest.post("http://localhost:8080").build();
+
+        when(authServiceClient.sendForgottenEmail(any(),any()))
+                .thenThrow(new GenericHttpException("error",BAD_REQUEST));
+
+
+
+        client.post()
+                .uri("/api/gateway/users/forgot_password")
+                .body(Mono.just(dto), UserEmailRequestDTO.class)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody();
+
+        verify(authServiceClient, times(1)).sendForgottenEmail(any(ServerHttpRequest.class),anyString());
+        }
+
+
+        @Test
+        void processResetPassword_ShouldSucceed(){
+            final UserPasswordAndTokenRequestModel dto = UserPasswordAndTokenRequestModel.builder()
+                    .password("password")
+                    .token("Valid token")
+                    .build();
+
+
+            when(authServiceClient.changePassword(dto))
+                    .thenReturn(Mono.just(ResponseEntity.ok().build()));
+
+
+            client.post()
+                    .uri("/api/gateway/users/reset_password")
+                    .body(Mono.just(dto), UserPasswordAndTokenRequestModel.class)
+                    .exchange()
+                    .expectStatus().isOk()
+                    .expectBody();
+
+            verify(authServiceClient, times(1)).changePassword(any(UserPasswordAndTokenRequestModel.class));
+        }
+
+
+
 
 
     }
 
 
-}
+
 
 

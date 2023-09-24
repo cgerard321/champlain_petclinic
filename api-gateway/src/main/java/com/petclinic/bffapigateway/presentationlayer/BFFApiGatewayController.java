@@ -3,13 +3,13 @@ package com.petclinic.bffapigateway.presentationlayer;
 
 import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.Auth.Login;
+import com.petclinic.bffapigateway.dtos.Auth.*;
 import com.petclinic.bffapigateway.dtos.Auth.UserPasswordLessDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.ProductRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.ProductResponseDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
@@ -28,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -452,12 +453,31 @@ public class BFFApiGatewayController {
     public Mono<ResponseEntity<UserPasswordLessDTO>> login(@RequestBody Login login) throws Exception {
         log.info("Entered controller /login");
         log.info("Login: " + login.getEmail() + " " + login.getPassword());
-        HttpEntity<UserPasswordLessDTO> responseFromService = authServiceClient.login(login);
 
 
-        return Mono.just(ResponseEntity.status(HttpStatus.OK).headers(responseFromService.getHeaders()).body(responseFromService.getBody()));
+        return authServiceClient.login(login);
 
     }
+
+
+
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @PostMapping(value = "/users/forgot_password")
+    public Mono<ResponseEntity<Void>> processForgotPassword(ServerWebExchange exchange, @RequestBody UserEmailRequestDTO email) {
+
+        return authServiceClient.sendForgottenEmail(exchange.getRequest(),email.getEmail());
+
+    }
+
+
+
+
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @PostMapping("/users/reset_password")
+    public Mono<ResponseEntity<Void>> processResetPassword(@RequestBody UserPasswordAndTokenRequestModel resetRequest) {
+        return authServiceClient.changePassword(resetRequest);
+    }
+
 
     //Start of Inventory Methods
     @PostMapping(value = "inventory/{inventoryId}/products")
