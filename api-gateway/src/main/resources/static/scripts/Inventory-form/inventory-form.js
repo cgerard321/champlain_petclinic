@@ -8,12 +8,11 @@ angular.module('inventoryForm', ['ui.router'])
                 url: '/inventory/new',
                 template: '<inventory-form></inventory-form>'
             })
+
             .state('updateInventory', {
                     parent: 'app',
                     url: '/inventory/:inventoryId',
                     template: '<inventory-form></inventory-form>'
                 }
             )
-
-
     }]);

@@ -3,45 +3,57 @@
 angular.module('inventoryForm')
     .controller('InventoryFormController', ["$http", '$state', '$stateParams', function ($http, $state, $stateParams) {
         var self = this;
-
-        self.submitInventoryForm = function () {
-            var req;
-            req = $http.post("api/gateway/inventory", self.inventory);
+        console.log("State params: " + $stateParams)
 
 
+        self.submitInventoryForm = function (value = true) {
 
-            req.then(function () {
-                $state.go('inventories');
-            }, function (response) {
-                var error = response.data;
-                error.errors = error.errors || [];
-                alert(error.error + "\r\n" + error.errors.map(function (e) {
-                    return e.field + ": " + e.defaultMessage;
-                }).join("\r\n"));
-            });
-        };
-
-        self.updateInventory = function (inventoryId) {
-            var req;
-            var varIsConf = confirm('Want to update inventory with Inventory Id: ' + inventoryId + '. Are you sure?');
-
-            if (varIsConf) {
-                req = $http.put('api/gateway/inventory/' + inventoryId, self.inventory);
-
-                req.then(function () {
-                    // Handle success, e.g., show a success message and navigate to a new page
-                    console.log('Inventory updated successfully.');
-                    $state.go('inventories'); // You may need to adjust the state name
-                }, function (response) {
-                    // Handle error, e.g., show an error message
-                    console.error('Error updating inventory:', response.data);
-                });
+            var data  = {
+                inventoryName: self.inventory.inventoryName,
+                inventoryType: self.inventory.inventoryType,
+                inventoryDescription: self.inventory.inventoryDescription
             }
-        };
 
+            if (value) {
+                var req;
+                req = $http.post("api/gateway/inventory", self.inventory);
+                req.then(function () {
+                    $state.go('inventories');
+                }, function (response) {
+                    var error = response.data;
+                    error.errors = error.errors || [];
+                    alert(error.error + "\r\n" + error.errors.map(function (e) {
+                        return e.field + ": " + e.defaultMessage;
+                    }).join("\r\n"));
+                });
 
+            } else {
+                $http.put('/api/gateway/inventory/' + self.inventory.inventoryId, data)
+                    .then(function (response) {
+                        console.log(response);
+                        $state.go('updateInventories');
+                    }, function (response) {
+                        var error = response.data;
+                        error.errors = error.errors || [];
+                        alert(error.error + "\r\n" + error.errors.map(function (e) {
+                            return e.field + ": " + e.defaultMessage;
+                        }).join("\r\n"));
+                    });
+            }
 
-
-
-
+        }
     }]);
+
+
+
+
+
+
+
+
+
+
+
+
+
+

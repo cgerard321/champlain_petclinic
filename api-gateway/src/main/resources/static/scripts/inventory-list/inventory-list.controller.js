@@ -10,10 +10,6 @@ angular.module('inventoryList')
                     console.log("inventory list: " + self.inventoryList)
                 });
 
-
-
-
-
         /*$scope.deleteBundle = function (bundleUUID) {
             let varIsConf = confirm('Want to delete Bundle with Bundle Id:' + bundleUUID + '. Are you sure?');
             if (varIsConf) {
