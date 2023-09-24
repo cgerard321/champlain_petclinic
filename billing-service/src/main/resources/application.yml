@@ -18,6 +18,13 @@ spring:
     embedded:
       version: 4.0.21
 
+app:
+  vet-service:
+    host: localhost
+    port: 7002
+  customers-service:
+    host: localhost
+    port: 7003
 ---
 spring:
   config:
