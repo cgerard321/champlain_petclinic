@@ -72,10 +72,12 @@ angular.module('vetDetails')
 
             const updateContainer=document.getElementById("ratingUpdate"+ratingId)
             const selectedValue=parseInt(document.getElementById("ratingOptions"+ratingId).value)
+
             if(selectedValue<1||selectedValue>5){
                 alert("rateScore should be between 1 and 5" + selectedValue)
                 return
             }
+
             const updatedDescription= document.getElementById("updateDescription"+ratingId).value
             if(updateContainer.style.display=="none"){
                 updateContainer.style.display="block"
