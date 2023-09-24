@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 
-import java.time.LocalDate;
 import java.util.Date;
 
 @Data
@@ -20,6 +19,9 @@ public class Bill {
     private int customerId;
     private String visitType;
     private String vetId;
-    private LocalDate date;
+    private String vetFirstName;
+    private String vetLastName;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private Date visitDate = new Date();
     private double amount;
 }

@@ -17,15 +17,13 @@ import java.util.HashMap;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class BillServiceImpl implements BillService{
 
     private final BillRepository billRepository;
-//    private final VetClient vetClient;
-//    private final OwnerClient ownerClient;
+    private final VetClient vetClient;
+    private final OwnerClient ownerClient;
 
-    public BillServiceImpl(BillRepository billRepository) {
-        this.billRepository = billRepository;
-    }
     @Override
     public Mono<BillResponseDTO> GetBill(String billUUID) {
 
@@ -46,6 +44,7 @@ public class BillServiceImpl implements BillService{
 //                    .map(RequestContextAdd::new)
 //                    .flatMap(this::vetRequestResponse)
 //                    .flatMap(this::ownerRequestResponse)
+//                    .map(EntityDtoUtil::toBillEntityRC)
                     .map(EntityDtoUtil::toBillEntity)
                     .doOnNext(e -> e.setBillId(EntityDtoUtil.generateUUIDString()))
                     .flatMap(billRepository::insert)
