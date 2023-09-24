@@ -76,9 +76,7 @@ angular.module('vetDetails')
                 alert("rateScore should be between 1 and 5" + selectedValue)
                 return
             }
-
             const updatedDescription= document.getElementById("updateDescription"+ratingId).value
-
             if(updateContainer.style.display=="none"){
                 updateContainer.style.display="block"
                 btn.textContent="Save"
