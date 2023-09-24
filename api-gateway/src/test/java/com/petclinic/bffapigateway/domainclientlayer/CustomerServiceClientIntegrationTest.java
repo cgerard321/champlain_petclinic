@@ -54,7 +54,7 @@ public class CustomerServiceClientIntegrationTest {
 
     private final PetResponseDTO TEST_PET = PetResponseDTO.builder()
             .name("Cat")
-            .id(1)
+            .petId("1")
             .name("Bonkers")
             .birthDate("2015-03-03")
             .type(type)
@@ -190,13 +190,13 @@ public class CustomerServiceClientIntegrationTest {
     @Test
     void createPetPhoto() throws JsonProcessingException {
 
-        customersServiceClient.setPetPhoto("ownerId-1", TEST_PHOTO,1);
+        customersServiceClient.setPetPhoto("ownerId-1", TEST_PHOTO,"1");
         final String body = mapper.writeValueAsString(mapper.convertValue(TEST_PHOTO, PhotoDetails.class));
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setBody(body));
 
-        final PhotoDetails testPhoto = customersServiceClient.getPetPhoto("ownerId-2", 2).block();
+        final PhotoDetails testPhoto = customersServiceClient.getPetPhoto("ownerId-2", "2").block();
 
         assertEquals(TEST_PHOTO.getId(), testPhoto.getId());
         assertEquals(TEST_PHOTO.getName(), testPhoto.getName());
@@ -212,7 +212,7 @@ public class CustomerServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody(body));
 
-        final PhotoDetails testPhoto = customersServiceClient.getPetPhoto("ownerId-3",1).block();
+        final PhotoDetails testPhoto = customersServiceClient.getPetPhoto("ownerId-3","1").block();
 
         assertEquals(TEST_PHOTO.getId(), testPhoto.getId());
         assertEquals(TEST_PHOTO.getName(), testPhoto.getName());

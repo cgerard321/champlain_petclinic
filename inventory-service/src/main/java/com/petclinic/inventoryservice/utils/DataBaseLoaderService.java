@@ -24,7 +24,7 @@ public class DataBaseLoaderService  implements CommandLineRunner {
     public void run(String... args) throws Exception {
         Inventory inventory1 = Inventory.builder()
                 .inventoryId("1")
-                .inventoryName("invtone")
+                .inventoryName("Medication")
                 .inventoryType(InventoryType.internal)
                 .inventoryDescription("Medication for procedures")
                 .build();

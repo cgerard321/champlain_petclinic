@@ -55,6 +55,7 @@ class InventoryControllerIntegrationTest {
                 .create(inventoryPublisher)
                 .expectNextCount(1)
                 .verifyComplete();
+
         Publisher<Product> productPublisher = productRepository.deleteAll()
                 .thenMany(productRepository.save(Product.builder()
                         .inventoryId("1")
@@ -72,6 +73,7 @@ class InventoryControllerIntegrationTest {
                         .productPrice(100.00)
                         .productQuantity(10)
                         .build()));
+
         StepVerifier
                 .create(productPublisher)
                 .expectNextCount(1)
@@ -339,8 +341,6 @@ class InventoryControllerIntegrationTest {
                     assertEquals(2, list.size());
                 });
     }
-
-
     @Test
     public void addNewInventoryWithValidValues_shouldSucceed(){
         InventoryRequestDTO inventoryRequestDTO = InventoryRequestDTO.builder()
@@ -426,8 +426,6 @@ class InventoryControllerIntegrationTest {
                 });
     }
 
-
-
     @Test
     public void updateInventory_withInvalidInventoryId() {
         String InvalidInventoryId = "inventoryId_234";
@@ -495,109 +493,6 @@ class InventoryControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isNotFound();
     }
-
-    /*
-    @Test
-    public void testUpdateProductInInventory_ShouldSucceed() {
-        ProductRequestDTO productRequestDTO = ProductRequestDTO.builder()
-                .productName("Updated Benzodiazepines 02")
-                .productDescription("Updated Sedative Medication 02")
-                .productPrice(150.00)
-                .productQuantity(20)
-                .build();
-        webTestClient.put()
-                .uri("/inventory/" + "inventoryId_3" + "/products/" + "productId_1")
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(productRequestDTO)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(ProductResponseDTO.class)
-                .value(productResponseDTO -> {
-                    assertNotNull(productResponseDTO);
-                    assertEquals(product1.getProductId(), "productId_1");
-                    assertEquals(productRequestDTO.getProductName(), productResponseDTO.getProductName());
-                    assertEquals(productRequestDTO.getProductDescription(), productResponseDTO.getProductDescription());
-                    assertEquals(productRequestDTO.getProductPrice(), productResponseDTO.getProductPrice());
-                    assertEquals(productRequestDTO.getProductQuantity(), productResponseDTO.getProductQuantity());
-                });
-    }
-
-     */
-
-    /*
-    @Test
-    public void testUpdateProductInInventory_ShouldSucceed() {
-        // Arrange
-        String validInventoryId = inventory1.getInventoryId();
-        String validProductId = "productId_1";
-
-        ProductRequestDTO productRequestDTO = ProductRequestDTO.builder()
-                .productName("Updated Product Name")
-                .productDescription("Updated Product Description")
-                .productPrice(150.00)
-                .productQuantity(20)
-                .build();
-
-        // Act and assert
-        webTestClient
-                .put()
-                .uri("/inventory/" + validInventoryId + "/products/" + validProductId)
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(productRequestDTO)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(ProductResponseDTO.class)
-                .value(updatedProduct -> {
-                    assertNotNull(updatedProduct);
-                    assertEquals(validProductId, updatedProduct.getProductId());
-                    assertEquals(productRequestDTO.getProductName(), updatedProduct.getProductName());
-                    assertEquals(productRequestDTO.getProductDescription(), updatedProduct.getProductDescription());
-                    assertEquals(productRequestDTO.getProductPrice(), updatedProduct.getProductPrice());
-                    assertEquals(productRequestDTO.getProductQuantity(), updatedProduct.getProductQuantity());
-                });
-    }
-
-     */
-
-
-
-
-    /*
-    @Test
-    public void testUpdateProductInInventory_ShouldSucceed() {
-        String inventoryId = "1";
-        String productId = UUID.randomUUID().toString();
-        ProductRequestDTO productRequestDTO = ProductRequestDTO.builder()
-                .productName("Updated Benzodiazepines")
-                .productDescription("Updated Sedative Medication")
-                .productPrice(150.00)
-                .productQuantity(20)
-                .build();
-        webTestClient.put()
-                .uri("/inventories/{inventoryId}/products/{productId}", inventoryId, productId)
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(productRequestDTO)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(ProductResponseDTO.class)
-                .value(productResponseDTO -> {
-                    assertNotNull(productResponseDTO);
-                    assertEquals(productId, productResponseDTO.getProductId());
-                    assertEquals(productRequestDTO.getProductName(), productResponseDTO.getProductName());
-                    assertEquals(productRequestDTO.getProductDescription(), productResponseDTO.getProductDescription());
-                    assertEquals(productRequestDTO.getProductPrice(), productResponseDTO.getProductPrice());
-                    assertEquals(productRequestDTO.getProductQuantity(), productResponseDTO.getProductQuantity());
-                });
-    }
- */
-
-
     private Inventory buildInventory(String inventoryId, String name, InventoryType inventoryType, String inventoryDescription) {
         return Inventory.builder()
                 .inventoryId(inventoryId)
@@ -617,40 +512,36 @@ class InventoryControllerIntegrationTest {
                 .productQuantity(productQuantity)
                 .build();
     }
+    @Test
+    public void deleteProductInInventory_byProductId_ShouldSucceed(){
+        webTestClient.delete()
+                .uri("/inventory/{inventoryId}/products/{productId}", "inventoryId_3","123F567C9")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent();
+    }
 
+    @Test
+    public void deleteProductInInventory_byInvalidProductId_shouldNotFound(){
+        String invalidProduct = "invalid";
+        webTestClient.delete()
+                .uri("/inventory/{inventory}/products/{productId}","inventoryId_3",invalidProduct)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Product not found, make sure it exists, productId: "+invalidProduct);
+    }
 
-
-
-//    @Test
-//    void addProductToInventory_WithValidInventoryIdAndValidBody_ShouldSucceed(){
-//        // Arrange
-//        ProductRequestDTO productRequestDTO = ProductRequestDTO.builder()
-//                .productName("Benzodiazepines")
-//                .productDescription("Sedative Medication")
-//                .productPrice(100.00)
-//                .productQuantity(10)
-//                .build();
-////        when(inventoryRepository.findInventoryByInventoryId("1")).thenReturn(Mono.just(Inventory.builder()
-////                .inventoryId("1")
-////                .inventoryType("Medication")
-////                .inventoryDescription("Medication for procedures")
-////                .build()));
-//        // Act and assert
-//        webTestClient
-//                .post()
-//                .uri("/inventories/{inventoryId}/products", "1")
-//                .accept(MediaType.APPLICATION_JSON)
-//                .bodyValue(productRequestDTO)
-//                .exchange()
-//                .expectStatus().isCreated()
-//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-//                .expectBody(ProductResponseDTO.class)
-//                .value(dto -> {
-//                    assertNotNull(dto);
-//                    assertEquals(productRequestDTO.getProductName(), dto.getProductName());
-//                    assertEquals(productRequestDTO.getProductDescription(), dto.getProductDescription());
-//                    assertEquals(productRequestDTO.getProductPrice(), dto.getProductPrice());
-//                    assertEquals(productRequestDTO.getProductQuantity(), dto.getProductQuantity());
-//                });
-//    }
+    @Test
+    public void deleteProductInInventory_byInvalidInventoryId_shouldNotFound(){
+        String invalidInventory = "invalid";
+        webTestClient.delete()
+                .uri("/inventory/{inventory}/products/{productId}",invalidInventory,"123F567C9")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Inventory not found, make sure it exists, inventoryId: "+invalidInventory);
+    }
 }

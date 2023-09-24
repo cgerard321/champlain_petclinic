@@ -9,6 +9,7 @@ import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.ProductRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.ProductResponseDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
@@ -23,23 +24,12 @@ import com.petclinic.bffapigateway.dtos.Visits.VisitDetails;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import com.petclinic.bffapigateway.utils.VetsEntityDtoUtil;
-import io.netty.handler.codec.http.cookie.Cookie;
-import io.swagger.annotations.ResponseHeader;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
-import org.springframework.http.server.ServletServerHttpRequest;
-import org.springframework.http.server.ServletServerHttpResponse;
-import org.springframework.http.server.reactive.ServerHttpResponse;
-import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
-import java.time.Duration;
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author Maciej Szarlinski
@@ -124,9 +114,19 @@ public class BFFApiGatewayController {
         return customersServiceClient.createPet(pet, ownerId);
     }
 
+//    @GetMapping(value = "owners/{ownerId}/pets")
+//    public Flux<PetResponseDTO> getAllPetsFromOwnerId(@PathVariable String ownerId){
+//        return customersServiceClient.getAllPets(ownerId);
+//    }
+
     @GetMapping(value = "owners/{ownerId}/pets/{petId}")
     public Mono<PetResponseDTO> getPet(@PathVariable int ownerId, @PathVariable int petId){
         return customersServiceClient.getPet(ownerId, petId);
+    }
+
+    @GetMapping(value = "/owners/{ownerId}/pets")
+    public Flux<PetResponseDTO> getPetsByOwnerId(@PathVariable String ownerId){
+        return customersServiceClient.getPetsByOwnerId(ownerId);
     }
 
     @DeleteMapping("owners/{ownerId}/pets/{petId}")
@@ -208,6 +208,9 @@ public class BFFApiGatewayController {
     public Mono<Void> deleteVisitsByVisitId(final @PathVariable String visitId){
         return visitsServiceClient.deleteVisitByVisitId(visitId);
     }
+    /**
+     * End of Visit Methods
+     **/
 
     @GetMapping(value = "vets")
     public Flux<VetDTO> getAllVets() {
@@ -370,12 +373,12 @@ public class BFFApiGatewayController {
     }*/
 
     @PostMapping(value = "owners/{ownerId}/pet/photo/{petId}")
-    public Mono<String> setPetPhoto(@PathVariable String ownerId, @RequestBody PhotoDetails photoDetails, @PathVariable int petId) {
+    public Mono<String> setPetPhoto(@PathVariable String ownerId, @RequestBody PhotoDetails photoDetails, @PathVariable String petId) {
         return customersServiceClient.setPetPhoto(ownerId, photoDetails, petId);
     }
 
     @GetMapping(value = "owners/{ownerId}/pet/photo/{petId}")
-    public Mono<PhotoDetails> getPetPhoto(@PathVariable String ownerId, @PathVariable int petId) {
+    public Mono<PhotoDetails> getPetPhoto(@PathVariable String ownerId, @PathVariable String petId) {
         return customersServiceClient.getPetPhoto(ownerId, petId);
     }
 
