@@ -45,6 +45,11 @@ public class GlobalExceptionHandler {
                 .body(new HttpErrorInfo(401, ex.getMessage()));
     }
 
+    @ExceptionHandler(value = InvalidCredentialsException.class)
+    public ResponseEntity<HttpErrorInfo> invalidCredentialException(InvalidCredentialsException ex){
+        return ResponseEntity.status(401).body(new HttpErrorInfo(401,ex.getMessage()));
+    }
+
 
     @ExceptionHandler(value = InvalidTokenException.class)
     public ResponseEntity<HttpErrorInfo> invalidTokenException(InvalidTokenException ex) {
