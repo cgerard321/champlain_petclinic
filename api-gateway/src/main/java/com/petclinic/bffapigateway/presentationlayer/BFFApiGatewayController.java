@@ -3,13 +3,13 @@ package com.petclinic.bffapigateway.presentationlayer;
 
 import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.Auth.Login;
+import com.petclinic.bffapigateway.dtos.Auth.*;
 import com.petclinic.bffapigateway.dtos.Auth.UserPasswordLessDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.ProductRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.ProductResponseDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
@@ -28,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -72,7 +73,7 @@ public class BFFApiGatewayController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "bills")
+    @GetMapping(value = "bills", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getAllBilling() {
         return billServiceClient.getAllBilling();
     }
@@ -80,13 +81,13 @@ public class BFFApiGatewayController {
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
-    @GetMapping(value = "bills/customer/{customerId}")
+    @GetMapping(value = "bills/customer/{customerId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getBillsByOwnerId(final @PathVariable int customerId)
     {
         return billServiceClient.getBillsByOwnerId(customerId);
     }
 
-    @GetMapping(value = "bills/vet/{vetId}")
+    @GetMapping(value = "bills/vet/{vetId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getBillsByVetId(final @PathVariable String vetId)
     {
         return billServiceClient.getBillsByVetId(vetId);
@@ -126,8 +127,18 @@ public class BFFApiGatewayController {
     }*/
 
 
+    @GetMapping(value = "pets")
+    public Flux<PetResponseDTO> getAllPets(){
+        return customersServiceClient.getAllPets();
+    }
+
+    @GetMapping(value = "pets/{petId}")
+    public Mono<PetResponseDTO> getPetByPetId(@PathVariable String petId){
+        return customersServiceClient.getPetByPetId(petId);
+    }
+
     @GetMapping(value = "owners/{ownerId}/pets/{petId}")
-    public Mono<PetResponseDTO> getPet(@PathVariable int ownerId, @PathVariable int petId){
+    public Mono<PetResponseDTO> getPet(@PathVariable String ownerId, @PathVariable String petId){
         return customersServiceClient.getPet(ownerId, petId);
     }
 
@@ -137,7 +148,7 @@ public class BFFApiGatewayController {
     }
 
     @DeleteMapping("owners/{ownerId}/pets/{petId}")
-    public Mono<PetResponseDTO> deletePet(@PathVariable String ownerId, @PathVariable int petId){
+    public Mono<PetResponseDTO> deletePet(@PathVariable String ownerId, @PathVariable String petId){
         return customersServiceClient.deletePet(ownerId,petId);
     }
 
@@ -153,12 +164,12 @@ public class BFFApiGatewayController {
     @GetMapping(value = "visits", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VisitResponseDTO> getAllVisits() {return visitsServiceClient.getAllVisits();}
     @GetMapping(value = "visits/previous/{petId}")
-    public Flux<VisitDetails> getPreviousVisitsForPet(@PathVariable final int petId) {
+    public Flux<VisitDetails> getPreviousVisitsForPet(@PathVariable final String petId) {
         return visitsServiceClient.getPreviousVisitsForPet(petId);
     }
 
     @GetMapping(value = "visits/scheduled/{petId}")
-    public Flux<VisitDetails> getScheduledVisitsForPet(@PathVariable final int petId) {
+    public Flux<VisitDetails> getScheduledVisitsForPet(@PathVariable final String petId) {
         return visitsServiceClient.getScheduledVisitsForPet(petId);
     }
 
@@ -177,7 +188,7 @@ public class BFFApiGatewayController {
     }
      */
     @GetMapping(value = "visits/pets/{petId}")
-    public Flux<VisitDetails> getVisitsForPet(final @PathVariable int petId){
+    public Flux<VisitDetails> getVisitsForPet(final @PathVariable String petId){
         return visitsServiceClient.getVisitsForPet(petId);
     }
 
@@ -202,11 +213,11 @@ public class BFFApiGatewayController {
 
     @PostMapping(value = "visit/owners/{ownerId}/pets/{petId}/visits", consumes = "application/json", produces = "application/json")
     Mono<VisitDetails> addVisit(@RequestBody VisitDetails visit, @PathVariable String ownerId, @PathVariable String petId) {
-        visit.setPetId(Integer.parseInt(petId));
+        visit.setPetId(petId);
         return visitsServiceClient.createVisitForPet(visit);
     }
     @PutMapping(value = "owners/*/pets/{petId}/visits/{visitId}", consumes = "application/json", produces = "application/json")
-    Mono<VisitDetails> updateVisit(@RequestBody VisitDetails visit, @PathVariable int petId, @PathVariable String visitId) {
+    Mono<VisitDetails> updateVisit(@RequestBody VisitDetails visit, @PathVariable String petId, @PathVariable String visitId) {
         visit.setPetId(petId);
         visit.setVisitId(visitId);
         return visitsServiceClient.updateVisitForPet(visit);
@@ -379,25 +390,25 @@ public class BFFApiGatewayController {
         return customersServiceClient.getOwnerPhoto(ownerId);
     }*/
 
-    @PostMapping(value = "owners/{ownerId}/pet/photo/{petId}")
-    public Mono<String> setPetPhoto(@PathVariable String ownerId, @RequestBody PhotoDetails photoDetails, @PathVariable String petId) {
-        return customersServiceClient.setPetPhoto(ownerId, photoDetails, petId);
-    }
-
-    @GetMapping(value = "owners/{ownerId}/pet/photo/{petId}")
-    public Mono<PhotoDetails> getPetPhoto(@PathVariable String ownerId, @PathVariable String petId) {
-        return customersServiceClient.getPetPhoto(ownerId, petId);
-    }
-
-    @DeleteMapping(value = "owners/photo/{photoId}")
-    public Mono<Void> deleteOwnerPhoto(@PathVariable int photoId){
-        return customersServiceClient.deleteOwnerPhoto(photoId);
-    }
-
-    @DeleteMapping(value = "owners/{ownerId}/pet/photo/{photoId}")
-    public Mono<Void> deletePetPhoto(@PathVariable int ownerId, @PathVariable int photoId){
-        return customersServiceClient.deletePetPhoto(ownerId, photoId);
-    }
+//    @PostMapping(value = "owners/{ownerId}/pet/photo/{petId}")
+//    public Mono<String> setPetPhoto(@PathVariable String ownerId, @RequestBody PhotoDetails photoDetails, @PathVariable String petId) {
+//        return customersServiceClient.setPetPhoto(ownerId, photoDetails, petId);
+//    }
+//
+//    @GetMapping(value = "owners/{ownerId}/pet/photo/{petId}")
+//    public Mono<PhotoDetails> getPetPhoto(@PathVariable String ownerId, @PathVariable String petId) {
+//        return customersServiceClient.getPetPhoto(ownerId, petId);
+//    }
+//
+//    @DeleteMapping(value = "owners/photo/{photoId}")
+//    public Mono<Void> deleteOwnerPhoto(@PathVariable int photoId){
+//        return customersServiceClient.deleteOwnerPhoto(photoId);
+//    }
+//
+//    @DeleteMapping(value = "owners/{ownerId}/pet/photo/{photoId}")
+//    public Mono<Void> deletePetPhoto(@PathVariable int ownerId, @PathVariable int photoId){
+//        return customersServiceClient.deletePetPhoto(ownerId, photoId);
+//    }
 
 
 
@@ -459,12 +470,31 @@ public class BFFApiGatewayController {
     public Mono<ResponseEntity<UserPasswordLessDTO>> login(@RequestBody Login login) throws Exception {
         log.info("Entered controller /login");
         log.info("Login: " + login.getEmail() + " " + login.getPassword());
-        HttpEntity<UserPasswordLessDTO> responseFromService = authServiceClient.login(login);
 
 
-        return Mono.just(ResponseEntity.status(HttpStatus.OK).headers(responseFromService.getHeaders()).body(responseFromService.getBody()));
+        return authServiceClient.login(login);
 
     }
+
+
+
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @PostMapping(value = "/users/forgot_password")
+    public Mono<ResponseEntity<Void>> processForgotPassword(ServerWebExchange exchange, @RequestBody UserEmailRequestDTO email) {
+
+        return authServiceClient.sendForgottenEmail(exchange.getRequest(),email.getEmail());
+
+    }
+
+
+
+
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @PostMapping("/users/reset_password")
+    public Mono<ResponseEntity<Void>> processResetPassword(@RequestBody UserPasswordAndTokenRequestModel resetRequest) {
+        return authServiceClient.changePassword(resetRequest);
+    }
+
 
     //Start of Inventory Methods
     @PostMapping(value = "inventory/{inventoryId}/products")
