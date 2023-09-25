@@ -18,6 +18,6 @@ public class VisitRequestDTO {
     private int day;*/
     private String description;
     private String petId;
-    private String practitionerId;
+    private String vetId;
     private boolean status;
 }
