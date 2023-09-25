@@ -4,6 +4,7 @@ import com.petclinic.bffapigateway.dtos.Bills.BillDetails;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -61,6 +62,18 @@ public class BillServiceClient {
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve().bodyToMono(BillResponseDTO.class);
     }
+
+    public Mono<BillResponseDTO> updateBill(String billId, Mono<BillRequestDTO> billRequestDTO){
+        return webClientBuilder
+                .build()
+                .put()
+                .uri(billServiceUrl + "/{billId}", billId)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(billRequestDTO, BillResponseDTO.class)
+                .retrieve()
+                .bodyToMono(BillResponseDTO.class);
+    }
+
 
     public Mono<Void> deleteBill(final String billId) {
         return webClientBuilder.build()

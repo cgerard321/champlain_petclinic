@@ -3,15 +3,16 @@
 const whiteList = new Set([
     'login',
     'signup',
+    'forgot_password',
+    'reset_password'
 ]);
 
 /* App Module */
 var petClinicApp = angular.module('petClinicApp', [
     'ui.router', 'layoutNav', 'layoutFooter', 'layoutWelcome', 'ownerList', 'ownerDetails', 'ownerForm', 'ownerRegister', 'petForm'
-    , 'visits', 'vetList','vetForm','vetDetails', 'visitList', 'billForm', 'loginForm', 'rolesDetails', 'signupForm',
-    'billDetails', 'billsByOwnerId', 'billHistory','billsByVetId','inventoryList','productForm','inventoryProductList','bundleForm'
-    , 'verification' , 'adminPanel']);
-
+    , 'visits', 'vetList','vetForm','vetDetails', 'visitList', 'billForm', 'billUpdateForm', 'loginForm', 'rolesDetails', 'signupForm',
+    'billDetails', 'billsByOwnerId', 'billHistory','billsByVetId','inventoryList', 'inventoryForm', 'productForm','inventoryProductList'
+    , 'verification' , 'adminPanel','resetPwdForm','forgotPwdForm']);
 
 
 
@@ -53,7 +54,7 @@ petClinicApp.factory("httpErrorInterceptor", ["$q", "$location", "authProvider",
 petClinicApp.run(['$rootScope', '$location', 'authProvider', function ($rootScope, $location, authProvider) {
     $rootScope.$on('$locationChangeSuccess', function (event) {
 
-        if(whiteList.has($location.path().substring(1))) {
+        if(whiteList.has($location.path().substring(1)) || $location.path().startsWith('/reset_password')) {
             return console.log("WHITE LISTED: Ignoring");
         }
 

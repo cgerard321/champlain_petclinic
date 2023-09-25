@@ -16,6 +16,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import org.springframework.beans.BeanUtils;
+import static org.mockito.ArgumentMatchers.*;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -99,29 +100,6 @@ public class BillServiceImplTest {
     }
 
     @Test
-    void updateBill() {
-        Bill billEntity = buildBill();
-        String billId = billEntity.getBillId();
-        BillDTO dto = buildBillDTO();
-        dto.setVisitType("This is a new test type");
-
-        Bill updatedBillEntity = new Bill();
-        BeanUtils.copyProperties(billEntity, updatedBillEntity);
-        updatedBillEntity.setVisitType(dto.getVisitType());
-        when(repo.findByBillId(anyString())).thenReturn((Mono.just(billEntity)));
-        when(repo.save(any(Bill.class))).thenReturn(Mono.just(updatedBillEntity));
-
-        Mono<BillDTO> billDTOMono = billService.updateBill(billId, Mono.just(dto));
-
-        StepVerifier.create(billDTOMono)
-                .consumeNextWith(foundBill -> {
-                    assertNotEquals(billEntity.getVisitType(), foundBill.getVisitType());
-                })
-                .verifyComplete();
-    }
-
-
-    @Test
     public void test_DeleteBill(){
 
         Bill billEntity = buildBill();
@@ -198,6 +176,38 @@ public class BillServiceImplTest {
                 .verifyComplete();
     }
 
+    @Test
+    public void test_UpdateBill() {
+
+        Bill originalBill = buildBill();
+
+
+        double updatedAmount = 20.0;
+        originalBill.setAmount(updatedAmount);
+
+
+        BillRequestDTO updatedBillRequestDTO = buildBillRequestDTO();
+        updatedBillRequestDTO.setAmount(updatedAmount);
+
+
+        Mono<BillRequestDTO> updatedBillRequestMono = Mono.just(updatedBillRequestDTO);
+
+
+        when(repo.findByBillId(anyString())).thenReturn(Mono.just(originalBill));
+        when(repo.save(any(Bill.class))).thenReturn(Mono.just(originalBill));
+
+
+        Mono<BillResponseDTO> updatedBillMono = billService.updateBill(originalBill.getBillId(), updatedBillRequestMono);
+
+
+        StepVerifier.create(updatedBillMono)
+                .consumeNextWith(updatedBill -> {
+                    assertEquals(originalBill.getBillId(), updatedBill.getBillId());
+                    assertEquals(updatedAmount, updatedBill.getAmount());
+
+                })
+                .verifyComplete();
+    }
 
     private Bill buildBill(){
 

@@ -23,6 +23,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
 
     private final InventoryRepository inventoryRepository;
     private final ProductRepository productRepository;
+
     @Override
     public Mono<ProductResponseDTO> addProductToInventory(Mono<ProductRequestDTO> productRequestDTOMono, String inventoryId) {
         return productRequestDTOMono
@@ -38,7 +39,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                                 Product product = EntityDTOUtil.toProductEntity(requestDTO);
                                 product.setInventoryId(inventoryId);
                                 product.setProductId(EntityDTOUtil.generateUUID());
-                                return productRepository.insert(product)
+                                return productRepository.save(product)
                                         .map(EntityDTOUtil::toProductResponseDTO);
                             }
                         }))
@@ -110,6 +111,13 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                         }))
                 .switchIfEmpty(Mono.error(new InvalidInputException("Unable to update product in the repository, an error occurred.")));
     }
+
+
+
+
+
+
+
 
     @Override
     public Mono<Void> deleteProductInInventory(String inventoryId, String productId) {

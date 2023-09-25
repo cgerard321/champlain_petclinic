@@ -63,8 +63,8 @@ angular.module('vetForm')
             vet.resume = document.getElementById("vetResume").value;
             vet.workday = document.getElementById("workDays").value;
 
-            let phoneNumber = self.vet.phoneNumber.substring(0, self.vet.phoneNumber.length - 4);
-            vet.phoneNumber = phoneNumber + document.getElementById("phoneNumber").value;
+            let basePhoneNumber = "(514)-634-8276 #";
+            vet.phoneNumber = basePhoneNumber + document.getElementById("phoneNumber").value;
 
             let isAct = document.getElementsByClassName("isActiveRadio");
             vet.active = isAct[0].checked;
