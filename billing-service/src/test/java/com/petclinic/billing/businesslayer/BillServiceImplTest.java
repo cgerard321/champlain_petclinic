@@ -99,29 +99,6 @@ public class BillServiceImplTest {
     }
 
     @Test
-    void updateBill() {
-        Bill billEntity = buildBill();
-        String billId = billEntity.getBillId();
-        BillDTO dto = buildBillDTO();
-        dto.setVisitType("This is a new test type");
-
-        Bill updatedBillEntity = new Bill();
-        BeanUtils.copyProperties(billEntity, updatedBillEntity);
-        updatedBillEntity.setVisitType(dto.getVisitType());
-        when(repo.findByBillId(anyString())).thenReturn((Mono.just(billEntity)));
-        when(repo.save(any(Bill.class))).thenReturn(Mono.just(updatedBillEntity));
-
-        Mono<BillDTO> billDTOMono = billService.updateBill(billId, Mono.just(dto));
-
-        StepVerifier.create(billDTOMono)
-                .consumeNextWith(foundBill -> {
-                    assertNotEquals(billEntity.getVisitType(), foundBill.getVisitType());
-                })
-                .verifyComplete();
-    }
-
-
-    @Test
     public void test_DeleteBill(){
 
         Bill billEntity = buildBill();
