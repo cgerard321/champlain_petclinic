@@ -13,14 +13,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 public class VisitRequestDTO {
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-=======
->>>>>>> 336d2006 (Working on parse date)
-=======
-    
->>>>>>> 2b061185 (Fixed error in api testing with Dtos PR)
     private LocalDateTime visitDate;
 /*   private int year;
     private int month;
