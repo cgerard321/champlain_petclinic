@@ -824,7 +824,7 @@ class ApiGatewayControllerTest {
         PetResponseDTO pet = new PetResponseDTO();
         PetType type = new PetType();
         type.setName("Dog");
-        pet.setId(30);
+        pet.setPetId("30");
         pet.setName("Fluffy");
         pet.setBirthDate("2000-01-01");
         pet.setType(type);
@@ -833,14 +833,14 @@ class ApiGatewayControllerTest {
                 .thenReturn(Mono.just(pet));
 
         client.put()
-                .uri("/api/gateway/owners/{ownerId}/pets/{petId}", od.getOwnerId(), pet.getId())
+                .uri("/api/gateway/owners/{ownerId}/pets/{petId}", od.getOwnerId(), pet.getPetId())
                 .body(fromValue(pet))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.id").isEqualTo(pet.getId())
+                .jsonPath("$.petId").isEqualTo(pet.getPetId())
                 .jsonPath("$.name").isEqualTo(pet.getName())
                 .jsonPath("$.birthDate").isEqualTo(pet.getBirthDate())
                 .jsonPath("$.type").isEqualTo(pet.getType());
