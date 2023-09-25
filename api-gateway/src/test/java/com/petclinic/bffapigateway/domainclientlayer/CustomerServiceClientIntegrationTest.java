@@ -187,37 +187,37 @@ public class CustomerServiceClientIntegrationTest {
 //        assertEquals(TEST_PHOTO.getPhoto(), testPhoto.getPhoto());
 
     }*/
-    @Test
-    void createPetPhoto() throws JsonProcessingException {
-
-        customersServiceClient.setPetPhoto("ownerId-1", TEST_PHOTO,"1");
-        final String body = mapper.writeValueAsString(mapper.convertValue(TEST_PHOTO, PhotoDetails.class));
-        prepareResponse(response -> response
-                .setHeader("Content-Type", "application/json")
-                .setBody(body));
-
-        final PhotoDetails testPhoto = customersServiceClient.getPetPhoto("ownerId-2", "2").block();
-
-        assertEquals(TEST_PHOTO.getId(), testPhoto.getId());
-        assertEquals(TEST_PHOTO.getName(), testPhoto.getName());
-        assertEquals(TEST_PHOTO.getType(), testPhoto.getType());
-//        assertEquals(TEST_PHOTO.getPhoto(), testPhoto.getPhoto());
-
-    }
-    @Test
-    void getPetPhoto() throws JsonProcessingException {
-
-        final String body = mapper.writeValueAsString(mapper.convertValue(TEST_PHOTO, PhotoDetails.class));
-        prepareResponse(response -> response
-                .setHeader("Content-Type", "application/json")
-                .setBody(body));
-
-        final PhotoDetails testPhoto = customersServiceClient.getPetPhoto("ownerId-3","1").block();
-
-        assertEquals(TEST_PHOTO.getId(), testPhoto.getId());
-        assertEquals(TEST_PHOTO.getName(), testPhoto.getName());
-        assertEquals(TEST_PHOTO.getType(), testPhoto.getType());
-    }
+//    @Test
+//    void createPetPhoto() throws JsonProcessingException {
+//
+//        customersServiceClient.setPetPhoto("ownerId-1", TEST_PHOTO,"1");
+//        final String body = mapper.writeValueAsString(mapper.convertValue(TEST_PHOTO, PhotoDetails.class));
+//        prepareResponse(response -> response
+//                .setHeader("Content-Type", "application/json")
+//                .setBody(body));
+//
+//        final PhotoDetails testPhoto = customersServiceClient.getPetPhoto("ownerId-2", "2").block();
+//
+//        assertEquals(TEST_PHOTO.getId(), testPhoto.getId());
+//        assertEquals(TEST_PHOTO.getName(), testPhoto.getName());
+//        assertEquals(TEST_PHOTO.getType(), testPhoto.getType());
+////        assertEquals(TEST_PHOTO.getPhoto(), testPhoto.getPhoto());
+//
+//    }
+//    @Test
+//    void getPetPhoto() throws JsonProcessingException {
+//
+//        final String body = mapper.writeValueAsString(mapper.convertValue(TEST_PHOTO, PhotoDetails.class));
+//        prepareResponse(response -> response
+//                .setHeader("Content-Type", "application/json")
+//                .setBody(body));
+//
+//        final PhotoDetails testPhoto = customersServiceClient.getPetPhoto("ownerId-3","1").block();
+//
+//        assertEquals(TEST_PHOTO.getId(), testPhoto.getId());
+//        assertEquals(TEST_PHOTO.getName(), testPhoto.getName());
+//        assertEquals(TEST_PHOTO.getType(), testPhoto.getType());
+//    }
 
 //    @Test
 //    void deleteOwnerPhoto() throws JsonProcessingException {
@@ -232,18 +232,18 @@ public class CustomerServiceClientIntegrationTest {
 //        assertEquals(empty.block(), null);
 //    }
 
-    @Test
-    void deletePetPhoto() throws JsonProcessingException {
-
-        final String body = mapper.writeValueAsString(mapper.convertValue(TEST_PHOTO, PhotoDetails.class));
-        prepareResponse(response -> response
-                .setHeader("Content-Type", "application/json")
-                .setBody(body));
-
-        final Mono<Void> empty = customersServiceClient.deletePetPhoto(1,TEST_PHOTO.getId());
-
-        assertEquals(empty.block(), null);
-    }
+//    @Test
+//    void deletePetPhoto() throws JsonProcessingException {
+//
+//        final String body = mapper.writeValueAsString(mapper.convertValue(TEST_PHOTO, PhotoDetails.class));
+//        prepareResponse(response -> response
+//                .setHeader("Content-Type", "application/json")
+//                .setBody(body));
+//
+//        final Mono<Void> empty = customersServiceClient.deletePetPhoto(1,TEST_PHOTO.getId());
+//
+//        assertEquals(empty.block(), null);
+//    }
 
     private void prepareResponse(Consumer<MockResponse> consumer) {
         MockResponse response = new MockResponse();

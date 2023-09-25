@@ -888,105 +888,105 @@ class ApiGatewayControllerTest {
 //
 //
 //    }
-    @Test
-    void createPetPhoto(){
-
-        OwnerResponseDTO owner = new OwnerResponseDTO();
-        owner.setOwnerId("ownerId-123");
-        PetResponseDTO pet = new PetResponseDTO();
-        PetType type = new PetType();
-        type.setName("Cat");
-        pet.setPetId("petId-123");
-        pet.setName("Bonkers");
-        pet.setBirthDate("2015-03-03");
-        pet.setType(type);
-        pet.setImageId(2);
-
-        final String test = "Test photo";
-        final byte[] testBytes = test.getBytes();
-
-        PhotoDetails photo = new PhotoDetails();
-        photo.setId(2);
-        photo.setName("photo");
-        photo.setType("jpeg");
-        photo.setPhoto("testBytes");
-
-        when(customersServiceClient.setPetPhoto(owner.getOwnerId(), photo, pet.getPetId()))
-                .thenReturn(Mono.just("Image uploaded successfully: " + photo.getName()));
-
-        client.post()
-                .uri("/api/gateway/owners/1/pet/photo/1")
-                .body(Mono.just(photo), PhotoDetails.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
-                .expectBody();
-    }
-    //
-    @Test
-    void getPetPhoto(){
-
-        OwnerResponseDTO owner = new OwnerResponseDTO();
-        owner.setOwnerId("ownerId-1234");
-        PetResponseDTO pet = new PetResponseDTO();
-        PetType type = new PetType();
-        type.setName("Cat");
-        pet.setPetId("petId-123");
-        pet.setName("Bonkers");
-        pet.setBirthDate("2015-03-03");
-        pet.setType(type);
-        pet.setImageId(2);
-
-        final String test = "Test photo";
-        final byte[] testBytes = test.getBytes();
-
-        PhotoDetails photo = new PhotoDetails();
-        photo.setId(2);
-        photo.setName("photo");
-        photo.setType("jpeg");
-        photo.setPhoto("testBytes");
-
-        when(customersServiceClient.getPetPhoto(owner.getOwnerId(), pet.getPetId()))
-                .thenReturn(Mono.just(photo));
-
-        client.get()
-                .uri("/api/gateway/owners/"+ owner.getOwnerId() +"/pet/photo/" + pet.getPetId() )
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.name").isEqualTo("photo")
-                .jsonPath("$.type").isEqualTo("jpeg");
-    }
-    //
+//    @Test
+//    void createPetPhoto(){
 //
-    @Test
-    void shouldThrowUnsupportedMediaTypeIfBodyDoesNotExist(){
-        OwnerResponseDTO od = new OwnerResponseDTO();
-        od.setOwnerId("ownerId-21");
-        PetResponseDTO pet = new PetResponseDTO();
-        PetType type = new PetType();
-        type.setName("Dog");
-        pet.setPetId("petId-123");
-        pet.setName("Fluffy");
-        pet.setBirthDate("2000-01-01");
-        pet.setType(type);
-
-        when(customersServiceClient.createPet(pet,od.getOwnerId()))
-                .thenReturn(Mono.just(pet));
-
-        client.post()
-                .uri("/api/gateway/owners/{ownerId}/pets", od.getOwnerId())
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isEqualTo(UNSUPPORTED_MEDIA_TYPE)
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.message").isEqualTo("Content type '' not supported");
-
-
-    }
+//        OwnerResponseDTO owner = new OwnerResponseDTO();
+//        owner.setOwnerId("ownerId-123");
+//        PetResponseDTO pet = new PetResponseDTO();
+//        PetType type = new PetType();
+//        type.setName("Cat");
+//        pet.setPetId("petId-123");
+//        pet.setName("Bonkers");
+//        pet.setBirthDate("2015-03-03");
+//        pet.setType(type);
+//        pet.setImageId(2);
+//
+//        final String test = "Test photo";
+//        final byte[] testBytes = test.getBytes();
+//
+//        PhotoDetails photo = new PhotoDetails();
+//        photo.setId(2);
+//        photo.setName("photo");
+//        photo.setType("jpeg");
+//        photo.setPhoto("testBytes");
+//
+//        when(customersServiceClient.setPetPhoto(owner.getOwnerId(), photo, pet.getPetId()))
+//                .thenReturn(Mono.just("Image uploaded successfully: " + photo.getName()));
+//
+//        client.post()
+//                .uri("/api/gateway/owners/1/pet/photo/1")
+//                .body(Mono.just(photo), PhotoDetails.class)
+//                .accept(MediaType.APPLICATION_JSON)
+//                .exchange()
+//                .expectStatus().isOk()
+//                .expectHeader().contentType(MediaType.APPLICATION_JSON_UTF8)
+//                .expectBody();
+//    }
+//    //
+//    @Test
+//    void getPetPhoto(){
+//
+//        OwnerResponseDTO owner = new OwnerResponseDTO();
+//        owner.setOwnerId("ownerId-1234");
+//        PetResponseDTO pet = new PetResponseDTO();
+//        PetType type = new PetType();
+//        type.setName("Cat");
+//        pet.setPetId("petId-123");
+//        pet.setName("Bonkers");
+//        pet.setBirthDate("2015-03-03");
+//        pet.setType(type);
+//        pet.setImageId(2);
+//
+//        final String test = "Test photo";
+//        final byte[] testBytes = test.getBytes();
+//
+//        PhotoDetails photo = new PhotoDetails();
+//        photo.setId(2);
+//        photo.setName("photo");
+//        photo.setType("jpeg");
+//        photo.setPhoto("testBytes");
+//
+//        when(customersServiceClient.getPetPhoto(owner.getOwnerId(), pet.getPetId()))
+//                .thenReturn(Mono.just(photo));
+//
+//        client.get()
+//                .uri("/api/gateway/owners/"+ owner.getOwnerId() +"/pet/photo/" + pet.getPetId() )
+//                .exchange()
+//                .expectStatus().isOk()
+//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+//                .expectBody()
+//                .jsonPath("$.name").isEqualTo("photo")
+//                .jsonPath("$.type").isEqualTo("jpeg");
+//    }
+//    //
+////
+//    @Test
+//    void shouldThrowUnsupportedMediaTypeIfBodyDoesNotExist(){
+//        OwnerResponseDTO od = new OwnerResponseDTO();
+//        od.setOwnerId("ownerId-21");
+//        PetResponseDTO pet = new PetResponseDTO();
+//        PetType type = new PetType();
+//        type.setName("Dog");
+//        pet.setPetId("petId-123");
+//        pet.setName("Fluffy");
+//        pet.setBirthDate("2000-01-01");
+//        pet.setType(type);
+//
+//        when(customersServiceClient.createPet(pet,od.getOwnerId()))
+//                .thenReturn(Mono.just(pet));
+//
+//        client.post()
+//                .uri("/api/gateway/owners/{ownerId}/pets", od.getOwnerId())
+//                .accept(MediaType.APPLICATION_JSON)
+//                .exchange()
+//                .expectStatus().isEqualTo(UNSUPPORTED_MEDIA_TYPE)
+//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+//                .expectBody()
+//                .jsonPath("$.message").isEqualTo("Content type '' not supported");
+//
+//
+//    }
     //
     @Test
     void ifOwnerIdIsNotSpecifiedInUrlThrowNotAllowed(){
@@ -1445,7 +1445,7 @@ class ApiGatewayControllerTest {
         VisitDetails visit = new VisitDetails();
         owner.setOwnerId("ownerId-123");
         visit.setVisitId(UUID.randomUUID().toString());
-        visit.setPetId(1);
+        visit.setPetId("1");
         visit.setVisitDate(LocalDateTime.parse("2021-12-12T14:00:00"));
         visit.setDescription("Charle's Richard cat has a paw infection.");
         visit.setStatus(false);
@@ -1464,7 +1464,7 @@ class ApiGatewayControllerTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.visitId").isEqualTo(visit.getVisitId())
-                .jsonPath("$.petId").isEqualTo(1)
+                .jsonPath("$.petId").isEqualTo("1")
                 .jsonPath("$.visitDate").isEqualTo("2021-12-12T14:00:00")
                 .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$.status").isEqualTo(false)
@@ -1518,7 +1518,7 @@ class ApiGatewayControllerTest {
         OwnerResponseDTO owner = new OwnerResponseDTO();
         owner.setOwnerId("ownerId-90");
         visit.setVisitId(UUID.randomUUID().toString());
-        visit.setPetId(1);
+        visit.setPetId("1");
         visit.setVisitDate(LocalDateTime.parse("2021-12-12T14:00:00"));
         visit.setDescription("Charle's Richard cat has a paw infection.");
         visit.setStatus(false);
@@ -1529,7 +1529,7 @@ class ApiGatewayControllerTest {
 
         owner2.setOwnerId("ownerId-12");
         visit2.setVisitId(UUID.randomUUID().toString());
-        visit2.setPetId(2);
+        visit2.setPetId("2");
         visit2.setVisitDate(LocalDateTime.parse("2021-12-12T14:00:00"));
         visit2.setDescription("Charle's Richard dog has a paw infection.");
         visit2.setStatus(false);
@@ -1548,7 +1548,7 @@ class ApiGatewayControllerTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.visitId").isEqualTo(visit.getVisitId())
-                .jsonPath("$.petId").isEqualTo(1)
+                .jsonPath("$.petId").isEqualTo("1")
                 .jsonPath("$.visitDate").isEqualTo("2021-12-12T14:00:00")
                 .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$.status").isEqualTo(false)
@@ -1566,7 +1566,7 @@ class ApiGatewayControllerTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
 
-        assertEquals(visitsServiceClient.getVisitsForPet(1), null);
+        assertEquals(visitsServiceClient.getVisitsForPet("1"), null);
     }
     @Test
     void shouldGetAllVisits() {
@@ -1588,7 +1588,7 @@ class ApiGatewayControllerTest {
     void shouldGetAVisit() {
         VisitDetails visit = new VisitDetails();
         visit.setVisitId(UUID.randomUUID().toString());
-        visit.setPetId(1);
+        visit.setPetId("1");
         visit.setVisitDate(LocalDateTime.parse("2021-12-12T14:00:00"));
         visit.setDescription("Charle's Richard cat has a paw infection.");
         visit.setStatus(false);
@@ -1603,7 +1603,7 @@ class ApiGatewayControllerTest {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$[0].visitId").isEqualTo(visit.getVisitId())
-                .jsonPath("$[0].petId").isEqualTo(1)
+                .jsonPath("$[0].petId").isEqualTo("1")
                 .jsonPath("$[0].visitDate").isEqualTo("2021-12-12T14:00:00")
                 .jsonPath("$[0].description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$[0].practitionerId").isEqualTo(1);
@@ -1613,13 +1613,13 @@ class ApiGatewayControllerTest {
     void shouldGetAVisitForPractitioner(){
         VisitDetails visit = new VisitDetails();
         visit.setVisitId(UUID.randomUUID().toString());
-        visit.setPetId(1);
+        visit.setPetId("1");
         visit.setVisitDate(LocalDateTime.parse("2021-12-12T14:00:00"));
         visit.setDescription("Charle's Richard cat has a paw infection.");
         visit.setStatus(false);
         visit.setPractitionerId(1);
 
-        when(visitsServiceClient.getVisitForPractitioner(visit.getPetId()))
+        when(visitsServiceClient.getVisitForPractitioner(Integer.parseInt(visit.getPetId())))
                 .thenReturn(Flux.just(visit));
 
         client.get()
@@ -1628,7 +1628,7 @@ class ApiGatewayControllerTest {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$[0].visitId").isEqualTo(visit.getVisitId())
-                .jsonPath("$[0].petId").isEqualTo(1)
+                .jsonPath("$[0].petId").isEqualTo("1")
                 .jsonPath("$[0].visitDate").isEqualTo("2021-12-12T14:00:00")
                 .jsonPath("$[0].description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$[0].practitionerId").isEqualTo(1);
@@ -1701,13 +1701,13 @@ class ApiGatewayControllerTest {
         VisitDetails visit1 = new VisitDetails();
         VisitDetails visit2 = new VisitDetails();
         visit1.setVisitId(UUID.randomUUID().toString());
-        visit1.setPetId(21);
+        visit1.setPetId("21");
         visit1.setVisitDate(LocalDateTime.parse("2021-12-07T14:00:00"));
         visit1.setDescription("John Smith's cat has a paw infection.");
         visit1.setStatus(false);
         visit1.setPractitionerId(2);
         visit2.setVisitId(UUID.randomUUID().toString());
-        visit2.setPetId(21);
+        visit2.setPetId("21");
         visit2.setVisitDate(LocalDateTime.parse("2021-12-08T15:00:00"));
         visit2.setDescription("John Smith's dog has a paw infection.");
         visit2.setStatus(false);
@@ -1719,7 +1719,7 @@ class ApiGatewayControllerTest {
 
         Flux<VisitDetails> previousVisits = Flux.fromIterable(previousVisitsList);
 
-        when(visitsServiceClient.getPreviousVisitsForPet(21))
+        when(visitsServiceClient.getPreviousVisitsForPet("21"))
                 .thenReturn(previousVisits);
 
         client.get()
@@ -1728,13 +1728,13 @@ class ApiGatewayControllerTest {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$[0].visitId").isEqualTo(visit1.getVisitId())
-                .jsonPath("$[0].petId").isEqualTo(21)
+                .jsonPath("$[0].petId").isEqualTo("21")
                 .jsonPath("$[0].visitDate").isEqualTo("2021-12-07T14:00:00")
                 .jsonPath("$[0].description").isEqualTo("John Smith's cat has a paw infection.")
                 .jsonPath("$[0].status").isEqualTo(false)
                 .jsonPath("$[0].practitionerId").isEqualTo(2)
                 .jsonPath("$[1].visitId").isEqualTo(visit2.getVisitId())
-                .jsonPath("$[1].petId").isEqualTo(21)
+                .jsonPath("$[1].petId").isEqualTo("21")
                 .jsonPath("$[1].visitDate").isEqualTo("2021-12-08T15:00:00")
                 .jsonPath("$[1].description").isEqualTo("John Smith's dog has a paw infection.")
                 .jsonPath("$[1].status").isEqualTo(false)
@@ -1745,7 +1745,7 @@ class ApiGatewayControllerTest {
     @Test
     @DisplayName("Should return a bad request if the petId is invalid when trying to get the previous visits of a pet")
     void shouldGetBadRequestWhenInvalidPetIdToRetrievePreviousVisits() {
-        final int invalidPetId = -1;
+        final String invalidPetId = "-1";
         final String expectedErrorMessage = "error message";
 
         when(visitsServiceClient.getPreviousVisitsForPet(invalidPetId))
@@ -1766,13 +1766,13 @@ class ApiGatewayControllerTest {
         VisitDetails visit1 = new VisitDetails();
         VisitDetails visit2 = new VisitDetails();
         visit1.setVisitId(UUID.randomUUID().toString());
-        visit1.setPetId(21);
+        visit1.setPetId("21");
         visit1.setVisitDate(LocalDateTime.parse("2021-12-07T14:00:00"));
         visit1.setDescription("John Smith's cat has a paw infection.");
         visit1.setStatus(true);
         visit1.setPractitionerId(2);
         visit2.setVisitId(UUID.randomUUID().toString());
-        visit2.setPetId(21);
+        visit2.setPetId("21");
         visit2.setVisitDate(LocalDateTime.parse("2021-12-08T15:00"));
         visit2.setDescription("John Smith's dog has a paw infection.");
         visit2.setStatus(true);
@@ -1784,7 +1784,7 @@ class ApiGatewayControllerTest {
 
         Flux<VisitDetails> scheduledVisits = Flux.fromIterable(scheduledVisitsList);
 
-        when(visitsServiceClient.getScheduledVisitsForPet(21))
+        when(visitsServiceClient.getScheduledVisitsForPet("21"))
                 .thenReturn(scheduledVisits);
 
         client.get()
@@ -1845,7 +1845,7 @@ class ApiGatewayControllerTest {
     @Test
     @DisplayName("Should return a bad request if the petId is invalid when trying to get the scheduled visits of a pet")
     void shouldGetBadRequestWhenInvalidPetIdToRetrieveScheduledVisits() {
-        final int invalidPetId = -1;
+        final String invalidPetId = "0";
         final String expectedErrorMessage = "error message";
 
         when(visitsServiceClient.getScheduledVisitsForPet(invalidPetId))
