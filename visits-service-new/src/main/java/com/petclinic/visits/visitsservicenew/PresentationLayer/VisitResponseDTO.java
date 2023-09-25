@@ -13,10 +13,10 @@ import java.time.LocalDateTime;
 @Builder
 public class VisitResponseDTO {
     private String visitId;
-   // private LocalDateTime visitDate;
-   private int year;
+    private LocalDateTime visitDate;
+/*   private int year;
     private int month;
-    private int day;
+    private int day;*/
     private String description;
     private String petId;
     private String practitionerId;
