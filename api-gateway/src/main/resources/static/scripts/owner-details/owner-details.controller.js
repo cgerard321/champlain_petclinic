@@ -8,7 +8,9 @@ angular.module('ownerDetails')
             console.log("Owner id is " + $stateParams.ownerId)
             console.log(resp.data)
             self.owner = resp.data;
+
         });
+
 
         self.toggleActiveStatus = function (petId) {
             $http.get('api/gateway/pets/' + petId + '?_=' + new Date().getTime(), { headers: { 'Cache-Control': 'no-cache' } }).then(function (resp) {
