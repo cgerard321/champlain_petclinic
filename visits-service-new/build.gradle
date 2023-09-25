@@ -35,6 +35,8 @@ dependencies {
     testImplementation 'org.yaml:snakeyaml:2.2'
     testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo.spring30x:4.9.2'
     testImplementation 'io.projectreactor:reactor-test'
+    testImplementation 'com.squareup.okhttp3:okhttp:4.11.0'
+    testImplementation 'com.squareup.okhttp3:mockwebserver:4.11.0'
 }
 
 jacoco {

@@ -14,8 +14,11 @@ import java.time.LocalDateTime;
 public class VisitResponseDTO {
     private String visitId;
     private LocalDateTime visitDate;
+/*   private int year;
+    private int month;
+    private int day;*/
     private String description;
-    private int petId;
-    private int practitionerId;
+    private String petId;
+    private String practitionerId;
     private boolean status;
 }
