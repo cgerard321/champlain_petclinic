@@ -120,6 +120,16 @@ public class BFFApiGatewayController {
 //        return customersServiceClient.getAllPets(ownerId);
 //    }
 
+    @GetMapping(value = "pets")
+    public Flux<PetResponseDTO> getAllPets(){
+        return customersServiceClient.getAllPets();
+    }
+
+    @GetMapping(value = "pets/{petId}")
+    public Mono<PetResponseDTO> getPetByPetId(@PathVariable String petId){
+        return customersServiceClient.getPetByPetId(petId);
+    }
+
     @GetMapping(value = "owners/{ownerId}/pets/{petId}")
     public Mono<PetResponseDTO> getPet(@PathVariable int ownerId, @PathVariable int petId){
         return customersServiceClient.getPet(ownerId, petId);

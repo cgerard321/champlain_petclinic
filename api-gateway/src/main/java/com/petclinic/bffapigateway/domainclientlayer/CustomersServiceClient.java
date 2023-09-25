@@ -36,20 +36,20 @@ public class CustomersServiceClient {
             @Value("${app.customers-service.port}") String customersServicePort
     ) {
         this.webClientBuilder = webClientBuilder;
-        customersServiceUrl = "http://" + customersServiceHost + ":" + customersServicePort + "/owners/";
+        customersServiceUrl = "http://" + customersServiceHost + ":" + customersServicePort;
     }
 
 
     public Mono<OwnerResponseDTO> getOwner(final String ownerId) {
         return webClientBuilder.build().get()
-                .uri(customersServiceUrl + ownerId)
+                .uri(customersServiceUrl+ "/owners/" + ownerId)
                 .retrieve()
                 .bodyToMono(OwnerResponseDTO.class);
     }
 
     public Flux<OwnerResponseDTO> getAllOwners() {
         return webClientBuilder.build().get()
-                .uri(customersServiceUrl)
+                .uri(customersServiceUrl + "/owners")
                 .retrieve()
                 .bodyToFlux(OwnerResponseDTO.class);
     }
@@ -80,7 +80,7 @@ public class CustomersServiceClient {
         return ownerRequestDTO.flatMap(requestDTO ->
                 webClientBuilder.build()
                         .put()
-                        .uri(customersServiceUrl + ownerId)
+                        .uri(customersServiceUrl + "/owners/" + ownerId)
                         .body(BodyInserters.fromValue(requestDTO))
                         .retrieve()
                         .bodyToMono(OwnerResponseDTO.class)
@@ -101,7 +101,7 @@ public class CustomersServiceClient {
 
     public Mono<OwnerResponseDTO> createOwner (OwnerResponseDTO model){
         return webClientBuilder.build().post()
-                .uri(customersServiceUrl)
+                .uri(customersServiceUrl + "/owners")
                 .accept(MediaType.APPLICATION_JSON)
                 .body(Mono.just(model), OwnerResponseDTO.class)
                 .retrieve().bodyToMono(OwnerResponseDTO.class);
@@ -113,6 +113,19 @@ public class CustomersServiceClient {
                 .uri(customersServiceUrl + "/petTypes")
                 .retrieve()
                 .bodyToFlux(PetType.class);
+    }
+    public Flux<PetResponseDTO> getAllPets(){
+        return webClientBuilder.build().get()
+                .uri(customersServiceUrl + "/pet")
+                .retrieve()
+                .bodyToFlux(PetResponseDTO.class);
+    }
+
+    public Mono<PetResponseDTO> getPetByPetId(String petId){
+        return webClientBuilder.build().get()
+                .uri(customersServiceUrl + "/pet/" + petId)
+                .retrieve()
+                .bodyToMono(PetResponseDTO.class);
     }
 
     public Mono<PetResponseDTO> getPet(final int ownerId, final int petId){
