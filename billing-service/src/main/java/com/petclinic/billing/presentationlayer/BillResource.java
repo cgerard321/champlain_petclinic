@@ -6,6 +6,7 @@ import com.petclinic.billing.datalayer.BillRequestDTO;
 import com.petclinic.billing.datalayer.BillResponseDTO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -22,15 +23,18 @@ public class BillResource {
 
     // Create Bill //
     @PostMapping("/bills")
-    @ResponseStatus(HttpStatus.CREATED)
-    public Mono<BillResponseDTO> createBill(@Valid @RequestBody Mono<BillRequestDTO> billDTO){
-        return SERVICE.CreateBill(billDTO);
+    public Mono<ResponseEntity<BillResponseDTO>> createBill(@Valid @RequestBody Mono<BillRequestDTO> billDTO){
+        return SERVICE.CreateBill(billDTO)
+                .map(e -> ResponseEntity.status(HttpStatus.CREATED).body(e))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
     // Read Bill //
     @GetMapping(value = "/bills/{billId}")
-    public Mono<BillResponseDTO> findBill(@PathVariable("billId") String billId){
-        return SERVICE.GetBill(billId);
+    public Mono<ResponseEntity<BillResponseDTO>> findBill(@PathVariable("billId") String billId){
+        return SERVICE.GetBill(billId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @GetMapping(value = "/bills")
@@ -39,8 +43,10 @@ public class BillResource {
     }
 
     @PutMapping(value ="/bills/{billId}")
-    public Mono<BillDTO> updateBill(@PathVariable String billId, @RequestBody Mono<BillDTO> billDTOMono){
-        return SERVICE.updateBill(billId, billDTOMono);
+    public Mono<ResponseEntity<BillDTO>> updateBill(@PathVariable String billId, @RequestBody Mono<BillDTO> billDTOMono){
+        return SERVICE.updateBill(billId, billDTOMono)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
     @GetMapping(value = "/bills/customer/{customerId}")
