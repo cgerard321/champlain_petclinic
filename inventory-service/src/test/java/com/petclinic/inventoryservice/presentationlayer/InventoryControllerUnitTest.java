@@ -16,9 +16,9 @@ import java.util.Arrays;
 import java.util.List;
 
 import static com.petclinic.inventoryservice.datalayer.Inventory.InventoryType.internal;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @WebFluxTest(controllers = InventoryController.class)
@@ -58,12 +58,7 @@ class InventoryControllerUnitTest {
                     .productQuantity(10)
                     .build()
     );
-    ProductRequestDTO productRequestDTO = ProductRequestDTO.builder()
-            .productName("Benzodiazepines")
-            .productDescription("Sedative Medication")
-            .productPrice(100.00)
-            .productQuantity(10)
-            .build();
+
     @Test
     void updateInventory_ValidRequest_ShouldReturnOk() {
         // Arrange
@@ -510,6 +505,80 @@ class InventoryControllerUnitTest {
                 .expectStatus().isNotFound()
                 .expectBody()
                 .jsonPath("$.message","Inventory not found, make sure it exists, inventoryId: "+invalidInventoryId);
+    }
+    @Test
+    void addProductToInventory_ShouldCallServiceAddProduct() {
+        // Arrange
+        String inventoryId = "123";
+        ProductRequestDTO requestDTO = ProductRequestDTO.builder()
+                .productName("New Product")
+                .productDescription("New Description")
+                .productPrice(200.00)
+                .productQuantity(20)
+                .build();
+
+        ProductResponseDTO responseDTO = ProductResponseDTO.builder()
+                .id("456")
+                .inventoryId(inventoryId)
+                .productName("New Product")
+                .productDescription("New Description")
+                .productPrice(200.00)
+                .productQuantity(20)
+                .build();
+
+        when(productInventoryService.addProductToInventory(any(), eq(inventoryId)))
+                .thenReturn(Mono.just(responseDTO));
+
+        // Act and Assert
+        webTestClient
+                .post()
+                .uri("/inventory/{inventoryId}/products", inventoryId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(ProductResponseDTO.class)
+                .value(dto -> {
+                    assertNotNull(dto);
+                    assertEquals(responseDTO.getId(), dto.getId());
+                    assertEquals(responseDTO.getInventoryId(), dto.getInventoryId());
+                    assertEquals(responseDTO.getProductName(), dto.getProductName());
+                    assertEquals(responseDTO.getProductDescription(), dto.getProductDescription());
+                    assertEquals(responseDTO.getProductPrice(), dto.getProductPrice());
+                    assertEquals(responseDTO.getProductQuantity(), dto.getProductQuantity());
+                });
+
+        verify(productInventoryService, times(1))
+                .addProductToInventory(any(), eq(inventoryId));
+    }
+
+    @Test
+    void addProductToInventory_InvalidInput_ShouldReturnBadRequest() {
+        // Arrange
+        String inventoryId = "123";
+        ProductRequestDTO requestDTO = ProductRequestDTO.builder()
+                .productName("New Product")
+                .productDescription("New Description")
+                .productPrice(200.00)
+                .productQuantity(20)
+                .build();
+
+        when(productInventoryService.addProductToInventory(any(), eq(inventoryId)))
+                .thenReturn(Mono.error(new InvalidInputException("Invalid input")));
+
+        // Act and Assert
+        webTestClient
+                .post()
+                .uri("/inventory/{inventoryId}/products", inventoryId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.message", "Invalid input");
+
+        verify(productInventoryService, times(1))
+                .addProductToInventory(any(), eq(inventoryId));
     }
 }
 

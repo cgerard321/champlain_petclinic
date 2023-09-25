@@ -494,4 +494,67 @@ class ProductInventoryServiceUnitTest {
                 .verifyComplete();
         Mockito.verify(inventoryRepository, Mockito.times(1)).deleteAll();
     }
+
+    @Test
+    void addProductToInventory_ShouldSucceed(){
+        // Arrange
+        String inventoryId = "1";
+        Mockito.when(inventoryRepository.findInventoryByInventoryId(inventoryId))
+                .thenReturn(Mono.just(inventory));
+        Mockito.when(productRepository.save(any(Product.class)))
+                .thenReturn(Mono.just(product));
+        //Act
+        Mono<ProductResponseDTO> result = productInventoryService.addProductToInventory(Mono.just(productRequestDTO), inventoryId);
+        //Assert
+        StepVerifier.create(result)
+                .assertNext(productResponseDTO -> {
+                    assertNotNull(productResponseDTO);
+                    assertEquals(productResponseDTO.getInventoryId(), inventoryId);
+                    assertEquals(productResponseDTO.getProductName(), productRequestDTO.getProductName());
+                    assertEquals(productResponseDTO.getProductPrice(), productRequestDTO.getProductPrice());
+                    assertEquals(productResponseDTO.getProductQuantity(), productRequestDTO.getProductQuantity());
+                })
+                .verifyComplete();
+        Mockito.verify(productRepository, Mockito.times(1)).save(any(Product.class));
+    }
+
+    @Test
+    void addProductToInventory_WithInvalidInventoryId_ShouldThrowNotFoundException(){
+        // Arrange
+        String inventoryId = "1";
+        Mockito.when(inventoryRepository.findInventoryByInventoryId(inventoryId))
+                .thenReturn(Mono.empty());
+        //Act
+        Mono<ProductResponseDTO> result = productInventoryService.addProductToInventory(Mono.just(productRequestDTO), inventoryId);
+        //Assert
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> {
+                    assertEquals("Inventory not found with id: " + inventoryId, throwable.getMessage());
+                    return throwable instanceof NotFoundException;
+                })
+                .verify();
+    }
+
+    @Test
+    void addProductToInventory_WithInvalidProductRequest_ShouldThrowInvalidInputException(){
+        // Arrange
+        String inventoryId = "1";
+        ProductRequestDTO productRequestDTO = ProductRequestDTO.builder()
+                .productName("Benzodiazepines")
+                .productDescription("Sedative Medication")
+                .productPrice(-100.00)
+                .productQuantity(10)
+                .build();
+        Mockito.when(inventoryRepository.findInventoryByInventoryId(inventoryId))
+                .thenReturn(Mono.just(inventory));
+        //Act
+        Mono<ProductResponseDTO> result = productInventoryService.addProductToInventory(Mono.just(productRequestDTO), inventoryId);
+        //Assert
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> {
+                    assertEquals("Product price and quantity must be greater than 0.", throwable.getMessage());
+                    return throwable instanceof InvalidInputException;
+                })
+                .verify();
+    }
 }
