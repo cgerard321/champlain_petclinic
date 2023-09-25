@@ -3,6 +3,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
+import com.petclinic.bffapigateway.dtos.Inventory.ProductRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.ProductResponseDTO;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -14,6 +15,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.io.IOException;
@@ -70,6 +72,28 @@ class InventoryServiceClientIntegrationTest {
                 .verifyComplete();
     }
 
+    @Test
+    void addProductsToInventory() throws JsonProcessingException {
+        ProductResponseDTO productResponseDTO = new ProductResponseDTO(
+                "1",
+                "productId",
+                "inventoryId",
+                "name",
+                "desc",
+                10.00,
+                2
+        );
 
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .setBody(objectMapper.writeValueAsString(productResponseDTO))
+                .addHeader("Content-Type", "application/json"));
+
+        Mono<ProductResponseDTO> productResponseDTOFlux = inventoryServiceClient
+                .addProductToInventory(new ProductRequestDTO(), productResponseDTO.getInventoryId());
+        StepVerifier.create(productResponseDTOFlux)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
 
 }

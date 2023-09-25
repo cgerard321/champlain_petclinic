@@ -2197,6 +2197,87 @@ void deleteAllInventory_shouldSucceed() {
 
     }
 
+    @Test
+    @DisplayName("Given valid inventoryId and valid productRequest Post and return productResponse")
+    void testAddProductToInventory_ShouldSucceed() {
+        // Create a sample ProductRequestDTO
+        ProductRequestDTO requestDTO = new ProductRequestDTO("Sample Product", "Sample Description", 10.0, 100);
+
+        // Define the expected response
+        ProductResponseDTO expectedResponse = ProductResponseDTO.builder()
+                .id("sampleId")
+                .productId("sampleProductId")
+                .inventoryId("sampleInventoryId")
+                .productName(requestDTO.getProductName())
+                .productDescription(requestDTO.getProductDescription())
+                .productPrice(requestDTO.getProductPrice())
+                .productQuantity(requestDTO.getProductQuantity())
+                .build();
+
+        // Mock the behavior of the inventoryServiceClient
+        when(inventoryServiceClient.addProductToInventory(any(), anyString()))
+                .thenReturn(Mono.just(expectedResponse));
+
+        // Perform the POST request
+        client.post()
+                .uri("/api/gateway/inventory/{inventoryId}/products", "sampleInventoryId")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(ProductResponseDTO.class)
+                .value(dto -> {
+                    assertNotNull(dto);
+                    assertEquals(requestDTO.getProductName(), dto.getProductName());
+                    assertEquals(requestDTO.getProductDescription(), dto.getProductDescription());
+                    assertEquals(requestDTO.getProductPrice(), dto.getProductPrice());
+                    assertEquals(requestDTO.getProductQuantity(), dto.getProductQuantity());
+                });
+
+        // Verify that the inventoryServiceClient method was called
+        verify(inventoryServiceClient, times(1))
+                .addProductToInventory(eq(requestDTO), eq("sampleInventoryId"));
+    }
+
+    @Test
+    @DisplayName("Given invalid inventoryId and valid productRequest Post and return NotFoundException")
+    void testAddProductToInventory_InvalidInventoryId_ShouldReturnNotFoundException() {
+        // Create a sample ProductRequestDTO
+        ProductRequestDTO requestDTO = new ProductRequestDTO("Sample Product", "Sample Description", 10.0, 100);
+
+        // Define the expected response
+        ProductResponseDTO expectedResponse = ProductResponseDTO.builder()
+                .id("sampleId")
+                .productId("sampleProductId")
+                .inventoryId("sampleInventoryId")
+                .productName(requestDTO.getProductName())
+                .productDescription(requestDTO.getProductDescription())
+                .productPrice(requestDTO.getProductPrice())
+                .productQuantity(requestDTO.getProductQuantity())
+                .build();
+
+        // Mock the behavior of the inventoryServiceClient
+        when(inventoryServiceClient.addProductToInventory(any(), anyString()))
+                .thenThrow(new NotFoundException("Inventory not found"));
+
+        // Perform the POST request
+        client.post()
+                .uri("/api/gateway/inventory/{inventoryId}/products", "invalidInventoryId")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(requestDTO)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.statusCode").isEqualTo(NOT_FOUND.value())
+                .jsonPath("$.message").isEqualTo("Inventory not found")
+                .jsonPath("$.timestamp").exists();
+
+        // Verify that the inventoryServiceClient method was called
+        verify(inventoryServiceClient, times(1))
+                .addProductToInventory(eq(requestDTO), eq("invalidInventoryId"));
+    }
+
     private ProductResponseDTO buildProductDTO(){
         return ProductResponseDTO.builder()
                 .id("1")

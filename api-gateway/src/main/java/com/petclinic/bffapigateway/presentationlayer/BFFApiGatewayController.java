@@ -491,8 +491,10 @@ public class BFFApiGatewayController {
 
     //Start of Inventory Methods
     @PostMapping(value = "inventory/{inventoryId}/products")
-    public Mono<ProductResponseDTO> addProductToInventory(@RequestBody ProductRequestDTO model, @PathVariable String inventoryId){
-        return inventoryServiceClient.addProductToInventory(model, inventoryId);
+    public Mono<ResponseEntity<ProductResponseDTO>> addProductToInventory(@RequestBody ProductRequestDTO model, @PathVariable String inventoryId){
+        return inventoryServiceClient.addProductToInventory(model, inventoryId)
+                .map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
 
