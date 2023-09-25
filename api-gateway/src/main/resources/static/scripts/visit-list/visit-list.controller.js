@@ -9,6 +9,7 @@ angular.module('visitList')
         let eventSource = new EventSource("api/gateway/visits")
         eventSource.addEventListener('message', function (event){
             $scope.$apply(function(){
+                console.log(event.data)
                 self.upcomingVisits.push(JSON.parse(event.data))
             })
         })

@@ -51,12 +51,11 @@ public class VisitServiceImpl implements VisitService {
     @Override
     public Mono<VisitResponseDTO> addVisit(Mono<VisitRequestDTO> visitRequestDTOMono) {
         return visitRequestDTOMono
-                .flatMap(visitRequestDTO -> validatePetId(visitRequestDTO.getPetId())
-                        .then(validateVetId(visitRequestDTO.getPractitionerId()))
-                        .then(Mono.just(visitRequestDTO)))
+                .doOnNext(v -> System.out.println("Request Date: " + v.getVisitDate())) // Debugging
                 .map(EntityDtoUtil::toVisitEntity)
-                .doOnNext(visitEntity -> visitEntity.setVisitId(EntityDtoUtil.generateVisitIdString()))
-                .flatMap(repo::insert)
+                .doOnNext(x -> x.setVisitId(EntityDtoUtil.generateVisitIdString()))
+                .doOnNext(v -> System.out.println("Entity Date: " + v.getVisitDate())) // Debugging
+                .flatMap((repo::insert))
                 .map(EntityDtoUtil::toVisitResponseDTO);
     }
 
