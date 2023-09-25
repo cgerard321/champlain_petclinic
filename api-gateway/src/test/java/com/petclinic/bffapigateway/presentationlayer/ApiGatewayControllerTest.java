@@ -826,11 +826,11 @@ class ApiGatewayControllerTest {
         pet.setBirthDate("2000-01-01");
         pet.setType(type);
 
-        when(customersServiceClient.updatePet(any(PetResponseDTO.class), any(String.class), any(Integer.class)))
+        when(customersServiceClient.updatePet(any(PetResponseDTO.class), any(String.class)))
                 .thenReturn(Mono.just(pet));
 
         client.put()
-                .uri("/api/gateway/owners/{ownerId}/pets/{petId}", od.getOwnerId(), pet.getPetId())
+                .uri("/api/gateway/pets/{petId}", od.getOwnerId(), pet.getPetId())
                 .body(fromValue(pet))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()

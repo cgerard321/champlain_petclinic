@@ -108,9 +108,9 @@ public class CustomersServiceClient {
 
     }
 
-    public Flux<PetType> getPetTypes (){
+    public Flux<PetType> getPetTypes(){
         return webClientBuilder.build().get()
-                .uri(customersServiceUrl + "/petTypes")
+                .uri(customersServiceUrl + "/owners/petTypes")
                 .retrieve()
                 .bodyToFlux(PetType.class);
     }
@@ -130,14 +130,14 @@ public class CustomersServiceClient {
 
     public Mono<PetResponseDTO> getPet(final String ownerId, final String petId){
         return webClientBuilder.build().get()
-                .uri(customersServiceUrl + ownerId + "/pets/" + petId)
+                .uri(customersServiceUrl + "/owners/" + ownerId + "/pets/" + petId)
                 .retrieve()
                 .bodyToMono(PetResponseDTO.class);
     }
 
     public Flux<PetResponseDTO> getPetsByOwnerId(final String ownerId){
         return webClientBuilder.build().get()
-                .uri(customersServiceUrl + ownerId + "/pets")
+                .uri(customersServiceUrl + "/owners/" + ownerId + "/pets")
                 .retrieve()
                 .bodyToFlux(PetResponseDTO.class);
     }
@@ -151,9 +151,9 @@ public class CustomersServiceClient {
     }
 
 
-    public Mono<PetResponseDTO> updatePet(PetResponseDTO model, final String ownerId, final int petId){
+    public Mono<PetResponseDTO> updatePet(PetResponseDTO model, final String petId){
         return webClientBuilder.build().put()
-                .uri(customersServiceUrl +"{ownerId}/pets/{petId}", ownerId, petId)
+                .uri(customersServiceUrl +"/pet/{petId}", petId)
                 .body(just(model), PetResponseDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve().bodyToMono(PetResponseDTO.class);

@@ -4,6 +4,7 @@
     <div class="form-group formColor">
         <label class="col-sm-2 control-label">Owner</label>
         <div class="pet marg col-sm-6">
+            <input type="hidden" ng-model="$ctrl.pet.petId" name="petId" />
             <p class="pet form-control-static">{{$ctrl.pet.owner}}</p>
         </div>
     </div>
@@ -28,7 +29,6 @@
         <label class="col-sm-2 control-label">Type</label>
         <div class="pet col-sm-6">
             <select class="form-control" ng-model="$ctrl.pet.type" name="type" ng-options="t as t.name for t in $ctrl.types track by t.id" ng-disabled="$ctrl.checked"></select>
-            </select>
         </div>
     </div>
 
