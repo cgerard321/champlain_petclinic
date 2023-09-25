@@ -2,9 +2,11 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.bffapigateway.dtos.Auth.*;
+import com.petclinic.bffapigateway.dtos.Auth.Login;
+import com.petclinic.bffapigateway.dtos.Auth.Register;
+import com.petclinic.bffapigateway.dtos.Auth.Role;
+import com.petclinic.bffapigateway.dtos.Auth.UserPasswordLessDTO;
 import com.petclinic.bffapigateway.utils.Security.Variables.SecurityConst;
-import com.petclinic.bffapigateway.utils.Utility;
 import lombok.RequiredArgsConstructor;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -15,12 +17,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
-import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -48,9 +45,6 @@ public class AuthServiceClientIntegrationTest {
     private AuthServiceClient authServiceClient;
     private MockWebServer server;
     private ObjectMapper objectMapper;
-
-    @MockBean
-    private Utility utility;
     private final Register USER_REGISTER = Register.builder()
             .username("username")
             .password("password")
@@ -248,7 +242,7 @@ public class AuthServiceClientIntegrationTest {
                 .password("password")
                 .build();
 
-        final Mono<ResponseEntity<UserPasswordLessDTO>> validatedTokenResponse = authServiceClient.login(login);
+        final HttpEntity<UserPasswordLessDTO> validatedTokenResponse = authServiceClient.login(login);
 
         // check status response in step verifier
         StepVerifier.create(Mono.just(validatedTokenResponse))
@@ -256,48 +250,5 @@ public class AuthServiceClientIntegrationTest {
                 .verifyComplete();
         }
 
-
-
-    @Test
-    @DisplayName("Should send a forgotten email")
-    void ShouldSendForgottenEmail_ShouldReturnOk() throws Exception {
-        final MockResponse mockResponse = new MockResponse();
-        ServerHttpRequest request = MockServerHttpRequest.post("http://localhost:8080").build();
-        mockResponse
-                .setHeader("Content-Type", "application/json")
-                .setResponseCode(200);
-
-        server.enqueue(mockResponse);
-
-        final Mono<ResponseEntity<Void>> validatedTokenResponse = authServiceClient.sendForgottenEmail(request, "email");
-
-        // check status response in step verifier
-        StepVerifier.create(Mono.just(validatedTokenResponse))
-                .expectNextCount(1)
-                .verifyComplete();
-    }
-
-    @Test
-    @DisplayName("Should process reset password")
-    void ShouldProcessResetPassword_ShouldReturnOk() throws Exception {
-        final MockResponse mockResponse = new MockResponse();
-        mockResponse
-                .setHeader("Content-Type", "application/json")
-                .setResponseCode(200);
-
-        server.enqueue(mockResponse);
-
-        UserPasswordAndTokenRequestModel pwdChange = UserPasswordAndTokenRequestModel.builder()
-                .token("token")
-                .password("password")
-                .build();
-
-        final Mono<ResponseEntity<Void>> validatedTokenResponse = authServiceClient.changePassword(pwdChange);
-
-        // check status response in step verifier
-        StepVerifier.create(Mono.just(validatedTokenResponse))
-                .expectNextCount(1)
-                .verifyComplete();
-    }
 
 }

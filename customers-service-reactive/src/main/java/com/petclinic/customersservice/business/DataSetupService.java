@@ -4,7 +4,6 @@ import com.petclinic.customersservice.data.Owner;
 import com.petclinic.customersservice.data.Pet;
 import com.petclinic.customersservice.data.PetType;
 import com.petclinic.customersservice.data.Photo;
-import com.petclinic.customersservice.presentationlayer.PetResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
@@ -14,9 +13,7 @@ import reactor.core.publisher.Mono;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 @Service
 public class DataSetupService implements CommandLineRunner {
@@ -48,8 +45,6 @@ public class DataSetupService implements CommandLineRunner {
                 .subscribe();
 
 
-
-
         Pet p1 = new Pet("c3eecf3a-d732-46d6-9e51-ab03314f3c4d", "1","f470653d-05c5-4c45-b7a0-7d70f003d2ac", "Leo", new SimpleDateFormat( "yyyyMMdd" ).parse( "2010-05-20" ), "1", "1");
         Pet p2 = new Pet("180143e7-547d-46c2-82fd-7c84547e126c", "2", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", "Basil", new SimpleDateFormat( "yyyyMMdd" ).parse( "2002-08-06" ), "6",  "1");
         Pet p3 = new Pet("6566cc34-21f7-4f71-9388-c70c95b01636", "3", "3f59dca2-903e-495c-90c3-7f4d01f3a2aa", "Rosy", new SimpleDateFormat( "yyyyMMdd" ).parse( "2001-04-17" ), "2", "1");
@@ -70,50 +65,16 @@ public class DataSetupService implements CommandLineRunner {
                         .log(p.toString()))
                 .subscribe();
 
-        List<PetResponseDTO> petResponseDTOS1 = petService.getPetsByOwnerId("f470653d-05c5-4c45-b7a0-7d70f003d2ac")
-                .collectList()
-                .block();
-        List<PetResponseDTO> petResponseDTOS2 = petService.getPetsByOwnerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
-                .collectList()
-                .block();
-        List<PetResponseDTO> petResponseDTOS3 = petService.getPetsByOwnerId("3f59dca2-903e-495c-90c3-7f4d01f3a2aa")
-                .collectList()
-                .block();
-        List<PetResponseDTO> petResponseDTOS4 = petService.getPetsByOwnerId("a6e0e5b0-5f60-45f0-8ac7-becd8b330486")
-                .collectList()
-                .block();
-        List<PetResponseDTO> petResponseDTOS5 = petService.getPetsByOwnerId("c6a0fb9d-fc6f-4c21-95fc-4f5e7311d0e2")
-                .collectList()
-                .block();
-
-        List<PetResponseDTO> petResponseDTOS6 = petService.getPetsByOwnerId("b3d09eab-4085-4b2d-a121-78a0a2f9e501")
-                .collectList()
-                .block();
-        List<PetResponseDTO> petResponseDTOS7 = petService.getPetsByOwnerId("5fe81e29-1f1d-4f9d-b249-8d3e0cc0b7dd")
-                .collectList()
-                .block();
-        List<PetResponseDTO> petResponseDTOS8 = petService.getPetsByOwnerId("48f9945a-4ee0-4b0b-9b44-3da829a0f0f7")
-                .collectList()
-                .block();
-        List<PetResponseDTO> petResponseDTOS9 = petService.getPetsByOwnerId("9f6accd1-e943-4322-932e-199d93824317")
-                .collectList()
-                .block();
-        List<PetResponseDTO> petResponseDTOS10 = petService.getPetsByOwnerId("7c0d42c2-0c2d-41ce-bd9c-6ca67478956f")
-                .collectList()
-                .block();
-
-
-
-        Owner o1 = new Owner("1","f470653d-05c5-4c45-b7a0-7d70f003d2ac", "George", "Franklin", "110 W. Liberty St.", "Madison", "6085551023", petResponseDTOS1 );
-        Owner o2 = new Owner("2","e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", "Betty", "Davis", "638 Cardinal Ave.", "Sun Prairie", "6085551749", petResponseDTOS2 );
-        Owner o3 = new Owner("3","3f59dca2-903e-495c-90c3-7f4d01f3a2aa", "Eduardo", "Rodriguez", "2693 Commerce St.", "McFarland", "6085558763", petResponseDTOS3 );
-        Owner o4 = new Owner("4","a6e0e5b0-5f60-45f0-8ac7-becd8b330486", "Harold", "Davis", "563 Friendly St.", "Windsor", "6085553198", petResponseDTOS4 );
-        Owner o5 = new Owner("5","c6a0fb9d-fc6f-4c21-95fc-4f5e7311d0e2", "Peter", "McTavish", "2387 S. Fair Way", "Madison", "6085552765", petResponseDTOS5 );
-        Owner o6 = new Owner("6","b3d09eab-4085-4b2d-a121-78a0a2f9e501", "Jean", "Coleman", "105 N. Lake St.", "Monona", "6085552654", petResponseDTOS6 );
-        Owner o7 = new Owner("7","5fe81e29-1f1d-4f9d-b249-8d3e0cc0b7dd", "Jeff", "Black", "1450 Oak Blvd.", "Monona", "6085555387", petResponseDTOS7 );
-        Owner o8 = new Owner("8","48f9945a-4ee0-4b0b-9b44-3da829a0f0f7", "Maria", "Escobito", "345 Maple St.", "Madison", "6085557683", petResponseDTOS8 );
-        Owner o9 = new Owner("9","9f6accd1-e943-4322-932e-199d93824317", "David", "Schroeder", "2749 Blackhawk Trail", "Madison", "6085559435", petResponseDTOS9 );
-        Owner o10 = new Owner("10","7c0d42c2-0c2d-41ce-bd9c-6ca67478956f", "Carlos", "Esteban", "2335 Independence La.", "Waunakee", "6085555487", petResponseDTOS10 );
+        Owner o1 = new Owner("1","f470653d-05c5-4c45-b7a0-7d70f003d2ac", "George", "Franklin", "110 W. Liberty St.", "Madison", "6085551023");
+        Owner o2 = new Owner("2","e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", "Betty", "Davis", "638 Cardinal Ave.", "Sun Prairie", "6085551749");
+        Owner o3 = new Owner("3","3f59dca2-903e-495c-90c3-7f4d01f3a2aa", "Eduardo", "Rodriguez", "2693 Commerce St.", "McFarland", "6085558763");
+        Owner o4 = new Owner("4","a6e0e5b0-5f60-45f0-8ac7-becd8b330486", "Harold", "Davis", "563 Friendly St.", "Windsor", "6085553198");
+        Owner o5 = new Owner("5","c6a0fb9d-fc6f-4c21-95fc-4f5e7311d0e2", "Peter", "McTavish", "2387 S. Fair Way", "Madison", "6085552765");
+        Owner o6 = new Owner("6","b3d09eab-4085-4b2d-a121-78a0a2f9e501", "Jean", "Coleman", "105 N. Lake St.", "Monona", "6085552654");
+        Owner o7 = new Owner("7","5fe81e29-1f1d-4f9d-b249-8d3e0cc0b7dd", "Jeff", "Black", "1450 Oak Blvd.", "Monona", "6085555387");
+        Owner o8 = new Owner("8","48f9945a-4ee0-4b0b-9b44-3da829a0f0f7", "Maria", "Escobito", "345 Maple St.", "Madison", "6085557683");
+        Owner o9 = new Owner("9","9f6accd1-e943-4322-932e-199d93824317", "David", "Schroeder", "2749 Blackhawk Trail", "Madison", "6085559435");
+        Owner o10 = new Owner("10","7c0d42c2-0c2d-41ce-bd9c-6ca67478956f", "Carlos", "Esteban", "2335 Independence La.", "Waunakee", "6085555487");
 
         Flux.just(o1, o2, o3, o4, o5, o6, o7, o8, o9, o10)
                 .flatMap(p -> ownerService.insertOwner(Mono.just(p))

@@ -40,7 +40,7 @@ class VisitsServiceClientIntegrationTest {
     private static MockWebServer server;
     private static ObjectMapper objectMapper = new ObjectMapper();
 
-    private static final String PET_ID = "1";
+    private static final Integer PET_ID = 1;
 
 
     @BeforeAll
@@ -77,7 +77,7 @@ class VisitsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setBody("{\"items\":[{\"visitId\":\"773fa7b2-e04e-47b8-98e7-4adf7cfaaeee\"," +
-                        "\"date\":\"2018-11-15\",\"description\":\"test visit\",\"petId\":\"1\"}]}"));
+                        "\"date\":\"2018-11-15\",\"description\":\"test visit\",\"petId\":1}]}"));
 
         Mono<Visits> visits = visitsServiceClient.getVisitsForPets(Collections.singletonList(1));
 
@@ -92,7 +92,7 @@ class VisitsServiceClientIntegrationTest {
                         "\"date\":\"2018-11-15\",\"description\":\"test visit\",\"petId\":1," +
                         " \"practitionerId\":1,\"status\":false}"));
 
-        Flux<VisitDetails> visits = visitsServiceClient.getVisitsForPet("1");
+        Flux<VisitDetails> visits = visitsServiceClient.getVisitsForPet(1);
 
         assertVisitDescriptionEq(visits.blockFirst(), PET_ID,"test visit");
     }
@@ -101,7 +101,7 @@ class VisitsServiceClientIntegrationTest {
     void shouldDeleteVisitsForPet() throws JsonProcessingException {
         final VisitDetails visit = VisitDetails.builder()
                 .visitId(UUID.randomUUID().toString())
-                .petId("15")
+                .petId(15)
                 .practitionerId(2)
                 .visitDate(LocalDateTime.parse("2021-12-12T13:00:00"))
                 .description("Cat is crazy")
@@ -151,7 +151,7 @@ class VisitsServiceClientIntegrationTest {
 
         final VisitDetails visit = VisitDetails.builder()
                 .visitId(UUID.randomUUID().toString())
-                .petId("15")
+                .petId(15)
                 .practitionerId(2)
                 .visitDate(LocalDateTime.parse("2021-12-12T13:00:00"))
                 .description("Cat is crazy")
@@ -159,7 +159,7 @@ class VisitsServiceClientIntegrationTest {
                 .build();
         final VisitDetails visit2 = VisitDetails.builder()
                 .visitId(UUID.randomUUID().toString())
-                .petId("201")
+                .petId(201)
                 .practitionerId(22)
                 .visitDate(LocalDateTime.parse("2021-12-12T13:00:00"))
                 .description("Dog is sick")
@@ -177,7 +177,7 @@ class VisitsServiceClientIntegrationTest {
 //                .setBody(body));
 
         visitsServiceClient.updateVisitForPet(visit2);
-        final VisitDetails petVisit = visitsServiceClient.getVisitsForPet("201").blockFirst();
+        final VisitDetails petVisit = visitsServiceClient.getVisitsForPet(201).blockFirst();
 
         assertEquals(visit2.getVisitId(), petVisit.getVisitId());
         assertEquals(visit2.getPetId(), petVisit.getPetId());
@@ -293,12 +293,12 @@ class VisitsServiceClientIntegrationTest {
 //        assertEquals(visit.getStatus(), scheduledVisits.getStatus());
 //    }
 
-    private void assertVisitDescriptionEq(VisitDetails visits, String petId, String description) {
+    private void assertVisitDescriptionEq(VisitDetails visits, int petId, String description) {
         assertEquals("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee", visits.getVisitId());
         assertEquals(description, visits.getDescription());
     }
 
-    private void assertVisitDescriptionEquals(Visits visits, String petId, String description) {
+    private void assertVisitDescriptionEquals(Visits visits, int petId, String description) {
         assertEquals(1, visits.getItems().size());
         assertNotNull(visits.getItems().get(0));
         assertEquals(petId, visits.getItems().get(0).getPetId());

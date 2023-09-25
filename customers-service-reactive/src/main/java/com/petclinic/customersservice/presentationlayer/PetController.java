@@ -2,7 +2,6 @@ package com.petclinic.customersservice.presentationlayer;
 
 import com.petclinic.customersservice.business.PetService;
 import com.petclinic.customersservice.data.Pet;
-import com.petclinic.customersservice.util.EntityDTOUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,14 +16,8 @@ public class PetController {
     private PetService petService;
 
     @GetMapping("/{petId}")
-    public Mono<PetResponseDTO> getPetDTOByPetId(@PathVariable String petId) {
-        return petService.getPetById(petId)
-                .map(EntityDTOUtil::toPetResponseDTO);
-    }
-
-    @GetMapping("/owner/{ownerId}")
-    public Flux<PetResponseDTO> getPetsByOwnerId(@PathVariable String ownerId) {
-        return petService.getPetsByOwnerId(ownerId);
+    public Mono<Pet> getPetDTOByPetId(@PathVariable String petId) {
+        return petService.getPetById(petId);
     }
 
     @DeleteMapping("/{petId}")
@@ -33,8 +26,8 @@ public class PetController {
     }
 
     @PostMapping
-    public Mono<PetResponseDTO> insertPet(@RequestBody Mono<Pet> petMono) {
-        return petService.insertPet(petMono).map(EntityDTOUtil::toPetResponseDTO);
+    public Mono<Pet> insertPet(@RequestBody Mono<Pet> petMono) {
+        return petService.insertPet(petMono);
     }
 
     @PutMapping("/{petId}")
@@ -45,8 +38,8 @@ public class PetController {
     }
 
     @GetMapping()
-    public Flux<PetResponseDTO> getAllPets() {
-        return petService.getAllPets().map(EntityDTOUtil::toPetResponseDTO);
+    public Flux<Pet> getAllPets() {
+        return petService.getAllPets();
     }
 
 }

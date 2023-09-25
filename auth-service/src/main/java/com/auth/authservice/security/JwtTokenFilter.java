@@ -68,6 +68,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         }
         Cookie sessionCookie = null;
         for (Cookie cookie : cookies) {
+
             if ((securityConst.getTOKEN_PREFIX()).equals(cookie.getName())) {
                 sessionCookie = cookie;
                 break;

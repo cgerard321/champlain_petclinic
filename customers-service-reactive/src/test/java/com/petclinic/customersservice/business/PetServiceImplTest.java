@@ -1,8 +1,6 @@
 package com.petclinic.customersservice.business;
 
 import com.petclinic.customersservice.data.*;
-import com.petclinic.customersservice.presentationlayer.OwnerResponseDTO;
-import com.petclinic.customersservice.presentationlayer.PetResponseDTO;
 import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -15,11 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port= 27019"})
@@ -32,7 +26,6 @@ class PetServiceImplTest {
     @Autowired
     private PetService petService;
 
-    /*
     @Test
     void insertPet() {
         Pet petEntity = buildPet();
@@ -42,7 +35,7 @@ class PetServiceImplTest {
         StepVerifier
                 .create(returnedPet)
                 .consumeNextWith(foundPet -> {
-                    assertEquals(petEntity.getPetId(), foundPet.getPetId());
+                    assertEquals(petEntity.getId(), foundPet.getId());
                     assertEquals(petEntity.getName(), foundPet.getName());
                     assertEquals(petEntity.getPetTypeId(), foundPet.getPetTypeId());
                     assertEquals(petEntity.getPhotoId(), foundPet.getPhotoId());
@@ -51,13 +44,12 @@ class PetServiceImplTest {
                 })
                 .verifyComplete();
     }
-    */
-/*
+
     @Test
     public void deletePet() {
 
         Pet pet = buildPet();
-        String PET_ID = pet.getPetId();
+        String PET_ID = pet.getId();
 
         when(repo.deleteById(anyString())).thenReturn(Mono.empty());
 
@@ -89,28 +81,6 @@ class PetServiceImplTest {
                     assertEquals(pet.getBirthDate(), foundPet.getBirthDate());
                 })
                 .verifyComplete();
-    }
-
-    @Test
-    void getAllPets_ShouldSucceed() {
-        PetResponseDTO petResponseDTO = PetResponseDTO.builder()
-                .petId("pet-123")
-                .name("Pet Name")
-                .photoId("12314151")
-                .birthDate(date)
-                .ownerId("ownerId-123")
-                .build();
-
-        List<PetResponseDTO> pets = new ArrayList<>();
-        pets.add(petResponseDTO);
-
-        Flux<PetResponseDTO> returnAllOwners = Flux.just(petResponseDTO);
-
-        StepVerifier
-                .create(returnAllOwners)
-                .expectNextMatches(petDto -> petDto.getPetId().equals(petResponseDTO.getPetId()))
-                .expectComplete()
-                .verify();
     }
 
 //    @Test
@@ -161,7 +131,6 @@ class PetServiceImplTest {
                 .expectNextCount(1)
                 .expectError();
     }
-    */
 
     Date date = new Date(20221010);
 

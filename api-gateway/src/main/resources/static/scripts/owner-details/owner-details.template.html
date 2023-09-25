@@ -1,10 +1,10 @@
 <link href="/css/ownerdetail.css" rel="stylesheet" type="text/css"/>
 
-    <div ng-controller="OwnerDetailsController" ng-app="ownerDetails" class="d-flex justify-content-center mt-5 mb-5 gap-5">
-        <div class="d-flex flex-column">
-            <div >
+    <div class="d-flex justify-content-center mt-5 mb-5">
+        <div ng-app="ownerDetails" class="d-flex flex-column">
+        <div ng-controller="OwnerDetailsController">
 
-            <div class=" d-flex flex-column p-5 shadow">
+            <div class="ownerDetailContainer d-flex flex-column p-5 shadow">
 
                 <h3 class="">Owner Details</h3>
 
@@ -73,38 +73,9 @@
                 </form>
 
             </div>
-        </div>
-        </div>
-        <div class="d-flex flex-column">
-                <div class="d-flex flex-column p-5 shadow">
-
-                    <div class="d-flex justify-content-between gap-5">
-                        <h3 class="">Pet Details</h3>
-
-                        <div class="border-5 rounded">
-                            <a style="color: rgba(0,0,0,0.5);" class="btn btn-light" ui-sref="ownerEdit({ownerId: $ctrl.owner.ownerId, method: 'edit'})">Add Pet</a>
-                        </div>
-                    </div>
-
-
-                    <div>
-                        <!-- Use ng-repeat to iterate through the owner's pets -->
-                        <div ng-repeat="pet in $ctrl.owner.pets" class="d-flex justify-content-between">
-                            <!-- Display pet details here -->
-                            <div class="mt-3">
-                                <p>Name: {{ pet.name }}</p>
-
-                                <!-- Add more pet details as needed -->
-                            </div>
-                            <div class="border-5 rounded">
-                                <a style="color: rgba(0,0,0,0.5);" class="btn btn-light" ui-sref="ownerEdit({ownerId: $ctrl.owner.ownerId, method: 'edit'})">Toggle Pet Status</a>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
 
         </div>
+    </div>
     </div>
 
 

@@ -23,6 +23,7 @@ import com.auth.authservice.datamapperlayer.UserMapper;
 
 import com.auth.authservice.security.JwtTokenUtil;
 import com.auth.authservice.security.SecurityConst;
+import com.auth.authservice.security.UserPrincipalImpl;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +36,8 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.ui.Model;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -44,10 +46,10 @@ import java.time.Duration;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.ResponseEntity.ok;
+
 @RestController
 @RequestMapping("/users")
 @Slf4j
@@ -152,25 +154,6 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
-
-
-
-
-    @PostMapping("/forgot_password")
-    public ResponseEntity<Void> processForgotPassword(@RequestBody UserResetPwdRequestModel userResetPwdRequestModel) {
-        userService.processForgotPassword(userResetPwdRequestModel);
-        return ResponseEntity.ok().build();
-    }
-
-
-
-    @PostMapping("/reset_password")
-    public ResponseEntity<Void> processResetPassword(@RequestBody UserResetPwdWithTokenRequestModel resetRequest, Model model) {
-        userService.processResetPassword(resetRequest);
-
-        return ResponseEntity.ok().build();
-    }
-
 
     @RequestMapping(method = RequestMethod.HEAD)
     public void preflight() {

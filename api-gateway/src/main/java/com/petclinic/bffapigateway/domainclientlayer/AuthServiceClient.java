@@ -1,22 +1,20 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
-import com.petclinic.bffapigateway.dtos.Auth.*;
-import com.petclinic.bffapigateway.exceptions.InvalidCredentialsException;
+import com.petclinic.bffapigateway.dtos.Auth.Login;
+import com.petclinic.bffapigateway.dtos.Auth.Role;
+import com.petclinic.bffapigateway.dtos.Auth.UserPasswordLessDTO;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Rethrower;
 import com.petclinic.bffapigateway.exceptions.InvalidTokenException;
 import com.petclinic.bffapigateway.utils.Security.Variables.SecurityConst;
-import com.petclinic.bffapigateway.utils.Utility;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -110,75 +108,20 @@ public class AuthServiceClient {
 //                .bodyToMono(UserDetails.class);
 //    }
 
-    public  Mono<ResponseEntity<UserPasswordLessDTO>> login(final Login login) throws Exception {
+    public  HttpEntity<UserPasswordLessDTO> login(final Login login) throws Exception {
         log.info("Entered domain service login");
         UserPasswordLessDTO userResponseModel;
         try {
             log.info("Email : {}",login.getEmail());
-            return webClientBuilder.build()
-                    .post()
-                    .uri(authServiceUrl+"/users/login")
-                    .bodyValue(login)
-                    .retrieve()
-                    .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> Mono.error(new InvalidCredentialsException("Invalid token")))
-                    .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> Mono.error(new InvalidInputException("Invalid token")))
-                    .toEntity(UserPasswordLessDTO.class);
+            HttpEntity<Login> userRequestModelHttpEntity = new HttpEntity<>(login);
 
-//            HttpEntity<Login> userRequestModelHttpEntity = new HttpEntity<>(login);
-//
-//            HttpEntity<UserPasswordLessDTO> response = restTemplate.exchange(authServiceUrl + "/users/login", HttpMethod.POST, userRequestModelHttpEntity, UserPasswordLessDTO.class);
-//            log.info("Fetched user from auth-service");
-//            return Mono.just(response);
+            HttpEntity<UserPasswordLessDTO> response = restTemplate.exchange(authServiceUrl + "/users/login", HttpMethod.POST, userRequestModelHttpEntity, UserPasswordLessDTO.class);
+            log.info("Fetched user from auth-service");
+            return response;
+
         } catch (HttpClientErrorException ex) {
             log.info("Error throw in auth domain client service");
-            throw new InvalidInputException(ex.getMessage());
-        }
-    }
-
-
-    public Mono<ResponseEntity<Void>> sendForgottenEmail(ServerHttpRequest request, String email) {
-
-        UserResetPwdRequestModel userResetPwdRequestModel = UserResetPwdRequestModel.builder().email(email).url(Utility.getSiteURL(request)).build();
-
-        try {
-            String url = authServiceUrl+"/users/forgot_password";
-
-            return webClientBuilder.build()
-                    .post()
-                    .uri(url)
-                    .bodyValue(userResetPwdRequestModel)
-                    .retrieve()
-                    .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> Mono.error(new InvalidInputException("Unexpected error")))
-                    .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> Mono.error(new InvalidInputException("Unexpected error")))
-                    .toEntity(Void.class);
-
-        } catch (HttpClientErrorException ex) {
-            throw new InvalidInputException(ex.getMessage());
-        }
-    }
-
-    public Mono<ResponseEntity<Void>> changePassword(UserPasswordAndTokenRequestModel pwdChange) {
-
-        UserResetPwdWithTokenRequestModel userResetPwdWithTokenRequestModel = UserResetPwdWithTokenRequestModel.builder().token(pwdChange.getToken()).password(pwdChange.getPassword()).build();
-
-        log.info("Token : {}",pwdChange.getToken());
-        log.info("Password : {}",pwdChange.getPassword());
-        String formPage;
-        try {
-            String url = authServiceUrl+"/users/reset_password";
-
-            return webClientBuilder.build()
-                            .post().uri(url)
-                            .bodyValue(userResetPwdWithTokenRequestModel)
-                    .retrieve()
-                    .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> Mono.error(new InvalidInputException("Unexpected error")))
-                    .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> Mono.error(new InvalidInputException("Unexpected error")))
-                    .toEntity(Void.class);
-
-
-
-        } catch (HttpClientErrorException ex) {
-            throw new InvalidInputException(ex.getMessage());
+            throw new Exception(ex);
         }
     }
 
@@ -190,12 +133,11 @@ public class AuthServiceClient {
                 .post()
                 .uri(authServiceUrl + "/users/validate-token")
                 .bodyValue(jwtToken)
-                .cookie("Bearer", jwtToken)
+                .cookie(securityConst.getTOKEN_PREFIX(), jwtToken)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> Mono.error(new InvalidTokenException("Invalid token")))
                 .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> Mono.error(new InvalidInputException("Invalid token")))
                 .toEntityFlux(String.class);
     }
-
 }
 

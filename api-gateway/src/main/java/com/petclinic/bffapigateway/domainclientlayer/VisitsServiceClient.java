@@ -57,7 +57,7 @@ public class VisitsServiceClient {
                 .bodyToMono(Visits.class);
     }
 
-    public Flux<VisitDetails> getVisitsForPet(final String petId){
+    public Flux<VisitDetails> getVisitsForPet(final int petId){
         return webClient
                 .get()
                 .uri("/visits/pets/{petId}", petId)
@@ -65,7 +65,7 @@ public class VisitsServiceClient {
                 .bodyToFlux(VisitDetails.class);
     }
 
-    public Flux<VisitDetails> getPreviousVisitsForPet(final String petId) {
+    public Flux<VisitDetails> getPreviousVisitsForPet(final int petId) {
         return webClient
                 .get()
                 .uri("/visits/previous/{petId}", petId)
@@ -91,7 +91,7 @@ public class VisitsServiceClient {
     }
      */
 
-    public Flux<VisitDetails> getScheduledVisitsForPet(final String petId) {
+    public Flux<VisitDetails> getScheduledVisitsForPet(final int petId) {
         return webClient
                 .get()
                 .uri("/visits/scheduled/{petId}", petId)

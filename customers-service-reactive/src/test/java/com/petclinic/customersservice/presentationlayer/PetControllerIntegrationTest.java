@@ -12,11 +12,6 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.nio.charset.StandardCharsets;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-
 @SpringBootTest
 @AutoConfigureWebTestClient
 class PetControllerIntegrationTest {
@@ -28,8 +23,6 @@ class PetControllerIntegrationTest {
     private PetRepo repo;
     Pet petEntity = buildPet();
     String PET_ID = petEntity.getPetId();
-
-    private String validPetId;
 
     @Test
     void deletePetByPetId() {
@@ -49,42 +42,32 @@ class PetControllerIntegrationTest {
     void getAllPets() {
         Publisher<Pet> setup = repo.deleteAll().thenMany(repo.save(petEntity));
         StepVerifier.create(setup).expectNextCount(1).verifyComplete();
-        client
-                .get()
-                .uri("/pet")
-                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
-                .acceptCharset(StandardCharsets.UTF_8)
+        client.get().uri("/pet/")
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
-                .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
-                .expectBodyList(PetResponseDTO.class)
-                .value((list) -> {
-                    assertNotNull(list);
-                    assertEquals(1, list.size());
-                });
+                .expectStatus().isOk().expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$[0].id").isEqualTo(petEntity.getId())
+                .jsonPath("$[0].name").isEqualTo(petEntity.getName())
+                .jsonPath("$[0].petTypeId").isEqualTo(petEntity.getPetTypeId())
+                .jsonPath("$[0].ownerId").isEqualTo(petEntity.getOwnerId())
+                .jsonPath("$[0].photoId").isEqualTo(petEntity.getPhotoId());
     }
 
     @Test
     void getPetByPetId() {
-        Mono<Pet> petMono = Mono.from(repo.findAll()
-                .doOnNext(pet -> {
-                    validPetId = pet.getPetId();
-                    System.out.println(validPetId);
-                }));
-
-        StepVerifier.create(petMono)
-                .expectNextCount(1)
-                .verifyComplete();
-
-        client
-                .get()
-                .uri("/pet/{petId}", validPetId)
+        Publisher<Pet> setup = repo.deleteAll().thenMany(repo.save(petEntity));
+        StepVerifier.create(setup).expectNextCount(1).verifyComplete();
+        client.get().uri("/pet/" + PET_ID)
                 .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
+                .exchange().expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.petId").isEqualTo(validPetId);
+                .jsonPath("$.petId").isEqualTo(petEntity.getPetId())
+                .jsonPath("$.name").isEqualTo(petEntity.getName())
+                .jsonPath("$.petTypeId").isEqualTo(petEntity.getPetTypeId())
+                .jsonPath("$.ownerId").isEqualTo(petEntity.getOwnerId())
+                .jsonPath("$.photoId").isEqualTo(petEntity.getPhotoId());
     }
 
     @Test

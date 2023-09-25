@@ -39,19 +39,5 @@ public class DatabaseLoaderService implements CommandLineRunner {
                 .verified(true)
                 .build();
         userRepo.save(admin);
-
-
-        Set<Role> roles2 = new HashSet<>();
-        roles2.add(roleRepo.findById(2L).get());
-        User vet = User.builder()
-                .username("Vet")
-                .roles(roles2)
-                .email("dylan.brassard@outlook.com")
-                .password(passwordEncoder.encode("pwd"))
-                .verified(true)
-                .build();
-
-
-        userRepo.save(vet);
     }
 }

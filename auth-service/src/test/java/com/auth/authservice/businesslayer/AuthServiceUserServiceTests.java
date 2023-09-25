@@ -8,7 +8,6 @@ import com.auth.authservice.datalayer.user.UserRepo;
 import com.auth.authservice.datamapperlayer.UserMapper;
 import com.auth.authservice.domainclientlayer.Mail.MailService;
 import com.auth.authservice.presentationlayer.User.UserIDLessUsernameLessDTO;
-import com.auth.authservice.presentationlayer.User.UserResetPwdRequestModel;
 import com.auth.authservice.security.JwtTokenUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,12 +19,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
@@ -56,8 +54,6 @@ public class AuthServiceUserServiceTests {
 
     @MockBean
     private MailService mailService;
-
-
 
     @MockBean
     private JwtTokenUtil jwtService;
@@ -93,30 +89,6 @@ public class AuthServiceUserServiceTests {
         UserIDLessUsernameLessDTO user2 = new UserIDLessUsernameLessDTO("admin@admin.com", "pwd");
         assertEquals(VALID_TOKEN,userService.login(user2).get("token").toString().substring(7,19));
         assertNotNull(userService.login(user2).get("user"));
-    }
-
-    @Test
-    @DisplayName("Send email should succeed")
-    void sendEmail_ShouldSucceed() {
-
-        User user = User.builder()
-                .username(USER)
-                .email(EMAIL)
-                .password(passwordEncoder.encode(PASS))
-                .verified(true)
-                .build();
-        userRepo.save(user);
-
-        UserResetPwdRequestModel userResetPwdRequestModel = UserResetPwdRequestModel.builder().email(EMAIL).url("someFakeLink").build();
-
-        when(mailService.sendMail(any()))
-                .thenReturn("Your verification link: someFakeLink");
-
-        userService.processForgotPassword(userResetPwdRequestModel);
-
-
-        verify(mailService,times(1)).sendMail(any());
-
     }
 
 

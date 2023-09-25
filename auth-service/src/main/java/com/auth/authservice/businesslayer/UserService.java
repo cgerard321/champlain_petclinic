@@ -28,15 +28,15 @@ import com.auth.authservice.Util.Exceptions.IncorrectPasswordException;
 import com.auth.authservice.Util.Exceptions.NotFoundException;
 import com.auth.authservice.datalayer.user.User;
 import com.auth.authservice.domainclientlayer.Mail.Mail;
-import com.auth.authservice.presentationlayer.User.*;
+import com.auth.authservice.presentationlayer.User.UserIDLessRoleLessDTO;
+import com.auth.authservice.presentationlayer.User.UserIDLessUsernameLessDTO;
+import com.auth.authservice.presentationlayer.User.UserPasswordLessDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.ui.Model;
 
 import java.nio.file.attribute.UserPrincipal;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 public interface UserService {
@@ -62,15 +62,4 @@ public interface UserService {
 
 
     User getUserByEmail(String email) throws NotFoundException;
-
-
-    void processForgotPassword(UserResetPwdRequestModel userResetPwdWithTokenRequestModel);
-
-    void updateResetPasswordToken(String token, String email);
-
-    UserPasswordLessDTO getByResetPasswordToken(String token);
-
-    void updatePassword(String newPassword, String token);
-
-    void processResetPassword(UserResetPwdWithTokenRequestModel resetRequest);
 }

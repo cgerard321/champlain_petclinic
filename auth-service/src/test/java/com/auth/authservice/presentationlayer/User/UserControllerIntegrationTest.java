@@ -2,28 +2,20 @@ package com.auth.authservice.presentationlayer.User;
 
 import com.auth.authservice.Util.Exceptions.HTTPErrorMessage;
 import com.auth.authservice.businesslayer.UserService;
-import com.auth.authservice.datalayer.user.ResetPasswordToken;
-import com.auth.authservice.datalayer.user.ResetPasswordTokenRepository;
 import com.auth.authservice.datalayer.user.User;
 import com.auth.authservice.datalayer.user.UserRepo;
-import com.auth.authservice.domainclientlayer.Mail.MailService;
 import com.auth.authservice.security.JwtTokenUtil;
 import org.aspectj.lang.annotation.Before;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 
 import java.util.List;
 
@@ -40,15 +32,9 @@ class UserControllerIntegrationTest {
     @Autowired
     private UserRepo userRepo;
 
-    @MockBean
-    private ResetPasswordTokenRepository resetPasswordTokenRepository;
-
 
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
-
-    @MockBean
-    private MailService mailService;
 
     @Before("setup")
     public void setup() {
@@ -170,86 +156,5 @@ class UserControllerIntegrationTest {
                 });
         }
 
-
-
-        @Test
-        void processResetPassword_ShouldSucceed(){
-
-            when(resetPasswordTokenRepository.findResetPasswordTokenByToken(anyString())).thenReturn(new ResetPasswordToken(1L,"testToken"));
-
-            UserResetPwdWithTokenRequestModel resetRequest = new UserResetPwdWithTokenRequestModel();
-            resetRequest.setToken("testToken");
-            resetRequest.setPassword("newPassword");
-
-            webTestClient.post()
-                    .uri("/users/reset_password")
-                    .accept(MediaType.APPLICATION_JSON)
-                    .bodyValue(resetRequest)
-                    .exchange()
-                    .expectStatus().isOk();
-        }
-
-        @Test
-        void processResetPassword_ShouldFindNoToken(){
-
-            when(resetPasswordTokenRepository.findResetPasswordTokenByToken(anyString())).thenReturn(null);
-
-            UserResetPwdWithTokenRequestModel resetRequest = new UserResetPwdWithTokenRequestModel();
-            resetRequest.setToken("testToken");
-            resetRequest.setPassword("newPassword");
-
-            webTestClient.post()
-                    .uri("/users/reset_password")
-                    .accept(MediaType.APPLICATION_JSON)
-                    .bodyValue(resetRequest)
-                    .exchange()
-                    .expectStatus().isUnauthorized();
-        }
-
-
-
-    @Test
-    void sendForgottenPasswordLink_ShouldSucceed(){
-
-        UserResetPwdRequestModel resetPwdRequestModel = UserResetPwdRequestModel.builder()
-                .email("admin@admin.com")
-                        .build();
-
-        when(mailService.sendMail(any())).thenReturn("Your verification link: someFakeLink");
-
-
-        webTestClient.post()
-                .uri("/users/forgot_password")
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(resetPwdRequestModel)
-                .exchange()
-                .expectStatus().isOk();
-
-    }
-
-
-    @Test
-    void sendForgottenPasswordLink_ShouldFail(){
-
-        UserResetPwdRequestModel resetPwdRequestModel = UserResetPwdRequestModel.builder()
-                .email("invalidEmail")
-                .build();
-
-        when(mailService.sendMail(any())).thenReturn("Your verification link: someFakeLink");
-
-        webTestClient.post()
-                .uri("/users/forgot_password")
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(resetPwdRequestModel)
-                .exchange()
-                .expectStatus().isNotFound()
-                .expectBody(HTTPErrorMessage.class)
-                .value(error -> {
-                    assertEquals("Could not find any customer with the email invalidEmail",error.getMessage());
-                    assertEquals(404,error.getStatusCode());
-                    assertNotNull(error.getTimestamp());
-                });
-
-    }
 
 }

@@ -20,7 +20,7 @@ public class VisitDetails {
 
     private String visitId = null;
 
-    private String petId = null;
+    private Integer petId = null;
 
     private Integer practitionerId = null;
 

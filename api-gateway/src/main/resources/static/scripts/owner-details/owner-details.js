@@ -9,12 +9,6 @@ angular.module('ownerDetails', ['ui.router'])
                 params: {ownerId: null},
                 template: '<owner-details></owner-details>'
             })
-            // .state('petOwnerDetails', {
-            //     parent: 'app',
-            //     url: '/owners/:ownerId/pets/:petId/',
-            //     params: {ownerId: null, petId: null},
-            //     template: '<owner-details></owner-details>'
-            // }
 
     }]);
 

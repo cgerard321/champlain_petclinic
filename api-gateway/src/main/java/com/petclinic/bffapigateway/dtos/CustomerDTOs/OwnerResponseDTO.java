@@ -1,17 +1,25 @@
 package com.petclinic.bffapigateway.dtos.CustomerDTOs;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
-@Data
+import static java.util.stream.Collectors.toList;
+
+/**
+ * @author Maciej Szarlinski
+ * Copied from https://github.com/spring-petclinic/spring-petclinic-microservices
+ */
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@Data
 public class OwnerResponseDTO {
 
     private String ownerId;
@@ -20,5 +28,14 @@ public class OwnerResponseDTO {
     private String address;
     private String city;
     private String telephone;
-    private List<PetResponseDTO> pets;
+    //private int imageId;
+
+    /*private final List<PetResponseDTO> pets = new ArrayList<>();
+
+    @JsonIgnore
+    public List<Integer> getPetIds() {
+        return pets.stream()
+                .map(PetResponseDTO::getId)
+                .collect(toList());
+    }*/
 }
