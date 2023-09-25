@@ -51,28 +51,11 @@ public class VisitServiceImpl implements VisitService {
     @Override
     public Mono<VisitResponseDTO> addVisit(Mono<VisitRequestDTO> visitRequestDTOMono) {
         return visitRequestDTOMono
-<<<<<<< HEAD
                 .doOnNext(v -> System.out.println("Request Date: " + v.getVisitDate())) // Debugging
                 .map(EntityDtoUtil::toVisitEntity)
                 .doOnNext(x -> x.setVisitId(EntityDtoUtil.generateVisitIdString()))
                 .doOnNext(v -> System.out.println("Entity Date: " + v.getVisitDate())) // Debugging
                 .flatMap((repo::insert))
-=======
-<<<<<<< HEAD
-                .flatMap(visitRequestDTO -> validatePetId(visitRequestDTO.getPetId())
-                        .then(validateVetId(visitRequestDTO.getPractitionerId()))
-                        .then(Mono.just(visitRequestDTO)))
-                .map(EntityDtoUtil::toVisitEntity)
-                .doOnNext(visitEntity -> visitEntity.setVisitId(EntityDtoUtil.generateVisitIdString()))
-                .flatMap(repo::insert)
-=======
-                .doOnNext(v -> System.out.println("Request Date: " + v.getVisitDate())) // Debugging
-                .map(EntityDtoUtil::toVisitEntity)
-                .doOnNext(x -> x.setVisitId(EntityDtoUtil.generateVisitIdString()))
-                .doOnNext(v -> System.out.println("Entity Date: " + v.getVisitDate())) // Debugging
-                .flatMap((repo::insert))
->>>>>>> 0ca04f24 (Fixing back end to receive date properly)
->>>>>>> 6a2f3c88 (Fixing back end to receive date properly)
                 .map(EntityDtoUtil::toVisitResponseDTO);
     }
 

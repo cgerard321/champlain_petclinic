@@ -126,9 +126,6 @@ public class VisitsServiceClient {
                 .retrieve()
                 .bodyToMono(VisitDetails.class);
 <<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 6a2f3c88 (Fixing back end to receive date properly)
     }*/
 public Mono<VisitResponseDTO> createVisitForPet(VisitRequestDTO visit) {
     return webClient
