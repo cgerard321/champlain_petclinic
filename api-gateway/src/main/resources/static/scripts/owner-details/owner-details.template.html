@@ -97,8 +97,13 @@
                                 <!-- Add more pet details as needed -->
                             </div>
                             <div class="border-5 rounded">
-                                <a style="color: rgba(0,0,0,0.5);" class="btn btn-light" ui-sref="ownerEdit({ownerId: $ctrl.owner.ownerId, method: 'edit'})">Toggle Pet Status</a>
+                                <a style="color: rgba(0,0,0,0.5);" class="btn btn-light" ng-click="$ctrl.toggleActiveStatus(pet.petId)">
+                                    {{ pet.activeStatus ? 'Deactivate Pet' : 'Activate Pet' }}
+                                </a>
+
+
                             </div>
+
                         </div>
                     </div>
 

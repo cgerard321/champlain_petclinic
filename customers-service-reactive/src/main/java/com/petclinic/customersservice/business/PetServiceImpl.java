@@ -47,7 +47,14 @@ public class PetServiceImpl implements PetService {
                 )
                 .flatMap(petRepo::save);
     }
-
+    @Override
+    public Mono<Pet> updatePetIsActive(String petId, String isActive) {
+        return petRepo.findPetByPetId(petId)
+                .flatMap(p -> {
+                    p.setIsActive(isActive);
+                    return petRepo.save(p);
+                });
+    }
     @Override
     public Mono<Void> deletePetByPetId(String petId) {
         return petRepo.deleteById(petId);

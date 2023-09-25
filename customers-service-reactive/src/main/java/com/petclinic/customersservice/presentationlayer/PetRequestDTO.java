@@ -11,7 +11,7 @@ import java.util.Date;
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
-public class PetResponseDTO {
+public class PetRequestDTO {
 
     private String ownerId;
     private String petId;
