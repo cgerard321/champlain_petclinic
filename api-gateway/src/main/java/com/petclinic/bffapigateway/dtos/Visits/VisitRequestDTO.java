@@ -18,7 +18,9 @@ public class VisitRequestDTO {
     private int month;
     private int day;*/
     private String description;
-    private int petId;
-    private int practitionerId;
+    private String petId;
+    private String practitionerId;
+/*    private int petId;
+    private int practitionerId;*/
     private boolean status;
 }
