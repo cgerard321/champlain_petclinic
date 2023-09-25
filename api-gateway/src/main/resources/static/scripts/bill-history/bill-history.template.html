@@ -33,6 +33,8 @@
     <tr id="billId" ng-repeat="bill in $ctrl.billHistory | filter:$ctrl.query track by bill.billId">
     <tr ng-repeat="bill in $ctrl.billHistory | filter:search:strict">
     <td><a href="http://localhost:8080/#!/bills/details/{{bill.billId}}/owner/{{bill.customerId}}">{{bill.billId}}</a></td>
+<!--        <td>{{bill.customerId}}</td>-->
+        <td>{{ getCustomerDetails(bill.customerId) }}</td>
         <td>{{bill.customerId}}</td>
 <!--        <td>{{ getCustomerDetails(bill.customerId) }}</td>-->
         <td><a href="http://localhost:8080/#!/owners/details/{{bill.customerId}}">Owner details</a></td>

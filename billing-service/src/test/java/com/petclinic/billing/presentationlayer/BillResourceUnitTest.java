@@ -1,8 +1,6 @@
 package com.petclinic.billing.presentationlayer;
 
 import com.petclinic.billing.businesslayer.BillService;
-import com.petclinic.billing.datalayer.Bill;
-import com.petclinic.billing.datalayer.BillDTO;
 import com.petclinic.billing.datalayer.BillResponseDTO;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -10,13 +8,10 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
@@ -24,21 +19,15 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static reactor.core.publisher.Mono.just;
-
 
 @WebFluxTest(controllers = BillResource.class)
 class BillResourceUnitTest {
 
-//    private BillDTO dto = buildBillDTO();
-    private BillResponseDTO responseDTO =buildBillResponseDTO();
+    private BillResponseDTO responseDTO = buildBillResponseDTO();
     private final String BILL_ID_OK = responseDTO.getBillId();
 
-    private final int CUSTOMER_ID_OK = responseDTO.getCustomerId();
+    private final String CUSTOMER_ID_OK = responseDTO.getCustomerId();
     private final String VET_ID_OK = responseDTO.getVetId();
 
     @Autowired
@@ -94,7 +83,7 @@ class BillResourceUnitTest {
     @Test
     void getBillByCustomerId() {
 
-        when(billService.GetBillsByCustomerId(anyInt())).thenReturn(Flux.just(responseDTO));
+        when(billService.GetBillsByCustomerId(anyString())).thenReturn(Flux.just(responseDTO));
 
         client.get()
                 .uri("/bills/customer/" + responseDTO.getCustomerId())
@@ -165,7 +154,7 @@ class BillResourceUnitTest {
     @Test
     void deleteBillsByCustomerId() {
 
-        when(billService.DeleteBillsByCustomerId(anyInt())).thenReturn(Flux.empty());
+        when(billService.DeleteBillsByCustomerId(anyString())).thenReturn(Flux.empty());
 
         client.delete()
                 .uri("/bills/customer/" + responseDTO.getCustomerId())
@@ -195,9 +184,9 @@ class BillResourceUnitTest {
         calendar.set(2022, Calendar.SEPTEMBER, 25);
         LocalDate date = calendar.getTime().toInstant()
                 .atZone(ZoneId.systemDefault())
-                .toLocalDate();;
+                .toLocalDate();
 
 
-        return BillResponseDTO.builder().billId("BillUUID").customerId(1).vetId("1").visitType("Test Type").date(date).amount(13.37).build();
+        return BillResponseDTO.builder().billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).build();
     }
 }

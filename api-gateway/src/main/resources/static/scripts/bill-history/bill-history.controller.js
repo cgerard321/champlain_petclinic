@@ -45,7 +45,7 @@ angular.module('billHistory')
 
         $scope.getCustomerDetails = function(customerId) {
             const customer = self.owners.find(function(customer) {
-                return customer.ownerId === customerId;
+                return customer.id === customerId;
             });
 
             if (customer) {
