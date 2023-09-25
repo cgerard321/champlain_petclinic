@@ -93,6 +93,7 @@ public class VisitServiceImpl implements VisitService {
                 .map(EntityDtoUtil::toVisitResponseDTO);
     }
 
+
     private Mono<PetResponseDTO> validatePetId(String petId) {
         return petsClient.getPetById(petId)
                 .switchIfEmpty(Mono.error(new NotFoundException("No pet was found with petId: " + petId)));
