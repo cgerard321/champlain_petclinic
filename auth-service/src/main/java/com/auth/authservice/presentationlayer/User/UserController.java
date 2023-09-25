@@ -142,6 +142,13 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
+    @PutMapping("/changeUsername/{username}")
+    public ResponseEntity<UserPasswordLessDTO> changeUsername(@RequestBody UserPasswordLessDTO user, @PathVariable("username") String username){
+        log.info("In update controller username");
+        userService.updateUsername(user, username);
+        log.info("In the change username controller method in the UserController Class");
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
 
     @PostMapping("/validate-token")
     public ResponseEntity<String> validateToken(@RequestBody String token) {

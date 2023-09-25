@@ -3,6 +3,7 @@ package com.petclinic.bffapigateway.presentationlayer;
 
 import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.Auth.Login;
+import com.petclinic.bffapigateway.dtos.Auth.UserDetails;
 import com.petclinic.bffapigateway.dtos.Auth.UserPasswordLessDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
@@ -26,6 +27,7 @@ import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import com.petclinic.bffapigateway.utils.VetsEntityDtoUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -457,6 +459,11 @@ public class BFFApiGatewayController {
 
         return Mono.just(ResponseEntity.status(HttpStatus.OK).headers(responseFromService.getHeaders()).body(responseFromService.getBody()));
 
+    }
+    @PutMapping(value = "/users/changeUsername/{username}", produces = "application/json;charset=utf-8;", consumes = "application/json")
+    public ResponseEntity<Mono<UserPasswordLessDTO>> changeUsername(@CookieValue("Bearer") String jwtToken,@RequestBody UserPasswordLessDTO user, @PathVariable("username") String username){
+        log.info("in the change username method in the api gateway controller");
+        return ResponseEntity.status(HttpStatus.OK).body(authServiceClient.changeUsername(user, username,jwtToken));
     }
 
     //Start of Inventory Methods

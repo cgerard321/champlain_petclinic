@@ -2,6 +2,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.Auth.Login;
 import com.petclinic.bffapigateway.dtos.Auth.Role;
+import com.petclinic.bffapigateway.dtos.Auth.UserDetails;
 import com.petclinic.bffapigateway.dtos.Auth.UserPasswordLessDTO;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Rethrower;
@@ -10,6 +11,7 @@ import com.petclinic.bffapigateway.utils.Security.Variables.SecurityConst;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.security.SecurityProperties;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
@@ -123,6 +125,21 @@ public class AuthServiceClient {
             log.info("Error throw in auth domain client service");
             throw new Exception(ex);
         }
+    }
+    public Mono<UserPasswordLessDTO> changeUsername(UserPasswordLessDTO user, String username, String jwtToken){
+        log.info("User HttpEntity: " + user);
+        log.info("In the Auth Service Client for Change Username");
+        log.info("Auth Service URL: "+ authServiceUrl + "/users/changeUsername/" + username);
+
+        return webClientBuilder.build()
+                .put()
+                .uri(authServiceUrl + "/users/changeUsername/"+username)
+                .bodyValue(user)
+                .cookie(securityConst.getTOKEN_PREFIX(), jwtToken)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> Mono.error(new InvalidTokenException("Invalid token")))
+                .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> Mono.error(new InvalidInputException("Invalid token")))
+                .bodyToMono(UserPasswordLessDTO.class);
     }
 
 

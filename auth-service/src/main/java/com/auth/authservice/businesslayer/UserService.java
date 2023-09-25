@@ -44,6 +44,8 @@ public interface UserService {
 
     User createUser(UserIDLessRoleLessDTO user);
 
+    UserPasswordLessDTO updateUsername(UserPasswordLessDTO user, String username);
+
     User passwordReset(long id, String newPassword);
 
     User getUserById(long id);

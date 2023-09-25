@@ -118,6 +118,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public UserPasswordLessDTO updateUsername(UserPasswordLessDTO userPasswordLessDTO, String username) {
+        log.info("Update username");
+        User user = userRepo.findUserByUsername(username);
+        log.info("The User Entity that the repo should be getting: " + user);
+        user.setUsername(userPasswordLessDTO.getUsername());
+        userRepo.save(user);
+        log.info("the username has been changed to {}", username);
+        return userMapper.modelToPasswordLessDTO(user);
+    }
+
+    @Override
     public User passwordReset(long userId, @Valid String newPassword) {
 
         log.info("id={}", userId);
