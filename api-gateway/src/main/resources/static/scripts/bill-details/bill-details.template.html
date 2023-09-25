@@ -27,4 +27,6 @@
 
     <a class="newBtn btn btn-primary" href="http://localhost:8080/#!/bills/vetId/{{$ctrl.bills.vetId}}">
         Get all bills by vet</a>
+
+    <a class="newBtn btn btn-primary" ui-sref="billEdit({ billId: $ctrl.bills.billId, method: 'edit' })">Update Bill</a>
 </div>
