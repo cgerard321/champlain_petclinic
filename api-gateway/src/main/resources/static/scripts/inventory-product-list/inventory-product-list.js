@@ -19,4 +19,9 @@ angular.module('inventoryProductList', ['ui.router'])
                 url: '/inventory/:inventoryId/products/:productId',
                 template: '<inventory-product-item></inventory-product-item>'
             })
+            .state('deleteAllProducts', {
+                parent: 'app',
+                url: '/inventory/:inventoryId/products',
+                template: '<inventory-product-item></inventory-product-item>'
+            })
     }]);

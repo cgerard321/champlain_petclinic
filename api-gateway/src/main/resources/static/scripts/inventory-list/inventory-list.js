@@ -8,9 +8,13 @@ angular.module('inventoryList', ['ui.router'])
                 url: '/inventory',
                 template: '<inventory-list></inventory-list>'
             })
-            /*.state('deleteBundle', {
+
+
+            //delete all inventory
+            .state('deleteAllInventories', {
                 parent: 'app',
-                url: '/bundles/:bundleUUID/deleteBundle',
-                template: '<bundle-list></bundle-list>'
-            })*/
+                url: '/inventory',
+                template: '<inventory-delete-confirm></inventory-delete-confirm>'
+
+            })
     }]);

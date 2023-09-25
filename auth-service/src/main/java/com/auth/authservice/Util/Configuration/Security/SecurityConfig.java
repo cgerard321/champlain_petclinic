@@ -71,6 +71,8 @@ public class SecurityConfig {
         http.authorizeHttpRequests(authorizeRequests -> authorizeRequests
                 .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET,"/users/verification/*")).permitAll()
                 .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST,"/users/login")).permitAll()
+                        .requestMatchers(AntPathRequestMatcher.antMatcher("/users/forgot_password")).permitAll()
+                        .requestMatchers(AntPathRequestMatcher.antMatcher("/users/reset_password")).permitAll()
                 // .antMatchers("/users").permitAll()
                 // .antMatchers("/users/*").permitAll()
                 .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.HEAD,"/users")).authenticated()
@@ -101,10 +103,6 @@ public class SecurityConfig {
                 UsernamePasswordAuthenticationFilter.class
         );
 
-        http.addFilterBefore(
-                jwtTokenFilter,
-                UsernamePasswordAuthenticationFilter.class
-        );
 
 
         return http.build();
