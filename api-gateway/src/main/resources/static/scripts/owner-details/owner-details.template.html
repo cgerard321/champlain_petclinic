@@ -92,8 +92,10 @@
                         <div ng-repeat="pet in $ctrl.owner.pets" class="d-flex justify-content-between">
                             <!-- Display pet details here -->
                             <div class="mt-3">
+                                <a style="color: rgba(0,0,0,0.5);" class="btn btn-light" ui-sref="editPet({ownerId: $ctrl.owner.ownerId, petId: pet.petId, method: 'edit'})">Edit Pet</a>
                                 <p>Name: {{ pet.name }}</p>
-
+                                <p>Pet Id: {{pet.petId}}</p>
+                                <p>Pet Type: {{pet.petType}}</p>
                                 <!-- Add more pet details as needed -->
                             </div>
                             <div class="border-5 rounded">

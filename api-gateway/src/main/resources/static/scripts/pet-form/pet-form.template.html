@@ -1,4 +1,4 @@
-<div class="bColor"><h2 class="titleOwner form">Add Pet</h2></div>
+<div class="bColor"><h2 class="titleOwner form">Pet</h2></div>
 
 <form id="petForm" class="form-horizontal" ng-submit="$ctrl.submit()">
     <div class="form-group formColor">
@@ -27,7 +27,7 @@
     <div class="form-group formColor">
         <label class="col-sm-2 control-label">Type</label>
         <div class="pet col-sm-6">
-            <select class="form-control" ng-model="$ctrl.pet.type" name="type" ng-options="t.id as t.name for t in $ctrl.types track by t.id" ng-disabled="$ctrl.checked">
+            <select class="form-control" ng-model="$ctrl.pet.type" name="type" ng-options="t as t.name for t in $ctrl.types track by t.id" ng-disabled="$ctrl.checked"></select>
             </select>
         </div>
     </div>
