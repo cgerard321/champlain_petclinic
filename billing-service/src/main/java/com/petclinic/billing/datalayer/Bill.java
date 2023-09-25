@@ -1,10 +1,9 @@
 package com.petclinic.billing.datalayer;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 @Data
 @ToString
@@ -21,7 +20,6 @@ public class Bill {
     private String vetId;
     private String vetFirstName;
     private String vetLastName;
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    private Date visitDate = new Date();
+    private LocalDate date;
     private double amount;
 }

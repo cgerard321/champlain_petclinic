@@ -21,19 +21,39 @@ angular.module('billHistory')
             }
         }
 
-        // $http.get('api/gateway/bills').then(function (resp) {
-        //     self.billHistory = resp.data;
-        // });
-/*
-        $scope.getVetByVetId = function (vetId) {
-            $http.get('api/gateway/vets/'+vetId).then(function (resp1) {
-                self.vetName = resp1.firstName + ' ' + resp1.lastName;
-                //{{vet.firstName}} {{vet.lastName}}
-                console.log(self.vetName)
-            });
-        }
-*/
+        $http.get('api/gateway/vets').then(function (resp) {
+            self.vetList = resp.data;
+            arr = resp.data;
+        });
 
+        $http.get('api/gateway/owners').then(function (owners) {
+            self.owners = owners.data;
+            console.log(owners)
+        });
+
+        $scope.getVetDetails = function(vetId) {
+            const vet = self.vetList.find(function(vet) {
+                return vet.vetBillId === vetId;
+            });
+
+            if (vet) {
+                return vet.firstName + ' ' + vet.lastName;
+            } else {
+                return 'Unknown Vet';
+            }
+        };
+
+        $scope.getCustomerDetails = function(customerId) {
+            const customer = self.owners.find(function(customer) {
+                return customer.ownerId === customerId;
+            });
+
+            if (customer) {
+                return customer.firstName + ' ' + customer.lastName;
+            } else {
+                return 'Unknown Customer';
+            }
+        }
 
         $scope.deleteBill = function (billId) {
             let varIsConf = confirm('You are about to delete billId ' + billId + '. Is it what you want to do ? ');
