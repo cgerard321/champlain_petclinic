@@ -128,7 +128,7 @@ public class CustomersServiceClient {
                 .bodyToMono(PetResponseDTO.class);
     }
 
-    public Mono<PetResponseDTO> getPet(final int ownerId, final int petId){
+    public Mono<PetResponseDTO> getPet(final String ownerId, final String petId){
         return webClientBuilder.build().get()
                 .uri(customersServiceUrl + ownerId + "/pets/" + petId)
                 .retrieve()
@@ -150,7 +150,7 @@ public class CustomersServiceClient {
                 .retrieve().bodyToMono(PetResponseDTO.class);
     }
 
-    public Mono<PetResponseDTO> deletePet(final String ownerId, final int petId){
+    public Mono<PetResponseDTO> deletePet(final String ownerId, final String petId){
         return webClientBuilder.build().delete()
                 .uri(customersServiceUrl + "{ownerId}/pets/{petId}", ownerId ,petId)
                 .retrieve()
@@ -179,28 +179,28 @@ public class CustomersServiceClient {
                 .bodyToMono(PhotoDetails.class);
     }*/
 
-    public Mono<Void> deleteOwnerPhoto(int photoId) {
-        return webClientBuilder.build().delete()
-                .uri(customersServiceUrl + "/photo/" + photoId)
-                .retrieve()
-                .bodyToMono(Void.class);
-    }
-
-
-
-    public Mono<String> setPetPhoto(String ownerId, PhotoDetails file, String petId){
-        return webClientBuilder.build().post()
-                .uri(customersServiceUrl + ownerId + "/pets/photo/" + petId)
-                .body(just(file), PhotoDetails.class)
-                .retrieve().bodyToMono(String.class);
-    }
-
-    public Mono<PhotoDetails> getPetPhoto(String ownerId, String petId){
-        return webClientBuilder.build().get()
-                .uri(customersServiceUrl + ownerId + "/pets/photo/" + petId)
-                .retrieve()
-                .bodyToMono(PhotoDetails.class);
-    }
+//    public Mono<Void> deleteOwnerPhoto(int photoId) {
+//        return webClientBuilder.build().delete()
+//                .uri(customersServiceUrl + "/photo/" + photoId)
+//                .retrieve()
+//                .bodyToMono(Void.class);
+//    }
+//
+//
+//
+//    public Mono<String> setPetPhoto(String ownerId, PhotoDetails file, String petId){
+//        return webClientBuilder.build().post()
+//                .uri(customersServiceUrl + ownerId + "/pets/photo/" + petId)
+//                .body(just(file), PhotoDetails.class)
+//                .retrieve().bodyToMono(String.class);
+//    }
+//
+//    public Mono<PhotoDetails> getPetPhoto(String ownerId, String petId){
+//        return webClientBuilder.build().get()
+//                .uri(customersServiceUrl + ownerId + "/pets/photo/" + petId)
+//                .retrieve()
+//                .bodyToMono(PhotoDetails.class);
+//    }
 
     public Mono<Void> deletePetPhoto (int ownerId, int photoId) {
         return webClientBuilder.build().delete()

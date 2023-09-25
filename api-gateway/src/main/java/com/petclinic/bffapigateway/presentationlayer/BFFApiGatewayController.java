@@ -131,7 +131,7 @@ public class BFFApiGatewayController {
     }
 
     @GetMapping(value = "owners/{ownerId}/pets/{petId}")
-    public Mono<PetResponseDTO> getPet(@PathVariable int ownerId, @PathVariable int petId){
+    public Mono<PetResponseDTO> getPet(@PathVariable String ownerId, @PathVariable String petId){
         return customersServiceClient.getPet(ownerId, petId);
     }
 
@@ -141,7 +141,7 @@ public class BFFApiGatewayController {
     }
 
     @DeleteMapping("owners/{ownerId}/pets/{petId}")
-    public Mono<PetResponseDTO> deletePet(@PathVariable String ownerId, @PathVariable int petId){
+    public Mono<PetResponseDTO> deletePet(@PathVariable String ownerId, @PathVariable String petId){
         return customersServiceClient.deletePet(ownerId,petId);
     }
 
@@ -157,12 +157,12 @@ public class BFFApiGatewayController {
     @GetMapping(value = "visits", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VisitResponseDTO> getAllVisits() {return visitsServiceClient.getAllVisits();}
     @GetMapping(value = "visits/previous/{petId}")
-    public Flux<VisitDetails> getPreviousVisitsForPet(@PathVariable final int petId) {
+    public Flux<VisitDetails> getPreviousVisitsForPet(@PathVariable final String petId) {
         return visitsServiceClient.getPreviousVisitsForPet(petId);
     }
 
     @GetMapping(value = "visits/scheduled/{petId}")
-    public Flux<VisitDetails> getScheduledVisitsForPet(@PathVariable final int petId) {
+    public Flux<VisitDetails> getScheduledVisitsForPet(@PathVariable final String petId) {
         return visitsServiceClient.getScheduledVisitsForPet(petId);
     }
 
@@ -181,7 +181,7 @@ public class BFFApiGatewayController {
     }
      */
     @GetMapping(value = "visits/pets/{petId}")
-    public Flux<VisitDetails> getVisitsForPet(final @PathVariable int petId){
+    public Flux<VisitDetails> getVisitsForPet(final @PathVariable String petId){
         return visitsServiceClient.getVisitsForPet(petId);
     }
 
@@ -206,11 +206,11 @@ public class BFFApiGatewayController {
 
     @PostMapping(value = "visit/owners/{ownerId}/pets/{petId}/visits", consumes = "application/json", produces = "application/json")
     Mono<VisitDetails> addVisit(@RequestBody VisitDetails visit, @PathVariable String ownerId, @PathVariable String petId) {
-        visit.setPetId(Integer.parseInt(petId));
+        visit.setPetId(petId);
         return visitsServiceClient.createVisitForPet(visit);
     }
     @PutMapping(value = "owners/*/pets/{petId}/visits/{visitId}", consumes = "application/json", produces = "application/json")
-    Mono<VisitDetails> updateVisit(@RequestBody VisitDetails visit, @PathVariable int petId, @PathVariable String visitId) {
+    Mono<VisitDetails> updateVisit(@RequestBody VisitDetails visit, @PathVariable String petId, @PathVariable String visitId) {
         visit.setPetId(petId);
         visit.setVisitId(visitId);
         return visitsServiceClient.updateVisitForPet(visit);
@@ -383,25 +383,25 @@ public class BFFApiGatewayController {
         return customersServiceClient.getOwnerPhoto(ownerId);
     }*/
 
-    @PostMapping(value = "owners/{ownerId}/pet/photo/{petId}")
-    public Mono<String> setPetPhoto(@PathVariable String ownerId, @RequestBody PhotoDetails photoDetails, @PathVariable String petId) {
-        return customersServiceClient.setPetPhoto(ownerId, photoDetails, petId);
-    }
-
-    @GetMapping(value = "owners/{ownerId}/pet/photo/{petId}")
-    public Mono<PhotoDetails> getPetPhoto(@PathVariable String ownerId, @PathVariable String petId) {
-        return customersServiceClient.getPetPhoto(ownerId, petId);
-    }
-
-    @DeleteMapping(value = "owners/photo/{photoId}")
-    public Mono<Void> deleteOwnerPhoto(@PathVariable int photoId){
-        return customersServiceClient.deleteOwnerPhoto(photoId);
-    }
-
-    @DeleteMapping(value = "owners/{ownerId}/pet/photo/{photoId}")
-    public Mono<Void> deletePetPhoto(@PathVariable int ownerId, @PathVariable int photoId){
-        return customersServiceClient.deletePetPhoto(ownerId, photoId);
-    }
+//    @PostMapping(value = "owners/{ownerId}/pet/photo/{petId}")
+//    public Mono<String> setPetPhoto(@PathVariable String ownerId, @RequestBody PhotoDetails photoDetails, @PathVariable String petId) {
+//        return customersServiceClient.setPetPhoto(ownerId, photoDetails, petId);
+//    }
+//
+//    @GetMapping(value = "owners/{ownerId}/pet/photo/{petId}")
+//    public Mono<PhotoDetails> getPetPhoto(@PathVariable String ownerId, @PathVariable String petId) {
+//        return customersServiceClient.getPetPhoto(ownerId, petId);
+//    }
+//
+//    @DeleteMapping(value = "owners/photo/{photoId}")
+//    public Mono<Void> deleteOwnerPhoto(@PathVariable int photoId){
+//        return customersServiceClient.deleteOwnerPhoto(photoId);
+//    }
+//
+//    @DeleteMapping(value = "owners/{ownerId}/pet/photo/{photoId}")
+//    public Mono<Void> deletePetPhoto(@PathVariable int ownerId, @PathVariable int photoId){
+//        return customersServiceClient.deletePetPhoto(ownerId, photoId);
+//    }
 
 
 
