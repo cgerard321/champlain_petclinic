@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 public class VisitRequestDTO {
-    
+
     private LocalDateTime visitDate;
 /*   private int year;
     private int month;
