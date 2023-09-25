@@ -1,28 +1,22 @@
 package com.petclinic.billing.businesslayer;
 
 import com.petclinic.billing.datalayer.*;
-import com.petclinic.billing.domainclientlayer.OwnerClient;
-import com.petclinic.billing.domainclientlayer.VetClient;
-import com.petclinic.billing.exceptions.InvalidInputException;
-import com.petclinic.billing.exceptions.NotFoundException;
+//import com.petclinic.billing.domainclientlayer.OwnerClient;
+//import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.util.EntityDtoUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.dao.DuplicateKeyException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.HashMap;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class BillServiceImpl implements BillService{
 
     private final BillRepository billRepository;
-    private final VetClient vetClient;
-    private final OwnerClient ownerClient;
+//    private final VetClient vetClient;
+//    private final OwnerClient ownerClient;
 
     @Override
     public Mono<BillResponseDTO> GetBill(String billUUID) {
