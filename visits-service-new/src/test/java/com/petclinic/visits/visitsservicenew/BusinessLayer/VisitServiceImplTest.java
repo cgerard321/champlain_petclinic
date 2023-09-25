@@ -56,7 +56,7 @@ class VisitServiceImplTest {
     private final VisitResponseDTO visitResponseDTO = buildVisitResponseDTO();
     private final VisitRequestDTO visitRequestDTO = buildVisitRequestDTO();
     private final String PRAC_ID = visitResponseDTO.getPractitionerId();
-    private final int PET_ID = visitResponseDTO.getPetId();
+    private final String PET_ID = visitResponseDTO.getPetId();
     private final String VISIT_ID = visitResponseDTO.getVisitId();
 
     String uuid1 = UUID.randomUUID().toString();
@@ -135,8 +135,8 @@ class VisitServiceImplTest {
 
     @Test
     void getVisitsForPet(){
-        when(visitRepo.findByPetId(anyInt())).thenReturn(Flux.just(visit1));
-        when(petsClient.getPetById(anyInt())).thenReturn(Mono.just(petResponseDTO));
+        when(visitRepo.findByPetId(anyString())).thenReturn(Flux.just(visit1));
+        when(petsClient.getPetById(anyString())).thenReturn(Mono.just(petResponseDTO));
 
         Flux<VisitResponseDTO> visitResponseDTOFlux = visitService.getVisitsForPet(PET_ID);
 
@@ -174,7 +174,7 @@ class VisitServiceImplTest {
     @Test
     void addVisit(){
         when(visitRepo.insert(any(Visit.class))).thenReturn(Mono.just(visit1));
-        when(petsClient.getPetById(anyInt())).thenReturn(Mono.just(petResponseDTO));
+        when(petsClient.getPetById(anyString())).thenReturn(Mono.just(petResponseDTO));
         when(vetsClient.getVetByVetId(anyString())).thenReturn(Mono.just(vet));
 
         StepVerifier.create(visitService.addVisit(Mono.just(visitRequestDTO)))
@@ -196,7 +196,7 @@ class VisitServiceImplTest {
     void updateVisit(){
         when(visitRepo.save(any(Visit.class))).thenReturn(Mono.just(visit1));
         when(visitRepo.findByVisitId(anyString())).thenReturn(Mono.just(visit1));
-        when(petsClient.getPetById(anyInt())).thenReturn(Mono.just(petResponseDTO));
+        when(petsClient.getPetById(anyString())).thenReturn(Mono.just(petResponseDTO));
         when(vetsClient.getVetByVetId(anyString())).thenReturn(Mono.just(vet));
 
         StepVerifier.create(visitService.updateVisit(VISIT_ID, Mono.just(visitRequestDTO)))
@@ -216,7 +216,7 @@ class VisitServiceImplTest {
                 .visitId(uuid)
                 .visitDate(LocalDateTime.parse("2022-11-25T13:45", dtf))
                 .description(description)
-                .petId(2)
+                .petId("2")
                 .practitionerId(vetId)
                 .status(true).build();
     }
@@ -226,7 +226,7 @@ class VisitServiceImplTest {
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
                 .visitDate(LocalDateTime.parse("2022-11-25T13:45:00", dtf))
                 .description("this is a dummy description")
-                .petId(2)
+                .petId("2")
                 .practitionerId(UUID.randomUUID().toString())
                 .status(true).build();
     }
@@ -235,7 +235,7 @@ class VisitServiceImplTest {
             return VisitRequestDTO.builder()
                     .visitDate(LocalDateTime.parse("2022-11-25T13:45:00", dtf))
                     .description("this is a dummy description")
-                    .petId(2)
+                    .petId("2")
                     .practitionerId(UUID.randomUUID().toString())
                     .status(true).build();
         }

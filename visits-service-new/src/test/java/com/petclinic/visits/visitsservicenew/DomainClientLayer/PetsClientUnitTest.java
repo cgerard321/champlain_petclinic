@@ -65,7 +65,7 @@ class PetsClientUnitTest {
         );
 
         // Call the method and verify the response
-        Mono<PetResponseDTO> petResponseDTOMono = petsClient.getPetById(123);
+        Mono<PetResponseDTO> petResponseDTOMono = petsClient.getPetById("123");
         StepVerifier.create(petResponseDTOMono)
                 .expectNextMatches(response -> response.getName().equals("Billy"))
                 .verifyComplete();
@@ -81,7 +81,7 @@ class PetsClientUnitTest {
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .addHeader("Content-Type", "application/json"));
 
-        Mono<PetResponseDTO> result = petsClient.getPetById(Integer.parseInt(invalidId));
+        Mono<PetResponseDTO> result = petsClient.getPetById(invalidId);
 
 
         StepVerifier.create(result)

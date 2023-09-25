@@ -77,7 +77,7 @@ class VisitControllerUnitTest {
     private final VisitRequestDTO visitRequestDTO = buildVisitRequestDTO(vet.getVetId());
     private final String Visit_UUID_OK = visitResponseDTO.getVisitId();
     private final String Practitioner_Id_OK = visitResponseDTO.getPractitionerId();
-    private final int Pet_Id_OK = visitResponseDTO.getPetId();
+    private final String Pet_Id_OK = visitResponseDTO.getPetId();
     //private final LocalDateTime visitDate = visitResponseDTO.getVisitDate().withSecond(0);
     @Test
     void getAllVisits(){
@@ -132,7 +132,7 @@ class VisitControllerUnitTest {
 
     @Test
     void getVisitsByPetId(){
-        when(visitService.getVisitsForPet(anyInt())).thenReturn(Flux.just(visitResponseDTO));
+        when(visitService.getVisitsForPet(anyString())).thenReturn(Flux.just(visitResponseDTO));
 
         webFluxTest.get()
                 .uri("/visits/pets/" + Pet_Id_OK)
@@ -214,7 +214,7 @@ class VisitControllerUnitTest {
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
                 .visitDate(LocalDateTime.parse("2022-11-25T13:45:00", dtf))
                 .description("this is a dummy description")
-                .petId(2)
+                .petId("2")
                 .practitionerId(UUID.randomUUID().toString())
                 .status(true).build();
     }
@@ -223,7 +223,7 @@ class VisitControllerUnitTest {
         return VisitRequestDTO.builder()
                 .visitDate(LocalDateTime.parse("2022-11-25T13:45:00", dtf))
                 .description("this is a dummy description")
-                .petId(2)
+                .petId("2")
                 .practitionerId(UUID.randomUUID().toString())
                 .status(true).build();
     }
@@ -234,7 +234,7 @@ class VisitControllerUnitTest {
                 .visitId(uuid)
                 .visitDate(LocalDateTime.parse("2022-11-25T13:45", dtf))
                 .description(description)
-                .petId(2)
+                .petId("2")
                 .practitionerId(vetId)
                 .status(true).build();
     }

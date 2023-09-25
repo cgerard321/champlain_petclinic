@@ -81,7 +81,7 @@ class VisitsControllerIntegrationTest {
     private final VisitRequestDTO visitRequestDTO = buildVisitRequestDto(vet.getVetId());
 
     private final String PRAC_ID = visitResponseDTO.getPractitionerId();
-    private final int PET_ID = visitResponseDTO.getPetId();
+    private final String PET_ID = visitResponseDTO.getPetId();
     private final String VISIT_ID = visitResponseDTO.getVisitId();
     private final int dbSize = 2;
     //private final LocalDateTime visitDate = visitResponseDTO.getVisitDate().withSecond(0);
@@ -152,7 +152,7 @@ class VisitsControllerIntegrationTest {
 
     @Test
     void getVisitsForPet(){
-        when(petsClient.getPetById(anyInt())).thenReturn(Mono.just(petResponseDTO));
+        when(petsClient.getPetById(anyString())).thenReturn(Mono.just(petResponseDTO));
 
         client
                 .get()
@@ -201,7 +201,7 @@ class VisitsControllerIntegrationTest {
 
     @Test
     void addVisit(){
-        when(petsClient.getPetById(anyInt())).thenReturn(Mono.just(petResponseDTO));
+        when(petsClient.getPetById(anyString())).thenReturn(Mono.just(petResponseDTO));
         when(vetsClient.getVetByVetId(anyString())).thenReturn(Mono.just(vet));
 
         client
@@ -232,7 +232,7 @@ class VisitsControllerIntegrationTest {
     }
     @Test
     void updateVisit(){
-        when(petsClient.getPetById(anyInt())).thenReturn(Mono.just(petResponseDTO));
+        when(petsClient.getPetById(anyString())).thenReturn(Mono.just(petResponseDTO));
         when(vetsClient.getVetByVetId(anyString())).thenReturn(Mono.just(vet));
 
         client
@@ -258,7 +258,7 @@ class VisitsControllerIntegrationTest {
                 .visitId(uuid)
                 .visitDate(LocalDateTime.parse("2022-11-25T13:45", dtf))
                 .description(description)
-                .petId(2)
+                .petId("2")
                 .practitionerId(vetId)
                 .status(true).build();
     }
@@ -269,7 +269,7 @@ class VisitsControllerIntegrationTest {
                 .visitId(visitId)
                 .visitDate(LocalDateTime.parse("2022-11-25T13:45:00", dtf))
                 .description("this is a dummy description")
-                .petId(2)
+                .petId("2")
                 .practitionerId(vetId)
                 .status(true).build();
     }
@@ -278,7 +278,7 @@ class VisitsControllerIntegrationTest {
         return VisitRequestDTO.builder()
                 .visitDate(LocalDateTime.parse("2022-11-25T13:45:00", dtf))
                 .description("this is a dummy description")
-                .petId(2)
+                .petId("2")
                 .practitionerId(vetId)
                 .status(true).build();
     }

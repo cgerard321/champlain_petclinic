@@ -29,7 +29,7 @@ public class VisitServiceImpl implements VisitService {
     }
 
     @Override
-    public Flux<VisitResponseDTO> getVisitsForPet(int petId) {
+    public Flux<VisitResponseDTO> getVisitsForPet(String petId) {
         return validatePetId(petId)
                 .thenMany(repo.findByPetId(petId)
                         .map(EntityDtoUtil::toVisitResponseDTO));
@@ -93,7 +93,7 @@ public class VisitServiceImpl implements VisitService {
                 .map(EntityDtoUtil::toVisitResponseDTO);
     }
 
-    private Mono<PetResponseDTO> validatePetId(int petId) {
+    private Mono<PetResponseDTO> validatePetId(String petId) {
         return petsClient.getPetById(petId)
                 .switchIfEmpty(Mono.error(new NotFoundException("No pet was found with petId: " + petId)));
     }

@@ -28,7 +28,7 @@ public class PetsClient {
         }
 
 
-        public Mono<PetResponseDTO> getPetById( final int petId){
+        public Mono<PetResponseDTO> getPetById( final String petId){
             return webClient
                     .get()
                     .uri(petClientServiceBaseURL + "/{petId}",petId)

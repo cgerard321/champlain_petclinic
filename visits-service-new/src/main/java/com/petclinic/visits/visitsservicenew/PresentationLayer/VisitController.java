@@ -19,8 +19,9 @@ public class VisitController {
     public Flux<VisitResponseDTO> getAllVisits(){
         return visitService.getAllVisits();
     }
+
     @GetMapping(value="/pets/{petId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<VisitResponseDTO> getVisitsForPet(@PathVariable int petId){
+    public Flux<VisitResponseDTO> getVisitsForPet(@PathVariable String petId){
         return visitService.getVisitsForPet(petId);
     }
     @GetMapping("/{visitId}")
@@ -29,7 +30,7 @@ public class VisitController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-    @GetMapping(value="practitioner/visits/{practitionerId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value="practitioner/{practitionerId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VisitResponseDTO> getVisitByPractitionerId(@PathVariable String practitionerId){
         return visitService.getVisitsForPractitioner(practitionerId);
     }
