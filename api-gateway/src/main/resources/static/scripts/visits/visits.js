@@ -8,9 +8,4 @@ angular.module('visits', ['ui.router'])
                 url: '/visits/new',
                 template: '<visits></visits>'
             })
-<<<<<<< HEAD
     }]);
-=======
-    }]);
-
->>>>>>> d158d8be (Working on parse date)
