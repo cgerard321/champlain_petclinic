@@ -140,6 +140,31 @@ angular.module('inventoryProductList')
                                 alert('An error occurred: ' + error.statusText);
                             }
                         });
+
                     }
                 }
+        $scope.deleteAllProducts = function () {
+            let varIsConf = confirm('Are you sure you want to delete all products for this inventory?');
+            if (varIsConf) {
+                let inventoryId = $stateParams.inventoryId;  // Retrieve the inventoryId from the appropriate location
+
+                $http.delete('api/gateway/inventory/' + inventoryId + '/products')
+                    .then(function(response) {
+                        alert("All products for this inventory have been deleted!");
+
+
+                        $scope.fetchProductList();
+                    }, function(error) {
+                        alert(error.data.errors);
+                        console.log(error, 'Failed to delete all products.');
+                    });
+            }
+        };
+
+        $scope.fetchProductList = function() {
+            let inventoryId = $stateParams.inventoryId;
+            $http.get('api/gateway/inventory/' + inventoryId + '/products').then(function (resp) {
+                $ctrl.inventoryProductList = resp.data;
+            });
+        };
             }]);
