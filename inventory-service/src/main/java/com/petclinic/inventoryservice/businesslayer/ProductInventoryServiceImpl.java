@@ -23,6 +23,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
 
     private final InventoryRepository inventoryRepository;
     private final ProductRepository productRepository;
+
     @Override
     public Mono<ProductResponseDTO> addProductToInventory(Mono<ProductRequestDTO> productRequestDTOMono, String inventoryId) {
         return productRequestDTOMono
@@ -110,6 +111,13 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                         }))
                 .switchIfEmpty(Mono.error(new InvalidInputException("Unable to update product in the repository, an error occurred.")));
     }
+
+
+
+
+
+
+
 
     @Override
     public Mono<Void> deleteProductInInventory(String inventoryId, String productId) {

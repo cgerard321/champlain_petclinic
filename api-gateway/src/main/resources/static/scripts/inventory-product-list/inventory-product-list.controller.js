@@ -17,6 +17,8 @@ angular.module('inventoryProductList')
                         console.error('An error occurred:', error);
                     }
                 });
+
+
                 $scope.deleteProduct = function (product) {
                     let varIsConf = confirm('Are you sure you want to remove this product?');
                     if (varIsConf) {
