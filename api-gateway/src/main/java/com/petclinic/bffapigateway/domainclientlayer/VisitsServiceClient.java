@@ -1,6 +1,7 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.Visits.VisitDetails;
+import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.Visits;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -116,15 +117,24 @@ public class VisitsServiceClient {
                 .bodyToMono(VisitDetails.class);
     }
 
-    public Mono<VisitDetails> createVisitForPet(VisitDetails visit) {
+/*    public Mono<VisitDetails> createVisitForPet(VisitDetails visit) {
         return webClient
                 .post()
-                .uri("/owners/*/pets/" + visit.getPetId() + "/visits")
+                .uri("/visits")
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .body(Mono.just(visit), VisitDetails.class)
                 .retrieve()
                 .bodyToMono(VisitDetails.class);
-    }
+    }*/
+public Mono<VisitResponseDTO> createVisitForPet(VisitRequestDTO visit) {
+    return webClient
+            .post()
+            .uri("/visits")
+            .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            .body(Mono.just(visit), VisitRequestDTO.class)
+            .retrieve()
+            .bodyToMono(VisitResponseDTO.class);
+}
 
     public Mono<Void> deleteVisitByVisitId(String visitId){
         return webClient
@@ -133,11 +143,6 @@ public class VisitsServiceClient {
                 .retrieve()
                 .bodyToMono(Void.class);
     }
-
-
-
-
-
     private String joinIds(List<Integer> petIds) {
         return petIds.stream().map(Object::toString).collect(joining(","));
     }

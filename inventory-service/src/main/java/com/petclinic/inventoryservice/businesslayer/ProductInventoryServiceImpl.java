@@ -39,7 +39,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                                 Product product = EntityDTOUtil.toProductEntity(requestDTO);
                                 product.setInventoryId(inventoryId);
                                 product.setProductId(EntityDTOUtil.generateUUID());
-                                return productRepository.insert(product)
+                                return productRepository.save(product)
                                         .map(EntityDTOUtil::toProductResponseDTO);
                             }
                         }))

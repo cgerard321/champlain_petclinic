@@ -251,5 +251,44 @@ class BillServiceClientIntegrationTest {
                 .verifyComplete();
     }
 
+    @Test
+    void shouldUpdateSpecificFieldsOfBill() throws Exception {
+
+        BillRequestDTO updateRequest = BillRequestDTO.builder()
+                .customerId(1)
+                .visitType("New Visit Type")
+                .vetId("New Vet ID")
+                .date(null)
+                .amount(200.0)
+                .build();
+
+
+        BillResponseDTO updatedResponse = BillResponseDTO.builder()
+                .billId("1")
+                .customerId(1)
+                .visitType("New Visit Type")
+                .vetId("New Vet ID")
+                .date(null)
+                .amount(200.0)
+                .build();
+
+
+        server.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(mapper.writeValueAsString(updatedResponse))
+                .addHeader("Content-Type", "application/json"));
+
+
+        Mono<BillRequestDTO> monoUpdateRequest = Mono.just(updateRequest);
+
+
+        Mono<BillResponseDTO> updatedBillResponseMono = billServiceClient.updateBill("1", monoUpdateRequest);
+
+
+        StepVerifier.create(updatedBillResponseMono)
+                .expectNext(updatedResponse)
+                .verifyComplete();
+    }
+
 
 }

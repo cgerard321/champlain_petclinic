@@ -9,6 +9,7 @@ import reactor.test.StepVerifier;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -16,9 +17,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class VisitRepoTest {
     @Autowired
     private VisitRepo visitRepo;
-    private final Visit visit1 = buildVisit("73b5c112-5703-4fb7-b7bc-ac8186811ae1", 2);
-    private final Visit visit2 = buildVisit("visitId2", 2);
-    private final Visit visit3 = buildVisit("visitId3", 3);
+    private final Visit visit1 = buildVisit("73b5c112-5703-4fb7-b7bc-ac8186811ae1", "2");
+    private final Visit visit2 = buildVisit("visitId2", "2");
+    private final Visit visit3 = buildVisit("visitId3", "3");
 
     @BeforeEach
     void setupDb(){
@@ -51,7 +52,7 @@ class VisitRepoTest {
     @Test
     void findVisitsByPractitionerId(){
         StepVerifier.create(visitRepo.findVisitsByPractitionerId(visit1.getPractitionerId()))
-                .expectNextCount(3)
+                .expectNextCount(1)
                 .verifyComplete();
     }
     /*
@@ -76,14 +77,14 @@ class VisitRepoTest {
                 }).then(this::deleteVisitByVisitId).verifyComplete();
     }
 
-    private Visit buildVisit(String visitId, int petId){
+    private Visit buildVisit(String visitId, String petId){
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         return Visit.builder()
                 .visitId(visitId)
                 .visitDate(LocalDateTime.parse("2022-11-25T13:45:00"))
                 .description("this is a dummy description")
                 .petId(petId)
-                .practitionerId(2)
+                .practitionerId(UUID.randomUUID().toString())
                 .status(true).build();
     }
 }

@@ -14,6 +14,8 @@ import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 
 @DataMongoTest
 public class BillServicePersistenceTests {
@@ -92,6 +94,45 @@ public class BillServicePersistenceTests {
                 .expectNextCount(1)
                 .verifyComplete();
 
+    }
+
+    @Test
+    void shouldUpdateBillInformation() {
+
+        Bill originalBill = buildBill();
+        repo.save(originalBill).block();
+
+
+        Bill updatedBill = Bill.builder()
+                .id(originalBill.getId())
+                .billId(originalBill.getBillId())
+                .customerId(originalBill.getCustomerId())
+                .vetId(originalBill.getVetId())
+                .visitType("New Visit Type")
+                .date(originalBill.getDate())
+                .amount(42.0)
+                .build();
+
+
+        Mono<Bill> updateMono = repo.save(updatedBill);
+
+
+        StepVerifier
+                .create(updateMono)
+                .expectNext(updatedBill)
+                .verifyComplete();
+
+
+        Mono<Bill> retrievedBillMono = repo.findById(originalBill.getId());
+
+        StepVerifier
+                .create(retrievedBillMono)
+                .assertNext(retrievedBill -> {
+
+                    assertEquals(updatedBill.getVisitType(), retrievedBill.getVisitType());
+                    assertEquals(updatedBill.getAmount(), retrievedBill.getAmount());
+                })
+                .verifyComplete();
     }
 
     @Test
