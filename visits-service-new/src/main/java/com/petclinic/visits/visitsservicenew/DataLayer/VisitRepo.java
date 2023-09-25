@@ -11,7 +11,7 @@ public interface VisitRepo extends ReactiveMongoRepository<Visit, String> {
 
     Flux<Visit> findByPetId(String petId);
 
-    Flux<Visit> findVisitsByPractitionerId(String practitionerId);
+    Flux<Visit> findVisitsByVetId(String practitionerId);
     //Flux<Visit> findVisitsByPractitionerIdAndMonth(int practitionerId, int month); replace w query params search
 
     Mono<Visit> findByVisitId(String visitId);
