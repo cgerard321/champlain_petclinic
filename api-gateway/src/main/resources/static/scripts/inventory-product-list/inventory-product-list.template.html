@@ -57,11 +57,8 @@
         <td></td>
     </tr>
 </table>
-<a ui-sref="productNew">
+<a ui-sref="productNew({ inventoryId: $ctrl.inventoryProductList[0].inventoryId })">
     <button class="add-bundle-button btn btn-success">Add Product</button>
-</a>
-<a ui-sref="bundleNew">
-    <button class="add-bundle-button btn btn-success">Add Bundle</button>
 </a>
 <a ui-sref="inventories">
     <button class="btn btn-success">Back</button>
