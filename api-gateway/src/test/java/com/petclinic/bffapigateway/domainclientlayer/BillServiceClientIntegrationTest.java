@@ -66,7 +66,7 @@ class BillServiceClientIntegrationTest {
     private final BillResponseDTO billResponseDTO = BillResponseDTO.builder()
             .billId("1")
             .amount(100.0)
-            .customerId(1)
+            .customerId("1")
             .vetId("1")
             .visitType("Check up")
             .date(null)
@@ -75,7 +75,7 @@ class BillServiceClientIntegrationTest {
     private final BillResponseDTO billResponseDTO2 = BillResponseDTO.builder()
             .billId("2")
             .amount(150.0)
-            .customerId(2)
+            .customerId("2")
             .vetId("2")
             .visitType("Check up")
             .date(null)
@@ -84,7 +84,7 @@ class BillServiceClientIntegrationTest {
     private final BillResponseDTO billResponseDTO3 = BillResponseDTO.builder()
             .billId("3")
             .amount(250.0)
-            .customerId(3)
+            .customerId("3")
             .vetId("3")
             .visitType("Check up")
             .date(null)
@@ -117,9 +117,9 @@ class BillServiceClientIntegrationTest {
         server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setBody(mapper.writeValueAsString(billResponseDTO)).addHeader("Content-Type", "application/json"));
 
-        Flux<BillResponseDTO> billResponseDTOMono = billServiceClient.getBillsByOwnerId(1);
+        Flux<BillResponseDTO> billResponseDTOMono = billServiceClient.getBillsByOwnerId("1");
         StepVerifier.create(billResponseDTOMono)
-                .expectNextMatches(returnedBillResponseDTO1 -> returnedBillResponseDTO1.getCustomerId() == 1)
+                .expectNextMatches(returnedBillResponseDTO1 -> returnedBillResponseDTO1.getCustomerId() == "1")
                 .verifyComplete();
     }
 
@@ -128,7 +128,7 @@ class BillServiceClientIntegrationTest {
         final BillDetails bill = BillDetails.builder()
                 .billId(UUID.randomUUID().toString())
                 .vetId("15")
-                .customerId(2)
+                .customerId("2")
                 .date(null)
                 .amount(100)
                 .visitType("Check")
@@ -149,7 +149,7 @@ class BillServiceClientIntegrationTest {
         final BillDetails bill = BillDetails.builder()
                 .billId(UUID.randomUUID().toString())
                 .vetId("15")
-                .customerId(2)
+                .customerId("2")
                 .date(null)
                 .amount(100)
                 .visitType("Check")
@@ -172,7 +172,7 @@ class BillServiceClientIntegrationTest {
         final BillDetails bill = BillDetails.builder()
                 .billId(UUID.randomUUID().toString())
                 .vetId("15")
-                .customerId(2)
+                .customerId("2")
                 .date(null)
                 .amount(100)
                 .visitType("Check")
@@ -195,7 +195,7 @@ class BillServiceClientIntegrationTest {
         // Create a sample BillRequestDTO object to send in the request
         BillRequestDTO billRequest = new BillRequestDTO();
         billRequest.setVetId("1");
-        billRequest.setCustomerId(1);
+        billRequest.setCustomerId("1");
         billRequest.setDate(null);
         billRequest.setAmount(100.0);
         billRequest.setVisitType("Check up");
