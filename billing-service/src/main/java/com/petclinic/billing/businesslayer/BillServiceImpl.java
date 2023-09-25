@@ -47,8 +47,22 @@ public class BillServiceImpl implements BillService{
 
 
     @Override
-    public Mono<BillDTO> updateBill(String billId, Mono<BillDTO> billDTOMono) {
-        return billRepository.findByBillId(billId)
+    public Mono<BillResponseDTO> updateBill(String billId, Mono<BillRequestDTO> billRequestDTO) {
+        return billRequestDTO
+                .flatMap(r -> billRepository.findByBillId(billId)
+                        .flatMap(existingBill -> {
+                            existingBill.setCustomerId(r.getCustomerId());
+                            existingBill.setVisitType(r.getVisitType());
+                            existingBill.setVetId(r.getVetId());
+                            existingBill.setDate(r.getDate());
+                            existingBill.setAmount(r.getAmount());
+
+                            return billRepository.save(existingBill);
+                        })
+                        .map(EntityDtoUtil::toBillResponseDto)
+                );
+                /*
+                billRepository.findByBillId(billId)
                 .flatMap(p -> billDTOMono
                         .map(EntityDtoUtil::toEntity)
                         .doOnNext(e -> e.setBillId(p.getBillId()))
@@ -56,6 +70,8 @@ public class BillServiceImpl implements BillService{
                 )
                 .flatMap(billRepository::save)
                 .map(EntityDtoUtil::toDto);
+
+                 */
     }
 
 
