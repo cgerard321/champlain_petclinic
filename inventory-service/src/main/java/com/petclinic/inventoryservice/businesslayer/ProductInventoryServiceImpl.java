@@ -24,29 +24,6 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     private final InventoryRepository inventoryRepository;
     private final ProductRepository productRepository;
 
-    //    @Override
-//    public Mono<ProductResponseDTO> addProductToInventory(Mono<ProductRequestDTO> productRequestDTOMono, String inventoryId) {
-//        Inventory inventory = inventoryRepository.findInventoryByInventoryId(inventoryId);
-//        return productRequestDTOMono
-//                .publishOn(Schedulers.boundedElastic())
-//                .flatMap(requestDTO -> {
-//                    if (requestDTO.getProductName() == null || requestDTO.getProductPrice() == null || requestDTO.getProductQuantity() == null) {
-//                        return Mono.error(new InvalidInputException("Product must have an inventory id, product name, product price, and product quantity."));
-//                    } else if (requestDTO.getProductPrice() < 0 || requestDTO.getProductQuantity() < 0) {
-//                        return Mono.error(new InvalidInputException("Product price and quantity must be greater than 0."));
-//                    } else if (inventory == null) {
-//                        return Mono.error(new NotFoundException("Inventory not found with id: " + inventoryId));
-//                    } else {
-//                        return generateUniqueSku()
-//                                .flatMap(sku ->{
-//                                    Product productEntity = EntityDTOUtil.toProductEntity(requestDTO);
-//                                    productEntity.setSku(sku);
-//                                    return productRepository.insert(productEntity)
-//                                            .map(EntityDTOUtil::toProductResponseDTO);
-//                                });
-//                    }
-//                }).switchIfEmpty(Mono.error(new InvalidInputException("Unable to save product to repository, an error occurred.")));
-//    }
     @Override
     public Mono<ProductResponseDTO> addProductToInventory(Mono<ProductRequestDTO> productRequestDTOMono, String inventoryId) {
         return productRequestDTOMono
