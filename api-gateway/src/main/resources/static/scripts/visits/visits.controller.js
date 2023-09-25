@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('visits')
-    .controller('VisitsController', ['$http', '$state', '$stateParams', '$filter', function ($http, $state, $stateParams, $filter) {
+    .controller('VisitsController', ['$http', '$state', '$stateParams', '$filter','$scope', function ($http, $state, $stateParams, $filter, $scope) {
         var self = this;
         var petId = $stateParams.petId || 0;
         var postURL = "api/gateway/visit/owners/" + ($stateParams.ownerId || 0) + "/pets/" + petId + "/visits";
@@ -15,6 +15,11 @@ angular.module('visits')
         $http.get("api/gateway/visits/"+petId).then(function (resp) {
             self.visits = resp.data;
             self.sortFetchedVisits();
+        });
+
+        $scope.$on('selectedDateChanged', function(event, selectedDate) {
+            console.log('Selected Date:', selectedDate); // Debugging
+            self.date = $filter('date')(selectedDate, "yyyy-MM-dd");
         });
 
         // Function to... get the current date ;)
@@ -272,8 +277,10 @@ angular.module('visits')
             modalConfirmButton.data("update-index", $(e.target).closest('tr').data("index"));
 
             self.submit = function () {
+                console.log('Date in Submit:', self.date);
                 var data = {
-                    date: $('#date_input').val(),
+                    //date: $('#date_input').val(),
+                    date: $filter('date')(self.date, "yyyy-MM-ddTHH:mm:ss"),
                     description: $('#description_textarea').val(),
                     practitionerId: $("#selectedVet").val(),
                     status: visitStatus
@@ -622,7 +629,7 @@ angular.module('visits')
 
         self.submit = function () {
             var data = {
-                date: $filter('date')(self.date, "yyyy-MM-dd"),
+                date: $filter('date')(self.date, "MM-dd-yyyy"),
                 description: self.desc,
                 practitionerId: self.practitionerId,
                 status: true
