@@ -14,7 +14,7 @@ angular.module('ownerDetails')
         });
         self.toggleActiveStatus = function (petId) {
 
-            $http.get('api/gateway/pets/' + petId).then(function (resp) {
+            $http.get('api/gateway/pets/' + petId + '?_=' + new Date().getTime()).then(function (resp) {
                 console.log("Pet id is " + petId)
                 console.log(resp.data)
                 self.pet = resp.data;
@@ -30,7 +30,7 @@ angular.module('ownerDetails')
                     isActive: self.pet.isActive
                 }).then(function (resp) {
                     console.log("Pet active status updated successfully");
-                    $scope.$apply();
+                    self.pet = resp.data;
                 }).catch(function (error) {
                     console.error("Error updating pet active status:", error);
                     // Handle the error appropriately
@@ -40,5 +40,4 @@ angular.module('ownerDetails')
             });
             location.reload();
         };
-
     }]);
