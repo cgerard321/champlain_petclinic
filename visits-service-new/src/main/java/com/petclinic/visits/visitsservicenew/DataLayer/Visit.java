@@ -20,9 +20,9 @@ public class Visit {
 
     private String description;
 
-    private int petId;
+    private String petId;
 
-    private int practitionerId;
+    private String practitionerId;
 
     private boolean status;
 

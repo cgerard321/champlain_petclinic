@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 public class VisitRequestDTO {
     private LocalDateTime visitDate;
     private String description;
-    private int petId;
-    private int practitionerId;
+    private String petId;
+    private String practitionerId;
     private boolean status;
 }
