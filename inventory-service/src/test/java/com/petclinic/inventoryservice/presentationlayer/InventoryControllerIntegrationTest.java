@@ -6,6 +6,7 @@ import com.petclinic.inventoryservice.datalayer.Inventory.InventoryType;
 import com.petclinic.inventoryservice.datalayer.Product.Product;
 import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
 import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
+import com.petclinic.inventoryservice.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
@@ -17,12 +18,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.test.StepVerifier;
 
-
-import java.util.UUID;
-
 import static com.petclinic.inventoryservice.datalayer.Inventory.InventoryType.internal;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port:0"})
 @AutoConfigureWebTestClient
@@ -40,8 +39,6 @@ class InventoryControllerIntegrationTest {
     Inventory inventory1 = buildInventory("inventoryId_3", "internal", InventoryType.internal ,"inventoryDescription_3");
 
     Inventory inventory2 = buildInventory("inventoryId_4", "sales", InventoryType.sales ,"inventoryDescription_4");
-
-    Product product1 = buildProduct("productId_1","inventoryId_3","productName","productDescription",10.99, 100);
 
 
     @BeforeEach
@@ -543,5 +540,137 @@ class InventoryControllerIntegrationTest {
                 .expectStatus().isNotFound()
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("Inventory not found, make sure it exists, inventoryId: "+invalidInventory);
+    }
+    @Test
+    void addProductToInventory_WithValidInventoryIdAndValidBody_ShouldSucceed(){
+        // Arrange
+        ProductRequestDTO productRequestDTO = ProductRequestDTO.builder()
+                .productName("Benzodiazepines")
+                .productDescription("Sedative Medication")
+                .productPrice(100.00)
+                .productQuantity(10)
+                .build();
+        // Act and assert
+        webTestClient
+                .post()
+                .uri("/inventory/{inventoryId}/products", inventory1.getInventoryId())
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(productRequestDTO)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(ProductResponseDTO.class)
+                .value(dto -> {
+                    assertNotNull(dto);
+                    assertEquals(productRequestDTO.getProductName(), dto.getProductName());
+                    assertEquals(productRequestDTO.getProductDescription(), dto.getProductDescription());
+                    assertEquals(productRequestDTO.getProductPrice(), dto.getProductPrice());
+                    assertEquals(productRequestDTO.getProductQuantity(), dto.getProductQuantity());
+                });
+    }
+
+    @Test
+    void addProductToInventory_WithInvalidInventoryId_AndValidValues_ShouldThrowNotFoundException(){
+        // Arrange
+        ProductRequestDTO productRequestDTO = ProductRequestDTO.builder()
+                .productName("Benzodiazepines")
+                .productDescription("Sedative Medication")
+                .productPrice(100.00)
+                .productQuantity(10)
+                .build();
+        // Act and assert
+        webTestClient
+                .post()
+                .uri("/inventory/{inventoryId}/products", "2")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(productRequestDTO)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody(NotFoundException.class)
+                .value(dto -> {
+                    assertNotNull(dto);
+                    assertEquals("Inventory not found with id: 2", dto.getMessage());
+                });
+    }
+
+    @Test
+    void addProductToInventory_WithValidInventoryId_AndMissingProductName_ShouldThrowBadRequestException(){
+        // Arrange
+        ProductRequestDTO productRequestDTO = ProductRequestDTO.builder()
+                .productDescription("Sedative Medication")
+                .productPrice(100.00)
+                .productQuantity(10)
+                .build();
+        // Act and assert
+        webTestClient
+                .post()
+                .uri("/inventory/{inventoryId}/products", inventory1.getInventoryId())
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(productRequestDTO)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(InvalidInputException.class)
+                .value(dto -> {
+                    assertNotNull(dto);
+                    assertEquals("Product must have an inventory id, product name, product price, and product quantity.", dto.getMessage());
+                });
+    }
+
+    @Test
+    void addProductToInventory_WithValidInventoryId_AndMissingProductQuantity_ShouldThrowBadRequestException(){
+        // Arrange
+        ProductRequestDTO productRequestDTO = ProductRequestDTO.builder()
+                .productName("Benzodiazepines")
+                .productDescription("Sedative Medication")
+                .productPrice(100.00)
+                .build();
+        // Act and assert
+        webTestClient
+                .post()
+                .uri("/inventory/{inventoryId}/products", inventory1.getInventoryId())
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(productRequestDTO)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(InvalidInputException.class)
+                .value(dto -> {
+                    assertNotNull(dto);
+                    assertEquals("Product must have an inventory id, product name, product price, and product quantity.", dto.getMessage());
+                });
+    }
+
+    @Test
+    void addProductToInventory_WithValidInventoryId_AndMissingProductPrice_ShouldThrowBadRequestException(){
+        // Arrange
+        ProductRequestDTO productRequestDTO = ProductRequestDTO.builder()
+                .productName("Benzodiazepines")
+                .productDescription("Sedative Medication")
+                .productQuantity(10)
+                .build();
+        // Act and assert
+        webTestClient
+                .post()
+                .uri("/inventory/{inventoryId}/products", inventory1.getInventoryId())
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(productRequestDTO)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(InvalidInputException.class)
+                .value(dto -> {
+                    assertNotNull(dto);
+                    assertEquals("Product must have an inventory id, product name, product price, and product quantity.", dto.getMessage());
+                });
+    }
+
+    @Test
+    void addProductToInventory_WithValidInventoryId_WithoutPayload_ShouldThrowBadRequestException(){
+        // Act and assert
+        webTestClient
+                .post()
+                .uri("/inventory/{inventoryId}/products", inventory1.getInventoryId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody(InvalidInputException.class);
     }
 }
