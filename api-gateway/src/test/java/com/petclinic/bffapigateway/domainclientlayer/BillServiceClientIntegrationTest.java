@@ -119,7 +119,7 @@ class BillServiceClientIntegrationTest {
 
         Flux<BillResponseDTO> billResponseDTOMono = billServiceClient.getBillsByOwnerId("1");
         StepVerifier.create(billResponseDTOMono)
-                .expectNextMatches(returnedBillResponseDTO1 -> returnedBillResponseDTO1.getCustomerId() == "1")
+                .expectNextMatches(returnedBillResponseDTO1 -> returnedBillResponseDTO1.getCustomerId().equals("1"))
                 .verifyComplete();
     }
 
