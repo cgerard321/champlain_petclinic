@@ -1,10 +1,8 @@
 'use strict';
 
 angular.module('productForm')
-    .controller('ProductFormController', ["$http", '$state', '$stateParams', function ($http, $state , $scope,  $stateParams) {
+    .controller('ProductFormController', ["$http", '$state', '$stateParams', '$scope', 'InventoryService', function ($http, $state , $scope,  $stateParams, InventoryService) {
         var self = this;
-        var inventoryId = $stateParams.inventoryId;
-       // var inventoryId = 1 //temporarily hardcoding inventoryId to
         var product = {}
         // post request to create a new product
         self.submitProductForm = function () {
@@ -14,16 +12,13 @@ angular.module('productForm')
                 productPrice: self.product.productPrice,
                 productQuantity: self.product.productQuantity
             }
-
+            var inventoryId = InventoryService.getInventoryId();
+            console.log("InventoryId: " + inventoryId);
             $http.post('/api/gateway/inventory/' + inventoryId + '/products', data
-                // productName: $scope.product.productName,
-                // productDescription: $scope.product.productDescription,
-                // productPrice: $scope.product.productPrice,
-                // productQuantity: $scope.product.productQuantity
             )
                 .then(function (response) {
                     console.log(response);
-                    $state.go('productList');
+                    $state.go('productList', {inventoryId: inventoryId});
                 }, function (response) {
                     var error = response.data;
                     error.errors = error.errors || [];
@@ -32,5 +27,7 @@ angular.module('productForm')
                     }).join("\r\n"));
                 });
         }
+
+
 
     }]);

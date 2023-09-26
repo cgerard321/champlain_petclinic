@@ -12,6 +12,7 @@ import java.util.UUID;
 public class EntityDtoUtil {
 
     public static VisitResponseDTO toVisitResponseDTO(Visit visit) {
+        System.out.println("Entity Date in Mapping: " + visit.getVisitDate()); // Debugging
         VisitResponseDTO visitResponseDTO = new VisitResponseDTO();
         BeanUtils.copyProperties(visit, visitResponseDTO);
         return visitResponseDTO;

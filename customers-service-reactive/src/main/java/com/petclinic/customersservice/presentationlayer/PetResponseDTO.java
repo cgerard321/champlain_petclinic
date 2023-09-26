@@ -19,5 +19,6 @@ public class PetResponseDTO {
     private Date birthDate;
     private String petTypeId;
     private String photoId;
+    private String isActive;
 
 }

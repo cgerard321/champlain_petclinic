@@ -2,6 +2,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.Auth.*;
 import com.petclinic.bffapigateway.exceptions.InvalidCredentialsException;
+import com.petclinic.bffapigateway.exceptions.GenericHttpException;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Rethrower;
 import com.petclinic.bffapigateway.exceptions.InvalidTokenException;
@@ -20,6 +21,8 @@ import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 import static reactor.core.publisher.Mono.error;
 import static reactor.core.publisher.Mono.just;
 
@@ -64,18 +67,19 @@ public class AuthServiceClient {
 //                .bodyToFlux(UserDetails.class);
 //    }
 //
-//    public Mono<UserDetails> createUser (final Register model) {
-//        return webClientBuilder.build().post()
-//                .uri(authServiceUrl + "/users")
-//                .body(just(model), Register.class)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .retrieve()
-//                .onStatus(HttpStatus::is4xxClientError,
-//                        n -> rethrower.rethrow(n,
-//                                x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
-//                        )
-//                .bodyToMono(UserDetails.class);
-//    }
+        public Mono<UserPasswordLessDTO> createUser (Register model) {
+            return webClientBuilder.build().post()
+                    .uri(authServiceUrl + "/users")
+                    .body(just(model), Register.class)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::is4xxClientError,
+                            n -> rethrower.rethrow(n,
+                                    x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST)))
+                    .bodyToMono(UserPasswordLessDTO.class);
+        }
+
+
 //    public Mono<UserDetails> updateUser (final long userId, final Register model) {
 //        return webClientBuilder.build().put()
 //                .uri(authServiceUrl + "/users/{userId}", userId)
@@ -97,18 +101,18 @@ public class AuthServiceClient {
 //                .retrieve()
 //                .bodyToMono(UserDetails.class);
 //    }
-//
-//    public Mono<UserDetails> verifyUser(final String token) {
-//        return webClientBuilder.build()
-//                .get()
-//                .uri(authServiceUrl + "/users/verification/{token}", token)
-//                .retrieve()
-//                .onStatus(HttpStatus::is4xxClientError,
-//                        n -> rethrower.rethrow(n,
-//                                x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
-//                )
-//                .bodyToMono(UserDetails.class);
-//    }
+
+    public Mono<UserDetails> verifyUser(final String token) {
+        return webClientBuilder.build()
+                .get()
+                .uri(authServiceUrl + "/users/verification/{token}", token)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        n -> rethrower.rethrow(n,
+                                x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
+                )
+                .bodyToMono(UserDetails.class);
+    }
 
     public  Mono<ResponseEntity<UserPasswordLessDTO>> login(final Login login) throws Exception {
         log.info("Entered domain service login");

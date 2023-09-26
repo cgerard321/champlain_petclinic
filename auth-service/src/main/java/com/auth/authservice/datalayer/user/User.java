@@ -27,6 +27,7 @@
  */
 package com.auth.authservice.datalayer.user;
 
+import com.auth.authservice.Util.Configuration.Security.PasswordStrengthCheck;
 import com.auth.authservice.datalayer.roles.Role;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
@@ -56,6 +57,7 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    //private String userId;
 
     @NotEmpty
     private String username;

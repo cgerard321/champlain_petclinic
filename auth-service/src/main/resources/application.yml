@@ -82,6 +82,11 @@ mailer-service:
   host: mailer-service
   port: 8080
 
+logging:
+  level:
+    root: INFO
+    com.petclinic: DEBUG
+
 server.port: 8080
 
 spring.datasource.hikari.initializationFailTimeout: 60000

@@ -1,29 +1,25 @@
 package com.petclinic.billing.businesslayer;
 
 import com.petclinic.billing.datalayer.*;
-import com.petclinic.billing.exceptions.InvalidInputException;
-import com.petclinic.billing.exceptions.NotFoundException;
+//import com.petclinic.billing.domainclientlayer.OwnerClient;
+//import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.util.EntityDtoUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.dao.DuplicateKeyException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.HashMap;
-import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class BillServiceImpl implements BillService{
 
     private final BillRepository billRepository;
+//    private final VetClient vetClient;
+//    private final OwnerClient ownerClient;
 
-    public BillServiceImpl(BillRepository billRepository) {
-        this.billRepository = billRepository;
-    }
     @Override
-    public Mono<BillResponseDTO> GetBill(String billUUID) {
+    public Mono<BillResponseDTO> getBillByBillId(String billUUID) {
 
         return billRepository.findByBillId(billUUID).map(EntityDtoUtil::toBillResponseDto);
     }
@@ -36,9 +32,13 @@ public class BillServiceImpl implements BillService{
     }
 
     @Override
-    public Mono<BillResponseDTO> CreateBill(Mono<BillRequestDTO> model) {
+    public Mono<BillResponseDTO> CreateBill(Mono<BillRequestDTO> billRequestDTO) {
 
-            return model
+            return billRequestDTO
+//                    .map(RequestContextAdd::new)
+//                    .flatMap(this::vetRequestResponse)
+//                    .flatMap(this::ownerRequestResponse)
+//                    .map(EntityDtoUtil::toBillEntityRC)
                     .map(EntityDtoUtil::toBillEntity)
                     .doOnNext(e -> e.setBillId(EntityDtoUtil.generateUUIDString()))
                     .flatMap(billRepository::insert)
@@ -87,7 +87,7 @@ public class BillServiceImpl implements BillService{
     }
 
     @Override
-    public Flux<BillResponseDTO> GetBillsByCustomerId(int customerId) {
+    public Flux<BillResponseDTO> GetBillsByCustomerId(String customerId) {
 /**/
         return billRepository.findByCustomerId(customerId).map(EntityDtoUtil::toBillResponseDto);
     }
@@ -101,8 +101,21 @@ public class BillServiceImpl implements BillService{
 
 
     @Override
-    public Flux<Void> DeleteBillsByCustomerId(int customerId){
+    public Flux<Void> DeleteBillsByCustomerId(String customerId){
         return billRepository.deleteBillsByCustomerId(customerId);
 
     }
+
+//    private Mono<RequestContextAdd> vetRequestResponse(RequestContextAdd rc) {
+//        return
+//                this.vetClient.getVetByVetId(rc.getVetDTO().getVetId())
+//                        .doOnNext(rc::setVetDTO)
+//                        .thenReturn(rc);
+//    }
+//    private Mono<RequestContextAdd> ownerRequestResponse(RequestContextAdd rc) {
+//        return
+//                this.ownerClient.getOwnerByOwnerId(rc.getOwnerResponseDTO().getOwnerId())
+//                        .doOnNext(rc::setOwnerResponseDTO)
+//                        .thenReturn(rc);
+//    }
 }

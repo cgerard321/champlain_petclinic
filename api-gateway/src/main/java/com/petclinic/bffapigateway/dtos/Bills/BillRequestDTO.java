@@ -14,7 +14,7 @@ import java.util.Date;
 @Builder
 public class BillRequestDTO {
 
-    private int customerId;
+    private String customerId;
     private String visitType;
     private String vetId;
     private LocalDate date;

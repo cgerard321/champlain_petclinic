@@ -174,6 +174,7 @@ class PetServiceImplTest {
                 .photoId("3")
                 .birthDate(date)
                 .ownerId("ownerId-1234")
+                .isActive("true")
                 .build();
     }
 

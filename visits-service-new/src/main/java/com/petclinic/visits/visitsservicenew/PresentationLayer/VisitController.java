@@ -33,7 +33,7 @@ public class VisitController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
     @GetMapping(value="practitioner/{practitionerId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<VisitResponseDTO> getVisitByPractitionerId(@PathVariable String practitionerId){
+    public Flux<VisitResponseDTO> getVisitByPractitionerId(@PathVariable String practitionerId) {
         return visitService.getVisitsForPractitioner(practitionerId);
     }
     /*

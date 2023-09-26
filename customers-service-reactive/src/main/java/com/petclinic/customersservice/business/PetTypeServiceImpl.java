@@ -25,7 +25,7 @@ public class PetTypeServiceImpl implements PetTypeService {
     }
 
     @Override
-    public Mono<PetType> getPetTypeById(String Id) {
+    public Mono<PetType> getPetTypeById(Integer Id) {
         return petTypeRepo.findPetTypeById(Id);
     }
 

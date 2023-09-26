@@ -41,15 +41,14 @@ public class BillServiceImplTest {
     BillService billService;
 
     @Test
-    public void test_GetBill(){
+    public void test_getBillById(){
         Bill billEntity = buildBill();
-
 
         String BILL_ID = billEntity.getBillId();
 
         when(repo.findByBillId(anyString())).thenReturn(Mono.just(billEntity));
 
-        Mono<BillResponseDTO> billDTOMono = billService.GetBill(BILL_ID);
+        Mono<BillResponseDTO> billDTOMono = billService.getBillByBillId(BILL_ID);
 
         StepVerifier.create(billDTOMono)
                 .consumeNextWith(foundBill -> {
@@ -58,8 +57,6 @@ public class BillServiceImplTest {
                     assertEquals(billEntity.getVisitType(), foundBill.getVisitType());
                 })
                 .verifyComplete();
-
-
     }
 
     @Test
@@ -129,7 +126,7 @@ public class BillServiceImplTest {
     @Test
     public void test_DeleteBillsByCustomerId(){
         Bill billEntity = buildBill();
-        when(repo.deleteBillsByCustomerId(anyInt())).thenReturn(Flux.empty());
+        when(repo.deleteBillsByCustomerId(anyString())).thenReturn(Flux.empty());
         Flux<Void> deletedObj = billService.DeleteBillsByCustomerId(billEntity.getCustomerId());
 
         StepVerifier.create(deletedObj)
@@ -141,9 +138,9 @@ public class BillServiceImplTest {
 
         Bill billEntity = buildBill();
 
-        int CUSTOMER_ID = billEntity.getCustomerId();
+        String CUSTOMER_ID = billEntity.getCustomerId();
 
-        when(repo.findByCustomerId(anyInt())).thenReturn(Flux.just(billEntity));
+        when(repo.findByCustomerId(anyString())).thenReturn(Flux.just(billEntity));
 
         Flux<BillResponseDTO> billDTOMono = billService.GetBillsByCustomerId(CUSTOMER_ID);
 
@@ -218,7 +215,7 @@ public class BillServiceImplTest {
                 .toLocalDate();;
 
 
-        return Bill.builder().id("Id").billId("BillUUID").customerId(1).vetId("1").visitType("Test Type").date(date).amount(13.37).build();
+        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).build();
     }
 
     private BillDTO buildBillDTO(){
@@ -230,7 +227,7 @@ public class BillServiceImplTest {
                 .toLocalDate();;
 
 
-        return BillDTO.builder().billId("BillUUID").customerId(1).vetId("1").visitType("Test Type").date(date).amount(13.37).build();
+        return BillDTO.builder().billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).build();
     }
 
     private BillRequestDTO buildBillRequestDTO(){
@@ -242,7 +239,7 @@ public class BillServiceImplTest {
                 .toLocalDate();;
 
 
-        return BillRequestDTO.builder().customerId(1).vetId("1").visitType("Test Type").date(date).amount(13.37).build();
+        return BillRequestDTO.builder().customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).build();
     }
 
 
