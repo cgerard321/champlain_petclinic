@@ -20,11 +20,12 @@
         </td>
         <td><span>{{inventory.inventoryType}}</span></td>
         <td><span>{{inventory.inventoryDescription}}</span></td>
+
+
         <td>
-            <a ng-click="self.submitInventoryForm(false); $state.go('updateInventories', { inventoryId: inventory.inventoryId })">
-                <button class="btn btn-warning">Edit</button>
+            <a class="btn btn-warning" ui-sref="updateInventory({inventoryId: inventory.inventoryId, method: 'edit'})"> Edit
+
             </a>
-        </td>
 
 
 
@@ -32,7 +33,7 @@
 
 
 
-        <!--<td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteBundle(bundle.bundleUUID)">Delete Bundle</a></td>-->
+            <!--<td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteBundle(bundle.bundleUUID)">Delete Bundle</a></td>-->
     </tr>
 </table>
 
