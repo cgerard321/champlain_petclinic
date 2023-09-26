@@ -468,6 +468,7 @@ public class BFFApiGatewayController {
      **/
 
 
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping("/verification/{token}")
     public Mono<UserDetails> verifyUser(@PathVariable final String token) {
         return authServiceClient.verifyUser(token);
