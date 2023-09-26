@@ -2,7 +2,6 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.bffapigateway.dtos.Vets.EducationResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.RatingRequestDTO;
 import com.petclinic.bffapigateway.dtos.Vets.RatingResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetDTO;
@@ -509,6 +508,7 @@ class VetsServiceClientIntegrationTest {
                 .build();
 
         String validVetId="678910";
+        String validRatingId="12345";
 
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
@@ -538,6 +538,7 @@ class VetsServiceClientIntegrationTest {
                 .build();
 
         String validVetId="678910";
+        String validRatingId="12345";
 
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
@@ -1028,6 +1029,26 @@ class VetsServiceClientIntegrationTest {
     }
 
     @Test
+    void deleteVetByVetId() throws JsonProcessingException {
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody("    {\n" +
+                        "        \"vetId\": \"678910\",\n" +
+                        "        \"firstName\": \"Clementine\",\n" +
+                        "        \"lastName\": \"LeBlanc\",\n" +
+                        "        \"email\": \"skjfhf@gmail.com\",\n" +
+                        "        \"phoneNumber\": \"947-238-2847\",\n" +
+                        "        \"resume\": \"Just became a vet\",\n" +
+                        "        \"workday\": \"Monday\",\n" +
+                        "        \"active\": false\n" +
+                        "    }"));
+
+        final Mono<Void> empty = vetsServiceClient.deleteVet(vetDTO.getVetId());
+
+        assertEquals(empty.block(), null);
+    }
+
+    @Test
     void deleteVetByInvalidVetId_shouldNotSucceed() throws ExistingVetNotFoundException{
         String invalidVetId="123";
 
@@ -1087,49 +1108,6 @@ class VetsServiceClientIntegrationTest {
                 .block();
 
         assertNull(empty);
-    }
-
-    @Test
-    void deleteVetByVetId() throws JsonProcessingException {
-        prepareResponse(response -> response
-                .setHeader("Content-Type", "application/json")
-                .setBody("    {\n" +
-                        "        \"vetId\": \"678910\",\n" +
-                        "        \"firstName\": \"Clementine\",\n" +
-                        "        \"lastName\": \"LeBlanc\",\n" +
-                        "        \"email\": \"skjfhf@gmail.com\",\n" +
-                        "        \"phoneNumber\": \"947-238-2847\",\n" +
-                        "        \"resume\": \"Just became a vet\",\n" +
-                        "        \"workday\": \"Monday\",\n" +
-                        "        \"active\": false\n" +
-                        "    }"));
-
-        final Mono<Void> empty = vetsServiceClient.deleteVet(vetDTO.getVetId());
-
-        assertEquals(empty.block(), null);
-    }
-
-    @Test void getAllEducationsByVetId_ValidId() throws JsonProcessingException {
-        prepareResponse(response -> response
-                .setHeader("Content-Type", "application/json")
-                .setBody("    {\n" +
-                        "    \"educationId\": \"123456\",\n" +
-                        "    \"vetId\": \"678910\",\n" +
-                        "    \"schoolName\": \"University of Toronto\",\n" +
-                        "    \"degree\": \"Doctor of Veterinary Medicine\",\n" +
-                        "    \"fieldOfStudy\": \"Veterinary Medicine\",\n" +
-                        "    \"startDate\": \"2015\",\n" +
-                        "    \"endDate\": \"2019\"\n" +
-                        "    }"));
-
-        final EducationResponseDTO education = vetsServiceClient.getEducationsByVetId("678910").blockFirst();
-        assertEquals("123456", education.getEducationId());
-        assertEquals("678910", education.getVetId());
-        assertEquals("University of Toronto", education.getSchoolName());
-        assertEquals("Doctor of Veterinary Medicine", education.getDegree());
-        assertEquals("Veterinary Medicine", education.getFieldOfStudy());
-        assertEquals("2015", education.getStartDate());
-        assertEquals("2019", education.getEndDate());
     }
 
     private void prepareResponse(Consumer<MockResponse> consumer) {

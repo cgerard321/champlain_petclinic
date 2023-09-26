@@ -40,8 +40,6 @@ class VetControllerIntegrationTest {
     @Autowired
     EducationRepository educationRepository;
 
-
-
     Education education1 = buildEducation();
     Education education2 = buildEducation2();
     Vet vet = buildVet("1234");
@@ -720,7 +718,6 @@ class VetControllerIntegrationTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("phoneNumber length not equal to 20 characters: "+updatedVet.getPhoneNumber());
-
     }
 
     @Test
