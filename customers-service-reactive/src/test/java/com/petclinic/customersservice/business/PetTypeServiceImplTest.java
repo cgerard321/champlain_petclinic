@@ -13,9 +13,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
@@ -53,9 +52,9 @@ class PetTypeServiceImplTest {
     void getPetTypeById() {
 
         PetType petType = buildPetType();
-        String PET_TYPE_ID = petType.getId();
+        Integer PET_TYPE_ID = petType.getId();
 
-        when(repo.findPetTypeById(anyString())).thenReturn(Mono.just(petType));
+        when(repo.findPetTypeById(anyInt())).thenReturn(Mono.just(petType));
 
         Mono<PetType> petTypeTest = petTypeService.getPetTypeById(PET_TYPE_ID);
 
@@ -84,7 +83,7 @@ class PetTypeServiceImplTest {
     }
 
     private PetType buildPetType() {
-        return PetType.builder().id("10").name("TestType").build();
+        return PetType.builder().id(10).name("TestType").build();
     }
 
 }

@@ -10,7 +10,7 @@ import org.springframework.data.annotation.Id;
 public class PetType {
 
     @Id
-    private String id;
+    private Integer id;
     private String name;
 
 }

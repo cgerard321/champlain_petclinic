@@ -124,10 +124,12 @@ public class BFFApiGatewayController {
         return customersServiceClient.createPet(pet, ownerId);
     }
 
-//    @GetMapping(value = "owners/{ownerId}/pets")
-//    public Flux<PetResponseDTO> getAllPetsFromOwnerId(@PathVariable String ownerId){
-//        return customersServiceClient.getAllPets(ownerId);
-//    }
+
+  /*@GetMapping(value = "owners/{ownerId}/pets")
+   public Flux<PetResponseDTO> getAllPetsFromOwnerId(@PathVariable String ownerId){
+        return customersServiceClient.getAllPets(ownerId);
+    }*/
+
 
     @PatchMapping(value = "/pet/{petId}", produces = "application/json", consumes = "application/json")
     public Mono<PetResponseDTO> patchPet(@RequestBody PetRequestDTO pet, @PathVariable String petId) {
@@ -163,6 +165,11 @@ public class BFFApiGatewayController {
     @GetMapping("owners/petTypes")
     public Flux<PetType> getPetTypes(){
         return customersServiceClient.getPetTypes();
+    }
+
+    @PutMapping("pets/{petId}")
+    public Mono<PetResponseDTO> updatePet(@RequestBody PetResponseDTO pet, @PathVariable String petId){
+        return customersServiceClient.updatePet(pet, petId);
     }
 
 
