@@ -118,24 +118,15 @@ class VisitControllerUnitTest {
     void getVisitByPractitionerId(){
         when(visitService.getVisitsForPractitioner(anyString())).thenReturn(Flux.just(visitResponseDTO));
 
-<<<<<<< HEAD
-        webFluxTest.get()
-                .uri("/visits/practitioner/" + Practitioner_Id_OK)
-=======
         webTestClient.get()
-                .uri("/visits/veterinarians/" + Vet_Id_OK)
->>>>>>> 0d8aafd3 (Modified some backend logic to be more reactive and updated some test methods)
+                .uri("/visits/practitioner/" + Practitioner_Id_OK)
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
                 .returnResult(VisitResponseDTO.class);
 
-<<<<<<< HEAD
         Mockito.verify(visitService, times(1)).getVisitsForPractitioner(Practitioner_Id_OK);
-=======
-        verify(visitService, times(1)).getVisitsForVet(Vet_Id_OK);
->>>>>>> 0d8aafd3 (Modified some backend logic to be more reactive and updated some test methods)
     }
 
     @Test
