@@ -192,7 +192,7 @@ class InventoryControllerUnitTest {
     }
 
     @Test
-    void getProductsInInventory_withValidId_andValidProductName_andValidProductPrice_shouldSucceed(){
+    void getProductsInInventory_withValidId_andValidProductName_andValidProductPrice_shouldSucceed() {
         when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), "Benzodiazepines", 100.00, null))
                 .thenReturn(Flux.fromIterable(productResponseDTOS));
 
@@ -204,14 +204,14 @@ class InventoryControllerUnitTest {
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBodyList(ProductResponseDTO.class)
-                .value(responseDTOs ->{
+                .value(responseDTOs -> {
                     assertNotNull(responseDTOs);
                     assertEquals(productResponseDTOS.size(), responseDTOs.size());
                 });
     }
 
     @Test
-    void getProductsInInventory_withValidId_andValidProductName_shouldSucceed(){
+    void getProductsInInventory_withValidId_andValidProductName_shouldSucceed() {
         when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), "Benzodiazepines", null, null))
                 .thenReturn(Flux.fromIterable(productResponseDTOS));
 
@@ -223,14 +223,14 @@ class InventoryControllerUnitTest {
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBodyList(ProductResponseDTO.class)
-                .value(responseDTOs ->{
+                .value(responseDTOs -> {
                     assertNotNull(responseDTOs);
                     assertEquals(productResponseDTOS.size(), responseDTOs.size());
                 });
     }
 
     @Test
-    void getProductsInInventory_withValidId_andValidProductPrice_andValidProductQuantity_shouldSucceed(){
+    void getProductsInInventory_withValidId_andValidProductPrice_andValidProductQuantity_shouldSucceed() {
         when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), null, 100.00, 10))
                 .thenReturn(Flux.fromIterable(productResponseDTOS));
 
@@ -261,26 +261,26 @@ class InventoryControllerUnitTest {
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBodyList(ProductResponseDTO.class)
-                .value(responseDTOs ->{
+                .value(responseDTOs -> {
                     assertNotNull(responseDTOs);
                     assertEquals(productResponseDTOS.size(), responseDTOs.size());
                 });
     }
 
     @Test
-    void getProductsInInventory_withValidId_andValidProductPrice_shouldSucceed(){
+    void getProductsInInventory_withValidId_andValidProductPrice_shouldSucceed() {
         when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(productResponseDTOS.get(1).getInventoryId(), null, 100.00, null))
                 .thenReturn(Flux.fromIterable(productResponseDTOS));
 
         webTestClient.get()
                 .uri("/inventory/{inventoryId}/products?productPrice={productPrice}",
-                        productResponseDTOS.get(1).getInventoryId(),  100.00)
+                        productResponseDTOS.get(1).getInventoryId(), 100.00)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBodyList(ProductResponseDTO.class)
-                .value(responseDTOs ->{
+                .value(responseDTOs -> {
                     assertNotNull(responseDTOs);
                     assertEquals(productResponseDTOS.size(), responseDTOs.size());
                 });
@@ -333,6 +333,7 @@ class InventoryControllerUnitTest {
                 .exchange()
                 .expectStatus().isBadRequest();
     }
+
     //delete all
     @Test
     void deleteProductInventory_ValidInventoryId_ShouldCallServiceDelete() {

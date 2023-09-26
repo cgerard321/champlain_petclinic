@@ -39,7 +39,7 @@ class VisitRepoTest {
                     assertEquals(visit1.getVisitId(), gotVisit.getVisitId());
                     assertEquals(visit1.getPetId(), gotVisit.getPetId());
                     assertEquals(visit1.getVisitDate(), gotVisit.getVisitDate());
-                    assertEquals(visit1.getPractitionerId(), gotVisit.getPractitionerId());
+                    assertEquals(visit1.getVetId(), gotVisit.getVetId());
                     assertEquals(visit1.isStatus(), gotVisit.isStatus());
                 }).verifyComplete();
     }
@@ -50,8 +50,8 @@ class VisitRepoTest {
                 .verifyComplete();
     }
     @Test
-    void findVisitsByPractitionerId(){
-        StepVerifier.create(visitRepo.findVisitsByPractitionerId(visit1.getPractitionerId()))
+    void findVisitsByVetId(){
+        StepVerifier.create(visitRepo.findVisitsByVetId(visit1.getVetId()))
                 .expectNextCount(1)
                 .verifyComplete();
     }
@@ -72,7 +72,7 @@ class VisitRepoTest {
                     assertEquals(visit1.getVisitId(), gotVisit.getVisitId());
                     assertEquals(visit1.getPetId(), gotVisit.getPetId());
                     assertEquals(visit1.getVisitDate(), gotVisit.getVisitDate());
-                    assertEquals(visit1.getPractitionerId(), gotVisit.getPractitionerId());
+                    assertEquals(visit1.getVetId(), gotVisit.getVetId());
                     assertEquals(visit1.isStatus(), gotVisit.isStatus());
                 }).then(this::deleteVisitByVisitId).verifyComplete();
     }
@@ -84,7 +84,7 @@ class VisitRepoTest {
                 .visitDate(LocalDateTime.parse("2022-11-25T13:45:00"))
                 .description("this is a dummy description")
                 .petId(petId)
-                .practitionerId(UUID.randomUUID().toString())
+                .vetId(UUID.randomUUID().toString())
                 .status(true).build();
     }
 }

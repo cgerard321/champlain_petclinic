@@ -24,15 +24,18 @@ public class BillResource {
 
     // Create Bill //
     @PostMapping("/bills")
-    @ResponseStatus(HttpStatus.CREATED)
-    public Mono<BillResponseDTO> createBill(@Valid @RequestBody Mono<BillRequestDTO> billDTO){
-        return SERVICE.CreateBill(billDTO);
+    public Mono<ResponseEntity<BillResponseDTO>> createBill(@Valid @RequestBody Mono<BillRequestDTO> billDTO){
+        return SERVICE.CreateBill(billDTO)
+                .map(e -> ResponseEntity.status(HttpStatus.CREATED).body(e))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
     // Read Bill //
     @GetMapping(value = "/bills/{billId}")
-    public Mono<BillResponseDTO> findBill(@PathVariable("billId") String billId){
-        return SERVICE.GetBill(billId);
+    public Mono<ResponseEntity<BillResponseDTO>> findBill(@PathVariable("billId") String billId){
+        return SERVICE.GetBill(billId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @GetMapping(value = "/bills", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
@@ -48,7 +51,7 @@ public class BillResource {
     }
 
     @GetMapping(value = "/bills/customer/{customerId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getBillsByCustomerId(@PathVariable("customerId") int customerId)
+    public Flux<BillResponseDTO> getBillsByCustomerId(@PathVariable("customerId") String customerId)
     {
         return SERVICE.GetBillsByCustomerId(customerId);
     }
@@ -75,7 +78,7 @@ public class BillResource {
 
     @DeleteMapping (value = "/bills/customer/{customerId}")
     @ResponseStatus (HttpStatus.NO_CONTENT)
-    public Flux<Void> deleteBillsByCustomerId (@PathVariable("customerId") int customerId){
+    public Flux<Void> deleteBillsByCustomerId (@PathVariable("customerId") String customerId){
         return SERVICE.DeleteBillsByCustomerId(customerId);
     }
 

@@ -2,6 +2,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
+import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
 import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
@@ -151,37 +152,43 @@ public class CustomersServiceClient {
     }
 
 
-    public Mono<PetResponseDTO> updatePet(PetResponseDTO model, final String petId){
+    public Mono<PetResponseDTO> updatePet(PetResponseDTO model, final String petId) {
         return webClientBuilder.build().put()
-                .uri(customersServiceUrl +"/pet/{petId}", petId)
+                .uri(customersServiceUrl + "/pet/{petId}", petId)
                 .body(just(model), PetResponseDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve().bodyToMono(PetResponseDTO.class);
-    }
+        public Mono<PetResponseDTO> patchPet (PetRequestDTO model, String petId){
+            return webClientBuilder.build().patch()
+                    .uri(customersServiceUrl + "/pet/{petId}", petId)
+                    .body(just(model), PetRequestDTO.class)
+                    .retrieve()
+                    .bodyToMono(PetResponseDTO.class);
+        }
 
 
-    public Mono<PetResponseDTO> deletePet(final String ownerId, final String petId){
+        public Mono<PetResponseDTO> deletePet ( final String ownerId, final String petId){
 
-        return webClientBuilder.build().delete()
-                .uri(customersServiceUrl + "{ownerId}/pets/{petId}", ownerId ,petId)
-                .retrieve()
-                .bodyToMono(PetResponseDTO.class);
-    }
+            return webClientBuilder.build().delete()
+                    .uri(customersServiceUrl + "{ownerId}/pets/{petId}", ownerId, petId)
+                    .retrieve()
+                    .bodyToMono(PetResponseDTO.class);
+        }
 
 
-    public Mono<OwnerResponseDTO> deleteOwner (final long ownerId) {
-        return webClientBuilder.build().delete()
-                .uri(customersServiceUrl + ownerId)
-                .retrieve()
-                .bodyToMono(OwnerResponseDTO.class);
-    }
+        public Mono<OwnerResponseDTO> deleteOwner ( final long ownerId){
+            return webClientBuilder.build().delete()
+                    .uri(customersServiceUrl + ownerId)
+                    .retrieve()
+                    .bodyToMono(OwnerResponseDTO.class);
+        }
 
-    public Mono<String> setOwnerPhoto(PhotoDetails file, int id){
-        return webClientBuilder.build().post()
-                .uri(customersServiceUrl +"/photo/" + id)
-                .body(just(file), PhotoDetails.class)
-                .retrieve().bodyToMono(String.class);
-    }
+        public Mono<String> setOwnerPhoto (PhotoDetails file,int id){
+            return webClientBuilder.build().post()
+                    .uri(customersServiceUrl + "/photo/" + id)
+                    .body(just(file), PhotoDetails.class)
+                    .retrieve().bodyToMono(String.class);
+        }
 
     /*public Mono<PhotoDetails> getOwnerPhoto(int id){
         return webClientBuilder.build().get()
@@ -213,12 +220,12 @@ public class CustomersServiceClient {
 //                .bodyToMono(PhotoDetails.class);
 //    }
 
-    public Mono<Void> deletePetPhoto (int ownerId, int photoId) {
-        return webClientBuilder.build().delete()
-                .uri(customersServiceUrl + ownerId + "/pets/photo/" + photoId)
-                .retrieve()
-                .bodyToMono(Void.class);
+        public Mono<Void> deletePetPhoto ( int ownerId, int photoId){
+            return webClientBuilder.build().delete()
+                    .uri(customersServiceUrl + ownerId + "/pets/photo/" + photoId)
+                    .retrieve()
+                    .bodyToMono(Void.class);
+        }
+
     }
-
-
 }

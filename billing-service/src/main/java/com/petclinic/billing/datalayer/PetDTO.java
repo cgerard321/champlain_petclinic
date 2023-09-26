@@ -1,4 +1,4 @@
-package com.petclinic.customersservice.presentationlayer;
+package com.petclinic.billing.datalayer;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,17 +8,18 @@ import lombok.NoArgsConstructor;
 import java.util.Date;
 
 @Data
-@NoArgsConstructor
 @Builder
 @AllArgsConstructor
-public class PetResponseDTO {
+@NoArgsConstructor
+public class PetDTO {
 
+    private String id;
     private String ownerId;
-    private String petId;
     private String name;
     private Date birthDate;
     private String petTypeId;
     private String photoId;
-    private String isActive;
+    private PetType petType;
+    private Photo photo;
 
 }

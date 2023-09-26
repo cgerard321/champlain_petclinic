@@ -74,6 +74,7 @@ class PetDTOServiceImplTest {
                 .photoId("3")
                 .birthDate(date)
                 .ownerId("ownerId-123")
+                .isActive("true")
                 .build();
     }
 
@@ -85,6 +86,7 @@ class PetDTOServiceImplTest {
                 .petTypeId(PetType.builder().id(1).name("TESTPETTYPE").build().toString())
                 .photoId(Photo.builder().id("1").photo("1").name("test").type("test").build().toString())
                 .ownerId("ownerId-1234")
+                .isActive("true")
                 .build();
     }
 

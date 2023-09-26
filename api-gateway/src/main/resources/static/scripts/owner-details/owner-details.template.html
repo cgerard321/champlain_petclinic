@@ -97,8 +97,12 @@
                                 <!-- Add more pet details as needed -->
                             </div>
                             <div class="border-5 rounded">
-                                <a style="color: rgba(0,0,0,0.5);" class="btn btn-light" ui-sref="ownerEdit({ownerId: $ctrl.owner.ownerId, method: 'edit'})">Toggle Pet Status</a>
+                                <input type="checkbox" ng-model="$ctrl.pet.isActive" ng-change="$ctrl.toggleActiveStatus(pet.petId)">
+                                <label ng-if="$ctrl.pet.isActive === 'true'" style="color: rgba(0,0,0,0.5);">Deactivate Pet</label>
+                                <label ng-if="$ctrl.pet.isActive !== 'true'" style="color: rgba(0,0,0,0.5);">Activate Pet</label>
                             </div>
+
+
                         </div>
 
                     </div>
