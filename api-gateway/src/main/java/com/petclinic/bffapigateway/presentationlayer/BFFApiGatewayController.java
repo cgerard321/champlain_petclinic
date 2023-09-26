@@ -13,6 +13,7 @@ import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.ProductRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.ProductResponseDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
+import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
 import com.petclinic.bffapigateway.dtos.Vets.RatingRequestDTO;
@@ -128,12 +129,18 @@ public class BFFApiGatewayController {
 //        return customersServiceClient.getAllPets(ownerId);
 //    }
 
-    @GetMapping(value = "pets")
+    @PatchMapping(value = "/pet/{petId}", produces = "application/json", consumes = "application/json")
+    public Mono<PetResponseDTO> patchPet(@RequestBody PetRequestDTO pet, @PathVariable String petId) {
+        return customersServiceClient.patchPet(pet, petId);
+    }
+
+
+    @GetMapping(value = "/pets")
     public Flux<PetResponseDTO> getAllPets(){
         return customersServiceClient.getAllPets();
     }
 
-    @GetMapping(value = "pets/{petId}")
+    @GetMapping(value = "/pets/{petId}")
     public Mono<PetResponseDTO> getPetByPetId(@PathVariable String petId){
         return customersServiceClient.getPetByPetId(petId);
     }

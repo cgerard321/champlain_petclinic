@@ -2,6 +2,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
+import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
 import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
@@ -149,6 +150,15 @@ public class CustomersServiceClient {
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve().bodyToMono(PetResponseDTO.class);
     }
+
+    public Mono<PetResponseDTO> patchPet(PetRequestDTO model, String petId){
+        return webClientBuilder.build().patch()
+                .uri(customersServiceUrl + "/pet/{petId}",petId)
+                .body(just(model), PetRequestDTO.class)
+                .retrieve()
+                .bodyToMono(PetResponseDTO.class);
+    }
+
 
     public Mono<PetResponseDTO> deletePet(final String ownerId, final String petId){
         return webClientBuilder.build().delete()
