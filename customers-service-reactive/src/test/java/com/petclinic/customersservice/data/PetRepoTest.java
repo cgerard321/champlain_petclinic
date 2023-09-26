@@ -31,6 +31,7 @@ class PetRepoTest {
                     assertEquals(pet.getBirthDate(), foundPet.getBirthDate());
                     assertEquals(pet.getPhotoId(), foundPet.getPhotoId());
                     assertEquals(pet.getOwnerId(), foundPet.getOwnerId());
+                    assertEquals(pet.getIsActive(),foundPet.getIsActive());
                 })
                 .verifyComplete();
     }
@@ -57,6 +58,7 @@ class PetRepoTest {
                 .petTypeId("2")
                 .photoId("2")
                 .ownerId("2")
+                .isActive("true")
                 .build();
     }
 

@@ -1,4 +1,4 @@
-package com.petclinic.customersservice.presentationlayer;
+package com.petclinic.bffapigateway.dtos.Pets;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,7 +11,7 @@ import java.util.Date;
 @NoArgsConstructor
 @Builder
 @AllArgsConstructor
-public class PetResponseDTO {
+public class PetRequestDTO {
 
     private String ownerId;
     private String petId;

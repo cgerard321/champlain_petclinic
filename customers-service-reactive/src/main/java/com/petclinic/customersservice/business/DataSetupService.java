@@ -49,20 +49,19 @@ public class DataSetupService implements CommandLineRunner {
 
 
 
-
-        Pet p1 = new Pet("c3eecf3a-d732-46d6-9e51-ab03314f3c4d", "1","f470653d-05c5-4c45-b7a0-7d70f003d2ac", "Leo", new SimpleDateFormat( "yyyyMMdd" ).parse( "2010-05-20" ), "1", "1");
-        Pet p2 = new Pet("180143e7-547d-46c2-82fd-7c84547e126c", "2", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", "Basil", new SimpleDateFormat( "yyyyMMdd" ).parse( "2002-08-06" ), "6",  "1");
-        Pet p3 = new Pet("6566cc34-21f7-4f71-9388-c70c95b01636", "3", "3f59dca2-903e-495c-90c3-7f4d01f3a2aa", "Rosy", new SimpleDateFormat( "yyyyMMdd" ).parse( "2001-04-17" ), "2", "1");
-        Pet p4 = new Pet("daa049e0-b6ec-4465-a20e-6bd4be11606e", "4", "3f59dca2-903e-495c-90c3-7f4d01f3a2aa", "Jewel", new SimpleDateFormat( "yyyyMMdd" ).parse( "2000-03-07"), "2","1");
-        Pet p5 = new Pet("09b1085e-9ddc-468b-9a20-1bd8fe284d2c", "5", "a6e0e5b0-5f60-45f0-8ac7-becd8b330486", "Iggy", new SimpleDateFormat( "yyyyMMdd" ).parse( "2000-11-30"),"3",  "1");
-        Pet p6 = new Pet("4713b5c9-0426-4f70-a070-47e97ed25fa6", "6", "c6a0fb9d-fc6f-4c21-95fc-4f5e7311d0e2", "George", new SimpleDateFormat( "yyyyMMdd" ).parse( "2000-11-30"), "6", "1");
-        Pet p7 = new Pet("534a9744-e316-461b-9ada-3552fbeb86b7", "7", "b3d09eab-4085-4b2d-a121-78a0a2f9e501", "Samantha", new SimpleDateFormat( "yyyyMMdd" ).parse( "1995-09-04"), "1", "1");
-        Pet p8 = new Pet("19979a4f-cd0b-4cd3-a593-c94e96172756", "8", "b3d09eab-4085-4b2d-a121-78a0a2f9e501", "Max", new SimpleDateFormat( "yyyyMMdd" ).parse( "1995-09-04"), "1", "1");
-        Pet p9 = new Pet("91f56a80-049b-4bd7-8620-3354854b9541", "9", "5fe81e29-1f1d-4f9d-b249-8d3e0cc0b7dd", "Lucky", new SimpleDateFormat( "yyyyMMdd" ).parse( "1999-08-06"), "5", "1");
-        Pet p10 = new Pet("15d16020-3056-4a8f-a754-18fbd19ab31c", "10", "48f9945a-4ee0-4b0b-9b44-3da829a0f0f7", "Mulligan", new SimpleDateFormat( "yyyyMMdd" ).parse( "1997-02-24"), "2", "1");
-        Pet p11 = new Pet("913149c2-a712-4151-8b4c-a4b55b7f8d49", "11", "9f6accd1-e943-4322-932e-199d93824317", "Freddy", new SimpleDateFormat( "yyyyMMdd" ).parse( "2000-03-09"), "5", "1");
-        Pet p12 = new Pet("f9540265-6ff7-46a6-b3f9-b25a9f150733", "12", "7c0d42c2-0c2d-41ce-bd9c-6ca67478956f", "Ulysses", new SimpleDateFormat( "yyyyMMdd" ).parse( "2000-06-24"), "2", "1");
-        Pet p13 = new Pet("706a12a4-5e7a-42ea-b818-5add08accece", "13", "7c0d42c2-0c2d-41ce-bd9c-6ca67478956f", "Sly", new SimpleDateFormat( "yyyyMMdd" ).parse( "2002-06-08"), "1", "1");
+        Pet p1 = new Pet("c3eecf3a-d732-46d6-9e51-ab03314f3c4d", "1","f470653d-05c5-4c45-b7a0-7d70f003d2ac", "Leo", new SimpleDateFormat( "yyyyMMdd" ).parse( "2010-05-20" ), "1", "1","false");
+        Pet p2 = new Pet("180143e7-547d-46c2-82fd-7c84547e126c", "2", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", "Basil", new SimpleDateFormat( "yyyyMMdd" ).parse( "2002-08-06" ), "6",  "1","true");
+        Pet p3 = new Pet("6566cc34-21f7-4f71-9388-c70c95b01636", "3", "3f59dca2-903e-495c-90c3-7f4d01f3a2aa", "Rosy", new SimpleDateFormat( "yyyyMMdd" ).parse( "2001-04-17" ), "2", "1","false");
+        Pet p4 = new Pet("daa049e0-b6ec-4465-a20e-6bd4be11606e", "4", "3f59dca2-903e-495c-90c3-7f4d01f3a2aa", "Jewel", new SimpleDateFormat( "yyyyMMdd" ).parse( "2000-03-07"), "2","1","true");
+        Pet p5 = new Pet("09b1085e-9ddc-468b-9a20-1bd8fe284d2c", "5", "a6e0e5b0-5f60-45f0-8ac7-becd8b330486", "Iggy", new SimpleDateFormat( "yyyyMMdd" ).parse( "2000-11-30"),"3",  "1","false");
+        Pet p6 = new Pet("4713b5c9-0426-4f70-a070-47e97ed25fa6", "6", "c6a0fb9d-fc6f-4c21-95fc-4f5e7311d0e2", "George", new SimpleDateFormat( "yyyyMMdd" ).parse( "2000-11-30"), "6", "1","true");
+        Pet p7 = new Pet("534a9744-e316-461b-9ada-3552fbeb86b7", "7", "b3d09eab-4085-4b2d-a121-78a0a2f9e501", "Samantha", new SimpleDateFormat( "yyyyMMdd" ).parse( "1995-09-04"), "1", "1","true");
+        Pet p8 = new Pet("19979a4f-cd0b-4cd3-a593-c94e96172756", "8", "b3d09eab-4085-4b2d-a121-78a0a2f9e501", "Max", new SimpleDateFormat( "yyyyMMdd" ).parse( "1995-09-04"), "1", "1","true");
+        Pet p9 = new Pet("91f56a80-049b-4bd7-8620-3354854b9541", "9", "5fe81e29-1f1d-4f9d-b249-8d3e0cc0b7dd", "Lucky", new SimpleDateFormat( "yyyyMMdd" ).parse( "1999-08-06"), "5", "1","true");
+        Pet p10 = new Pet("15d16020-3056-4a8f-a754-18fbd19ab31c", "10", "48f9945a-4ee0-4b0b-9b44-3da829a0f0f7", "Mulligan", new SimpleDateFormat( "yyyyMMdd" ).parse( "1997-02-24"), "2", "1","true");
+        Pet p11 = new Pet("913149c2-a712-4151-8b4c-a4b55b7f8d49", "11", "9f6accd1-e943-4322-932e-199d93824317", "Freddy", new SimpleDateFormat( "yyyyMMdd" ).parse( "2000-03-09"), "5", "1","true");
+        Pet p12 = new Pet("f9540265-6ff7-46a6-b3f9-b25a9f150733", "12", "7c0d42c2-0c2d-41ce-bd9c-6ca67478956f", "Ulysses", new SimpleDateFormat( "yyyyMMdd" ).parse( "2000-06-24"), "2", "1","true");
+        Pet p13 = new Pet("706a12a4-5e7a-42ea-b818-5add08accece", "13", "7c0d42c2-0c2d-41ce-bd9c-6ca67478956f", "Sly", new SimpleDateFormat( "yyyyMMdd" ).parse( "2002-06-08"), "1", "1","true");
 
 
         Flux.just(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13)
