@@ -61,7 +61,14 @@ public class VisitServiceImpl implements VisitService {
 
     @Override
     public Mono<Void> deleteVisit(String visitId) {
-        return repo.deleteByVisitId(visitId);
+        return repo.existsByVisitId(visitId)
+                .flatMap(visitExists -> {
+                    if (!visitExists) {
+                        return Mono.error(new NotFoundException("No visit was found with visitId: " + visitId));
+                    } else {
+                        return repo.deleteByVisitId(visitId);
+                    }
+                });
     }
 
 

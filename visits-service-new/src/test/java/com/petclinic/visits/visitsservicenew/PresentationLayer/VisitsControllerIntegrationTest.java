@@ -15,13 +15,11 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -32,7 +30,7 @@ import java.util.UUID;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class VisitsControllerIntegrationTest {
     @Autowired
-    private WebTestClient client;
+    private WebTestClient webTestClient;
 
     @Autowired
     private VisitRepo visitRepo;
@@ -98,7 +96,7 @@ class VisitsControllerIntegrationTest {
 
     @Test
     void getAllVisits(){
-        client
+        webTestClient
                 .get()
                 .uri("/visits")
                 .accept(MediaType.TEXT_EVENT_STREAM)
@@ -110,7 +108,7 @@ class VisitsControllerIntegrationTest {
     }
     @Test
     void getVisitByVisitId(){
-        client
+        webTestClient
                 .get()
                 .uri("/visits/"+visit1.getVisitId())
                 .accept(MediaType.APPLICATION_JSON)
@@ -130,7 +128,7 @@ class VisitsControllerIntegrationTest {
 
         when(vetsClient.getVetByVetId(anyString())).thenReturn(Mono.just(vet));
 
-        client
+        webTestClient
                 .get()
                 .uri("/visits/veterinarians/"+vet.getVetId())
                 .accept(MediaType.TEXT_EVENT_STREAM)
@@ -154,7 +152,7 @@ class VisitsControllerIntegrationTest {
     void getVisitsForPet(){
         when(petsClient.getPetById(anyString())).thenReturn(Mono.just(petResponseDTO));
 
-        client
+        webTestClient
                 .get()
                 .uri("/visits/pets/"+visit1.getPetId())
                 .accept(MediaType.TEXT_EVENT_STREAM)
@@ -204,7 +202,7 @@ class VisitsControllerIntegrationTest {
         when(petsClient.getPetById(anyString())).thenReturn(Mono.just(petResponseDTO));
         when(vetsClient.getVetByVetId(anyString())).thenReturn(Mono.just(vet));
 
-        client
+        webTestClient
                 .post()
                 .uri("/visits")
                 .body(Mono.just(visitRequestDTO), VisitRequestDTO.class)
@@ -222,20 +220,19 @@ class VisitsControllerIntegrationTest {
     }
     @Test
     void deleteVisit(){
-        client
+        webTestClient
                 .delete()
                 .uri("/visits/"+visit1.getVisitId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
-                .expectBody();
+                .expectStatus().isNoContent();
     }
     @Test
     void updateVisit(){
         when(petsClient.getPetById(anyString())).thenReturn(Mono.just(petResponseDTO));
         when(vetsClient.getVetByVetId(anyString())).thenReturn(Mono.just(vet));
 
-        client
+        webTestClient
                 .put()
                 .uri("/visits/"+visit1.getVisitId())
                 .body(Mono.just(visitResponseDTO), VisitResponseDTO.class)
