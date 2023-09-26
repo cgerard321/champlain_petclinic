@@ -22,7 +22,7 @@ public class Visit {
 
     private String petId;
 
-    private String vetId;
+    private String practitionerId;
 
     private boolean status;
 

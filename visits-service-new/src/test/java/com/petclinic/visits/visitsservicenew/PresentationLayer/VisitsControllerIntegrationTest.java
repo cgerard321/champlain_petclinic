@@ -80,7 +80,7 @@ class VisitsControllerIntegrationTest {
     private final VisitResponseDTO visitResponseDTO = buildVisitResponseDto(visit1.getVisitId(),vet.getVetId());
     private final VisitRequestDTO visitRequestDTO = buildVisitRequestDto(vet.getVetId());
 
-    private final String VET_ID = visitResponseDTO.getVetId();
+    private final String PRAC_ID = visitResponseDTO.getPractitionerId();
     private final String PET_ID = visitResponseDTO.getPetId();
     private final String VISIT_ID = visitResponseDTO.getVisitId();
     private final int dbSize = 2;
@@ -119,20 +119,20 @@ class VisitsControllerIntegrationTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.visitId").isEqualTo(visit1.getVisitId())
-                .jsonPath("$.vetId").isEqualTo(visit1.getVetId())
+                .jsonPath("$.practitionerId").isEqualTo(visit1.getPractitionerId())
                 .jsonPath("$.petId").isEqualTo(visit1.getPetId())
                 .jsonPath("$.description").isEqualTo(visit1.getDescription())
                 .jsonPath("$.visitDate").isEqualTo("2022-11-25T13:45:00")
                 .jsonPath("$.status").isEqualTo(visit1.isStatus());
     }
     @Test
-    void getVisitByVetId(){
+    void getVisitByPractitionerId(){
 
         when(vetsClient.getVetByVetId(anyString())).thenReturn(Mono.just(vet));
 
         client
                 .get()
-                .uri("/visits/veterinarians/"+vet.getVetId())
+                .uri("/visits/practitioner/"+vet.getVetId())
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
@@ -142,7 +142,7 @@ class VisitsControllerIntegrationTest {
                     assertNotNull(list);
                     assertEquals(dbSize, list.size());
                     assertEquals(list.get(0).getVisitId(), visit1.getVisitId());
-                    assertEquals(list.get(0).getVetId(), visit1.getVetId());
+                    assertEquals(list.get(0).getPractitionerId(), visit1.getPractitionerId());
                     assertEquals(list.get(0).getPetId(), visit1.getPetId());
                     assertEquals(list.get(0).getDescription(), visit1.getDescription());
                     assertEquals(list.get(0).getVisitDate(), visit1.getVisitDate());
@@ -166,7 +166,7 @@ class VisitsControllerIntegrationTest {
                     assertNotNull(list);
                     assertEquals(dbSize, list.size());
                     assertEquals(list.get(0).getVisitId(), visit1.getVisitId());
-                    assertEquals(list.get(0).getVetId(), visit1.getVetId());
+                    assertEquals(list.get(0).getPractitionerId(), visit1.getPractitionerId());
                     assertEquals(list.get(0).getPetId(), visit1.getPetId());
                     assertEquals(list.get(0).getDescription(), visit1.getDescription());
                     assertEquals(list.get(0).getVisitDate(), visit1.getVisitDate());
@@ -217,7 +217,7 @@ class VisitsControllerIntegrationTest {
                     assertEquals(visitDTO1.getDescription(), visit1.getDescription());
                     assertEquals(visitDTO1.getPetId(), visit1.getPetId());
                     assertEquals(visitDTO1.getVisitDate(), visit1.getVisitDate());
-                    assertEquals(visitDTO1.getVetId(), visit1.getVetId());
+                    assertEquals(visitDTO1.getPractitionerId(), visit1.getPractitionerId());
                 });
     }
     @Test
@@ -245,7 +245,7 @@ class VisitsControllerIntegrationTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.visitId").isEqualTo(visit1.getVisitId())
-                .jsonPath("$.vetId").isEqualTo(visit1.getVetId())
+                .jsonPath("$.practitionerId").isEqualTo(visit1.getPractitionerId())
                 .jsonPath("$.petId").isEqualTo(visit1.getPetId())
                 .jsonPath("$.description").isEqualTo(visit1.getDescription())
                 .jsonPath("$.visitDate").isEqualTo("2022-11-25T13:45:00")
@@ -259,7 +259,7 @@ class VisitsControllerIntegrationTest {
                 .visitDate(LocalDateTime.parse("2022-11-25T13:45", dtf))
                 .description(description)
                 .petId("2")
-                .vetId(vetId)
+                .practitionerId(vetId)
                 .status(true).build();
     }
 
@@ -270,7 +270,7 @@ class VisitsControllerIntegrationTest {
                 .visitDate(LocalDateTime.parse("2022-11-25T13:45:00", dtf))
                 .description("this is a dummy description")
                 .petId("2")
-                .vetId(vetId)
+                .practitionerId(vetId)
                 .status(true).build();
     }
     private VisitRequestDTO buildVisitRequestDto(String vetId){
@@ -279,7 +279,7 @@ class VisitsControllerIntegrationTest {
                 .visitDate(LocalDateTime.parse("2022-11-25T13:45:00", dtf))
                 .description("this is a dummy description")
                 .petId("2")
-                .vetId(vetId)
+                .practitionerId(vetId)
                 .status(true).build();
     }
 }

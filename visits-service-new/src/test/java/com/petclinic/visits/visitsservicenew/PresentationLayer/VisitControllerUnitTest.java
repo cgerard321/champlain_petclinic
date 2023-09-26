@@ -76,7 +76,7 @@ class VisitControllerUnitTest {
     private final VisitResponseDTO visitResponseDTO = buildVisitResponseDto();
     private final VisitRequestDTO visitRequestDTO = buildVisitRequestDTO(vet.getVetId());
     private final String Visit_UUID_OK = visitResponseDTO.getVisitId();
-    private final String Vet_Id_OK = visitResponseDTO.getVetId();
+    private final String Practitioner_Id_OK = visitResponseDTO.getPractitionerId();
     private final String Pet_Id_OK = visitResponseDTO.getPetId();
     //private final LocalDateTime visitDate = visitResponseDTO.getVisitDate().withSecond(0);
     @Test
@@ -109,25 +109,25 @@ class VisitControllerUnitTest {
                 .jsonPath("$.visitDate").isEqualTo("2022-11-25T13:45:00")
                 .jsonPath("$.description").isEqualTo(visitResponseDTO.getDescription())
                 .jsonPath("$.petId").isEqualTo(visitResponseDTO.getPetId())
-                .jsonPath("$.vetId").isEqualTo(visitResponseDTO.getVetId())
+                .jsonPath("$.practitionerId").isEqualTo(visitResponseDTO.getPractitionerId())
                 .jsonPath("$.status").isEqualTo(visitResponseDTO.isStatus());
 
         Mockito.verify(visitService, times(1)).getVisitByVisitId(Visit_UUID_OK);
     }
 
     @Test
-    void getVisitByVetId(){
-        when(visitService.getVisitsForVet(anyString())).thenReturn(Flux.just(visitResponseDTO));
+    void getVisitByPractitionerId(){
+        when(visitService.getVisitsForPractitioner(anyString())).thenReturn(Flux.just(visitResponseDTO));
 
         webFluxTest.get()
-                .uri("/visits/veterinarians/" + Vet_Id_OK)
+                .uri("/visits/practitioner/" + Practitioner_Id_OK)
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
                 .returnResult(VisitResponseDTO.class);
 
-        Mockito.verify(visitService, times(1)).getVisitsForVet(Vet_Id_OK);
+        Mockito.verify(visitService, times(1)).getVisitsForPractitioner(Practitioner_Id_OK);
     }
 
     @Test
@@ -215,7 +215,7 @@ class VisitControllerUnitTest {
                 .visitDate(LocalDateTime.parse("2022-11-25T13:45:00", dtf))
                 .description("this is a dummy description")
                 .petId("2")
-                .vetId(UUID.randomUUID().toString())
+                .practitionerId(UUID.randomUUID().toString())
                 .status(true).build();
     }
     private VisitRequestDTO buildVisitRequestDTO(String vetId){
@@ -224,7 +224,7 @@ class VisitControllerUnitTest {
                 .visitDate(LocalDateTime.parse("2022-11-25T13:45:00", dtf))
                 .description("this is a dummy description")
                 .petId("2")
-                .vetId(UUID.randomUUID().toString())
+                .practitionerId(UUID.randomUUID().toString())
                 .status(true).build();
     }
 
@@ -235,7 +235,7 @@ class VisitControllerUnitTest {
                 .visitDate(LocalDateTime.parse("2022-11-25T13:45", dtf))
                 .description(description)
                 .petId("2")
-                .vetId(vetId)
+                .practitionerId(vetId)
                 .status(true).build();
     }
 }
