@@ -70,6 +70,14 @@
                     <img alt="" src="data:image/png;base64, {{$ctrl.PreviewImage}}" ng-show="$ctrl.PreviewImage != null" width="150" height="150" class="image2"/>
                     <input type="file" accept="image/jpeg" class="fileInput" id="photoVet"/>
                 </div>
+                <!-- Edit Vet Button -->
+                <div class="row g-3">
+                    <div class="col-sm-12" style="margin: 50%">
+                        <a ui-sref="vetEdit({vetId: $ctrl.vet.vetId})">
+                            <button class="edit-vet-button btn btn-success large-button">Edit Vet</button>
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
         <hr>
@@ -84,6 +92,10 @@
             </div>
 
             <!-- Add Rating Form -->
+            <div class="col-md-6">
+                <div class="add-rating-container">
+                    <h3 class="form-label-rating">Add A Rating</h3>
+                    <!-- Add Rating Form -->
             <div class="col-md-6">
                 <div class="add-rating-container">
                     <h3 class="form-label-rating">Add A Rating</h3>

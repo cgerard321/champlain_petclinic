@@ -32,3 +32,7 @@
     margin-left: 10px;
 }
 
+.large-button {
+    padding: 10px 20px;
+    font-size: 16px;
+}
