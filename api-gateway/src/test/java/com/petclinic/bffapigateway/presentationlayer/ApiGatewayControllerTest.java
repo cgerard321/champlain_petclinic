@@ -2454,9 +2454,42 @@ void deleteAllInventory_shouldSucceed() {
 
 
 
+    @Test
+    void createUser_withValidModel_shouldSucceed() {
+        // Define a valid Register model here
+        Register validUser = Register.builder()
+                .email("richard200danon@gmail.com")
+                .password("pwd%jfjfjDkkkk8")
+                .username("Ric")
+                .build();
+
+        UserPasswordLessDTO userLess = UserPasswordLessDTO.builder()
+                .username(validUser.getUsername())
+                .email(validUser.getEmail())
+                .build();
+
+        when(authServiceClient.createUser(any()))
+                .thenReturn(Mono.just(userLess));
+
+        client.post()
+                .uri("/api/gateway/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(validUser)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(UserPasswordLessDTO.class)
+                .value(dto ->{
+                    assertNotNull(dto);
+                    assertEquals(validUser.getUsername(),dto.getUsername());
+                    assertEquals(validUser.getEmail(),dto.getEmail());
+                });
 
 
     }
+}
+
+
 
 
 
