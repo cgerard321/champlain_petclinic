@@ -24,14 +24,14 @@ public class DataSetupService implements CommandLineRunner {
     }
 
 
-    private Visit buildVisit(String visitId, LocalDateTime visitDate, String description, String petId, String practitionerId, boolean status){
+    private Visit buildVisit(String visitId, LocalDateTime visitDate, String description, String petId, String vetId, boolean status){
 
         return Visit.builder()
                 .visitId(visitId)
                 .visitDate(visitDate)
                 .description(description)
                 .petId(petId)
-                .practitionerId(practitionerId)
+                .vetId(vetId)
                 .status(status)
                 .build();
     }

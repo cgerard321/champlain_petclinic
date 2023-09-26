@@ -36,9 +36,9 @@ public class VisitServiceImpl implements VisitService {
     }
 
     @Override
-    public Flux<VisitResponseDTO> getVisitsForPractitioner(String vetId) {
+    public Flux<VisitResponseDTO> getVisitsForVet(String vetId) {
         return validateVetId(vetId)
-                .thenMany(repo.findVisitsByPractitionerId(vetId))
+                .thenMany(repo.findVisitsByVetId(vetId))
                 .map(EntityDtoUtil::toVisitResponseDTO);
     }
 
@@ -81,7 +81,7 @@ public class VisitServiceImpl implements VisitService {
         return repo.findByVisitId(visitId)
                 .flatMap(visitEntity -> visitRequestDTOMono
                         .flatMap(visitRequestDTO -> validatePetId(visitRequestDTO.getPetId())
-                                .then(validateVetId(visitRequestDTO.getPractitionerId()))
+                                .then(validateVetId(visitRequestDTO.getVetId()))
                                 .then(Mono.just(visitRequestDTO)))
                         .map(EntityDtoUtil::toVisitEntity)
                         .doOnNext(visitEntityToUpdate -> {
