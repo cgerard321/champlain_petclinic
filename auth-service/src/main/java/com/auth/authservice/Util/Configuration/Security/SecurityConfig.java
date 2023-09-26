@@ -52,7 +52,8 @@ public class SecurityConfig {
     JwtTokenFilter jwtTokenFilter;
     CustomBasicAuthenticationEntryPoint customBasicAuthenticationEntryPoint;
 
-    public SecurityConfig(UserDetailsService userDetailService, JwtTokenFilter jwtTokenFilter, CustomBasicAuthenticationEntryPoint customBasicAuthenticationEntryPoint) {
+    public SecurityConfig(UserDetailsService userDetailService, JwtTokenFilter jwtTokenFilter,
+                          CustomBasicAuthenticationEntryPoint customBasicAuthenticationEntryPoint) {
         this.userDetailService = userDetailService;
         this.jwtTokenFilter = jwtTokenFilter;
         this.customBasicAuthenticationEntryPoint = customBasicAuthenticationEntryPoint;

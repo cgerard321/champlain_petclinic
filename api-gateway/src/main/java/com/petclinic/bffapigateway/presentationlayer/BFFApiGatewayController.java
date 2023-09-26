@@ -333,12 +333,7 @@ public class BFFApiGatewayController {
         return vetsServiceClient.deleteVet(VetsEntityDtoUtil.verifyId(vetId));
     }
 
-//    @PostMapping(value = "users",
-//            consumes = "application/json",
-//            produces = "application/json")
-//    public Mono<UserDetails> createUser(@RequestBody Register model) {
-//        return authServiceClient.createUser(model);
-//    }
+
 //
 //    @DeleteMapping(value = "users/{userId}")
 //    public Mono<UserDetails> deleteUser(@RequestHeader(AUTHORIZATION) String auth, final @PathVariable long userId) {
@@ -479,6 +474,13 @@ public class BFFApiGatewayController {
 
 
 
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @PostMapping(value = "/users",
+            consumes = "application/json",
+            produces = "application/json")
+    public Mono<UserPasswordLessDTO> createUser(@RequestBody Register model) {
+        return authServiceClient.createUser(model);
+    }
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @PostMapping(value = "/users/login",produces = "application/json;charset=utf-8;", consumes = "application/json")
@@ -490,7 +492,6 @@ public class BFFApiGatewayController {
         return authServiceClient.login(login);
 
     }
-
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})

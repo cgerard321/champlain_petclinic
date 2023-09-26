@@ -8,13 +8,11 @@
 
 package com.auth.authservice.businesslayer;
 
-import com.auth.authservice.Util.Exceptions.EmailAlreadyExistsException;
-import com.auth.authservice.Util.Exceptions.IncorrectPasswordException;
-import com.auth.authservice.Util.Exceptions.InvalidInputException;
-import com.auth.authservice.Util.Exceptions.NotFoundException;
+import com.auth.authservice.Util.Exceptions.*;
 import com.auth.authservice.datalayer.roles.Role;
 import com.auth.authservice.datalayer.user.ResetPasswordToken;
 import com.auth.authservice.datalayer.user.ResetPasswordTokenRepository;
+import com.auth.authservice.datalayer.roles.RoleRepo;
 import com.auth.authservice.datalayer.user.User;
 import com.auth.authservice.datalayer.user.UserRepo;
 import com.auth.authservice.datamapperlayer.UserMapper;
@@ -36,11 +34,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.Model;
-import org.w3c.dom.Text;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import javax.swing.text.html.HTMLDocument;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.*;
@@ -55,7 +50,7 @@ public class UserServiceImpl implements UserService {
     private final SecurityConst securityConst;
     private final ResetPasswordTokenRepository tokenRepository;
     private final UserRepo userRepo;
-    //private final RoleRepo roleRepo;
+    private final RoleRepo roleRepo;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final MailService mailService;
@@ -97,28 +92,29 @@ public class UserServiceImpl implements UserService {
     @Override
     public User createUser(@Valid UserIDLessRoleLessDTO userIDLessDTO) {
 
-        final Optional<User> byEmail = userRepo.findByEmail(userIDLessDTO.getEmail());
+            final Optional<User> byEmail = userRepo.findByEmail(userIDLessDTO.getEmail());
 
-        if(byEmail.isPresent()) {
-            throw new EmailAlreadyExistsException(
-                    format("User with e-mail %s already exists", userIDLessDTO.getEmail()));
-        }
+            if (byEmail.isPresent()) {
+                throw new EmailAlreadyExistsException(
+                        format("User with e-mail %s already exists", userIDLessDTO.getEmail()));
+            }
 
-        log.info("Saving user with email {}", userIDLessDTO.getEmail());
-        User user = userMapper.idLessRoleLessDTOToModel(userIDLessDTO);
+            log.info("Saving user with email {}", userIDLessDTO.getEmail());
+            User user = userMapper.idLessRoleLessDTOToModel(userIDLessDTO);
 
-        //Optional<Role> role = roleRepo.findById(1L);
-        Set<Role> roleSet = new HashSet<>();
-        //role.ifPresent(roleSet::add);
-        user.setRoles(roleSet);
+            Optional<Role> role = roleRepo.findById(3L);
+            Set<Role> roleSet = new HashSet<>();
+            role.ifPresent(roleSet::add);
+            user.setRoles(roleSet);
 
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        log.info("Sending email to {}...", userIDLessDTO.getEmail());
-        log.info(mailService.sendMail(generateVerificationMail(user)));
-        log.info("Email sent to {}", userIDLessDTO.getEmail());
+            log.info("Sending email to {}...", userIDLessDTO.getEmail());
+            log.info(mailService.sendMail(generateVerificationMail(user)));
+            log.info("Email sent to {}", userIDLessDTO.getEmail());
 
-        return userRepo.save(user);
+            return userRepo.save(user);
+
     }
 
     @Override

@@ -36,17 +36,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Duration;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.ResponseEntity.ok;
 @RestController
 @RequestMapping("/users")
@@ -89,15 +85,14 @@ public class UserController {
     }
 
     @PostMapping
-    public UserPasswordLessDTO createUser(
-            @RequestBody @Valid UserIDLessRoleLessDTO dto,
-            BindingResult bindingResult) {
+    public ResponseEntity<UserPasswordLessDTO> createUser(@RequestBody @Valid UserIDLessRoleLessDTO dto){
 
         log.info("Trying to persist user");
         final User saved = userService.createUser(dto);
         log.info("Successfully persisted user");
 
-        return userMapper.modelToPasswordLessDTO(saved);
+        return ResponseEntity.ok()
+                .body(userMapper.modelToPasswordLessDTO(saved));
     }
 
     @PutMapping("/passwordReset/{userId}")
