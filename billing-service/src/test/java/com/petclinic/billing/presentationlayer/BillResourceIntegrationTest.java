@@ -2,15 +2,12 @@ package com.petclinic.billing.presentationlayer;
 
 import com.petclinic.billing.datalayer.Bill;
 import com.petclinic.billing.datalayer.BillRepository;
-import com.petclinic.billing.datalayer.BillResponseDTO;
-import com.petclinic.billing.http.HttpErrorInfo;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.test.StepVerifier;
@@ -19,11 +16,9 @@ import static reactor.core.publisher.Mono.just;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port: 0"})
 @AutoConfigureWebTestClient
@@ -289,9 +284,9 @@ class BillResourceIntegrationTest {
         calendar.set(2022, Calendar.SEPTEMBER, 25);
         LocalDate date = calendar.getTime().toInstant()
                 .atZone(ZoneId.systemDefault())
-                .toLocalDate();;
+                .toLocalDate();
 
 
-        return Bill.builder().id("Id").billId("BillUUID").customerId(1).vetId("1").visitType("Test Type").date(date).amount(13.37).build();
+        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).build();
     }
 }

@@ -51,7 +51,7 @@ public class BillResource {
     }
 
     @GetMapping(value = "/bills/customer/{customerId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getBillsByCustomerId(@PathVariable("customerId") int customerId)
+    public Flux<BillResponseDTO> getBillsByCustomerId(@PathVariable("customerId") String customerId)
     {
         return SERVICE.GetBillsByCustomerId(customerId);
     }
@@ -78,7 +78,7 @@ public class BillResource {
 
     @DeleteMapping (value = "/bills/customer/{customerId}")
     @ResponseStatus (HttpStatus.NO_CONTENT)
-    public Flux<Void> deleteBillsByCustomerId (@PathVariable("customerId") int customerId){
+    public Flux<Void> deleteBillsByCustomerId (@PathVariable("customerId") String customerId){
         return SERVICE.DeleteBillsByCustomerId(customerId);
     }
 
