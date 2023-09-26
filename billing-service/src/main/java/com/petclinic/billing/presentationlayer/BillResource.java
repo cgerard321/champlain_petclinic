@@ -24,15 +24,18 @@ public class BillResource {
 
     // Create Bill //
     @PostMapping("/bills")
-    @ResponseStatus(HttpStatus.CREATED)
-    public Mono<BillResponseDTO> createBill(@Valid @RequestBody Mono<BillRequestDTO> billDTO){
-        return SERVICE.CreateBill(billDTO);
+    public Mono<ResponseEntity<BillResponseDTO>> createBill(@Valid @RequestBody Mono<BillRequestDTO> billDTO){
+        return SERVICE.CreateBill(billDTO)
+                .map(e -> ResponseEntity.status(HttpStatus.CREATED).body(e))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
     // Read Bill //
     @GetMapping(value = "/bills/{billId}")
-    public Mono<BillResponseDTO> findBill(@PathVariable("billId") String billId){
-        return SERVICE.GetBill(billId);
+    public Mono<ResponseEntity<BillResponseDTO>> findBill(@PathVariable("billId") String billId){
+        return SERVICE.GetBill(billId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @GetMapping(value = "/bills", produces = MediaType.TEXT_EVENT_STREAM_VALUE)

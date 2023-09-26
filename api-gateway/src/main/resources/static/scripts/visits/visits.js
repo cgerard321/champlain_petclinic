@@ -9,5 +9,3 @@ angular.module('visits', ['ui.router'])
                 template: '<visits></visits>'
             })
     }]);
-
-//url: '/owners/:ownerId/pets/:petId/visits',

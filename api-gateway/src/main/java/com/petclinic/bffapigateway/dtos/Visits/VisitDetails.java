@@ -24,6 +24,7 @@ public class VisitDetails {
 
     private Integer practitionerId = null;
 
+    private String date = null;
     private LocalDateTime visitDate = null;
 
     private String description = null;

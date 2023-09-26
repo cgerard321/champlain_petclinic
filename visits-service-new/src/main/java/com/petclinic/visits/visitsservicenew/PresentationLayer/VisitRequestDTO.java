@@ -13,8 +13,11 @@ import java.time.LocalDateTime;
 @Builder
 public class VisitRequestDTO {
     private LocalDateTime visitDate;
+/*    private int year;
+    private int month;
+    private int day;*/
     private String description;
     private String petId;
-    private String practitionerId;
+    private String vetId;
     private boolean status;
 }
