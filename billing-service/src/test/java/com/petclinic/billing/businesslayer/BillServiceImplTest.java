@@ -41,15 +41,14 @@ public class BillServiceImplTest {
     BillService billService;
 
     @Test
-    public void test_GetBill(){
+    public void test_getBillById(){
         Bill billEntity = buildBill();
-
 
         String BILL_ID = billEntity.getBillId();
 
         when(repo.findByBillId(anyString())).thenReturn(Mono.just(billEntity));
 
-        Mono<BillResponseDTO> billDTOMono = billService.GetBill(BILL_ID);
+        Mono<BillResponseDTO> billDTOMono = billService.getBillByBillId(BILL_ID);
 
         StepVerifier.create(billDTOMono)
                 .consumeNextWith(foundBill -> {
@@ -58,8 +57,6 @@ public class BillServiceImplTest {
                     assertEquals(billEntity.getVisitType(), foundBill.getVisitType());
                 })
                 .verifyComplete();
-
-
     }
 
     @Test
