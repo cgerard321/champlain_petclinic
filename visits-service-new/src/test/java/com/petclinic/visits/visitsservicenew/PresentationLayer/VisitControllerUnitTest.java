@@ -128,6 +128,7 @@ class VisitControllerUnitTest {
 
         Mockito.verify(visitService, times(1)).getVisitsForPractitioner(Practitioner_Id_OK);
     }
+    
 
     @Test
     void getVisitsByPetId(){
