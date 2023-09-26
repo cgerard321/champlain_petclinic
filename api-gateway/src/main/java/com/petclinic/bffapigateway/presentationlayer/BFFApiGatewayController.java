@@ -84,7 +84,7 @@ public class BFFApiGatewayController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
     @GetMapping(value = "bills/customer/{customerId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> getBillsByOwnerId(final @PathVariable int customerId)
+    public Flux<BillResponseDTO> getBillsByOwnerId(final @PathVariable String customerId)
     {
         return billServiceClient.getBillsByOwnerId(customerId);
     }
@@ -113,7 +113,7 @@ public class BFFApiGatewayController {
     }
 
     @DeleteMapping(value = "bills/customer/{customerId}")
-    public Flux<Void> deleteBillsByCustomerId(final @PathVariable int customerId){
+    public Flux<Void> deleteBillsByCustomerId(final @PathVariable String customerId){
         return billServiceClient.deleteBillsByCustomerId(customerId);
     }
 

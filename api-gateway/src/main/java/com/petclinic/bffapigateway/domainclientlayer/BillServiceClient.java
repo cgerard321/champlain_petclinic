@@ -1,6 +1,5 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
-import com.petclinic.bffapigateway.dtos.Bills.BillDetails;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,7 +15,7 @@ import reactor.core.publisher.Mono;
 public class BillServiceClient {
 
     private final WebClient.Builder webClientBuilder;
-    private String billServiceUrl;
+    private final String billServiceUrl;
 
 
     public BillServiceClient(
@@ -36,7 +35,7 @@ public class BillServiceClient {
                 .retrieve()
                 .bodyToMono(BillResponseDTO.class);
     }
-    public Flux<BillResponseDTO> getBillsByOwnerId(final int customerId) {
+    public Flux<BillResponseDTO> getBillsByOwnerId(final String customerId) {
         return webClientBuilder.build().get()
                 .uri(billServiceUrl + "/customer/{customerId}", customerId)
                 .retrieve()
@@ -91,7 +90,7 @@ public class BillServiceClient {
                 .bodyToFlux(Void.class);
     }
 
-    public Flux<Void> deleteBillsByCustomerId(final int customerId) {
+    public Flux<Void> deleteBillsByCustomerId(final String customerId) {
         return webClientBuilder.build()
                 .delete()
                 .uri(billServiceUrl + "/customer/{customerId}", customerId)
