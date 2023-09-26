@@ -27,6 +27,8 @@ public class DatabaseLoaderService implements CommandLineRunner {
     public void run(String... args) throws Exception {
         roleRepo.save(Role.builder().name("ADMIN").build());
         roleRepo.save(Role.builder().name("VET").build());
+        roleRepo.save(Role.builder().name("OWNER").build());
+
 
         Set<Role> roles = new HashSet<>();
         roles.add(roleRepo.findById(1L).get());

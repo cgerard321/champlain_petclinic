@@ -125,6 +125,7 @@ public class VisitsServiceClient {
                 .body(Mono.just(visit), VisitDetails.class)
                 .retrieve()
                 .bodyToMono(VisitDetails.class);
+<<<<<<< HEAD
     }*/
 public Mono<VisitResponseDTO> createVisitForPet(VisitRequestDTO visit) {
     return webClient

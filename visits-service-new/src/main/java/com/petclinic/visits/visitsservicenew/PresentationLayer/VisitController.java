@@ -33,9 +33,9 @@ public class VisitController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-    @GetMapping(value="veterinarians/{vetId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<VisitResponseDTO> getVisitByVetId(@PathVariable String vetId){
-        return visitService.getVisitsForVet(vetId);
+    @GetMapping(value="practitioner/{practitionerId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<VisitResponseDTO> getVisitByPractitionerId(@PathVariable String practitionerId) {
+        return visitService.getVisitsForPractitioner(practitionerId);
     }
     /*
     @GetMapping(value="practitioner/{practitionerId}/{month}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)

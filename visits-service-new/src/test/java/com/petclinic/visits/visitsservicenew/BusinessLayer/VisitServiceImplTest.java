@@ -56,7 +56,7 @@ class VisitServiceImplTest {
 
     private final VisitResponseDTO visitResponseDTO = buildVisitResponseDTO();
     private final VisitRequestDTO visitRequestDTO = buildVisitRequestDTO();
-    private final String VET_ID = visitResponseDTO.getVetId();
+    private final String PRAC_ID = visitResponseDTO.getPractitionerId();
     private final String PET_ID = visitResponseDTO.getPetId();
     private final String VISIT_ID = visitResponseDTO.getVisitId();
 
@@ -114,14 +114,14 @@ class VisitServiceImplTest {
                     assertEquals(visit1.getVisitDate(), foundVisit.getVisitDate());
                     assertEquals(visit1.getDescription(), foundVisit.getDescription());
                     assertEquals(visit1.getPetId(), foundVisit.getPetId());
-                    assertEquals(visit1.getVetId(), foundVisit.getVetId());
+                    assertEquals(visit1.getPractitionerId(), foundVisit.getPractitionerId());
                 }).verifyComplete();
     }
     @Test
-    void getVisitsByVetId(){
-        when(visitRepo.findVisitsByVetId(anyString())).thenReturn(Flux.just(visit1));
+    void getVisitsByPractitionerId(){
+        when(visitRepo.findVisitsByPractitionerId(anyString())).thenReturn(Flux.just(visit1));
         when(vetsClient.getVetByVetId(anyString())).thenReturn(Mono.just(vet));
-        Flux<VisitResponseDTO> visitResponseDTOFlux = visitService.getVisitsForVet(VET_ID);
+        Flux<VisitResponseDTO> visitResponseDTOFlux = visitService.getVisitsForPractitioner(PRAC_ID);;
 
         StepVerifier
                 .create(visitResponseDTOFlux)
@@ -130,7 +130,7 @@ class VisitServiceImplTest {
                     assertEquals(visit1.getVisitDate(), foundVisit.getVisitDate());
                     assertEquals(visit1.getDescription(), foundVisit.getDescription());
                     assertEquals(visit1.getPetId(), foundVisit.getPetId());
-                    assertEquals(visit1.getVetId(), foundVisit.getVetId());
+                    assertEquals(visit1.getPractitionerId(), foundVisit.getPractitionerId());
                 }).verifyComplete();
     }
 
@@ -148,7 +148,7 @@ class VisitServiceImplTest {
                     assertEquals(visit1.getVisitDate(), foundVisit.getVisitDate());
                     assertEquals(visit1.getDescription(), foundVisit.getDescription());
                     assertEquals(visit1.getPetId(), foundVisit.getPetId());
-                    assertEquals(visit1.getVetId(), foundVisit.getVetId());
+                    assertEquals(visit1.getPractitionerId(), foundVisit.getPractitionerId());
                 }).verifyComplete();
     }
     /*
@@ -184,7 +184,7 @@ class VisitServiceImplTest {
                     assertEquals(visit1.getDescription(), visitDTO1.getDescription());
                     assertEquals(visit1.getPetId(), visitDTO1.getPetId());
                     assertEquals(visit1.getVisitDate(), visitDTO1.getVisitDate());
-                    assertEquals(visit1.getVetId(), visitDTO1.getVetId());
+                    assertEquals(visit1.getPractitionerId(), visitDTO1.getPractitionerId());
                 }).verifyComplete();
     }
     @Test
@@ -220,7 +220,7 @@ class VisitServiceImplTest {
                     assertEquals(visit1.getDescription(), visitDTO1.getDescription());
                     assertEquals(visit1.getPetId(), visitDTO1.getPetId());
                     assertEquals(visit1.getVisitDate(), visitDTO1.getVisitDate());
-                    assertEquals(visit1.getVetId(), visitDTO1.getVetId());
+                    assertEquals(visit1.getPractitionerId(), visitDTO1.getPractitionerId());
                 }).verifyComplete();
     }
 
@@ -232,7 +232,7 @@ class VisitServiceImplTest {
                 .visitDate(LocalDateTime.parse("2022-11-25T13:45", dtf))
                 .description(description)
                 .petId("2")
-                .vetId(vetId)
+                .practitionerId(vetId)
                 .status(true).build();
     }
     private VisitResponseDTO buildVisitResponseDTO(){
@@ -242,7 +242,7 @@ class VisitServiceImplTest {
                 .visitDate(LocalDateTime.parse("2022-11-25T13:45:00", dtf))
                 .description("this is a dummy description")
                 .petId("2")
-                .vetId(UUID.randomUUID().toString())
+                .practitionerId(UUID.randomUUID().toString())
                 .status(true).build();
     }
     private VisitRequestDTO buildVisitRequestDTO() {
@@ -251,7 +251,7 @@ class VisitServiceImplTest {
                     .visitDate(LocalDateTime.parse("2022-11-25T13:45:00", dtf))
                     .description("this is a dummy description")
                     .petId("2")
-                    .vetId(UUID.randomUUID().toString())
+                    .practitionerId(UUID.randomUUID().toString())
                     .status(true).build();
         }
 
