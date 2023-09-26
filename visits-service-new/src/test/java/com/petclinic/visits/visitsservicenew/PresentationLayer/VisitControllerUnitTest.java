@@ -118,7 +118,11 @@ class VisitControllerUnitTest {
     void getVisitByPractitionerId(){
         when(visitService.getVisitsForPractitioner(anyString())).thenReturn(Flux.just(visitResponseDTO));
 
+<<<<<<< HEAD
         webTestClient.get()
+=======
+        webFluxTest.get()
+>>>>>>> dcb59fdb (Undid VetId change)
                 .uri("/visits/practitioner/" + Practitioner_Id_OK)
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
