@@ -10,7 +10,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface BillService {
-    Mono<BillResponseDTO> GetBill(@RequestParam(value = "billId", required = true) String billId);
+    Mono<BillResponseDTO> getBillByBillId(String billId);
+
     Flux<BillResponseDTO> GetAllBills();
 
     Mono<BillResponseDTO> CreateBill(@RequestBody Mono<BillRequestDTO> model);

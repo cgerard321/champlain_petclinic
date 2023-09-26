@@ -31,13 +31,9 @@ import com.auth.authservice.domainclientlayer.Mail.Mail;
 import com.auth.authservice.presentationlayer.User.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.ui.Model;
 
-import java.nio.file.attribute.UserPrincipal;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 
 public interface UserService {
 

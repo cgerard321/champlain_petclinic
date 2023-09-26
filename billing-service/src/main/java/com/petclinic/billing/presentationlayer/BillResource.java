@@ -32,10 +32,8 @@ public class BillResource {
 
     // Read Bill //
     @GetMapping(value = "/bills/{billId}")
-    public Mono<ResponseEntity<BillResponseDTO>> findBill(@PathVariable("billId") String billId){
-        return SERVICE.GetBill(billId)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    public Mono<BillResponseDTO> getBillByBillId(@PathVariable String billId){
+        return SERVICE.getBillByBillId(billId);
     }
 
     @GetMapping(value = "/bills", produces = MediaType.TEXT_EVENT_STREAM_VALUE)

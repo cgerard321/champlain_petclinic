@@ -10,6 +10,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.security.GeneralSecurityException;
+import java.util.Arrays;
 
 @Slf4j
 @Component
@@ -40,10 +41,17 @@ public class GlobalServletExceptionHandler implements ErrorWebExceptionHandler {
                 log.error("Exception not handled: {}", exClass.getSimpleName());
                 status = HttpStatus.UNPROCESSABLE_ENTITY;
             }
+
             // Handle any other exception types here
         }
 
 
+        log.error(ex.toString());
+        log.error(ex.getMessage());
+        log.error(ex.getLocalizedMessage());
+        log.error(ex.getCause().toString());
+        log.error(Arrays.toString(ex.getStackTrace()));
+        log.error(Arrays.toString(ex.getSuppressed()));
 
 
         if (exchange.getResponse().isCommitted()) {

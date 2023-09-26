@@ -19,7 +19,7 @@ public class BillServiceImpl implements BillService{
 //    private final OwnerClient ownerClient;
 
     @Override
-    public Mono<BillResponseDTO> GetBill(String billUUID) {
+    public Mono<BillResponseDTO> getBillByBillId(String billUUID) {
 
         return billRepository.findByBillId(billUUID).map(EntityDtoUtil::toBillResponseDto);
     }

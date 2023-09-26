@@ -36,17 +36,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Duration;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 import static org.springframework.http.ResponseEntity.ok;
 @RestController
 @RequestMapping("/users")
@@ -89,15 +85,14 @@ public class UserController {
     }
 
     @PostMapping
-    public UserPasswordLessDTO createUser(
-            @RequestBody @Valid UserIDLessRoleLessDTO dto,
-            BindingResult bindingResult) {
+    public ResponseEntity<UserPasswordLessDTO> createUser(@RequestBody @Valid UserIDLessRoleLessDTO dto){
 
         log.info("Trying to persist user");
         final User saved = userService.createUser(dto);
         log.info("Successfully persisted user");
 
-        return userMapper.modelToPasswordLessDTO(saved);
+        return ResponseEntity.ok()
+                .body(userMapper.modelToPasswordLessDTO(saved));
     }
 
     @PutMapping("/passwordReset/{userId}")
@@ -114,13 +109,37 @@ public class UserController {
     }
 
     @GetMapping("/verification/{base64EncodedToken}")
-    public UserPasswordLessDTO verifyEmail(@PathVariable String base64EncodedToken) {
-        return userService.verifyEmailFromToken(new String(Base64.getDecoder().decode(base64EncodedToken)));
+    public ResponseEntity <UserPasswordLessDTO> verifyEmail(@PathVariable String base64EncodedToken) {
+
+        try {
+            // Validate the base64EncodedToken (optional)
+            if (!isValidBase64(base64EncodedToken)) {
+                return ResponseEntity.badRequest().body(null);
+            }
+
+            String decodedToken = new String(Base64.getDecoder().decode(base64EncodedToken));
+            UserPasswordLessDTO result = userService.verifyEmailFromToken(decodedToken);
+
+            // Handle cases where verification fails
+            if (result == null) {
+                return ResponseEntity.badRequest().body(null);
+            }
+
+            return ResponseEntity.ok().body(result);
+        } catch (IllegalArgumentException | NullPointerException e) {
+            // Handle decoding exceptions
+            return ResponseEntity.badRequest().body(null);
+        }
+//        return ResponseEntity.ok()
+//                        .body(userService.verifyEmailFromToken(
+//                                new String(Base64.getDecoder().decode(base64EncodedToken))
+//                        ));
     }
 
 
     @PostMapping("/login")
-    public ResponseEntity<UserPasswordLessDTO> login(@RequestBody UserIDLessUsernameLessDTO login, HttpServletResponse response) throws IncorrectPasswordException {
+    public ResponseEntity<UserPasswordLessDTO> login(@RequestBody UserIDLessUsernameLessDTO login,
+                                                     HttpServletResponse response) throws IncorrectPasswordException {
         log.info("In controller");
 
         try {
@@ -177,5 +196,13 @@ public class UserController {
         log.info("Preflight request received and accepted");
     }
 
+    private boolean isValidBase64(String s) {
+        try {
+            Base64.getDecoder().decode(s);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
 
 }

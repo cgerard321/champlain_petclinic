@@ -1,5 +1,6 @@
 package com.auth.authservice.presentationlayer.User;
 
+import com.auth.authservice.Util.Exceptions.EmailAlreadyExistsException;
 import com.auth.authservice.Util.Exceptions.HTTPErrorMessage;
 import com.auth.authservice.businesslayer.UserService;
 import com.auth.authservice.datalayer.user.ResetPasswordToken;
@@ -15,6 +16,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.reactive.server.WebTestClient;
@@ -250,6 +252,58 @@ class UserControllerIntegrationTest {
                     assertNotNull(error.getTimestamp());
                 });
 
+    }
+
+    @Test
+    void createUser_ShouldSucceed() {
+        UserIDLessRoleLessDTO userDTO = UserIDLessRoleLessDTO.builder()
+                .email("richard2004danon@gmail.com")
+                .password("pwd%jfjfjDkkkk8")
+                .username("Ricky")
+                .build();
+
+        webTestClient.post()
+                .uri("/users")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(userDTO)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(UserPasswordLessDTO.class)
+                .value(user -> {
+                    assertEquals(userDTO.getEmail(), user.getEmail());
+                    assertEquals(userDTO.getUsername(),user.getUsername());
+                });
+    }
+
+    @Test
+    void createUser_ShouldThrowEmailAlreadyExistsException() {
+        UserIDLessRoleLessDTO userDTO = UserIDLessRoleLessDTO.builder()
+                .email("richard200danon@gmail.com")
+                .password("pwd%jfjfjDkkkk8")
+                .username("Ric")
+                .build();
+
+        User existingUser = new User();
+        existingUser.setEmail("richard200danon@gmail.com");
+        existingUser.setUsername("existingUsername");
+        existingUser.setPassword("pwd%jfjfjDkkkk8");
+
+
+        userRepo.save(existingUser);
+
+
+        webTestClient
+                .post()
+                .uri("/users")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(userDTO)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.BAD_REQUEST)
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo(String.format("User with e-mail %s already exists", userDTO.getEmail()));
     }
 
 }

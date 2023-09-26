@@ -7,7 +7,7 @@
 angular.module('signupForm')
     .controller('SignupFormController', ['$http', '$scope', "$location", "authProvider", function ($http, $scope, $location, authProvider) {
 
-        this.add = () => $http.post('/api/gateway/users/', {
+        this.add = () => $http.post('/api/gateway/users', {
             username: $scope.signup.username,
             password: $scope.signup.password,
             email: $scope.signup.email,
