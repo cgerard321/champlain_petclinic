@@ -22,7 +22,7 @@ import java.lang.annotation.Target;
 //constraint
 @Constraint(validatedBy = PasswordValidation.class)
 public @interface PasswordStrengthCheck {
-    String message() default "Invalid Password, must be atleast 8 characters, have 1 digit, lower and upper case letters and a special character.";
+    String message() default "Invalid Password, password must be atleast 8 characters, have 1 digit, lower and upper case letters and a special character.";
 
     Class<?>[] groups() default {};
 

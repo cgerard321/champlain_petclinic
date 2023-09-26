@@ -467,12 +467,11 @@ public class BFFApiGatewayController {
      * End of Owner Methods
      **/
 
-//    @GetMapping("/verification/{token}")
-//    public Mono<UserDetails> verifyUser(@PathVariable final String token) {
-//        return authServiceClient.verifyUser(token);
-//    }
 
-
+    @GetMapping("/verification/{token}")
+    public Mono<UserDetails> verifyUser(@PathVariable final String token) {
+        return authServiceClient.verifyUser(token);
+    }
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @PostMapping(value = "/users",

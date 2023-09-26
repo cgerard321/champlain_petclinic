@@ -101,18 +101,18 @@ public class AuthServiceClient {
 //                .retrieve()
 //                .bodyToMono(UserDetails.class);
 //    }
-//
-//    public Mono<UserDetails> verifyUser(final String token) {
-//        return webClientBuilder.build()
-//                .get()
-//                .uri(authServiceUrl + "/users/verification/{token}", token)
-//                .retrieve()
-//                .onStatus(HttpStatus::is4xxClientError,
-//                        n -> rethrower.rethrow(n,
-//                                x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
-//                )
-//                .bodyToMono(UserDetails.class);
-//    }
+
+    public Mono<UserDetails> verifyUser(final String token) {
+        return webClientBuilder.build()
+                .get()
+                .uri(authServiceUrl + "/users/verification/{token}", token)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        n -> rethrower.rethrow(n,
+                                x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
+                )
+                .bodyToMono(UserDetails.class);
+    }
 
     public  Mono<ResponseEntity<UserPasswordLessDTO>> login(final Login login) throws Exception {
         log.info("Entered domain service login");

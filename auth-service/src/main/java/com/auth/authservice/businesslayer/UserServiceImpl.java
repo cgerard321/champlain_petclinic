@@ -143,17 +143,71 @@ public class UserServiceImpl implements UserService {
         // Remove dangling . in case of empty sub
         String niceSub = gatewaySubdomain.length() > 0 ? gatewaySubdomain + "." : "";
 
+        String email = format("""
+                     <!DOCTYPE html>
+                     <html lang="en">
+                     <head>
+                         <meta charset="UTF-8">
+                         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                         <title>Email Verification</title>
+                         <style>
+                             body {
+                                 font-family: Arial, sans-serif;
+                                 background-color: #f4f4f4;
+                                 margin: 0;
+                                 padding: 0;
+                             }
+                             .container {
+                                 max-width: 600px;
+                                 margin: 0 auto;
+                                 padding: 20px;
+                                 background-color: #fff;
+                                 border-radius: 5px;
+                                 box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                             }
+                             h1 {
+                                 color: #333;
+                             }
+                             p {
+                                 color: #555;
+                             }
+                             a {
+                                 color: #007BFF;
+                             }
+                         </style>
+                     </head>
+                     <body>
+                         <div class="container">
+                             <h1>Thank you for Signing Up with us - Verify your email address</h1>
+                             <h3>We have received a request to create an account for Pet Clinic from this email.</h3>
+                            \s
+                             <ol>
+                                 <li>Click on the following link to verify your identity: <a href="%s://%s%s/verification/%s">Verify Email</a></li>
+                             </ol>
+                            \s
+                             <p>If you do not wish to create an account, please disregard this email.</p>
+                            \s
+                             <p>Thank you for choosing Pet Clinic.</p>
+                         </div>
+                     </body>
+                     </html>
+                     """, gatewayProtocol, niceSub, gatewayOrigin, base64Token);
+
         return Mail.builder()
-                .message(format("Your verification link: %s://%s%s/verification/%s",
-                        gatewayProtocol, niceSub, gatewayOrigin, base64Token))
+                .message(email)
                 .subject("PetClinic e-mail verification")
                 .to(user.getEmail())
                 .build();
+
+//                .message(format("Your verification link: %s://%s%s/verification/%s",
+//                gatewayProtocol, niceSub, gatewayOrigin, base64Token))
     }
 
     @Override
     public UserPasswordLessDTO verifyEmailFromToken(String token) {
-        final Optional<User> decryptUser = userRepo.findByEmail(jwtService.getUsernameFromToken(token));
+
+        final Optional<User> decryptUser = userRepo.findByUsername(jwtService.getUsernameFromToken(token));
+
         log.info("Decrypted user with email {} from token", decryptUser.get().getEmail());
 
         decryptUser.get().setVerified(true);
@@ -316,9 +370,7 @@ public class UserServiceImpl implements UserService {
 
     public void sendEmailForgotPassword(String recipientEmail, String link){
 
-
-        // Initialize an empty HTMLDocument object instance
-             String email = format("""
+         String email = format("""
                      <!DOCTYPE html>
                      <html lang="en">
                      <head>

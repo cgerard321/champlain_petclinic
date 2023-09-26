@@ -109,13 +109,37 @@ public class UserController {
     }
 
     @GetMapping("/verification/{base64EncodedToken}")
-    public UserPasswordLessDTO verifyEmail(@PathVariable String base64EncodedToken) {
-        return userService.verifyEmailFromToken(new String(Base64.getDecoder().decode(base64EncodedToken)));
+    public ResponseEntity <UserPasswordLessDTO> verifyEmail(@PathVariable String base64EncodedToken) {
+
+        try {
+            // Validate the base64EncodedToken (optional)
+            if (!isValidBase64(base64EncodedToken)) {
+                return ResponseEntity.badRequest().body(null);
+            }
+
+            String decodedToken = new String(Base64.getDecoder().decode(base64EncodedToken));
+            UserPasswordLessDTO result = userService.verifyEmailFromToken(decodedToken);
+
+            // Handle cases where verification fails
+            if (result == null) {
+                return ResponseEntity.badRequest().body(null);
+            }
+
+            return ResponseEntity.ok().body(result);
+        } catch (IllegalArgumentException | NullPointerException e) {
+            // Handle decoding exceptions
+            return ResponseEntity.badRequest().body(null);
+        }
+//        return ResponseEntity.ok()
+//                        .body(userService.verifyEmailFromToken(
+//                                new String(Base64.getDecoder().decode(base64EncodedToken))
+//                        ));
     }
 
 
     @PostMapping("/login")
-    public ResponseEntity<UserPasswordLessDTO> login(@RequestBody UserIDLessUsernameLessDTO login, HttpServletResponse response) throws IncorrectPasswordException {
+    public ResponseEntity<UserPasswordLessDTO> login(@RequestBody UserIDLessUsernameLessDTO login,
+                                                     HttpServletResponse response) throws IncorrectPasswordException {
         log.info("In controller");
 
         try {
@@ -172,5 +196,13 @@ public class UserController {
         log.info("Preflight request received and accepted");
     }
 
+    private boolean isValidBase64(String s) {
+        try {
+            Base64.getDecoder().decode(s);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
 
 }
