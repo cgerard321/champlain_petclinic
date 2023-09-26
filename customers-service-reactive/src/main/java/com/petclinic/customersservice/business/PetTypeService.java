@@ -7,7 +7,7 @@ import reactor.core.publisher.Mono;
 public interface PetTypeService {
 
     Mono<PetType> insertPetType(Mono<PetType> petTypeMono);
-    Mono<PetType> getPetTypeById(String Id);
+    Mono<PetType> getPetTypeById(Integer Id);
     Flux<PetType> getAllPetTypes();
 
 }

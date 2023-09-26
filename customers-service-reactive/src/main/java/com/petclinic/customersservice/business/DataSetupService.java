@@ -35,12 +35,12 @@ public class DataSetupService implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
-        PetType pt1 = new PetType("4a7fd25e-426f-450d-847f-10d18202769d", "Cat");
-        PetType pt2 = new PetType("155591e4-8b69-4f43-9c78-5ba9211c85fb", "Dog");
-        PetType pt3 = new PetType("ec640eda-14c6-4273-b2a0-5bd057bd6608", "Lizard");
-        PetType pt4 = new PetType("11b6947b-610e-4e92-b79e-7395abfc9251", "Snake");
-        PetType pt5 = new PetType("44c1e8e1-c3a5-4bb2-8ca0-b9353102d09e", "Bird");
-        PetType pt6 = new PetType("e965b83f-dcf4-4067-8467-7efa0c794c1b", "Hamster");
+        PetType pt1 = new PetType(1, "Cat");
+        PetType pt2 = new PetType(2, "Dog");
+        PetType pt3 = new PetType(3, "Lizard");
+        PetType pt4 = new PetType(4, "Snake");
+        PetType pt5 = new PetType(5, "Bird");
+        PetType pt6 = new PetType(6, "Hamster");
 
         Flux.just(pt1, pt2, pt3, pt4, pt5, pt6)
                 .flatMap(p -> petTypeService.insertPetType(Mono.just(p))

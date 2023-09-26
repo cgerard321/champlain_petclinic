@@ -18,13 +18,6 @@ import reactor.core.publisher.Mono;
 
 import static reactor.core.publisher.Mono.just;
 
-/**
- * @author Maciej Szarlinski
- * @author Christine Gerard
- * Copied from https://github.com/spring-petclinic/spring-petclinic-microservices
- * Modified to remove circuitbreaker
- */
-
 @Component
 public class CustomersServiceClient {
 
@@ -40,10 +33,9 @@ public class CustomersServiceClient {
         customersServiceUrl = "http://" + customersServiceHost + ":" + customersServicePort;
     }
 
-
     public Mono<OwnerResponseDTO> getOwner(final String ownerId) {
         return webClientBuilder.build().get()
-                .uri(customersServiceUrl+ "/owners/" + ownerId)
+                .uri(customersServiceUrl + "/owners/" + ownerId)
                 .retrieve()
                 .bodyToMono(OwnerResponseDTO.class);
     }
@@ -54,28 +46,6 @@ public class CustomersServiceClient {
                 .retrieve()
                 .bodyToFlux(OwnerResponseDTO.class);
     }
-
-    /*
-    public Mono<OwnerResponseDTO> updateOwner(Mono<OwnerRequestDTO> ownerRequestDTOMono , String ownerId){
-
-            return webClientBuilder.build().put()
-                    .uri(customersServiceUrl + ownerId)
-                    .body(Mono.just(ownerRequestDTOMono), OwnerRequestDTO.class)
-                    .retrieve().bodyToMono(OwnerResponseDTO.class);
-    }
-
-     */
-/*
-    public Mono<OwnerResponseDTO> updateOwner(String ownerId, OwnerRequestDTO ownerRequest) {
-        return webClientBuilder.build()
-                .put()
-                .uri(customersServiceUrl + ownerId)
-                .body(BodyInserters.fromValue(ownerRequest))
-                .retrieve()
-                .bodyToMono(OwnerResponseDTO.class);
-    }
-
- */
 
     public Mono<OwnerResponseDTO> updateOwner(String ownerId, Mono<OwnerRequestDTO> ownerRequestDTO) {
         return ownerRequestDTO.flatMap(requestDTO ->
@@ -88,136 +58,105 @@ public class CustomersServiceClient {
         );
     }
 
-
-
-
-
-    public Flux<OwnerResponseDTO> createOwners (){
+    public Flux<OwnerResponseDTO> createOwners() {
         return webClientBuilder.build().post()
                 .uri(customersServiceUrl)
-               .accept(MediaType.APPLICATION_JSON)
-            .retrieve().bodyToFlux(OwnerResponseDTO.class);
-
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve().bodyToFlux(OwnerResponseDTO.class);
     }
 
-    public Mono<OwnerResponseDTO> createOwner (OwnerResponseDTO model){
+    public Mono<OwnerResponseDTO> createOwner(OwnerResponseDTO model) {
         return webClientBuilder.build().post()
                 .uri(customersServiceUrl + "/owners")
                 .accept(MediaType.APPLICATION_JSON)
                 .body(Mono.just(model), OwnerResponseDTO.class)
                 .retrieve().bodyToMono(OwnerResponseDTO.class);
-
     }
 
-    public Flux<PetType> getPetTypes (){
+    public Flux<PetType> getPetTypes() {
         return webClientBuilder.build().get()
-                .uri(customersServiceUrl + "/petTypes")
+                .uri(customersServiceUrl + "/owners/petTypes")
                 .retrieve()
                 .bodyToFlux(PetType.class);
     }
-    public Flux<PetResponseDTO> getAllPets(){
+
+    public Flux<PetResponseDTO> getAllPets() {
         return webClientBuilder.build().get()
                 .uri(customersServiceUrl + "/pet")
                 .retrieve()
                 .bodyToFlux(PetResponseDTO.class);
     }
 
-    public Mono<PetResponseDTO> getPetByPetId(String petId){
+    public Mono<PetResponseDTO> getPetByPetId(String petId) {
         return webClientBuilder.build().get()
                 .uri(customersServiceUrl + "/pet/" + petId)
                 .retrieve()
                 .bodyToMono(PetResponseDTO.class);
     }
 
-    public Mono<PetResponseDTO> getPet(final String ownerId, final String petId){
+    public Mono<PetResponseDTO> getPet(final String ownerId, final String petId) {
         return webClientBuilder.build().get()
-                .uri(customersServiceUrl + ownerId + "/pets/" + petId)
+                .uri(customersServiceUrl + "/owners/" + ownerId + "/pets/" + petId)
                 .retrieve()
                 .bodyToMono(PetResponseDTO.class);
     }
 
-    public Flux<PetResponseDTO> getPetsByOwnerId(final String ownerId){
+    public Flux<PetResponseDTO> getPetsByOwnerId(final String ownerId) {
         return webClientBuilder.build().get()
-                .uri(customersServiceUrl + ownerId + "/pets")
+                .uri(customersServiceUrl + "/owners/" + ownerId + "/pets")
                 .retrieve()
                 .bodyToFlux(PetResponseDTO.class);
     }
 
-    public Mono<PetResponseDTO> createPet(PetResponseDTO model, final String ownerId){
+    public Mono<PetResponseDTO> createPet(PetResponseDTO model, final String ownerId) {
         return webClientBuilder.build().post()
-                .uri(customersServiceUrl +"{ownerId}/pets", ownerId)
+                .uri(customersServiceUrl + "{ownerId}/pets", ownerId)
                 .body(just(model), PetResponseDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve().bodyToMono(PetResponseDTO.class);
     }
 
-    public Mono<PetResponseDTO> patchPet(PetRequestDTO model, String petId){
+    public Mono<PetResponseDTO> updatePet(PetResponseDTO model, final String petId) {
+        return webClientBuilder.build().put()
+                .uri(customersServiceUrl + "/pet/{petId}", petId)
+                .body(just(model), PetResponseDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve().bodyToMono(PetResponseDTO.class);
+    }
+
+    public Mono<PetResponseDTO> patchPet(PetRequestDTO model, String petId) {
         return webClientBuilder.build().patch()
-                .uri(customersServiceUrl + "/pet/{petId}",petId)
+                .uri(customersServiceUrl + "/pet/{petId}", petId)
                 .body(just(model), PetRequestDTO.class)
                 .retrieve()
                 .bodyToMono(PetResponseDTO.class);
     }
 
-
-    public Mono<PetResponseDTO> deletePet(final String ownerId, final String petId){
+    public Mono<PetResponseDTO> deletePet(final String ownerId, final String petId) {
         return webClientBuilder.build().delete()
-                .uri(customersServiceUrl + "{ownerId}/pets/{petId}", ownerId ,petId)
+                .uri(customersServiceUrl + "{ownerId}/pets/{petId}", ownerId, petId)
                 .retrieve()
                 .bodyToMono(PetResponseDTO.class);
     }
 
-
-    public Mono<OwnerResponseDTO> deleteOwner (final long ownerId) {
+    public Mono<OwnerResponseDTO> deleteOwner(final long ownerId) {
         return webClientBuilder.build().delete()
                 .uri(customersServiceUrl + ownerId)
                 .retrieve()
                 .bodyToMono(OwnerResponseDTO.class);
     }
 
-    public Mono<String> setOwnerPhoto(PhotoDetails file, int id){
+    public Mono<String> setOwnerPhoto(PhotoDetails file, int id) {
         return webClientBuilder.build().post()
-                .uri(customersServiceUrl +"/photo/" + id)
+                .uri(customersServiceUrl + "/photo/" + id)
                 .body(just(file), PhotoDetails.class)
                 .retrieve().bodyToMono(String.class);
     }
 
-    /*public Mono<PhotoDetails> getOwnerPhoto(int id){
-        return webClientBuilder.build().get()
-                .uri(customersServiceUrl +"/photo/" + id)
-                .retrieve()
-                .bodyToMono(PhotoDetails.class);
-    }*/
-
-//    public Mono<Void> deleteOwnerPhoto(int photoId) {
-//        return webClientBuilder.build().delete()
-//                .uri(customersServiceUrl + "/photo/" + photoId)
-//                .retrieve()
-//                .bodyToMono(Void.class);
-//    }
-//
-//
-//
-//    public Mono<String> setPetPhoto(String ownerId, PhotoDetails file, String petId){
-//        return webClientBuilder.build().post()
-//                .uri(customersServiceUrl + ownerId + "/pets/photo/" + petId)
-//                .body(just(file), PhotoDetails.class)
-//                .retrieve().bodyToMono(String.class);
-//    }
-//
-//    public Mono<PhotoDetails> getPetPhoto(String ownerId, String petId){
-//        return webClientBuilder.build().get()
-//                .uri(customersServiceUrl + ownerId + "/pets/photo/" + petId)
-//                .retrieve()
-//                .bodyToMono(PhotoDetails.class);
-//    }
-
-    public Mono<Void> deletePetPhoto (int ownerId, int photoId) {
+    public Mono<Void> deletePetPhoto(int ownerId, int photoId) {
         return webClientBuilder.build().delete()
                 .uri(customersServiceUrl + ownerId + "/pets/photo/" + photoId)
                 .retrieve()
                 .bodyToMono(Void.class);
     }
-
-
 }

@@ -13,4 +13,9 @@ angular.module('petForm', ['ui.router'])
                 url: '/owners/:ownerId/pets/:petId/:method',
                 template: '<pet-form></pet-form>'
             })
+            .state('editPet', {
+                parent: 'app',
+                url: '/owners/:ownerId/pets/:petId/:method',
+                template: '<pet-form></pet-form>'
+            })
     }]);

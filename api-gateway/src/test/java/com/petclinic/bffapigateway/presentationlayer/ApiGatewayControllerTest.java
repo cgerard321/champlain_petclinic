@@ -64,6 +64,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.web.reactive.function.BodyInserters.fromValue;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {
@@ -799,7 +800,38 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.type").isEqualTo(pet.getType());
 
     }
-//
+
+    @Test
+    void shouldUpdatePet() {
+        OwnerResponseDTO od = new OwnerResponseDTO();
+        od.setOwnerId("ownerId-12345");
+        PetResponseDTO pet = new PetResponseDTO();
+        PetType type = new PetType();
+        type.setName("Dog");
+        pet.setPetId("30");
+        pet.setName("Fluffy");
+        pet.setBirthDate("2000-01-01");
+        pet.setType(type);
+
+        when(customersServiceClient.updatePet(any(PetResponseDTO.class), any(String.class)))
+                .thenReturn(Mono.just(pet));
+
+        client.put()
+                .uri("/api/gateway/pets/{petId}", od.getOwnerId(), pet.getPetId())
+                .body(fromValue(pet))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.petId").isEqualTo(pet.getPetId())
+                .jsonPath("$.name").isEqualTo(pet.getName())
+                .jsonPath("$.birthDate").isEqualTo(pet.getBirthDate())
+                .jsonPath("$.type").isEqualTo(pet.getType());
+    }
+
+
+    //
 //
 ////TODO
 //    @Test
