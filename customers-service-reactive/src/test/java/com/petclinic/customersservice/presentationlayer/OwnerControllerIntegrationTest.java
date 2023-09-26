@@ -124,7 +124,7 @@ class OwnerControllerIntegrationTest {
 
         // Create an updated owner object
         Owner updatedOwner = Owner.builder()
-                .ownerId(ownerEntity.getOwnerId()) // Set the same ownerId
+                .ownerId(PUBLIC_OWNER_ID) // Set the same ownerId
                 .firstName("UpdatedFirstName")
                 .lastName("UpdatedLastName")
                 .address("Updated Address")
@@ -135,7 +135,7 @@ class OwnerControllerIntegrationTest {
 
         // Send a PUT request to update the owner
         client.put()
-                .uri("/owners/" + ownerEntity.getOwnerId()) // Use the ownerId for the update
+                .uri("/owners/" + PUBLIC_OWNER_ID) // Use the ownerId for the update
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(updatedOwner)
                 .exchange()
