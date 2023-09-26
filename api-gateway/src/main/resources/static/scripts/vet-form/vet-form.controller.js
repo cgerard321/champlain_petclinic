@@ -60,11 +60,19 @@ angular.module('vetForm')
             vet.firstName = document.getElementById("firstName").value;
             vet.lastName = document.getElementById("lastName").value;
             vet.email = document.getElementById("email").value;
+            if(vet.email.length>320){
+                alert("email length over 320: "+vet.email)
+                return
+            }
             vet.resume = document.getElementById("vetResume").value;
             vet.workday = document.getElementById("workDays").value;
 
             let basePhoneNumber = "(514)-634-8276 #";
             vet.phoneNumber = basePhoneNumber + document.getElementById("phoneNumber").value;
+            if(vet.phoneNumber.length>20){
+                alert("phoneNumber length over 15: "+vet.phoneNumber)
+                return
+            }
 
             let isAct = document.getElementsByClassName("isActiveRadio");
             vet.active = isAct[0].checked;

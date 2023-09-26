@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -49,6 +50,12 @@ public class VetsServiceClient {
                         .get()
                         .uri(vetsServiceUrl + "/" + vetId + "/ratings")
                         .retrieve()
+                        .onStatus(HttpStatusCode::is4xxClientError, error->{
+                            HttpStatusCode statusCode = error.statusCode();
+                            if(statusCode.equals(HttpStatus.NOT_FOUND))
+                                return Mono.error(new NotFoundException("vetId not found: "+vetId));
+                            return Mono.error(new IllegalArgumentException("Something went wrong"));
+                        })
                         .onStatus(HttpStatusCode::is5xxServerError, error->
                                 Mono.error(new IllegalArgumentException("Something went wrong"))
                         )
@@ -132,7 +139,7 @@ public class VetsServiceClient {
                         .onStatus(HttpStatusCode::is4xxClientError, error -> {
                             HttpStatusCode statusCode = error.statusCode();
                             if (statusCode.equals(HttpStatus.NOT_FOUND))
-                                return Mono.error(new ExistingRatingNotFoundException("Rating not found for vetId: " + vetId + " and ratingId: " + ratingId));
+                                return Mono.error(new NotFoundException("Rating not found for vetId: " + vetId + " and ratingId: " + ratingId));
                             return Mono.error(new IllegalArgumentException("Something went wrong"));
                         })
                         .onStatus(HttpStatusCode::is5xxServerError, error ->
@@ -152,7 +159,7 @@ public class VetsServiceClient {
                 .onStatus(HttpStatusCode::is4xxClientError, error -> {
                     HttpStatusCode statusCode = error.statusCode();
                     if (statusCode.equals(HttpStatus.NOT_FOUND))
-                        return Mono.error(new ExistingRatingNotFoundException("ratingId not found: " + ratingId));
+                        return Mono.error(new NotFoundException("vetId not found "+vetId+" or ratingId not found: " + ratingId));
                     return Mono.error(new IllegalArgumentException("Something went wrong"));
                 })
                 .onStatus(HttpStatusCode::is5xxServerError, error ->

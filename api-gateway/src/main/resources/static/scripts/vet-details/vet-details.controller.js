@@ -72,6 +72,10 @@ angular.module('vetDetails')
 
             const updateContainer=document.getElementById("ratingUpdate"+ratingId)
             const selectedValue=parseInt(document.getElementById("ratingOptions"+ratingId).value)
+            if(selectedValue<1||selectedValue>5){
+                alert("rateScore should be between 1 and 5" + selectedValue)
+                return
+            }
             const updatedDescription= document.getElementById("updateDescription"+ratingId).value
 
             if(updateContainer.style.display=="none"){
@@ -139,6 +143,10 @@ angular.module('vetDetails')
         self.submitRatingForm = function (rating) {
             rating.vetId = $stateParams.vetId;
             rating.rateScore = document.getElementById("ratingScore").value;
+            if(rating.rateScore<1||rating.rateScore>5){
+                alert("rateScore should be between 1 and 5" + selectedValue)
+                return
+            }
             rating.rateDescription = document.getElementById("ratingDescription").value;
             var currentDate = new Date();
             var readableDate = currentDate.toLocaleDateString();

@@ -12,6 +12,8 @@ package com.petclinic.vet.servicelayer;
  */
 
 import com.petclinic.vet.dataaccesslayer.VetRepository;
+import com.petclinic.vet.exceptions.InvalidInputException;
+import com.petclinic.vet.exceptions.NotFoundException;
 import com.petclinic.vet.util.EntityDtoUtil;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -37,6 +39,13 @@ public class VetServiceImpl implements VetService {
     @Override
     public Mono<VetDTO> insertVet(Mono<VetDTO> vetDTOMono) {
         return vetDTOMono
+                .flatMap(requestDTO->{
+                    if(requestDTO.getPhoneNumber().length()>20)
+                        return Mono.error(new InvalidInputException("phoneNumber length over 20: "+requestDTO.getPhoneNumber()));
+                    if(requestDTO.getEmail().length()>320)
+                        return Mono.error(new InvalidInputException("email length over 320: "+requestDTO.getEmail()));
+                    return Mono.just(requestDTO);
+                })
                 .map(EntityDtoUtil::toEntity)
                 .doOnNext(e -> e.setVetId(EntityDtoUtil.generateVetId()))
                 .flatMap((vetRepository::save))
@@ -46,7 +55,15 @@ public class VetServiceImpl implements VetService {
     @Override
     public Mono<VetDTO> updateVet(String vetId, Mono<VetDTO> vetDTOMono) {
         return vetRepository.findVetByVetId(vetId)
+                .switchIfEmpty(Mono.error(new NotFoundException("No vet with this vetId was found: " + vetId)))
                 .flatMap(p -> vetDTOMono
+                        .flatMap(requestDTO->{
+                            if(requestDTO.getPhoneNumber().length()>20)
+                                return Mono.error(new InvalidInputException("phoneNumber length over 20: "+requestDTO.getPhoneNumber()));
+                            if(requestDTO.getEmail().length()>320)
+                                return Mono.error(new InvalidInputException("email length over 320: "+requestDTO.getPhoneNumber()));
+                            return Mono.just(requestDTO);
+                        })
                         .map(EntityDtoUtil::toEntity)
                         .doOnNext(e -> e.setVetId(p.getVetId()))
                         .doOnNext(e -> e.setId(p.getId()))
@@ -58,6 +75,7 @@ public class VetServiceImpl implements VetService {
     @Override
     public Mono<VetDTO> getVetByVetId(String vetId) {
         return vetRepository.findVetByVetId(vetId)
+                .switchIfEmpty(Mono.error(new NotFoundException("No vet with this vetId was found: " + vetId)))
                 .map(EntityDtoUtil::toDTO);
     }
 
@@ -75,7 +93,9 @@ public class VetServiceImpl implements VetService {
 
     @Override
     public Mono<Void> deleteVetByVetId(String vetId) {
-        return vetRepository.deleteVetByVetId(vetId);
+        return vetRepository.findVetByVetId(vetId)
+                .switchIfEmpty(Mono.error(new NotFoundException("No vet with this vetId was found: " + vetId)))
+                .flatMap(vetRepository::delete);
     }
 
 

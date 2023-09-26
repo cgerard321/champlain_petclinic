@@ -43,13 +43,12 @@ class VetControllerIntegrationTest {
 
     Vet vet = buildVet();
     Vet vet2 = buildVet2();
-    Rating rating1 = buildRating("12345", vet.getVetId(), 5.0);
-    Rating rating2 = buildRating("12346", vet.getVetId(), 4.0);
-
     Education education1 = buildEducation();
     Education education2 = buildEducation2();
+    Rating rating1 = buildRating("12345", "678910", 5.0);
+    Rating rating2 = buildRating("12346", "678910", 4.0);
     VetDTO vetDTO = buildVetDTO();
-    String VET_ID = vet.getVetId();
+    String VET_ID = "678910";
     String VET_BILL_ID = vet.getVetBillId();
     String INVALID_VET_ID = "mjbedf";
     RatingRequestDTO updatedRating = RatingRequestDTO.builder()
@@ -90,6 +89,20 @@ class VetControllerIntegrationTest {
     }
 
     @Test
+    void getAllRatingsForAVet_WithInvalidVetId_ShouldNotSucceed() {
+        String invalidVetId="123";
+        client
+                .get()
+                .uri("/vets/" + 123 + "/ratings")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("vetId not found: " + invalidVetId);
+    }
+
+    @Test
     void getNumberOfRatingsForAVet_WithValidVetId_ShouldSucceed() {
         Publisher<Rating> setup = ratingRepository.deleteAll()
                 .thenMany(ratingRepository.save(rating1))
@@ -114,6 +127,21 @@ class VetControllerIntegrationTest {
     }
 
     @Test
+    void getNumberOfRatingsForAVet_WithInvalidVetId_ShouldNotSucceed() {
+        String invalidVetId="123";
+
+        client
+                .get()
+                .uri("/vets/" + invalidVetId + "/ratings/count")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("vetId not found: " + invalidVetId);
+    }
+
+    @Test
     void addRatingToAVet_WithValidValues_ShouldSucceed() {
         StepVerifier
                 .create(ratingRepository.deleteAll())
@@ -133,7 +161,7 @@ class VetControllerIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(ratingRequestDTO)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody(RatingResponseDTO.class)
                 .value(dto -> {
@@ -145,6 +173,65 @@ class VetControllerIntegrationTest {
                     assertThat(dto.getRateDate()).isEqualTo(ratingRequestDTO.getRateDate());
                 });
 
+    }
+
+    @Test
+    void addRatingToAVet_WithInvalidVetId_ShouldNotSucceed() {
+        StepVerifier
+                .create(vetRepository.deleteAll())
+                .expectNextCount(0)
+                .verifyComplete();
+
+        StepVerifier
+                .create(ratingRepository.deleteAll())
+                .expectNextCount(0)
+                .verifyComplete();
+
+        String invalidVetId="123";
+
+        RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
+                .vetId(invalidVetId)
+                .rateScore(3.5)
+                .rateDescription("The vet was decent but lacked table manners.")
+                .rateDate("16/09/2023")
+                .build();
+
+        client.post()
+                .uri("/vets/" + invalidVetId + "/ratings")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(ratingRequestDTO)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("vetId not found: " + invalidVetId);
+    }
+
+    @Test
+    void addRatingToAVet_WithInvalidValues_ShouldNotSucceed() {
+        StepVerifier
+                .create(ratingRepository.deleteAll())
+                .expectNextCount(0)
+                .verifyComplete();
+
+        RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
+                .vetId(VET_ID)
+                .rateScore(8.0)
+                .rateDescription("The vet was decent but lacked table manners.")
+                .rateDate("16/09/2023")
+                .build();
+
+        client.post()
+                .uri("/vets/" + VET_ID + "/ratings")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(ratingRequestDTO)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("rateScore should be between 1 and 5: " + ratingRequestDTO.getRateScore());
     }
 
     @Test
@@ -180,12 +267,45 @@ class VetControllerIntegrationTest {
     }
 
     @Test
-    void updateRating_withValidVetIdAndInvalidRatingId_shouldNotSucceed() {
+    void updateRating_withInvalidVetIdAndValidRatingId_shouldNotSucceed() {
         Publisher<Rating> setup = ratingRepository.deleteAll()
                 .thenMany(ratingRepository.save(rating1));
 
         StepVerifier
                 .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        String existingRatingId = rating1.getRatingId();
+
+        String invalidVetId="123";
+
+        client.put()
+                .uri("/vets/" + invalidVetId + "/ratings/" + existingRatingId)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedRating)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("vetId not found: " + invalidVetId);
+    }
+
+    @Test
+    void updateRating_withValidVetIdAndInvalidRatingId_shouldNotSucceed() {
+        Publisher<Rating> setup1 = ratingRepository.deleteAll()
+                .thenMany(ratingRepository.save(rating1));
+
+        StepVerifier
+                .create(setup1)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        Publisher<Vet> setup2 = vetRepository.deleteAll().thenMany(vetRepository.save(vet));
+
+        StepVerifier
+                .create(setup2)
                 .expectNextCount(1)
                 .verifyComplete();
 
@@ -200,7 +320,7 @@ class VetControllerIntegrationTest {
                 .expectStatus().isNotFound()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("Rating with id " + invalidRatingId + " not found.");
+                .jsonPath("$.message").isEqualTo("ratingId not found: "+invalidRatingId);
     }
 
     @Test
@@ -236,6 +356,32 @@ class VetControllerIntegrationTest {
 
     @Test
     void deleteARatingForVet_WithValidId_ShouldSucceed() {
+        Publisher<Vet> setup1 = vetRepository.deleteAll()
+                .thenMany(vetRepository.save(vet));
+
+        StepVerifier
+                .create(setup1)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        Publisher<Rating> setup2 = ratingRepository.deleteAll()
+                .thenMany(ratingRepository.save(rating1));
+
+        StepVerifier
+                .create(setup2)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        client
+                .delete()
+                .uri("/vets/" + VET_ID + "/ratings/{ratingId}", rating1.getRatingId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent();
+    }
+
+    @Test
+    void deleteARatingForVet_WithInvalidVetId_ShouldNotSucceed() {
         Publisher<Rating> setup = ratingRepository.deleteAll().
                 thenMany(ratingRepository.save(rating1));
 
@@ -244,15 +390,46 @@ class VetControllerIntegrationTest {
                 .expectNextCount(1)
                 .verifyComplete();
 
+        String invalidVetId="123";
+
         client
                 .delete()
-                .uri("/vets/" + vet.getVetId() + "/ratings/{ratingId}", rating1.getId())
+                .uri("/vets/" + invalidVetId + "/ratings/{ratingId}", rating1.getRatingId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
-                .expectBody();
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("vetId not found: "+invalidVetId);
     }
 
+    @Test
+    void deleteARatingForVet_WithInvalidRatingId_ShouldNotSucceed() {
+        Publisher<Rating> setup1 = ratingRepository.deleteAll().
+                thenMany(ratingRepository.save(rating1));
+
+        StepVerifier
+                .create(setup1)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        Publisher<Vet> setup2 = vetRepository.deleteAll().thenMany(vetRepository.save(vet));
+
+        StepVerifier
+                .create(setup2)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        String invalidRatingId="123";
+
+        client
+                .delete()
+                .uri("/vets/" + vet.getVetId() + "/ratings/{ratingId}", invalidRatingId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("ratingId not found: "+invalidRatingId);
+    }
 
     @Test
     void getAverageRatingByVetId_ShouldSucceed() {
@@ -309,6 +486,21 @@ class VetControllerIntegrationTest {
                 .value(resp ->{
                     assertEquals("{\"1.0\":0.0,\"2.0\":0.0,\"3.0\":0.0,\"4.0\":0.5,\"5.0\":0.5}", resp);
                 });
+    }
+
+    @Test
+    void getPercentageOfRatingsByInvalidVetId_ShouldNotSucceed(){
+        String invalidVetId="123";
+
+        client.get()
+                .uri("/vets/" + invalidVetId + "/ratings" + "/percentages")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("vetId not found: "+invalidVetId);
+
     }
 
     @Test
@@ -425,6 +617,84 @@ class VetControllerIntegrationTest {
     }
 
     @Test
+    void updateVet_withInvalidPhoneNumber_shouldNotSucceed() {
+        Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet2));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        VetDTO updatedVet=VetDTO.builder()
+                .vetId("678910")
+                .vetBillId("1")
+                .firstName("Clementine")
+                .lastName("LeBlanc")
+                .email("skjfhf@gmail.com")
+                .phoneNumber("947-238-28479999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999")
+                .resume("Just became a vet")
+                .imageId("kjd")
+                .workday("Monday")
+                .specialties(new HashSet<>())
+                .active(false)
+                .build();
+
+        client
+                .put()
+                .uri("/vets/" + VET_ID)
+                .body(Mono.just(updatedVet), VetDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("phoneNumber length over 20: "+updatedVet.getPhoneNumber());
+
+    }
+
+    @Test
+    void updateVet_withInvalidEmail_shouldNotSucceed() {
+        Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet2));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        VetDTO updatedVet=VetDTO.builder()
+                .vetId("678910")
+                .vetBillId("1")
+                .firstName("Clementine")
+                .lastName("LeBlanc")
+                .email("skjfhf@gmail.commmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm" +
+                        "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm" +
+                        "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm" +
+                        "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm" +
+                        "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm" +
+                        "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm" +
+                        "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm" +
+                        "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm")
+                .phoneNumber("947-238-2847")
+                .resume("Just became a vet")
+                .imageId("kjd")
+                .workday("Monday")
+                .specialties(new HashSet<>())
+                .active(false)
+                .build();
+
+        client
+                .put()
+                .uri("/vets/" + VET_ID)
+                .body(Mono.just(updatedVet), VetDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("email length over 320: "+updatedVet.getPhoneNumber());
+    }
+
+    @Test
     void getVetIsActive() {
         Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet2));
 
@@ -494,7 +764,7 @@ class VetControllerIntegrationTest {
                 .body(Mono.just(vet), Vet.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody(VetDTO.class)
                 .value((dto) -> {
@@ -510,6 +780,83 @@ class VetControllerIntegrationTest {
                 });
     }
 
+    @Test
+    void createVet_withInvalidPhoneNumber() {
+        Publisher<Void> setup = vetRepository.deleteAll();
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(0)
+                .verifyComplete();
+
+        VetDTO newVet=VetDTO.builder()
+                .vetId("678910")
+                .vetBillId("1")
+                .firstName("Clementine")
+                .lastName("LeBlanc")
+                .email("skjfhf@gmail.com")
+                .phoneNumber("947-238-28479999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999")
+                .resume("Just became a vet")
+                .imageId("kjd")
+                .workday("Monday")
+                .specialties(new HashSet<>())
+                .active(false)
+                .build();
+
+        client
+                .post()
+                .uri("/vets")
+                .body(Mono.just(newVet), Vet.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("phoneNumber length over 20: "+newVet.getPhoneNumber());
+    }
+
+    @Test
+    void createVet_withInvalidEmail() {
+        Publisher<Void> setup = vetRepository.deleteAll();
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(0)
+                .verifyComplete();
+
+        VetDTO newVet=VetDTO.builder()
+                .vetId("678910")
+                .vetBillId("1")
+                .firstName("Clementine")
+                .lastName("LeBlanc")
+                .email("skjfhf@gmail.commmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm" +
+                        "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm" +
+                        "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm" +
+                        "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm" +
+                        "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm" +
+                        "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm" +
+                        "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm" +
+                        "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm")
+                .phoneNumber("947-238-2847")
+                .resume("Just became a vet")
+                .imageId("kjd")
+                .workday("Monday")
+                .specialties(new HashSet<>())
+                .active(false)
+                .build();
+
+        client
+                .post()
+                .uri("/vets")
+                .body(Mono.just(newVet), Vet.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("email length over 320: "+newVet.getEmail());
+
+    }
 
     @Test
     void deleteVet() {
@@ -525,7 +872,7 @@ class VetControllerIntegrationTest {
                 .uri("/vets/" + VET_ID)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isNoContent()
                 .expectBody();
     }
 
