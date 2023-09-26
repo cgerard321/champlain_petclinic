@@ -7,6 +7,7 @@
             <div class="col-sm-6 form-group">
                 <label class="control-label" for="item">Product</label>
                 <input class="form-control" id="item" ng-model="$ctrl.product.productName" name="productName" type="text" placeholder="Please enter product name." />
+                <input type="hidden" ng-model="$ctrl.product.inventoryId" ng-value="inventoryId">
             </div>
         </div>
         <div class="col-sm-6 form-group">

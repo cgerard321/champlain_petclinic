@@ -1,13 +1,14 @@
 'use strict';
 
 angular.module('inventoryProductList')
-    .controller('InventoryProductController', ['$http', '$scope', '$stateParams','$window', function ($http, $scope, $stateParams,$window) {
+    .controller('InventoryProductController', ['$http', '$scope', '$stateParams','$window', 'InventoryService', function ($http, $scope, $stateParams, $window, InventoryService) {
         var self = this;
-        var inventoryId = $stateParams.inventoryId;
-        console.log("State params: " + $stateParams)
+        var inventoryId
 
-                $http.get('api/gateway/inventory/' + inventoryId + '/products').then(function (resp) {
+                $http.get('api/gateway/inventory/' + $stateParams.inventoryId + '/products').then(function (resp) {
                     self.inventoryProductList = resp.data;
+                    inventoryId = $stateParams.inventoryId;
+                    InventoryService.setInventoryId(inventoryId);
                 }).catch(function (error) {
                     if (error.status === 404) {
                         console.clear()
@@ -17,6 +18,8 @@ angular.module('inventoryProductList')
                         console.error('An error occurred:', error);
                     }
                 });
+
+
                 $scope.deleteProduct = function (product) {
                     let varIsConf = confirm('Are you sure you want to remove this product?');
                     if (varIsConf) {

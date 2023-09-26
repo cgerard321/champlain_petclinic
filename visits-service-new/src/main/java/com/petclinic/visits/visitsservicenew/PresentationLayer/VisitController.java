@@ -2,6 +2,8 @@ package com.petclinic.visits.visitsservicenew.PresentationLayer;
 
 
 import com.petclinic.visits.visitsservicenew.BusinessLayer.VisitService;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.PetResponseDTO;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,8 +21,9 @@ public class VisitController {
     public Flux<VisitResponseDTO> getAllVisits(){
         return visitService.getAllVisits();
     }
+
     @GetMapping(value="/pets/{petId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<VisitResponseDTO> getVisitsForPet(@PathVariable int petId){
+    public Flux<VisitResponseDTO> getVisitsForPet(@PathVariable String petId){
         return visitService.getVisitsForPet(petId);
     }
     @GetMapping("/{visitId}")
@@ -29,8 +32,8 @@ public class VisitController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-    @GetMapping(value="practitioner/visits/{practitionerId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<VisitResponseDTO> getVisitByPractitionerId(@PathVariable int practitionerId){
+    @GetMapping(value="practitioner/{practitionerId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<VisitResponseDTO> getVisitByPractitionerId(@PathVariable String practitionerId){
         return visitService.getVisitsForPractitioner(practitionerId);
     }
     /*
@@ -45,7 +48,7 @@ public class VisitController {
         return visitService.addVisit(visitRequestDTOMono);
     }
 
-    @PutMapping(value = "visits/{visitId}", consumes = "application/json", produces = "application/json")
+    @PutMapping(value = "/{visitId}", consumes = "application/json", produces = "application/json")
     public Mono<VisitResponseDTO> updateVisitByVisitId(@PathVariable String visitId, @RequestBody Mono<VisitRequestDTO> visitRequestDTOMono){
         return visitService.updateVisit(visitId, visitRequestDTOMono);
     }
@@ -56,4 +59,13 @@ public class VisitController {
     }
 
 
+//    @GetMapping("/pets/{petId}")
+//    public Mono<PetResponseDTO> getPetByIdTest(@PathVariable int petId){
+//       return visitService.testingGetPetDTO(petId);
+//    }
+//
+//    @GetMapping("/vets/{vetId}")
+//    public Mono<VetDTO> getVetByIdTest(@PathVariable String vetId){
+//        return visitService.testingGetVetDTO(vetId);
+//    }
 }
