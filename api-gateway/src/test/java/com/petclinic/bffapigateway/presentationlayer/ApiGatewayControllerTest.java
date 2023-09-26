@@ -126,7 +126,7 @@ class ApiGatewayControllerTest {
                 .uri("/api/gateway/vets/" + VET_ID + "/ratings/{ratingsId}", ratingResponseDTO.getRatingId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk();
+                .expectStatus().isNoContent();
 
         Mockito.verify(vetsServiceClient, times(1))
                 .deleteRating(VET_ID, ratingResponseDTO.getRatingId());
@@ -221,15 +221,15 @@ class ApiGatewayControllerTest {
                 .rateDescription("The vet was decent but lacked table manners.")
                 .rateDate("16/09/2023")
                 .build();
-        when(vetsServiceClient.addRatingToVet(VET_ID, Mono.just(ratingRequestDTO)))
+        when(vetsServiceClient.addRatingToVet(anyString(), any(Mono.class)))
                 .thenReturn(Mono.just(ratingResponseDTO));
 
         client.post()
-                .uri("/api/gateway/vets/{vetId}/ratings", ratingRequestDTO.getVetId())
+                .uri("/api/gateway/vets/{vetId}/ratings", VET_ID)
                 .bodyValue(ratingRequestDTO)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
     }
@@ -382,7 +382,7 @@ class ApiGatewayControllerTest {
     @Test
     void createVet() {
         Mono<VetDTO> dto = Mono.just(vetDTO);
-        when(vetsServiceClient.createVet(dto))
+        when(vetsServiceClient.createVet(any(Mono.class)))
                 .thenReturn(dto);
 
         client
@@ -391,7 +391,7 @@ class ApiGatewayControllerTest {
                 .body(dto, VetDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
 
@@ -436,7 +436,7 @@ class ApiGatewayControllerTest {
                 .uri("/api/gateway/vets/" + VET_ID)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk();
+                .expectStatus().isNoContent();
 
         Mockito.verify(vetsServiceClient, times(1))
                 .deleteVet(VET_ID);
