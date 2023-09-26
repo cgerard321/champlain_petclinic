@@ -97,5 +97,31 @@ public class VisitServiceImpl implements VisitService {
                 .map(EntityDtoUtil::toVisitResponseDTO);
     }
 
+    @Override
+    public Mono<VisitResponseDTO> updateStatusForVisitByVisitId(String visitId, String status) {
+        Status newStatus;
+        Status newStatus1;
+        switch (status){
+            case "CONFIRMED":
+                newStatus1 = Status.CONFIRMED;
+                break;
 
+            case "IN_PROGRESS":
+                newStatus1 = Status.IN_PROGRESS;
+                break;
+
+            case "COMPLETED":
+                newStatus1 = Status.COMPLETED;
+                break;
+
+            default:
+                newStatus1 = Status.CANCELLED;
+                break;
+        }
+        newStatus = newStatus1;
+        return repo.findByVisitId(visitId)
+                .doOnNext(v -> v.setStatus(newStatus))
+                .flatMap(repo::save)
+                .map(EntityDtoUtil::toVisitResponseDTO);
+    }
 }

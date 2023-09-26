@@ -49,9 +49,14 @@ public class VisitController {
         return visitService.addVisit(visitRequestDTOMono);
     }
 
-    @PutMapping(value = "visits/{visitId}", consumes = "application/json", produces = "application/json")
+    @PutMapping(value = "/{visitId}", consumes = "application/json", produces = "application/json")
     public Mono<VisitResponseDTO> updateVisitByVisitId(@PathVariable String visitId, @RequestBody Mono<VisitRequestDTO> visitRequestDTOMono){
         return visitService.updateVisit(visitId, visitRequestDTOMono);
+    }
+
+    @PutMapping(value = "/{visitId}/status/{status}", produces = "application/json")
+    public Mono<VisitResponseDTO> updateStatusForVisitByVisitId(@PathVariable String visitId, @PathVariable String status){
+        return visitService.updateStatusForVisitByVisitId(visitId, status);
     }
 
     @DeleteMapping("/{visitId}")

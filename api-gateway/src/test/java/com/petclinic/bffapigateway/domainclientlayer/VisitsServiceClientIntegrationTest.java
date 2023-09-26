@@ -2,10 +2,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.bffapigateway.dtos.Visits.Status;
-import com.petclinic.bffapigateway.dtos.Visits.VisitDetails;
-import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
-import com.petclinic.bffapigateway.dtos.Visits.Visits;
+import com.petclinic.bffapigateway.dtos.Visits.*;
 import com.petclinic.bffapigateway.utils.Security.Filters.JwtTokenFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.RoleFilter;
 import okhttp3.mockwebserver.MockResponse;
@@ -31,6 +28,9 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 @WebFluxTest(value = VisitsServiceClient.class, excludeFilters = @ComponentScan.Filter(type = FilterType.CUSTOM,
         classes = {JwtTokenFilter.class, RoleFilter.class}), useDefaultFilters = false)
@@ -42,6 +42,8 @@ class VisitsServiceClientIntegrationTest {
     private static ObjectMapper objectMapper = new ObjectMapper();
 
     private static final Integer PET_ID = 1;
+
+
 
     private static final String STATUS = "REQUESTED";
 
@@ -164,6 +166,7 @@ class VisitsServiceClientIntegrationTest {
 //        assertEquals(visit.getStatus(), petVisit.getStatus());
 //    }
 
+
     @Test
     void shouldUpdateVisitsForPet() throws JsonProcessingException {
 
@@ -194,7 +197,7 @@ class VisitsServiceClientIntegrationTest {
 //                .setHeader("Content-Type", "application/json")
 //                .setBody(body));
 
-        visitsServiceClient.updateVisitForPet(visit2);
+        visitsServiceClient.updateVisitForPet(visit2, visit2.getPetId());
         final VisitDetails petVisit = visitsServiceClient.getVisitsForPet(201).blockFirst();
 
         assertEquals(visit2.getVisitId(), petVisit.getVisitId());
@@ -205,6 +208,36 @@ class VisitsServiceClientIntegrationTest {
         assertEquals(visit2.getStatus(), petVisit.getStatus());
 
     }
+
+    @Test
+    void shouldUpdateStatusForVisitByVisitId() throws JsonProcessingException {
+
+        String status = "CANCELLED";
+
+        final VisitResponseDTO visit = VisitResponseDTO.builder()
+                .visitId(UUID.randomUUID().toString())
+                .petId(201)
+                .practitionerId(22)
+                .visitDate(LocalDateTime.parse("2021-12-12T13:00:00"))
+                .description("Dog is sick")
+                .status(Status.REQUESTED)
+                .build();
+
+        String visitId = visit.getVisitId();
+
+        StepVerifier.create(visitsServiceClient.updateStatusForVisitByVisitId(visitId, status))
+                .consumeNextWith(visitDTO1 -> {
+                    assertEquals(visit.getVisitId(), visitDTO1.getVisitId());
+                    assertEquals(visit.getDescription(), visitDTO1.getDescription());
+                    assertEquals(visit.getPetId(), visitDTO1.getPetId());
+                    assertEquals(visit.getVisitDate(), visitDTO1.getVisitDate());
+                    assertEquals(visit.getPractitionerId(), visitDTO1.getPractitionerId());
+                    assertEquals(visit.getStatus(), Status.CANCELLED);
+                }).verifyComplete();
+
+    }
+
+
 
 
 //    @Test

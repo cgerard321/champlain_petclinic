@@ -14,6 +14,8 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -73,7 +75,7 @@ class VisitsControllerIntegrationTest {
                 .jsonPath("$.petId").isEqualTo(visit.getPetId())
                 .jsonPath("$.description").isEqualTo(visit.getDescription())
                 .jsonPath("$.visitDate").isEqualTo("2022-11-25T13:45:00")
-                .jsonPath("$.status").isEqualTo(visit.getStatus());
+                .jsonPath("$.status").isEqualTo("COMPLETED");
     }
     @Test
     void getVisitByPractitionerId(){
@@ -99,8 +101,8 @@ class VisitsControllerIntegrationTest {
 
     @Test
     void getVisitsForStatus(){
-        client
-                .get()
+
+        client.get()
                 .uri("/visits/status/"+STATUS)
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
@@ -196,8 +198,8 @@ class VisitsControllerIntegrationTest {
     }
     @Test
     void updateVisit(){
-        client
-                .put()
+
+        client.put()
                 .uri("/visits/visits/"+VISIT_ID)
                 .body(Mono.just(visitResponseDTO), VisitResponseDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
@@ -210,7 +212,23 @@ class VisitsControllerIntegrationTest {
                 .jsonPath("$.petId").isEqualTo(visit.getPetId())
                 .jsonPath("$.description").isEqualTo(visit.getDescription())
                 .jsonPath("$.visitDate").isEqualTo("2022-11-25T13:45:00")
-                .jsonPath("$.status").isEqualTo(visit.getStatus());
+                .jsonPath("$.status").isEqualTo("COMPLETED");
+    }
+
+    @Test
+    void updateStatusForVisitByVisitId(){
+        String status = "CANCELLED";
+        client.put()
+                .uri("/visits/"+VISIT_ID+"/status/"+status)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.visitId").isEqualTo(visit.getVisitId())
+                .jsonPath("$.practitionerId").isEqualTo(visit.getPractitionerId())
+                .jsonPath("$.petId").isEqualTo(visit.getPetId())
+                .jsonPath("$.description").isEqualTo(visit.getDescription())
+                .jsonPath("$.visitDate").isEqualTo("2022-11-25T13:45:00")
+                .jsonPath("$.status").isEqualTo("CANCELLED");
     }
 
     private Visit buildVisit(){
@@ -221,7 +239,8 @@ class VisitsControllerIntegrationTest {
                 .description("this is a dummy description")
                 .petId(2)
                 .practitionerId(2)
-                .status(Status.COMPLETED).build();
+                .status(Status.COMPLETED)
+                .build();
     }
 
     private VisitResponseDTO buildVisitResponseDto(){

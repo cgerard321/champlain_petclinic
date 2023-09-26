@@ -680,25 +680,22 @@ angular.module('visits')
             return statusText;
         };
 
-        self.cancelVisit = function (id, visitStatus, visitPractitionerId, visitDate, visitDescription){
-            visitId = id;
-            var data = {};
+        self.cancelVisit = function (id, status){
+            console.log("Called Function")
+            id = visitId
+            var data = {}
+            status = data.status
 
-            if (visitStatus) {
+            if (status === "CANCELLED") {
                 data = {
-                    date: visitDate,
-                    description: visitDescription,
-                    practitionerId: visitPractitionerId,
-                    status: false
-                };
+                    status: "REQUESTED"
+                }
             }else {
                 data = {
-                    date: visitDate,
-                    description: visitDescription,
-                    practitionerId: visitPractitionerId,
-                    status: true
-                };
+                    status: "CANCELLED"
+                }
             }
+            console.log("Function Finished")
 
             let putURL = "api/gateway/owners/*/pets/" + petId + "/visits/" + visitId;
 
@@ -711,14 +708,8 @@ angular.module('visits')
                 // Call the last sort if there was one
                 callLastSort(true);
 
-                if(!visitStatus) {
-                    createAlert("success", "Successfully reverted cancel on visit!");
-                } else {
+                if(status === "CANCELLED") {
                     createAlert("success", "Successfully cancelled visit!");
-                }
-            },function() {
-                if(!visitStatus) {
-                    createAlert("danger", "Failed to revert cancel on visit!");
                 } else {
                     createAlert("danger", "Failed to cancel visit!");
                 }

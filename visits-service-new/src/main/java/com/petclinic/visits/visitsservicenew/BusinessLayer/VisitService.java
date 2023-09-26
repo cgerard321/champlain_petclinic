@@ -14,5 +14,6 @@ public interface VisitService {
     Mono<VisitResponseDTO> getVisitByVisitId(String visitId);
     Mono<VisitResponseDTO> addVisit(Mono<VisitRequestDTO> visitRequestDTOMono);
     Mono<VisitResponseDTO> updateVisit(String visitId, Mono<VisitRequestDTO> visitRequestDTOMono);
+    Mono<VisitResponseDTO> updateStatusForVisitByVisitId(String visitId, String status);
     Mono<Void> deleteVisit(String visitId);
 }

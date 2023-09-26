@@ -5,10 +5,13 @@ import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
+import com.petclinic.visits.visitsservicenew.Utils.EntityDtoUtil;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -159,6 +162,24 @@ class VisitServiceImplTest {
                     assertEquals(visit.getPetId(), visitDTO1.getPetId());
                     assertEquals(visit.getVisitDate(), visitDTO1.getVisitDate());
                     assertEquals(visit.getPractitionerId(), visitDTO1.getPractitionerId());
+                }).verifyComplete();
+    }
+
+    @Test
+    void updateStatusForVisitByVisitId(){
+        String status = "CANCELLED";
+
+        when(visitRepo.save(any(Visit.class))).thenReturn(Mono.just(visit));
+        when(visitRepo.findByVisitId(anyString())).thenReturn(Mono.just(visit));
+
+        StepVerifier.create(visitService.updateStatusForVisitByVisitId(VISIT_ID, status))
+                .consumeNextWith(visitDTO1 -> {
+                    assertEquals(visit.getVisitId(), visitDTO1.getVisitId());
+                    assertEquals(visit.getDescription(), visitDTO1.getDescription());
+                    assertEquals(visit.getPetId(), visitDTO1.getPetId());
+                    assertEquals(visit.getVisitDate(), visitDTO1.getVisitDate());
+                    assertEquals(visit.getPractitionerId(), visitDTO1.getPractitionerId());
+                    assertEquals(visit.getStatus(), Status.CANCELLED);
                 }).verifyComplete();
     }
 

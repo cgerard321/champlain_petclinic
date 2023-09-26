@@ -1,14 +1,17 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
-import com.petclinic.bffapigateway.dtos.Visits.VisitDetails;
-import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
-import com.petclinic.bffapigateway.dtos.Visits.Visits;
+import com.petclinic.bffapigateway.dtos.Visits.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -113,14 +116,53 @@ public class VisitsServiceClient {
                 .retrieve()
                 .bodyToMono(VisitResponseDTO.class);
     }
-    public Mono<VisitDetails> updateVisitForPet(VisitDetails visit) {
+
+    public Mono<VisitDetails> updateVisitForPet(VisitDetails visit, Integer petId) {
         return webClient
                 .put()
-                .uri("/owners/*/pets/" + visit.getPetId() + "/visits/" + visit.getVisitId())
+                .uri("/visits/pets/{visitId}")
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .body(Mono.just(visit), VisitDetails.class)
                 .retrieve()
                 .bodyToMono(VisitDetails.class);
+    }
+
+    public Mono<VisitResponseDTO> updateVisitByVisitId(VisitRequestDTO visit, String visitId) {
+        return webClient
+                .put()
+                .uri("/visits/{visitId}")
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(Mono.just(visit), VisitRequestDTO.class)
+                .retrieve()
+                .bodyToMono(VisitResponseDTO.class);
+    }
+
+    public Mono<VisitResponseDTO> updateStatusForVisitByVisitId(String visitId, String status) {
+
+        Status newStatus;
+        switch (status){
+            case "CONFIRMED":
+                newStatus = Status.CONFIRMED;
+                break;
+
+            case "IN_PROGRESS":
+                newStatus = Status.IN_PROGRESS;
+                break;
+
+            case "COMPLETED":
+                newStatus = Status.COMPLETED;
+                break;
+
+            default:
+                newStatus = Status.CANCELLED;
+                break;
+        }
+        return webClient
+                .put()
+                .uri("/visits/"+ visitId +"/status/" + newStatus)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .retrieve()
+                .bodyToMono(VisitResponseDTO.class);
     }
 
     public Mono<VisitDetails> createVisitForPet(VisitDetails visit) {

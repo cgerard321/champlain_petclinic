@@ -16,6 +16,7 @@ import com.petclinic.bffapigateway.dtos.Vets.RatingRequestDTO;
 import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
 import com.petclinic.bffapigateway.dtos.Vets.RatingResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetDTO;
+import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.dtos.Visits.VisitDetails;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
@@ -194,11 +195,13 @@ public class BFFApiGatewayController {
         visit.setPetId(Integer.parseInt(petId));
         return visitsServiceClient.createVisitForPet(visit);
     }
-    @PutMapping(value = "owners/*/pets/{petId}/visits/{visitId}", consumes = "application/json", produces = "application/json")
-    Mono<VisitDetails> updateVisit(@RequestBody VisitDetails visit, @PathVariable int petId, @PathVariable String visitId) {
-        visit.setPetId(petId);
-        visit.setVisitId(visitId);
-        return visitsServiceClient.updateVisitForPet(visit);
+    @PutMapping(value = "/visits/{visitId}", consumes = "application/json", produces = "application/json")
+    Mono<VisitResponseDTO> updateVisitByVisitId(@RequestBody VisitRequestDTO visit, @PathVariable String visitId) {
+        return visitsServiceClient.updateVisitByVisitId(visit, visitId);
+    }
+    @PutMapping(value = "/visits/{visitId}/status/{status}")
+    Mono<VisitResponseDTO> updateStatusForVisitByVisitId(@PathVariable String visitId, @PathVariable String status) {
+        return visitsServiceClient.updateStatusForVisitByVisitId(visitId, status);
     }
     @DeleteMapping (value = "visits/{visitId}")
     public Mono<Void> deleteVisitsByVisitId(final @PathVariable String visitId){

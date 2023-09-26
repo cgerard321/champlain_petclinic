@@ -1446,7 +1446,7 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.status").isEqualTo(false)
                 .jsonPath("$.practitionerId").isEqualTo(1);
 
-        when(visitsServiceClient.updateVisitForPet(visit2))
+        when(visitsServiceClient.updateVisitForPet(visit2, visit2.getPetId()))
                 .thenReturn(Mono.just(visit2));
 
         client.put()
@@ -1554,6 +1554,37 @@ class ApiGatewayControllerTest {
      */
 
     @Test
+    void updateStatusForVisitByVisitId(){
+        String status = "CANCELLED";
+        VisitResponseDTO visit = VisitResponseDTO.builder()
+                .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
+                .visitDate(LocalDateTime.parse("2022-11-25T13:45:00"))
+                .description("this is a dummy description")
+                .practitionerId(2)
+                .petId(2)
+                .status(Status.CANCELLED)
+                .build();
+        String visitId = visit.getVisitId();
+        when(visitsServiceClient.updateStatusForVisitByVisitId(anyString(), anyString()))
+                .thenReturn(Mono.just(visit));
+
+        client.put()
+                .uri("/api/gateway/visits/"+visitId+"/status/"+status)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.visitId").isEqualTo(visit.getVisitId())
+                .jsonPath("$.practitionerId").isEqualTo(visit.getPractitionerId())
+                .jsonPath("$.petId").isEqualTo(visit.getPetId())
+                .jsonPath("$.description").isEqualTo(visit.getDescription())
+                .jsonPath("$.visitDate").isEqualTo("2022-11-25T13:45:00")
+                .jsonPath("$.status").isEqualTo("CANCELLED");
+
+        Mockito.verify(visitsServiceClient, times(1))
+                .updateStatusForVisitByVisitId(anyString(), anyString());
+    }
+
+    @Test
     void getSingleVisit_Valid() {
         VisitResponseDTO visitResponseDTO = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25T13:45:00"), "this is a dummy description", 2, 2, Status.REQUESTED);
         when(visitsServiceClient.getVisitByVisitId(anyString())).thenReturn(Mono.just(visitResponseDTO));
@@ -1568,7 +1599,7 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.visitDate").isEqualTo("2022-11-25T13:45:00")
                 .jsonPath("$.description").isEqualTo(visitResponseDTO.getDescription())
                 .jsonPath("$.practitionerId").isEqualTo(visitResponseDTO.getPractitionerId())
-                .jsonPath("$.status").isEqualTo(visitResponseDTO.getStatus());
+                .jsonPath("$.status").isEqualTo("REQUESTED");
     }
 
 //    @Test

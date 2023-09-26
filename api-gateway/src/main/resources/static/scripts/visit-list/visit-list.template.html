@@ -24,26 +24,12 @@
         <td style="white-space: pre-line">{{v.petId}}</td>
         <td id="statusTextBox" class="status-text" style="white-space: pre-line">{{v.status}}</td>
         <td class="status-text" style="white-space: pre-line"></td>
-        <td id="cancelBtn" style="text-align:center; vertical-align:middle" ><button class="btn btn-default cancel-button" type="button" style="background-color: orangered; color: white" onclick="changeStatus()" >Cancel Visit</button></td>
+        <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="cancelVisit(v.visitId, v.status)">Cancel Visit A</a></td>
+        <!-- <td id="cancelBtn" style="text-align:center; vertical-align:middle" ><button class="btn btn-default cancel-button" type="button" style="background-color: orangered; color: white" onclick="changeStatus()" >Cancel Visit</button></td> -->
         <td style="text-align:center; vertical-align:middle"><button class="btn btn-default" type="button" style="background-color: royalblue; color: white" ng-click="$ctrl.switchToUpdateForm($event, v.practitionerId, v.description, v.visitId, v.status)">Edit Visit</button></td>
         <td style="text-align:center; vertical-align:middle"><button class="btn btn-danger" type="button" ng-click="$ctrl.showConfirmationModal($event, v.visitId)">Delete visit</button></td>
     </tr>
     </tbody>
-
-    <script>
-        function changeStatus(){
-            let stattext = document.getElementById("statusTextBox")
-            let btn = document.getElementById("cancelBtn")
-            if(stattext.innerHTML !== "CANCELLED"){
-                stattext.innerHTML = "CANCELLED";
-                btn.innerHTML = "Visit Successfully Cancelled!";
-                $ctrl.status = "CANCELLED";
-                v.status = "CANCELLED";
-            }else{
-
-            }
-        }
-    </script>
 
 </table><h3 style="margin-top: 6px">Previous Visits</h3>
 <table class="table">
@@ -71,7 +57,8 @@
         <td style="white-space: pre-line">{{v.petId}}</td>
         <td class="status-text" style="white-space: pre-line">{{v.status}}</td>
         <td class="status-text" style="white-space: pre-line"></td>
-        <td style="text-align:center; vertical-align:middle"><button class="btn btn-default cancel-button" type="button" style="background-color: orangered; color: white" ng-click="$ctrl.showConfirmationModal($event, v.visitId, v.status, v.practitionerId, v.description)">Cancel Visit</button></td>
+        <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="cancelVisit(v.visitId, v.status)">Cancel Visit A</a></td>
+        <!-- <td style="text-align:center; vertical-align:middle"><button class="btn btn-default cancel-button" type="button" style="background-color: orangered; color: white" ng-click="$ctrl.showConfirmationModal($event, v.visitId, v.status, v.practitionerId, v.description)">Cancel Visit</button></td> -->
         <td style="text-align:center; vertical-align:middle"><button class="btn btn-default" type="button" style="background-color: royalblue; color: white" ng-click="$ctrl.switchToUpdateForm($event, v.practitionerId, v.description, v.visitId, v.status)">Edit Visit</button></td>
         <td style="text-align:center; vertical-align:middle"><button class="btn btn-danger" type="button" ng-click="$ctrl.showConfirmationModal($event, v.visitId)">Delete visit</button></td>
     </tr>
