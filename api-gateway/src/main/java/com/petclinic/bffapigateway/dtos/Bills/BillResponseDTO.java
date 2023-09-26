@@ -6,7 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.Date;
 
 @Data
 @AllArgsConstructor
@@ -15,7 +14,7 @@ import java.util.Date;
 public class BillResponseDTO {
 
     private String billId;
-    private int customerId;
+    private String customerId;
     private String visitType;
     private String vetId;
     private LocalDate date;

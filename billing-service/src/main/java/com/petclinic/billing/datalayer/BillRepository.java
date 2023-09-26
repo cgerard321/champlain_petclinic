@@ -15,7 +15,7 @@ public interface BillRepository extends ReactiveMongoRepository<Bill, String> {
     Mono<Bill> findByBillId(String billId);
 
     @Transactional(readOnly = true)
-    Flux<Bill> findByCustomerId(int customerId);
+    Flux<Bill> findByCustomerId(String customerId);
 
     @Transactional(readOnly = true)
     Flux<Bill> findByVetId(String vetId);
@@ -23,6 +23,6 @@ public interface BillRepository extends ReactiveMongoRepository<Bill, String> {
     Mono<Void>deleteBillByBillId(String billId);
 
     Flux<Void> deleteBillsByVetId(String vetId);
-    Flux<Void> deleteBillsByCustomerId(int customerId);
+    Flux<Void> deleteBillsByCustomerId(String customerId);
 
 }

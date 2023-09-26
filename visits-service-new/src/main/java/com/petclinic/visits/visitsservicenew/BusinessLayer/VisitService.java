@@ -10,7 +10,7 @@ import reactor.core.publisher.Mono;
 public interface VisitService {
     Flux<VisitResponseDTO> getAllVisits();
     Flux<VisitResponseDTO> getVisitsForPet(String petId);
-    Flux<VisitResponseDTO> getVisitsForPractitioner(String vetId);
+    Flux<VisitResponseDTO> getVisitsForVet(String vetId);
     //Flux<VisitResponseDTO> getVisitsByPractitionerIdAndMonth(int practitionerId, int month);
     Mono<VisitResponseDTO> getVisitByVisitId(String visitId);
     Mono<VisitResponseDTO> addVisit(Mono<VisitRequestDTO> visitRequestDTOMono);
