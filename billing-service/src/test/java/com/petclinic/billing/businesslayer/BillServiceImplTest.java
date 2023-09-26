@@ -44,7 +44,6 @@ public class BillServiceImplTest {
     public void test_getBillById(){
         Bill billEntity = buildBill();
 
-
         String BILL_ID = billEntity.getBillId();
 
         when(repo.findByBillId(anyString())).thenReturn(Mono.just(billEntity));
@@ -58,8 +57,6 @@ public class BillServiceImplTest {
                     assertEquals(billEntity.getVisitType(), foundBill.getVisitType());
                 })
                 .verifyComplete();
-
-
     }
 
     @Test
