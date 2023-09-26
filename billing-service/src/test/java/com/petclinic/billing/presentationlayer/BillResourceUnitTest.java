@@ -41,9 +41,9 @@ class BillResourceUnitTest {
 
 
     @Test
-    void findBill() {
+    void findBillByBillId() {
 
-        when(billService.GetBill(anyString())).thenReturn(Mono.just(responseDTO));
+        when(billService.getBillByBillId(anyString())).thenReturn(Mono.just(responseDTO));
 
         client.get()
                 .uri("/bills/" + BILL_ID_OK)
@@ -56,8 +56,7 @@ class BillResourceUnitTest {
                 .jsonPath("$.customerId").isEqualTo(responseDTO.getCustomerId())
                 .jsonPath("$.amount").isEqualTo(responseDTO.getAmount());
 
-        Mockito.verify(billService, times(1)).GetBill(BILL_ID_OK);
-
+        Mockito.verify(billService, times(1)).getBillByBillId(BILL_ID_OK);
     }
 
     @Test

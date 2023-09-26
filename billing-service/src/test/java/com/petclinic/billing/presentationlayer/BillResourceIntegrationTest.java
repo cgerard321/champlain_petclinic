@@ -30,6 +30,30 @@ class BillResourceIntegrationTest {
     @Autowired
     private BillRepository repo;
 
+    @Test
+    void findBillByValidBillID() {
+
+        Bill billEntity = buildBill();
+
+        Publisher<Bill> setup = repo.deleteAll().thenMany(repo.save(billEntity));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        client.get()
+                .uri("/bills/" + billEntity.getBillId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.visitType").isEqualTo(billEntity.getVisitType())
+                .jsonPath("$.customerId").isEqualTo(billEntity.getCustomerId())
+                .jsonPath("$.amount").isEqualTo(billEntity.getAmount());
+
+    }
 
     @Test
     void findAllBills() {
@@ -141,32 +165,6 @@ class BillResourceIntegrationTest {
     }
 
     @Test
-    void findBillByValidBillID() {
-
-        Bill billEntity = buildBill();
-
-        Publisher<Bill> setup = repo.deleteAll().thenMany(repo.save(billEntity));
-
-        StepVerifier
-                .create(setup)
-                .expectNextCount(1)
-                .verifyComplete();
-
-        client.get()
-                .uri("/bills/" + billEntity.getBillId())
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.visitType").isEqualTo(billEntity.getVisitType())
-                .jsonPath("$.customerId").isEqualTo(billEntity.getCustomerId())
-                .jsonPath("$.amount").isEqualTo(billEntity.getAmount());
-
-    }
-
-
-    @Test
     void getBillByCustomerId() {
 
         Bill billEntity = buildBill();
@@ -190,6 +188,7 @@ class BillResourceIntegrationTest {
                     Assertions.assertNotNull(bills);
                 });
     }
+
     @Test
     void getBillByVetId() {
 
@@ -214,6 +213,7 @@ class BillResourceIntegrationTest {
                     Assertions.assertNotNull(bills);
                 });
     }
+
     @Test
     void deleteBillByBillId() {
 
