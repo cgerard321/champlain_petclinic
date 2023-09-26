@@ -20,6 +20,7 @@
 
 package com.auth.authservice.presentationlayer.User;
 
+import com.auth.authservice.Util.Configuration.Security.PasswordStrengthCheck;
 import lombok.*;
 
 
@@ -32,6 +33,7 @@ public class UserIDLessRoleLessDTO {
 
     private String username;
 
+    @PasswordStrengthCheck
     private String password;
 
     private String email;

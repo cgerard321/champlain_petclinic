@@ -8,13 +8,11 @@
 
 package com.auth.authservice.businesslayer;
 
-import com.auth.authservice.Util.Exceptions.EmailAlreadyExistsException;
-import com.auth.authservice.Util.Exceptions.IncorrectPasswordException;
-import com.auth.authservice.Util.Exceptions.InvalidInputException;
-import com.auth.authservice.Util.Exceptions.NotFoundException;
+import com.auth.authservice.Util.Exceptions.*;
 import com.auth.authservice.datalayer.roles.Role;
 import com.auth.authservice.datalayer.user.ResetPasswordToken;
 import com.auth.authservice.datalayer.user.ResetPasswordTokenRepository;
+import com.auth.authservice.datalayer.roles.RoleRepo;
 import com.auth.authservice.datalayer.user.User;
 import com.auth.authservice.datalayer.user.UserRepo;
 import com.auth.authservice.datamapperlayer.UserMapper;
@@ -36,11 +34,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.ui.Model;
-import org.w3c.dom.Text;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import javax.swing.text.html.HTMLDocument;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.*;
@@ -55,7 +50,7 @@ public class UserServiceImpl implements UserService {
     private final SecurityConst securityConst;
     private final ResetPasswordTokenRepository tokenRepository;
     private final UserRepo userRepo;
-    //private final RoleRepo roleRepo;
+    private final RoleRepo roleRepo;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
     private final MailService mailService;
@@ -97,28 +92,29 @@ public class UserServiceImpl implements UserService {
     @Override
     public User createUser(@Valid UserIDLessRoleLessDTO userIDLessDTO) {
 
-        final Optional<User> byEmail = userRepo.findByEmail(userIDLessDTO.getEmail());
+            final Optional<User> byEmail = userRepo.findByEmail(userIDLessDTO.getEmail());
 
-        if(byEmail.isPresent()) {
-            throw new EmailAlreadyExistsException(
-                    format("User with e-mail %s already exists", userIDLessDTO.getEmail()));
-        }
+            if (byEmail.isPresent()) {
+                throw new EmailAlreadyExistsException(
+                        format("User with e-mail %s already exists", userIDLessDTO.getEmail()));
+            }
 
-        log.info("Saving user with email {}", userIDLessDTO.getEmail());
-        User user = userMapper.idLessRoleLessDTOToModel(userIDLessDTO);
+            log.info("Saving user with email {}", userIDLessDTO.getEmail());
+            User user = userMapper.idLessRoleLessDTOToModel(userIDLessDTO);
 
-        //Optional<Role> role = roleRepo.findById(1L);
-        Set<Role> roleSet = new HashSet<>();
-        //role.ifPresent(roleSet::add);
-        user.setRoles(roleSet);
+            Optional<Role> role = roleRepo.findById(3L);
+            Set<Role> roleSet = new HashSet<>();
+            role.ifPresent(roleSet::add);
+            user.setRoles(roleSet);
 
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        log.info("Sending email to {}...", userIDLessDTO.getEmail());
-        log.info(mailService.sendMail(generateVerificationMail(user)));
-        log.info("Email sent to {}", userIDLessDTO.getEmail());
+            log.info("Sending email to {}...", userIDLessDTO.getEmail());
+            log.info(mailService.sendMail(generateVerificationMail(user)));
+            log.info("Email sent to {}", userIDLessDTO.getEmail());
 
-        return userRepo.save(user);
+            return userRepo.save(user);
+
     }
 
     @Override
@@ -147,17 +143,71 @@ public class UserServiceImpl implements UserService {
         // Remove dangling . in case of empty sub
         String niceSub = gatewaySubdomain.length() > 0 ? gatewaySubdomain + "." : "";
 
+        String email = format("""
+                     <!DOCTYPE html>
+                     <html lang="en">
+                     <head>
+                         <meta charset="UTF-8">
+                         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                         <title>Email Verification</title>
+                         <style>
+                             body {
+                                 font-family: Arial, sans-serif;
+                                 background-color: #f4f4f4;
+                                 margin: 0;
+                                 padding: 0;
+                             }
+                             .container {
+                                 max-width: 600px;
+                                 margin: 0 auto;
+                                 padding: 20px;
+                                 background-color: #fff;
+                                 border-radius: 5px;
+                                 box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                             }
+                             h1 {
+                                 color: #333;
+                             }
+                             p {
+                                 color: #555;
+                             }
+                             a {
+                                 color: #007BFF;
+                             }
+                         </style>
+                     </head>
+                     <body>
+                         <div class="container">
+                             <h1>Thank you for Signing Up with us - Verify your email address</h1>
+                             <h3>We have received a request to create an account for Pet Clinic from this email.</h3>
+                            \s
+                             <ol>
+                                 <li>Click on the following link to verify your identity: <a href="%s://%s%s/verification/%s">Verify Email</a></li>
+                             </ol>
+                            \s
+                             <p>If you do not wish to create an account, please disregard this email.</p>
+                            \s
+                             <p>Thank you for choosing Pet Clinic.</p>
+                         </div>
+                     </body>
+                     </html>
+                     """, gatewayProtocol, niceSub, gatewayOrigin, base64Token);
+
         return Mail.builder()
-                .message(format("Your verification link: %s://%s%s/verification/%s",
-                        gatewayProtocol, niceSub, gatewayOrigin, base64Token))
+                .message(email)
                 .subject("PetClinic e-mail verification")
                 .to(user.getEmail())
                 .build();
+
+//                .message(format("Your verification link: %s://%s%s/verification/%s",
+//                gatewayProtocol, niceSub, gatewayOrigin, base64Token))
     }
 
     @Override
     public UserPasswordLessDTO verifyEmailFromToken(String token) {
-        final Optional<User> decryptUser = userRepo.findByEmail(jwtService.getUsernameFromToken(token));
+
+        final Optional<User> decryptUser = userRepo.findByUsername(jwtService.getUsernameFromToken(token));
+
         log.info("Decrypted user with email {} from token", decryptUser.get().getEmail());
 
         decryptUser.get().setVerified(true);
@@ -320,9 +370,7 @@ public class UserServiceImpl implements UserService {
 
     public void sendEmailForgotPassword(String recipientEmail, String link){
 
-
-        // Initialize an empty HTMLDocument object instance
-             String email = format("""
+         String email = format("""
                      <!DOCTYPE html>
                      <html lang="en">
                      <head>

@@ -77,7 +77,7 @@ public class JwtTokenFilter extends OncePerRequestFilter {
         if (sessionCookie == null) {
             log.info("No token found");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            chain.doFilter(request, response);
+            resolver.resolveException(request, response, null, new InvalidBearerTokenException("No Token Found"));
             return;
         }
 
