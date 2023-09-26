@@ -5,6 +5,7 @@ import com.petclinic.visits.visitsservicenew.BusinessLayer.VisitService;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.PetResponseDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -54,8 +55,9 @@ public class VisitController {
     }
 
     @DeleteMapping("/{visitId}")
-    public Mono<Void> deleteVisit(@PathVariable("visitId") String visitId) {
-        return visitService.deleteVisit(visitId);
+    public Mono<ResponseEntity<Void>> deleteVisit(@PathVariable String visitId) {
+        return visitService.deleteVisit(visitId)
+                .then(Mono.just(new ResponseEntity<Void>(HttpStatus.NO_CONTENT)));
     }
 
 
