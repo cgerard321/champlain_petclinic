@@ -7,6 +7,7 @@ import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -187,11 +188,25 @@ class VisitServiceImplTest {
                 }).verifyComplete();
     }
     @Test
-    void deleteVisit(){
-        visitService.deleteVisit(VISIT_ID);
+    void deleteVisitById_visitId_shouldSucceed(){
+        //arrange
+        String visitId = uuid1.toString();
 
-        verify(visitRepo, times(1)).deleteByVisitId(VISIT_ID);
+        Mockito.when(visitRepo.existsByVisitId(visitId)).thenReturn(Mono.just(true));
+        Mockito.when(visitRepo.deleteByVisitId(visitId)).thenReturn(Mono.empty());
+
+        //act
+        Mono<Void> expectResult = visitService.deleteVisit(visitId);
+
+        //assert
+        StepVerifier.create(expectResult)
+                .verifyComplete();
+
+        Mockito.verify(visitRepo, Mockito.times(1)).deleteByVisitId(visitId);
+
     }
+
+
     @Test
     void updateVisit(){
         when(visitRepo.save(any(Visit.class))).thenReturn(Mono.just(visit1));

@@ -3,8 +3,8 @@ package com.petclinic.visits.visitsservicenew.PresentationLayer;
 
 import com.petclinic.visits.visitsservicenew.BusinessLayer.VisitService;
 import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
-import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.*;
+import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,12 +15,10 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -30,8 +28,9 @@ import java.util.UUID;
 class VisitControllerUnitTest {
     @MockBean
     private VisitService visitService;
+
     @Autowired
-    private WebTestClient webFluxTest;
+    private WebTestClient webTestClient;
 
 
     @MockBean
@@ -83,7 +82,7 @@ class VisitControllerUnitTest {
     void getAllVisits(){
         when(visitService.getAllVisits()).thenReturn(Flux.just(visitResponseDTO, visitResponseDTO));
 
-        webFluxTest.get()
+        webTestClient.get()
                 .uri("/visits")
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
@@ -91,14 +90,14 @@ class VisitControllerUnitTest {
                 .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM + ";charset=UTF-8")
                 .returnResult(VisitResponseDTO.class);
 
-        Mockito.verify(visitService, times(1)).getAllVisits();
+        verify(visitService, times(1)).getAllVisits();
     }
 
     @Test
     void getVisitByVisitId(){
         when(visitService.getVisitByVisitId(anyString())).thenReturn(Mono.just(visitResponseDTO));
 
-        webFluxTest.get()
+        webTestClient.get()
                 .uri("/visits/" + Visit_UUID_OK)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -112,14 +111,14 @@ class VisitControllerUnitTest {
                 .jsonPath("$.practitionerId").isEqualTo(visitResponseDTO.getPractitionerId())
                 .jsonPath("$.status").isEqualTo(visitResponseDTO.isStatus());
 
-        Mockito.verify(visitService, times(1)).getVisitByVisitId(Visit_UUID_OK);
+        verify(visitService, times(1)).getVisitByVisitId(Visit_UUID_OK);
     }
 
     @Test
     void getVisitByPractitionerId(){
         when(visitService.getVisitsForPractitioner(anyString())).thenReturn(Flux.just(visitResponseDTO));
 
-        webFluxTest.get()
+        webTestClient.get()
                 .uri("/visits/practitioner/" + Practitioner_Id_OK)
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
@@ -129,12 +128,13 @@ class VisitControllerUnitTest {
 
         Mockito.verify(visitService, times(1)).getVisitsForPractitioner(Practitioner_Id_OK);
     }
+    
 
     @Test
     void getVisitsByPetId(){
         when(visitService.getVisitsForPet(anyString())).thenReturn(Flux.just(visitResponseDTO));
 
-        webFluxTest.get()
+        webTestClient.get()
                 .uri("/visits/pets/" + Pet_Id_OK)
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
@@ -142,7 +142,7 @@ class VisitControllerUnitTest {
                 .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM + ";charset=UTF-8")
                 .returnResult(VisitResponseDTO.class);
 
-        Mockito.verify(visitService, times(1)).getVisitsForPet(Pet_Id_OK);
+        verify(visitService, times(1)).getVisitsForPet(Pet_Id_OK);
     }
 
     /*
@@ -166,7 +166,7 @@ class VisitControllerUnitTest {
     void addVisit(){
         when(visitService.addVisit(any(Mono.class))).thenReturn(Mono.just(visitResponseDTO));
 
-        webFluxTest
+        webTestClient
                 .post()
                 .uri("/visits")
                 .body(Mono.just(visitRequestDTO), VisitRequestDTO.class)
@@ -176,7 +176,7 @@ class VisitControllerUnitTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
 
-        Mockito.verify(visitService, times(1)).addVisit(any(Mono.class));
+        verify(visitService, times(1)).addVisit(any(Mono.class));
     }
 
     @Test
@@ -186,7 +186,7 @@ class VisitControllerUnitTest {
         Mono<VisitRequestDTO> monoVisit = Mono.just(visitRequestDTO);
 
 
-        webFluxTest.put()
+        webTestClient.put()
                 .uri("/visits/" + Visit_UUID_OK)
                 .accept(MediaType.APPLICATION_JSON)
                 .body(monoVisit, VisitRequestDTO.class)
@@ -196,8 +196,9 @@ class VisitControllerUnitTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
 
-        Mockito.verify(visitService, times(1)).updateVisit(anyString(), any(Mono.class));
+        verify(visitService, times(1)).updateVisit(anyString(), any(Mono.class));
     }
+    /*
     @Test
     void deleteVisit(){
         webFluxTest.delete()
@@ -208,6 +209,41 @@ class VisitControllerUnitTest {
 
         Mockito.verify(visitService, times(1)).deleteVisit(Visit_UUID_OK);
     }
+     */
+    @Test
+    void deleteVisit_visitId_shouldSucceed() {
+        // Arrange
+        String visitId = UUID.randomUUID().toString();
+        when(visitService.deleteVisit(visitId)).thenReturn(Mono.empty());
+
+        // Act & Assert
+        webTestClient
+                .delete()
+                .uri("/visits/{visitId}", visitId)
+                .exchange()
+                .expectStatus().isNoContent();  // Expecting 204 NO CONTENT status.
+
+        verify(visitService, times(1)).deleteVisit(visitId);
+    }
+
+    @Test
+    void deleteVisit_NonExistentVisitId_ShouldReturnNotFound() {
+        // Arrange
+        String invalidVisitId = "fakeId";
+        when(visitService.deleteVisit(invalidVisitId)).thenReturn(Mono.error(new NotFoundException("No visit was found with visitId: " + invalidVisitId)));
+
+        // Act & Assert
+        webTestClient
+                .delete()
+                .uri("/visits/{visitId}", invalidVisitId)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message", "No visit was found with visitId: " + invalidVisitId);
+    }
+
+
+
     private VisitResponseDTO buildVisitResponseDto(){
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         return VisitResponseDTO.builder()
