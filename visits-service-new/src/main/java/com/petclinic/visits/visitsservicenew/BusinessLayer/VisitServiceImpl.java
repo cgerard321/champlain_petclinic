@@ -6,6 +6,7 @@ import com.petclinic.visits.visitsservicenew.DomainClientLayer.PetResponseDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.PetsClient;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetsClient;
+import com.petclinic.visits.visitsservicenew.Exceptions.BadRequestException;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
@@ -14,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.time.LocalDateTime;
 
 
 @Service
@@ -51,6 +54,11 @@ public class VisitServiceImpl implements VisitService {
     @Override
     public Mono<VisitResponseDTO> addVisit(Mono<VisitRequestDTO> visitRequestDTOMono) {
         return visitRequestDTOMono
+                .flatMap(visitRequestDTO -> validateVisitRequest(visitRequestDTO)
+                        .then(validatePetId(visitRequestDTO.getPetId()))
+                        .then(validateVetId(visitRequestDTO.getPractitionerId()))
+                        .then(Mono.just(visitRequestDTO))
+                )
                 .doOnNext(v -> System.out.println("Request Date: " + v.getVisitDate())) // Debugging
                 .map(EntityDtoUtil::toVisitEntity)
                 .doOnNext(x -> x.setVisitId(EntityDtoUtil.generateVisitIdString()))
@@ -108,5 +116,19 @@ public class VisitServiceImpl implements VisitService {
     private Mono<VetDTO> validateVetId(String vetId) {
         return vetsClient.getVetByVetId(vetId)
                 .switchIfEmpty(Mono.error(new NotFoundException("No vet was found with vetId: " + vetId)));
+    }
+
+    private Mono<VisitRequestDTO> validateVisitRequest(VisitRequestDTO dto) {
+        if (dto.getDescription() == null || dto.getDescription().isBlank()) {
+            return Mono.error(new BadRequestException("Please enter a description for this visit"));
+        } else if (dto.getVisitDate() == null || dto.getVisitDate().isBefore(LocalDateTime.now())) {
+            return Mono.error(new BadRequestException("Appointment cannot be scheduled in the past"));
+        } else if (dto.getPetId() == null || dto.getPetId().isBlank()) {
+            return Mono.error(new BadRequestException("PetId cannot be null or blank"));
+        } else if ( dto.getPractitionerId() == null || dto.getPractitionerId().isBlank()) {
+            return Mono.error(new BadRequestException("VetId cannot be null or blank"));
+        } else {
+            return Mono.just(dto);
+        }
     }
 }
