@@ -2487,6 +2487,37 @@ void deleteAllInventory_shouldSucceed() {
 
 
     }
+
+    @Test
+    void getAllEducationsByVetId_WithValidId_ShouldSucceed(){
+        EducationResponseDTO educationResponseDTO = buildEducation();
+        when(vetsServiceClient.getEducationsByVetId(anyString()))
+                .thenReturn(Flux.just(educationResponseDTO));
+
+        client
+                .get()
+                .uri("/api/gateway/vets/" + VET_ID + "/educations")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$[0].educationId").isEqualTo(educationResponseDTO.getEducationId());
+
+    }
+
+    private EducationResponseDTO buildEducation(){
+        return EducationResponseDTO.builder()
+                .educationId("1")
+                .vetId(VET_ID)
+                .degree("Doctor of Veterinary Medicine")
+                .fieldOfStudy("Veterinary Medicine")
+                .schoolName("University of Montreal")
+                .startDate("2010")
+                .endDate("2014")
+                .build();
+    }
+
 }
 
 
