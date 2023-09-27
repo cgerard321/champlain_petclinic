@@ -1,19 +1,25 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Visits.VisitDetails;
 import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.Visits;
+import com.petclinic.bffapigateway.exceptions.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.io.IOException;
 import java.util.List;
 
 import static java.util.stream.Collectors.joining;
@@ -134,6 +140,26 @@ public Mono<VisitResponseDTO> createVisitForPet(VisitRequestDTO visit) {
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             .body(Mono.just(visit), VisitRequestDTO.class)
             .retrieve()
+            .onStatus(response -> response.is4xxClientError(), response -> {
+                HttpStatusCode httpStatus = response.statusCode();
+                return response.bodyToMono(String.class)
+                        .flatMap(errorMessage -> {
+                            try {
+                                ObjectMapper objectMapper = new ObjectMapper();
+                                JsonNode errorNode = objectMapper.readTree(errorMessage);
+                                String message = errorNode.get("message").asText();
+
+                                if (httpStatus == HttpStatus.NOT_FOUND) {
+                                    return Mono.error(new NotFoundException(message));
+                                } else {
+                                    return Mono.error(new BadRequestException(message));
+                                }
+                            } catch (IOException e) {
+                                // Handle parsing error
+                                return Mono.error(new BadRequestException("Bad Request"));
+                            }
+                        });
+            })
             .bodyToMono(VisitResponseDTO.class);
 }
 
@@ -147,7 +173,6 @@ public Mono<VisitResponseDTO> createVisitForPet(VisitRequestDTO visit) {
     private String joinIds(List<Integer> petIds) {
         return petIds.stream().map(Object::toString).collect(joining(","));
     }
-
 
 
 }
