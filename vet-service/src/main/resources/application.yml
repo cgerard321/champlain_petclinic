@@ -11,6 +11,11 @@ spring:
     activate:
       on-profile: default
 
+  r2dbc:
+    url: r2dbc:h2:mem:///images
+    username: user
+    password: pwd
+
   data:
     mongodb:
       port: 0
@@ -38,6 +43,10 @@ spring:
   config:
     activate:
       on-profile: docker
+  r2dbc:
+    url: r2dbc:postgresql://postgres:5432/images
+    username: user
+    password: pwd
   data:
     mongodb:
       host: mongo
