@@ -1,0 +1,7 @@
+DROP TABLE IF EXISTS images;
+
+CREATE TABLE IF NOT EXISTS images(
+    id SERIAL,
+    imageUrl VARCHAR(100),
+    PRIMARY KEY (id)
+);

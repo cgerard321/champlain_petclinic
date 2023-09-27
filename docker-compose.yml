@@ -236,6 +236,28 @@ services:
             - mongo
             - vet-service
 
+    #Vet Images Postgres container
+    postgres:
+      image: postgres
+      container_name: postgres
+      environment:
+        - POSTGRES_USER=user
+        - POSTGRES_PASSWORD=pwd
+        - POSTGRES_DB=images
+      ports:
+        - 5432:5432
+    pgadmin:
+      image: dpage/pgadmin4:latest
+      container_name: pgadmin
+      restart: always
+      environment:
+        - PGADMIN_DEFAULT_EMAIL=admin@vets.com
+        - PGADMIN_DEFAULT_PASSWORD=admin
+      ports:
+        - 9003:80
+      depends_on:
+        - postgres
+
     # billing mongo container
     mongo1:
         image: mongo
