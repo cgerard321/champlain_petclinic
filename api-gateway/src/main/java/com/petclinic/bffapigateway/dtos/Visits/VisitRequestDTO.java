@@ -24,4 +24,12 @@ public class VisitRequestDTO {
 /*    private int petId;
     private int practitionerId;*/
     private boolean status;
+
+    public VisitRequestDTO(LocalDateTime now, String description, String petId, String practitionerId) {
+        this.visitDate = now;
+        this.description = description;
+        this.petId =  petId;
+        this.practitionerId = practitionerId;
+        this.status = true;
+    }
 }

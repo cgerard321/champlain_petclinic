@@ -229,7 +229,7 @@ class VisitServiceImplTest {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
         return Visit.builder()
                 .visitId(uuid)
-                .visitDate(LocalDateTime.parse("2022-11-25T13:45", dtf))
+                .visitDate(LocalDateTime.parse("2023-11-25T13:45", dtf))
                 .description(description)
                 .petId("2")
                 .practitionerId(vetId)
@@ -239,7 +239,7 @@ class VisitServiceImplTest {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         return VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
-                .visitDate(LocalDateTime.parse("2022-11-25T13:45:00", dtf))
+                .visitDate(LocalDateTime.parse("2023-11-25T13:45:00", dtf))
                 .description("this is a dummy description")
                 .petId("2")
                 .practitionerId(UUID.randomUUID().toString())
@@ -248,7 +248,7 @@ class VisitServiceImplTest {
     private VisitRequestDTO buildVisitRequestDTO() {
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
             return VisitRequestDTO.builder()
-                    .visitDate(LocalDateTime.parse("2022-11-25T13:45:00", dtf))
+                    .visitDate(LocalDateTime.parse("2023-11-25T13:45:00", dtf))
                     .description("this is a dummy description")
                     .petId("2")
                     .practitionerId(UUID.randomUUID().toString())
