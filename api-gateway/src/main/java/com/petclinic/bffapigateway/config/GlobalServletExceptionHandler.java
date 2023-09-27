@@ -38,6 +38,7 @@ public class GlobalServletExceptionHandler implements ErrorWebExceptionHandler {
                 GenericHttpException error = (GenericHttpException) ex;
                 status = error.getHttpStatus();
 
+
             } else if(exClass.equals(IllegalArgumentException.class)){
 
                 status = HttpStatus.BAD_REQUEST;
