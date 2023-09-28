@@ -57,11 +57,14 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    //private String userId;
-
     @NotEmpty
     private String username;
 
+    @Embedded
+    private UserIdentifier userIdentifier;
+
+
+    @JsonIgnore
     @NotEmpty
     private String password;
 

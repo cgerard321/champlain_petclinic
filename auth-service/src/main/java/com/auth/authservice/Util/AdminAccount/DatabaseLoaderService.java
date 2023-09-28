@@ -3,6 +3,7 @@ package com.auth.authservice.Util.AdminAccount;
 import com.auth.authservice.datalayer.roles.Role;
 import com.auth.authservice.datalayer.roles.RoleRepo;
 import com.auth.authservice.datalayer.user.User;
+import com.auth.authservice.datalayer.user.UserIdentifier;
 import com.auth.authservice.datalayer.user.UserRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
@@ -32,9 +33,9 @@ public class DatabaseLoaderService implements CommandLineRunner {
 
         Set<Role> roles = new HashSet<>();
         roles.add(roleRepo.findById(1L).get());
-        roles.add(roleRepo.findById(2L).get());
         User admin = User.builder()
                 .username("Admin")
+                .userIdentifier(new UserIdentifier())
                 .roles(roles)
                 .email("admin@admin.com")
                 .password(passwordEncoder.encode("pwd"))
@@ -47,6 +48,7 @@ public class DatabaseLoaderService implements CommandLineRunner {
         roles2.add(roleRepo.findById(2L).get());
         User vet = User.builder()
                 .username("Vet")
+                .userIdentifier(new UserIdentifier())
                 .roles(roles2)
                 .email("dylan.brassard@outlook.com")
                 .password(passwordEncoder.encode("pwd"))

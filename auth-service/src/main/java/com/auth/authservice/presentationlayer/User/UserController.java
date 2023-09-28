@@ -79,7 +79,7 @@ public class UserController {
     }
 
     @GetMapping("/withoutPages")
-    public List<User> getUserWithoutPage() {
+    public List<UserDetails> getUserWithoutPage() {
 
         return userService.findAllWithoutPage();
     }

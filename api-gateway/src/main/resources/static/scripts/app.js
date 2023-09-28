@@ -19,19 +19,41 @@ var petClinicApp = angular.module('petClinicApp', [
 petClinicApp.factory("authProvider", ["$window", function ($window) {
 
     return {
-        setUser: ({ username, email }) => {
+        setUser: ({ username, email, userId, roles }) => {
+            console.log("Setting user")
+            console.log(username)
+            console.log(email)
+            console.log(userId)
+            console.log(roles)
+
             $window.localStorage.setItem("username", username)
             $window.localStorage.setItem("email", email)
+            $window.localStorage.setItem("UUID", userId)
+
+            let rolesArr = []
+            roles.forEach(role => {
+                rolesArr.push(role.name)
+            });
+
+
+            console.log(rolesArr.toString())
+
+            $window.localStorage.setItem("roles", rolesArr.toString())
         },
         getUser: () => ({
             username: $window.localStorage.getItem("username"),
             email: $window.localStorage.getItem("email"),
+            UUID: $window.localStorage.getItem("UUID"),
+            roles : $window.localStorage.getItem("roles")
         }),
         purgeUser: () => {
             $window.localStorage.removeItem("username")
             $window.localStorage.removeItem("email")
+            $window.localStorage.removeItem("UUID")
+            $window.localStorage.removeItem("roles")
         },
-        isLoggedIn: () => !!$window.localStorage.getItem("email")
+        isLoggedIn: () => !!$window.localStorage.getItem("email"),
+        isAdmin: () =>  $window.localStorage.getItem("roles") != null && !!$window.localStorage.getItem("roles").includes("ADMIN")
     }
 }]);
 
@@ -103,11 +125,15 @@ petClinicApp.config(['$stateProvider', '$urlRouterProvider', '$locationProvider'
 
             const load = () => {
                 $scope.isLoggedIn = authProvider.isLoggedIn();
+                $scope.isAdmin = authProvider.isAdmin();
                 if(!$scope.isLoggedIn)return;
 
-                const { email, username } = authProvider.getUser();
+                const { email, username, roles, UUID } = authProvider.getUser();
                 $scope.email = email;
                 $scope.username = username;
+                $scope.roles = roles;
+                $scope.UUID = UUID;
+
             }
 
             $rootScope.$on('$locationChangeSuccess', load);

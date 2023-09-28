@@ -46,7 +46,7 @@ public interface UserService {
 
     Page<User> findAll(PageRequest of);
 
-    List<User> findAllWithoutPage();
+    List<UserDetails> findAllWithoutPage();
 
     void deleteUser(long id);
 

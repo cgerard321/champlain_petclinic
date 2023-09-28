@@ -10,11 +10,8 @@ package com.auth.authservice.businesslayer;
 
 import com.auth.authservice.Util.Exceptions.*;
 import com.auth.authservice.datalayer.roles.Role;
-import com.auth.authservice.datalayer.user.ResetPasswordToken;
-import com.auth.authservice.datalayer.user.ResetPasswordTokenRepository;
+import com.auth.authservice.datalayer.user.*;
 import com.auth.authservice.datalayer.roles.RoleRepo;
-import com.auth.authservice.datalayer.user.User;
-import com.auth.authservice.datalayer.user.UserRepo;
 import com.auth.authservice.datamapperlayer.UserMapper;
 import com.auth.authservice.domainclientlayer.Mail.Mail;
 import com.auth.authservice.domainclientlayer.Mail.MailService;
@@ -85,8 +82,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> findAllWithoutPage() {
-        return userRepo.findAll();
+    public List<UserDetails> findAllWithoutPage() {
+        return userMapper.modelToDetailsList(userRepo.findAll());
     }
 
     @Override
@@ -106,7 +103,7 @@ public class UserServiceImpl implements UserService {
             Set<Role> roleSet = new HashSet<>();
             role.ifPresent(roleSet::add);
             user.setRoles(roleSet);
-
+            user.setUserIdentifier(new UserIdentifier());
             user.setPassword(passwordEncoder.encode(user.getPassword()));
 
             log.info("Sending email to {}...", userIDLessDTO.getEmail());

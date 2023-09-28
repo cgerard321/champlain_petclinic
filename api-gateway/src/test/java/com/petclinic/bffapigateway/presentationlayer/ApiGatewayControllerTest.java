@@ -1986,8 +1986,6 @@ class ApiGatewayControllerTest {
     void login_valid() throws Exception {
         final String validToken = "some.valid.token";
         final UserDetails user = UserDetails.builder()
-                .id(-1)
-                .password("pwd")
                 .email("e@mail.com")
                 .username("user")
                 .roles(Collections.emptySet())
@@ -1995,7 +1993,6 @@ class ApiGatewayControllerTest {
 
         UserPasswordLessDTO userPasswordLessDTO = UserPasswordLessDTO.builder()
                 .email(user.getEmail())
-                .id(1)
                 .username(user.getUsername())
                 .roles(user.getRoles())
                 .build();
@@ -2040,8 +2037,6 @@ class ApiGatewayControllerTest {
     @DisplayName("Given invalid Login, throw 401")
     void login_invalid() throws Exception {
         final UserDetails user = UserDetails.builder()
-                .id(-1)
-                .password(null)
                 .email("e@mail.com")
                 .username("user")
                 .roles(Collections.emptySet())
