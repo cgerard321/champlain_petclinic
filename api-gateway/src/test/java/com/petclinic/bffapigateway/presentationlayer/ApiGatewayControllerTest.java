@@ -12,6 +12,7 @@ import com.petclinic.bffapigateway.dtos.Inventory.*;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.ProductResponseDTO;
+import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
 import com.petclinic.bffapigateway.dtos.Vets.*;
@@ -779,6 +780,7 @@ class ApiGatewayControllerTest {
         pet.setName("Fluffy");
         pet.setBirthDate("2000-01-01");
         pet.setType(type);
+        pet.setIsActive("true");
 
         when(customersServiceClient.createPet(pet,od.getOwnerId()))
 
@@ -797,7 +799,8 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.petId").isEqualTo(pet.getPetId())
                 .jsonPath("$.name").isEqualTo(pet.getName())
                 .jsonPath("$.birthDate").isEqualTo(pet.getBirthDate())
-                .jsonPath("$.type").isEqualTo(pet.getType());
+                .jsonPath("$.type").isEqualTo(pet.getType())
+                .jsonPath("$.isActive").isEqualTo(pet.getIsActive());
 
     }
 
@@ -812,6 +815,7 @@ class ApiGatewayControllerTest {
         pet.setName("Fluffy");
         pet.setBirthDate("2000-01-01");
         pet.setType(type);
+        pet.setIsActive("true");
 
         when(customersServiceClient.updatePet(any(PetResponseDTO.class), any(String.class)))
                 .thenReturn(Mono.just(pet));
@@ -827,8 +831,35 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.petId").isEqualTo(pet.getPetId())
                 .jsonPath("$.name").isEqualTo(pet.getName())
                 .jsonPath("$.birthDate").isEqualTo(pet.getBirthDate())
-                .jsonPath("$.type").isEqualTo(pet.getType());
+                .jsonPath("$.type").isEqualTo(pet.getType())
+                .jsonPath("$.isActive").isEqualTo(pet.getIsActive());
     }
+
+    @Test
+    void shouldPatchPet() {
+        PetRequestDTO petRequest = new PetRequestDTO();
+        petRequest.setIsActive("false");
+
+        PetResponseDTO petResponse = new PetResponseDTO();
+        petResponse.setPetId("30");
+        petResponse.setIsActive("false");
+
+        when(customersServiceClient.patchPet(any(PetRequestDTO.class), any(String.class)))
+                .thenReturn(Mono.just(petResponse));
+
+        client.patch()
+                .uri("/api/gateway/pet/{petId}", petResponse.getPetId())
+                .body(fromValue(petRequest))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.petId").isEqualTo(petResponse.getPetId())
+                .jsonPath("$.isActive").isEqualTo(petResponse.getIsActive());
+    }
+
+
 
 
     //
@@ -1017,6 +1048,7 @@ class ApiGatewayControllerTest {
         pet.setName("Fluffy");
         pet.setBirthDate("2000-01-01");
         pet.setType(type);
+        pet.setIsActive("true");
 
         when(customersServiceClient.createPet(pet,od.getOwnerId()))
                 .thenReturn(Mono.just(pet));
@@ -1082,6 +1114,7 @@ class ApiGatewayControllerTest {
         pet.setName("Fluffy");
         pet.setBirthDate("2000-01-01");
         pet.setType(type);
+        pet.setIsActive("true");
 
         when(customersServiceClient.createPet(pet,od.getOwnerId()))
 
@@ -1116,6 +1149,7 @@ class ApiGatewayControllerTest {
         pet.setName("Fluffy");
         pet.setBirthDate("2000-01-01");
         pet.setType(type);
+        pet.setIsActive("true");
 
         when(customersServiceClient.createPet(pet,od.getOwnerId()))
                 .thenReturn(Mono.just(pet));
