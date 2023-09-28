@@ -121,7 +121,10 @@ public class VisitServiceImpl implements VisitService {
     private Mono<VisitRequestDTO> validateVisitRequest(VisitRequestDTO dto) {
         if (dto.getDescription() == null || dto.getDescription().isBlank()) {
             return Mono.error(new BadRequestException("Please enter a description for this visit"));
-        } else if (dto.getVisitDate() == null || dto.getVisitDate().isBefore(LocalDateTime.now())) {
+        } else if (dto.getVisitDate() == null) {
+            return Mono.error(new BadRequestException("Please choose a date for your appointment"));
+        }
+        if(dto.getVisitDate().isBefore(LocalDateTime.now())) {
             return Mono.error(new BadRequestException("Appointment cannot be scheduled in the past"));
         } else if (dto.getPetId() == null || dto.getPetId().isBlank()) {
             return Mono.error(new BadRequestException("PetId cannot be null or blank"));
