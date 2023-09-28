@@ -62,6 +62,12 @@ class EducationRepositoryTest {
                 .create(find)
                 .consumeNextWith(found -> {
                     assertEquals(e1.getEducationId(), found.getEducationId());
+                    assertEquals(e1.getVetId(), found.getVetId());
+                    assertEquals(e1.getDegree(), found.getDegree());
+                    assertEquals(e1.getSchoolName(), found.getSchoolName());
+                    assertEquals(e1.getFieldOfStudy(), found.getFieldOfStudy());
+                    assertEquals(e1.getStartDate(), found.getStartDate());
+                    assertEquals(e1.getEndDate(), found.getEndDate());
                 })
                 .verifyComplete();
     }

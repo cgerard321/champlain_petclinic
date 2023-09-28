@@ -2502,7 +2502,13 @@ void deleteAllInventory_shouldSucceed() {
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$[0].educationId").isEqualTo(educationResponseDTO.getEducationId());
+                .jsonPath("$[0].educationId").isEqualTo(educationResponseDTO.getEducationId())
+                .jsonPath("$[0].vetId").isEqualTo(educationResponseDTO.getVetId())
+                .jsonPath("$[0].degree").isEqualTo(educationResponseDTO.getDegree())
+                .jsonPath("$[0].fieldOfStudy").isEqualTo(educationResponseDTO.getFieldOfStudy())
+                .jsonPath("$[0].schoolName").isEqualTo(educationResponseDTO.getSchoolName())
+                .jsonPath("$[0].startDate").isEqualTo(educationResponseDTO.getStartDate())
+                .jsonPath("$[0].endDate").isEqualTo(educationResponseDTO.getEndDate());
 
     }
 

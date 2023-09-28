@@ -551,6 +551,12 @@ class VetControllerIntegrationTest {
                 .value((list) -> {
                     assertEquals(2, list.size());
                     assertEquals(education1.getEducationId(), list.get(0).getEducationId());
+                    assertEquals(education1.getVetId(), list.get(0).getVetId());
+                    assertEquals(education1.getDegree(), list.get(0).getDegree());
+                    assertEquals(education1.getFieldOfStudy(), list.get(0).getFieldOfStudy());
+                    assertEquals(education1.getSchoolName(), list.get(0).getSchoolName());
+                    assertEquals(education1.getStartDate(), list.get(0).getStartDate());
+                    assertEquals(education1.getEndDate(), list.get(0).getEndDate());
                 });
     }
 

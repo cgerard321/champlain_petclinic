@@ -484,7 +484,12 @@ class VetControllerUnitTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$[0].educationId").isEqualTo(educationResponseDTO1.getEducationId())
-                .jsonPath("$[0].vetId").isEqualTo(educationResponseDTO1.getVetId());
+                .jsonPath("$[0].vetId").isEqualTo(educationResponseDTO1.getVetId())
+                .jsonPath("$[0].degree").isEqualTo(educationResponseDTO1.getDegree())
+                .jsonPath("$[0].fieldOfStudy").isEqualTo(educationResponseDTO1.getFieldOfStudy())
+                .jsonPath("$[0].schoolName").isEqualTo(educationResponseDTO1.getSchoolName())
+                .jsonPath("$[0].startDate").isEqualTo(educationResponseDTO1.getStartDate())
+                .jsonPath("$[0].endDate").isEqualTo(educationResponseDTO1.getEndDate());
 
         Mockito.verify(educationService, times(1)).getAllEducationsByVetId(VET_ID);
     }
