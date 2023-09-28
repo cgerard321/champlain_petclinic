@@ -28,6 +28,7 @@ angular.module('visits')
             var dd = String(dateObj.getDate()).padStart(2, '0');
             var mm = String(dateObj.getMonth() + 1).padStart(2, '0');
             var yyyy = dateObj.getFullYear();
+            console.log("got currentDate");
             return Date.parse(yyyy + '-' + mm + '-' + dd);
         }
 
@@ -629,7 +630,7 @@ angular.module('visits')
 
         self.submit = function () {
             var data = {
-                visitDate: $filter('selectedDate')(self.date, "yyyy-MM-ddTHH:mm:ss"),
+                visitDate: $filter('date')(self.date, "yyyy-MM-ddTHH:mm:ss"),
                 description: self.desc,
                 practitionerId: self.practitionerId,
                 status: true
