@@ -19,6 +19,11 @@ angular.module('vetDetails')
             self.ratings = resp.data;
         });
 
+        $http.get('api/gateway/vets/' + $stateParams.vetId + '/educations').then(function (resp) {
+            console.log(resp.data)
+            self.educations = resp.data;
+        });
+
         $http.get('api/gateway/vets/' + $stateParams.vetId + '/ratings/percentages')
             .then(function (resp) {
                 const ratingsData = resp.data;
