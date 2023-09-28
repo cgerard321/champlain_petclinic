@@ -105,5 +105,11 @@ public Flux<InventoryResponseDTO> searchInventories(
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @DeleteMapping("/{inventoryId}")
+    public Mono<ResponseEntity<Void>> deleteInventoryByInventoryId(@PathVariable String inventoryId){
+        return productInventoryService.deleteInventoryByInventoryId(inventoryId)
+        .then(Mono.just(ResponseEntity.noContent().build()));
+    }
+
 }
 

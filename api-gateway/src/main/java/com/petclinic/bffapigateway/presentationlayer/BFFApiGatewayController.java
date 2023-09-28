@@ -628,4 +628,8 @@ public class BFFApiGatewayController {
     }
 
 
+    @DeleteMapping(value = "inventory/{inventoryId}")
+    public Mono<Void> deleteInventoryByInventoryId(@PathVariable String inventoryId){
+        return inventoryServiceClient.deleteInventoryByInventoryId(inventoryId);
+    }
 }

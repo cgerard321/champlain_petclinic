@@ -51,6 +51,15 @@
 
 
     <td>
+        <td>
+            <a class="btn btn-warning" ui-sref="updateInventory({inventoryId: inventory.inventoryId, method: 'edit'})"> Edit
+
+            </a>
+        </td>
+
+        <td>
+            <a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteInventory(inventory)">Delete</a>
+        </td>
 
         <a class="btn btn-warning" ui-sref="updateInventory({inventoryId: inventory.inventoryId, method:'edit'})"> Edit
         </a>
@@ -65,6 +74,8 @@
 
             <!--<td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteBundle(bundle.bundleUUID)">Delete Bundle</a></td>-->
 
+        <!--<td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteBundle(bundle.bundleUUID)">Delete Bundle</a></td>-->
+    </tr>
 </table>
 
 
