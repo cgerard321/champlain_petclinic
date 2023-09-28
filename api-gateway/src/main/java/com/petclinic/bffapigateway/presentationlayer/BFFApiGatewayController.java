@@ -248,8 +248,13 @@ public class BFFApiGatewayController {
     }
     */
 
+<<<<<<< HEAD
     @PostMapping(value = "visit/owners/{ownerId}/pets/{petId}/visits", consumes = "application/json", produces = "application/json")
     Mono<ResponseEntity<VisitResponseDTO>> addVisit(@RequestBody VisitRequestDTO visit, @PathVariable String ownerId, @PathVariable String petId) {
+=======
+    @PostMapping(value = "visits", consumes = "application/json", produces = "application/json")
+    Mono<VisitResponseDTO> addVisit(@RequestBody VisitRequestDTO visit /*@PathVariable String ownerId, @PathVariable String petId*/) {
+>>>>>>> b92691c0 (Found fix to display visitDate instead of date in request payload, backend now receives date)
        // visit.setPetId(petId);
         return visitsServiceClient.createVisitForPet(visit).map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());

@@ -313,7 +313,7 @@ services:
             - ME_CONFIG_MONGODB_SERVER=mongo2
             - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
         ports:
-            - 9001:8082
+            - 9003:8082
         depends_on:
             - mongo2
             - visits-service-new

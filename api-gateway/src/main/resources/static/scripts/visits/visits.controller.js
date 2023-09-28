@@ -4,7 +4,7 @@ angular.module('visits')
     .controller('VisitsController', ['$http', '$state', '$stateParams', '$filter','$scope', function ($http, $state, $stateParams, $filter, $scope) {
         var self = this;
         var petId = $stateParams.petId || 0;
-        var postURL = "api/gateway/visit/owners/" + ($stateParams.ownerId || 0) + "/pets/" + petId + "/visits";
+        var postURL = "api/gateway/visits";
         var vetsUrl = "api/gateway/vets";
         var billsUrl = "api/gateway/bill";
         var visitId = 0;
@@ -219,7 +219,7 @@ angular.module('visits')
                 if(buttonText.toLowerCase().includes("cancel")) {
                     modalConfirmButton.data("targetStatus", status);
                     modalConfirmButton.data("targetPractitionerId", practitionerId);
-                    modalConfirmButton.data("targetDate", date);
+                    modalConfirmButton.data("targetDate", visitDate);
                     modalConfirmButton.data("targetDescription", description);
                     modalConfirmButton.data("cancel-index", $(e.target).closest("tr").data("index"));
                 }
@@ -629,7 +629,7 @@ angular.module('visits')
 
         self.submit = function () {
             var data = {
-                date: $filter('date')(self.date, "MM-dd-yyyy"),
+                visitDate: $filter('selectedDate')(self.date, "yyyy-MM-ddTHH:mm:ss"),
                 description: self.desc,
                 practitionerId: self.practitionerId,
                 status: true
