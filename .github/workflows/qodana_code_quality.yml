@@ -127,5 +127,5 @@ jobs:
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
         with:
-          args: "-i,gradle"
+          args: "-i,gradle,--linter,jetbrains/qodana-jvm:latest"
           pr-mode: false
