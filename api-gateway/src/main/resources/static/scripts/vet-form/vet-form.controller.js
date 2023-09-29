@@ -62,12 +62,21 @@ angular.module('vetForm')
             vet.specialties = specialties;
 
             vet.firstName = document.getElementById("firstName").value;
+            var namePattern = /^[a-zA-Z -]+/;
+            if (!namePattern.test(vet.firstName)) {
+                alert("first name should be minimum 2 characters and maximum of 30 characters, only letters, spaces, and hyphens: "+vet.firstName)
+                return
+            }
             if(vet.firstName.length>30||vet.firstName.length<2){
                 alert("first name should be minimum 2 characters and maximum of 30 characters, only letters, spaces, and hyphens: "+vet.firstName)
                 return
             }
 
             vet.lastName = document.getElementById("lastName").value;
+            if (!namePattern.test(vet.lastName)) {
+                alert("last name should be minimum 2 characters and maximum of 30 characters, only letters, spaces, and hyphens: "+vet.lastName)
+                return
+            }
             if(vet.lastName.length>30||vet.lastName.length<2){
                 alert("last name should be minimum 2 characters and maximum of 30 characters, only letters, spaces, and hyphens: "+vet.lastName)
                 return
