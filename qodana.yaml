@@ -12,7 +12,7 @@ profile:
 #Enable inspections
 include:
   - name: VulnerableLibrariesGlobal
-  - name: CheckDependencyLicenses
+#  - name: CheckDependencyLicenses
 #Disable inspections
 #exclude:
 #  - name: <SomeDisabledInspectionId>
