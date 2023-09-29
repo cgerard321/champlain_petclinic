@@ -65,7 +65,7 @@ jobs:
         run: chmod +x gradlew
       - name: Run Tests
         run: ./gradlew build
-        working-directory: visit-service-new/gradle
+#        working-directory: visit-service-new/gradle
 
 #      - name: Create coverage-data directory and copy contents
 #        run: |
@@ -80,7 +80,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: gradle-coverage-data.zip
-          path: champlain_petclinic/gradle/.qodana/code-coverage
+          path: gradle/.qodana/code-coverage
 
       - name: 'Qodana Scan'
         uses: JetBrains/qodana-action@v2023.2
