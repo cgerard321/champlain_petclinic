@@ -69,7 +69,9 @@ public class VetController {
     }
 
     @PutMapping("{vetId}/ratings/{ratingId}")
-    public Mono<ResponseEntity<RatingResponseDTO>> updateRatingByVetIdAndRatingId(@PathVariable String vetId, @PathVariable String ratingId, @RequestBody Mono<RatingRequestDTO> ratingRequestDTOMono){
+    public Mono<ResponseEntity<RatingResponseDTO>> updateRatingByVetIdAndRatingId(@PathVariable String vetId,
+                                                                                  @PathVariable String ratingId,
+                                                                                  @RequestBody Mono<RatingRequestDTO> ratingRequestDTOMono){
         return ratingService.updateRatingByVetIdAndRatingId(vetId, ratingId, ratingRequestDTOMono)
                 .map(r->ResponseEntity.status(HttpStatus.OK).body(r))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());

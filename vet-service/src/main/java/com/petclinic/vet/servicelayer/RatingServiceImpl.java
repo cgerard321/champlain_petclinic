@@ -97,7 +97,7 @@ public class RatingServiceImpl implements RatingService {
     public Mono<RatingResponseDTO> updateRatingByVetIdAndRatingId(String vetId, String ratingId, Mono<RatingRequestDTO> ratingRequestDTOMono) {
         return vetRepository.findVetByVetId(vetId)
                 .switchIfEmpty(Mono.error(new NotFoundException("vetId not found: " + vetId)))
-                .then(ratingRepository.findByRatingId(ratingId)
+                .then(ratingRepository.findByVetIdAndRatingId(vetId, ratingId)
                         .switchIfEmpty(Mono.error(new NotFoundException("ratingId not found: " + ratingId)))
                         .flatMap(rating -> ratingRequestDTOMono
                                 .flatMap(r -> {

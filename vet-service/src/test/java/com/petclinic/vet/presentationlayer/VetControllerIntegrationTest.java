@@ -41,13 +41,14 @@ class VetControllerIntegrationTest {
     EducationRepository educationRepository;
 
 
-    Vet vet = buildVet();
-    Vet vet2 = buildVet2();
+
     Education education1 = buildEducation();
     Education education2 = buildEducation2();
+    Vet vet = buildVet("1234");
+    Vet vet2 = buildVet2("2345");
     Rating rating1 = buildRating("12345", "678910", 5.0);
     Rating rating2 = buildRating("12346", "678910", 4.0);
-    VetDTO vetDTO = buildVetDTO();
+    VetDTO vetDTO = buildVetDTO("3456");
     String VET_ID = "678910";
     String VET_BILL_ID = vet.getVetBillId();
     String INVALID_VET_ID = "mjbedf";
@@ -209,7 +210,7 @@ class VetControllerIntegrationTest {
     }
 
     @Test
-    void addRatingToAVet_WithInvalidValues_ShouldNotSucceed() {
+    void addRatingToAVet_WithInvalidRateScore_ShouldNotSucceed() {
         StepVerifier
                 .create(ratingRepository.deleteAll())
                 .expectNextCount(0)
@@ -617,6 +618,76 @@ class VetControllerIntegrationTest {
     }
 
     @Test
+    void updateVet_withInvalidFirstName_shouldNotSucceed(){
+        Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet2));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        VetDTO updatedVet=VetDTO.builder()
+                .vetId("678910")
+                .vetBillId("1")
+                .firstName("Clementineeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+                .lastName("LeBlanc")
+                .email("skjfhf@gmail.com")
+                .phoneNumber("947-238-28479")
+                .resume("Just became a vet")
+                .imageId("kjd")
+                .workday("Monday")
+                .specialties(new HashSet<>())
+                .active(false)
+                .build();
+
+        client
+                .put()
+                .uri("/vets/" + VET_ID)
+                .body(Mono.just(updatedVet), VetDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("firstName length should be between 2 and 20 characters: "+updatedVet.getFirstName());
+    }
+
+    @Test
+    void updateVet_withInvalidLastName_shouldNotSucceed(){
+        Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet2));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        VetDTO updatedVet=VetDTO.builder()
+                .vetId("678910")
+                .vetBillId("1")
+                .firstName("Clementine")
+                .lastName("LeBlanccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc")
+                .email("skjfhf@gmail.com")
+                .phoneNumber("947-238-28479")
+                .resume("Just became a vet")
+                .imageId("kjd")
+                .workday("Monday")
+                .specialties(new HashSet<>())
+                .active(false)
+                .build();
+
+        client
+                .put()
+                .uri("/vets/" + VET_ID)
+                .body(Mono.just(updatedVet), VetDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("lastName length should be between 2 and 20 characters: "+updatedVet.getLastName());
+    }
+
+    @Test
     void updateVet_withInvalidPhoneNumber_shouldNotSucceed() {
         Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet2));
 
@@ -648,7 +719,7 @@ class VetControllerIntegrationTest {
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("phoneNumber length over 20: "+updatedVet.getPhoneNumber());
+                .jsonPath("$.message").isEqualTo("phoneNumber length not equal to 20 characters: "+updatedVet.getPhoneNumber());
 
     }
 
@@ -661,6 +732,7 @@ class VetControllerIntegrationTest {
                 .expectNextCount(1)
                 .verifyComplete();
 
+        String extensionNum="7654";
         VetDTO updatedVet=VetDTO.builder()
                 .vetId("678910")
                 .vetBillId("1")
@@ -674,7 +746,7 @@ class VetControllerIntegrationTest {
                         "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm" +
                         "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm" +
                         "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm")
-                .phoneNumber("947-238-2847")
+                .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Just became a vet")
                 .imageId("kjd")
                 .workday("Monday")
@@ -691,7 +763,43 @@ class VetControllerIntegrationTest {
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("email length over 320: "+updatedVet.getPhoneNumber());
+                .jsonPath("$.message").isEqualTo("email length should be between 6 and 320 characters: "+updatedVet.getEmail());
+    }
+
+    @Test
+    void updateVet_withInvalidResume_shouldNotSucceed() {
+        Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet2));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        String extensionNum="7920";
+        VetDTO updatedVet=VetDTO.builder()
+                .vetId("678910")
+                .vetBillId("1")
+                .firstName("Clementine")
+                .lastName("LeBlanc")
+                .email("skjfhf@gmail.com")
+                .phoneNumber("(514)-634-8276 #"+extensionNum)
+                .resume("Jo")
+                .imageId("kjd")
+                .workday("Monday")
+                .specialties(new HashSet<>())
+                .active(false)
+                .build();
+
+        client
+                .put()
+                .uri("/vets/" + VET_ID)
+                .body(Mono.just(updatedVet), VetDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("resume length should be more than 10 characters: "+updatedVet.getResume());
     }
 
     @Test
@@ -812,7 +920,7 @@ class VetControllerIntegrationTest {
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("phoneNumber length over 20: "+newVet.getPhoneNumber());
+                .jsonPath("$.message").isEqualTo("phoneNumber length not equal to 20 characters: "+newVet.getPhoneNumber());
     }
 
     @Test
@@ -824,6 +932,7 @@ class VetControllerIntegrationTest {
                 .expectNextCount(0)
                 .verifyComplete();
 
+        String extensionNum="4527";
         VetDTO newVet=VetDTO.builder()
                 .vetId("678910")
                 .vetBillId("1")
@@ -837,7 +946,7 @@ class VetControllerIntegrationTest {
                         "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm" +
                         "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm" +
                         "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm")
-                .phoneNumber("947-238-2847")
+                .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Just became a vet")
                 .imageId("kjd")
                 .workday("Monday")
@@ -854,7 +963,115 @@ class VetControllerIntegrationTest {
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("email length over 320: "+newVet.getEmail());
+                .jsonPath("$.message").isEqualTo("email length should be between 6 and 320 characters: "+newVet.getEmail());
+
+    }
+
+    @Test
+    void createVet_withInvalidFirstName() {
+        Publisher<Void> setup = vetRepository.deleteAll();
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(0)
+                .verifyComplete();
+
+        VetDTO newVet=VetDTO.builder()
+                .vetId("678910")
+                .vetBillId("1")
+                .firstName("Clementineeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
+                .lastName("LeBlanc")
+                .email("skjfhf@gmail.com")
+                .phoneNumber("947-238-28479")
+                .resume("Just became a vet")
+                .imageId("kjd")
+                .workday("Monday")
+                .specialties(new HashSet<>())
+                .active(false)
+                .build();
+
+        client
+                .post()
+                .uri("/vets")
+                .body(Mono.just(newVet), Vet.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("firstName length should be between 2 and 30 characters: "+newVet.getFirstName());
+    }
+
+    @Test
+    void createVet_withInvalidLastName() {
+        Publisher<Void> setup = vetRepository.deleteAll();
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(0)
+                .verifyComplete();
+
+        String extensionNum="0987";
+        VetDTO newVet=VetDTO.builder()
+                .vetId("678910")
+                .vetBillId("1")
+                .firstName("Clementine")
+                .lastName("LeBlanccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc")
+                .email("skjfhf@gmail.com")
+                .phoneNumber("(514)-634-8276 #"+extensionNum)
+                .resume("Just became a vet")
+                .imageId("kjd")
+                .workday("Monday")
+                .specialties(new HashSet<>())
+                .active(false)
+                .build();
+
+        client
+                .post()
+                .uri("/vets")
+                .body(Mono.just(newVet), Vet.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("lastName length should be between 2 and 30 characters: "+newVet.getLastName());
+    }
+
+    @Test
+    void createVet_withInvalidResume() {
+        Publisher<Void> setup = vetRepository.deleteAll();
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(0)
+                .verifyComplete();
+
+        String extensionNum="4527";
+        VetDTO newVet=VetDTO.builder()
+                .vetId("678910")
+                .vetBillId("1")
+                .firstName("Clementine")
+                .lastName("LeBlanc")
+                .email("skjfhf@gmail.com")
+                .phoneNumber("(514)-634-8276 #"+extensionNum)
+                .resume("Jo")
+                .imageId("kjd")
+                .workday("Monday")
+                .specialties(new HashSet<>())
+                .active(false)
+                .build();
+
+        client
+                .post()
+                .uri("/vets")
+                .body(Mono.just(newVet), Vet.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("resume length should be more than 10 characters: "+newVet.getResume());
 
     }
 
@@ -979,15 +1196,15 @@ class VetControllerIntegrationTest {
 
     }
 
-
-    private Vet buildVet() {
+    //the extension number can only be 4 digits
+    private Vet buildVet(String extensionNum) {
         return Vet.builder()
                 .vetId("678910")
                 .vetBillId("1")
                 .firstName("Pauline")
                 .lastName("LeBlanc")
                 .email("skjfhf@gmail.com")
-                .phoneNumber("947-238-2847")
+                .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Just became a vet")
                 .workday("Monday")
                 .imageId("kjd")
@@ -996,14 +1213,15 @@ class VetControllerIntegrationTest {
                 .build();
     }
 
-    private Vet buildVet2() {
+    //the extension number can only be 4 digits
+    private Vet buildVet2(String extensionNum) {
         return Vet.builder()
                 .vetId("678910")
                 .vetBillId("2")
                 .firstName("Pauline")
                 .lastName("LeBlanc")
                 .email("skjfhf@gmail.com")
-                .phoneNumber("947-238-2847")
+                .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Just became a vet")
                 .imageId("kjd")
                 .workday("Monday")
@@ -1044,14 +1262,15 @@ class VetControllerIntegrationTest {
                 .build();
     }
 
-    private VetDTO buildVetDTO() {
+    //the extension number can only be 4 digits
+    private VetDTO buildVetDTO(String extensionNum) {
         return VetDTO.builder()
                 .vetId("678910")
                 .vetBillId("1")
                 .firstName("Clementine")
                 .lastName("LeBlanc")
                 .email("skjfhf@gmail.com")
-                .phoneNumber("947-238-2847")
+                .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Just became a vet")
                 .imageId("kjd")
                 .workday("Monday")

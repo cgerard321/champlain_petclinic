@@ -88,6 +88,27 @@ class RatingServiceImplTest {
     }
 
     @Test
+    void updateRatingOfVet(){
+        when(ratingRepository.save(any())).thenReturn(Mono.just(rating));
+        when(vetRepository.findVetByVetId(anyString())).thenReturn(Mono.just(existingVet));
+        when(ratingRepository.findByVetIdAndRatingId(anyString(), anyString())).thenReturn(Mono.just(rating));
+
+        Mono<RatingResponseDTO> ratingResponseDTO=ratingService.updateRatingByVetIdAndRatingId(existingVet.getVetId(), rating.getRatingId(), Mono.just(ratingRequestDTO));
+
+        StepVerifier
+                .create(ratingResponseDTO)
+                .consumeNextWith(existingRating -> {
+                    assertNotNull(rating.getId());
+                    assertEquals(rating.getRatingId(), existingRating.getRatingId());
+                    assertEquals(rating.getVetId(), existingRating.getVetId());
+                    assertEquals(rating.getRateScore(), existingRating.getRateScore());
+                    assertEquals(rating.getRateDate(), existingRating.getRateDate());
+                    assertEquals(rating.getRateDescription(), existingRating.getRateDescription());
+                })
+                .verifyComplete();
+    }
+
+    @Test
     void getNumberOfRatingsByVetId() {
         when(vetRepository.findVetByVetId(anyString())).thenReturn(Mono.just(existingVet));
         when(vetRepository.findVetByVetId(anyString())).thenReturn(Mono.just(existingVet));
@@ -151,11 +172,14 @@ class RatingServiceImplTest {
     }
 
     private Rating buildRating() {
-        Rating rating = new Rating();
-        rating.setRatingId("ratingId");
-        rating.setVetId("vetId");
-        rating.setRateScore(5.0);
-        return rating;
+        return Rating.builder()
+                .id("1")
+                .ratingId("ratingId")
+                .vetId("vetId")
+                .rateScore(5.0)
+                .rateDescription("Vet is the best vet in the wooooorld!")
+                .rateDate("16/09/2023")
+                .build();
     }
 
     private RatingRequestDTO buildRatingRequestDTO() {

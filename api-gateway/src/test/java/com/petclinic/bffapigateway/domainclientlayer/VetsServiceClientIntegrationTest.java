@@ -143,6 +143,28 @@ class VetsServiceClientIntegrationTest {
     }
 
     @Test
+    void getNumberOfRatingsByInvalidVetId_shouldNotSucceed() throws ExistingVetNotFoundException{
+        String invalidVetId="123";
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(404)
+                .setBody("vetId not found: "+invalidVetId));
+
+        final Integer numberOfRatings = vetsServiceClient.getNumberOfRatingsByVetId(invalidVetId)
+                .onErrorResume(throwable -> {
+                    if (throwable instanceof ExistingVetNotFoundException && throwable.getMessage().equals("vetId not found: "+invalidVetId)) {
+                        return Mono.empty();
+                    } else {
+                        return Mono.error(throwable);
+                    }
+                })
+                .block();
+
+        assertNull(numberOfRatings);
+    }
+
+    @Test
     void getNumberOfRatingsByVetId_IllegalArgumentException400() throws IllegalArgumentException {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
@@ -487,14 +509,13 @@ class VetsServiceClientIntegrationTest {
                 .build();
 
         String validVetId="678910";
-        String validRatingId="12345";
 
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(400)
                 .setBody("Something went wrong"));
 
-        final Void empty = vetsServiceClient.deleteRating(validVetId, validRatingId)
+        final RatingResponseDTO rating = vetsServiceClient.addRatingToVet(validVetId, Mono.just(ratingRequestDTO))
                 .onErrorResume(throwable -> {
                     if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
                         return Mono.empty();
@@ -504,7 +525,7 @@ class VetsServiceClientIntegrationTest {
                 })
                 .block();
 
-        assertNull(empty);
+        assertNull(rating);
     }
 
     @Test
@@ -517,14 +538,13 @@ class VetsServiceClientIntegrationTest {
                 .build();
 
         String validVetId="678910";
-        String validRatingId="12345";
 
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setResponseCode(500)
                 .setBody("Something went wrong"));
 
-        final Void empty = vetsServiceClient.deleteRating(validVetId, validRatingId)
+        final RatingResponseDTO rating = vetsServiceClient.addRatingToVet(validVetId, Mono.just(ratingRequestDTO))
                 .onErrorResume(throwable -> {
                     if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
                         return Mono.empty();
@@ -534,7 +554,7 @@ class VetsServiceClientIntegrationTest {
                 })
                 .block();
 
-        assertNull(empty);
+        assertNull(rating);
     }
 
     @Test
@@ -556,7 +576,8 @@ class VetsServiceClientIntegrationTest {
                         "        \"rateDate\": \"20/09/2023\"\n" +
                         "    }"));
 
-        final RatingResponseDTO ratingResponseDTO = vetsServiceClient.updateRatingByVetIdAndByRatingId("678910","123456", Mono.just(updatedRating)).block();
+        final RatingResponseDTO ratingResponseDTO =
+                vetsServiceClient.updateRatingByVetIdAndByRatingId("678910","123456", Mono.just(updatedRating)).block();
         assertNotNull(ratingResponseDTO);
         assertNotNull(ratingResponseDTO.getRatingId());
         assertThat(ratingResponseDTO.getVetId()).isEqualTo(updatedRating.getVetId());

@@ -40,10 +40,16 @@ public class VetServiceImpl implements VetService {
     public Mono<VetDTO> insertVet(Mono<VetDTO> vetDTOMono) {
         return vetDTOMono
                 .flatMap(requestDTO->{
-                    if(requestDTO.getPhoneNumber().length()>20)
-                        return Mono.error(new InvalidInputException("phoneNumber length over 20: "+requestDTO.getPhoneNumber()));
-                    if(requestDTO.getEmail().length()>320)
-                        return Mono.error(new InvalidInputException("email length over 320: "+requestDTO.getEmail()));
+                    if(requestDTO.getFirstName().length()>30||requestDTO.getFirstName().length()<2)
+                        return Mono.error(new InvalidInputException("firstName length should be between 2 and 30 characters: "+requestDTO.getFirstName()));
+                    if(requestDTO.getLastName().length()>30||requestDTO.getLastName().length()<2)
+                        return Mono.error(new InvalidInputException("lastName length should be between 2 and 30 characters: "+requestDTO.getLastName()));
+                    if(requestDTO.getPhoneNumber().length()!=20)
+                        return Mono.error(new InvalidInputException("phoneNumber length not equal to 20 characters: "+requestDTO.getPhoneNumber()));
+                    if(requestDTO.getEmail().length()<6||requestDTO.getEmail().length()>320)
+                        return Mono.error(new InvalidInputException("email length should be between 6 and 320 characters: "+requestDTO.getEmail()));
+                    if(requestDTO.getResume().length()<10)
+                        return Mono.error(new InvalidInputException("resume length should be more than 10 characters: "+requestDTO.getResume()));
                     return Mono.just(requestDTO);
                 })
                 .map(EntityDtoUtil::toEntity)
@@ -58,10 +64,16 @@ public class VetServiceImpl implements VetService {
                 .switchIfEmpty(Mono.error(new NotFoundException("No vet with this vetId was found: " + vetId)))
                 .flatMap(p -> vetDTOMono
                         .flatMap(requestDTO->{
-                            if(requestDTO.getPhoneNumber().length()>20)
-                                return Mono.error(new InvalidInputException("phoneNumber length over 20: "+requestDTO.getPhoneNumber()));
-                            if(requestDTO.getEmail().length()>320)
-                                return Mono.error(new InvalidInputException("email length over 320: "+requestDTO.getPhoneNumber()));
+                            if(requestDTO.getFirstName().length()>30||requestDTO.getFirstName().length()<2)
+                                return Mono.error(new InvalidInputException("firstName length should be between 2 and 20 characters: "+requestDTO.getFirstName()));
+                            if(requestDTO.getLastName().length()>30||requestDTO.getLastName().length()<2)
+                                return Mono.error(new InvalidInputException("lastName length should be between 2 and 20 characters: "+requestDTO.getLastName()));
+                            if(requestDTO.getPhoneNumber().length()!=20)
+                                return Mono.error(new InvalidInputException("phoneNumber length not equal to 20 characters: "+requestDTO.getPhoneNumber()));
+                            if(requestDTO.getEmail().length()<6||requestDTO.getEmail().length()>320)
+                                return Mono.error(new InvalidInputException("email length should be between 6 and 320 characters: "+requestDTO.getEmail()));
+                            if(requestDTO.getResume().length()<10)
+                                return Mono.error(new InvalidInputException("resume length should be more than 10 characters: "+requestDTO.getResume()));
                             return Mono.just(requestDTO);
                         })
                         .map(EntityDtoUtil::toEntity)
