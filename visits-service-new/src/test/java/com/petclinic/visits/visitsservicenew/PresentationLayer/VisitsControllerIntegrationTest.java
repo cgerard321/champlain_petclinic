@@ -41,17 +41,17 @@ class VisitsControllerIntegrationTest {
     @MockBean
     private PetsClient petsClient;
 
-    String uuid1 = UUID.randomUUID().toString();
-    String uuid2 = UUID.randomUUID().toString();
-    String uuid3 = UUID.randomUUID().toString();
-    String uuid4 = UUID.randomUUID().toString();
-    String uuid5 = UUID.randomUUID().toString();
-    String uuid6 = UUID.randomUUID().toString();
+    String uuidVisit1 = UUID.randomUUID().toString();
+    String uuidVisit2 = UUID.randomUUID().toString();
+    String uuidVet = UUID.randomUUID().toString();
+    String uuidPet = UUID.randomUUID().toString();
+    String uuidPhoto = UUID.randomUUID().toString();
+    String uuidOwner = UUID.randomUUID().toString();
 
     Set<SpecialtyDTO> set= new HashSet<>();
 
     VetDTO vet = VetDTO.builder()
-            .vetId(uuid3)
+            .vetId(uuidVet)
             .vetBillId("1")
             .firstName("James")
             .lastName("Carter")
@@ -66,15 +66,15 @@ class VisitsControllerIntegrationTest {
 
     Date currentDate =new Date();
     PetResponseDTO petResponseDTO = PetResponseDTO.builder()
-            .petTypeId(uuid4)
+            .petTypeId(uuidPet)
             .name("Billy")
             .birthDate(currentDate)
-            .photoId(uuid5)
-            .ownerId(uuid6)
+            .photoId(uuidPhoto)
+            .ownerId(uuidOwner)
             .build();
 
-    Visit visit1 = buildVisit(uuid1,"this is a dummy description",vet.getVetId());
-    Visit visit2 = buildVisit(uuid2,"this is a dummy description",vet.getVetId());
+    Visit visit1 = buildVisit(uuidVisit1,"this is a dummy description",vet.getVetId());
+    Visit visit2 = buildVisit(uuidVisit2,"this is a dummy description",vet.getVetId());
     private final VisitResponseDTO visitResponseDTO = buildVisitResponseDto(visit1.getVisitId(),vet.getVetId());
     private final VisitRequestDTO visitRequestDTO = buildVisitRequestDto(vet.getVetId());
 
@@ -120,7 +120,7 @@ class VisitsControllerIntegrationTest {
                 .jsonPath("$.practitionerId").isEqualTo(visit1.getPractitionerId())
                 .jsonPath("$.petId").isEqualTo(visit1.getPetId())
                 .jsonPath("$.description").isEqualTo(visit1.getDescription())
-                .jsonPath("$.visitDate").isEqualTo("2023-11-25T13:45:00")
+                .jsonPath("$.visitDate").isEqualTo("2024-11-25 13:45")
                 .jsonPath("$.status").isEqualTo(visit1.isStatus());
     }
     @Test
@@ -214,7 +214,7 @@ class VisitsControllerIntegrationTest {
                 .value((visitDTO1) -> {
                     assertEquals(visitDTO1.getDescription(), visit1.getDescription());
                     assertEquals(visitDTO1.getPetId(), visit1.getPetId());
-                    assertEquals(visitDTO1.getVisitDate(), LocalDateTime.parse("2023-11-25T13:45"));
+                    assertEquals(visitDTO1.getVisitDate(), LocalDateTime.parse("2024-11-25 13:45",DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
                     assertEquals(visitDTO1.getPractitionerId(), visit1.getPractitionerId());
                 });
     }
@@ -245,38 +245,39 @@ class VisitsControllerIntegrationTest {
                 .jsonPath("$.practitionerId").isEqualTo(visit1.getPractitionerId())
                 .jsonPath("$.petId").isEqualTo(visit1.getPetId())
                 .jsonPath("$.description").isEqualTo(visit1.getDescription())
-                .jsonPath("$.visitDate").isEqualTo("2023-11-25T13:45:00")
+                .jsonPath("$.visitDate").isEqualTo("2024-11-25 13:45")
                 .jsonPath("$.status").isEqualTo(visit1.isStatus());
     }
 
     private Visit buildVisit(String uuid,String description, String vetId){
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
         return Visit.builder()
                 .visitId(uuid)
-                .visitDate(LocalDateTime.parse("2023-11-25T13:45", dtf))
+
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description(description)
                 .petId("2")
                 .practitionerId(vetId)
-                .status(true).build();
+                .status(true)
+                .build();
     }
 
     private VisitResponseDTO buildVisitResponseDto(String visitId,String vetId){
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         return VisitResponseDTO.builder()
                 .visitId(visitId)
-                .visitDate(LocalDateTime.parse("2023-11-25T13:45:00", dtf))
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("this is a dummy description")
                 .petId("2")
                 .practitionerId(vetId)
-                .status(true).build();
+                .status(true)
+                .build();
     }
     private VisitRequestDTO buildVisitRequestDto(String vetId){
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         return VisitRequestDTO.builder()
-                .visitDate(LocalDateTime.parse("2023-11-25T13:45:00", dtf))
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("this is a dummy description")
                 .petId("2")
                 .practitionerId(vetId)
-                .status(true).build();
+                .status(true)
+                .build();
     }
 }
