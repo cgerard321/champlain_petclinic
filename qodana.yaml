@@ -12,6 +12,10 @@ profile:
 #Enable inspections
 include:
   - name: VulnerableLibrariesGlobal
+  - name: UNUSED_IMPORT
+  - name: FieldCanBeLocal
+  - name: DefaultAnnotationParam
+  - name: CommentedOutCode
 #  - name: CheckDependencyLicenses
 #Disable inspections
 #exclude:
