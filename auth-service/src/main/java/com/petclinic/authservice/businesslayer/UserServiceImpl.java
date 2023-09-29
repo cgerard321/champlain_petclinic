@@ -401,4 +401,18 @@ public class UserServiceImpl implements UserService {
         return userRepo.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("No account found for email: " + email));
     }
+
+    @Override
+    public User updateUserRole(long userId, User user) {
+        User existingUser = userRepo.findUserById(userId);
+
+        if(existingUser == null) {
+            return null;
+        }
+
+        user.setId(existingUser.getId());
+        user.setEmail(existingUser.getEmail());
+
+        return userRepo.save(user);
+    }
 }
