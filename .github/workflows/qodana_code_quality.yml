@@ -46,9 +46,10 @@ jobs:
         uses: JetBrains/qodana-action@main
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
-        with:
-          args: "-i,JVM/intellij-coverage-agent/gradle,--linter,jetbrains/qodana-jvm:2023.2-eap"
-          pr-mode: false
+#        with:
+#          args: "-i,JVM/intellij-coverage-agent/gradle,--linter,jetbrains/qodana-jvm:2023.2-eap"
+#          args: ""
+#          pr-mode: false
 
 #jobs:
 #  build:
