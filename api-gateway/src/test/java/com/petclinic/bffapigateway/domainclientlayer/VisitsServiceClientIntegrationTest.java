@@ -48,10 +48,6 @@ class VisitsServiceClientIntegrationTest {
     private VisitsServiceClient visitsServiceClient;
     private static MockWebServer server;
     private static ObjectMapper objectMapper = new ObjectMapper();
-    @Autowired
-    private WebTestClient webTestClient;
-    @MockBean
-    private WebClient.Builder webClientBuilder;
 
     private static final String PET_ID = "1";
 
