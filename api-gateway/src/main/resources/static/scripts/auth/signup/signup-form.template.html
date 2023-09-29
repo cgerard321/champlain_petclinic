@@ -9,60 +9,50 @@
         <div class="d-flex justify-content-center">
             <form class="form-horizontal" ng-submit="$ctrl.add()" style="max-width: 25em; justify-content: center;">
                 <div class="form-group formColor">
-                    <label class="col-sm-2 control-label">First name</label>
-                    <div class="owner col-sm-6">
+                    <label>First name</label>
                         <input class="form-control col-sm-4" ng-model="signup.firstName" name="firstName" ng-disabled="$ctrl.checked" required />
                         <span ng-show="ownerForm.firstName.$error.required" class="help-block">First name is required.</span>
-                    </div>
                 </div>
 
                 <div class="form-group formColor">
-                    <label class="col-sm-2 control-label">Last name</label>
-                    <div class="owner col-sm-6">
+                    <label>Last name</label>
                         <input class="form-control col-sm-4" ng-model="signup.lastName" name="lastName" ng-disabled="$ctrl.checked" required/>
                         <span ng-show="ownerForm.lastName.$error.required" class="help-block">Last name is required.</span>
-                    </div>
                 </div>
 
 
                 <div class="form-group formColor">
-                    <label class="col-sm-2 control-label">Address</label>
-                    <div class="owner col-sm-6">
+                    <label >Address</label>
                         <input class="form-control col-sm-4" ng-model="signup.address" name="address" ng-disabled="$ctrl.checked" required/>
                         <span ng-show="ownerForm.address.$error.required" class="help-block">Address is required.</span>
-                    </div>
                 </div>
 
                 <div class="form-group formColor">
-                    <label class="col-sm-2 control-label">City</label>
-                    <div class="owner col-sm-6">
+                    <label>City</label>
                         <input class="form-control col-sm-4" ng-model="signup.city" name="city" ng-disabled="$ctrl.checked" required/>
                         <span ng-show="ownerForm.city.$error.required" class="help-block">City is required.</span>
-                    </div>
                 </div>
 
                 <div class="form-group formColor">
-                    <label class="col-sm-2 control-label">Telephone</label>
-                    <div class="owner col-sm-6">
+                    <label >Telephone</label>
                         <input class="form-control col-sm-4" ng-model="signup.telephone" name="telephone" ng-disabled="$ctrl.checked" required/>
                         <span ng-show="ownerForm.telephone.$error.required" class="help-block">Telephone is required.</span>
-                    </div>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group formColor">
                     <label>Username</label>
                     <input class="form-control" ng-model="signup.username" name="username" required/>
                     <span ng-show="signupForm.username.$error.required" class="help-block"> Username is required.</span>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group formColor">
                     <label>Password</label>
                     <input class="form-control" type="password" ng-model="signup.password" name="password" required/>
                     <span ng-show="signupForm.password.$error.required" class="help-block">Password is required.</span>
                 </div>
 
 
-                <div class="form-group">
+                <div class="form-group formColor">
                     <label>Email</label>
                     <input class="form-control" ng-model="signup.email" name="email" required/>
                     <span ng-show="signupForm.email.$error.required" class="help-block">Email is required.</span>
