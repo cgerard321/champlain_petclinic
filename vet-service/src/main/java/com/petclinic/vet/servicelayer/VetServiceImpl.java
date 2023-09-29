@@ -50,6 +50,8 @@ public class VetServiceImpl implements VetService {
                         return Mono.error(new InvalidInputException("email length should be between 6 and 320 characters: "+requestDTO.getEmail()));
                     if(requestDTO.getResume().length()<10)
                         return Mono.error(new InvalidInputException("resume length should be more than 10 characters: "+requestDTO.getResume()));
+                    if(requestDTO.getSpecialties()==null)
+                        return Mono.error(new InvalidInputException("invalid specialties"));
                     return Mono.just(requestDTO);
                 })
                 .map(EntityDtoUtil::toEntity)
@@ -74,6 +76,8 @@ public class VetServiceImpl implements VetService {
                                 return Mono.error(new InvalidInputException("email length should be between 6 and 320 characters: "+requestDTO.getEmail()));
                             if(requestDTO.getResume().length()<10)
                                 return Mono.error(new InvalidInputException("resume length should be more than 10 characters: "+requestDTO.getResume()));
+                            if(requestDTO.getSpecialties()==null)
+                                return Mono.error(new InvalidInputException("invalid specialties"));
                             return Mono.just(requestDTO);
                         })
                         .map(EntityDtoUtil::toEntity)
