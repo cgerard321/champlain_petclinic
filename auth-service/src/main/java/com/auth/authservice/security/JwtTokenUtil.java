@@ -26,6 +26,7 @@ public class JwtTokenUtil implements Serializable {
     private static final String CLAIM_KEY_USERNAME = "sub";
     private static final String CLAIM_KEY_CREATED = "created";
     private static final String CLAIM_KEY_ROLES = "roles";
+    private static final String CLAIM_KEY_ID = "id";
 
 
 
@@ -82,6 +83,7 @@ public class JwtTokenUtil implements Serializable {
         claims.put(CLAIM_KEY_USERNAME, user.getUsername());
         claims.put(CLAIM_KEY_CREATED, new Date());
         claims.put(CLAIM_KEY_ROLES, user.getRoles().stream().map(Role::getName).toArray(String[]::new));
+        claims.put(CLAIM_KEY_ID, user.getUserIdentifier().getUserId());
         log.info("Claims are {}", claims.get(CLAIM_KEY_ROLES));
         log.info(user.getAuthorities().toString());
         log.info("Claims are {}", claims);

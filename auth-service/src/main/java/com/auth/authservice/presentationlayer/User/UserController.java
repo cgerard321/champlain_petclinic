@@ -33,6 +33,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.ui.Model;
@@ -60,27 +61,8 @@ public class UserController {
 
     private final JwtTokenUtil jwtService;
 
-    @GetMapping("/{userId}")
-    public User getUser(@PathVariable long userId) {
-        log.info("Getting user with id: {}", userId);
-        return userService.getUserById(userId);
-    }
-
-    @GetMapping
-    public Page<User> getAllUsers(
-            @RequestParam(required = false, defaultValue = "1") int page,
-            @RequestParam(required = false, defaultValue = "10") int size
-    ) {
-
-        log.info("page={}", page);
-        final Page<User> all = userService.findAll(PageRequest.of(page - 1, size));
-        log.info("Retrieved paginated result with {} entries and {} pages", all.getTotalElements(), all.getTotalPages());
-        return all;
-    }
-
     @GetMapping("/withoutPages")
-    public List<User> getUserWithoutPage() {
-
+    public List<UserDetails> getUserWithoutPage() {
         return userService.findAllWithoutPage();
     }
 
@@ -95,18 +77,12 @@ public class UserController {
                 .body(userMapper.modelToPasswordLessDTO(saved));
     }
 
-    @PutMapping("/passwordReset/{userId}")
-    public void passwordReset(@PathVariable long userId, @RequestBody String newPassword) {
 
-        userService.passwordReset(userId, newPassword);
-        log.info("Password for User with id {} with new password {}", userId, newPassword);
-    }
-
-    @DeleteMapping("/{userId}")
-    public void deleteUser(@PathVariable long userId) {
-        userService.deleteUser(userId);
-        log.info("Deleted role with id {}", userId);
-    }
+//    @DeleteMapping("/{userId}")
+//    public void deleteUser(@PathVariable long userId) {
+//        userService.deleteUser(userId);
+//        log.info("Deleted role with id {}", userId);
+//    }
 
     @GetMapping("/verification/{base64EncodedToken}")
     public ResponseEntity <UserPasswordLessDTO> verifyEmail(@PathVariable String base64EncodedToken) {
@@ -161,15 +137,10 @@ public class UserController {
     }
 
     @PostMapping("/validate-token")
-    public ResponseEntity<String> validateToken(@RequestBody String token) {
-        log.info("Validating token");
-        if (jwtService.validateToken(token)) {
+    public ResponseEntity<String> validateToken() {
             log.info("Token is valid");
             return ResponseEntity.ok().build();
-        } else {
-            log.info("Token is invalid");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+     
     }
 
 
@@ -188,12 +159,6 @@ public class UserController {
         userService.processResetPassword(resetRequest);
 
         return ResponseEntity.ok().build();
-    }
-
-
-    @RequestMapping(method = RequestMethod.HEAD)
-    public void preflight() {
-        log.info("Preflight request received and accepted");
     }
 
     private boolean isValidBase64(String s) {

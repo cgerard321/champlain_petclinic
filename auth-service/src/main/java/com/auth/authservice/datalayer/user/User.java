@@ -57,11 +57,14 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    //private String userId;
-
     @NotEmpty
     private String username;
 
+    @Embedded
+    private UserIdentifier userIdentifier;
+
+
+    @JsonIgnore
     @NotEmpty
     private String password;
 
@@ -87,11 +90,7 @@ public class User implements UserDetails {
         final HashSet<GrantedAuthority> grantedAuthorities = new HashSet<>();
 
         for (Role role : roles) {
-            Role parent = role.getParent();
-            while (parent != null) {
-                grantedAuthorities.add(new SimpleGrantedAuthority(format("ROLE_%s", parent.getName())));
-                parent = parent.getParent();
-            }
+
             grantedAuthorities.add(new SimpleGrantedAuthority(format("ROLE_%s", role.getName())));
         }
 
