@@ -27,7 +27,7 @@ public class PasswordValidation implements ConstraintValidator<PasswordStrengthC
         }
         log.info("Where is my password");
 
-        String pattern = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=*])(?=\\S+$).{8,}$";
+        String pattern = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=*!()_.<>,{}])(?=\\S+$).{8,}$";
 
         return value.matches(pattern);
 

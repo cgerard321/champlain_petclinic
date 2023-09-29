@@ -3,14 +3,23 @@ angular.module('adminPanel')
     .controller('AdminPanelController', ['$http', '$scope', "authProvider", function ($http, $scope, authProvider) {
 
         var self = this;
+        self.users = []
 
-
-
-        $http.get('api/gateway/users', {
-            headers: {'Authorization': "Bearer " + authProvider.getUser().token}})
-            .then(function (resp) {
-            self.users = resp.data;
-        });
+        let eventSource = new EventSource("api/gateway/users")
+        eventSource.addEventListener('message', function (event){
+            $scope.$apply(function(){
+                console.log(event.data)
+                self.users.push(JSON.parse(event.data))
+            })
+        })
+        eventSource.onerror = (error) =>{
+            if(eventSource.readyState === 0){
+                eventSource.close()
+                console.log("EventSource was closed by server successfully."+error)
+            }else{
+                console.log("EventSource error: "+error)
+            }
+        }
 
 
         $scope.removeUser = function (userid) {

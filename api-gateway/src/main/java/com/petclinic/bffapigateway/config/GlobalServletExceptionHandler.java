@@ -37,21 +37,16 @@ public class GlobalServletExceptionHandler implements ErrorWebExceptionHandler {
             } else if (exClass.equals(GenericHttpException.class)) {
                 GenericHttpException error = (GenericHttpException) ex;
                 status = error.getHttpStatus();
-            } else {
+            } else if(exClass.equals(IllegalArgumentException.class)){
+                status = HttpStatus.BAD_REQUEST;
+            }
+            else {
                 log.error("Exception not handled: {}", exClass.getSimpleName());
                 status = HttpStatus.UNPROCESSABLE_ENTITY;
             }
 
             // Handle any other exception types here
         }
-
-
-        log.error(ex.toString());
-        log.error(ex.getMessage());
-        log.error(ex.getLocalizedMessage());
-        log.error(ex.getCause().toString());
-        log.error(Arrays.toString(ex.getStackTrace()));
-        log.error(Arrays.toString(ex.getSuppressed()));
 
 
         if (exchange.getResponse().isCommitted()) {

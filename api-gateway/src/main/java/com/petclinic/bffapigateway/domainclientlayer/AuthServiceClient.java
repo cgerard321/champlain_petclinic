@@ -59,13 +59,13 @@ public class AuthServiceClient {
 //                .bodyToMono(UserDetails.class);
 //    }
 //
-//    public Flux<UserDetails> getUsers(String auth) {
-//        return webClientBuilder.build().get()
-//                .uri(authServiceUrl + "/users/withoutPages")
-//                .header("Authorization", auth)
-//                .retrieve()
-//                .bodyToFlux(UserDetails.class);
-//    }
+    public Flux<UserDetails> getUsers(String jwtToken) {
+        return webClientBuilder.build().get()
+                .uri(authServiceUrl + "/users/withoutPages")
+                .cookie("Bearer", jwtToken)
+                .retrieve()
+                .bodyToFlux(UserDetails.class);
+    }
 //
         public Mono<UserPasswordLessDTO> createUser (Register model) {
             return webClientBuilder.build().post()
@@ -193,7 +193,6 @@ public class AuthServiceClient {
         return webClientBuilder.build()
                 .post()
                 .uri(authServiceUrl + "/users/validate-token")
-                .bodyValue(jwtToken)
                 .cookie("Bearer", jwtToken)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> Mono.error(new InvalidTokenException("Invalid token")))

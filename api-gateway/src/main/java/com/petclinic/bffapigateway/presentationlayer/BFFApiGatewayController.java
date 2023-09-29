@@ -344,10 +344,7 @@ public class BFFApiGatewayController {
 //    public Mono<UserDetails> getUserDetails(final @PathVariable long userId) {
 //        return authServiceClient.getUser(userId);
 //    }
-//    @GetMapping(value = "users")
-//    public Flux<UserDetails> getAll(@RequestHeader(AUTHORIZATION) String auth) {
-//        return authServiceClient.getUsers(auth);
-//    }
+
 //
 //    @PutMapping(value = "users/{userId}",
 //            consumes = "application/json",
@@ -482,13 +479,16 @@ public class BFFApiGatewayController {
         return authServiceClient.createUser(model);
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "users", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<UserDetails> getAllUsers(@CookieValue("Bearer") String auth) {
+        return authServiceClient.getUsers(auth);
+    }
+
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @PostMapping(value = "/users/login",produces = "application/json;charset=utf-8;", consumes = "application/json")
     public Mono<ResponseEntity<UserPasswordLessDTO>> login(@RequestBody Login login) throws Exception {
         log.info("Entered controller /login");
-        log.info("Login: " + login.getEmail() + " " + login.getPassword());
-
-
         return authServiceClient.login(login);
 
     }
