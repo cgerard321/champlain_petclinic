@@ -124,7 +124,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: gradle-coverage-data.zip
-#          path: JVM/intellij-coverage-agent/gradle/.qodana/code-coverage
+          path: JVM/intellij-coverage-agent/gradle/.qodana/code-coverage
       - name: 'Qodana Scan'
         uses: JetBrains/qodana-action@v2023.2
         env:
