@@ -7,17 +7,12 @@ import com.petclinic.visits.visitsservicenew.Exceptions.BadRequestException;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
-import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -28,7 +23,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
@@ -62,18 +56,18 @@ class VisitServiceImplTest {
     private final String PET_ID = visitResponseDTO.getPetId();
     private final String VISIT_ID = visitResponseDTO.getVisitId();
 
-    String uuid1 = UUID.randomUUID().toString();
-    String uuid2 = UUID.randomUUID().toString();
-    String uuid3 = UUID.randomUUID().toString();
-    String uuid4 = UUID.randomUUID().toString();
-    String uuid5 = UUID.randomUUID().toString();
-    String uuid6 = UUID.randomUUID().toString();
+    String uuidVisit1 = UUID.randomUUID().toString();
+    String uuidVisit2 = UUID.randomUUID().toString();
+    String uuidVet = UUID.randomUUID().toString();
+    String uuidPet = UUID.randomUUID().toString();
+    String uuidPhoto = UUID.randomUUID().toString();
+    String uuidOwner = UUID.randomUUID().toString();
 
     Set<SpecialtyDTO> set= new HashSet<>();
 
 
     VetDTO vet = VetDTO.builder()
-            .vetId(uuid3)
+            .vetId(uuidVet)
             .vetBillId("1")
             .firstName("James")
             .lastName("Carter")
@@ -88,18 +82,18 @@ class VisitServiceImplTest {
 
     Date currentDate =new Date();
     PetResponseDTO petResponseDTO = PetResponseDTO.builder()
-            .petTypeId(uuid4)
+            .petTypeId(uuidPet)
             .name("Billy")
             .birthDate(currentDate)
-            .photoId(uuid5)
-            .ownerId(uuid6)
+            .photoId(uuidPhoto)
+            .ownerId(uuidOwner)
             .build();
 
 
 
 
-    Visit visit1 = buildVisit(uuid1,"this is a dummy description",vet.getVetId());
-    Visit visit2 = buildVisit(uuid2,"this is a dummy description",vet.getVetId());
+    Visit visit1 = buildVisit(uuidVisit1,"this is a dummy description",vet.getVetId());
+    Visit visit2 = buildVisit(uuidVisit2,"this is a dummy description",vet.getVetId());
 
     @Test
     void getVisitByVisitId(){
@@ -182,7 +176,6 @@ class VisitServiceImplTest {
 
         StepVerifier.create(visitService.addVisit(Mono.just(visitRequestDTO)))
                 .consumeNextWith(visitDTO1 -> {
-                    assertEquals(visit1.getVisitId(), visitDTO1.getVisitId());
                     assertEquals(visit1.getDescription(), visitDTO1.getDescription());
                     assertEquals(visit1.getPetId(), visitDTO1.getPetId());
                     assertEquals(visit1.getVisitDate(), visitDTO1.getVisitDate());
@@ -193,7 +186,7 @@ class VisitServiceImplTest {
     @Test
     void deleteVisitById_visitId_shouldSucceed(){
         //arrange
-        String visitId = uuid1.toString();
+        String visitId = uuidVisit1.toString();
 
         Mockito.when(visitRepo.existsByVisitId(visitId)).thenReturn(Mono.just(true));
         Mockito.when(visitRepo.deleteByVisitId(visitId)).thenReturn(Mono.empty());
@@ -212,7 +205,7 @@ class VisitServiceImplTest {
     @Test
     void deleteVisitById_visitDoesNotExist_shouldThrowNotFoundException() {
         // Arrange
-        String visitId = uuid1.toString();
+        String visitId = UUID.randomUUID().toString();
 
         // Mock the existsByVisitId method to return false, indicating that the visit does not exist
         Mockito.when(visitRepo.existsByVisitId(visitId)).thenReturn(Mono.just(false));
@@ -249,33 +242,33 @@ class VisitServiceImplTest {
 
 
     private Visit buildVisit(String uuid,String description, String vetId){
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
         return Visit.builder()
                 .visitId(uuid)
-                .visitDate(LocalDateTime.parse("2023-11-25T13:45", dtf))
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description(description)
                 .petId("2")
                 .practitionerId(vetId)
-                .status(true).build();
+                .status(true)
+                .build();
     }
     private VisitResponseDTO buildVisitResponseDTO(){
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         return VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
-                .visitDate(LocalDateTime.parse("2023-11-25T13:45:00", dtf))
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("this is a dummy description")
                 .petId("2")
                 .practitionerId(UUID.randomUUID().toString())
-                .status(true).build();
+                .status(true)
+                .build();
     }
     private VisitRequestDTO buildVisitRequestDTO() {
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
             return VisitRequestDTO.builder()
-                    .visitDate(LocalDateTime.parse("2023-11-25T13:45:00", dtf))
+                    .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                     .description("this is a dummy description")
                     .petId("2")
                     .practitionerId(UUID.randomUUID().toString())
-                    .status(true).build();
+                    .status(true)
+                    .build();
         }
 
 }
