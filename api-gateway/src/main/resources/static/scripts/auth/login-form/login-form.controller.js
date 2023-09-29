@@ -8,11 +8,12 @@ angular.module('loginForm')
             password: $scope.login.password,
         })
             .then(n => {
-                const { data: { username, email } } = n;
-
+                console.log(n)
                 authProvider.setUser({
-                    username,
-                    email
+                    username: n.data.username,
+                    email: n.data.email,
+                    userId: n.data.userId,
+                    roles: n.data.roles
                 });
                 $location.path("/welcome")
             })
@@ -23,4 +24,3 @@ angular.module('loginForm')
 
         this.keypress = ({ originalEvent: { key } }) => key === 'Enter' && this.add()
     }]);
-

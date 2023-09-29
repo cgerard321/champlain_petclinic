@@ -23,10 +23,12 @@ import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.io.IOException;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
@@ -300,4 +302,34 @@ public class AuthServiceClientIntegrationTest {
                 .verifyComplete();
     }
 
+
+    @Test
+    void getAllUser_ShouldReturn2() throws JsonProcessingException {
+        UserDetails user1 = UserDetails.builder()
+                .username("user1")
+                .userId("jkbjbhjbllb")
+                .email("email1")
+                .build();
+
+        UserDetails user2 = UserDetails.builder()
+                .username("user2")
+                .email("email2")
+                .userId("hhvhvhvhuvul")
+                .build();
+        String validToken = "jvhgvgvgjkvgjvgj";
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setBody(objectMapper.writeValueAsString(List.of(user1,user2)))
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(200);
+
+        server.enqueue(mockResponse);
+
+        final Flux<UserDetails> validatedTokenResponse = authServiceClient.getUsers(validToken);
+
+        // check status response in step verifier
+        StepVerifier.create(validatedTokenResponse)
+                .expectNextCount(2)
+                .verifyComplete();
+    }
 }
