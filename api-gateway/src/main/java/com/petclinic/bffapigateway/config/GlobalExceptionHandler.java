@@ -82,7 +82,6 @@ public class GlobalExceptionHandler {
 
 
 
-
     @ExceptionHandler(value = IllegalArgumentException.class)
     public ResponseEntity<HttpErrorInfo> illegalArgumentException(IllegalArgumentException ex) {
 
