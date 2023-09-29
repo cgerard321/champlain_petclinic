@@ -183,8 +183,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
         return productRepository
                 .findAllProductsByInventoryId(inventoryId)
                 .map(EntityDTOUtil::toProductResponseDTO);
-                //where the 404 not found issue lies
-                //.switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId)));
+                //where the 404 not found issue lies if we switchIfEmpty
     }
 
     @Override
