@@ -97,12 +97,12 @@ public class UserServiceImpl implements UserService {
 
     }
 
-    @Override
-    public void deleteUser
-            (long userId) {
-        log.info("deleteUser: trying to delete entity with userId: {}", userId);
-        userRepo.findById(userId).ifPresent(userRepo::delete);
-    }
+//    @Override
+//    public void deleteUser
+//            (long userId) {
+//        log.info("deleteUser: trying to delete entity with userId: {}", userId);
+//        userRepo.findById(userId).ifPresent(userRepo::delete);
+//    }
 
     @Override
     public Mail generateVerificationMail(User user) {

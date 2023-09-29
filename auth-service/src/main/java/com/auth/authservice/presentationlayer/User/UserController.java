@@ -78,11 +78,11 @@ public class UserController {
     }
 
 
-    @DeleteMapping("/{userId}")
-    public void deleteUser(@PathVariable long userId) {
-        userService.deleteUser(userId);
-        log.info("Deleted role with id {}", userId);
-    }
+//    @DeleteMapping("/{userId}")
+//    public void deleteUser(@PathVariable long userId) {
+//        userService.deleteUser(userId);
+//        log.info("Deleted role with id {}", userId);
+//    }
 
     @GetMapping("/verification/{base64EncodedToken}")
     public ResponseEntity <UserPasswordLessDTO> verifyEmail(@PathVariable String base64EncodedToken) {

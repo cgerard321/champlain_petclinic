@@ -44,7 +44,7 @@ public interface UserService {
 
     List<UserDetails> findAllWithoutPage();
 
-    void deleteUser(long id);
+    //void deleteUser(long id);
 
     Mail generateVerificationMail(User user);
 
