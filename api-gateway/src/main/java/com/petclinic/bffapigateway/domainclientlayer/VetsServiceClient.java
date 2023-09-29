@@ -1,5 +1,6 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
+import com.petclinic.bffapigateway.dtos.Vets.EducationResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.RatingRequestDTO;
 import com.petclinic.bffapigateway.dtos.Vets.RatingResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetDTO;
@@ -219,6 +220,18 @@ public class VetsServiceClient {
                 .bodyToMono(VetDTO.class);
 
         return vetDTOMono;
+    }
+
+    public Flux<EducationResponseDTO> getEducationsByVetId(String vetId) {
+        Flux<EducationResponseDTO> educationResponseDTOFlux =
+                webClientBuilder
+                        .build()
+                        .get()
+                        .uri(vetsServiceUrl + "/" + vetId + "/educations")
+                        .retrieve()
+                        .bodyToFlux(EducationResponseDTO.class);
+
+        return educationResponseDTOFlux;
     }
 
 }

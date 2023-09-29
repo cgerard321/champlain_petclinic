@@ -2,6 +2,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.petclinic.bffapigateway.dtos.Vets.EducationResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.RatingRequestDTO;
 import com.petclinic.bffapigateway.dtos.Vets.RatingResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetDTO;
@@ -348,6 +349,29 @@ class VetsServiceClientIntegrationTest {
         final Mono<Void> empty = vetsServiceClient.deleteVet(vetDTO.getVetId());
 
         assertEquals(empty.block(), null);
+    }
+
+    @Test void getAllEducationsByVetId_ValidId() throws JsonProcessingException {
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody("    {\n" +
+                        "    \"educationId\": \"123456\",\n" +
+                        "    \"vetId\": \"678910\",\n" +
+                        "    \"schoolName\": \"University of Toronto\",\n" +
+                        "    \"degree\": \"Doctor of Veterinary Medicine\",\n" +
+                        "    \"fieldOfStudy\": \"Veterinary Medicine\",\n" +
+                        "    \"startDate\": \"2015\",\n" +
+                        "    \"endDate\": \"2019\"\n" +
+                        "    }"));
+
+        final EducationResponseDTO education = vetsServiceClient.getEducationsByVetId("678910").blockFirst();
+        assertEquals("123456", education.getEducationId());
+        assertEquals("678910", education.getVetId());
+        assertEquals("University of Toronto", education.getSchoolName());
+        assertEquals("Doctor of Veterinary Medicine", education.getDegree());
+        assertEquals("Veterinary Medicine", education.getFieldOfStudy());
+        assertEquals("2015", education.getStartDate());
+        assertEquals("2019", education.getEndDate());
     }
 
     private void prepareResponse(Consumer<MockResponse> consumer) {
