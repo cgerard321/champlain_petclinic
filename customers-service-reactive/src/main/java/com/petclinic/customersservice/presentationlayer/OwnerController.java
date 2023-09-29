@@ -5,6 +5,8 @@ import com.petclinic.customersservice.data.Owner;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import java.util.Optional;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +24,16 @@ public class OwnerController {
     public Flux<OwnerResponseDTO> getAllOwners() {
         return ownerService.getAllOwners();
     }
+
+    @GetMapping("/owners-pagination")
+    public Flux<OwnerResponseDTO> getAllOwnersPagination(
+            @RequestParam Optional<Integer> page,
+            @RequestParam Optional<Integer> size
+    ){
+        return ownerService.getAllOwnersPagination(
+                PageRequest.of(page.orElse(0),size.orElse(5)));
+    }
+
     @GetMapping("/{ownerId}")
     public Mono<ResponseEntity<OwnerResponseDTO>> getOwnerByOwnerId(@PathVariable String ownerId) {
         return ownerService.getOwnerByOwnerId(ownerId)
