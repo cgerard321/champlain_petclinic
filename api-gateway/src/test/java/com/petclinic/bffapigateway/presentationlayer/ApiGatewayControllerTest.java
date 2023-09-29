@@ -2479,9 +2479,35 @@ void deleteAllInventory_shouldSucceed() {
                     assertEquals(validUser.getUsername(),dto.getUsername());
                     assertEquals(validUser.getEmail(),dto.getEmail());
                 });
-
-
     }
+
+
+    @Test
+    void getAllUsers_ShouldReturn2(){
+        UserDetails user1 = UserDetails.builder()
+                .username("user1")
+                .userId("jkbjbhjbllb")
+                .email("email1")
+                .build();
+
+        UserDetails user2 = UserDetails.builder()
+                        .username("user2")
+                        .email("email2")
+                        .userId("hhvhvhvhuvul")
+                        .build();
+        String validToken = "IamValidTrustMe";
+
+        when(authServiceClient.getUsers(validToken))
+                .thenReturn(Flux.just(user1,user2));
+
+        client.get()
+                .uri("/api/gateway/users")
+                .cookie("Bearer",validToken)
+                .exchange()
+                .expectBodyList(UserDetails.class)
+                .hasSize(2);
+    }
+
 }
 
 

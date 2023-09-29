@@ -7,6 +7,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -50,18 +51,6 @@ public class GlobalControllerExceptionHandlerConfig {
         return ResponseEntity.badRequest().body(errorResponse);
     }
 
-    @ExceptionHandler(value = ConstraintViolationException.class)
-    @ResponseStatus(value = BAD_REQUEST)
-    public HTTPErrorMessage constraintViolationException(ConstraintViolationException ex, WebRequest request) {
-
-        final List<String> collect = ex.getConstraintViolations().stream()
-                .map(ConstraintViolation::getMessage)
-                .collect(Collectors.toList());
-        return new HTTPErrorMessage(
-                BAD_REQUEST.value(),
-                String.join("\n", collect));
-    }
-
     @ExceptionHandler(value = EmailAlreadyExistsException.class)
     @ResponseStatus(value = BAD_REQUEST)
     public HTTPErrorMessage emailAlreadyExistsException(EmailAlreadyExistsException ex, WebRequest request) {
@@ -83,9 +72,16 @@ public class GlobalControllerExceptionHandlerConfig {
         return new HTTPErrorMessage(422, ex.getMessage());
     }
 
-    @ExceptionHandler(value = JwtException.class)
+    @ExceptionHandler(value = InvalidBearerTokenException.class)
+    @ResponseStatus(value = UNAUTHORIZED)
+    public HTTPErrorMessage invalidBearerTokenException(InvalidBearerTokenException ex, WebRequest request) {
+
+        return new HTTPErrorMessage(UNAUTHORIZED.value(), ex.getMessage());
+    }
+
+    @ExceptionHandler(value = IllegalArgumentException.class)
     @ResponseStatus(value = BAD_REQUEST)
-    public HTTPErrorMessage jwtException(JwtException ex) {
+    public HTTPErrorMessage illegalArgumentException(IllegalArgumentException ex) {
 
         return new HTTPErrorMessage(BAD_REQUEST.value(), ex.getMessage());
     }

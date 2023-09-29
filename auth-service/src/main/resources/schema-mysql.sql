@@ -12,10 +12,8 @@ create table if not exists users (
 create table if not exists roles (
                        id INT AUTO_INCREMENT,
                        name VARCHAR(2048) NOT NULL UNIQUE,
-                       parent_id INT NULL,
-                       PRIMARY KEY (id),
-                       FOREIGN KEY (parent_id) REFERENCES roles (id)
-);
+                       PRIMARY KEY (id)
+                                 );
 
 
 create table if not exists users_roles(

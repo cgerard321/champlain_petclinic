@@ -193,7 +193,6 @@ public class AuthServiceClient {
         return webClientBuilder.build()
                 .post()
                 .uri(authServiceUrl + "/users/validate-token")
-                .bodyValue(jwtToken)
                 .cookie("Bearer", jwtToken)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> Mono.error(new InvalidTokenException("Invalid token")))

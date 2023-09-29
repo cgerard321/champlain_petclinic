@@ -1,6 +1,5 @@
 package com.auth.authservice.presentationlayer.User;
 
-import com.auth.authservice.Util.Exceptions.EmailAlreadyExistsException;
 import com.auth.authservice.Util.Exceptions.HTTPErrorMessage;
 import com.auth.authservice.businesslayer.UserService;
 import com.auth.authservice.datalayer.user.ResetPasswordToken;
@@ -13,25 +12,39 @@ import org.aspectj.lang.annotation.Before;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.test.web.servlet.MockMvc;
 
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+
+import java.util.Base64;
 import java.util.List;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @AutoConfigureWebTestClient
+@AutoConfigureMockMvc
 class UserControllerIntegrationTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private JwtTokenUtil jwtService;
 
     @Autowired
     private WebTestClient webTestClient;
@@ -57,6 +70,8 @@ class UserControllerIntegrationTest {
         String baseUri = "http://localhost:" + "9200";
         this.webTestClient = WebTestClient.bindToServer().baseUrl(baseUri).build();
     }
+
+
 
     @Test
     void validateToken_ShouldSucceed() {
@@ -148,7 +163,7 @@ class UserControllerIntegrationTest {
                 .expectBody(UserPasswordLessDTO.class)
                 .value(user -> {
                     assertEquals(user.getEmail(),(userDTO.getEmail()));
-                    assertEquals(user.getRoles().size(),2);
+                    assertEquals(user.getRoles().size(),1);
                 });
     }
 
@@ -191,6 +206,7 @@ class UserControllerIntegrationTest {
                     .expectStatus().isOk();
         }
 
+
         @Test
         void processResetPassword_ShouldFindNoToken(){
 
@@ -229,6 +245,49 @@ class UserControllerIntegrationTest {
 
     }
 
+    @Test
+    void sendForgottenPasswordLinkWithAnExistingToken_ShouldSucceed(){
+        UserResetPwdRequestModel resetPwdRequestModel = UserResetPwdRequestModel.builder()
+                .email("admin@admin.com")
+                .build();
+
+        when(mailService.sendMail(any())).thenReturn("Your verification link: someFakeLink");
+
+
+        webTestClient.post()
+                .uri("/users/forgot_password")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(resetPwdRequestModel)
+                .exchange()
+                .expectStatus().isOk();
+
+
+        webTestClient.post()
+                .uri("/users/forgot_password")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(resetPwdRequestModel)
+                .exchange()
+                .expectStatus().isOk();
+
+    }
+
+
+    @Test
+    void sendForgotPasswordLinkWithInvalidEmail_ShouldReturnNotFound(){
+        UserResetPwdRequestModel resetPwdRequestModel = UserResetPwdRequestModel.builder()
+                .email("fake@admin.com")
+                .build();
+
+        when(mailService.sendMail(any())).thenReturn("Your verification link: someFakeLink");
+
+
+        webTestClient.post()
+                .uri("/users/forgot_password")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(resetPwdRequestModel)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
 
     @Test
     void sendForgottenPasswordLink_ShouldFail(){
@@ -272,8 +331,58 @@ class UserControllerIntegrationTest {
                 .value(user -> {
                     assertEquals(userDTO.getEmail(), user.getEmail());
                     assertEquals(userDTO.getUsername(),user.getUsername());
+
                 });
+
+        User user = userRepo.findByEmail(userDTO.getEmail()).get();
+
+        final String base64Token = Base64.getEncoder()
+                .withoutPadding()
+                .encodeToString(jwtService.generateToken(user).getBytes());
+
+        webTestClient.get()
+                        .uri("/users/verification/"+base64Token)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .exchange()
+                        .expectStatus().isOk();
+
+        assertTrue(userRepo.findByEmail(userDTO.getEmail()).get().isVerified());
+
+        userRepo.delete(userRepo.findByEmail(userDTO.getEmail()).get());
     }
+
+
+    @Test
+    void createUser_ShouldFail() {
+        UserIDLessRoleLessDTO userDTO = UserIDLessRoleLessDTO.builder()
+                .email("email@email.com")
+                .password("weakPwd")
+                .username("Ricky")
+                .build();
+
+        webTestClient.post()
+                .uri("/users")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(userDTO)
+                .exchange()
+                .expectStatus().isBadRequest();
+        }
+    @Test
+    void verifyInvalidToken_ShouldReturnBadRequest(){
+        User user = userRepo.findByEmail("admin@admin.com").get();
+
+        final String base64Token = "suckyToken&*@()5O9))&)@";
+
+        webTestClient.get()
+                .uri("/users/verification/"+base64Token)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isBadRequest();
+
+
+    }
+
+
 
     @Test
     void createUser_ShouldThrowEmailAlreadyExistsException() {
@@ -304,6 +413,29 @@ class UserControllerIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.message").isEqualTo(String.format("User with e-mail %s already exists", userDTO.getEmail()));
+
+
+
     }
+
+    @Test
+    void getAllUsers_ShouldSucceed(){
+        String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
+
+
+        webTestClient.get()
+                .uri("/users/withoutPages")
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer",token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(UserDetails.class)
+                .value(users -> {
+                    assertEquals(2,users.size());
+                });
+    }
+
+
+
 
 }

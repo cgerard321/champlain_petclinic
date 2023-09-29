@@ -90,11 +90,7 @@ public class User implements UserDetails {
         final HashSet<GrantedAuthority> grantedAuthorities = new HashSet<>();
 
         for (Role role : roles) {
-            Role parent = role.getParent();
-            while (parent != null) {
-                grantedAuthorities.add(new SimpleGrantedAuthority(format("ROLE_%s", parent.getName())));
-                parent = parent.getParent();
-            }
+
             grantedAuthorities.add(new SimpleGrantedAuthority(format("ROLE_%s", role.getName())));
         }
 

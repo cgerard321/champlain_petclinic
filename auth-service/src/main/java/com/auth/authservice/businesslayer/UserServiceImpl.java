@@ -30,6 +30,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.server.resource.InvalidBearerTokenException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
@@ -64,24 +65,6 @@ public class UserServiceImpl implements UserService {
     private String gatewayProtocol;
 
     @Override
-    public User getUserById(long id) {
-        if (id <= 0){
-            throw new InvalidInputException("Id cannot be a negative number for " + id);
-        }
-        else {
-            User entity  = userRepo.findById(id)
-                    .orElseThrow(() -> new NotFoundException("No user found for userID " + id));
-            log.info("User getUserById: found userId: {}", entity.getId());
-            return entity;
-        }
-    }
-
-    @Override
-    public Page<User> findAll(PageRequest of) {
-        return userRepo.findAll(of);
-    }
-
-    @Override
     public List<UserDetails> findAllWithoutPage() {
         return userMapper.modelToDetailsList(userRepo.findAll());
     }
@@ -111,16 +94,6 @@ public class UserServiceImpl implements UserService {
             log.info("Email sent to {}", userIDLessDTO.getEmail());
 
             return userRepo.save(user);
-
-    }
-
-    @Override
-    public User passwordReset(long userId, @Valid String newPassword) {
-
-        log.info("id={}", userId);
-        User user = userRepo.findById(userId).orElseThrow(() -> new NotFoundException("No user for id:" + userId));
-        user.setPassword(newPassword);
-        return userRepo.save(user);
 
     }
 
@@ -307,9 +280,12 @@ public class UserServiceImpl implements UserService {
         String hashedToken = BCrypt.hashpw(token, salt);
         log.info("Hashed token: " + hashedToken);
         ResetPasswordToken resetPasswordToken = tokenRepository.findResetPasswordTokenByToken(hashedToken);
+        if (resetPasswordToken == null) {
+            throw new InvalidBearerTokenException("Token not found");
+        }
+
         final Calendar cal = Calendar.getInstance();
         Optional<User> user =userRepo.findById(resetPasswordToken.getUserIdentifier());
-
         if(resetPasswordToken.getExpiryDate().after(cal.getTime()) && user.isPresent())
             return userMapper.modelToPasswordLessDTO(user.get());
         else
@@ -427,16 +403,6 @@ public class UserServiceImpl implements UserService {
         mailService.sendMail(mail);
     }
 
-
-    public void sendEmail(String recipientEmail, String link){
-        Mail mail = Mail.builder()
-                .message(format("Your verification link: %s", link))
-                .subject("PetClinic e-mail verification")
-                .to(recipientEmail)
-                .build();
-
-        mailService.sendMail(mail);
-    }
 
     @Override
     public User getUserByEmail(String email) throws NotFoundException {

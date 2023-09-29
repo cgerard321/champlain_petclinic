@@ -481,7 +481,7 @@ public class BFFApiGatewayController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "users", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<UserDetails> getAll(@CookieValue("Bearer") String auth) {
+    public Flux<UserDetails> getAllUsers(@CookieValue("Bearer") String auth) {
         return authServiceClient.getUsers(auth);
     }
 

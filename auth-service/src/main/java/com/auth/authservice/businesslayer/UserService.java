@@ -40,11 +40,7 @@ public interface UserService {
 
     User createUser(UserIDLessRoleLessDTO user);
 
-    User passwordReset(long id, String newPassword);
 
-    User getUserById(long id);
-
-    Page<User> findAll(PageRequest of);
 
     List<UserDetails> findAllWithoutPage();
 

@@ -29,15 +29,11 @@ petClinicApp.factory("authProvider", ["$window", function ($window) {
             $window.localStorage.setItem("username", username)
             $window.localStorage.setItem("email", email)
             $window.localStorage.setItem("UUID", userId)
-
             let rolesArr = []
             roles.forEach(role => {
                 rolesArr.push(role.name)
             });
-
-
             console.log(rolesArr.toString())
-
             $window.localStorage.setItem("roles", rolesArr.toString())
         },
         getUser: () => ({
@@ -59,9 +55,6 @@ petClinicApp.factory("authProvider", ["$window", function ($window) {
 
 petClinicApp.factory("httpErrorInterceptor", ["$q", "$location", "authProvider", function ($q, $location, authProvider) {
     return {
-        // NOTE: This is not the correct way to do this
-        // This method completely disregards whoever was subscribed to this promise and just cancels it
-        // I just do not care to implement it correctly because it is more complex
         responseError: rej => {
             if (!whiteList.has($location.path().substring(1)) && (rej.status === 401 || rej.status === 403)) {
                 authProvider.purgeUser();
