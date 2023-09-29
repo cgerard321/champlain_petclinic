@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('ownerDetails', ['ui.router'])
-    .config(['$stateProvider', function ($stateProvider) {
+    .config(['$stateProvider',"$scope", function ($stateProvider,$scope) {
         $stateProvider
             .state('ownerDetails', {
                 parent: 'app',

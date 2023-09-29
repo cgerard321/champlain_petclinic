@@ -86,7 +86,7 @@ public class UserServiceImpl implements UserService {
             Set<Role> roleSet = new HashSet<>();
             role.ifPresent(roleSet::add);
             user.setRoles(roleSet);
-            user.setUserIdentifier(new UserIdentifier());
+            user.setUserIdentifier(new UserIdentifier(userIDLessDTO.getUserId()));
             user.setPassword(passwordEncoder.encode(user.getPassword()));
 
             log.info("Sending email to {}...", userIDLessDTO.getEmail());

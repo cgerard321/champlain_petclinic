@@ -1,6 +1,7 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.Auth.*;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.exceptions.InvalidCredentialsException;
 import com.petclinic.bffapigateway.exceptions.GenericHttpException;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
@@ -17,12 +18,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.UUID;
+
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
 import static reactor.core.publisher.Mono.error;
 import static reactor.core.publisher.Mono.just;
 
@@ -31,6 +32,8 @@ import static reactor.core.publisher.Mono.just;
 public class AuthServiceClient {
 
     private final WebClient.Builder webClientBuilder;
+
+    private final CustomersServiceClient customersServiceClient;
     private final String authServiceUrl;
 
     private final RestTemplate restTemplate;
@@ -42,10 +45,11 @@ public class AuthServiceClient {
 
     public AuthServiceClient(
             WebClient.Builder webClientBuilder,
-            @Value("${app.auth-service.host}") String authServiceHost,
+            CustomersServiceClient customersServiceClient, @Value("${app.auth-service.host}") String authServiceHost,
             @Value("${app.auth-service.port}") String authServicePort,
             RestTemplate restTemplate, SecurityConst securityConst) {
         this.webClientBuilder = webClientBuilder;
+        this.customersServiceClient = customersServiceClient;
         this.restTemplate = restTemplate;
         this.securityConst = securityConst;
         authServiceUrl = "http://" + authServiceHost + ":" + authServicePort;
@@ -67,7 +71,14 @@ public class AuthServiceClient {
                 .bodyToFlux(UserDetails.class);
     }
 //
-        public Mono<UserPasswordLessDTO> createUser (Register model) {
+        public Mono<OwnerResponseDTO> createUser (Register model) {
+
+            String uuid = UUID.randomUUID().toString();
+            model.setUserId(uuid);
+            model.getOwner().setOwnerId(uuid);
+            log.info("Entered domain service create user");
+            log.info("UUID : {}",uuid);
+
             return webClientBuilder.build().post()
                     .uri(authServiceUrl + "/users")
                     .body(just(model), Register.class)
@@ -76,9 +87,17 @@ public class AuthServiceClient {
                     .onStatus(HttpStatusCode::is4xxClientError,
                             n -> rethrower.rethrow(n,
                                     x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST)))
-                    .bodyToMono(UserPasswordLessDTO.class);
-        }
+                    .onStatus(HttpStatusCode::is5xxServerError,  n -> rethrower.rethrow(n,
+                            x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST)))
+                    .bodyToMono(UserPasswordLessDTO.class)
+                    .then(customersServiceClient.createOwner(model.getOwner()))
+                    .onErrorResume(e -> {
+                        //todo: delete user if owner creation fails and vice versa
+                        log.info("Error in create user");
 
+                        return  customersServiceClient.deleteOwner(uuid).then(error(e));
+                    });
+        }
 
 //    public Mono<UserDetails> updateUser (final long userId, final Register model) {
 //        return webClientBuilder.build().put()

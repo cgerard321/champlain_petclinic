@@ -18,11 +18,13 @@ import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
 import com.petclinic.bffapigateway.dtos.Vets.*;
 import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
+import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.dtos.Visits.VisitDetails;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import com.petclinic.bffapigateway.utils.VetsEntityDtoUtil;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
@@ -108,6 +110,7 @@ public class BFFApiGatewayController {
     public Flux<Void> deleteBillsByVetId(final @PathVariable String vetId){
         return billServiceClient.deleteBillsByVetId(vetId);
     }
+
 
     @DeleteMapping(value = "bills/customer/{customerId}")
     public Flux<Void> deleteBillsByCustomerId(final @PathVariable String customerId){
@@ -373,7 +376,7 @@ public class BFFApiGatewayController {
                 );*/
     }
 
-
+    @IsUserSpecific(idToMatch = "ownerId", bypassRoles = {Roles.ADMIN})
     @GetMapping(value = "owners/{ownerId}")
     public Mono<ResponseEntity<OwnerResponseDTO>> getOwnerDetails(final @PathVariable String ownerId) {
         return customersServiceClient.getOwner(ownerId)
@@ -387,12 +390,12 @@ public class BFFApiGatewayController {
     }
 
 
-    @PostMapping(value = "owners",
-            consumes = "application/json",
-            produces = "application/json")
-    public Mono<OwnerResponseDTO> createOwner(@RequestBody OwnerResponseDTO model){
-        return customersServiceClient.createOwner(model);
-    }
+//    @PostMapping(value = "owners",
+//            consumes = "application/json",
+//            produces = "application/json")
+//    public Mono<OwnerResponseDTO> createOwner(@RequestBody OwnerResponseDTO model){
+//        return customersServiceClient.createOwner(model);
+//    }
 
     @PostMapping(value = "owners/photo/{ownerId}")
     public Mono<String> setOwnerPhoto(@RequestBody PhotoDetails photoDetails, @PathVariable int ownerId) {
@@ -455,15 +458,8 @@ public class BFFApiGatewayController {
     }
 
 
-
-
-
-
-
-
-
     @DeleteMapping(value = "owners/{ownerId}")
-    public Mono<OwnerResponseDTO> deleteOwner(@PathVariable int ownerId){
+    public Mono<OwnerResponseDTO> deleteOwner(@PathVariable String ownerId){
         return customersServiceClient.deleteOwner(ownerId);
     }
     
@@ -482,7 +478,7 @@ public class BFFApiGatewayController {
     @PostMapping(value = "/users",
             consumes = "application/json",
             produces = "application/json")
-    public Mono<UserPasswordLessDTO> createUser(@RequestBody Register model) {
+    public Mono<OwnerResponseDTO> createUser(@RequestBody @Valid Register model) {
         return authServiceClient.createUser(model);
     }
 

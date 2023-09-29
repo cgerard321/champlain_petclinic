@@ -106,10 +106,6 @@ public class UserController {
             // Handle decoding exceptions
             return ResponseEntity.badRequest().body(null);
         }
-//        return ResponseEntity.ok()
-//                        .body(userService.verifyEmailFromToken(
-//                                new String(Base64.getDecoder().decode(base64EncodedToken))
-//                        ));
     }
 
 

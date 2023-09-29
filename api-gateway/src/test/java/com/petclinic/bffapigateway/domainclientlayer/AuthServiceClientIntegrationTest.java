@@ -12,14 +12,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -29,9 +24,6 @@ import reactor.test.StepVerifier;
 
 import java.io.IOException;
 import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 /**
  * Created by IntelliJ IDEA.
@@ -48,6 +40,9 @@ public class AuthServiceClientIntegrationTest {
             ,"Bearer");
 
     private AuthServiceClient authServiceClient;
+
+    @MockBean
+    private CustomersServiceClient customersServiceClient;
     private MockWebServer server;
     private ObjectMapper objectMapper;
 
@@ -65,7 +60,7 @@ public class AuthServiceClientIntegrationTest {
         server = new MockWebServer();
         authServiceClient = new AuthServiceClient(
                 WebClient.builder(),
-                server.getHostName(),
+                customersServiceClient, server.getHostName(),
                 String.valueOf(server.getPort()),
                 new RestTemplate(), securityConst);
         objectMapper = new ObjectMapper();

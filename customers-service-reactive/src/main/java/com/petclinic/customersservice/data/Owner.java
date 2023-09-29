@@ -9,6 +9,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @Builder
+@Getter
 @AllArgsConstructor
 public class Owner {
 

@@ -17,6 +17,7 @@ import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -65,7 +66,7 @@ public class RoleFilter implements WebFilter {
 
 
         if (handler.getMethod().getAnnotation(SecuredEndpoint.class) == null
-                || handler.getMethod().getAnnotation(SecuredEndpoint.class).allowedRoles()[0] == Roles.ALL) {
+                || Arrays.stream(handler.getMethod().getAnnotation(SecuredEndpoint.class).allowedRoles()).anyMatch(role -> role == Roles.ALL)){
             return chain.filter(exchange);
         }
 
@@ -93,10 +94,10 @@ public class RoleFilter implements WebFilter {
             return Mono.error(new InvalidTokenException("Unauthorized, invalid token"));
         }
 
-
-        if (roles.contains(Roles.ADMIN.toString())) {
-            return chain.filter(exchange);
-        }
+//todo : ask other teams if they want admin to have carte blanche
+//        if (roles.contains(Roles.ADMIN.toString())) {
+//            return chain.filter(exchange);
+//        }
 
 
 

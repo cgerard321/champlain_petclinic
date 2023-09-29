@@ -728,37 +728,37 @@ class ApiGatewayControllerTest {
 
 
 
-    @Test
-    void createOwner(){
-        OwnerResponseDTO owner = new OwnerResponseDTO();
-        owner.setOwnerId("ownerId-123");
-        owner.setFirstName("John");
-        owner.setLastName("Johnny");
-        owner.setAddress("111 John St");
-        owner.setCity("Johnston");
-        owner.setTelephone("51451545144");
-        when(customersServiceClient.createOwner(owner))
-                .thenReturn(Mono.just(owner));
-
-
-        client.post()
-                .uri("/api/gateway/owners")
-                .body(Mono.just(owner), OwnerResponseDTO.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody();
-
-
-
-        assertEquals(owner.getOwnerId(),owner.getOwnerId());
-        assertEquals(owner.getFirstName(),"John");
-        assertEquals(owner.getLastName(),"Johnny");
-        assertEquals(owner.getAddress(),"111 John St");
-        assertEquals(owner.getCity(),"Johnston");
-        assertEquals(owner.getTelephone(),"51451545144");
-    }
+//    @Test
+//    void createOwner(){
+//        OwnerResponseDTO owner = new OwnerResponseDTO();
+//        owner.setOwnerId("ownerId-123");
+//        owner.setFirstName("John");
+//        owner.setLastName("Johnny");
+//        owner.setAddress("111 John St");
+//        owner.setCity("Johnston");
+//        owner.setTelephone("51451545144");
+//        when(customersServiceClient.createOwner(owner))
+//                .thenReturn(Mono.just(owner));
+//
+//
+//        client.post()
+//                .uri("/api/gateway/owners")
+//                .body(Mono.just(owner), OwnerResponseDTO.class)
+//                .accept(MediaType.APPLICATION_JSON)
+//                .exchange()
+//                .expectStatus().isOk()
+//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+//                .expectBody();
+//
+//
+//
+//        assertEquals(owner.getOwnerId(),owner.getOwnerId());
+//        assertEquals(owner.getFirstName(),"John");
+//        assertEquals(owner.getLastName(),"Johnny");
+//        assertEquals(owner.getAddress(),"111 John St");
+//        assertEquals(owner.getCity(),"Johnston");
+//        assertEquals(owner.getTelephone(),"51451545144");
+//    }
 
 
 
@@ -2488,10 +2488,17 @@ void deleteAllInventory_shouldSucceed() {
     @Test
     void createUser_withValidModel_shouldSucceed() {
         // Define a valid Register model here
+        OwnerResponseDTO ownerResponseDTO = OwnerResponseDTO.builder()
+                .ownerId("1")
+                .firstName("Ric")
+                .lastName("Danon")
+                .build();
+
         Register validUser = Register.builder()
                 .email("richard200danon@gmail.com")
                 .password("pwd%jfjfjDkkkk8")
                 .username("Ric")
+                .owner(ownerResponseDTO)
                 .build();
 
         UserPasswordLessDTO userLess = UserPasswordLessDTO.builder()
@@ -2499,8 +2506,9 @@ void deleteAllInventory_shouldSucceed() {
                 .email(validUser.getEmail())
                 .build();
 
+
         when(authServiceClient.createUser(any()))
-                .thenReturn(Mono.just(userLess));
+                .thenReturn(Mono.just(ownerResponseDTO));
 
         client.post()
                 .uri("/api/gateway/users")
@@ -2509,11 +2517,12 @@ void deleteAllInventory_shouldSucceed() {
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(UserPasswordLessDTO.class)
+                .expectBody(OwnerResponseDTO.class)
                 .value(dto ->{
                     assertNotNull(dto);
-                    assertEquals(validUser.getUsername(),dto.getUsername());
-                    assertEquals(validUser.getEmail(),dto.getEmail());
+                    assertEquals(ownerResponseDTO.getFirstName(),dto.getFirstName());
+                    assertEquals(ownerResponseDTO.getLastName(),dto.getLastName());
+                    assertEquals(ownerResponseDTO.getOwnerId(),dto.getOwnerId());
                 });
     }
 

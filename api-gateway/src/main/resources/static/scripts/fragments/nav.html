@@ -14,43 +14,45 @@
     </button>
 
     <div class="collapse navbar-collapse justify-content-between" id="navbarSupportedContent">
-        <ul class="navbar-nav mr-auto">
-            <li class="nav-item active">
-                <a class="nav-link" ui-sref="welcome">Home <span class="sr-only">(current)</span></a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" ui-sref="vets">Veterinarians</a>
-            </li>
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    Owners
-                </a>
-                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                    <a class="nav-link" ui-sref="owners">Owners</a>
-                    <a class="nav-link" ui-sref="ownerRegister">Register</a>
-                </div>
-            </li>
-            <li class="nav-item">
-                    <a class="nav-link" ui-sref="bills">Bills</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" ui-sref="visitList">Visits</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" ui-sref="inventories">Inventory</a>
-            </li>
-        </ul>
-        <ul class="navbar-nav mr-auto justify-content-end" ng-if="isLoggedIn">
-            <li class="nav-item ">
-                <a class="nav-link" ui-sref="welcome">Welcome back {{ username }}!</a>
-            </li>
-            <li class="nav-item"  ng-if="isAdmin">
-                <a class="nav-link" ui-sref="AdminPanel" >Admin-Panel</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" onclick="purgeUser()" style="cursor:pointer" ui-sref="login">Logout</a>
-            </li>
-        </ul>
+        <span  ng-if="isLoggedIn">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                    <a class="nav-link" ui-sref="welcome">Home <span class="sr-only">(current)</span></a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" ui-sref="vets">Veterinarians</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Owners
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="nav-link" ui-sref="owners">Owners</a>
+                        <a class="nav-link" ui-sref="ownerDetails({ ownerId: UUID })">Edit Account</a>
+                    </div>
+                </li>
+                <li class="nav-item">
+                        <a class="nav-link" ui-sref="bills">Bills</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" ui-sref="visitList">Visits</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" ui-sref="inventories">Inventory</a>
+                </li>
+            </ul>
+            <ul class="navbar-nav mr-auto justify-content-end" ng-if="isLoggedIn">
+                <li class="nav-item ">
+                    <a class="nav-link" ui-sref="welcome">Welcome back {{ username }}!</a>
+                </li>
+                <li class="nav-item"  ng-if="isAdmin">
+                    <a class="nav-link" ui-sref="AdminPanel" >Admin-Panel</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" onclick="purgeUser()" style="cursor:pointer" ui-sref="login">Logout</a>
+                </li>
+            </ul>
+        </span>
         <ul class="navbar-nav mr-auto justify-content-end" ng-if="!isLoggedIn">
             <li class="nav-item ">
                 <a class="nav-link" ui-sref="signupForm">Signup</a>

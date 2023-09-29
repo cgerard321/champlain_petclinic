@@ -6,15 +6,15 @@ import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
 import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
-import com.petclinic.bffapigateway.dtos.Vets.VetDTO;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.UUID;
 
 import static reactor.core.publisher.Mono.just;
 
@@ -27,8 +27,7 @@ public class CustomersServiceClient {
     public CustomersServiceClient(
             WebClient.Builder webClientBuilder,
             @Value("${app.customers-service.host}") String customersServiceHost,
-            @Value("${app.customers-service.port}") String customersServicePort
-    ) {
+            @Value("${app.customers-service.port}") String customersServicePort) {
         this.webClientBuilder = webClientBuilder;
         customersServiceUrl = "http://" + customersServiceHost + ":" + customersServicePort;
     }
@@ -139,7 +138,7 @@ public class CustomersServiceClient {
                 .bodyToMono(PetResponseDTO.class);
     }
 
-    public Mono<OwnerResponseDTO> deleteOwner(final long ownerId) {
+    public Mono<OwnerResponseDTO> deleteOwner(final String ownerId) {
         return webClientBuilder.build().delete()
                 .uri(customersServiceUrl + ownerId)
                 .retrieve()
