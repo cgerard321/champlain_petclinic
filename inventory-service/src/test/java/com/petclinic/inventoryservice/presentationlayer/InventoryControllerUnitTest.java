@@ -14,8 +14,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.List;
-
-import static com.petclinic.inventoryservice.datalayer.Inventory.InventoryType.internal;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -66,14 +64,14 @@ class InventoryControllerUnitTest {
         String validInventoryId = "123";
         InventoryRequestDTO inventoryRequestDTO = InventoryRequestDTO.builder()
                 .inventoryName("Updated Internal")
-                .inventoryType(internal)
+                .inventoryType("Internal")
                 .inventoryDescription("Updated inventory_3")
                 .build();
 
         InventoryResponseDTO inventoryResponseDTO = InventoryResponseDTO.builder()
                 .inventoryId(validInventoryId)
                 .inventoryName("Updated Internal")
-                .inventoryType(internal)
+                .inventoryType("Internal")
                 .inventoryDescription("Updated inventory_3")
                 .build();
 
@@ -117,14 +115,14 @@ class InventoryControllerUnitTest {
     void addInventory_ValidRequest_ShouldReturnCreated() {
         InventoryRequestDTO inventoryRequestDTO = InventoryRequestDTO.builder()
                 .inventoryName("New Internal")
-                .inventoryType(internal)
+                .inventoryType("Internal")
                 .inventoryDescription("New inventory_4")
                 .build();
 
         InventoryResponseDTO inventoryResponseDTO = InventoryResponseDTO.builder()
                 .inventoryId("inventoryid1")
                 .inventoryName("New Internal")
-                .inventoryType(internal)
+                .inventoryType("Internal")
                 .inventoryDescription("New inventory_4")
                 .build();
 
@@ -347,7 +345,7 @@ class InventoryControllerUnitTest {
         String invalidInventoryId = "invalid_id";
         InventoryRequestDTO inventoryRequestDTO = InventoryRequestDTO.builder()
                 .inventoryName("Updated Internal")
-                .inventoryType(internal)
+                .inventoryType("Internal")
                 .inventoryDescription("Updated inventory_3")
                 .build();
 

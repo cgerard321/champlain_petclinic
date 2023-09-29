@@ -2,6 +2,7 @@ package com.petclinic.inventoryservice.businesslayer;
 import com.petclinic.inventoryservice.datalayer.Inventory.Inventory;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryRepository;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryType;
+import com.petclinic.inventoryservice.datalayer.Inventory.InventoryTypeRepository;
 import com.petclinic.inventoryservice.datalayer.Product.Product;
 import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
 import com.petclinic.inventoryservice.presentationlayer.InventoryRequestDTO;
@@ -33,6 +34,8 @@ class ProductInventoryServiceUnitTest {
     ProductRepository productRepository;
     @MockBean
     InventoryRepository inventoryRepository;
+    @MockBean
+    InventoryTypeRepository inventoryTypeRepository;
 
 
     ProductResponseDTO productResponseDTO = ProductResponseDTO.builder()
@@ -52,11 +55,16 @@ class ProductInventoryServiceUnitTest {
             .productPrice(100.00)
             .productQuantity(10)
             .build();
+    InventoryType inventoryType = InventoryType.builder()
+            .id(1)
+            .typeId("81445f86-5329-4df6-badc-8f230ee07e75")
+            .type("Internal")
+            .build();
 
     Inventory inventory = Inventory.builder()
             .id("1")
             .inventoryId("1")
-            .inventoryType(InventoryType.internal)
+            .inventoryType(inventoryType.getType())
             .inventoryDescription("Medication for procedures")
             .build();
     ProductRequestDTO productRequestDTO = ProductRequestDTO.builder()
@@ -262,14 +270,14 @@ class ProductInventoryServiceUnitTest {
         // Arrange
         InventoryRequestDTO inventoryRequestDTO = InventoryRequestDTO.builder()
                 .inventoryName("internal")
-                .inventoryType(InventoryType.internal)
+                .inventoryType(inventoryType.getType())
                 .inventoryDescription("inventory_id1")
                 .build();
 
         Inventory inventoryEntity = Inventory.builder()
                 .inventoryId("inventoryId_1")
                 .inventoryName("internal")
-                .inventoryType(InventoryType.internal)
+                .inventoryType(inventoryType.getType())
                 .inventoryDescription("inventory_id1")
                 .build();
 
@@ -350,7 +358,7 @@ class ProductInventoryServiceUnitTest {
         String invalidInventoryId = "145";
         InventoryRequestDTO inventoryRequestDTO = InventoryRequestDTO.builder()
                 .inventoryName("internal")
-                .inventoryType(InventoryType.internal)
+                .inventoryType(inventoryType.getType())
                 .inventoryDescription("Updated description")
                 .build();
 
@@ -381,7 +389,7 @@ class ProductInventoryServiceUnitTest {
         Inventory inventory = Inventory.builder()
                 .id("1")
                 .inventoryId("1")
-                .inventoryType(InventoryType.internal)
+                .inventoryType(inventoryType.getType())
                 .inventoryDescription("Medication for procedures")
                 .build();
 
@@ -462,7 +470,7 @@ class ProductInventoryServiceUnitTest {
         Inventory inventory = Inventory.builder()
                 .id("1")
                 .inventoryId("1")
-                .inventoryType(InventoryType.internal)
+                .inventoryType(inventoryType.getType())
                 .inventoryDescription("Medication for procedures")
                 .build();
 

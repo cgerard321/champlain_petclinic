@@ -21,7 +21,7 @@ class InventoryRepositoryTest {
     @Test
     public void shouldSaveSingleInventory(){
         //arrange
-        Inventory newInventory = buildInventory("inventoryId_3", "inventoryType_3", InventoryType.internal, "inventoryDescription_3");
+        Inventory newInventory = buildInventory("inventoryId_3", "inventoryType_3", "Internal", "inventoryDescription_3");
         Publisher<Inventory> setup = inventoryRepository.save(newInventory);
         //act and assert
         StepVerifier
@@ -35,7 +35,7 @@ class InventoryRepositoryTest {
     @Test public void findInventoryByInventoryID_shouldFindOne(){
 
 
-        Inventory newInventory = buildInventory("inventoryId_3", "internal", InventoryType.internal ,"inventoryDescription_3");
+        Inventory newInventory = buildInventory("inventoryId_3", "internal", "Internal" ,"inventoryDescription_3");
 
         StepVerifier
                 .create(inventoryRepository.findInventoryByInventoryId(newInventory.getInventoryId()))
@@ -49,7 +49,7 @@ class InventoryRepositoryTest {
     @Test
     public void shouldDeleteInventory() {
         // Arrange
-        Inventory inventoryToBeDeleted = buildInventory("inventoryId_4", "inventoryType_4", InventoryType.internal ,"inventoryDescription_4");
+        Inventory inventoryToBeDeleted = buildInventory("inventoryId_4", "inventoryType_4", "Internal" ,"inventoryDescription_4");
         inventoryRepository.save(inventoryToBeDeleted).block();
 
         // Act
@@ -61,6 +61,7 @@ class InventoryRepositoryTest {
                 .expectNextCount(0)  // No inventory should be found
                 .verifyComplete();
     }
+    private Inventory buildInventory(String inventoryId, String inventoryName, String inventoryType, String inventoryDescription) {
     //search
     @Test
     public void shouldFindInventoryByNameTypeAndDescription() {

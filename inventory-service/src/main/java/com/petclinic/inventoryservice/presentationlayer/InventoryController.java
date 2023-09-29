@@ -111,5 +111,12 @@ public Flux<InventoryResponseDTO> searchInventories(
         .then(Mono.just(ResponseEntity.noContent().build()));
     }
 
+    @PostMapping("/inventoryType")
+    public Mono<ResponseEntity<InventoryTypeResponseDTO>> addInventoryType(@RequestBody Mono<InventoryTypeRequestDTO> inventoryTypeRequestDTO){
+        return productInventoryService.addInventoryType(inventoryTypeRequestDTO)
+                .map(inventoryTypeResponseDTO -> ResponseEntity.status(HttpStatus.CREATED).body(inventoryTypeResponseDTO))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
 }
 

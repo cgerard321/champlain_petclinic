@@ -10,6 +10,7 @@ import com.petclinic.bffapigateway.exceptions.InventoryNotFoundException;
 import com.petclinic.bffapigateway.exceptions.ProductListNotFoundException;
 import com.petclinic.bffapigateway.utils.Rethrower;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.petclinic.bffapigateway.dtos.Inventory.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -180,6 +181,13 @@ public class InventoryServiceClient {
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToMono(Void.class);
+    }
+    public Mono<InventoryTypeResponseDTO> addInventoryType(InventoryTypeRequestDTO inventoryTypeRequestDTO){
+        return webClient.post()
+                .uri(inventoryServiceUrl + "/inventoryType")
+                .body(Mono.just(inventoryTypeRequestDTO),InventoryTypeRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve().bodyToMono(InventoryTypeResponseDTO.class);
     }
 
     public Mono<Void> deleteInventoryByInventoryId(final String inventoryId){

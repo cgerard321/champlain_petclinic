@@ -3,6 +3,7 @@ package com.petclinic.inventoryservice.utils;
 import com.petclinic.inventoryservice.datalayer.Inventory.Inventory;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryRepository;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryType;
+import com.petclinic.inventoryservice.datalayer.Inventory.InventoryTypeRepository;
 import com.petclinic.inventoryservice.datalayer.Product.Product;
 import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,13 +20,23 @@ public class DataBaseLoaderService  implements CommandLineRunner {
     InventoryRepository inventoryRepository;
     @Autowired
     ProductRepository productRepository;
+    @Autowired
+    InventoryTypeRepository inventoryTypeRepository;
 
     @Override
     public void run(String... args) throws Exception {
+        InventoryType inventoryType1 = InventoryType.builder()
+                .typeId(UUID.randomUUID().toString())
+                .type("Internal")
+                .build();
+        InventoryType inventoryType2 = InventoryType.builder()
+                .typeId(UUID.randomUUID().toString())
+                .type("Sales")
+                .build();
         Inventory inventory1 = Inventory.builder()
                 .inventoryId("1")
                 .inventoryName("Medication")
-                .inventoryType(InventoryType.internal)
+                .inventoryType(inventoryType1.getType())
                 .inventoryDescription("Medication for procedures")
                 .build();
         Product product1 = Product.builder()

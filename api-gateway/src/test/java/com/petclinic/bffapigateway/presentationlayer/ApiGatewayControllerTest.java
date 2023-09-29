@@ -2343,14 +2343,14 @@ private InventoryResponseDTO buildInventoryDTO(){
         return InventoryResponseDTO.builder()
                 .inventoryId("1")
                 .inventoryName("invt1")
-                .inventoryType(internal)
+                .inventoryType("Internal")
                 .inventoryDescription("invtone")
                 .build();
 }
     @Test
     void addInventory_withValidValue_shouldSucceed() {
 
-        InventoryRequestDTO requestDTO = new InventoryRequestDTO("internal", internal, "invt1");
+        InventoryRequestDTO requestDTO = new InventoryRequestDTO("internal", "Internal", "invt1");
 
         InventoryResponseDTO inventoryResponseDTO = buildInventoryDTO();
 
@@ -2367,7 +2367,7 @@ private InventoryResponseDTO buildInventoryDTO(){
                 .expectBody()
                 .jsonPath("$.inventoryId").isEqualTo(inventoryResponseDTO.getInventoryId())
                 .jsonPath("$.inventoryName").isEqualTo(inventoryResponseDTO.getInventoryName())
-                .jsonPath("$.inventoryType").isEqualTo("internal")
+                .jsonPath("$.inventoryType").isEqualTo("Internal")
                 .jsonPath("$.inventoryDescription").isEqualTo("invtone");
 
 
@@ -2379,12 +2379,12 @@ private InventoryResponseDTO buildInventoryDTO(){
 
     @Test
     void updateInventory_withValidValue_shouldSucceed() {
-        InventoryRequestDTO requestDTO = new InventoryRequestDTO("internal", internal, "newDescription");
+        InventoryRequestDTO requestDTO = new InventoryRequestDTO("internal", "Internal", "newDescription");
 
         InventoryResponseDTO expectedResponse = InventoryResponseDTO.builder()
                 .inventoryId("1")
                 .inventoryName("newName")
-                .inventoryType(internal)
+                .inventoryType("Internal")
                 .inventoryDescription("newDescription")
                 .build();
 
@@ -2402,7 +2402,7 @@ private InventoryResponseDTO buildInventoryDTO(){
                 .expectBody()
                 .jsonPath("$.inventoryId").isEqualTo(expectedResponse.getInventoryId())
                 .jsonPath("$.inventoryName").isEqualTo(expectedResponse.getInventoryName())
-                .jsonPath("$.inventoryType").isEqualTo("internal")
+                .jsonPath("$.inventoryType").isEqualTo("Internal")
                 .jsonPath("$.inventoryDescription").isEqualTo(expectedResponse.getInventoryDescription());
 
         verify(inventoryServiceClient, times(1))
