@@ -3,11 +3,15 @@ package com.petclinic.bffapigateway.config;
 import com.petclinic.bffapigateway.exceptions.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.webjars.NotFoundException;
 
 import java.security.GeneralSecurityException;
+
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 /**
  * Created by IntelliJ IDEA.
@@ -77,11 +81,18 @@ public class GlobalExceptionHandler {
     }
 
 
+
     @ExceptionHandler(value = IllegalArgumentException.class)
     public ResponseEntity<HttpErrorInfo> illegalArgumentException(IllegalArgumentException ex) {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new HttpErrorInfo(HttpStatus.BAD_REQUEST.value(), ex.getMessage()));
+    }
+    
+    @ExceptionHandler(value = BadRequestException.class)
+    public ResponseEntity<HttpErrorInfo> handleBadRequestException(BadRequestException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new HttpErrorInfo(HttpStatus.BAD_REQUEST.value(),ex.getMessage()));
     }
 
 }

@@ -553,7 +553,7 @@
 
     <div class="form-group">
         <label for="selectedVet">Practitioner</label>
-        <select id="selectedVet" ng-model="$ctrl.practitionerId" ng-change="$ctrl.loadVetInfo();$ctrl.getVisitsForPractitionerIdAndMonth()" required>
+        <select id="selectedVet" ng-model="$ctrl.practitionerId" ng-change="$ctrl.loadVetInfo();$ctrl.getVisitsForPractitionerIdAndMonth()">
             <option disabled selected value>Please Select A Veterinarian</option>
             <option ng-repeat="p in $ctrl.vets" data-target="{{p.firstName}} {{p.lastName}}" value="{{p.vetId}}">{{p.firstName}} {{p.lastName}}</option>
         </select>
@@ -588,12 +588,12 @@
 
     <div class="form-group" style="margin-top: 4px">
         <label for="date_input">Date</label>
-        <input id="date_input" type="date" class="form-control" ng-model='$ctrl.selectedDate' required disabled/>
+        <input id="date_input" type="date" class="form-control" ng-model='$ctrl.selectedDate' disabled/>
     </div>
 
     <div class="form-group">
         <label for="description_textarea">Description</label>
-        <textarea id="description_textarea" class="form-control" ng-model="$ctrl.desc" style="resize:vertical;" required></textarea>
+        <textarea id="description_textarea" class="form-control" ng-model="$ctrl.desc" style="resize:vertical;" ></textarea>
     </div>
 
     <div class="form-group" style="margin-top: 6px; margin-bottom: 6px">

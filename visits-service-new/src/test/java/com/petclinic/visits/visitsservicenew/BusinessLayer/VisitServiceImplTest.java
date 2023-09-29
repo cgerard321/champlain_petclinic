@@ -3,6 +3,8 @@ package com.petclinic.visits.visitsservicenew.BusinessLayer;
 import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.*;
+import com.petclinic.visits.visitsservicenew.Exceptions.BadRequestException;
+import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
 import org.junit.jupiter.api.BeforeEach;
@@ -187,6 +189,7 @@ class VisitServiceImplTest {
                     assertEquals(visit1.getPractitionerId(), visitDTO1.getPractitionerId());
                 }).verifyComplete();
     }
+
     @Test
     void deleteVisitById_visitId_shouldSucceed(){
         //arrange
@@ -204,6 +207,26 @@ class VisitServiceImplTest {
 
         Mockito.verify(visitRepo, Mockito.times(1)).deleteByVisitId(visitId);
 
+    }
+
+    @Test
+    void deleteVisitById_visitDoesNotExist_shouldThrowNotFoundException() {
+        // Arrange
+        String visitId = uuid1.toString();
+
+        // Mock the existsByVisitId method to return false, indicating that the visit does not exist
+        Mockito.when(visitRepo.existsByVisitId(visitId)).thenReturn(Mono.just(false));
+
+        // Act
+        Mono<Void> result = visitService.deleteVisit(visitId);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectError(NotFoundException.class) // Expecting a NotFoundException
+                .verify();
+
+        // Verify that deleteByVisitId was not called
+        Mockito.verify(visitRepo, Mockito.never()).deleteByVisitId(visitId);
     }
 
 
@@ -229,7 +252,7 @@ class VisitServiceImplTest {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
         return Visit.builder()
                 .visitId(uuid)
-                .visitDate(LocalDateTime.parse("2022-11-25T13:45", dtf))
+                .visitDate(LocalDateTime.parse("2023-11-25T13:45", dtf))
                 .description(description)
                 .petId("2")
                 .practitionerId(vetId)
@@ -239,7 +262,7 @@ class VisitServiceImplTest {
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
         return VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
-                .visitDate(LocalDateTime.parse("2022-11-25T13:45:00", dtf))
+                .visitDate(LocalDateTime.parse("2023-11-25T13:45:00", dtf))
                 .description("this is a dummy description")
                 .petId("2")
                 .practitionerId(UUID.randomUUID().toString())
@@ -248,7 +271,7 @@ class VisitServiceImplTest {
     private VisitRequestDTO buildVisitRequestDTO() {
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
             return VisitRequestDTO.builder()
-                    .visitDate(LocalDateTime.parse("2022-11-25T13:45:00", dtf))
+                    .visitDate(LocalDateTime.parse("2023-11-25T13:45:00", dtf))
                     .description("this is a dummy description")
                     .petId("2")
                     .practitionerId(UUID.randomUUID().toString())
