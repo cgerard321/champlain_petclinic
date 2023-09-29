@@ -14,8 +14,7 @@
     </button>
 
     <div class="collapse navbar-collapse justify-content-between" id="navbarSupportedContent">
-        <span  ng-if="isLoggedIn">
-            <ul class="navbar-nav mr-auto">
+            <ul class="navbar-nav mr-auto" ng-if="isLoggedIn">
                 <li class="nav-item active">
                     <a class="nav-link" ui-sref="welcome">Home <span class="sr-only">(current)</span></a>
                 </li>
@@ -52,7 +51,6 @@
                     <a class="nav-link" onclick="purgeUser()" style="cursor:pointer" ui-sref="login">Logout</a>
                 </li>
             </ul>
-        </span>
         <ul class="navbar-nav mr-auto justify-content-end" ng-if="!isLoggedIn">
             <li class="nav-item ">
                 <a class="nav-link" ui-sref="signupForm">Signup</a>
