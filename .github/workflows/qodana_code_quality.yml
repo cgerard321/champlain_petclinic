@@ -106,25 +106,19 @@ jobs:
           distribution: 'adopt'
           cache: 'gradle'
 
-
-#      - name: Validate Gradle Wrapper
-#        run: ./gradlew --version
-#        working-directory: JVM/intellij-coverage-agent/gradle
-
       - name: Run Tests
         run: ./gradlew test
-#        working-directory: JVM/intellij-coverage-agent/gradle
 
       - name: Create coverage-data directory and copy contents
         run: |
-#          mkdir -p JVM/intellij-coverage-agent/gradle/.qodana/code-coverage
-#          cp -R JVM/intellij-coverage-agent/gradle/build/kover/bin-reports/* JVM/intellij-coverage-agent/gradle/.qodana/code-coverage/
+          mkdir -p code-coverage/report
+          cp -R build/kover/bin-reports/* code-coverage/report/
 
       - name: Archive coverage data
         uses: actions/upload-artifact@v2
         with:
           name: gradle-coverage-data.zip
-          path: JVM/intellij-coverage-agent/gradle/.qodana/code-coverage
+          path: code-coverage/report
       - name: 'Qodana Scan'
         uses: JetBrains/qodana-action@v2023.2
         env:
