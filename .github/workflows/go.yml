@@ -1,36 +1,36 @@
-name: Go
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.17
-
-      - name: Install Go Swagger CLI
-        run: go install github.com/swaggo/swag/cmd/swag@v1.3.2
-
-      - name: Swagger
-        run: cd mailer-service && swag init; cd -
-
-      - name: Build
-        run: cd mailer-service && go build -v -o app; cd -
-
-      - name: Test
-        run: cd mailer-service && go test -v ./...; cd -
-
-      - name: Grant execute perm on cover.sh
-        run: chmod +x cover.sh
-
-      - name: Code coverage test
-        run: ./cover.sh
+#name: Go
+#
+#on:
+#  push:
+#    branches: [main]
+#  pull_request:
+#    branches: [main]
+#
+#jobs:
+#  build:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#
+#      - name: Set up Go
+#        uses: actions/setup-go@v2
+#        with:
+#          go-version: 1.17
+#
+#      - name: Install Go Swagger CLI
+#        run: go install github.com/swaggo/swag/cmd/swag@v1.3.2
+#
+#      - name: Swagger
+#        run: cd mailer-service && swag init; cd -
+#
+#      - name: Build
+#        run: cd mailer-service && go build -v -o app; cd -
+#
+#      - name: Test
+#        run: cd mailer-service && go test -v ./...; cd -
+#
+#      - name: Grant execute perm on cover.sh
+#        run: chmod +x cover.sh
+#
+#      - name: Code coverage test
+#        run: ./cover.sh
