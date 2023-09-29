@@ -29,7 +29,7 @@ public class VisitRequestDTO {
     private boolean status;
 
     public VisitRequestDTO(LocalDateTime now, String description, String petId, String practitionerId) {
-        this.visitDate = LocalDateTime.parse(now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+        this.visitDate = now;
         this.description = description;
         this.petId =  petId;
         this.practitionerId = practitionerId;
