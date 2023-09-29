@@ -1,9 +1,7 @@
 package com.petclinic.vet.presentationlayer;
 
-import com.petclinic.vet.dataaccesslayer.Rating;
-import com.petclinic.vet.dataaccesslayer.RatingRepository;
-import com.petclinic.vet.dataaccesslayer.Vet;
-import com.petclinic.vet.dataaccesslayer.VetRepository;
+import com.petclinic.vet.dataaccesslayer.*;
+import com.petclinic.vet.servicelayer.EducationResponseDTO;
 import com.petclinic.vet.servicelayer.RatingRequestDTO;
 import com.petclinic.vet.servicelayer.RatingResponseDTO;
 import com.petclinic.vet.servicelayer.VetDTO;
@@ -39,11 +37,17 @@ class VetControllerIntegrationTest {
     @Autowired
     RatingRepository ratingRepository;
 
+    @Autowired
+    EducationRepository educationRepository;
+
 
     Vet vet = buildVet();
     Vet vet2 = buildVet2();
     Rating rating1 = buildRating("12345", vet.getVetId(), 5.0);
     Rating rating2 = buildRating("12346", vet.getVetId(), 4.0);
+
+    Education education1 = buildEducation();
+    Education education2 = buildEducation2();
     VetDTO vetDTO = buildVetDTO();
     String VET_ID = vet.getVetId();
     String VET_BILL_ID = vet.getVetBillId();
@@ -526,6 +530,38 @@ class VetControllerIntegrationTest {
     }
 
     @Test
+    void getAllEducationForAVet_WithValidId_ShouldSucceed(){
+        Publisher<Education> setup = educationRepository.deleteAll()
+                .thenMany(educationRepository.save(education1))
+                .thenMany(educationRepository.save(education2));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        client
+                .get()
+                .uri("/vets/" + vet.getVetId() + "/educations")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(EducationResponseDTO.class)
+                .value((list) -> {
+                    assertEquals(2, list.size());
+                    assertEquals(education1.getEducationId(), list.get(0).getEducationId());
+                    assertEquals(education1.getVetId(), list.get(0).getVetId());
+                    assertEquals(education1.getDegree(), list.get(0).getDegree());
+                    assertEquals(education1.getFieldOfStudy(), list.get(0).getFieldOfStudy());
+                    assertEquals(education1.getSchoolName(), list.get(0).getSchoolName());
+                    assertEquals(education1.getStartDate(), list.get(0).getStartDate());
+                    assertEquals(education1.getEndDate(), list.get(0).getEndDate());
+                });
+    }
+
+
+    @Test
     void toStringBuilders() {
         System.out.println(Vet.builder());
         System.out.println(VetDTO.builder());
@@ -634,6 +670,30 @@ class VetControllerIntegrationTest {
                 .ratingId(ratingId)
                 .vetId(vetId)
                 .rateScore(rateScore)
+                .build();
+    }
+
+    private Education buildEducation(){
+        return Education.builder()
+                .educationId("1")
+                .vetId(vet.getVetId())
+                .degree("Doctor of Veterinary Medicine")
+                .fieldOfStudy("Veterinary Medicine")
+                .schoolName("University of Montreal")
+                .startDate("2010")
+                .endDate("2014")
+                .build();
+    }
+
+    private Education buildEducation2(){
+        return  Education.builder()
+                .educationId("2")
+                .vetId(vet.getVetId())
+                .degree("Doctor of Veterinary Medicine")
+                .fieldOfStudy("Veterinary Medicine")
+                .schoolName("University of Veterinary Sciences")
+                .startDate("2008")
+                .endDate("2013")
                 .build();
     }
 

@@ -29,6 +29,11 @@ public class VetController {
 
     @Autowired
     RatingService ratingService;
+
+
+    @Autowired
+    EducationService educationService;
+
     @GetMapping("{vetId}/ratings")
     public Flux<RatingResponseDTO> getAllRatingsByVetId(@PathVariable String vetId) {
         return ratingService.getAllRatingsByVetId(EntityDtoUtil.verifyId(vetId));
@@ -123,6 +128,11 @@ public class VetController {
     @DeleteMapping("{vetId}")
     public Mono<Void> deleteVet(@PathVariable String vetId) {
         return vetService.deleteVetByVetId(EntityDtoUtil.verifyId(vetId));
+    }
+
+    @GetMapping("{vetId}/educations")
+    public Flux<EducationResponseDTO> getAllEducationsByVetId(@PathVariable String vetId) {
+        return educationService.getAllEducationsByVetId(EntityDtoUtil.verifyId(vetId));
     }
 
 

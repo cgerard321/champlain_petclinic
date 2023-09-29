@@ -81,7 +81,41 @@
             </div>
         </div>
         <hr>
-
+        <!-- Vet Education -->
+        <div class="row g-5">
+            <!-- Educations Header -->
+            <h3 class="form-label-rating text-center" style="margin-top: 5%">Educations</h3>
+            <div class="col-md-12" ng-if="$ctrl.educations.length > 0">
+                <div class="col-md-12">
+                    <div ng-if="$ctrl.educations.length === 0" style="text-align: center">
+                        This vet has no educations listed.
+                    </div>
+                    <!-- Education Table -->
+                    <table class="table" style="margin-bottom: 10%">
+                        <thead>
+                        <tr>
+                            <th>Degree</th>
+                            <th>Institution</th>
+                            <th>Field Of Study</th>
+                            <th>Start Year</th>
+                            <th>End Year</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="educations in $ctrl.educations track by educations.educatonId">
+                                <td>{{ educations.degree }}</td>
+                                <td>{{ educations.schoolName }}</td>
+                                <td>{{ educations.fieldOfStudy }}</td>
+                                <td>{{ educations.startDate }}</td>
+                                <td>{{ educations.endDate }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <hr>
+<!-- tete -->
         <!-- Ratings and Add Rating -->
         <div class="row g-5">
 
