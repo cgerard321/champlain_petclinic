@@ -5,7 +5,13 @@ import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.ProductRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.ProductResponseDTO;
+import com.petclinic.bffapigateway.exceptions.InvalidInputsInventoryException;
+import com.petclinic.bffapigateway.exceptions.InventoryNotFoundException;
+import com.petclinic.bffapigateway.exceptions.ProductListNotFoundException;
+import com.petclinic.bffapigateway.utils.Rethrower;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -15,12 +21,15 @@ import reactor.core.publisher.Mono;
 
 import java.util.Optional;
 
+import static org.springframework.http.HttpStatus.*;
+
 
 @Component
 public class InventoryServiceClient {
     private final WebClient webClient;
     private String inventoryServiceUrl;
-
+    @Autowired
+    private Rethrower rethrower;
 
     public InventoryServiceClient(
             @Value("${app.inventory-service.host}") String inventoryServiceHost,
@@ -38,7 +47,10 @@ public class InventoryServiceClient {
                 .uri(inventoryServiceUrl + "/{inventoryId}/products", inventoryId)
                 .body(Mono.just(model),ProductRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
-                .retrieve().bodyToMono(ProductResponseDTO.class);
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        resp -> rethrower.rethrow(resp, ex -> new InvalidInputsInventoryException(ex.get("message").toString(), BAD_REQUEST)))
+                .bodyToMono(ProductResponseDTO.class);
     }
 
 
@@ -49,7 +61,10 @@ public class InventoryServiceClient {
                 .uri(inventoryServiceUrl)
                 .body(Mono.just(model),InventoryRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
-                .retrieve().bodyToMono(InventoryResponseDTO.class);
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        resp -> rethrower.rethrow(resp, ex -> new InvalidInputsInventoryException(ex.get("message").toString(), BAD_REQUEST)))
+                .bodyToMono(InventoryResponseDTO.class);
     }
 
 
@@ -59,7 +74,10 @@ public class InventoryServiceClient {
                 .uri(inventoryServiceUrl + "/{inventoryId}" , inventoryId)
                 .body(Mono.just(model),InventoryRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
-                .retrieve().bodyToMono(InventoryResponseDTO.class);
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        resp -> rethrower.rethrow(resp, ex -> new InventoryNotFoundException(ex.get("message").toString(), NOT_FOUND)))
+                .bodyToMono(InventoryResponseDTO.class);
     }
 
     public Mono<ProductResponseDTO> updateProductInInventory(final ProductRequestDTO model, final String inventoryId, final String productId){
@@ -75,6 +93,8 @@ public class InventoryServiceClient {
         return webClient.delete()
                 .uri(inventoryServiceUrl + "/{inventoryId}/products/{productId}", inventoryId, productId)
                 .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        resp -> rethrower.rethrow(resp, ex -> new ProductListNotFoundException(ex.get("message").toString(), NOT_FOUND)))
                 .bodyToMono(Void.class);
     }
 
@@ -88,6 +108,8 @@ public class InventoryServiceClient {
                 .uri(uriBuilder.buildAndExpand(inventoryId).toUri())
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        resp -> rethrower.rethrow(resp, ex -> new ProductListNotFoundException(ex.get("message").toString(), NOT_FOUND)))
                 .bodyToFlux(ProductResponseDTO.class);
     }
 
@@ -96,6 +118,8 @@ public class InventoryServiceClient {
                 .uri(inventoryServiceUrl)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        resp -> rethrower.rethrow(resp, ex -> new InventoryNotFoundException(ex.get("message").toString(), NOT_FOUND)))
                 .bodyToFlux(InventoryResponseDTO.class);
     }
     //delete all
@@ -105,6 +129,8 @@ public class InventoryServiceClient {
                 .uri(inventoryServiceUrl + "/{inventoryId}/products", inventoryId)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        resp -> rethrower.rethrow(resp, ex -> new ProductListNotFoundException(ex.get("message").toString(), NOT_FOUND)))
                 .bodyToMono(Void.class);
     }
     public Mono<Void> deleteAllInventories() {
