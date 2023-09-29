@@ -535,6 +535,7 @@ public class BFFApiGatewayController {
 //        return authServiceClient.updateUser(userId, model);
 //    }
 
+
     /**
      * Owners Methods
      **/
@@ -701,6 +702,15 @@ public class BFFApiGatewayController {
     @GetMapping(value = "users", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<UserDetails> getAllUsers(@CookieValue("Bearer") String auth) {
         return authServiceClient.getUsers(auth);
+    }
+
+    @PutMapping(value = "users/{userId}",
+            consumes = "application/json",
+            produces = "application/json")
+    public Mono<ResponseEntity<UserResponseDTO>> updateUser(final @PathVariable long userId, @RequestBody UserRequestDTO userRequestDTO, @CookieValue("Bearer") String auth) {
+        return authServiceClient.updateUser(userId, userRequestDTO, auth)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
