@@ -1,26 +1,74 @@
 name: Qodana
 on:
+#  workflow_dispatch:
+#  push:
+#    branches: [ main ]
+#  pull_request:
+#    branches: [ main ]
   workflow_dispatch:
-  push:
-    branches: [ main ]
   pull_request:
-    branches: [ main ]
+  push:
+    branches:
+      - main
+      - 'releases/*'
+
 
 jobs:
-  qodana:
+  build:
+
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
       - name: Set up JDK 17
         uses: actions/setup-java@v2
         with:
           java-version: '17'
           distribution: 'adopt'
-          cache: gradle
-#      - uses: actions/checkout@v3
-#        with:
-#          fetch-depth: 0
-      - name: 'Qodana Scan'
-        uses: JetBrains/qodana-action@v2023.2
+          cache: 'gradle'
+
+      - name: Validate Gradle Wrapper
+        run: ./gradlew --version
+        working-directory: JVM/jacoco/gradle
+
+      - name: Run Tests
+        run: ./gradlew test
+        working-directory: JVM/jacoco/gradle
+
+      - name: Archive coverage data
+        uses: actions/upload-artifact@v2
+        with:
+          name: gradle-coverage-data-jacoco
+          path: JVM/jacoco/gradle/.qodana/code-coverage
+
+      - name: Qodana Scan
+        uses: JetBrains/qodana-action@main
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
+        with:
+          args: "-i,JVM/jacoco/gradle,--linter,jetbrains/qodana-jvm:2023.2-eap"
+          pr-mode: false
+
+#jobs:
+#  qodana:
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v2
+#      - name: Set up JDK 17
+#        uses: actions/setup-java@v2
+#        with:
+#          java-version: '17'
+#          distribution: 'adopt'
+#          cache: gradle
+##      - uses: actions/checkout@v3
+##        with:
+##          fetch-depth: 0
+#      - name: 'Qodana Scan'
+#        uses: JetBrains/qodana-action@v2023.2
+#        env:
+#          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
