@@ -41,7 +41,6 @@ public class IsUserFilter implements WebFilter {
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
 
         log.debug("IsUserFilter");
-
         if (exchange.getAttribute("whitelisted") != null && exchange.getAttribute("whitelisted") instanceof Boolean) {
             if((boolean) exchange.getAttribute("whitelisted")) {
                 return chain.filter(exchange);
@@ -111,7 +110,7 @@ public class IsUserFilter implements WebFilter {
 
 
 
-            String idToMatch = handler.getMethod().getAnnotation(IsUserSpecific.class).idToMatch();
+            String[] idToMatch = handler.getMethod().getAnnotation(IsUserSpecific.class).idToMatch();
 
 
 
@@ -119,15 +118,12 @@ public class IsUserFilter implements WebFilter {
 
 
 
-            if (pathVariables == null || !pathVariables.containsKey(idToMatch)){
+            if (pathVariables == null){
                 throw new InvalidInputException("You are not allowed to access this resource");
             }
             log.debug("Path variables: {}", pathVariables);
 
 
-            String id = pathVariables.get(idToMatch);
-            log.debug("Id: {}", id);
-            log.debug("Id to match: {}", idToMatch);
 
             log.debug("Token: {}", token);
 
@@ -140,11 +136,17 @@ public class IsUserFilter implements WebFilter {
             String tokenId = jwtTokenUtil.getIdFromToken(token);
 
             log.debug("Token id: {}", tokenId);
-            if (id.equals(tokenId)){
-                return chain.filter(exchange);
-            }else {
-                throw new InvalidTokenException("You are not allowed to access this resource");
+
+            for (String id : idToMatch) {
+                if (pathVariables.get(id) == null) {
+                    throw new InvalidInputException("This is likely error is caused by assigning the wrong id to the annotation");
+                }
+                if (!pathVariables.get(id).equals(tokenId)) {
+                    throw new InvalidInputException("You are not allowed to access this resource");
+                }
             }
+
+            return chain.filter(exchange);
 
 
         }

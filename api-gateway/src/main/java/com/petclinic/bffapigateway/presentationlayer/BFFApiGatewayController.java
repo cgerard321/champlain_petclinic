@@ -376,7 +376,7 @@ public class BFFApiGatewayController {
                 );*/
     }
 
-    @IsUserSpecific(idToMatch = "ownerId", bypassRoles = {Roles.ADMIN})
+    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN})
     @GetMapping(value = "owners/{ownerId}")
     public Mono<ResponseEntity<OwnerResponseDTO>> getOwnerDetails(final @PathVariable String ownerId) {
         return customersServiceClient.getOwner(ownerId)
@@ -446,6 +446,7 @@ public class BFFApiGatewayController {
 
      */
 
+    @IsUserSpecific(idToMatch = {"ownerId"})
     @PutMapping("owners/{ownerId}")
     public Mono<ResponseEntity<OwnerResponseDTO>> updateOwner(
             @PathVariable String ownerId,

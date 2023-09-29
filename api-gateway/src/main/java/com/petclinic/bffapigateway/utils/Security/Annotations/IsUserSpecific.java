@@ -18,5 +18,5 @@ public @interface IsUserSpecific {
 
     @NotEmpty
     @Valid
-    String idToMatch();
+    String[] idToMatch();
 }
