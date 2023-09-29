@@ -6,7 +6,7 @@ version: "1.0"
 
 #Specify inspection profile for code analysis
 profile:
-  name: qodana.recommended
+  name: qodana.starter
 
 
 #Enable inspections
@@ -30,4 +30,4 @@ projectJDK: 17 #(Applied in CI/CD pipeline)
 #  - id: <plugin.id> #(plugin id can be found at https://plugins.jetbrains.com)
 
 #Specify Qodana linter for analysis (Applied in CI/CD pipeline)
-#linter: jetbrains/qodana-jvm:latest
+linter: jetbrains/qodana-jvm:latest, intellij-coverage-agent
