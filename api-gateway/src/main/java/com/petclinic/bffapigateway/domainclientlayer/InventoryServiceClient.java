@@ -11,6 +11,7 @@ import com.petclinic.bffapigateway.exceptions.ProductListNotFoundException;
 import com.petclinic.bffapigateway.utils.Rethrower;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -76,7 +77,7 @@ public class InventoryServiceClient {
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError,
-                        resp -> rethrower.rethrow(resp, ex -> new InventoryNotFoundException(ex.get("message").toString(), NOT_FOUND)))
+                        resp -> rethrower.rethrow(resp, ex -> new InvalidInputsInventoryException(ex.get("message").toString(), BAD_REQUEST)))
                 .bodyToMono(InventoryResponseDTO.class);
     }
 
@@ -86,7 +87,10 @@ public class InventoryServiceClient {
                 .uri(inventoryServiceUrl + "/{inventoryId}/products/{productId}", inventoryId, productId)
                 .body(Mono.just(model),ProductRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
-                .retrieve().bodyToMono(ProductResponseDTO.class);
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        resp -> rethrower.rethrow(resp, ex -> new InvalidInputsInventoryException(ex.get("message").toString(), BAD_REQUEST)))
+                .bodyToMono(ProductResponseDTO.class);
     }
 
     public Mono<Void> deleteProductInInventory(final String inventoryId, final String productId){
@@ -118,8 +122,6 @@ public class InventoryServiceClient {
                 .uri(inventoryServiceUrl)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError,
-                        resp -> rethrower.rethrow(resp, ex -> new InventoryNotFoundException(ex.get("message").toString(), NOT_FOUND)))
                 .bodyToFlux(InventoryResponseDTO.class);
     }
     //delete all
