@@ -5,6 +5,7 @@ import com.petclinic.bffapigateway.exceptions.HandlerIsNullException;
 import com.petclinic.bffapigateway.exceptions.InvalidTokenException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
+import lombok.Generated;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
@@ -24,6 +25,7 @@ import java.util.concurrent.ExecutionException;
 @Slf4j
 @Component
 @Order(2)
+@Generated
 public class RoleFilter implements WebFilter {
 
     private final JwtTokenUtil jwtTokenUtil;

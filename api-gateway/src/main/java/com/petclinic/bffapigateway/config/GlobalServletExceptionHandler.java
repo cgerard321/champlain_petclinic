@@ -45,6 +45,9 @@ public class GlobalServletExceptionHandler implements ErrorWebExceptionHandler {
             } else if(exClass.equals(BadRequestException.class)){
                 status = HttpStatus.BAD_REQUEST;
             }
+            else if(exClass.equals(NullPointerException.class)){
+                status = HttpStatus.NOT_FOUND;
+            }
             else {
                 log.error("Exception not handled: {}", exClass.getSimpleName());
                 status = HttpStatus.UNPROCESSABLE_ENTITY;

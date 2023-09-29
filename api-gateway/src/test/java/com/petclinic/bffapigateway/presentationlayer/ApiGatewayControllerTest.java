@@ -556,32 +556,48 @@ class ApiGatewayControllerTest {
 //        assertEquals(user.getId(), 1);
 //    }
 //
-//    @Test
-//    void createUser(){
-//        UserDetails user = new UserDetails();
-//        user.setId(1);
-//        user.setUsername("Johnny123");
-//        user.setPassword("password");
-//        user.setEmail("email@email.com");
-//        when(authServiceClient.createUser(argThat(
-//                n -> user.getEmail().equals(n.getEmail())
-//        ))).thenReturn(Mono.just(user));
-//
-//        client.post()
-//                .uri("/api/gateway/users")
-//                .body(Mono.just(user), UserDetails.class)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .exchange()
-//                .expectStatus().isOk()
-//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-//                .expectBody();
-//
-//        assertEquals(user.getId(), 1);
-//        assertEquals(user.getUsername(), "Johnny123");
-//        assertEquals(user.getPassword(), "password");
-//        assertEquals(user.getEmail(), "email@email.com");
-//
-//    }
+    @Test
+    void createUser(){
+        String uuid = UUID.randomUUID().toString();
+        OwnerResponseDTO owner = OwnerResponseDTO
+                .builder()
+                .ownerId(uuid)
+                .firstName("John")
+                .lastName("Johnny")
+                .address("111 John St")
+                .city("Johnston")
+                .telephone("51451545144")
+                .build();
+        when(authServiceClient.createUser(any(Register.class)))
+                .thenReturn(Mono.just(owner));
+
+        Register register = Register.builder()
+                .username("Johnny123")
+                .password("Password22##")
+                .email("email@email.com")
+                .owner(owner)
+                .build();
+
+        client.post()
+                .uri("/api/gateway/users")
+                .body(Mono.just(register), UserDetails.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(OwnerResponseDTO.class)
+                .value(dto->{
+                    assertNotNull(dto.getOwnerId());
+                    assertEquals(dto.getFirstName(),owner.getFirstName());
+                    assertEquals(dto.getLastName(),owner.getLastName());
+                    assertEquals(dto.getAddress(),owner.getAddress());
+                    assertEquals(dto.getCity(),owner.getCity());
+                    assertEquals(dto.getTelephone(),owner.getTelephone());
+                });
+
+
+
+    }
     /*@Test
     void getOwnerDetails_withAvailableVisitsService() {
         OwnerResponseDTO owner = new OwnerResponseDTO();
@@ -638,32 +654,6 @@ class ApiGatewayControllerTest {
 //        assertEquals(user.getId(), 1);
 //    }
 //
-//    @Test
-//    void createUser(){
-//        UserDetails user = new UserDetails();
-//        user.setId(1);
-//        user.setUsername("Johnny123");
-//        user.setPassword("password");
-//        user.setEmail("email@email.com");
-//        when(authServiceClient.createUser(argThat(
-//                n -> user.getEmail().equals(n.getEmail())
-//        ))).thenReturn(Mono.just(user));
-//
-//        client.post()
-//                .uri("/api/gateway/users")
-//                .body(Mono.just(user), UserDetails.class)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .exchange()
-//                .expectStatus().isOk()
-//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-//                .expectBody();
-//
-//        assertEquals(user.getId(), 1);
-//        assertEquals(user.getUsername(), "Johnny123");
-//        assertEquals(user.getPassword(), "password");
-//        assertEquals(user.getEmail(), "email@email.com");
-//
-//    }
 
     @Test
     void getAllOwners_shouldSucceed(){

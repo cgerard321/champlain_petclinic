@@ -7,6 +7,7 @@ import com.petclinic.bffapigateway.exceptions.InvalidTokenException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
+import lombok.Generated;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +31,7 @@ import java.util.concurrent.ExecutionException;
 @Component
 @RequiredArgsConstructor
 @Order(3)
+@Generated
 public class IsUserFilter implements WebFilter {
 
     private final JwtTokenUtil jwtTokenUtil;

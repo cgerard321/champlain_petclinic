@@ -91,11 +91,8 @@ public class AuthServiceClient {
                             x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST)))
                     .bodyToMono(UserPasswordLessDTO.class)
                     .then(customersServiceClient.createOwner(model.getOwner()))
-                    .onErrorResume(e -> {
-                        //todo: delete user if owner creation fails and vice versa
-                        log.info("Error in create user");
-
-                        return  customersServiceClient.deleteOwner(uuid).then(error(e));
+                    .doOnError(e -> {
+                         customersServiceClient.deleteOwner(uuid);
                     });
         }
 

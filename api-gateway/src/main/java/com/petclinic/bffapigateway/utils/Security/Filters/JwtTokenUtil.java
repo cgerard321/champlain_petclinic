@@ -6,6 +6,7 @@ import com.petclinic.bffapigateway.utils.Security.Variables.SecurityConst;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import lombok.Generated;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import java.util.*;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@Generated
 public class JwtTokenUtil implements Serializable {
 
 

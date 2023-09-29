@@ -6,6 +6,8 @@ import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
 import com.petclinic.bffapigateway.exceptions.HandlerIsNullException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
+import lombok.Generated;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
@@ -32,6 +34,7 @@ import java.util.concurrent.ExecutionException;
 @Slf4j
 @Component
 @Order(1)
+@Generated
 public class JwtTokenFilter implements WebFilter {
 
     AntPathMatcher antPathMatcher = new AntPathMatcher();

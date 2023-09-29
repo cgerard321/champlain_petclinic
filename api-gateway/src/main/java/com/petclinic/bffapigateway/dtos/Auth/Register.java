@@ -21,17 +21,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class Register {
-
     private String userId;
-
     private String email;
     private String username;
     @PasswordStrengthCheck
     private String password;
-
     private OwnerResponseDTO owner;
-
-    public void setUserId(String usedId) {
-        this.userId = usedId;
-    }
 }
