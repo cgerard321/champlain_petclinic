@@ -52,7 +52,7 @@ class VetControllerIntegrationTest {
     String INVALID_VET_ID = "mjbedf";
     RatingRequestDTO updatedRating = RatingRequestDTO.builder()
             .rateScore(2.0)
-            .vetId(vet.getVetId())
+            .vetId("678910")
             .rateDescription("Vet cancelled last minute.")
             .rateDate("20/09/2023")
             .build();
@@ -1310,7 +1310,7 @@ class VetControllerIntegrationTest {
     private Education buildEducation(){
         return Education.builder()
                 .educationId("1")
-                .vetId(vet.getVetId())
+                .vetId("678910")
                 .degree("Doctor of Veterinary Medicine")
                 .fieldOfStudy("Veterinary Medicine")
                 .schoolName("University of Montreal")
@@ -1322,7 +1322,7 @@ class VetControllerIntegrationTest {
     private Education buildEducation2(){
         return  Education.builder()
                 .educationId("2")
-                .vetId(vet.getVetId())
+                .vetId("678910")
                 .degree("Doctor of Veterinary Medicine")
                 .fieldOfStudy("Veterinary Medicine")
                 .schoolName("University of Veterinary Sciences")
