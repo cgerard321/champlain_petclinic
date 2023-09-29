@@ -95,7 +95,7 @@ on:
 
 
 jobs:
-  qodana:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -106,8 +106,10 @@ jobs:
           distribution: 'adopt'
           cache: 'gradle'
 
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
       - name: Run Tests
-        run: ./gradlew test
+        run: ./gradlew build
 
 #      - name: Create coverage-data directory and copy contents
 #        run: |
