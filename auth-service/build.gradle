@@ -23,6 +23,8 @@ ext {
 
 
 dependencies {
+    implementation 'org.yaml:snakeyaml:2.2'
+    testImplementation 'org.yaml:snakeyaml:2.2'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-webflux'

@@ -6,6 +6,7 @@ import com.petclinic.customersservice.data.OwnerRepo;
 import com.petclinic.customersservice.presentationlayer.OwnerRequestDTO;
 import com.petclinic.customersservice.presentationlayer.OwnerResponseDTO;
 import com.petclinic.customersservice.util.EntityDTOUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -13,6 +14,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class OwnerServiceImpl implements OwnerService {
 
@@ -22,10 +24,7 @@ public class OwnerServiceImpl implements OwnerService {
     // insertOwner has been updated, now sets a UUID for ownerId rather than leave null
     @Override
     public Mono<Owner> insertOwner(Mono<Owner> ownerMono) {
-        return ownerMono.map(owner -> {
-            owner.setOwnerId(UUID.randomUUID().toString());
-            return owner;
-        }).flatMap(ownerRepo::insert);
+        return ownerMono.flatMap(ownerRepo::insert);
     }
 
 

@@ -31,6 +31,7 @@ import lombok.*;
 @Builder(toBuilder = true)
 public class UserIDLessRoleLessDTO {
 
+    private String userId;
     private String username;
 
     @PasswordStrengthCheck
