@@ -61,8 +61,8 @@ jobs:
           distribution: 'adopt'
           cache: 'gradle'
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+#      - name: Grant execute permission for gradlew
+#        run: chmod +x gradlew
       - name: Run Tests
         run: ./gradlew build
 #        working-directory: visit-service-new/gradle
@@ -83,9 +83,9 @@ jobs:
           path: gradle/.qodana/code-coverage
 
       - name: 'Qodana Scan'
-        uses: JetBrains/qodana-action@v2023.2
+        uses: JetBrains/qodana-action@main
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
-        with:
-          args: "-i,visits-service-new/gradle,--linter,jetbrains/qodana-jvm:latest"
-          pr-mode: false
+#        with:
+#          args: "-i,gradle,--linter,jetbrains/qodana-jvm:latest"
+#          pr-mode: false
