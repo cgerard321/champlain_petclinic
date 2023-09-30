@@ -1109,6 +1109,27 @@ class VetsServiceClientIntegrationTest {
 
         assertNull(empty);
     }
+    @Test
+    void deleteEducationsByEducationId() throws JsonProcessingException{
+        final String educationId = "794ac37f-1e07-43c2-93bc-61839e61d989";
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody("    {\n" +
+                        "    \"educationId\": \"123456\",\n" +
+                        "    \"vetId\": \"678910\",\n" +
+                        "    \"schoolName\": \"University of Toronto\",\n" +
+                        "    \"degree\": \"Doctor of Veterinary Medicine\",\n" +
+                        "    \"fieldOfStudy\": \"Veterinary Medicine\",\n" +
+                        "    \"startDate\": \"2015\",\n" +
+                        "    \"endDate\": \"2019\"\n" +
+                        "    }"));
+
+
+        final Mono<Void> empty = vetsServiceClient.deleteEducation(vetDTO.getVetId(), educationId);
+
+        assertEquals(empty.block(), null);
+    }
 
     private void prepareResponse(Consumer<MockResponse> consumer) {
         MockResponse response = new MockResponse();

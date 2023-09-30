@@ -9,9 +9,11 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -43,6 +45,17 @@ class EducationServiceImplTest {
                     assertEquals(education.getEducationId(), found.getEducationId());
                     assertEquals(education.getVetId(), found.getVetId());
                 })
+                .verifyComplete();
+    }
+    @Test
+    void deleteEducationByEducationId() {
+        when(educationRepository.findByVetIdAndEducationId(anyString(), anyString())).thenReturn(Mono.just(education));
+        when(educationRepository.delete(any())).thenReturn(Mono.empty());
+
+        Mono<Void> deletedEducation = educationService.deleteEducationByEducationId(education.getVetId(), education.getEducationId());
+
+        StepVerifier
+                .create(deletedEducation)
                 .verifyComplete();
     }
 

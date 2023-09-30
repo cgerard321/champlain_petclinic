@@ -274,6 +274,46 @@ class ApiGatewayControllerTest {
                     assertThat(responseDTO.getRateDate()).isEqualTo(updatedRating.getRateDate());
                 });
     }
+    @Test
+    void getAllEducationsByVetId_WithValidId_ShouldSucceed(){
+        EducationResponseDTO educationResponseDTO = buildEducation();
+        when(vetsServiceClient.getEducationsByVetId(anyString()))
+                .thenReturn(Flux.just(educationResponseDTO));
+
+        client
+                .get()
+                .uri("/api/gateway/vets/" + VET_ID + "/educations")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$[0].educationId").isEqualTo(educationResponseDTO.getEducationId())
+                .jsonPath("$[0].vetId").isEqualTo(educationResponseDTO.getVetId())
+                .jsonPath("$[0].degree").isEqualTo(educationResponseDTO.getDegree())
+                .jsonPath("$[0].fieldOfStudy").isEqualTo(educationResponseDTO.getFieldOfStudy())
+                .jsonPath("$[0].schoolName").isEqualTo(educationResponseDTO.getSchoolName())
+                .jsonPath("$[0].startDate").isEqualTo(educationResponseDTO.getStartDate())
+                .jsonPath("$[0].endDate").isEqualTo(educationResponseDTO.getEndDate());
+
+    }
+
+    @Test
+    void deleteVetEducation() {
+        EducationResponseDTO educationResponseDTO = buildEducation();
+        when(vetsServiceClient.deleteEducation(VET_ID, educationResponseDTO.getEducationId()))
+                .thenReturn((Mono.empty()));
+
+        client
+                .delete()
+                .uri("/api/gateway/vets/" + VET_ID + "/educations/{educationId}", educationResponseDTO.getEducationId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk();
+
+        Mockito.verify(vetsServiceClient, times(1))
+                .deleteEducation(VET_ID, educationResponseDTO.getEducationId());
+    }
 
     @Test
     void getAllVets() {
@@ -2563,29 +2603,7 @@ void deleteAllInventory_shouldSucceed() {
                 .hasSize(2);
     }
 
-    @Test
-    void getAllEducationsByVetId_WithValidId_ShouldSucceed(){
-        EducationResponseDTO educationResponseDTO = buildEducation();
-        when(vetsServiceClient.getEducationsByVetId(anyString()))
-                .thenReturn(Flux.just(educationResponseDTO));
 
-        client
-                .get()
-                .uri("/api/gateway/vets/" + VET_ID + "/educations")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$[0].educationId").isEqualTo(educationResponseDTO.getEducationId())
-                .jsonPath("$[0].vetId").isEqualTo(educationResponseDTO.getVetId())
-                .jsonPath("$[0].degree").isEqualTo(educationResponseDTO.getDegree())
-                .jsonPath("$[0].fieldOfStudy").isEqualTo(educationResponseDTO.getFieldOfStudy())
-                .jsonPath("$[0].schoolName").isEqualTo(educationResponseDTO.getSchoolName())
-                .jsonPath("$[0].startDate").isEqualTo(educationResponseDTO.getStartDate())
-                .jsonPath("$[0].endDate").isEqualTo(educationResponseDTO.getEndDate());
-
-    }
 
     private EducationResponseDTO buildEducation(){
         return EducationResponseDTO.builder()
