@@ -13,26 +13,25 @@ package com.petclinic.vet.presentationlayer;
 
 import com.petclinic.vet.servicelayer.*;
 import com.petclinic.vet.util.EntityDtoUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("vets")
 public class VetController {
-
-    @Autowired
-    VetService vetService;
-
-    @Autowired
-    RatingService ratingService;
-
-
-    @Autowired
-    EducationService educationService;
+    private final VetService vetService;
+    private final RatingService ratingService;
+    private final PhotoService photoService;
+    private final EducationService educationService;
 
     @GetMapping("{vetId}/ratings")
     public Flux<RatingResponseDTO> getAllRatingsByVetId(@PathVariable String vetId) {
@@ -153,4 +152,11 @@ public class VetController {
     }
 
 
+    //Photo
+    @GetMapping("{vetId}/photo")
+    public Mono<ResponseEntity<Resource>> getPhotoByVetId(@PathVariable String vetId){
+        return photoService.getPhotoByVetId(vetId)
+                .map(r -> ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE).body(r))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 }

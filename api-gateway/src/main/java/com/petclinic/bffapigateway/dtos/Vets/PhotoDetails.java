@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PhotoDetails {
-    private String id;
+    private int id;
 
     private String filename;
 
