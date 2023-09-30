@@ -1,5 +1,8 @@
 package com.petclinic.bffapigateway.dtos.Auth;
 
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
+import com.petclinic.bffapigateway.utils.Security.Annotations.PasswordStrengthCheck;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,8 +21,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class Register {
-
+    private String userId;
     private String email;
     private String username;
+    @PasswordStrengthCheck
     private String password;
+    private OwnerRequestDTO owner;
 }

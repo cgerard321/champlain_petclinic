@@ -3,9 +3,7 @@ package com.petclinic.bffapigateway.config;
 import com.petclinic.bffapigateway.exceptions.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.webjars.NotFoundException;
 
@@ -80,6 +78,8 @@ public class GlobalExceptionHandler {
                 .body(new HttpErrorInfo(HttpStatus.UNAUTHORIZED.value(), ex.getMessage()));
     }
 
+
+
     @ExceptionHandler(value = IllegalArgumentException.class)
     public ResponseEntity<HttpErrorInfo> illegalArgumentException(IllegalArgumentException ex) {
 
@@ -108,4 +108,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(ex.getHttpStatus())
                 .body(new HttpErrorInfo(ex.getHttpStatus().value(), ex.getMessage()));
     }
+    @ExceptionHandler(value = ForbiddenAccessException.class)
+    public ResponseEntity<HttpErrorInfo> handleForbiddenAccessException(ForbiddenAccessException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new HttpErrorInfo(HttpStatus.FORBIDDEN.value(),ex.getMessage()));
+    }
+
 }

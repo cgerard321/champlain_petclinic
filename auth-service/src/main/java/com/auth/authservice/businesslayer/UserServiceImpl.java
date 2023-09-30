@@ -79,14 +79,13 @@ public class UserServiceImpl implements UserService {
                         format("User with e-mail %s already exists", userIDLessDTO.getEmail()));
             }
 
-            log.info("Saving user with email {}", userIDLessDTO.getEmail());
             User user = userMapper.idLessRoleLessDTOToModel(userIDLessDTO);
 
             Optional<Role> role = roleRepo.findById(3L);
             Set<Role> roleSet = new HashSet<>();
             role.ifPresent(roleSet::add);
             user.setRoles(roleSet);
-            user.setUserIdentifier(new UserIdentifier());
+            user.setUserIdentifier(new UserIdentifier(userIDLessDTO.getUserId()));
             user.setPassword(passwordEncoder.encode(user.getPassword()));
 
             log.info("Sending email to {}...", userIDLessDTO.getEmail());
@@ -178,12 +177,8 @@ public class UserServiceImpl implements UserService {
 
         final Optional<User> decryptUser = userRepo.findByUsername(jwtService.getUsernameFromToken(token));
 
-        log.info("Decrypted user with email {} from token", decryptUser.get().getEmail());
-
         decryptUser.get().setVerified(true);
         final User save = userRepo.save(decryptUser.get());
-        log.info("Updated user with email {} to verified=true", save.getEmail());
-
         return userMapper.modelToPasswordLessDTO(save);
     }
 
@@ -199,13 +194,7 @@ public class UserServiceImpl implements UserService {
                                     login.getEmail(), login.getPassword()
                             )
                     );
-            log.info("User authenticated");
-
-            log.info("User principal retrieved");
-
             User loggedInUser = getUserByEmail(login.getEmail());
-            log.info("User retrieved from db");
-
             ResponseCookie token = ResponseCookie.from(securityConst.getTOKEN_PREFIX(), jwtService.generateToken(loggedInUser))
                     .httpOnly(true)
                     .secure(true)
@@ -230,9 +219,7 @@ public class UserServiceImpl implements UserService {
     public void processForgotPassword(UserResetPwdRequestModel userResetPwdRequestModel) {
         String email = userResetPwdRequestModel.getEmail();
         String token = UUID.randomUUID().toString();
-        log.info("Generated token: " + token);
         try {
-            log.info("Line 214");
             getUserByEmail(email);
         }
         catch(RuntimeException e){
@@ -240,9 +227,7 @@ public class UserServiceImpl implements UserService {
         }
 
         try {
-            log.info("Line 223");
             updateResetPasswordToken( token, email);
-            log.info("Line 225");
 
 
             String resetPasswordLink =  "http://localhost:8080/#!/reset_password/" + token;
@@ -254,20 +239,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updateResetPasswordToken(String token, String email) {
-        log.info("In updateResetPasswordToken()");
         Optional<User> user = userRepo.findByEmail(email);
-        log.info("User: " + user);
         if (user.isPresent()) {
             if(tokenRepository.findResetPasswordTokenByUserIdentifier(user.get().getId()) != null){
-                log.info("Token already exists");
                 tokenRepository.delete(tokenRepository.findResetPasswordTokenByUserIdentifier(user.get().getId()));
             }
 
             //Hash the tokens
             ResetPasswordToken resetPasswordToken = new ResetPasswordToken(user.get().getId(), BCrypt.hashpw(token,salt));
-            log.info("ResetPasswordToken: " + resetPasswordToken);
             tokenRepository.save(resetPasswordToken);
-            log.info("Token saved");
         } else {
             throw new IllegalArgumentException("Could not find any customer with the email " + email);
         }
@@ -275,10 +255,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserPasswordLessDTO getByResetPasswordToken(String token) {
-        log.info("Token: " + token);
-        log.info("Line 255");
         String hashedToken = BCrypt.hashpw(token, salt);
-        log.info("Hashed token: " + hashedToken);
         ResetPasswordToken resetPasswordToken = tokenRepository.findResetPasswordTokenByToken(hashedToken);
         if (resetPasswordToken == null) {
             throw new InvalidBearerTokenException("Token not found");
@@ -297,7 +274,6 @@ public class UserServiceImpl implements UserService {
     public void updatePassword(String newPassword, String token) {
 
         final Calendar cal = Calendar.getInstance();
-        log.info("line 272");
         ResetPasswordToken resetPasswordToken = tokenRepository.findResetPasswordTokenByToken(BCrypt.hashpw(token, salt));
         if(resetPasswordToken.getExpiryDate().before(cal.getTime())){
             throw new IllegalArgumentException("Token expired");
@@ -323,11 +299,6 @@ public class UserServiceImpl implements UserService {
     public void processResetPassword(UserResetPwdWithTokenRequestModel resetRequest) {
         String token = resetRequest.getToken();
         String password = resetRequest.getPassword();
-        log.info("Token: " + token);
-        log.info("Password: " + password);
-
-
-        //Hash token
         UserPasswordLessDTO userResponseModel = getByResetPasswordToken(token);
 
 
@@ -406,7 +377,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserByEmail(String email) throws NotFoundException {
-        log.info("getUserByEmail: trying to find user with email: {}", email);
         return userRepo.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("No account found for email: " + email));
     }
