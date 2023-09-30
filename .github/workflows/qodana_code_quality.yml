@@ -8,7 +8,7 @@ on:
       - 'releases/*'
 
 jobs:
-  qodana:
+  build:
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -26,6 +26,7 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
           cache: 'gradle'
+
       - name: Run Build
         run: ./gradlew test
 
