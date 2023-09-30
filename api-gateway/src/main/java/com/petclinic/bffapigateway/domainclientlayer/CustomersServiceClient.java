@@ -64,7 +64,7 @@ public class CustomersServiceClient {
                 .retrieve().bodyToFlux(OwnerResponseDTO.class);
     }
 
-    public Mono<OwnerResponseDTO> createOwner(OwnerResponseDTO model) {
+    public Mono<OwnerResponseDTO> createOwner(OwnerRequestDTO model) {
         return webClientBuilder.build().post()
                 .uri(customersServiceUrl + "/owners")
                 .accept(MediaType.APPLICATION_JSON)

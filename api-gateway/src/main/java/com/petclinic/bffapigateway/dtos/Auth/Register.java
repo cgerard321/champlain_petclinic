@@ -26,5 +26,5 @@ public class Register {
     private String username;
     @PasswordStrengthCheck
     private String password;
-    private OwnerResponseDTO owner;
+    private OwnerRequestDTO owner;
 }

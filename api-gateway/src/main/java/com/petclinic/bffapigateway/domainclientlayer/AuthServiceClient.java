@@ -7,7 +7,6 @@ import com.petclinic.bffapigateway.exceptions.GenericHttpException;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Rethrower;
 import com.petclinic.bffapigateway.exceptions.InvalidTokenException;
-import com.petclinic.bffapigateway.utils.Security.Variables.SecurityConst;
 import com.petclinic.bffapigateway.utils.Utility;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +15,6 @@ import org.springframework.http.*;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -24,7 +22,6 @@ import reactor.core.publisher.Mono;
 import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static reactor.core.publisher.Mono.error;
 import static reactor.core.publisher.Mono.just;
 
 @Slf4j
@@ -36,22 +33,15 @@ public class AuthServiceClient {
     private final CustomersServiceClient customersServiceClient;
     private final String authServiceUrl;
 
-    private final RestTemplate restTemplate;
-
-    private final SecurityConst securityConst;
-
     @Autowired
     private Rethrower rethrower;
 
     public AuthServiceClient(
             WebClient.Builder webClientBuilder,
             CustomersServiceClient customersServiceClient, @Value("${app.auth-service.host}") String authServiceHost,
-            @Value("${app.auth-service.port}") String authServicePort,
-            RestTemplate restTemplate, SecurityConst securityConst) {
+            @Value("${app.auth-service.port}") String authServicePort) {
         this.webClientBuilder = webClientBuilder;
         this.customersServiceClient = customersServiceClient;
-        this.restTemplate = restTemplate;
-        this.securityConst = securityConst;
         authServiceUrl = "http://" + authServiceHost + ":" + authServicePort;
     }
 
@@ -132,7 +122,6 @@ public class AuthServiceClient {
 
     public  Mono<ResponseEntity<UserPasswordLessDTO>> login(final Login login) throws Exception {
         log.info("Entered domain service login");
-        UserPasswordLessDTO userResponseModel;
         try {
             log.info("Email : {}",login.getEmail());
             return webClientBuilder.build()
@@ -183,7 +172,6 @@ public class AuthServiceClient {
 
         log.info("Token : {}",pwdChange.getToken());
         log.info("Password : {}",pwdChange.getPassword());
-        String formPage;
         try {
             String url = authServiceUrl+"/users/reset_password";
 

@@ -27,13 +27,10 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.ui.Model;
@@ -44,7 +41,6 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 
-import static org.springframework.http.ResponseEntity.ok;
 @RestController
 @RequestMapping("/users")
 @Slf4j
