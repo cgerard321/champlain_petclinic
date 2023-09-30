@@ -16,10 +16,7 @@ import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
-import com.petclinic.bffapigateway.dtos.Vets.RatingRequestDTO;
-import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
-import com.petclinic.bffapigateway.dtos.Vets.RatingResponseDTO;
-import com.petclinic.bffapigateway.dtos.Vets.VetDTO;
+import com.petclinic.bffapigateway.dtos.Vets.*;
 import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.dtos.Visits.VisitDetails;
@@ -263,14 +260,18 @@ public class BFFApiGatewayController {
     }
 
     @PostMapping(value = "vets/{vetId}/ratings")
-    public Mono<RatingResponseDTO> addRatingToVet(@PathVariable String vetId, @RequestBody Mono<RatingRequestDTO> ratingRequestDTO) {
-        return vetsServiceClient.addRatingToVet(vetId, ratingRequestDTO);
+    public Mono<ResponseEntity<RatingResponseDTO>> addRatingToVet(@PathVariable String vetId, @RequestBody Mono<RatingRequestDTO> ratingRequestDTO) {
+        return vetsServiceClient.addRatingToVet(vetId, ratingRequestDTO)
+                .map(r->ResponseEntity.status(HttpStatus.CREATED).body(r))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
     @DeleteMapping(value = "vets/{vetId}/ratings/{ratingId}")
-    public Mono<Void> deleteRatingByRatingId(@PathVariable String vetId,
+    public Mono<ResponseEntity<Void>> deleteRatingByRatingId(@PathVariable String vetId,
                                              @PathVariable String ratingId){
-        return vetsServiceClient.deleteRating(vetId,ratingId);
+        return vetsServiceClient.deleteRating(vetId,ratingId)
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @GetMapping(value = "vets/{vetId}/ratings/average")
@@ -281,7 +282,9 @@ public class BFFApiGatewayController {
     }
 
     @PutMapping(value="vets/{vetId}/ratings/{ratingId}")
-    public Mono<ResponseEntity<RatingResponseDTO>> updateRatingByVetIdAndRatingId(@PathVariable String vetId, @PathVariable String ratingId, @RequestBody Mono<RatingRequestDTO> ratingRequestDTOMono){
+    public Mono<ResponseEntity<RatingResponseDTO>> updateRatingByVetIdAndRatingId(@PathVariable String vetId,
+                                                                                  @PathVariable String ratingId,
+                                                                                  @RequestBody Mono<RatingRequestDTO> ratingRequestDTOMono){
         return vetsServiceClient.updateRatingByVetIdAndByRatingId(vetId, ratingId, ratingRequestDTOMono)
                 .map(r->ResponseEntity.status(HttpStatus.OK).body(r))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
@@ -317,8 +320,10 @@ public class BFFApiGatewayController {
     }
 
     @PostMapping(value = "/vets",consumes = "application/json",produces = "application/json")
-    public Mono<VetDTO> insertVet(@RequestBody Mono<VetDTO> vetDTOMono) {
-        return vetsServiceClient.createVet(vetDTOMono);
+    public Mono<ResponseEntity<VetDTO>> insertVet(@RequestBody Mono<VetDTO> vetDTOMono) {
+        return vetsServiceClient.createVet(vetDTOMono)
+                .map(v->ResponseEntity.status(HttpStatus.CREATED).body(v))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
     @PutMapping(value = "/vets/{vetId}",consumes = "application/json",produces = "application/json")
@@ -329,8 +334,10 @@ public class BFFApiGatewayController {
     }
 
     @DeleteMapping(value = "/vets/{vetId}")
-    public Mono<Void> deleteVet(@PathVariable String vetId) {
-        return vetsServiceClient.deleteVet(VetsEntityDtoUtil.verifyId(vetId));
+    public Mono<ResponseEntity<Void>> deleteVet(@PathVariable String vetId) {
+        return vetsServiceClient.deleteVet(VetsEntityDtoUtil.verifyId(vetId))
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
 
@@ -344,10 +351,7 @@ public class BFFApiGatewayController {
 //    public Mono<UserDetails> getUserDetails(final @PathVariable long userId) {
 //        return authServiceClient.getUser(userId);
 //    }
-//    @GetMapping(value = "users")
-//    public Flux<UserDetails> getAll(@RequestHeader(AUTHORIZATION) String auth) {
-//        return authServiceClient.getUsers(auth);
-//    }
+
 //
 //    @PutMapping(value = "users/{userId}",
 //            consumes = "application/json",
@@ -482,13 +486,16 @@ public class BFFApiGatewayController {
         return authServiceClient.createUser(model);
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "users", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<UserDetails> getAllUsers(@CookieValue("Bearer") String auth) {
+        return authServiceClient.getUsers(auth);
+    }
+
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @PostMapping(value = "/users/login",produces = "application/json;charset=utf-8;", consumes = "application/json")
     public Mono<ResponseEntity<UserPasswordLessDTO>> login(@RequestBody Login login) throws Exception {
         log.info("Entered controller /login");
-        log.info("Login: " + login.getEmail() + " " + login.getPassword());
-
-
         return authServiceClient.login(login);
 
     }
@@ -570,4 +577,8 @@ public class BFFApiGatewayController {
         return inventoryServiceClient.deleteAllInventories();
     }
 
+    @GetMapping(value = "vets/{vetId}/educations")
+    public Flux<EducationResponseDTO> getEducationsByVetId(@PathVariable String vetId) {
+        return vetsServiceClient.getEducationsByVetId(VetsEntityDtoUtil.verifyId(vetId));
+    }
 }

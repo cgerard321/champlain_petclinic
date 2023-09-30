@@ -49,4 +49,16 @@ class GlobalControllerExceptionHandlerTest {
         assertEquals("/api/resource", httpErrorInfo.getPath());
         assertEquals("Invalid input", httpErrorInfo.getMessage());
     }
+
+    @Test
+    void handleBadRequestException_ReturnsHttpErrorInfo() {
+        BadRequestException badRequestException = new BadRequestException("Bad Request");
+        ServerHttpRequest serverHttpRequest = MockServerHttpRequest.get("/api/resource").build();
+
+        HttpErrorInfo httpErrorInfo = exceptionHandler.handleBadRequestException(serverHttpRequest, badRequestException);
+
+        assertEquals(HttpStatus.BAD_REQUEST, httpErrorInfo.getHttpStatus());
+        assertEquals("/api/resource", httpErrorInfo.getPath());
+        assertEquals("Bad Request", httpErrorInfo.getMessage());
+    }
 }

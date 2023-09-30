@@ -3,13 +3,16 @@ package com.petclinic.bffapigateway.domainclientlayer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Visits.VisitDetails;
+import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.Visits;
+import com.petclinic.bffapigateway.exceptions.BadRequestException;
 import com.petclinic.bffapigateway.utils.Security.Filters.JwtTokenFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.RoleFilter;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -17,6 +20,10 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -24,12 +31,15 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.time.LocalDateTime;
 
 import java.io.IOException;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.UUID;
 import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 
 @WebFluxTest(value = VisitsServiceClient.class, excludeFilters = @ComponentScan.Filter(type = FilterType.CUSTOM,
         classes = {JwtTokenFilter.class, RoleFilter.class}), useDefaultFilters = false)
@@ -61,8 +71,8 @@ class VisitsServiceClientIntegrationTest {
 
     @Test
     void getAllVisits() throws JsonProcessingException {
-        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25T13:45:00"), "this is a dummy description", "2", "2", true);
-        VisitResponseDTO visitResponseDTO2 = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25T13:45:00"), "this is a dummy description", "2", "2", true);
+        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", true);
+        VisitResponseDTO visitResponseDTO2 = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", true);
         server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setBody(objectMapper.writeValueAsString(Arrays.asList(visitResponseDTO, visitResponseDTO2))).addHeader("Content-Type", "application/json"));
 
@@ -72,6 +82,43 @@ class VisitsServiceClientIntegrationTest {
                 .expectNext(visitResponseDTO2)
                 .verifyComplete();
     }
+
+    @Test
+    void createVisitForPet_Valid() throws JsonProcessingException {
+        // Arrange
+        VisitRequestDTO visitRequestDTO = new VisitRequestDTO(
+                LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
+                "Test Visit",
+                "1",
+                "2"
+        );
+
+        // Mock the server response
+        VisitResponseDTO visitResponseDTO = new VisitResponseDTO(
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1",
+                LocalDateTime.parse("2024-11-25 14:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
+                "Test Visit",
+                "1",
+                "2",
+                true
+        );
+        server.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(visitResponseDTO))
+        );
+
+        // Act
+        Mono<VisitResponseDTO> resultMono = visitsServiceClient.createVisitForPet(visitRequestDTO);
+
+        // Assert
+        StepVerifier.create(resultMono)
+                .expectNextMatches(visitResponse -> visitResponse.getVisitId().equals(visitResponseDTO.getVisitId()))
+                .verifyComplete();
+
+    }
+
+
+
     @Test
     void getVisitsForPets_withAvailableVisitsService() {
         prepareResponse(response -> response
@@ -103,7 +150,7 @@ class VisitsServiceClientIntegrationTest {
                 .visitId(UUID.randomUUID().toString())
                 .petId("15")
                 .practitionerId(2)
-                .visitDate(LocalDateTime.parse("2021-12-12T13:00:00"))
+                .visitDate(LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("Cat is crazy")
                 .status(false)
                 .build();
@@ -153,7 +200,7 @@ class VisitsServiceClientIntegrationTest {
                 .visitId(UUID.randomUUID().toString())
                 .petId("15")
                 .practitionerId(2)
-                .visitDate(LocalDateTime.parse("2021-12-12T13:00:00"))
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("Cat is crazy")
                 .status(false)
                 .build();
@@ -161,7 +208,7 @@ class VisitsServiceClientIntegrationTest {
                 .visitId(UUID.randomUUID().toString())
                 .petId("201")
                 .practitionerId(22)
-                .visitDate(LocalDateTime.parse("2021-12-12T13:00:00"))
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("Dog is sick")
                 .status(false)
                 .build();
@@ -313,7 +360,7 @@ class VisitsServiceClientIntegrationTest {
 
     @Test
     void getVisitById() throws Exception {
-        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee", LocalDateTime.parse("2022-11-25T13:45:00"), "this is a dummy description", "2", "2", true);        server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee", LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", true);        server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setBody(objectMapper.writeValueAsString(visitResponseDTO)).addHeader("Content-Type", "application/json"));
 
         Mono<VisitResponseDTO> visitResponseDTOMono = visitsServiceClient.getVisitByVisitId("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee");

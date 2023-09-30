@@ -1,5 +1,6 @@
 package com.petclinic.visits.visitsservicenew.DataLayer;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import java.time.LocalDateTime;
@@ -16,6 +17,7 @@ public class Visit {
 
     private String visitId;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     LocalDateTime visitDate;
 
     private String description;

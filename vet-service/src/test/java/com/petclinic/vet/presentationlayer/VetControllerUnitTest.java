@@ -1,5 +1,6 @@
 package com.petclinic.vet.presentationlayer;
 
+import com.petclinic.vet.dataaccesslayer.Education;
 import com.petclinic.vet.dataaccesslayer.Vet;
 import com.petclinic.vet.servicelayer.*;
 import org.junit.jupiter.api.Test;
@@ -33,8 +34,14 @@ class VetControllerUnitTest {
     @MockBean
     RatingService ratingService;
 
+    @MockBean
+    EducationService educationService;
+
     VetDTO vetDTO = buildVetDTO();
     VetDTO vetDTO2 = buildVetDTO2();
+
+    EducationResponseDTO educationResponseDTO1 = buildEducation();
+    EducationResponseDTO educationResponseDTO2 = buildEducation2();
 
     RatingResponseDTO ratingDTO = buildRatingResponseDTO("Vet was super calming with my pet",5.0);
     Vet vet = buildVet();
@@ -76,7 +83,7 @@ class VetControllerUnitTest {
                 .uri("/vets/" + vetId + "/ratings/{ratingId}", ratingId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk();
+                .expectStatus().isNoContent();
 
         Mockito.verify(ratingService, times(1))
                 .deleteRatingByRatingId(vetId,ratingId);
@@ -92,7 +99,7 @@ class VetControllerUnitTest {
                         .build();
         RatingResponseDTO rating = buildRatingResponseDTO(ratingRequestDTO.getRateDescription(), ratingRequestDTO.getRateScore());
 
-        when(ratingService.addRatingToVet(VET_ID, Mono.just(ratingRequestDTO)))
+        when(ratingService.addRatingToVet(anyString(), any(Mono.class)))
                 .thenReturn(Mono.just(rating));
 
         client.post()
@@ -100,7 +107,7 @@ class VetControllerUnitTest {
                 .bodyValue(ratingRequestDTO)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
 
@@ -325,7 +332,7 @@ class VetControllerUnitTest {
     @Test
     void createVet() {
         Mono<VetDTO> dto = Mono.just(vetDTO);
-        when(vetService.insertVet(dto))
+        when(vetService.insertVet(any(Mono.class)))
                 .thenReturn(dto);
 
         client
@@ -334,7 +341,7 @@ class VetControllerUnitTest {
                 .body(dto, Vet.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
 
@@ -405,7 +412,7 @@ class VetControllerUnitTest {
                 .uri("/vets/" + VET_ID)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk();
+                .expectStatus().isNoContent();
 
         Mockito.verify(vetService, times(1))
                 .deleteVetByVetId(VET_ID);
@@ -463,6 +470,30 @@ class VetControllerUnitTest {
 
     }
 
+    @Test
+    void getAllEducationForVetByVetId_ShouldSucceed() {
+        when(educationService.getAllEducationsByVetId(anyString()))
+                .thenReturn(Flux.just(educationResponseDTO1));
+
+        client
+                .get()
+                .uri("/vets/" + VET_ID + "/educations")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$[0].educationId").isEqualTo(educationResponseDTO1.getEducationId())
+                .jsonPath("$[0].vetId").isEqualTo(educationResponseDTO1.getVetId())
+                .jsonPath("$[0].degree").isEqualTo(educationResponseDTO1.getDegree())
+                .jsonPath("$[0].fieldOfStudy").isEqualTo(educationResponseDTO1.getFieldOfStudy())
+                .jsonPath("$[0].schoolName").isEqualTo(educationResponseDTO1.getSchoolName())
+                .jsonPath("$[0].startDate").isEqualTo(educationResponseDTO1.getStartDate())
+                .jsonPath("$[0].endDate").isEqualTo(educationResponseDTO1.getEndDate());
+
+        Mockito.verify(educationService, times(1)).getAllEducationsByVetId(VET_ID);
+    }
+
     private Vet buildVet() {
         return Vet.builder()
                 .vetId("678910")
@@ -507,6 +538,30 @@ class VetControllerUnitTest {
                 .workday("Monday")
                 .specialties(new HashSet<>())
                 .active(true)
+                .build();
+    }
+
+    private EducationResponseDTO buildEducation(){
+        return EducationResponseDTO.builder()
+                .educationId("1")
+                .vetId(VET_ID)
+                .degree("Doctor of Veterinary Medicine")
+                .fieldOfStudy("Veterinary Medicine")
+                .schoolName("University of Montreal")
+                .startDate("2010")
+                .endDate("2014")
+                .build();
+    }
+
+    private EducationResponseDTO buildEducation2(){
+        return  EducationResponseDTO.builder()
+                .educationId("2")
+                .vetId(VET_ID)
+                .degree("Doctor of Veterinary Medicine")
+                .fieldOfStudy("Veterinary Medicine")
+                .schoolName("University of Veterinary Sciences")
+                .startDate("2008")
+                .endDate("2013")
                 .build();
     }
 

@@ -40,15 +40,11 @@ public interface UserService {
 
     User createUser(UserIDLessRoleLessDTO user);
 
-    User passwordReset(long id, String newPassword);
 
-    User getUserById(long id);
 
-    Page<User> findAll(PageRequest of);
+    List<UserDetails> findAllWithoutPage();
 
-    List<User> findAllWithoutPage();
-
-    void deleteUser(long id);
+    //void deleteUser(long id);
 
     Mail generateVerificationMail(User user);
 

@@ -16,7 +16,7 @@
     </tr>
     </thead>
 
-    <tr id="userTd" ng-repeat="user in $ctrl.users | filter:$ctrl.query track by user.id">
+    <tr id="userTd" ng-repeat="user in $ctrl.users | filter:$ctrl.query track by user.userId">
         <td>{{user.username}}</td>
         <td>{{user.email}}</td>
         <td>

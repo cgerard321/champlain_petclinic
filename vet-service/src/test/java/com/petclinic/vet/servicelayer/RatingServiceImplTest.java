@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.vet.dataaccesslayer.Rating;
 import com.petclinic.vet.dataaccesslayer.RatingRepository;
+import com.petclinic.vet.dataaccesslayer.Vet;
+import com.petclinic.vet.dataaccesslayer.VetRepository;
 import com.petclinic.vet.exceptions.NotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+import java.util.HashSet;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -28,6 +32,10 @@ class RatingServiceImplTest {
 
     @MockBean
     RatingRepository ratingRepository;
+    @MockBean
+    VetRepository vetRepository;
+
+    Vet existingVet=buildVet();
 
     @MockBean
     ObjectMapper objectMapper;
@@ -37,6 +45,7 @@ class RatingServiceImplTest {
     RatingRequestDTO ratingRequestDTO = buildRatingRequestDTO();
     @Test
     void getAllRatingsByVetId() {
+        when(vetRepository.findVetByVetId(anyString())).thenReturn(Mono.just(existingVet));
         when(ratingRepository.findAllByVetId(anyString())).thenReturn(Flux.just(rating));
 
         Flux<RatingResponseDTO> ratingResponseDTO = ratingService.getAllRatingsByVetId("vetId");
@@ -54,6 +63,7 @@ class RatingServiceImplTest {
 
     @Test
     void deleteRatingByRatingId() {
+        when(vetRepository.findVetByVetId(anyString())).thenReturn(Mono.just(existingVet));
         when(ratingRepository.findByVetIdAndRatingId(anyString(), anyString())).thenReturn(Mono.just(rating));
         when(ratingRepository.delete(any())).thenReturn(Mono.empty());
 
@@ -66,6 +76,8 @@ class RatingServiceImplTest {
 
     @Test
     void addRatingToVet() {
+        when(vetRepository.findVetByVetId(anyString())).thenReturn(Mono.just(existingVet));
+
         ratingService.addRatingToVet(rating.getVetId(), Mono.just(ratingRequestDTO))
                 .map(ratingResponseDTO -> {
                     assertEquals(ratingResponseDTO.getVetId(), ratingRequestDTO.getVetId());
@@ -76,7 +88,30 @@ class RatingServiceImplTest {
     }
 
     @Test
+    void updateRatingOfVet(){
+        when(ratingRepository.save(any())).thenReturn(Mono.just(rating));
+        when(vetRepository.findVetByVetId(anyString())).thenReturn(Mono.just(existingVet));
+        when(ratingRepository.findByVetIdAndRatingId(anyString(), anyString())).thenReturn(Mono.just(rating));
+
+        Mono<RatingResponseDTO> ratingResponseDTO=ratingService.updateRatingByVetIdAndRatingId(existingVet.getVetId(), rating.getRatingId(), Mono.just(ratingRequestDTO));
+
+        StepVerifier
+                .create(ratingResponseDTO)
+                .consumeNextWith(existingRating -> {
+                    assertNotNull(rating.getId());
+                    assertEquals(rating.getRatingId(), existingRating.getRatingId());
+                    assertEquals(rating.getVetId(), existingRating.getVetId());
+                    assertEquals(rating.getRateScore(), existingRating.getRateScore());
+                    assertEquals(rating.getRateDate(), existingRating.getRateDate());
+                    assertEquals(rating.getRateDescription(), existingRating.getRateDescription());
+                })
+                .verifyComplete();
+    }
+
+    @Test
     void getNumberOfRatingsByVetId() {
+        when(vetRepository.findVetByVetId(anyString())).thenReturn(Mono.just(existingVet));
+        when(vetRepository.findVetByVetId(anyString())).thenReturn(Mono.just(existingVet));
         when(ratingRepository.countAllByVetId(anyString())).thenReturn(Mono.just(1L));
 
         Mono<Integer> numberOfRatings = ratingService.getNumberOfRatingsByVetId(rating.getVetId());
@@ -108,6 +143,7 @@ class RatingServiceImplTest {
 
     @Test
     void getRatingPercentagesByVetId() throws JsonProcessingException {
+        when(vetRepository.findVetByVetId(anyString())).thenReturn(Mono.just(existingVet));
         when(ratingRepository.findAllByVetId(anyString())).thenReturn(Flux.just(rating));
         when(objectMapper.writeValueAsString(any())).thenReturn("{\"1.0\":0.0,\"2.0\":0.0,\"4.0\":0.0,\"5.0\":1.0,\"3.0\":0.0}");
         Mono<String> ratingPercent = ratingService.getRatingPercentagesByVetId(rating.getVetId());
@@ -124,6 +160,7 @@ class RatingServiceImplTest {
     // get rating percentage error handling test
     @Test
     void getRatingPercentagesByVetIdError() throws JsonProcessingException {
+        when(vetRepository.findVetByVetId(anyString())).thenReturn(Mono.just(existingVet));
         when(ratingRepository.findAllByVetId(anyString())).thenReturn(Flux.empty());
         when(objectMapper.writeValueAsString(any())).thenThrow(JsonProcessingException.class);
         Mono<String> ratingPercent = ratingService.getRatingPercentagesByVetId(rating.getVetId());
@@ -135,11 +172,14 @@ class RatingServiceImplTest {
     }
 
     private Rating buildRating() {
-        Rating rating = new Rating();
-        rating.setRatingId("ratingId");
-        rating.setVetId("vetId");
-        rating.setRateScore(5.0);
-        return rating;
+        return Rating.builder()
+                .id("1")
+                .ratingId("ratingId")
+                .vetId("vetId")
+                .rateScore(5.0)
+                .rateDescription("Vet is the best vet in the wooooorld!")
+                .rateDate("16/09/2023")
+                .build();
     }
 
     private RatingRequestDTO buildRatingRequestDTO() {
@@ -148,5 +188,22 @@ class RatingServiceImplTest {
                 .rateScore(5.0)
                 .build();
         return ratingRequestDTO;
+    }
+
+    private Vet buildVet() {
+        return Vet.builder()
+                .id("1")
+                .vetId("vetId")
+                .vetBillId("1")
+                .firstName("Clementine")
+                .lastName("LeBlanc")
+                .email("skjfhf@gmail.com")
+                .phoneNumber("947-238-2847")
+                .resume("Just became a vet")
+                .imageId("kjd")
+                .workday("Monday")
+                .specialties(new HashSet<>())
+                .active(false)
+                .build();
     }
 }
