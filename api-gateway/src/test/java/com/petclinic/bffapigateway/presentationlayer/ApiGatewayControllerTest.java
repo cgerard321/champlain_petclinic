@@ -556,32 +556,62 @@ class ApiGatewayControllerTest {
 //        assertEquals(user.getId(), 1);
 //    }
 //
-//    @Test
-//    void createUser(){
-//        UserDetails user = new UserDetails();
-//        user.setId(1);
-//        user.setUsername("Johnny123");
-//        user.setPassword("password");
-//        user.setEmail("email@email.com");
-//        when(authServiceClient.createUser(argThat(
-//                n -> user.getEmail().equals(n.getEmail())
-//        ))).thenReturn(Mono.just(user));
-//
-//        client.post()
-//                .uri("/api/gateway/users")
-//                .body(Mono.just(user), UserDetails.class)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .exchange()
-//                .expectStatus().isOk()
-//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-//                .expectBody();
-//
-//        assertEquals(user.getId(), 1);
-//        assertEquals(user.getUsername(), "Johnny123");
-//        assertEquals(user.getPassword(), "password");
-//        assertEquals(user.getEmail(), "email@email.com");
-//
-//    }
+    @Test
+    void createUser(){
+        String uuid = UUID.randomUUID().toString();
+        OwnerRequestDTO owner = OwnerRequestDTO
+                .builder()
+                .ownerId(uuid)
+                .firstName("John")
+                .lastName("Johnny")
+                .address("111 John St")
+                .city("Johnston")
+                .telephone("51451545144")
+                .build();
+
+
+        OwnerResponseDTO owner_response = OwnerResponseDTO
+                .builder()
+                .ownerId(uuid)
+                .firstName("John")
+                .lastName("Johnny")
+                .address("111 John St")
+                .city("Johnston")
+                .telephone("51451545144")
+                .build();
+
+
+
+        when(authServiceClient.createUser(any(Register.class)))
+                .thenReturn(Mono.just(owner_response));
+
+        Register register = Register.builder()
+                .username("Johnny123")
+                .password("Password22##")
+                .email("email@email.com")
+                .owner(owner)
+                .build();
+
+        client.post()
+                .uri("/api/gateway/users")
+                .body(Mono.just(register), UserDetails.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(OwnerResponseDTO.class)
+                .value(dto->{
+                    assertNotNull(dto.getOwnerId());
+                    assertEquals(dto.getFirstName(),owner.getFirstName());
+                    assertEquals(dto.getLastName(),owner.getLastName());
+                    assertEquals(dto.getAddress(),owner.getAddress());
+                    assertEquals(dto.getCity(),owner.getCity());
+                    assertEquals(dto.getTelephone(),owner.getTelephone());
+                });
+
+
+
+    }
     /*@Test
     void getOwnerDetails_withAvailableVisitsService() {
         OwnerResponseDTO owner = new OwnerResponseDTO();
@@ -638,32 +668,6 @@ class ApiGatewayControllerTest {
 //        assertEquals(user.getId(), 1);
 //    }
 //
-//    @Test
-//    void createUser(){
-//        UserDetails user = new UserDetails();
-//        user.setId(1);
-//        user.setUsername("Johnny123");
-//        user.setPassword("password");
-//        user.setEmail("email@email.com");
-//        when(authServiceClient.createUser(argThat(
-//                n -> user.getEmail().equals(n.getEmail())
-//        ))).thenReturn(Mono.just(user));
-//
-//        client.post()
-//                .uri("/api/gateway/users")
-//                .body(Mono.just(user), UserDetails.class)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .exchange()
-//                .expectStatus().isOk()
-//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-//                .expectBody();
-//
-//        assertEquals(user.getId(), 1);
-//        assertEquals(user.getUsername(), "Johnny123");
-//        assertEquals(user.getPassword(), "password");
-//        assertEquals(user.getEmail(), "email@email.com");
-//
-//    }
 
     @Test
     void getAllOwners_shouldSucceed(){
@@ -728,37 +732,37 @@ class ApiGatewayControllerTest {
 
 
 
-    @Test
-    void createOwner(){
-        OwnerResponseDTO owner = new OwnerResponseDTO();
-        owner.setOwnerId("ownerId-123");
-        owner.setFirstName("John");
-        owner.setLastName("Johnny");
-        owner.setAddress("111 John St");
-        owner.setCity("Johnston");
-        owner.setTelephone("51451545144");
-        when(customersServiceClient.createOwner(owner))
-                .thenReturn(Mono.just(owner));
-
-
-        client.post()
-                .uri("/api/gateway/owners")
-                .body(Mono.just(owner), OwnerResponseDTO.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody();
-
-
-
-        assertEquals(owner.getOwnerId(),owner.getOwnerId());
-        assertEquals(owner.getFirstName(),"John");
-        assertEquals(owner.getLastName(),"Johnny");
-        assertEquals(owner.getAddress(),"111 John St");
-        assertEquals(owner.getCity(),"Johnston");
-        assertEquals(owner.getTelephone(),"51451545144");
-    }
+//    @Test
+//    void createOwner(){
+//        OwnerResponseDTO owner = new OwnerResponseDTO();
+//        owner.setOwnerId("ownerId-123");
+//        owner.setFirstName("John");
+//        owner.setLastName("Johnny");
+//        owner.setAddress("111 John St");
+//        owner.setCity("Johnston");
+//        owner.setTelephone("51451545144");
+//        when(customersServiceClient.createOwner(owner))
+//                .thenReturn(Mono.just(owner));
+//
+//
+//        client.post()
+//                .uri("/api/gateway/owners")
+//                .body(Mono.just(owner), OwnerResponseDTO.class)
+//                .accept(MediaType.APPLICATION_JSON)
+//                .exchange()
+//                .expectStatus().isOk()
+//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+//                .expectBody();
+//
+//
+//
+//        assertEquals(owner.getOwnerId(),owner.getOwnerId());
+//        assertEquals(owner.getFirstName(),"John");
+//        assertEquals(owner.getLastName(),"Johnny");
+//        assertEquals(owner.getAddress(),"111 John St");
+//        assertEquals(owner.getCity(),"Johnston");
+//        assertEquals(owner.getTelephone(),"51451545144");
+//    }
 
 
 
@@ -2488,10 +2492,23 @@ void deleteAllInventory_shouldSucceed() {
     @Test
     void createUser_withValidModel_shouldSucceed() {
         // Define a valid Register model here
+        OwnerRequestDTO ownerRequestDTO = OwnerRequestDTO.builder()
+                .ownerId("1")
+                .firstName("Ric")
+                .lastName("Danon")
+                .build();
+
+        OwnerResponseDTO ownerResponseDTO = OwnerResponseDTO.builder()
+                .ownerId("1")
+                .firstName("Ric")
+                .lastName("Danon")
+                .build();
+
         Register validUser = Register.builder()
                 .email("richard200danon@gmail.com")
                 .password("pwd%jfjfjDkkkk8")
                 .username("Ric")
+                .owner(ownerRequestDTO)
                 .build();
 
         UserPasswordLessDTO userLess = UserPasswordLessDTO.builder()
@@ -2499,8 +2516,9 @@ void deleteAllInventory_shouldSucceed() {
                 .email(validUser.getEmail())
                 .build();
 
+
         when(authServiceClient.createUser(any()))
-                .thenReturn(Mono.just(userLess));
+                .thenReturn(Mono.just(ownerResponseDTO));
 
         client.post()
                 .uri("/api/gateway/users")
@@ -2509,11 +2527,12 @@ void deleteAllInventory_shouldSucceed() {
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(UserPasswordLessDTO.class)
+                .expectBody(OwnerResponseDTO.class)
                 .value(dto ->{
                     assertNotNull(dto);
-                    assertEquals(validUser.getUsername(),dto.getUsername());
-                    assertEquals(validUser.getEmail(),dto.getEmail());
+                    assertEquals(ownerRequestDTO.getFirstName(),dto.getFirstName());
+                    assertEquals(ownerRequestDTO.getLastName(),dto.getLastName());
+                    assertEquals(ownerRequestDTO.getOwnerId(),dto.getOwnerId());
                 });
     }
 

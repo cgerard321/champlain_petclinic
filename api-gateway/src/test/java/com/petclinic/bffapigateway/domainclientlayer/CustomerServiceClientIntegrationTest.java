@@ -43,7 +43,18 @@ public class CustomerServiceClientIntegrationTest {
             .photo("testBytes")
             .build();
 
-    private final OwnerResponseDTO TEST_OWNER = OwnerResponseDTO.builder()
+    private final OwnerRequestDTO TEST_OWNER = OwnerRequestDTO.builder()
+            .ownerId("ownerId-123")
+            .firstName("John")
+            .lastName("Smith")
+            .address("456 Elm")
+            .city("Montreal")
+            .telephone("5553334444")
+            //.imageId(1)
+            .build();
+
+
+    private final OwnerResponseDTO TEST_OWNER_RESPONSE = OwnerResponseDTO.builder()
             .ownerId("ownerId-123")
             .firstName("John")
             .lastName("Smith")
@@ -135,7 +146,7 @@ public class CustomerServiceClientIntegrationTest {
 
     @Test
     void getAllOwners() throws JsonProcessingException {
-        Flux<OwnerResponseDTO> owners = Flux.just(TEST_OWNER);
+        Flux<OwnerResponseDTO> owners = Flux.just(TEST_OWNER_RESPONSE);
 
         final String body = mapper.writeValueAsString(owners.collectList().block());
 

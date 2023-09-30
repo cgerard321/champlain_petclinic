@@ -3,23 +3,20 @@ package com.petclinic.bffapigateway.domainclientlayer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Auth.*;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.utils.Security.Variables.SecurityConst;
 import com.petclinic.bffapigateway.utils.Utility;
 import lombok.RequiredArgsConstructor;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
-import org.springframework.boot.test.context.SpringBootTest;
+import okhttp3.mockwebserver.internal.duplex.DuplexResponseBody;
+import org.junit.jupiter.api.*;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
-import org.springframework.http.server.reactive.ServerHttpRequestDecorator;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -30,8 +27,9 @@ import reactor.test.StepVerifier;
 import java.io.IOException;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
+import static junit.framework.TestCase.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static reactor.core.publisher.Mono.when;
 
 /**
  * Created by IntelliJ IDEA.
@@ -47,27 +45,46 @@ public class AuthServiceClientIntegrationTest {
             ,"MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDTnkqggdMFu5O58pB8U0f8D4pab_7j5T8jNZfEep23DbvoMCjR6X1cFe4qCsvaY4aDF6d6Vn3TVY2INHMuyOTXqe5vhBWiRgaI3TIPkGjgHZ1f6Up_ZPQFJCGTo2b3OiXBq3LTK7PXvMj2EIQPJrHuX099ACDvO"
             ,"Bearer");
 
-    private AuthServiceClient authServiceClient;
+    @MockBean
+    CustomersServiceClient customersServiceClient;
     private MockWebServer server;
     private ObjectMapper objectMapper;
 
     @MockBean
     private Utility utility;
+
+    UserDetails userDetails = UserDetails.builder()
+            .username("username")
+            .userId("userId")
+            .email("email")
+            .build();
+
+    private AuthServiceClient authServiceClient;
+
     private final Register USER_REGISTER = Register.builder()
             .username("username")
             .password("password")
             .email("email")
+            .owner(OwnerRequestDTO.builder()
+                    .ownerId("UUID")
+                    .firstName("firstName")
+                    .lastName("lastName")
+                    .address("address")
+                    .city("city")
+                    .telephone("telephone")
+                    .build())
             .build();
 
     @BeforeEach
     void setup() {
 
+        customersServiceClient = Mockito.mock(CustomersServiceClient.class);
+
         server = new MockWebServer();
         authServiceClient = new AuthServiceClient(
                 WebClient.builder(),
-                server.getHostName(),
-                String.valueOf(server.getPort()),
-                new RestTemplate(), securityConst);
+                customersServiceClient, server.getHostName(),
+                String.valueOf(server.getPort()));
         objectMapper = new ObjectMapper();
     }
 
@@ -76,34 +93,39 @@ public class AuthServiceClientIntegrationTest {
         server.shutdown();
     }
 
-//    @Test
-//    @DisplayName("Given valid register information, register user")
-//    void valid_register() throws JsonProcessingException {
-//        final String asString = objectMapper.writeValueAsString(
-//                objectMapper.convertValue(USER_REGISTER, UserDetails.class)
-//                        .toBuilder()
-//                        .id(1)
-//                        .roles(Collections.emptySet())
-//                        .password(null)
-//                        .build()
-//        );
-//
-//        final MockResponse mockResponse = new MockResponse();
-//        mockResponse
-//                .setHeader("Content-Type", "application/json")
-//                .setBody(asString);
-//
-//        server.enqueue(mockResponse);
-//
-//        final UserDetails block = authServiceClient.createUser(USER_REGISTER).block();
-//
-//        assertEquals(USER_REGISTER.getEmail(), block.getEmail());
-//        assertEquals(USER_REGISTER.getUsername(), block.getUsername());
-//        assertNull(block.getPassword());
-//        assertNotNull(block.getId());
-//        assertEquals(0, block.getRoles().size());
-//    }
-//
+    @Test
+    @DisplayName("Given valid register information, register user")
+    void valid_register(){
+        OwnerResponseDTO ownerResponseDTO = OwnerResponseDTO.builder()
+                        .ownerId("UUID")
+                        .firstName("firstName")
+                        .lastName("lastName")
+                        .address("address")
+                        .city("city")
+                        .telephone("telephone")
+                        .pets(List.of())
+                        .build();
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(200);
+
+        server.enqueue(mockResponse);
+
+        Mockito.when(customersServiceClient.createOwner(any(OwnerRequestDTO.class)))
+                .thenReturn(Mono.just(ownerResponseDTO));
+
+
+        Mono<OwnerResponseDTO> block = authServiceClient.createUser(USER_REGISTER);
+
+        StepVerifier
+                .create(block)
+                .expectNext(ownerResponseDTO)
+                .verifyComplete();
+
+    }
+
 //    @Test
 //    @DisplayName("Given valid JWT, verify user")
 //    void valid_verification() throws JsonProcessingException {

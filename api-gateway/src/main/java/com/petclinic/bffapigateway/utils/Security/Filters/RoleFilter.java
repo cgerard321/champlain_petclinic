@@ -1,13 +1,13 @@
 package com.petclinic.bffapigateway.utils.Security.Filters;
 
 
+import com.petclinic.bffapigateway.exceptions.ForbiddenAccessException;
 import com.petclinic.bffapigateway.exceptions.HandlerIsNullException;
-import com.petclinic.bffapigateway.exceptions.InvalidTokenException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
+import lombok.Generated;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping;
@@ -16,13 +16,14 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 @Slf4j
 @Component
 @Order(2)
+@Generated
 public class RoleFilter implements WebFilter {
 
     private final JwtTokenUtil jwtTokenUtil;
@@ -65,7 +66,7 @@ public class RoleFilter implements WebFilter {
 
 
         if (handler.getMethod().getAnnotation(SecuredEndpoint.class) == null
-                || handler.getMethod().getAnnotation(SecuredEndpoint.class).allowedRoles()[0] == Roles.ALL) {
+                || Arrays.stream(handler.getMethod().getAnnotation(SecuredEndpoint.class).allowedRoles()).anyMatch(role -> role == Roles.ALL)){
             return chain.filter(exchange);
         }
 
@@ -90,13 +91,13 @@ public class RoleFilter implements WebFilter {
 
 
         if (roles == null) {
-            return Mono.error(new InvalidTokenException("Unauthorized, invalid token"));
+            return Mono.error(new ForbiddenAccessException("No roles attached to token"));
         }
 
-
-        if (roles.contains(Roles.ADMIN.toString())) {
-            return chain.filter(exchange);
-        }
+//todo : ask other teams if they want admin to have carte blanche
+//        if (roles.contains(Roles.ADMIN.toString())) {
+//            return chain.filter(exchange);
+//        }
 
 
 
@@ -113,6 +114,6 @@ public class RoleFilter implements WebFilter {
             }
         }
 
-        return Mono.error(new InvalidTokenException("Unauthorized, invalid token"));
+        return Mono.error(new ForbiddenAccessException("Unauthorized, you do not possess the necessary permissions to access the endpoint"));
     }
 }

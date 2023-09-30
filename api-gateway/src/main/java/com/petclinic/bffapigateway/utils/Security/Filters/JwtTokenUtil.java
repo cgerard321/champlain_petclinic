@@ -6,6 +6,7 @@ import com.petclinic.bffapigateway.utils.Security.Variables.SecurityConst;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import lombok.Generated;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import java.util.*;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@Generated
 public class JwtTokenUtil implements Serializable {
 
 
@@ -32,9 +34,7 @@ public class JwtTokenUtil implements Serializable {
             final Claims claims = getClaimsFromToken(token);
 
            roles = Arrays.asList(claims.get(CLAIM_KEY_ROLES).toString().split(","));
-            log.debug("Roles: {}", roles.toArray());
         } catch (Exception e) {
-            log.debug("Exception in get Roles: {}", e.getMessage());
             roles = null;
         }
         return roles;
@@ -51,7 +51,6 @@ public class JwtTokenUtil implements Serializable {
                     .parseClaimsJws(token)
                     .getBody();
         } catch (Exception e) {
-            log.debug("Exception get claims: {}", e.getMessage());
             claims = null;
         }
         return claims;
@@ -77,14 +76,11 @@ public class JwtTokenUtil implements Serializable {
 
 
     public String getTokenFromRequest(ServerWebExchange exchange){
-        log.debug("Entered Util getTokenFromRequest");
         final List<String> cookies = exchange.getRequest().getHeaders().get("Cookie");
 
 
-        log.debug("Cookies: {}", cookies);
 
         if (cookies == null) {
-            log.debug("No cookies found");
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
 
             throw new NoTokenFoundException("No cookies found");
@@ -103,5 +99,16 @@ public class JwtTokenUtil implements Serializable {
         token = token.replace(" ", "");
 
         return token;
+    }
+
+    public String getIdFromToken(String token) {
+        String id;
+        try {
+            final Claims claims = getClaimsFromToken(token);
+            id = claims.get("id").toString();
+        } catch (Exception e) {
+            id = null;
+        }
+        return id;
     }
 }
