@@ -5,6 +5,7 @@ import com.petclinic.vet.dataaccesslayer.EducationRepository;
 import com.petclinic.vet.util.EntityDtoUtil;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Service
 public class EducationServiceImpl implements EducationService {
@@ -23,4 +24,12 @@ public class EducationServiceImpl implements EducationService {
                 .map(EntityDtoUtil::toDTO);
     }
 
-}
+    @Override
+    public Mono<Void> deleteEducationByEducationId(String vetId, String educationId) {
+        return educationRepository.findByVetIdAndEducationId(vetId, educationId)
+                .switchIfEmpty(Mono.error(new Exception("Education with id " + educationId + " not found.")))
+                    .flatMap(educationRepository::delete);
+        }
+    }
+
+

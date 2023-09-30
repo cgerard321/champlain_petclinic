@@ -24,6 +24,31 @@ angular.module('vetDetails')
             self.educations = resp.data;
         });
 
+        $scope.deleteVetEducation = function (educationId) {
+            let varIsConf = confirm('Are you sure you want to delete this educationId: ' + educationId + '?');
+            if (varIsConf) {
+
+                $http.delete('api/gateway/vets/' + $stateParams.vetId + '/educations/' + educationId)
+                    .then(successCallback, errorCallback)
+
+                function successCallback(response) {
+                    $scope.errors = [];
+                    alert(educationId + " Deleted Successfully!");
+                    console.log(response, 'res');
+                    //refresh list
+                    $http.get('api/gateway/vets/' + $stateParams.vetId + '/educations').then(function (resp) {
+                        self.educations = resp.data;
+                        arr = resp.data;
+                    });
+                }
+
+                function errorCallback(error) {
+                    alert(data.errors);
+                    console.log(error, 'cannot get data.');
+                }
+            }
+        };
+
         $http.get('api/gateway/vets/' + $stateParams.vetId + '/ratings/percentages')
             .then(function (resp) {
                 const ratingsData = resp.data;
@@ -62,7 +87,7 @@ angular.module('vetDetails')
 
                 function errorCallback(error) {
                     alert(data.errors);
-                    console.log(error, 'can not get data.');
+                    console.log(error, 'cannot get data.');
                 }
             }
         };
