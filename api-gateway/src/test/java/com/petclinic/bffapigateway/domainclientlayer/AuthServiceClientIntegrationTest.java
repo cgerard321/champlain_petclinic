@@ -65,14 +65,13 @@ public class AuthServiceClientIntegrationTest {
             .username("username")
             .password("password")
             .email("email")
-            .owner(OwnerResponseDTO.builder()
+            .owner(OwnerRequestDTO.builder()
                     .ownerId("UUID")
                     .firstName("firstName")
                     .lastName("lastName")
                     .address("address")
                     .city("city")
                     .telephone("telephone")
-                    .pets(List.of())
                     .build())
             .build();
 
@@ -85,8 +84,7 @@ public class AuthServiceClientIntegrationTest {
         authServiceClient = new AuthServiceClient(
                 WebClient.builder(),
                 customersServiceClient, server.getHostName(),
-                String.valueOf(server.getPort()),
-                new RestTemplate(), securityConst);
+                String.valueOf(server.getPort()));
         objectMapper = new ObjectMapper();
     }
 
@@ -115,7 +113,7 @@ public class AuthServiceClientIntegrationTest {
 
         server.enqueue(mockResponse);
 
-        Mockito.when(customersServiceClient.createOwner(any(OwnerResponseDTO.class)))
+        Mockito.when(customersServiceClient.createOwner(any(OwnerRequestDTO.class)))
                 .thenReturn(Mono.just(ownerResponseDTO));
 
 

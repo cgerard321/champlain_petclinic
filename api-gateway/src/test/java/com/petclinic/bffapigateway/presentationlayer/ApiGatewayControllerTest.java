@@ -559,7 +559,7 @@ class ApiGatewayControllerTest {
     @Test
     void createUser(){
         String uuid = UUID.randomUUID().toString();
-        OwnerResponseDTO owner = OwnerResponseDTO
+        OwnerRequestDTO owner = OwnerRequestDTO
                 .builder()
                 .ownerId(uuid)
                 .firstName("John")
@@ -568,8 +568,22 @@ class ApiGatewayControllerTest {
                 .city("Johnston")
                 .telephone("51451545144")
                 .build();
+
+
+        OwnerResponseDTO owner_response = OwnerResponseDTO
+                .builder()
+                .ownerId(uuid)
+                .firstName("John")
+                .lastName("Johnny")
+                .address("111 John St")
+                .city("Johnston")
+                .telephone("51451545144")
+                .build();
+
+
+
         when(authServiceClient.createUser(any(Register.class)))
-                .thenReturn(Mono.just(owner));
+                .thenReturn(Mono.just(owner_response));
 
         Register register = Register.builder()
                 .username("Johnny123")
@@ -2478,6 +2492,12 @@ void deleteAllInventory_shouldSucceed() {
     @Test
     void createUser_withValidModel_shouldSucceed() {
         // Define a valid Register model here
+        OwnerRequestDTO ownerRequestDTO = OwnerRequestDTO.builder()
+                .ownerId("1")
+                .firstName("Ric")
+                .lastName("Danon")
+                .build();
+
         OwnerResponseDTO ownerResponseDTO = OwnerResponseDTO.builder()
                 .ownerId("1")
                 .firstName("Ric")
@@ -2488,7 +2508,7 @@ void deleteAllInventory_shouldSucceed() {
                 .email("richard200danon@gmail.com")
                 .password("pwd%jfjfjDkkkk8")
                 .username("Ric")
-                .owner(ownerResponseDTO)
+                .owner(ownerRequestDTO)
                 .build();
 
         UserPasswordLessDTO userLess = UserPasswordLessDTO.builder()
@@ -2510,9 +2530,9 @@ void deleteAllInventory_shouldSucceed() {
                 .expectBody(OwnerResponseDTO.class)
                 .value(dto ->{
                     assertNotNull(dto);
-                    assertEquals(ownerResponseDTO.getFirstName(),dto.getFirstName());
-                    assertEquals(ownerResponseDTO.getLastName(),dto.getLastName());
-                    assertEquals(ownerResponseDTO.getOwnerId(),dto.getOwnerId());
+                    assertEquals(ownerRequestDTO.getFirstName(),dto.getFirstName());
+                    assertEquals(ownerRequestDTO.getLastName(),dto.getLastName());
+                    assertEquals(ownerRequestDTO.getOwnerId(),dto.getOwnerId());
                 });
     }
 
