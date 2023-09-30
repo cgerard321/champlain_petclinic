@@ -2,10 +2,7 @@ package com.auth.authservice.presentationlayer.User;
 
 import com.auth.authservice.Util.Exceptions.HTTPErrorMessage;
 import com.auth.authservice.businesslayer.UserService;
-import com.auth.authservice.datalayer.user.ResetPasswordToken;
-import com.auth.authservice.datalayer.user.ResetPasswordTokenRepository;
-import com.auth.authservice.datalayer.user.User;
-import com.auth.authservice.datalayer.user.UserRepo;
+import com.auth.authservice.datalayer.user.*;
 import com.auth.authservice.domainclientlayer.Mail.MailService;
 import com.auth.authservice.security.JwtTokenUtil;
 import org.aspectj.lang.annotation.Before;
@@ -319,6 +316,7 @@ class UserControllerIntegrationTest {
                 .email("richard2004danon@gmail.com")
                 .password("pwd%jfjfjDkkkk8")
                 .username("Ricky")
+                .userId(new UserIdentifier().getUserId())
                 .build();
 
         webTestClient.post()
@@ -431,7 +429,7 @@ class UserControllerIntegrationTest {
                 .expectStatus().isOk()
                 .expectBodyList(UserDetails.class)
                 .value(users -> {
-                    assertEquals(2,users.size());
+                    assertEquals(12,users.size());
                 });
     }
 

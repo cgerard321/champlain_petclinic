@@ -6,6 +6,8 @@ import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
 import com.petclinic.bffapigateway.exceptions.HandlerIsNullException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
+import lombok.Generated;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
@@ -32,6 +34,7 @@ import java.util.concurrent.ExecutionException;
 @Slf4j
 @Component
 @Order(1)
+@Generated
 public class JwtTokenFilter implements WebFilter {
 
     AntPathMatcher antPathMatcher = new AntPathMatcher();
@@ -75,7 +78,6 @@ public class JwtTokenFilter implements WebFilter {
 
         //todo optimize this
        if (AUTH_WHITELIST.keySet().stream().anyMatch(pattern -> antPathMatcher.match(pattern, path))) {
-            log.debug("Request is a whitelisted endpoint, skipping filters !");
             exchange.getAttributes().put("whitelisted", true);
 
             return chain.filter(exchange);
@@ -84,7 +86,6 @@ public class JwtTokenFilter implements WebFilter {
         if (Objects.requireNonNull(exchange.getRequest().getHeaders().get(HttpHeaders.ACCEPT)).get(0).contains("html")
                 && path.equals("/")
                 && exchange.getRequest().getMethod().toString().equals("GET")) {
-            log.debug("Request is a browser request, skipping filters !");
             exchange.getAttributes().put("whitelisted", true);
 
             return chain.filter(exchange);
@@ -112,7 +113,6 @@ public class JwtTokenFilter implements WebFilter {
         if (handler.getMethod().getAnnotation(SecuredEndpoint.class) != null) {
             if(Arrays.asList(handler.getMethod().getAnnotation(SecuredEndpoint.class).allowedRoles()).contains(Roles.ANONYMOUS))
             {
-                log.debug("Anonymous request skipping filters !");
                 exchange.getAttributes().put("whitelisted", true);
 
                 return chain.filter(exchange);
@@ -121,10 +121,8 @@ public class JwtTokenFilter implements WebFilter {
 
 
         String token = jwtTokenUtil.getTokenFromRequest(exchange);
-        log.debug("Token: {}", token);
 
         if (token == null) {
-            log.debug("Token is null");
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap("No token provided".getBytes())));
         }
@@ -137,9 +135,7 @@ public class JwtTokenFilter implements WebFilter {
         return validationResponse.flatMap(responseEntity -> {
             if (responseEntity.getStatusCode() == HttpStatus.OK && responseEntity.getBody() != null) {
                 // Token is valid, proceed with the request
-
-               log.debug("Token is valid");
-               return chain.filter(exchange);
+                return chain.filter(exchange);
                 }
         else {
             exchange.getResponse().setStatusCode(responseEntity.getStatusCode());

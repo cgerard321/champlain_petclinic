@@ -19,6 +19,36 @@ angular.module('vetDetails')
             self.ratings = resp.data;
         });
 
+        $http.get('api/gateway/vets/' + $stateParams.vetId + '/educations').then(function (resp) {
+            console.log(resp.data)
+            self.educations = resp.data;
+        });
+
+        $scope.deleteVetEducation = function (educationId) {
+            let varIsConf = confirm('Are you sure you want to delete this educationId: ' + educationId + '?');
+            if (varIsConf) {
+
+                $http.delete('api/gateway/vets/' + $stateParams.vetId + '/educations/' + educationId)
+                    .then(successCallback, errorCallback)
+
+                function successCallback(response) {
+                    $scope.errors = [];
+                    alert(educationId + " Deleted Successfully!");
+                    console.log(response, 'res');
+                    //refresh list
+                    $http.get('api/gateway/vets/' + $stateParams.vetId + '/educations').then(function (resp) {
+                        self.educations = resp.data;
+                        arr = resp.data;
+                    });
+                }
+
+                function errorCallback(error) {
+                    alert(data.errors);
+                    console.log(error, 'cannot get data.');
+                }
+            }
+        };
+
         $http.get('api/gateway/vets/' + $stateParams.vetId + '/ratings/percentages')
             .then(function (resp) {
                 const ratingsData = resp.data;
@@ -57,44 +87,50 @@ angular.module('vetDetails')
 
                 function errorCallback(error) {
                     alert(data.errors);
-                    console.log(error, 'can not get data.');
+                    console.log(error, 'cannot get data.');
                 }
             }
         };
 
         self.updateRating = function (ratingId, rating) {
-            const btn = document.getElementById("updateRatingBtn");
+            const btn = document.getElementById("updateRatingBtn"+ratingId);
 
-            const updateContainer=document.getElementById("ratingUpdate")
-            const selectedValue=parseInt(document.getElementById("ratingOptions").value)
-            const updatedDescription= document.getElementById("updateDescription").value
+            const updateContainer=document.getElementById("ratingUpdate"+ratingId)
+            const selectedValue=parseInt(document.getElementById("ratingOptions"+ratingId).value)
+            if(selectedValue<1||selectedValue>5){
+                alert("rateScore should be between 1 and 5" + selectedValue)
+                return
+            }
 
+            const updatedDescription= document.getElementById("updateDescription"+ratingId).value
             if(updateContainer.style.display=="none"){
                 updateContainer.style.display="block"
                 btn.textContent="Save"
             }
             else if(btn.textContent=="Save"){
-                rating.rateScore=selectedValue
-                rating.vetId=$stateParams.vetId
-                rating.rateDescription=updatedDescription
-                rating.rateDate = Date.now().toString()
-                console.log(rating.rateScore);
-                updateContainer.style.display="none"
-                btn.textContent="Update"
+                const updatedRating = {
+                    rateScore: selectedValue,
+                    vetId: $stateParams.vetId,
+                    rateDescription: updatedDescription,
+                    rateDate: Date.now().toString()
+                };
+                console.log(updatedRating.rateScore)
 
-                $http.put("api/gateway/vets/" + $stateParams.vetId + "/ratings/"+ratingId, rating).then(function (resp){
+                $http.put("api/gateway/vets/" + $stateParams.vetId + "/ratings/" + ratingId, updatedRating).then(function (resp) {
                     console.log(resp.data)
-                    self.rating = resp.data;
+                    rating = resp.data;
                     alert('Your review was successfully updated!');
                     //refresh list
                     $http.get('api/gateway/vets/' + $stateParams.vetId + '/ratings').then(function (resp) {
                         console.log(resp.data)
                         self.ratings = resp.data;
-                        arr = resp.data;
                     });
                     //refresh percentages
                     percentageOfRatings();
                 });
+
+                updateContainer.style.display="none"
+                btn.textContent="Update"
             }
         }
 
@@ -132,6 +168,10 @@ angular.module('vetDetails')
         self.submitRatingForm = function (rating) {
             rating.vetId = $stateParams.vetId;
             rating.rateScore = document.getElementById("ratingScore").value;
+            if(rating.rateScore<1||rating.rateScore>5){
+                alert("rateScore should be between 1 and 5" + selectedValue)
+                return
+            }
             rating.rateDescription = document.getElementById("ratingDescription").value;
             var currentDate = new Date();
             var readableDate = currentDate.toLocaleDateString();

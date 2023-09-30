@@ -1,5 +1,6 @@
 package com.petclinic.bffapigateway.dtos.Visits;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,6 +26,8 @@ public class VisitDetails {
     private Integer practitionerId = null;
 
     private String date = null;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime visitDate = null;
 
     private String description = null;

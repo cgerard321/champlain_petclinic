@@ -1,12 +1,12 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.Auth.*;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.exceptions.InvalidCredentialsException;
 import com.petclinic.bffapigateway.exceptions.GenericHttpException;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Rethrower;
 import com.petclinic.bffapigateway.exceptions.InvalidTokenException;
-import com.petclinic.bffapigateway.utils.Security.Variables.SecurityConst;
 import com.petclinic.bffapigateway.utils.Utility;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,15 +15,13 @@ import org.springframework.http.*;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.UUID;
+
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
-import static reactor.core.publisher.Mono.error;
 import static reactor.core.publisher.Mono.just;
 
 @Slf4j
@@ -31,23 +29,19 @@ import static reactor.core.publisher.Mono.just;
 public class AuthServiceClient {
 
     private final WebClient.Builder webClientBuilder;
+
+    private final CustomersServiceClient customersServiceClient;
     private final String authServiceUrl;
-
-    private final RestTemplate restTemplate;
-
-    private final SecurityConst securityConst;
 
     @Autowired
     private Rethrower rethrower;
 
     public AuthServiceClient(
             WebClient.Builder webClientBuilder,
-            @Value("${app.auth-service.host}") String authServiceHost,
-            @Value("${app.auth-service.port}") String authServicePort,
-            RestTemplate restTemplate, SecurityConst securityConst) {
+            CustomersServiceClient customersServiceClient, @Value("${app.auth-service.host}") String authServiceHost,
+            @Value("${app.auth-service.port}") String authServicePort) {
         this.webClientBuilder = webClientBuilder;
-        this.restTemplate = restTemplate;
-        this.securityConst = securityConst;
+        this.customersServiceClient = customersServiceClient;
         authServiceUrl = "http://" + authServiceHost + ":" + authServicePort;
     }
 
@@ -67,7 +61,12 @@ public class AuthServiceClient {
                 .bodyToFlux(UserDetails.class);
     }
 //
-        public Mono<UserPasswordLessDTO> createUser (Register model) {
+        public Mono<OwnerResponseDTO> createUser (Register model) {
+
+            String uuid = UUID.randomUUID().toString();
+            model.setUserId(uuid);
+            model.getOwner().setOwnerId(uuid);
+
             return webClientBuilder.build().post()
                     .uri(authServiceUrl + "/users")
                     .body(just(model), Register.class)
@@ -76,9 +75,14 @@ public class AuthServiceClient {
                     .onStatus(HttpStatusCode::is4xxClientError,
                             n -> rethrower.rethrow(n,
                                     x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST)))
-                    .bodyToMono(UserPasswordLessDTO.class);
+                    .onStatus(HttpStatusCode::is5xxServerError,  n -> rethrower.rethrow(n,
+                            x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST)))
+                    .bodyToMono(UserPasswordLessDTO.class)
+                    .then(customersServiceClient.createOwner(model.getOwner()))
+                    .doOnError(e -> {
+                         customersServiceClient.deleteOwner(uuid);
+                    });
         }
-
 
 //    public Mono<UserDetails> updateUser (final long userId, final Register model) {
 //        return webClientBuilder.build().put()
@@ -115,10 +119,7 @@ public class AuthServiceClient {
     }
 
     public  Mono<ResponseEntity<UserPasswordLessDTO>> login(final Login login) throws Exception {
-        log.info("Entered domain service login");
-        UserPasswordLessDTO userResponseModel;
         try {
-            log.info("Email : {}",login.getEmail());
             return webClientBuilder.build()
                     .post()
                     .uri(authServiceUrl+"/users/login")
@@ -127,14 +128,7 @@ public class AuthServiceClient {
                     .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> Mono.error(new InvalidCredentialsException("Invalid token")))
                     .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> Mono.error(new InvalidInputException("Invalid token")))
                     .toEntity(UserPasswordLessDTO.class);
-
-//            HttpEntity<Login> userRequestModelHttpEntity = new HttpEntity<>(login);
-//
-//            HttpEntity<UserPasswordLessDTO> response = restTemplate.exchange(authServiceUrl + "/users/login", HttpMethod.POST, userRequestModelHttpEntity, UserPasswordLessDTO.class);
-//            log.info("Fetched user from auth-service");
-//            return Mono.just(response);
         } catch (HttpClientErrorException ex) {
-            log.info("Error throw in auth domain client service");
             throw new InvalidInputException(ex.getMessage());
         }
     }
@@ -165,9 +159,6 @@ public class AuthServiceClient {
 
         UserResetPwdWithTokenRequestModel userResetPwdWithTokenRequestModel = UserResetPwdWithTokenRequestModel.builder().token(pwdChange.getToken()).password(pwdChange.getPassword()).build();
 
-        log.info("Token : {}",pwdChange.getToken());
-        log.info("Password : {}",pwdChange.getPassword());
-        String formPage;
         try {
             String url = authServiceUrl+"/users/reset_password";
 
