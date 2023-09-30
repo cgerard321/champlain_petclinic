@@ -559,7 +559,24 @@ class VetControllerIntegrationTest {
                     assertEquals(education1.getEndDate(), list.get(0).getEndDate());
                 });
     }
+    @Test
+    void deleteAnEducationForVet_WithValidId_ShouldSucceed() {
+        Publisher<Education> setup = educationRepository.deleteAll().
+                thenMany(educationRepository.save(education1));
 
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        client
+                .delete()
+                .uri("/vets/" + vet.getVetId() + "/educations/{educationId}", education1.getEducationId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody();
+    }
 
     @Test
     void toStringBuilders() {
