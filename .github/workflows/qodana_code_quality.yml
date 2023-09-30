@@ -48,6 +48,6 @@ jobs:
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
         with:
-          args: "-i,,--linter,jetbrains/qodana-jvm:latest"
-#          args: "-i,.qodana/code-coverage,--linter,jetbrains/qodana-jvm:2023-2-eap"
+#          args: "-i,,--linter,jetbrains/qodana-jvm:latest"
+          args: "-i,.qodana/code-coverage,--linter,jetbrains/qodana-jvm:2023-2-eap"
           pr-mode: false
