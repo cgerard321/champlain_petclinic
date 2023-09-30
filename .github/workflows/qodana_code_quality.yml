@@ -6,7 +6,7 @@ on:
     branches:
       - main
       - 'releases/*'
-      -
+
 #jobs:
 #  build:
 #
@@ -73,9 +73,9 @@ jobs:
 #          cp -R champlain_petclinic/gradle/build/kover/bin-reports/* champlain_petclinic/gradle/.qodana/code-coverage/
       - name: Create coverage-data directory and copy contents
         run: |
-          mkdir -p visits-service-new/gradle/.qodana/code-coverage
-          cp -R visits-service-new/build/reports/* visits-service-new/gradle/.qodana/code-coverage/
-#
+          mkdir -p gradle/.qodana/code-coverage
+          cp -R */build/reports/* gradle/.qodana/code-coverage/
+
       - name: Archive coverage data
         uses: actions/upload-artifact@v2
         with:
