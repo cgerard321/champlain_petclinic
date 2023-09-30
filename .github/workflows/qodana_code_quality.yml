@@ -30,10 +30,10 @@ jobs:
       - name: Run Build
         run: ./gradlew build
 
-      - name: Create coverage-data directory and copy contents
-        run: |
+#      - name: Create coverage-data directory and copy contents
+#        run: |
 #          mkdir -p .qodana/code-coverage
-          cp -R */build/reports/* .qodana/code-coverage/
+#          cp -R */build/reports/* .qodana/code-coverage/
 #          mkdir -p gradle/.qodana/code-coverage
 #          cp -R */build/reports/* gradle/.qodana/code-coverage/
 
