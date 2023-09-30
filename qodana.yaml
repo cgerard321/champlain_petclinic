@@ -16,22 +16,8 @@ include:
   - name: FieldCanBeLocal
   - name: DefaultAnnotationParam
   - name: CommentedOutCode
-#  - name: CheckDependencyLicenses
-#Disable inspections
-#exclude:
-#  - name: <SomeDisabledInspectionId>
-#    paths:
-#      - <path/where/not/run/inspection>
 
 projectJDK: 17 #(Applied in CI/CD pipeline)
-
-#Execute shell command before Qodana execution (Applied in CI/CD pipeline)
-#bootstrap: sh ./prepare-qodana.sh
-
-#Install IDE plugins before Qodana execution (Applied in CI/CD pipeline)
-#plugins:
-#  - id: org.intellij.qodana
-#  - id: <plugin.id> #(plugin id can be found at https://plugins.jetbrains.com)
 
 #Specify Qodana linter for analysis (Applied in CI/CD pipeline)
 linter: jetbrains/qodana-jvm:latest #, intellij-coverage-agent

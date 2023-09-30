@@ -18,14 +18,9 @@ jobs:
           java-version: '17'
           distribution: 'adopt'
           cache: 'gradle'
-      - name: Run Tests
-        run: ./gradlew test visits-service-new
-#        working-directory: visit-service-new/gradle
+      - name: Run Build
+        run: ./gradlew build
 
-#      - name: Create coverage-data directory and copy contents
-#        run: |
-#          mkdir -p champlain_petclinic/gradle/.qodana/code-coverage
-#          cp -R champlain_petclinic/gradle/build/kover/bin-reports/* champlain_petclinic/gradle/.qodana/code-coverage/
       - name: Create coverage-data directory and copy contents
         run: |
           mkdir -p gradle/.qodana/code-coverage
