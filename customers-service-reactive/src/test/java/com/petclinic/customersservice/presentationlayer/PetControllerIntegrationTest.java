@@ -101,7 +101,8 @@ class PetControllerIntegrationTest {
                 .jsonPath("$.name").isEqualTo(petEntity.getName())
                 .jsonPath("$.petTypeId").isEqualTo(petEntity.getPetTypeId())
                 .jsonPath("$.ownerId").isEqualTo(petEntity.getOwnerId())
-                .jsonPath("$.photoId").isEqualTo(petEntity.getPhotoId());
+                .jsonPath("$.photoId").isEqualTo(petEntity.getPhotoId())
+                .jsonPath("$.isActive").isEqualTo(petEntity.getIsActive());
     }
 
     @Test
@@ -118,8 +119,23 @@ class PetControllerIntegrationTest {
                 .jsonPath("$.name").isEqualTo(petEntity.getName())
                 .jsonPath("$.petTypeId").isEqualTo(petEntity.getPetTypeId())
                 .jsonPath("$.ownerId").isEqualTo(petEntity.getOwnerId())
-                .jsonPath("$.photoId").isEqualTo(petEntity.getPhotoId());
+                .jsonPath("$.photoId").isEqualTo(petEntity.getPhotoId())
+                .jsonPath("$.isActive").isEqualTo(petEntity.getIsActive());
 
+
+    }
+
+    @Test
+    void updatePetIsActive() {
+        Publisher<Pet> setup = repo.deleteAll().thenMany(repo.save(petEntity));
+        StepVerifier.create(setup).expectNextCount(1).verifyComplete();
+        client.patch().uri("/pet/" + PET_ID)
+                .body(Mono.just(petEntity), Pet.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange().expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.isActive").isEqualTo(petEntity.getIsActive());
     }
 
     private Pet buildPet() {
@@ -130,6 +146,7 @@ class PetControllerIntegrationTest {
                 .ownerId("111")
                 .petTypeId("111")
                 .photoId("111")
+                .isActive("true")
                 .build();
     }
 
