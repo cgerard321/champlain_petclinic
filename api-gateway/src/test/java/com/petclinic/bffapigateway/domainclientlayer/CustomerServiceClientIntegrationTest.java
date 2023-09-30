@@ -19,6 +19,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -65,13 +66,14 @@ public class CustomerServiceClientIntegrationTest {
             .build();
     PetType type = new PetType();
 
+    Date date = new Date(20221010);
     private final PetResponseDTO TEST_PET = PetResponseDTO.builder()
+            .ownerId("ownerId-123")
+            .petId("petId-123")
             .name("Cat")
-            .petId("1")
-            .name("Bonkers")
-            .birthDate("2015-03-03")
-            .type(type)
-            .imageId(2)
+            .birthDate(date)
+            .petTypeId("5")
+            .photoId("2")
             .isActive("true")
             .build();
 
