@@ -8,14 +8,10 @@
             </div>
         </div>
             <div class="col-sm-6 form-group">
-                <label class="control-label" for="inventoryType"> Inventory Type</label>
-                <select class="form-control col-sm-4" id="inventoryType" ng-model="$ctrl.inventory.inventoryType" name="inventoryType" required title="Please select the inventory type.">
-                    <option value="internal">internal</option>
-                    <option value="sales">sales</option>
+                <label class="control-label" for="inventoryType">Inventory Type</label>
+                <input class="form-control col-sm-4" type="text" placeholder="Search" ng-model="inventoryTypeFormSearch" ng-change="updateOption()">
+                <select class="form-control col-sm-4" id="inventoryType" ng-options="option for option in inventoryTypeOptions" ng-model="selectedOption" name="inventoryType" required title="Please select the inventory type.">
                 </select>
-
-
-
             </div>
         <div class="row">
             <div class="form-group col-sm-12">
