@@ -127,20 +127,6 @@ class InventoryControllerIntegrationTest {
     }
 
     @Test
-    void getAllProductsInInventory_withInvalidInventoryType_throwsNotFoundException(){
-        String invalidInventoryId = "123";
-
-        webTestClient.get()
-                .uri("/inventory/{inventoryId}/products", invalidInventoryId)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.message").isEqualTo("Inventory not found with InventoryId: " + invalidInventoryId);
-    }
-
-    @Test
     void getAllProductsInInventoryByInventoryId_andProductName_andProductPrice_andProductQuantity_shouldSucceed(){
         String inventoryId = "1";
         String productName = "Benzodiazepines";

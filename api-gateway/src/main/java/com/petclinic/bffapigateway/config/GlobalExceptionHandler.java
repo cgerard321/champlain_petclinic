@@ -80,8 +80,6 @@ public class GlobalExceptionHandler {
                 .body(new HttpErrorInfo(HttpStatus.UNAUTHORIZED.value(), ex.getMessage()));
     }
 
-
-
     @ExceptionHandler(value = IllegalArgumentException.class)
     public ResponseEntity<HttpErrorInfo> illegalArgumentException(IllegalArgumentException ex) {
 
@@ -95,4 +93,19 @@ public class GlobalExceptionHandler {
                 .body(new HttpErrorInfo(HttpStatus.BAD_REQUEST.value(),ex.getMessage()));
     }
 
+    @ExceptionHandler(value = InventoryNotFoundException.class)
+    public ResponseEntity<HttpErrorInfo> inventoryNotFoundException(InventoryNotFoundException ex){
+        return ResponseEntity.status(ex.getHttpStatus())
+                .body(new HttpErrorInfo(ex.getHttpStatus().value(), ex.getMessage()));
+    }
+    @ExceptionHandler(value = ProductListNotFoundException.class)
+    public ResponseEntity<HttpErrorInfo> productListNotFoundException(ProductListNotFoundException ex){
+        return ResponseEntity.status(ex.getHttpStatus())
+                .body(new HttpErrorInfo(ex.getHttpStatus().value(), ex.getMessage()));
+    }
+    @ExceptionHandler(value = InvalidInputsInventoryException.class)
+    public ResponseEntity<HttpErrorInfo> invalidInputsInventoryException(InvalidInputsInventoryException ex){
+        return ResponseEntity.status(ex.getHttpStatus())
+                .body(new HttpErrorInfo(ex.getHttpStatus().value(), ex.getMessage()));
+    }
 }
