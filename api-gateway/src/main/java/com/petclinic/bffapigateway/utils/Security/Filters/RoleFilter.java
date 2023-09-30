@@ -1,6 +1,7 @@
 package com.petclinic.bffapigateway.utils.Security.Filters;
 
 
+import com.petclinic.bffapigateway.exceptions.ForbiddenAccessException;
 import com.petclinic.bffapigateway.exceptions.HandlerIsNullException;
 import com.petclinic.bffapigateway.exceptions.InvalidTokenException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
@@ -93,7 +94,7 @@ public class RoleFilter implements WebFilter {
 
 
         if (roles == null) {
-            return Mono.error(new InvalidTokenException("Unauthorized, invalid token"));
+            return Mono.error(new ForbiddenAccessException("No roles attached to token"));
         }
 
 //todo : ask other teams if they want admin to have carte blanche
@@ -116,6 +117,6 @@ public class RoleFilter implements WebFilter {
             }
         }
 
-        return Mono.error(new InvalidTokenException("Unauthorized, invalid token"));
+        return Mono.error(new ForbiddenAccessException("Unauthorized, you do not process the necessary permissions to access the endpoint"));
     }
 }

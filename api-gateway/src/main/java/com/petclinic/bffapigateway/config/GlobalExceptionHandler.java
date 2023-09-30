@@ -78,6 +78,8 @@ public class GlobalExceptionHandler {
                 .body(new HttpErrorInfo(HttpStatus.UNAUTHORIZED.value(), ex.getMessage()));
     }
 
+
+
     @ExceptionHandler(value = IllegalArgumentException.class)
     public ResponseEntity<HttpErrorInfo> illegalArgumentException(IllegalArgumentException ex) {
 
@@ -106,4 +108,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(ex.getHttpStatus())
                 .body(new HttpErrorInfo(ex.getHttpStatus().value(), ex.getMessage()));
     }
+    @ExceptionHandler(value = ForbiddenAccessException.class)
+    public ResponseEntity<HttpErrorInfo> handleForbiddenAccessException(ForbiddenAccessException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new HttpErrorInfo(HttpStatus.FORBIDDEN.value(),ex.getMessage()));
+    }
+
 }

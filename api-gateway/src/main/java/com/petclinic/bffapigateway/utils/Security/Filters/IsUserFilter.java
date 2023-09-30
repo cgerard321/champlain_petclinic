@@ -1,6 +1,7 @@
 package com.petclinic.bffapigateway.utils.Security.Filters;
 
 
+import com.petclinic.bffapigateway.exceptions.ForbiddenAccessException;
 import com.petclinic.bffapigateway.exceptions.HandlerIsNullException;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.exceptions.InvalidTokenException;
@@ -107,11 +108,6 @@ public class IsUserFilter implements WebFilter {
                }
             }
 
-
-
-
-
-
             String[] idToMatch = handler.getMethod().getAnnotation(IsUserSpecific.class).idToMatch();
 
 
@@ -121,7 +117,7 @@ public class IsUserFilter implements WebFilter {
 
 
             if (pathVariables == null){
-                throw new InvalidInputException("You are not allowed to access this resource");
+                throw new ForbiddenAccessException("You are not allowed to access this resource");
             }
             log.debug("Path variables: {}", pathVariables);
 
@@ -144,7 +140,7 @@ public class IsUserFilter implements WebFilter {
                     throw new InvalidInputException("This is likely error is caused by assigning the wrong id to the annotation");
                 }
                 if (!pathVariables.get(id).equals(tokenId)) {
-                    throw new InvalidInputException("You are not allowed to access this resource");
+                    throw new ForbiddenAccessException("You are not allowed to access this resource");
                 }
             }
 
