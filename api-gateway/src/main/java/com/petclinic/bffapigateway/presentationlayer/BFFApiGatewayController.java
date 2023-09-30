@@ -78,26 +78,23 @@ public class BFFApiGatewayController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "bills", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ResponseEntity<BillResponseDTO>> getAllBilling() {
-        return billServiceClient.getAllBilling().map(s -> ResponseEntity.status(HttpStatus.OK).body(s))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    public Flux<BillResponseDTO> getAllBilling() {
+        return billServiceClient.getAllBilling();
     }
 
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET})
     @GetMapping(value = "bills/customer/{customerId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ResponseEntity<BillResponseDTO>> getBillsByOwnerId(final @PathVariable String customerId)
+    public Flux<BillResponseDTO> getBillsByOwnerId(final @PathVariable String customerId)
     {
-        return billServiceClient.getBillsByOwnerId(customerId).map(s -> ResponseEntity.status(HttpStatus.OK).body(s))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+        return billServiceClient.getBillsByOwnerId(customerId);
     }
 
     @GetMapping(value = "bills/vet/{vetId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ResponseEntity<BillResponseDTO>> getBillsByVetId(final @PathVariable String vetId)
+    public Flux<BillResponseDTO> getBillsByVetId(final @PathVariable String vetId)
     {
-        return billServiceClient.getBillsByVetId(vetId).map(s -> ResponseEntity.status(HttpStatus.OK).body(s))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+        return billServiceClient.getBillsByVetId(vetId);
     }
 
     @PutMapping("/bills/{billId}")
@@ -149,9 +146,8 @@ public class BFFApiGatewayController {
 
 
     @GetMapping(value = "/pets", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ResponseEntity<PetResponseDTO>> getAllPets(){
-        return customersServiceClient.getAllPets().map(s -> ResponseEntity.status(HttpStatus.OK).body(s))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    public Flux<PetResponseDTO> getAllPets(){
+        return customersServiceClient.getAllPets();
     }
 
     @GetMapping(value = "/pets/{petId}")
@@ -167,9 +163,8 @@ public class BFFApiGatewayController {
     }
 
     @GetMapping(value = "/owners/{ownerId}/pets", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ResponseEntity<PetResponseDTO>> getPetsByOwnerId(@PathVariable String ownerId){
-        return customersServiceClient.getPetsByOwnerId(ownerId).map(s -> ResponseEntity.status(HttpStatus.OK).body(s))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    public Flux<PetResponseDTO> getPetsByOwnerId(@PathVariable String ownerId){
+        return customersServiceClient.getPetsByOwnerId(ownerId);
     }
 
     @DeleteMapping("owners/{ownerId}/pets/{petId}")
@@ -179,9 +174,8 @@ public class BFFApiGatewayController {
     }
 
     @GetMapping(value = "owners/petTypes", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ResponseEntity<PetType>> getPetTypes(){
-        return customersServiceClient.getPetTypes().map(s -> ResponseEntity.status(HttpStatus.OK).body(s))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    public Flux<PetType> getPetTypes(){
+        return customersServiceClient.getPetTypes();
     }
 
     @PutMapping("pets/{petId}")
@@ -195,26 +189,22 @@ public class BFFApiGatewayController {
      * Visits Methods
      **/
     @GetMapping(value = "visits", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ResponseEntity<VisitResponseDTO>> getAllVisits() {
-        return visitsServiceClient.getAllVisits().map(s -> ResponseEntity.status(HttpStatus.OK).body(s))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    public Flux<VisitResponseDTO> getAllVisits() {
+        return visitsServiceClient.getAllVisits();
     }
     @GetMapping(value = "visits/previous/{petId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ResponseEntity<VisitDetails>> getPreviousVisitsForPet(@PathVariable final String petId) {
-        return visitsServiceClient.getPreviousVisitsForPet(petId).map(s -> ResponseEntity.status(HttpStatus.OK).body(s))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    public Flux<VisitDetails> getPreviousVisitsForPet(@PathVariable final String petId) {
+        return visitsServiceClient.getPreviousVisitsForPet(petId);
     }
 
     @GetMapping(value = "visits/scheduled/{petId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ResponseEntity<VisitDetails>> getScheduledVisitsForPet(@PathVariable final String petId) {
-        return visitsServiceClient.getScheduledVisitsForPet(petId).map(s -> ResponseEntity.status(HttpStatus.OK).body(s))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    public Flux<VisitDetails> getScheduledVisitsForPet(@PathVariable final String petId) {
+        return visitsServiceClient.getScheduledVisitsForPet(petId);
     }
 
     @GetMapping(value = "visits/vets/{practitionerId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ResponseEntity<VisitDetails>> getVisitForPractitioner(@PathVariable int practitionerId){
-        return visitsServiceClient.getVisitForPractitioner(practitionerId).map(s -> ResponseEntity.status(HttpStatus.OK).body(s))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    public Flux<VisitDetails> getVisitForPractitioner(@PathVariable int practitionerId){
+        return visitsServiceClient.getVisitForPractitioner(practitionerId);
     }
 
     /*
@@ -227,15 +217,13 @@ public class BFFApiGatewayController {
     }
      */
     @GetMapping(value = "visits/pets/{petId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ResponseEntity<VisitDetails>> getVisitsForPet(final @PathVariable String petId){
-        return visitsServiceClient.getVisitsForPet(petId).map(s -> ResponseEntity.status(HttpStatus.OK).body(s))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    public Flux<VisitDetails> getVisitsForPet(final @PathVariable String petId){
+        return visitsServiceClient.getVisitsForPet(petId);
     }
 
     @GetMapping(value ="visits/{visitId}")
-    public Mono<ResponseEntity<VisitResponseDTO>> getVisitByVisitId(final @PathVariable String visitId){
-        return visitsServiceClient.getVisitByVisitId(visitId).map(s -> ResponseEntity.status(HttpStatus.OK).body(s))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    public Mono<VisitResponseDTO> getVisitByVisitId(final @PathVariable String visitId){
+        return visitsServiceClient.getVisitByVisitId(visitId);
     }
 
     /*
@@ -279,15 +267,13 @@ public class BFFApiGatewayController {
      **/
 
     @GetMapping(value = "vets", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ResponseEntity<VetDTO>> getAllVets() {
-        return vetsServiceClient.getVets().map(s -> ResponseEntity.status(HttpStatus.OK).body(s))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    public Flux<VetDTO> getAllVets() {
+        return vetsServiceClient.getVets();
     }
 
     @GetMapping(value = "vets/{vetId}/ratings", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ResponseEntity<RatingResponseDTO>> getRatingsByVetId(@PathVariable String vetId) {
-        return vetsServiceClient.getRatingsByVetId(VetsEntityDtoUtil.verifyId(vetId)).map(s -> ResponseEntity.status(HttpStatus.OK).body(s))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    public Flux<RatingResponseDTO> getRatingsByVetId(@PathVariable String vetId) {
+        return vetsServiceClient.getRatingsByVetId(VetsEntityDtoUtil.verifyId(vetId));
     }
 
     @GetMapping("/vets/{vetId}/ratings/count")
@@ -335,9 +321,8 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
     @GetMapping(value = "vets/{vetId}/educations", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ResponseEntity<EducationResponseDTO>> getEducationsByVetId(@PathVariable String vetId) {
-        return vetsServiceClient.getEducationsByVetId(VetsEntityDtoUtil.verifyId(vetId)).map(s -> ResponseEntity.status(HttpStatus.OK).body(s))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    public Flux<EducationResponseDTO> getEducationsByVetId(@PathVariable String vetId) {
+        return vetsServiceClient.getEducationsByVetId(VetsEntityDtoUtil.verifyId(vetId));
     }
 
     @DeleteMapping(value = "vets/{vetId}/educations/{educationId}")
@@ -361,15 +346,13 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
     @GetMapping(value = "/vets/active", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ResponseEntity<VetDTO>> getActiveVets() {
-        return vetsServiceClient.getActiveVets().map(s -> ResponseEntity.status(HttpStatus.OK).body(s))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    public Flux<VetDTO> getActiveVets() {
+        return vetsServiceClient.getActiveVets();
     }
 
     @GetMapping(value = "/vets/inactive", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ResponseEntity<VetDTO>> getInactiveVets() {
-        return vetsServiceClient.getInactiveVets().map(s -> ResponseEntity.status(HttpStatus.OK).body(s))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    public Flux<VetDTO> getInactiveVets() {
+        return vetsServiceClient.getInactiveVets();
     }
 
     @PostMapping(value = "/vets",consumes = "application/json",produces = "application/json")
@@ -420,10 +403,8 @@ public class BFFApiGatewayController {
      **/
 
     @GetMapping(value = "owners", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ResponseEntity<OwnerResponseDTO>> getAllOwners() {
-        return customersServiceClient.getAllOwners()
-                .map(s -> ResponseEntity.status(HttpStatus.OK).body(s))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    public Flux<OwnerResponseDTO> getAllOwners() {
+        return customersServiceClient.getAllOwners();
                 /*.flatMap(n ->
                         visitsServiceClient.getVisitsForPets(n.getPetIds())
                                 .map(addVisitsToOwner(n))
@@ -542,8 +523,8 @@ public class BFFApiGatewayController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "users", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ResponseEntity<UserDetails>> getAllUsers(@CookieValue("Bearer") String auth) {
-        return authServiceClient.getUsers(auth).map(ResponseEntity::ok).defaultIfEmpty(ResponseEntity.notFound().build());
+    public Flux<UserDetails> getAllUsers(@CookieValue("Bearer") String auth) {
+        return authServiceClient.getUsers(auth);
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
@@ -612,18 +593,16 @@ public class BFFApiGatewayController {
     }
 
     @GetMapping(value = "inventory/{inventoryId}/products", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ResponseEntity<ProductResponseDTO>> getProductsInInventoryByInventoryIdAndFields(@PathVariable String inventoryId,
+    public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndFields(@PathVariable String inventoryId,
                                                                                                  @RequestParam(required = false) String productName,
                                                                                                  @RequestParam(required = false) Double productPrice,
                                                                                                  @RequestParam(required = false) Integer productQuantity){
-        return inventoryServiceClient.getProductsInInventoryByInventoryIdAndProductsField(inventoryId, productName, productPrice, productQuantity).map(s -> ResponseEntity.status(HttpStatus.OK).body(s))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+        return inventoryServiceClient.getProductsInInventoryByInventoryIdAndProductsField(inventoryId, productName, productPrice, productQuantity);
     }
 
     @GetMapping(value = "inventory", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ResponseEntity<InventoryResponseDTO>> getAllInventory(){
-        return inventoryServiceClient.getAllInventory().map(s -> ResponseEntity.status(HttpStatus.OK).body(s))
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+    public Flux <InventoryResponseDTO> getAllInventory(){
+        return inventoryServiceClient.getAllInventory();
     }
 
     @DeleteMapping(value = "inventory/{inventoryId}/products")

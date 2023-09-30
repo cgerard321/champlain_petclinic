@@ -309,7 +309,7 @@ class ApiGatewayControllerTest {
                 .uri("/api/gateway/vets/" + VET_ID + "/educations/{educationId}", educationResponseDTO.getEducationId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk();
+                .expectStatus().isNoContent();
 
         Mockito.verify(vetsServiceClient, times(1))
                 .deleteEducation(VET_ID, educationResponseDTO.getEducationId());
@@ -637,7 +637,7 @@ class ApiGatewayControllerTest {
                 .body(Mono.just(register), UserDetails.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody(OwnerResponseDTO.class)
                 .value(dto->{
@@ -836,7 +836,7 @@ class ApiGatewayControllerTest {
                 .body(Mono.just(pet), PetResponseDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
 
                 .expectBody()
@@ -1169,7 +1169,7 @@ class ApiGatewayControllerTest {
                 .body(Mono.just(pet), PetResponseDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
 
@@ -1203,7 +1203,7 @@ class ApiGatewayControllerTest {
                 .body(Mono.just(pet), PetResponseDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
 
@@ -1415,7 +1415,7 @@ class ApiGatewayControllerTest {
                 .body(Mono.just(billRequestDTO), BillRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
 
@@ -1449,42 +1449,15 @@ class ApiGatewayControllerTest {
 
     @Test
     void shouldDeleteBillById(){
-
-        BillResponseDTO billResponseDTO = new BillResponseDTO();
-        billResponseDTO.setBillId("9");
-        billResponseDTO.setDate(null);
-        billResponseDTO.setAmount(600);
-        billResponseDTO.setVisitType("Adoption");
-
-        BillRequestDTO billRequestDTO = new BillRequestDTO();
-        billRequestDTO.setDate(null);
-        billRequestDTO.setAmount(600);
-        billRequestDTO.setVisitType("Adoption");
-        when(billServiceClient.createBill(billRequestDTO))
-                .thenReturn(Mono.just(billResponseDTO));
-
-
-            client.post()
-                    .uri("/api/gateway/bills")
-                    .body(Mono.just(billRequestDTO), BillRequestDTO.class)
-                    .accept(MediaType.APPLICATION_JSON)
-                    .exchange()
-                    .expectStatus().isOk()
-                    .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                    .expectBody();
-
-            assertEquals(billResponseDTO.getBillId(),"9");
-
-
+        when(billServiceClient.deleteBill("9"))
+                    .thenReturn(Mono.empty());
         client.delete()
                 .uri("/api/gateway/bills/9")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody();
-
-        assertNull(billServiceClient.getBilling(billResponseDTO.getBillId()));
+                .expectStatus().isNoContent()
+                .expectBody().isEmpty();
+        verify(billServiceClient, times(1)).deleteBill("9");
     }
 
     @Test
@@ -1509,7 +1482,7 @@ class ApiGatewayControllerTest {
                 .body(Mono.just(billRequestDTO), BillRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
 
@@ -1653,7 +1626,7 @@ class ApiGatewayControllerTest {
                 .body(Mono.just(visitRequestDTO), VisitRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.visitId").isEqualTo(visitResponseDTO.getVisitId())
@@ -1989,7 +1962,7 @@ class ApiGatewayControllerTest {
                 .uri("/api/gateway/visits/" + VISIT_ID)
                 .accept(APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk();
+                .expectStatus().isNoContent();
 
         Mockito.verify(visitsServiceClient, times(1))
                 .deleteVisitByVisitId(VISIT_ID);
@@ -2240,7 +2213,7 @@ void deleteAllInventory_shouldSucceed() {
     client.delete()
             .uri("/api/gateway/inventory")  // Assuming the endpoint for deleting all inventories is the same without an ID.
             .exchange()
-            .expectStatus().isOk()
+            .expectStatus().isNoContent()
             .expectBody().isEmpty();
 
     // Verify that the deleteAllInventories method on the service client was called exactly once.
@@ -2262,7 +2235,7 @@ void deleteAllInventory_shouldSucceed() {
         client.delete()
                 .uri("/api/gateway/inventory/{inventoryId}/products", inventoryId)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isNoContent()
                 .expectBody().isEmpty();
 
         // Verify that the deleteAllProductInventoriesForInventory method on the service client was called exactly once with the specific inventoryId.
@@ -2565,7 +2538,7 @@ void deleteAllInventory_shouldSucceed() {
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(validUser)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody(OwnerResponseDTO.class)
                 .value(dto ->{
