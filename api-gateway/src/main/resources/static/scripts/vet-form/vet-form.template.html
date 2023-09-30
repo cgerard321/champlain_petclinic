@@ -18,9 +18,8 @@
                 <div class="row g-3">
                     <div class="col-sm-6">
                         <h5 class="form-label">Firstname</h5>
-                        <input class="form-control" id="firstName" maxlength="30" minlength="3"
+                        <input class="form-control" id="firstName"
                                name="firstName" ng-model="vet.firstName" ng-value="$ctrl.vet.firstName"
-                               pattern="^(a-z| |,|.|-)+"
                                placeholder="First Name" required
                                title="Minimum of 3 characters and maximum of 30 characters. Only letters and punctuation mark."
                                type="text"><br/>
@@ -28,24 +27,24 @@
 
                     <div class="col-sm-6">
                         <h5 class="form-label">Lastname</h5>
-                        <input class="form-control" id="lastName" maxlength="30" minlength="3" name="lastName"
-                               ng-model="vet.lastName" pattern="^(a-z| |,|.|-)+" placeholder="Last Name" required
-                               title="Minimum of 3 characters and maximum of 30 characters. Only letters and punctuation mark."
+                        <input class="form-control" id="lastName"  name="lastName"
+                               ng-model="vet.lastName" pattern="^[a-zA-Z -]+" placeholder="Last Name" required
+                               title="Minimum of 2 characters and maximum of 30 characters. Only letters and punctuation mark."
                                type="text">
                     </div>
 
                     <div class="col-12">
                         <h5 class="form-label">Email Address</h5>
-                        <input class="form-control" id="email" maxlength="100" minlength="5" name="email"
-                               ng-model="vet.email" pattern="\b[\w.%-]+@[-.\w]+\.[A-Za-z]{2,5}\b" placeholder="Email"
+                        <input class="form-control" id="email" name="email"
+                               ng-model="vet.email" pattern="\b[\w.%-]+@[-.\w]+\.[A-Za-z]{2,3}\b" placeholder="Email"
                                required
-                               title="Minimum of 5 characters and maximum of 100 characters. Top level domain should have 2 to 5 characters."
+                               title="Minimum of 6 characters and maximum of 320 characters. Top level domain should have 2 to 3 characters."
                                type="email">
                     </div>
 
                     <div class="col-sm-12">
                         <h5 class="form-label">Phone Number</h5>
-                        <input class="form-control" id="phoneNumber" maxlength="4" minlength="4"
+                        <input class="form-control" id="phoneNumber"
                                name="phoneNumber" ng-model="vet.phoneNumber" placeholder="Phone Number" required
                                title="Accepts only numbers for 4 characters." type="number">
                     </div>
@@ -91,9 +90,9 @@
 
                     <div class="col-sm-12">
                         <h5 class="form-label">Career Resume</h5>
-                        <textarea class="form-control" id="vetResume" maxlength="350" name="resume"
-                                  ng-model="vet.resume" pattern="^(.*)" placeholder="Resume"
-                                  title="Maximum of 350 characters."></textarea>
+                        <textarea class="form-control" id="vetResume" name="resume"
+                                  ng-model="vet.resume" pattern="^(.*)" placeholder="Resume">
+                        </textarea>
                     </div>
 
                     <hr class="my-4"/>
@@ -140,11 +139,10 @@
                         <div class="my-3 check-align">
                             <h5 class="mb-3">Available Work Days</h5>
                             <div class="col-sm-12">
-                                <input class="form-control" id="workDays" maxlength="250" name="workday"
+                                <input class="form-control" id="workDays" name="workday"
                                        ng-model="vet.workday"
-                                       pattern="((\bMonday\b|\bTuesday\b|\bWednesday\b|\bThursday\b|\bFriday\b|\bSaturday\b|\bSunday\b)(,|)( |))+"
                                        placeholder="ex:Monday, Tuesday"
-                                       title="Maximum of 250 characters. Accepts only days of the week seperated by commas."
+                                       title="Accepts only days of the week separated by commas."
                                        type="text">
                             </div>
                         </div>

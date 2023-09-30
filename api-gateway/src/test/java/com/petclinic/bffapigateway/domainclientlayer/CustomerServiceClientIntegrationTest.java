@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
+import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
 import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
@@ -22,6 +23,7 @@ import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static reactor.core.publisher.Mono.just;
 
 public class CustomerServiceClientIntegrationTest {
 
@@ -59,6 +61,7 @@ public class CustomerServiceClientIntegrationTest {
             .birthDate("2015-03-03")
             .type(type)
             .imageId(2)
+            .isActive("true")
             .build();
 
 
@@ -168,6 +171,33 @@ public class CustomerServiceClientIntegrationTest {
         assertEquals(updatedPetResponse.getPetId(), responseDTO.getPetId());
         assertEquals(updatedPetResponse.getName(), responseDTO.getName());
     }
+
+
+    @Test
+    void testPatchPet() throws Exception {
+        PetRequestDTO petRequestDTO = new PetRequestDTO(); // Create a request DTO
+        petRequestDTO.setPetId("petId-123");
+        petRequestDTO.setIsActive("true"); // Set the isActive status
+
+        PetResponseDTO updatedPetResponse = new PetResponseDTO(); // Create an expected response DTO
+        updatedPetResponse.setPetId("petId-123");
+        updatedPetResponse.setIsActive("true"); // Set the isActive status in the expected response
+
+        server.enqueue(new MockResponse()
+                .setResponseCode(200)
+                .setHeader("Content-Type", "application/json")
+                .setBody(mapper.writeValueAsString(updatedPetResponse))); // Use the expected response DTO
+
+        Mono<PetResponseDTO> responseMono = customersServiceClient.patchPet(petRequestDTO, "petId-123");
+
+        PetResponseDTO responseDTO = responseMono.block(); // Blocking for simplicity
+
+        // Verify the response
+        assertEquals(updatedPetResponse.getPetId(), responseDTO.getPetId());
+        assertEquals(updatedPetResponse.getIsActive(), responseDTO.getIsActive()); // Check the isActive status
+    }
+
+
 
 
     @Test
