@@ -6,8 +6,6 @@ import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
-import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
-import okhttp3.Response;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterEach;
@@ -33,13 +31,6 @@ public class CustomerServiceClientIntegrationTest {
 
     final String test = "Test photo";
     final byte[] testBytes = test.getBytes();
-
-    private final PhotoDetails TEST_PHOTO = PhotoDetails.builder()
-            .id(2)
-            .name("photo")
-            .type("jpeg")
-            .photo("testBytes")
-            .build();
 
     private final OwnerResponseDTO TEST_OWNER = OwnerResponseDTO.builder()
             .ownerId("ownerId-123")

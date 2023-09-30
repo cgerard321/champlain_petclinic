@@ -38,6 +38,7 @@ services:
             - SPRING_PROFILES_ACTIVE=docker
         depends_on:
             - mongo
+            - postgres
 
     customers-service-reactive:
         build: customers-service-reactive

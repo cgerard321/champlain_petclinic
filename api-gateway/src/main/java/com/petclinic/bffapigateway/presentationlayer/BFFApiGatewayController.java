@@ -28,8 +28,10 @@ import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import com.petclinic.bffapigateway.utils.VetsEntityDtoUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -245,11 +247,19 @@ public class BFFApiGatewayController {
      * End of Visit Methods
      **/
 
-    @GetMapping(value = "vets")
-    public Flux<VetDTO> getAllVets() {
-        return vetsServiceClient.getVets();
+
+    /**
+     * Beginning of Vets-Service
+     */
+    //Photo
+    @GetMapping("vets/{vetId}/photo")
+    public Mono<ResponseEntity<Resource>> getPhotoByVetId(@PathVariable String vetId) {
+        return vetsServiceClient.getPhotoByVetId(vetId)
+                .map(r -> ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE).body(r))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    //Ratings
     @GetMapping(value = "vets/{vetId}/ratings")
     public Flux<RatingResponseDTO> getRatingsByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getRatingsByVetId(VetsEntityDtoUtil.verifyId(vetId));
@@ -294,6 +304,11 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    //Vets
+    @GetMapping(value = "vets")
+    public Flux<VetDTO> getAllVets() {
+        return vetsServiceClient.getVets();
+    }
     @GetMapping("/vets/{vetId}")
     public Mono<ResponseEntity<VetDTO>> getVetByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getVetByVetId(VetsEntityDtoUtil.verifyId(vetId))

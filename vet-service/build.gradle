@@ -8,7 +8,7 @@ plugins {
 
 group = 'com.petclinic.vet'
 version = '1.0.0-SNAPSHOT'
-sourceCompatibility = '1.8'
+sourceCompatibility = "1.9"
 
 configurations {
     compileOnly {
@@ -33,7 +33,7 @@ repositories {
         testImplementation 'org.springframework.boot:spring-boot-starter-test'
         testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo'
         testImplementation 'io.projectreactor:reactor-test'
-
+        testImplementation 'io.r2dbc:r2dbc-h2:1.0.0.RELEASE'
     }
 
 
@@ -75,3 +75,4 @@ test {
         events "passed", "skipped", "failed"
     }
 }
+targetCompatibility = JavaVersion.VERSION_1_9

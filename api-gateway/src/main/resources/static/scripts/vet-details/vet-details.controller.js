@@ -99,33 +99,12 @@ angular.module('vetDetails')
         }
 
         //photo
-        $http.get('api/gateway/vets/photo/' + $stateParams.vetId).then(function (resp) {
+        $http.get('api/gateway/vets/' + $stateParams.vetId + '/photo').then(function (resp) {
             self.vetPhoto = resp.data;
         });
-        const fileInput = document.querySelector('input[id="photoVet"]');
-        let vetPhoto = "";
-        fileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                vetPhoto = reader.result
-                    .replace('data:', '')
-                    .replace(/^.+,/, '');
-                self.PreviewImage = vetPhoto;
-                var image = {
-                    name: uuidv4(),
-                    type: "jpeg",
-                    photo: vetPhoto
-                };
-                var test = $http.post('api/gateway/vets/photo/' + $stateParams.vetId, image);
-                console.log(test);
 
-            };
-            reader.readAsDataURL(file);
-        });
-
-        self.init = function (id){
-            $http.get('api/gateway/vets/' + $stateParams.vetId + '/vets/photo/' + id).then(function (resp) {
+        self.init = function (){
+            $http.get('api/gateway/vets/' + $stateParams.vetId + '/photo').then(function (resp) {
                 self.vetPhoto = resp.data;
             });
         }

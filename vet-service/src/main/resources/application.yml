@@ -43,6 +43,7 @@ spring:
   config:
     activate:
       on-profile: docker
+
   r2dbc:
     url: r2dbc:postgresql://postgres:5432/images
     username: user
@@ -55,3 +56,8 @@ spring:
       username: root
       password: password
       authentication-database: admin
+
+logging:
+  level:
+    root: INFO
+    com.petclinic: DEBUG
