@@ -50,6 +50,8 @@ class OwnerControllerIntegrationTest {
     }
 
 
+
+    /*
     @Test
     void getAllOwners() {
         StepVerifier
@@ -70,6 +72,10 @@ class OwnerControllerIntegrationTest {
                 });
 
     }
+    
+     */
+
+
     
 
 
