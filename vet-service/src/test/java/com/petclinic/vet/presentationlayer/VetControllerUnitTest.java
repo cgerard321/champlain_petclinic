@@ -494,6 +494,25 @@ class VetControllerUnitTest {
         Mockito.verify(educationService, times(1)).getAllEducationsByVetId(VET_ID);
     }
 
+    @Test
+    void deleteEducationForVetByEducationId_ShouldSucceed() {
+        String educationId = "794ac37f-1e07-43c2-93bc-61839e61d989";
+        String vetId = "694ac37f-1e07-43c2-93bc-61839e61d989";
+
+        when(educationService.deleteEducationByEducationId(vetId,educationId))
+                .thenReturn((Mono.empty()));
+
+        client
+                .delete()
+                .uri("/vets/" + vetId + "/educations/{educationId}", educationId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk();
+
+        Mockito.verify(educationService, times(1))
+                .deleteEducationByEducationId(vetId,educationId);
+    }
+
     private Vet buildVet() {
         return Vet.builder()
                 .vetId("678910")
