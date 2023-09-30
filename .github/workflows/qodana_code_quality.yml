@@ -19,7 +19,7 @@ jobs:
           distribution: 'adopt'
           cache: 'gradle'
       - name: Run Tests
-        run: ./gradlew build
+        run: ./gradlew test visits-service-new
 #        working-directory: visit-service-new/gradle
 
 #      - name: Create coverage-data directory and copy contents
@@ -38,7 +38,7 @@ jobs:
           path: gradle/.qodana/code-coverage
 
       - name: 'Qodana Scan'
-        uses: JetBrains/qodana-action@main
+        uses: JetBrains/qodana-action@latest
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
 #        with:
