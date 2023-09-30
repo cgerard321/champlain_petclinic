@@ -7,23 +7,33 @@
 angular.module('signupForm')
     .controller('SignupFormController', ['$http', '$scope', "$location", "authProvider", function ($http, $scope, $location, authProvider) {
 
-        this.add = () => $http.post('/api/gateway/users', {
-            username: $scope.signup.username,
-            password: $scope.signup.password,
-            email: $scope.signup.email,
-            owner: {
-                firstName: $scope.signup.firstName,
-                lastName: $scope.signup.lastName,
-                address: $scope.signup.address,
-                city: $scope.signup.city,
-                telephone: $scope.signup.telephone
-            }
-        })
-            .then(() => $location.path("/login"))
+        let loaderDiv = document.getElementById("loaderDiv");
+        loaderDiv.style.display = "none";
+
+        this.add = () => {
+                loaderDiv.style.display = "block";
+                $http.post('/api/gateway/users', {
+                username: $scope.signup.username,
+                password: $scope.signup.password,
+                email: $scope.signup.email,
+                owner: {
+                    firstName: $scope.signup.firstName,
+                    lastName: $scope.signup.lastName,
+                    address: $scope.signup.address,
+                    city: $scope.signup.city,
+                    telephone: $scope.signup.telephone
+                }
+            })
+            .then(() => {
+                loaderDiv.style.display = "none";
+                $location.path("/login")
+            })
             .catch(n => {
+                loaderDiv.style.display = "none";
                 $scope.errorMessages = n.data.message.split`\n`;
                 console.log(n);
             });
+        }
 
         this.keypress = ({ originalEvent: { key } }) => key === 'Enter' && this.add()
     }]);

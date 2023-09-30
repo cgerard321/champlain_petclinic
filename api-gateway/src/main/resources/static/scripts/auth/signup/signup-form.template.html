@@ -5,7 +5,11 @@
 <div style="display: flex; justify-content: center">
     <div>
         <h2 class="text-center">Signup</h2>
-        <h3 class="text-danger text-center" ng-repeat="error in errorMessages">{{ error }}</h3>
+        <div class="alert alert-danger alert-dismissible text-center" role="alert" ng-repeat="error in errorMessages">
+            <a class="close" data-dismiss="alert" aria-label="close">&times;</a>
+            <strong>Danger!</strong> {{error}}
+        </div>
+
         <div class="d-flex justify-content-center">
             <form class="form-horizontal" ng-submit="$ctrl.add()" style="max-width: 25em; justify-content: center;">
                 <div class="form-group formColor">
@@ -48,14 +52,29 @@
                 <div class="form-group formColor">
                     <label>Password</label>
                     <input class="form-control" type="password" ng-model="signup.password" name="password" required/>
+                    <i id="eye" onclick="viewPwd()" style="margin-left: 180px; margin-top: -700px; cursor: pointer" class="bi bi-eye-slash"></i>
+                    <script>
+                        function viewPwd(){
+                            const x = document.getElementsByName("password")[0];
+                            if (x.getAttribute("type") === "password"){
+                                x.setAttribute("type", "text");
+                            } else {
+                                x.setAttribute("type", "password");
+                            }
+                        }
+                    </script>
                     <span ng-show="signupForm.password.$error.required" class="help-block">Password is required.</span>
-                </div>
 
+                </div>
 
                 <div class="form-group formColor">
                     <label>Email</label>
                     <input class="form-control" ng-model="signup.email" name="email" required/>
                     <span ng-show="signupForm.email.$error.required" class="help-block">Email is required.</span>
+                </div>
+
+                <div style="padding-left: 30%">
+                    <div id="loaderDiv" class="loader m-2"></div> <!-- Center vertically -->
                 </div>
 
                 <div class="form-group text-center">
@@ -67,3 +86,18 @@
 </div>
 
 
+<style>
+    .loader {
+        border: 16px solid #f3f3f3; /* Light grey */
+        border-top: 16px solid #005d9a; /* Blue */
+        border-radius: 50%;
+        width: 60px;
+        height: 60px;
+        animation: spin 2s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
