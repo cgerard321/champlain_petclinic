@@ -242,6 +242,10 @@ public class BFFApiGatewayController {
      * End of Visit Methods
      **/
 
+    /**
+     * Start of Vet Methods
+     **/
+
     @GetMapping(value = "vets")
     public Flux<VetDTO> getAllVets() {
         return vetsServiceClient.getVets();
@@ -290,6 +294,17 @@ public class BFFApiGatewayController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+    @GetMapping(value = "vets/{vetId}/educations")
+    public Flux<EducationResponseDTO> getEducationsByVetId(@PathVariable String vetId) {
+        return vetsServiceClient.getEducationsByVetId(VetsEntityDtoUtil.verifyId(vetId));
+    }
+
+    @DeleteMapping(value = "vets/{vetId}/educations/{educationId}")
+    public Mono<Void> deleteEducationByEducationId(@PathVariable String vetId,
+                                                   @PathVariable String educationId){
+        return vetsServiceClient.deleteEducation(vetId,educationId);
+    }
+
 
     @GetMapping("/vets/{vetId}")
     public Mono<ResponseEntity<VetDTO>> getVetByVetId(@PathVariable String vetId) {
@@ -330,7 +345,9 @@ public class BFFApiGatewayController {
         return vetsServiceClient.deleteVet(VetsEntityDtoUtil.verifyId(vetId));
     }
 
-
+    /**
+     * End of Vet Methods
+     **/
 //
 //    @DeleteMapping(value = "users/{userId}")
 //    public Mono<UserDetails> deleteUser(@RequestHeader(AUTHORIZATION) String auth, final @PathVariable long userId) {
@@ -567,8 +584,5 @@ public class BFFApiGatewayController {
         return inventoryServiceClient.deleteAllInventories();
     }
 
-    @GetMapping(value = "vets/{vetId}/educations")
-    public Flux<EducationResponseDTO> getEducationsByVetId(@PathVariable String vetId) {
-        return vetsServiceClient.getEducationsByVetId(VetsEntityDtoUtil.verifyId(vetId));
-    }
+
 }

@@ -234,4 +234,14 @@ public class VetsServiceClient {
         return educationResponseDTOFlux;
     }
 
+    public Mono<Void> deleteEducation(String vetId, String educationId) {
+        Mono<Void> result = webClientBuilder
+                .build()
+                .delete()
+                .uri(vetsServiceUrl + "/" + vetId + "/educations" + "/" + educationId)
+                .retrieve()
+                .bodyToMono(Void.class);
+        return result;
+    }
+
 }

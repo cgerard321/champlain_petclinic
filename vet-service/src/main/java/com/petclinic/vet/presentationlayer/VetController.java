@@ -130,9 +130,17 @@ public class VetController {
         return vetService.deleteVetByVetId(EntityDtoUtil.verifyId(vetId));
     }
 
+    //education
     @GetMapping("{vetId}/educations")
     public Flux<EducationResponseDTO> getAllEducationsByVetId(@PathVariable String vetId) {
         return educationService.getAllEducationsByVetId(EntityDtoUtil.verifyId(vetId));
+    }
+
+    @DeleteMapping("{vetId}/educations/{educationId}")
+    public Mono<Void> deleteEducationByEducationId(@PathVariable String vetId,
+                                                   @PathVariable String educationId){
+        return educationService.deleteEducationByEducationId(vetId, educationId);
+
     }
 
 

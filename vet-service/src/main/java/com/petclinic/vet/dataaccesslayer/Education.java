@@ -1,6 +1,7 @@
 package com.petclinic.vet.dataaccesslayer;
 
 import lombok.*;
+import org.springframework.data.annotation.Id;
 
 @Setter
 @Getter
@@ -8,6 +9,8 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 public class Education {
+    @Id //very important
+    private String id;
     private String educationId;
     private String vetId;
     private String schoolName;
