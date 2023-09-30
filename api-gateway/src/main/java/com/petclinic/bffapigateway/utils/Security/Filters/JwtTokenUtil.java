@@ -34,9 +34,7 @@ public class JwtTokenUtil implements Serializable {
             final Claims claims = getClaimsFromToken(token);
 
            roles = Arrays.asList(claims.get(CLAIM_KEY_ROLES).toString().split(","));
-            log.debug("Roles: {}", roles.toArray());
         } catch (Exception e) {
-            log.debug("Exception in get Roles: {}", e.getMessage());
             roles = null;
         }
         return roles;
@@ -53,7 +51,6 @@ public class JwtTokenUtil implements Serializable {
                     .parseClaimsJws(token)
                     .getBody();
         } catch (Exception e) {
-            log.debug("Exception get claims: {}", e.getMessage());
             claims = null;
         }
         return claims;
@@ -79,14 +76,11 @@ public class JwtTokenUtil implements Serializable {
 
 
     public String getTokenFromRequest(ServerWebExchange exchange){
-        log.debug("Entered Util getTokenFromRequest");
         final List<String> cookies = exchange.getRequest().getHeaders().get("Cookie");
 
 
-        log.debug("Cookies: {}", cookies);
 
         if (cookies == null) {
-            log.debug("No cookies found");
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
 
             throw new NoTokenFoundException("No cookies found");

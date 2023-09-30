@@ -55,11 +55,16 @@ petClinicApp.factory("authProvider", ["$window", function ($window) {
 petClinicApp.factory("httpErrorInterceptor", ["$q", "$location", "authProvider", function ($q, $location, authProvider) {
     return {
         responseError: rej => {
-            if (!whiteList.has($location.path().substring(1)) && (rej.status === 401 || rej.status === 403)) {
+            if (!whiteList.has($location.path().substring(1)) && (rej.status === 401)) {
                 authProvider.purgeUser();
                 $location.path('/login');
                 return $q(() => null)
+            }else if(rej.status === 403){
+                $location.path('/welcome');
+                console.log("You are not authorized to access this page")
+                return $q(() => null)
             }
+
             return $q.reject(rej);
         }
     }

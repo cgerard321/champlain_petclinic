@@ -66,8 +66,6 @@ public class AuthServiceClient {
             String uuid = UUID.randomUUID().toString();
             model.setUserId(uuid);
             model.getOwner().setOwnerId(uuid);
-            log.info("Entered domain service create user");
-            log.info("UUID : {}",uuid);
 
             return webClientBuilder.build().post()
                     .uri(authServiceUrl + "/users")
@@ -121,9 +119,7 @@ public class AuthServiceClient {
     }
 
     public  Mono<ResponseEntity<UserPasswordLessDTO>> login(final Login login) throws Exception {
-        log.info("Entered domain service login");
         try {
-            log.info("Email : {}",login.getEmail());
             return webClientBuilder.build()
                     .post()
                     .uri(authServiceUrl+"/users/login")
@@ -132,14 +128,7 @@ public class AuthServiceClient {
                     .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> Mono.error(new InvalidCredentialsException("Invalid token")))
                     .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> Mono.error(new InvalidInputException("Invalid token")))
                     .toEntity(UserPasswordLessDTO.class);
-
-//            HttpEntity<Login> userRequestModelHttpEntity = new HttpEntity<>(login);
-//
-//            HttpEntity<UserPasswordLessDTO> response = restTemplate.exchange(authServiceUrl + "/users/login", HttpMethod.POST, userRequestModelHttpEntity, UserPasswordLessDTO.class);
-//            log.info("Fetched user from auth-service");
-//            return Mono.just(response);
         } catch (HttpClientErrorException ex) {
-            log.info("Error throw in auth domain client service");
             throw new InvalidInputException(ex.getMessage());
         }
     }
@@ -170,8 +159,6 @@ public class AuthServiceClient {
 
         UserResetPwdWithTokenRequestModel userResetPwdWithTokenRequestModel = UserResetPwdWithTokenRequestModel.builder().token(pwdChange.getToken()).password(pwdChange.getPassword()).build();
 
-        log.info("Token : {}",pwdChange.getToken());
-        log.info("Password : {}",pwdChange.getPassword());
         try {
             String url = authServiceUrl+"/users/reset_password";
 

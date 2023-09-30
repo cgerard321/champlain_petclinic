@@ -43,7 +43,6 @@ public class IsUserFilter implements WebFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
 
-        log.debug("IsUserFilter");
         if (exchange.getAttribute("whitelisted") != null && exchange.getAttribute("whitelisted") instanceof Boolean) {
             if((boolean) exchange.getAttribute("whitelisted")) {
                 return chain.filter(exchange);
@@ -70,7 +69,7 @@ public class IsUserFilter implements WebFilter {
         || Arrays.stream(handler.getMethod().getAnnotation(IsUserSpecific.class).bypassRoles()).anyMatch(role -> role == Roles.ANONYMOUS)) {
 
             if(Arrays.stream(handler.getMethod().getAnnotation(IsUserSpecific.class).bypassRoles()).anyMatch(role -> role == Roles.ANONYMOUS))
-                log.warn("Endpoint is not secured, anyone can access it and annotation is redundant");
+                log.error("Endpoint is not secured, anyone can access it and annotation is redundant. This is likely caused because the bypassRoles array contains ANONYMOUS.");
 
 
             return chain.filter(exchange);
@@ -82,7 +81,6 @@ public class IsUserFilter implements WebFilter {
             List<String> roles = jwtTokenUtil.getRolesFromToken(token);
 
 
-            log.debug("Roles: {}", roles);
 
 
             if (roles == null) {
@@ -101,7 +99,6 @@ public class IsUserFilter implements WebFilter {
                         .replace("]", "")
                         .replace(",","")
                         .trim();
-                log.debug("Role: {}", role);
 
                if(Arrays.toString(handler.getMethod().getAnnotation(IsUserSpecific.class).bypassRoles()).contains(role)){
                    return chain.filter(exchange);
@@ -119,21 +116,17 @@ public class IsUserFilter implements WebFilter {
             if (pathVariables == null){
                 throw new ForbiddenAccessException("You are not allowed to access this resource");
             }
-            log.debug("Path variables: {}", pathVariables);
 
 
 
-            log.debug("Token: {}", token);
 
             if (token == null) {
-                log.debug("Token is null");
                 exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
                 return exchange.getResponse().writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap("No token provided".getBytes())));
             }
 
             String tokenId = jwtTokenUtil.getIdFromToken(token);
 
-            log.debug("Token id: {}", tokenId);
 
             for (String id : idToMatch) {
                 if (pathVariables.get(id) == null) {

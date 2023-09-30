@@ -64,11 +64,7 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<UserPasswordLessDTO> createUser(@RequestBody @Valid UserIDLessRoleLessDTO dto){
-
-        log.info("Trying to persist user");
         final User saved = userService.createUser(dto);
-        log.info("Successfully persisted user");
-
         return ResponseEntity.ok()
                 .body(userMapper.modelToPasswordLessDTO(saved));
     }
@@ -108,29 +104,22 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<UserPasswordLessDTO> login(@RequestBody UserIDLessUsernameLessDTO login,
                                                      HttpServletResponse response) throws IncorrectPasswordException {
-        log.info("In controller");
-
         try {
 
             HashMap<String, Object> userAndToken = userService.login(login);
             ResponseCookie token = (ResponseCookie) userAndToken.get("token");
             User loggedInUser = (User) userAndToken.get("user");
             response.setHeader(HttpHeaders.SET_COOKIE, token.toString());
-            log.info("Token : {}", token.getValue());
-
-            log.info("In controller after set header");
             UserPasswordLessDTO testUser = userMapper.modelToIDLessPasswordLessDTO(loggedInUser);
             return ResponseEntity.ok()
                     .body(testUser);
         } catch (BadCredentialsException ex) {
-            log.info("Bad credentials exception");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
 
     @PostMapping("/validate-token")
     public ResponseEntity<String> validateToken() {
-            log.info("Token is valid");
             return ResponseEntity.ok().build();
      
     }

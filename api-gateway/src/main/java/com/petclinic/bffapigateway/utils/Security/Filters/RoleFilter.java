@@ -3,13 +3,11 @@ package com.petclinic.bffapigateway.utils.Security.Filters;
 
 import com.petclinic.bffapigateway.exceptions.ForbiddenAccessException;
 import com.petclinic.bffapigateway.exceptions.HandlerIsNullException;
-import com.petclinic.bffapigateway.exceptions.InvalidTokenException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import lombok.Generated;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping;
@@ -18,7 +16,6 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -117,6 +114,6 @@ public class RoleFilter implements WebFilter {
             }
         }
 
-        return Mono.error(new ForbiddenAccessException("Unauthorized, you do not process the necessary permissions to access the endpoint"));
+        return Mono.error(new ForbiddenAccessException("Unauthorized, you do not possess the necessary permissions to access the endpoint"));
     }
 }
