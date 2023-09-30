@@ -8,7 +8,6 @@ angular.module('inventoryProductList')
                 $http.get('api/gateway/inventory/' + $stateParams.inventoryId + '/products').then(function (resp) {
                     self.inventoryProductList = resp.data;
                     inventoryId = $stateParams.inventoryId;
-                    InventoryService.setInventoryId(inventoryId);
                     if (resp.data.length === 0) {
                         // Handle if inventory is empty
                         console.log("The inventory is empty!");
@@ -131,7 +130,6 @@ angular.module('inventoryProductList')
             $http.get('api/gateway/inventory/' + inventoryId + '/products').then(function (resp) {
                 self.inventoryProductList = resp.data;
                 inventoryId = $stateParams.inventoryId;
-                InventoryService.setInventoryId(inventoryId);
                 if (resp.data.length === 0) {
                     // Handle if inventory is empty
                     console.log("The inventory is empty!");
