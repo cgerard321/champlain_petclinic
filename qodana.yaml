@@ -16,6 +16,7 @@ include:
   - name: FieldCanBeLocal
 #  - name: DefaultAnnotationParam
   - name: CommentedOutCode
+#  - name: JvmCoverageInspection
 
 projectJDK: 17 #(Applied in CI/CD pipeline)
 

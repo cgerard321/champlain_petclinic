@@ -32,8 +32,8 @@ jobs:
 
       - name: Create coverage-data directory and copy contents
         run: |
-          mkdir -p gradle/.qodana/code-coverage
-          cp -R */build/reports/* gradle/.qodana/code-coverage/
+          mkdir -p .qodana/code-coverage
+          cp -R */build/reports/* .qodana/code-coverage/
 #          mkdir -p gradle/.qodana/code-coverage
 #          cp -R */build/reports/* gradle/.qodana/code-coverage/
 
@@ -41,13 +41,13 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: gradle-coverage-data.zip
-          path: gradle/.qodana/code-coverage
+          path: .qodana/code-coverage
 
       - name: 'Qodana Scan'
         uses: JetBrains/qodana-action@latest
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
         with:
-          args: "-i,gradle,--linter,jetbrains/qodana-jvm:latest"
+          args: "-i,,--linter,jetbrains/qodana-jvm:latest"
 #          args: "-i,.qodana/code-coverage,--linter,jetbrains/qodana-jvm:2023-2-eap"
           pr-mode: false
