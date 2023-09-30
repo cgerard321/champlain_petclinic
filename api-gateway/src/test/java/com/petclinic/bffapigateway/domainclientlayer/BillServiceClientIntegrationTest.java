@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Bills.BillDetails;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
+import com.petclinic.bffapigateway.dtos.Bills.BillStatus;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitDetails;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
@@ -22,6 +23,8 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -69,7 +72,8 @@ class BillServiceClientIntegrationTest {
             .customerId("1")
             .vetId("1")
             .visitType("Check up")
-            .date(null)
+            .date( null)
+            .billStatus(BillStatus.PAID)
             .build();
 
     private final BillResponseDTO billResponseDTO2 = BillResponseDTO.builder()
@@ -79,6 +83,7 @@ class BillServiceClientIntegrationTest {
             .vetId("2")
             .visitType("Check up")
             .date(null)
+            .billStatus(BillStatus.UNPAID)
             .build();
 
     private final BillResponseDTO billResponseDTO3 = BillResponseDTO.builder()
@@ -88,6 +93,8 @@ class BillServiceClientIntegrationTest {
             .vetId("3")
             .visitType("Check up")
             .date(null)
+            .billStatus(BillStatus.OVERDUE)
+
             .build();
 
     @Test
@@ -130,6 +137,7 @@ class BillServiceClientIntegrationTest {
                 .vetId("15")
                 .customerId("2")
                 .date(null)
+                .billStatus(BillStatus.PAID)
                 .amount(100)
                 .visitType("Check")
                 .build();
@@ -151,6 +159,7 @@ class BillServiceClientIntegrationTest {
                 .vetId("15")
                 .customerId("2")
                 .date(null)
+                .billStatus(BillStatus.UNPAID)
                 .amount(100)
                 .visitType("Check")
                 .build();
@@ -174,6 +183,7 @@ class BillServiceClientIntegrationTest {
                 .vetId("15")
                 .customerId("2")
                 .date(null)
+                .billStatus(BillStatus.UNPAID)
                 .amount(100)
                 .visitType("Check")
                 .build();
@@ -197,6 +207,7 @@ class BillServiceClientIntegrationTest {
         billRequest.setVetId("1");
         billRequest.setCustomerId("1");
         billRequest.setDate(null);
+        billRequest.setBillStatus(BillStatus.PAID);
         billRequest.setAmount(100.0);
         billRequest.setVisitType("Check up");
 
@@ -259,6 +270,7 @@ class BillServiceClientIntegrationTest {
                 .visitType("New Visit Type")
                 .vetId("New Vet ID")
                 .date(null)
+                .billStatus(BillStatus.UNPAID)
                 .amount(200.0)
                 .build();
 
@@ -269,6 +281,7 @@ class BillServiceClientIntegrationTest {
                 .visitType("New Visit Type")
                 .vetId("New Vet ID")
                 .date(null)
+                .billStatus(BillStatus.PAID)
                 .amount(200.0)
                 .build();
 

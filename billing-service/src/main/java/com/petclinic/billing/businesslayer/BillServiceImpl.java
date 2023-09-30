@@ -25,6 +25,12 @@ public class BillServiceImpl implements BillService{
     }
 
     @Override
+    public Flux<BillResponseDTO> GetAllBillsByStatus(BillStatus status) {
+        return billRepository.findAllBillsByBillStatus(status).map(EntityDtoUtil::toBillResponseDto);
+    }
+
+
+    @Override
     public Flux<BillResponseDTO> GetAllBills() {
 
         return billRepository.findAll().map(EntityDtoUtil::toBillResponseDto);

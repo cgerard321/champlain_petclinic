@@ -25,6 +25,7 @@
             <td>Vet Name</td>
             <td>Visit Type</td>
             <td>Amount</td>
+            <td>Status</td>
             <td>Date</td>
             <td>Details</td>
             <td>Delete</td>
@@ -45,6 +46,7 @@
     <td>{{ getVetDetails(bill.vetId) }}</td>
         <td>{{bill.visitType}}</td>
         <td>{{bill.amount}}</td>
+        <td>{{bill.billStatus}}</td>
         <td>{{bill.date}}</td>
         <td><a href="http://localhost:8080/#!/bills/details/{{bill.billId}}/owner/{{bill.customerId}}">Get Details</a></td>
         <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteBill(bill.billId)">Delete Bill</a></td>

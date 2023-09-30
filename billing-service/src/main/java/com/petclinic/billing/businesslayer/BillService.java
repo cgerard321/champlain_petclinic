@@ -4,6 +4,7 @@ package com.petclinic.billing.businesslayer;
 import com.petclinic.billing.datalayer.BillDTO;
 import com.petclinic.billing.datalayer.BillRequestDTO;
 import com.petclinic.billing.datalayer.BillResponseDTO;
+import com.petclinic.billing.datalayer.BillStatus;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import reactor.core.publisher.Flux;
@@ -11,6 +12,9 @@ import reactor.core.publisher.Mono;
 
 public interface BillService {
     Mono<BillResponseDTO> getBillByBillId(String billId);
+
+    Flux<BillResponseDTO> GetAllBillsByStatus(BillStatus status);
+
 
     Flux<BillResponseDTO> GetAllBills();
 
