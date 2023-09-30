@@ -15,6 +15,8 @@ const petClinicApp = angular.module('petClinicApp', [
     , 'verification' , 'adminPanel','resetPwdForm','forgotPwdForm']);
 
 
+
+
 petClinicApp.factory("authProvider", ["$window", function ($window) {
 
     return {
@@ -142,3 +144,5 @@ petClinicApp.config(['$stateProvider', '$urlRouterProvider', '$locationProvider'
         controller,
     });
 });
+
+
