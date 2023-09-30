@@ -12,6 +12,7 @@ import com.petclinic.bffapigateway.dtos.Inventory.*;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.ProductResponseDTO;
+import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
 import com.petclinic.bffapigateway.dtos.Vets.*;
@@ -126,7 +127,7 @@ class ApiGatewayControllerTest {
                 .uri("/api/gateway/vets/" + VET_ID + "/ratings/{ratingsId}", ratingResponseDTO.getRatingId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk();
+                .expectStatus().isNoContent();
 
         Mockito.verify(vetsServiceClient, times(1))
                 .deleteRating(VET_ID, ratingResponseDTO.getRatingId());
@@ -221,15 +222,15 @@ class ApiGatewayControllerTest {
                 .rateDescription("The vet was decent but lacked table manners.")
                 .rateDate("16/09/2023")
                 .build();
-        when(vetsServiceClient.addRatingToVet(VET_ID, Mono.just(ratingRequestDTO)))
+        when(vetsServiceClient.addRatingToVet(anyString(), any(Mono.class)))
                 .thenReturn(Mono.just(ratingResponseDTO));
 
         client.post()
-                .uri("/api/gateway/vets/{vetId}/ratings", ratingRequestDTO.getVetId())
+                .uri("/api/gateway/vets/{vetId}/ratings", VET_ID)
                 .bodyValue(ratingRequestDTO)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
     }
@@ -422,7 +423,7 @@ class ApiGatewayControllerTest {
     @Test
     void createVet() {
         Mono<VetDTO> dto = Mono.just(vetDTO);
-        when(vetsServiceClient.createVet(dto))
+        when(vetsServiceClient.createVet(any(Mono.class)))
                 .thenReturn(dto);
 
         client
@@ -431,7 +432,7 @@ class ApiGatewayControllerTest {
                 .body(dto, VetDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
 
@@ -476,7 +477,7 @@ class ApiGatewayControllerTest {
                 .uri("/api/gateway/vets/" + VET_ID)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk();
+                .expectStatus().isNoContent();
 
         Mockito.verify(vetsServiceClient, times(1))
                 .deleteVet(VET_ID);
@@ -595,32 +596,62 @@ class ApiGatewayControllerTest {
 //        assertEquals(user.getId(), 1);
 //    }
 //
-//    @Test
-//    void createUser(){
-//        UserDetails user = new UserDetails();
-//        user.setId(1);
-//        user.setUsername("Johnny123");
-//        user.setPassword("password");
-//        user.setEmail("email@email.com");
-//        when(authServiceClient.createUser(argThat(
-//                n -> user.getEmail().equals(n.getEmail())
-//        ))).thenReturn(Mono.just(user));
-//
-//        client.post()
-//                .uri("/api/gateway/users")
-//                .body(Mono.just(user), UserDetails.class)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .exchange()
-//                .expectStatus().isOk()
-//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-//                .expectBody();
-//
-//        assertEquals(user.getId(), 1);
-//        assertEquals(user.getUsername(), "Johnny123");
-//        assertEquals(user.getPassword(), "password");
-//        assertEquals(user.getEmail(), "email@email.com");
-//
-//    }
+    @Test
+    void createUser(){
+        String uuid = UUID.randomUUID().toString();
+        OwnerRequestDTO owner = OwnerRequestDTO
+                .builder()
+                .ownerId(uuid)
+                .firstName("John")
+                .lastName("Johnny")
+                .address("111 John St")
+                .city("Johnston")
+                .telephone("51451545144")
+                .build();
+
+
+        OwnerResponseDTO owner_response = OwnerResponseDTO
+                .builder()
+                .ownerId(uuid)
+                .firstName("John")
+                .lastName("Johnny")
+                .address("111 John St")
+                .city("Johnston")
+                .telephone("51451545144")
+                .build();
+
+
+
+        when(authServiceClient.createUser(any(Register.class)))
+                .thenReturn(Mono.just(owner_response));
+
+        Register register = Register.builder()
+                .username("Johnny123")
+                .password("Password22##")
+                .email("email@email.com")
+                .owner(owner)
+                .build();
+
+        client.post()
+                .uri("/api/gateway/users")
+                .body(Mono.just(register), UserDetails.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(OwnerResponseDTO.class)
+                .value(dto->{
+                    assertNotNull(dto.getOwnerId());
+                    assertEquals(dto.getFirstName(),owner.getFirstName());
+                    assertEquals(dto.getLastName(),owner.getLastName());
+                    assertEquals(dto.getAddress(),owner.getAddress());
+                    assertEquals(dto.getCity(),owner.getCity());
+                    assertEquals(dto.getTelephone(),owner.getTelephone());
+                });
+
+
+
+    }
     /*@Test
     void getOwnerDetails_withAvailableVisitsService() {
         OwnerResponseDTO owner = new OwnerResponseDTO();
@@ -677,32 +708,6 @@ class ApiGatewayControllerTest {
 //        assertEquals(user.getId(), 1);
 //    }
 //
-//    @Test
-//    void createUser(){
-//        UserDetails user = new UserDetails();
-//        user.setId(1);
-//        user.setUsername("Johnny123");
-//        user.setPassword("password");
-//        user.setEmail("email@email.com");
-//        when(authServiceClient.createUser(argThat(
-//                n -> user.getEmail().equals(n.getEmail())
-//        ))).thenReturn(Mono.just(user));
-//
-//        client.post()
-//                .uri("/api/gateway/users")
-//                .body(Mono.just(user), UserDetails.class)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .exchange()
-//                .expectStatus().isOk()
-//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-//                .expectBody();
-//
-//        assertEquals(user.getId(), 1);
-//        assertEquals(user.getUsername(), "Johnny123");
-//        assertEquals(user.getPassword(), "password");
-//        assertEquals(user.getEmail(), "email@email.com");
-//
-//    }
 
     @Test
     void getAllOwners_shouldSucceed(){
@@ -767,37 +772,37 @@ class ApiGatewayControllerTest {
 
 
 
-    @Test
-    void createOwner(){
-        OwnerResponseDTO owner = new OwnerResponseDTO();
-        owner.setOwnerId("ownerId-123");
-        owner.setFirstName("John");
-        owner.setLastName("Johnny");
-        owner.setAddress("111 John St");
-        owner.setCity("Johnston");
-        owner.setTelephone("51451545144");
-        when(customersServiceClient.createOwner(owner))
-                .thenReturn(Mono.just(owner));
-
-
-        client.post()
-                .uri("/api/gateway/owners")
-                .body(Mono.just(owner), OwnerResponseDTO.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody();
-
-
-
-        assertEquals(owner.getOwnerId(),owner.getOwnerId());
-        assertEquals(owner.getFirstName(),"John");
-        assertEquals(owner.getLastName(),"Johnny");
-        assertEquals(owner.getAddress(),"111 John St");
-        assertEquals(owner.getCity(),"Johnston");
-        assertEquals(owner.getTelephone(),"51451545144");
-    }
+//    @Test
+//    void createOwner(){
+//        OwnerResponseDTO owner = new OwnerResponseDTO();
+//        owner.setOwnerId("ownerId-123");
+//        owner.setFirstName("John");
+//        owner.setLastName("Johnny");
+//        owner.setAddress("111 John St");
+//        owner.setCity("Johnston");
+//        owner.setTelephone("51451545144");
+//        when(customersServiceClient.createOwner(owner))
+//                .thenReturn(Mono.just(owner));
+//
+//
+//        client.post()
+//                .uri("/api/gateway/owners")
+//                .body(Mono.just(owner), OwnerResponseDTO.class)
+//                .accept(MediaType.APPLICATION_JSON)
+//                .exchange()
+//                .expectStatus().isOk()
+//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+//                .expectBody();
+//
+//
+//
+//        assertEquals(owner.getOwnerId(),owner.getOwnerId());
+//        assertEquals(owner.getFirstName(),"John");
+//        assertEquals(owner.getLastName(),"Johnny");
+//        assertEquals(owner.getAddress(),"111 John St");
+//        assertEquals(owner.getCity(),"Johnston");
+//        assertEquals(owner.getTelephone(),"51451545144");
+//    }
 
 
 
@@ -819,6 +824,7 @@ class ApiGatewayControllerTest {
         pet.setName("Fluffy");
         pet.setBirthDate("2000-01-01");
         pet.setType(type);
+        pet.setIsActive("true");
 
         when(customersServiceClient.createPet(pet,od.getOwnerId()))
 
@@ -837,7 +843,8 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.petId").isEqualTo(pet.getPetId())
                 .jsonPath("$.name").isEqualTo(pet.getName())
                 .jsonPath("$.birthDate").isEqualTo(pet.getBirthDate())
-                .jsonPath("$.type").isEqualTo(pet.getType());
+                .jsonPath("$.type").isEqualTo(pet.getType())
+                .jsonPath("$.isActive").isEqualTo(pet.getIsActive());
 
     }
 
@@ -852,6 +859,7 @@ class ApiGatewayControllerTest {
         pet.setName("Fluffy");
         pet.setBirthDate("2000-01-01");
         pet.setType(type);
+        pet.setIsActive("true");
 
         when(customersServiceClient.updatePet(any(PetResponseDTO.class), any(String.class)))
                 .thenReturn(Mono.just(pet));
@@ -867,8 +875,35 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.petId").isEqualTo(pet.getPetId())
                 .jsonPath("$.name").isEqualTo(pet.getName())
                 .jsonPath("$.birthDate").isEqualTo(pet.getBirthDate())
-                .jsonPath("$.type").isEqualTo(pet.getType());
+                .jsonPath("$.type").isEqualTo(pet.getType())
+                .jsonPath("$.isActive").isEqualTo(pet.getIsActive());
     }
+
+    @Test
+    void shouldPatchPet() {
+        PetRequestDTO petRequest = new PetRequestDTO();
+        petRequest.setIsActive("false");
+
+        PetResponseDTO petResponse = new PetResponseDTO();
+        petResponse.setPetId("30");
+        petResponse.setIsActive("false");
+
+        when(customersServiceClient.patchPet(any(PetRequestDTO.class), any(String.class)))
+                .thenReturn(Mono.just(petResponse));
+
+        client.patch()
+                .uri("/api/gateway/pet/{petId}", petResponse.getPetId())
+                .body(fromValue(petRequest))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.petId").isEqualTo(petResponse.getPetId())
+                .jsonPath("$.isActive").isEqualTo(petResponse.getIsActive());
+    }
+
+
 
 
     //
@@ -1057,6 +1092,7 @@ class ApiGatewayControllerTest {
         pet.setName("Fluffy");
         pet.setBirthDate("2000-01-01");
         pet.setType(type);
+        pet.setIsActive("true");
 
         when(customersServiceClient.createPet(pet,od.getOwnerId()))
                 .thenReturn(Mono.just(pet));
@@ -1122,6 +1158,7 @@ class ApiGatewayControllerTest {
         pet.setName("Fluffy");
         pet.setBirthDate("2000-01-01");
         pet.setType(type);
+        pet.setIsActive("true");
 
         when(customersServiceClient.createPet(pet,od.getOwnerId()))
 
@@ -1156,6 +1193,7 @@ class ApiGatewayControllerTest {
         pet.setName("Fluffy");
         pet.setBirthDate("2000-01-01");
         pet.setType(type);
+        pet.setIsActive("true");
 
         when(customersServiceClient.createPet(pet,od.getOwnerId()))
                 .thenReturn(Mono.just(pet));
@@ -1586,7 +1624,7 @@ class ApiGatewayControllerTest {
     void shouldUpdateAVisitsById() {
         // Create instances of VisitRequestDTO and VisitResponseDTO for creating a visit
         VisitRequestDTO visitRequestDTO = VisitRequestDTO.builder()
-                .visitDate(LocalDateTime.parse("2021-12-12T14:00:00"))
+                .visitDate(LocalDateTime.parse("2024-11-25 14:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("Charle's Richard cat has a paw infection.")
                 .petId("1")
                 .practitionerId("1")
@@ -1595,7 +1633,7 @@ class ApiGatewayControllerTest {
 
         VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
                 .visitId(UUID.randomUUID().toString())
-                .visitDate(LocalDateTime.parse("2021-12-12T14:00:00"))
+                .visitDate(LocalDateTime.parse("2024-11-25 14:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("Charle's Richard cat has a paw infection.")
                 .petId("1")
                 .practitionerId("1")
@@ -1620,14 +1658,14 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$.visitId").isEqualTo(visitResponseDTO.getVisitId())
                 .jsonPath("$.petId").isEqualTo("1")
-                .jsonPath("$.visitDate").isEqualTo("2021-12-12T14:00:00")
+                .jsonPath("$.visitDate").isEqualTo("2024-11-25 14:45")
                 .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$.status").isEqualTo(false)
                 .jsonPath("$.practitionerId").isEqualTo("1");
 
         // Create an instance of VisitDetails for updating
         VisitDetails visitDetailsToUpdate = VisitDetails.builder()
-                .visitDate(LocalDateTime.parse("2021-12-12T14:00:00"))
+                .visitDate(LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("Charle's Richard dog has a paw infection.")
                 .petId("2")
                 .practitionerId(2)
@@ -1653,8 +1691,8 @@ class ApiGatewayControllerTest {
     }
     @Test
     void shouldGetAllVisits() {
-        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25T13:45:00"), "this is a dummy description", "2", "2", true);
-        VisitResponseDTO visitResponseDTO2 = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25T13:45:00"), "this is a dummy description", "2", "2", true);
+        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", true);
+        VisitResponseDTO visitResponseDTO2 = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", true);
         when(visitsServiceClient.getAllVisits()).thenReturn(Flux.just(visitResponseDTO,visitResponseDTO2));
 
         client.get()
@@ -1672,7 +1710,7 @@ class ApiGatewayControllerTest {
         VisitDetails visit = new VisitDetails();
         visit.setVisitId(UUID.randomUUID().toString());
         visit.setPetId("1");
-        visit.setVisitDate(LocalDateTime.parse("2021-12-12T14:00:00"));
+        visit.setVisitDate(LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
         visit.setDescription("Charle's Richard cat has a paw infection.");
         visit.setStatus(false);
         visit.setPractitionerId(1);
@@ -1687,7 +1725,7 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$[0].visitId").isEqualTo(visit.getVisitId())
                 .jsonPath("$[0].petId").isEqualTo("1")
-                .jsonPath("$[0].visitDate").isEqualTo("2021-12-12T14:00:00")
+                .jsonPath("$[0].visitDate").isEqualTo("2022-11-25 13:45")
                 .jsonPath("$[0].description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$[0].practitionerId").isEqualTo(1);
     }
@@ -1697,7 +1735,7 @@ class ApiGatewayControllerTest {
         VisitDetails visit = new VisitDetails();
         visit.setVisitId(UUID.randomUUID().toString());
         visit.setPetId("1");
-        visit.setVisitDate(LocalDateTime.parse("2021-12-12T14:00:00"));
+        visit.setVisitDate(LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
         visit.setDescription("Charle's Richard cat has a paw infection.");
         visit.setStatus(false);
         visit.setPractitionerId(1);
@@ -1712,7 +1750,7 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$[0].visitId").isEqualTo(visit.getVisitId())
                 .jsonPath("$[0].petId").isEqualTo("1")
-                .jsonPath("$[0].visitDate").isEqualTo("2021-12-12T14:00:00")
+                .jsonPath("$[0].visitDate").isEqualTo("2022-11-25 13:45")
                 .jsonPath("$[0].description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$[0].practitionerId").isEqualTo(1);
     }
@@ -1745,7 +1783,7 @@ class ApiGatewayControllerTest {
 
     @Test
     void getSingleVisit_Valid() {
-        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25T13:45:00"), "this is a dummy description", "2", "2", true);
+        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", true);
         when(visitsServiceClient.getVisitByVisitId(anyString())).thenReturn(Mono.just(visitResponseDTO));
 
         client.get()
@@ -1755,7 +1793,7 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$.visitId").isEqualTo(visitResponseDTO.getVisitId())
                 .jsonPath("$.petId").isEqualTo(visitResponseDTO.getPetId())
-                .jsonPath("$.visitDate").isEqualTo("2022-11-25T13:45:00")
+                .jsonPath("$.visitDate").isEqualTo("2022-11-25 13:45")
                 .jsonPath("$.description").isEqualTo(visitResponseDTO.getDescription())
                 .jsonPath("$.practitionerId").isEqualTo(visitResponseDTO.getPractitionerId());
     }
@@ -1785,13 +1823,13 @@ class ApiGatewayControllerTest {
         VisitDetails visit2 = new VisitDetails();
         visit1.setVisitId(UUID.randomUUID().toString());
         visit1.setPetId("21");
-        visit1.setVisitDate(LocalDateTime.parse("2021-12-07T14:00:00"));
+        visit1.setVisitDate(LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
         visit1.setDescription("John Smith's cat has a paw infection.");
         visit1.setStatus(false);
         visit1.setPractitionerId(2);
         visit2.setVisitId(UUID.randomUUID().toString());
         visit2.setPetId("21");
-        visit2.setVisitDate(LocalDateTime.parse("2021-12-08T15:00:00"));
+        visit2.setVisitDate(LocalDateTime.parse("2022-11-25 14:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
         visit2.setDescription("John Smith's dog has a paw infection.");
         visit2.setStatus(false);
         visit2.setPractitionerId(2);
@@ -1812,13 +1850,13 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$[0].visitId").isEqualTo(visit1.getVisitId())
                 .jsonPath("$[0].petId").isEqualTo("21")
-                .jsonPath("$[0].visitDate").isEqualTo("2021-12-07T14:00:00")
+                .jsonPath("$[0].visitDate").isEqualTo("2022-11-25 13:45")
                 .jsonPath("$[0].description").isEqualTo("John Smith's cat has a paw infection.")
                 .jsonPath("$[0].status").isEqualTo(false)
                 .jsonPath("$[0].practitionerId").isEqualTo(2)
                 .jsonPath("$[1].visitId").isEqualTo(visit2.getVisitId())
                 .jsonPath("$[1].petId").isEqualTo("21")
-                .jsonPath("$[1].visitDate").isEqualTo("2021-12-08T15:00:00")
+                .jsonPath("$[1].visitDate").isEqualTo("2022-11-25 14:45")
                 .jsonPath("$[1].description").isEqualTo("John Smith's dog has a paw infection.")
                 .jsonPath("$[1].status").isEqualTo(false)
                 .jsonPath("$[1].practitionerId").isEqualTo(2);
@@ -1850,13 +1888,13 @@ class ApiGatewayControllerTest {
         VisitDetails visit2 = new VisitDetails();
         visit1.setVisitId(UUID.randomUUID().toString());
         visit1.setPetId("21");
-        visit1.setVisitDate(LocalDateTime.parse("2021-12-07T14:00:00"));
+        visit1.setVisitDate(LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
         visit1.setDescription("John Smith's cat has a paw infection.");
         visit1.setStatus(true);
         visit1.setPractitionerId(2);
         visit2.setVisitId(UUID.randomUUID().toString());
         visit2.setPetId("21");
-        visit2.setVisitDate(LocalDateTime.parse("2021-12-08T15:00"));
+        visit2.setVisitDate(LocalDateTime.parse("2022-11-25 14:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
         visit2.setDescription("John Smith's dog has a paw infection.");
         visit2.setStatus(true);
         visit2.setPractitionerId(2);
@@ -1877,13 +1915,13 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$[0].visitId").isEqualTo(visit1.getVisitId())
                 .jsonPath("$[0].petId").isEqualTo(21)
-                .jsonPath("$[0].visitDate").isEqualTo("2021-12-07T14:00:00")
+                .jsonPath("$[0].visitDate").isEqualTo("2022-11-25 13:45")
                 .jsonPath("$[0].description").isEqualTo("John Smith's cat has a paw infection.")
                 .jsonPath("$[0].status").isEqualTo(true)
                 .jsonPath("$[0].practitionerId").isEqualTo(2)
                 .jsonPath("$[1].visitId").isEqualTo(visit2.getVisitId())
                 .jsonPath("$[1].petId").isEqualTo(21)
-                .jsonPath("$[1].visitDate").isEqualTo("2021-12-08T15:00:00")
+                .jsonPath("$[1].visitDate").isEqualTo("2022-11-25 14:45")
                 .jsonPath("$[1].description").isEqualTo("John Smith's dog has a paw infection.")
                 .jsonPath("$[1].status").isEqualTo(true)
                 .jsonPath("$[1].practitionerId").isEqualTo(2);
@@ -1973,6 +2011,21 @@ class ApiGatewayControllerTest {
         Mockito.verify(visitsServiceClient, times(1))
                 .deleteVisitByVisitId(invalidId);
     }
+
+    private VisitResponseDTO buildVisitResponseDTO(){
+        return VisitResponseDTO.builder()
+                .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
+                .visitDate(LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .description("this is a dummy description")
+                .petId("2")
+                .practitionerId(UUID.randomUUID().toString())
+                .status(true)
+                .build();
+    }
+    /**
+     * End of Visits Methods
+     * **/
+
 
 
 
@@ -2405,19 +2458,6 @@ void deleteAllInventory_shouldSucceed() {
                 .build();
     }
 
-    private VisitResponseDTO buildVisitResponseDTO(){
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
-        String visitId = UUID.randomUUID().toString();
-        return VisitResponseDTO.builder()
-                .visitId(visitId)
-                .visitDate(LocalDateTime.parse("2023-01-21T21:00:00", dtf))
-                .description("delete this desc")
-                .petId("2")
-                .practitionerId("2")
-                .status(true)
-                .build();
-        }
-
     @Test
     void sendForgottenEmail_ShouldSucceed(){
         final UserEmailRequestDTO dto = UserEmailRequestDTO.builder()
@@ -2492,10 +2532,23 @@ void deleteAllInventory_shouldSucceed() {
     @Test
     void createUser_withValidModel_shouldSucceed() {
         // Define a valid Register model here
+        OwnerRequestDTO ownerRequestDTO = OwnerRequestDTO.builder()
+                .ownerId("1")
+                .firstName("Ric")
+                .lastName("Danon")
+                .build();
+
+        OwnerResponseDTO ownerResponseDTO = OwnerResponseDTO.builder()
+                .ownerId("1")
+                .firstName("Ric")
+                .lastName("Danon")
+                .build();
+
         Register validUser = Register.builder()
                 .email("richard200danon@gmail.com")
                 .password("pwd%jfjfjDkkkk8")
                 .username("Ric")
+                .owner(ownerRequestDTO)
                 .build();
 
         UserPasswordLessDTO userLess = UserPasswordLessDTO.builder()
@@ -2503,8 +2556,9 @@ void deleteAllInventory_shouldSucceed() {
                 .email(validUser.getEmail())
                 .build();
 
+
         when(authServiceClient.createUser(any()))
-                .thenReturn(Mono.just(userLess));
+                .thenReturn(Mono.just(ownerResponseDTO));
 
         client.post()
                 .uri("/api/gateway/users")
@@ -2513,11 +2567,12 @@ void deleteAllInventory_shouldSucceed() {
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(UserPasswordLessDTO.class)
+                .expectBody(OwnerResponseDTO.class)
                 .value(dto ->{
                     assertNotNull(dto);
-                    assertEquals(validUser.getUsername(),dto.getUsername());
-                    assertEquals(validUser.getEmail(),dto.getEmail());
+                    assertEquals(ownerRequestDTO.getFirstName(),dto.getFirstName());
+                    assertEquals(ownerRequestDTO.getLastName(),dto.getLastName());
+                    assertEquals(ownerRequestDTO.getOwnerId(),dto.getOwnerId());
                 });
     }
 

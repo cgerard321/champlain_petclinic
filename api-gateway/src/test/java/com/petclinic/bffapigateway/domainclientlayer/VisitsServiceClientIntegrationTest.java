@@ -31,6 +31,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.time.LocalDateTime;
 
 import java.io.IOException;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.UUID;
@@ -70,8 +71,8 @@ class VisitsServiceClientIntegrationTest {
 
     @Test
     void getAllVisits() throws JsonProcessingException {
-        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25T13:45:00"), "this is a dummy description", "2", "2", true);
-        VisitResponseDTO visitResponseDTO2 = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25T13:45:00"), "this is a dummy description", "2", "2", true);
+        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", true);
+        VisitResponseDTO visitResponseDTO2 = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", true);
         server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setBody(objectMapper.writeValueAsString(Arrays.asList(visitResponseDTO, visitResponseDTO2))).addHeader("Content-Type", "application/json"));
 
@@ -86,7 +87,7 @@ class VisitsServiceClientIntegrationTest {
     void createVisitForPet_Valid() throws JsonProcessingException {
         // Arrange
         VisitRequestDTO visitRequestDTO = new VisitRequestDTO(
-                LocalDateTime.now(),
+                LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
                 "Test Visit",
                 "1",
                 "2"
@@ -95,7 +96,7 @@ class VisitsServiceClientIntegrationTest {
         // Mock the server response
         VisitResponseDTO visitResponseDTO = new VisitResponseDTO(
                 "73b5c112-5703-4fb7-b7bc-ac8186811ae1",
-                LocalDateTime.now(),
+                LocalDateTime.parse("2024-11-25 14:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
                 "Test Visit",
                 "1",
                 "2",
@@ -149,7 +150,7 @@ class VisitsServiceClientIntegrationTest {
                 .visitId(UUID.randomUUID().toString())
                 .petId("15")
                 .practitionerId(2)
-                .visitDate(LocalDateTime.parse("2021-12-12T13:00:00"))
+                .visitDate(LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("Cat is crazy")
                 .status(false)
                 .build();
@@ -199,7 +200,7 @@ class VisitsServiceClientIntegrationTest {
                 .visitId(UUID.randomUUID().toString())
                 .petId("15")
                 .practitionerId(2)
-                .visitDate(LocalDateTime.parse("2021-12-12T13:00:00"))
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("Cat is crazy")
                 .status(false)
                 .build();
@@ -207,7 +208,7 @@ class VisitsServiceClientIntegrationTest {
                 .visitId(UUID.randomUUID().toString())
                 .petId("201")
                 .practitionerId(22)
-                .visitDate(LocalDateTime.parse("2021-12-12T13:00:00"))
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("Dog is sick")
                 .status(false)
                 .build();
@@ -359,7 +360,7 @@ class VisitsServiceClientIntegrationTest {
 
     @Test
     void getVisitById() throws Exception {
-        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee", LocalDateTime.parse("2022-11-25T13:45:00"), "this is a dummy description", "2", "2", true);        server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee", LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", true);        server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setBody(objectMapper.writeValueAsString(visitResponseDTO)).addHeader("Content-Type", "application/json"));
 
         Mono<VisitResponseDTO> visitResponseDTOMono = visitsServiceClient.getVisitByVisitId("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee");

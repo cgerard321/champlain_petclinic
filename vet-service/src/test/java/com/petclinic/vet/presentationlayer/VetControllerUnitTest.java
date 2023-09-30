@@ -83,7 +83,7 @@ class VetControllerUnitTest {
                 .uri("/vets/" + vetId + "/ratings/{ratingId}", ratingId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk();
+                .expectStatus().isNoContent();
 
         Mockito.verify(ratingService, times(1))
                 .deleteRatingByRatingId(vetId,ratingId);
@@ -99,7 +99,7 @@ class VetControllerUnitTest {
                         .build();
         RatingResponseDTO rating = buildRatingResponseDTO(ratingRequestDTO.getRateDescription(), ratingRequestDTO.getRateScore());
 
-        when(ratingService.addRatingToVet(VET_ID, Mono.just(ratingRequestDTO)))
+        when(ratingService.addRatingToVet(anyString(), any(Mono.class)))
                 .thenReturn(Mono.just(rating));
 
         client.post()
@@ -107,7 +107,7 @@ class VetControllerUnitTest {
                 .bodyValue(ratingRequestDTO)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
 
@@ -332,7 +332,7 @@ class VetControllerUnitTest {
     @Test
     void createVet() {
         Mono<VetDTO> dto = Mono.just(vetDTO);
-        when(vetService.insertVet(dto))
+        when(vetService.insertVet(any(Mono.class)))
                 .thenReturn(dto);
 
         client
@@ -341,7 +341,7 @@ class VetControllerUnitTest {
                 .body(dto, Vet.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
 
@@ -412,7 +412,7 @@ class VetControllerUnitTest {
                 .uri("/vets/" + VET_ID)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk();
+                .expectStatus().isNoContent();
 
         Mockito.verify(vetService, times(1))
                 .deleteVetByVetId(VET_ID);

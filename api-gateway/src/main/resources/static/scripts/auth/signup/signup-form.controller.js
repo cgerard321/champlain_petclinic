@@ -11,6 +11,13 @@ angular.module('signupForm')
             username: $scope.signup.username,
             password: $scope.signup.password,
             email: $scope.signup.email,
+            owner: {
+                firstName: $scope.signup.firstName,
+                lastName: $scope.signup.lastName,
+                address: $scope.signup.address,
+                city: $scope.signup.city,
+                telephone: $scope.signup.telephone
+            }
         })
             .then(() => $location.path("/login"))
             .catch(n => {

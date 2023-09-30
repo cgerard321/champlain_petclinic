@@ -5,7 +5,7 @@ angular.module('productForm')
         var self = this;
         var product = {}
         // post request to create a new product
-        self.submitProductForm = function () {
+        self.submitProductForm = function (product) {
             var data  = {
                 productName: self.product.productName,
                 productDescription: self.product.productDescription,

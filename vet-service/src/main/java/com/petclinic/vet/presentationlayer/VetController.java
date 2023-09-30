@@ -48,15 +48,18 @@ public class VetController {
     }
 
     @PostMapping("/{vetId}/ratings")
-    public Mono<RatingResponseDTO> addRatingToVet(@PathVariable String vetId, @RequestBody Mono<RatingRequestDTO> ratingRequest) {
-        return ratingService.addRatingToVet(vetId, ratingRequest);
+    public Mono<ResponseEntity<RatingResponseDTO>> addRatingToVet(@PathVariable String vetId, @RequestBody Mono<RatingRequestDTO> ratingRequest) {
+        return ratingService.addRatingToVet(vetId, ratingRequest)
+                .map(r->ResponseEntity.status(HttpStatus.CREATED).body(r))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
     @DeleteMapping("{vetId}/ratings/{ratingId}")
-    public Mono<Void> deleteRatingByRatingId(@PathVariable String vetId,
+    public Mono<ResponseEntity<Void>> deleteRatingByRatingId(@PathVariable String vetId,
                                              @PathVariable String ratingId){
-        return ratingService.deleteRatingByRatingId(vetId, ratingId);
-
+        return ratingService.deleteRatingByRatingId(vetId, ratingId)
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
     @GetMapping("{vetId}/ratings/average")
     public Mono<ResponseEntity<Double>> getAverageRatingByVetId(@PathVariable String vetId){
@@ -66,7 +69,9 @@ public class VetController {
     }
 
     @PutMapping("{vetId}/ratings/{ratingId}")
-    public Mono<ResponseEntity<RatingResponseDTO>> updateRatingByVetIdAndRatingId(@PathVariable String vetId, @PathVariable String ratingId, @RequestBody Mono<RatingRequestDTO> ratingRequestDTOMono){
+    public Mono<ResponseEntity<RatingResponseDTO>> updateRatingByVetIdAndRatingId(@PathVariable String vetId,
+                                                                                  @PathVariable String ratingId,
+                                                                                  @RequestBody Mono<RatingRequestDTO> ratingRequestDTOMono){
         return ratingService.updateRatingByVetIdAndRatingId(vetId, ratingId, ratingRequestDTOMono)
                 .map(r->ResponseEntity.status(HttpStatus.OK).body(r))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
@@ -114,8 +119,10 @@ public class VetController {
     }
 
     @PostMapping
-    public Mono<VetDTO> insertVet(@RequestBody Mono<VetDTO> vetDTOMono) {
-        return vetService.insertVet(vetDTOMono);
+    public Mono<ResponseEntity<VetDTO>> insertVet(@RequestBody Mono<VetDTO> vetDTOMono) {
+        return vetService.insertVet(vetDTOMono)
+                .map(v->ResponseEntity.status(HttpStatus.CREATED).body(v))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
     @PutMapping("{vetId}")
@@ -126,8 +133,10 @@ public class VetController {
     }
 
     @DeleteMapping("{vetId}")
-    public Mono<Void> deleteVet(@PathVariable String vetId) {
-        return vetService.deleteVetByVetId(EntityDtoUtil.verifyId(vetId));
+    public Mono<ResponseEntity<Void>> deleteVet(@PathVariable String vetId) {
+        return vetService.deleteVetByVetId(EntityDtoUtil.verifyId(vetId))
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     //education

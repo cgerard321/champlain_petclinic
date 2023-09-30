@@ -3,9 +3,7 @@ package com.petclinic.bffapigateway.config;
 import com.petclinic.bffapigateway.exceptions.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.webjars.NotFoundException;
 
@@ -93,6 +91,27 @@ public class GlobalExceptionHandler {
     public ResponseEntity<HttpErrorInfo> handleBadRequestException(BadRequestException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new HttpErrorInfo(HttpStatus.BAD_REQUEST.value(),ex.getMessage()));
+    }
+
+    @ExceptionHandler(value = InventoryNotFoundException.class)
+    public ResponseEntity<HttpErrorInfo> inventoryNotFoundException(InventoryNotFoundException ex){
+        return ResponseEntity.status(ex.getHttpStatus())
+                .body(new HttpErrorInfo(ex.getHttpStatus().value(), ex.getMessage()));
+    }
+    @ExceptionHandler(value = ProductListNotFoundException.class)
+    public ResponseEntity<HttpErrorInfo> productListNotFoundException(ProductListNotFoundException ex){
+        return ResponseEntity.status(ex.getHttpStatus())
+                .body(new HttpErrorInfo(ex.getHttpStatus().value(), ex.getMessage()));
+    }
+    @ExceptionHandler(value = InvalidInputsInventoryException.class)
+    public ResponseEntity<HttpErrorInfo> invalidInputsInventoryException(InvalidInputsInventoryException ex){
+        return ResponseEntity.status(ex.getHttpStatus())
+                .body(new HttpErrorInfo(ex.getHttpStatus().value(), ex.getMessage()));
+    }
+    @ExceptionHandler(value = ForbiddenAccessException.class)
+    public ResponseEntity<HttpErrorInfo> handleForbiddenAccessException(ForbiddenAccessException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new HttpErrorInfo(HttpStatus.FORBIDDEN.value(),ex.getMessage()));
     }
 
 }
