@@ -27,7 +27,7 @@ jobs:
           distribution: 'adopt'
           cache: 'gradle'
       - name: Run Build
-        run: ./gradlew build
+        run: ./gradlew test
 
       - name: Create coverage-data directory and copy contents
         run: |
