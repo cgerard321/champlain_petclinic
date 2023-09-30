@@ -50,7 +50,7 @@ on:
 
 
 jobs:
-  build:
+  qodana:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -73,8 +73,8 @@ jobs:
 #          cp -R champlain_petclinic/gradle/build/kover/bin-reports/* champlain_petclinic/gradle/.qodana/code-coverage/
       - name: Create coverage-data directory and copy contents
         run: |
-          mkdir -p visit-service-new/gradle/.qodana/code-coverage
-          cp -R visit-service-new/build/reports/* visit-service-new/gradle/.qodana/code-coverage/
+          mkdir -p visits-service-new/gradle/.qodana/code-coverage
+          cp -R visits-service-new/build/reports/* visits-service-new/gradle/.qodana/code-coverage/
 #
       - name: Archive coverage data
         uses: actions/upload-artifact@v2
@@ -87,5 +87,5 @@ jobs:
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
         with:
-          args: "-i,visit-service-new/gradle,--linter,jetbrains/qodana-jvm:latest"
+          args: "-i,visits-service-new/gradle,--linter,jetbrains/qodana-jvm:latest"
           pr-mode: false
