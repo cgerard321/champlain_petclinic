@@ -36,6 +36,6 @@ jobs:
         uses: JetBrains/qodana-action@latest
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
-#        with:
+        with:
 #          args: "-i,gradle,--linter,jetbrains/qodana-jvm:latest"
-#          pr-mode: false
+          pr-mode: false
