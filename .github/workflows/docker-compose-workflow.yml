@@ -6,9 +6,9 @@ jobs:
     steps:
       - name: 'Create env file'
         run: |
-          cd /home/runner/work/champlain_petclinic/champlain_petclinic
-          touch mailer.env
-          echo SMTP_PASS=fakePass >> mailer.env
+          cd /home/runner/work/champlain_petclinic/champlain_petclinic |
+          touch mailer.env |
+          echo SMTP_PASS=fakePass >> mailer.env |
           cat mailer.env
       - uses: actions/checkout@v2
       - name: Build the stack
