@@ -10,7 +10,6 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.security.GeneralSecurityException;
-import java.util.Arrays;
 
 @Slf4j
 @Component
@@ -37,8 +36,19 @@ public class GlobalServletExceptionHandler implements ErrorWebExceptionHandler {
             } else if (exClass.equals(GenericHttpException.class)) {
                 GenericHttpException error = (GenericHttpException) ex;
                 status = error.getHttpStatus();
+
             } else if(exClass.equals(IllegalArgumentException.class)){
+
                 status = HttpStatus.BAD_REQUEST;
+
+            } else if(exClass.equals(BadRequestException.class)){
+                status = HttpStatus.BAD_REQUEST;
+            }
+            else if(exClass.equals(NullPointerException.class)){
+                status = HttpStatus.NOT_FOUND;
+            }
+            else if(exClass.equals(ForbiddenAccessException.class)){
+                status = HttpStatus.FORBIDDEN;
             }
             else {
                 log.error("Exception not handled: {}", exClass.getSimpleName());

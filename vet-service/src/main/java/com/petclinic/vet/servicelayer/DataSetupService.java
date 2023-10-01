@@ -20,9 +20,12 @@ public class DataSetupService implements CommandLineRunner {
 
     private final RatingRepository ratingRepository;
 
-    public DataSetupService(VetRepository vetRepository, RatingRepository ratingRepository) {
+    private final EducationRepository educationRepository;
+
+    public DataSetupService(VetRepository vetRepository, RatingRepository ratingRepository, EducationRepository educationRepository){
         this.vetRepository = vetRepository;
         this.ratingRepository = ratingRepository;
+        this.educationRepository = educationRepository;
     }
 
     @Override
@@ -159,6 +162,55 @@ public class DataSetupService implements CommandLineRunner {
                 .build();
         Flux.just(r1, r2, r3, r4)
                 .flatMap(ratingRepository::insert)
+                .log()
+                .subscribe();
+        Education e1 = Education.builder()
+                .educationId(UUID.randomUUID().toString())
+                .vetId(v1.getVetId())
+                .degree("Doctor of Veterinary Medicine")
+                .fieldOfStudy("Veterinary Medicine")
+                .schoolName("University of Montreal")
+                .startDate("2010")
+                .endDate("2014")
+                .build();
+        Education e2 = Education.builder()
+                .educationId(UUID.randomUUID().toString())
+                .vetId(v2.getVetId())
+                .degree("Doctor of Veterinary Medicine")
+                .fieldOfStudy("Veterinary Medicine")
+                .schoolName("University of Veterinary Sciences")
+                .startDate("2008")
+                .endDate("2013")
+                .build();
+        Education e3 = Education.builder()
+                .educationId(UUID.randomUUID().toString())
+                .vetId(v3.getVetId())
+                .degree("Doctor of Veterinary Medicine")
+                .fieldOfStudy("Animal Surgery")
+                .schoolName("California Veterinary College")
+                .startDate("2009")
+                .endDate("2015")
+                .build();
+        Education e4 = Education.builder()
+                .educationId(UUID.randomUUID().toString())
+                .vetId(v4.getVetId())
+                .degree("Master of Science in Veterinary Pathology")
+                .fieldOfStudy("Pathology")
+                .schoolName("Texas A&M University")
+                .startDate("2016")
+                .endDate("2018")
+                .build();
+        Education e5 = Education.builder()
+                .educationId(UUID.randomUUID().toString())
+                .vetId(v1.getVetId())
+                .degree("Bachelor of Veterinary Science")
+                .fieldOfStudy("Veterinary Genetics")
+                .schoolName("University of Sydney")
+                .startDate("2016")
+                .endDate("2018")
+                .build();
+        Flux.just(e1, e2, e3, e4, e5)
+                .flatMap(educationRepository::insert)
                 .log()
                 .subscribe();
     }

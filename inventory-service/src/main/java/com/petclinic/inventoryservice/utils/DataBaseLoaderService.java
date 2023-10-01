@@ -34,6 +34,7 @@ public class DataBaseLoaderService  implements CommandLineRunner {
                 .productPrice(100.00)
                 .inventoryId("1")
                 .productQuantity(10)
+                .productDescription("Drugs for sleep")
                 .build();
         Product product2 = Product.builder()
                 .productName("Trazodone")
@@ -41,6 +42,7 @@ public class DataBaseLoaderService  implements CommandLineRunner {
                 .productPrice(150.00)
                 .inventoryId("1")
                 .productQuantity(10)
+                .productDescription("Drugs for anxiety/stress")
                 .build();
         Flux.just(product1, product2)
                 .flatMap(productRepository::insert)

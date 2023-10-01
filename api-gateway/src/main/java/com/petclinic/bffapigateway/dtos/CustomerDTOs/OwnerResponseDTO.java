@@ -13,7 +13,6 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OwnerResponseDTO {
-
     private String ownerId;
     private String firstName;
     private String lastName;

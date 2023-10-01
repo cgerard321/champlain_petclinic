@@ -6,7 +6,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.ProviderManager;
@@ -31,22 +30,6 @@ import java.util.Arrays;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-
-    private static final String[] AUTH_WHITELIST = {
-            // -- Swagger UI v2
-            "/v2/api-docs",
-            "/swagger-resources",
-            "/swagger-resources/**",
-            "/configuration/ui",
-            "/configuration/security",
-            "/swagger-ui.html",
-            "/webjars/**",
-            // -- Swagger UI v3 (OpenAPI)
-            "/v3/api-docs/**",
-            "/swagger-ui/**"
-            // other public endpoints of your API may be appended to this array
-    };
-
 
     UserDetailsService userDetailService;
     JwtTokenFilter jwtTokenFilter;
@@ -84,9 +67,9 @@ public class SecurityConfig {
                 .anyRequest().authenticated())
                 .logout(logout -> logout
                         .logoutUrl("/api/v1/users/logout")
-                        .logoutSuccessHandler((httpServletRequest, httpServletResponse, authentication) -> {
-                            httpServletResponse.setStatus(HttpServletResponse.SC_NO_CONTENT);
-                        })
+                        .logoutSuccessHandler((httpServletRequest, httpServletResponse, authentication) ->
+                            httpServletResponse.setStatus(HttpServletResponse.SC_NO_CONTENT)
+                        )
                         .addLogoutHandler((request, response, auth) -> {
                             for (Cookie cookie : request.getCookies()) {
                                 String cookieName = cookie.getName();
@@ -111,13 +94,6 @@ public class SecurityConfig {
         return http.build();
     }
 
-//    @Bean
-//    public WebSecurityCustomizer webSecurityCustomizer() {
-//        return (web) -> web.ignoring()
-//                .requestMatchers(new AntPathRequestMatcher("/api/v1/users/login",HttpMethod.POST.toString()))
-//                .requestMatchers(new AntPathRequestMatcher("/api/v1/users",HttpMethod.POST.toString()));
-//    }
-
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -134,7 +110,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public UserDetailsService userDetailsServiceBean() throws Exception {
+    public UserDetailsService userDetailsServiceBean(){
 
         UserDetails user = User.withUsername("user")
                 .password(encoder().encode("pwd"))

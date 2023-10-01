@@ -656,8 +656,11 @@ angular.module('visits')
                 callLastSort(isForUpcomingVisitsTable);
 
                 createAlert("success", "Successfully created visit!");
-            },function () {
-                createAlert("danger", "Failed to add visit!");
+            },function(errorResponse) {
+                console.log(errorResponse);
+                const errorMessage = errorResponse.data.message || "Unknown error";
+
+                createAlert("danger", "Failed to add visit: " + errorMessage);
             });
 
             $http.post(billsUrl, billData).then(function () {
