@@ -42,8 +42,12 @@ jobs:
           path: .qodana/code-coverage
 
       - name: 'Qodana Scan'
-        uses: JetBrains/qodana-action@latest
+        uses: JetBrains/qodana-action@v2023.2
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
         with:
+#          args: "-i,"
+          args: "--linter,jetbrains/qodana-jvm:latest"
+#          args: "-i,--linter,jetbrains/qodana-jvm:latest"
+#          args: "-i,.qodana/code-coverage,--linter,jetbrains/qodana-jvm:latest"
           pr-mode: false
