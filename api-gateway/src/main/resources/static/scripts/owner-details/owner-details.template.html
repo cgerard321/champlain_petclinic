@@ -102,6 +102,15 @@
                                 <label ng-if="$ctrl.pet.isActive !== 'true'" style="color: rgba(0,0,0,0.5);">Activate Pet</label>
                             </div>
 
+                            <div class="border-5 rounded">
+                                <form action="owners/{ownerId}/pets/{petId}" method="DELETE">
+                                    <button type="submit" class="btn btn-light">Delete Pet</button>
+                                </form>
+                            </div>
+
+
+
+
 
                         </div>
 
