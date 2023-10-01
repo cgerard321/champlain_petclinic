@@ -5,24 +5,28 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
-    
+
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
       - name: 'Create env file'
         run: |
           echo "SMTP_PASS=fakepass" > mailer.env
+
       - name: Start containers
-        run: docker-compose -f "docker-compose.yml" up -d --build
+        run: |
+          docker-compose -f "docker-compose.yml" up -d --build
+          # Wait for containers to be healthy
+          while [[ $(docker-compose -f "docker-compose.yml" ps -q | wc -l) -ne $(docker-compose -f "docker-compose.yml" ps --filter "status=running" -q | wc -l) ]]; do
+            sleep 1
+          done
+
       - name: Show running containers
         run: docker ps
-      - name: Wait to see stability
-        run: sleep 20s
-      - name: Show running containers
-        run: docker ps
+
       - name: Stop containers
         if: always()
         run: docker-compose -f "docker-compose.yml" down
-      
