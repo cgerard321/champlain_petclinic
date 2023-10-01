@@ -207,6 +207,11 @@ public class BFFApiGatewayController {
         return visitsServiceClient.getVisitsForPet(petId);
     }
 
+    @GetMapping(value = "visits/status/{status}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<VisitResponseDTO> getVisitsForStatus(final @PathVariable String status){
+        return visitsServiceClient.getVisitsForStatus(status);
+    }
+
     @GetMapping(value ="visits/{visitId}")
     public Mono<VisitResponseDTO>  getVisitByVisitId(final @PathVariable String visitId){
         return visitsServiceClient.getVisitByVisitId(visitId);
@@ -237,6 +242,12 @@ public class BFFApiGatewayController {
         visit.setVisitId(visitId);
         return visitsServiceClient.updateVisitForPet(visit);
     }
+
+    @PutMapping(value = "/visits/{visitId}/status/{status}")
+    Mono<VisitResponseDTO> updateStatusForVisitByVisitId(@PathVariable String visitId, @PathVariable String status) {
+        return visitsServiceClient.updateStatusForVisitByVisitId(visitId, status);
+    }
+
     @DeleteMapping (value = "visits/{visitId}")
     public Mono<Void> deleteVisitsByVisitId(final @PathVariable String visitId){
         return visitsServiceClient.deleteVisitByVisitId(visitId);

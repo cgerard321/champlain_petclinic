@@ -42,8 +42,15 @@ class VisitRepoTest {
                     assertEquals(visit1.getPetId(), gotVisit.getPetId());
                     assertEquals(visit1.getVisitDate(), gotVisit.getVisitDate());
                     assertEquals(visit1.getPractitionerId(), gotVisit.getPractitionerId());
-                    assertEquals(visit1.isStatus(), gotVisit.isStatus());
+                    assertEquals(visit1.getStatus(), gotVisit.getStatus());
                 }).verifyComplete();
+    }
+
+    @Test
+    void findVisitsByStatus(){
+        StepVerifier.create(visitRepo.findAllByStatus(visit1.getStatus().toString()))
+                .expectNextCount(3)
+                .verifyComplete();
     }
     @Test
     void findByPetId(){
@@ -75,7 +82,7 @@ class VisitRepoTest {
                     assertEquals(visit1.getPetId(), gotVisit.getPetId());
                     assertEquals(visit1.getVisitDate(), gotVisit.getVisitDate());
                     assertEquals(visit1.getPractitionerId(), gotVisit.getPractitionerId());
-                    assertEquals(visit1.isStatus(), gotVisit.isStatus());
+                    assertEquals(visit1.getStatus(), gotVisit.getStatus());
                 }).then(this::deleteVisitByVisitId).verifyComplete();
     }
 
@@ -89,6 +96,6 @@ class VisitRepoTest {
                 .description(description)
                 .petId("2")
                 .practitionerId(vetId)
-                .status(true).build();
+                .status(Status.UPCOMING).build();
     }
 }

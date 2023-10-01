@@ -16,6 +16,7 @@ import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
 import com.petclinic.bffapigateway.dtos.Vets.*;
+import com.petclinic.bffapigateway.dtos.Visits.Status;
 import com.petclinic.bffapigateway.dtos.Visits.VisitDetails;
 import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
@@ -1628,7 +1629,7 @@ class ApiGatewayControllerTest {
                 .description("Charle's Richard cat has a paw infection.")
                 .petId("1")
                 .practitionerId("1")
-                .status(false)
+                .status(Status.UPCOMING)
                 .build();
 
         VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
@@ -1637,7 +1638,7 @@ class ApiGatewayControllerTest {
                 .description("Charle's Richard cat has a paw infection.")
                 .petId("1")
                 .practitionerId("1")
-                .status(false)
+                .status(Status.UPCOMING)
                 .build();
 
         OwnerResponseDTO owner = new OwnerResponseDTO();
@@ -1660,7 +1661,7 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.petId").isEqualTo("1")
                 .jsonPath("$.visitDate").isEqualTo("2024-11-25 14:45")
                 .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
-                .jsonPath("$.status").isEqualTo(false)
+                .jsonPath("$.status").isEqualTo(Status.UPCOMING)
                 .jsonPath("$.practitionerId").isEqualTo("1");
 
         // Create an instance of VisitDetails for updating
@@ -1669,7 +1670,7 @@ class ApiGatewayControllerTest {
                 .description("Charle's Richard dog has a paw infection.")
                 .petId("2")
                 .practitionerId(2)
-                .status(false)
+                .status(Status.UPCOMING)
                 .build();
 
         // Mock the service call for updating a visit
@@ -1689,10 +1690,41 @@ class ApiGatewayControllerTest {
         // Assert the updated visit
         assertEquals(visitsServiceClient.getVisitsForPet("1"), null);
     }
+
+    @Test
+    void updateStatusForVisitByVisitId(){
+        String status = "CANCELLED";
+        VisitResponseDTO visit = VisitResponseDTO.builder()
+                .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
+                .visitDate(LocalDateTime.parse("2022-11-25T13:45:00"))
+                .description("this is a dummy description")
+                .practitionerId("2")
+                .petId("2")
+                .status(Status.CANCELLED)
+                .build();
+        String visitId = visit.getVisitId();
+        when(visitsServiceClient.updateStatusForVisitByVisitId(anyString(), anyString()))
+                .thenReturn(Mono.just(visit));
+
+        client.put()
+                .uri("/api/gateway/visits/"+visitId+"/status/"+status)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.visitId").isEqualTo(visit.getVisitId())
+                .jsonPath("$.practitionerId").isEqualTo(visit.getPractitionerId())
+                .jsonPath("$.petId").isEqualTo(visit.getPetId())
+                .jsonPath("$.description").isEqualTo(visit.getDescription())
+                .jsonPath("$.visitDate").isEqualTo("2022-11-25T13:45:00")
+                .jsonPath("$.status").isEqualTo("CANCELLED");
+
+        Mockito.verify(visitsServiceClient, times(1))
+                .updateStatusForVisitByVisitId(anyString(), anyString());
+    }
     @Test
     void shouldGetAllVisits() {
-        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", true);
-        VisitResponseDTO visitResponseDTO2 = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", true);
+        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", Status.UPCOMING);
+        VisitResponseDTO visitResponseDTO2 = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", Status.UPCOMING);
         when(visitsServiceClient.getAllVisits()).thenReturn(Flux.just(visitResponseDTO,visitResponseDTO2));
 
         client.get()
@@ -1712,7 +1744,7 @@ class ApiGatewayControllerTest {
         visit.setPetId("1");
         visit.setVisitDate(LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
         visit.setDescription("Charle's Richard cat has a paw infection.");
-        visit.setStatus(false);
+        visit.setStatus(Status.UPCOMING);
         visit.setPractitionerId(1);
 
         when(visitsServiceClient.getVisitsForPet(visit.getPetId()))
@@ -1737,7 +1769,7 @@ class ApiGatewayControllerTest {
         visit.setPetId("1");
         visit.setVisitDate(LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
         visit.setDescription("Charle's Richard cat has a paw infection.");
-        visit.setStatus(false);
+        visit.setStatus(Status.UPCOMING);
         visit.setPractitionerId(1);
 
         when(visitsServiceClient.getVisitForPractitioner(Integer.parseInt(visit.getPetId())))
@@ -1783,7 +1815,7 @@ class ApiGatewayControllerTest {
 
     @Test
     void getSingleVisit_Valid() {
-        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", true);
+        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", Status.UPCOMING);
         when(visitsServiceClient.getVisitByVisitId(anyString())).thenReturn(Mono.just(visitResponseDTO));
 
         client.get()
@@ -1825,13 +1857,13 @@ class ApiGatewayControllerTest {
         visit1.setPetId("21");
         visit1.setVisitDate(LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
         visit1.setDescription("John Smith's cat has a paw infection.");
-        visit1.setStatus(false);
+        visit1.setStatus(Status.UPCOMING);
         visit1.setPractitionerId(2);
         visit2.setVisitId(UUID.randomUUID().toString());
         visit2.setPetId("21");
         visit2.setVisitDate(LocalDateTime.parse("2022-11-25 14:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
         visit2.setDescription("John Smith's dog has a paw infection.");
-        visit2.setStatus(false);
+        visit2.setStatus(Status.UPCOMING);
         visit2.setPractitionerId(2);
 
         List<VisitDetails> previousVisitsList = new ArrayList<>();
@@ -1890,13 +1922,13 @@ class ApiGatewayControllerTest {
         visit1.setPetId("21");
         visit1.setVisitDate(LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
         visit1.setDescription("John Smith's cat has a paw infection.");
-        visit1.setStatus(true);
+        visit1.setStatus(Status.UPCOMING);
         visit1.setPractitionerId(2);
         visit2.setVisitId(UUID.randomUUID().toString());
         visit2.setPetId("21");
         visit2.setVisitDate(LocalDateTime.parse("2022-11-25 14:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
         visit2.setDescription("John Smith's dog has a paw infection.");
-        visit2.setStatus(true);
+        visit2.setStatus(Status.UPCOMING);
         visit2.setPractitionerId(2);
 
         List<VisitDetails> scheduledVisitsList = new ArrayList<>();
@@ -2019,7 +2051,7 @@ class ApiGatewayControllerTest {
                 .description("this is a dummy description")
                 .petId("2")
                 .practitionerId(UUID.randomUUID().toString())
-                .status(true)
+                .status(Status.UPCOMING)
                 .build();
     }
     /**
