@@ -6,7 +6,13 @@ angular.module('inventoryUpdateForm')
         var inventoryId = $stateParams.inventoryId || "";
         var method = $stateParams.method;
 
-        // Other controller code...
+
+        $http.get('api/gateway/inventory/' + inventoryId).then(function (resp) {
+            self.inventory = resp.data;
+
+        });
+
+  
 
         self.submitUpdateInventoryForm = function () {
             var req;
@@ -29,16 +35,15 @@ angular.module('inventoryUpdateForm')
                     }).join("\r\n"));
                 });
             } else {
-                // Handle the case when method is not 'edit'
+
                 console.error("Invalid method:", method);
-                // You can add additional error handling or messages here
+
             }
 
-            // Move the 'else' block inside the outer 'if' block
             if (!inventoryId) {
-                // Handle the case when id is not available
+
                 console.error("Inventory ID is missing");
-                // You can add additional error handling or messages here
+
             }
         };
     }]);
