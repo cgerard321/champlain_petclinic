@@ -278,12 +278,12 @@ public class BFFApiGatewayController {
      * Start of Vet Methods
      **/
 
-    @GetMapping(value = "vets", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "vets")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VetDTO> getAllVets() {
         return vetsServiceClient.getVets();
     }
 
-    @GetMapping(value = "vets/{vetId}/ratings", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "vets/{vetId}/ratings")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<RatingResponseDTO> getRatingsByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getRatingsByVetId(VetsEntityDtoUtil.verifyId(vetId));
     }
@@ -332,7 +332,7 @@ public class BFFApiGatewayController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-    @GetMapping(value = "vets/{vetId}/educations", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "vets/{vetId}/educations")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<EducationResponseDTO> getEducationsByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getEducationsByVetId(VetsEntityDtoUtil.verifyId(vetId));
     }
@@ -357,12 +357,12 @@ public class BFFApiGatewayController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-    @GetMapping(value = "/vets/active", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "/vets/active")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VetDTO> getActiveVets() {
         return vetsServiceClient.getActiveVets();
     }
 
-    @GetMapping(value = "/vets/inactive", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "/vets/inactive")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VetDTO> getInactiveVets() {
         return vetsServiceClient.getInactiveVets();
     }
@@ -414,7 +414,7 @@ public class BFFApiGatewayController {
      * Owners Methods
      **/
 
-    @GetMapping(value = "owners", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "owners")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<OwnerResponseDTO> getAllOwners() {
         return customersServiceClient.getAllOwners();
                 /*.flatMap(n ->
@@ -534,7 +534,7 @@ public class BFFApiGatewayController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "users", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "users")//, produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<UserDetails> getAllUsers(@CookieValue("Bearer") String auth) {
         return authServiceClient.getUsers(auth);
     }
@@ -617,7 +617,7 @@ public class BFFApiGatewayController {
 
 
 
-    @GetMapping(value = "inventory/{inventoryId}/products", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "inventory/{inventoryId}/products")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndFields(@PathVariable String inventoryId,
                                                                                                  @RequestParam(required = false) String productName,
                                                                                                  @RequestParam(required = false) Double productPrice,
@@ -626,7 +626,7 @@ public class BFFApiGatewayController {
     }
 
 
-    @GetMapping(value = "inventory")
+    @GetMapping(value = "inventory")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<InventoryResponseDTO> searchInventory(@RequestParam(required = false) String inventoryName,
                                                       @RequestParam(required = false) String inventoryType,
                                                       @RequestParam(required = false) String inventoryDescription){
