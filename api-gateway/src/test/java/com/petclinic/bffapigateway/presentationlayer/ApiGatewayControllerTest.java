@@ -583,7 +583,7 @@ class ApiGatewayControllerTest {
 
 
 
-        when(authServiceClient.createUser(any(Register.class)))
+        when(authServiceClient.createUser(any()))
                 .thenReturn(Mono.just(owner_response));
 
         Register register = Register.builder()
@@ -2081,10 +2081,10 @@ class ApiGatewayControllerTest {
 
         Mono<ResponseEntity<UserPasswordLessDTO>> httpResponse = Mono.just(ResponseEntity.ok().headers(HttpHeaders.readOnlyHttpHeaders(headers)).body(userPasswordLessDTO));
 
-        when(authServiceClient.login(any(Login.class)))
+        when(authServiceClient.login(any()))
                 .thenReturn(httpResponse);
 
-        when(authServiceClient.login(any(Login.class)))
+        when(authServiceClient.login(any()))
                 .thenReturn(httpResponse);
 
 
@@ -2092,7 +2092,7 @@ class ApiGatewayControllerTest {
                 .password("valid")
                 .email(user.getEmail())
                 .build();
-        when(authServiceClient.login(login))
+        when(authServiceClient.login(any()))
                 .thenReturn(
                         httpResponse
                 );
@@ -2125,7 +2125,7 @@ class ApiGatewayControllerTest {
                 .email(user.getEmail())
                 .build();
         final String message = "I live in unending agony. I spent 6 hours and ended up with nothing";
-        when(authServiceClient.login(login))
+        when(authServiceClient.login(any()))
                 .thenThrow(new GenericHttpException(message, UNAUTHORIZED));
 
         client.post()
@@ -2486,7 +2486,9 @@ void deleteAllInventory_shouldSucceed() {
 
         ServerHttpRequest request = MockServerHttpRequest.post("http://localhost:8080").build();
 
-        when(authServiceClient.sendForgottenEmail(request,dto.getEmail()))
+
+
+        when(authServiceClient.sendForgottenEmail(Mono.just(dto)))
                 .thenReturn(Mono.just(ResponseEntity.ok().build()));
 
 
@@ -2497,7 +2499,7 @@ void deleteAllInventory_shouldSucceed() {
                 .expectStatus().isOk()
                 .expectBody();
 
-        verify(authServiceClient, times(1)).sendForgottenEmail(any(ServerHttpRequest.class),anyString());
+        verify(authServiceClient, times(1)).sendForgottenEmail(any());
     }
 
 
@@ -2509,7 +2511,7 @@ void deleteAllInventory_shouldSucceed() {
 
         ServerHttpRequest request = MockServerHttpRequest.post("http://localhost:8080").build();
 
-        when(authServiceClient.sendForgottenEmail(any(),any()))
+        when(authServiceClient.sendForgottenEmail(any()))
                 .thenThrow(new GenericHttpException("error",BAD_REQUEST));
 
 
@@ -2521,7 +2523,7 @@ void deleteAllInventory_shouldSucceed() {
                 .expectStatus().isBadRequest()
                 .expectBody();
 
-        verify(authServiceClient, times(1)).sendForgottenEmail(any(ServerHttpRequest.class),anyString());
+        verify(authServiceClient, times(1)).sendForgottenEmail(any());
         }
 
 
@@ -2533,7 +2535,7 @@ void deleteAllInventory_shouldSucceed() {
                     .build();
 
 
-            when(authServiceClient.changePassword(dto))
+            when(authServiceClient.changePassword(any()))
                     .thenReturn(Mono.just(ResponseEntity.ok().build()));
 
 
@@ -2544,7 +2546,7 @@ void deleteAllInventory_shouldSucceed() {
                     .expectStatus().isOk()
                     .expectBody();
 
-            verify(authServiceClient, times(1)).changePassword(any(UserPasswordAndTokenRequestModel.class));
+            verify(authServiceClient, times(1)).changePassword(any());
         }
 
 
