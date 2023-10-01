@@ -2,57 +2,58 @@
 <!--        * User: @JordanAlbayrak-->
 <!--        * Date: 22/09/21-->
 <!--        * Ticket: feat(AUTH-CPC-102)_signup_user-->
-<div style="display: flex; justify-content: center">
-    <div>
+<div style="display: flex; justify-content: center;">
+    <div style="width: 400px;">
         <h2 class="text-center">Signup</h2>
+
         <div class="alert alert-danger alert-dismissible text-center" role="alert" ng-repeat="error in errorMessages">
-            <a class="close" data-dismiss="alert" aria-label="close">&times;</a>
-            <strong>Danger!</strong> {{error}}
+            <a class="close" data-dismiss="alert" aria-label="close" ng-click="clearErrorMessages()">&times;</a>
+            <strong>Error:</strong> {{ error }}
         </div>
 
-        <div class="d-flex justify-content-center">
-            <form class="form-horizontal" ng-submit="$ctrl.add()" style="max-width: 25em; justify-content: center;">
-                <div class="form-group formColor">
-                    <label>First name</label>
-                        <input class="form-control col-sm-4" ng-model="signup.firstName" name="firstName" ng-disabled="$ctrl.checked" required />
-                        <span ng-show="ownerForm.firstName.$error.required" class="help-block">First name is required.</span>
-                </div>
+        <form class="form-horizontal" ng-submit="$ctrl.add()" style="max-width: 100%;">
+            <div class="form-group">
+                <label for="firstName">First Name</label>
+                <input id="firstName" class="form-control" ng-model="signup.firstName" name="firstName" ng-disabled="$ctrl.checked" required />
+                <span ng-show="ownerForm.firstName.$error.required" class="help-block">First name is required.</span>
+            </div>
 
-                <div class="form-group formColor">
-                    <label>Last name</label>
-                        <input class="form-control col-sm-4" ng-model="signup.lastName" name="lastName" ng-disabled="$ctrl.checked" required/>
-                        <span ng-show="ownerForm.lastName.$error.required" class="help-block">Last name is required.</span>
-                </div>
+            <div class="form-group">
+                <label for="lastName">Last Name</label>
+                <input id="lastName" class="form-control" ng-model="signup.lastName" name="lastName" ng-disabled="$ctrl.checked" required />
+                <span ng-show="ownerForm.lastName.$error.required" class="help-block">Last name is required.</span>
+            </div>
 
+            <div class="form-group">
+                <label for="address">Address</label>
+                <input id="address" class="form-control" ng-model="signup.address" name="address" ng-disabled="$ctrl.checked" required />
+                <span ng-show="ownerForm.address.$error.required" class="help-block">Address is required.</span>
+            </div>
 
-                <div class="form-group formColor">
-                    <label >Address</label>
-                        <input class="form-control col-sm-4" ng-model="signup.address" name="address" ng-disabled="$ctrl.checked" required/>
-                        <span ng-show="ownerForm.address.$error.required" class="help-block">Address is required.</span>
-                </div>
+            <div class="form-group">
+                <label for="city">City</label>
+                <input id="city" class="form-control" ng-model="signup.city" name="city" ng-disabled="$ctrl.checked" required />
+                <span ng-show="ownerForm.city.$error.required" class="help-block">City is required.</span>
+            </div>
 
-                <div class="form-group formColor">
-                    <label>City</label>
-                        <input class="form-control col-sm-4" ng-model="signup.city" name="city" ng-disabled="$ctrl.checked" required/>
-                        <span ng-show="ownerForm.city.$error.required" class="help-block">City is required.</span>
-                </div>
+            <div class="form-group">
+                <label for="telephone">Telephone</label>
+                <input id="telephone" class="form-control" ng-model="signup.telephone" name="telephone" ng-disabled="$ctrl.checked" required />
+                <span ng-show="ownerForm.telephone.$error.required" class="help-block">Telephone is required.</span>
+            </div>
 
-                <div class="form-group formColor">
-                    <label >Telephone</label>
-                        <input class="form-control col-sm-4" ng-model="signup.telephone" name="telephone" ng-disabled="$ctrl.checked" required/>
-                        <span ng-show="ownerForm.telephone.$error.required" class="help-block">Telephone is required.</span>
-                </div>
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input id="username" class="form-control" ng-model="signup.username" name="username" required />
+                <span ng-show="signupForm.username.$error.required" class="help-block">Username is required.</span>
+            </div>
 
-                <div class="form-group formColor">
-                    <label>Username</label>
-                    <input class="form-control" ng-model="signup.username" name="username" required/>
-                    <span ng-show="signupForm.username.$error.required" class="help-block"> Username is required.</span>
-                </div>
-
-                <div class="form-group formColor">
-                    <label>Password</label>
-                    <input class="form-control" type="password" ng-model="signup.password" name="password" required/>
-                    <i id="eye" onclick="viewPwd()" style="margin-left: 180px; margin-top: -700px; cursor: pointer" class="bi bi-eye-slash"></i>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <div class="input-group">
+                    <input id="password" class="form-control" type="password" ng-model="signup.password" name="password" required />
+                    <span class="input-group-addon" id="eye" onclick="viewPwd()" style="cursor: pointer;">
+                        <i class="bi bi-eye-slash"></i>
                     <script>
                         function viewPwd(){
                             const x = document.getElementsByName("password")[0];
@@ -63,41 +64,54 @@
                             }
                         }
                     </script>
-                    <span ng-show="signupForm.password.$error.required" class="help-block">Password is required.</span>
-
+                    </span>
                 </div>
+                <span ng-show="signupForm.password.$error.required" class="help-block">Password is required.</span>
+            </div>
 
-                <div class="form-group formColor">
-                    <label>Email</label>
-                    <input class="form-control" ng-model="signup.email" name="email" required/>
-                    <span ng-show="signupForm.email.$error.required" class="help-block">Email is required.</span>
-                </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input id="email" class="form-control" ng-model="signup.email" name="email" required />
+                <span ng-show="signupForm.email.$error.required" class="help-block">Email is required.</span>
+            </div>
 
-                <div style="padding-left: 30%">
-                    <div id="loaderDiv" class="loader m-2"></div> <!-- Center vertically -->
-                </div>
+            <div style="padding-left: 45%">
+                <div id="loaderDiv" class="loader m-2"></div>
+            </div>
 
-                <div class="form-group text-center">
-                    <button class="btn btn-default" type="submit">Submit</button>
-                </div>
-            </form>
-        </div>
+            <div class="form-group text-center">
+                <button class="btn btn-primary" type="submit">Submit</button>
+            </div>
+        </form>
+
     </div>
 </div>
 
-
 <style>
     .loader {
-        border: 16px solid #f3f3f3; /* Light grey */
-        border-top: 16px solid #005d9a; /* Blue */
+        border: 8px solid #f3f3f3; /* Light grey */
+        border-top: 8px solid #005d9a; /* Blue */
         border-radius: 50%;
-        width: 60px;
-        height: 60px;
-        animation: spin 2s linear infinite;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
     }
 
     @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
     }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    label {
+        font-weight: bold;
+    }
+
+    .help-block {
+        color: red;
+    }
 </style>
+le>
