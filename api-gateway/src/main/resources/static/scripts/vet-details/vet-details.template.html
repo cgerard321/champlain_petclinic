@@ -103,6 +103,7 @@ vet details.template.html:
                             <th>Field Of Study</th>
                             <th>Start Year</th>
                             <th>End Year</th>
+                            <th>Delete</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -112,6 +113,9 @@ vet details.template.html:
                             <td>{{ educations.fieldOfStudy }}</td>
                             <td>{{ educations.startDate }}</td>
                             <td>{{ educations.endDate }}</td>
+                               <td>
+                                <a class="btn btn-danger educationButton" href="javascript:void(0)" ng-click="deleteVetEducation(educations.educationId)">Delete Education</a>
+                            </td>
                         </tr>
                         </tbody>
                     </table>
