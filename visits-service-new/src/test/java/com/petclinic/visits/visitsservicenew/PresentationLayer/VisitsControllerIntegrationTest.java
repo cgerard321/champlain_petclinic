@@ -1,4 +1,5 @@
 package com.petclinic.visits.visitsservicenew.PresentationLayer;
+import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.*;
@@ -47,6 +48,8 @@ class VisitsControllerIntegrationTest {
     String uuidPet = UUID.randomUUID().toString();
     String uuidPhoto = UUID.randomUUID().toString();
     String uuidOwner = UUID.randomUUID().toString();
+
+    private final String STATUS = "UPCOMING";
 
     Set<SpecialtyDTO> set= new HashSet<>();
 
@@ -121,7 +124,7 @@ class VisitsControllerIntegrationTest {
                 .jsonPath("$.petId").isEqualTo(visit1.getPetId())
                 .jsonPath("$.description").isEqualTo(visit1.getDescription())
                 .jsonPath("$.visitDate").isEqualTo("2024-11-25 13:45")
-                .jsonPath("$.status").isEqualTo(visit1.isStatus());
+                .jsonPath("$.status").isEqualTo("UPCOMING");
     }
     @Test
     void getVisitByPractitionerId(){
@@ -144,7 +147,7 @@ class VisitsControllerIntegrationTest {
                     assertEquals(list.get(0).getPetId(), visit1.getPetId());
                     assertEquals(list.get(0).getDescription(), visit1.getDescription());
                     assertEquals(list.get(0).getVisitDate(), visit1.getVisitDate());
-                    assertEquals(list.get(0).isStatus(), visit1.isStatus());
+                    assertEquals(list.get(0).getStatus(), visit1.getStatus());
                 });
     }
 
@@ -168,9 +171,33 @@ class VisitsControllerIntegrationTest {
                     assertEquals(list.get(0).getPetId(), visit1.getPetId());
                     assertEquals(list.get(0).getDescription(), visit1.getDescription());
                     assertEquals(list.get(0).getVisitDate(), visit1.getVisitDate());
-                    assertEquals(list.get(0).isStatus(), visit1.isStatus());
+                    assertEquals(list.get(0).getStatus(), visit1.getStatus());
                 });
     }
+
+    @Test
+    void getVisitsForStatus(){
+
+        webTestClient
+                .get()
+                .uri("/visits/status/"+STATUS)
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
+                .expectBodyList(VisitResponseDTO.class)
+                .value((list)->{
+                    assertNotNull(list);
+                    assertEquals(dbSize, list.size());
+                    assertEquals(list.get(0).getVisitId(), visit1.getVisitId());
+                    assertEquals(list.get(0).getPractitionerId(), visit1.getPractitionerId());
+                    assertEquals(list.get(0).getPetId(), visit1.getPetId());
+                    assertEquals(list.get(0).getDescription(), visit1.getDescription());
+                    assertEquals(list.get(0).getVisitDate(), visit1.getVisitDate());
+                    assertEquals(list.get(0).getStatus().toString(), "UPCOMING");
+                });
+    }
+
     /*
     @Test
     void getVisitsByPractitionerIdAndMonth(){
@@ -218,6 +245,24 @@ class VisitsControllerIntegrationTest {
                     assertEquals(visitDTO1.getPractitionerId(), visit1.getPractitionerId());
                 });
     }
+
+    @Test
+    void updateStatusForVisitByVisitId(){
+        String status = "CANCELLED";
+        webTestClient
+                .put()
+                .uri("/visits/"+VISIT_ID+"/status/"+status)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.visitId").isEqualTo(visit1.getVisitId())
+                .jsonPath("$.practitionerId").isEqualTo(visit1.getPractitionerId())
+                .jsonPath("$.petId").isEqualTo(visit1.getPetId())
+                .jsonPath("$.description").isEqualTo(visit1.getDescription())
+                .jsonPath("$.visitDate").isEqualTo("2024-11-25 13:45")
+                .jsonPath("$.status").isEqualTo("CANCELLED");
+    }
+
     @Test
     void deleteVisit(){
         webTestClient
@@ -246,7 +291,7 @@ class VisitsControllerIntegrationTest {
                 .jsonPath("$.petId").isEqualTo(visit1.getPetId())
                 .jsonPath("$.description").isEqualTo(visit1.getDescription())
                 .jsonPath("$.visitDate").isEqualTo("2024-11-25 13:45")
-                .jsonPath("$.status").isEqualTo(visit1.isStatus());
+                .jsonPath("$.status").isEqualTo("UPCOMING");
     }
 
     private Visit buildVisit(String uuid,String description, String vetId){
@@ -257,7 +302,7 @@ class VisitsControllerIntegrationTest {
                 .description(description)
                 .petId("2")
                 .practitionerId(vetId)
-                .status(true)
+                .status(Status.UPCOMING)
                 .build();
     }
 
@@ -268,7 +313,7 @@ class VisitsControllerIntegrationTest {
                 .description("this is a dummy description")
                 .petId("2")
                 .practitionerId(vetId)
-                .status(true)
+                .status(Status.UPCOMING)
                 .build();
     }
     private VisitRequestDTO buildVisitRequestDto(String vetId){
@@ -277,7 +322,7 @@ class VisitsControllerIntegrationTest {
                 .description("this is a dummy description")
                 .petId("2")
                 .practitionerId(vetId)
-                .status(true)
+                .status(Status.UPCOMING)
                 .build();
     }
 }
