@@ -56,6 +56,13 @@ public class CustomersServiceClient {
                 .bodyToFlux(OwnerResponseDTO.class);
     }
 
+    public Mono<Long> getTotalNumberOfOwners(){
+        return webClientBuilder.build().get()
+                .uri(customersServiceUrl + "/owners/owners-count")
+                .retrieve()
+                .bodyToMono(Long.class);
+    }
+
     public Mono<OwnerResponseDTO> updateOwner(String ownerId, Mono<OwnerRequestDTO> ownerRequestDTO) {
         return ownerRequestDTO.flatMap(requestDTO ->
                 webClientBuilder.build()

@@ -211,6 +211,21 @@ public class CustomerServiceClientIntegrationTest {
     }
 
     @Test
+    void getTotalNumberOfOwners() throws Exception {
+        // Simulate the expected total count
+        long expectedCount = 0;
+
+        // Prepare the response with the expected count as a plain long value
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(String.valueOf(expectedCount)));
+
+        final Mono<Long> response = customersServiceClient.getTotalNumberOfOwners();
+
+        assertEquals(expectedCount,response.block());
+    }
+
+    @Test
     void testUpdatePet() throws Exception {
         PetResponseDTO petRequestDTO = new PetResponseDTO(); // Create a request DTO
         petRequestDTO.setPetId("petId-123");

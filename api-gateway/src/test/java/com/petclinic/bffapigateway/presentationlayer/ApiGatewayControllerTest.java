@@ -760,7 +760,7 @@ class ApiGatewayControllerTest {
         when(customersServiceClient.getOwnersByPagination(page,size)).thenReturn(ownerResponseDTOFlux);
 
         client.get()
-                .uri("/api/gateway/owners/owners-pagination?page="+page.get()+"&size="+size.get())
+                .uri("/api/gateway/owners-pagination?page="+page.get()+"&size="+size.get())
                 .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
                 .acceptCharset(StandardCharsets.UTF_8)
                 .exchange().expectStatus().isOk()
@@ -770,6 +770,25 @@ class ApiGatewayControllerTest {
                     Assertions.assertNotNull(list);
                     Assertions.assertEquals(size.get(),list.size());
                 });
+    }
+
+    @Test
+    void getTotalNumberOfOwners(){
+        long expectedCount = 0;
+
+        when(customersServiceClient.getTotalNumberOfOwners()).thenReturn(Mono.just(expectedCount));
+
+        client.get()
+                .uri("/api/gateway/owners-count")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Long.class) // Expecting a Long response
+                .consumeWith(response -> {
+                    Long responseBody = response.getResponseBody();
+                    assertNotNull(responseBody);
+                    assertEquals(expectedCount, responseBody.longValue());
+                });
+
     }
 
     @Test

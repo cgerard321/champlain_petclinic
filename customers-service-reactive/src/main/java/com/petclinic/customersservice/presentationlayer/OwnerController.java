@@ -25,6 +25,12 @@ public class OwnerController {
         return ownerService.getAllOwners();
     }
 
+    @GetMapping("/owners-count")
+    public Mono<ResponseEntity<Long>> getTotalNumberOfOwners(){
+        return ownerService.getAllOwners().count()
+                .map(response -> ResponseEntity.status(HttpStatus.OK).body(response));
+    }
+
     @GetMapping("/owners-pagination")
     public Flux<OwnerResponseDTO> getAllOwnersPagination(
             @RequestParam Optional<Integer> page,

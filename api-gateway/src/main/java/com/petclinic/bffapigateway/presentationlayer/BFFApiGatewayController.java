@@ -113,7 +113,6 @@ public class BFFApiGatewayController {
         return billServiceClient.deleteBillsByVetId(vetId);
     }
 
-
     @DeleteMapping(value = "bills/customer/{customerId}")
     public Flux<Void> deleteBillsByCustomerId(final @PathVariable String customerId){
         return billServiceClient.deleteBillsByCustomerId(customerId);
@@ -394,13 +393,25 @@ public class BFFApiGatewayController {
                                 .map(addVisitsToOwner(n))
                 );*/
     }
-    @GetMapping(value = "owners/owners-pagination")
-    public Flux<OwnerResponseDTO> getOwnersByPagination(
-            @RequestParam Optional<Integer> page,
-            @RequestParam Optional<Integer> size) {
+    @GetMapping(value = "/owners-pagination")
+    public Flux<OwnerResponseDTO> getOwnersByPagination(@RequestParam Optional<Integer> page, @RequestParam Optional<Integer> size) {
+
+        if(page.isEmpty() || page == null){
+            page = Optional.of(0);
+        }
+
+        if (size.isEmpty() || size == null) {
+            size = Optional.of(5);
+        }
 
         return customersServiceClient.getOwnersByPagination(page,size);
     }
+
+    @GetMapping(value = "/owners-count")
+    public Mono<Long> getTotalNumberOfOwners(){
+        return customersServiceClient.getTotalNumberOfOwners();
+    }
+
 
     @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN})
     @GetMapping(value = "owners/{ownerId}")
@@ -485,8 +496,15 @@ public class BFFApiGatewayController {
     }
 
 
+
+
+
+
+
+
+
     @DeleteMapping(value = "owners/{ownerId}")
-    public Mono<OwnerResponseDTO> deleteOwner(@PathVariable String ownerId){
+    public Mono<OwnerResponseDTO> deleteOwner(@PathVariable int ownerId){
         return customersServiceClient.deleteOwner(ownerId);
     }
     
