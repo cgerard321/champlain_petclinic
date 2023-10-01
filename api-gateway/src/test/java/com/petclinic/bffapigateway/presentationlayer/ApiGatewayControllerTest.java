@@ -1902,13 +1902,13 @@ class ApiGatewayControllerTest {
                 .jsonPath("$[0].petId").isEqualTo(21)
                 .jsonPath("$[0].visitDate").isEqualTo("2022-11-25 13:45")
                 .jsonPath("$[0].description").isEqualTo("John Smith's cat has a paw infection.")
-                .jsonPath("$[0].status").isEqualTo(true)
+                .jsonPath("$[0].status").isEqualTo("UPCOMING")
                 .jsonPath("$[0].practitionerId").isEqualTo(2)
                 .jsonPath("$[1].visitId").isEqualTo(visit2.getVisitId())
                 .jsonPath("$[1].petId").isEqualTo(21)
                 .jsonPath("$[1].visitDate").isEqualTo("2022-11-25 14:45")
                 .jsonPath("$[1].description").isEqualTo("John Smith's dog has a paw infection.")
-                .jsonPath("$[1].status").isEqualTo(true)
+                .jsonPath("$[1].status").isEqualTo("UPCOMING")
                 .jsonPath("$[1].practitionerId").isEqualTo(2);
     }
 
