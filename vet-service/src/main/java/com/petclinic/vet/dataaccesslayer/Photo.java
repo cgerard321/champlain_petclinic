@@ -15,7 +15,7 @@ import org.springframework.data.relational.core.mapping.Table;
 @Table("images")
 public class Photo {
     @Id
-    private String id;
+    private Integer id;
     @Column("vet_id")
     private String vetId;
     @Column("filename")

@@ -11,20 +11,30 @@ import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import static io.netty.handler.codec.http.HttpHeaders.setHeader;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.in;
+import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 
@@ -71,7 +81,8 @@ class VetsServiceClientIntegrationTest {
         final RatingResponseDTO rating = vetsServiceClient.getRatingsByVetId("678910").blockFirst();
         assertEquals("123456", rating.getRatingId());
         assertEquals("678910", rating.getVetId());
-        assertEquals(4.5, rating.getRateScore());
+        //Had to make it optional so it could diferentiate between double and object
+        assertEquals(Optional.of(4.5), Optional.ofNullable(rating.getRateScore()));
     }
 
     @Test
@@ -138,7 +149,8 @@ class VetsServiceClientIntegrationTest {
                 .setBody("5"));
 
         final Integer numberOfRatings = vetsServiceClient.getNumberOfRatingsByVetId("678910").block();
-        assertEquals(5, numberOfRatings);
+        //Had to make it optional so it could diferentiate between double and object
+        assertEquals(Optional.of(5), Optional.ofNullable(numberOfRatings));
     }
 
     @Test
@@ -216,8 +228,8 @@ class VetsServiceClientIntegrationTest {
                             }
                         })
                         .block();
-        assertEquals(4.5, averageRating);
-
+        //Had to make it optional so it could diferentiate between double and object
+        assertEquals(Optional.of(4.5), Optional.ofNullable(averageRating));
     }
 
     @Test
@@ -672,6 +684,20 @@ class VetsServiceClientIntegrationTest {
                         .block();
 
         assertNull(ratingResponseDTO);
+    }
+
+    @Test
+    void getPhotoByVetId() throws IOException {
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "image/jpeg")
+                .setBody("    {\n" +
+                        "        {12, 24, 52, 87}" +
+                        "    }"));
+
+        final Resource photo = vetsServiceClient.getPhotoByVetId("678910").block();
+        byte[] photoBytes = FileCopyUtils.copyToByteArray(photo.getInputStream());
+
+        assertNotNull(photoBytes);
     }
 
     @Test

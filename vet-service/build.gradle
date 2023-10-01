@@ -19,22 +19,22 @@ repositories {
     mavenCentral()
 }
 
-    dependencies {
-        implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
-        implementation 'org.springframework.boot:spring-boot-starter-webflux'
-        implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
-        implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb-reactive'
+    implementation 'org.springframework.boot:spring-boot-starter-webflux'
+    implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
+    implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
 
-        runtimeOnly 'org.postgresql:postgresql'
-        runtimeOnly 'org.postgresql:r2dbc-postgresql'
-        compileOnly 'org.projectlombok:lombok'
-        annotationProcessor 'org.projectlombok:lombok'
+    runtimeOnly 'org.postgresql:postgresql'
+    runtimeOnly 'org.postgresql:r2dbc-postgresql'
+    compileOnly 'org.projectlombok:lombok'
+    annotationProcessor 'org.projectlombok:lombok'
 
-        testImplementation 'org.springframework.boot:spring-boot-starter-test'
-        testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo'
-        testImplementation 'io.projectreactor:reactor-test'
-        testImplementation 'io.r2dbc:r2dbc-h2:1.0.0.RELEASE'
-    }
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'de.flapdoodle.embed:de.flapdoodle.embed.mongo'
+    testImplementation 'io.projectreactor:reactor-test'
+    testImplementation 'io.r2dbc:r2dbc-h2:1.0.0.RELEASE'
+}
 
 
 tasks.named('test') {

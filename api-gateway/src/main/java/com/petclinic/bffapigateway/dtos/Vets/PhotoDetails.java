@@ -13,9 +13,9 @@ import lombok.NoArgsConstructor;
 public class PhotoDetails {
     private int id;
 
-    private String filename;
+    private String name;
 
-    private String imgType;
+    private String type;
 
-    private byte[] data;
+    private String photo;
 }

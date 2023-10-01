@@ -4,7 +4,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.r2dbc.init.R2dbcScriptDatabaseInitializer;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -14,6 +17,12 @@ import static org.junit.jupiter.api.Assertions.*;
 class RatingRepositoryTest {
     @Autowired
     RatingRepository ratingRepository;
+
+    //To counter missing bean error
+    @MockBean
+    ConnectionFactoryInitializer connectionFactoryInitializer;
+    @MockBean
+    R2dbcScriptDatabaseInitializer r2dbcScriptDatabaseInitializer;
 
     Rating rating1 = Rating.builder()
             .ratingId("1")

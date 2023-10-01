@@ -1,6 +1,5 @@
 package com.petclinic.vet.servicelayer;
 
-//import com.petclinic.vet.dataaccesslayer.Photo;
 import com.petclinic.vet.dataaccesslayer.*;
 import com.petclinic.vet.util.EntityDtoUtil;
 import org.springframework.boot.CommandLineRunner;
