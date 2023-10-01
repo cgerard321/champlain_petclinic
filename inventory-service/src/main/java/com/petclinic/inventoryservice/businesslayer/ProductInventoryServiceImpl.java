@@ -186,6 +186,16 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                 //where the 404 not found issue lies if we switchIfEmpty
     }
 
+
+
+
+    @Override
+    public Mono<InventoryResponseDTO> getInventoryById(String inventoryId){
+    return inventoryRepository.findInventoryByInventoryId(inventoryId)
+            .switchIfEmpty(Mono.error(new NotFoundException("No inventory with this id was found" + inventoryId)))
+            .map(EntityDTOUtil::toInventoryResponseDTO);
+
+    }
     @Override
     public Flux<InventoryResponseDTO> getAllInventory() {
         return inventoryRepository.findAll()

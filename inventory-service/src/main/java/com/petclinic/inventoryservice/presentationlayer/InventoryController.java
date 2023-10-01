@@ -48,6 +48,19 @@ public class InventoryController {
     public Flux<InventoryResponseDTO> getAllInventory(){
         return productInventoryService.getAllInventory();
     }
+
+
+    @GetMapping("/{inventoryId}")
+    public Mono<ResponseEntity<InventoryResponseDTO>> getInventoryById(@PathVariable String inventoryId){
+        return productInventoryService.getInventoryById(inventoryId)
+                .map(i -> ResponseEntity.status(HttpStatus.OK).body(i))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+
+
+
+
     @PutMapping("/{inventoryId}")
     public Mono<ResponseEntity<InventoryResponseDTO>> updateInventory(@RequestBody Mono<InventoryRequestDTO> inventoryRequestDTO, @PathVariable String inventoryId) {
         return productInventoryService.updateInventory(inventoryRequestDTO, inventoryId)
