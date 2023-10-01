@@ -16,6 +16,10 @@ jobs:
           echo "SMTP_PASS=fakepass" > mailer.env
       - name: Start containers
         run: docker-compose -f "docker-compose.yml" up -d --build
+      - name: Show running containers
+        run: docker ps
+      - name: Wait to see stability
+        run: sleep 20s
       - name: Stop containers
         if: always()
         run: docker-compose -f "docker-compose.yml" down
