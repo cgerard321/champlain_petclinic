@@ -70,12 +70,13 @@ class RatingRepositoryTest {
     }
 
     @Test
-    public void addRatingToAVet_ShouldSucced(){
+    public void addRatingToAVet_WithWrittenDescriptionOnly_ShouldSetRatingDescToItsValue(){
         Rating rating = Rating.builder()
                 .ratingId("3")
                 .vetId("1")
                 .rateScore(1.0)
                 .rateDescription("My dog wouldn't stop crying after his appointment")
+                .predefinedDescription(null)
                 .rateDate("13/09/2023")
                 .build();
 
@@ -106,6 +107,7 @@ class RatingRepositoryTest {
                 .vetId("2")
                 .rateScore(2.0)
                 .rateDescription("Vet cancelled last minute.")
+                .predefinedDescription(PredefinedDescription.POOR)
                 .rateDate("20/09/2023")
                 .build();
 
@@ -115,6 +117,7 @@ class RatingRepositoryTest {
                     assertEquals(rating.getVetId(), updatedRating.getVetId());
                     assertEquals(rating.getRateScore(), updatedRating.getRateScore());
                     assertEquals(rating.getRateDescription(), updatedRating.getRateDescription());
+                    assertEquals(rating.getPredefinedDescription(), updatedRating.getPredefinedDescription());
                     assertEquals(rating.getRateDate(), updatedRating.getRateDate());
                 })
                 .verifyComplete();

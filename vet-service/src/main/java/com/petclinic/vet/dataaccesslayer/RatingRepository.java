@@ -11,4 +11,5 @@ public interface RatingRepository extends ReactiveMongoRepository<Rating, String
     Mono<Long> countAllByVetId(String vetId);
     Mono<Rating> findByVetIdAndRatingId(String vetId, String ratingId);
     Mono<Rating> findByRatingId(String ratingId);
+   // Mono<Integer> countAllByVetIdAndPredefinedDescription(String vetId, PredefinedDescription predefinedDescription);
 }
