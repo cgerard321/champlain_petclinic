@@ -1,5 +1,9 @@
 server.port: 7000
-server.error.include-message: always
+
+server:
+  error:
+    include-binding-errors: always
+    include-message: always
 
 app:
   visits-service-new:
@@ -26,6 +30,7 @@ logging:
     root: INFO
     com.petclinic: DEBUG
 
+
 ---
 spring:
   config:
@@ -34,6 +39,11 @@ spring:
 
 
 server.port: 8080
+
+server:
+  error:
+    include-binding-errors: always
+    include-message: always
 
 app:
   visits-service-new:
@@ -59,3 +69,4 @@ logging:
   level:
     root: INFO
     com.petclinic: DEBUG
+
