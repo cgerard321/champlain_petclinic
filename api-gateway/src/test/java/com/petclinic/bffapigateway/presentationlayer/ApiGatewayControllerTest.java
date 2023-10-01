@@ -1614,7 +1614,7 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.petId").isEqualTo("1")
                 .jsonPath("$.visitDate").isEqualTo("2024-11-25 14:45")
                 .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
-                .jsonPath("$.status").isEqualTo(Status.UPCOMING)
+                .jsonPath("$.status").isEqualTo("UPCOMING")
                 .jsonPath("$.practitionerId").isEqualTo("1");
 
         // Create an instance of VisitDetails for updating
@@ -1810,13 +1810,13 @@ class ApiGatewayControllerTest {
         visit1.setPetId("21");
         visit1.setVisitDate(LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
         visit1.setDescription("John Smith's cat has a paw infection.");
-        visit1.setStatus(Status.UPCOMING);
+        visit1.setStatus(Status.COMPLETED);
         visit1.setPractitionerId(2);
         visit2.setVisitId(UUID.randomUUID().toString());
         visit2.setPetId("21");
         visit2.setVisitDate(LocalDateTime.parse("2022-11-25 14:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
         visit2.setDescription("John Smith's dog has a paw infection.");
-        visit2.setStatus(Status.UPCOMING);
+        visit2.setStatus(Status.COMPLETED);
         visit2.setPractitionerId(2);
 
         List<VisitDetails> previousVisitsList = new ArrayList<>();
@@ -1837,13 +1837,13 @@ class ApiGatewayControllerTest {
                 .jsonPath("$[0].petId").isEqualTo("21")
                 .jsonPath("$[0].visitDate").isEqualTo("2022-11-25 13:45")
                 .jsonPath("$[0].description").isEqualTo("John Smith's cat has a paw infection.")
-                .jsonPath("$[0].status").isEqualTo(false)
+                .jsonPath("$[0].status").isEqualTo("COMPLETED")
                 .jsonPath("$[0].practitionerId").isEqualTo(2)
                 .jsonPath("$[1].visitId").isEqualTo(visit2.getVisitId())
                 .jsonPath("$[1].petId").isEqualTo("21")
                 .jsonPath("$[1].visitDate").isEqualTo("2022-11-25 14:45")
                 .jsonPath("$[1].description").isEqualTo("John Smith's dog has a paw infection.")
-                .jsonPath("$[1].status").isEqualTo(false)
+                .jsonPath("$[1].status").isEqualTo("COMPLETED")
                 .jsonPath("$[1].practitionerId").isEqualTo(2);
 
     }

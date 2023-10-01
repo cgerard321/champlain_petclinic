@@ -49,7 +49,7 @@ class VisitRepoTest {
     @Test
     void findVisitsByStatus(){
         StepVerifier.create(visitRepo.findAllByStatus(visit1.getStatus().toString()))
-                .expectNextCount(3)
+                .expectNextCount(2)
                 .verifyComplete();
     }
     @Test

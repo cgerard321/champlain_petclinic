@@ -49,7 +49,7 @@ class VisitsControllerIntegrationTest {
     String uuidPhoto = UUID.randomUUID().toString();
     String uuidOwner = UUID.randomUUID().toString();
 
-    private final String STATUS = "COMPLETED";
+    private final String STATUS = "UPCOMING";
 
     Set<SpecialtyDTO> set= new HashSet<>();
 
@@ -124,7 +124,7 @@ class VisitsControllerIntegrationTest {
                 .jsonPath("$.petId").isEqualTo(visit1.getPetId())
                 .jsonPath("$.description").isEqualTo(visit1.getDescription())
                 .jsonPath("$.visitDate").isEqualTo("2024-11-25 13:45")
-                .jsonPath("$.status").isEqualTo(visit1.getStatus());
+                .jsonPath("$.status").isEqualTo("UPCOMING");
     }
     @Test
     void getVisitByPractitionerId(){
@@ -194,7 +194,7 @@ class VisitsControllerIntegrationTest {
                     assertEquals(list.get(0).getPetId(), visit1.getPetId());
                     assertEquals(list.get(0).getDescription(), visit1.getDescription());
                     assertEquals(list.get(0).getVisitDate(), visit1.getVisitDate());
-                    assertEquals(list.get(0).getStatus(), visit1.getStatus());
+                    assertEquals(list.get(0).getStatus().toString(), "UPCOMING");
                 });
     }
 
@@ -259,7 +259,7 @@ class VisitsControllerIntegrationTest {
                 .jsonPath("$.practitionerId").isEqualTo(visit1.getPractitionerId())
                 .jsonPath("$.petId").isEqualTo(visit1.getPetId())
                 .jsonPath("$.description").isEqualTo(visit1.getDescription())
-                .jsonPath("$.visitDate").isEqualTo("2022-11-25T13:45:00")
+                .jsonPath("$.visitDate").isEqualTo("2024-11-25 13:45")
                 .jsonPath("$.status").isEqualTo("CANCELLED");
     }
 
@@ -291,7 +291,7 @@ class VisitsControllerIntegrationTest {
                 .jsonPath("$.petId").isEqualTo(visit1.getPetId())
                 .jsonPath("$.description").isEqualTo(visit1.getDescription())
                 .jsonPath("$.visitDate").isEqualTo("2024-11-25 13:45")
-                .jsonPath("$.status").isEqualTo(visit1.getStatus());
+                .jsonPath("$.status").isEqualTo("UPCOMING");
     }
 
     private Visit buildVisit(String uuid,String description, String vetId){

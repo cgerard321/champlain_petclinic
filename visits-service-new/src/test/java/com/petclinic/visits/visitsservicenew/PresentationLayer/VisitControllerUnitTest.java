@@ -113,7 +113,7 @@ class VisitControllerUnitTest {
                 .jsonPath("$.description").isEqualTo(visitResponseDTO.getDescription())
                 .jsonPath("$.petId").isEqualTo(visitResponseDTO.getPetId())
                 .jsonPath("$.practitionerId").isEqualTo(visitResponseDTO.getPractitionerId())
-                .jsonPath("$.status").isEqualTo(visitResponseDTO.getStatus());
+                .jsonPath("$.status").isEqualTo("UPCOMING");
 
         verify(visitService, times(1)).getVisitByVisitId(Visit_UUID_OK);
     }

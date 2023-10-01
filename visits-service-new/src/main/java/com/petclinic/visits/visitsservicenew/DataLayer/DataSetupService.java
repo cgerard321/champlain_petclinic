@@ -20,7 +20,7 @@ public class DataSetupService implements CommandLineRunner {
         Visit visit2 = buildVisit("visitId2", "2022-03-01 13:00", "Dog Needs Meds", "1", "2200332", Status.COMPLETED);
         Visit visit3 = buildVisit("visitId3", "2020-07-19 13:00","Dog Needs Surgery After Meds", "1", "2200332", Status.COMPLETED);
         Visit visit4 = buildVisit("visitId4", "2022-12-24 13:00", "Dog Needs Physio-Therapy", "1", "2200332", Status.COMPLETED);
-        Visit visit5 = buildVisit("visitId5", "2023-12-24 13:00", "Cat Needs Check-Up", "4", "2200332", Status.UPCOMING);
+        Visit visit5 = buildVisit("visitId5", "2023-12-24 13:00", "Cat Needs Check-Up", "4", "2200332", Status.REQUESTED);
 
         Flux.just(visit1, visit2, visit3, visit4, visit5).flatMap(x -> visitRepo.insert(Mono.just(x)).log(x.toString())).subscribe();
     }
