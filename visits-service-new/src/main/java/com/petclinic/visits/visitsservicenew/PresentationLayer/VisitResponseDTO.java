@@ -1,6 +1,7 @@
 package com.petclinic.visits.visitsservicenew.PresentationLayer;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -23,5 +24,5 @@ public class VisitResponseDTO {
     private String description;
     private String petId;
     private String practitionerId;
-    private boolean status;
+    private Status status;
 }

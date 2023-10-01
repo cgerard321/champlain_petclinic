@@ -43,11 +43,34 @@ public class InventoryController {
                                                        @RequestParam(required = false) Integer productQuantity){
         return productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(inventoryId, productName, productPrice, productQuantity);
     }
-
+/*
     @GetMapping()
     public Flux<InventoryResponseDTO> getAllInventory(){
         return productInventoryService.getAllInventory();
     }
+
+ */
+@GetMapping()
+public Flux<InventoryResponseDTO> searchInventories(
+        @RequestParam(name = "inventoryName", required = false) String inventoryName,
+        @RequestParam(name = "inventoryType", required = false) String inventoryType,
+        @RequestParam(name = "inventoryDescription", required = false) String inventoryDescription) {
+
+    return productInventoryService.searchInventories(inventoryName, inventoryType, inventoryDescription);
+}
+
+
+    @GetMapping("/{inventoryId}")
+    public Mono<ResponseEntity<InventoryResponseDTO>> getInventoryById(@PathVariable String inventoryId){
+        return productInventoryService.getInventoryById(inventoryId)
+                .map(i -> ResponseEntity.status(HttpStatus.OK).body(i))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+
+
+
+
     @PutMapping("/{inventoryId}")
     public Mono<ResponseEntity<InventoryResponseDTO>> updateInventory(@RequestBody Mono<InventoryRequestDTO> inventoryRequestDTO, @PathVariable String inventoryId) {
         return productInventoryService.updateInventory(inventoryRequestDTO, inventoryId)

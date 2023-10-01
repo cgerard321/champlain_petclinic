@@ -29,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ServerWebExchange;
@@ -46,6 +47,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("/api/gateway")
+@Validated
 public class BFFApiGatewayController {
 
     private final CustomersServiceClient customersServiceClient;
@@ -209,6 +211,11 @@ public class BFFApiGatewayController {
         return visitsServiceClient.getVisitsForPet(petId);
     }
 
+    @GetMapping(value = "visits/status/{status}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<VisitResponseDTO> getVisitsForStatus(final @PathVariable String status){
+        return visitsServiceClient.getVisitsForStatus(status);
+    }
+
     @GetMapping(value ="visits/{visitId}")
     public Mono<VisitResponseDTO>  getVisitByVisitId(final @PathVariable String visitId){
         return visitsServiceClient.getVisitByVisitId(visitId);
@@ -239,6 +246,12 @@ public class BFFApiGatewayController {
         visit.setVisitId(visitId);
         return visitsServiceClient.updateVisitForPet(visit);
     }
+
+    @PutMapping(value = "/visits/{visitId}/status/{status}")
+    Mono<VisitResponseDTO> updateStatusForVisitByVisitId(@PathVariable String visitId, @PathVariable String status) {
+        return visitsServiceClient.updateStatusForVisitByVisitId(visitId, status);
+    }
+
     @DeleteMapping (value = "visits/{visitId}")
     public Mono<Void> deleteVisitsByVisitId(final @PathVariable String visitId){
         return visitsServiceClient.deleteVisitByVisitId(visitId);
@@ -510,7 +523,7 @@ public class BFFApiGatewayController {
     @PostMapping(value = "/users",
             consumes = "application/json",
             produces = "application/json")
-    public Mono<OwnerResponseDTO> createUser(@RequestBody @Valid Register model) {
+    public Mono<OwnerResponseDTO> createUser(@RequestBody @Valid Mono<Register> model) {
         return authServiceClient.createUser(model);
     }
 
@@ -522,7 +535,7 @@ public class BFFApiGatewayController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @PostMapping(value = "/users/login",produces = "application/json;charset=utf-8;", consumes = "application/json")
-    public Mono<ResponseEntity<UserPasswordLessDTO>> login(@RequestBody Login login) throws Exception {
+    public Mono<ResponseEntity<UserPasswordLessDTO>> login(@RequestBody Mono<Login> login) throws Exception {
         log.info("Entered controller /login");
         return authServiceClient.login(login);
 
@@ -531,9 +544,9 @@ public class BFFApiGatewayController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @PostMapping(value = "/users/forgot_password")
-    public Mono<ResponseEntity<Void>> processForgotPassword(ServerWebExchange exchange, @RequestBody UserEmailRequestDTO email) {
+    public Mono<ResponseEntity<Void>> processForgotPassword(@RequestBody Mono<UserEmailRequestDTO> email) {
 
-        return authServiceClient.sendForgottenEmail(exchange.getRequest(),email.getEmail());
+        return authServiceClient.sendForgottenEmail(email);
 
     }
 
@@ -542,7 +555,7 @@ public class BFFApiGatewayController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @PostMapping("/users/reset_password")
-    public Mono<ResponseEntity<Void>> processResetPassword(@RequestBody UserPasswordAndTokenRequestModel resetRequest) {
+    public Mono<ResponseEntity<Void>> processResetPassword(@RequestBody @Valid Mono<UserPasswordAndTokenRequestModel> resetRequest) {
         return authServiceClient.changePassword(resetRequest);
     }
 
@@ -564,6 +577,14 @@ public class BFFApiGatewayController {
 
     }
 
+    @GetMapping(value ="inventory/{inventoryId}")
+    public Mono<ResponseEntity<InventoryResponseDTO>> getInventoryById(@PathVariable String inventoryId){
+        return inventoryServiceClient.getInventoryById(inventoryId)
+                .map(inventory -> ResponseEntity.status(HttpStatus.OK).body(inventory))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+
 
     @PutMapping(value = "inventory/{inventoryId}")
     public Mono<ResponseEntity<InventoryResponseDTO>> updateInventory( @RequestBody InventoryRequestDTO model, @PathVariable String inventoryId) {
@@ -572,6 +593,9 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
 
     }
+
+
+
 
     @PutMapping(value = "inventory/{inventoryId}/products/{productId}")
     public Mono<ProductResponseDTO> updateProductInInventory(@RequestBody ProductRequestDTO model, @PathVariable String inventoryId, @PathVariable String productId){
@@ -583,6 +607,8 @@ public class BFFApiGatewayController {
         return inventoryServiceClient.deleteProductInInventory(inventoryId, productId);
     }
 
+
+
     @GetMapping(value = "inventory/{inventoryId}/products")
     public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndFields(@PathVariable String inventoryId,
                                                                                  @RequestParam(required = false) String productName,
@@ -592,9 +618,20 @@ public class BFFApiGatewayController {
     }
 
     @GetMapping(value = "inventory")
+    public Flux<InventoryResponseDTO> searchInventory(@RequestParam(required = false) String inventoryName,
+                                                      @RequestParam(required = false) String inventoryType,
+                                                      @RequestParam(required = false) String inventoryDescription){
+        return inventoryServiceClient.searchInventory(inventoryName, inventoryType, inventoryDescription);
+    }
+    /*
+    @GetMapping(value = "inventory")
     public Flux<InventoryResponseDTO> getAllInventory(){
         return inventoryServiceClient.getAllInventory();
     }
+
+     */
+
+
 
     @DeleteMapping(value = "inventory/{inventoryId}/products")
     public Mono<Void> deleteAllProductsFromInventory(@PathVariable String inventoryId) {

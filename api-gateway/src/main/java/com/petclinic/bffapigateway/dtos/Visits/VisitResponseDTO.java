@@ -24,5 +24,5 @@ private LocalDateTime visitDate;
     private String practitionerId;
 /*    private int petId;
     private int practitionerId;*/
-    private boolean status;
+    private Status status;
 }
