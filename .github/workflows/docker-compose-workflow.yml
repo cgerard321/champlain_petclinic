@@ -15,7 +15,9 @@ jobs:
         run: |
           echo "SMTP_PASS=fakepass" > mailer.env
       - name: Build and up the docker
-        run: docker-compose up --abort-on-container-exit
+        run: docker-compose up -d
+      - name: Integration test api
+        run: docker-compose exec -T api-gateway yarn run api:test
       - name: Down the containers
         run: docker-compose down
       
