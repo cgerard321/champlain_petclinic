@@ -184,6 +184,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                 .findAllProductsByInventoryId(inventoryId)
                 .map(EntityDTOUtil::toProductResponseDTO);
                 //where the 404 not found issue lies if we switchIfEmpty
+
     }
 
 
@@ -196,11 +197,22 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
             .map(EntityDTOUtil::toInventoryResponseDTO);
 
     }
+    /*
     @Override
     public Flux<InventoryResponseDTO> getAllInventory() {
         return inventoryRepository.findAll()
                 .map(EntityDTOUtil::toInventoryResponseDTO);
     }
+
+     */
+    @Override
+    public Mono<Void> deleteInventoryByInventoryId(String inventoryId) {
+        return inventoryRepository.findInventoryByInventoryId(inventoryId)
+                .switchIfEmpty(Mono.error(new RuntimeException("The InventoryId is invalid")))
+                .flatMapMany(inventory -> inventoryRepository.delete(inventory))
+                .then();
+    }
+
     //delete all products and delete all inventory
   /*  @Override
     public Mono<Void> deleteAllProductInventory(String inventoryId) {
@@ -212,6 +224,53 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                 .then();
     }
 */
+    @Override
+    public Flux<InventoryResponseDTO>searchInventories(String inventoryName, String inventoryType, String inventoryDescription) {
+
+        if (inventoryName != null && inventoryType != null && inventoryDescription != null){
+            return inventoryRepository
+                    .findAllByInventoryNameAndInventoryTypeAndInventoryDescription(inventoryName, inventoryType, inventoryDescription)
+                    .map(EntityDTOUtil::toInventoryResponseDTO)
+                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Name: " + inventoryName +
+                            ", Type: " + inventoryType + ", Description: " + inventoryDescription)));
+        }
+
+        if (inventoryType != null && inventoryDescription != null){
+            return inventoryRepository
+                    .findAllByInventoryTypeAndInventoryDescription(inventoryType, inventoryDescription)
+                    .map(EntityDTOUtil::toInventoryResponseDTO)
+                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Type: " + inventoryType +
+                            " and Description: " + inventoryDescription)));
+        }
+
+        if (inventoryName != null){
+            return inventoryRepository
+                    .findAllByInventoryName(inventoryName)
+                    .map(EntityDTOUtil::toInventoryResponseDTO)
+                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Name: " + inventoryName)));
+        }
+
+        if (inventoryType != null){
+            return inventoryRepository
+                    .findAllByInventoryType(inventoryType)
+                    .map(EntityDTOUtil::toInventoryResponseDTO)
+                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Type: " + inventoryType)));
+        }
+
+        if (inventoryDescription != null){
+            return inventoryRepository
+                    .findAllByInventoryDescription(inventoryDescription)
+                    .map(EntityDTOUtil::toInventoryResponseDTO)
+                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Description: " + inventoryDescription)));
+        }
+
+        // Default - fetch all if no criteria provided.
+        return inventoryRepository
+                .findAll()
+                .map(EntityDTOUtil::toInventoryResponseDTO);
+    }
+
+
     //delete all products and delete all inventory
     @Override
     public Mono<Void> deleteAllProductInventory (String inventoryId){
@@ -224,7 +283,6 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     @Override
     public Mono<Void> deleteAllInventory () {
         return inventoryRepository.deleteAll();
-
 
     }
 }

@@ -606,4 +606,139 @@ class ProductInventoryServiceUnitTest {
                 })
                 .verify();
     }
+    //for search
+    //SearchInventory
+    @Test
+    void searchInventories_WithNameTypeAndDescription_shouldSucceed() {
+        String inventoryName = "SampleName";
+        String inventoryType = "SampleType";
+        String inventoryDescription = "SampleDescription";
+
+        when(inventoryRepository
+                .findAllByInventoryNameAndInventoryTypeAndInventoryDescription(inventoryName, inventoryType, inventoryDescription))
+                .thenReturn(Flux.just(inventory));
+
+        Flux<InventoryResponseDTO> responseFlux = productInventoryService.searchInventories(inventoryName, inventoryType, inventoryDescription);
+
+        StepVerifier
+                .create(responseFlux)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
+    void searchInventories_WithTypeAndDescription_shouldSucceed() {
+        String inventoryType = "SampleType";
+        String inventoryDescription = "SampleDescription";
+
+        when(inventoryRepository
+                .findAllByInventoryTypeAndInventoryDescription(inventoryType, inventoryDescription))
+                .thenReturn(Flux.just(inventory));
+
+        Flux<InventoryResponseDTO> responseFlux = productInventoryService
+                .searchInventories(null, inventoryType, inventoryDescription);
+
+        StepVerifier
+                .create(responseFlux)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
+    void searchInventories_WithName_shouldSucceed() {
+        String inventoryName = "SampleName";
+
+        when(inventoryRepository.findAllByInventoryName(inventoryName))
+                .thenReturn(Flux.just(inventory));
+
+        Flux<InventoryResponseDTO> responseFlux = productInventoryService
+                .searchInventories(inventoryName, null, null);
+
+        StepVerifier
+                .create(responseFlux)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
+    void searchInventories_WithType_shouldSucceed() {
+        String inventoryType = "SampleType";
+
+        when(inventoryRepository.findAllByInventoryType(inventoryType))
+                .thenReturn(Flux.just(inventory));
+
+        Flux<InventoryResponseDTO> responseFlux = productInventoryService
+                .searchInventories(null, inventoryType, null);
+
+        StepVerifier
+                .create(responseFlux)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
+    void searchInventories_WithDescription_shouldSucceed() {
+        String inventoryDescription = "SampleDescription";
+
+        when(inventoryRepository.findAllByInventoryDescription(inventoryDescription))
+                .thenReturn(Flux.just(inventory));
+
+        Flux<InventoryResponseDTO> responseFlux = productInventoryService
+                .searchInventories(null, null, inventoryDescription);
+
+        StepVerifier
+                .create(responseFlux)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
+    void searchInventories_WithNoFilters_shouldFetchAll() {
+        when(inventoryRepository.findAll())
+                .thenReturn(Flux.just(inventory));
+
+        Flux<InventoryResponseDTO> responseFlux = productInventoryService
+                .searchInventories(null, null, null);
+
+        StepVerifier
+                .create(responseFlux)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+
+
+    @Test
+    public void deleteInventoryByInventoryId_validInventory_ShouldSucceed() {
+        // Arrange
+        String validInventoryId = "1";
+
+        when(inventoryRepository.findInventoryByInventoryId(validInventoryId)).thenReturn(Mono.just(inventory));
+
+        when(inventoryRepository.delete(inventory)).thenReturn(Mono.empty());
+
+        // Act & Assert
+        StepVerifier.create(productInventoryService.deleteInventoryByInventoryId(validInventoryId))
+                .verifyComplete();
+
+        verify(inventoryRepository).findInventoryByInventoryId(validInventoryId);
+        verify(inventoryRepository).delete(inventory);
+    }
+
+    @Test
+    public void deleteInventoryByInventoryId_invalidInventory_ShouldThrowRuntimeException() {
+        // Arrange
+        String invalidInventoryId = "nonexistentId";
+
+        when(inventoryRepository.findInventoryByInventoryId(invalidInventoryId)).thenReturn(Mono.empty());
+
+        // Act & Assert
+        StepVerifier.create(productInventoryService.deleteInventoryByInventoryId(invalidInventoryId))
+                .expectErrorMatches(throwable -> throwable instanceof RuntimeException && throwable.getMessage().equals("The InventoryId is invalid"))
+                .verify();
+
+        verify(inventoryRepository).findInventoryByInventoryId(invalidInventoryId);
+        verify(inventoryRepository, never()).delete(any(Inventory.class));
+    }
+
 }
