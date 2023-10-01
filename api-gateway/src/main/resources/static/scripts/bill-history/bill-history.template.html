@@ -14,6 +14,118 @@
 <input ng-model="search.customerId" placeholder="Filter by Owner ID">
 <input ng-model="search.vetId" placeholder="Filter by Vet ID">
 
+<h2>Paid Bills</h2>
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <td>Bill ID</td>
+        <td>Owner ID</td>
+        <td>Owner Name</td>
+        <td>Owner Details</td>
+        <td>Vet ID</td>
+        <td>Vet Name</td>
+        <td>Visit Type</td>
+        <td>Amount</td>
+        <td>Status</td>
+        <td>Date</td>
+        <td>Details</td>
+        <td>Delete</td>
+
+    </tr>
+    </thead>
+
+    <tr id="billIdPaid" ng-repeat="paidBill in $ctrl.paidBills | filter:$ctrl.query track by paidBill.billIdPaid">
+    <tr ng-repeat="paidBill in $ctrl.paidBills | filter:search:strict">
+        <td><a href="http://localhost:8080/#!/bills/details/{{paidBill.billId}}/owner/{{paidBill.customerId}}">{{paidBill.billId}}</a></td>
+        <td>{{paidBill.customerId}}</td>
+        <td>{{ getCustomerDetails(paidBill.customerId) }}</td>
+        <td><a href="http://localhost:8080/#!/owners/details/{{paidBill.customerId}}">Owner details</a></td>
+        <td>{{paidBill.vetId}}</td>
+        <td>{{ getVetDetails(paidBill.vetId) }}</td>
+        <td>{{paidBill.visitType}}</td>
+        <td>{{paidBill.amount}}</td>
+        <td>{{paidBill.billStatus}}</td>
+        <td>{{paidBill.date}}</td>
+        <td><a href="http://localhost:8080/#!/bills/details/{{paidBill.billId}}/owner/{{paidBill.customerId}}">Get Details</a></td>
+        <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteBill(paidBill.billId)">Delete Bill</a></td>
+    </tr>
+</table>
+
+<h2>Unpaid Bills</h2>
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <td>Bill ID</td>
+        <td>Owner ID</td>
+        <td>Owner Name</td>
+        <td>Owner Details</td>
+        <td>Vet ID</td>
+        <td>Vet Name</td>
+        <td>Visit Type</td>
+        <td>Amount</td>
+        <td>Status</td>
+        <td>Date</td>
+        <td>Details</td>
+        <td>Delete</td>
+
+    </tr>
+    </thead>
+
+    <tr id="billIdUnpaid" ng-repeat="unpaidBill in $ctrl.unpaidBills | filter:$ctrl.query track by unpaidBill.billIdUnpaid">
+    <tr ng-repeat="unpaidBill in $ctrl.unpaidBills | filter:search:strict">
+        <td><a href="http://localhost:8080/#!/bills/details/{{unpaidBill.billId}}/owner/{{unpaidBill.customerId}}">{{unpaidBill.billId}}</a></td>
+        <td>{{unpaidBill.customerId}}</td>
+        <td>{{ getCustomerDetails(unpaidBill.customerId) }}</td>
+        <td><a href="http://localhost:8080/#!/owners/details/{{unpaidBill.customerId}}">Owner details</a></td>
+        <td>{{unpaidBill.vetId}}</td>
+        <td>{{ getVetDetails(unpaidBill.vetId) }}</td>
+        <td>{{unpaidBill.visitType}}</td>
+        <td>{{unpaidBill.amount}}</td>
+        <td>{{unpaidBill.billStatus}}</td>
+        <td>{{unpaidBill.date}}</td>
+        <td><a href="http://localhost:8080/#!/bills/details/{{unpaidBill.billId}}/owner/{{unpaidBill.customerId}}">Get Details</a></td>
+        <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteBill(unpaidBill.billId)">Delete Bill</a></td>
+    </tr>
+</table>
+
+<h2>Overdue Bills</h2>
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <td>Bill ID</td>
+        <td>Owner ID</td>
+        <td>Owner Name</td>
+        <td>Owner Details</td>
+        <td>Vet ID</td>
+        <td>Vet Name</td>
+        <td>Visit Type</td>
+        <td>Amount</td>
+        <td>Status</td>
+        <td>Date</td>
+        <td>Details</td>
+        <td>Delete</td>
+
+    </tr>
+    </thead>
+
+    <tr id="billIdOverdue" ng-repeat="overdueBill in $ctrl.overdueBills | filter:$ctrl.query track by overdueBill.billIdOverdue">
+    <tr ng-repeat="overdueBill in $ctrl.overdueBills | filter:search:strict">
+        <td><a href="http://localhost:8080/#!/bills/details/{{overdueBill.billId}}/owner/{{overdueBill.customerId}}">{{overdueBill.billId}}</a></td>
+        <td>{{overdueBill.customerId}}</td>
+        <td>{{ getCustomerDetails(overdueBill.customerId) }}</td>
+        <td><a href="http://localhost:8080/#!/owners/details/{{overdueBill.customerId}}">Owner details</a></td>
+        <td>{{overdueBill.vetId}}</td>
+        <td>{{ getVetDetails(overdueBill.vetId) }}</td>
+        <td>{{overdueBill.visitType}}</td>
+        <td>{{overdueBill.amount}}</td>
+        <td>{{overdueBill.billStatus}}</td>
+        <td>{{overdueBill.date}}</td>
+        <td><a href="http://localhost:8080/#!/bills/details/{{overdueBill.billId}}/owner/{{overdueBill.customerId}}">Get Details</a></td>
+        <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteBill(overdueBill.billId)">Delete Bill</a></td>
+    </tr>
+</table>
+
+<h1>All Bills</h1>
 <table class="table table-striped">
     <thead>
         <tr>
@@ -38,10 +150,8 @@
     <td><a href="http://localhost:8080/#!/bills/details/{{bill.billId}}/owner/{{bill.customerId}}">{{bill.billId}}</a></td>
         <td>{{bill.customerId}}</td>
         <td>{{ getCustomerDetails(bill.customerId) }}</td>
-<!--        <td>{{bill.customerId}}</td>-->
-<!--        <td>{{ getCustomerDetails(bill.customerId) }}</td>-->
+
         <td><a href="http://localhost:8080/#!/owners/details/{{bill.customerId}}">Owner details</a></td>
-<!--        <td ng-app="billHistory" ng-controller="BillHistoryController">{{getVetByVetId(bill.vetId)}}</td>-->
         <td>{{bill.vetId}}</td>
     <td>{{ getVetDetails(bill.vetId) }}</td>
         <td>{{bill.visitType}}</td>

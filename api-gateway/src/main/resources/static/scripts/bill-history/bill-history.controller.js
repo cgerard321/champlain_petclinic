@@ -5,6 +5,9 @@ angular.module('billHistory')
     .controller('BillHistoryController', ['$http','$scope', function ($http,$scope) {
         let self = this;
         self.billHistory = []
+        self.paidBills = []
+        self.unpaidBills = []
+        self.overdueBills = []
 
         self.owners = [
             { ownerId: '1', firstName: 'George', lastName: 'Franklin' },
@@ -35,6 +38,54 @@ angular.module('billHistory')
         eventSource.onerror = (error)=>{
             if(eventSource.readyState === 0){
                 eventSource.close()
+                console.log("Event source was closed by server succesfully. " + error)
+            }else{
+                console.log("EventSource error: "+error)
+            }
+        }
+
+        let eventSourcePaid = new EventSource("api/gateway/bills/paid")
+        eventSourcePaid.addEventListener('message',function (event){
+            $scope.$apply(function (){
+                self.paidBills.push(JSON.parse(event.data))
+            })
+        })
+
+        eventSourcePaid.onerror = (error)=>{
+            if(eventSourcePaid.readyState === 0){
+                eventSourcePaid.close()
+                console.log("Event source was closed by server succesfully. " + error)
+            }else{
+                console.log("EventSource error: "+error)
+            }
+        }
+
+        let eventSourceUnpaid = new EventSource("api/gateway/bills/unpaid")
+        eventSourceUnpaid.addEventListener('message',function (event){
+            $scope.$apply(function (){
+                self.unpaidBills.push(JSON.parse(event.data))
+            })
+        })
+
+        eventSourceUnpaid.onerror = (error)=>{
+            if(eventSourceUnpaid.readyState === 0){
+                eventSourceUnpaid.close()
+                console.log("Event source was closed by server succesfully. " + error)
+            }else{
+                console.log("EventSource error: "+error)
+            }
+        }
+
+        let eventSourceOverdue = new EventSource("api/gateway/bills/overdue")
+        eventSourceOverdue.addEventListener('message',function (event){
+            $scope.$apply(function (){
+                self.overdueBills.push(JSON.parse(event.data))
+            })
+        })
+
+        eventSourceOverdue.onerror = (error)=>{
+            if(eventSourceOverdue.readyState === 0){
+                eventSourceOverdue.close()
                 console.log("Event source was closed by server succesfully. " + error)
             }else{
                 console.log("EventSource error: "+error)
