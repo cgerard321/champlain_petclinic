@@ -185,7 +185,6 @@ vet details.template.html:
                         <tr>
                             <th>Rating</th>
                             <th>Description</th>
-                            <th>Review</th>
                             <th>Update</th>
                             <th>Delete</th>
                         </tr>
@@ -194,7 +193,6 @@ vet details.template.html:
                         <tr ng-repeat="rating in $ctrl.ratings track by rating.ratingId" ng-if="$ctrl.ratings.length > 0">
                             <td>{{ rating.rateScore }} / 5</td>
                             <td>{{ rating.rateDescription }}</td>
-                            <td>{{rating.predefinedDescription}}</td>
 
                             <!-- Rating Update Form -->
                             <td>
@@ -226,9 +224,6 @@ vet details.template.html:
                                     Update
                                 </button>
                             </td>
-                            <td>
-                            <td>
-
                             <td>
                                 <a class="btn btn-danger ratingButton" href="javascript:void(0)" ng-click="deleteVetRating(rating.ratingId)">Delete Rating</a>
                             </td>
