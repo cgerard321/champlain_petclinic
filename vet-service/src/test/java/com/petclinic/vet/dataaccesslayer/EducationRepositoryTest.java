@@ -71,4 +71,11 @@ class EducationRepositoryTest {
                 })
                 .verifyComplete();
     }
+    @Test
+    public void deleteEducationOfVet_ShouldSucceed () {
+        StepVerifier
+                .create(educationRepository.delete(e1))
+                .expectNextCount(0)
+                .verifyComplete();
+    }
 }

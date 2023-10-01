@@ -99,15 +99,20 @@
                             <th>Field Of Study</th>
                             <th>Start Year</th>
                             <th>End Year</th>
+                            <th>Delete</th>
                         </tr>
                         </thead>
                         <tbody>
-                            <tr ng-repeat="educations in $ctrl.educations track by educations.educatonId">
+
+                        <tr ng-repeat="educations in $ctrl.educations track by educations.educationId">
                                 <td>{{ educations.degree }}</td>
                                 <td>{{ educations.schoolName }}</td>
                                 <td>{{ educations.fieldOfStudy }}</td>
                                 <td>{{ educations.startDate }}</td>
                                 <td>{{ educations.endDate }}</td>
+                                <td>
+                                    <a class="btn btn-danger educationButton" href="javascript:void(0)" ng-click="deleteVetEducation(educations.educationId)">Delete Education</a>
+                                    </td>
                             </tr>
                         </tbody>
                     </table>
