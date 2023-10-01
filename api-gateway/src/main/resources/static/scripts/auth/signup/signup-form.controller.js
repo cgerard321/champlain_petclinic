@@ -30,8 +30,13 @@ angular.module('signupForm')
             })
             .catch(n => {
                 loaderDiv.style.display = "none";
-                $scope.errorMessages = n.data.message.split`\n`;
                 console.log(n);
+                try {
+                    $scope.errorMessages = n.data.password.split`\n`;
+                }
+                catch (e) {
+                    $scope.errorMessages = n.data.message.split`\n`;
+                }
             });
         }
 
