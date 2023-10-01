@@ -108,4 +108,5 @@ $scope.fetchInventoryList = function() {
             }
         };
 
+
     }]);
