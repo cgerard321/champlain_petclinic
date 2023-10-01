@@ -21,4 +21,4 @@ include:
 projectJDK: 17 #(Applied in CI/CD pipeline)
 
 #Specify Qodana linter for analysis (Applied in CI/CD pipeline)
-#linter: jetbrains/qodana-jvm:latest
+linter: jetbrains/qodana-jvm:latest
