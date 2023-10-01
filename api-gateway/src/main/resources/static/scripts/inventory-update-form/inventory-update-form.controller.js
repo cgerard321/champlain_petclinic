@@ -12,7 +12,7 @@ angular.module('inventoryUpdateForm')
 
         });
 
-  
+
 
         self.submitUpdateInventoryForm = function () {
             var req;
