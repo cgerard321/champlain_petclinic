@@ -46,7 +46,7 @@ jobs:
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
         with:
-          args: "--linter,jetbrains/qodana-jvm:latest"
+#          args: "--linter,jetbrains/qodana-jvm:latest"
           #todo Will setup the code-coverage percent to show on the Qodana reports in the future
 #          args: "-i,.qodana/code-coverage,--linter,jetbrains/qodana-jvm:latest"
           pr-mode: false
