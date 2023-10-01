@@ -30,10 +30,10 @@ jobs:
       - name: Run Build
         run: ./gradlew build
 
-      - name: Create coverage-data directory and copy contents
-        run: |
-          mkdir -p .qodana/code-coverage
-          cp -R */build/reports/* .qodana/code-coverage/
+#      - name: Create coverage-data directory and copy contents
+#        run: |
+#          mkdir -p .qodana/code-coverage
+#          cp -R */build/reports/* .qodana/code-coverage/
 
       - name: Archive coverage data
         uses: actions/upload-artifact@v2
@@ -46,7 +46,7 @@ jobs:
         env:
           QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
         with:
-#          args: "-i,--linter,jetbrains/qodana-jvm:latest"
+#          args: "-i,"
 #          args: "-i,--linter,jetbrains/qodana-jvm:latest"
 #          args: "-i,.qodana/code-coverage,--linter,jetbrains/qodana-jvm:latest"
           pr-mode: false
