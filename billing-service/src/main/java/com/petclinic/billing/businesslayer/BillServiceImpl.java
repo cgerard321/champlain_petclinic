@@ -61,6 +61,7 @@ public class BillServiceImpl implements BillService{
                             existingBill.setVisitType(r.getVisitType());
                             existingBill.setVetId(r.getVetId());
                             existingBill.setDate(r.getDate());
+                            existingBill.setBillStatus(r.getBillStatus());
                             existingBill.setAmount(r.getAmount());
 
                             return billRepository.save(existingBill);
