@@ -131,7 +131,24 @@ public class InventoryServiceClient {
                         resp -> rethrower.rethrow(resp, ex -> new ProductListNotFoundException(ex.get("message").toString(), NOT_FOUND)))
                 .bodyToFlux(ProductResponseDTO.class);
     }
+    public Flux<InventoryResponseDTO> searchInventory(
+            final String inventoryName,
+            final String inventoryType,
+            final String inventoryDescription
+    ) {
+        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(inventoryServiceUrl)
+                .queryParamIfPresent("inventoryName", Optional.ofNullable(inventoryName))
+                .queryParamIfPresent("inventoryType", Optional.ofNullable(inventoryType))
+                .queryParamIfPresent("inventoryDescription", Optional.ofNullable(inventoryDescription));
 
+        return webClient.get()
+                .uri(uriBuilder.buildAndExpand().toUri())
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                // Consider adding error-handling logic here if needed.
+                .bodyToFlux(InventoryResponseDTO.class);
+    }
+    /*
     public Flux<InventoryResponseDTO> getAllInventory(){
         return webClient.get()
                 .uri(inventoryServiceUrl)
@@ -139,6 +156,8 @@ public class InventoryServiceClient {
                 .retrieve()
                 .bodyToFlux(InventoryResponseDTO.class);
     }
+
+     */
     //delete all
 
     public Mono<Void> deleteAllProductForInventory(final String inventoryId) {
