@@ -38,6 +38,10 @@ spring:
       username: root
       password: password
       authentication-database: admin
+  r2dbc:
+    url: r2dbc:h2:mem:///images
+    username: user
+    password: pwd
 ---
 spring:
   config:

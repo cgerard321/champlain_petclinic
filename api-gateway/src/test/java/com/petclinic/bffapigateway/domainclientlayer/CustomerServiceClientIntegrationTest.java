@@ -7,6 +7,7 @@ import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
+import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterEach;
@@ -34,7 +35,6 @@ public class CustomerServiceClientIntegrationTest {
     final String test = "Test photo";
     final byte[] testBytes = test.getBytes();
 
-<<<<<<< HEAD
     private final PhotoDetails TEST_PHOTO = PhotoDetails.builder()
             .id(2)
             .name("photo")
@@ -54,9 +54,6 @@ public class CustomerServiceClientIntegrationTest {
 
 
     private final OwnerResponseDTO TEST_OWNER_RESPONSE = OwnerResponseDTO.builder()
-=======
-    private final OwnerResponseDTO TEST_OWNER = OwnerResponseDTO.builder()
->>>>>>> 484b3f73 (GetPhotoByVetId all changed files)
             .ownerId("ownerId-123")
             .firstName("John")
             .lastName("Smith")
