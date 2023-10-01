@@ -602,11 +602,19 @@ public class BFFApiGatewayController {
         return inventoryServiceClient.getProductsInInventoryByInventoryIdAndProductsField(inventoryId, productName, productPrice, productQuantity);
     }
 
-
+    @GetMapping(value = "inventory")
+    public Flux<InventoryResponseDTO> searchInventory(@RequestParam(required = false) String inventoryName,
+                                                      @RequestParam(required = false) String inventoryType,
+                                                      @RequestParam(required = false) String inventoryDescription){
+        return inventoryServiceClient.searchInventory(inventoryName, inventoryType, inventoryDescription);
+    }
+    /*
     @GetMapping(value = "inventory")
     public Flux<InventoryResponseDTO> getAllInventory(){
         return inventoryServiceClient.getAllInventory();
     }
+
+     */
 
 
 

@@ -16,9 +16,12 @@ public interface ProductInventoryService {
     Mono<ProductResponseDTO> updateProductInInventory(Mono<ProductRequestDTO> productRequestDTOMono, String inventoryId, String productId);
     Mono<Void> deleteProductInInventory(String inventoryId, String productId);
     Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductsField(String inventoryId, String productName, Double productPrice, Integer productQuantity);
-    Flux<InventoryResponseDTO> getAllInventory();
+   // Flux<InventoryResponseDTO> getAllInventory();
 
     Mono<Void> deleteAllProductInventory(String inventoryId);
     Mono<Void> deleteAllInventory();
+
+    Flux<InventoryResponseDTO> searchInventories(String inventoryName, String inventoryType, String inventoryDescription);
+
 
 }
