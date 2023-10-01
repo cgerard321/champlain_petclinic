@@ -86,4 +86,27 @@ $scope.fetchInventoryList = function() {
         arr = resp.data;
     });
 };
-}]);
+
+        $scope.deleteInventory = function (inventory) {
+            let ifConfirmed = confirm('Are you sure you want to remove this inventory?');
+            if (ifConfirmed) {
+
+                $http.delete('api/gateway/inventory/' + inventory.inventoryId)
+                    .then(successCallback, errorCallback)
+
+                function successCallback(response) {
+                    $scope.errors = [];
+                    alert(inventory.inventoryName + " Successfully Removed!");
+                    console.log(response, 'res');
+                    location.reload();
+
+                }
+                function errorCallback(error) {
+                    alert(data.errors);
+                    console.log(error, 'Data is inaccessible.');
+                }
+            }
+        };
+
+
+    }]);

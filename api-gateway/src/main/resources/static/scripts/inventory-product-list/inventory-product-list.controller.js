@@ -49,13 +49,13 @@ angular.module('inventoryProductList')
                         }
                     });
                 }
-
                 function errorCallback(error) {
                     alert(data.errors);
                     console.log(error, 'Data is inaccessible.');
                 }
             }
-        };
+        }
+
         $scope.searchProduct = function (productName, productQuantity, productPrice){
 
             inventoryId = $stateParams.inventoryId;

@@ -17,4 +17,10 @@ angular.module('inventoryList', ['ui.router'])
                 template: '<inventory-delete-confirm></inventory-delete-confirm>'
 
             })
+
+            .state('deleteInventory', {
+                parent: 'app',
+                url: '/inventory/:inventoryId',
+                template: '<inventory-item></inventory-item>'
+            })
     }]);
