@@ -89,12 +89,12 @@ public class VetController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-   @GetMapping("{vetId}/ratings/{predefinedDescription}/count")
+   /*@GetMapping("{vetId}/ratings/{predefinedDescription}/count")
    public Mono<ResponseEntity<Integer>> getCountOfRatingsByVetIdAndPredefinedDescription(@PathVariable String vetId, @PathVariable PredefinedDescription predefinedDescription){
        return ratingService.getCountOfRatingsByVetIdAndPredefinedDescription(EntityDtoUtil.verifyId(vetId), predefinedDescription)
                .map(ResponseEntity::ok)
                .defaultIfEmpty(ResponseEntity.notFound().build());
-   }
+   }*/
 
    //Vets
     @GetMapping()
