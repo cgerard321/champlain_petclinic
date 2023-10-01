@@ -504,7 +504,7 @@ public class BFFApiGatewayController {
 
 
     @DeleteMapping(value = "owners/{ownerId}")
-    public Mono<OwnerResponseDTO> deleteOwner(@PathVariable int ownerId){
+    public Mono<OwnerResponseDTO> deleteOwner(@PathVariable String ownerId){
         return customersServiceClient.deleteOwner(ownerId);
     }
     
