@@ -195,8 +195,14 @@ class VetServiceImplTest {
 
     @Test
     void deleteVet() {
-        vetService.deleteVetByVetId(VET_ID);
-        verify(vetRepository, times(1)).deleteVetByVetId(VET_ID);
+        when(vetRepository.findVetByVetId(anyString())).thenReturn(Mono.just(vet));
+        when(vetRepository.delete(any())).thenReturn(Mono.empty());
+
+        Mono<Void> deletedVet=vetService.deleteVetByVetId(VET_ID);
+
+        StepVerifier
+                .create(deletedVet)
+                .verifyComplete();
     }
 
 

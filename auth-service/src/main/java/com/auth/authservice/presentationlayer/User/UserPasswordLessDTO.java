@@ -24,10 +24,10 @@ import java.util.Set;
 @Builder(toBuilder = true)
 public class UserPasswordLessDTO {
 
-    private long id;
+    private String userId;
+
 
     private String username;
-
 
     private String email;
 

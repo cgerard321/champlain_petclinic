@@ -17,16 +17,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class VisitRepoTest {
     @Autowired
     private VisitRepo visitRepo;
-    private final Visit visit1 = buildVisit("73b5c112-5703-4fb7-b7bc-ac8186811ae1", "2");
-    private final Visit visit2 = buildVisit("visitId2", "2");
-    private final Visit visit3 = buildVisit("visitId3", "3");
+    String uuidVisit1 = UUID.randomUUID().toString();
+    String uuidVisit2 = UUID.randomUUID().toString();
+    Visit visit1 = buildVisit(uuidVisit1, "testing 1", "2200332");
+    Visit visit2 = buildVisit(uuidVisit2, "testing 1", "2200333");
+
+
 
     @BeforeEach
     void setupDb(){
         Publisher<Visit> visitPublisher = visitRepo.deleteAll()
                 .thenMany(visitRepo.save(visit1))
-                .thenMany(visitRepo.save(visit2))
-                .thenMany(visitRepo.save(visit3));
+                .thenMany(visitRepo.save(visit2));
         StepVerifier.create(visitPublisher)
                 .expectNextCount(1)
                 .verifyComplete();
@@ -80,15 +82,13 @@ class VisitRepoTest {
 
 
 
-
-    private Visit buildVisit(String visitId, String petId){
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+    private Visit buildVisit(String uuid,String description, String vetId){
         return Visit.builder()
-                .visitId(visitId)
-                .visitDate(LocalDateTime.parse("2022-11-25T13:45:00"))
-                .description("this is a dummy description")
-                .petId(petId)
-                .practitionerId(UUID.randomUUID().toString())
+                .visitId(uuid)
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .description(description)
+                .petId("2")
+                .practitionerId(vetId)
                 .status(true).build();
     }
 }

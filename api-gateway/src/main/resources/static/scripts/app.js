@@ -8,44 +8,63 @@ const whiteList = new Set([
 ]);
 
 /* App Module */
-var petClinicApp = angular.module('petClinicApp', [
+const petClinicApp = angular.module('petClinicApp', [
     'ui.router', 'layoutNav', 'layoutFooter', 'layoutWelcome', 'ownerList', 'ownerDetails', 'ownerForm', 'ownerRegister', 'petForm'
-    , 'visits', 'vetList','vetForm','vetDetails', 'visitList', 'billForm', 'billUpdateForm', 'loginForm', 'rolesDetails', 'signupForm',
-    'billDetails', 'billsByOwnerId', 'billHistory','billsByVetId','inventoryList', 'inventoryForm', 'productForm','inventoryProductList'
-    , 'verification' , 'adminPanel','resetPwdForm','forgotPwdForm']);
-
+    , 'visits', 'vetList', 'vetForm', 'vetDetails', 'visitList', 'billForm', 'billUpdateForm', 'loginForm', 'rolesDetails', 'signupForm',
+    'billDetails', 'billsByOwnerId', 'billHistory', 'billsByVetId', 'inventoryList', 'inventoryForm', 'productForm', 'inventoryProductList'
+    , 'verification', 'adminPanel', 'resetPwdForm', 'forgotPwdForm']);
 
 
 petClinicApp.factory("authProvider", ["$window", function ($window) {
 
     return {
-        setUser: ({ username, email }) => {
+        setUser: ({ username, email, userId, roles }) => {
+            console.log("Setting user")
+            console.log(username)
+            console.log(email)
+            console.log(userId)
+            console.log(roles)
+
             $window.localStorage.setItem("username", username)
             $window.localStorage.setItem("email", email)
+            $window.localStorage.setItem("UUID", userId)
+            let rolesArr = []
+            roles.forEach(role => {
+                rolesArr.push(role.name)
+            });
+            console.log(rolesArr.toString())
+            $window.localStorage.setItem("roles", rolesArr.toString())
         },
         getUser: () => ({
             username: $window.localStorage.getItem("username"),
             email: $window.localStorage.getItem("email"),
+            UUID: $window.localStorage.getItem("UUID"),
+            roles : $window.localStorage.getItem("roles")
         }),
         purgeUser: () => {
             $window.localStorage.removeItem("username")
             $window.localStorage.removeItem("email")
+            $window.localStorage.removeItem("UUID")
+            $window.localStorage.removeItem("roles")
         },
-        isLoggedIn: () => !!$window.localStorage.getItem("email")
+        isLoggedIn: () => !!$window.localStorage.getItem("email"),
+        isAdmin: () =>  $window.localStorage.getItem("roles") != null && !!$window.localStorage.getItem("roles").includes("ADMIN")
     }
 }]);
 
 petClinicApp.factory("httpErrorInterceptor", ["$q", "$location", "authProvider", function ($q, $location, authProvider) {
     return {
-        // NOTE: This is not the correct way to do this
-        // This method completely disregards whoever was subscribed to this promise and just cancels it
-        // I just do not care to implement it correctly because it is more complex
         responseError: rej => {
-            if (!whiteList.has($location.path().substring(1)) && (rej.status === 401 || rej.status === 403)) {
+            if (!whiteList.has($location.path().substring(1)) && (rej.status === 401)) {
                 authProvider.purgeUser();
                 $location.path('/login');
                 return $q(() => null)
+            }else if(rej.status === 403){
+                $location.path('/welcome');
+                console.log("You are not authorized to access this page")
+                return $q(() => null)
             }
+
             return $q.reject(rej);
         }
     }
@@ -103,11 +122,15 @@ petClinicApp.config(['$stateProvider', '$urlRouterProvider', '$locationProvider'
 
             const load = () => {
                 $scope.isLoggedIn = authProvider.isLoggedIn();
+                $scope.isAdmin = authProvider.isAdmin();
                 if(!$scope.isLoggedIn)return;
 
-                const { email, username } = authProvider.getUser();
+                const { email, username, roles, UUID } = authProvider.getUser();
                 $scope.email = email;
                 $scope.username = username;
+                $scope.roles = roles;
+                $scope.UUID = UUID;
+
             }
 
             $rootScope.$on('$locationChangeSuccess', load);

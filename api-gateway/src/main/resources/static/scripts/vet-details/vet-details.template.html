@@ -81,10 +81,48 @@
             </div>
         </div>
         <hr>
+        <!-- Vet Education -->
+        <div class="row g-5">
+            <!-- Educations Header -->
+            <h3 class="form-label-rating text-center" style="margin-top: 5%">Educations</h3>
+            <div class="col-md-12" ng-if="$ctrl.educations.length > 0">
+                <div class="col-md-12">
+                    <div ng-if="$ctrl.educations.length === 0" style="text-align: center">
+                        This vet has no educations listed.
+                    </div>
+                    <!-- Education Table -->
+                    <table class="table" style="margin-bottom: 10%">
+                        <thead>
+                        <tr>
+                            <th>Degree</th>
+                            <th>Institution</th>
+                            <th>Field Of Study</th>
+                            <th>Start Year</th>
+                            <th>End Year</th>
+                            <th>Delete</th>
+                        </tr>
+                        </thead>
+                        <tbody>
 
+                        <tr ng-repeat="educations in $ctrl.educations track by educations.educationId">
+                                <td>{{ educations.degree }}</td>
+                                <td>{{ educations.schoolName }}</td>
+                                <td>{{ educations.fieldOfStudy }}</td>
+                                <td>{{ educations.startDate }}</td>
+                                <td>{{ educations.endDate }}</td>
+                                <td>
+                                    <a class="btn btn-danger educationButton" href="javascript:void(0)" ng-click="deleteVetEducation(educations.educationId)">Delete Education</a>
+                                    </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <hr>
+<!-- tete -->
         <!-- Ratings and Add Rating -->
         <div class="row g-5">
-
             <!-- Percentage of ratings -->
             <div class="col-md-6" style="margin-top: 9%">
                 <h3 class="form-label-rating">Percentages of Ratings:</h3>
@@ -124,8 +162,9 @@
                                 </form>
                             </div>
                         </div>
-                    </div>
+                </div>
             </div>
+
         <!-- Ratings Chart -->
         <div class="col-md-12" ng-if="$ctrl.ratings.length > 0" style="margin-top: 5%">
             <div class="col-md-12">
@@ -150,9 +189,9 @@
 
                         <!-- Rating Update Form -->
                         <td>
-                            <form enctype="multipart/form-data" id="updateForm" name="updateForm">
-                                <div class="col-sm-12" name="ratingUpdate" id="ratingUpdate" style="display: none">
-                                    <select name="ratingOptions" id="ratingOptions">
+                            <form enctype="multipart/form-data" id="updateForm{{rating.ratingId}}" name="updateForm">
+                                <div class="col-sm-12" name="ratingUpdate" id="ratingUpdate{{rating.ratingId}}" style="display: none">
+                                    <select name="ratingOptions" id="ratingOptions{{rating.ratingId}}">
                                         <option value="1">1/5</option>
                                         <option value="2">2/5</option>
                                         <option value="3">3/5</option>
@@ -161,14 +200,15 @@
                                     </select>
                                     <br />
                                     <h5 class="form-label">Review Description</h5>
-                                    <textarea class="form-control" id="updateDescription" maxlength="350" name="updateDescription"
+                                    <textarea class="form-control" id="updateDescription{{rating.ratingId}}" maxlength="350" name="updateDescription"
                                               ng-model="rating.rateDescription" pattern="^(.*)" placeholder="Update Description"
                                               title="Maximum of 350 characters."></textarea>
                                 </div>
                             </form>
 
-                            <button class="update-vet-button btn btn-success" id="updateRatingBtn"
-                                    ng-click="$ctrl.updateRating(rating.ratingId, updateForm)">
+                            <button class="update-vet-button btn btn-success"
+                                    id="updateRatingBtn{{rating.ratingId}}" 
+                                    ng-click="$ctrl.updateRating(rating.ratingId, updateForm+rating.ratingId)">
                                 Update
                             </button>
                         </td>

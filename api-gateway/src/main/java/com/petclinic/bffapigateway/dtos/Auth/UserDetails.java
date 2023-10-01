@@ -13,11 +13,8 @@ import java.util.Set;
 @Builder(toBuilder = true)
 public class UserDetails {
 
-    private long id;
-
+    private String userId;
     private String username;
-
-    private String password;
 
     private String email;
 

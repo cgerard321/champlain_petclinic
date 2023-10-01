@@ -1,5 +1,6 @@
 package com.petclinic.visits.visitsservicenew.PresentationLayer;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,6 +14,8 @@ import java.time.LocalDateTime;
 @Builder
 public class VisitResponseDTO {
     private String visitId;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime visitDate;
 /*   private int year;
     private int month;

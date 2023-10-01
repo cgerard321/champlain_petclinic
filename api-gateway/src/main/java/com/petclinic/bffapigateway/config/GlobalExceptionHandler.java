@@ -9,6 +9,8 @@ import org.webjars.NotFoundException;
 
 import java.security.GeneralSecurityException;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+
 /**
  * Created by IntelliJ IDEA.
  *
@@ -74,6 +76,42 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                 .body(new HttpErrorInfo(HttpStatus.UNAUTHORIZED.value(), ex.getMessage()));
+    }
+
+
+
+    @ExceptionHandler(value = IllegalArgumentException.class)
+    public ResponseEntity<HttpErrorInfo> illegalArgumentException(IllegalArgumentException ex) {
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new HttpErrorInfo(HttpStatus.BAD_REQUEST.value(), ex.getMessage()));
+    }
+    
+    @ExceptionHandler(value = BadRequestException.class)
+    public ResponseEntity<HttpErrorInfo> handleBadRequestException(BadRequestException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new HttpErrorInfo(HttpStatus.BAD_REQUEST.value(),ex.getMessage()));
+    }
+
+    @ExceptionHandler(value = InventoryNotFoundException.class)
+    public ResponseEntity<HttpErrorInfo> inventoryNotFoundException(InventoryNotFoundException ex){
+        return ResponseEntity.status(ex.getHttpStatus())
+                .body(new HttpErrorInfo(ex.getHttpStatus().value(), ex.getMessage()));
+    }
+    @ExceptionHandler(value = ProductListNotFoundException.class)
+    public ResponseEntity<HttpErrorInfo> productListNotFoundException(ProductListNotFoundException ex){
+        return ResponseEntity.status(ex.getHttpStatus())
+                .body(new HttpErrorInfo(ex.getHttpStatus().value(), ex.getMessage()));
+    }
+    @ExceptionHandler(value = InvalidInputsInventoryException.class)
+    public ResponseEntity<HttpErrorInfo> invalidInputsInventoryException(InvalidInputsInventoryException ex){
+        return ResponseEntity.status(ex.getHttpStatus())
+                .body(new HttpErrorInfo(ex.getHttpStatus().value(), ex.getMessage()));
+    }
+    @ExceptionHandler(value = ForbiddenAccessException.class)
+    public ResponseEntity<HttpErrorInfo> handleForbiddenAccessException(ForbiddenAccessException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(new HttpErrorInfo(HttpStatus.FORBIDDEN.value(),ex.getMessage()));
     }
 
 }
