@@ -8,7 +8,7 @@ version: "1.0"
 profile:
   name: qodana.recommended
 
-linter: jetbrains/qodana-jvm:latest
+
 #Enable inspections
 include:
   - name: VulnerableLibrariesGlobal
@@ -27,3 +27,4 @@ exclude:
 projectJDK: 17 #(Applied in CI/CD pipeline)
 
 #Specify Qodana linter for analysis (Applied in CI/CD pipeline)
+#linter: jetbrains/qodana-jvm:latest
