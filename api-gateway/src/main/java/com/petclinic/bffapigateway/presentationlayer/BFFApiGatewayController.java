@@ -247,10 +247,10 @@ public class BFFApiGatewayController {
      * End of Visit Methods
      **/
 
+
     /**
      * Start of Vet Methods
      **/
-
     //Photo
     @GetMapping("vets/{vetId}/photo")
     public Mono<ResponseEntity<Resource>> getPhotoByVetId(@PathVariable String vetId) {
@@ -309,6 +309,7 @@ public class BFFApiGatewayController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
 
     //Education
     @GetMapping(value = "vets/{vetId}/educations")

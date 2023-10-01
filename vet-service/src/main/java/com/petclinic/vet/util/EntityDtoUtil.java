@@ -11,7 +11,10 @@ package com.petclinic.vet.util;
   * Ticket: feat(VVS-CPC-553): add veterinarian
  */
 
+<<<<<<< HEAD
 import com.petclinic.vet.dataaccesslayer.Education;
+=======
+>>>>>>> 484b3f73fd535c5c00418715b80ee59714bd7340
 import com.petclinic.vet.dataaccesslayer.Photo;
 import com.petclinic.vet.dataaccesslayer.Rating;
 import com.petclinic.vet.dataaccesslayer.Specialty;
@@ -20,7 +23,13 @@ import com.petclinic.vet.exceptions.InvalidInputException;
 import com.petclinic.vet.servicelayer.*;
 import lombok.Generated;
 import org.springframework.beans.BeanUtils;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
+import org.springframework.util.StreamUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
