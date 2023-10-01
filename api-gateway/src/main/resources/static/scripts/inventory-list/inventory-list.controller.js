@@ -96,7 +96,7 @@ $scope.fetchInventoryList = function() {
 
                 function successCallback(response) {
                     $scope.errors = [];
-                    alert(inventory.inventoryId + " Successfully Removed!");
+                    alert(inventory.inventoryName + " Successfully Removed!");
                     console.log(response, 'res');
                     location.reload();
 
