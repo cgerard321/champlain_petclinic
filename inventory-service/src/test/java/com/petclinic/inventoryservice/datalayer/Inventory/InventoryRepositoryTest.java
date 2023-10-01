@@ -90,7 +90,7 @@ class InventoryRepositoryTest {
     }
 
     @Test
-    public void shouldFindInventoryByName() {
+    public void shouldFindInventoryByName() {git s
         // Arrange
         Inventory inventory = buildInventory("inventoryId_3", "SampleName", InventoryType.internal, "OtherDescription");
         inventoryRepository.save(inventory).block();
