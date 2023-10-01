@@ -117,6 +117,7 @@ public class InventoryServiceClient {
                 .bodyToMono(Void.class);
     }
 
+
     public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductsField(final String inventoryId, final String productName, final Double productPrice, final Integer productQuantity){
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(inventoryServiceUrl + "/{inventoryType}/products")
                 .queryParamIfPresent("productName", Optional.ofNullable(productName))
@@ -131,6 +132,7 @@ public class InventoryServiceClient {
                         resp -> rethrower.rethrow(resp, ex -> new ProductListNotFoundException(ex.get("message").toString(), NOT_FOUND)))
                 .bodyToFlux(ProductResponseDTO.class);
     }
+
 
     public Flux<InventoryResponseDTO> getAllInventory(){
         return webClient.get()
