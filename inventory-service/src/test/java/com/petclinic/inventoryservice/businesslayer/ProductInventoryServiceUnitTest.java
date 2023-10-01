@@ -707,4 +707,38 @@ class ProductInventoryServiceUnitTest {
     }
 
 
+
+    @Test
+    public void deleteInventoryByInventoryId_validInventory_ShouldSucceed() {
+        // Arrange
+        String validInventoryId = "1";
+
+        when(inventoryRepository.findInventoryByInventoryId(validInventoryId)).thenReturn(Mono.just(inventory));
+
+        when(inventoryRepository.delete(inventory)).thenReturn(Mono.empty());
+
+        // Act & Assert
+        StepVerifier.create(productInventoryService.deleteInventoryByInventoryId(validInventoryId))
+                .verifyComplete();
+
+        verify(inventoryRepository).findInventoryByInventoryId(validInventoryId);
+        verify(inventoryRepository).delete(inventory);
+    }
+
+    @Test
+    public void deleteInventoryByInventoryId_invalidInventory_ShouldThrowRuntimeException() {
+        // Arrange
+        String invalidInventoryId = "nonexistentId";
+
+        when(inventoryRepository.findInventoryByInventoryId(invalidInventoryId)).thenReturn(Mono.empty());
+
+        // Act & Assert
+        StepVerifier.create(productInventoryService.deleteInventoryByInventoryId(invalidInventoryId))
+                .expectErrorMatches(throwable -> throwable instanceof RuntimeException && throwable.getMessage().equals("The InventoryId is invalid"))
+                .verify();
+
+        verify(inventoryRepository).findInventoryByInventoryId(invalidInventoryId);
+        verify(inventoryRepository, never()).delete(any(Inventory.class));
+    }
+
 }

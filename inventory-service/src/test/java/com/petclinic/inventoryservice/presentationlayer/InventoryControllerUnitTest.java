@@ -639,5 +639,55 @@ class InventoryControllerUnitTest {
         verify(productInventoryService, times(1))
                 .addProductToInventory(any(), eq(inventoryId));
     }
+
+    @Test
+    public void deleteInventory_byInventoryId_shouldSucceed(){
+
+        String validInventoryId = "123";
+
+        InventoryResponseDTO inventoryResponseDTO = InventoryResponseDTO.builder()
+                .inventoryId(validInventoryId)
+                .inventoryName("Updated Internal")
+                .inventoryType(internal)
+                .inventoryDescription("Updated inventory_3")
+                .build();
+        //arrange
+        when(productInventoryService.deleteInventoryByInventoryId(inventoryResponseDTO.getInventoryId()))
+                .thenReturn(Mono.empty());
+
+        //act and assert
+        webTestClient.delete()
+                .uri("/inventory/{inventoryId}", inventoryResponseDTO.getInventoryId())
+                .exchange()
+                .expectStatus().isNoContent();
+
+        verify(productInventoryService, times(1))
+                .deleteInventoryByInventoryId( eq(validInventoryId));
+    }
+
+    @Test
+    public void deleteInventory_byInvalidInventoryId_shouldThrowNotFoundException(){
+
+        String invalidInventoryId = "nonExistentId";
+
+        //arrange
+        when(productInventoryService.deleteInventoryByInventoryId(invalidInventoryId))
+                .thenReturn(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + invalidInventoryId)));
+
+        //act and assert
+        webTestClient.delete()
+                .uri("/inventory/{inventoryId}", invalidInventoryId)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message","Inventory not found with InventoryId: " + invalidInventoryId);
+
+
+        verify(productInventoryService, times(1))
+                .deleteInventoryByInventoryId(eq(invalidInventoryId));
+    }
+
+
+
 }
 
