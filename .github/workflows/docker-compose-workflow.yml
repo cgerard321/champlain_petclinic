@@ -7,11 +7,7 @@ jobs:
       - uses: actions/checkout@v2
       - name: 'Create env file'
         run: |
-          cd /home/runner/work/champlain_petclinic/champlain_petclinic;
-          ls
-          touch mailer.env
-          echo SMTP_PASS=fakePass >> mailer.env
-          cat mailer.env
+          echo "SMTP_PASS=fakepass" > mailer.env
       - name: Build the stack
         run: docker-compose up -d
       - name: Test
