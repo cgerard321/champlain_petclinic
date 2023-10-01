@@ -43,7 +43,7 @@ class PhotoServiceImplTest {
             .build();
 
     @Test
-    void getVetByVetId() {
+    void getPhotoByValidVetId() {
         when(photoRepository.findByVetId(anyString())).thenReturn(Mono.just(photo));
 
         Mono<Resource> photoMono = photoService.getPhotoByVetId(VET_ID);
