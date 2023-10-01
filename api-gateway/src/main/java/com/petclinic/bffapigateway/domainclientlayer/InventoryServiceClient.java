@@ -43,6 +43,17 @@ public class InventoryServiceClient {
                 .build();
     }
 
+
+    public Mono<InventoryResponseDTO> getInventoryById(final String inventoryId) {
+        return webClient.get()
+                .uri(inventoryServiceUrl + "/{inventoryId}", inventoryId)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        resp -> rethrower.rethrow(resp, ex -> new InventoryNotFoundException(ex.get("message").toString(), NOT_FOUND)))
+                .bodyToMono(InventoryResponseDTO.class);
+    }
+
     public Mono<ProductResponseDTO> addProductToInventory(final ProductRequestDTO model, final String inventoryId){
         return webClient.post()
                 .uri(inventoryServiceUrl + "/{inventoryId}/products", inventoryId)
@@ -81,6 +92,10 @@ public class InventoryServiceClient {
                 .bodyToMono(InventoryResponseDTO.class);
     }
 
+
+
+
+
     public Mono<ProductResponseDTO> updateProductInInventory(final ProductRequestDTO model, final String inventoryId, final String productId){
         return webClient
                 .put()
@@ -102,6 +117,7 @@ public class InventoryServiceClient {
                 .bodyToMono(Void.class);
     }
 
+
     public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductsField(final String inventoryId, final String productName, final Double productPrice, final Integer productQuantity){
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(inventoryServiceUrl + "/{inventoryType}/products")
                 .queryParamIfPresent("productName", Optional.ofNullable(productName))
@@ -116,6 +132,27 @@ public class InventoryServiceClient {
                         resp -> rethrower.rethrow(resp, ex -> new ProductListNotFoundException(ex.get("message").toString(), NOT_FOUND)))
                 .bodyToFlux(ProductResponseDTO.class);
     }
+    public Flux<InventoryResponseDTO> searchInventory(
+            final String inventoryName,
+            final String inventoryType,
+            final String inventoryDescription
+    ) {
+        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(inventoryServiceUrl)
+                .queryParamIfPresent("inventoryName", Optional.ofNullable(inventoryName))
+                .queryParamIfPresent("inventoryType", Optional.ofNullable(inventoryType))
+                .queryParamIfPresent("inventoryDescription", Optional.ofNullable(inventoryDescription));
+
+
+        return webClient.get()
+                .uri(uriBuilder.buildAndExpand().toUri())
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                // Consider adding error-handling logic here if needed.
+                .bodyToFlux(InventoryResponseDTO.class);
+    }
+    /*
+
+
 
     public Flux<InventoryResponseDTO> getAllInventory(){
         return webClient.get()
@@ -124,6 +161,8 @@ public class InventoryServiceClient {
                 .retrieve()
                 .bodyToFlux(InventoryResponseDTO.class);
     }
+
+     */
     //delete all
 
     public Mono<Void> deleteAllProductForInventory(final String inventoryId) {

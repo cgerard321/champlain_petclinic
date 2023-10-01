@@ -1,25 +1,30 @@
 package com.petclinic.bffapigateway.config;
 
 import com.petclinic.bffapigateway.exceptions.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.bind.support.WebExchangeBindException;
 import org.webjars.NotFoundException;
 
 import java.security.GeneralSecurityException;
+import java.util.HashMap;
+import java.util.Map;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 
 /**
  * Created by IntelliJ IDEA.
- *
  * User: @nariman
  * Date: 2021-10-15
  * Ticket: feat(APIG-CPC-354)
  */
 
-
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -68,7 +73,17 @@ public class GlobalExceptionHandler {
                 .body(new HttpErrorInfo(HttpStatus.NOT_FOUND.value(), ex.getMessage()));
     }
 
-
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(WebExchangeBindException.class)
+    public Map<String, String> handleValidationExceptions(WebExchangeBindException ex) {
+        Map<String, String> errors = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            String fieldName = ((FieldError) error).getField();
+            String errorMessage = error.getDefaultMessage();
+            errors.put(fieldName, errorMessage);
+        });
+        return errors;
+    }
   
 
     @ExceptionHandler(value = NoTokenFoundException.class)

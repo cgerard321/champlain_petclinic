@@ -10,6 +10,7 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.security.GeneralSecurityException;
+import java.util.Arrays;
 
 @Slf4j
 @Component
@@ -22,6 +23,9 @@ public class GlobalServletExceptionHandler implements ErrorWebExceptionHandler {
         try{
             //get the first 3 digits of the exception message for the error code
             status = HttpStatus.valueOf((Integer.parseInt(ex.getMessage().substring(0, 3))));
+            log.debug("Exception type: {}", ex.getClass().getSimpleName());
+            log.debug("Exception message: {}", ex.getMessage());
+            log.debug("Status found in 3 digits : "+status.toString());
         }
         catch (Exception e){
 
@@ -36,12 +40,7 @@ public class GlobalServletExceptionHandler implements ErrorWebExceptionHandler {
             } else if (exClass.equals(GenericHttpException.class)) {
                 GenericHttpException error = (GenericHttpException) ex;
                 status = error.getHttpStatus();
-
-            } else if(exClass.equals(IllegalArgumentException.class)){
-
-                status = HttpStatus.BAD_REQUEST;
-
-            } else if(exClass.equals(BadRequestException.class)){
+            } else if(exClass.equals(IllegalArgumentException.class) || exClass.equals(BadRequestException.class)){
                 status = HttpStatus.BAD_REQUEST;
             }
             else if(exClass.equals(NullPointerException.class)){
@@ -49,14 +48,14 @@ public class GlobalServletExceptionHandler implements ErrorWebExceptionHandler {
             }
             else if(exClass.equals(ForbiddenAccessException.class)){
                 status = HttpStatus.FORBIDDEN;
-            }
+            } // Handle any other exception types here
             else {
                 log.error("Exception not handled: {}", exClass.getSimpleName());
                 status = HttpStatus.UNPROCESSABLE_ENTITY;
             }
 
-            // Handle any other exception types here
         }
+
 
 
         if (exchange.getResponse().isCommitted()) {
@@ -67,6 +66,14 @@ public class GlobalServletExceptionHandler implements ErrorWebExceptionHandler {
         exchange.getResponse().setStatusCode(status);
         HttpErrorInfo errorInfo = new HttpErrorInfo(status.value(), ex.getMessage());
 
+        try{
+            log.error(Arrays.toString(ex.getStackTrace()));
+        }
+        catch (Exception e){
+            log.error("Could not print stack trace");
+        }
+
+        log.error("Error info: {}", errorInfo);
         exchange.getResponse().getHeaders().setContentType(org.springframework.http.MediaType.APPLICATION_JSON);
         return exchange.getResponse().writeWith(Mono.just(exchange.getResponse()
                 .bufferFactory().wrap((errorInfo.toJson()).getBytes())));

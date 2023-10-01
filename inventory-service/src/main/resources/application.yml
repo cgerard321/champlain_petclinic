@@ -13,10 +13,8 @@ spring:
   data:
     mongodb:
       port: 0
-      database: billings
-  mongodb:
-    embedded:
-      version: 4.0.21
+      database: inventories
+de.flapdoodle.mongodb.embedded.version: 5.0.5
 
 ---
 spring:

@@ -61,6 +61,49 @@ class InventoryRepositoryTest {
                 .expectNextCount(0)  // No inventory should be found
                 .verifyComplete();
     }
+    //search
+    @Test
+    public void shouldFindInventoryByNameTypeAndDescription() {
+        // Arrange
+        Inventory inventory = buildInventory("inventoryId_1", "SampleName", InventoryType.internal, "SampleDescription");
+        inventoryRepository.save(inventory).block();
+
+        // Act & Assert
+        StepVerifier
+                .create(inventoryRepository.findAllByInventoryNameAndInventoryTypeAndInventoryDescription(
+                        "SampleName", InventoryType.internal.toString(), "SampleDescription"))
+                .expectNextMatches(result -> result.getInventoryId().equals("inventoryId_1"))
+                .verifyComplete();
+    }
+
+    @Test
+    public void shouldFindInventoryByTypeAndDescription() {
+        // Arrange
+        Inventory inventory = buildInventory("inventoryId_2", "OtherName", InventoryType.internal, "SampleDescription");
+        inventoryRepository.save(inventory).block();
+
+        // Act & Assert
+        StepVerifier
+                .create(inventoryRepository.findAllByInventoryTypeAndInventoryDescription(InventoryType.internal.toString(), "SampleDescription"))
+                .expectNextMatches(result -> result.getInventoryId().equals("inventoryId_2"))
+                .verifyComplete();
+    }
+
+    @Test
+    public void shouldFindInventoryByName() {
+        // Arrange
+        Inventory inventory = buildInventory("inventoryId_3", "SampleName", InventoryType.internal, "OtherDescription");
+        inventoryRepository.save(inventory).block();
+
+        // Act & Assert
+        StepVerifier
+                .create(inventoryRepository.findAllByInventoryName("SampleName"))
+                .expectNextMatches(result -> result.getInventoryId().equals("inventoryId_3"))
+                .verifyComplete();
+    }
+
+
+
     private Inventory buildInventory(String inventoryId, String inventoryName, InventoryType inventoryType, String inventoryDescription) {
         return Inventory.builder()
                 .inventoryName(inventoryName)
