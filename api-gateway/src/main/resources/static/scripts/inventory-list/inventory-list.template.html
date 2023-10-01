@@ -57,8 +57,10 @@
             </a>
         </td>
 
+
+
         <td>
-            <a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteInventory(inventory)">Delete</a>
+            <button class="btn btn-danger" type="button" ng-click="$ctrl.deleteInventory(inventory)">Delete visit</button>
         </td>
 
         <a class="btn btn-warning" ui-sref="updateInventory({inventoryId: inventory.inventoryId, method:'edit'})"> Edit
@@ -77,6 +79,8 @@
         <!--<td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteBundle(bundle.bundleUUID)">Delete Bundle</a></td>-->
     </tr>
 </table>
+
+<div id="loadingObject" style="display: none;">Loading...</div> <!--This is the page loading element-->
 
 
 <a ng-click="deleteAllInventories()">

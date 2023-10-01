@@ -184,6 +184,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                 .findAllProductsByInventoryId(inventoryId)
                 .map(EntityDTOUtil::toProductResponseDTO);
                 //where the 404 not found issue lies if we switchIfEmpty
+
     }
 
 

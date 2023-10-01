@@ -86,4 +86,51 @@ $scope.fetchInventoryList = function() {
         arr = resp.data;
     });
 };
-}]);
+
+        $scope.deleteInventory = function (inventory) {
+            let ifComfirmed = confirm('Are you sure you want to remove this inventory?');
+            if (ifComfirmed) {
+
+                $http.delete('api/gateway/inventory/' + inventory.inventoryId)
+                    .then(successCallback, errorCallback)
+
+                function successCallback(response) {
+                    $scope.errors = [];
+                    alert(inventory.inventoryId + " Successfully Removed!");
+                    console.log(response, 'res');
+                    delayedReload();
+
+
+                    /*
+                    $http.get('api/gateway/inventory'+ inventory.inventoryId).then(function (resp) {
+                        self.inventoryProductList = resp.data;
+                        arr = resp.data;
+
+                    }).catch(function (error) {
+                        if (error.status === 404) {
+                            $window.location.reload();
+                        } else {
+                            console.error('An error occurred:', error);
+                        }
+                    });
+
+                     */
+                }
+
+                function errorCallback(error) {
+                    alert(data.errors);
+                    console.log(error, 'Data is inaccessible.');
+                }
+            }
+        };
+
+
+        function delayedReload() {
+            var loadingIndicator = document.getElementById('loadingObject');
+            loadingIndicator.style.display = 'block';
+            setTimeout(function() {
+                location.reload();
+            }, 1000); //delay by 1 second
+        }
+
+    }]);
