@@ -9,7 +9,7 @@ profile:
   name: qodana.recommended
 
 
-linter: jetbrains/qodana-jvm:latest
+
 #Enable inspections
 include:
   - name: VulnerableLibrariesGlobal
@@ -24,7 +24,8 @@ include:
 exclude:
   - name: all
     paths:
-      - .qodana/code-coverage/jacoco/test/html/jacoco-resources
+      - .qodana/code-coverage/jacoco/test/html/jacoco-resources/prettify.js
 
 projectJDK: 17 #(Applied in CI/CD pipeline)
 #Specify Qodana linter for analysis (Applied in CI/CD pipeline)
+linter: jetbrains/qodana-jvm:latest
