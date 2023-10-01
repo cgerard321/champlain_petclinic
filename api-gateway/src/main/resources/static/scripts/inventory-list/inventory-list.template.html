@@ -49,16 +49,6 @@
         <td><span>{{inventory.inventoryType}}</span></td>
         <td><span>{{inventory.inventoryDescription}}</span></td>
 
-
-    <td>
-        <td>
-            <a class="btn btn-warning" ui-sref="updateInventory({inventoryId: inventory.inventoryId, method: 'edit'})"> Edit
-
-            </a>
-        </td>
-
-
-
         <td>
             <!--<button class="btn btn-danger" type="button" ui-sref="deleteInventory({ inventoryId: inventory.inventoryId })">Delete visit</button>-->
             <a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteInventory(inventory)">Delete</a>
