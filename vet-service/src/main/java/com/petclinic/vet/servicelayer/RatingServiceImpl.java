@@ -19,6 +19,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
+import static org.springframework.data.repository.util.ReactiveWrapperConverters.map;
+
 @Service
 public class RatingServiceImpl implements RatingService {
     private final VetRepository vetRepository;
@@ -53,20 +55,26 @@ public class RatingServiceImpl implements RatingService {
     @Override
     public Mono<RatingResponseDTO> addRatingToVet(String vetId, Mono<RatingRequestDTO> ratingRequestDTO) {
         return vetRepository.findVetByVetId(vetId)
-                .switchIfEmpty(Mono.error(new NotFoundException("vetId not found: "+vetId)))
+                .switchIfEmpty(Mono.error(new NotFoundException("vetId not found: " + vetId)))
                 .flatMap(r -> ratingRequestDTO.flatMap(dto -> {
                     if (dto.getRateScore() < 1 || dto.getRateScore() > 5) {
                         return Mono.error(new InvalidInputException("rateScore should be between 1 and 5: " + dto.getRateScore()));
                     } else {
-                        return ratingRequestDTO;
+                        return Mono.just(dto);
                     }
                 }))
-                .switchIfEmpty(Mono.error(new NotFoundException("Hello")))
+                .map(requestDto -> {
+                    if (requestDto.getPredefinedDescription() != null){
+                        requestDto.setRateDescription(requestDto.getPredefinedDescription().name());
+                    }
+                    return requestDto;
+                })
                 .map(EntityDtoUtil::toEntity)
                 .doOnNext(r -> r.setRatingId(UUID.randomUUID().toString()))
                 .flatMap(ratingRepository::insert)
                 .map(EntityDtoUtil::toDTO);
     }
+
 
     @Override
     public Mono<Integer> getNumberOfRatingsByVetId(String vetId) {
@@ -93,7 +101,6 @@ public class RatingServiceImpl implements RatingService {
                 });
     }
 
-    @Override
     public Mono<RatingResponseDTO> updateRatingByVetIdAndRatingId(String vetId, String ratingId, Mono<RatingRequestDTO> ratingRequestDTOMono) {
         return vetRepository.findVetByVetId(vetId)
                 .switchIfEmpty(Mono.error(new NotFoundException("vetId not found: " + vetId)))
@@ -103,6 +110,9 @@ public class RatingServiceImpl implements RatingService {
                                 .flatMap(r -> {
                                     if (r.getRateScore() < 1 || r.getRateScore() > 5)
                                         return Mono.error(new InvalidInputException("rateScore should be between 1 and 5" + r.getRateScore()));
+                                    if (r.getPredefinedDescription() != null){
+                                        r.setRateDescription(r.getPredefinedDescription().name());
+                                    }
                                     return Mono.just(r);
                                 })
                                 .map(EntityDtoUtil::toEntity)
@@ -112,6 +122,8 @@ public class RatingServiceImpl implements RatingService {
                                 .map(EntityDtoUtil::toDTO))
                 );
     }
+
+
 
     @Override
     public Mono<String> getRatingPercentagesByVetId(String vetId) {
