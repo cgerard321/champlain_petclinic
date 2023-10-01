@@ -43,6 +43,17 @@ public class InventoryServiceClient {
                 .build();
     }
 
+
+    public Mono<InventoryResponseDTO> getInventoryById(final String inventoryId) {
+        return webClient.get()
+                .uri(inventoryServiceUrl + "/{inventoryId}", inventoryId)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        resp -> rethrower.rethrow(resp, ex -> new InventoryNotFoundException(ex.get("message").toString(), NOT_FOUND)))
+                .bodyToMono(InventoryResponseDTO.class);
+    }
+
     public Mono<ProductResponseDTO> addProductToInventory(final ProductRequestDTO model, final String inventoryId){
         return webClient.post()
                 .uri(inventoryServiceUrl + "/{inventoryId}/products", inventoryId)
@@ -80,6 +91,10 @@ public class InventoryServiceClient {
                         resp -> rethrower.rethrow(resp, ex -> new InvalidInputsInventoryException(ex.get("message").toString(), BAD_REQUEST)))
                 .bodyToMono(InventoryResponseDTO.class);
     }
+
+
+
+
 
     public Mono<ProductResponseDTO> updateProductInInventory(final ProductRequestDTO model, final String inventoryId, final String productId){
         return webClient
