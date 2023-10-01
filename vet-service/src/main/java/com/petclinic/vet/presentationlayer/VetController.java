@@ -68,6 +68,11 @@ public class VetController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("topVets")
+    public Flux<VetAverageRatingDTO> getTopThreeVetsWithHighestAverageRating() {
+        return ratingService.getTopThreeVetsWithHighestAverageRating();
+    }
+
     @PutMapping("{vetId}/ratings/{ratingId}")
     public Mono<ResponseEntity<RatingResponseDTO>> updateRatingByVetIdAndRatingId(@PathVariable String vetId,
                                                                                   @PathVariable String ratingId,

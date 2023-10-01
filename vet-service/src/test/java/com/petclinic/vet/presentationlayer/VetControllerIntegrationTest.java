@@ -1,10 +1,7 @@
 package com.petclinic.vet.presentationlayer;
 
 import com.petclinic.vet.dataaccesslayer.*;
-import com.petclinic.vet.servicelayer.EducationResponseDTO;
-import com.petclinic.vet.servicelayer.RatingRequestDTO;
-import com.petclinic.vet.servicelayer.RatingResponseDTO;
-import com.petclinic.vet.servicelayer.VetDTO;
+import com.petclinic.vet.servicelayer.*;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.reactivestreams.Publisher;
@@ -62,6 +59,8 @@ class VetControllerIntegrationTest {
     Vet vet2 = buildVet2("2345");
     Rating rating1 = buildRating("12345", "678910", 5.0);
     Rating rating2 = buildRating("12346", "678910", 4.0);
+    Rating rating3 = buildRating("12347", "678910", 3.0);
+
     VetDTO vetDTO = buildVetDTO("3456");
     String VET_ID = "678910";
     String VET_BILL_ID = vet.getVetBillId();
@@ -557,7 +556,7 @@ class VetControllerIntegrationTest {
 
     @Test
     void getAverageRatingByVetId_ShouldSucceed() {
-
+        
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
                 .vetId(vet.getVetId())
                 .rateScore(rating1.getRateScore()).build();
@@ -576,7 +575,9 @@ class VetControllerIntegrationTest {
     }
 
     @Test
-    void getAverageRatingByVetId_withInvalidVetId_ShouldThrowNotFound() {
+    void getAverageRatingByVetId_withInvalidVetId_ShouldThrowNumberZero() {
+
+
         client
                 .get()
                 .uri("/vets/" + INVALID_VET_ID + "/ratings/average")
@@ -588,6 +589,44 @@ class VetControllerIntegrationTest {
                             assertEquals(0.0, avg);
                         }
                 );
+    }
+
+    @Test
+    void getTopThreeVetWithTheHighestRating_ShouldSucceed(){
+
+        VetAverageRatingDTO vetAverageRatingDTO1 = VetAverageRatingDTO.builder()
+                .averageRating(rating1.getRateScore())
+                .vetId(vet.getVetId())
+                .build();
+
+        VetAverageRatingDTO vetAverageRatingDTO2 = VetAverageRatingDTO.builder()
+                .averageRating(rating2.getRateScore())
+                .vetId(vet.getVetId())
+                .build();
+
+        VetAverageRatingDTO vetAverageRatingDTO3 = VetAverageRatingDTO.builder()
+                .averageRating(rating3.getRateScore())
+                .vetId(vet.getVetId())
+                .build();
+
+        client
+                .get()
+                .uri("/vets/" + "topVets")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(VetAverageRatingDTO.class)
+                .value(resp -> {
+                    assertEquals(rating1.getVetId(), vetAverageRatingDTO1.getVetId());
+                    assertEquals(rating2.getVetId(), vetAverageRatingDTO2.getVetId());
+                    assertEquals(rating3.getVetId(), vetAverageRatingDTO3.getVetId());
+                    assertEquals(rating1.getRateScore(), vetAverageRatingDTO1.getAverageRating());
+                    assertEquals(rating2.getRateScore(), vetAverageRatingDTO2.getAverageRating());
+                    assertEquals(rating3.getRateScore(), vetAverageRatingDTO3.getAverageRating());
+
+
+                });
     }
 
     @Test

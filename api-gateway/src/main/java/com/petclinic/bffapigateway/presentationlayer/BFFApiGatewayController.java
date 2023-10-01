@@ -318,6 +318,10 @@ public class BFFApiGatewayController {
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+    @GetMapping("/vets/topVets")
+    public Flux<VetAverageRatingDTO>getTopThreeVetsWithHighestAverageRating(){
+        return vetsServiceClient.getTopThreeVetsWithHighestAverageRating();
+    }
 
     @GetMapping(value = "vets/{vetId}/ratings/average")
     public Mono<ResponseEntity<Double>> getAverageRatingByVetId(@PathVariable String vetId){

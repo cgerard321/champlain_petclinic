@@ -126,6 +126,24 @@ class ApiGatewayControllerTest {
                     assertThat(responseDTO.get(0).getRateScore()).isEqualTo(ratingResponseDTO.getRateScore());
                 });
     }
+
+    @Test
+    void getTopThreeVetsWithHighestRating(){
+        VetAverageRatingDTO vetAverageRatingDTO = buildVetAverageRatingDTO();
+        when(vetsServiceClient.getTopThreeVetsWithHighestAverageRating())
+                .thenReturn(Flux.just(vetAverageRatingDTO));
+
+        client
+                .get()
+                .uri("/api/gateway/vets/topVets")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$[0].vetId").isEqualTo(vetAverageRatingDTO.getVetId())
+                .jsonPath("$[0].averageRating").isEqualTo(vetAverageRatingDTO.getAverageRating());
+    }
     @Test
     void deleteVetRating() {
         RatingResponseDTO ratingResponseDTO = buildRatingResponseDTO();
@@ -2652,7 +2670,12 @@ void deleteAllInventory_shouldSucceed() {
                 .rateScore(4.0)
                 .build();
     }
-
+private VetAverageRatingDTO buildVetAverageRatingDTO(){
+        return VetAverageRatingDTO.builder()
+                .vetId("678910")
+                .averageRating(2.0)
+                .build();
+}
     @Test
     void sendForgottenEmail_ShouldSucceed(){
         final UserEmailRequestDTO dto = UserEmailRequestDTO.builder()

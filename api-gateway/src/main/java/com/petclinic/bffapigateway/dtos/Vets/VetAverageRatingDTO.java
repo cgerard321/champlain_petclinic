@@ -1,4 +1,4 @@
-package com.petclinic.vet.servicelayer;
+package com.petclinic.bffapigateway.dtos.Vets;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

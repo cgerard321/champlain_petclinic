@@ -20,6 +20,7 @@ import java.util.HashSet;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -50,6 +51,8 @@ class RatingServiceImplTest {
     String VET_ID = "vetId";
     Rating rating = buildRating();
     RatingRequestDTO ratingRequestDTO = buildRatingRequestDTO();
+
+    VetAverageRatingDTO vetAverageRatingDTO1=buildVetAverageRatingDTO();
     @Test
     void getAllRatingsByVetId() {
         when(vetRepository.findVetByVetId(anyString())).thenReturn(Mono.just(existingVet));
@@ -148,6 +151,26 @@ class RatingServiceImplTest {
                 .verifyComplete();
     }
 
+
+//    @Test
+//    void getTopThreeVetsWithHighestRating() {
+//
+//
+//        rating.setRateScore(4.0);
+//        rating.setVetId("68790");
+//
+//        when(ratingRepository.findAll()).thenReturn(Flux.just(rating));
+//
+//        Flux<VetAverageRatingDTO> averageRatingDTOFlux = ratingService.getTopThreeVetsWithHighestAverageRating();
+//
+//        StepVerifier
+//                .create(averageRatingDTOFlux)
+//                .consumeNextWith(highestRating -> {
+//                    assertEquals("68790", highestRating.getVetId()); // Vet ID should match
+//                    assertEquals(4.0, highestRating.getAverageRating(),0.01); // Correct field name
+//                });
+//    }
+
     @Test
     void getRatingPercentagesByVetId() throws JsonProcessingException {
         when(vetRepository.findVetByVetId(anyString())).thenReturn(Mono.just(existingVet));
@@ -212,5 +235,11 @@ class RatingServiceImplTest {
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
+    }
+
+    private VetAverageRatingDTO buildVetAverageRatingDTO(){
+        return VetAverageRatingDTO.builder()
+                .averageRating(5.0)
+                .vetId("57385").build();
     }
 }

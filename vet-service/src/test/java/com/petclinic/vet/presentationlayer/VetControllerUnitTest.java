@@ -50,6 +50,14 @@ class VetControllerUnitTest {
     VetDTO vetDTO = buildVetDTO();
     VetDTO vetDTO2 = buildVetDTO2();
 
+    VetDTO vetDTO3=buildVetDTO3();
+
+    VetAverageRatingDTO averageRatingDTO=buildVetAverageRatingDTO1();
+    VetAverageRatingDTO averageRatingDTO2=buildVetAverageRatingDTO2();
+    VetAverageRatingDTO averageRatingDTO3=buildVetAverageRatingDTO3();
+
+
+
     EducationResponseDTO educationResponseDTO1 = buildEducation();
     EducationResponseDTO educationResponseDTO2 = buildEducation2();
 
@@ -57,6 +65,7 @@ class VetControllerUnitTest {
 
 
     RatingResponseDTO ratingDTO = buildRatingResponseDTO("Vet was super calming with my pet",5.0);
+
     Vet vet = buildVet();
     String VET_ID = vet.getVetId();
     String VET_BILL_ID = vet.getVetBillId();
@@ -216,6 +225,34 @@ class VetControllerUnitTest {
 
         Mockito.verify(ratingService, times(1))
                 .getAverageRatingByVetId(ratingDTO.getVetId());
+
+    }
+
+
+    @Test
+    void getTopThreeVetsWithTheHighestRating() {
+
+
+        when(ratingService.getTopThreeVetsWithHighestAverageRating())
+                .thenReturn(Flux.just(averageRatingDTO, averageRatingDTO2, averageRatingDTO3));
+
+
+        client.get()
+                .uri("/vets/topVets")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(VetAverageRatingDTO.class)
+                .value(vetDTOs -> {
+                    assertEquals(3, vetDTOs.size());
+                    assertEquals(averageRatingDTO, vetDTOs.get(0));
+                    assertEquals(averageRatingDTO2, vetDTOs.get(1));
+                    assertEquals(averageRatingDTO3, vetDTOs.get(2));
+                });
+
+        Mockito.verify(ratingService, times(1))
+                .getTopThreeVetsWithHighestAverageRating();
 
     }
 
@@ -591,6 +628,22 @@ class VetControllerUnitTest {
                 .build();
     }
 
+    private VetDTO buildVetDTO3() {
+        return VetDTO.builder()
+                .vetId("678910Hi")
+                .vetBillId("3")
+                .firstName("Olivia")
+                .lastName("Shaun")
+                .email("asdhbw@gmail.com")
+                .phoneNumber("543-201-2547")
+                .imageId("kjd")
+                .resume("Still a vet")
+                .workday("Tuesday")
+                .specialties(new HashSet<>())
+                .active(true)
+                .build();
+    }
+
     private EducationResponseDTO buildEducation(){
         return EducationResponseDTO.builder()
                 .educationId("1")
@@ -638,5 +691,27 @@ class VetControllerUnitTest {
     private Resource buildPhotoData(){
         ByteArrayResource resource = new ByteArrayResource(photo.getData());
         return resource;
+    }
+
+
+    private VetAverageRatingDTO buildVetAverageRatingDTO1(){
+        return  VetAverageRatingDTO.builder()
+                .averageRating(2.0)
+                .vetId("20381")
+                .build();
+    }
+
+    private VetAverageRatingDTO buildVetAverageRatingDTO2(){
+        return  VetAverageRatingDTO.builder()
+                .averageRating(4.0)
+                .vetId("28179")
+                .build();
+    }
+
+    private VetAverageRatingDTO buildVetAverageRatingDTO3(){
+        return  VetAverageRatingDTO.builder()
+                .averageRating(1.0)
+                .vetId("92739")
+                .build();
     }
 }

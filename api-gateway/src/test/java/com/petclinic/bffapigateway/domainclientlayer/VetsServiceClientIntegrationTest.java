@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Vets.PredefinedDescription;
 import com.petclinic.bffapigateway.dtos.Vets.RatingRequestDTO;
 import com.petclinic.bffapigateway.dtos.Vets.RatingResponseDTO;
+import com.petclinic.bffapigateway.dtos.Vets.VetAverageRatingDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetDTO;
 import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import okhttp3.mockwebserver.MockResponse;
@@ -154,6 +155,22 @@ class VetsServiceClientIntegrationTest {
         assertEquals(Optional.of(5), Optional.ofNullable(numberOfRatings));
     }
 
+
+    @Test
+    void getTopThreeVetsWithHighestRating() throws JsonProcessingException{
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody("    {\n" +
+                        "        \"ratingId\": \"123456\",\n" +
+                        "        \"vetId\": \"678910\",\n" +
+                        "        \"rateScore\": 4.5\n" +
+                        "    }"));
+
+        final VetAverageRatingDTO averageRatingDTO = vetsServiceClient.getTopThreeVetsWithHighestAverageRating().blockFirst();
+        assertEquals("678910",vetDTO.getVetId());
+        assertEquals(0.0, averageRatingDTO.getAverageRating());
+        //its 0.0 because the vet doesn't have any ratings
+    }
     @Test
     void getNumberOfRatingsByInvalidVetId_shouldNotSucceed() throws ExistingVetNotFoundException{
         String invalidVetId="123";

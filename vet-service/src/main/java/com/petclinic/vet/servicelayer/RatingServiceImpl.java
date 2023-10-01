@@ -13,6 +13,7 @@ import com.petclinic.vet.util.EntityDtoUtil;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuples;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -101,6 +102,22 @@ public class RatingServiceImpl implements RatingService {
                 });
     }
 
+
+    @Override
+    public Flux<VetAverageRatingDTO> getTopThreeVetsWithHighestAverageRating() {
+        return ratingRepository.findAll()
+                .groupBy(Rating::getVetId)
+                .flatMap(group -> {
+                    String vetId = group.key();
+                    return getAverageRatingByVetId(vetId)
+                            .map(averageRating -> Tuples.of(vetId, averageRating));
+                })
+                .sort((t1, t2) -> Double.compare(t2.getT2(), t1.getT2())) //It is being sorted in descending order by average rating
+                .take(3) // Take the top 3 vets
+                .map(tuple -> new VetAverageRatingDTO(tuple.getT1(), tuple.getT2()));
+    }
+
+    @Override
     public Mono<RatingResponseDTO> updateRatingByVetIdAndRatingId(String vetId, String ratingId, Mono<RatingRequestDTO> ratingRequestDTOMono) {
         return vetRepository.findVetByVetId(vetId)
                 .switchIfEmpty(Mono.error(new NotFoundException("vetId not found: " + vetId)))

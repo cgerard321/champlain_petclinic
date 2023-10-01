@@ -1,5 +1,6 @@
 package com.petclinic.vet.dataaccesslayer;
 
+import com.petclinic.vet.servicelayer.VetAverageRatingDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
@@ -8,6 +9,7 @@ import org.springframework.boot.r2dbc.init.R2dbcScriptDatabaseInitializer;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -39,6 +41,16 @@ class RatingRepositoryTest {
             .rateDate("10/09/2023")
             .rateDescription("Vet very kind, but a bit slow.")
             .build();
+
+    Rating rating3 = Rating.builder()
+            .ratingId("3")
+            .vetId("3")
+            .rateScore(1.0)
+            .rateDate("11/19/2022")
+            .rateDescription("Vet very mean and slow.")
+            .build();
+
+
     @BeforeEach
     void setUp() {
         Publisher<Rating> setUp = ratingRepository.deleteAll()
