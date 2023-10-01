@@ -103,9 +103,9 @@
                             </div>
 
                             <div class="border-5 rounded">
-                                <form action="owners/{ownerId}/pets/{petId}" method="DELETE">
-                                    <button type="submit" class="btn btn-light">Delete Pet</button>
-                                </form>
+
+                                    <a style="color: rgba(0,0,0,0.5);" class="btn btn-light" ui-sref="ownerEdit({ownerId: $ctrl.owner.ownerId,petId: pet.petId, method: 'delete'})">Delete</a>
+
                             </div>
 
 
