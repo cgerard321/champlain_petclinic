@@ -15,11 +15,13 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 
 import static java.util.stream.Collectors.joining;
@@ -113,17 +115,24 @@ public class VisitsServiceClient {
                 .retrieve()
                 .bodyToMono(VisitResponseDTO.class);
     }
+
     public Mono<VisitDetails> updateVisitForPet(VisitDetails visit) {
+        URI uri = UriComponentsBuilder
+                .fromPath("/owners/*/pets/{petId}/visits/{visitId}")
+                .buildAndExpand(visit.getPetId(), visit.getVisitId())
+                .toUri();
+
         return webClient
                 .put()
-                .uri("/owners/*/pets/" + visit.getPetId() + "/visits/" + visit.getVisitId())
+                .uri(uri)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .body(Mono.just(visit), VisitDetails.class)
                 .retrieve()
+                .onStatus(HttpStatusCode::isError, response  -> Mono.error(new BadRequestException("Failed to update visit")))
                 .bodyToMono(VisitDetails.class);
     }
 
-/*    public Mono<VisitDetails> createVisitForPet(VisitDetails visit) {
+    /*    public Mono<VisitDetails> createVisitForPet(VisitDetails visit) {
         return webClient
                 .post()
                 .uri("/visits")

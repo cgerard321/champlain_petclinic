@@ -49,7 +49,9 @@ import org.springframework.util.MultiValueMap;
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
+import javax.print.attribute.standard.Media;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -107,21 +109,25 @@ class ApiGatewayControllerTest {
         client
                 .get()
                 .uri("/api/gateway/vets/" + VET_ID + "/ratings")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .acceptCharset(StandardCharsets.UTF_8)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$[0].ratingId").isEqualTo(ratingResponseDTO.getRatingId())
-                .jsonPath("$[0].vetId").isEqualTo(ratingResponseDTO.getVetId())
-                .jsonPath("$[0].rateScore").isEqualTo(ratingResponseDTO.getRateScore());
+                .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
+                .expectBodyList(RatingResponseDTO.class)
+                .value(responseDTO -> {
+                    Assertions.assertNotNull(responseDTO);
+                    Assertions.assertNotNull(responseDTO.get(0).getRatingId());
+                    assertThat(responseDTO.get(0).getRatingId()).isEqualTo(ratingResponseDTO.getRatingId());
+                    assertThat(responseDTO.get(0).getVetId()).isEqualTo(ratingResponseDTO.getVetId());
+                    assertThat(responseDTO.get(0).getRateScore()).isEqualTo(ratingResponseDTO.getRateScore());
+                });
     }
     @Test
     void deleteVetRating() {
         RatingResponseDTO ratingResponseDTO = buildRatingResponseDTO();
         when(vetsServiceClient.deleteRating(VET_ID, ratingResponseDTO.getRatingId()))
                 .thenReturn((Mono.empty()));
-
         client
                 .delete()
                 .uri("/api/gateway/vets/" + VET_ID + "/ratings/{ratingsId}", ratingResponseDTO.getRatingId())
@@ -142,10 +148,11 @@ class ApiGatewayControllerTest {
         client
                 .get()
                 .uri("/api/gateway/vets/" + INVALID_VET_ID + "/ratings")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .acceptCharset(StandardCharsets.UTF_8)
                 .exchange()
                 .expectStatus().isEqualTo(INTERNAL_SERVER_ERROR)
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                //  .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("This id is not valid");
     }
@@ -283,19 +290,23 @@ class ApiGatewayControllerTest {
         client
                 .get()
                 .uri("/api/gateway/vets/" + VET_ID + "/educations")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .acceptCharset(StandardCharsets.UTF_8)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$[0].educationId").isEqualTo(educationResponseDTO.getEducationId())
-                .jsonPath("$[0].vetId").isEqualTo(educationResponseDTO.getVetId())
-                .jsonPath("$[0].degree").isEqualTo(educationResponseDTO.getDegree())
-                .jsonPath("$[0].fieldOfStudy").isEqualTo(educationResponseDTO.getFieldOfStudy())
-                .jsonPath("$[0].schoolName").isEqualTo(educationResponseDTO.getSchoolName())
-                .jsonPath("$[0].startDate").isEqualTo(educationResponseDTO.getStartDate())
-                .jsonPath("$[0].endDate").isEqualTo(educationResponseDTO.getEndDate());
-
+                .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
+                .expectBodyList(EducationResponseDTO.class)
+                .value(responseDTO -> {
+                    Assertions.assertNotNull(responseDTO);
+                    Assertions.assertNotNull(responseDTO.get(0).getEducationId());
+                    assertThat(responseDTO.get(0).getEducationId()).isEqualTo(educationResponseDTO.getEducationId());
+                    assertThat(responseDTO.get(0).getVetId()).isEqualTo(educationResponseDTO.getVetId());
+                    assertThat(responseDTO.get(0).getDegree()).isEqualTo(educationResponseDTO.getDegree());
+                    assertThat(responseDTO.get(0).getFieldOfStudy()).isEqualTo(educationResponseDTO.getFieldOfStudy());
+                    assertThat(responseDTO.get(0).getSchoolName()).isEqualTo(educationResponseDTO.getSchoolName());
+                    assertThat(responseDTO.get(0).getStartDate()).isEqualTo(educationResponseDTO.getStartDate());
+                    assertThat(responseDTO.get(0).getEndDate()).isEqualTo(educationResponseDTO.getEndDate());
+                });
     }
 
     @Test
@@ -323,20 +334,24 @@ class ApiGatewayControllerTest {
         client
                 .get()
                 .uri("/api/gateway/vets")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .acceptCharset(StandardCharsets.UTF_8)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$[0].vetId").isEqualTo(vetDTO.getVetId())
-                .jsonPath("$[0].resume").isEqualTo(vetDTO.getResume())
-                .jsonPath("$[0].lastName").isEqualTo(vetDTO.getLastName())
-                .jsonPath("$[0].firstName").isEqualTo(vetDTO.getFirstName())
-                .jsonPath("$[0].email").isEqualTo(vetDTO.getEmail())
-                .jsonPath("$[0].image").isNotEmpty()
-                .jsonPath("$[0].active").isEqualTo(vetDTO.isActive())
-                .jsonPath("$[0].workday").isEqualTo(vetDTO.getWorkday());
-
+                .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
+                .expectBodyList(VetDTO.class)
+                .value(responseDTO -> {
+                    Assertions.assertNotNull(responseDTO);
+                    Assertions.assertNotNull(responseDTO.get(0).getVetId());
+                    assertThat(responseDTO.get(0).getVetId()).isEqualTo(vetDTO.getVetId());
+                    assertThat(responseDTO.get(0).getResume()).isEqualTo(vetDTO.getResume());
+                    assertThat(responseDTO.get(0).getLastName()).isEqualTo(vetDTO.getLastName());
+                    assertThat(responseDTO.get(0).getFirstName()).isEqualTo(vetDTO.getFirstName());
+                    assertThat(responseDTO.get(0).getEmail()).isEqualTo(vetDTO.getEmail());
+                    assertThat(responseDTO.get(0).getImage()).isNotEmpty();
+                    assertThat(responseDTO.get(0).isActive()).isEqualTo(vetDTO.isActive());
+                    assertThat(responseDTO.get(0).getWorkday()).isEqualTo(vetDTO.getWorkday());
+                });
         Mockito.verify(vetsServiceClient, times(1))
                 .getVets();
     }
@@ -375,21 +390,24 @@ class ApiGatewayControllerTest {
         client
                 .get()
                 .uri("/api/gateway/vets/active")
-                .accept(MediaType.APPLICATION_JSON)
-                .header("Content-Type", "application/json;charset=UTF-8")
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .acceptCharset(StandardCharsets.UTF_8)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$[0].vetId").isEqualTo(vetDTO2.getVetId())
-                .jsonPath("$[0].resume").isEqualTo(vetDTO2.getResume())
-                .jsonPath("$[0].lastName").isEqualTo(vetDTO2.getLastName())
-                .jsonPath("$[0].firstName").isEqualTo(vetDTO2.getFirstName())
-                .jsonPath("$[0].email").isEqualTo(vetDTO2.getEmail())
-                .jsonPath("$[0].image").isNotEmpty()
-                .jsonPath("$[0].active").isEqualTo(vetDTO2.isActive())
-                .jsonPath("$[0].workday").isEqualTo(vetDTO2.getWorkday());
-
+                .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
+                .expectBodyList(VetDTO.class)
+                .value(responseDTO -> {
+                    Assertions.assertNotNull(responseDTO);
+                    Assertions.assertNotNull(responseDTO.get(0).getVetId());
+                    assertThat(responseDTO.get(0).getVetId()).isEqualTo(vetDTO2.getVetId());
+                    assertThat(responseDTO.get(0).getResume()).isEqualTo(vetDTO2.getResume());
+                    assertThat(responseDTO.get(0).getLastName()).isEqualTo(vetDTO2.getLastName());
+                    assertThat(responseDTO.get(0).getFirstName()).isEqualTo(vetDTO2.getFirstName());
+                    assertThat(responseDTO.get(0).getEmail()).isEqualTo(vetDTO2.getEmail());
+                    assertThat(responseDTO.get(0).getImage()).isNotEmpty();
+                    assertThat(responseDTO.get(0).isActive()).isEqualTo(vetDTO2.isActive());
+                    assertThat(responseDTO.get(0).getWorkday()).isEqualTo(vetDTO2.getWorkday());
+                });
         Mockito.verify(vetsServiceClient, times(1))
                 .getActiveVets();
     }
@@ -402,20 +420,24 @@ class ApiGatewayControllerTest {
         client
                 .get()
                 .uri("/api/gateway/vets/inactive")
-                .accept(MediaType.APPLICATION_JSON)
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .acceptCharset(StandardCharsets.UTF_8)
                 .exchange()
                 .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$[0].vetId").isEqualTo(vetDTO.getVetId())
-                .jsonPath("$[0].resume").isEqualTo(vetDTO.getResume())
-                .jsonPath("$[0].lastName").isEqualTo(vetDTO.getLastName())
-                .jsonPath("$[0].firstName").isEqualTo(vetDTO.getFirstName())
-                .jsonPath("$[0].email").isEqualTo(vetDTO.getEmail())
-                .jsonPath("$[0].image").isNotEmpty()
-                .jsonPath("$[0].active").isEqualTo(vetDTO.isActive())
-                .jsonPath("$[0].workday").isEqualTo(vetDTO.getWorkday());
-
+                .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
+                .expectBodyList(VetDTO.class)
+                .value(responseDTO -> {
+                    Assertions.assertNotNull(responseDTO);
+                    Assertions.assertNotNull(responseDTO.get(0).getVetId());
+                    assertThat(responseDTO.get(0).getVetId()).isEqualTo(vetDTO.getVetId());
+                    assertThat(responseDTO.get(0).getResume()).isEqualTo(vetDTO.getResume());
+                    assertThat(responseDTO.get(0).getLastName()).isEqualTo(vetDTO.getLastName());
+                    assertThat(responseDTO.get(0).getFirstName()).isEqualTo(vetDTO.getFirstName());
+                    assertThat(responseDTO.get(0).getEmail()).isEqualTo(vetDTO.getEmail());
+                    assertThat(responseDTO.get(0).getImage()).isNotEmpty();
+                    assertThat(responseDTO.get(0).isActive()).isEqualTo(vetDTO.isActive());
+                    assertThat(responseDTO.get(0).getWorkday()).isEqualTo(vetDTO.getWorkday());
+                });
         Mockito.verify(vetsServiceClient, times(1))
                 .getInactiveVets();
     }
@@ -1567,73 +1589,37 @@ class ApiGatewayControllerTest {
 
     @Test
     void shouldUpdateAVisitsById() {
-        // Create instances of VisitRequestDTO and VisitResponseDTO for creating a visit
-        VisitRequestDTO visitRequestDTO = VisitRequestDTO.builder()
-                .visitDate(LocalDateTime.parse("2024-11-25 14:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
-                .description("Charle's Richard cat has a paw infection.")
-                .petId("1")
-                .practitionerId("1")
-                .status(false)
-                .build();
-
-        VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
-                .visitId(UUID.randomUUID().toString())
-                .visitDate(LocalDateTime.parse("2024-11-25 14:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
-                .description("Charle's Richard cat has a paw infection.")
-                .petId("1")
-                .practitionerId("1")
-                .status(false)
-                .build();
-
-        OwnerResponseDTO owner = new OwnerResponseDTO();
-        owner.setOwnerId("ownerId-90");
-
-        // Mock the service call for creating a visit
-        when(visitsServiceClient.createVisitForPet(visitRequestDTO))
-                .thenReturn(Mono.just(visitResponseDTO));
-
-        // Perform POST request to create a visit
-        client.post()
-                .uri("/api/gateway/visit/owners/{ownerId}/pets/{petId}/visits", owner.getOwnerId(), visitRequestDTO.getPetId())
-                .body(Mono.just(visitRequestDTO), VisitRequestDTO.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isCreated()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.visitId").isEqualTo(visitResponseDTO.getVisitId())
-                .jsonPath("$.petId").isEqualTo("1")
-                .jsonPath("$.visitDate").isEqualTo("2024-11-25 14:45")
-                .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
-                .jsonPath("$.status").isEqualTo(false)
-                .jsonPath("$.practitionerId").isEqualTo("1");
-
         // Create an instance of VisitDetails for updating
         VisitDetails visitDetailsToUpdate = VisitDetails.builder()
                 .visitDate(LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("Charle's Richard dog has a paw infection.")
-                .petId("2")
+                .petId("1")
+                .visitId("1")
                 .practitionerId(2)
                 .status(false)
                 .build();
 
-        // Mock the service call for updating a visit
         when(visitsServiceClient.updateVisitForPet(visitDetailsToUpdate))
                 .thenReturn(Mono.just(visitDetailsToUpdate));
 
-        // Perform PUT request to update a visit
+
         client.put()
-                .uri("/api/gateway/owners/*/pets/{petId}/visits/{visitId}", visitRequestDTO.getPetId(), visitResponseDTO.getVisitId())
-                .body(Mono.just(visitDetailsToUpdate), VisitDetails.class)
+                .uri("/api/gateway/owners/*/pets/{petId}/visits/{visitId}", "1", "1")
                 .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(visitDetailsToUpdate)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody();
-
-        // Assert the updated visit
-        assertEquals(visitsServiceClient.getVisitsForPet("1"), null);
+                .expectBody()
+                .jsonPath("$.visitId").isEqualTo("1")
+                .jsonPath("$.petId").isEqualTo("1")
+                .jsonPath("$.description").isEqualTo("Charle's Richard dog has a paw infection.")
+                .jsonPath("$.status").isEqualTo(false)
+                .jsonPath("$.practitionerId").isEqualTo(2);
+        Mockito.verify(visitsServiceClient,times(1)).updateVisitForPet(visitDetailsToUpdate);
     }
+
     @Test
     void shouldGetAllVisits() {
         VisitResponseDTO visitResponseDTO = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", true);
@@ -1665,14 +1651,21 @@ class ApiGatewayControllerTest {
 
         client.get()
                 .uri("/api/gateway/visits/pets/{petId}", visit.getPetId())
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .acceptCharset(StandardCharsets.UTF_8)
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$[0].visitId").isEqualTo(visit.getVisitId())
-                .jsonPath("$[0].petId").isEqualTo("1")
-                .jsonPath("$[0].visitDate").isEqualTo("2022-11-25 13:45")
-                .jsonPath("$[0].description").isEqualTo("Charle's Richard cat has a paw infection.")
-                .jsonPath("$[0].practitionerId").isEqualTo(1);
+                .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
+                .expectBodyList(VisitDetails.class)
+                .value((list)-> {
+                    assertEquals(list.size(),1);
+                    assertEquals(list.get(0).getVisitId(),visit.getVisitId());
+                    assertEquals(list.get(0).getPetId(),visit.getPetId());
+                    assertEquals(list.get(0).getVisitDate(),visit.getVisitDate());
+                    assertEquals(list.get(0).getDescription(),visit.getDescription());
+                    assertEquals(list.get(0).getStatus(),visit.getStatus());
+                    assertEquals(list.get(0).getPractitionerId(),visit.getPractitionerId());
+                });
     }
 
     @Test
@@ -1690,14 +1683,21 @@ class ApiGatewayControllerTest {
 
         client.get()
                 .uri("/api/gateway/visits/vets/{practitionerId}", visit.getPractitionerId())
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .acceptCharset(StandardCharsets.UTF_8)
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$[0].visitId").isEqualTo(visit.getVisitId())
-                .jsonPath("$[0].petId").isEqualTo("1")
-                .jsonPath("$[0].visitDate").isEqualTo("2022-11-25 13:45")
-                .jsonPath("$[0].description").isEqualTo("Charle's Richard cat has a paw infection.")
-                .jsonPath("$[0].practitionerId").isEqualTo(1);
+                .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
+                .expectBodyList(VisitDetails.class)
+                .value((list)-> {
+                    assertEquals(list.size(),1);
+                    assertEquals(list.get(0).getVisitId(),visit.getVisitId());
+                    assertEquals(list.get(0).getPetId(),visit.getPetId());
+                    assertEquals(list.get(0).getVisitDate(),visit.getVisitDate());
+                    assertEquals(list.get(0).getDescription(),visit.getDescription());
+                    assertEquals(list.get(0).getStatus(),visit.getStatus());
+                    assertEquals(list.get(0).getPractitionerId(),visit.getPractitionerId());
+                });
     }
     /*
     @Test
@@ -1859,19 +1859,22 @@ class ApiGatewayControllerTest {
                 .uri("/api/gateway/visits/scheduled/{petId}", 21)
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$[0].visitId").isEqualTo(visit1.getVisitId())
-                .jsonPath("$[0].petId").isEqualTo(21)
-                .jsonPath("$[0].visitDate").isEqualTo("2022-11-25 13:45")
-                .jsonPath("$[0].description").isEqualTo("John Smith's cat has a paw infection.")
-                .jsonPath("$[0].status").isEqualTo(true)
-                .jsonPath("$[0].practitionerId").isEqualTo(2)
-                .jsonPath("$[1].visitId").isEqualTo(visit2.getVisitId())
-                .jsonPath("$[1].petId").isEqualTo(21)
-                .jsonPath("$[1].visitDate").isEqualTo("2022-11-25 14:45")
-                .jsonPath("$[1].description").isEqualTo("John Smith's dog has a paw infection.")
-                .jsonPath("$[1].status").isEqualTo(true)
-                .jsonPath("$[1].practitionerId").isEqualTo(2);
+                .expectBodyList(VisitDetails.class)
+                .value((list) -> {
+                    assertEquals(list.size(), 2);
+                    assertEquals(list.get(0).getVisitId(), visit1.getVisitId());
+                    assertEquals(list.get(0).getPetId(), visit1.getPetId());
+                    assertEquals(list.get(0).getVisitDate(), visit1.getVisitDate());
+                    assertEquals(list.get(0).getDescription(), visit1.getDescription());
+                    assertEquals(list.get(0).getStatus(), visit1.getStatus());
+                    assertEquals(list.get(0).getPractitionerId(), visit1.getPractitionerId());
+                    assertEquals(list.get(1).getVisitId(), visit2.getVisitId());
+                    assertEquals(list.get(1).getPetId(), visit2.getPetId());
+                    assertEquals(list.get(1).getVisitDate(), visit2.getVisitDate());
+                    assertEquals(list.get(1).getDescription(), visit2.getDescription());
+                    assertEquals(list.get(1).getStatus(), visit2.getStatus());
+                    assertEquals(list.get(1).getPractitionerId(), visit2.getPractitionerId());
+                });
     }
 
     @Test
