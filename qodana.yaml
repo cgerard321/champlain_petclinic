@@ -21,7 +21,7 @@ include:
 exclude:
   - name: all
     paths:
-      - .qodana/code-coverage
+      - .qodana/code-coverage/*
 
 
 projectJDK: 17 #(Applied in CI/CD pipeline)
