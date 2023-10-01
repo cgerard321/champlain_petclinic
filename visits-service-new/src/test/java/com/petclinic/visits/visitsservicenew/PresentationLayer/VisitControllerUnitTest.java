@@ -2,6 +2,7 @@ package com.petclinic.visits.visitsservicenew.PresentationLayer;
 
 
 import com.petclinic.visits.visitsservicenew.BusinessLayer.VisitService;
+import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.*;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
@@ -44,6 +45,8 @@ class VisitControllerUnitTest {
     String uuidPet = UUID.randomUUID().toString();
     String uuidPhoto = UUID.randomUUID().toString();
     String uuidOwner = UUID.randomUUID().toString();
+
+    private final String STATUS = "COMPLETED";
 
 
     Set<SpecialtyDTO> set= new HashSet<>();
@@ -110,7 +113,7 @@ class VisitControllerUnitTest {
                 .jsonPath("$.description").isEqualTo(visitResponseDTO.getDescription())
                 .jsonPath("$.petId").isEqualTo(visitResponseDTO.getPetId())
                 .jsonPath("$.practitionerId").isEqualTo(visitResponseDTO.getPractitionerId())
-                .jsonPath("$.status").isEqualTo(visitResponseDTO.isStatus());
+                .jsonPath("$.status").isEqualTo(visitResponseDTO.getStatus());
 
         verify(visitService, times(1)).getVisitByVisitId(Visit_UUID_OK);
     }
@@ -250,7 +253,7 @@ class VisitControllerUnitTest {
                 .description(description)
                 .petId("2")
                 .practitionerId(vetId)
-                .status(true)
+                .status(Status.UPCOMING)
                 .build();
     }
 
@@ -262,7 +265,7 @@ class VisitControllerUnitTest {
                 .description("this is a dummy description")
                 .petId("2")
                 .practitionerId(UUID.randomUUID().toString())
-                .status(true)
+                .status(Status.UPCOMING)
                 .build();
     }
     private VisitRequestDTO buildVisitRequestDTO(String vetId){
@@ -271,7 +274,7 @@ class VisitControllerUnitTest {
                 .description("this is a dummy description")
                 .petId("2")
                 .practitionerId(vetId)
-                .status(true)
+                .status(Status.UPCOMING)
                 .build();
     }
 

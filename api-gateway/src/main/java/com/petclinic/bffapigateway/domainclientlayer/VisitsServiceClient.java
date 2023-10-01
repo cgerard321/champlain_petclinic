@@ -2,10 +2,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.bffapigateway.dtos.Visits.VisitDetails;
-import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
-import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
-import com.petclinic.bffapigateway.dtos.Visits.Visits;
+import com.petclinic.bffapigateway.dtos.Visits.*;
 import com.petclinic.bffapigateway.exceptions.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -56,6 +53,15 @@ public class VisitsServiceClient {
                 .onStatus(HttpStatusCode::is5xxServerError, error -> Mono.error(new IllegalArgumentException("Something went wrong and we got a 500 error")))
                 .bodyToFlux(VisitResponseDTO.class);
     }
+
+    public Flux<VisitResponseDTO> getVisitsForStatus(final String status){
+        return webClient
+                .get()
+                .uri("/visits/status/{status}", status)
+                .retrieve()
+                .bodyToFlux(VisitResponseDTO.class);
+    }
+
     public Mono<Visits> getVisitsForPets(final List<Integer> petIds) {
         return this.webClient
                 .get()
@@ -121,6 +127,34 @@ public class VisitsServiceClient {
                 .body(Mono.just(visit), VisitDetails.class)
                 .retrieve()
                 .bodyToMono(VisitDetails.class);
+    }
+
+    public Mono<VisitResponseDTO> updateStatusForVisitByVisitId(String visitId, String status) {
+
+        Status newStatus;
+        switch (status){
+            case "CONFIRMED":
+                newStatus = Status.CONFIRMED;
+                break;
+
+            case "IN_PROGRESS":
+                newStatus = Status.IN_PROGRESS;
+                break;
+
+            case "COMPLETED":
+                newStatus = Status.COMPLETED;
+                break;
+
+            default:
+                newStatus = Status.CANCELLED;
+                break;
+        }
+        return webClient
+                .put()
+                .uri("/visits/"+ visitId +"/status/" + newStatus)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .retrieve()
+                .bodyToMono(VisitResponseDTO.class);
     }
 
 /*    public Mono<VisitDetails> createVisitForPet(VisitDetails visit) {
