@@ -20,6 +20,8 @@ jobs:
         run: docker ps
       - name: Wait to see stability
         run: sleep 20s
+      - name: Show running containers
+        run: docker ps
       - name: Stop containers
         if: always()
         run: docker-compose -f "docker-compose.yml" down
