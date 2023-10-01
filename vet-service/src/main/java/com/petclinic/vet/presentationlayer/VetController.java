@@ -11,6 +11,7 @@ package com.petclinic.vet.presentationlayer;
   * Ticket: feat(VVS-CPC-553): add veterinarian
  */
 
+import com.petclinic.vet.dataaccesslayer.PredefinedDescription;
 import com.petclinic.vet.servicelayer.*;
 import com.petclinic.vet.util.EntityDtoUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,6 +89,13 @@ public class VetController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
+//    @GetMapping("{vetId}/ratings/{predefinedDescription}/count")
+//    public Mono<ResponseEntity<Integer>> getCountOfRatingsByVetIdAndPredefinedDescription(@PathVariable String vetId, @PathVariable PredefinedDescription predefinedDescription){
+//        return ratingService.getCountOfRatingsByVetIdAndPredefinedDescription(EntityDtoUtil.verifyId(vetId), predefinedDescription)
+//                .map(ResponseEntity::ok)
+//                .defaultIfEmpty(ResponseEntity.notFound().build());
+//    }
 
     @GetMapping()
     public Flux<VetDTO> getAllVets() {

@@ -2,6 +2,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.petclinic.bffapigateway.dtos.Vets.PredefinedDescription;
 import com.petclinic.bffapigateway.dtos.Vets.RatingRequestDTO;
 import com.petclinic.bffapigateway.dtos.Vets.RatingResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetDTO;
@@ -444,11 +445,12 @@ class VetsServiceClientIntegrationTest {
     }
 
     @Test
-    void addRatingToVet() throws JsonProcessingException {
+    void addRatingToVet_WithRateDescriptionOnly_ShouldSetRateDescriptionToItsValue() throws JsonProcessingException {
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
                 .vetId("678910")
                 .rateScore(3.5)
                 .rateDescription("The vet was decent but lacked table manners.")
+                .predefinedDescription(null)
                 .rateDate("16/09/2023")
                 .build();
         prepareResponse(response -> response
@@ -458,6 +460,7 @@ class VetsServiceClientIntegrationTest {
                         "        \"vetId\": \"678910\",\n" +
                         "        \"rateScore\": 3.5,\n" +
                         "        \"rateDescription\": \"The vet was decent but lacked table manners.\",\n" +
+                        "        \"predefinedDescription\": null,\n" +
                         "        \"rateDate\": \"16/09/2023\"\n" +
                         "    }"));
 
@@ -466,9 +469,69 @@ class VetsServiceClientIntegrationTest {
         assertEquals(ratingRequestDTO.getVetId(), rating.getVetId());
         assertEquals(ratingRequestDTO.getRateScore(), rating.getRateScore());
         assertEquals(ratingRequestDTO.getRateDescription(), rating.getRateDescription());
+        assertEquals(ratingRequestDTO.getPredefinedDescription(), rating.getPredefinedDescription());
         assertEquals(ratingRequestDTO.getRateDate(), rating.getRateDate());
     }
 
+    @Test
+    void addRatingToVet_withPredefinedDescOnly_ShouldSetRateDescriptionToPredefDescription() throws JsonProcessingException {
+        RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
+                .vetId("678910")
+                .rateScore(3.0)
+                .rateDescription(null)
+                .predefinedDescription(PredefinedDescription.GOOD)
+                .build();
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody("    {\n" +
+                        "        \"ratingId\": \"123456\",\n" +
+                        "        \"vetId\": \"678910\",\n" +
+                        "        \"rateScore\": 3.0,\n" +
+                        "        \"rateDescription\": \"GOOD\",\n" +
+                        "        \"predefinedDescription\": \"GOOD\",\n" +
+                        "        \"rateDate\": \"16/09/2023\"\n" +
+                        "    }"));
+
+        final RatingResponseDTO rating = vetsServiceClient.addRatingToVet("678910", Mono.just(ratingRequestDTO)).block();
+
+        assertNotNull(rating.getRatingId());
+        assertEquals(ratingRequestDTO.getVetId(), rating.getVetId());
+        assertEquals(ratingRequestDTO.getRateScore(), rating.getRateScore(), 0.01); // Use delta for comparing double values
+        assertEquals(ratingRequestDTO.getPredefinedDescription(), rating.getPredefinedDescription());
+
+        // Assert that rateDescription is set to the predefined description's name
+        assertEquals(ratingRequestDTO.getPredefinedDescription().name(), rating.getRateDescription());
+    }
+
+    @Test
+    void addRatingToVet_withPredefinedDescAndRateDesc_ShouldSetRateDescriptionToPredefDescription() throws JsonProcessingException {
+        RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
+                .vetId("678910")
+                .rateScore(3.0)
+                .rateDescription("The vet was decent but lacked table manners.")
+                .predefinedDescription(PredefinedDescription.GOOD)
+                .build();
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody("    {\n" +
+                        "        \"ratingId\": \"123456\",\n" +
+                        "        \"vetId\": \"678910\",\n" +
+                        "        \"rateScore\": 3.0,\n" +
+                        "        \"rateDescription\": \"GOOD\",\n" +
+                        "        \"predefinedDescription\": \"GOOD\",\n" +
+                        "        \"rateDate\": \"16/09/2023\"\n" +
+                        "    }"));
+
+        final RatingResponseDTO rating = vetsServiceClient.addRatingToVet("678910", Mono.just(ratingRequestDTO)).block();
+        assertNotNull(rating.getRatingId());
+        assertEquals(ratingRequestDTO.getVetId(), rating.getVetId());
+        assertEquals(ratingRequestDTO.getRateScore(), rating.getRateScore());
+        // Assert that rateDescription is set to the predefined description's name
+        assertEquals(ratingRequestDTO.getPredefinedDescription().name(), rating.getRateDescription());
+        assertEquals(ratingRequestDTO.getPredefinedDescription(), rating.getPredefinedDescription());
+    }
     @Test
     void addRatingToVet_withInvalidVetId_shouldNotSucceed() throws ExistingVetNotFoundException {
         String invalidVetId="123";
@@ -559,11 +622,12 @@ class VetsServiceClientIntegrationTest {
     }
 
     @Test
-    void updateRatingByVetIdAndRatingId() throws JsonProcessingException {
+    void updateRatingByVetIdAndRatingId_withRateDescriptionOnly_ShouldSetRateDescriptionToItsValue() throws JsonProcessingException {
         RatingRequestDTO updatedRating = RatingRequestDTO.builder()
                 .rateScore(2.0)
                 .vetId("678910")
                 .rateDescription("Vet cancelled last minute.")
+                .predefinedDescription(null)
                 .rateDate("20/09/2023")
                 .build();
 
@@ -574,6 +638,7 @@ class VetsServiceClientIntegrationTest {
                         "        \"vetId\": \"678910\",\n" +
                         "        \"rateScore\": 2.0,\n" +
                         "        \"rateDescription\": \"Vet cancelled last minute.\",\n" +
+                        "        \"predefinedDescription\": null,\n" +
                         "        \"rateDate\": \"20/09/2023\"\n" +
                         "    }"));
 
@@ -581,10 +646,77 @@ class VetsServiceClientIntegrationTest {
                 vetsServiceClient.updateRatingByVetIdAndByRatingId("678910","123456", Mono.just(updatedRating)).block();
         assertNotNull(ratingResponseDTO);
         assertNotNull(ratingResponseDTO.getRatingId());
-        assertThat(ratingResponseDTO.getVetId()).isEqualTo(updatedRating.getVetId());
-        assertThat(ratingResponseDTO.getRateScore()).isEqualTo(updatedRating.getRateScore());
-        assertThat(ratingResponseDTO.getRateDescription()).isEqualTo(updatedRating.getRateDescription());
-        assertThat(ratingResponseDTO.getRateDate()).isEqualTo(updatedRating.getRateDate());
+        assertEquals(updatedRating.getVetId(), ratingResponseDTO.getVetId());
+        assertEquals(updatedRating.getRateScore(), ratingResponseDTO.getRateScore());
+        assertEquals(updatedRating.getRateDescription(), ratingResponseDTO.getRateDescription());
+        assertEquals(updatedRating.getPredefinedDescription(), ratingResponseDTO.getPredefinedDescription());
+        assertEquals(updatedRating.getRateDate(), ratingResponseDTO.getRateDate());
+    }
+
+    @Test
+    void updateRatingByVetIdAndRatingId_withPredefinedDescOnly_ShouldSetRateDescriptionToPredefDescription() throws JsonProcessingException {
+        RatingRequestDTO updatedRating = RatingRequestDTO.builder()
+                .rateScore(2.0)
+                .vetId("678910")
+                .rateDescription(null)
+                .predefinedDescription(PredefinedDescription.POOR)
+                .rateDate("20/09/2023")
+                .build();
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody("    {\n" +
+                        "        \"ratingId\": \"123456\",\n" +
+                        "        \"vetId\": \"678910\",\n" +
+                        "        \"rateScore\": 2.0,\n" +
+                        "        \"rateDescription\": \"POOR\",\n" +
+                        "        \"predefinedDescription\": \"POOR\",\n" +
+                        "        \"rateDate\": \"20/09/2023\"\n" +
+                        "    }"));
+
+        final RatingResponseDTO ratingResponseDTO =
+                vetsServiceClient.updateRatingByVetIdAndByRatingId("678910","123456", Mono.just(updatedRating)).block();
+        assertNotNull(ratingResponseDTO);
+        assertNotNull(ratingResponseDTO.getRatingId());
+        assertEquals(updatedRating.getVetId(), ratingResponseDTO.getVetId());
+        assertEquals(updatedRating.getRateScore(), ratingResponseDTO.getRateScore());
+        // assert that rateDescription is set to the predefined description's name
+        assertEquals(updatedRating.getPredefinedDescription().name(), ratingResponseDTO.getRateDescription());
+        assertEquals(updatedRating.getPredefinedDescription(), ratingResponseDTO.getPredefinedDescription());
+        assertEquals(updatedRating.getRateDate(), ratingResponseDTO.getRateDate());
+    }
+
+    @Test
+    void updateRatingByVetIdAndRatingId_withPredefinedDescAndRateDesc_ShouldSetRateDescriptionToPredefDescription() throws JsonProcessingException {
+        RatingRequestDTO updatedRating = RatingRequestDTO.builder()
+                .rateScore(2.0)
+                .vetId("678910")
+                .rateDescription("Vet cancelled last minute.")
+                .predefinedDescription(PredefinedDescription.POOR)
+                .rateDate("20/09/2023")
+                .build();
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody("    {\n" +
+                        "        \"ratingId\": \"123456\",\n" +
+                        "        \"vetId\": \"678910\",\n" +
+                        "        \"rateScore\": 2.0,\n" +
+                        "        \"rateDescription\": \"POOR\",\n" +
+                        "        \"predefinedDescription\": \"POOR\",\n" +
+                        "        \"rateDate\": \"20/09/2023\"\n" +
+                        "    }"));
+
+        final RatingResponseDTO ratingResponseDTO =
+                vetsServiceClient.updateRatingByVetIdAndByRatingId("678910","123456", Mono.just(updatedRating)).block();
+        assertNotNull(ratingResponseDTO);
+        assertNotNull(ratingResponseDTO.getRatingId());
+        assertEquals(updatedRating.getVetId(), ratingResponseDTO.getVetId());
+        assertEquals(updatedRating.getRateScore(), ratingResponseDTO.getRateScore());
+        // assert that rateDescription is set to rateDescription's value
+        assertEquals(updatedRating.getPredefinedDescription().name(), ratingResponseDTO.getRateDescription());
+        assertEquals(updatedRating.getPredefinedDescription(), ratingResponseDTO.getPredefinedDescription());
+        assertEquals(updatedRating.getRateDate(), ratingResponseDTO.getRateDate());
     }
 
     @Test

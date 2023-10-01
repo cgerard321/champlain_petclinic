@@ -216,18 +216,20 @@ class ApiGatewayControllerTest {
 
 
    @Test
-    void addRatingToAVet() {
+    void addRatingToAVet_withRateDescriptionAndPredefinedDesc_ShouldSetRateDescriptionToPredefinedDesc() {
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
                 .vetId(VET_ID)
                 .rateScore(3.5)
                 .rateDescription("The vet was decent but lacked table manners.")
+                .predefinedDescription(PredefinedDescription.GOOD)
                 .rateDate("16/09/2023")
                 .build();
         RatingResponseDTO ratingResponseDTO = RatingResponseDTO.builder()
                 .ratingId("12356789")
                 .vetId(VET_ID)
                 .rateScore(3.5)
-                .rateDescription("The vet was decent but lacked table manners.")
+                .rateDescription("GOOD")
+                .predefinedDescription(PredefinedDescription.GOOD)
                 .rateDate("16/09/2023")
                 .build();
         when(vetsServiceClient.addRatingToVet(anyString(), any(Mono.class)))
@@ -244,43 +246,194 @@ class ApiGatewayControllerTest {
     }
 
     @Test
-    void updateRatingForVet(){
-        RatingRequestDTO updatedRating = RatingRequestDTO.builder()
-                .rateScore(2.0)
+    void addRatingToVet_withPredefinedDescriptionOnly_ShouldSetRateDescriptionToPredefinedDesc() {
+        RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
                 .vetId(VET_ID)
-                .rateDescription("Vet cancelled last minute.")
-                .rateDate("20/09/2023")
+                .rateScore(3.5)
+                .rateDescription(null)
+                .predefinedDescription(PredefinedDescription.GOOD)
+                .rateDate("16/09/2023")
                 .build();
-
         RatingResponseDTO ratingResponseDTO = RatingResponseDTO.builder()
                 .ratingId("12356789")
                 .vetId(VET_ID)
-                .rateScore(2.0)
-                .rateDescription("Vet cancelled last minute.")
-                .rateDate("20/09/2023")
+                .rateScore(3.5)
+                .rateDescription("GOOD")
+                .predefinedDescription(PredefinedDescription.GOOD)
+                .rateDate("16/09/2023")
                 .build();
+        when(vetsServiceClient.addRatingToVet(anyString(), any(Mono.class)))
+                .thenReturn(Mono.just(ratingResponseDTO));
 
+        client.post()
+                .uri("/api/gateway/vets/{vetId}/ratings", VET_ID)
+                .bodyValue(ratingRequestDTO)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+    }
+
+    @Test
+    void addRatingToVet_withRateDescriptionOnly_ShouldSetPredefinedDescriptionToNull() {
+        RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
+                .vetId(VET_ID)
+                .rateScore(3.5)
+                .rateDescription("The vet was decent but lacked table manners.")
+                .predefinedDescription(null)
+                .rateDate("16/09/2023")
+                .build();
+        RatingResponseDTO ratingResponseDTO = RatingResponseDTO.builder()
+                .ratingId("12356789")
+                .vetId(VET_ID)
+                .rateScore(3.5)
+                .rateDescription("The vet was decent but lacked table manners.")
+                .predefinedDescription(null)
+                .rateDate("16/09/2023")
+                .build();
+        when(vetsServiceClient.addRatingToVet(anyString(), any(Mono.class)))
+                .thenReturn(Mono.just(ratingResponseDTO));
+
+        client.post()
+                .uri("/api/gateway/vets/{vetId}/ratings", VET_ID)
+                .bodyValue(ratingRequestDTO)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+    }
+
+    @Test
+    void updateRatingForVet_withRateDescriptionAndPredefinedDesc_ShouldSetRateDescriptionToPredefinedDesc() {
+        RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
+                .vetId(VET_ID)
+                .rateScore(3.5)
+                .rateDescription("The vet was decent but lacked table manners.")
+                .predefinedDescription(PredefinedDescription.GOOD)
+                .rateDate("16/09/2023")
+                .build();
+        RatingResponseDTO ratingResponseDTO = RatingResponseDTO.builder()
+                .ratingId("12356789")
+                .vetId(VET_ID)
+                .rateScore(3.5)
+                .rateDescription("GOOD")
+                .predefinedDescription(PredefinedDescription.GOOD)
+                .rateDate("16/09/2023")
+                .build();
         when(vetsServiceClient.updateRatingByVetIdAndByRatingId(anyString(), anyString(), any(Mono.class)))
                 .thenReturn(Mono.just(ratingResponseDTO));
 
         client.put()
-                .uri("/api/gateway/vets/"+VET_ID+"/ratings/"+ratingResponseDTO.getRatingId())
+                .uri("/api/gateway/vets/{vetId}/ratings/{ratingId}", VET_ID, ratingResponseDTO.getRatingId())
+                .bodyValue(ratingRequestDTO)
                 .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(updatedRating)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(RatingResponseDTO.class)
-                .value(responseDTO -> {
-                    Assertions.assertNotNull(responseDTO);
-                    Assertions.assertNotNull(responseDTO.getRatingId());
-                    assertThat(responseDTO.getRatingId()).isEqualTo(ratingResponseDTO.getRatingId());
-                    assertThat(responseDTO.getVetId()).isEqualTo(updatedRating.getVetId());
-                    assertThat(responseDTO.getRateScore()).isEqualTo(updatedRating.getRateScore());
-                    assertThat(responseDTO.getRateDescription()).isEqualTo(updatedRating.getRateDescription());
-                    assertThat(responseDTO.getRateDate()).isEqualTo(updatedRating.getRateDate());
-                });
+                .expectBody();
+    }
+    @Test
+    void updateRatingForVet_withPredefinedDescriptionOnly_ShouldSetRateDescriptionToPredefinedDesc() {
+        RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
+                .vetId(VET_ID)
+                .rateScore(3.5)
+                .rateDescription(null)
+                .predefinedDescription(PredefinedDescription.GOOD)
+                .rateDate("16/09/2023")
+                .build();
+        RatingResponseDTO ratingResponseDTO = RatingResponseDTO.builder()
+                .ratingId("12356789")
+                .vetId(VET_ID)
+                .rateScore(3.5)
+                .rateDescription("GOOD")
+                .predefinedDescription(PredefinedDescription.GOOD)
+                .rateDate("16/09/2023")
+                .build();
+        when(vetsServiceClient.updateRatingByVetIdAndByRatingId(anyString(), anyString(), any(Mono.class)))
+                .thenReturn(Mono.just(ratingResponseDTO));
+
+        client.put()
+                .uri("/api/gateway/vets/{vetId}/ratings/{ratingId}", VET_ID, ratingResponseDTO.getRatingId())
+                .bodyValue(ratingRequestDTO)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+    }
+
+    @Test
+    void updateRatingForVet_withRateDescriptionOnly_ShouldSetRateDescriptionToItsValue() {
+        RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
+                .vetId(VET_ID)
+                .rateScore(3.5)
+                .rateDescription("The vet was decent but lacked table manners.")
+                .predefinedDescription(null)
+                .rateDate("16/09/2023")
+                .build();
+        RatingResponseDTO ratingResponseDTO = RatingResponseDTO.builder()
+                .ratingId("12356789")
+                .vetId(VET_ID)
+                .rateScore(3.5)
+                .rateDescription("The vet was decent but lacked table manners.")
+                .predefinedDescription(null)
+                .rateDate("16/09/2023")
+                .build();
+        when(vetsServiceClient.updateRatingByVetIdAndByRatingId(anyString(), anyString(), any(Mono.class)))
+                .thenReturn(Mono.just(ratingResponseDTO));
+
+        client.put()
+                .uri("/api/gateway/vets/{vetId}/ratings/{ratingId}", VET_ID, ratingResponseDTO.getRatingId())
+                .bodyValue(ratingRequestDTO)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+    }
+
+
+    @Test
+    void getAllEducationsByVetId_WithValidId_ShouldSucceed(){
+        EducationResponseDTO educationResponseDTO = buildEducation();
+        when(vetsServiceClient.getEducationsByVetId(anyString()))
+                .thenReturn(Flux.just(educationResponseDTO));
+
+        client
+                .get()
+                .uri("/api/gateway/vets/" + VET_ID + "/educations")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$[0].educationId").isEqualTo(educationResponseDTO.getEducationId())
+                .jsonPath("$[0].vetId").isEqualTo(educationResponseDTO.getVetId())
+                .jsonPath("$[0].degree").isEqualTo(educationResponseDTO.getDegree())
+                .jsonPath("$[0].fieldOfStudy").isEqualTo(educationResponseDTO.getFieldOfStudy())
+                .jsonPath("$[0].schoolName").isEqualTo(educationResponseDTO.getSchoolName())
+                .jsonPath("$[0].startDate").isEqualTo(educationResponseDTO.getStartDate())
+                .jsonPath("$[0].endDate").isEqualTo(educationResponseDTO.getEndDate());
+
+    }
+
+    @Test
+    void deleteVetEducation() {
+        EducationResponseDTO educationResponseDTO = buildEducation();
+        when(vetsServiceClient.deleteEducation(VET_ID, educationResponseDTO.getEducationId()))
+                .thenReturn((Mono.empty()));
+
+        client
+                .delete()
+                .uri("/api/gateway/vets/" + VET_ID + "/educations/{educationId}", educationResponseDTO.getEducationId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk();
+
+        Mockito.verify(vetsServiceClient, times(1))
+                .deleteEducation(VET_ID, educationResponseDTO.getEducationId());
     }
     @Test
     void getAllEducationsByVetId_WithValidId_ShouldSucceed(){
