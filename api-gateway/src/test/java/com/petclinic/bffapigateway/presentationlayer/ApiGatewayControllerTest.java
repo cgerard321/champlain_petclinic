@@ -1461,43 +1461,15 @@ class ApiGatewayControllerTest {
     }
 
     @Test
-    void shouldDeleteBillByVetId() {
-        BillRequestDTO billRequestDTO = new BillRequestDTO();
-        billRequestDTO.setVetId("9");
-        billRequestDTO.setDate(null);
-        billRequestDTO.setAmount(600);
-        billRequestDTO.setVisitType("Adoption");
-
-        BillResponseDTO billResponseDTO = new BillResponseDTO();
-        billResponseDTO.setVetId("9");
-        billResponseDTO.setDate(null);
-        billResponseDTO.setAmount(600);
-        billResponseDTO.setVisitType("Adoption");
-
-        when(billServiceClient.createBill(billRequestDTO))
-                .thenReturn(Mono.just(billResponseDTO));
-
-        client.post()
-                .uri("/api/gateway/bills")
-                .body(Mono.just(billRequestDTO), BillRequestDTO.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isCreated()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody();
-
-        // Compare the vetId property, not the billId property
-        assertEquals(billResponseDTO.getVetId(), "9");
-
+    void shouldDeleteBillsByVetId() {
+        when(billServiceClient.deleteBillsByVetId("9"))
+                .thenReturn(Flux.empty());
         client.delete()
                 .uri("/api/gateway/bills/vet/9")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody();
-
-        assertNull(billServiceClient.getBilling(billResponseDTO.getBillId()));
+                .expectStatus().isNoContent()
+                .expectBody().isEmpty();
     }
 
 
@@ -1820,20 +1792,22 @@ class ApiGatewayControllerTest {
                 .uri("/api/gateway/visits/previous/{petId}", 21)
                 .exchange()
                 .expectStatus().isOk()
-                .expectBody()
-                .jsonPath("$[0].visitId").isEqualTo(visit1.getVisitId())
-                .jsonPath("$[0].petId").isEqualTo("21")
-                .jsonPath("$[0].visitDate").isEqualTo("2022-11-25 13:45")
-                .jsonPath("$[0].description").isEqualTo("John Smith's cat has a paw infection.")
-                .jsonPath("$[0].status").isEqualTo(false)
-                .jsonPath("$[0].practitionerId").isEqualTo(2)
-                .jsonPath("$[1].visitId").isEqualTo(visit2.getVisitId())
-                .jsonPath("$[1].petId").isEqualTo("21")
-                .jsonPath("$[1].visitDate").isEqualTo("2022-11-25 14:45")
-                .jsonPath("$[1].description").isEqualTo("John Smith's dog has a paw infection.")
-                .jsonPath("$[1].status").isEqualTo(false)
-                .jsonPath("$[1].practitionerId").isEqualTo(2);
-
+                .expectBodyList(VisitDetails.class)
+                .value((list) -> {
+                    assertEquals(list.size(), 2);
+                    assertEquals(list.get(0).getVisitId(), visit1.getVisitId());
+                    assertEquals(list.get(0).getPetId(), visit1.getPetId());
+                    assertEquals(list.get(0).getVisitDate(), visit1.getVisitDate());
+                    assertEquals(list.get(0).getDescription(), visit1.getDescription());
+                    assertEquals(list.get(0).getStatus(), visit1.getStatus());
+                    assertEquals(list.get(0).getPractitionerId(), visit1.getPractitionerId());
+                    assertEquals(list.get(1).getVisitId(), visit2.getVisitId());
+                    assertEquals(list.get(1).getPetId(), visit2.getPetId());
+                    assertEquals(list.get(1).getVisitDate(), visit2.getVisitDate());
+                    assertEquals(list.get(1).getDescription(), visit2.getDescription());
+                    assertEquals(list.get(1).getStatus(), visit2.getStatus());
+                    assertEquals(list.get(1).getPractitionerId(), visit2.getPractitionerId());
+                });
     }
 
     @Test
