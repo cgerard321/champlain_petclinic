@@ -324,6 +324,35 @@ class InventoryControllerIntegrationTest {
                     assertEquals(2, list.size());
                 });
     }
+
+
+    @Test
+    public void getInventoryByInventoryId_withValidInventoryId_Should_Succed(){
+        webTestClient.get()
+                .uri("/inventory/{inventoryId}" , inventory1.getInventoryId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.inventoryId").isEqualTo(inventory1.getInventoryId());
+    }
+
+
+    @Test
+    void getInventoryByInventoryId_withInvalidInventoryId_throwsNotFoundException(){
+        String invalidInventoryId= "123";
+
+        webTestClient
+                .get()
+                .uri("/inventory/{inventoryId}", invalidInventoryId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("No inventory with this id was found" + invalidInventoryId);
+    }
     @Test
     public void addNewInventoryWithValidValues_shouldSucceed(){
         InventoryRequestDTO inventoryRequestDTO = InventoryRequestDTO.builder()

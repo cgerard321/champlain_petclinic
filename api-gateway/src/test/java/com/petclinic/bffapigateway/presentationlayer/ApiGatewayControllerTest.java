@@ -2213,7 +2213,42 @@ private InventoryResponseDTO buildInventoryDTO(){
     }
 
 
-//delete all product inventory and delete all inventory
+    @Test
+    void getInventoryByInventoryId_ValidId_shouldSucceed() {
+
+        String validInventoryId = "inventoryId_1";
+        InventoryResponseDTO inventoryResponseDTO = InventoryResponseDTO.builder()
+                .inventoryId(validInventoryId)
+                .inventoryName("Pet food")
+                .inventoryType(internal)
+                .inventoryDescription("pet")
+                .build();
+
+        when(inventoryServiceClient.getInventoryById(validInventoryId))
+                .thenReturn(Mono.just(inventoryResponseDTO));
+
+
+        client.get()
+                .uri("/api/gateway/inventory/{inventoryId}", validInventoryId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(APPLICATION_JSON)
+                .expectBody(InventoryResponseDTO.class)
+                .value(dto -> {
+                    assertNotNull(dto);
+                    assertEquals(inventoryResponseDTO.getInventoryId(), dto.getInventoryId());
+                    assertEquals(inventoryResponseDTO.getInventoryName(), dto.getInventoryName());
+                    assertEquals(inventoryResponseDTO.getInventoryType(), dto.getInventoryType());
+                    assertEquals(inventoryResponseDTO.getInventoryDescription(), dto.getInventoryDescription());
+                });
+
+
+        verify(inventoryServiceClient, times(1))
+                .getInventoryById(validInventoryId);
+    }
+
+
+    //delete all product inventory and delete all inventory
 @Test
 void deleteAllInventory_shouldSucceed() {
     // Mock the service call to simulate the successful deletion of all inventories.
