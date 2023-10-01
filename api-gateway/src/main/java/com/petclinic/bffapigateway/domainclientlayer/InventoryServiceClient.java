@@ -176,13 +176,18 @@ public class InventoryServiceClient {
     }
     public Mono<Void> deleteAllInventories() {
         return webClient.delete()
-                .uri(inventoryServiceUrl)  // Notice that we don't append any specific path
+                .uri(inventoryServiceUrl)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToMono(Void.class);
     }
 
-
+    public Mono<Void> deleteInventoryByInventoryId(final String inventoryId){
+        return webClient.delete()
+                .uri(inventoryServiceUrl + "/{inventoryId}", inventoryId)
+                .retrieve()
+                .bodyToMono(Void.class);
+    }
 
 
 }

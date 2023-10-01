@@ -92,47 +92,67 @@ angular.module('vetDetails')
             }
         };
 
-        self.updateRating = function (ratingId, rating) {
-            const btn = document.getElementById("updateRatingBtn"+ratingId);
+        self.updateRating = function (ratingId) {
+            const btn = document.getElementById("updateRatingBtn" + ratingId);
+            const updateContainer = document.getElementById("ratingUpdate" + ratingId);
+            const selectedValue = parseInt(document.getElementById("ratingOptions" + ratingId).value);
 
-            const updateContainer=document.getElementById("ratingUpdate"+ratingId)
-            const selectedValue=parseInt(document.getElementById("ratingOptions"+ratingId).value)
-            if(selectedValue<1||selectedValue>5){
-                alert("rateScore should be between 1 and 5" + selectedValue)
-                return
+            if (selectedValue < 1 || selectedValue > 5) {
+                alert("rateScore should be between 1 and 5" + selectedValue);
+                return;
             }
 
-            const updatedDescription= document.getElementById("updateDescription"+ratingId).value
-            if(updateContainer.style.display=="none"){
-                updateContainer.style.display="block"
-                btn.textContent="Save"
+            let updatedDescription = document.getElementById("updateDescription" + ratingId).value;
+            if (updatedDescription.trim() === "") {
+                updatedDescription = null;
             }
-            else if(btn.textContent=="Save"){
-                const updatedRating = {
-                    rateScore: selectedValue,
-                    vetId: $stateParams.vetId,
-                    rateDescription: updatedDescription,
-                    rateDate: Date.now().toString()
-                };
-                console.log(updatedRating.rateScore)
 
+            const predefinedDesc = document.querySelector('input[name="predefinedDescriptionUpdate' + ratingId + '"]:checked')
+                ? document.querySelector('input[name="predefinedDescriptionUpdate' + ratingId + '"]:checked').value
+                : null;
+
+            let updatedRating = {
+                ratingId: ratingId,
+                rateScore: selectedValue,
+                vetId: $stateParams.vetId,
+                rateDescription: updatedDescription,
+                rateDate: Date.now().toString(),
+                predefinedDescription: predefinedDesc
+            };
+
+            if (updateContainer.style.display === "none") {
+                // Show the update form
+                updateContainer.style.display = "block";
+                btn.textContent = "Save";
+            } else if (btn.textContent === "Save") {
+                // Save the updated rating
                 $http.put("api/gateway/vets/" + $stateParams.vetId + "/ratings/" + ratingId, updatedRating).then(function (resp) {
-                    console.log(resp.data)
-                    rating = resp.data;
+                    console.log(resp.data);
+                    self.updatedRating = resp.data;
                     alert('Your review was successfully updated!');
-                    //refresh list
+
+                    // Refresh list
                     $http.get('api/gateway/vets/' + $stateParams.vetId + '/ratings').then(function (resp) {
-                        console.log(resp.data)
+                        console.log(resp.data);
                         self.ratings = resp.data;
                     });
-                    //refresh percentages
+
+                    // Refresh percentages
                     percentageOfRatings();
                 });
 
-                updateContainer.style.display="none"
-                btn.textContent="Update"
+                // Hide the update form
+                updateContainer.style.display = "none";
+                btn.textContent = "Update";
+
+                // reset predefinedDescription radio buttons to unchecked
+                document.querySelectorAll('input[name="predefinedDescriptionUpdate' + ratingId + '"]').forEach(function (radio) {
+                    radio.checked = false;
+                });
             }
-        }
+        };
+
+
 
         //photo
         $http.get('api/gateway/vets/' + $stateParams.vetId + '/photo').then(function (resp) {
@@ -144,52 +164,62 @@ angular.module('vetDetails')
                 self.vetPhoto = resp.data;
             });
         }
-        self.submitRatingForm = function (rating) {
-            rating.vetId = $stateParams.vetId;
-            rating.rateScore = document.getElementById("ratingScore").value;
-            if(rating.rateScore<1||rating.rateScore>5){
-                alert("rateScore should be between 1 and 5" + selectedValue)
-                return
-            }
-            rating.rateDescription = document.getElementById("ratingDescription").value;
-            var currentDate = new Date();
-            var readableDate = currentDate.toLocaleDateString();
-            rating.rateDate = readableDate;
-
-            if(!rating.rateScore){
-                alert("Please select a rating score")
+        self.submitRatingForm = function () {
+            var rating = {
+                vetId: $stateParams.vetId,
+                rateScore: parseFloat(document.getElementById("ratingScore").value),
+                rateDate: new Date().toLocaleDateString(),
+                rateDescription: document.getElementById("ratingDescription").value,
+                predefinedDescription: document.querySelector('input[name="predefinedDescription"]:checked')
+                    ? document.querySelector('input[name="predefinedDescription"]:checked').value
+                    : null,
+            };
+            if (!rating.rateScore) {
+                alert("Please select a rating score");
                 return;
             }
             else {
+                // If ratingDescription is an empty string, set it to null
+                if (rating.rateDescription.trim() === "") {
+                    rating.rateDescription = null;
+                }
+                $http.post("api/gateway/vets/" + $stateParams.vetId + "/ratings", rating)
+                    .then(function (resp) {
+                        console.log(resp.data);
+                        self.rating = resp.data;
+                        alert('Your review was successfully added!');
 
-            $http.post("api/gateway/vets/" + $stateParams.vetId + "/ratings", rating).then(function (resp){
-                console.log(resp.data)
-                self.rating = resp.data;
-                alert('Your review was successfully added!');
+                        // Refresh list
+                        $http.get('api/gateway/vets/' + $stateParams.vetId + '/ratings').then(function (resp) {
+                            console.log(resp.data);
+                            self.ratings = resp.data;
+                            arr = resp.data;
+                        });
 
+                        // Refresh percentages
+                        percentageOfRatings();
 
-                //refresh list
-                $http.get('api/gateway/vets/' + $stateParams.vetId + '/ratings').then(function (resp) {
-                    console.log(resp.data)
-                    self.ratings = resp.data;
-                    arr = resp.data;
-                });
-                //refresh percentages
-                percentageOfRatings();
+                        document.getElementById("ratingScore").value = "";
+                        document.getElementById("ratingDescription").value = "";
 
+                        // Refresh list
+                        $http.get('api/gateway/vets/' + $stateParams.vetId + '/ratings').then(function (resp) {
+                            self.ratings = resp.data;
+                            arr = resp.data;
+                        });
+                    })
+                    .catch(function (error) {
+                        let errorMessage = "An error occurred while adding the rating. Please try again.";
+                        if (error.data && error.data.errors) {
+                            errorMessage = error.data.errors;
+                        }
+                        alert(errorMessage);
+                    });
 
-                document.getElementById("ratingScore").value = ""
-                document.getElementById("ratingDescription").value = ""
-                //refresh list
-                $http.get('api/gateway/vets/' + $stateParams.vetId + '/ratings').then(function (resp) {
-                    self.ratings = resp.data;
-                    arr = resp.data;
-                });
-            }, function (response) {
-                let error = "Missing rating, please input a rating.";
-                alert(error);
-            })
-        }};
+                // clear form with .reset()
+                document.getElementById("ratingForm").reset();
+            }
+        };
         function uuidv4() {
             return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
                 (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)

@@ -11,6 +11,7 @@ package com.petclinic.vet.presentationlayer;
   * Ticket: feat(VVS-CPC-553): add veterinarian
  */
 
+import com.petclinic.vet.dataaccesslayer.PredefinedDescription;
 import com.petclinic.vet.servicelayer.*;
 import com.petclinic.vet.util.EntityDtoUtil;
 import lombok.RequiredArgsConstructor;
@@ -88,7 +89,14 @@ public class VetController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    //Vets
+   @GetMapping("{vetId}/ratings/{predefinedDescription}/count")
+   public Mono<ResponseEntity<Integer>> getCountOfRatingsByVetIdAndPredefinedDescription(@PathVariable String vetId, @PathVariable PredefinedDescription predefinedDescription){
+       return ratingService.getCountOfRatingsByVetIdAndPredefinedDescription(EntityDtoUtil.verifyId(vetId), predefinedDescription)
+               .map(ResponseEntity::ok)
+               .defaultIfEmpty(ResponseEntity.notFound().build());
+   }
+
+   //Vets
     @GetMapping()
     public Flux<VetDTO> getAllVets() {
         return vetService.getAll();

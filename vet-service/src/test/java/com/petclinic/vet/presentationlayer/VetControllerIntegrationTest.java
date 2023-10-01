@@ -157,6 +157,74 @@ class VetControllerIntegrationTest {
     }
 
     @Test
+    void addRatingToAVet_WithPredefinedDescriptionOnly_ShouldSetRateDescriptionToPredefinedDescription() {
+        StepVerifier
+                .create(ratingRepository.deleteAll())
+                .expectNextCount(0)
+                .verifyComplete();
+
+        RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
+                .vetId(VET_ID)
+                .rateScore(5.0)
+                .rateDescription(null)
+                .predefinedDescription(PredefinedDescription.GOOD)
+                .rateDate("21/09/2023")
+                .build();
+
+        client.post()
+                .uri("/vets/" + VET_ID + "/ratings")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(ratingRequestDTO)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(RatingResponseDTO.class)
+                .value(ratingResponseDTO -> {
+                    assertNotNull(ratingResponseDTO);
+                    assertNotNull(ratingResponseDTO.getRatingId());
+                    assertThat(ratingResponseDTO.getVetId()).isEqualTo(ratingRequestDTO.getVetId());
+                    assertThat(ratingResponseDTO.getRateScore()).isEqualTo(ratingRequestDTO.getRateScore());
+                    assertThat(ratingResponseDTO.getRateDescription()).isEqualTo(ratingRequestDTO.getPredefinedDescription().name());
+                    assertThat(ratingResponseDTO.getPredefinedDescription()).isEqualTo(ratingRequestDTO.getPredefinedDescription());
+                    assertThat(ratingResponseDTO.getRateDate()).isEqualTo(ratingRequestDTO.getRateDate());
+                });
+    }
+    @Test
+    void addRatingWithWrittenDescriptionAndPredefinedValue_ShouldSetRatingDescriptionToPredefinedValue(){
+        StepVerifier
+                .create(ratingRepository.deleteAll())
+                .expectNextCount(0)
+                .verifyComplete();
+
+        RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
+                .vetId(VET_ID)
+                .rateScore(5.0)
+                .rateDescription("Vet was very gentle with my hamster.")
+                .predefinedDescription(PredefinedDescription.GOOD)
+                .rateDate("21/09/2023")
+                .build();
+
+        client.post()
+                .uri("/vets/" + VET_ID + "/ratings")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(ratingRequestDTO)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(RatingResponseDTO.class)
+                .value(ratingResponseDTO -> {
+                    assertNotNull(ratingResponseDTO);
+                    assertNotNull(ratingResponseDTO.getRatingId());
+                    assertThat(ratingResponseDTO.getVetId()).isEqualTo(ratingRequestDTO.getVetId());
+                    assertThat(ratingResponseDTO.getRateScore()).isEqualTo(ratingRequestDTO.getRateScore());
+                    assertThat(ratingResponseDTO.getRateDescription()).isEqualTo(ratingRequestDTO.getPredefinedDescription().name());
+                    assertThat(ratingResponseDTO.getPredefinedDescription()).isEqualTo(ratingRequestDTO.getPredefinedDescription());
+                    assertThat(ratingResponseDTO.getRateDate()).isEqualTo(ratingRequestDTO.getRateDate());
+                });
+    }
+    @Test
     void addRatingToAVet_WithInvalidVetId_ShouldNotSucceed() {
         StepVerifier
                 .create(vetRepository.deleteAll())
@@ -216,6 +284,41 @@ class VetControllerIntegrationTest {
     }
 
     @Test
+    void addRatingToVet_WithPredefinedDescription_ShouldSetRateDescriptionToPredefinedDescription() {
+        StepVerifier
+                .create(ratingRepository.deleteAll())
+                .expectNextCount(0)
+                .verifyComplete();
+
+        RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
+                .vetId(VET_ID)
+                .rateScore(5.0)
+                .rateDescription(null)
+                .predefinedDescription(PredefinedDescription.GOOD)
+                .rateDate("21/09/2023")
+                .build();
+
+        client.post()
+                .uri("/vets/" + VET_ID + "/ratings")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(ratingRequestDTO)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(RatingResponseDTO.class)
+                .value(ratingResponseDTO -> {
+                    assertNotNull(ratingResponseDTO);
+                    assertNotNull(ratingResponseDTO.getRatingId());
+                    assertThat(ratingResponseDTO.getVetId()).isEqualTo(ratingRequestDTO.getVetId());
+                    assertThat(ratingResponseDTO.getRateScore()).isEqualTo(ratingRequestDTO.getRateScore());
+                    assertThat(ratingResponseDTO.getRateDescription()).isEqualTo(ratingRequestDTO.getPredefinedDescription().name());
+                    assertThat(ratingResponseDTO.getPredefinedDescription()).isEqualTo(ratingRequestDTO.getPredefinedDescription());
+                    assertThat(ratingResponseDTO.getRateDate()).isEqualTo(ratingRequestDTO.getRateDate());
+                });
+    }
+
+    @Test
     void updateRating_withValidVetIdAndValidRatingId_shouldSucceed() {
         Publisher<Rating> setup = ratingRepository.deleteAll()
                 .thenMany(ratingRepository.save(rating1));
@@ -271,6 +374,46 @@ class VetControllerIntegrationTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("vetId not found: " + invalidVetId);
+    }
+
+    @Test
+    void updateRating_withPredefinedDescriptionOnly_ShouldSetRateDescriptionToPredefinedDescription() {
+        Publisher<Rating> setup = ratingRepository.deleteAll()
+                .thenMany(ratingRepository.save(rating1));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        String existingRatingId = rating1.getRatingId();
+
+        RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
+                .vetId(VET_ID)
+                .rateScore(5.0)
+                .rateDescription(null)
+                .predefinedDescription(PredefinedDescription.GOOD)
+                .rateDate("21/09/2023")
+                .build();
+
+        client.put()
+                .uri("/vets/" + VET_ID + "/ratings/" + existingRatingId)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(ratingRequestDTO)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(RatingResponseDTO.class)
+                .value(ratingResponseDTO -> {
+                    assertNotNull(ratingResponseDTO);
+                    assertNotNull(ratingResponseDTO.getRatingId());
+                    assertThat(ratingResponseDTO.getVetId()).isEqualTo(ratingRequestDTO.getVetId());
+                    assertThat(ratingResponseDTO.getRateScore()).isEqualTo(ratingRequestDTO.getRateScore());
+                    assertThat(ratingResponseDTO.getRateDescription()).isEqualTo(ratingRequestDTO.getPredefinedDescription().name());
+                    assertThat(ratingResponseDTO.getPredefinedDescription()).isEqualTo(ratingRequestDTO.getPredefinedDescription());
+                    assertThat(ratingResponseDTO.getRateDate()).isEqualTo(ratingRequestDTO.getRateDate());
+                });
     }
 
     @Test
