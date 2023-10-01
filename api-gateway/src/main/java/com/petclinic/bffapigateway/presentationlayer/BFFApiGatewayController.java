@@ -28,8 +28,8 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.*;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -44,6 +44,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("/api/gateway")
+@Validated
 public class BFFApiGatewayController {
 
     private final CustomersServiceClient customersServiceClient;
@@ -207,6 +208,11 @@ public class BFFApiGatewayController {
         return visitsServiceClient.getVisitsForPet(petId);
     }
 
+    @GetMapping(value = "visits/status/{status}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<VisitResponseDTO> getVisitsForStatus(final @PathVariable String status){
+        return visitsServiceClient.getVisitsForStatus(status);
+    }
+
     @GetMapping(value ="visits/{visitId}")
     public Mono<VisitResponseDTO>  getVisitByVisitId(final @PathVariable String visitId){
         return visitsServiceClient.getVisitByVisitId(visitId);
@@ -237,6 +243,12 @@ public class BFFApiGatewayController {
         visit.setVisitId(visitId);
         return visitsServiceClient.updateVisitForPet(visit);
     }
+
+    @PutMapping(value = "/visits/{visitId}/status/{status}")
+    Mono<VisitResponseDTO> updateStatusForVisitByVisitId(@PathVariable String visitId, @PathVariable String status) {
+        return visitsServiceClient.updateStatusForVisitByVisitId(visitId, status);
+    }
+
     @DeleteMapping (value = "visits/{visitId}")
     public Mono<Void> deleteVisitsByVisitId(final @PathVariable String visitId){
         return visitsServiceClient.deleteVisitByVisitId(visitId);
@@ -496,7 +508,7 @@ public class BFFApiGatewayController {
     @PostMapping(value = "/users",
             consumes = "application/json",
             produces = "application/json")
-    public Mono<OwnerResponseDTO> createUser(@RequestBody @Valid Register model) {
+    public Mono<OwnerResponseDTO> createUser(@RequestBody @Valid Mono<Register> model) {
         return authServiceClient.createUser(model);
     }
 
@@ -508,7 +520,7 @@ public class BFFApiGatewayController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @PostMapping(value = "/users/login",produces = "application/json;charset=utf-8;", consumes = "application/json")
-    public Mono<ResponseEntity<UserPasswordLessDTO>> login(@RequestBody Login login) throws Exception {
+    public Mono<ResponseEntity<UserPasswordLessDTO>> login(@RequestBody Mono<Login> login) throws Exception {
         log.info("Entered controller /login");
         return authServiceClient.login(login);
 
@@ -517,9 +529,9 @@ public class BFFApiGatewayController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @PostMapping(value = "/users/forgot_password")
-    public Mono<ResponseEntity<Void>> processForgotPassword(ServerWebExchange exchange, @RequestBody UserEmailRequestDTO email) {
+    public Mono<ResponseEntity<Void>> processForgotPassword(@RequestBody Mono<UserEmailRequestDTO> email) {
 
-        return authServiceClient.sendForgottenEmail(exchange.getRequest(),email.getEmail());
+        return authServiceClient.sendForgottenEmail(email);
 
     }
 
@@ -528,7 +540,7 @@ public class BFFApiGatewayController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @PostMapping("/users/reset_password")
-    public Mono<ResponseEntity<Void>> processResetPassword(@RequestBody UserPasswordAndTokenRequestModel resetRequest) {
+    public Mono<ResponseEntity<Void>> processResetPassword(@RequestBody @Valid Mono<UserPasswordAndTokenRequestModel> resetRequest) {
         return authServiceClient.changePassword(resetRequest);
     }
 
