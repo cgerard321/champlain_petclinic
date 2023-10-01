@@ -275,46 +275,6 @@ class ApiGatewayControllerTest {
                     assertThat(responseDTO.getRateDate()).isEqualTo(updatedRating.getRateDate());
                 });
     }
-    @Test
-    void getAllEducationsByVetId_WithValidId_ShouldSucceed(){
-        EducationResponseDTO educationResponseDTO = buildEducation();
-        when(vetsServiceClient.getEducationsByVetId(anyString()))
-                .thenReturn(Flux.just(educationResponseDTO));
-
-        client
-                .get()
-                .uri("/api/gateway/vets/" + VET_ID + "/educations")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$[0].educationId").isEqualTo(educationResponseDTO.getEducationId())
-                .jsonPath("$[0].vetId").isEqualTo(educationResponseDTO.getVetId())
-                .jsonPath("$[0].degree").isEqualTo(educationResponseDTO.getDegree())
-                .jsonPath("$[0].fieldOfStudy").isEqualTo(educationResponseDTO.getFieldOfStudy())
-                .jsonPath("$[0].schoolName").isEqualTo(educationResponseDTO.getSchoolName())
-                .jsonPath("$[0].startDate").isEqualTo(educationResponseDTO.getStartDate())
-                .jsonPath("$[0].endDate").isEqualTo(educationResponseDTO.getEndDate());
-
-    }
-
-    @Test
-    void deleteVetEducation() {
-        EducationResponseDTO educationResponseDTO = buildEducation();
-        when(vetsServiceClient.deleteEducation(VET_ID, educationResponseDTO.getEducationId()))
-                .thenReturn((Mono.empty()));
-
-        client
-                .delete()
-                .uri("/api/gateway/vets/" + VET_ID + "/educations/{educationId}", educationResponseDTO.getEducationId())
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk();
-
-        Mockito.verify(vetsServiceClient, times(1))
-                .deleteEducation(VET_ID, educationResponseDTO.getEducationId());
-    }
 
     @Test
     void getAllVets() {
@@ -709,6 +669,32 @@ class ApiGatewayControllerTest {
 //        assertEquals(user.getId(), 1);
 //    }
 //
+//    @Test
+//    void createUser(){
+//        UserDetails user = new UserDetails();
+//        user.setId(1);
+//        user.setUsername("Johnny123");
+//        user.setPassword("password");
+//        user.setEmail("email@email.com");
+//        when(authServiceClient.createUser(argThat(
+//                n -> user.getEmail().equals(n.getEmail())
+//        ))).thenReturn(Mono.just(user));
+//
+//        client.post()
+//                .uri("/api/gateway/users")
+//                .body(Mono.just(user), UserDetails.class)
+//                .accept(MediaType.APPLICATION_JSON)
+//                .exchange()
+//                .expectStatus().isOk()
+//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+//                .expectBody();
+//
+//        assertEquals(user.getId(), 1);
+//        assertEquals(user.getUsername(), "Johnny123");
+//        assertEquals(user.getPassword(), "password");
+//        assertEquals(user.getEmail(), "email@email.com");
+//
+//    }
 
     @Test
     void getAllOwners_shouldSucceed(){
@@ -825,7 +811,6 @@ class ApiGatewayControllerTest {
         pet.setName("Fluffy");
         pet.setBirthDate("2000-01-01");
         pet.setType(type);
-        pet.setIsActive("true");
 
         when(customersServiceClient.createPet(pet,od.getOwnerId()))
 
@@ -844,8 +829,7 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.petId").isEqualTo(pet.getPetId())
                 .jsonPath("$.name").isEqualTo(pet.getName())
                 .jsonPath("$.birthDate").isEqualTo(pet.getBirthDate())
-                .jsonPath("$.type").isEqualTo(pet.getType())
-                .jsonPath("$.isActive").isEqualTo(pet.getIsActive());
+                .jsonPath("$.type").isEqualTo(pet.getType());
 
     }
 
@@ -860,7 +844,6 @@ class ApiGatewayControllerTest {
         pet.setName("Fluffy");
         pet.setBirthDate("2000-01-01");
         pet.setType(type);
-        pet.setIsActive("true");
 
         when(customersServiceClient.updatePet(any(PetResponseDTO.class), any(String.class)))
                 .thenReturn(Mono.just(pet));
@@ -876,35 +859,8 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.petId").isEqualTo(pet.getPetId())
                 .jsonPath("$.name").isEqualTo(pet.getName())
                 .jsonPath("$.birthDate").isEqualTo(pet.getBirthDate())
-                .jsonPath("$.type").isEqualTo(pet.getType())
-                .jsonPath("$.isActive").isEqualTo(pet.getIsActive());
+                .jsonPath("$.type").isEqualTo(pet.getType());
     }
-
-    @Test
-    void shouldPatchPet() {
-        PetRequestDTO petRequest = new PetRequestDTO();
-        petRequest.setIsActive("false");
-
-        PetResponseDTO petResponse = new PetResponseDTO();
-        petResponse.setPetId("30");
-        petResponse.setIsActive("false");
-
-        when(customersServiceClient.patchPet(any(PetRequestDTO.class), any(String.class)))
-                .thenReturn(Mono.just(petResponse));
-
-        client.patch()
-                .uri("/api/gateway/pet/{petId}", petResponse.getPetId())
-                .body(fromValue(petRequest))
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.petId").isEqualTo(petResponse.getPetId())
-                .jsonPath("$.isActive").isEqualTo(petResponse.getIsActive());
-    }
-
-
 
 
     //
@@ -1093,7 +1049,6 @@ class ApiGatewayControllerTest {
         pet.setName("Fluffy");
         pet.setBirthDate("2000-01-01");
         pet.setType(type);
-        pet.setIsActive("true");
 
         when(customersServiceClient.createPet(pet,od.getOwnerId()))
                 .thenReturn(Mono.just(pet));
@@ -1159,7 +1114,6 @@ class ApiGatewayControllerTest {
         pet.setName("Fluffy");
         pet.setBirthDate("2000-01-01");
         pet.setType(type);
-        pet.setIsActive("true");
 
         when(customersServiceClient.createPet(pet,od.getOwnerId()))
 
@@ -1194,7 +1148,6 @@ class ApiGatewayControllerTest {
         pet.setName("Fluffy");
         pet.setBirthDate("2000-01-01");
         pet.setType(type);
-        pet.setIsActive("true");
 
         when(customersServiceClient.createPet(pet,od.getOwnerId()))
                 .thenReturn(Mono.just(pet));
@@ -2634,7 +2587,29 @@ void deleteAllInventory_shouldSucceed() {
                 .hasSize(2);
     }
 
+    @Test
+    void getAllEducationsByVetId_WithValidId_ShouldSucceed(){
+        EducationResponseDTO educationResponseDTO = buildEducation();
+        when(vetsServiceClient.getEducationsByVetId(anyString()))
+                .thenReturn(Flux.just(educationResponseDTO));
 
+        client
+                .get()
+                .uri("/api/gateway/vets/" + VET_ID + "/educations")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$[0].educationId").isEqualTo(educationResponseDTO.getEducationId())
+                .jsonPath("$[0].vetId").isEqualTo(educationResponseDTO.getVetId())
+                .jsonPath("$[0].degree").isEqualTo(educationResponseDTO.getDegree())
+                .jsonPath("$[0].fieldOfStudy").isEqualTo(educationResponseDTO.getFieldOfStudy())
+                .jsonPath("$[0].schoolName").isEqualTo(educationResponseDTO.getSchoolName())
+                .jsonPath("$[0].startDate").isEqualTo(educationResponseDTO.getStartDate())
+                .jsonPath("$[0].endDate").isEqualTo(educationResponseDTO.getEndDate());
+
+    }
 
     private EducationResponseDTO buildEducation(){
         return EducationResponseDTO.builder()
