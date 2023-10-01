@@ -33,6 +33,8 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Optional;
+
 /**
  * @author Maciej Szarlinski
  * @author Christine Gerard
@@ -391,6 +393,13 @@ public class BFFApiGatewayController {
                         visitsServiceClient.getVisitsForPets(n.getPetIds())
                                 .map(addVisitsToOwner(n))
                 );*/
+    }
+    @GetMapping(value = "owners/owners-pagination")
+    public Flux<OwnerResponseDTO> getOwnersByPagination(
+            @RequestParam Optional<Integer> page,
+            @RequestParam Optional<Integer> size) {
+
+        return customersServiceClient.getOwnersByPagination(page,size);
     }
 
     @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN})
