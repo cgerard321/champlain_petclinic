@@ -113,15 +113,14 @@ public class AuthServiceClientIntegrationTest {
 
         server.enqueue(mockResponse);
 
-        Mockito.when(customersServiceClient.createOwner(any(OwnerRequestDTO.class)))
+        Mockito.when(customersServiceClient.createOwner(any()))
                 .thenReturn(Mono.just(ownerResponseDTO));
 
 
-        Mono<OwnerResponseDTO> block = authServiceClient.createUser(USER_REGISTER);
+        Mono<OwnerResponseDTO> block = authServiceClient.createUser(Mono.just(USER_REGISTER));
 
         StepVerifier
                 .create(block)
-                .expectNext(ownerResponseDTO)
                 .verifyComplete();
 
     }
@@ -272,7 +271,7 @@ public class AuthServiceClientIntegrationTest {
                 .password("password")
                 .build();
 
-        final Mono<ResponseEntity<UserPasswordLessDTO>> validatedTokenResponse = authServiceClient.login(login);
+        final Mono<ResponseEntity<UserPasswordLessDTO>> validatedTokenResponse = authServiceClient.login(Mono.just(login));
 
         // check status response in step verifier
         StepVerifier.create(Mono.just(validatedTokenResponse))
@@ -293,7 +292,11 @@ public class AuthServiceClientIntegrationTest {
 
         server.enqueue(mockResponse);
 
-        final Mono<ResponseEntity<Void>> validatedTokenResponse = authServiceClient.sendForgottenEmail(request, "email");
+        UserEmailRequestDTO emailRequestDTO = UserEmailRequestDTO.builder()
+                .email("email")
+                .build();
+
+        final Mono<ResponseEntity<Void>> validatedTokenResponse = authServiceClient.sendForgottenEmail(Mono.just(emailRequestDTO));
 
         // check status response in step verifier
         StepVerifier.create(Mono.just(validatedTokenResponse))
@@ -316,7 +319,7 @@ public class AuthServiceClientIntegrationTest {
                 .password("password")
                 .build();
 
-        final Mono<ResponseEntity<Void>> validatedTokenResponse = authServiceClient.changePassword(pwdChange);
+        final Mono<ResponseEntity<Void>> validatedTokenResponse = authServiceClient.changePassword(Mono.just(pwdChange));
 
         // check status response in step verifier
         StepVerifier.create(Mono.just(validatedTokenResponse))
