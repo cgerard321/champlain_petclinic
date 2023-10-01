@@ -15,7 +15,12 @@ angular.module('resetPwdForm')
             })
             .catch(n => {
                 console.log(n)
-                $scope.errorMessages = n.data.message.split`\n`;
+                try {
+                    $scope.errorMessages = n.data.password.split`\n`;
+                }
+                catch (e) {
+                    $scope.errorMessages = n.data.message.split`\n`;
+                }
             })
 
         this.keypress = ({ originalEvent: { key } }) => key === 'Enter' && this.add()

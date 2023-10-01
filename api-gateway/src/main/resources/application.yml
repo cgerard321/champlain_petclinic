@@ -3,8 +3,6 @@ server.port: 7000
 server:
   error:
     include-binding-errors: always
-    include-exception: true
-    include-stacktrace: always
     include-message: always
 
 app:
