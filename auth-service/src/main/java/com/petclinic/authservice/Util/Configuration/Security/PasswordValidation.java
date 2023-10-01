@@ -5,7 +5,7 @@
  * Date: 26/09/21
  * Ticket: feat(AUTH-CPC-13)
  */
-package com.petclinic.bffapigateway.utils.Security.Annotations;
+package com.petclinic.authservice.Util.Configuration.Security;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
@@ -25,7 +25,6 @@ public class PasswordValidation implements ConstraintValidator<PasswordStrengthC
         if (value == null) {
             return false;
         }
-
         String pattern = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=*!()_.<>,{}])(?=\\S+$).{8,}$";
 
         return value.matches(pattern);
