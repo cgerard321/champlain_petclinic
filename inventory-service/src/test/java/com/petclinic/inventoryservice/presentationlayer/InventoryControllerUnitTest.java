@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @WebFluxTest(controllers = InventoryController.class)
 class InventoryControllerUnitTest {
@@ -287,6 +288,60 @@ class InventoryControllerUnitTest {
     }
 
     @Test
+    void getInventoryByInventoryId_ValidIdShouldSucceed(){
+        //arrange
+        InventoryResponseDTO inventoryResponseDTO = InventoryResponseDTO.builder()
+                .inventoryId("inventoryId_2")
+                .inventoryName("Pet food")
+                .inventoryType(internal)
+                .inventoryDescription("pet")
+                .build();
+
+        when(productInventoryService.getInventoryById(inventoryResponseDTO.getInventoryId()))
+                .thenReturn(Mono.just(inventoryResponseDTO));
+
+        webTestClient
+                .get()
+                .uri("/inventory/{inventoryId}", inventoryResponseDTO.getInventoryId())
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(APPLICATION_JSON)
+                .expectBody(InventoryResponseDTO.class)
+                .value(dto ->{
+                    assertNotNull(dto);
+                    assertEquals(inventoryResponseDTO.getInventoryId(), dto.getInventoryId());
+                    assertEquals(inventoryResponseDTO.getInventoryName(), dto.getInventoryName());
+                    assertEquals(inventoryResponseDTO.getInventoryType(), dto.getInventoryType());
+                    assertEquals(inventoryResponseDTO.getInventoryDescription(), dto.getInventoryDescription());
+                });
+
+        verify(productInventoryService, times(1))
+                .getInventoryById(inventoryResponseDTO.getInventoryId());
+
+    }
+
+
+
+    @Test
+    void getInventoryByInvalidInventoryId_ReturnNotFound() {
+
+        String invalidInventoryId = "invalid_id";
+        when(productInventoryService.getInventoryById(invalidInventoryId))
+                .thenReturn(Mono.empty());
+
+        webTestClient
+                .get()
+                .uri("/inventory/{inventoryId}", invalidInventoryId)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        verify(productInventoryService, times(1))
+                .getInventoryById(invalidInventoryId);
+    }
+
+    @Test
     void updateInventory_InvalidId_ShouldReturnError() {
         // Arrange
         String invalidInventoryId = "invalid_id";
@@ -428,6 +483,9 @@ class InventoryControllerUnitTest {
         verify(productInventoryService, times(1))
                 .updateProductInInventory(any(), eq(inventoryId), eq(productId));
     }
+
+
+
 
     @Test
     void updateProductInInventory_InvalidInput_ShouldReturnBadRequest() {
