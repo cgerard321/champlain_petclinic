@@ -19,6 +19,7 @@ import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -158,6 +159,71 @@ public class CustomerServiceClientIntegrationTest {
         final OwnerResponseDTO firstOwnerFromFlux = customersServiceClient.getAllOwners().blockFirst();
 
         assertEquals(firstOwnerFromFlux.getOwnerId(), TEST_OWNER.getOwnerId());
+    }
+
+    @Test
+    void getOwnersByPagination() throws JsonProcessingException {
+       OwnerResponseDTO TEST_OWNER1 = OwnerResponseDTO.builder()
+                .ownerId("ownerId-1")
+               .firstName("Test")
+               .lastName("Test")
+               .address("Test")
+               .city("Test")
+               .telephone("Test")
+                //.imageId(1)
+                .build();
+        OwnerResponseDTO TEST_OWNER2 = OwnerResponseDTO.builder()
+                .ownerId("ownerId-2")
+                .firstName("Test")
+                .lastName("Test")
+                .address("Test")
+                .city("Test")
+                .telephone("Test")
+                //.imageId(1)
+                .build();
+        OwnerResponseDTO TEST_OWNER3 = OwnerResponseDTO.builder()
+                .ownerId("ownerId-3")
+                .firstName("Test")
+                .lastName("Test")
+                .address("Test")
+                .city("Test")
+                .telephone("Test")
+                //.imageId(1)
+                .build();
+
+        Flux<OwnerResponseDTO> owners = Flux.just(TEST_OWNER1,TEST_OWNER2);
+
+        final String body = mapper.writeValueAsString(owners.collectList().block());
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(body));
+
+        Optional<Integer> page = Optional.of(0);
+        Optional<Integer> size =  Optional.of(2);
+
+        final Flux<OwnerResponseDTO> ownersFlux = customersServiceClient.getOwnersByPagination(page,size);
+
+        Long fluxSize = ownersFlux.count().block();
+        Long predictedSize = (long) size.get();
+
+
+        assertEquals(fluxSize, predictedSize);
+    }
+
+    @Test
+    void getTotalNumberOfOwners() throws Exception {
+        // Simulate the expected total count
+        long expectedCount = 0;
+
+        // Prepare the response with the expected count as a plain long value
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(String.valueOf(expectedCount)));
+
+        final Mono<Long> response = customersServiceClient.getTotalNumberOfOwners();
+
+        assertEquals(expectedCount,response.block());
     }
 
     @Test

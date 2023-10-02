@@ -126,6 +126,26 @@ class ApiGatewayControllerTest {
                     assertThat(responseDTO.get(0).getRateScore()).isEqualTo(ratingResponseDTO.getRateScore());
                 });
     }
+
+    @Test
+    void getTopThreeVetsWithHighestRating(){
+        VetAverageRatingDTO vetAverageRatingDTO = buildVetAverageRatingDTO();
+        when(vetsServiceClient.getTopThreeVetsWithHighestAverageRating())
+                .thenReturn(Flux.just(vetAverageRatingDTO));
+
+        client
+                .get()
+                .uri("/api/gateway/vets/topVets")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+//                .jsonPath("$[0].firstName").isEqualTo(vetAverageRatingDTO.getFirstName())
+//                .jsonPath("$[0].lastName").isEqualTo(vetAverageRatingDTO.getLastName())
+                .jsonPath("$[0].vetId").isEqualTo(vetAverageRatingDTO.getVetId())
+                .jsonPath("$[0].averageRating").isEqualTo(vetAverageRatingDTO.getAverageRating());
+    }
     @Test
     void deleteVetRating() {
         RatingResponseDTO ratingResponseDTO = buildRatingResponseDTO();
@@ -922,6 +942,57 @@ class ApiGatewayControllerTest {
                     assertEquals(1,list.size());
                     assertEquals(list.get(0).getOwnerId(),owner1.getOwnerId());
                     assertEquals(list.get(0).getFirstName(),owner1.getFirstName());
+                });
+
+    }
+
+    @Test
+    void getOwnersByPagination(){
+
+        OwnerResponseDTO owner = new OwnerResponseDTO();
+        owner.setOwnerId("ownerId-09");
+        owner.setFirstName("Test");
+        owner.setLastName("Test");
+        owner.setAddress("Test");
+        owner.setCity("Test");
+        owner.setTelephone("Test");
+
+        Optional<Integer> page = Optional.of(0);
+        Optional<Integer> size =  Optional.of(1);
+
+
+        Flux<OwnerResponseDTO> ownerResponseDTOFlux = Flux.just(owner);
+
+        when(customersServiceClient.getOwnersByPagination(page,size)).thenReturn(ownerResponseDTOFlux);
+
+        client.get()
+                .uri("/api/gateway/owners-pagination?page="+page.get()+"&size="+size.get())
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .acceptCharset(StandardCharsets.UTF_8)
+                .exchange().expectStatus().isOk()
+                .expectHeader().valueEquals("Content-Type","text/event-stream;charset=UTF-8")
+                .expectBodyList(OwnerResponseDTO.class)
+                .value((list) -> {
+                    Assertions.assertNotNull(list);
+                    Assertions.assertEquals(size.get(),list.size());
+                });
+    }
+
+    @Test
+    void getTotalNumberOfOwners(){
+        long expectedCount = 0;
+
+        when(customersServiceClient.getTotalNumberOfOwners()).thenReturn(Mono.just(expectedCount));
+
+        client.get()
+                .uri("/api/gateway/owners-count")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Long.class) // Expecting a Long response
+                .consumeWith(response -> {
+                    Long responseBody = response.getResponseBody();
+                    assertNotNull(responseBody);
+                    assertEquals(expectedCount, responseBody.longValue());
                 });
 
     }
@@ -2616,7 +2687,12 @@ void deleteAllInventory_shouldSucceed() {
                 .rateScore(4.0)
                 .build();
     }
-
+private VetAverageRatingDTO buildVetAverageRatingDTO(){
+        return VetAverageRatingDTO.builder()
+                .vetId("678910")
+                .averageRating(2.0)
+                .build();
+}
     @Test
     void sendForgottenEmail_ShouldSucceed(){
         final UserEmailRequestDTO dto = UserEmailRequestDTO.builder()

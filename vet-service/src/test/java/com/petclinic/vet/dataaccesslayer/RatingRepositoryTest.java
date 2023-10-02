@@ -1,5 +1,8 @@
 package com.petclinic.vet.dataaccesslayer;
 
+import com.petclinic.vet.dataaccesslayer.ratings.PredefinedDescription;
+import com.petclinic.vet.dataaccesslayer.ratings.Rating;
+import com.petclinic.vet.dataaccesslayer.ratings.RatingRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
@@ -39,6 +42,16 @@ class RatingRepositoryTest {
             .rateDate("10/09/2023")
             .rateDescription("Vet very kind, but a bit slow.")
             .build();
+
+    Rating rating3 = Rating.builder()
+            .ratingId("3")
+            .vetId("3")
+            .rateScore(1.0)
+            .rateDate("11/19/2022")
+            .rateDescription("Vet very mean and slow.")
+            .build();
+
+
     @BeforeEach
     void setUp() {
         Publisher<Rating> setUp = ratingRepository.deleteAll()

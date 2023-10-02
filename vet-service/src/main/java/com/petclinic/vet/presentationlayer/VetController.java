@@ -11,8 +11,12 @@ package com.petclinic.vet.presentationlayer;
   * Ticket: feat(VVS-CPC-553): add veterinarian
  */
 
-import com.petclinic.vet.dataaccesslayer.PredefinedDescription;
 import com.petclinic.vet.servicelayer.*;
+import com.petclinic.vet.servicelayer.education.EducationResponseDTO;
+import com.petclinic.vet.servicelayer.education.EducationService;
+import com.petclinic.vet.servicelayer.ratings.RatingRequestDTO;
+import com.petclinic.vet.servicelayer.ratings.RatingResponseDTO;
+import com.petclinic.vet.servicelayer.ratings.RatingService;
 import com.petclinic.vet.util.EntityDtoUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.Resource;
@@ -66,6 +70,11 @@ public class VetController {
         return ratingService.getAverageRatingByVetId(vetId)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("topVets")
+    public Flux<VetAverageRatingDTO> getTopThreeVetsWithHighestAverageRating() {
+        return ratingService.getTopThreeVetsWithHighestAverageRating();
     }
 
     @PutMapping("{vetId}/ratings/{ratingId}")

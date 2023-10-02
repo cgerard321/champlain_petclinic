@@ -1,4 +1,4 @@
-package com.petclinic.vet.dataaccesslayer;
+package com.petclinic.vet.dataaccesslayer.education;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
