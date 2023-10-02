@@ -1,4 +1,4 @@
-package com.petclinic.vet.dataaccesslayer;
+package com.petclinic.vet.dataaccesslayer.education;
 
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import org.springframework.stereotype.Repository;
