@@ -13,9 +13,10 @@
 
 <input ng-model="search.customerId" placeholder="Filter by Owner ID">
 <input ng-model="search.vetId" placeholder="Filter by Vet ID">
+<br><br>
 
-<h3>Paid Bills</h3>
-<table class="table table-striped">
+<button type="button" class="collapsible" data-section="Paid">Open Paid</button>
+<table class="content table table-striped">
     <thead>
     <tr>
         <td>Bill ID</td>
@@ -50,9 +51,9 @@
         <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteBill(paidBill.billId)">Delete Bill</a></td>
     </tr>
 </table>
-
-<h3>Unpaid Bills</h3>
-<table class="table table-striped">
+<br><br>
+<button type="button" class="collapsible" data-section="Unpaid">Open Unpaid Bills</button>
+<table class="content table table-striped">
     <thead>
     <tr>
         <td>Bill ID</td>
@@ -88,8 +89,9 @@
     </tr>
 </table>
 
-<h3>Overdue Bills</h3>
-<table class="table table-striped">
+<br><br>
+<button type="button" class="collapsible" data-section="Overdue">Open Overdue Bills</button>
+<table class="content table table-striped">
     <thead>
     <tr>
         <td>Bill ID</td>
@@ -124,7 +126,7 @@
         <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteBill(overdueBill.billId)">Delete Bill</a></td>
     </tr>
 </table>
-
+<br><br>
 <h3>All Bills</h3>
 <table class="table table-striped">
     <thead>
@@ -162,3 +164,47 @@
         <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteBill(bill.billId)">Delete Bill</a></td>
     </tr>
 </table>
+<style>
+    /* Style the collapsible content. Note: hidden by default */
+    .content {
+        display: none;
+        overflow: hidden;
+    }
+    .collapsible {
+        background-color: #eee;
+        color: #444;
+        cursor: pointer;
+        padding: 10px;
+        border: none;
+        text-align: left;
+        font-size: 15px;
+        font-weight: bold;
+        text-decoration: underline;
+    }
+
+    .active, .collapsible:hover {
+        background-color: #ccc;
+    }
+
+</style>
+
+<script>
+    var coll = document.getElementsByClassName("collapsible");
+    var i;
+
+    for (i = 0; i < coll.length; i++) {
+        coll[i].addEventListener("click", function() {
+            this.classList.toggle("active");
+            var content = this.nextElementSibling;
+            if (content.style.display === "block") {
+                content.style.display = "none";
+                this.textContent = "Open " + this.getAttribute("data-section") + " Bills";
+
+            } else {
+                content.style.display = "block";
+                this.textContent = "Close " + this.getAttribute("data-section") + " Bills";
+
+            }
+        });
+    }
+</script>

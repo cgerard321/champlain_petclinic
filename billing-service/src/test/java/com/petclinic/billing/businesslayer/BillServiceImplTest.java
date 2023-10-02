@@ -74,6 +74,48 @@ public class BillServiceImplTest {
                .verifyComplete();
     }
 
+    @Test
+    public void test_GetAllBillsByPaidStatus() {
+        BillStatus status = BillStatus.PAID; // Change this to the desired status
+
+        Bill billEntity = buildBill(); // Create a sample bill entity
+        when(repo.findAllBillsByBillStatus(status)).thenReturn(Flux.just(billEntity));
+
+        Flux<BillResponseDTO> billDTOFlux = billService.GetAllBillsByStatus(status);
+
+        StepVerifier.create(billDTOFlux)
+                .expectNextCount(1) // Adjust this count according to the number of expected results
+                .verifyComplete();
+    }
+
+    @Test
+    public void test_GetAllBillsByUnpaidStatus() {
+        BillStatus status = BillStatus.UNPAID; // Change this to the desired status
+
+        Bill billEntity = buildUnpaidBill(); // Create a sample bill entity
+        when(repo.findAllBillsByBillStatus(status)).thenReturn(Flux.just(billEntity));
+
+        Flux<BillResponseDTO> billDTOFlux = billService.GetAllBillsByStatus(status);
+
+        StepVerifier.create(billDTOFlux)
+                .expectNextCount(1) // Adjust this count according to the number of expected results
+                .verifyComplete();
+    }
+
+    @Test
+    public void test_GetAllBillsByOverdueStatus() {
+        BillStatus status = BillStatus.OVERDUE; // Change this to the desired status
+
+        Bill billEntity = buildOverdueBill(); // Create a sample bill entity
+        when(repo.findAllBillsByBillStatus(status)).thenReturn(Flux.just(billEntity));
+
+        Flux<BillResponseDTO> billDTOFlux = billService.GetAllBillsByStatus(status);
+
+        StepVerifier.create(billDTOFlux)
+                .expectNextCount(1) // Adjust this count according to the number of expected results
+                .verifyComplete();
+    }
+
 
     @Test
     public void test_CreateBill(){
@@ -215,10 +257,10 @@ public class BillServiceImplTest {
                 .toLocalDate();;
 
 
-        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).build();
+        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.PAID).build();
     }
 
-    private BillDTO buildBillDTO(){
+    private Bill buildUnpaidBill(){
 
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);
@@ -227,11 +269,26 @@ public class BillServiceImplTest {
                 .toLocalDate();;
 
 
-        return BillDTO.builder().billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).build();
+        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.UNPAID).build();
     }
+
+    private Bill buildOverdueBill(){
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(2022, Calendar.SEPTEMBER, 25);
+        LocalDate date = calendar.getTime().toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();;
+
+
+        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.OVERDUE).build();
+    }
+
+
 
     private BillRequestDTO buildBillRequestDTO(){
 
+
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);
         LocalDate date = calendar.getTime().toInstant()
@@ -239,7 +296,7 @@ public class BillServiceImplTest {
                 .toLocalDate();;
 
 
-        return BillRequestDTO.builder().customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).build();
+        return BillRequestDTO.builder().customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.PAID).build();
     }
 
 
