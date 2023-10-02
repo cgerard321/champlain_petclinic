@@ -291,7 +291,7 @@ class VisitsControllerIntegrationTest {
                 .jsonPath("$.petId").isEqualTo(visit1.getPetId())
                 .jsonPath("$.description").isEqualTo(visit1.getDescription())
                 .jsonPath("$.visitDate").isEqualTo("2024-11-25 13:45")
-                .jsonPath("$.status").isEqualTo("UPCOMING");
+                .jsonPath("$.status").isEqualTo("REQUESTED");
     }
 
     private Visit buildVisit(String uuid,String description, String vetId){
@@ -313,7 +313,7 @@ class VisitsControllerIntegrationTest {
                 .description("this is a dummy description")
                 .petId("2")
                 .practitionerId(vetId)
-                .status(Status.UPCOMING)
+                .status(Status.REQUESTED)
                 .build();
     }
     private VisitRequestDTO buildVisitRequestDto(String vetId){
@@ -322,7 +322,7 @@ class VisitsControllerIntegrationTest {
                 .description("this is a dummy description")
                 .petId("2")
                 .practitionerId(vetId)
-                .status(Status.UPCOMING)
+                .status(Status.REQUESTED)
                 .build();
     }
 }
