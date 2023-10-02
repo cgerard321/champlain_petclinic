@@ -3,7 +3,11 @@ package com.petclinic.vet.servicelayer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.vet.dataaccesslayer.*;
-import com.petclinic.vet.exceptions.NotFoundException;
+import com.petclinic.vet.dataaccesslayer.ratings.Rating;
+import com.petclinic.vet.dataaccesslayer.ratings.RatingRepository;
+import com.petclinic.vet.servicelayer.ratings.RatingRequestDTO;
+import com.petclinic.vet.servicelayer.ratings.RatingResponseDTO;
+import com.petclinic.vet.servicelayer.ratings.RatingService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.r2dbc.init.R2dbcScriptDatabaseInitializer;
@@ -164,7 +168,54 @@ class RatingServiceImplTest {
         rating3.setRateScore(2.0);
         rating3.setVetId("68793");
 
+        Vet vet1 = Vet.builder()
+                .vetId("vetId")
+                .vetBillId("1")
+                .firstName("Clementine")
+                .lastName("LeBlanc")
+                .email("skjfhf@gmail.com")
+                .phoneNumber("947-238-2847")
+                .resume("Just became a vet")
+                .imageId("kjd")
+                .workday("Monday")
+                .specialties(new HashSet<>())
+                .active(false)
+                .build();
+
+        Vet vet2 = Vet.builder()
+                .vetId("vetId")
+                .vetBillId("1")
+                .firstName("Clementine")
+                .lastName("LeBlanc")
+                .email("skjfhf@gmail.com")
+                .phoneNumber("947-238-2847")
+                .resume("Just became a vet")
+                .imageId("kjd")
+                .workday("Monday")
+                .specialties(new HashSet<>())
+                .active(false)
+                .build();
+        Vet vet3 = Vet.builder()
+                .id("2")
+                .vetId("vetId")
+                .vetBillId("1")
+                .firstName("Clementine")
+                .lastName("LeBlanc")
+                .email("skjfhf@gmail.com")
+                .phoneNumber("947-238-2847")
+                .resume("Just became a vet")
+                .imageId("kjd")
+                .workday("Monday")
+                .specialties(new HashSet<>())
+                .active(false)
+                .build();
+
+
         when(ratingRepository.countAllByVetId(anyString())).thenReturn(Mono.just(5L));
+        when(vetRepository.findVetByVetId(rating.getVetId())).thenReturn(Mono.just(vet1));
+        when(vetRepository.findVetByVetId(rating2.getVetId())).thenReturn(Mono.just(vet2));
+        when(vetRepository.findVetByVetId(rating3.getVetId())).thenReturn(Mono.just(vet3));
+
 
 
         when(ratingRepository.findAll()).thenReturn(Flux.just(rating,rating2,rating3));

@@ -11,12 +11,15 @@ package com.petclinic.vet.util;
   * Ticket: feat(VVS-CPC-553): add veterinarian
  */
 
-import com.petclinic.vet.dataaccesslayer.Education;
-import com.petclinic.vet.dataaccesslayer.Rating;
+import com.petclinic.vet.dataaccesslayer.education.Education;
+import com.petclinic.vet.dataaccesslayer.ratings.Rating;
 import com.petclinic.vet.dataaccesslayer.Specialty;
 import com.petclinic.vet.dataaccesslayer.Vet;
 import com.petclinic.vet.exceptions.InvalidInputException;
 import com.petclinic.vet.servicelayer.*;
+import com.petclinic.vet.servicelayer.education.EducationResponseDTO;
+import com.petclinic.vet.servicelayer.ratings.RatingRequestDTO;
+import com.petclinic.vet.servicelayer.ratings.RatingResponseDTO;
 import lombok.Generated;
 import org.springframework.beans.BeanUtils;
 

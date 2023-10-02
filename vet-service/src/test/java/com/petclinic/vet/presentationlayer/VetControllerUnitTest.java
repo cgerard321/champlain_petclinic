@@ -1,9 +1,13 @@
 package com.petclinic.vet.presentationlayer;
 
-import com.petclinic.vet.dataaccesslayer.Education;
 import com.petclinic.vet.dataaccesslayer.Photo;
 import com.petclinic.vet.dataaccesslayer.Vet;
 import com.petclinic.vet.servicelayer.*;
+import com.petclinic.vet.servicelayer.education.EducationResponseDTO;
+import com.petclinic.vet.servicelayer.education.EducationService;
+import com.petclinic.vet.servicelayer.ratings.RatingRequestDTO;
+import com.petclinic.vet.servicelayer.ratings.RatingResponseDTO;
+import com.petclinic.vet.servicelayer.ratings.RatingService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;

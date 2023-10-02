@@ -1,6 +1,8 @@
 package com.petclinic.vet.dataaccesslayer;
 
-import com.petclinic.vet.servicelayer.VetAverageRatingDTO;
+import com.petclinic.vet.dataaccesslayer.ratings.PredefinedDescription;
+import com.petclinic.vet.dataaccesslayer.ratings.Rating;
+import com.petclinic.vet.dataaccesslayer.ratings.RatingRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
@@ -9,7 +11,6 @@ import org.springframework.boot.r2dbc.init.R2dbcScriptDatabaseInitializer;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 

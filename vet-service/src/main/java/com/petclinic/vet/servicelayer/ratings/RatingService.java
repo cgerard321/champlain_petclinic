@@ -1,7 +1,6 @@
-package com.petclinic.vet.servicelayer;
+package com.petclinic.vet.servicelayer.ratings;
 
-import com.petclinic.vet.dataaccesslayer.PredefinedDescription;
-import com.petclinic.vet.dataaccesslayer.Vet;
+import com.petclinic.vet.servicelayer.VetAverageRatingDTO;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

@@ -1,6 +1,5 @@
-package com.petclinic.vet.dataaccesslayer;
+package com.petclinic.vet.dataaccesslayer.ratings;
 
-import com.petclinic.vet.servicelayer.VetAverageRatingDTO;
 import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;

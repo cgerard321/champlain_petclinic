@@ -1,6 +1,6 @@
-package com.petclinic.vet.servicelayer;
+package com.petclinic.vet.servicelayer.ratings;
 
-import com.petclinic.vet.dataaccesslayer.PredefinedDescription;
+import com.petclinic.vet.dataaccesslayer.ratings.PredefinedDescription;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,13 +8,12 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class RatingResponseDTO {
-    private String ratingId;
+@NoArgsConstructor
+public class RatingRequestDTO {
     private String vetId;
     private Double rateScore;
     private String rateDescription;
-    private PredefinedDescription predefinedDescription;
     private String rateDate;
+    private PredefinedDescription predefinedDescription;
 }

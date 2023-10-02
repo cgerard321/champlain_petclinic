@@ -1,33 +1,32 @@
-package com.petclinic.vet.servicelayer;
+package com.petclinic.vet.servicelayer.ratings;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.vet.dataaccesslayer.Rating;
-import com.petclinic.vet.dataaccesslayer.RatingRepository;
-import com.petclinic.vet.dataaccesslayer.Vet;
+import com.petclinic.vet.dataaccesslayer.ratings.Rating;
+import com.petclinic.vet.dataaccesslayer.ratings.RatingRepository;
 import com.petclinic.vet.dataaccesslayer.VetRepository;
 import com.petclinic.vet.exceptions.NotFoundException;
 
 import com.petclinic.vet.exceptions.InvalidInputException;
 
+import com.petclinic.vet.servicelayer.VetAverageRatingDTO;
+import com.petclinic.vet.servicelayer.VetDTO;
 import com.petclinic.vet.util.EntityDtoUtil;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 import reactor.util.function.Tuples;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.UUID;
-
-import static org.springframework.data.repository.util.ReactiveWrapperConverters.map;
+import java.util.*;
 
 @Service
 public class RatingServiceImpl implements RatingService {
     private final VetRepository vetRepository;
     private final RatingRepository ratingRepository;
     private final ObjectMapper objectMapper;
+
+
 
     public RatingServiceImpl(RatingRepository ratingRepository, ObjectMapper objectMapper, VetRepository vetRepository) {
         this.ratingRepository = ratingRepository;
@@ -106,12 +105,7 @@ public class RatingServiceImpl implements RatingService {
 
     @Override
     public Flux<VetAverageRatingDTO> getTopThreeVetsWithHighestAverageRating() {
-        VetDTO vetDTO= VetDTO.builder()
-                .firstName("Jane")
-                .lastName("Shaun")
-                .email("hasd@gmail.com")
-                .phoneNumber("512-431-4312")
-                .build();
+
 
         return ratingRepository.findAll()
                 .groupBy(Rating::getVetId)
@@ -122,8 +116,17 @@ public class RatingServiceImpl implements RatingService {
                 })
                 .sort((t1, t2) -> Double.compare(t2.getT2(), t1.getT2()))
                 .take(3)
-                .map(tuple -> new VetAverageRatingDTO(vetDTO,tuple.getT1(), tuple.getT2()));
+                .publishOn(Schedulers.boundedElastic())
+                .flatMap(tuple -> {
+                    Mono<VetDTO> vetMono = vetRepository.findVetByVetId(tuple.getT1())
+                            .map(EntityDtoUtil::toDTO);
+
+                    return vetMono.map(vetDTO ->
+                            new VetAverageRatingDTO(vetDTO, tuple.getT1(), tuple.getT2()));
+                });
     }
+
+
 
     @Override
     public Mono<RatingResponseDTO> updateRatingByVetIdAndRatingId(String vetId, String ratingId, Mono<RatingRequestDTO> ratingRequestDTOMono) {
