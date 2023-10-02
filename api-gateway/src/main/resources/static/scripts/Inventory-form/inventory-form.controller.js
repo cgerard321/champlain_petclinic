@@ -21,24 +21,18 @@ angular.module('inventoryForm')
 
             };
         $scope.inventoryTypeFormSearch = "";
-        $scope.inventoryTypeOptions = ["Test option"]; //Make foreach for the get all inventory types
+        $scope.inventoryTypeOptions = ["Internal", "Sales"];
         $scope.selectedOption = "";
 
         $scope.updateOption = function() {
+            var searchLowerCase = $scope.inventoryTypeFormSearch.toLowerCase();
+            $scope.selectedOption = "";
             for (var i = 0; i < $scope.inventoryTypeOptions.length; i++) {
-                for (var j = 0; j < $scope.inventoryTypeOptions[i].length; j++){
-                    if ($scope.inventoryTypeOptions[i].charAt(j) === $scope.inventoryTypeFormSearch.charAt(j)){
-                        git a
-                    }
-                    else {
-
-                    }
+                var optionLowerCase = $scope.inventoryTypeOptions[i].toLowerCase();
+                if (optionLowerCase.indexOf(searchLowerCase) !== -1) {
+                    $scope.selectedOption = $scope.inventoryTypeOptions[i];
+                    break;
                 }
-            }
-
-            if ($scope.inventoryTypeFormSearch) {
-                $scope.inventoryTypeOptions.push($scope.inventoryTypeFormSearch);
-                $scope.selectedOption = $scope.inventoryTypeFormSearch;
             }
         };
     }]);
