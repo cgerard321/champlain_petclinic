@@ -2,16 +2,15 @@ package com.petclinic.vet.servicelayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.vet.dataaccesslayer.Rating;
-import com.petclinic.vet.dataaccesslayer.RatingRepository;
-import com.petclinic.vet.dataaccesslayer.Vet;
-import com.petclinic.vet.dataaccesslayer.VetRepository;
+import com.petclinic.vet.dataaccesslayer.*;
 import com.petclinic.vet.exceptions.NotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.r2dbc.init.R2dbcScriptDatabaseInitializer;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -29,11 +28,19 @@ class RatingServiceImplTest {
 
     @Autowired
     RatingService ratingService;
+    @Autowired
+    PhotoService photoService;
 
     @MockBean
     RatingRepository ratingRepository;
     @MockBean
     VetRepository vetRepository;
+
+    //To counter missing bean error
+    @MockBean
+    ConnectionFactoryInitializer connectionFactoryInitializer;
+    @MockBean
+    R2dbcScriptDatabaseInitializer r2dbcScriptDatabaseInitializer;
 
     Vet existingVet=buildVet();
 

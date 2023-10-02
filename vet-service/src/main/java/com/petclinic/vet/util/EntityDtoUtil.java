@@ -23,7 +23,6 @@ import org.springframework.beans.BeanUtils;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
-import java.util.UUID;
 
 public class EntityDtoUtil {
     @Generated
@@ -128,6 +127,5 @@ public class EntityDtoUtil {
         }
         return id;
     }
-
 
 }
