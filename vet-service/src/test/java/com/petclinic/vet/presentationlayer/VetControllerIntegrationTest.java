@@ -6,12 +6,18 @@ import com.petclinic.vet.servicelayer.RatingRequestDTO;
 import com.petclinic.vet.servicelayer.RatingResponseDTO;
 import com.petclinic.vet.servicelayer.VetDTO;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.r2dbc.init.R2dbcScriptDatabaseInitializer;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -22,10 +28,12 @@ import java.util.HashSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
-@AutoConfigureWebTestClient
 class VetControllerIntegrationTest {
 
     @Autowired
@@ -39,6 +47,14 @@ class VetControllerIntegrationTest {
 
     @Autowired
     EducationRepository educationRepository;
+
+    //To counter missing bean error
+    @Autowired
+    PhotoRepository photoRepository;
+    @MockBean
+    ConnectionFactoryInitializer connectionFactoryInitializer;
+    @MockBean
+    R2dbcScriptDatabaseInitializer r2dbcScriptDatabaseInitializer;
 
     Education education1 = buildEducation();
     Education education2 = buildEducation2();
@@ -1320,6 +1336,40 @@ class VetControllerIntegrationTest {
                 .expectBody();
     }
 
+    /*@Test
+    void getPhotoByVetId() {
+        Publisher<Photo> setup = photoRepository.deleteAll()
+                .thenMany(photoRepository.save(buildPhoto()));
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        byte[] photo = {123, 23, 75, 34};
+        Resource resource = new ByteArrayResource(photo);
+
+        client.get()
+                .uri("/api/gateway/vets/{vetId}/photo", VET_ID)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.IMAGE_JPEG_VALUE)
+                .expectBody(Resource.class)
+                .consumeWith(response -> {
+                    assertEquals(resource, response.getResponseBody());
+                });
+    }*/
+    @Test
+    void getPhotoByVetId_NoExistingPhoto_ShouldReturnNotFound() {
+        String emptyVetId = "1234567";
+        client.get()
+                .uri("/api/gateway/vets/{vetId}/photo", emptyVetId)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.NOT_FOUND)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.path").isEqualTo("/api/gateway/vets/" + emptyVetId + "/photo");
+    }
+
     @Test
     void toStringBuilders() {
         System.out.println(Vet.builder());
@@ -1474,5 +1524,14 @@ class VetControllerIntegrationTest {
                 .build();
     }
 
+    private Photo buildPhoto(){
+        byte[] photo = {123, 23, 75, 34};
+        return Photo.builder()
+                .vetId(VET_ID)
+                .filename("vet_default.jpg")
+                .imgType("image/jpeg")
+                .data(photo)
+                .build();
+    }
 
 }

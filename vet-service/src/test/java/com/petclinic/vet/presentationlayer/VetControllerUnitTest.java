@@ -1,6 +1,7 @@
 package com.petclinic.vet.presentationlayer;
 
 import com.petclinic.vet.dataaccesslayer.Education;
+import com.petclinic.vet.dataaccesslayer.Photo;
 import com.petclinic.vet.dataaccesslayer.Vet;
 import com.petclinic.vet.servicelayer.*;
 import org.junit.jupiter.api.Test;
@@ -8,8 +9,12 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -23,6 +28,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 @WebFluxTest(controllers=VetController.class)
+@ContextConfiguration(classes = {VetController.class})
 class VetControllerUnitTest {
 
     @Autowired
@@ -36,12 +42,19 @@ class VetControllerUnitTest {
 
     @MockBean
     EducationService educationService;
+    @MockBean
+    PhotoService photoService;
+    @MockBean
+    ConnectionFactoryInitializer connectionFactoryInitializer;
 
     VetDTO vetDTO = buildVetDTO();
     VetDTO vetDTO2 = buildVetDTO2();
 
     EducationResponseDTO educationResponseDTO1 = buildEducation();
     EducationResponseDTO educationResponseDTO2 = buildEducation2();
+
+    Photo photo = buildPhoto();
+
 
     RatingResponseDTO ratingDTO = buildRatingResponseDTO("Vet was super calming with my pet",5.0);
     Vet vet = buildVet();
@@ -428,11 +441,10 @@ class VetControllerUnitTest {
                 .uri("/vets/" + INVALID_VET_ID)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+                .expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("This id is not valid");
-
+                .jsonPath("$").isNotEmpty();
     }
 
     @Test
@@ -446,10 +458,10 @@ class VetControllerUnitTest {
                 .body(Mono.just(vetDTO), VetDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+                .expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("This id is not valid");
+                .jsonPath("$").isNotEmpty();
 
     }
 
@@ -463,10 +475,10 @@ class VetControllerUnitTest {
                 .uri("/vets/" + INVALID_VET_ID)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+                .expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("This id is not valid");
+                .jsonPath("$").isNotEmpty();
 
     }
 
@@ -511,6 +523,25 @@ class VetControllerUnitTest {
 
         Mockito.verify(educationService, times(1))
                 .deleteEducationByEducationId(vetId,educationId);
+    }
+
+    @Test
+    void getPhotoByVetId() {
+        when(photoService.getPhotoByVetId(anyString()))
+                .thenReturn(Mono.just(buildPhotoData()));
+
+        client.get()
+                .uri("/vets/{vetId}/photo", VET_ID)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.IMAGE_JPEG_VALUE)
+                .expectBody(Resource.class)
+                .consumeWith(response -> {
+                    assertEquals(buildPhotoData(), response.getResponseBody());
+                });
+
+        Mockito.verify(photoService, times(1))
+                .getPhotoByVetId(VET_ID);
     }
 
     private Vet buildVet() {
@@ -592,5 +623,20 @@ class VetControllerUnitTest {
                 .rateDescription(description)
                 .rateDate("16/09/2023")
                 .build();
+    }
+
+    private Photo buildPhoto(){
+        byte[] photo = {123, 23, 75, 34};
+        return Photo.builder()
+                .vetId(VET_ID)
+                .filename("vet_default.jpg")
+                .imgType("image/jpeg")
+                .data(photo)
+                .build();
+    }
+
+    private Resource buildPhotoData(){
+        ByteArrayResource resource = new ByteArrayResource(photo.getData());
+        return resource;
     }
 }

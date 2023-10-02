@@ -1,12 +1,15 @@
 package com.petclinic.vet.servicelayer;
 
+import com.petclinic.vet.dataaccesslayer.PhotoRepository;
 import com.petclinic.vet.dataaccesslayer.Vet;
 import com.petclinic.vet.dataaccesslayer.VetRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.r2dbc.init.R2dbcScriptDatabaseInitializer;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -23,9 +26,16 @@ class VetServiceImplTest {
 
     @Autowired
     VetService vetService;
+    @Autowired
+    PhotoService photoService;
 
     @MockBean
     VetRepository vetRepository;
+    //To counter missing bean error
+    @MockBean
+    ConnectionFactoryInitializer connectionFactoryInitializer;
+    @MockBean
+    R2dbcScriptDatabaseInitializer r2dbcScriptDatabaseInitializer;
 
     VetDTO vetDTO = buildVetDTO();
     Vet vet = buildVet();

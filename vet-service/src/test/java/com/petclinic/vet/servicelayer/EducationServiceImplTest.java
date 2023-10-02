@@ -3,11 +3,14 @@ package com.petclinic.vet.servicelayer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.vet.dataaccesslayer.Education;
 import com.petclinic.vet.dataaccesslayer.EducationRepository;
+import com.petclinic.vet.dataaccesslayer.PhotoRepository;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.r2dbc.init.R2dbcScriptDatabaseInitializer;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -29,6 +32,14 @@ class EducationServiceImplTest {
 
     @MockBean
     ObjectMapper objectMapper;
+
+    //To counter missing bean error
+    @Autowired
+    PhotoRepository photoRepository;
+    @MockBean
+    ConnectionFactoryInitializer connectionFactoryInitializer;
+    @MockBean
+    R2dbcScriptDatabaseInitializer r2dbcScriptDatabaseInitializer;
 
     String Vet_Id = "1";
     Education education = buildEducation();
