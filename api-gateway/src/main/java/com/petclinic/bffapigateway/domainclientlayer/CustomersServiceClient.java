@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
@@ -17,6 +18,8 @@ import reactor.core.publisher.Mono;
 
 
 import java.util.Objects;
+
+import java.util.Optional;
 
 import static reactor.core.publisher.Mono.just;
 
@@ -47,6 +50,20 @@ public class CustomersServiceClient {
                 .uri(customersServiceUrl + "/owners")
                 .retrieve()
                 .bodyToFlux(OwnerResponseDTO.class);
+    }
+
+    public Flux<OwnerResponseDTO> getOwnersByPagination(Optional<Integer> page, Optional<Integer> size) {
+        return webClientBuilder.build().get()
+                .uri(customersServiceUrl + "/owners/owners-pagination?page="+page.orElse(0)+"&size="+size.orElse(5))
+                .retrieve()
+                .bodyToFlux(OwnerResponseDTO.class);
+    }
+
+    public Mono<Long> getTotalNumberOfOwners(){
+        return webClientBuilder.build().get()
+                .uri(customersServiceUrl + "/owners/owners-count")
+                .retrieve()
+                .bodyToMono(Long.class);
     }
 
     public Mono<OwnerResponseDTO> updateOwner(String ownerId, Mono<OwnerRequestDTO> ownerRequestDTO) {

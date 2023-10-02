@@ -1,4 +1,4 @@
-package com.petclinic.vet.servicelayer;
+package com.petclinic.vet.servicelayer.education;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,9 +7,10 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Builder
-@AllArgsConstructor
 @NoArgsConstructor
-public class EducationRequestDTO {
+@AllArgsConstructor
+public class EducationResponseDTO {
+    private String educationId;
     private String vetId;
     private String schoolName;
     private String degree;

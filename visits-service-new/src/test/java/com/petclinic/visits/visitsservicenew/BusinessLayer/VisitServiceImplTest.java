@@ -296,7 +296,7 @@ class VisitServiceImplTest {
                 .description("this is a dummy description")
                 .petId("2")
                 .practitionerId(UUID.randomUUID().toString())
-                .status(Status.UPCOMING)
+                .status(Status.REQUESTED)
                 .build();
     }
     private VisitRequestDTO buildVisitRequestDTO() {
@@ -305,7 +305,7 @@ class VisitServiceImplTest {
                     .description("this is a dummy description")
                     .petId("2")
                     .practitionerId(UUID.randomUUID().toString())
-                    .status(Status.UPCOMING)
+                    .status(Status.REQUESTED)
                     .build();
         }
 
