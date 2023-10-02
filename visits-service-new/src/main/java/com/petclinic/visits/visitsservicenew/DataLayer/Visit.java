@@ -26,6 +26,6 @@ public class Visit {
 
     private String practitionerId;
 
-    private boolean status;
+    private Status status;
 
 }

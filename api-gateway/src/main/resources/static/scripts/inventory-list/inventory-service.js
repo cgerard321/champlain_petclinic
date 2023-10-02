@@ -13,4 +13,7 @@ angular.module('productForm')
         this.getInventoryId = function () {
             return inventoryId;
         };
+
+
+
     });

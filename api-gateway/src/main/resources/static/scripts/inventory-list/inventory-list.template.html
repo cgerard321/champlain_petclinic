@@ -9,6 +9,34 @@
         <td>Description</td>
         <td>Update</td>
     </tr>
+    <tr>
+        <td>
+        <td>
+        <span>
+            <input type="text" ng-model="inventoryName">
+        </span>
+        </td>
+        <td>
+        <span>
+            <select class="form-control col-sm-4" id="inventoryType" ng-model="inventoryType" name="inventoryType" required title="Please select the inventory type.">
+                <option value="internal">internal</option>
+                <option value="sales">sales</option>
+            </select>
+        </span>
+        </td>
+        <td>
+        <span>
+            <input type="text" ng-model="inventoryDescription">
+        </span>
+        </td>
+        <td></td>
+        <td></td>
+        <td>
+        <span>
+            <input class="btn btn-success" type="button" value="Search" ng-click="searchInventory(inventoryName, inventoryType, inventoryDescription)">
+        </span>
+        </td>
+    </tr>
     </thead>
 
     <tr ng-repeat="inventory in $ctrl.inventoryList | filter:$ctrl.query track by inventory.inventoryId">
@@ -22,20 +50,36 @@
         <td><span>{{inventory.inventoryDescription}}</span></td>
 
 
+    <td>
         <td>
             <a class="btn btn-warning" ui-sref="updateInventory({inventoryId: inventory.inventoryId, method: 'edit'})"> Edit
 
             </a>
+        </td>
 
 
 
+        <td>
+            <a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteInventory(inventory)">Delete</a>
+        </td>
 
+
+    </td>
+
+
+
+    </tr>
 
 
 
             <!--<td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteBundle(bundle.bundleUUID)">Delete Bundle</a></td>-->
+
+        <!--<td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteBundle(bundle.bundleUUID)">Delete Bundle</a></td>-->
     </tr>
 </table>
+
+
+<div id="loadingObject" style="display: none;">Loading...</div> <!--This is the page loading element-->
 
 
 <a ng-click="deleteAllInventories()">

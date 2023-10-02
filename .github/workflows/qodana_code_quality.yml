@@ -1,0 +1,54 @@
+name: Qodana
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches:
+      - main
+      - 'releases/*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      checks: write
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          java-version: '17'
+          distribution: 'adopt'
+          cache: 'gradle'
+
+      - name: Run Build
+        run: ./gradlew build
+
+      - name: Create coverage-data directory and copy contents
+        run: |
+          mkdir -p .qodana/code-coverage
+          cp -R */build/reports/* .qodana/code-coverage/
+
+      - name: Archive coverage data
+        uses: actions/upload-artifact@v2
+        with:
+          name: gradle-coverage-data.zip
+          path: .qodana/code-coverage
+
+      - name: 'Qodana Scan'
+        uses: JetBrains/qodana-action@v2023.2
+        env:
+          QODANA_TOKEN: ${{ secrets.QODANA_TOKEN }}
+        with:
+          args: "--linter,jetbrains/qodana-jvm:latest"
+          #todo Will setup the code-coverage percent to show on the Qodana reports in the future
+#          args: "-i,.qodana/code-coverage,--linter,jetbrains/qodana-jvm:latest"
+          pr-mode: false
+
+

@@ -27,6 +27,12 @@ public class VisitController {
     public Flux<VisitResponseDTO> getVisitsForPet(@PathVariable String petId){
         return visitService.getVisitsForPet(petId);
     }
+
+    @GetMapping(value = "/status/{status}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<VisitResponseDTO> getVisitsForStatus(@PathVariable String status){
+        return visitService.getVisitsForStatus(status);
+    }
+
     @GetMapping("/{visitId}")
     public Mono<ResponseEntity<VisitResponseDTO>> getVisitByVisitId(@PathVariable String visitId){
         return visitService.getVisitByVisitId(visitId)
@@ -52,6 +58,11 @@ public class VisitController {
     @PutMapping(value = "/{visitId}", consumes = "application/json", produces = "application/json")
     public Mono<VisitResponseDTO> updateVisitByVisitId(@PathVariable String visitId, @RequestBody Mono<VisitRequestDTO> visitRequestDTOMono){
         return visitService.updateVisit(visitId, visitRequestDTOMono);
+    }
+
+    @PutMapping(value = "/{visitId}/status/{status}", produces = "application/json")
+    public Mono<VisitResponseDTO> updateStatusForVisitByVisitId(@PathVariable String visitId, @PathVariable String status){
+        return visitService.updateStatusForVisitByVisitId(visitId, status);
     }
 
     @DeleteMapping("/{visitId}")
