@@ -1,6 +1,11 @@
 package com.petclinic.vet.servicelayer;
 
 import com.petclinic.vet.dataaccesslayer.*;
+import com.petclinic.vet.dataaccesslayer.education.Education;
+import com.petclinic.vet.dataaccesslayer.education.EducationRepository;
+import com.petclinic.vet.dataaccesslayer.ratings.PredefinedDescription;
+import com.petclinic.vet.dataaccesslayer.ratings.Rating;
+import com.petclinic.vet.dataaccesslayer.ratings.RatingRepository;
 import com.petclinic.vet.util.EntityDtoUtil;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;

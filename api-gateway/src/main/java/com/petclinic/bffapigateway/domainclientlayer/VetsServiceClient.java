@@ -1,9 +1,6 @@
 package com.petclinic.bffapigateway.domainclientlayer;
 
-import com.petclinic.bffapigateway.dtos.Vets.EducationResponseDTO;
-import com.petclinic.bffapigateway.dtos.Vets.RatingRequestDTO;
-import com.petclinic.bffapigateway.dtos.Vets.RatingResponseDTO;
-import com.petclinic.bffapigateway.dtos.Vets.VetDTO;
+import com.petclinic.bffapigateway.dtos.Vets.*;
 import com.petclinic.bffapigateway.exceptions.ExistingRatingNotFoundException;
 import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -182,7 +179,17 @@ public class VetsServiceClient {
                 .bodyToMono(Void.class);
         return result;
     }
+    public Flux<VetAverageRatingDTO> getTopThreeVetsWithHighestAverageRating() {
+        Flux<VetAverageRatingDTO> averageRatingDTOFlux =
+                webClientBuilder
+                        .build()
+                        .get()
+                        .uri(vetsServiceUrl + "/topVets" )
+                        .retrieve()
+                        .bodyToFlux(VetAverageRatingDTO.class);
 
+        return averageRatingDTOFlux;
+    }
     public Mono<Double> getAverageRatingByVetId(String vetId) {
         Mono<Double> averageRating =
                 webClientBuilder

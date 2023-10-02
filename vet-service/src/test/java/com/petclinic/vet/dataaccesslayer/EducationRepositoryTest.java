@@ -1,5 +1,7 @@
 package com.petclinic.vet.dataaccesslayer;
 
+import com.petclinic.vet.dataaccesslayer.education.Education;
+import com.petclinic.vet.dataaccesslayer.education.EducationRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
@@ -9,8 +11,6 @@ import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
 import reactor.test.StepVerifier;
-
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 

@@ -1,20 +1,21 @@
 package com.petclinic.vet.presentationlayer;
 
 import com.petclinic.vet.dataaccesslayer.*;
-import com.petclinic.vet.servicelayer.EducationResponseDTO;
-import com.petclinic.vet.servicelayer.RatingRequestDTO;
-import com.petclinic.vet.servicelayer.RatingResponseDTO;
-import com.petclinic.vet.servicelayer.VetDTO;
+import com.petclinic.vet.dataaccesslayer.education.Education;
+import com.petclinic.vet.dataaccesslayer.education.EducationRepository;
+import com.petclinic.vet.dataaccesslayer.ratings.PredefinedDescription;
+import com.petclinic.vet.dataaccesslayer.ratings.Rating;
+import com.petclinic.vet.dataaccesslayer.ratings.RatingRepository;
+import com.petclinic.vet.servicelayer.*;
+import com.petclinic.vet.servicelayer.education.EducationResponseDTO;
+import com.petclinic.vet.servicelayer.ratings.RatingRequestDTO;
+import com.petclinic.vet.servicelayer.ratings.RatingResponseDTO;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.r2dbc.init.R2dbcScriptDatabaseInitializer;
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
@@ -22,15 +23,11 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
@@ -62,6 +59,8 @@ class VetControllerIntegrationTest {
     Vet vet2 = buildVet2("2345");
     Rating rating1 = buildRating("12345", "678910", 5.0);
     Rating rating2 = buildRating("12346", "678910", 4.0);
+    Rating rating3 = buildRating("12347", "678910", 3.0);
+
     VetDTO vetDTO = buildVetDTO("3456");
     String VET_ID = "678910";
     String VET_BILL_ID = vet.getVetBillId();
@@ -557,7 +556,7 @@ class VetControllerIntegrationTest {
 
     @Test
     void getAverageRatingByVetId_ShouldSucceed() {
-
+        
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
                 .vetId(vet.getVetId())
                 .rateScore(rating1.getRateScore()).build();
@@ -576,7 +575,9 @@ class VetControllerIntegrationTest {
     }
 
     @Test
-    void getAverageRatingByVetId_withInvalidVetId_ShouldThrowNotFound() {
+    void getAverageRatingByVetId_withInvalidVetId_ShouldThrowNumberZero() {
+
+
         client
                 .get()
                 .uri("/vets/" + INVALID_VET_ID + "/ratings/average")
@@ -588,6 +589,44 @@ class VetControllerIntegrationTest {
                             assertEquals(0.0, avg);
                         }
                 );
+    }
+
+    @Test
+    void getTopThreeVetWithTheHighestRating_ShouldSucceed(){
+
+        VetAverageRatingDTO vetAverageRatingDTO1 = VetAverageRatingDTO.builder()
+                .averageRating(rating1.getRateScore())
+                .vetId(vet.getVetId())
+                .build();
+
+        VetAverageRatingDTO vetAverageRatingDTO2 = VetAverageRatingDTO.builder()
+                .averageRating(rating2.getRateScore())
+                .vetId(vet.getVetId())
+                .build();
+
+        VetAverageRatingDTO vetAverageRatingDTO3 = VetAverageRatingDTO.builder()
+                .averageRating(rating3.getRateScore())
+                .vetId(vet.getVetId())
+                .build();
+
+        client
+                .get()
+                .uri("/vets/" + "topVets")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(VetAverageRatingDTO.class)
+                .value(resp -> {
+                    assertEquals(rating1.getVetId(), vetAverageRatingDTO1.getVetId());
+                    assertEquals(rating2.getVetId(), vetAverageRatingDTO2.getVetId());
+                    assertEquals(rating3.getVetId(), vetAverageRatingDTO3.getVetId());
+                    assertEquals(rating1.getRateScore(), vetAverageRatingDTO1.getAverageRating());
+                    assertEquals(rating2.getRateScore(), vetAverageRatingDTO2.getAverageRating());
+                    assertEquals(rating3.getRateScore(), vetAverageRatingDTO3.getAverageRating());
+
+
+                });
     }
 
     @Test
