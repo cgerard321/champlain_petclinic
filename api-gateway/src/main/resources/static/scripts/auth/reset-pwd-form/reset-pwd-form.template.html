@@ -7,7 +7,12 @@
 
 <div style="display: flex; justify-content: center">
   <form ng-submit="$ctrl.resetPwdForm()" style="max-width: 25em;justify-content: center">
-    <h3 class="text-danger text-center" ng-repeat="error in errorMessages">{{ error }}</h3>
+    
+    <div class="alert alert-danger alert-dismissible text-center" role="alert" ng-repeat="error in errorMessages">
+      <a class="close" data-dismiss="alert" aria-label="close" ng-click="clearErrorMessages()">&times;</a>
+      <strong>Error:</strong> {{ error }}
+    </div>
+
     <div class="group-form">
       <label for="pwd">New Password</label>
       <input id="pwd" type="password" class="form-control" ng-model="resetPwdForm.password" name="password" required/>
