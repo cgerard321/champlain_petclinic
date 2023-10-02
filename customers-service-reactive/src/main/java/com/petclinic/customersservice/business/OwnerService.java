@@ -5,9 +5,13 @@ import com.petclinic.customersservice.presentationlayer.OwnerRequestDTO;
 import com.petclinic.customersservice.presentationlayer.OwnerResponseDTO;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import org.springframework.data.domain.Pageable;
+
 
 public interface OwnerService {
     Flux<OwnerResponseDTO> getAllOwners();
+
+    Flux<OwnerResponseDTO> getAllOwnersPagination(Pageable pageable);
 
     Mono<Owner> insertOwner(Mono<Owner> ownerMono);
 

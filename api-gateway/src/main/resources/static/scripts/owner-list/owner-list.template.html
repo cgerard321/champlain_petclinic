@@ -47,7 +47,7 @@
 
 </style>
 
-<div class="CurrentOwnersContainer">
+<div class="CurrentOwnersContainer" ng-app="ownerList" ng-controller="OwnerListController">
 
     <h3 class="titleOwner">Current Owners</h3>
 
@@ -90,7 +90,7 @@
                     </td>
                 </tr>
 
-                <tr class="" id="ownerTd" ng-repeat="owner in $ctrl.owners | filter:$ctrl.query track by owner.ownerId">
+                <tr class="" id="ownerTd" ng-repeat="owner in $ctrl.owners">
                     <td>
                         <a class="btn p-0 responsive-text" style="color: blue" ui-sref="ownerDetails({ ownerId: owner.ownerId })">
                             {{owner.ownerId}}
@@ -103,5 +103,26 @@
                 </tr>
             </tbody>
         </table>
+
+    <div class="d-flex justify-content-center pb-3">
+        <nav aria-label="Page navigation example">
+            <ul class="pagination">
+                <li class="page-item">
+                    <a class="page-link text-dark" aria-label="Previous" ng-click="$ctrl.goPreviousPage()">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+
+                <li class="page-item">
+                    <a class="page-link text-dark" disabled>{{$ctrl.currentPageOnSite}}</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link text-dark" aria-label="Next" ng-click="$ctrl.goNextPage()">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
 
 </div>

@@ -36,6 +36,8 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Optional;
+
 /**
  * @author Maciej Szarlinski
  * @author Christine Gerard
@@ -119,7 +121,6 @@ public class BFFApiGatewayController {
         return billServiceClient.deleteBillsByVetId(vetId).then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-
 
     @DeleteMapping(value = "bills/customer/{customerId}")
     public Mono<ResponseEntity<Void>> deleteBillsByCustomerId(final @PathVariable String customerId){
@@ -437,6 +438,25 @@ public class BFFApiGatewayController {
                                 .map(addVisitsToOwner(n))
                 );*/
     }
+    @GetMapping(value = "/owners-pagination")
+    public Flux<OwnerResponseDTO> getOwnersByPagination(@RequestParam Optional<Integer> page, @RequestParam Optional<Integer> size) {
+
+        if(page.isEmpty() || page == null){
+            page = Optional.of(0);
+        }
+
+        if (size.isEmpty() || size == null) {
+            size = Optional.of(5);
+        }
+
+        return customersServiceClient.getOwnersByPagination(page,size);
+    }
+
+    @GetMapping(value = "/owners-count")
+    public Mono<Long> getTotalNumberOfOwners(){
+        return customersServiceClient.getTotalNumberOfOwners();
+    }
+
 
     @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN})
     @GetMapping(value = "owners/{ownerId}")
@@ -520,6 +540,13 @@ public class BFFApiGatewayController {
                         .defaultIfEmpty(ResponseEntity.notFound().build())
         );
     }
+
+
+
+
+
+
+
 
 
     @DeleteMapping(value = "owners/{ownerId}")

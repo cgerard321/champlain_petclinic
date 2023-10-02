@@ -4,11 +4,15 @@ import com.petclinic.customersservice.data.Owner;
 import com.petclinic.customersservice.data.OwnerRepo;
 import com.petclinic.customersservice.presentationlayer.OwnerRequestDTO;
 import com.petclinic.customersservice.presentationlayer.OwnerResponseDTO;
+import com.petclinic.customersservice.util.EntityDTOUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -54,6 +58,52 @@ class OwnerServiceImplTest {
                 .expectNextMatches(ownerDto -> ownerDto.getOwnerId().equals(ownerResponseDTO.getOwnerId()))
                 .expectComplete()
                 .verify();
+    }
+
+    @Test
+    void getOwnersPagination_ShouldSucceed(){
+
+        Owner owner1 = Owner.builder()
+                .ownerId("ownerId-11")
+                .firstName("FirstName1")
+                .lastName("LastName1")
+                .address("Test address1")
+                .city("test city1")
+                .telephone("telephone1")
+                .build();
+        Owner owner2 = Owner.builder()
+                .ownerId("ownerId-17")
+                .firstName("FirstName2")
+                .lastName("LastName2")
+                .address("Test address2")
+                .city("test city2")
+                .telephone("telephone2")
+                .build();
+        Owner owner3 = Owner.builder()
+                .ownerId("ownerId-13")
+                .firstName("FirstName3")
+                .lastName("LastName3")
+                .address("Test address3")
+                .city("test city3")
+                .telephone("telephone3")
+                .build();
+
+        // Create a Pageable object for the first page with 2 items per page
+        Pageable pageable = PageRequest.of(0, 2);
+
+        // Mock the repository to return a Flux of owners
+        when(repo.findAll()).thenReturn(Flux.just(owner1, owner2, owner3));
+
+        // Call the method under test
+        Flux<OwnerResponseDTO> owners = ownerService.getAllOwnersPagination(pageable);
+
+        // Verify the behavior using StepVerifier
+        StepVerifier.create(owners)
+                .expectNextMatches(ownerDto1 -> ownerDto1.getOwnerId().equals(owner1.getOwnerId()))
+                .expectNextMatches(ownerDto2 -> ownerDto2.getOwnerId().equals(owner2.getOwnerId()))
+                .expectComplete()
+                .verify();
+
     }
 
     @Test
