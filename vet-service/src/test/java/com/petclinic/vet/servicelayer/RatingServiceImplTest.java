@@ -50,6 +50,8 @@ class RatingServiceImplTest {
 
     String VET_ID = "vetId";
     Rating rating = buildRating();
+    Rating rating2 = buildRating2();
+    Rating rating3 = buildRating3();
     RatingRequestDTO ratingRequestDTO = buildRatingRequestDTO();
 
     VetAverageRatingDTO vetAverageRatingDTO1=buildVetAverageRatingDTO();
@@ -152,24 +154,33 @@ class RatingServiceImplTest {
     }
 
 
-//    @Test
-//    void getTopThreeVetsWithHighestRating() {
-//
-//
-//        rating.setRateScore(4.0);
-//        rating.setVetId("68790");
-//
-//        when(ratingRepository.findAll()).thenReturn(Flux.just(rating));
-//
-//        Flux<VetAverageRatingDTO> averageRatingDTOFlux = ratingService.getTopThreeVetsWithHighestAverageRating();
-//
-//        StepVerifier
-//                .create(averageRatingDTOFlux)
-//                .consumeNextWith(highestRating -> {
-//                    assertEquals("68790", highestRating.getVetId()); // Vet ID should match
-//                    assertEquals(4.0, highestRating.getAverageRating(),0.01); // Correct field name
-//                });
-//    }
+    @Test
+    void getTopThreeVetsWithHighestRating() {
+
+        rating.setRateScore(4.0);
+        rating.setVetId("68790");
+        rating2.setRateScore(1.0);
+        rating2.setVetId("68792");
+        rating3.setRateScore(2.0);
+        rating3.setVetId("68793");
+
+        when(ratingRepository.countAllByVetId(anyString())).thenReturn(Mono.just(5L));
+
+
+        when(ratingRepository.findAll()).thenReturn(Flux.just(rating,rating2,rating3));
+
+        when(ratingRepository.findAllByVetId(rating.getVetId())).thenReturn(Flux.just(rating));
+        when(ratingRepository.findAllByVetId(rating2.getVetId())).thenReturn(Flux.just(rating2));
+        when(ratingRepository.findAllByVetId(rating3.getVetId())).thenReturn(Flux.just(rating3));
+
+
+        Flux<VetAverageRatingDTO> averageRatingDTOFlux = ratingService.getTopThreeVetsWithHighestAverageRating();
+
+        StepVerifier
+                .create(averageRatingDTOFlux)
+                .expectNextCount(3)
+                .verifyComplete();
+    }
 
     @Test
     void getRatingPercentagesByVetId() throws JsonProcessingException {
@@ -211,7 +222,26 @@ class RatingServiceImplTest {
                 .rateDate("16/09/2023")
                 .build();
     }
-
+    private Rating buildRating2() {
+        return Rating.builder()
+                .id("2")
+                .ratingId("ratingId2")
+                .vetId("vetId2")
+                .rateScore(1.0)
+                .rateDescription("Vet is the worst vet in the wooooorld!")
+                .rateDate("10/08/2023")
+                .build();
+    }
+    private Rating buildRating3() {
+        return Rating.builder()
+                .id("3")
+                .ratingId("ratingId3")
+                .vetId("vetId3")
+                .rateScore(2.0)
+                .rateDescription("Vet is the almost worst vet in the wooooorld!")
+                .rateDate("05/18/2023")
+                .build();
+    }
     private RatingRequestDTO buildRatingRequestDTO() {
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
                 .vetId("vetId")

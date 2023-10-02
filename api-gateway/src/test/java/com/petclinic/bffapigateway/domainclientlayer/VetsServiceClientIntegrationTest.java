@@ -154,21 +154,18 @@ class VetsServiceClientIntegrationTest {
         //Had to make it optional so it could diferentiate between double and object
         assertEquals(Optional.of(5), Optional.ofNullable(numberOfRatings));
     }
-
-
     @Test
     void getTopThreeVetsWithHighestRating() throws JsonProcessingException{
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setBody("    {\n" +
-                        "        \"ratingId\": \"123456\",\n" +
                         "        \"vetId\": \"678910\",\n" +
-                        "        \"rateScore\": 4.5\n" +
+                        "        \"averageRating\": 4.5\n" +
                         "    }"));
 
         final VetAverageRatingDTO averageRatingDTO = vetsServiceClient.getTopThreeVetsWithHighestAverageRating().blockFirst();
         assertEquals("678910",vetDTO.getVetId());
-        assertEquals(0.0, averageRatingDTO.getAverageRating());
+        assertEquals(4.5, averageRatingDTO.getAverageRating());
         //its 0.0 because the vet doesn't have any ratings
     }
     @Test

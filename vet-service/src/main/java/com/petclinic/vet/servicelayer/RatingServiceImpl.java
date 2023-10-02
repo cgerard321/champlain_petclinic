@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.vet.dataaccesslayer.Rating;
 import com.petclinic.vet.dataaccesslayer.RatingRepository;
+import com.petclinic.vet.dataaccesslayer.Vet;
 import com.petclinic.vet.dataaccesslayer.VetRepository;
 import com.petclinic.vet.exceptions.NotFoundException;
 
@@ -105,16 +106,23 @@ public class RatingServiceImpl implements RatingService {
 
     @Override
     public Flux<VetAverageRatingDTO> getTopThreeVetsWithHighestAverageRating() {
+        VetDTO vetDTO= VetDTO.builder()
+                .firstName("Jane")
+                .lastName("Shaun")
+                .email("hasd@gmail.com")
+                .phoneNumber("512-431-4312")
+                .build();
+
         return ratingRepository.findAll()
                 .groupBy(Rating::getVetId)
                 .flatMap(group -> {
                     String vetId = group.key();
                     return getAverageRatingByVetId(vetId)
-                            .map(averageRating -> Tuples.of(vetId, averageRating));
+                            .map(averageRating -> Tuples.of(vetId,averageRating));
                 })
-                .sort((t1, t2) -> Double.compare(t2.getT2(), t1.getT2())) //It is being sorted in descending order by average rating
-                .take(3) // Take the top 3 vets
-                .map(tuple -> new VetAverageRatingDTO(tuple.getT1(), tuple.getT2()));
+                .sort((t1, t2) -> Double.compare(t2.getT2(), t1.getT2()))
+                .take(3)
+                .map(tuple -> new VetAverageRatingDTO(vetDTO,tuple.getT1(), tuple.getT2()));
     }
 
     @Override

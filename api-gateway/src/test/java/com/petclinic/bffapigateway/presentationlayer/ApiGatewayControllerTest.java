@@ -141,6 +141,8 @@ class ApiGatewayControllerTest {
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
+//                .jsonPath("$[0].firstName").isEqualTo(vetAverageRatingDTO.getFirstName())
+//                .jsonPath("$[0].lastName").isEqualTo(vetAverageRatingDTO.getLastName())
                 .jsonPath("$[0].vetId").isEqualTo(vetAverageRatingDTO.getVetId())
                 .jsonPath("$[0].averageRating").isEqualTo(vetAverageRatingDTO.getAverageRating());
     }
