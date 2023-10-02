@@ -291,7 +291,7 @@ class InventoryControllerUnitTest {
         InventoryResponseDTO inventoryResponseDTO = InventoryResponseDTO.builder()
                 .inventoryId("inventoryId_2")
                 .inventoryName("Pet food")
-                .inventoryType(internal)
+                .inventoryType("internal")
                 .inventoryDescription("pet")
                 .build();
 
@@ -646,7 +646,7 @@ class InventoryControllerUnitTest {
         InventoryResponseDTO inventoryResponseDTO = InventoryResponseDTO.builder()
                 .inventoryId(validInventoryId)
                 .inventoryName("Updated Internal")
-                .inventoryType(internal)
+                .inventoryType("internal")
                 .inventoryDescription("Updated inventory_3")
                 .build();
         //arrange

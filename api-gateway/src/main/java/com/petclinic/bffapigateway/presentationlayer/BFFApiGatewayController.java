@@ -343,13 +343,6 @@ public class BFFApiGatewayController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-
-
-    @GetMapping(value = "vets/{vetId}/educations")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<EducationResponseDTO> getEducationsByVetId(@PathVariable String vetId) {
-        return vetsServiceClient.getEducationsByVetId(VetsEntityDtoUtil.verifyId(vetId));
-    }
-
     @DeleteMapping(value = "vets/{vetId}/educations/{educationId}")
     public Mono<ResponseEntity<Void>> deleteEducationByEducationId(@PathVariable String vetId,
                                                    @PathVariable String educationId){
@@ -716,8 +709,9 @@ public class BFFApiGatewayController {
     public Flux<EducationResponseDTO> getEducationsByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getEducationsByVetId(VetsEntityDtoUtil.verifyId(vetId));
 
+    }
     @DeleteMapping(value = "inventory/{inventoryId}")
-    public Mono<Void> deleteInventoryByInventoryId(@PathVariable String inventoryId){
+    public Mono<Void> deleteInventoryByInventoryId(@PathVariable String inventoryId) {
         return inventoryServiceClient.deleteInventoryByInventoryId(inventoryId);
     }
 }

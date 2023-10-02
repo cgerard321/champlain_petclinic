@@ -56,7 +56,7 @@ class ProductInventoryServiceUnitTest {
             .productQuantity(10)
             .build();
     InventoryType inventoryType = InventoryType.builder()
-            .id(1)
+            .id("1")
             .typeId("81445f86-5329-4df6-badc-8f230ee07e75")
             .type("Internal")
             .build();

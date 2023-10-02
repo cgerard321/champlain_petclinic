@@ -61,18 +61,17 @@ class InventoryRepositoryTest {
                 .expectNextCount(0)  // No inventory should be found
                 .verifyComplete();
     }
-    private Inventory buildInventory(String inventoryId, String inventoryName, String inventoryType, String inventoryDescription) {
     //search
     @Test
     public void shouldFindInventoryByNameTypeAndDescription() {
         // Arrange
-        Inventory inventory = buildInventory("inventoryId_1", "SampleName", InventoryType.internal, "SampleDescription");
+        Inventory inventory = buildInventory("inventoryId_1", "SampleName", "Internal", "SampleDescription");
         inventoryRepository.save(inventory).block();
 
         // Act & Assert
         StepVerifier
                 .create(inventoryRepository.findAllByInventoryNameAndInventoryTypeAndInventoryDescription(
-                        "SampleName", InventoryType.internal.toString(), "SampleDescription"))
+                        "SampleName", "Internal", "SampleDescription"))
                 .expectNextMatches(result -> result.getInventoryId().equals("inventoryId_1"))
                 .verifyComplete();
     }
@@ -80,12 +79,12 @@ class InventoryRepositoryTest {
     @Test
     public void shouldFindInventoryByTypeAndDescription() {
         // Arrange
-        Inventory inventory = buildInventory("inventoryId_2", "OtherName", InventoryType.internal, "SampleDescription");
+        Inventory inventory = buildInventory("inventoryId_2", "OtherName", "Internal", "SampleDescription");
         inventoryRepository.save(inventory).block();
 
         // Act & Assert
         StepVerifier
-                .create(inventoryRepository.findAllByInventoryTypeAndInventoryDescription(InventoryType.internal.toString(), "SampleDescription"))
+                .create(inventoryRepository.findAllByInventoryTypeAndInventoryDescription("Internal", "SampleDescription"))
                 .expectNextMatches(result -> result.getInventoryId().equals("inventoryId_2"))
                 .verifyComplete();
     }
@@ -93,7 +92,7 @@ class InventoryRepositoryTest {
     @Test
     public void shouldFindInventoryByName() {
         // Arrange
-        Inventory inventory = buildInventory("inventoryId_3", "SampleName", InventoryType.internal, "OtherDescription");
+        Inventory inventory = buildInventory("inventoryId_3", "SampleName", "Internal", "OtherDescription");
         inventoryRepository.save(inventory).block();
 
         // Act & Assert
@@ -105,7 +104,7 @@ class InventoryRepositoryTest {
 
 
 
-    private Inventory buildInventory(String inventoryId, String inventoryName, InventoryType inventoryType, String inventoryDescription) {
+    private Inventory buildInventory(String inventoryId, String inventoryName, String inventoryType, String inventoryDescription) {
         return Inventory.builder()
                 .inventoryName(inventoryName)
                 .inventoryId(inventoryId)
