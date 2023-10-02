@@ -482,11 +482,8 @@
 
         renderCalendar();
     });
-
-    //select dates
-    document.querySelector('.days').addEventListener('click', (event) => {
+/*    document.querySelector('.days').addEventListener('click', (event) => {
         let target = event.target.dataset.target;
-        let date = new Date(); // Assuming you have a date object initialized already
 
         if(target !== undefined) {
             if (target.substring(0, 13) === "previous-page") {
@@ -499,7 +496,6 @@
                 selectedDate = target;
                 date.setDate(parseInt(target));
             }
-            selectedTime = "";
         }
 
         // Access the AngularJS scope
@@ -514,49 +510,72 @@
         $rootScope.$broadcast('selectedDateChanged', date);
 
         renderCalendar();
-    });
-    /*    document.querySelector('.days').addEventListener('click',(event) => {
-
-        let target = event.target.dataset.target;
-
-        if(target !== undefined) {
-            if (target.substring(0, 13) === "previous-page") {
-                selectedDate = target.substring(14, 16).trim();
-
-                date.setMonth(date.getMonth() - 1);
-
-            } else if (target.substring(0, 9) === "next-page") {
-                selectedDate = target.substring(10, 12).trim();
-
-                date.setMonth(date.getMonth() + 1);
-
-            } else {
-                selectedDate = target;
-                date.setDate(parseInt(target));
-            }
-            selectedTime = "";
-        }
-/!*        if (self) {
-            self.date = $filter('date')(date, "MM-dd-yyyy");
-        }*!/
-
-        console.log("Broadcasting date:", date);
-        $rootScope.$broadcast('selectedDateChanged', date);
-
-        renderCalendar();
     });*/
 
-    document.querySelector('.times').addEventListener('click',(event) => {
 
+        //select dates
+        document.querySelector('.days').addEventListener('click', (event) => {
+            let target = event.target.dataset.target;
+            let date = new Date(); // Assuming you have a date object initialized already
+
+            if(target !== undefined) {
+                if (target.substring(0, 13) === "previous-page") {
+                    selectedDate = target.substring(14, 16).trim();
+                    date.setMonth(date.getMonth() - 1);
+                } else if (target.substring(0, 9) === "next-page") {
+                    selectedDate = target.substring(10, 12).trim();
+                    date.setMonth(date.getMonth() + 1);
+                } else {
+                    selectedDate = target;
+                    date.setDate(parseInt(target));
+                }
+                selectedTime = "";
+            }
+
+            // Access the AngularJS scope
+            let scope = angular.element(document.querySelector('.container-calendar')).scope();
+
+            // Update the chosenDate on the scope
+            scope.$apply(function() {
+                scope.$ctrl.chosenDate = date;
+            });
+
+            console.log("Broadcasting date:", date);
+            $rootScope.$broadcast('selectedDateChanged', date);
+
+            renderCalendar();
+        });
+    document.querySelector('.times').addEventListener('click', (event) => {
         let selected = event.target.dataset.target;
 
         if(selected !== undefined) {
-            selectedTime = selected;
+            selectedTime = parseInt(selected); // Assuming the selected time is in hours
+
+            // Access the AngularJS scope
+            let scope = angular.element(document.querySelector('.container-calendar')).scope();
+
+            // Update the chosenDate's hours based on the selected time
+            scope.$apply(function() {
+                scope.$ctrl.chosenDate.setHours(selectedTime, 0, 0); // Set minutes and seconds to 0
+            });
         }
-        console.log("Time Broadcasting date:", selectedTime);
+
+        console.log("Time Broadcasting date:",selectedTime);
         renderCalendar();
     });
-    console.log(this.previousVisits)
+
+
+    /*    document.querySelector('.times').addEventListener('click',(event) => {
+
+            let selected = event.target.dataset.target;
+
+            if(selected !== undefined) {
+                selectedTime = selected;
+            }
+            console.log("Time Broadcasting date:", selectedTime);
+            renderCalendar();
+        });
+        console.log(this.previousVisits)*/
 </script>
 
 <h2>Visits</h2>

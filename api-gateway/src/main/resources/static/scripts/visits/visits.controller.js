@@ -12,6 +12,8 @@ angular.module('visits')
         self.date = new Date();
         self.desc = "";
         self.chosenDate = null;
+        self.chosenTime = null;
+
 
 
         $http.get("api/gateway/visits/"+petId).then(function (resp) {
