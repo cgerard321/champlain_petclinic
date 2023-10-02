@@ -1,5 +1,6 @@
 package com.petclinic.vet.servicelayer;
 
+import com.petclinic.vet.dataaccesslayer.PredefinedDescription;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -11,4 +12,5 @@ public interface RatingService {
     Mono<Void> deleteRatingByRatingId(String vetId, String ratingId);
     Mono<Double> getAverageRatingByVetId(String vetId);
     Mono<String> getRatingPercentagesByVetId(String vetId);
+    //Mono<Integer> getCountOfRatingsByVetIdAndPredefinedDescription(String vetId, PredefinedDescription predefinedDescription);
 }

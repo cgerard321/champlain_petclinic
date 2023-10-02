@@ -43,11 +43,21 @@ public class InventoryController {
                                                        @RequestParam(required = false) Integer productQuantity){
         return productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(inventoryId, productName, productPrice, productQuantity);
     }
-
+/*
     @GetMapping()
     public Flux<InventoryResponseDTO> getAllInventory(){
         return productInventoryService.getAllInventory();
     }
+
+ */
+@GetMapping()
+public Flux<InventoryResponseDTO> searchInventories(
+        @RequestParam(name = "inventoryName", required = false) String inventoryName,
+        @RequestParam(name = "inventoryType", required = false) String inventoryType,
+        @RequestParam(name = "inventoryDescription", required = false) String inventoryDescription) {
+
+    return productInventoryService.searchInventories(inventoryName, inventoryType, inventoryDescription);
+}
 
 
     @GetMapping("/{inventoryId}")
@@ -93,6 +103,12 @@ public class InventoryController {
         return productInventoryService.updateProductInInventory(productRequestDTOMono, inventoryId, productId)
                 .map(productResponseDTO -> ResponseEntity.ok().body(productResponseDTO))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping("/{inventoryId}")
+    public Mono<ResponseEntity<Void>> deleteInventoryByInventoryId(@PathVariable String inventoryId){
+        return productInventoryService.deleteInventoryByInventoryId(inventoryId)
+        .then(Mono.just(ResponseEntity.noContent().build()));
     }
 
 }
