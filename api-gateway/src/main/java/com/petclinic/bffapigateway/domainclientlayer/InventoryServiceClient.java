@@ -55,6 +55,17 @@ public class InventoryServiceClient {
                 .bodyToMono(InventoryResponseDTO.class);
     }
 
+
+    public Mono<ProductResponseDTO> getProductByProductIdInInventory(final String inventoryId, final String productId) {
+        return webClient.get()
+                .uri(inventoryServiceUrl + "/{inventoryId}/products/{productId}", inventoryId, productId)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        resp -> rethrower.rethrow(resp, ex -> new ProductListNotFoundException(ex.get("message").toString(), NOT_FOUND)))
+                .bodyToMono(ProductResponseDTO.class);
+    }
+
     public Mono<ProductResponseDTO> addProductToInventory(final ProductRequestDTO model, final String inventoryId){
         return webClient.post()
                 .uri(inventoryServiceUrl + "/{inventoryId}/products", inventoryId)

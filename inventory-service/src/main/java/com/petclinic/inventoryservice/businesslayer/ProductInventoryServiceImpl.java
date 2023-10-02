@@ -179,6 +179,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                             "\nOr ProductName: " + productName)));
         }
 
+
         return productRepository
                 .findAllProductsByInventoryId(inventoryId)
                 .map(EntityDTOUtil::toProductResponseDTO);
@@ -267,6 +268,26 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
         return inventoryRepository
                 .findAll()
                 .map(EntityDTOUtil::toInventoryResponseDTO);
+    }
+
+
+    @Override
+    public Mono<ProductResponseDTO> getProductByProductIdInInventory(String inventoryId, String productId) {
+     if(inventoryId == null ){
+        return Mono.error(new NotFoundException("Inventory id not found:" + inventoryId ));
+
+  }
+     else if (productId == null) {
+         return Mono.error(new NotFoundException("product id not found:" + productId ));
+     }
+
+
+        return productRepository
+                .findProductByInventoryIdAndProductId(inventoryId, productId)
+                .map(EntityDTOUtil::toProductResponseDTO)
+                .switchIfEmpty(Mono.error(new NotFoundException("Inventory id:" + inventoryId + "and product:" + productId + "are not found")));
+
+
     }
 
 
