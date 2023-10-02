@@ -2,8 +2,6 @@ package com.petclinic.visits.visitsservicenew.PresentationLayer;
 
 
 import com.petclinic.visits.visitsservicenew.BusinessLayer.VisitService;
-import com.petclinic.visits.visitsservicenew.DomainClientLayer.PetResponseDTO;
-import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;

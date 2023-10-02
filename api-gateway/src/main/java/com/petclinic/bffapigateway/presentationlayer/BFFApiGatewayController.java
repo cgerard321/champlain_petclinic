@@ -193,6 +193,7 @@ public class BFFApiGatewayController {
     /**
      * Visits Methods
      **/
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "visits", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VisitResponseDTO> getAllVisits() {
         return visitsServiceClient.getAllVisits();
