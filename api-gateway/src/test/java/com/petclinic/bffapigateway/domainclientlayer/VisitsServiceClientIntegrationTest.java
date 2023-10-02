@@ -118,7 +118,26 @@ class VisitsServiceClientIntegrationTest {
                 .verifyComplete();
 
     }
+    @Test
+    void getVisitsForPet() throws Exception {
+        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee", LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", Status.UPCOMING);
+        server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).setBody(objectMapper.writeValueAsString(visitResponseDTO)).addHeader("Content-Type", "application/json"));
 
+        Flux<VisitResponseDTO> visits = visitsServiceClient.getVisitsForPet("2");
+        StepVerifier.create(visits)
+                .expectNext(visitResponseDTO)
+                .verifyComplete();
+    }
+    @Test
+    void getVisitById() throws Exception {
+        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee", LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", Status.UPCOMING);
+        server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).setBody(objectMapper.writeValueAsString(visitResponseDTO)).addHeader("Content-Type", "application/json"));
+
+        Mono<VisitResponseDTO> visitResponseDTOMono = visitsServiceClient.getVisitByVisitId("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee");
+        StepVerifier.create(visitResponseDTOMono)
+                .expectNextMatches(returnedVisitResponseDTO1 -> Objects.equals(returnedVisitResponseDTO1, visitResponseDTO))
+                .verifyComplete();
+    }
 
 //    @Test
 //    void getVisitsForPets_withAvailableVisitsService() {
@@ -132,16 +151,7 @@ class VisitsServiceClientIntegrationTest {
 //        assertVisitDescriptionEquals(visits.block(), PET_ID,"test visit");
 //    }
 
-    @Test
-    void getVisitsForPet() throws Exception {
-        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee", LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", Status.REQUESTED);
-        server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).setBody(objectMapper.writeValueAsString(visitResponseDTO)).addHeader("Content-Type", "application/json"));
 
-        Flux<VisitResponseDTO> visits = visitsServiceClient.getVisitsForPet("2");
-        StepVerifier.create(visits)
-        .expectNext(visitResponseDTO)
-        .verifyComplete();
-    }
 /*
     @Test
     void shouldDeleteVisitsForPet() throws JsonProcessingException {
@@ -393,23 +403,12 @@ class VisitsServiceClientIntegrationTest {
         assertEquals(petId, visits.getItems().get(0).getPetId());
         assertEquals(description, visits.getItems().get(0).getDescription());
     }
- */
+
     private void prepareResponse(Consumer<MockResponse> consumer) {
         MockResponse response = new MockResponse();
         consumer.accept(response);
         server.enqueue(response);
-    }
-
-    @Test
-    void getVisitById() throws Exception {
-        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee", LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", Status.UPCOMING);
-        server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).setBody(objectMapper.writeValueAsString(visitResponseDTO)).addHeader("Content-Type", "application/json"));
-
-        Mono<VisitResponseDTO> visitResponseDTOMono = visitsServiceClient.getVisitByVisitId("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee");
-        StepVerifier.create(visitResponseDTOMono)
-            .expectNextMatches(returnedVisitResponseDTO1 -> Objects.equals(returnedVisitResponseDTO1, visitResponseDTO))
-            .verifyComplete();
-    }
+    }*/
 
     @Test
     void deleteAllCancelledVisits_shouldSucceed() {
