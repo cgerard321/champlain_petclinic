@@ -182,7 +182,6 @@
                     <div id="ratings-list" style="text-align: left; margin-left: 40%"></div>
                 </div>
             </div>
-
             <!-- Add Rating -->
             <div class="col-md-6">
                 <div class="add-rating-container">
@@ -224,6 +223,7 @@
                     </div>
                 </div>
             </div>
+
 
             <!-- Ratings Chart -->
             <div class="col-md-12" ng-if="$ctrl.ratings.length > 0" style="margin-top: 5%">
@@ -271,6 +271,7 @@
                                         </div>
                                     </div>
                                 </form>
+
                                 <button class="update-vet-button btn btn-success"
                                         id="updateRatingBtn{{rating.ratingId}}"
                                         ng-click="$ctrl.updateRating(rating.ratingId)">
@@ -288,3 +289,4 @@
         </div>
     </div>
 </div>
+
