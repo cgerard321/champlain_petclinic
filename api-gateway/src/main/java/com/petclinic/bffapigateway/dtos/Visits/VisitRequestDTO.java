@@ -17,14 +17,9 @@ public class VisitRequestDTO {
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime visitDate;
-/*   private int year;
-    private int month;
-    private int day;*/
     private String description;
     private String petId;
     private String practitionerId;
-/*    private int petId;
-    private int practitionerId;*/
     private Status status;
 
     public VisitRequestDTO(LocalDateTime now, String description, String petId, String practitionerId) {
