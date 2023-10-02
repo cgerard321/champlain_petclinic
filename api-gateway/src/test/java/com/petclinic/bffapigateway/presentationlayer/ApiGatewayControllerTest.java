@@ -1,5 +1,6 @@
 package com.petclinic.bffapigateway.presentationlayer;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.config.GlobalExceptionHandler;
 import com.petclinic.bffapigateway.domainclientlayer.*;
@@ -49,6 +50,7 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import org.springframework.web.server.ResponseStatusException;
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -2209,30 +2211,30 @@ class ApiGatewayControllerTest {
 
 
 
+    @Test
+    @DisplayName("Given valid JWT, verify user with redirection")
+    void verify_user_with_redirection_shouldSucceed(){
+        final String validToken = "some.valid.token";
 
-//    @Test
-//    @DisplayName("Given valid JWT, verify user")
-//    void verify_user() throws JsonProcessingException {
-//
-//        final String validToken = "some.valid.token";
-//        final UserDetails user = UserDetails.builder()
-//                .id(1)
-//                .password(null)
-//                .email("e@mail.com")
-//                .username("user")
-//                .roles(Collections.emptySet())
-//                .build();
-//
-//        when(authServiceClient.verifyUser(validToken))
-//                .thenReturn(Mono.just(user));
-//
-//        client.get()
-//                .uri("/api/gateway/verification/{token}", validToken)
-//                .exchange()
-//                .expectStatus().isOk()
-//                .expectBody()
-//                .json(objectMapper.writeValueAsString(user));
-//    }
+        // Mocking the behavior of authServiceClient.verifyUser to return a successful response
+        UserDetails user = UserDetails.builder()
+                .userId("22222")
+                .email("e@mail.com")
+                .username("user")
+                .roles(Collections.emptySet())
+                .build();
+
+        ResponseEntity<UserDetails> responseEntity = ResponseEntity.ok(user);
+
+        when(authServiceClient.verifyUser(validToken))
+                .thenReturn(Mono.just(responseEntity));
+
+        client.get()
+                .uri("/api/gateway/verification/{token}", validToken)
+                .exchange()
+                .expectStatus().isFound()
+                .expectHeader().valueEquals("Location", "http://localhost:8080/#!/login");
+    }
 
 //    @Test
 //    @DisplayName("Given invalid JWT, expect 400")
