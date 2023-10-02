@@ -178,6 +178,12 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @DeleteMapping("pets/{petId}")
+    public Mono<ResponseEntity<PetResponseDTO>> deletePetByPetId(@PathVariable String petId){
+        return customersServiceClient.deletePetByPetId(petId).then(Mono.just(ResponseEntity.noContent().<PetResponseDTO>build()))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
     @GetMapping(value = "owners/petTypes", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<PetType> getPetTypes(){
         return customersServiceClient.getPetTypes();

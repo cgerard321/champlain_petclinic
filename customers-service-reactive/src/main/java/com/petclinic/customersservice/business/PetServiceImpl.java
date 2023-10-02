@@ -57,7 +57,8 @@ public class PetServiceImpl implements PetService {
     }
     @Override
     public Mono<Void> deletePetByPetId(String petId) {
-        return petRepo.deleteById(petId);
+        return petRepo.findPetByPetId(petId)
+                .flatMap(petRepo::delete);
     }
 
 }

@@ -18,6 +18,37 @@ angular.module('ownerDetails')
             });
         });
 
+        self.deletePet = function (petId) {
+            var config = {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+            $http.delete('api/gateway/pets/' + petId, config)
+                .then(function (resp) {
+                    console.log("Pet deleted successfully");
+
+                    $http.get('api/gateway/owners/' + $stateParams.ownerId).then(function (resp) {
+                        self.owner = resp.data;
+                    });
+
+                    self.owner.pets = self.owner.pets.filter(function(pet) {
+                        return pet.petId !== petId;
+                    });
+
+                    $scope.$applyAsync();
+                    // Handle the success appropriately
+                }).catch(function (error) {
+                console.error("Error deleting pet:", error);
+                // Handle the error appropriately
+            });
+        };
+
+
+
+
+
+
         self.toggleActiveStatus = function (petId) {
             $http.get('api/gateway/pets/' + petId + '?_=' + new Date().getTime(), { headers: { 'Cache-Control': 'no-cache' } }).then(function (resp) {
                 console.log("Pet id is " + petId);
@@ -36,6 +67,7 @@ angular.module('ownerDetails')
                 }, { headers: { 'Cache-Control': 'no-cache' } }).then(function (resp) {
                     console.log("Pet active status updated successfully");
                     self.pet = resp.data;
+                    $scope.$applyAsync()
                     $timeout(); // Manually trigger the $digest cycle to update the UI
                 }).catch(function (error) {
                     console.error("Error updating pet active status:", error);
