@@ -26,6 +26,7 @@ angular.module('signupForm')
             })
             .then(() => {
                 loaderDiv.style.display = "none";
+                alert("Email was sent !");
                 $location.path("/login")
             })
             .catch(n => {
