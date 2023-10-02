@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('visits')
-    .controller('VisitsController', ['$http', '$state', '$stateParams', '$filter','$scope', function ($http, $state, $stateParams, $filter, $scope) {
+    .controller('VisitsController', ['$http', '$state', '$stateParams', '$filter','$scope','$rootScope', function ($http, $state, $stateParams, $filter, $scope,$rootScope) {
         var self = this;
         var petId = $stateParams.petId || 0;
         var postURL = "api/gateway/visits";
@@ -11,6 +11,8 @@ angular.module('visits')
         self.practitionerId = 0;
         self.date = new Date();
         self.desc = "";
+        self.chosenDate = null;
+
 
         $http.get("api/gateway/visits/"+petId).then(function (resp) {
             self.visits = resp.data;
@@ -18,8 +20,9 @@ angular.module('visits')
         });
 
         $scope.$on('selectedDateChanged', function(event, selectedDate) {
-            console.log('Selected Date:', selectedDate); // Debugging
-            self.date = $filter('date')(selectedDate, "yyyy-MM-dd");
+            console.log("Received selected date:", selectedDate);
+            // Set dateChosen to the received selected date
+            self.chosenDate = selectedDate;
         });
 
         // Function to... get the current date ;)
@@ -627,10 +630,15 @@ angular.module('visits')
                 }
             }
         }
+        $scope.$on('selectedDateChanged', function(event, selectedDate) {
+            self.chosenDate = selectedDate;
+            console.log("Received and set chosen date:", self.chosenDate);
+        });
+
 
         self.submit = function () {
             var data = {
-                visitDate: $filter('date')(self.date, "yyyy-MM-ddTHH:mm:ss"),
+                visitDate: $filter('date')(self.chosenDate, "yyyy-MM-ddTHH:mm:ss"),
                 description: self.desc,
                 practitionerId: self.practitionerId,
                 status: true
@@ -638,7 +646,7 @@ angular.module('visits')
             
             var billData = {
                 ownerId: $stateParams.ownerId,
-                date: $filter('date')(self.date, "yyyy-MM-dd"),
+                date: $filter('date')(self.chosenDate, "yyyy-MM-dd"),
                 visitType : $("#selectedVisitType").val()
             }
 
