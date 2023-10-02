@@ -1,5 +1,6 @@
 package com.petclinic.vet.servicelayer;
 
+import com.petclinic.vet.dataaccesslayer.PredefinedDescription;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,4 +15,5 @@ public class RatingRequestDTO {
     private Double rateScore;
     private String rateDescription;
     private String rateDate;
+    private PredefinedDescription predefinedDescription;
 }

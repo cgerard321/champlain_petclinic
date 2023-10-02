@@ -6,6 +6,7 @@ import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
 import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -15,12 +16,14 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.UUID;
+
+import java.util.Objects;
 
 import java.util.Optional;
 
 import static reactor.core.publisher.Mono.just;
 
+@Slf4j
 @Component
 public class CustomersServiceClient {
 
@@ -82,11 +85,28 @@ public class CustomersServiceClient {
     }
 
     public Mono<OwnerResponseDTO> createOwner(OwnerRequestDTO model) {
-        return webClientBuilder.build().post()
-                .uri(customersServiceUrl + "/owners")
-                .accept(MediaType.APPLICATION_JSON)
-                .body(Mono.just(model), OwnerResponseDTO.class)
-                .retrieve().bodyToMono(OwnerResponseDTO.class);
+        log.info("createOwner");
+
+        if (Objects.isNull(model)) {
+            log.info("model is null");
+        } else {
+            log.info("model is not null");
+        }
+
+                return webClientBuilder.build()
+                        .post()
+                        .uri(customersServiceUrl + "/owners")
+                        .bodyValue(model)
+                        .retrieve()
+                        .bodyToMono(OwnerResponseDTO.class);
+//        return webClientBuilder.build()
+//                .post()
+//                .uri(customersServiceUrl + "/owners")
+//                .accept(MediaType.APPLICATION_JSON)
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .body(model, OwnerRequestDTO.class)
+//                .retrieve()
+//                .bodyToMono(OwnerResponseDTO.class);
     }
 
     public Flux<PetType> getPetTypes() {
@@ -157,7 +177,7 @@ public class CustomersServiceClient {
 
     public Mono<OwnerResponseDTO> deleteOwner(final String ownerId) {
         return webClientBuilder.build().delete()
-                .uri(customersServiceUrl + ownerId)
+                .uri(customersServiceUrl +"/owners/"+ ownerId)
                 .retrieve()
                 .bodyToMono(OwnerResponseDTO.class);
     }

@@ -6,6 +6,7 @@ import com.petclinic.bffapigateway.utils.Security.Variables.SecurityConst;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import lombok.Generated;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,34 +47,15 @@ public class JwtTokenUtil implements Serializable {
     private Claims getClaimsFromToken(String token) {
         Claims claims;
         try {
-            claims = Jwts.parser()
-                    .setSigningKey(securityConst.getSECRET())
-                    .parseClaimsJws(token)
-                    .getBody();
+            claims = Jwts.parserBuilder()
+                    .setSigningKey(Keys.hmacShaKeyFor(securityConst.getSECRET().getBytes()))
+                    .build()
+                    .parseClaimsJws(token).getBody();
         } catch (Exception e) {
             claims = null;
         }
         return claims;
     }
-
-
-    public String getTokenFromRequest(List<String> cookies){
-
-        String[] allCookies = cookies.get(0).split(";");
-
-        String token;
-
-        token = Arrays.stream(allCookies).filter(cookie -> cookie.contains(securityConst.getTOKEN_PREFIX())).findFirst().orElseThrow(() -> new InvalidTokenException("Token is invalid"));
-
-
-
-        token = token.replace(securityConst.getTOKEN_PREFIX()+"=", "");
-        token = token.replace(";", "");
-        token = token.replace(" ", "");
-
-        return token;
-    }
-
 
     public String getTokenFromRequest(ServerWebExchange exchange){
         final List<String> cookies = exchange.getRequest().getHeaders().get("Cookie");
