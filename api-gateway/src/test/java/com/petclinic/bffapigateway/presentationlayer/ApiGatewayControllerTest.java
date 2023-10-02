@@ -1974,7 +1974,8 @@ class ApiGatewayControllerTest {
 
 
 //todo fix
-    /*@Test
+    /*
+    @Test
     void shouldCreateAVisitWithOwnerInfo(){
         OwnerResponseDTO owner = new OwnerResponseDTO();
         VisitRequestDTO visit = VisitRequestDTO.builder()
