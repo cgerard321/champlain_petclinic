@@ -15,5 +15,6 @@ public class Rating {
     private String vetId;
     private Double rateScore;
     private String rateDescription;
+    private PredefinedDescription predefinedDescription;
     private String rateDate;
 }

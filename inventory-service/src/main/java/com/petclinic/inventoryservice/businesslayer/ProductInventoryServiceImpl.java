@@ -184,6 +184,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                 .findAllProductsByInventoryId(inventoryId)
                 .map(EntityDTOUtil::toProductResponseDTO);
                 //where the 404 not found issue lies if we switchIfEmpty
+
     }
 
 
@@ -204,6 +205,14 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     }
 
      */
+    @Override
+    public Mono<Void> deleteInventoryByInventoryId(String inventoryId) {
+        return inventoryRepository.findInventoryByInventoryId(inventoryId)
+                .switchIfEmpty(Mono.error(new RuntimeException("The InventoryId is invalid")))
+                .flatMapMany(inventory -> inventoryRepository.delete(inventory))
+                .then();
+    }
+
     //delete all products and delete all inventory
   /*  @Override
     public Mono<Void> deleteAllProductInventory(String inventoryId) {
@@ -274,7 +283,6 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     @Override
     public Mono<Void> deleteAllInventory () {
         return inventoryRepository.deleteAll();
-
 
     }
 }
