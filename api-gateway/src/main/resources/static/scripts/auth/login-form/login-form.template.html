@@ -2,7 +2,12 @@
     <div>
     <h2 class="text-center">Login</h2>
     <form ng-submit="$ctrl.login()" style="max-width: 25em;justify-content: center">
-        <h3 class="text-danger text-center" ng-repeat="error in errorMessages">{{ error }}</h3>
+
+        <div class="alert alert-danger text-center" ng-repeat="error in errorMessages">
+            <a class="close" data-dismiss="alert" aria-label="close" ng-click="clearErrorMessages()">&times;</a>
+            <strong>Error:</strong> {{ error }}
+        </div>
+
         <div class="group-form">
             <label>Email</label>
 
@@ -45,3 +50,13 @@
     </tbody>
     </div>
 </div>
+
+
+
+<style>
+
+    label {
+        font-weight: bold;
+    }
+
+</style>

@@ -1,6 +1,7 @@
 package com.petclinic.authservice.businesslayer;
 
 import com.petclinic.authservice.Util.Exceptions.IncorrectPasswordException;
+import com.petclinic.authservice.Util.Exceptions.NotFoundException;
 import com.petclinic.authservice.datalayer.roles.Role;
 import com.petclinic.authservice.datalayer.user.*;
 import com.petclinic.authservice.datamapperlayer.UserMapper;
@@ -17,10 +18,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -125,7 +123,24 @@ public class AuthServiceUserServiceTests {
         verify(mailService,times(1)).sendMail(any());
 
     }
+    @Test
+    @DisplayName("Verify email from token should throw NotFoundException for non-existing user")
+    void verifyEmailFromToken_ShouldThrowNotFoundException() {
+        // Arrange
+        String token = "invalidToken";
 
+        when(jwtService.getUsernameFromToken(token)).thenReturn("username");
+
+        when(userRepo.findByUsername("username")).thenReturn(Optional.empty());
+
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
+            userService.verifyEmailFromToken(token);
+        });
+
+        assertEquals("User not found", exception.getMessage());
+
+        verify(userRepo).findByUsername("username");
+    }
 
 
     @Test
@@ -202,7 +217,57 @@ public class AuthServiceUserServiceTests {
         // IllegalArgumentException should be thrown
     }
 
+    @Test
+    @DisplayName("updatePassword should throw NotFoundException for non-existing user")
+    void updatePassword_ShouldThrowNotFoundExceptionForNonExistingUser() {
+        // Arrange
+        String newPassword = "newPassword";
+        String token = "validToken";
 
+        ResetPasswordToken validToken = new ResetPasswordToken();
+        validToken.setUserIdentifier(1L);
+        validToken.setExpiryDate(new Date(System.currentTimeMillis() + 1000));
+
+        when(tokenRepository.findResetPasswordTokenByToken(any())).thenReturn(validToken);
+
+        when(userRepo.findById(validToken.getUserIdentifier())).thenReturn(Optional.empty());
+
+        // Act and Assert
+        NotFoundException exception = assertThrows(NotFoundException.class, () -> {
+            userService.updatePassword(newPassword, token);
+        });
+
+        assertEquals("Could not find any customer with the token " + token, exception.getMessage());
+
+        verify(userRepo).findById(validToken.getUserIdentifier());
+    }
+
+
+// Next Story
+//    @Test
+//    @DisplayName("processForgotPassword should handle InvalidInputException")
+//    void processForgotPassword_ShouldHandleInvalidInputException() {
+//        // Arrange
+//        UserResetPwdRequestModel userResetPwdRequestModel = UserResetPwdRequestModel.builder()
+//                .email("test@example.com")
+//                .build();
+//
+//        when(userRepo.findByEmail(any())).thenReturn(Optional.empty());
+//
+//        when(tokenRepository.save(any())).thenThrow(new RuntimeException("Simulated Exception"));
+//
+//        // Act and Assert
+//        InvalidInputException exception = assertThrows(InvalidInputException.class, () -> {
+//            userService.processForgotPassword(userResetPwdRequestModel);
+//        });
+//
+//        // Verify that the InvalidInputException is thrown with the expected message
+//        assertEquals("Simulated Exception", exception.getMessage());
+//
+//        // Verify that the NotFoundException is caught and rethrown as an InvalidInputException
+//        verify(userRepo).findByEmail("test@example.com");
+//        verify(tokenRepository).save(any());
+//    }
 
 
 }

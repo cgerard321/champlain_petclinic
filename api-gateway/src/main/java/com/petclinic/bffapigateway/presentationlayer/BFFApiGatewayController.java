@@ -568,7 +568,15 @@ public class BFFApiGatewayController {
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping("/verification/{token}")
     public Mono<ResponseEntity<UserDetails>> verifyUser(@PathVariable final String token) {
-        return authServiceClient.verifyUser(token).map(ResponseEntity::ok).defaultIfEmpty(ResponseEntity.notFound().build());
+        return authServiceClient.verifyUser(token)
+                .map(userDetailsResponseEntity -> {
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.add("Location", "http://localhost:8080/#!/login");
+                    return ResponseEntity.status(HttpStatus.FOUND)
+                            .headers(headers)
+                            .body(userDetailsResponseEntity.getBody());
+                })
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
