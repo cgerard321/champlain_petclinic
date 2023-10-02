@@ -1255,7 +1255,7 @@ class ApiGatewayControllerTest {
         pet.setName("Fluffy");
         pet.setBirthDate(date);
         pet.setPetTypeId("5");
-        pet.setIsActive("true")
+        pet.setIsActive("true");
 
         when(customersServiceClient.createPet(pet,od.getOwnerId()))
                 .thenReturn(Mono.just(pet));
