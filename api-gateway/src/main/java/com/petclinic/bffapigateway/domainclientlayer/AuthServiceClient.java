@@ -121,16 +121,27 @@ public class AuthServiceClient {
 //                .bodyToMono(UserDetails.class);
 //    }
 
-    public Mono<UserDetails> verifyUser(final String token) {
+    public Mono<ResponseEntity<UserDetails>> verifyUser(final String token) {
+
         return webClientBuilder.build()
                 .get()
                 .uri(authServiceUrl + "/users/verification/{token}", token)
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError,
-                        n -> rethrower.rethrow(n,
+                .onStatus(
+                        HttpStatusCode::is4xxClientError,
+                        n -> rethrower.rethrow(
+                                n,
                                 x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
                 )
-                .bodyToMono(UserDetails.class);
+                //grabbing the response entity and modifying the headers a little before returning it
+                .toEntity(UserDetails.class)
+                .map(responseEntity -> {
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.add("Location", "http://localhost:8080/#!/login");
+                    return ResponseEntity.status(HttpStatus.FOUND)
+                            .headers(headers)
+                            .body(responseEntity.getBody());
+                });
     }
 
     public  Mono<ResponseEntity<UserPasswordLessDTO>> login(final Mono<Login> login) throws Exception {
