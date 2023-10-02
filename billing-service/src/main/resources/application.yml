@@ -17,13 +17,14 @@ spring:
     embedded:
       version: 4.0.21
 
-app:
-  vet-service:
-    host: localhost
-    port: 7002
-  customers-service:
-    host: localhost
-    port: 7003
+#app:
+#  vet-service:
+#    host: localhost
+#    port: 7002
+#  customers-service:
+#    host: localhost
+#    port: 7003
+# Apparently not needed
 ---
 spring:
   config:
@@ -50,26 +51,27 @@ spring:
       username: root
       password: password
       authentication-database: admin
-#server.port: 8080
-#app:
-#  vet-service:
-#    host: localhost
-#    port: 8080
-#  customers-service:
-#    host: localhost
-#    port: 8080
-#
-#logging:
-#  level:
-#    root: INFO
-#    com.petclinic: DEBUG
+server.port: 8080
+app:
+  vet-service:
+    host: localhost
+    port: 8080
+  customers-service:
+    host: localhost
+    port: 8080
+# Without this section of code the microservice throws a 422 error
+# Only when the domainclientlayer is uncommented though ***
+logging:
+  level:
+    root: INFO
+    com.petclinic: DEBUG
 
-#server:
-#  error:
-#    include-message: always
+server:
+  error:
+    include-message: always
 
-#    org.hibernate.SQL: DEBUG
-#    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
 #---
 #spring.profiles: h2
