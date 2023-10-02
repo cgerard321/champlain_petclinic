@@ -18,6 +18,7 @@ include:
   - name: CommentedOutCode
 #  - name: JvmCoverageInspection
 
+
 projectJDK: 17 #(Applied in CI/CD pipeline)
 
 #Specify Qodana linter for analysis (Applied in CI/CD pipeline)
