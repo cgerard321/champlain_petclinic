@@ -9,7 +9,6 @@ profile:
   name: qodana.recommended
 
 
-
 #Enable inspections
 include:
   - name: VulnerableLibrariesGlobal
@@ -17,15 +16,10 @@ include:
   - name: FieldCanBeLocal
 #  - name: DefaultAnnotationParam
   - name: CommentedOutCode
-
 #  - name: JvmCoverageInspection
 
 
-exclude:
-  - name: all
-    paths:
-      - .qodana/code-coverage/jacoco/test/html/jacoco-resources/prettify.js
-
 projectJDK: 17 #(Applied in CI/CD pipeline)
+
 #Specify Qodana linter for analysis (Applied in CI/CD pipeline)
 linter: jetbrains/qodana-jvm:latest
