@@ -131,7 +131,7 @@ public class AuthServiceClient {
                         HttpStatusCode::is4xxClientError,
                         n -> rethrower.rethrow(
                                 n,
-                                x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
+                                x -> new GenericHttpException(x.get("message").toString(),(HttpStatus) n.statusCode()))
                 )
                 //grabbing the response entity and modifying the headers a little before returning it
                 .toEntity(UserDetails.class)
