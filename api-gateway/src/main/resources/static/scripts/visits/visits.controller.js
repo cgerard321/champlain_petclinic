@@ -170,10 +170,10 @@ angular.module('visits')
         self.getPractitionerName = function (id){
             var practitionerName = "";
             $.each(self.vets, function (i, vet){
-               if (vet.vetId == id){
-                   practitionerName = vet.firstName + " " + vet.lastName;
-                   return false;
-               }
+                if (vet.vetId == id){
+                    practitionerName = vet.firstName + " " + vet.lastName;
+                    return false;
+                }
             });
             return practitionerName;
         };
@@ -643,7 +643,7 @@ angular.module('visits')
                 practitionerId: self.practitionerId,
                 status: true
             };
-            
+
             var billData = {
                 ownerId: $stateParams.ownerId,
                 date: $filter('date')(self.chosenDate, "yyyy-MM-dd"),
