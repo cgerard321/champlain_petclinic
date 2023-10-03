@@ -30,6 +30,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.ArrayList;
 import java.util.Optional;
 
 /**
@@ -237,6 +239,7 @@ public class BFFApiGatewayController {
 //not ideal since returns complete pet dto
         return getPetsByOwnerId(ownerId).flatMap(petResponseDTO -> getVisitsForPet(petResponseDTO.getPetId()));
     }
+//        Flux<VisitResponseDTO> visitResponseDTOFlux;
 
     @GetMapping(value = "visits/pets/{petId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VisitResponseDTO> getVisitsForPet(final @PathVariable String petId){
@@ -255,7 +258,7 @@ public class BFFApiGatewayController {
     @PostMapping(value = "visit/owners/{ownerId}/pets/{petId}/visits", consumes = "application/json", produces = "application/json")
     Mono<ResponseEntity<VisitResponseDTO>> addVisit(@RequestBody VisitRequestDTO visit, @PathVariable String ownerId, @PathVariable String petId) {
         // visit.setPetId(petId);
-        return visitsServiceClient.createVisitForPet(visit).map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
+        return visitsServiceClient.createVisitForPet(visit).map(ResponseEntity.status(HttpStatus.CREATED)::body)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
