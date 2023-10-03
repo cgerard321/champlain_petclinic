@@ -294,7 +294,7 @@ angular.module('vetDetails')
             self.addEducationFormVisible = true;
         };
 
-        // Function to handle the form submission for adding education
+        
 
         // Function to cancel adding education and hide the form
         self.cancelEducationForm = function () {
