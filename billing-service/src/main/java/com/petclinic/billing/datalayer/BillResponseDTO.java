@@ -21,12 +21,4 @@ public class BillResponseDTO {
     private BillStatus billStatus;
 
 
-    public BillResponseDTO(String customerId, String visitType, String vetId, LocalDate date, double amount, BillStatus billStatus) {
-        this.customerId = customerId;
-        this.visitType = visitType;
-        this.vetId = vetId;
-        this.date = date;
-        this.amount = amount;
-        this.billStatus = billStatus;
     }
-}
