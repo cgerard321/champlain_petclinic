@@ -114,25 +114,25 @@ public class DataSetupService implements CommandLineRunner {
 
 
         Owner o1 = new Owner("1","f470653d-05c5-4c45-b7a0-7d70f003d2ac", "George", "Franklin",
-                "110 W. Liberty St.", "Madison", "6085551023", petResponseList );
+                "110 W. Liberty St.", "Madison", "6085551023", "georgef@gmail.com", petResponseList );
         Owner o2 = new Owner("2","e6c7398e-8ac4-4e10-9ee0-03ef33f0361a", "Betty", "Davis",
-                "638 Cardinal Ave.", "Sun Prairie", "6085551749",petResponseList2 );
+                "638 Cardinal Ave.", "Sun Prairie", "6085551749", "bettyd@gmail.com", petResponseList2 );
         Owner o3 = new Owner("3","3f59dca2-903e-495c-90c3-7f4d01f3a2aa", "Eduardo", "Rodriguez",
-                "2693 Commerce St.", "McFarland", "6085558763", petResponseList3);
+                "2693 Commerce St.", "McFarland", "6085558763", "eduardor@gmail.com", petResponseList3);
         Owner o4 = new Owner("4","a6e0e5b0-5f60-45f0-8ac7-becd8b330486", "Harold", "Davis",
-                "563 Friendly St.", "Windsor", "6085553198",petResponseList4);
+                "563 Friendly St.", "Windsor", "6085553198", "haroldd@gmail.com", petResponseList4);
         Owner o5 = new Owner("5","c6a0fb9d-fc6f-4c21-95fc-4f5e7311d0e2", "Peter", "McTavish",
-                "2387 S. Fair Way", "Madison", "6085552765",petResponseList5);
+                "2387 S. Fair Way", "Madison", "6085552765", "peterm@gmail.com", petResponseList5);
         Owner o6 = new Owner("6","b3d09eab-4085-4b2d-a121-78a0a2f9e501", "Jean", "Coleman",
-                "105 N. Lake St.", "Monona", "6085552654", petResponseList6);
+                "105 N. Lake St.", "Monona", "6085552654", "jeanc@gmail.com", petResponseList6);
         Owner o7 = new Owner("7","5fe81e29-1f1d-4f9d-b249-8d3e0cc0b7dd", "Jeff", "Black",
-                "1450 Oak Blvd.", "Monona", "6085555387", petResponseList7);
+                "1450 Oak Blvd.", "Monona", "6085555387", "jeffb@gmail.com", petResponseList7);
         Owner o8 = new Owner("8","48f9945a-4ee0-4b0b-9b44-3da829a0f0f7", "Maria", "Escobito",
-                "345 Maple St.", "Madison", "6085557683", petResponseList8);
+                "345 Maple St.", "Madison", "6085557683", "mariae@gmail.com", petResponseList8);
         Owner o9 = new Owner("9","9f6accd1-e943-4322-932e-199d93824317", "David", "Schroeder",
-                "2749 Blackhawk Trail", "Madison", "6085559435", petResponseList9);
+                "2749 Blackhawk Trail", "Madison", "6085559435", "davids@gmail.com", petResponseList9);
         Owner o10 = new Owner("10","7c0d42c2-0c2d-41ce-bd9c-6ca67478956f", "Carlos", "Esteban",
-                "2335 Independence La.", "Waunakee", "6085555487", petResponseList10);
+                "2335 Independence La.", "Waunakee", "6085555487", "carlose@gmail.com", petResponseList10);
 
         Flux.just(o1, o2, o3, o4, o5, o6, o7, o8, o9, o10)
                 .flatMap(p -> ownerService.insertOwner(Mono.just(p))

@@ -46,6 +46,7 @@ class OwnerServiceImplTest {
                 .address("Test address")
                 .city("test city")
                 .telephone("telephone")
+                .email("email")
                 .build();
 
         List<OwnerResponseDTO> owners = new ArrayList<>();
@@ -70,6 +71,7 @@ class OwnerServiceImplTest {
                 .address("Test address1")
                 .city("test city1")
                 .telephone("telephone1")
+                .email("email1")
                 .build();
         Owner owner2 = Owner.builder()
                 .ownerId("ownerId-17")
@@ -78,6 +80,7 @@ class OwnerServiceImplTest {
                 .address("Test address2")
                 .city("test city2")
                 .telephone("telephone2")
+                .email("email2")
                 .build();
         Owner owner3 = Owner.builder()
                 .ownerId("ownerId-13")
@@ -86,6 +89,7 @@ class OwnerServiceImplTest {
                 .address("Test address3")
                 .city("test city3")
                 .telephone("telephone3")
+                .email("email3")
                 .build();
 
         // Create a Pageable object for the first page with 2 items per page
@@ -119,6 +123,7 @@ class OwnerServiceImplTest {
             assertEquals(ownerEntity.getAddress(), foundOwner.getAddress());
             assertEquals(ownerEntity.getCity(), foundOwner.getCity());
             assertEquals(ownerEntity.getTelephone(), foundOwner.getTelephone());
+            assertEquals(ownerEntity.getEmail(), foundOwner.getEmail());
             //assertEquals(ownerEntity.getPhotoId(), foundOwner.getPhotoId());
         })
                 .verifyComplete();
@@ -139,6 +144,7 @@ class OwnerServiceImplTest {
                     assertEquals(ownerEntity.getAddress(), foundOwner.getAddress());
                     assertEquals(ownerEntity.getCity(), foundOwner.getCity());
                     assertEquals(ownerEntity.getTelephone(), foundOwner.getTelephone());
+                    assertEquals(ownerEntity.getEmail(), foundOwner.getEmail());
                 })
                 .verifyComplete();
     }
@@ -158,6 +164,7 @@ class OwnerServiceImplTest {
                     assertEquals(ownerEntity.getAddress(), foundOwner.getAddress());
                     assertEquals(ownerEntity.getCity(), foundOwner.getCity());
                     assertEquals(ownerEntity.getTelephone(), foundOwner.getTelephone());
+                    assertEquals(ownerEntity.getEmail(), foundOwner.getEmail());
                     //assertEquals(ownerEntity.getPhotoId(), foundOwner.getPhotoId());
                 })
                 .verifyComplete();
@@ -210,6 +217,7 @@ class OwnerServiceImplTest {
                 .address("Test address")
                 .city("test city")
                 .telephone("telephone")
+                .email("email")
                 //.photoId("1")
                 .build();
     }
@@ -226,6 +234,7 @@ class OwnerServiceImplTest {
         ownerRequestDTO.setAddress("Updated Address");
         ownerRequestDTO.setCity("Updated City");
         ownerRequestDTO.setTelephone("5555555555");
+        ownerRequestDTO.setEmail("Updated Email");
 
         // Create a mock for an existing owner in the repository
         Owner existingOwner = new Owner();
@@ -235,6 +244,7 @@ class OwnerServiceImplTest {
         existingOwner.setAddress("Original Address");
         existingOwner.setCity("Original City");
         existingOwner.setTelephone("1234567890");
+        existingOwner.setEmail("Original Email");
 
         // Mock the repository behavior
         when(repo.findOwnerByOwnerId(ownerId)).thenReturn(Mono.just(existingOwner));
@@ -252,6 +262,7 @@ class OwnerServiceImplTest {
                     assertEquals(ownerRequestDTO.getAddress(), updatedOwner.getAddress());
                     assertEquals(ownerRequestDTO.getCity(), updatedOwner.getCity());
                     assertEquals(ownerRequestDTO.getTelephone(), updatedOwner.getTelephone());
+                    assertEquals(ownerRequestDTO.getEmail(), updatedOwner.getEmail());
                     return true;
                 })
                 .expectComplete()
