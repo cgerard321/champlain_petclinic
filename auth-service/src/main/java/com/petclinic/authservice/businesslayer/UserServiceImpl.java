@@ -406,11 +406,15 @@ public class UserServiceImpl implements UserService {
     public UserPasswordLessDTO updateUserRole(String userId, RolesChangeRequestDTO roles, String token) {
         User existingUser = userRepo.findUserByUserIdentifier_UserId(userId);
 
-        //if (existingUser.getUserIdentifier().getUserId() == jwtService.getId)
-
         if(existingUser == null) {
             throw new NotFoundException("No user was found with id : " + userId);
         }
+
+
+        if (userId.equals(jwtService.getIdFromToken(token)))
+            throw new InvalidRequestException("You can't change your own roles !");
+
+
 
         existingUser.setId(existingUser.getId());
         existingUser.setUserIdentifier(new UserIdentifier(userId));

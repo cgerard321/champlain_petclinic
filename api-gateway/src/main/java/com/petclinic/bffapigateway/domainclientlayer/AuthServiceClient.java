@@ -270,6 +270,8 @@ public class AuthServiceClient {
                 .cookie("Bearer", jwToken)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, n -> rethrower.rethrow(n,
+                        x -> new GenericHttpException(x.get("message").toString(), (HttpStatus) n.statusCode())))
                 .bodyToMono(UserResponseDTO.class);
     }
 
