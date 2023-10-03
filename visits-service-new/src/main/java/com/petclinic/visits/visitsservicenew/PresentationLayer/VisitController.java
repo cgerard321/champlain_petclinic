@@ -69,7 +69,11 @@ public class VisitController {
                 .then(Mono.just(new ResponseEntity<Void>(HttpStatus.NO_CONTENT)));
     }
 
-    //test
+    @DeleteMapping("/cancelled")
+    public Mono<ResponseEntity<Void>> deleteAllCancelLedVisits(){
+        return visitService.deleteAllCancelledVisits()
+                .then(Mono.just(new ResponseEntity<Void>(HttpStatus.NO_CONTENT)));
+    }
 
 
 //    @GetMapping("/pets/{petId}")

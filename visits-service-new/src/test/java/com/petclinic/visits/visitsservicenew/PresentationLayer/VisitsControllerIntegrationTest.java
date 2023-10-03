@@ -1,10 +1,12 @@
 package com.petclinic.visits.visitsservicenew.PresentationLayer;
+import com.petclinic.visits.visitsservicenew.BusinessLayer.VisitService;
 import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -17,6 +19,7 @@ import reactor.test.StepVerifier;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
@@ -37,10 +40,15 @@ class VisitsControllerIntegrationTest {
     private VisitRepo visitRepo;
 
     @MockBean
+    private VisitService visitService;
+
+
+    @MockBean
     private VetsClient vetsClient;
 
     @MockBean
     private PetsClient petsClient;
+
 
     String uuidVisit1 = UUID.randomUUID().toString();
     String uuidVisit2 = UUID.randomUUID().toString();
@@ -76,8 +84,11 @@ class VisitsControllerIntegrationTest {
             .ownerId(uuidOwner)
             .build();
 
+
     Visit visit1 = buildVisit(uuidVisit1,"this is a dummy description",vet.getVetId());
     Visit visit2 = buildVisit(uuidVisit2,"this is a dummy description",vet.getVetId());
+
+
     private final VisitResponseDTO visitResponseDTO = buildVisitResponseDto(visit1.getVisitId(),vet.getVetId());
     private final VisitRequestDTO visitRequestDTO = buildVisitRequestDto(vet.getVetId());
 
@@ -109,6 +120,7 @@ class VisitsControllerIntegrationTest {
                 .expectBodyList(VisitResponseDTO.class)
                 .value((list)-> assertEquals(list.size(), dbSize));
     }
+
     @Test
     void getVisitByVisitId(){
         webTestClient
@@ -198,31 +210,6 @@ class VisitsControllerIntegrationTest {
                 });
     }
 
-    /*
-    @Test
-    void getVisitsByPractitionerIdAndMonth(){
-        client
-                .get()
-                .uri("/visits/practitioner/"+PRAC_ID + "/" + MONTH)
-                .accept(MediaType.TEXT_EVENT_STREAM)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE + ";charset=UTF-8")
-                .expectBodyList(VisitResponseDTO.class)
-                .value((list)->{
-                    assertNotNull(list);
-                    assertEquals(dbSize, list.size());
-                    assertEquals(list.get(0).getVisitId(), visit.getVisitId());
-                    assertEquals(list.get(0).getPractitionerId(), visit.getPractitionerId());
-                    assertEquals(list.get(0).getPetId(), visit.getPetId());
-                    assertEquals(list.get(0).getDescription(), visit.getDescription());
-                    assertEquals(list.get(0).getDay(), visit.getDay());
-                    assertEquals(list.get(0).getYear(), visit.getYear());
-                    assertEquals(list.get(0).getMonth(), visit.getMonth());
-                    assertEquals(list.get(0).isStatus(), visit.isStatus());
-                });
-    }
-     */
 
     @Test
     void addVisit(){
@@ -246,6 +233,8 @@ class VisitsControllerIntegrationTest {
                 });
     }
 
+
+
     @Test
     void updateStatusForVisitByVisitId(){
         String status = "CANCELLED";
@@ -263,15 +252,6 @@ class VisitsControllerIntegrationTest {
                 .jsonPath("$.status").isEqualTo("CANCELLED");
     }
 
-    @Test
-    void deleteVisit(){
-        webTestClient
-                .delete()
-                .uri("/visits/"+visit1.getVisitId())
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNoContent();
-    }
     @Test
     void updateVisit(){
         when(petsClient.getPetById(anyString())).thenReturn(Mono.just(petResponseDTO));
@@ -291,8 +271,56 @@ class VisitsControllerIntegrationTest {
                 .jsonPath("$.petId").isEqualTo(visit1.getPetId())
                 .jsonPath("$.description").isEqualTo(visit1.getDescription())
                 .jsonPath("$.visitDate").isEqualTo("2024-11-25 13:45")
-                .jsonPath("$.status").isEqualTo("REQUESTED");
+                .jsonPath("$.status").isEqualTo("UPCOMING");
     }
+
+    @Test
+    void deleteVisit(){
+        // Arrange
+        String visitId = UUID.randomUUID().toString();
+        when(visitService.deleteVisit(visitId)).thenReturn(Mono.empty());
+
+        // Act & Assert
+        webTestClient
+                .delete()
+                .uri("/visits/{visitId}", visitId)
+                .exchange()
+                .expectStatus().isNoContent();
+    }
+
+    @Test
+    void deleteAllCancelledVisits_shouldSucceed() {
+        // Arrange
+        Mockito.when(visitService.deleteAllCancelledVisits()).thenReturn(Mono.empty());
+
+        // Act & Assert
+        webTestClient
+                .delete()
+                .uri("/visits/cancelled")
+                .exchange()
+                .expectStatus().isNoContent();
+
+        Mockito.verify(visitService, times(1)).deleteAllCancelledVisits();
+    }
+
+
+    @Test
+    void deleteAllCancelledVisits_shouldThrowRuntimeException() {
+        // Arrange
+        Mockito.when(visitService.deleteAllCancelledVisits())
+                .thenReturn(Mono.error(new RuntimeException("Failed to delete cancelled visits")));
+
+        // Act & Assert
+        webTestClient
+                .delete()
+                .uri("/visits/cancelled")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().is5xxServerError()  // Simulating a failure, expecting a server error status.
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Failed to delete cancelled visits");
+    }
+
 
     private Visit buildVisit(String uuid,String description, String vetId){
         return Visit.builder()
@@ -313,7 +341,7 @@ class VisitsControllerIntegrationTest {
                 .description("this is a dummy description")
                 .petId("2")
                 .practitionerId(vetId)
-                .status(Status.REQUESTED)
+                .status(Status.UPCOMING)
                 .build();
     }
     private VisitRequestDTO buildVisitRequestDto(String vetId){
@@ -322,7 +350,7 @@ class VisitsControllerIntegrationTest {
                 .description("this is a dummy description")
                 .petId("2")
                 .practitionerId(vetId)
-                .status(Status.REQUESTED)
+                .status(Status.UPCOMING)
                 .build();
     }
 }

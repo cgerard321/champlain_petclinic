@@ -2216,7 +2216,7 @@ class ApiGatewayControllerTest {
         when(visitsServiceClient.deleteVisitByVisitId(VISIT_ID)).thenReturn(Mono.empty());
         client.delete()
                 .uri("/api/gateway/visits/" + VISIT_ID)
-                .accept(APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNoContent();
 
@@ -2233,12 +2233,43 @@ class ApiGatewayControllerTest {
 
         client.delete()
                 .uri("/api/gateway/visits/" + invalidId)
-                .accept(APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNotFound(); // Expecting a 404 status code
 
         Mockito.verify(visitsServiceClient, times(1))
                 .deleteVisitByVisitId(invalidId);
+    }
+
+    @Test
+    void deleteAllCancelledVisits_shouldSucceed(){
+
+        when(visitsServiceClient.deleteAllCancelledVisits()).thenReturn(Mono.empty());
+
+        client.delete()
+                .uri("/api/gateway/visits/cancelled")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent();
+        Mockito.verify(visitsServiceClient, times(1))
+                .deleteAllCancelledVisits();
+
+    }
+
+    @Test
+    void deleteAllCancelledVisits_shouldThrowRuntimeException(){
+
+        when(visitsServiceClient.deleteAllCancelledVisits())
+                .thenReturn(Mono.error(new RuntimeException("Failed to delete cancelled visits")));
+
+        client.delete()
+                .uri("/api/gateway/visits/cancelled")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().is5xxServerError();
+
+        Mockito.verify(visitsServiceClient, times(1)).deleteAllCancelledVisits();
+
     }
 
     private VisitResponseDTO buildVisitResponseDTO(){

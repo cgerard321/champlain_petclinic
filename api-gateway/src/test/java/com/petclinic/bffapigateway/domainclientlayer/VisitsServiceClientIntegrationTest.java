@@ -76,7 +76,8 @@ class VisitsServiceClientIntegrationTest {
 
     @Test
     void getVisitsForStatus() throws JsonProcessingException{
-        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee", LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", Status.REQUESTED);        server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee", LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", Status.UPCOMING);
+        server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setBody(objectMapper.writeValueAsString(visitResponseDTO)).addHeader("Content-Type", "application/json"));
 
         Flux<VisitResponseDTO> visitResponseDTOFlux = visitsServiceClient.getVisitsForStatus(STATUS);
@@ -102,7 +103,7 @@ class VisitsServiceClientIntegrationTest {
                 "Test Visit",
                 "1",
                 "2",
-                Status.REQUESTED
+                Status.UPCOMING
         );
         server.enqueue(new MockResponse()
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -204,7 +205,7 @@ class VisitsServiceClientIntegrationTest {
                 .practitionerId(2)
                 .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("Cat is crazy")
-                .status(Status.REQUESTED)
+                .status(Status.UPCOMING)
                 .build();
         final VisitDetails visit2 = VisitDetails.builder()
                 .visitId(UUID.randomUUID().toString())
@@ -212,7 +213,7 @@ class VisitsServiceClientIntegrationTest {
                 .practitionerId(22)
                 .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("Dog is sick")
-                .status(Status.REQUESTED)
+                .status(Status.UPCOMING)
                 .build();
 
 //        final String body = objectMapper.writeValueAsString(objectMapper.convertValue(visit, VisitDetails.class));
@@ -392,7 +393,8 @@ class VisitsServiceClientIntegrationTest {
 
     @Test
     void getVisitById() throws Exception {
-        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee", LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", Status.REQUESTED);        server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee", LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", Status.UPCOMING);
+        server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setBody(objectMapper.writeValueAsString(visitResponseDTO)).addHeader("Content-Type", "application/json"));
 
         Mono<VisitResponseDTO> visitResponseDTOMono = visitsServiceClient.getVisitByVisitId("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee");
@@ -400,4 +402,18 @@ class VisitsServiceClientIntegrationTest {
                 .expectNextMatches(returnedVisitResponseDTO1 -> returnedVisitResponseDTO1.getVisitId().equals("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee"))
                 .verifyComplete();
     }
+
+    @Test
+    void deleteAllCancelledVisits_shouldSucceed() {
+        server.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setResponseCode(204));
+
+        Mono<Void> result = visitsServiceClient.deleteAllCancelledVisits();
+
+        StepVerifier.create(result)
+                .verifyComplete();
+    }
+
+
 }

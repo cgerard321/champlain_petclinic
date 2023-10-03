@@ -22,6 +22,14 @@ angular.module('visitList')
             }
         }
 
+        function delayedReload() {
+            var loadingIndicator = document.getElementById('loadingIndicator');
+            loadingIndicator.style.display = 'block';
+            setTimeout(function() {
+                location.reload();
+            }, 1000); //delay by 1 second
+        }
+
         $scope.cancelVisit = function (visitId, status){
             console.log("Called Function")
             console.log(status)
@@ -30,8 +38,6 @@ angular.module('visitList')
                 status = "CANCELLED"
             }else if(status === "CONFIRMED"){
                 status = "CONFIRMED"
-            }else if(status === "IN_PROGRESS"){
-                status = "IN_PROGRESS"
             }else if(status === "COMPLETED"){
                 status = "COMPLETED"
             }else{
@@ -59,6 +65,7 @@ angular.module('visitList')
             }
         }
 
+
         $scope.deleteVisit = function (visitId) {
             let varIsConf = confirm('You are about to delete visit ' + visitId + '. Is this what you want to do ? ');
             if (varIsConf) {
@@ -78,15 +85,28 @@ angular.module('visitList')
                     console.log(error, 'Could not receive data');
                 }
             }
+        };
 
-            function delayedReload() {
-                var loadingIndicator = document.getElementById('loadingIndicator');
-                loadingIndicator.style.display = 'block';
-                setTimeout(function() {
-                    location.reload();
-                }, 1000); //delay by 1 second
+        $scope.deleteAllCancelledVisits = function () {
+            let varIsConf = confirm('You are about to delete all canceled visits. Is this what you want to do ? ');
+            if (varIsConf) {
+                $http.delete('api/gateway/visits/cancelled')
+                    .then(successCallback, errorCallback);
+
+                function successCallback(response) {
+                    $scope.errors = [];
+                    alert("All canceled visits were deleted successfully");
+                    console.log(response, 'res');
+                    delayedReload();
+                }
+
+                function errorCallback(error) {
+                    alert(data.errors);
+                    console.log(error, 'Could not receive data');
+                }
             }
         };
+
     }]);
 
 //     // self.sortFetchedVisits = function() {

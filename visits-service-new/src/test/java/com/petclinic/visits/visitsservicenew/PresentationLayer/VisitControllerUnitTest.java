@@ -246,6 +246,38 @@ class VisitControllerUnitTest {
                 .jsonPath("$.message", "No visit was found with visitId: " + invalidVisitId);
     }
 
+    @Test
+    void deleteAllCancelledVisits_shouldSucceed(){
+        // Arrange
+        Mockito.when(visitService.deleteAllCancelledVisits()).thenReturn(Mono.empty());
+
+        // Act & Assert
+       webTestClient
+               .delete()
+               .uri("/visits/cancelled")
+               .exchange()
+               .expectStatus().isNoContent();
+
+       Mockito.verify(visitService, times(1)).deleteAllCancelledVisits();
+    }
+
+    @Test
+    void deleteAllCancelledVisits_shouldThrowRuntimeException() {
+        // Arrange
+        Mockito.when(visitService.deleteAllCancelledVisits())
+                .thenReturn(Mono.error(new RuntimeException("Failed to delete cancelled visits")));
+
+        // Act & Assert
+        webTestClient
+                .delete()
+                .uri("/visits/cancelled")
+                .exchange()
+                .expectStatus().is5xxServerError();  // Expecting a 5xx Server Error status.
+
+        Mockito.verify(visitService, times(1)).deleteAllCancelledVisits();
+    }
+
+
     private Visit buildVisit(String uuid,String description, String vetId){
         return Visit.builder()
                 .visitId(uuid)
