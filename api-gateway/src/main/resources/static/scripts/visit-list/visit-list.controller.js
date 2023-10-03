@@ -5,8 +5,18 @@ angular.module('visitList')
         // Lists holding visits for the tables to display
         self.upcomingVisits = []
         self.previousVisits = []
+        // isAdmin: () =>  $window.localStorage.getItem("roles") != null && !!$window.localStorage.getItem("roles").includes("ADMIN")
+        var url = ""
+        if ($window.localStorage.getItem("roles")!=null){
+            if ($window.localStorage.getItem("roles").includes("ADMIN")||$window.localStorage.getItem("roles").includes("VET")){ url = "api/gateway/visits"}
+            //todo get implemented once vet signup completed
 
-        let eventSource = new EventSource("api/gateway/visits")
+            // if ($window.localStorage.getItem("roles").includes("VET")) url = "api/gateway/visits"
+            else if ($window.localStorage.getItem("roles").includes("OWNER")) {url = "api/gateway/visits/owner/"+$window.localStorage.getItem("ownerId")}
+
+        }
+
+        let eventSource = new EventSource(url)
         eventSource.addEventListener('message', function (event){
             $scope.$apply(function(){
                 console.log(event.data)
