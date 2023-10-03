@@ -13,6 +13,6 @@ public class Inventory {
     private String id;
     private String inventoryId;
     private String inventoryName;
-    private InventoryType inventoryType;
+    private String inventoryType;
     private String inventoryDescription;
 }

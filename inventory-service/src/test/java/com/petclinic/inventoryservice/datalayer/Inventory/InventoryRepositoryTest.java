@@ -21,7 +21,7 @@ class InventoryRepositoryTest {
     @Test
     public void shouldSaveSingleInventory(){
         //arrange
-        Inventory newInventory = buildInventory("inventoryId_3", "inventoryType_3", InventoryType.internal, "inventoryDescription_3");
+        Inventory newInventory = buildInventory("inventoryId_3", "inventoryType_3", "Internal", "inventoryDescription_3");
         Publisher<Inventory> setup = inventoryRepository.save(newInventory);
         //act and assert
         StepVerifier
@@ -35,7 +35,7 @@ class InventoryRepositoryTest {
     @Test public void findInventoryByInventoryID_shouldFindOne(){
 
 
-        Inventory newInventory = buildInventory("inventoryId_3", "internal", InventoryType.internal ,"inventoryDescription_3");
+        Inventory newInventory = buildInventory("inventoryId_3", "internal", "Internal" ,"inventoryDescription_3");
 
         StepVerifier
                 .create(inventoryRepository.findInventoryByInventoryId(newInventory.getInventoryId()))
@@ -49,7 +49,7 @@ class InventoryRepositoryTest {
     @Test
     public void shouldDeleteInventory() {
         // Arrange
-        Inventory inventoryToBeDeleted = buildInventory("inventoryId_4", "inventoryType_4", InventoryType.internal ,"inventoryDescription_4");
+        Inventory inventoryToBeDeleted = buildInventory("inventoryId_4", "inventoryType_4", "Internal" ,"inventoryDescription_4");
         inventoryRepository.save(inventoryToBeDeleted).block();
 
         // Act
@@ -65,13 +65,13 @@ class InventoryRepositoryTest {
     @Test
     public void shouldFindInventoryByNameTypeAndDescription() {
         // Arrange
-        Inventory inventory = buildInventory("inventoryId_1", "SampleName", InventoryType.internal, "SampleDescription");
+        Inventory inventory = buildInventory("inventoryId_1", "SampleName", "Internal", "SampleDescription");
         inventoryRepository.save(inventory).block();
 
         // Act & Assert
         StepVerifier
                 .create(inventoryRepository.findAllByInventoryNameAndInventoryTypeAndInventoryDescription(
-                        "SampleName", InventoryType.internal.toString(), "SampleDescription"))
+                        "SampleName", "Internal", "SampleDescription"))
                 .expectNextMatches(result -> result.getInventoryId().equals("inventoryId_1"))
                 .verifyComplete();
     }
@@ -79,12 +79,12 @@ class InventoryRepositoryTest {
     @Test
     public void shouldFindInventoryByTypeAndDescription() {
         // Arrange
-        Inventory inventory = buildInventory("inventoryId_2", "OtherName", InventoryType.internal, "SampleDescription");
+        Inventory inventory = buildInventory("inventoryId_2", "OtherName", "Internal", "SampleDescription");
         inventoryRepository.save(inventory).block();
 
         // Act & Assert
         StepVerifier
-                .create(inventoryRepository.findAllByInventoryTypeAndInventoryDescription(InventoryType.internal.toString(), "SampleDescription"))
+                .create(inventoryRepository.findAllByInventoryTypeAndInventoryDescription("Internal", "SampleDescription"))
                 .expectNextMatches(result -> result.getInventoryId().equals("inventoryId_2"))
                 .verifyComplete();
     }
@@ -92,7 +92,7 @@ class InventoryRepositoryTest {
     @Test
     public void shouldFindInventoryByName() {
         // Arrange
-        Inventory inventory = buildInventory("inventoryId_3", "SampleName", InventoryType.internal, "OtherDescription");
+        Inventory inventory = buildInventory("inventoryId_3", "SampleName", "Internal", "OtherDescription");
         inventoryRepository.save(inventory).block();
 
         // Act & Assert
@@ -104,7 +104,7 @@ class InventoryRepositoryTest {
 
 
 
-    private Inventory buildInventory(String inventoryId, String inventoryName, InventoryType inventoryType, String inventoryDescription) {
+    private Inventory buildInventory(String inventoryId, String inventoryName, String inventoryType, String inventoryDescription) {
         return Inventory.builder()
                 .inventoryName(inventoryName)
                 .inventoryId(inventoryId)
