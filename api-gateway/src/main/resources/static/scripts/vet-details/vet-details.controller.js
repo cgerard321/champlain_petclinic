@@ -153,7 +153,7 @@ angular.module('vetDetails')
         };
 
         //photo
-        $http.get('api/gateway/vets/photo/' + $stateParams.vetId).then(function (resp) {
+        $http.get('api/gateway/vets/' + $stateParams.vetId+"/photo").then(function (resp) {
             self.vetPhoto = resp.data;
         });
 //photo
