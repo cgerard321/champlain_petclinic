@@ -184,7 +184,7 @@ public class InventoryServiceClient {
     }
     public Mono<InventoryTypeResponseDTO> addInventoryType(InventoryTypeRequestDTO inventoryTypeRequestDTO){
         return webClient.post()
-                .uri(inventoryServiceUrl + "/inventoryType")
+                .uri(inventoryServiceUrl + "/type")
                 .body(Mono.just(inventoryTypeRequestDTO),InventoryTypeRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve().bodyToMono(InventoryTypeResponseDTO.class);

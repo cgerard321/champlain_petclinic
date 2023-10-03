@@ -698,7 +698,7 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @PostMapping(value = "inventory/inventoryType")
+    @PostMapping(value = "inventory/type")
     public Mono<ResponseEntity<InventoryTypeResponseDTO>> addInventoryType(@RequestBody InventoryTypeRequestDTO inventoryTypeRequestDTO){
         return inventoryServiceClient.addInventoryType(inventoryTypeRequestDTO)
                 .map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))

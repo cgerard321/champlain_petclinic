@@ -21,8 +21,7 @@ angular.module('inventoryForm')
                         inventoryType: $scope.selectedOption,
                         inventoryDescription: self.inventory.inventoryDescription
                     }
-                    console.log($scope.selectedOption)
-                    $http.post("api/gateway/inventory/inventoryType", {"type":$scope.selectedOption})
+                    $http.post("api/gateway/inventory/type", {"type":$scope.selectedOption})
                         .then(function (resp) {
                             $http.post("api/gateway/inventory", data)
                                 .then(function (resp) {
