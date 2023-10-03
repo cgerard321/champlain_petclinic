@@ -94,7 +94,6 @@ class BillServiceClientIntegrationTest {
             .visitType("Check up")
             .date(null)
             .billStatus(BillStatus.OVERDUE)
-
             .build();
 
     @Test
@@ -256,6 +255,75 @@ class BillServiceClientIntegrationTest {
                     assertEquals(3, returnedBillList.size());
                     assertTrue(returnedBillList.stream().anyMatch(bill -> "1".equals(bill.getBillId())));
                     assertTrue(returnedBillList.stream().anyMatch(bill -> "2".equals(bill.getBillId())));
+                    assertTrue(returnedBillList.stream().anyMatch(bill -> "3".equals(bill.getBillId())));
+                    return true;
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void getAllPaidBills() throws JsonProcessingException {
+        // Prepare a list of bill responses as if they were returned from the service
+        List<BillResponseDTO> billResponseList = Arrays.asList(
+                billResponseDTO
+        );
+
+        final String body = mapper.writeValueAsString(billResponseList);
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(body));
+
+        Flux<BillResponseDTO> billResponseFlux = billServiceClient.getAllPaidBilling();
+
+        StepVerifier.create(billResponseFlux.collectList())
+                .expectNextMatches(returnedBillList -> {
+                    assertEquals(1, returnedBillList.size());
+                    assertTrue(returnedBillList.stream().anyMatch(bill -> "1".equals(bill.getBillId())));
+
+                    return true;
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void getAllUnpaidBills() throws JsonProcessingException {
+        List<BillResponseDTO> billResponseList = Arrays.asList(
+                billResponseDTO2
+        );
+
+        final String body = mapper.writeValueAsString(billResponseList);
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(body));
+
+        Flux<BillResponseDTO> billResponseFlux = billServiceClient.getAllUnpaidBilling();
+
+        StepVerifier.create(billResponseFlux.collectList())
+                .expectNextMatches(returnedBillList -> {
+                    assertEquals(1, returnedBillList.size());
+                    assertTrue(returnedBillList.stream().anyMatch(bill -> "2".equals(bill.getBillId())));
+
+                    return true;
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void getAllOverdueBills() throws JsonProcessingException {
+        List<BillResponseDTO> billResponseList = Arrays.asList(billResponseDTO3);
+        final String body = mapper.writeValueAsString(billResponseList);
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(body));
+
+        Flux<BillResponseDTO> billResponseFlux = billServiceClient.getAllOverdueBilling();
+
+        StepVerifier.create(billResponseFlux.collectList())
+                .expectNextMatches(returnedBillList -> {
+                    assertEquals(1, returnedBillList.size());
                     assertTrue(returnedBillList.stream().anyMatch(bill -> "3".equals(bill.getBillId())));
                     return true;
                 })
