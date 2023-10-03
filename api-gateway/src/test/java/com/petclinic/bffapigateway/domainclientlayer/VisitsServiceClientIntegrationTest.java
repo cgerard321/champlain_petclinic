@@ -407,13 +407,12 @@ class VisitsServiceClientIntegrationTest {
     void deleteAllCancelledVisits_shouldSucceed() {
         server.enqueue(new MockResponse()
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .setResponseCode(204));
+                .setResponseCode(204)); //no content
 
         Mono<Void> result = visitsServiceClient.deleteAllCancelledVisits();
 
         StepVerifier.create(result)
                 .verifyComplete();
     }
-
 
 }

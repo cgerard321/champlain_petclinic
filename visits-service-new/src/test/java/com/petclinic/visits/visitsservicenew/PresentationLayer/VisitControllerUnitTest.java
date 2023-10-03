@@ -272,7 +272,7 @@ class VisitControllerUnitTest {
                 .delete()
                 .uri("/visits/cancelled")
                 .exchange()
-                .expectStatus().is5xxServerError();  // Expecting a 5xx Server Error status.
+                .expectStatus().is5xxServerError();
 
         Mockito.verify(visitService, times(1)).deleteAllCancelledVisits();
     }

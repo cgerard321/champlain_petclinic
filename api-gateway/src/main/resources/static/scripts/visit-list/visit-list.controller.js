@@ -27,7 +27,7 @@ angular.module('visitList')
             loadingIndicator.style.display = 'block';
             setTimeout(function() {
                 location.reload();
-            }, 1000); //delay by 1 second
+            }, 500); //delay by 1 second
         }
 
         $scope.cancelVisit = function (visitId, status){

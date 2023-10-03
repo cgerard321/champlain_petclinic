@@ -279,7 +279,7 @@ class VisitServiceImplTest {
         List<Visit> cancelledVisits = new ArrayList<>();
         cancelledVisits.add(buildVisit(uuidVisit1, "Cat is sick", vet.getVetId()));
         cancelledVisits.add(buildVisit(uuidVisit2, "Cat is sick", vet.getVetId()));
-        cancelledVisits.forEach(visit -> visit.setStatus(Status.CANCELLED)); //set visit statuses to cancelled
+        cancelledVisits.forEach(visit -> visit.setStatus(Status.CANCELLED)); //set statuses to CANCELLED
 
         Mockito.when(visitRepo.findAllByStatus("CANCELLED")).thenReturn(Flux.fromIterable(cancelledVisits));
         Mockito.when(visitRepo.deleteAll(cancelledVisits)).thenReturn(Mono.empty());
@@ -298,11 +298,10 @@ class VisitServiceImplTest {
     @Test
     void deleteAllCanceledVisits_shouldThrowRuntimeException() {
         // Arrange
-
         List<Visit> cancelledVisits = new ArrayList<>();
         cancelledVisits.add(buildVisit(uuidVisit1, "Cat is sick", vet.getVetId()));
         cancelledVisits.add(buildVisit(uuidVisit2, "Cat is sick", vet.getVetId()));
-        cancelledVisits.forEach(visit -> visit.setStatus(Status.CANCELLED)); //set visit statuses to cancelled
+        cancelledVisits.forEach(visit -> visit.setStatus(Status.CANCELLED)); //set statuses to CANCELLED
 
         Mockito.when(visitRepo.findAllByStatus("CANCELLED")).thenReturn(Flux.fromIterable(cancelledVisits));
         Mockito.when(visitRepo.deleteAll(cancelledVisits)).thenReturn(Mono.error(new RuntimeException("Failed to delete visits")));
