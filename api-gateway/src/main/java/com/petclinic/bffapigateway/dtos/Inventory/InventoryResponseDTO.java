@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class InventoryResponseDTO {
     private String inventoryId;
-    private InventoryType inventoryType;
+    private String inventoryType;
    private String  inventoryName;
     private String inventoryDescription;
 }

@@ -1,7 +1,5 @@
 package com.petclinic.visits.visitsservicenew.BusinessLayer;
 
-import com.petclinic.visits.visitsservicenew.DomainClientLayer.PetResponseDTO;
-import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
 import reactor.core.publisher.Flux;

@@ -189,7 +189,11 @@ public class VisitServiceImpl implements VisitService {
             return Mono.error(new BadRequestException("PetId cannot be null or blank"));
         } else if ( dto.getPractitionerId() == null || dto.getPractitionerId().isBlank()) {
             return Mono.error(new BadRequestException("VetId cannot be null or blank"));
-        } else {
+        }
+        else if (dto.getStatus() != Status.REQUESTED){
+            return Mono.error(new BadRequestException("Status is being set wrong!"));
+        }
+        else {
             return Mono.just(dto);
         }
     }

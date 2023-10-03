@@ -10,6 +10,7 @@ import com.petclinic.bffapigateway.exceptions.InventoryNotFoundException;
 import com.petclinic.bffapigateway.exceptions.ProductListNotFoundException;
 import com.petclinic.bffapigateway.utils.Rethrower;
 import org.springframework.beans.factory.annotation.Autowired;
+import com.petclinic.bffapigateway.dtos.Inventory.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -52,6 +53,17 @@ public class InventoryServiceClient {
                 .onStatus(HttpStatusCode::is4xxClientError,
                         resp -> rethrower.rethrow(resp, ex -> new InventoryNotFoundException(ex.get("message").toString(), NOT_FOUND)))
                 .bodyToMono(InventoryResponseDTO.class);
+    }
+
+
+    public Mono<ProductResponseDTO> getProductByProductIdInInventory(final String inventoryId, final String productId) {
+        return webClient.get()
+                .uri(inventoryServiceUrl + "/{inventoryId}/products/{productId}", inventoryId, productId)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        resp -> rethrower.rethrow(resp, ex -> new ProductListNotFoundException(ex.get("message").toString(), NOT_FOUND)))
+                .bodyToMono(ProductResponseDTO.class);
     }
 
     public Mono<ProductResponseDTO> addProductToInventory(final ProductRequestDTO model, final String inventoryId){
@@ -180,6 +192,13 @@ public class InventoryServiceClient {
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToMono(Void.class);
+    }
+    public Mono<InventoryTypeResponseDTO> addInventoryType(InventoryTypeRequestDTO inventoryTypeRequestDTO){
+        return webClient.post()
+                .uri(inventoryServiceUrl + "/type")
+                .body(Mono.just(inventoryTypeRequestDTO),InventoryTypeRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve().bodyToMono(InventoryTypeResponseDTO.class);
     }
 
     public Mono<Void> deleteInventoryByInventoryId(final String inventoryId){

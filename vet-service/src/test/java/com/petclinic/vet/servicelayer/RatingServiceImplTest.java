@@ -3,7 +3,11 @@ package com.petclinic.vet.servicelayer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.vet.dataaccesslayer.*;
-import com.petclinic.vet.exceptions.NotFoundException;
+import com.petclinic.vet.dataaccesslayer.ratings.Rating;
+import com.petclinic.vet.dataaccesslayer.ratings.RatingRepository;
+import com.petclinic.vet.servicelayer.ratings.RatingRequestDTO;
+import com.petclinic.vet.servicelayer.ratings.RatingResponseDTO;
+import com.petclinic.vet.servicelayer.ratings.RatingService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.r2dbc.init.R2dbcScriptDatabaseInitializer;
@@ -20,6 +24,7 @@ import java.util.HashSet;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -49,7 +54,11 @@ class RatingServiceImplTest {
 
     String VET_ID = "vetId";
     Rating rating = buildRating();
+    Rating rating2 = buildRating2();
+    Rating rating3 = buildRating3();
     RatingRequestDTO ratingRequestDTO = buildRatingRequestDTO();
+
+    VetAverageRatingDTO vetAverageRatingDTO1=buildVetAverageRatingDTO();
     @Test
     void getAllRatingsByVetId() {
         when(vetRepository.findVetByVetId(anyString())).thenReturn(Mono.just(existingVet));
@@ -148,6 +157,82 @@ class RatingServiceImplTest {
                 .verifyComplete();
     }
 
+
+    @Test
+    void getTopThreeVetsWithHighestRating() {
+
+        rating.setRateScore(4.0);
+        rating.setVetId("68790");
+        rating2.setRateScore(1.0);
+        rating2.setVetId("68792");
+        rating3.setRateScore(2.0);
+        rating3.setVetId("68793");
+
+        Vet vet1 = Vet.builder()
+                .vetId("vetId")
+                .vetBillId("1")
+                .firstName("Clementine")
+                .lastName("LeBlanc")
+                .email("skjfhf@gmail.com")
+                .phoneNumber("947-238-2847")
+                .resume("Just became a vet")
+                .imageId("kjd")
+                .workday("Monday")
+                .specialties(new HashSet<>())
+                .active(false)
+                .build();
+
+        Vet vet2 = Vet.builder()
+                .vetId("vetId")
+                .vetBillId("1")
+                .firstName("Clementine")
+                .lastName("LeBlanc")
+                .email("skjfhf@gmail.com")
+                .phoneNumber("947-238-2847")
+                .resume("Just became a vet")
+                .imageId("kjd")
+                .workday("Monday")
+                .specialties(new HashSet<>())
+                .active(false)
+                .build();
+        Vet vet3 = Vet.builder()
+                .id("2")
+                .vetId("vetId")
+                .vetBillId("1")
+                .firstName("Clementine")
+                .lastName("LeBlanc")
+                .email("skjfhf@gmail.com")
+                .phoneNumber("947-238-2847")
+                .resume("Just became a vet")
+                .imageId("kjd")
+                .workday("Monday")
+                .specialties(new HashSet<>())
+                .active(false)
+                .build();
+
+
+        when(ratingRepository.countAllByVetId(anyString())).thenReturn(Mono.just(5L));
+        when(vetRepository.findVetByVetId(rating.getVetId())).thenReturn(Mono.just(vet1));
+        when(vetRepository.findVetByVetId(rating2.getVetId())).thenReturn(Mono.just(vet2));
+        when(vetRepository.findVetByVetId(rating3.getVetId())).thenReturn(Mono.just(vet3));
+
+
+
+        when(ratingRepository.findAll()).thenReturn(Flux.just(rating,rating2,rating3));
+
+        when(ratingRepository.findAllByVetId(rating.getVetId())).thenReturn(Flux.just(rating));
+        when(ratingRepository.findAllByVetId(rating2.getVetId())).thenReturn(Flux.just(rating2));
+        when(ratingRepository.findAllByVetId(rating3.getVetId())).thenReturn(Flux.just(rating3));
+
+
+        Flux<VetAverageRatingDTO> averageRatingDTOFlux = ratingService.getTopThreeVetsWithHighestAverageRating();
+
+        StepVerifier
+                .create(averageRatingDTOFlux)
+                .expectNextCount(3)
+                .verifyComplete();
+    }
+
     @Test
     void getRatingPercentagesByVetId() throws JsonProcessingException {
         when(vetRepository.findVetByVetId(anyString())).thenReturn(Mono.just(existingVet));
@@ -188,7 +273,26 @@ class RatingServiceImplTest {
                 .rateDate("16/09/2023")
                 .build();
     }
-
+    private Rating buildRating2() {
+        return Rating.builder()
+                .id("2")
+                .ratingId("ratingId2")
+                .vetId("vetId2")
+                .rateScore(1.0)
+                .rateDescription("Vet is the worst vet in the wooooorld!")
+                .rateDate("10/08/2023")
+                .build();
+    }
+    private Rating buildRating3() {
+        return Rating.builder()
+                .id("3")
+                .ratingId("ratingId3")
+                .vetId("vetId3")
+                .rateScore(2.0)
+                .rateDescription("Vet is the almost worst vet in the wooooorld!")
+                .rateDate("05/18/2023")
+                .build();
+    }
     private RatingRequestDTO buildRatingRequestDTO() {
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
                 .vetId("vetId")
@@ -212,5 +316,11 @@ class RatingServiceImplTest {
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
+    }
+
+    private VetAverageRatingDTO buildVetAverageRatingDTO(){
+        return VetAverageRatingDTO.builder()
+                .averageRating(5.0)
+                .vetId("57385").build();
     }
 }

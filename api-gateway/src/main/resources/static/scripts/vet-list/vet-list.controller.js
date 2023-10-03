@@ -30,6 +30,8 @@ angular.module('vetList')
             child.classList.add("modalOff");
         }
 
+        this.selectedFilter = 'Top Vets'
+
         $scope.vetList = [];
 
         $http.get('api/gateway/vets').then(function (resp) {
@@ -41,6 +43,7 @@ angular.module('vetList')
             angular.forEach($scope.vetList, function(vet) {
                 getCountOfRatings(vet)
                 getAverageRating(vet)
+                getTopThreeVetsWithHighestRating(vet)
             });
         });
 
@@ -53,12 +56,23 @@ angular.module('vetList')
             });
         }
 
+        function getTopThreeVetsWithHighestRating(vet){
+            $http.get('api/gateway/vets/topVets').then(function (resp) {
+                console.log(resp.data);
+                vet.showRating=true;
+                vet.rating = parseFloat(resp.data.toFixed(1));
+
+            });
+
+            }
+
         function getCountOfRatings(vet) {
             $http.get('api/gateway/vets/' + vet.vetId + "/ratings/count").then(function (resp) {
                 console.log(resp.data)
                 vet.count = resp.data;
             });
         }
+
 
         $scope.deleteVet = function (vetId) {
             let varIsConf = confirm('Want to delete vet with vetId:' + vetId + '. Are you sure?');
@@ -93,13 +107,19 @@ angular.module('vetList')
                 url+= '/active';
             } else if (optionSelection === "Inactive") {
                 url+= '/inactive';
-            }
+
+        } else if (optionSelection === "Top Vets") {
+            url+= '/topVets';
+        }
+            self.selectedFilter=optionSelection;
+
             $http.get(url).then(function (resp) {
                 self.vetList = resp.data;
                 arr = resp.data;
                 angular.forEach(self.vetList, function(vet) {
                     getAverageRating(vet)
                     getCountOfRatings(vet)
+                    getTopThreeVetsWithHighestRating(vet)
             });
 
             });

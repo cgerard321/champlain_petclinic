@@ -36,6 +36,7 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;

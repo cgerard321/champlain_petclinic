@@ -1,11 +1,9 @@
 package com.petclinic.inventoryservice.utils;
 
 import com.petclinic.inventoryservice.datalayer.Inventory.Inventory;
+import com.petclinic.inventoryservice.datalayer.Inventory.InventoryType;
 import com.petclinic.inventoryservice.datalayer.Product.Product;
-import com.petclinic.inventoryservice.presentationlayer.InventoryRequestDTO;
-import com.petclinic.inventoryservice.presentationlayer.InventoryResponseDTO;
-import com.petclinic.inventoryservice.presentationlayer.ProductRequestDTO;
-import com.petclinic.inventoryservice.presentationlayer.ProductResponseDTO;
+import com.petclinic.inventoryservice.presentationlayer.*;
 import org.springframework.beans.BeanUtils;
 
 import java.util.Random;
@@ -31,6 +29,16 @@ public class EntityDTOUtil {
         Inventory inventory = new Inventory();
         BeanUtils.copyProperties(inventoryResponseDTO, inventory);
         return inventory;
+    }
+    public static InventoryType toInventoryTypeEntity(InventoryTypeRequestDTO inventoryTypeRequestDTO){
+        InventoryType inventoryType = new InventoryType();
+        BeanUtils.copyProperties(inventoryTypeRequestDTO, inventoryType);
+        return inventoryType;
+    }
+    public static InventoryTypeResponseDTO toInventoryTypeResponseDTO(InventoryType inventoryType){
+        InventoryTypeResponseDTO inventoryTypeResponseDTO = new InventoryTypeResponseDTO();
+        BeanUtils.copyProperties(inventoryType, inventoryTypeResponseDTO);
+        return inventoryTypeResponseDTO;
     }
 
     public static String generateUUID(){

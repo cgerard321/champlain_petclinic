@@ -1,5 +1,6 @@
 package com.petclinic.bffapigateway.presentationlayer;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.config.GlobalExceptionHandler;
 import com.petclinic.bffapigateway.domainclientlayer.*;
@@ -49,6 +50,7 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
+import org.springframework.web.server.ResponseStatusException;
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -125,6 +127,26 @@ class ApiGatewayControllerTest {
                     assertThat(responseDTO.get(0).getVetId()).isEqualTo(ratingResponseDTO.getVetId());
                     assertThat(responseDTO.get(0).getRateScore()).isEqualTo(ratingResponseDTO.getRateScore());
                 });
+    }
+
+    @Test
+    void getTopThreeVetsWithHighestRating(){
+        VetAverageRatingDTO vetAverageRatingDTO = buildVetAverageRatingDTO();
+        when(vetsServiceClient.getTopThreeVetsWithHighestAverageRating())
+                .thenReturn(Flux.just(vetAverageRatingDTO));
+
+        client
+                .get()
+                .uri("/api/gateway/vets/topVets")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+//                .jsonPath("$[0].firstName").isEqualTo(vetAverageRatingDTO.getFirstName())
+//                .jsonPath("$[0].lastName").isEqualTo(vetAverageRatingDTO.getLastName())
+                .jsonPath("$[0].vetId").isEqualTo(vetAverageRatingDTO.getVetId())
+                .jsonPath("$[0].averageRating").isEqualTo(vetAverageRatingDTO.getAverageRating());
     }
     @Test
     void deleteVetRating() {
@@ -1047,9 +1069,9 @@ class ApiGatewayControllerTest {
 
 
 
+    Date date = new Date(20221010);
 
     @Test
-
     void shouldCreatePet(){
 
         OwnerResponseDTO od = new OwnerResponseDTO();
@@ -1058,9 +1080,11 @@ class ApiGatewayControllerTest {
         PetType type = new PetType();
         type.setName("Dog");
         pet.setPetId("30-30-30-30");
+        pet.setOwnerId("ownerId-12345");
         pet.setName("Fluffy");
-        pet.setBirthDate("2000-01-01");
-        pet.setType(type);
+        pet.setBirthDate(date);
+        pet.setPetTypeId("5");
+        pet.setIsActive("true");
 
         when(customersServiceClient.createPet(pet,od.getOwnerId()))
 
@@ -1078,8 +1102,8 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$.petId").isEqualTo(pet.getPetId())
                 .jsonPath("$.name").isEqualTo(pet.getName())
-                .jsonPath("$.birthDate").isEqualTo(pet.getBirthDate())
-                .jsonPath("$.type").isEqualTo(pet.getType());
+                .jsonPath("$.petTypeId").isEqualTo(pet.getPetTypeId())
+                .jsonPath("$.isActive").isEqualTo(pet.getIsActive());
 
     }
 
@@ -1090,10 +1114,13 @@ class ApiGatewayControllerTest {
         PetResponseDTO pet = new PetResponseDTO();
         PetType type = new PetType();
         type.setName("Dog");
-        pet.setPetId("30");
+        pet.setPetId("30-30-30-30");
+        pet.setOwnerId("ownerId-12345");
         pet.setName("Fluffy");
-        pet.setBirthDate("2000-01-01");
-        pet.setType(type);
+        pet.setBirthDate(date);
+        pet.setPetTypeId("5");
+        pet.setIsActive("true");
+
 
         when(customersServiceClient.updatePet(any(PetResponseDTO.class), any(String.class)))
                 .thenReturn(Mono.just(pet));
@@ -1108,8 +1135,9 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$.petId").isEqualTo(pet.getPetId())
                 .jsonPath("$.name").isEqualTo(pet.getName())
-                .jsonPath("$.birthDate").isEqualTo(pet.getBirthDate())
-                .jsonPath("$.type").isEqualTo(pet.getType());
+                .jsonPath("$.petTypeId").isEqualTo(pet.getPetTypeId())
+                .jsonPath("$.isActive").isEqualTo(pet.getIsActive());
+
     }
 
 
@@ -1295,10 +1323,12 @@ class ApiGatewayControllerTest {
         PetResponseDTO pet = new PetResponseDTO();
         PetType type = new PetType();
         type.setName("Dog");
-        pet.setPetId("petId-123");
+        pet.setPetId("30-30-30-30");
+        pet.setOwnerId("ownerId-12345");
         pet.setName("Fluffy");
-        pet.setBirthDate("2000-01-01");
-        pet.setType(type);
+        pet.setBirthDate(date);
+        pet.setPetTypeId("5");
+        pet.setIsActive("true");
 
         when(customersServiceClient.createPet(pet,od.getOwnerId()))
                 .thenReturn(Mono.just(pet));
@@ -1360,10 +1390,14 @@ class ApiGatewayControllerTest {
         PetResponseDTO pet = new PetResponseDTO();
         PetType type = new PetType();
         type.setName("Dog");
-        pet.setPetId("petId-123");
+        pet.setPetId("30-30-30-30");
+        pet.setOwnerId("ownerId-12345");
         pet.setName("Fluffy");
-        pet.setBirthDate("2000-01-01");
-        pet.setType(type);
+
+        pet.setBirthDate(date);
+        pet.setPetTypeId("5");
+        pet.setIsActive("true");
+
 
         when(customersServiceClient.createPet(pet,od.getOwnerId()))
 
@@ -1394,10 +1428,13 @@ class ApiGatewayControllerTest {
         PetResponseDTO pet = new PetResponseDTO();
         PetType type = new PetType();
         type.setName("Dog");
-        pet.setPetId("petId-123");
+        pet.setPetId("30-30-30-30");
+        pet.setOwnerId("ownerId-12345");
         pet.setName("Fluffy");
-        pet.setBirthDate("2000-01-01");
-        pet.setType(type);
+        pet.setBirthDate(date);
+        pet.setPetTypeId("5");
+        pet.setIsActive("true");
+
 
         when(customersServiceClient.createPet(pet,od.getOwnerId()))
                 .thenReturn(Mono.just(pet));
@@ -2189,30 +2226,30 @@ class ApiGatewayControllerTest {
 
 
 
+    @Test
+    @DisplayName("Given valid JWT, verify user with redirection")
+    void verify_user_with_redirection_shouldSucceed(){
+        final String validToken = "some.valid.token";
 
-//    @Test
-//    @DisplayName("Given valid JWT, verify user")
-//    void verify_user() throws JsonProcessingException {
-//
-//        final String validToken = "some.valid.token";
-//        final UserDetails user = UserDetails.builder()
-//                .id(1)
-//                .password(null)
-//                .email("e@mail.com")
-//                .username("user")
-//                .roles(Collections.emptySet())
-//                .build();
-//
-//        when(authServiceClient.verifyUser(validToken))
-//                .thenReturn(Mono.just(user));
-//
-//        client.get()
-//                .uri("/api/gateway/verification/{token}", validToken)
-//                .exchange()
-//                .expectStatus().isOk()
-//                .expectBody()
-//                .json(objectMapper.writeValueAsString(user));
-//    }
+        // Mocking the behavior of authServiceClient.verifyUser to return a successful response
+        UserDetails user = UserDetails.builder()
+                .userId("22222")
+                .email("e@mail.com")
+                .username("user")
+                .roles(Collections.emptySet())
+                .build();
+
+        ResponseEntity<UserDetails> responseEntity = ResponseEntity.ok(user);
+
+        when(authServiceClient.verifyUser(validToken))
+                .thenReturn(Mono.just(responseEntity));
+
+        client.get()
+                .uri("/api/gateway/verification/{token}", validToken)
+                .exchange()
+                .expectStatus().isFound()
+                .expectHeader().valueEquals("Location", "http://localhost:8080/#!/login");
+    }
 
 //    @Test
 //    @DisplayName("Given invalid JWT, expect 400")
@@ -2321,14 +2358,14 @@ private InventoryResponseDTO buildInventoryDTO(){
         return InventoryResponseDTO.builder()
                 .inventoryId("1")
                 .inventoryName("invt1")
-                .inventoryType(internal)
+                .inventoryType("Internal")
                 .inventoryDescription("invtone")
                 .build();
 }
     @Test
     void addInventory_withValidValue_shouldSucceed() {
 
-        InventoryRequestDTO requestDTO = new InventoryRequestDTO("internal", internal, "invt1");
+        InventoryRequestDTO requestDTO = new InventoryRequestDTO("internal", "Internal", "invt1");
 
         InventoryResponseDTO inventoryResponseDTO = buildInventoryDTO();
 
@@ -2345,7 +2382,7 @@ private InventoryResponseDTO buildInventoryDTO(){
                 .expectBody()
                 .jsonPath("$.inventoryId").isEqualTo(inventoryResponseDTO.getInventoryId())
                 .jsonPath("$.inventoryName").isEqualTo(inventoryResponseDTO.getInventoryName())
-                .jsonPath("$.inventoryType").isEqualTo("internal")
+                .jsonPath("$.inventoryType").isEqualTo("Internal")
                 .jsonPath("$.inventoryDescription").isEqualTo("invtone");
 
 
@@ -2357,12 +2394,12 @@ private InventoryResponseDTO buildInventoryDTO(){
 
     @Test
     void updateInventory_withValidValue_shouldSucceed() {
-        InventoryRequestDTO requestDTO = new InventoryRequestDTO("internal", internal, "newDescription");
+        InventoryRequestDTO requestDTO = new InventoryRequestDTO("internal", "Internal", "newDescription");
 
         InventoryResponseDTO expectedResponse = InventoryResponseDTO.builder()
                 .inventoryId("1")
                 .inventoryName("newName")
-                .inventoryType(internal)
+                .inventoryType("Internal")
                 .inventoryDescription("newDescription")
                 .build();
 
@@ -2380,7 +2417,7 @@ private InventoryResponseDTO buildInventoryDTO(){
                 .expectBody()
                 .jsonPath("$.inventoryId").isEqualTo(expectedResponse.getInventoryId())
                 .jsonPath("$.inventoryName").isEqualTo(expectedResponse.getInventoryName())
-                .jsonPath("$.inventoryType").isEqualTo("internal")
+                .jsonPath("$.inventoryType").isEqualTo("Internal")
                 .jsonPath("$.inventoryDescription").isEqualTo(expectedResponse.getInventoryDescription());
 
         verify(inventoryServiceClient, times(1))
@@ -2395,7 +2432,7 @@ private InventoryResponseDTO buildInventoryDTO(){
         InventoryResponseDTO inventoryResponseDTO = InventoryResponseDTO.builder()
                 .inventoryId(validInventoryId)
                 .inventoryName("Pet food")
-                .inventoryType(internal)
+                .inventoryType("Internal")
                 .inventoryDescription("pet")
                 .build();
 
@@ -2652,7 +2689,12 @@ void deleteAllInventory_shouldSucceed() {
                 .rateScore(4.0)
                 .build();
     }
-
+private VetAverageRatingDTO buildVetAverageRatingDTO(){
+        return VetAverageRatingDTO.builder()
+                .vetId("678910")
+                .averageRating(2.0)
+                .build();
+}
     @Test
     void sendForgottenEmail_ShouldSucceed(){
         final UserEmailRequestDTO dto = UserEmailRequestDTO.builder()

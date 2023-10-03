@@ -1,7 +1,6 @@
-package com.petclinic.vet.servicelayer;
+package com.petclinic.vet.servicelayer.education;
 
 
-import com.petclinic.vet.dataaccesslayer.EducationRepository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 

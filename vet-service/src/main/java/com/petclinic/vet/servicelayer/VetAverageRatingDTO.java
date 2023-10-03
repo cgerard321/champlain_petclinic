@@ -9,12 +9,11 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class EducationResponseDTO {
-    private String educationId;
+public class VetAverageRatingDTO {
+
+    private VetDTO vetDTO;
     private String vetId;
-    private String schoolName;
-    private String degree;
-    private String fieldOfStudy;
-    private String startDate;
-    private String endDate;
+    private double averageRating;
+
+
 }

@@ -6,6 +6,7 @@ angular.module('ownerDetails')
 
         $http.get('api/gateway/owners/' + $stateParams.ownerId).then(function (resp) {
             self.owner = resp.data;
+            console.log(self.owner);
 
             var petPromises = self.owner.pets.map(function (pet) {
                 return $http.get('api/gateway/pets/' + pet.petId);

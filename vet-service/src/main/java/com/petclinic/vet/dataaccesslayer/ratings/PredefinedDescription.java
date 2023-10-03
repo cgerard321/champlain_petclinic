@@ -1,4 +1,4 @@
-package com.petclinic.vet.dataaccesslayer;
+package com.petclinic.vet.dataaccesslayer.ratings;
 
 public enum PredefinedDescription {
     POOR,
