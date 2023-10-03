@@ -23,5 +23,7 @@ public interface ProductInventoryService {
 
     Flux<InventoryResponseDTO> searchInventories(String inventoryName, String inventoryType, String inventoryDescription);
 
+    Mono<ProductResponseDTO> getProductByProductIdInInventory(String inventoryId, String productId);
+
 
 }

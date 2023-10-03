@@ -8,7 +8,7 @@ public interface ProductRepository extends ReactiveMongoRepository<Product, Stri
     Mono<Boolean> existsByProductId(String productId);
 
     Mono<Product> findProductByProductId(String productId);
-
+    Mono<Product> findProductByInventoryIdAndProductId(String inventoryId, String productId);
     Mono<Void> deleteByProductId(String productId);
     Flux<Product> findAllProductsByInventoryId(String inventoryId);
     Flux<Product> findAllProductsByInventoryIdAndProductNameAndProductPriceAndProductQuantity(String inventoryId, String productName, Double productPrice, Integer productQuantity);

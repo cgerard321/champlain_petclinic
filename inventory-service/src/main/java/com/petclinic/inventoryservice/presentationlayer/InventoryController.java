@@ -43,6 +43,14 @@ public class InventoryController {
                                                        @RequestParam(required = false) Integer productQuantity){
         return productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(inventoryId, productName, productPrice, productQuantity);
     }
+
+    @GetMapping("/{inventoryId}/products/{productId}")
+    public Mono<ResponseEntity<ProductResponseDTO>>getProductByProductIdInInventory(@PathVariable String inventoryId, @PathVariable String productId){
+        return productInventoryService.getProductByProductIdInInventory(inventoryId,productId)
+                .map(i -> ResponseEntity.status(HttpStatus.OK).body(i))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
 /*
     @GetMapping()
     public Flux<InventoryResponseDTO> getAllInventory(){

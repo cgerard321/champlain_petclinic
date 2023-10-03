@@ -636,6 +636,12 @@ public class BFFApiGatewayController {
     }
 
 
+    @GetMapping(value ="inventory/{inventoryId}/products/{productId}")
+    public Mono<ResponseEntity<ProductResponseDTO>> getProductByProductIdInInventory(@PathVariable String inventoryId, @PathVariable String productId){
+        return inventoryServiceClient.getProductByProductIdInInventory(inventoryId, productId)
+                .map(product ->ResponseEntity.status(HttpStatus.OK).body(product))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 
     @PutMapping(value = "inventory/{inventoryId}")
     public Mono<ResponseEntity<InventoryResponseDTO>> updateInventory( @RequestBody InventoryRequestDTO model, @PathVariable String inventoryId) {
