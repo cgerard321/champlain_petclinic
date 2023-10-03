@@ -343,11 +343,26 @@ public class BFFApiGatewayController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "vets/{vetId}/educations")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<EducationResponseDTO> getEducationsByVetId(@PathVariable String vetId) {
+        return vetsServiceClient.getEducationsByVetId(VetsEntityDtoUtil.verifyId(vetId));
+    }
+
     @DeleteMapping(value = "vets/{vetId}/educations/{educationId}")
     public Mono<ResponseEntity<Void>> deleteEducationByEducationId(@PathVariable String vetId,
                                                    @PathVariable String educationId){
         return vetsServiceClient.deleteEducation(vetId,educationId).then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @PostMapping(value = "vets/{vetId}/educations")
+    public Mono<ResponseEntity<EducationResponseDTO>> addEducationToAVet(@PathVariable String vetId, @RequestBody Mono<EducationRequestDTO> educationRequestDTOMono){
+        return vetsServiceClient.addEducationToAVet(vetId, educationRequestDTOMono)
+                .map(r->ResponseEntity.status(HttpStatus.CREATED).body(r))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
 
@@ -711,11 +726,6 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-    @GetMapping(value = "vets/{vetId}/educations")
-    public Flux<EducationResponseDTO> getEducationsByVetId(@PathVariable String vetId) {
-        return vetsServiceClient.getEducationsByVetId(VetsEntityDtoUtil.verifyId(vetId));
-
-    }
     @DeleteMapping(value = "inventory/{inventoryId}")
     public Mono<Void> deleteInventoryByInventoryId(@PathVariable String inventoryId) {
         return inventoryServiceClient.deleteInventoryByInventoryId(inventoryId);

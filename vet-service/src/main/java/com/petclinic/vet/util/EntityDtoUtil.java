@@ -17,6 +17,7 @@ import com.petclinic.vet.dataaccesslayer.Specialty;
 import com.petclinic.vet.dataaccesslayer.Vet;
 import com.petclinic.vet.exceptions.InvalidInputException;
 import com.petclinic.vet.servicelayer.*;
+import com.petclinic.vet.servicelayer.education.EducationRequestDTO;
 import com.petclinic.vet.servicelayer.education.EducationResponseDTO;
 import com.petclinic.vet.servicelayer.ratings.RatingRequestDTO;
 import com.petclinic.vet.servicelayer.ratings.RatingResponseDTO;
@@ -91,6 +92,12 @@ public class EntityDtoUtil {
         EducationResponseDTO dto = new EducationResponseDTO();
         BeanUtils.copyProperties(education, dto);
         return dto;
+    }
+
+    public static Education toEntity(EducationRequestDTO educationRequestDTO) {
+        Education education = new Education();
+        BeanUtils.copyProperties(educationRequestDTO, education);
+        return education;
     }
 
     public static Rating toEntity(RatingRequestDTO ratingRequestDTO) {

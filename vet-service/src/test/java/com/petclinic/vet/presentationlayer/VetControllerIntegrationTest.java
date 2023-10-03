@@ -1375,6 +1375,37 @@ class VetControllerIntegrationTest {
                 .expectBody();
     }
 
+    @Test
+    void addEducationToAVet_WithValidValues_shouldSucceed(){
+        Publisher<Education> setup = educationRepository.deleteAll()
+                .thenMany(educationRepository.save(education1));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        client.post()
+                .uri("/vets/" + vet.getVetId() + "/educations")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(education2)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(EducationResponseDTO.class)
+                .value(dto -> {
+                    assertNotNull(dto);
+                    assertNotNull(dto.getEducationId());
+                    assertThat(dto.getVetId()).isEqualTo(education2.getVetId());
+                    assertThat(dto.getDegree()).isEqualTo(education2.getDegree());
+                    assertThat(dto.getFieldOfStudy()).isEqualTo(education2.getFieldOfStudy());
+                    assertThat(dto.getSchoolName()).isEqualTo(education2.getSchoolName());
+                    assertThat(dto.getStartDate()).isEqualTo(education2.getStartDate());
+                    assertThat(dto.getEndDate()).isEqualTo(education2.getEndDate());
+                });
+    }
+
     /*@Test
     void getPhotoByVetId() {
         Publisher<Photo> setup = photoRepository.deleteAll()

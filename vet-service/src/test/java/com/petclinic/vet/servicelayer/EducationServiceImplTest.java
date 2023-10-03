@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.vet.dataaccesslayer.education.Education;
 import com.petclinic.vet.dataaccesslayer.education.EducationRepository;
 import com.petclinic.vet.dataaccesslayer.PhotoRepository;
+import com.petclinic.vet.servicelayer.education.EducationRequestDTO;
 import com.petclinic.vet.servicelayer.education.EducationResponseDTO;
 import com.petclinic.vet.servicelayer.education.EducationService;
 import org.junit.jupiter.api.Test;
@@ -70,6 +71,34 @@ class EducationServiceImplTest {
         StepVerifier
                 .create(deletedEducation)
                 .verifyComplete();
+    }
+
+    @Test
+    void addEducationToVet() {
+        EducationRequestDTO educationRequestDTO = buildEducationRequestDTO();
+
+        educationService.addEducationToVet(education.getVetId(), Mono.just(educationRequestDTO))
+                .map(educationResponseDTO -> {
+                    assertEquals(educationResponseDTO.getVetId(), educationRequestDTO.getVetId());
+                    assertEquals(educationResponseDTO.getSchoolName(), educationRequestDTO.getSchoolName());
+                    assertEquals(educationResponseDTO.getDegree(), educationRequestDTO.getDegree());
+                    assertEquals(educationResponseDTO.getFieldOfStudy(), educationRequestDTO.getFieldOfStudy());
+                    assertEquals(educationResponseDTO.getStartDate(), educationRequestDTO.getStartDate());
+                    assertEquals(educationResponseDTO.getEndDate(), educationRequestDTO.getEndDate());
+                    assertNotNull(educationResponseDTO.getEducationId());
+                    return educationResponseDTO;
+                });
+    }
+
+    private EducationRequestDTO buildEducationRequestDTO() {
+        return EducationRequestDTO.builder()
+                .vetId("1")
+                .schoolName("test school")
+                .degree("test degree")
+                .fieldOfStudy("test field")
+                .startDate("test start year")
+                .endDate("test end year")
+                .build();
     }
 
     private Education buildEducation() {

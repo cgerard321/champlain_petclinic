@@ -375,4 +375,27 @@ public class VetsServiceClient {
         return result;
     }
 
+    public Mono<EducationResponseDTO> addEducationToAVet(String vetId, Mono<EducationRequestDTO> educationRequestDTOMono){
+        Mono<EducationResponseDTO> educationResponseDTOMono =
+                webClientBuilder
+                        .build()
+                        .post()
+                        .uri(vetsServiceUrl + "/" + vetId + "/educations")
+                        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .body(educationRequestDTOMono, EducationResponseDTO.class)
+                        .retrieve()
+                        .onStatus(HttpStatusCode::is4xxClientError, error->{
+                            HttpStatusCode statusCode = error.statusCode();
+                            if(statusCode.equals(NOT_FOUND))
+                                return Mono.error(new ExistingVetNotFoundException("vetId not found: "+ vetId, NOT_FOUND));
+                            return Mono.error(new IllegalArgumentException("Something went wrong"));
+                        })
+                        .onStatus(HttpStatusCode::is5xxServerError,error->
+                                Mono.error(new IllegalArgumentException("Something went wrong"))
+                        )
+                        .bodyToMono(EducationResponseDTO.class);
+
+        return educationResponseDTOMono;
+    }
+
 }
