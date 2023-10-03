@@ -3,6 +3,7 @@ package com.petclinic.vet.presentationlayer;
 import com.petclinic.vet.dataaccesslayer.Photo;
 import com.petclinic.vet.dataaccesslayer.Vet;
 import com.petclinic.vet.servicelayer.*;
+import com.petclinic.vet.servicelayer.education.EducationRequestDTO;
 import com.petclinic.vet.servicelayer.education.EducationResponseDTO;
 import com.petclinic.vet.servicelayer.education.EducationService;
 import com.petclinic.vet.servicelayer.ratings.RatingRequestDTO;
@@ -564,6 +565,41 @@ class VetControllerUnitTest {
 
         Mockito.verify(educationService, times(1))
                 .deleteEducationByEducationId(vetId,educationId);
+    }
+
+    @Test
+    void addEducationWithVetId_ValidValues_ShouldSucceed(){
+        EducationRequestDTO educationRequestDTO = EducationRequestDTO.builder()
+                .vetId(VET_ID)
+                .degree("Doctor of Veterinary Medicine")
+                .fieldOfStudy("Veterinary Medicine")
+                .schoolName("University of Montreal")
+                .startDate("2010")
+                .endDate("2014")
+                .build();
+
+        EducationResponseDTO educationResponseDTO = EducationResponseDTO.builder()
+                .educationId("3")
+                .vetId(VET_ID)
+                .degree("Doctor of Veterinary Medicine")
+                .fieldOfStudy("Veterinary Medicine")
+                .schoolName("University of Montreal")
+                .startDate("2010")
+                .endDate("2014")
+                .build();
+
+        when(educationService.addEducationToVet(VET_ID, Mono.just(educationRequestDTO))).thenReturn(Mono.just(educationResponseDTO));
+
+        client.post()
+                .uri("/vets/{vetId}/educations", VET_ID)
+                .bodyValue(educationRequestDTO)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+
+        Mockito.verify(educationService, times(1)).addEducationToVet(anyString(), any(Mono.class));
     }
 
     @Test

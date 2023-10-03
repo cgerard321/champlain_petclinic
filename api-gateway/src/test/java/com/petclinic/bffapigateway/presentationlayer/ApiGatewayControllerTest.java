@@ -465,6 +465,38 @@ class ApiGatewayControllerTest {
     }
 
     @Test
+    void addEducationToAVet() {
+        EducationRequestDTO educationRequestDTO = EducationRequestDTO.builder()
+                .vetId(VET_ID)
+                .degree("Doctor of Veterinary Medicine")
+                .fieldOfStudy("Veterinary Medicine")
+                .schoolName("University of Montreal")
+                .startDate("2010")
+                .endDate("2014")
+                .build();
+        EducationResponseDTO educationResponseDTO = EducationResponseDTO.builder()
+                .educationId("12356789")
+                .vetId(VET_ID)
+                .degree("Doctor of Veterinary Medicine")
+                .fieldOfStudy("Veterinary Medicine")
+                .schoolName("University of Montreal")
+                .startDate("2010")
+                .endDate("2014")
+                .build();
+        when(vetsServiceClient.addEducationToAVet(anyString(), any(Mono.class)))
+                .thenReturn(Mono.just(educationResponseDTO));
+
+        client.post()
+                .uri("/api/gateway/vets/{vetId}/educations", VET_ID)
+                .bodyValue(educationRequestDTO)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+    }
+
+    @Test
     void getAllVets() {
         when(vetsServiceClient.getVets())
                 .thenReturn(Flux.just(vetDTO));

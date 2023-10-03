@@ -2,11 +2,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.bffapigateway.dtos.Vets.PredefinedDescription;
-import com.petclinic.bffapigateway.dtos.Vets.RatingRequestDTO;
-import com.petclinic.bffapigateway.dtos.Vets.RatingResponseDTO;
-import com.petclinic.bffapigateway.dtos.Vets.VetAverageRatingDTO;
-import com.petclinic.bffapigateway.dtos.Vets.VetDTO;
+import com.petclinic.bffapigateway.dtos.Vets.*;
 import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -1301,6 +1297,39 @@ class VetsServiceClientIntegrationTest {
         final Mono<Void> empty = vetsServiceClient.deleteEducation(vetDTO.getVetId(), educationId);
 
         assertEquals(empty.block(), null);
+    }
+
+    @Test
+    void addEducationsToAVet() throws JsonProcessingException {
+        EducationRequestDTO educationRequestDTO = EducationRequestDTO.builder()
+                .vetId("678910")
+                .schoolName("University of Toronto")
+                .degree("Doctor of Veterinary Medicine")
+                .fieldOfStudy("Veterinary Medicine")
+                .startDate("2015")
+                .endDate("2019")
+                .build();
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody("    {\n" +
+                        "    \"educationId\": \"123456\",\n" +
+                        "    \"vetId\": \"678910\",\n" +
+                        "    \"schoolName\": \"University of Toronto\",\n" +
+                        "    \"degree\": \"Doctor of Veterinary Medicine\",\n" +
+                        "    \"fieldOfStudy\": \"Veterinary Medicine\",\n" +
+                        "    \"startDate\": \"2015\",\n" +
+                        "    \"endDate\": \"2019\"\n" +
+                        "    }"));
+
+        final EducationResponseDTO education = vetsServiceClient.addEducationToAVet("678910", Mono.just(educationRequestDTO)).block();
+        assertNotNull(education.getEducationId());
+        assertEquals(educationRequestDTO.getVetId(), education.getVetId());
+        assertEquals(educationRequestDTO.getSchoolName(), education.getSchoolName());
+        assertEquals(educationRequestDTO.getDegree(), education.getDegree());
+        assertEquals(educationRequestDTO.getFieldOfStudy(), education.getFieldOfStudy());
+        assertEquals(educationRequestDTO.getStartDate(), education.getStartDate());
+        assertEquals(educationRequestDTO.getEndDate(), education.getEndDate());
     }
 
     private void prepareResponse(Consumer<MockResponse> consumer) {

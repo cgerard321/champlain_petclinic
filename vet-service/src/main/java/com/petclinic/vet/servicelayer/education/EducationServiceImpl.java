@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.UUID;
+
 @Service
 public class EducationServiceImpl implements EducationService {
 
@@ -30,6 +32,15 @@ public class EducationServiceImpl implements EducationService {
                 .switchIfEmpty(Mono.error(new Exception("Education with id " + educationId + " not found.")))
                     .flatMap(educationRepository::delete);
         }
+
+    @Override
+    public Mono<EducationResponseDTO> addEducationToVet(String vetId, Mono<EducationRequestDTO> educationRequestDTOMono) {
+        return educationRequestDTOMono
+                .map(EntityDtoUtil::toEntity)
+                .doOnNext(r -> r.setEducationId(UUID.randomUUID().toString()))
+                .flatMap(educationRepository::insert)
+                .map(EntityDtoUtil::toDTO);
     }
+}
 
 

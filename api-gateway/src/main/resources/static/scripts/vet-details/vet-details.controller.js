@@ -220,6 +220,41 @@ angular.module('vetDetails')
                 document.getElementById("ratingForm").reset();
             }
         };
+
+        self.submitEducationForm = function (education) {
+            education.vetId = $stateParams.vetId;
+            education.degree = document.getElementById("degree").value;
+            education.schoolName = document.getElementById("schoolName").value;
+            education.fieldOfStudy = document.getElementById("fieldOfStudy").value;
+            education.startDate = document.getElementById("startDate").value;
+            education.endDate = document.getElementById("endDate").value;
+
+            // Send a POST request to add the new education
+            $http.post("api/gateway/vets/" + $stateParams.vetId + "/educations", education)
+                .then(function (resp) {
+                    console.log(resp.data);
+                    self.education = resp.data;
+                    self.addEducationFormVisible = false;
+                    alert('Your education was successfully added!');
+
+                    $http.get('api/gateway/vets/' + $stateParams.vetId + '/educations').then(function (resp) {
+                        console.log(resp.data);
+                        self.educations = resp.data;
+                    });
+                    // clear the form with .reset()
+
+                    document.getElementById("educationForm").reset();
+
+                    // Refresh the education data
+                    $http.get('api/gateway/vets/' + $stateParams.vetId + '/educations').then(function (resp) {
+                        console.log(resp.data);
+                        self.educations = resp.data;
+                    });
+                }, function (error) {
+                    alert('Error adding education: ' + error.data.message);
+                });
+        };
+
         function uuidv4() {
             return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
                 (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
@@ -247,4 +282,23 @@ angular.module('vetDetails')
                     ratingsContainer.innerHTML = html.slice(0, -2);
                 });
         }
+
+        var self = this;
+        self.newEducation = {}; // Initialize newEducation
+
+        self.addEducationFormVisible = false; // Hide the education form initially
+
+        // Function to toggle the visibility of the education form
+        self.addEducation = function () {
+            self.addEducationFormVisible = true;
+        };
+
+        // Function to handle the form submission for adding education
+
+        // Function to cancel adding education and hide the form
+        self.cancelEducationForm = function () {
+            self.newEducation = {}; // Clear form fields
+            self.addEducationFormVisible = false; // Hide the education form
+        };
+
     }]);

@@ -86,4 +86,30 @@ class EducationRepositoryTest {
                 .expectNextCount(0)
                 .verifyComplete();
     }
+
+
+    @Test
+    public void addEducationToAVet_ShouldSucceed(){
+        Education e3 = Education.builder()
+                .educationId("3")
+                .vetId("1")
+                .degree("Doctor of Veterinary Medicine")
+                .fieldOfStudy("Veterinary Medicine")
+                .schoolName("University of Montreal")
+                .startDate("2010")
+                .endDate("2014")
+                .build();
+
+        StepVerifier.create(educationRepository.save(e3))
+                .consumeNextWith(createdEducation -> {
+                    assertEquals(e3.getEducationId(), createdEducation.getEducationId());
+                    assertEquals(e3.getVetId(), createdEducation.getVetId());
+                    assertEquals(e3.getDegree(), createdEducation.getDegree());
+                    assertEquals(e3.getSchoolName(), createdEducation.getSchoolName());
+                    assertEquals(e3.getFieldOfStudy(), createdEducation.getFieldOfStudy());
+                    assertEquals(e3.getStartDate(), createdEducation.getStartDate());
+                    assertEquals(e3.getEndDate(), createdEducation.getEndDate());
+                })
+                .verifyComplete();
+    }
 }
