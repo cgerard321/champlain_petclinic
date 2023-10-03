@@ -7,6 +7,7 @@ import com.petclinic.vet.dataaccesslayer.ratings.PredefinedDescription;
 import com.petclinic.vet.dataaccesslayer.ratings.Rating;
 import com.petclinic.vet.dataaccesslayer.ratings.RatingRepository;
 import com.petclinic.vet.servicelayer.*;
+import com.petclinic.vet.servicelayer.education.EducationRequestDTO;
 import com.petclinic.vet.servicelayer.education.EducationResponseDTO;
 import com.petclinic.vet.servicelayer.ratings.RatingRequestDTO;
 import com.petclinic.vet.servicelayer.ratings.RatingResponseDTO;
@@ -70,6 +71,14 @@ class VetControllerIntegrationTest {
             .vetId("678910")
             .rateDescription("Vet cancelled last minute.")
             .rateDate("20/09/2023")
+            .build();
+    EducationRequestDTO updatedEducation = EducationRequestDTO.builder()
+            .schoolName("McGill")
+            .vetId("678910")
+            .degree("Bachelor of Medicine")
+            .fieldOfStudy("Medicine")
+            .startDate("2010")
+            .endDate("2015")
             .build();
 
     @Test
@@ -1373,6 +1382,39 @@ class VetControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody();
+    }
+    @Test
+    void updateEducation_withValidVetIdAndValidEducationId_shouldSucceed() {
+        Publisher<Education> setup = educationRepository.deleteAll()
+                .thenMany(educationRepository.save(education1));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        String existingEducationId = education1.getEducationId();
+
+        client.put()
+                .uri("/vets/" + VET_ID + "/educations/" + existingEducationId)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedEducation)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(EducationResponseDTO.class)
+                .value(educationResponseDTO -> {
+                    assertNotNull(educationResponseDTO);
+                    assertNotNull(educationResponseDTO.getEducationId());
+                    assertThat(educationResponseDTO.getEducationId()).isEqualTo(existingEducationId);
+                    assertThat(educationResponseDTO.getVetId()).isEqualTo(updatedEducation.getVetId());
+                    assertThat(educationResponseDTO.getSchoolName()).isEqualTo(updatedEducation.getSchoolName());
+                    assertThat(educationResponseDTO.getDegree()).isEqualTo(updatedEducation.getDegree());
+                    assertThat(educationResponseDTO.getFieldOfStudy()).isEqualTo(updatedEducation.getFieldOfStudy());
+                    assertThat(educationResponseDTO.getStartDate()).isEqualTo(updatedEducation.getStartDate());
+                    assertThat(educationResponseDTO.getEndDate()).isEqualTo(updatedEducation.getEndDate());
+                });
     }
 
     @Test

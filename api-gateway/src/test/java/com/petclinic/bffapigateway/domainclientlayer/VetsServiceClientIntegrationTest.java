@@ -827,6 +827,41 @@ class VetsServiceClientIntegrationTest {
 
         assertNull(ratingResponseDTO);
     }
+    @Test
+    void updateEducationByVetIdAndEducationId() throws JsonProcessingException {
+        EducationRequestDTO updatedEducation = EducationRequestDTO.builder()
+                .schoolName("McGill")
+                .vetId("678910")
+                .degree("Bachelor of Medicine")
+                .fieldOfStudy("Medicine")
+                .startDate("2010")
+                .endDate("2015")
+                .build();
+
+         prepareResponse(response -> response
+                        .setHeader("Content-Type", "application/json")
+                 .setHeader("Content-Type", "application/json")
+                 .setBody("    {\n" +
+                         "        \"educationId\": \"123456\",\n" +
+                         "        \"vetId\": \"678910\",\n" +
+                         "        \"schoolName\": \"McGill\",\n" +
+                         "        \"degree\": \"Bachelor of Medicine\",\n" +
+                         "        \"fieldOfStudy\": \"Medicine\",\n" +
+                         "        \"startDate\": \"2010\",\n" +
+                         "        \"endDate\": \"2015\"\n" +
+                         "    }"));
+
+        final EducationResponseDTO educationResponseDTO =
+                vetsServiceClient.updateEducationByVetIdAndByEducationId("678910","123456", Mono.just(updatedEducation)).block();
+        assertNotNull(educationResponseDTO);
+        assertNotNull(educationResponseDTO.getEducationId());
+        assertThat(educationResponseDTO.getVetId()).isEqualTo(updatedEducation.getVetId());
+        assertThat(educationResponseDTO.getSchoolName()).isEqualTo(updatedEducation.getSchoolName());
+        assertThat(educationResponseDTO.getDegree()).isEqualTo(updatedEducation.getDegree());
+        assertThat(educationResponseDTO.getFieldOfStudy()).isEqualTo(updatedEducation.getFieldOfStudy());
+        assertThat(educationResponseDTO.getStartDate()).isEqualTo(updatedEducation.getStartDate());
+        assertThat(educationResponseDTO.getEndDate()).isEqualTo(updatedEducation.getEndDate());
+    }
 
     @Test
     void getPhotoByVetId() throws IOException {

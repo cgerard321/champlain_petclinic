@@ -463,6 +463,51 @@ class ApiGatewayControllerTest {
         Mockito.verify(vetsServiceClient, times(1))
                 .deleteEducation(VET_ID, educationResponseDTO.getEducationId());
     }
+    @Test
+    void updateEducationForVet(){
+        EducationRequestDTO updatedEducation = EducationRequestDTO.builder()
+                .schoolName("McGill")
+                .vetId("678910")
+                .degree("Bachelor of Medicine")
+                .fieldOfStudy("Medicine")
+                .startDate("2010")
+                .endDate("2015")
+                .build();
+
+        EducationResponseDTO educationResponseDTO = EducationResponseDTO.builder()
+                .educationId("12356789")
+                .vetId("678910")
+                .schoolName("McGill")
+                .degree("Bachelor of Medicine")
+                .fieldOfStudy("Medicine")
+                .startDate("2010")
+                .endDate("2015")
+                .build();
+
+        when(vetsServiceClient.updateEducationByVetIdAndByEducationId(anyString(), anyString(), any(Mono.class)))
+                .thenReturn(Mono.just(educationResponseDTO));
+
+        client.put()
+                .uri("/api/gateway/vets/"+VET_ID+"/educations/"+educationResponseDTO.getEducationId())
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedEducation)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(EducationResponseDTO.class)
+                .value(responseDTO -> {
+                    Assertions.assertNotNull(responseDTO);
+                    Assertions.assertNotNull(responseDTO.getEducationId());
+                    assertThat(responseDTO.getEducationId()).isEqualTo(educationResponseDTO.getEducationId());
+                    assertThat(responseDTO.getVetId()).isEqualTo(updatedEducation.getVetId());
+                    assertThat(responseDTO.getSchoolName()).isEqualTo(updatedEducation.getSchoolName());
+                    assertThat(responseDTO.getDegree()).isEqualTo(updatedEducation.getDegree());
+                    assertThat(responseDTO.getFieldOfStudy()).isEqualTo(updatedEducation.getFieldOfStudy());
+                    assertThat(responseDTO.getStartDate()).isEqualTo(updatedEducation.getStartDate());
+                    assertThat(responseDTO.getEndDate()).isEqualTo(updatedEducation.getEndDate());
+                });
+    }
 
     @Test
     void addEducationToAVet() {

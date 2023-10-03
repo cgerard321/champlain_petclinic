@@ -364,6 +364,14 @@ public class BFFApiGatewayController {
                 .map(r->ResponseEntity.status(HttpStatus.CREATED).body(r))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
+    @PutMapping(value="vets/{vetId}/educations/{educationId}")
+    public Mono<ResponseEntity<EducationResponseDTO>> updateEducationByVetIdAndEducationId(@PathVariable String vetId,
+                                                                                           @PathVariable String educationId,
+                                                                                           @RequestBody Mono<EducationRequestDTO> educationRequestDTOMono){
+        return vetsServiceClient.updateEducationByVetIdAndByEducationId(vetId, educationId, educationRequestDTOMono)
+                .map(e->ResponseEntity.status(HttpStatus.OK).body(e))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
 
 
     //Vets
