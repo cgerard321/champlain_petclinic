@@ -315,5 +315,11 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                 .flatMap(inventoryTypeRepository::insert)
                 .map(EntityDTOUtil::toInventoryTypeResponseDTO);
     }
+
+    @Override
+    public Flux<InventoryTypeResponseDTO> getAllInventoryTypes() {
+        return inventoryTypeRepository.findAll()
+                .map(EntityDTOUtil::toInventoryTypeResponseDTO);
+    }
 }
 

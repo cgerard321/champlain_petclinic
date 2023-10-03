@@ -197,6 +197,14 @@ public class InventoryServiceClient {
                 .retrieve().bodyToMono(InventoryTypeResponseDTO.class);
     }
 
+    public Flux<InventoryTypeResponseDTO> getAllInventoryTypes(){
+        return webClient.get()
+                .uri(inventoryServiceUrl + "/type")
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToFlux(InventoryTypeResponseDTO.class);
+    }
+
     public Mono<Void> deleteInventoryByInventoryId(final String inventoryId){
         return webClient.delete()
                 .uri(inventoryServiceUrl + "/{inventoryId}", inventoryId)
