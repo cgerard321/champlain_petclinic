@@ -5,10 +5,7 @@ import com.petclinic.inventoryservice.datalayer.Inventory.InventoryType;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryTypeRepository;
 import com.petclinic.inventoryservice.datalayer.Product.Product;
 import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
-import com.petclinic.inventoryservice.presentationlayer.InventoryRequestDTO;
-import com.petclinic.inventoryservice.presentationlayer.InventoryResponseDTO;
-import com.petclinic.inventoryservice.presentationlayer.ProductRequestDTO;
-import com.petclinic.inventoryservice.presentationlayer.ProductResponseDTO;
+import com.petclinic.inventoryservice.presentationlayer.*;
 import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
 import com.petclinic.inventoryservice.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.Test;
@@ -73,6 +70,7 @@ class ProductInventoryServiceUnitTest {
                 .productPrice(100.00)
                 .productQuantity(10)
                 .build();
+
 
     @Test
     void getAllProductsByInventoryId_andProductName_andProductPrice_andProductQuantity_withValidFields_shouldSucceed(){
@@ -747,6 +745,33 @@ class ProductInventoryServiceUnitTest {
 
         verify(inventoryRepository).findInventoryByInventoryId(invalidInventoryId);
         verify(inventoryRepository, never()).delete(any(Inventory.class));
+    }
+
+    @Test
+    public void addInventoryType_shouldSucceed(){
+        // Arrange
+        InventoryTypeRequestDTO inventoryTypeRequestDTO = InventoryTypeRequestDTO.builder()
+                .type("Internal")
+                .build();
+
+        assertNotNull(inventoryType);
+
+
+        when(inventoryTypeRepository.insert(any(InventoryType.class)))
+                .thenReturn(Mono.just(inventoryType));
+
+
+        Mono<InventoryTypeResponseDTO> inventoryTypeResponseDTO = productInventoryService.addInventoryType(Mono.just(inventoryTypeRequestDTO));
+
+
+        StepVerifier
+                .create(inventoryTypeResponseDTO)
+                .expectNextMatches(foundInventoryType -> {
+                    assertNotNull(foundInventoryType);
+                    assertEquals(inventoryType.getType(), foundInventoryType.getType());
+                    return true;
+                })
+                .verifyComplete();
     }
 
 }

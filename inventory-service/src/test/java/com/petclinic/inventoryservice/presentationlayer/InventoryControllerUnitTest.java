@@ -685,6 +685,39 @@ class InventoryControllerUnitTest {
                 .deleteInventoryByInventoryId(eq(invalidInventoryId));
     }
 
+    @Test
+    public void addInventoryType_shouldSucceed(){
+        InventoryTypeRequestDTO inventoryTypeRequestDTO = InventoryTypeRequestDTO.builder()
+                .type("Internal")
+                .build();
+
+        InventoryTypeResponseDTO inventoryTypeResponseDTO = InventoryTypeResponseDTO.builder()
+                .typeId("ee27f756-4790-447a-8ab9-37ce61ff3ffc")
+                .type("Internal")
+                .build();
+
+        when(productInventoryService.addInventoryType(any()))
+                .thenReturn(Mono.just(inventoryTypeResponseDTO));
+
+        // Act and Assert
+        webTestClient
+                .post()
+                .uri("/inventory/type")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(inventoryTypeRequestDTO)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(InventoryTypeResponseDTO.class)
+                .value(dto -> {
+                    assertNotNull(dto);
+                    assertEquals(inventoryTypeResponseDTO.getType(), dto.getType());
+                });
+
+
+        verify(productInventoryService, times(1))
+                .addInventoryType(any());
+    }
+
 
 
 }

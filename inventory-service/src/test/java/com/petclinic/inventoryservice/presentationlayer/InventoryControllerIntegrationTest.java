@@ -714,6 +714,27 @@ class InventoryControllerIntegrationTest {
                 .expectStatus().isNoContent();
     }
 
+    @Test
+    public void addInventoryType_shouldSucceed(){
+        InventoryTypeRequestDTO inventoryTypeRequestDTO = InventoryTypeRequestDTO.builder()
+                .type("Internal")
+                .build();
+
+        webTestClient
+                .post()
+                .uri("/inventory/type", inventoryType1.getType())
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(inventoryTypeRequestDTO)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(InventoryTypeRequestDTO.class)
+                .value(dto -> {
+                    assertNotNull(dto);
+                    assertEquals(inventoryTypeRequestDTO.getType(), dto.getType());
+                });
+    }
+
     /*
     @Test
     public void deleteInventoryByInventoryId_withNotFoundInventoryId_shouldNotFound() {

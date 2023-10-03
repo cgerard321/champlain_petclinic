@@ -2417,7 +2417,7 @@ private InventoryResponseDTO buildInventoryDTO(){
         InventoryResponseDTO inventoryResponseDTO = InventoryResponseDTO.builder()
                 .inventoryId(validInventoryId)
                 .inventoryName("Pet food")
-                .inventoryType(internal)
+                .inventoryType("Internal")
                 .inventoryDescription("pet")
                 .build();
 
