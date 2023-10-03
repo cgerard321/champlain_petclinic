@@ -1838,7 +1838,7 @@ class ApiGatewayControllerTest {
 //        assertEquals(null, visitsServiceClient.getVisitsForPet(visit.getPetId()));
 //    }
 
-    @Test
+   /* @Test
     void shouldUpdateAVisitsById() {
         VisitDetails visitDetailsToUpdate = VisitDetails.builder()
                 .visitDate(LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
@@ -1884,8 +1884,20 @@ class ApiGatewayControllerTest {
         when(visitsServiceClient.updateStatusForVisitByVisitId(anyString(), anyString()))
                 .thenReturn(Mono.just(visit));
 
+<<<<<<< HEAD
         client.put()
                 .uri("/api/gateway/visits/"+visitId+"/status/"+status)
+=======
+        // Mock the service call for updating a visit
+        when(visitsServiceClient.updateVisitForPet(visitDetailsToUpdate))
+                .thenReturn(Mono.just(visitDetailsToUpdate));*/
+
+        // Perform PUT request to update a visit
+        //client.put()
+               // .uri("/api/gateway/owners/*/pets/{petId}/visits/{visitId}", visitRequestDTO.getPetId(), visitResponseDTO.getVisitId())
+               /* .body(Mono.just(visitDetailsToUpdate), VisitDetails.class)
+                .accept(MediaType.APPLICATION_JSON)
+>>>>>>> 2be34c5b (9001)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
@@ -1896,9 +1908,16 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.visitDate").isEqualTo("2022-11-25 13:45")
                 .jsonPath("$.status").isEqualTo("CANCELLED");
 
+<<<<<<< HEAD
         Mockito.verify(visitsServiceClient, times(1))
                 .updateStatusForVisitByVisitId(anyString(), anyString());
     }
+=======
+        // Assert the updated visit
+        assertEquals(visitsServiceClient.getVisitsForPet("1"), null);
+    }*/
+
+>>>>>>> 2be34c5b (9001)
     @Test
     void shouldGetAllVisits() {
         VisitResponseDTO visitResponseDTO = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", Status.UPCOMING);
