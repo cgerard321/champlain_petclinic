@@ -272,6 +272,15 @@ public class BFFApiGatewayController {
         return visitsServiceClient.deleteVisitByVisitId(visitId).then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
+    @DeleteMapping(value = "visits/cancelled")
+    public Mono<ResponseEntity<Void>> deleteAllCancelledVisits(){
+        return visitsServiceClient.deleteAllCancelledVisits().then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+
+    }
+
+
     /**
      * End of Visit Methods
      **/

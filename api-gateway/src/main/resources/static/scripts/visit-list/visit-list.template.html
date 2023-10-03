@@ -1,29 +1,32 @@
 <style>
-
     .container {
         display: flex;
-        justify-content: space-between;
-        align-items: center;             /* This aligns items vertically */
+        justify-content: flex-end;
+        align-items: center;
         width: 100%;
         margin-bottom: 20px;
     }
 
-    .original-button {
+    .delete-all-button{
         display: flex;
+        justify-content: flex-end;
         align-items: center;
-        justify-content: center;
-        line-height: 1;
-        text-decoration: none;
-        color: #ffffff;
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    
+    .original-button {
+        color: #fff;
+        background-color: #19d256;
+        border-color: #dc3545;
         font-size: 18px;
         border-radius: 5px;
         width: 200px;
         height: 40px;
         font-weight: bold;
-        border-bottom: 4px solid #179e43;
-        transition: 0.3s;
-        box-shadow: 0px 3px 5px 0px rgba(0, 0, 0, 0.4);
-        background-color: #19d256;
+
+
     }
 
     .original-button:hover {
@@ -31,13 +34,17 @@
         border-bottom-width: 2px;
         transform: translateY(2px);
     }
+
 </style>
+
 <div class="container">
-    <h3 style="margin: 0;">Upcoming Visits</h3>
     <a ui-sref="visitsNew">
         <button class="original-button" id="addBtn">Create Visit</button>
     </a>
 </div>
+
+<h3 style="margin: 0;">Upcoming Visits</h3>
+
 <p>Type something in the input field to search throughout the table:</p>
 <input ng-model="search.visitId" placeholder="Filter by VisitID">
 <input ng-model="search.date" placeholder="Filter by Date">
@@ -46,6 +53,11 @@
 <input ng-model="search.petId" placeholder="Filter by PetId">
 <input ng-model="search.status" placeholder="Filter by Status">
 <input ng-model="search.billId" placeholder="Filter by Bill">
+
+<div class="delete-all-button">
+<button class="btn btn-danger" ng-click="deleteAllCancelledVisits()">Delete All Canceled Visits</button>
+</div>
+
 <table class="table">
     <thead>
     <tr>
@@ -103,7 +115,7 @@
         <td class="col-sm-2">{{v.visitId}}</td>
         <td class="col-sm-2">{{visitsCtrl.visit.visitDate}}</td>
         <td style="white-space: pre-line">{{v.description}}</td>
-        <!--        <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>-->
+        <!-- <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>-->
         <td style="white-space: pre-line">{{v.practitionerId}}</td>
         <td style="white-space: pre-line">{{v.petId}}</td>
         <td class="status-text" style="white-space: pre-line">{{v.status}}</td>
