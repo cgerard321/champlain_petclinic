@@ -3,6 +3,7 @@ package com.petclinic.inventoryservice.presentationlayer;
 import com.petclinic.inventoryservice.datalayer.Inventory.Inventory;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryRepository;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryType;
+import com.petclinic.inventoryservice.datalayer.Inventory.InventoryTypeRepository;
 import com.petclinic.inventoryservice.datalayer.Product.Product;
 import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
 import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
@@ -17,8 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.test.StepVerifier;
-
-import static com.petclinic.inventoryservice.datalayer.Inventory.InventoryType.internal;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -32,13 +31,26 @@ class InventoryControllerIntegrationTest {
     InventoryRepository inventoryRepository;
     @Autowired
     ProductRepository productRepository;
+    @Autowired
+    InventoryTypeRepository inventoryTypeRepository;
 
 
     private final Long DB_SIZE = 2L;
 
-    Inventory inventory1 = buildInventory("inventoryId_3", "internal", InventoryType.internal, "inventoryDescription_3");
+    InventoryType inventoryType1 = InventoryType.builder()
+            .id("1")
+            .typeId("d37a9df1-430b-40b8-be55-38730efa52a7")
+            .type("Internal")
+            .build();
+    InventoryType inventoryType2 = InventoryType.builder()
+            .id("1")
+            .typeId("e16b1726-b39a-4a6b-995c-fcfab223ab04")
+            .type("Sales")
+            .build();
 
-    Inventory inventory2 = buildInventory("inventoryId_4", "sales", InventoryType.sales, "inventoryDescription_4");
+    Inventory inventory1 = buildInventory("inventoryId_3", "internal", inventoryType1.getType(),"inventoryDescription_3");
+
+    Inventory inventory2 = buildInventory("inventoryId_4", "sales", inventoryType2.getType() ,"inventoryDescription_4");
 
 
     @BeforeEach
@@ -360,7 +372,7 @@ class InventoryControllerIntegrationTest {
     public void addNewInventoryWithValidValues_shouldSucceed() {
         InventoryRequestDTO inventoryRequestDTO = InventoryRequestDTO.builder()
                 .inventoryName("internal")
-                .inventoryType(internal)
+                .inventoryType(inventoryType1.getType())
                 .inventoryDescription("inventory_3")
                 .build();
 
@@ -417,7 +429,7 @@ class InventoryControllerIntegrationTest {
 
         InventoryRequestDTO inventoryRequestDTO = InventoryRequestDTO.builder()
                 .inventoryName("internal")
-                .inventoryType(internal)
+                .inventoryType(inventoryType1.getType())
                 .inventoryDescription(updatedInventoryDescription)
                 .build();
 
@@ -446,7 +458,7 @@ class InventoryControllerIntegrationTest {
 
         InventoryRequestDTO inventoryRequestDTO = InventoryRequestDTO.builder()
                 .inventoryName("internal")
-                .inventoryType(InventoryType.sales)
+                .inventoryType(inventoryType1.getType())
                 .inventoryDescription("internal_id9")
                 .build();
         webTestClient.put()
@@ -507,8 +519,7 @@ class InventoryControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isNotFound();
     }
-
-    private Inventory buildInventory(String inventoryId, String name, InventoryType inventoryType, String inventoryDescription) {
+    private Inventory buildInventory(String inventoryId, String name, String inventoryType, String inventoryDescription) {
         return Inventory.builder()
                 .inventoryId(inventoryId)
                 .inventoryName(name)
@@ -701,6 +712,27 @@ class InventoryControllerIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNoContent();
+    }
+
+    @Test
+    public void addInventoryType_shouldSucceed(){
+        InventoryTypeRequestDTO inventoryTypeRequestDTO = InventoryTypeRequestDTO.builder()
+                .type("Internal")
+                .build();
+
+        webTestClient
+                .post()
+                .uri("/inventory/type", inventoryType1.getType())
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(inventoryTypeRequestDTO)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(InventoryTypeRequestDTO.class)
+                .value(dto -> {
+                    assertNotNull(dto);
+                    assertEquals(inventoryTypeRequestDTO.getType(), dto.getType());
+                });
     }
 
     /*

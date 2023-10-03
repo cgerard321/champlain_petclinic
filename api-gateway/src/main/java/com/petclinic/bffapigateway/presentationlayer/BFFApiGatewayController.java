@@ -8,10 +8,7 @@ import com.petclinic.bffapigateway.dtos.Auth.UserPasswordLessDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
-import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
-import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
-import com.petclinic.bffapigateway.dtos.Inventory.ProductRequestDTO;
-import com.petclinic.bffapigateway.dtos.Inventory.ProductResponseDTO;
+import com.petclinic.bffapigateway.dtos.Inventory.*;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
@@ -283,7 +280,7 @@ public class BFFApiGatewayController {
     /**
      * Start of Vet Methods
      **/
-  
+
     //Photo
     @GetMapping("vets/{vetId}/photo")
     public Mono<ResponseEntity<Resource>> getPhotoByVetId(@PathVariable String vetId) {
@@ -346,13 +343,6 @@ public class BFFApiGatewayController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-
-
-    @GetMapping(value = "vets/{vetId}/educations")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<EducationResponseDTO> getEducationsByVetId(@PathVariable String vetId) {
-        return vetsServiceClient.getEducationsByVetId(VetsEntityDtoUtil.verifyId(vetId));
-    }
-
     @DeleteMapping(value = "vets/{vetId}/educations/{educationId}")
     public Mono<ResponseEntity<Void>> deleteEducationByEducationId(@PathVariable String vetId,
                                                    @PathVariable String educationId){
@@ -568,7 +558,15 @@ public class BFFApiGatewayController {
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping("/verification/{token}")
     public Mono<ResponseEntity<UserDetails>> verifyUser(@PathVariable final String token) {
-        return authServiceClient.verifyUser(token).map(ResponseEntity::ok).defaultIfEmpty(ResponseEntity.notFound().build());
+        return authServiceClient.verifyUser(token)
+                .map(userDetailsResponseEntity -> {
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.add("Location", "http://localhost:8080/#!/login");
+                    return ResponseEntity.status(HttpStatus.FOUND)
+                            .headers(headers)
+                            .body(userDetailsResponseEntity.getBody());
+                })
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
@@ -638,6 +636,12 @@ public class BFFApiGatewayController {
     }
 
 
+    @GetMapping(value ="inventory/{inventoryId}/products/{productId}")
+    public Mono<ResponseEntity<ProductResponseDTO>> getProductByProductIdInInventory(@PathVariable String inventoryId, @PathVariable String productId){
+        return inventoryServiceClient.getProductByProductIdInInventory(inventoryId, productId)
+                .map(product ->ResponseEntity.status(HttpStatus.OK).body(product))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 
     @PutMapping(value = "inventory/{inventoryId}")
     public Mono<ResponseEntity<InventoryResponseDTO>> updateInventory( @RequestBody InventoryRequestDTO model, @PathVariable String inventoryId) {
@@ -700,9 +704,20 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @PostMapping(value = "inventory/type")
+    public Mono<ResponseEntity<InventoryTypeResponseDTO>> addInventoryType(@RequestBody InventoryTypeRequestDTO inventoryTypeRequestDTO){
+        return inventoryServiceClient.addInventoryType(inventoryTypeRequestDTO)
+                .map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
 
+    @GetMapping(value = "vets/{vetId}/educations")
+    public Flux<EducationResponseDTO> getEducationsByVetId(@PathVariable String vetId) {
+        return vetsServiceClient.getEducationsByVetId(VetsEntityDtoUtil.verifyId(vetId));
+
+    }
     @DeleteMapping(value = "inventory/{inventoryId}")
-    public Mono<Void> deleteInventoryByInventoryId(@PathVariable String inventoryId){
+    public Mono<Void> deleteInventoryByInventoryId(@PathVariable String inventoryId) {
         return inventoryServiceClient.deleteInventoryByInventoryId(inventoryId);
     }
 }

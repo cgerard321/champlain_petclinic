@@ -1,12 +1,10 @@
 package com.petclinic.inventoryservice.businesslayer;
 
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryRepository;
+import com.petclinic.inventoryservice.datalayer.Inventory.InventoryTypeRepository;
 import com.petclinic.inventoryservice.datalayer.Product.Product;
 import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
-import com.petclinic.inventoryservice.presentationlayer.InventoryResponseDTO;
-import com.petclinic.inventoryservice.presentationlayer.InventoryRequestDTO;
-import com.petclinic.inventoryservice.presentationlayer.ProductRequestDTO;
-import com.petclinic.inventoryservice.presentationlayer.ProductResponseDTO;
+import com.petclinic.inventoryservice.presentationlayer.*;
 import com.petclinic.inventoryservice.utils.EntityDTOUtil;
 import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
 import com.petclinic.inventoryservice.utils.exceptions.NotFoundException;
@@ -23,6 +21,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
 
     private final InventoryRepository inventoryRepository;
     private final ProductRepository productRepository;
+    private final InventoryTypeRepository inventoryTypeRepository;
 
     @Override
     public Mono<ProductResponseDTO> addProductToInventory(Mono<ProductRequestDTO> productRequestDTOMono, String inventoryId) {
@@ -180,6 +179,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                             "\nOr ProductName: " + productName)));
         }
 
+
         return productRepository
                 .findAllProductsByInventoryId(inventoryId)
                 .map(EntityDTOUtil::toProductResponseDTO);
@@ -271,6 +271,26 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     }
 
 
+    @Override
+    public Mono<ProductResponseDTO> getProductByProductIdInInventory(String inventoryId, String productId) {
+     if(inventoryId == null ){
+        return Mono.error(new NotFoundException("Inventory id not found:" + inventoryId ));
+
+  }
+     else if (productId == null) {
+         return Mono.error(new NotFoundException("product id not found:" + productId ));
+     }
+
+
+        return productRepository
+                .findProductByInventoryIdAndProductId(inventoryId, productId)
+                .map(EntityDTOUtil::toProductResponseDTO)
+                .switchIfEmpty(Mono.error(new NotFoundException("Inventory id:" + inventoryId + "and product:" + productId + "are not found")));
+
+
+    }
+
+
     //delete all products and delete all inventory
     @Override
     public Mono<Void> deleteAllProductInventory (String inventoryId){
@@ -284,6 +304,17 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     public Mono<Void> deleteAllInventory () {
         return inventoryRepository.deleteAll();
 
+    }
+
+    @Override
+    public Mono<InventoryTypeResponseDTO> addInventoryType(Mono<InventoryTypeRequestDTO> inventoryTypeRequestDTO) {
+        return inventoryTypeRequestDTO
+                .map(EntityDTOUtil::toInventoryTypeEntity)
+                .doOnNext(e -> {
+                    e.setTypeId(EntityDTOUtil.generateUUID());
+                })
+                .flatMap(inventoryTypeRepository::insert)
+                .map(EntityDTOUtil::toInventoryTypeResponseDTO);
     }
 }
 

@@ -14,7 +14,7 @@ public class InventoryRequestDTO {
 
     private String inventoryName;
 
-    private InventoryType inventoryType;
+    private String inventoryType;
 
     private String inventoryDescription;
 }

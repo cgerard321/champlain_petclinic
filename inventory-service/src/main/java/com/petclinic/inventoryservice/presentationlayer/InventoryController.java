@@ -43,6 +43,14 @@ public class InventoryController {
                                                        @RequestParam(required = false) Integer productQuantity){
         return productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(inventoryId, productName, productPrice, productQuantity);
     }
+
+    @GetMapping("/{inventoryId}/products/{productId}")
+    public Mono<ResponseEntity<ProductResponseDTO>>getProductByProductIdInInventory(@PathVariable String inventoryId, @PathVariable String productId){
+        return productInventoryService.getProductByProductIdInInventory(inventoryId,productId)
+                .map(i -> ResponseEntity.status(HttpStatus.OK).body(i))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
 /*
     @GetMapping()
     public Flux<InventoryResponseDTO> getAllInventory(){
@@ -109,6 +117,13 @@ public Flux<InventoryResponseDTO> searchInventories(
     public Mono<ResponseEntity<Void>> deleteInventoryByInventoryId(@PathVariable String inventoryId){
         return productInventoryService.deleteInventoryByInventoryId(inventoryId)
         .then(Mono.just(ResponseEntity.noContent().build()));
+    }
+
+    @PostMapping("/type")
+    public Mono<ResponseEntity<InventoryTypeResponseDTO>> addInventoryType(@RequestBody Mono<InventoryTypeRequestDTO> inventoryTypeRequestDTO){
+        return productInventoryService.addInventoryType(inventoryTypeRequestDTO)
+                .map(inventoryTypeResponseDTO -> ResponseEntity.status(HttpStatus.CREATED).body(inventoryTypeResponseDTO))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
 }

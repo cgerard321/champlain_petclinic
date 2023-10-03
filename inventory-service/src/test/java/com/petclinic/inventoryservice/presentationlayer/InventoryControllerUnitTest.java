@@ -14,8 +14,6 @@ import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.List;
-
-import static com.petclinic.inventoryservice.datalayer.Inventory.InventoryType.internal;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -66,14 +64,14 @@ class InventoryControllerUnitTest {
         String validInventoryId = "123";
         InventoryRequestDTO inventoryRequestDTO = InventoryRequestDTO.builder()
                 .inventoryName("Updated Internal")
-                .inventoryType(internal)
+                .inventoryType("Internal")
                 .inventoryDescription("Updated inventory_3")
                 .build();
 
         InventoryResponseDTO inventoryResponseDTO = InventoryResponseDTO.builder()
                 .inventoryId(validInventoryId)
                 .inventoryName("Updated Internal")
-                .inventoryType(internal)
+                .inventoryType("Internal")
                 .inventoryDescription("Updated inventory_3")
                 .build();
 
@@ -117,14 +115,14 @@ class InventoryControllerUnitTest {
     void addInventory_ValidRequest_ShouldReturnCreated() {
         InventoryRequestDTO inventoryRequestDTO = InventoryRequestDTO.builder()
                 .inventoryName("New Internal")
-                .inventoryType(internal)
+                .inventoryType("Internal")
                 .inventoryDescription("New inventory_4")
                 .build();
 
         InventoryResponseDTO inventoryResponseDTO = InventoryResponseDTO.builder()
                 .inventoryId("inventoryid1")
                 .inventoryName("New Internal")
-                .inventoryType(internal)
+                .inventoryType("Internal")
                 .inventoryDescription("New inventory_4")
                 .build();
 
@@ -293,7 +291,7 @@ class InventoryControllerUnitTest {
         InventoryResponseDTO inventoryResponseDTO = InventoryResponseDTO.builder()
                 .inventoryId("inventoryId_2")
                 .inventoryName("Pet food")
-                .inventoryType(internal)
+                .inventoryType("internal")
                 .inventoryDescription("pet")
                 .build();
 
@@ -347,7 +345,7 @@ class InventoryControllerUnitTest {
         String invalidInventoryId = "invalid_id";
         InventoryRequestDTO inventoryRequestDTO = InventoryRequestDTO.builder()
                 .inventoryName("Updated Internal")
-                .inventoryType(internal)
+                .inventoryType("Internal")
                 .inventoryDescription("Updated inventory_3")
                 .build();
 
@@ -648,7 +646,7 @@ class InventoryControllerUnitTest {
         InventoryResponseDTO inventoryResponseDTO = InventoryResponseDTO.builder()
                 .inventoryId(validInventoryId)
                 .inventoryName("Updated Internal")
-                .inventoryType(internal)
+                .inventoryType("internal")
                 .inventoryDescription("Updated inventory_3")
                 .build();
         //arrange
@@ -685,6 +683,39 @@ class InventoryControllerUnitTest {
 
         verify(productInventoryService, times(1))
                 .deleteInventoryByInventoryId(eq(invalidInventoryId));
+    }
+
+    @Test
+    public void addInventoryType_shouldSucceed(){
+        InventoryTypeRequestDTO inventoryTypeRequestDTO = InventoryTypeRequestDTO.builder()
+                .type("Internal")
+                .build();
+
+        InventoryTypeResponseDTO inventoryTypeResponseDTO = InventoryTypeResponseDTO.builder()
+                .typeId("ee27f756-4790-447a-8ab9-37ce61ff3ffc")
+                .type("Internal")
+                .build();
+
+        when(productInventoryService.addInventoryType(any()))
+                .thenReturn(Mono.just(inventoryTypeResponseDTO));
+
+        // Act and Assert
+        webTestClient
+                .post()
+                .uri("/inventory/type")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(inventoryTypeRequestDTO)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(InventoryTypeResponseDTO.class)
+                .value(dto -> {
+                    assertNotNull(dto);
+                    assertEquals(inventoryTypeResponseDTO.getType(), dto.getType());
+                });
+
+
+        verify(productInventoryService, times(1))
+                .addInventoryType(any());
     }
 
 
