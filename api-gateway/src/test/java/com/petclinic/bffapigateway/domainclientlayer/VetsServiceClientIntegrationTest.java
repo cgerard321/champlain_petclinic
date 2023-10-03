@@ -155,12 +155,12 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setBody("    {\n" +
-                        "        \"vetId\": \"678910\",\n" +
+                        "        \"vetId\": \"deb1950c-3c56-45dc-874b-89e352695eb7\",\n" +
                         "        \"averageRating\": 4.5\n" +
                         "    }"));
 
         final VetAverageRatingDTO averageRatingDTO = vetsServiceClient.getTopThreeVetsWithHighestAverageRating().blockFirst();
-        assertEquals("678910",vetDTO.getVetId());
+        assertEquals("deb1950c-3c56-45dc-874b-89e352695eb7",vetDTO.getVetId());
         assertEquals(4.5, averageRatingDTO.getAverageRating(),0.1);
         //its 0.0 because the vet doesn't have any ratings
     }
