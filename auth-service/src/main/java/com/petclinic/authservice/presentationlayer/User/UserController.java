@@ -68,6 +68,11 @@ public class UserController {
                 .body(userMapper.modelToPasswordLessDTO(saved));
     }
 
+    @PatchMapping("/{userId}")
+    public ResponseEntity<UserPasswordLessDTO> updateUserRole (@PathVariable String userId, @RequestBody RolesChangeRequestDTO roleChanged,@CookieValue("Bearer") String token) {
+        return ResponseEntity.ok().body(userService.updateUserRole(userId, roleChanged, token));
+    }
+
 
 //    @DeleteMapping("/{userId}")
 //    public void deleteUser(@PathVariable long userId) {
@@ -143,7 +148,7 @@ public class UserController {
 
 
     @PostMapping("/reset_password")
-    public ResponseEntity<Void> processResetPassword(@RequestBody @Valid UserResetPwdWithTokenRequestModel resetRequest) {
+    public ResponseEntity<Void> processResetPassword(@RequestBody @Valid UserResetPwdWithTokenRequestModel resetRequest)  {
         userService.processResetPassword(resetRequest);
 
         return ResponseEntity.ok().build();

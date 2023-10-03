@@ -704,11 +704,11 @@ public class BFFApiGatewayController {
         return authServiceClient.getUsers(auth);
     }
 
-    @PutMapping(value = "users/{userId}",
+    @PatchMapping(value = "users/{userId}",
             consumes = "application/json",
             produces = "application/json")
-    public Mono<ResponseEntity<UserResponseDTO>> updateUser(final @PathVariable long userId, @RequestBody UserRequestDTO userRequestDTO, @CookieValue("Bearer") String auth) {
-        return authServiceClient.updateUser(userId, userRequestDTO, auth)
+    public Mono<ResponseEntity<UserResponseDTO>> updateUserRoles(final @PathVariable String userId, @RequestBody RolesChangeRequestDTO roleChangeDTO, @CookieValue("Bearer") String auth) {
+        return authServiceClient.updateUsersRoles(userId, roleChangeDTO, auth)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }

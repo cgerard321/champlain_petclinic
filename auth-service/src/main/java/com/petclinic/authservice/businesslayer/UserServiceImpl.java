@@ -403,16 +403,30 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User updateUserRole(long userId, User user) {
-        User existingUser = userRepo.findUserById(userId);
+    public UserPasswordLessDTO updateUserRole(String userId, RolesChangeRequestDTO roles, String token) {
+        User existingUser = userRepo.findUserByUserIdentifier_UserId(userId);
+
+        //if (existingUser.getUserIdentifier().getUserId() == jwtService.getId)
 
         if(existingUser == null) {
-            return null;
+            throw new NotFoundException("No user was found with id : " + userId);
         }
 
-        user.setId(existingUser.getId());
-        user.setEmail(existingUser.getEmail());
+        existingUser.setId(existingUser.getId());
+        existingUser.setUserIdentifier(new UserIdentifier(userId));
 
-        return userRepo.save(user);
+        Set<Role> newRoles = new HashSet<>();
+        for (String role:
+             roles.getRoles()) {
+            Role newRole = roleRepo.findRoleByName(role);
+            if (newRole == null)
+                throw new NotFoundException("Role was not found with name : " + newRole);
+            newRoles.add(newRole);
+        }
+
+
+        existingUser.setRoles(newRoles);
+
+        return userMapper.modelToPasswordLessDTO(userRepo.save(existingUser));
     }
 }

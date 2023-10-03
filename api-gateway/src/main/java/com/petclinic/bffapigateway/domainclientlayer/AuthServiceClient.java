@@ -262,10 +262,11 @@ public class AuthServiceClient {
                 .toEntity(TokenResponseDTO.class);
     }
 
-    public Mono<UserResponseDTO> updateUser (long userId, UserRequestDTO userRequestDTO, String jwToken) {
-        return webClientBuilder.build().put()
+    public Mono<UserResponseDTO> updateUsersRoles(String userId, RolesChangeRequestDTO rolesChangeRequestDTO, String jwToken) {
+        return webClientBuilder.build()
+                .patch()
                 .uri(authServiceUrl + "/users/{userId}", userId)
-                .bodyValue(userRequestDTO)
+                .bodyValue(rolesChangeRequestDTO)
                 .cookie("Bearer", jwToken)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
