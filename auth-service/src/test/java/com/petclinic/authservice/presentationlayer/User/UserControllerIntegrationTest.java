@@ -15,6 +15,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -26,23 +27,19 @@ import static org.mockito.Mockito.when;
 
 import java.util.Base64;
 import java.util.List;
+import java.util.Optional;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @AutoConfigureWebTestClient
 @AutoConfigureMockMvc
 class UserControllerIntegrationTest {
 
-    @Autowired
-    private MockMvc mockMvc;
 
     @Autowired
     private JwtTokenUtil jwtService;
 
     @Autowired
     private WebTestClient webTestClient;
-
-    @Autowired
-    private UserService userService;
 
     @Autowired
     private UserRepo userRepo;
@@ -135,6 +132,10 @@ class UserControllerIntegrationTest {
     @Test
     void userLogin_ShouldSucceed(){
 
+        Optional<User> userAdmin = userRepo.findByEmail("admin@admin.com");
+        String encodedPassword = BCrypt.hashpw("pwd", BCrypt.gensalt(10));
+        userAdmin.get().setPassword(encodedPassword);
+        userRepo.save(userAdmin.get());
 
         UserIDLessUsernameLessDTO userDTO = UserIDLessUsernameLessDTO.builder()
                 .email("admin@admin.com")
@@ -162,6 +163,9 @@ class UserControllerIntegrationTest {
 
     @Test
     void userLoginWithInvalidCredentials_ShouldReturnUnauthorized(){
+
+
+
         UserIDLessUsernameLessDTO userDTO = UserIDLessUsernameLessDTO.builder()
                 .email("invalidEmail").password("pwd").build();
 
@@ -170,11 +174,11 @@ class UserControllerIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(userDTO)
                 .exchange()
-                .expectStatus().isUnauthorized()
+                .expectStatus().isNotFound()
                 .expectBody(HTTPErrorMessage.class).
                 value(error -> {
-                    assertEquals(error.getMessage(),"Incorrect password for user with email: "+"invalidEmail");
-                    assertEquals(error.getStatusCode(),401);
+                    assertEquals(error.getMessage(),"No account found for email: invalidEmail");
+                    assertEquals(error.getStatusCode(),404);
                     assertNotNull(error.getTimestamp());
                 });
         }
@@ -198,9 +202,8 @@ class UserControllerIntegrationTest {
                     .expectStatus().isOk();
         }
 
-
         @Test
-        void processResetPassword_ShouldFindNoToken(){
+        void processResetPassword_ShouldFail(){
 
             when(resetPasswordTokenRepository.findResetPasswordTokenByToken(anyString())).thenReturn(null);
 
@@ -216,6 +219,27 @@ class UserControllerIntegrationTest {
                     .expectStatus().isUnauthorized();
         }
 
+        @Test
+        void loginWithInvalidCredentials_ShouldReturnUnauthorized(){
+
+                UserIDLessUsernameLessDTO userDTO = UserIDLessUsernameLessDTO.builder()
+                        .email("admin@admin.com")
+                        .password("invalidPassword")
+                        .build();
+
+                webTestClient.post()
+                        .uri("/users/login")
+                        .accept(MediaType.APPLICATION_JSON)
+                        .bodyValue(userDTO)
+                        .exchange()
+                        .expectStatus().isUnauthorized()
+                        .expectBody(HTTPErrorMessage.class)
+                        .value(error -> {
+                            assertEquals("Incorrect password for user with email: admin@admin.com",error.getMessage());
+                            assertEquals(401,error.getStatusCode());
+                            assertNotNull(error.getTimestamp());
+                        });
+        }
 
 
     @Test

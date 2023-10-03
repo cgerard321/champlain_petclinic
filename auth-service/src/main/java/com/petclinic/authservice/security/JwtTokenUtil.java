@@ -7,6 +7,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
@@ -107,5 +108,29 @@ public class JwtTokenUtil implements Serializable {
 
 
         return (!isTokenExpired(token));
+    }
+
+    public String getIdFromToken(String token) {
+        String id;
+        try {
+            final Claims claims = getClaimsFromToken(token);
+            id = claims.get("id").toString();
+        } catch (Exception e) {
+            id = null;
+        }
+        return id;
+    }
+
+
+    public List<String> getRolesFromToken(String token) {
+        List<String> roles;
+        try {
+            final Claims claims = getClaimsFromToken(token);
+
+            roles = Arrays.asList(claims.get(CLAIM_KEY_ROLES).toString().split(","));
+        } catch (Exception e) {
+            roles = null;
+        }
+        return roles;
     }
 }
