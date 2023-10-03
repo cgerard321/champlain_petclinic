@@ -92,8 +92,22 @@
                         <div ng-repeat="pet in $ctrl.owner.pets" class="d-flex justify-content-between">
                             <div class="mt-3">
                                 <a style="color: rgba(0,0,0,0.5);" class="btn btn-light" ui-sref="editPet({ownerId: $ctrl.owner.ownerId, petId: pet.petId, method: 'edit'})">Edit Pet</a>
-                                <p>Name: {{ pet.name }}</p>
-                                <p>Pet Id: {{pet.petId}}</p>
+                                <div class="d-flex flex-column">
+                                    <input class="inputFieldsStyle bg-white" value="{{pet.name}}" readonly disabled/>
+                                    <label class="inputLabel">Pet Name</label>
+                                </div>
+                                <div class="d-flex flex-column">
+                                    <input class="inputFieldsStyle bg-white" value="{{pet.petId}}" readonly disabled/>
+                                    <label class="inputLabel">Pet Id</label>
+                                </div>
+                                <div class="d-flex flex-column">
+                                    <input class="inputFieldsStyle bg-white" value="{{pet.birthDate | date:'yyyy-MM-dd'}}" readonly disabled/>
+                                    <label class="inputLabel">Birth Date</label>
+                                </div>
+                                <div class="d-flex flex-column">
+                                    <input class="inputFieldsStyle bg-white" value="{{pet.type}}" readonly disabled/>
+                                    <label class="inputLabel">Pet Type</label>
+                                </div>
                                 <!-- Add more pet details as needed -->
                             </div>
                             <div class="border-5 rounded">

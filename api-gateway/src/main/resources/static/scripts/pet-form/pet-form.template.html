@@ -5,12 +5,11 @@
         <label class="col-sm-2 control-label">Owner</label>
         <div class="pet marg col-sm-6">
             <input type="hidden" ng-model="$ctrl.pet.petId" name="petId" />
-            <p class="pet form-control-static">{{$ctrl.pet.owner}}</p>
         </div>
     </div>
 
     <div class="form-group formColor">
-        <label class="col-sm-2 control-label">Name </label>
+        <label class="col-sm-2 control-label"> Pet Name </label>
         <div class="pet col-sm-6">
             <input class="form-control col-sm-4" ng-model="$ctrl.pet.name" name="name" required type="text" ng-disabled="$ctrl.checked"/>
             <span ng-show="petForm.name.$error.required" class="help-inline">Name is required.</span>
@@ -29,6 +28,7 @@
         <label class="col-sm-2 control-label">Type</label>
         <div class="pet col-sm-6">
             <select class="form-control" ng-model="$ctrl.pet.type" name="type" ng-options="t as t.name for t in $ctrl.types track by t.id" ng-disabled="$ctrl.checked"></select>
+            <span ng-show="petForm.name.$error.required" class="help-inline"> Type is required.</span>
         </div>
     </div>
 
