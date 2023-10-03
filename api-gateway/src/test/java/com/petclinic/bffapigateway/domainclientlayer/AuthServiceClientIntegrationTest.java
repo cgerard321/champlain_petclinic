@@ -42,7 +42,6 @@ import static reactor.core.publisher.Mono.when;
 public class AuthServiceClientIntegrationTest {
 
     private final SecurityConst securityConst = new SecurityConst(60
-            ,"MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDTnkqggdMFu5O58pB8U0f8D4pab_7j5T8jNZfEep23DbvoMCjR6X1cFe4qCsvaY4aDF6d6Vn3TVY2INHMuyOTXqe5vhBWiRgaI3TIPkGjgHZ1f6Up_ZPQFJCGTo2b3OiXBq3LTK7PXvMj2EIQPJrHuX099ACDvO"
             ,"Bearer");
 
     @MockBean

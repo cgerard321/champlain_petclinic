@@ -8,6 +8,7 @@
 
 package com.petclinic.authservice.businesslayer;
 
+import com.petclinic.authservice.Util.Exceptions.*;
 import com.petclinic.authservice.datalayer.roles.Role;
 import com.petclinic.authservice.datalayer.roles.RoleRepo;
 import com.petclinic.authservice.datamapperlayer.UserMapper;
@@ -16,10 +17,6 @@ import com.petclinic.authservice.domainclientlayer.Mail.MailService;
 import com.petclinic.authservice.presentationlayer.User.*;
 import com.petclinic.authservice.security.JwtTokenUtil;
 import com.petclinic.authservice.security.SecurityConst;
-import com.petclinic.authservice.Util.Exceptions.EmailAlreadyExistsException;
-import com.petclinic.authservice.Util.Exceptions.IncorrectPasswordException;
-import com.petclinic.authservice.Util.Exceptions.InvalidInputException;
-import com.petclinic.authservice.Util.Exceptions.NotFoundException;
 import com.petclinic.authservice.datalayer.user.*;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -187,6 +184,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public HashMap<String,Object> login(UserIDLessUsernameLessDTO login) throws IncorrectPasswordException {
+        User loggedInUser = getUserByEmail(login.getEmail());
+
+        if (loggedInUser == null) {
+            throw new NotFoundException("User not found");
+        }
 
 
         try {
@@ -196,7 +198,12 @@ public class UserServiceImpl implements UserService {
                                     login.getEmail(), login.getPassword()
                             )
                     );
-            User loggedInUser = getUserByEmail(login.getEmail());
+
+            if (!loggedInUser.isVerified()) {
+                mailService.sendMail(generateVerificationMail(loggedInUser));
+                throw new UnverifiedUserException("Your account is not verified ! A link has been sent to verify the account !");
+            }
+
             ResponseCookie token = ResponseCookie.from(securityConst.getTOKEN_PREFIX(), jwtService.generateToken(loggedInUser))
                     .httpOnly(true)
                     .secure(true)
@@ -229,7 +236,7 @@ public class UserServiceImpl implements UserService {
         }
 
         try {
-            updateResetPasswordToken( token, email);
+            updateResetPasswordToken(token, email);
 
 
             String resetPasswordLink =  "http://localhost:8080/#!/reset_password/" + token;

@@ -594,7 +594,7 @@ public class BFFApiGatewayController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "users")//, produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "users", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<UserDetails> getAllUsers(@CookieValue("Bearer") String auth) {
         return authServiceClient.getUsers(auth);
     }
@@ -611,9 +611,7 @@ public class BFFApiGatewayController {
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @PostMapping(value = "/users/forgot_password")
     public Mono<ResponseEntity<Void>> processForgotPassword(@RequestBody Mono<UserEmailRequestDTO> email) {
-
         return authServiceClient.sendForgottenEmail(email);
-
     }
 
 

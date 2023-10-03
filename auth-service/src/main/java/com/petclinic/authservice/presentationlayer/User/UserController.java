@@ -36,7 +36,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -119,8 +118,16 @@ public class UserController {
     }
 
     @PostMapping("/validate-token")
-    public ResponseEntity<String> validateToken() {
-            return ResponseEntity.ok().build();
+    public ResponseEntity<TokenResponseDTO> validateToken(@CookieValue("Bearer") String token) {
+
+        TokenResponseDTO tokenResponseDTO = TokenResponseDTO.builder()
+                .token(token)
+                .userId(jwtService.getIdFromToken(token))
+                .email(jwtService.getUsernameFromToken(token))
+                .roles(jwtService.getRolesFromToken(token))
+                .build();
+
+        return ResponseEntity.ok(tokenResponseDTO);
      
     }
 

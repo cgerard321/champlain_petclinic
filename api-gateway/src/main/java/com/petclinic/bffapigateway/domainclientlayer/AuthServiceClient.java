@@ -3,11 +3,8 @@ package com.petclinic.bffapigateway.domainclientlayer;
 import com.petclinic.bffapigateway.dtos.Auth.*;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
-import com.petclinic.bffapigateway.exceptions.InvalidCredentialsException;
-import com.petclinic.bffapigateway.exceptions.GenericHttpException;
-import com.petclinic.bffapigateway.exceptions.InvalidInputException;
+import com.petclinic.bffapigateway.exceptions.*;
 import com.petclinic.bffapigateway.utils.Rethrower;
-import com.petclinic.bffapigateway.exceptions.InvalidTokenException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -151,7 +148,8 @@ public class AuthServiceClient {
                     .uri(authServiceUrl+"/users/login")
                     .body(login, Login.class)
                     .retrieve()
-                    .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> Mono.error(new InvalidCredentialsException("Invalid credentials")))
+                    .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> clientResponse.bodyToMono(HttpErrorInfo.class)
+                            .flatMap(error -> Mono.error(new InvalidCredentialsException(error.getMessage()))))
                     .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> Mono.error(new InvalidInputException("Invalid token")))
                     .toEntity(UserPasswordLessDTO.class);
         } catch (HttpClientErrorException ex) {
@@ -203,17 +201,18 @@ public class AuthServiceClient {
     }
 
 
-    public Mono<ResponseEntity<Flux<String>>> validateToken(String jwtToken) {
+    public Mono<ResponseEntity<TokenResponseDTO>> validateToken(String jwtToken) {
         // Make a POST request to the auth-service for token validation
 
         return webClientBuilder.build()
                 .post()
                 .uri(authServiceUrl + "/users/validate-token")
                 .cookie("Bearer", jwtToken)
+                .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> Mono.error(new InvalidTokenException("Invalid token")))
                 .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> Mono.error(new InvalidInputException("Invalid token")))
-                .toEntityFlux(String.class);
+                .toEntity(TokenResponseDTO.class);
     }
 
 }
