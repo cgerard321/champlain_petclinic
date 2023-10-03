@@ -2687,7 +2687,7 @@ void deleteAllInventory_shouldSucceed() {
 
     private VetDTO buildVetDTO() {
         return VetDTO.builder()
-                .vetId("678910")
+                .vetId("181faeb5-c024-425c-9f08-663600008f06")
                 .firstName("Pauline")
                 .lastName("LeBlanc")
                 .email("skjfhf@gmail.com")
@@ -2701,7 +2701,7 @@ void deleteAllInventory_shouldSucceed() {
     }
     private VetDTO buildVetDTO2() {
         return VetDTO.builder()
-                .vetId("678910")
+                .vetId("181faeb5-c024-425c-9f08-663600008f06")
                 .firstName("Pauline")
                 .lastName("LeBlanc")
                 .email("skjfhf@gmail.com")
@@ -2717,7 +2717,7 @@ void deleteAllInventory_shouldSucceed() {
     private RatingResponseDTO buildRatingResponseDTO() {
         return RatingResponseDTO.builder()
                 .ratingId("123456")
-                .vetId("678910")
+                .vetId("181faeb5-c024-425c-9f08-663600008f06")
                 .rateScore(4.0)
                 .build();
     }

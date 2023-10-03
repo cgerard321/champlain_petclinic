@@ -15,20 +15,17 @@ import com.petclinic.vet.dataaccesslayer.VetRepository;
 import com.petclinic.vet.exceptions.InvalidInputException;
 import com.petclinic.vet.exceptions.NotFoundException;
 import com.petclinic.vet.util.EntityDtoUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 
 @Service
+@RequiredArgsConstructor
 public class VetServiceImpl implements VetService {
 
-
     private final VetRepository vetRepository;
-
-    public VetServiceImpl(VetRepository vetRepository) {
-        this.vetRepository = vetRepository;
-    }
 
     @Override
     public Flux<VetDTO> getAll() {
