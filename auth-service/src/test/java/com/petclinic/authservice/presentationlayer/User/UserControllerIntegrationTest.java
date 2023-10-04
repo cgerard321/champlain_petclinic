@@ -448,7 +448,7 @@ class UserControllerIntegrationTest {
                 .expectStatus().isOk()
                 .expectBodyList(UserDetails.class)
                 .value(users -> {
-                    assertEquals(12,users.size());
+                    assertEquals(19,users.size());
                 });
     }
 

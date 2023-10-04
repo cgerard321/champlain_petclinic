@@ -80,7 +80,7 @@ public class UserServiceImpl implements UserService {
 
             User user = userMapper.idLessRoleLessDTOToModel(userIDLessDTO);
 
-            if (userIDLessDTO.getDefaultRole().isEmpty()){
+            if (userIDLessDTO.getDefaultRole() == null|| userIDLessDTO.getDefaultRole().isEmpty()){
 
             Optional<Role> role = roleRepo.findById(3L);
             Set<Role> roleSet = new HashSet<>();

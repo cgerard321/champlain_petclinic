@@ -653,7 +653,7 @@ class ApiGatewayControllerTest {
                 .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
-        
+
     }
 
     @Test
