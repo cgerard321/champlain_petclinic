@@ -2,14 +2,11 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-<<<<<<< HEAD
 import com.petclinic.bffapigateway.dtos.Visits.*;
-=======
 import com.petclinic.bffapigateway.dtos.Visits.VisitDetails;
 import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.Visits;
->>>>>>> 2be34c5b (9001)
 import com.petclinic.bffapigateway.utils.Security.Filters.JwtTokenFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.RoleFilter;
 import okhttp3.mockwebserver.MockResponse;
@@ -184,7 +181,7 @@ class VisitsServiceClientIntegrationTest {
                 .description("Dog needs grooming")
                 .petId(PET_ID)
                 .practitionerId("3")
-                .status(true)
+                .status(Status.UPCOMING)
                 .build();
 
         final VisitResponseDTO expectedVisitResponse = VisitResponseDTO.builder()
@@ -193,7 +190,7 @@ class VisitsServiceClientIntegrationTest {
                 .description(visitRequest.getDescription())
                 .petId(visitRequest.getPetId())
                 .practitionerId(visitRequest.getPractitionerId())
-                .status(visitRequest.isStatus()) // use isStatus here
+                .status(visitRequest.getStatus()) // use isStatus here
                 .build();
 
         final String responseBody = objectMapper.writeValueAsString(expectedVisitResponse);
@@ -215,7 +212,7 @@ class VisitsServiceClientIntegrationTest {
         assertEquals(expectedVisitResponse.getDescription(), actualVisitResponse.getDescription());
         assertEquals(expectedVisitResponse.getPetId(), actualVisitResponse.getPetId());
         assertEquals(expectedVisitResponse.getPractitionerId(), actualVisitResponse.getPractitionerId());
-        assertEquals(expectedVisitResponse.isStatus(), actualVisitResponse.isStatus());
+        assertEquals(expectedVisitResponse.getStatus(), actualVisitResponse.getStatus());
     }
 
 //    @Test
