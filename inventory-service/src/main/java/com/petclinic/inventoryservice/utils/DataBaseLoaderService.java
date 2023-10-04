@@ -125,5 +125,13 @@ public class DataBaseLoaderService  implements CommandLineRunner {
                 .flatMap(inventoryRepository::insert)
                 .log()
                 .subscribe();
+        Mono.just(inventoryType1)
+                .flatMap(inventoryTypeRepository::insert)
+                .log()
+                .subscribe();
+        Mono.just(inventoryType2)
+                .flatMap(inventoryTypeRepository::insert)
+                .log()
+                .subscribe();
     }
 }
