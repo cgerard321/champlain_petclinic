@@ -37,8 +37,9 @@ public class BillResource {
     }
 
     @GetMapping(value = "/bills", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> findAllBills() {
-        return SERVICE.GetAllBills();
+    public Flux<BillResponseDTO> findAllBills(@RequestParam(defaultValue = "0") int page,
+                                              @RequestParam(defaultValue = "10") int size) {
+        return SERVICE.GetAllBills(page, size);
     }
 
 

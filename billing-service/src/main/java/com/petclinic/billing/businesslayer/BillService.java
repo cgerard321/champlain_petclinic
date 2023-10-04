@@ -12,10 +12,14 @@ import reactor.core.publisher.Mono;
 public interface BillService {
     Mono<BillResponseDTO> getBillByBillId(String billId);
 
+<<<<<<< HEAD
     Flux<BillResponseDTO> GetAllBillsByStatus(BillStatus status);
 
 
     Flux<BillResponseDTO> GetAllBills();
+=======
+    Flux<BillResponseDTO> GetAllBills(int page, int size);
+>>>>>>> 6b04c66b (Implementation of pagination - backend)
 
     Mono<BillResponseDTO> CreateBill(@RequestBody Mono<BillRequestDTO> model);
 

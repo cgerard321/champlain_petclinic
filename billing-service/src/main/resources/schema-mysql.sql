@@ -1,4 +1,4 @@
-USE `billing-db`;
+1USE `billing-db`;
 DROP TABLE IF EXISTS billings;
 CREATE TABLE IF NOT EXISTS billings (
     id INT(7) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,

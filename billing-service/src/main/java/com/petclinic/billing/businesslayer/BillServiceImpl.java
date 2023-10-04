@@ -7,6 +7,7 @@ import com.petclinic.billing.domainclientlayer.OwnerClient;
 import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.util.EntityDtoUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -29,6 +30,7 @@ public class BillServiceImpl implements BillService{
     }
 
     @Override
+<<<<<<< HEAD
     public Flux<BillResponseDTO> GetAllBillsByStatus(BillStatus status) {
         return billRepository.findAllBillsByBillStatus(status).map(EntityDtoUtil::toBillResponseDto);
     }
@@ -39,6 +41,12 @@ public class BillServiceImpl implements BillService{
 
         return billRepository.findAll().map(EntityDtoUtil::toBillResponseDto);
 
+=======
+    public Flux<BillResponseDTO> GetAllBills(int page, int size) {
+        PageRequest pageRequest = PageRequest.of(page, size);
+        return billRepository.findAllBy(pageRequest)
+                .map(EntityDtoUtil::toBillResponseDto);
+>>>>>>> 6b04c66b (Implementation of pagination - backend)
     }
 
     @Override
