@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -25,7 +26,6 @@ public class VetsClient {
     }
 
 
-
     public Mono<VetDTO> getVetByVetId(String vetId) {
         Mono<VetDTO> vetDTOMono =
                 webClient
@@ -44,6 +44,23 @@ public class VetsClient {
                         .bodyToMono(VetDTO.class);
 
         return vetDTOMono;
+    }
+
+    public Flux<VetDTO> getAllVets() {
+        Flux<VetDTO> vetDTOFlux =
+                webClient
+                        .get()
+                        .uri(vetClientServiceBaseURL)
+                        .retrieve()
+                        .onStatus(HttpStatusCode::is4xxClientError, error -> {
+                            return Mono.error(new IllegalArgumentException("Something went wrong (4xx)"));
+                        })
+                        .onStatus(HttpStatusCode::is5xxServerError, error ->
+                                Mono.error(new IllegalArgumentException("Something went wrong (5xx)"))
+                        )
+                        .bodyToFlux(VetDTO.class);
+
+        return vetDTOFlux;
     }
 
 }

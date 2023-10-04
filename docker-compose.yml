@@ -7,12 +7,6 @@ services:
             - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
             - ./nginx/njs:/etc/nginx/njs
 
-    visits-service-new:
-        build: visits-service-new
-        environment:
-            - SPRING_PROFILES_ACTIVE=docker
-        depends_on:
-            - mongo2
 
 #    visits:
 #        build: visits-service
@@ -49,6 +43,13 @@ services:
         depends_on:
             - mongo-customers
 
+    visits-service-new:
+      build: visits-service-new
+      environment:
+        - SPRING_PROFILES_ACTIVE=docker
+      depends_on:
+        - vet-service
+        - mongo2
 #    customers:
 #        build: customers-service
 #        hostname: customers
