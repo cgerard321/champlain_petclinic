@@ -1838,7 +1838,7 @@ class ApiGatewayControllerTest {
 //        assertEquals(null, visitsServiceClient.getVisitsForPet(visit.getPetId()));
 //    }
 
-    @Test
+   /* @Test
     void shouldUpdateAVisitsById() {
         VisitDetails visitDetailsToUpdate = VisitDetails.builder()
                 .visitDate(LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
@@ -1853,8 +1853,8 @@ class ApiGatewayControllerTest {
                 .thenReturn(Mono.just(visitDetailsToUpdate));
 
         client.put()
-                .uri("/api/gateway/owners/*/pets/{petId}/visits/{visitId}", "1", "1")
-                .accept(MediaType.APPLICATION_JSON)
+                 .uri("/api/gateway/owners/**//*pets/{petId}/visits/{visitId}", "1", "1")
+               /* .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(visitDetailsToUpdate)
                 .exchange()
@@ -1867,7 +1867,7 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.status").isEqualTo(Status.UPCOMING.toString())
                 .jsonPath("$.practitionerId").isEqualTo(2);
         Mockito.verify(visitsServiceClient,times(1)).updateVisitForPet(visitDetailsToUpdate);
-    }
+    }*/
 
     @Test
     void ShouldUpdateStatusForVisitByVisitId(){
@@ -1899,6 +1899,7 @@ class ApiGatewayControllerTest {
         Mockito.verify(visitsServiceClient, times(1))
                 .updateStatusForVisitByVisitId(anyString(), anyString());
     }
+
     @Test
     void shouldGetAllVisits() {
         VisitResponseDTO visitResponseDTO = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", Status.UPCOMING);

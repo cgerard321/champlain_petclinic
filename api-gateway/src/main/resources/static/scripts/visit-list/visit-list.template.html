@@ -3,7 +3,6 @@
         display: flex;
         justify-content: flex-end;
         align-items: center;
-        width: 100%;
         margin-bottom: 20px;
     }
 
@@ -11,7 +10,6 @@
         display: flex;
         justify-content: flex-end;
         align-items: center;
-        width: 100%;
         margin-bottom: 20px;
     }
 
@@ -35,13 +33,25 @@
         transform: translateY(2px);
     }
 
+    .button-wrapper {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+    }
+
 </style>
 
-<div class="container">
-    <a ui-sref="visitsNew">
-        <button class="original-button" id="addBtn">Create Visit</button>
-    </a>
+<div class="button-wrapper">
+    <div class="container">
+        <a ui-sref="visitsNew">
+            <button class="original-button" id="addBtn">Create Visit</button>
+        </a>
+    </div>
+    <div class="delete-all-button">
+        <button class="btn btn-danger" ng-click="deleteAllCancelledVisits()">Delete All Canceled Visits</button>
+    </div>
 </div>
+
 
 <h3 style="margin: 0;">Upcoming Visits</h3>
 
@@ -54,9 +64,7 @@
 <input ng-model="search.status" placeholder="Filter by Status">
 <input ng-model="search.billId" placeholder="Filter by Bill">
 
-<div class="delete-all-button">
-<button class="btn btn-danger" ng-click="deleteAllCancelledVisits()">Delete All Canceled Visits</button>
-</div>
+
 
 <table class="table">
     <thead>

@@ -1,16 +1,21 @@
 'use strict';
 
 angular.module('visits')
-    .controller('VisitsController', ['$http', '$state', '$stateParams', '$filter','$scope', function ($http, $state, $stateParams, $filter, $scope) {
+    .controller('VisitsController', ['$http', '$state', '$stateParams', '$filter','$scope','$rootScope', function ($http, $state, $stateParams, $filter, $scope,$rootScope) {
         var self = this;
         var petId = $stateParams.petId || 0;
-        var postURL = "api/gateway/visit/owners/" + ($stateParams.ownerId || 0) + "/pets/" + petId + "/visits";
+        var postURL = "api/gateway/visit/owners/5fe81e29-1f1d-4f9d-b249-8d3e0cc0b7dd/pets/9/visits";
         var vetsUrl = "api/gateway/vets";
         var billsUrl = "api/gateway/bill";
         var visitId = 0;
         self.practitionerId = 0;
         self.date = new Date();
         self.desc = "";
+        self.chosenDate = null;
+        self.chosenTime = null;
+
+
+
 
         $http.get("api/gateway/visits/"+petId).then(function (resp) {
             self.visits = resp.data;
@@ -18,8 +23,9 @@ angular.module('visits')
         });
 
         $scope.$on('selectedDateChanged', function(event, selectedDate) {
-            console.log('Selected Date:', selectedDate); // Debugging
-            self.date = $filter('date')(selectedDate, "yyyy-MM-dd");
+            console.log("Received selected date:", selectedDate);
+            // Set dateChosen to the received selected date
+            self.chosenDate = selectedDate;
         });
 
         // Function to... get the current date ;)
@@ -28,6 +34,7 @@ angular.module('visits')
             var dd = String(dateObj.getDate()).padStart(2, '0');
             var mm = String(dateObj.getMonth() + 1).padStart(2, '0');
             var yyyy = dateObj.getFullYear();
+            console.log("got currentDate");
             return Date.parse(yyyy + '-' + mm + '-' + dd);
         }
 
@@ -166,10 +173,10 @@ angular.module('visits')
         self.getPractitionerName = function (id){
             var practitionerName = "";
             $.each(self.vets, function (i, vet){
-               if (vet.vetId == id){
-                   practitionerName = vet.firstName + " " + vet.lastName;
-                   return false;
-               }
+                if (vet.vetId == id){
+                    practitionerName = vet.firstName + " " + vet.lastName;
+                    return false;
+                }
             });
             return practitionerName;
         };
@@ -219,7 +226,7 @@ angular.module('visits')
                 if(buttonText.toLowerCase().includes("cancel")) {
                     modalConfirmButton.data("targetStatus", status);
                     modalConfirmButton.data("targetPractitionerId", practitionerId);
-                    modalConfirmButton.data("targetDate", date);
+                    modalConfirmButton.data("targetDate", visitDate);
                     modalConfirmButton.data("targetDescription", description);
                     modalConfirmButton.data("cancel-index", $(e.target).closest("tr").data("index"));
                 }
@@ -626,18 +633,23 @@ angular.module('visits')
                 }
             }
         }
+        $scope.$on('selectedDateChanged', function(event, selectedDate) {
+            self.chosenDate = selectedDate;
+            console.log("Received and set chosen date:", self.chosenDate);
+        });
+
 
         self.submit = function () {
             var data = {
-                date: $filter('date')(self.date, "MM-dd-yyyy"),
+                visitDate: $filter('date')(self.chosenDate, "yyyy-MM-dd HH:mm"),
                 description: self.desc,
                 practitionerId: self.practitionerId,
-                status: true
+                status: 'UPCOMING'
             };
-            
+
             var billData = {
                 ownerId: $stateParams.ownerId,
-                date: $filter('date')(self.date, "yyyy-MM-dd"),
+                date: $filter('date')(self.chosenDate, "yyyy-MM-dd"),
                 visitType : $("#selectedVisitType").val()
             }
 
