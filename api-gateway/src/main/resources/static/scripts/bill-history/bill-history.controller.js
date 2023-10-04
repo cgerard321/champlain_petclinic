@@ -25,7 +25,6 @@ angular.module('billHistory')
         self.customerNameMap = {};
 
         self.owners.forEach(function (customer) {
-            // The customer's ownerId is used as the key, and their full name as the value
             self.customerNameMap[customer.ownerId] = customer.firstName + ' ' + customer.lastName;
         });
 
