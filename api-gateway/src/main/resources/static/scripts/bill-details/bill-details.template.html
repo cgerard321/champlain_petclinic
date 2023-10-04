@@ -12,7 +12,9 @@
         </div>
     </div>
     <br>
-    <br>
+    <div class="alert alert-warning" ng-if="$ctrl.bills.billStatus === 'OVERDUE'">
+        NOTICE: This bill is overdue. Please notify client to pay as soon as possible.
+    </div>
     <br>
     <div class="row">
         <div class="col-md-6 text-start">
@@ -55,6 +57,9 @@
             <button class="btn btn-primary" onclick="printPage()">Print this page</button>
         </div>
     </div>
+
+
+
 </div>
 
 <style>
@@ -70,4 +75,9 @@
     function printPage() {
         window.print();
     }
+
 </script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.min.js"></script>
+
