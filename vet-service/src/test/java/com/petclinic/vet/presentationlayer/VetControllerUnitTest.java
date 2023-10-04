@@ -207,7 +207,7 @@ class VetControllerUnitTest {
     @Test
     void getAverageRatingForEachVetByVetId_ShouldSucceed(){
 
-        String vetId = "678910";
+        String vetId = "cf25e779-548b-4788-aefa-6d58621c2feb";
         Double averageRating = 5.0;
 
         when(vetService.getVetByVetId(vetId))
@@ -672,8 +672,8 @@ class VetControllerUnitTest {
 
     private Vet buildVet() {
         return Vet.builder()
-                .vetId("678910")
-                .vetBillId("1")
+                .vetId("cf25e779-548b-4788-aefa-6d58621c2feb")
+                .vetBillId("d9d3a7ac-6817-4c13-9a09-c09da74fb65f")
                 .firstName("Pauline")
                 .lastName("LeBlanc")
                 .email("skjfhf@gmail.com")
@@ -688,8 +688,8 @@ class VetControllerUnitTest {
 
     private VetDTO buildVetDTO() {
         return VetDTO.builder()
-                .vetId("678910")
-                .vetBillId("1")
+                .vetId("cf25e779-548b-4788-aefa-6d58621c2feb")
+                .vetBillId("d9d3a7ac-6817-4c13-9a09-c09da74fb65f")
                 .firstName("Pauline")
                 .lastName("LeBlanc")
                 .email("skjfhf@gmail.com")
@@ -703,7 +703,7 @@ class VetControllerUnitTest {
     }
     private VetDTO buildVetDTO2() {
         return VetDTO.builder()
-                .vetId("678910")
+                .vetId("cf25e779-548b-4788-aefa-6d58621c2feb")
                 .vetBillId("2")
                 .firstName("Pauline")
                 .lastName("LeBlanc")
@@ -760,7 +760,7 @@ class VetControllerUnitTest {
     private RatingResponseDTO buildRatingResponseDTO(String description, double score) {
         return RatingResponseDTO.builder()
                 .ratingId("2")
-                .vetId("678910")
+                .vetId("cf25e779-548b-4788-aefa-6d58621c2feb")
                 .rateScore(score)
                 .rateDescription(description)
                 .rateDate("16/09/2023")

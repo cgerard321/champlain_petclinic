@@ -222,7 +222,7 @@ class VetRepositoryTest {
 
     private Vet buildVet() {
         return Vet.builder()
-                .vetId("678910")
+                .vetId("b3bf6ec1-62bb-4297-9b5e-070a00d4e08f")
                 .vetBillId("1")
                 .firstName("Pauline")
                 .lastName("LeBlanc")
@@ -236,7 +236,7 @@ class VetRepositoryTest {
     }
     private Vet buildVet2() {
         return Vet.builder()
-                .vetId("678910")
+                .vetId("b3bf6ec1-62bb-4297-9b5e-070a00d4e08f")
                 .vetBillId("2")
                 .firstName("Pauline")
                 .lastName("LeBlanc")

@@ -27,6 +27,7 @@ import org.springframework.beans.BeanUtils;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 
 public class EntityDtoUtil {
     @Generated
@@ -50,7 +51,7 @@ public class EntityDtoUtil {
 
     public static Vet toEntity(VetDTO dto) {
         Vet vet = new Vet();
-        vet.setVetId(generateVetId());
+        vet.setVetId(dto.getVetId());
         vet.setVetBillId(dto.getVetBillId());
         vet.setFirstName(dto.getFirstName());
         vet.setLastName(dto.getLastName());
@@ -65,9 +66,7 @@ public class EntityDtoUtil {
     }
 
     public static String generateVetId() {
-        Random random = new Random();
-        int number = random.nextInt(99999);
-        return "22" + (String.format("%05d", number));
+        return UUID.randomUUID().toString();
     }
 
     public static SpecialtyDTO toDTO(Specialty specialty) {
@@ -129,12 +128,8 @@ public class EntityDtoUtil {
     }
 
     public static String verifyId(String id) {
-        try {
-            Integer.parseInt(id);
-        }
-        catch(NumberFormatException e) {
-            throw new InvalidInputException ("This id is not valid");
-        }
+        if(id.length() != 36)
+            throw new InvalidInputException("This id is not valid");
         return id;
     }
 

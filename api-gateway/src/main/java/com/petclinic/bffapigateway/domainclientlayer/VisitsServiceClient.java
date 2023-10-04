@@ -146,10 +146,6 @@ public class VisitsServiceClient {
                 newStatus = Status.CONFIRMED;
                 break;
 
-            case "IN_PROGRESS":
-                newStatus = Status.IN_PROGRESS;
-                break;
-
             case "COMPLETED":
                 newStatus = Status.COMPLETED;
                 break;
@@ -213,6 +209,17 @@ public Mono<VisitResponseDTO> createVisitForPet(VisitRequestDTO visit) {
                 .retrieve()
                 .bodyToMono(Void.class);
     }
+
+    public Mono<Void> deleteAllCancelledVisits(){
+        return webClient
+                .delete()
+                .uri("/visits/cancelled")
+                .retrieve()
+                .bodyToMono(Void.class);
+    }
+
+
+
     private String joinIds(List<Integer> petIds) {
         return petIds.stream().map(Object::toString).collect(joining(","));
     }

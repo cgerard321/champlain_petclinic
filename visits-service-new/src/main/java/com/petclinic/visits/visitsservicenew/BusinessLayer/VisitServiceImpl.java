@@ -47,23 +47,14 @@ public class VisitServiceImpl implements VisitService {
             case("UPCOMING"):
                 status = Status.UPCOMING;
 
-            case("REQUESTED"):
-                status = Status.REQUESTED;
-
             case("CONFIRMED"):
                 status = Status.CONFIRMED;
 
             case("CANCELLED"):
                 status = Status.CANCELLED;
 
-            case("IN_PROGRESS"):
-                status = Status.IN_PROGRESS;
-
-            case("COMPLETED"):
-                status = Status.COMPLETED;
-
             default:
-                status = Status.CONFIRMED;
+                status = Status.COMPLETED;
         }
         return repo.findAllByStatus(statusString)
                 .map(EntityDtoUtil::toVisitResponseDTO);
@@ -110,6 +101,19 @@ public class VisitServiceImpl implements VisitService {
                 });
     }
 
+    @Override
+    public Mono<Void> deleteAllCancelledVisits() {
+        return repo.findAllByStatus("CANCELLED")
+                .collectList()
+                .flatMap(canceledVisits ->{
+                    if(canceledVisits.isEmpty()){
+                        return Mono.empty();
+                    } else{
+                        return repo.deleteAll(canceledVisits);
+                    }
+                });
+    }
+
 
 //    @Override
 //    public Mono<VetDTO> testingGetVetDTO(String vetId) {
@@ -143,12 +147,13 @@ public class VisitServiceImpl implements VisitService {
         Status newStatus;
         Status newStatus1;
         switch (status){
-            case "CONFIRMED":
-                newStatus1 = Status.CONFIRMED;
+
+            case "UPCOMING":
+                newStatus1 = Status.UPCOMING;
                 break;
 
-            case "IN_PROGRESS":
-                newStatus1 = Status.IN_PROGRESS;
+            case "CONFIRMED":
+                newStatus1 = Status.CONFIRMED;
                 break;
 
             case "COMPLETED":
@@ -190,7 +195,7 @@ public class VisitServiceImpl implements VisitService {
         } else if ( dto.getPractitionerId() == null || dto.getPractitionerId().isBlank()) {
             return Mono.error(new BadRequestException("VetId cannot be null or blank"));
         }
-        else if (dto.getStatus() != Status.REQUESTED){
+        else if (dto.getStatus() != Status.UPCOMING){
             return Mono.error(new BadRequestException("Status is being set wrong!"));
         }
         else {

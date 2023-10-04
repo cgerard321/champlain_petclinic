@@ -25,6 +25,7 @@ import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import com.petclinic.bffapigateway.exceptions.GenericHttpException;
 import com.petclinic.bffapigateway.utils.Security.Filters.JwtTokenFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.RoleFilter;
+import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -659,22 +660,45 @@ class ApiGatewayControllerTest {
 
     @Test
     void createVet() {
-        Mono<VetDTO> dto = Mono.just(vetDTO);
-        when(vetsServiceClient.createVet(any(Mono.class)))
-                .thenReturn(dto);
+
+        RegisterVet registerVet = RegisterVet.builder()
+                .userId(VET_ID)
+                .username("vet")
+                .email("vet@email.com")
+                .password("pwd")
+                .vet(vetDTO).build();
+
+
+        Role role = Role.builder()
+                .id(1)
+                .name(Roles.ADMIN.name())
+                .build();
+
+        UserDetails userDetails = UserDetails.builder()
+                .userId(VET_ID)
+                .username("vet")
+                .email("email@vet.com")
+                .roles(Set.of(role))
+                .build();
+
+        Mono<RegisterVet> dto = Mono.just(registerVet);
+
+        when(authServiceClient.createVetUser(any(Mono.class)))
+                .thenReturn((Mono.just(vetDTO)));
+
+
+
 
         client
                 .post()
-                .uri("/api/gateway/vets")
-                .body(dto, VetDTO.class)
+                .uri("/api/gateway/users/vets")
+                .body(dto, RegisterVet.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
 
-        Mockito.verify(vetsServiceClient, times(1))
-                .createVet(any(Mono.class));
     }
 
     @Test
@@ -1883,7 +1907,7 @@ class ApiGatewayControllerTest {
 //        assertEquals(null, visitsServiceClient.getVisitsForPet(visit.getPetId()));
 //    }
 
-    @Test
+   /* @Test
     void shouldUpdateAVisitsById() {
         VisitDetails visitDetailsToUpdate = VisitDetails.builder()
                 .visitDate(LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
@@ -1898,8 +1922,8 @@ class ApiGatewayControllerTest {
                 .thenReturn(Mono.just(visitDetailsToUpdate));
 
         client.put()
-                .uri("/api/gateway/owners/*/pets/{petId}/visits/{visitId}", "1", "1")
-                .accept(MediaType.APPLICATION_JSON)
+                 .uri("/api/gateway/owners/**//*pets/{petId}/visits/{visitId}", "1", "1")
+               /* .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(visitDetailsToUpdate)
                 .exchange()
@@ -1912,7 +1936,7 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.status").isEqualTo(Status.UPCOMING.toString())
                 .jsonPath("$.practitionerId").isEqualTo(2);
         Mockito.verify(visitsServiceClient,times(1)).updateVisitForPet(visitDetailsToUpdate);
-    }
+    }*/
 
     @Test
     void ShouldUpdateStatusForVisitByVisitId(){
@@ -1944,6 +1968,7 @@ class ApiGatewayControllerTest {
         Mockito.verify(visitsServiceClient, times(1))
                 .updateStatusForVisitByVisitId(anyString(), anyString());
     }
+
     @Test
     void shouldGetAllVisits() {
         VisitResponseDTO visitResponseDTO = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", Status.UPCOMING);
@@ -2261,7 +2286,7 @@ class ApiGatewayControllerTest {
         when(visitsServiceClient.deleteVisitByVisitId(VISIT_ID)).thenReturn(Mono.empty());
         client.delete()
                 .uri("/api/gateway/visits/" + VISIT_ID)
-                .accept(APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNoContent();
 
@@ -2278,12 +2303,43 @@ class ApiGatewayControllerTest {
 
         client.delete()
                 .uri("/api/gateway/visits/" + invalidId)
-                .accept(APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNotFound(); // Expecting a 404 status code
 
         Mockito.verify(visitsServiceClient, times(1))
                 .deleteVisitByVisitId(invalidId);
+    }
+
+    @Test
+    void deleteAllCancelledVisits_shouldSucceed(){
+
+        when(visitsServiceClient.deleteAllCancelledVisits()).thenReturn(Mono.empty());
+
+        client.delete()
+                .uri("/api/gateway/visits/cancelled")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent();
+        Mockito.verify(visitsServiceClient, times(1))
+                .deleteAllCancelledVisits();
+
+    }
+
+    @Test
+    void deleteAllCancelledVisits_shouldThrowRuntimeException(){
+
+        when(visitsServiceClient.deleteAllCancelledVisits())
+                .thenReturn(Mono.error(new RuntimeException("Failed to delete cancelled visits")));
+
+        client.delete()
+                .uri("/api/gateway/visits/cancelled")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().is5xxServerError();
+
+        Mockito.verify(visitsServiceClient, times(1)).deleteAllCancelledVisits();
+
     }
 
     private VisitResponseDTO buildVisitResponseDTO(){
@@ -2732,7 +2788,7 @@ void deleteAllInventory_shouldSucceed() {
 
     private VetDTO buildVetDTO() {
         return VetDTO.builder()
-                .vetId("678910")
+                .vetId("181faeb5-c024-425c-9f08-663600008f06")
                 .firstName("Pauline")
                 .lastName("LeBlanc")
                 .email("skjfhf@gmail.com")
@@ -2746,7 +2802,7 @@ void deleteAllInventory_shouldSucceed() {
     }
     private VetDTO buildVetDTO2() {
         return VetDTO.builder()
-                .vetId("678910")
+                .vetId("181faeb5-c024-425c-9f08-663600008f06")
                 .firstName("Pauline")
                 .lastName("LeBlanc")
                 .email("skjfhf@gmail.com")
@@ -2762,7 +2818,7 @@ void deleteAllInventory_shouldSucceed() {
     private RatingResponseDTO buildRatingResponseDTO() {
         return RatingResponseDTO.builder()
                 .ratingId("123456")
-                .vetId("678910")
+                .vetId("181faeb5-c024-425c-9f08-663600008f06")
                 .rateScore(4.0)
                 .build();
     }

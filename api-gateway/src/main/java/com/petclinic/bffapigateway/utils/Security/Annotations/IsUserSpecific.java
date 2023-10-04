@@ -14,8 +14,8 @@ import java.lang.annotation.*;
  * <p>
  * When present, this annotation will require a valid token and will check if the user id in the token matches the id specified in the annotation.
  * You specify which fields need to match in the idToMatch field.
- * This means that if you specify the idToMatch field as {"ownerId"} it will match the path variable called ownerId and the JWE id field.
- * You can add as many fields as you want to the idToMatch field, this will check if the JWE id matched any of the path variables.
+ * This means that if you specify the idToMatch field as {"ownerId"} it will match the path variable called ownerId and the JWS id field.
+ * You can add as many fields as you want to the idToMatch field, this will check if the JWS id matched any of the path variables.
  *
  * </p>
  *
