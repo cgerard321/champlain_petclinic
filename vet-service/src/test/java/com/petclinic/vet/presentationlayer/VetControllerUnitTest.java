@@ -566,6 +566,55 @@ class VetControllerUnitTest {
         Mockito.verify(educationService, times(1))
                 .deleteEducationByEducationId(vetId,educationId);
     }
+    @Test
+    void updateEducationWithValidVetIdAndValidEducationId_shouldSucceed(){
+        EducationRequestDTO updatedEducation = EducationRequestDTO.builder()
+                .schoolName("McGill")
+                .vetId("678910")
+                .degree("Bachelor of Medicine")
+                .fieldOfStudy("Medicine")
+                .startDate("2010")
+                .endDate("2015")
+                .build();
+
+        EducationResponseDTO educationResponse = EducationResponseDTO.builder()
+                .educationId("2")
+                .schoolName("McGill")
+                .vetId("678910")
+                .degree("Bachelor of Medicine")
+                .fieldOfStudy("Medicine")
+                .startDate("2010")
+                .endDate("2015")
+                .build();
+
+        when(educationService.updateEducationByVetIdAndEducationId(anyString(), anyString(), any(Mono.class)))
+                .thenReturn(Mono.just(educationResponse));
+
+        client.put()
+                .uri("/vets/"+VET_ID+"/educations/"+educationResponse.getEducationId())
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedEducation)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(EducationResponseDTO.class)
+                .value(educationResponseDTO -> {
+                    assertNotNull(educationResponseDTO);
+                    assertNotNull(educationResponseDTO.getEducationId());
+                    assertThat(educationResponseDTO.getEducationId()).isEqualTo(educationResponse.getEducationId());
+                    assertThat(educationResponseDTO.getVetId()).isEqualTo(updatedEducation.getVetId());
+                    assertThat(educationResponseDTO.getSchoolName()).isEqualTo(updatedEducation.getSchoolName());
+                    assertThat(educationResponseDTO.getDegree()).isEqualTo(updatedEducation.getDegree());
+                    assertThat(educationResponseDTO.getFieldOfStudy()).isEqualTo(updatedEducation.getFieldOfStudy());
+                    assertThat(educationResponseDTO.getStartDate()).isEqualTo(updatedEducation.getStartDate());
+                    assertThat(educationResponseDTO.getEndDate()).isEqualTo(updatedEducation.getEndDate());
+                });
+
+        Mockito.verify(educationService, times(1))
+                .updateEducationByVetIdAndEducationId(anyString(), anyString(), any(Mono.class));
+    }
+
 
     @Test
     void addEducationWithVetId_ValidValues_ShouldSucceed(){

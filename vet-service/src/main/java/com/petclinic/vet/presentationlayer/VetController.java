@@ -169,6 +169,14 @@ public class VetController {
         return educationService.deleteEducationByEducationId(vetId, educationId);
 
     }
+    @PutMapping("{vetId}/educations/{educationId}")
+    public Mono<ResponseEntity<EducationResponseDTO>> updateEducationByVetIdAndEducationId(@PathVariable String vetId,
+                                                                                           @PathVariable String educationId,
+                                                                                           @RequestBody Mono<EducationRequestDTO> educationRequestDTOMono){
+        return educationService.updateEducationByVetIdAndEducationId(vetId, educationId, educationRequestDTOMono)
+                .map(e->ResponseEntity.status(HttpStatus.OK).body(e))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
 
     @PostMapping("{vetId}/educations")
     public Mono<EducationResponseDTO> addEducationToVet(@PathVariable String vetId, @RequestBody Mono<EducationRequestDTO> educationRequestDTOMono){
