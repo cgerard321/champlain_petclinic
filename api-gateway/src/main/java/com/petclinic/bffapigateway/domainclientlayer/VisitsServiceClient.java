@@ -140,20 +140,13 @@ public class VisitsServiceClient {
 
 
     public Mono<VisitResponseDTO> updateStatusForVisitByVisitId(String visitId, String status) {
-        Status newStatus;
-        switch (status){
-            case "CONFIRMED":
-                newStatus = Status.CONFIRMED;
-                break;
 
-            case "COMPLETED":
-                newStatus = Status.COMPLETED;
-                break;
+        Status newStatus = switch (status) {
+            case "CONFIRMED" -> Status.CONFIRMED;
+            case "COMPLETED" -> Status.COMPLETED;
+            default -> Status.CANCELLED;
+        };
 
-            default:
-                newStatus = Status.CANCELLED;
-                break;
-        }
         return webClient
                 .put()
                 .uri("/visits/"+ visitId +"/status/" + newStatus)

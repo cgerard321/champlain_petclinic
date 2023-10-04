@@ -30,19 +30,42 @@ angular.module('visitList')
             }, 500); //delay by 1 second
         }
 
+        $scope.confirmVisit = function (visitId, status){
+            console.log("Called Function")
+            console.log(status)
+
+            if (!(status === "CANCELLED" || "COMPLETED"))
+                status = "CONFIRMED"
+
+            console.log("Function Finished")
+
+            let putURL = 'api/gateway/visits/' + visitId + '/status/' + status;
+
+            console.log(putURL);
+
+            $http.put(putURL, status)
+                .then(successCallback, errorCallback)
+
+            function successCallback(response) {
+                $scope.errors = [];
+                alert(visitId + " visit was confirmed successfully");
+                console.log(response, 'res');
+                delayedReload();
+            }
+
+            function errorCallback(error) {
+                alert($scope.errors);
+                console.log(error, 'Could not receive data');
+            }
+        }
+
         $scope.cancelVisit = function (visitId, status){
             console.log("Called Function")
             console.log(status)
 
-            if (status === "CANCELLED") {
+            if (!(status === "CONFIRMED" || "COMPLETED"))
                 status = "CANCELLED"
-            }else if(status === "CONFIRMED"){
-                status = "CONFIRMED"
-            }else if(status === "COMPLETED"){
-                status = "COMPLETED"
-            }else{
-                status = "CANCELLED"
-            }
+
             console.log("Function Finished")
 
             let putURL = 'api/gateway/visits/' + visitId + '/status/' + status;
