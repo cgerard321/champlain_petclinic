@@ -58,7 +58,9 @@
                     <div class="col-md-12">
                         <h5 class="mb-3">Availabilities</h5>
                         <div>
-                            <p id="workDays">{{$ctrl.vet.workday}}</p>
+                            <ul>
+                                <li ng-repeat="workday in $ctrl.vet.workday">{{ workday }}</li>
+                            </ul>
                         </div>
                     </div>
                 </div>

@@ -56,6 +56,7 @@ class VisitsControllerIntegrationTest {
     private final String STATUS = "CONFIRMED";
 
     Set<SpecialtyDTO> set= new HashSet<>();
+    Set<Workday> workdaySet = new HashSet<>();
 
     VetDTO vet = VetDTO.builder()
             .vetId(uuidVet)
@@ -66,7 +67,7 @@ class VisitsControllerIntegrationTest {
             .phoneNumber("(514)-634-8276 #2384")
             .imageId("1")
             .resume("Practicing since 3 years")
-            .workday("Monday, Tuesday, Friday")
+            .workday(workdaySet)
             .active(true)
             .specialties(set)
             .build();

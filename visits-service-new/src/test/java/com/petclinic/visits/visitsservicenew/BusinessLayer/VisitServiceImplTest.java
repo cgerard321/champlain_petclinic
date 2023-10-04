@@ -59,7 +59,7 @@ class VisitServiceImplTest {
     String uuidOwner = UUID.randomUUID().toString();
 
     Set<SpecialtyDTO> set= new HashSet<>();
-
+    Set<Workday> workdays = new HashSet<>();
 
     VetDTO vet = VetDTO.builder()
             .vetId(uuidVet)
@@ -70,7 +70,7 @@ class VisitServiceImplTest {
             .phoneNumber("(514)-634-8276 #2384")
             .imageId("1")
             .resume("Practicing since 3 years")
-            .workday("Monday, Tuesday, Friday")
+            .workday(workdays)
             .active(true)
             .specialties(set)
             .build();

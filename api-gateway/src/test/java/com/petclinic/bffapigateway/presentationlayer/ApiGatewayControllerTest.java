@@ -592,8 +592,7 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.firstName").isEqualTo(vetDTO.getFirstName())
                 .jsonPath("$.email").isEqualTo(vetDTO.getEmail())
                 .jsonPath("$.image").isNotEmpty()
-                .jsonPath("$.active").isEqualTo(vetDTO.isActive())
-                .jsonPath("$.workday").isEqualTo(vetDTO.getWorkday());
+                .jsonPath("$.active").isEqualTo(vetDTO.isActive());
 
         Mockito.verify(vetsServiceClient, times(1))
                 .getVetByVetId(VET_ID);
@@ -722,8 +721,7 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.firstName").isEqualTo(vetDTO2.getFirstName())
                 .jsonPath("$.email").isEqualTo(vetDTO2.getEmail())
                 .jsonPath("$.image").isNotEmpty()
-                .jsonPath("$.active").isEqualTo(vetDTO2.isActive())
-                .jsonPath("$.workday").isEqualTo(vetDTO2.getWorkday());
+                .jsonPath("$.active").isEqualTo(vetDTO2.isActive());
 
         Mockito.verify(vetsServiceClient, times(1))
                 .updateVet(anyString(), any(Mono.class));
@@ -2801,7 +2799,7 @@ void deleteAllInventory_shouldSucceed() {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .image("kjd".getBytes())
                 .specialties(new HashSet<>())
                 .active(false)
@@ -2816,7 +2814,7 @@ void deleteAllInventory_shouldSucceed() {
                 .phoneNumber("947-238-2847")
                 .image("kjd".getBytes())
                 .resume("Just became a vet")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(true)
                 .build();

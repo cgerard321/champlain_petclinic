@@ -11,6 +11,7 @@ package com.petclinic.vet.servicelayer;
   * Ticket: feat(VVS-CPC-553): add veterinarian
  */
 
+import com.petclinic.vet.dataaccesslayer.Workday;
 import lombok.*;
 
 import java.util.Set;
@@ -30,7 +31,7 @@ public class VetDTO {
     private String phoneNumber;
     private String imageId;
     private String resume;
-    private String workday;
+    private Set<Workday> workday;
     private boolean active;
     private Set<SpecialtyDTO> specialties;
 
