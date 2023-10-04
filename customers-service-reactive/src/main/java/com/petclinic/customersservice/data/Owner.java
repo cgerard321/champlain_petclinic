@@ -21,7 +21,6 @@ public class Owner {
     private String address;
     private String city;
     private String telephone;
-    private String email;
     private List<PetResponseDTO> pets;
     //private String photoId;
 

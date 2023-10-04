@@ -51,7 +51,6 @@ public class CustomerServiceClientIntegrationTest {
             .address("456 Elm")
             .city("Montreal")
             .telephone("5553334444")
-            .email("email@gmail.com")
             //.imageId(1)
             .build();
 
@@ -63,7 +62,6 @@ public class CustomerServiceClientIntegrationTest {
             .address("456 Elm")
             .city("Montreal")
             .telephone("5553334444")
-            .email("email@gmail.com")
             //.imageId(1)
             .build();
     PetType type = new PetType();
@@ -131,7 +129,6 @@ public class CustomerServiceClientIntegrationTest {
         assertEquals(ownerResponseDTO.getAddress(),TEST_OWNER.getAddress());
         assertEquals(ownerResponseDTO.getCity(),TEST_OWNER.getCity());
         assertEquals(ownerResponseDTO.getTelephone(),TEST_OWNER.getTelephone());
-        assertEquals(ownerResponseDTO.getEmail(),TEST_OWNER.getEmail());
         //assertEquals(ownerResponseDTO.getImageId(),TEST_OWNER.getImageId());
     }
 
@@ -173,7 +170,6 @@ public class CustomerServiceClientIntegrationTest {
                .address("Test")
                .city("Test")
                .telephone("Test")
-               .email("Test")
                 //.imageId(1)
                 .build();
         OwnerResponseDTO TEST_OWNER2 = OwnerResponseDTO.builder()
@@ -183,7 +179,6 @@ public class CustomerServiceClientIntegrationTest {
                 .address("Test")
                 .city("Test")
                 .telephone("Test")
-                .email("Test")
                 //.imageId(1)
                 .build();
         OwnerResponseDTO TEST_OWNER3 = OwnerResponseDTO.builder()
@@ -193,7 +188,6 @@ public class CustomerServiceClientIntegrationTest {
                 .address("Test")
                 .city("Test")
                 .telephone("Test")
-                .email("Test")
                 //.imageId(1)
                 .build();
 
