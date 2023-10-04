@@ -133,7 +133,7 @@ public Flux<InventoryResponseDTO> searchInventories(
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/page")
+    @GetMapping("/pages")
     public Flux<InventoryResponseDTO> getAllInventoryPage (@RequestParam Optional<Integer> page, @RequestParam Optional<Integer> size){
         return productInventoryService.getAllInventoryPage(
                 PageRequest.of(page.orElse(0),size.orElse(10)));
