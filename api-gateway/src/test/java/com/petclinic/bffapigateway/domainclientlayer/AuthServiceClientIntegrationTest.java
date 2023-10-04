@@ -43,6 +43,8 @@ public class AuthServiceClientIntegrationTest {
 
     @MockBean
     CustomersServiceClient customersServiceClient;
+    @MockBean
+    VetsServiceClient vetsServiceClient;
     private MockWebServer server;
     private ObjectMapper objectMapper;
 
@@ -75,7 +77,7 @@ public class AuthServiceClientIntegrationTest {
     void setup() {
 
         customersServiceClient = Mockito.mock(CustomersServiceClient.class);
-
+        vetsServiceClient = Mockito.mock(VetsServiceClient.class);
         server = new MockWebServer();
         authServiceClient = new AuthServiceClient(
                 WebClient.builder(),

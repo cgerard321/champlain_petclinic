@@ -25,6 +25,7 @@ import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import com.petclinic.bffapigateway.exceptions.GenericHttpException;
 import com.petclinic.bffapigateway.utils.Security.Filters.JwtTokenFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.RoleFilter;
+import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -614,22 +615,45 @@ class ApiGatewayControllerTest {
 
     @Test
     void createVet() {
-        Mono<VetDTO> dto = Mono.just(vetDTO);
-        when(vetsServiceClient.createVet(any(Mono.class)))
-                .thenReturn(dto);
+
+        RegisterVet registerVet = RegisterVet.builder()
+                .userId(VET_ID)
+                .username("vet")
+                .email("vet@email.com")
+                .password("pwd")
+                .vet(vetDTO).build();
+
+
+        Role role = Role.builder()
+                .id(1)
+                .name(Roles.ADMIN.name())
+                .build();
+
+        UserDetails userDetails = UserDetails.builder()
+                .userId(VET_ID)
+                .username("vet")
+                .email("email@vet.com")
+                .roles(Set.of(role))
+                .build();
+
+        Mono<RegisterVet> dto = Mono.just(registerVet);
+
+        when(authServiceClient.createVetUser(any(Mono.class)))
+                .thenReturn((Mono.just(vetDTO)));
+
+
+
 
         client
                 .post()
-                .uri("/api/gateway/vets")
-                .body(dto, VetDTO.class)
+                .uri("/api/gateway/users/vets")
+                .body(dto, RegisterVet.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
-
-        Mockito.verify(vetsServiceClient, times(1))
-                .createVet(any(Mono.class));
+        
     }
 
     @Test
