@@ -9,17 +9,13 @@ angular.module('petForm')
         var owner = "";
         var myDate = new Date();
 
-        // Clear the form fields
-        $ctrl.pet = {};
-
         $http.get('api/gateway/owners/petTypes').then(function (resp) {
             self.types = resp.data;
         });
 
         $http.get('api/gateway/pets/' + petId).then(function (resp) {
             self.pet = resp.data;
-        }).catch(function (error) {
-            console.error('Error loading pet details:', error);
+
         });
 
         $http.get('api/gateway/owners/' + ownerId).then(function (resp) {
@@ -31,6 +27,7 @@ angular.module('petForm')
 
             self.checked = false;
         });
+
 
         // Function to submit the form
         self.submit = function () {
@@ -47,9 +44,11 @@ angular.module('petForm')
                 type: petType
             }
 
+
             var req;
 
-            req = $http.put("api/gateway/" + "pets/" + petId, data);
+
+                req = $http.put("api/gateway/" + "pets/" + petId, data);
 
             req.then(function () {
                 $state.go('ownerDetails', { ownerId: ownerId });

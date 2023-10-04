@@ -4,10 +4,6 @@ angular.module('ownerDetails')
         self.owner = {};
         self.pet = {};
 
-        $http.get('api/gateway/owners/petTypes').then(function (resp) {
-            self.types = resp.data;
-        });
-
         $http.get('api/gateway/owners/' + $stateParams.ownerId).then(function (resp) {
             self.owner = resp.data;
 
@@ -17,15 +13,10 @@ angular.module('ownerDetails')
 
             $q.all(petPromises).then(function (responses) {
                 self.owner.pets = responses.map(function (response) {
-                    var pet = response.data;
-                    pet.type = pet.type || 'Unknown'; // Add this line to include the pet type
-                    return pet;
+                    return response.data;
                 });
             });
         });
-
-
-
 
         self.toggleActiveStatus = function (petId) {
             $http.get('api/gateway/pets/' + petId + '?_=' + new Date().getTime(), { headers: { 'Cache-Control': 'no-cache' } }).then(function (resp) {
