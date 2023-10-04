@@ -2,6 +2,7 @@ package com.petclinic.authservice.businesslayer;
 
 import com.petclinic.authservice.Util.Exceptions.IncorrectPasswordException;
 import com.petclinic.authservice.Util.Exceptions.NotFoundException;
+import com.petclinic.authservice.Util.Exceptions.UnverifiedUserException;
 import com.petclinic.authservice.datalayer.roles.Role;
 import com.petclinic.authservice.datalayer.user.*;
 import com.petclinic.authservice.datamapperlayer.UserMapper;
@@ -140,6 +141,24 @@ public class AuthServiceUserServiceTests {
         assertEquals("User not found", exception.getMessage());
 
         verify(userRepo).findByUsername("username");
+    }
+
+    @Test
+    void loginWithUnverifiedUser_ShouldThrowException() {
+        User user = User.builder()
+                .username(USER)
+                .email(EMAIL)
+                .password(passwordEncoder.encode(PASS))
+                .verified(false)
+                .build();
+        userRepo.save(user);
+
+        UserIDLessUsernameLessDTO user2 = new UserIDLessUsernameLessDTO(EMAIL, PASS);
+
+        when(userRepo.findByEmail(any()))
+                .thenReturn(Optional.of(user));
+
+        assertThrows(UnverifiedUserException.class, () -> userService.login(user2));
     }
 
 
