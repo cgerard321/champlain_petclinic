@@ -10,15 +10,12 @@ import com.petclinic.bffapigateway.utils.Utility;
 import lombok.RequiredArgsConstructor;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
-import okhttp3.mockwebserver.internal.duplex.DuplexResponseBody;
 import org.junit.jupiter.api.*;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -46,6 +43,8 @@ public class AuthServiceClientIntegrationTest {
 
     @MockBean
     CustomersServiceClient customersServiceClient;
+    @MockBean
+    VetsServiceClient vetsServiceClient;
     private MockWebServer server;
     private ObjectMapper objectMapper;
 
@@ -78,11 +77,11 @@ public class AuthServiceClientIntegrationTest {
     void setup() {
 
         customersServiceClient = Mockito.mock(CustomersServiceClient.class);
-
+        vetsServiceClient = Mockito.mock(VetsServiceClient.class);
         server = new MockWebServer();
         authServiceClient = new AuthServiceClient(
                 WebClient.builder(),
-                customersServiceClient, server.getHostName(),
+                customersServiceClient, vetsServiceClient, server.getHostName(),
                 String.valueOf(server.getPort()));
         objectMapper = new ObjectMapper();
     }

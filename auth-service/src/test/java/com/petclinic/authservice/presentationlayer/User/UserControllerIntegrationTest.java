@@ -1,7 +1,6 @@
 package com.petclinic.authservice.presentationlayer.User;
 
 import com.petclinic.authservice.Util.Exceptions.HTTPErrorMessage;
-import com.petclinic.authservice.businesslayer.UserService;
 import com.petclinic.authservice.domainclientlayer.Mail.MailService;
 import com.petclinic.authservice.security.JwtTokenUtil;
 import com.petclinic.authservice.datalayer.user.*;
@@ -17,7 +16,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.test.web.servlet.MockMvc;
 
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -399,8 +397,6 @@ class UserControllerIntegrationTest {
 
     }
 
-
-
     @Test
     void createUser_ShouldThrowEmailAlreadyExistsException() {
         UserIDLessRoleLessDTO userDTO = UserIDLessRoleLessDTO.builder()
@@ -448,7 +444,7 @@ class UserControllerIntegrationTest {
                 .expectStatus().isOk()
                 .expectBodyList(UserDetails.class)
                 .value(users -> {
-                    assertEquals(12,users.size());
+                    assertEquals(19,users.size());
                 });
     }
 

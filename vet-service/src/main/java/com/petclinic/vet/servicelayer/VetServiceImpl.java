@@ -51,8 +51,7 @@ public class VetServiceImpl implements VetService {
                         return Mono.error(new InvalidInputException("invalid specialties"));
                     return Mono.just(requestDTO);
                 })
-                .map(EntityDtoUtil::toEntity)
-                .doOnNext(e -> e.setVetId(EntityDtoUtil.generateVetId()))
+                .map(vetDTO -> EntityDtoUtil.toEntity(vetDTO))
                 .flatMap((vetRepository::save))
                 .map(EntityDtoUtil::toDTO);
     }

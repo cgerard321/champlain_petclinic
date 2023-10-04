@@ -3,6 +3,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 import com.petclinic.bffapigateway.dtos.Auth.*;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
+import com.petclinic.bffapigateway.dtos.Vets.VetDTO;
 import com.petclinic.bffapigateway.exceptions.*;
 import com.petclinic.bffapigateway.utils.Rethrower;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +19,6 @@ import reactor.core.publisher.Mono;
 import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static reactor.core.publisher.Mono.just;
 
 @Slf4j
 @Component
@@ -27,6 +27,9 @@ public class AuthServiceClient {
     private final WebClient.Builder webClientBuilder;
 
     private final CustomersServiceClient customersServiceClient;
+
+    private final VetsServiceClient vetsServiceClient;
+
     private final String authServiceUrl;
 
     @Autowired
@@ -34,10 +37,11 @@ public class AuthServiceClient {
 
     public AuthServiceClient(
             WebClient.Builder webClientBuilder,
-            CustomersServiceClient customersServiceClient, @Value("${app.auth-service.host}") String authServiceHost,
+            CustomersServiceClient customersServiceClient, VetsServiceClient vetsServiceClient, @Value("${app.auth-service.host}") String authServiceHost,
             @Value("${app.auth-service.port}") String authServicePort) {
         this.webClientBuilder = webClientBuilder;
         this.customersServiceClient = customersServiceClient;
+        this.vetsServiceClient = vetsServiceClient;
         authServiceUrl = "http://" + authServiceHost + ":" + authServicePort;
     }
 
@@ -95,6 +99,48 @@ public class AuthServiceClient {
             });
 
         }
+
+
+        public Mono<VetDTO> createVetUser(Mono<RegisterVet> model){
+
+            String uuid = UUID.randomUUID().toString();
+            log.info("UUID: " + uuid);
+
+            return model.flatMap(registerVet -> {
+                registerVet.setUserId(uuid);
+                return webClientBuilder.build().post()
+                        .uri(authServiceUrl + "/users")
+                        .body(Mono.just(registerVet), RegisterVet.class)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .retrieve()
+                        .onStatus(HttpStatusCode::is4xxClientError,
+                                n -> rethrower.rethrow(n,
+                                        x -> new GenericHttpException(x.get("message").toString(),(HttpStatus) n.statusCode()))
+                        )
+                        .bodyToMono(UserPasswordLessDTO.class)
+                        .flatMap(userDetails -> {
+                                    VetDTO vetDTO = VetDTO.builder()
+                                            .specialties(registerVet.getVet().getSpecialties())
+                                            .active(registerVet.getVet().isActive())
+                                            .email(registerVet.getEmail())
+                                            .image(registerVet.getVet().getImage())
+                                            .resume(registerVet.getVet().getResume())
+                                            .workday(registerVet.getVet().getWorkday())
+                                            .phoneNumber(registerVet.getVet().getPhoneNumber())
+                                            .vetBillId(registerVet.getVet().getVetBillId())
+                                            .firstName(registerVet.getVet().getFirstName())
+                                            .lastName(registerVet.getVet().getLastName())
+                                            .vetId(uuid)
+                                            .build();
+                                    return vetsServiceClient.createVet((Mono.just(vetDTO)));
+                                }
+                        );
+            }).doOnError(throwable -> {
+                log.error("Error creating user: " + throwable.getMessage());
+                vetsServiceClient.deleteVet(uuid);
+            });
+        }
+
 
 //    public Mono<UserDetails> updateUser (final long userId, final Register model) {
 //        return webClientBuilder.build().put()
