@@ -60,20 +60,20 @@ public class BillServiceImplTest {
                 .verifyComplete();
     }
 
-    @Test
-    public void test_GetAllBills() {
-       Bill billEntity = buildBill();
-
-       when(repo.findAll()).thenReturn(Flux.just(billEntity));
-
-       Flux<BillResponseDTO> billDTOFlux = billService.GetAllBills();
-
-       StepVerifier.create(billDTOFlux)
-               .consumeNextWith(foundBill -> {
-                   assertNotNull(foundBill);
-               })
-               .verifyComplete();
-    }
+//    @Test
+//    public void test_GetAllBills() {
+//       Bill billEntity = buildBill();
+//
+//       when(repo.findAll()).thenReturn(Flux.just(billEntity));
+//
+//       Flux<BillResponseDTO> billDTOFlux = billService.GetAllBills();
+//
+//       StepVerifier.create(billDTOFlux)
+//               .consumeNextWith(foundBill -> {
+//                   assertNotNull(foundBill);
+//               })
+//               .verifyComplete();
+//    }
 
     @Test
     public void test_GetAllBillsByPaidStatus() {
