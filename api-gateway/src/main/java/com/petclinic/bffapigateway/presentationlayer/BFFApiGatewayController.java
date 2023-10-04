@@ -325,6 +325,11 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @PostMapping(value = "vets/{vetId}/photos/{photoName}")
+    public Mono<Resource> addPhoto(@PathVariable String vetId, @PathVariable String photoName, @RequestBody Mono<Resource> image) {
+        return vetsServiceClient.addPhotoToVet(vetId, photoName, image);
+    }
+
     //Ratings
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping(value = "vets/{vetId}/ratings")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)

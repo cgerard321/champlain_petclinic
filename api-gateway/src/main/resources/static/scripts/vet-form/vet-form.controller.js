@@ -20,6 +20,7 @@ angular.module('vetForm')
                 document.getElementById("lastName").value = self.vet.lastName;
                 document.getElementById("email-info").style.display = "none";
                 document.getElementById("vetResume").value = self.vet.resume;
+                document.getElementById("workDays").value = self.vet.workday;
                 document.getElementById("user-info").style.display = "none";
 
                 const specialties = self.vet.specialties;
@@ -46,7 +47,7 @@ angular.module('vetForm')
 
             });
         }
-        
+
         self.submitVetForm = function (vet = self.vet) {
             console.log("vet please: " + vet);
             document.getElementById("loaderDiv").style.display = "block";
@@ -134,6 +135,16 @@ angular.module('vetForm')
                 return
             }
 
+            vet.workday = document.getElementById("workDays").value;
+            var inputElement = document.getElementById("workDays"); // Replace with your actual element reference
+            var inputValue = inputElement.value.toLowerCase();
+            var daysOfWeekPattern = /^(monday|tuesday|wednesday|thursday|friday|saturday|sunday)(, (?!.*\1)(monday|tuesday|wednesday|thursday|friday|saturday|sunday))*$/;
+
+            if (!daysOfWeekPattern.test(inputValue)) {
+                alert("Work day(s) must be valid days of the week separated by commas.")
+                return
+            }
+
             let isAct = document.getElementsByClassName("isActiveRadio");
             vet.active = isAct[0].checked;
 
@@ -148,14 +159,19 @@ angular.module('vetForm')
                     vet:vet
                 });
                 console.log(self.vet)
-            }
 
-            req.then(function () {
+            req.then(function (response) {
+                var result = response.data;
+                console.log("Response data:", result);
+                console.log("Response vet id ", result.vetId);
+                uploadPhoto(result.vetId);
                 $state.go('vets');
             }, function (response) {
                 let error = "Missing fields, please fill out the form";
                 $state.go('vets');
                 alert(error);
+                console.error(error);
             });
-        };
+        }
+    }
     }]);
