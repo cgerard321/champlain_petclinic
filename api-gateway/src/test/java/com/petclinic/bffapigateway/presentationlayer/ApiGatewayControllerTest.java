@@ -820,6 +820,7 @@ class ApiGatewayControllerTest {
                 .lastName("Johnny")
                 .address("111 John St")
                 .city("Johnston")
+                .province("Quebec")
                 .telephone("51451545144")
                 .build();
 
@@ -831,6 +832,7 @@ class ApiGatewayControllerTest {
                 .lastName("Johnny")
                 .address("111 John St")
                 .city("Johnston")
+                .province("Quebec")
                 .telephone("51451545144")
                 .build();
 
@@ -860,6 +862,7 @@ class ApiGatewayControllerTest {
                     assertEquals(dto.getLastName(),owner.getLastName());
                     assertEquals(dto.getAddress(),owner.getAddress());
                     assertEquals(dto.getCity(),owner.getCity());
+                    assertEquals(dto.getProvince(),owner.getProvince());
                     assertEquals(dto.getTelephone(),owner.getTelephone());
                 });
 
@@ -957,6 +960,7 @@ class ApiGatewayControllerTest {
         owner1.setLastName("Johnny");
         owner1.setAddress("111 John St");
         owner1.setCity("Johnston");
+        owner1.setProvince("Quebec");
         owner1.setTelephone("51451545144");
 
         Flux<OwnerResponseDTO> ownerResponseDTOFlux = Flux.just(owner1);
@@ -989,6 +993,7 @@ class ApiGatewayControllerTest {
         owner.setLastName("Test");
         owner.setAddress("Test");
         owner.setCity("Test");
+        owner.setProvince("Test");
         owner.setTelephone("Test");
 
         Optional<Integer> page = Optional.of(0);
@@ -1039,6 +1044,7 @@ class ApiGatewayControllerTest {
         owner.setLastName("Johnny");
         owner.setAddress("111 John St");
         owner.setCity("Johnston");
+        owner.setProvince("Quebec");
         owner.setTelephone("51451545144");
         when(customersServiceClient.getOwner("ownerId-123"))
                 .thenReturn(Mono.just(owner));
