@@ -76,12 +76,24 @@ public class UserServiceImpl implements UserService {
                         format("User with e-mail %s already exists", userIDLessDTO.getEmail()));
             }
 
+
+
             User user = userMapper.idLessRoleLessDTOToModel(userIDLessDTO);
+
+            if (userIDLessDTO.getDefaultRole().isEmpty()){
 
             Optional<Role> role = roleRepo.findById(3L);
             Set<Role> roleSet = new HashSet<>();
             role.ifPresent(roleSet::add);
             user.setRoles(roleSet);
+            }else{
+                Role role = roleRepo.findRoleByName(userIDLessDTO.getDefaultRole());
+                Set<Role> roleSet = new HashSet<>();
+                if(role == null)
+                    throw new NotFoundException("Role not found");
+                roleSet.add(role);
+                user.setRoles(roleSet);
+            }
             user.setUserIdentifier(new UserIdentifier(userIDLessDTO.getUserId()));
             user.setPassword(passwordEncoder.encode(user.getPassword()));
 

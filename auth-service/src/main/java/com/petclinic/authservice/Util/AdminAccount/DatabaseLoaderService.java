@@ -165,6 +165,71 @@ public class DatabaseLoaderService implements CommandLineRunner {
                 .verified(true)
                 .build();
 
+        User vet1 = User.builder()
+                .username("Vet1")
+                .userIdentifier(new UserIdentifier("69f852ca-625b-11ee-8c99-0242ac120002"))
+                .roles(roles2)
+                .email("carterjames@email.com")
+                .password(passwordEncoder.encode("pwd"))
+                .verified(true)
+                .build();
+
+        User vet2 = User.builder()
+                .username("Vet2")
+                .userIdentifier(new UserIdentifier("69f85766-625b-11ee-8c99-0242ac120002"))
+                .roles(roles2)
+                .email("learyhelen@email.com")
+                .password(passwordEncoder.encode("pwd"))
+                .verified(true)
+                .build();
+
+        User vet3 = User.builder()
+                .username("Vet3")
+                .userIdentifier(new UserIdentifier("69f85bda-625b-11ee-8c99-0242ac120002"))
+                .roles(roles2)
+                .email("douglaslinda@email.com")
+                .password(passwordEncoder.encode("pwd"))
+                .verified(true)
+                .build();
+
+        User vet4 = User.builder()
+                .username("Vet4")
+                .userIdentifier(new UserIdentifier("69f85d2e-625b-11ee-8c99-0242ac120002"))
+                .roles(roles2)
+                .email("ortegarafael@email.com")
+                .password(passwordEncoder.encode("pwd"))
+                .verified(true)
+                .build();
+
+        User vet5 = User.builder()
+                .username("Vet5")
+                .userIdentifier(new UserIdentifier("ac9adeb8-625b-11ee-8c99-0242ac120002"))
+                .roles(roles2)
+                .email("stevenshenry@email.com")
+                .password(passwordEncoder.encode("pwd"))
+                .verified(true)
+                .build();
+
+        User vet6 = User.builder()
+                .username("Vet6")
+                .userIdentifier(new UserIdentifier("ac9adeb8-625b-11ee-8c99-0242ac120003"))
+                .roles(roles2)
+                .email("jenkinssharon@email.com")
+                .password(passwordEncoder.encode("pwd"))
+                .verified(true)
+                .build();
+
+        User vet7 = User.builder()
+                .username("Vet7")
+                .userIdentifier(new UserIdentifier("c02cbf82-625b-11ee-8c99-0242ac120002"))
+                .roles(roles2)
+                .email("johndoe@email.com")
+                .password(passwordEncoder.encode("pwd"))
+                .verified(true)
+                .build();
+
+
+        userRepo.saveAll(List.of(vet, vet1, vet2, vet3, vet4, vet5, vet6, vet7));
 
         userRepo.saveAll(List.of(owner1, owner2, owner3, owner4, owner5, owner6, owner7, owner8, owner9, owner10));
     }
