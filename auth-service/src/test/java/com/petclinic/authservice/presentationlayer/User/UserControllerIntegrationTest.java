@@ -398,14 +398,6 @@ class UserControllerIntegrationTest {
     }
 
     @Test
-    void loginWithUnverifiedUser_ShouldThrowUnverifiedUserException(){
-
-
-    }
-
-
-
-    @Test
     void createUser_ShouldThrowEmailAlreadyExistsException() {
         UserIDLessRoleLessDTO userDTO = UserIDLessRoleLessDTO.builder()
                 .email("richard200danon@gmail.com")
