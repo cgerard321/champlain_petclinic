@@ -310,7 +310,7 @@ public class BFFApiGatewayController {
      **/
 
     //Photo
-    @IsUserSpecific(idToMatch = {"vetId"})
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping("vets/{vetId}/photo")
     public Mono<ResponseEntity<Resource>> getPhotoByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getPhotoByVetId(vetId)
@@ -418,7 +418,7 @@ public class BFFApiGatewayController {
         return vetsServiceClient.getVets();
     }
 
-    @IsUserSpecific(idToMatch = {"vetId"})
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping("/vets/{vetId}")
     public Mono<ResponseEntity<VetDTO>> getVetByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getVetByVetId(VetsEntityDtoUtil.verifyId(vetId))
