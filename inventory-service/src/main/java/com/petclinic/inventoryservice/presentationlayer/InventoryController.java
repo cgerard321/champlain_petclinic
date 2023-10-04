@@ -3,11 +3,15 @@ package com.petclinic.inventoryservice.presentationlayer;
 import com.petclinic.inventoryservice.businesslayer.ProductInventoryService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import org.springframework.data.domain.PageRequest;
+
+import java.util.Optional;
 
 @RestController
 @AllArgsConstructor
@@ -127,6 +131,12 @@ public Flux<InventoryResponseDTO> searchInventories(
         return productInventoryService.addInventoryType(inventoryTypeRequestDTO)
                 .map(inventoryTypeResponseDTO -> ResponseEntity.status(HttpStatus.CREATED).body(inventoryTypeResponseDTO))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/page")
+    public Flux<InventoryResponseDTO> getAllInventoryPage (@RequestParam Optional<Integer> page, @RequestParam Optional<Integer> size){
+        return productInventoryService.getAllInventoryPage(
+                PageRequest.of(page.orElse(0),size.orElse(10)));
     }
 
 }

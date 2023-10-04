@@ -1,8 +1,10 @@
 package com.petclinic.inventoryservice.businesslayer;
 
 import com.petclinic.inventoryservice.presentationlayer.*;
+import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
 
 public interface ProductInventoryService {
     Mono<ProductResponseDTO> addProductToInventory(Mono<ProductRequestDTO> productRequestDTOMono, String inventoryId);
@@ -24,6 +26,8 @@ public interface ProductInventoryService {
     Flux<InventoryResponseDTO> searchInventories(String inventoryName, String inventoryType, String inventoryDescription);
 
     Mono<ProductResponseDTO> getProductByProductIdInInventory(String inventoryId, String productId);
+
+    Flux<InventoryResponseDTO> getAllInventoryPage(Pageable page);
 
 
 }

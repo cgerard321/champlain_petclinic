@@ -1,6 +1,7 @@
 
 package com.petclinic.bffapigateway.domainclientlayer;
 
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.ProductRequestDTO;
@@ -206,6 +207,13 @@ public class InventoryServiceClient {
                 .uri(inventoryServiceUrl + "/{inventoryId}", inventoryId)
                 .retrieve()
                 .bodyToMono(Void.class);
+    }
+
+    public Flux<InventoryResponseDTO> getAllInventoryPage(Optional<Integer> page, Optional<Integer> size) {
+        return webClient.get()
+                .uri(inventoryServiceUrl + "/page?page="+page.orElse(0)+"&size="+size.orElse(10))
+                .retrieve()
+                .bodyToFlux(InventoryResponseDTO.class);
     }
 
 

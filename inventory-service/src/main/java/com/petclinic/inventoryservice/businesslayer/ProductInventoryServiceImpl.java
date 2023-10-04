@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
+import org.springframework.data.domain.Pageable;
 
 
 @Service
@@ -289,6 +290,14 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                 .switchIfEmpty(Mono.error(new NotFoundException("Inventory id:" + inventoryId + "and product:" + productId + "are not found")));
 
 
+    }
+
+    @Override
+    public Flux<InventoryResponseDTO> getAllInventoryPage(Pageable page) {
+        return inventoryRepository.findAll()
+                .map(EntityDTOUtil::toInventoryResponseDTO)
+                .skip(page.getPageNumber() * page.getPageSize())
+                .take(page.getPageSize());
     }
 
 
