@@ -4,7 +4,7 @@ angular.module('visits')
     .controller('VisitsController', ['$http', '$state', '$stateParams', '$filter','$scope','$rootScope', function ($http, $state, $stateParams, $filter, $scope,$rootScope) {
         var self = this;
         var petId = $stateParams.petId || 0;
-        var postURL = "api/gateway/visits";
+        var postURL = "api/gateway/visit/owners/5fe81e29-1f1d-4f9d-b249-8d3e0cc0b7dd/pets/9/visits";
         var vetsUrl = "api/gateway/vets";
         var billsUrl = "api/gateway/bill";
         var visitId = 0;
@@ -13,6 +13,7 @@ angular.module('visits')
         self.desc = "";
         self.chosenDate = null;
         self.chosenTime = null;
+
 
 
 
@@ -640,10 +641,10 @@ angular.module('visits')
 
         self.submit = function () {
             var data = {
-                visitDate: $filter('date')(self.chosenDate, "yyyy-MM-ddTHH:mm:ss"),
+                visitDate: $filter('date')(self.chosenDate, "yyyy-MM-dd HH:mm"),
                 description: self.desc,
                 practitionerId: self.practitionerId,
-                status: true
+                status: 'UPCOMING'
             };
 
             var billData = {
