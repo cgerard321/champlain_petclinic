@@ -46,21 +46,4 @@ public class VetsClient {
         return vetDTOMono;
     }
 
-    public Flux<VetDTO> getAllVets() {
-        Flux<VetDTO> vetDTOFlux =
-                webClient
-                        .get()
-                        .uri(vetClientServiceBaseURL)
-                        .retrieve()
-                        .onStatus(HttpStatusCode::is4xxClientError, error -> {
-                            return Mono.error(new IllegalArgumentException("Something went wrong (4xx)"));
-                        })
-                        .onStatus(HttpStatusCode::is5xxServerError, error ->
-                                Mono.error(new IllegalArgumentException("Something went wrong (5xx)"))
-                        )
-                        .bodyToFlux(VetDTO.class);
-
-        return vetDTOFlux;
-    }
-
 }
