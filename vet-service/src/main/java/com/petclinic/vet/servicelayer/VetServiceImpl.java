@@ -14,6 +14,8 @@ package com.petclinic.vet.servicelayer;
 import com.petclinic.vet.dataaccesslayer.VetRepository;
 import com.petclinic.vet.exceptions.InvalidInputException;
 import com.petclinic.vet.exceptions.NotFoundException;
+import com.petclinic.vet.presentationlayer.VetRequestDTO;
+import com.petclinic.vet.presentationlayer.VetResponseDTO;
 import com.petclinic.vet.util.EntityDtoUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,13 +30,13 @@ public class VetServiceImpl implements VetService {
     private final VetRepository vetRepository;
 
     @Override
-    public Flux<VetDTO> getAll() {
+    public Flux<VetResponseDTO> getAll() {
         return vetRepository.findAll()
-                .map(EntityDtoUtil::toDTO);
+                .map(EntityDtoUtil::vetEntityToResponseDTO);
     }
 
     @Override
-    public Mono<VetDTO> insertVet(Mono<VetDTO> vetDTOMono) {
+    public Mono<VetResponseDTO> insertVet(Mono<VetRequestDTO> vetDTOMono) {
         return vetDTOMono
                 .flatMap(requestDTO->{
                     if(requestDTO.getFirstName().length()>30||requestDTO.getFirstName().length()<2)
@@ -51,13 +53,13 @@ public class VetServiceImpl implements VetService {
                         return Mono.error(new InvalidInputException("invalid specialties"));
                     return Mono.just(requestDTO);
                 })
-                .map(vetDTO -> EntityDtoUtil.toEntity(vetDTO))
+                .map(vetDTO -> EntityDtoUtil.vetRequestDtoToEntity(vetDTO))
                 .flatMap((vetRepository::save))
-                .map(EntityDtoUtil::toDTO);
+                .map(EntityDtoUtil::vetEntityToResponseDTO);
     }
 
     @Override
-    public Mono<VetDTO> updateVet(String vetId, Mono<VetDTO> vetDTOMono) {
+    public Mono<VetResponseDTO> updateVet(String vetId, Mono<VetRequestDTO> vetDTOMono) {
         return vetRepository.findVetByVetId(vetId)
                 .switchIfEmpty(Mono.error(new NotFoundException("No vet with this vetId was found: " + vetId)))
                 .flatMap(p -> vetDTOMono
@@ -76,31 +78,31 @@ public class VetServiceImpl implements VetService {
                                 return Mono.error(new InvalidInputException("invalid specialties"));
                             return Mono.just(requestDTO);
                         })
-                        .map(EntityDtoUtil::toEntity)
+                        .map(EntityDtoUtil::vetRequestDtoToEntity)
                         .doOnNext(e -> e.setVetId(p.getVetId()))
                         .doOnNext(e -> e.setId(p.getId()))
                 )
                 .flatMap(vetRepository::save)
-                .map(EntityDtoUtil::toDTO);
+                .map(EntityDtoUtil::vetEntityToResponseDTO);
     }
 
     @Override
-    public Mono<VetDTO> getVetByVetId(String vetId) {
+    public Mono<VetResponseDTO> getVetByVetId(String vetId) {
         return vetRepository.findVetByVetId(vetId)
                 .switchIfEmpty(Mono.error(new NotFoundException("No vet with this vetId was found: " + vetId)))
-                .map(EntityDtoUtil::toDTO);
+                .map(EntityDtoUtil::vetEntityToResponseDTO);
     }
 
     @Override
-    public Flux<VetDTO> getVetByIsActive(boolean isActive) {
+    public Flux<VetResponseDTO> getVetByIsActive(boolean isActive) {
         return vetRepository.findVetsByActive(isActive)
-                .map(EntityDtoUtil::toDTO);
+                .map(EntityDtoUtil::vetEntityToResponseDTO);
     }
 
     @Override
-    public Mono<VetDTO> getVetByVetBillId(String vetBillId) {
+    public Mono<VetResponseDTO> getVetByVetBillId(String vetBillId) {
         return  vetRepository.findVetByVetBillId(vetBillId)
-                .map(EntityDtoUtil::toDTO);
+                .map(EntityDtoUtil::vetEntityToResponseDTO);
     }
 
     @Override
