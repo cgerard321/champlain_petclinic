@@ -140,6 +140,18 @@ public class BillServiceImplTest {
     }
 
     @Test
+    public void test_DeleteAllBills(){
+        
+        when(repo.deleteAll()).thenReturn(Mono.empty());
+
+        Mono<Void> deleteObj = billService.DeleteAllBills();
+
+        StepVerifier.create(deleteObj)
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
+    @Test
     public void test_DeleteBill(){
 
         Bill billEntity = buildBill();

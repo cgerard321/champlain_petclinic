@@ -80,7 +80,7 @@ public class BillResource {
 
     // Delete Bill //
 
-    @DeleteMapping()
+    @DeleteMapping(value = "/bills")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public Mono<Void> deleteAllBills(){
         return SERVICE.DeleteAllBills();
