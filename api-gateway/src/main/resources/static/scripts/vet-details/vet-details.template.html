@@ -1,13 +1,9 @@
-vet details.template.html:
 <link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css"
       integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.5.0/font/bootstrap-icons.css" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 <link href="form.css" rel="stylesheet" type="text/css"/>
 <link href="/css/ownerdetail.css" rel="stylesheet" type="text/css"/>
 <link href="/css/vets/ratings.css" rel="stylesheet" type="text/css"/>
-<link rel="stylesheet" href="path/to/font-awesome/css/font-awesome.min.css">
-
 
 <div class="bg-light">
     <div class="container">
@@ -70,7 +66,9 @@ vet details.template.html:
             <div class="col-md-6">
                 <!-- Vet Profile Image -->
                 <div class="parent">
-                    <img alt="Profile picture preview" src="data:image/jpeg;base64, {{$ctrl.vetPhoto}}" width="150" height="150" class="image1">
+                    <img alt="Profile picture preview" src="data:image/png;base64, {{$ctrl.vetPhoto.photo}}" width="150" height="150" class="image1">
+                    <img alt="" src="data:image/png;base64, {{$ctrl.PreviewImage}}" ng-show="$ctrl.PreviewImage != null" width="150" height="150" class="image2"/>
+                    <input type="file" accept="image/jpeg" class="fileInput" id="photoVet"/>
                 </div>
                 <!-- Edit Vet Button -->
                 <div class="row g-3">
@@ -83,45 +81,134 @@ vet details.template.html:
             </div>
         </div>
         <hr>
-        <!-- Vet Education -->
         <div class="row g-5">
-            <!-- Educations Header -->
-            <h3 class="form-label-rating text-center" style="margin-top: 5%">Educations</h3>
-            <div class="col-md-12" ng-if="$ctrl.educations.length > 0">
-                <div class="col-md-12">
-                    <div ng-if="$ctrl.educations.length === 0" style="text-align: center">
-                        This vet has no educations listed.
+
+            <!-- Vet Education add button (displays the form) -->
+            <div class="container">
+                <button class="add-vet-button btn btn-primary" style="width: 140px" ng-click="$ctrl.addEducationFormVisible = true" >Add Education</button>
+            </div>
+
+            <!-- Vet Education -->
+            <div class="row g-5">
+                <!-- Education Form (Initially hidden) -->
+                <div class="education-form" style="width: 70%; margin-top: 5%" ng-show="$ctrl.addEducationFormVisible">
+
+                    <form enctype="multipart/form-data" id="educationForm" name="educationForm">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="degree">Degree</label>
+                                        <input type="text" class="form-control" id="degree" ng-model="$ctrl.newEducation.degree" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="schoolName">Institution</label>
+                                        <input type="text" class="form-control" id="schoolName" ng-model="$ctrl.newEducation.schoolName" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="fieldOfStudy">Field Of Study</label>
+                                        <input type="text" class="form-control" id="fieldOfStudy" ng-model="$ctrl.newEducation.fieldOfStudy" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="startDate">Start Year</label>
+                                        <input type="number" class="form-control" id="startDate" ng-model="$ctrl.newEducation.startDate" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="endDate">End Year</label>
+                                        <input type="number" class="form-control" id="endDate" ng-model="$ctrl.newEducation.endDate" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="margin-top: 5%">
+                                <!--<button type="submit" class="btn btn-primary" ng-click="$ctrl.addEducationFormVisible = false">Submit</button>-->
+                                <button type="button" class="btn btn-secondary" ng-click="$ctrl.addEducationFormVisible = false">Cancel</button>
+                                <button class="btn btn-primary ratingButton" ng-click="$ctrl.submitEducationForm(educationForm)" type="submit">
+                                    Submit
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <!-- Vet Education -->
+                <div class="row g-5">
+                    <!-- Educations Header -->
+                    <h3 class="form-label-rating text-center" style="margin-top: 5%">Educations</h3>
+                    <div class="col-md-12" ng-if="$ctrl.educations.length > 0">
+                        <div class="col-md-12">
+                            <div ng-if="$ctrl.educations.length === 0" style="text-align: center">
+                                This vet has no educations listed.
+                            </div>
+                            <!-- Education Table -->
+                            <table class="table" style="margin-bottom: 10%">
+                                <thead>
+                                <tr>
+                                    <th>Degree</th>
+                                    <th>Institution</th>
+                                    <th>Field Of Study</th>
+                                    <th>Start Year</th>
+                                    <th>End Year</th>
+                                    <th>Update</th>
+                                    <th>Delete</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+
+                                <tr ng-repeat="education in $ctrl.educations track by education.educationId">
+                                    <td>{{ education.degree }}</td>
+                                    <td>{{ education.schoolName }}</td>
+                                    <td>{{ education.fieldOfStudy }}</td>
+                                    <td>{{ education.startDate }}</td>
+                                    <td>{{ education.endDate }}</td>
+
+                                        <!-- Education Update Form -->
+                                    <td>
+                                        <form enctype="multipart/form-data" id="updateEducationForm{{education.educationId}}" name="updateEducationForm">
+                                            <div class="col-sm-12" name="educationUpdate" id="educationUpdate{{education.educationId}}" style="display: none">
+
+                                                <div class="form-group">
+                                                <label>Degree</label>
+                                            <input type="text" class="form-control" id="updateDegree{{education.educationId}}" ng-model="education.degree" required>
+                                                </div>
+                                        <div class="form-group">
+                                            <label>School Name</label>
+                                            <input type="text" class="form-control" id="updateSchoolName{{education.educationId}}" ng-model="education.schoolName" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Field of Study</label>
+                                            <input type="text" class="form-control" id="updateFieldOfStudy{{education.educationId}}" ng-model="education.fieldOfStudy" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Start Date</label>
+                                            <input type="text" class="form-control" id="updateStartDate{{education.educationId}}" ng-model="education.startDate" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>End Date</label>
+                                            <input type="text" class="form-control" id="updateEndDate{{education.educationId}}" ng-model="education.endDate" required>
+                                        </div>
+                                            </div>
+                                    </form>
+                                        <button class="update-vet-button btn btn-success"
+                                                id="updateEducationBtn{{education.educationId}}"
+                                                ng-click="$ctrl.updateEducation(education.educationId)">
+                                            Update
+                                        </button>
+                                    </td>
+
+                                    <td>
+                                        <a class="btn btn-danger educationButton" href="javascript:void(0)" ng-click="deleteVetEducation(education.educationId)">Delete Education</a>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
-                    <!-- Education Table -->
-                    <table class="table" style="margin-bottom: 10%">
-                        <thead>
-                        <tr>
-                            <th>Degree</th>
-                            <th>Institution</th>
-                            <th>Field Of Study</th>
-                            <th>Start Year</th>
-                            <th>End Year</th>
-                            <th>Delete</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr ng-repeat="educations in $ctrl.educations track by educations.educatonId">
-                            <td>{{ educations.degree }}</td>
-                            <td>{{ educations.schoolName }}</td>
-                            <td>{{ educations.fieldOfStudy }}</td>
-                            <td>{{ educations.startDate }}</td>
-                            <td>{{ educations.endDate }}</td>
-                               <td>
-                                <a class="btn btn-danger educationButton" href="javascript:void(0)" ng-click="deleteVetEducation(educations.educationId)">Delete Education</a>
-                            </td>
-                        </tr>
-                        </tbody>
-                    </table>
                 </div>
             </div>
         </div>
-        <hr>
-        <!-- tete -->
+                <hr>
+                <!-- tete -->
         <!-- Ratings and Add Rating -->
         <div class="row g-5">
             <!-- Percentage of ratings -->
@@ -131,7 +218,6 @@ vet details.template.html:
                     <div id="ratings-list" style="text-align: left; margin-left: 40%"></div>
                 </div>
             </div>
-
             <!-- Add Rating -->
             <div class="col-md-6">
                 <div class="add-rating-container">
@@ -173,6 +259,7 @@ vet details.template.html:
                     </div>
                 </div>
             </div>
+
 
             <!-- Ratings Chart -->
             <div class="col-md-12" ng-if="$ctrl.ratings.length > 0" style="margin-top: 5%">
@@ -220,6 +307,7 @@ vet details.template.html:
                                         </div>
                                     </div>
                                 </form>
+
                                 <button class="update-vet-button btn btn-success"
                                         id="updateRatingBtn{{rating.ratingId}}"
                                         ng-click="$ctrl.updateRating(rating.ratingId)">
@@ -237,3 +325,4 @@ vet details.template.html:
         </div>
     </div>
 </div>
+

@@ -1,6 +1,7 @@
 package com.petclinic.bffapigateway.utils.Security.Filters;
 
 
+import com.petclinic.bffapigateway.dtos.Auth.TokenResponseDTO;
 import com.petclinic.bffapigateway.exceptions.ForbiddenAccessException;
 import com.petclinic.bffapigateway.exceptions.HandlerIsNullException;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
@@ -26,6 +27,7 @@ import reactor.core.publisher.Mono;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 
 @Slf4j
@@ -76,9 +78,16 @@ public class IsUserFilter implements WebFilter {
         }
         else {
 
-            String token = jwtTokenUtil.getTokenFromRequest(exchange);
 
-            List<String> roles = jwtTokenUtil.getRolesFromToken(token);
+            TokenResponseDTO tokenResponseDTO = (TokenResponseDTO) exchange.getAttribute("tokenValues");
+
+
+            if (tokenResponseDTO == null) {
+                exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+                return exchange.getResponse().writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap("No token provided".getBytes())));
+            }
+
+            List<String> roles = tokenResponseDTO.getRoles();
 
 
 
@@ -86,12 +95,6 @@ public class IsUserFilter implements WebFilter {
             if (roles == null) {
                 return Mono.error(new InvalidTokenException("Unauthorized, invalid token"));
             }
-
-            //todo : ask other teams if they want admin to have carte blanche
-            //        if (roles.contains(Roles.ADMIN.toString())) {
-            //            return chain.filter(exchange);
-            //        }
-
 
 
             for (String role : roles) {
@@ -120,12 +123,9 @@ public class IsUserFilter implements WebFilter {
 
 
 
-            if (token == null) {
-                exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-                return exchange.getResponse().writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap("No token provided".getBytes())));
-            }
 
-            String tokenId = jwtTokenUtil.getIdFromToken(token);
+
+            String tokenId = tokenResponseDTO.getUserId();
 
 
             for (String id : idToMatch) {

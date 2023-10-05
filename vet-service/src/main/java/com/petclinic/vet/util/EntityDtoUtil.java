@@ -17,6 +17,7 @@ import com.petclinic.vet.dataaccesslayer.Specialty;
 import com.petclinic.vet.dataaccesslayer.Vet;
 import com.petclinic.vet.exceptions.InvalidInputException;
 import com.petclinic.vet.servicelayer.*;
+import com.petclinic.vet.servicelayer.education.EducationRequestDTO;
 import com.petclinic.vet.servicelayer.education.EducationResponseDTO;
 import com.petclinic.vet.servicelayer.ratings.RatingRequestDTO;
 import com.petclinic.vet.servicelayer.ratings.RatingResponseDTO;
@@ -26,6 +27,7 @@ import org.springframework.beans.BeanUtils;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 
 public class EntityDtoUtil {
     @Generated
@@ -49,7 +51,7 @@ public class EntityDtoUtil {
 
     public static Vet toEntity(VetDTO dto) {
         Vet vet = new Vet();
-        vet.setVetId(generateVetId());
+        vet.setVetId(dto.getVetId());
         vet.setVetBillId(dto.getVetBillId());
         vet.setFirstName(dto.getFirstName());
         vet.setLastName(dto.getLastName());
@@ -64,9 +66,7 @@ public class EntityDtoUtil {
     }
 
     public static String generateVetId() {
-        Random random = new Random();
-        int number = random.nextInt(99999);
-        return "22" + (String.format("%05d", number));
+        return UUID.randomUUID().toString();
     }
 
     public static SpecialtyDTO toDTO(Specialty specialty) {
@@ -91,6 +91,12 @@ public class EntityDtoUtil {
         EducationResponseDTO dto = new EducationResponseDTO();
         BeanUtils.copyProperties(education, dto);
         return dto;
+    }
+
+    public static Education toEntity(EducationRequestDTO educationRequestDTO) {
+        Education education = new Education();
+        BeanUtils.copyProperties(educationRequestDTO, education);
+        return education;
     }
 
     public static Rating toEntity(RatingRequestDTO ratingRequestDTO) {
@@ -122,12 +128,8 @@ public class EntityDtoUtil {
     }
 
     public static String verifyId(String id) {
-        try {
-            Integer.parseInt(id);
-        }
-        catch(NumberFormatException e) {
-            throw new InvalidInputException ("This id is not valid");
-        }
+        if(id.length() != 36)
+            throw new InvalidInputException("This id is not valid");
         return id;
     }
 

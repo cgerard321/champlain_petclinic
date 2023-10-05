@@ -20,4 +20,10 @@ angular.module('visitList', ['ui.router'])
                 url: '/visits/:visitId/deleteVisit',
                 template: '<visit-list></visit-list>'
             })
+
+            .state('deleteCancelledVisit', {
+                parent: 'app',
+                url: '/visits/cancelled',
+                template: '<visit-list></visit-list>'
+            })
     }]);

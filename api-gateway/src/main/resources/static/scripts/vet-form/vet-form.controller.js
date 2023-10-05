@@ -3,10 +3,13 @@
 angular.module('vetForm')
     .controller('VetFormController', ["$http", '$state', '$stateParams', function ($http, $state, $stateParams) {
         var self = this;
+        document.getElementById("loaderDiv").style.display = "none";
+
         var vetId = $stateParams.vetId || 0;
         if (!vetId || vetId === 0) {
             document.getElementById("title").innerHTML = "New Vet Sign Up";
             self.vet = {};
+
 
         } else {
             $http.get("api/gateway/vets/" + $stateParams.vetId).then(function (resp) {
@@ -14,9 +17,10 @@ angular.module('vetForm')
                 document.getElementById("title").innerHTML = "Edit Vet";
                 document.getElementById("firstName").value = self.vet.firstName;
                 document.getElementById("lastName").value = self.vet.lastName;
-                document.getElementById("email").value = self.vet.email;
+                document.getElementById("email-info").style.display = "none";
                 document.getElementById("vetResume").value = self.vet.resume;
                 document.getElementById("workDays").value = self.vet.workday;
+                document.getElementById("user-info").style.display = "none";
 
                 const specialties = self.vet.specialties;
                 specialties.forEach(specs => {
@@ -36,6 +40,8 @@ angular.module('vetForm')
             });
         }
         self.submitVetForm = function (vet) {
+            document.getElementById("loaderDiv").style.display = "block";
+
             let specialtyList = document.getElementsByClassName("specialty")
             let selectedSpecialtiesList = [];
             let specialtiesStr = "[";
@@ -82,16 +88,15 @@ angular.module('vetForm')
                 return
             }
 
-            vet.email = document.getElementById("email").value;
             var emailPattern = /\b[\w.%-]+@[-.\w]+\.[A-Za-z]{2,3}\b/;
-            if (!emailPattern.test(vet.email)) {
+            if (!emailPattern.test(document.getElementById("email").value)) {
                 alert("email should be minimum 6 characters and maximum 320 characters. Top level domain should have 2 to 3 letters: "+vet.email)
                 return
             }
 
             let basePhoneNumber = "(514)-634-8276 #";
             let inputPhoneNumber=document.getElementById("phoneNumber").value;
-            if(inputPhoneNumber.length!=4){
+            if(inputPhoneNumber.length!==4){
                 alert("phoneNumber length not equal to 4: "+vet.phoneNumber)
                 return
             }
@@ -120,7 +125,12 @@ angular.module('vetForm')
             if (id) {
                 req = $http.put("api/gateway/vets/" + vetId, vet);
             } else {
-                req = $http.post("api/gateway/vets", vet);
+                req = $http.post("api/gateway/users/vets", {
+                    username: vet.username,
+                    password: vet.password,
+                    email: vet.email,
+                    vet:vet
+                });
                 console.log(self.vet)
             }
 

@@ -2,11 +2,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.bffapigateway.dtos.Vets.PredefinedDescription;
-import com.petclinic.bffapigateway.dtos.Vets.RatingRequestDTO;
-import com.petclinic.bffapigateway.dtos.Vets.RatingResponseDTO;
-import com.petclinic.bffapigateway.dtos.Vets.VetAverageRatingDTO;
-import com.petclinic.bffapigateway.dtos.Vets.VetDTO;
+import com.petclinic.bffapigateway.dtos.Vets.*;
 import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -76,13 +72,13 @@ class VetsServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody("    {\n" +
                         "        \"ratingId\": \"123456\",\n" +
-                        "        \"vetId\": \"678910\",\n" +
+                        "        \"vetId\": \"deb1950c-3c56-45dc-874b-89e352695eb7\",\n" +
                         "        \"rateScore\": 4.5\n" +
                         "    }"));
 
-        final RatingResponseDTO rating = vetsServiceClient.getRatingsByVetId("678910").blockFirst();
+        final RatingResponseDTO rating = vetsServiceClient.getRatingsByVetId("deb1950c-3c56-45dc-874b-89e352695eb7").blockFirst();
         assertEquals("123456", rating.getRatingId());
-        assertEquals("678910", rating.getVetId());
+        assertEquals("deb1950c-3c56-45dc-874b-89e352695eb7", rating.getVetId());
         //Had to make it optional so it could diferentiate between double and object
         assertEquals(Optional.of(4.5), Optional.ofNullable(rating.getRateScore()));
     }
@@ -114,7 +110,7 @@ class VetsServiceClientIntegrationTest {
                 .setResponseCode(400)
                 .setBody("Something went wrong"));
 
-        final RatingResponseDTO rating = vetsServiceClient.getRatingsByVetId("678910").onErrorResume(throwable -> {
+        final RatingResponseDTO rating = vetsServiceClient.getRatingsByVetId("deb1950c-3c56-45dc-874b-89e352695eb7").onErrorResume(throwable -> {
             if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
                 return Mono.empty();
             } else {
@@ -132,7 +128,7 @@ class VetsServiceClientIntegrationTest {
                 .setResponseCode(500)
                 .setBody("Something went wrong"));
 
-        final RatingResponseDTO rating = vetsServiceClient.getRatingsByVetId("678910").onErrorResume(throwable -> {
+        final RatingResponseDTO rating = vetsServiceClient.getRatingsByVetId("deb1950c-3c56-45dc-874b-89e352695eb7").onErrorResume(throwable -> {
             if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
                 return Mono.empty();
             } else {
@@ -150,7 +146,7 @@ class VetsServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody("5"));
 
-        final Integer numberOfRatings = vetsServiceClient.getNumberOfRatingsByVetId("678910").block();
+        final Integer numberOfRatings = vetsServiceClient.getNumberOfRatingsByVetId("deb1950c-3c56-45dc-874b-89e352695eb7").block();
         //Had to make it optional so it could diferentiate between double and object
         assertEquals(Optional.of(5), Optional.ofNullable(numberOfRatings));
     }
@@ -159,12 +155,12 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setBody("    {\n" +
-                        "        \"vetId\": \"678910\",\n" +
+                        "        \"vetId\": \"deb1950c-3c56-45dc-874b-89e352695eb7\",\n" +
                         "        \"averageRating\": 4.5\n" +
                         "    }"));
 
         final VetAverageRatingDTO averageRatingDTO = vetsServiceClient.getTopThreeVetsWithHighestAverageRating().blockFirst();
-        assertEquals("678910",vetDTO.getVetId());
+        assertEquals("deb1950c-3c56-45dc-874b-89e352695eb7",vetDTO.getVetId());
         assertEquals(4.5, averageRatingDTO.getAverageRating(),0.1);
         //its 0.0 because the vet doesn't have any ratings
     }
@@ -197,7 +193,7 @@ class VetsServiceClientIntegrationTest {
                 .setResponseCode(400)
                 .setBody("Something went wrong"));
 
-        final Integer ratingNumber = vetsServiceClient.getNumberOfRatingsByVetId("678910").onErrorResume(throwable -> {
+        final Integer ratingNumber = vetsServiceClient.getNumberOfRatingsByVetId("deb1950c-3c56-45dc-874b-89e352695eb7").onErrorResume(throwable -> {
             if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
                 return Mono.empty();
             } else {
@@ -215,7 +211,7 @@ class VetsServiceClientIntegrationTest {
                 .setResponseCode(500)
                 .setBody("Something went wrong"));
 
-        final Integer ratingNumber = vetsServiceClient.getNumberOfRatingsByVetId("678910").onErrorResume(throwable -> {
+        final Integer ratingNumber = vetsServiceClient.getNumberOfRatingsByVetId("deb1950c-3c56-45dc-874b-89e352695eb7").onErrorResume(throwable -> {
             if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
                 return Mono.empty();
             } else {
@@ -316,7 +312,7 @@ class VetsServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody("{\"1.0\":0.0,\"2.0\":0.0,\"4.0\":0.0,\"5.0\":1.0,\"3.0\":0.0}"));
 
-        final String ratingPercentages = vetsServiceClient.getPercentageOfRatingsByVetId("678910").block();
+        final String ratingPercentages = vetsServiceClient.getPercentageOfRatingsByVetId("deb1950c-3c56-45dc-874b-89e352695eb7").block();
         assertEquals("{\"1.0\":0.0,\"2.0\":0.0,\"4.0\":0.0,\"5.0\":1.0,\"3.0\":0.0}", ratingPercentages);
     }
 
@@ -350,7 +346,7 @@ class VetsServiceClientIntegrationTest {
                 .setBody("Something went wrong"));
 
         final String ratingPercentages =
-                vetsServiceClient.getPercentageOfRatingsByVetId("678910")
+                vetsServiceClient.getPercentageOfRatingsByVetId("deb1950c-3c56-45dc-874b-89e352695eb7")
                         .onErrorResume(throwable -> {
                             if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
                                 return Mono.empty();
@@ -371,7 +367,7 @@ class VetsServiceClientIntegrationTest {
                 .setBody("Something went wrong"));
 
         final String ratingPercentages =
-                vetsServiceClient.getPercentageOfRatingsByVetId("678910")
+                vetsServiceClient.getPercentageOfRatingsByVetId("deb1950c-3c56-45dc-874b-89e352695eb7")
                         .onErrorResume(throwable -> {
                             if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
                                 return Mono.empty();
@@ -392,7 +388,7 @@ class VetsServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody("   {\n" +
                         "        \"ratingId\":\"" + ratingId + "\",\n" +
-                        "        \"vetId\": \"678910\",\n" +
+                        "        \"vetId\": \"deb1950c-3c56-45dc-874b-89e352695eb7\",\n" +
                         "        \"rateScore\": 4.5\n" +
                         "    }"));
 
@@ -473,7 +469,7 @@ class VetsServiceClientIntegrationTest {
     @Test
     void addRatingToVet_WithRateDescriptionOnly_ShouldSetRateDescriptionToItsValue() throws JsonProcessingException {
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
-                .vetId("678910")
+                .vetId("deb1950c-3c56-45dc-874b-89e352695eb7")
                 .rateScore(3.5)
                 .rateDescription("The vet was decent but lacked table manners.")
                 .predefinedDescription(null)
@@ -483,14 +479,14 @@ class VetsServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody("    {\n" +
                         "        \"ratingId\": \"123456\",\n" +
-                        "        \"vetId\": \"678910\",\n" +
+                        "        \"vetId\": \"deb1950c-3c56-45dc-874b-89e352695eb7\",\n" +
                         "        \"rateScore\": 3.5,\n" +
                         "        \"rateDescription\": \"The vet was decent but lacked table manners.\",\n" +
                         "        \"predefinedDescription\": null,\n" +
                         "        \"rateDate\": \"16/09/2023\"\n" +
                         "    }"));
 
-        final RatingResponseDTO rating = vetsServiceClient.addRatingToVet("678910", Mono.just(ratingRequestDTO)).block();
+        final RatingResponseDTO rating = vetsServiceClient.addRatingToVet("deb1950c-3c56-45dc-874b-89e352695eb7", Mono.just(ratingRequestDTO)).block();
         assertNotNull(rating.getRatingId());
         assertEquals(ratingRequestDTO.getVetId(), rating.getVetId());
         assertEquals(ratingRequestDTO.getRateScore(), rating.getRateScore());
@@ -502,7 +498,7 @@ class VetsServiceClientIntegrationTest {
     @Test
     void addRatingToVet_withPredefinedDescOnly_ShouldSetRateDescriptionToPredefDescription() throws JsonProcessingException {
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
-                .vetId("678910")
+                .vetId("deb1950c-3c56-45dc-874b-89e352695eb7")
                 .rateScore(3.0)
                 .rateDescription(null)
                 .predefinedDescription(PredefinedDescription.GOOD)
@@ -512,14 +508,14 @@ class VetsServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody("    {\n" +
                         "        \"ratingId\": \"123456\",\n" +
-                        "        \"vetId\": \"678910\",\n" +
+                        "        \"vetId\": \"deb1950c-3c56-45dc-874b-89e352695eb7\",\n" +
                         "        \"rateScore\": 3.0,\n" +
                         "        \"rateDescription\": \"GOOD\",\n" +
                         "        \"predefinedDescription\": \"GOOD\",\n" +
                         "        \"rateDate\": \"16/09/2023\"\n" +
                         "    }"));
 
-        final RatingResponseDTO rating = vetsServiceClient.addRatingToVet("678910", Mono.just(ratingRequestDTO)).block();
+        final RatingResponseDTO rating = vetsServiceClient.addRatingToVet("deb1950c-3c56-45dc-874b-89e352695eb7", Mono.just(ratingRequestDTO)).block();
 
         assertNotNull(rating.getRatingId());
         assertEquals(ratingRequestDTO.getVetId(), rating.getVetId());
@@ -533,7 +529,7 @@ class VetsServiceClientIntegrationTest {
     @Test
     void addRatingToVet_withPredefinedDescAndRateDesc_ShouldSetRateDescriptionToPredefDescription() throws JsonProcessingException {
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
-                .vetId("678910")
+                .vetId("deb1950c-3c56-45dc-874b-89e352695eb7")
                 .rateScore(3.0)
                 .rateDescription("The vet was decent but lacked table manners.")
                 .predefinedDescription(PredefinedDescription.GOOD)
@@ -543,14 +539,14 @@ class VetsServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody("    {\n" +
                         "        \"ratingId\": \"123456\",\n" +
-                        "        \"vetId\": \"678910\",\n" +
+                        "        \"vetId\": \"deb1950c-3c56-45dc-874b-89e352695eb7\",\n" +
                         "        \"rateScore\": 3.0,\n" +
                         "        \"rateDescription\": \"GOOD\",\n" +
                         "        \"predefinedDescription\": \"GOOD\",\n" +
                         "        \"rateDate\": \"16/09/2023\"\n" +
                         "    }"));
 
-        final RatingResponseDTO rating = vetsServiceClient.addRatingToVet("678910", Mono.just(ratingRequestDTO)).block();
+        final RatingResponseDTO rating = vetsServiceClient.addRatingToVet("deb1950c-3c56-45dc-874b-89e352695eb7", Mono.just(ratingRequestDTO)).block();
         assertNotNull(rating.getRatingId());
         assertEquals(ratingRequestDTO.getVetId(), rating.getVetId());
         assertEquals(ratingRequestDTO.getRateScore(), rating.getRateScore());
@@ -563,7 +559,7 @@ class VetsServiceClientIntegrationTest {
         String invalidVetId="123";
 
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
-                .vetId("678910")
+                .vetId("deb1950c-3c56-45dc-874b-89e352695eb7")
                 .rateScore(3.5)
                 .rateDescription("The vet was decent but lacked table manners.")
                 .rateDate("16/09/2023")
@@ -590,13 +586,13 @@ class VetsServiceClientIntegrationTest {
     @Test
     void addRatingToVet_IllegalArgumentException400() throws IllegalArgumentException {
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
-                .vetId("678910")
+                .vetId("deb1950c-3c56-45dc-874b-89e352695eb7")
                 .rateScore(3.5)
                 .rateDescription("The vet was decent but lacked table manners.")
                 .rateDate("16/09/2023")
                 .build();
 
-        String validVetId="678910";
+        String validVetId="deb1950c-3c56-45dc-874b-89e352695eb7";
         String validRatingId="12345";
 
         prepareResponse(response -> response
@@ -620,13 +616,13 @@ class VetsServiceClientIntegrationTest {
     @Test
     void addRatingToVet_IllegalArgumentException500() throws IllegalArgumentException {
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
-                .vetId("678910")
+                .vetId("deb1950c-3c56-45dc-874b-89e352695eb7")
                 .rateScore(3.5)
                 .rateDescription("The vet was decent but lacked table manners.")
                 .rateDate("16/09/2023")
                 .build();
 
-        String validVetId="678910";
+        String validVetId="deb1950c-3c56-45dc-874b-89e352695eb7";
         String validRatingId="12345";
 
         prepareResponse(response -> response
@@ -651,7 +647,7 @@ class VetsServiceClientIntegrationTest {
     void updateRatingByVetIdAndRatingId_withRateDescriptionOnly_ShouldSetRateDescriptionToItsValue() throws JsonProcessingException {
         RatingRequestDTO updatedRating = RatingRequestDTO.builder()
                 .rateScore(2.0)
-                .vetId("678910")
+                .vetId("deb1950c-3c56-45dc-874b-89e352695eb7")
                 .rateDescription("Vet cancelled last minute.")
                 .predefinedDescription(null)
                 .rateDate("20/09/2023")
@@ -661,7 +657,7 @@ class VetsServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody("    {\n" +
                         "        \"ratingId\": \"123456\",\n" +
-                        "        \"vetId\": \"678910\",\n" +
+                        "        \"vetId\": \"deb1950c-3c56-45dc-874b-89e352695eb7\",\n" +
                         "        \"rateScore\": 2.0,\n" +
                         "        \"rateDescription\": \"Vet cancelled last minute.\",\n" +
                         "        \"predefinedDescription\": null,\n" +
@@ -669,7 +665,7 @@ class VetsServiceClientIntegrationTest {
                         "    }"));
 
         final RatingResponseDTO ratingResponseDTO =
-                vetsServiceClient.updateRatingByVetIdAndByRatingId("678910","123456", Mono.just(updatedRating)).block();
+                vetsServiceClient.updateRatingByVetIdAndByRatingId("deb1950c-3c56-45dc-874b-89e352695eb7","123456", Mono.just(updatedRating)).block();
         assertNotNull(ratingResponseDTO);
         assertNotNull(ratingResponseDTO.getRatingId());
         assertEquals(updatedRating.getVetId(), ratingResponseDTO.getVetId());
@@ -683,7 +679,7 @@ class VetsServiceClientIntegrationTest {
     void updateRatingByVetIdAndRatingId_withPredefinedDescOnly_ShouldSetRateDescriptionToPredefDescription() throws JsonProcessingException {
         RatingRequestDTO updatedRating = RatingRequestDTO.builder()
                 .rateScore(2.0)
-                .vetId("678910")
+                .vetId("deb1950c-3c56-45dc-874b-89e352695eb7")
                 .rateDescription(null)
                 .predefinedDescription(PredefinedDescription.POOR)
                 .rateDate("20/09/2023")
@@ -693,7 +689,7 @@ class VetsServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody("    {\n" +
                         "        \"ratingId\": \"123456\",\n" +
-                        "        \"vetId\": \"678910\",\n" +
+                        "        \"vetId\": \"deb1950c-3c56-45dc-874b-89e352695eb7\",\n" +
                         "        \"rateScore\": 2.0,\n" +
                         "        \"rateDescription\": \"POOR\",\n" +
                         "        \"predefinedDescription\": \"POOR\",\n" +
@@ -701,7 +697,7 @@ class VetsServiceClientIntegrationTest {
                         "    }"));
 
         final RatingResponseDTO ratingResponseDTO =
-                vetsServiceClient.updateRatingByVetIdAndByRatingId("678910","123456", Mono.just(updatedRating)).block();
+                vetsServiceClient.updateRatingByVetIdAndByRatingId("deb1950c-3c56-45dc-874b-89e352695eb7","123456", Mono.just(updatedRating)).block();
         assertNotNull(ratingResponseDTO);
         assertNotNull(ratingResponseDTO.getRatingId());
         assertEquals(updatedRating.getVetId(), ratingResponseDTO.getVetId());
@@ -716,7 +712,7 @@ class VetsServiceClientIntegrationTest {
     void updateRatingByVetIdAndRatingId_withPredefinedDescAndRateDesc_ShouldSetRateDescriptionToPredefDescription() throws JsonProcessingException {
         RatingRequestDTO updatedRating = RatingRequestDTO.builder()
                 .rateScore(2.0)
-                .vetId("678910")
+                .vetId("deb1950c-3c56-45dc-874b-89e352695eb7")
                 .rateDescription("Vet cancelled last minute.")
                 .predefinedDescription(PredefinedDescription.POOR)
                 .rateDate("20/09/2023")
@@ -726,7 +722,7 @@ class VetsServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody("    {\n" +
                         "        \"ratingId\": \"123456\",\n" +
-                        "        \"vetId\": \"678910\",\n" +
+                        "        \"vetId\": \"deb1950c-3c56-45dc-874b-89e352695eb7\",\n" +
                         "        \"rateScore\": 2.0,\n" +
                         "        \"rateDescription\": \"POOR\",\n" +
                         "        \"predefinedDescription\": \"POOR\",\n" +
@@ -734,7 +730,7 @@ class VetsServiceClientIntegrationTest {
                         "    }"));
 
         final RatingResponseDTO ratingResponseDTO =
-                vetsServiceClient.updateRatingByVetIdAndByRatingId("678910","123456", Mono.just(updatedRating)).block();
+                vetsServiceClient.updateRatingByVetIdAndByRatingId("deb1950c-3c56-45dc-874b-89e352695eb7","123456", Mono.just(updatedRating)).block();
         assertNotNull(ratingResponseDTO);
         assertNotNull(ratingResponseDTO.getRatingId());
         assertEquals(updatedRating.getVetId(), ratingResponseDTO.getVetId());
@@ -752,7 +748,7 @@ class VetsServiceClientIntegrationTest {
 
         RatingRequestDTO updatedRating = RatingRequestDTO.builder()
                 .rateScore(2.0)
-                .vetId("678910")
+                .vetId("deb1950c-3c56-45dc-874b-89e352695eb7")
                 .rateDescription("Vet cancelled last minute.")
                 .rateDate("20/09/2023")
                 .build();
@@ -780,7 +776,7 @@ class VetsServiceClientIntegrationTest {
     void updateRatingByVetIdOrRatingId_IllegalArgumentException400() throws IllegalArgumentException {
         RatingRequestDTO updatedRating = RatingRequestDTO.builder()
                 .rateScore(2.0)
-                .vetId("678910")
+                .vetId("deb1950c-3c56-45dc-874b-89e352695eb7")
                 .rateDescription("Vet cancelled last minute.")
                 .rateDate("20/09/2023")
                 .build();
@@ -791,7 +787,7 @@ class VetsServiceClientIntegrationTest {
                 .setBody("Something went wrong"));
 
         final RatingResponseDTO ratingResponseDTO =
-                vetsServiceClient.updateRatingByVetIdAndByRatingId("678910","123456", Mono.just(updatedRating))
+                vetsServiceClient.updateRatingByVetIdAndByRatingId("deb1950c-3c56-45dc-874b-89e352695eb7","123456", Mono.just(updatedRating))
                         .onErrorResume(throwable -> {
                             if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
                                 return Mono.empty();
@@ -808,7 +804,7 @@ class VetsServiceClientIntegrationTest {
     void updateRatingByVetIdOrRatingId_IllegalArgumentException500() throws IllegalArgumentException {
         RatingRequestDTO updatedRating = RatingRequestDTO.builder()
                 .rateScore(2.0)
-                .vetId("678910")
+                .vetId("deb1950c-3c56-45dc-874b-89e352695eb7")
                 .rateDescription("Vet cancelled last minute.")
                 .rateDate("20/09/2023")
                 .build();
@@ -819,7 +815,7 @@ class VetsServiceClientIntegrationTest {
                 .setBody("Something went wrong"));
 
         final RatingResponseDTO ratingResponseDTO =
-                vetsServiceClient.updateRatingByVetIdAndByRatingId("678910","123456", Mono.just(updatedRating))
+                vetsServiceClient.updateRatingByVetIdAndByRatingId("deb1950c-3c56-45dc-874b-89e352695eb7","123456", Mono.just(updatedRating))
                         .onErrorResume(throwable -> {
                             if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
                                 return Mono.empty();
@@ -831,6 +827,41 @@ class VetsServiceClientIntegrationTest {
 
         assertNull(ratingResponseDTO);
     }
+    @Test
+    void updateEducationByVetIdAndEducationId() throws JsonProcessingException {
+        EducationRequestDTO updatedEducation = EducationRequestDTO.builder()
+                .schoolName("McGill")
+                .vetId("678910")
+                .degree("Bachelor of Medicine")
+                .fieldOfStudy("Medicine")
+                .startDate("2010")
+                .endDate("2015")
+                .build();
+
+         prepareResponse(response -> response
+                        .setHeader("Content-Type", "application/json")
+                 .setHeader("Content-Type", "application/json")
+                 .setBody("    {\n" +
+                         "        \"educationId\": \"123456\",\n" +
+                         "        \"vetId\": \"678910\",\n" +
+                         "        \"schoolName\": \"McGill\",\n" +
+                         "        \"degree\": \"Bachelor of Medicine\",\n" +
+                         "        \"fieldOfStudy\": \"Medicine\",\n" +
+                         "        \"startDate\": \"2010\",\n" +
+                         "        \"endDate\": \"2015\"\n" +
+                         "    }"));
+
+        final EducationResponseDTO educationResponseDTO =
+                vetsServiceClient.updateEducationByVetIdAndByEducationId("678910","123456", Mono.just(updatedEducation)).block();
+        assertNotNull(educationResponseDTO);
+        assertNotNull(educationResponseDTO.getEducationId());
+        assertThat(educationResponseDTO.getVetId()).isEqualTo(updatedEducation.getVetId());
+        assertThat(educationResponseDTO.getSchoolName()).isEqualTo(updatedEducation.getSchoolName());
+        assertThat(educationResponseDTO.getDegree()).isEqualTo(updatedEducation.getDegree());
+        assertThat(educationResponseDTO.getFieldOfStudy()).isEqualTo(updatedEducation.getFieldOfStudy());
+        assertThat(educationResponseDTO.getStartDate()).isEqualTo(updatedEducation.getStartDate());
+        assertThat(educationResponseDTO.getEndDate()).isEqualTo(updatedEducation.getEndDate());
+    }
 
     @Test
     void getPhotoByVetId() throws IOException {
@@ -840,7 +871,7 @@ class VetsServiceClientIntegrationTest {
                         "        {12, 24, 52, 87}" +
                         "    }"));
 
-        final Resource photo = vetsServiceClient.getPhotoByVetId("678910").block();
+        final Resource photo = vetsServiceClient.getPhotoByVetId("deb1950c-3c56-45dc-874b-89e352695eb7").block();
         byte[] photoBytes = FileCopyUtils.copyToByteArray(photo.getInputStream());
 
         assertNotNull(photoBytes);
@@ -851,7 +882,7 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setBody("    {\n" +
-                        "        \"vetId\": \"678910\",\n" +
+                        "        \"vetId\": \"deb1950c-3c56-45dc-874b-89e352695eb7\",\n" +
                         "        \"firstName\": \"Clementine\",\n" +
                         "        \"lastName\": \"LeBlanc\",\n" +
                         "        \"email\": \"skjfhf@gmail.com\",\n" +
@@ -896,7 +927,7 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setBody("    {\n" +
-                        "        \"vetId\": \"678910\",\n" +
+                        "        \"vetId\": \"deb1950c-3c56-45dc-874b-89e352695eb7\",\n" +
                         "        \"firstName\": \"Clementine\",\n" +
                         "        \"lastName\": \"LeBlanc\",\n" +
                         "        \"email\": \"skjfhf@gmail.com\",\n" +
@@ -941,7 +972,7 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setBody("    {\n" +
-                        "        \"vetId\": \"678910\",\n" +
+                        "        \"vetId\": \"deb1950c-3c56-45dc-874b-89e352695eb7\",\n" +
                         "        \"firstName\": \"Clementine\",\n" +
                         "        \"lastName\": \"LeBlanc\",\n" +
                         "        \"email\": \"skjfhf@gmail.com\",\n" +
@@ -986,7 +1017,7 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setBody("    {\n" +
-                        "        \"vetId\": \"678910\",\n" +
+                        "        \"vetId\": \"deb1950c-3c56-45dc-874b-89e352695eb7\",\n" +
                         "        \"firstName\": \"Clementine\",\n" +
                         "        \"lastName\": \"LeBlanc\",\n" +
                         "        \"email\": \"skjfhf@gmail.com\",\n" +
@@ -996,7 +1027,7 @@ class VetsServiceClientIntegrationTest {
                         "        \"active\": false\n" +
                         "    }"));
 
-        final VetDTO vet = vetsServiceClient.getVetByVetId("678910").block();
+        final VetDTO vet = vetsServiceClient.getVetByVetId("deb1950c-3c56-45dc-874b-89e352695eb7").block();
         assertFalse(vet.isActive());
         assertEquals(vetDTO.getFirstName(), vet.getFirstName());
         assertEquals(vetDTO.getLastName(), vet.getLastName());
@@ -1035,7 +1066,7 @@ class VetsServiceClientIntegrationTest {
                 .setResponseCode(400)
                 .setBody("Something went wrong"));
 
-        final VetDTO vet = vetsServiceClient.getVetByVetId("678910")
+        final VetDTO vet = vetsServiceClient.getVetByVetId("deb1950c-3c56-45dc-874b-89e352695eb7")
                 .onErrorResume(throwable -> {
                     if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
                         return Mono.empty();
@@ -1055,7 +1086,7 @@ class VetsServiceClientIntegrationTest {
                 .setResponseCode(500)
                 .setBody("Something went wrong"));
 
-        final VetDTO vet = vetsServiceClient.getVetByVetId("678910")
+        final VetDTO vet = vetsServiceClient.getVetByVetId("deb1950c-3c56-45dc-874b-89e352695eb7")
                 .onErrorResume(throwable -> {
                     if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
                         return Mono.empty();
@@ -1073,7 +1104,7 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setBody("    {\n" +
-                        "        \"vetId\": \"678910\",\n" +
+                        "        \"vetId\": \"deb1950c-3c56-45dc-874b-89e352695eb7\",\n" +
                         "        \"firstName\": \"Clementine\",\n" +
                         "        \"lastName\": \"LeBlanc\",\n" +
                         "        \"email\": \"skjfhf@gmail.com\",\n" +
@@ -1118,7 +1149,7 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setBody("    {\n" +
-                        "        \"vetId\": \"678910\",\n" +
+                        "        \"vetId\": \"deb1950c-3c56-45dc-874b-89e352695eb7\",\n" +
                         "        \"firstName\": \"Clementine\",\n" +
                         "        \"lastName\": \"LeBlanc\",\n" +
                         "        \"email\": \"skjfhf@gmail.com\",\n" +
@@ -1128,7 +1159,7 @@ class VetsServiceClientIntegrationTest {
                         "        \"active\": false\n" +
                         "    }"));
 
-        final VetDTO vet = vetsServiceClient.updateVet("678910", Mono.just(vetDTO)).block();
+        final VetDTO vet = vetsServiceClient.updateVet("deb1950c-3c56-45dc-874b-89e352695eb7", Mono.just(vetDTO)).block();
         assertFalse(vet.isActive());
         assertEquals(vetDTO.getFirstName(), vet.getFirstName());
         assertEquals(vetDTO.getLastName(), vet.getLastName());
@@ -1167,7 +1198,7 @@ class VetsServiceClientIntegrationTest {
                 .setResponseCode(400)
                 .setBody("Something went wrong"));
 
-        final VetDTO vet = vetsServiceClient.updateVet("678910", Mono.just(vetDTO))
+        final VetDTO vet = vetsServiceClient.updateVet("deb1950c-3c56-45dc-874b-89e352695eb7", Mono.just(vetDTO))
                 .onErrorResume(throwable -> {
                     if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
                         return Mono.empty();
@@ -1187,7 +1218,7 @@ class VetsServiceClientIntegrationTest {
                 .setResponseCode(500)
                 .setBody("Something went wrong"));
 
-        final VetDTO vet = vetsServiceClient.updateVet("678910", Mono.just(vetDTO))
+        final VetDTO vet = vetsServiceClient.updateVet("deb1950c-3c56-45dc-874b-89e352695eb7", Mono.just(vetDTO))
                 .onErrorResume(throwable -> {
                     if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
                         return Mono.empty();
@@ -1205,7 +1236,7 @@ class VetsServiceClientIntegrationTest {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setBody("    {\n" +
-                        "        \"vetId\": \"678910\",\n" +
+                        "        \"vetId\": \"deb1950c-3c56-45dc-874b-89e352695eb7\",\n" +
                         "        \"firstName\": \"Clementine\",\n" +
                         "        \"lastName\": \"LeBlanc\",\n" +
                         "        \"email\": \"skjfhf@gmail.com\",\n" +
@@ -1289,7 +1320,7 @@ class VetsServiceClientIntegrationTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody("    {\n" +
                         "    \"educationId\": \"123456\",\n" +
-                        "    \"vetId\": \"678910\",\n" +
+                        "    \"vetId\": \"deb1950c-3c56-45dc-874b-89e352695eb7\",\n" +
                         "    \"schoolName\": \"University of Toronto\",\n" +
                         "    \"degree\": \"Doctor of Veterinary Medicine\",\n" +
                         "    \"fieldOfStudy\": \"Veterinary Medicine\",\n" +
@@ -1303,6 +1334,39 @@ class VetsServiceClientIntegrationTest {
         assertEquals(empty.block(), null);
     }
 
+    @Test
+    void addEducationsToAVet() throws JsonProcessingException {
+        EducationRequestDTO educationRequestDTO = EducationRequestDTO.builder()
+                .vetId("678910")
+                .schoolName("University of Toronto")
+                .degree("Doctor of Veterinary Medicine")
+                .fieldOfStudy("Veterinary Medicine")
+                .startDate("2015")
+                .endDate("2019")
+                .build();
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody("    {\n" +
+                        "    \"educationId\": \"123456\",\n" +
+                        "    \"vetId\": \"678910\",\n" +
+                        "    \"schoolName\": \"University of Toronto\",\n" +
+                        "    \"degree\": \"Doctor of Veterinary Medicine\",\n" +
+                        "    \"fieldOfStudy\": \"Veterinary Medicine\",\n" +
+                        "    \"startDate\": \"2015\",\n" +
+                        "    \"endDate\": \"2019\"\n" +
+                        "    }"));
+
+        final EducationResponseDTO education = vetsServiceClient.addEducationToAVet("678910", Mono.just(educationRequestDTO)).block();
+        assertNotNull(education.getEducationId());
+        assertEquals(educationRequestDTO.getVetId(), education.getVetId());
+        assertEquals(educationRequestDTO.getSchoolName(), education.getSchoolName());
+        assertEquals(educationRequestDTO.getDegree(), education.getDegree());
+        assertEquals(educationRequestDTO.getFieldOfStudy(), education.getFieldOfStudy());
+        assertEquals(educationRequestDTO.getStartDate(), education.getStartDate());
+        assertEquals(educationRequestDTO.getEndDate(), education.getEndDate());
+    }
+
     private void prepareResponse(Consumer<MockResponse> consumer) {
         MockResponse response = new MockResponse();
         consumer.accept(response);
@@ -1311,7 +1375,7 @@ class VetsServiceClientIntegrationTest {
 
     private VetDTO buildVetDTO() {
         return VetDTO.builder()
-                .vetId("678910")
+                .vetId("deb1950c-3c56-45dc-874b-89e352695eb7")
                 .firstName("Clementine")
                 .lastName("LeBlanc")
                 .email("skjfhf@gmail.com")

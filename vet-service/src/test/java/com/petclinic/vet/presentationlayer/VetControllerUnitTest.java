@@ -3,6 +3,7 @@ package com.petclinic.vet.presentationlayer;
 import com.petclinic.vet.dataaccesslayer.Photo;
 import com.petclinic.vet.dataaccesslayer.Vet;
 import com.petclinic.vet.servicelayer.*;
+import com.petclinic.vet.servicelayer.education.EducationRequestDTO;
 import com.petclinic.vet.servicelayer.education.EducationResponseDTO;
 import com.petclinic.vet.servicelayer.education.EducationService;
 import com.petclinic.vet.servicelayer.ratings.RatingRequestDTO;
@@ -206,7 +207,7 @@ class VetControllerUnitTest {
     @Test
     void getAverageRatingForEachVetByVetId_ShouldSucceed(){
 
-        String vetId = "678910";
+        String vetId = "cf25e779-548b-4788-aefa-6d58621c2feb";
         Double averageRating = 5.0;
 
         when(vetService.getVetByVetId(vetId))
@@ -565,6 +566,90 @@ class VetControllerUnitTest {
         Mockito.verify(educationService, times(1))
                 .deleteEducationByEducationId(vetId,educationId);
     }
+    @Test
+    void updateEducationWithValidVetIdAndValidEducationId_shouldSucceed(){
+        EducationRequestDTO updatedEducation = EducationRequestDTO.builder()
+                .schoolName("McGill")
+                .vetId("678910")
+                .degree("Bachelor of Medicine")
+                .fieldOfStudy("Medicine")
+                .startDate("2010")
+                .endDate("2015")
+                .build();
+
+        EducationResponseDTO educationResponse = EducationResponseDTO.builder()
+                .educationId("2")
+                .schoolName("McGill")
+                .vetId("678910")
+                .degree("Bachelor of Medicine")
+                .fieldOfStudy("Medicine")
+                .startDate("2010")
+                .endDate("2015")
+                .build();
+
+        when(educationService.updateEducationByVetIdAndEducationId(anyString(), anyString(), any(Mono.class)))
+                .thenReturn(Mono.just(educationResponse));
+
+        client.put()
+                .uri("/vets/"+VET_ID+"/educations/"+educationResponse.getEducationId())
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedEducation)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(EducationResponseDTO.class)
+                .value(educationResponseDTO -> {
+                    assertNotNull(educationResponseDTO);
+                    assertNotNull(educationResponseDTO.getEducationId());
+                    assertThat(educationResponseDTO.getEducationId()).isEqualTo(educationResponse.getEducationId());
+                    assertThat(educationResponseDTO.getVetId()).isEqualTo(updatedEducation.getVetId());
+                    assertThat(educationResponseDTO.getSchoolName()).isEqualTo(updatedEducation.getSchoolName());
+                    assertThat(educationResponseDTO.getDegree()).isEqualTo(updatedEducation.getDegree());
+                    assertThat(educationResponseDTO.getFieldOfStudy()).isEqualTo(updatedEducation.getFieldOfStudy());
+                    assertThat(educationResponseDTO.getStartDate()).isEqualTo(updatedEducation.getStartDate());
+                    assertThat(educationResponseDTO.getEndDate()).isEqualTo(updatedEducation.getEndDate());
+                });
+
+        Mockito.verify(educationService, times(1))
+                .updateEducationByVetIdAndEducationId(anyString(), anyString(), any(Mono.class));
+    }
+
+
+    @Test
+    void addEducationWithVetId_ValidValues_ShouldSucceed(){
+        EducationRequestDTO educationRequestDTO = EducationRequestDTO.builder()
+                .vetId(VET_ID)
+                .degree("Doctor of Veterinary Medicine")
+                .fieldOfStudy("Veterinary Medicine")
+                .schoolName("University of Montreal")
+                .startDate("2010")
+                .endDate("2014")
+                .build();
+
+        EducationResponseDTO educationResponseDTO = EducationResponseDTO.builder()
+                .educationId("3")
+                .vetId(VET_ID)
+                .degree("Doctor of Veterinary Medicine")
+                .fieldOfStudy("Veterinary Medicine")
+                .schoolName("University of Montreal")
+                .startDate("2010")
+                .endDate("2014")
+                .build();
+
+        when(educationService.addEducationToVet(VET_ID, Mono.just(educationRequestDTO))).thenReturn(Mono.just(educationResponseDTO));
+
+        client.post()
+                .uri("/vets/{vetId}/educations", VET_ID)
+                .bodyValue(educationRequestDTO)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+
+        Mockito.verify(educationService, times(1)).addEducationToVet(anyString(), any(Mono.class));
+    }
 
     @Test
     void getPhotoByVetId() {
@@ -587,8 +672,8 @@ class VetControllerUnitTest {
 
     private Vet buildVet() {
         return Vet.builder()
-                .vetId("678910")
-                .vetBillId("1")
+                .vetId("cf25e779-548b-4788-aefa-6d58621c2feb")
+                .vetBillId("d9d3a7ac-6817-4c13-9a09-c09da74fb65f")
                 .firstName("Pauline")
                 .lastName("LeBlanc")
                 .email("skjfhf@gmail.com")
@@ -603,8 +688,8 @@ class VetControllerUnitTest {
 
     private VetDTO buildVetDTO() {
         return VetDTO.builder()
-                .vetId("678910")
-                .vetBillId("1")
+                .vetId("cf25e779-548b-4788-aefa-6d58621c2feb")
+                .vetBillId("d9d3a7ac-6817-4c13-9a09-c09da74fb65f")
                 .firstName("Pauline")
                 .lastName("LeBlanc")
                 .email("skjfhf@gmail.com")
@@ -618,7 +703,7 @@ class VetControllerUnitTest {
     }
     private VetDTO buildVetDTO2() {
         return VetDTO.builder()
-                .vetId("678910")
+                .vetId("cf25e779-548b-4788-aefa-6d58621c2feb")
                 .vetBillId("2")
                 .firstName("Pauline")
                 .lastName("LeBlanc")
@@ -675,7 +760,7 @@ class VetControllerUnitTest {
     private RatingResponseDTO buildRatingResponseDTO(String description, double score) {
         return RatingResponseDTO.builder()
                 .ratingId("2")
-                .vetId("678910")
+                .vetId("cf25e779-548b-4788-aefa-6d58621c2feb")
                 .rateScore(score)
                 .rateDescription(description)
                 .rateDate("16/09/2023")

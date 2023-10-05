@@ -3,6 +3,10 @@ package com.petclinic.bffapigateway.domainclientlayer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Visits.*;
+import com.petclinic.bffapigateway.dtos.Visits.VisitDetails;
+import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
+import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
+import com.petclinic.bffapigateway.dtos.Visits.Visits;
 import com.petclinic.bffapigateway.utils.Security.Filters.JwtTokenFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.RoleFilter;
 import okhttp3.mockwebserver.MockResponse;
@@ -14,6 +18,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -29,6 +34,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 
 @WebFluxTest(value = VisitsServiceClient.class, excludeFilters = @ComponentScan.Filter(type = FilterType.CUSTOM,
         classes = {JwtTokenFilter.class, RoleFilter.class}), useDefaultFilters = false)
@@ -76,7 +82,8 @@ class VisitsServiceClientIntegrationTest {
 
     @Test
     void getVisitsForStatus() throws JsonProcessingException{
-        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee", LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", Status.REQUESTED);        server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee", LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", Status.UPCOMING);
+        server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setBody(objectMapper.writeValueAsString(visitResponseDTO)).addHeader("Content-Type", "application/json"));
 
         Flux<VisitResponseDTO> visitResponseDTOFlux = visitsServiceClient.getVisitsForStatus(STATUS);
@@ -102,7 +109,7 @@ class VisitsServiceClientIntegrationTest {
                 "Test Visit",
                 "1",
                 "2",
-                Status.REQUESTED
+                Status.UPCOMING
         );
         server.enqueue(new MockResponse()
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
@@ -166,6 +173,47 @@ class VisitsServiceClientIntegrationTest {
 
         assertNull(empty.block());
     }
+    @Test
+    void shouldCreateVisitForPet() throws JsonProcessingException {
+        // Given
+        final VisitRequestDTO visitRequest = VisitRequestDTO.builder()
+                .visitDate(LocalDateTime.parse("2023-10-01T13:00:00"))
+                .description("Dog needs grooming")
+                .petId(PET_ID)
+                .practitionerId("3")
+                .status(Status.UPCOMING)
+                .build();
+
+        final VisitResponseDTO expectedVisitResponse = VisitResponseDTO.builder()
+                .visitId(UUID.randomUUID().toString())
+                .visitDate(visitRequest.getVisitDate())
+                .description(visitRequest.getDescription())
+                .petId(visitRequest.getPetId())
+                .practitionerId(visitRequest.getPractitionerId())
+                .status(visitRequest.getStatus()) // use isStatus here
+                .build();
+
+        final String responseBody = objectMapper.writeValueAsString(expectedVisitResponse);
+
+        // Mocking the server response
+        server.enqueue(
+                new MockResponse()
+                        .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .setResponseCode(HttpStatus.OK.value())
+                        .setBody(responseBody)
+        );
+
+        // When
+        VisitResponseDTO actualVisitResponse = visitsServiceClient.createVisitForPet(visitRequest).block();
+
+        // Then
+        assertEquals(expectedVisitResponse.getVisitId(), actualVisitResponse.getVisitId());
+        assertEquals(expectedVisitResponse.getVisitDate(), actualVisitResponse.getVisitDate());
+        assertEquals(expectedVisitResponse.getDescription(), actualVisitResponse.getDescription());
+        assertEquals(expectedVisitResponse.getPetId(), actualVisitResponse.getPetId());
+        assertEquals(expectedVisitResponse.getPractitionerId(), actualVisitResponse.getPractitionerId());
+        assertEquals(expectedVisitResponse.getStatus(), actualVisitResponse.getStatus());
+    }
 
 //    @Test
 //    void shouldCreateVisitsForPet() throws JsonProcessingException {
@@ -204,7 +252,7 @@ class VisitsServiceClientIntegrationTest {
                 .practitionerId(2)
                 .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("Cat is crazy")
-                .status(Status.REQUESTED)
+                .status(Status.UPCOMING)
                 .build();
         final VisitDetails visit2 = VisitDetails.builder()
                 .visitId(UUID.randomUUID().toString())
@@ -212,7 +260,7 @@ class VisitsServiceClientIntegrationTest {
                 .practitionerId(22)
                 .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("Dog is sick")
-                .status(Status.REQUESTED)
+                .status(Status.UPCOMING)
                 .build();
 
 //        final String body = objectMapper.writeValueAsString(objectMapper.convertValue(visit, VisitDetails.class));
@@ -392,7 +440,8 @@ class VisitsServiceClientIntegrationTest {
 
     @Test
     void getVisitById() throws Exception {
-        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee", LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", Status.REQUESTED);        server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee", LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", Status.UPCOMING);
+        server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setBody(objectMapper.writeValueAsString(visitResponseDTO)).addHeader("Content-Type", "application/json"));
 
         Mono<VisitResponseDTO> visitResponseDTOMono = visitsServiceClient.getVisitByVisitId("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee");
@@ -400,4 +449,17 @@ class VisitsServiceClientIntegrationTest {
                 .expectNextMatches(returnedVisitResponseDTO1 -> returnedVisitResponseDTO1.getVisitId().equals("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee"))
                 .verifyComplete();
     }
+
+    @Test
+    void deleteAllCancelledVisits_shouldSucceed() {
+        server.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setResponseCode(204)); //no content
+
+        Mono<Void> result = visitsServiceClient.deleteAllCancelledVisits();
+
+        StepVerifier.create(result)
+                .verifyComplete();
+    }
+
 }
