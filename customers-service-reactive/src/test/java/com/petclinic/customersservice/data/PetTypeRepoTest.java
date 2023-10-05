@@ -37,9 +37,34 @@ class PetTypeRepoTest {
                 .verifyComplete();
     }
 
+    @Test
+    void getAllOwners_shouldSucceed() {
+        PetType petType1= buildPetType();
+
+        Publisher<PetType> setup = petTypeRepo.deleteAll().thenMany(petTypeRepo.save(petType1));
+
+        StepVerifier
+                .create(setup)
+                .expectNext(petType1)
+                .verifyComplete();
+        StepVerifier
+                .create(petTypeRepo.findAll())
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+
+    private PetType buildPetType1() {
+        return PetType.builder().id("10").name("TestType").build();
+    }
+
 
     private PetType buildPetType() {
-        return PetType.builder().id(10).name("TestType").build();
+        return PetType.builder()
+                .id("1")
+                .petTypeId("petTypeId-123")
+                .name("Dog")
+                .build();
     }
 
 }
