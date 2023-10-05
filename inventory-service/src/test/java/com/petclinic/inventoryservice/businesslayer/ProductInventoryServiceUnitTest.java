@@ -483,6 +483,31 @@ class ProductInventoryServiceUnitTest {
         // Assert
         assertTrue(exception.getMessage().contains("Product price and quantity must be greater than 0."));
     }
+
+    @Test
+    void updateProductInInventory_InvalidInputNull_ShouldThrowInvalidInputException() {
+        // Arrange
+        String inventoryId = "1";
+        String productId = "2";
+
+        ProductRequestDTO productRequestDTO = ProductRequestDTO.builder()
+                .productName(null)
+                .productPrice(null)
+                .productQuantity(null)
+                .build();
+
+        // Mock the behavior of the inventoryRepository to return a dummy Inventory object
+        when(inventoryRepository.findInventoryByInventoryId(eq(inventoryId)))
+                .thenReturn(Mono.just(new Inventory()));
+
+        // Act and Assert
+        StepVerifier.create(productInventoryService.updateProductInInventory(Mono.just(productRequestDTO), inventoryId, productId))
+                .expectError(InvalidInputException.class)
+                .verify();
+
+        // You can also assert the exception message here if needed
+    }
+
     public void deleteProduct_InvalidInventoryId_ShouldNotFound(){
         //arrange
         String invalidInventoryId = "invalid";
