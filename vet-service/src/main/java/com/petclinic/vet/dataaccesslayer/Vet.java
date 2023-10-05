@@ -32,7 +32,6 @@ public class Vet {
     private String lastName;
     private String email;
     private String phoneNumber;
-    private String imageId;
     private String resume;
     private String workday;
     private boolean active;
