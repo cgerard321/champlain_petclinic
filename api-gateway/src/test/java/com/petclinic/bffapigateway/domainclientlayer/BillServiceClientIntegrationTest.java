@@ -371,6 +371,31 @@ class BillServiceClientIntegrationTest {
     }
 
     @Test
+    void deleteAllBills() throws JsonProcessingException {
+
+        final BillDetails bill = BillDetails.builder()
+                .billId(UUID.randomUUID().toString())
+                .vetId("15")
+                .customerId("2")
+                .date(null)
+                .amount(100)
+                .visitType("Check")
+                .build();
+
+        final String body = mapper.writeValueAsString(mapper.convertValue(bill, BillDetails.class));
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(body));
+
+        final Mono<Void> empty = billServiceClient.deleteAllBills();
+
+        StepVerifier.create(empty)
+                .expectComplete()
+                .verify();
+
+    }
+
+    @Test
     void getNonExistentBillById() {
         server.enqueue(new MockResponse().setResponseCode(404));
 

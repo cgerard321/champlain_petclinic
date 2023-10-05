@@ -97,6 +97,7 @@ public class BillServiceClient {
         return webClientBuilder.build()
                 .delete()
                 .uri(billServiceUrl)
+                .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
                 .bodyToMono(Void.class);
     }
