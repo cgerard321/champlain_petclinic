@@ -183,6 +183,23 @@ angular.module('visits')
             return practitionerName
         }
 
+        //Get Owners
+        var ownersUrl = "api/gateway/owners";
+        $http.get(ownersUrl).then(function (resp) {
+            self.owners = resp.data;
+        });
+
+        //get pets of owners
+        self.loadOwnerInfo = function() {
+            let ownerId = self.ownerId;
+            $http.get("api/gateway/owners/" + ownerId + "/pets").then(function(resp) {
+                self.pets = resp.data;
+            });
+        };
+
+
+
+
         self.getVisitDate = function (id) {
             console.log("Getting date for visitId:", id);
             var visitDate = null;

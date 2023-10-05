@@ -624,6 +624,20 @@
         <input id="vetWorkdays" disabled="disabled" style="background-color: #dbd9ce;" onchange=selectChanged() />
     </div>
 
+    <div class="form-group">
+        <label for="selectedOwner">Owner</label>
+        <select id="selectedOwner" name="selectedOwner" ng-model="$ctrl.ownerId" ng-change="$ctrl.loadOwnerInfo();">
+            <option disabled selected value>Please Select An Owner</option>
+            <option ng-repeat="o in $ctrl.owners" value="{{o.ownerId}}">{{o.firstName}} {{o.lastName}}</option>
+        </select>
+
+        <label for="selectedPet">Pet</label>
+        <select id="selectedPet" name="selectedPet" ng-model="$ctrl.petId">
+            <option disabled selected value>Please Select a Pet</option>
+            <option ng-repeat="p in $ctrl.pets" value="{{p.petId}}">{{p.name}}</option>
+        </select>
+    </div>
+    
     <div class="form-group" style="margin-top: 12px">
         <label for="selectedVisitType">Visit Type:</label>
         <select id="selectedVisitType" name="selectedVisitType" ng-model="$ctrl.visitType">
