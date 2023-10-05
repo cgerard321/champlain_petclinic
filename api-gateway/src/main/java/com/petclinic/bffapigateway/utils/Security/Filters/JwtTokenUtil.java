@@ -26,36 +26,9 @@ public class JwtTokenUtil implements Serializable {
 
 
     private final SecurityConst securityConst;
-    private static final String CLAIM_KEY_ROLES = "roles";
-
-
-    public List<String> getRolesFromToken(String token) {
-        List<String> roles;
-        try {
-            final Claims claims = getClaimsFromToken(token);
-
-           roles = Arrays.asList(claims.get(CLAIM_KEY_ROLES).toString().split(","));
-        } catch (Exception e) {
-            roles = null;
-        }
-        return roles;
-    }
 
 
 
-
-    private Claims getClaimsFromToken(String token) {
-        Claims claims;
-        try {
-            claims = Jwts.parserBuilder()
-                    .setSigningKey(Keys.hmacShaKeyFor(securityConst.getSECRET().getBytes()))
-                    .build()
-                    .parseClaimsJws(token).getBody();
-        } catch (Exception e) {
-            claims = null;
-        }
-        return claims;
-    }
 
     public String getTokenFromRequest(ServerWebExchange exchange){
         final List<String> cookies = exchange.getRequest().getHeaders().get("Cookie");
@@ -83,14 +56,5 @@ public class JwtTokenUtil implements Serializable {
         return token;
     }
 
-    public String getIdFromToken(String token) {
-        String id;
-        try {
-            final Claims claims = getClaimsFromToken(token);
-            id = claims.get("id").toString();
-        } catch (Exception e) {
-            id = null;
-        }
-        return id;
-    }
+
 }

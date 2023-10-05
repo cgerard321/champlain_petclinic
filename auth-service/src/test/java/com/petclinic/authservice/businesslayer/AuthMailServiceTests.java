@@ -78,4 +78,6 @@ public class AuthMailServiceTests {
                 assertThrows(HttpClientErrorException.class, () -> mailService.sendMail(EMAIL_EMPTY_INVALID));
         assertEquals("500 Unable to send mail", httpClientErrorException.getMessage());
     }
+
+
 }

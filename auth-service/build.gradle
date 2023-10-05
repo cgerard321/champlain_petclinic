@@ -52,6 +52,7 @@ dependencies {
 
     implementation 'mysql:mysql-connector-java'
     testImplementation('com.h2database:h2')
+    implementation('com.h2database:h2')
 
     testImplementation('org.springframework.boot:spring-boot-starter-test') {
         exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
