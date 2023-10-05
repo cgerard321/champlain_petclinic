@@ -20,6 +20,7 @@ import reactor.core.publisher.Mono;
 import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Slf4j
 @Component
@@ -47,7 +48,24 @@ public class AuthServiceClient {
     }
 
 
-//    public Mono<UserDetails> getUser(final long userId) {
+    public Mono<UserDetails> getUserById(String jwtToken, long userId) {
+        return webClientBuilder.build()
+                .get()
+                .uri(authServiceUrl + "/users/{userId}", userId)
+                .cookie("Bearer", jwtToken)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        n -> rethrower.rethrow(n,
+                                x -> new GenericHttpException(x.get("message").toString(), NOT_FOUND))
+
+                )
+                .bodyToMono(UserDetails.class);
+    }
+
+
+
+
+    //    public Mono<UserDetails> getUser(final long userId) {
 //        return webClientBuilder.build().get()
 //                .uri(authServiceUrl + "/users/{userId}", userId)
 //                .retrieve()

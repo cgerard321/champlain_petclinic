@@ -68,7 +68,7 @@ public class UserController {
         return ResponseEntity.ok(userMapper.modelToPasswordLessDTO(user));
     }
 
-    @GetMapping("/by-username")
+    @GetMapping("/username")
     public ResponseEntity<List<UserPasswordLessDTO>> getUsersByUsernameContaining(@RequestParam(name = "username") String username) {
         List<User> users = userService.getUsersByUsernameContaining(username);
         List<UserPasswordLessDTO> userDTOs = users.stream()
