@@ -16,6 +16,7 @@ import com.petclinic.bffapigateway.dtos.Inventory.ProductResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
+import com.petclinic.bffapigateway.dtos.Pets.PetTypeResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.*;
 import com.petclinic.bffapigateway.dtos.Visits.Status;
 import com.petclinic.bffapigateway.dtos.Visits.VisitDetails;
@@ -2965,6 +2966,31 @@ private VetAverageRatingDTO buildVetAverageRatingDTO(){
 
             verify(authServiceClient, times(1)).changePassword(any());
         }
+
+    @Test
+    void getAllPetTypes_shouldSucceed(){
+        PetTypeResponseDTO petType1 = new PetTypeResponseDTO();
+        petType1.setPetTypeId("petTypeId-90");
+        petType1.setName("Dog");
+        petType1.setPetTypeDescription("Mammal");
+
+        Flux<PetTypeResponseDTO> petTypeResponseDTOFlux = Flux.just(petType1);
+
+        when(customersServiceClient.getAllPetTypes()).thenReturn(petTypeResponseDTOFlux);
+
+        client.get()
+                .uri("/api/gateway/owners/petTypes")
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().valueEquals("Content-Type", "application/json") // Change content type expectation
+                .expectBodyList(PetTypeResponseDTO.class)
+                .value((list) -> {
+                    assertNotNull(list);
+                    assertEquals(1, list.size());
+                    assertEquals(list.get(0).getPetTypeId(), petType1.getPetTypeId());
+                    assertEquals(list.get(0).getName(), petType1.getName());
+                });
+    }
 
 
 

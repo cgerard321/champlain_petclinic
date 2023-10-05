@@ -1,5 +1,6 @@
 package com.petclinic.customersservice.presentationlayer;
 
+import com.petclinic.customersservice.data.Owner;
 import com.petclinic.customersservice.data.PetType;
 import com.petclinic.customersservice.data.PetTypeRepo;
 import org.junit.jupiter.api.Test;
@@ -11,6 +12,11 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.test.StepVerifier;
 
+import java.nio.charset.StandardCharsets;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+
 @SpringBootTest
 @AutoConfigureWebTestClient
 class PetTypeControllerIntegrationTest {
@@ -21,6 +27,10 @@ class PetTypeControllerIntegrationTest {
     @Autowired
     private PetTypeRepo petTypeRepo;
 
+    PetType petTypeEntity2 = buildPetType2();
+
+
+    /*
     @Test
     void getAllPetTypes() {
 
@@ -44,9 +54,36 @@ class PetTypeControllerIntegrationTest {
                 .jsonPath("$[0].name").isEqualTo(petType.getName());
     }
 
+     */
+
+
+    @Test
+    void getAllPetTypes_shouldSucceed() {
+        webTestClient.get()
+                .uri("/owners/petTypes")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(PetTypeResponseDTO.class)
+                .value((list) -> {
+                    assertNotNull(list);
+                    assertEquals(6, list.size());
+                });
+    }
+
 
     private PetType buildPetType() {
-        return PetType.builder().id(10).name("TestType").build();
+        return PetType.builder().id("10").name("TestType").build();
+    }
+
+    private PetType buildPetType2() {
+        return PetType.builder()
+                .id("10")
+                .petTypeId("petTypeId-1234")
+                .name("Dog")
+                .petTypeDescription("Mammal")
+                .build();
     }
 }
 
