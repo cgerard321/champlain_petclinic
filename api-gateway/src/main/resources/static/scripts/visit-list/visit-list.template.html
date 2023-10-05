@@ -84,8 +84,24 @@
         <td style="white-space: pre-line">{{v.petId}}</td>
         <td class="status-text" style="white-space: pre-line">{{v.status}}</td>
         <td class="status-text" style="white-space: pre-line"></td>
-        <td><a class="btn btn-success" href="javascript:void(0)" ng-click="confirmVisit(v.visitId, v.status)">Confirm Visit</a></td>
-        <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="cancelVisit(v.visitId, v.status)">Cancel Visit</a></td>
+        <td>
+            <a ng-class="{
+    'btn btn-success': v.status === 'UPCOMING',
+    'btn btn-info': v.status === 'CONFIRMED',
+    'btn btn-default': v.status === 'COMPLETED' || v.status === 'CANCELLED'
+  }"
+               href="javascript:void(0)"
+               ng-click="confirmVisit(v.visitId, v.status)">
+                {{ v.status === 'UPCOMING' ? 'Confirm Visit' : v.status === 'CONFIRMED' ? 'Complete Visit' : v.status === 'CANCELLED' ? 'Cannot Confirm Cancelled Visit' : 'Visit Completed!' }}
+            </a>
+        </td>
+
+        <td><a ng-class="{
+    'btn btn-danger': v.status === 'UPCOMING',
+    'btn btn-default': v.status === 'CANCELLED' || v.status === 'CONFIRMED' || v.status === 'COMPLETED'
+  }" href="javascript:void(0)" ng-click="cancelVisit(v.visitId, v.status)">
+            {{ v.status === 'UPCOMING' ? 'Cancel Visit' : v.status === 'CONFIRMED' ? 'Cannot Cancel Confirmed Visit' : v.status === 'COMPLETED' ? 'Cannot Cancel Completed Visit' : 'Visit Cancelled!' }}
+        </a></td>
         <td style="text-align:center; vertical-align:middle"><button class="btn btn-default" type="button" style="background-color: royalblue; color: white" ng-click="$ctrl.switchToUpdateForm($event, v.practitionerId, v.description, v.visitId, v.status)">Edit Visit</button></td>
         <!--<td style="text-align:center; vertical-align:middle"><button class="btn btn-danger" href="javascript:void(0)" ng-click="deleteVisit(v.visitId)">Delete visit</button></td> -->
         <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteVisit(v.visitId)">Delete Visit</a></td>
