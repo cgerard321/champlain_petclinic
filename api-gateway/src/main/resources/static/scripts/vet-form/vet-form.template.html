@@ -129,12 +129,25 @@
                     <div class="col-sm-6">
                         <div class="my-3 check-align">
                             <h5 class="mb-3">Available Work Days</h5>
-                            <div class="col-sm-12">
-                                <input class="form-control" id="workDays" name="workday"
-                                       ng-model="vet.workday"
-                                       placeholder="ex:Monday, Tuesday"
-                                       title="Accepts only days of the week separated by commas."
-                                       type="text">
+                            <div class="form-check">
+                                <input class="form-check-input workday" id="Monday" type="checkbox" value='Monday'>
+                                <label class="form-check-label vet-label-input" for="Monday">Monday</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input workday" id="Tuesday" type="checkbox" value='Tuesday'>
+                                <label class="form-check-label vet-label-input" for="Tuesday">Tuesday</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input workday" id="Wednesday" type="checkbox" value='Wednesday'>
+                                <label class="form-check-label vet-label-input" for="Wednesday">Wednesday</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input workday" id="Thursday" type="checkbox" value='Thursday'>
+                                <label class="form-check-label vet-label-input" for="Thursday">Thursday</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input workday" id="Friday" type="checkbox" value='Friday'>
+                                <label class="form-check-label vet-label-input" for="Friday">Friday</label>
                             </div>
                         </div>
                     </div>
