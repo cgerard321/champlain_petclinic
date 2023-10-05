@@ -16,6 +16,7 @@ import com.petclinic.bffapigateway.dtos.Inventory.ProductResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
+import com.petclinic.bffapigateway.dtos.Pets.PetTypeResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.*;
 import com.petclinic.bffapigateway.dtos.Visits.Status;
 import com.petclinic.bffapigateway.dtos.Visits.VisitDetails;
@@ -889,6 +890,7 @@ class ApiGatewayControllerTest {
                 .lastName("Johnny")
                 .address("111 John St")
                 .city("Johnston")
+                .province("Quebec")
                 .telephone("51451545144")
                 .build();
 
@@ -900,6 +902,7 @@ class ApiGatewayControllerTest {
                 .lastName("Johnny")
                 .address("111 John St")
                 .city("Johnston")
+                .province("Quebec")
                 .telephone("51451545144")
                 .build();
 
@@ -929,6 +932,7 @@ class ApiGatewayControllerTest {
                     assertEquals(dto.getLastName(),owner.getLastName());
                     assertEquals(dto.getAddress(),owner.getAddress());
                     assertEquals(dto.getCity(),owner.getCity());
+                    assertEquals(dto.getProvince(),owner.getProvince());
                     assertEquals(dto.getTelephone(),owner.getTelephone());
                 });
 
@@ -1026,6 +1030,7 @@ class ApiGatewayControllerTest {
         owner1.setLastName("Johnny");
         owner1.setAddress("111 John St");
         owner1.setCity("Johnston");
+        owner1.setProvince("Quebec");
         owner1.setTelephone("51451545144");
 
         Flux<OwnerResponseDTO> ownerResponseDTOFlux = Flux.just(owner1);
@@ -1058,6 +1063,7 @@ class ApiGatewayControllerTest {
         owner.setLastName("Test");
         owner.setAddress("Test");
         owner.setCity("Test");
+        owner.setProvince("Test");
         owner.setTelephone("Test");
 
         Optional<Integer> page = Optional.of(0);
@@ -1108,6 +1114,7 @@ class ApiGatewayControllerTest {
         owner.setLastName("Johnny");
         owner.setAddress("111 John St");
         owner.setCity("Johnston");
+        owner.setProvince("Quebec");
         owner.setTelephone("51451545144");
         when(customersServiceClient.getOwner("ownerId-123"))
                 .thenReturn(Mono.just(owner));
@@ -2898,6 +2905,31 @@ private VetAverageRatingDTO buildVetAverageRatingDTO(){
 
             verify(authServiceClient, times(1)).changePassword(any());
         }
+
+    @Test
+    void getAllPetTypes_shouldSucceed(){
+        PetTypeResponseDTO petType1 = new PetTypeResponseDTO();
+        petType1.setPetTypeId("petTypeId-90");
+        petType1.setName("Dog");
+        petType1.setPetTypeDescription("Mammal");
+
+        Flux<PetTypeResponseDTO> petTypeResponseDTOFlux = Flux.just(petType1);
+
+        when(customersServiceClient.getAllPetTypes()).thenReturn(petTypeResponseDTOFlux);
+
+        client.get()
+                .uri("/api/gateway/owners/petTypes")
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().valueEquals("Content-Type", "application/json") // Change content type expectation
+                .expectBodyList(PetTypeResponseDTO.class)
+                .value((list) -> {
+                    assertNotNull(list);
+                    assertEquals(1, list.size());
+                    assertEquals(list.get(0).getPetTypeId(), petType1.getPetTypeId());
+                    assertEquals(list.get(0).getName(), petType1.getName());
+                });
+    }
 
 
 

@@ -63,9 +63,10 @@
             <thead class="bg-white">
                 <tr>
                     <th class="bg-white border" >Owner ID</th>
-                    <th class="bg-white  border">Full Name</th>
+                    <th class="bg-white border">Full Name</th>
                     <th class="bg-white d-none d-sm-table-cell d-md-table-cell border">Address</th>
                     <th class="bg-white d-none d-sm-table-cell d-md-table-cell border">City</th>
+                    <th class="bg-white d-none d-sm-table-cell d-md-table-cell border">Province</th>
                     <th class="bg-white d-none d-sm-table-cell d-md-table-cell border">Phone Number</th>
                 </tr>
             </thead>
@@ -86,6 +87,9 @@
                         <input class="ps-2" type="text" size="15" placeholder="Search Filter...">
                     </td>
                     <td class="bg-white border d-none d-sm-table-cell d-md-table-cell">
+                        <input class="ps-2" type="text" size="15" placeholder="Search Filter...">
+                    </td>
+                    <td class="bg-white border d-none d-sm-table-cell d-md-table-cell">
                         <input class="ps-2" type="text" size="10" placeholder="Search Filter...">
                     </td>
                 </tr>
@@ -99,6 +103,7 @@
                     <td class="responsive-text">{{owner.firstName}} {{owner.lastName}}</td>
                     <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">{{owner.address}}</td>
                     <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">{{owner.city}}</td>
+                    <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">{{owner.province}}</td>
                     <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">{{owner.telephone}}</td>
                 </tr>
             </tbody>
