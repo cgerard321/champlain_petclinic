@@ -8,4 +8,5 @@ angular.module('productDetails', ['ui.router'])
                 url: '/inventory/:inventoryId/products/details/:productId',
                 template: '<product-details></product-details>'
             })
+
     }]);
