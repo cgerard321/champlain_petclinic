@@ -31,17 +31,26 @@ angular.module('visitList')
         }
 
         $scope.confirmVisit = function (visitId, status){
-            console.log("Called Function")
+
             console.log(status)
 
-            if (!(status === "CANCELLED" || "COMPLETED"))
-                status = "CONFIRMED"
+            switch(status){
 
-            console.log("Function Finished")
+                case "UPCOMING":
+                    status = "CONFIRMED"
+                    break;
+
+                case "CONFIRMED":
+                    status = "COMPLETED"
+                    break;
+
+                default:
+                    break;
+            }
+
+            console.log(status)
 
             let putURL = 'api/gateway/visits/' + visitId + '/status/' + status;
-
-            console.log(putURL);
 
             $http.put(putURL, status)
                 .then(successCallback, errorCallback)
@@ -60,17 +69,8 @@ angular.module('visitList')
         }
 
         $scope.cancelVisit = function (visitId, status){
-            console.log("Called Function")
-            console.log(status)
-
-            if (!(status === "CONFIRMED" || "COMPLETED"))
-                status = "CANCELLED"
-
-            console.log("Function Finished")
 
             let putURL = 'api/gateway/visits/' + visitId + '/status/' + status;
-
-            console.log(putURL);
 
             $http.put(putURL, status)
                 .then(successCallback, errorCallback)
