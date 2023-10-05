@@ -1,20 +1,14 @@
 package com.petclinic.visits.visitsservicenew.DataLayer;
 
-import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetDTO;
-import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetsClient;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import reactor.util.retry.Retry;
-
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+
 
 @Service
 @RequiredArgsConstructor
