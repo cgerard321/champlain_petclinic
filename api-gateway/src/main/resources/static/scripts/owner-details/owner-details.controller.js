@@ -9,8 +9,9 @@ angular.module('ownerDetails')
             console.log(self.owner);
 
             var petPromises = self.owner.pets.map(function (pet) {
-                return $http.get('api/gateway/pets/' + pet.petId);
+                return $http.get('api/gateway/pets/' + pet.petid, { cache: false });
             });
+
 
             $q.all(petPromises).then(function (responses) {
                 self.owner.pets = responses.map(function (response) {
@@ -29,9 +30,10 @@ angular.module('ownerDetails')
                 .then(function (resp) {
                     console.log("Pet deleted successfully");
 
-                    $http.get('api/gateway/owners/' + $stateParams.ownerId).then(function (resp) {
+                  /*  $http.get('api/gateway/owners/' + $stateParams.ownerId).then(function (resp) {
                         self.owner = resp.data;
                     });
+                   */
 
                     self.owner.pets = self.owner.pets.filter(function(pet) {
                         return pet.petId !== petId;
