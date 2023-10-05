@@ -10,6 +10,7 @@ import com.petclinic.bffapigateway.dtos.Pets.PetType;
 import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -274,6 +275,28 @@ public class CustomerServiceClientIntegrationTest {
         assertEquals(updatedPetResponse.getPetId(), responseDTO.getPetId());
         assertEquals(updatedPetResponse.getIsActive(), responseDTO.getIsActive()); // Check the isActive status
     }
+
+    @Test
+    void testDeletePetByPetId() throws Exception {
+        // Create a pet id that will be used in the test
+        String petId = "petId-123";
+
+        // Set up the mock server to return a 204 (No Content) status code when the deletePetById endpoint is hit
+        server.enqueue(new MockResponse()
+                .setResponseCode(204));
+
+        // Call the deletePetById method
+        Mono<PetResponseDTO> responseMono = customersServiceClient.deletePetByPetId(petId);
+
+        // Block the response for simplicity
+        responseMono.block();
+
+        // Verify that the deletePetById endpoint was hit with the correct pet id
+        RecordedRequest request = server.takeRequest();
+        assertEquals("/pet/" + petId, request.getPath());
+        assertEquals("DELETE", request.getMethod());
+    }
+
 
 
 

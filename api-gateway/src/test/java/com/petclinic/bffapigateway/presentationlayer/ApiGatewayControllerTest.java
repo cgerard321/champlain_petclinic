@@ -29,6 +29,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -97,6 +99,12 @@ class ApiGatewayControllerTest {
     @MockBean private AuthServiceClient authServiceClient;
     @MockBean private BillServiceClient billServiceClient;
     @MockBean private InventoryServiceClient inventoryServiceClient;
+
+    @InjectMocks
+    private BFFApiGatewayController apiGatewayController;
+
+    @Mock
+    private CustomersServiceClient customersServiceClientMock;
 
     VetDTO vetDTO = buildVetDTO();
     VetDTO vetDTO2 = buildVetDTO2();
@@ -1138,6 +1146,59 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.petTypeId").isEqualTo(pet.getPetTypeId())
                 .jsonPath("$.isActive").isEqualTo(pet.getIsActive());
 
+    }
+    @Test
+    void shouldDeletePet() {
+        // Create a pet id that will be used in the test
+        String petId = "petId-123";
+
+        // Mock the deletePetByPetId method in the customersServiceClient
+        when(customersServiceClientMock.deletePetByPetId(petId))
+                .thenReturn(Mono.empty());
+
+        // Call the deletePetByPetId method in the ApiGatewayController
+        Mono<ResponseEntity<PetResponseDTO>> responseMono = apiGatewayController.deletePetByPetId(petId);
+
+        // Verify that the deletePetByPetId method in the customersServiceClient was called with the correct pet id
+        verify(customersServiceClientMock, times(1)).deletePetByPetId(petId);
+
+        // Verify that the response is as expected
+        StepVerifier.create(responseMono)
+                .assertNext(response -> {
+                    assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+                    assertNull(response.getBody());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldPatchPet() {
+        // Create a pet id and a pet request DTO that will be used in the test
+        String petId = "petId-123";
+        PetRequestDTO petRequestDTO = new PetRequestDTO();
+        petRequestDTO.setPetId(petId);
+        petRequestDTO.setIsActive("true");
+
+        // Mock the patchPet method in the customersServiceClient
+        PetResponseDTO expectedPetResponse = new PetResponseDTO();
+        expectedPetResponse.setPetId(petId);
+        expectedPetResponse.setIsActive("true");
+        when(customersServiceClientMock.patchPet(petRequestDTO, petId))
+                .thenReturn(Mono.just(expectedPetResponse));
+
+        // Call the patchPet method in the ApiGatewayController
+        Mono<ResponseEntity<PetResponseDTO>> responseMono = apiGatewayController.patchPet(petRequestDTO, petId);
+
+        // Verify that the patchPet method in the customersServiceClient was called with the correct pet request DTO and pet id
+        verify(customersServiceClientMock, times(1)).patchPet(petRequestDTO, petId);
+
+        // Verify that the response is as expected
+        StepVerifier.create(responseMono)
+                .assertNext(response -> {
+                    assertEquals(HttpStatus.OK, response.getStatusCode());
+                    assertEquals(expectedPetResponse, response.getBody());
+                })
+                .verifyComplete();
     }
 
 
