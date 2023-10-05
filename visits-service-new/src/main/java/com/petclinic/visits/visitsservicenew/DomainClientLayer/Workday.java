@@ -5,7 +5,5 @@ public enum Workday {
     Tuesday,
     Wednesday,
     Thursday,
-    Friday,
-    Saturday,
-    Sunday
+    Friday
 }

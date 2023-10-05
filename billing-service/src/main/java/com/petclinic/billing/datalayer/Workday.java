@@ -1,4 +1,4 @@
-package com.petclinic.vet.dataaccesslayer;
+package com.petclinic.billing.datalayer;
 
 public enum Workday {
     Monday,
