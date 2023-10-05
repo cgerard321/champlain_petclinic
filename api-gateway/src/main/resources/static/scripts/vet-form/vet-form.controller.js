@@ -18,9 +18,9 @@ angular.module('vetForm')
                 document.getElementById("title").innerHTML = "Edit Vet";
                 document.getElementById("firstName").value = self.vet.firstName;
                 document.getElementById("lastName").value = self.vet.lastName;
-                //document.getElementById("email-info").style.display = "none";
+                document.getElementById("email-info").style.display = "none";
                 document.getElementById("vetResume").value = self.vet.resume;
-                //document.getElementById("user-info").style.display = "none";
+                document.getElementById("user-info").style.display = "none";
 
                 const specialties = self.vet.specialties;
                 specialties.forEach(specs => {
@@ -28,7 +28,6 @@ angular.module('vetForm')
                 })
 
                 const workdays = self.vet.workday;
-
                 workdays.forEach(work => {
                     console.log(work);
                     document.getElementById(work).checked = true;
@@ -47,7 +46,9 @@ angular.module('vetForm')
 
             });
         }
-        self.submitVetForm = function (vet) {
+        
+        self.submitVetForm = function (vet = self.vet) {
+            console.log("vet please: " + vet);
             document.getElementById("loaderDiv").style.display = "block";
 
             let specialtyList = document.getElementsByClassName("specialty")
@@ -110,12 +111,14 @@ angular.module('vetForm')
                 alert("last name should be minimum 2 characters and maximum of 30 characters, only letters, spaces, and hyphens: "+vet.lastName)
                 return
             }
-
+/*
             var emailPattern = /\b[\w.%-]+@[-.\w]+\.[A-Za-z]{2,3}\b/;
             if (!emailPattern.test(document.getElementById("email").value)) {
                 alert("email should be minimum 6 characters and maximum 320 characters. Top level domain should have 2 to 3 letters: "+vet.email)
                 return
             }
+
+ */
 
             let basePhoneNumber = "(514)-634-8276 #";
             let inputPhoneNumber=document.getElementById("phoneNumber").value;
