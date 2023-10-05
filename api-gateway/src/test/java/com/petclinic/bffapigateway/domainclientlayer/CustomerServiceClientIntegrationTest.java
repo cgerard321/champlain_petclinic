@@ -48,6 +48,7 @@ public class CustomerServiceClientIntegrationTest {
             .lastName("Smith")
             .address("456 Elm")
             .city("Montreal")
+            .province("QC")
             .telephone("5553334444")
             //.imageId(1)
             .build();
@@ -64,6 +65,7 @@ public class CustomerServiceClientIntegrationTest {
             .lastName("Smith")
             .address("456 Elm")
             .city("Montreal")
+            .province("QC")
             .telephone("5553334444")
             //.imageId(1)
             .build();
@@ -137,6 +139,7 @@ public class CustomerServiceClientIntegrationTest {
         assertEquals(ownerResponseDTO.getLastName(),TEST_OWNER.getLastName());
         assertEquals(ownerResponseDTO.getAddress(),TEST_OWNER.getAddress());
         assertEquals(ownerResponseDTO.getCity(),TEST_OWNER.getCity());
+        assertEquals(ownerResponseDTO.getProvince(),TEST_OWNER.getProvince());
         assertEquals(ownerResponseDTO.getTelephone(),TEST_OWNER.getTelephone());
         //assertEquals(ownerResponseDTO.getImageId(),TEST_OWNER.getImageId());
     }
@@ -178,6 +181,7 @@ public class CustomerServiceClientIntegrationTest {
                .lastName("Test")
                .address("Test")
                .city("Test")
+               .province("Test")
                .telephone("Test")
                 //.imageId(1)
                 .build();
@@ -187,6 +191,7 @@ public class CustomerServiceClientIntegrationTest {
                 .lastName("Test")
                 .address("Test")
                 .city("Test")
+                .province("Test")
                 .telephone("Test")
                 //.imageId(1)
                 .build();
@@ -196,6 +201,7 @@ public class CustomerServiceClientIntegrationTest {
                 .lastName("Test")
                 .address("Test")
                 .city("Test")
+                .province("Test")
                 .telephone("Test")
                 //.imageId(1)
                 .build();
