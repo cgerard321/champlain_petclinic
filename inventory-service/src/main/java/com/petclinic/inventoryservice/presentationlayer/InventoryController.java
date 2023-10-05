@@ -106,6 +106,7 @@ public Flux<InventoryResponseDTO> searchInventories(
 
 
 
+
     @PutMapping("/{inventoryId}/products/{productId}")
     public Mono<ResponseEntity<ProductResponseDTO>> updateProductInInventory(@RequestBody Mono<ProductRequestDTO> productRequestDTOMono,
                                                                              @PathVariable String inventoryId,
