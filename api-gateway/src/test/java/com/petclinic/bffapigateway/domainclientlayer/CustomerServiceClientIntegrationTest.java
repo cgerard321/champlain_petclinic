@@ -4,9 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
-import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
-import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
-import com.petclinic.bffapigateway.dtos.Pets.PetType;
+import com.petclinic.bffapigateway.dtos.Pets.*;
 import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
@@ -55,6 +53,11 @@ public class CustomerServiceClientIntegrationTest {
             //.imageId(1)
             .build();
 
+    private final PetTypeRequestDTO TEST_PETTYPE = PetTypeRequestDTO.builder()
+            .name("Dog")
+            .petTypeDescription("Mammal")
+            .build();
+
 
     private final OwnerResponseDTO TEST_OWNER_RESPONSE = OwnerResponseDTO.builder()
             .ownerId("ownerId-123")
@@ -65,6 +68,12 @@ public class CustomerServiceClientIntegrationTest {
             .province("QC")
             .telephone("5553334444")
             //.imageId(1)
+            .build();
+
+    private final PetTypeResponseDTO TEST_PETTYPE_RESPONSE = PetTypeResponseDTO.builder()
+            .petTypeId("petTypeId-123")
+            .name("Dog")
+            .petTypeDescription("Mammal")
             .build();
     PetType type = new PetType();
 
@@ -308,6 +317,22 @@ public class CustomerServiceClientIntegrationTest {
         assertEquals(updatedOwnerResponse.getOwnerId(), responseDTO.getOwnerId());
         assertEquals(updatedOwnerResponse.getFirstName(), responseDTO.getFirstName());
         assertEquals(updatedOwnerResponse.getLastName(), responseDTO.getLastName());
+    }
+
+
+    @Test
+    void getAllPetTypes() throws JsonProcessingException {
+        Flux<PetTypeResponseDTO> petTypes = Flux.just(TEST_PETTYPE_RESPONSE);
+
+        final String body = mapper.writeValueAsString(petTypes.collectList().block());
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(body));
+
+        final PetTypeResponseDTO firstPetTypeFromFlux = customersServiceClient.getAllPetTypes().blockFirst();
+
+        assertEquals(firstPetTypeFromFlux.getName(), TEST_PETTYPE.getName());
     }
 
     /*@Test

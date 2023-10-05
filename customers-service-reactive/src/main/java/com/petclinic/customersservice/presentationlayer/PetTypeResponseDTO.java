@@ -1,18 +1,14 @@
-package com.petclinic.customersservice.data;
+package com.petclinic.customersservice.presentationlayer;
 
 import lombok.*;
-import org.springframework.data.annotation.Id;
 
 @Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class PetType {
+public class PetTypeResponseDTO {
 
-    @Id
-    private String id;
     private String petTypeId;
     private String name;
     private String petTypeDescription;
-
 }
