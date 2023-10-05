@@ -176,6 +176,13 @@ public class CustomersServiceClient {
                 .bodyToMono(PetResponseDTO.class);
     }
 
+    public Mono<PetResponseDTO> deletePetByPetId(final String petId) {
+        return webClientBuilder.build().delete()
+                .uri(customersServiceUrl + "/pet/{petId}", petId)
+                .retrieve()
+                .bodyToMono(PetResponseDTO.class);
+    }
+
     public Mono<OwnerResponseDTO> deleteOwner(final String ownerId) {
         return webClientBuilder.build().delete()
                 .uri(customersServiceUrl +"/owners/"+ ownerId)
