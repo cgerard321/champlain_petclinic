@@ -65,16 +65,20 @@
 
 
     </td>
-
-
-
     </tr>
-
-
-
-            <!--<td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteBundle(bundle.bundleUUID)">Delete Bundle</a></td>-->
-
-        <!--<td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteBundle(bundle.bundleUUID)">Delete Bundle</a></td>-->
+    </tr>
+</table>
+<table>
+    <tr>
+        <td>
+            <a class="btn btn-success btn-sm" ng-click="pageBefore()"><</a>
+        </td>
+        <td>
+            <span>{{$ctrl.realPage}}</span>
+        </td>
+        <td>
+            <a class="btn btn-success btn-sm" ng-click="pageAfter()">></a>
+        </td>
     </tr>
 </table>
 

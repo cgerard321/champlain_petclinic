@@ -1,14 +1,21 @@
 'use strict';
 
 angular.module('inventoryList')
-    .controller('InventoryListController', ['$http', '$scope', function ($http, $scope) {
+    .controller('InventoryListController', ['$http', '$scope', '$stateParams', '$state', function ($http, $scope, $stateParams, $state) {
         var self = this;
+        self.currentPage = $stateParams.page = 0
+        self.listSize= $stateParams.size = 10
+        self.realPage = parseInt(self.currentPage) + 1
 
-                $http.get('api/gateway/inventory').then(function (resp) {
-                    self.inventoryList = resp.data;
-                    console.log("Resp data: " + resp.data)
-                    console.log("inventory list: " + self.inventoryList)
-                });
+        loadList()
+        function loadList(){
+            $state.transitionTo('inventoryList', {page: self.currentPage, size: self.listSize}, {notify: false});
+
+            $http.get('api/gateway/inventory/pages?page=' + self.currentPage + "&size=" + self.listSize).then(function (resp) {
+                self.inventoryList = resp.data;
+            });
+        }
+
 //search by inventory field
         $scope.searchInventory = function (inventoryName, inventoryType, inventoryDescription){
 
@@ -107,6 +114,20 @@ $scope.fetchInventoryList = function() {
                 }
             }
         };
+
+        $scope.pageBefore = function () {
+            if (self.currentPage - 1 >= 0){
+                self.currentPage = (parseInt(self.currentPage) - 1).toString();
+                self.realPage = parseInt(self.currentPage) + 1
+                loadList();
+            }
+        }
+
+        $scope.pageAfter = function () {
+                self.currentPage = (parseInt(self.currentPage) + 1).toString();
+                self.realPage = parseInt(self.currentPage) + 1
+                loadList();
+        }
 
 
     }]);
