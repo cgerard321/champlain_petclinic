@@ -39,6 +39,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/users")
@@ -59,6 +60,22 @@ public class UserController {
     @GetMapping("/withoutPages")
     public List<UserDetails> getUserWithoutPage() {
         return userService.findAllWithoutPage();
+    }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<UserPasswordLessDTO> getUserByUserId(@PathVariable String userId) {
+        User user = userService.getUserByUserId(userId);
+        return ResponseEntity.ok(userMapper.modelToPasswordLessDTO(user));
+    }
+
+    @GetMapping("/by-username")
+    public ResponseEntity<List<UserPasswordLessDTO>> getUsersByUsernameContaining(@RequestParam(name = "username") String username) {
+        List<User> users = userService.getUsersByUsernameContaining(username);
+        List<UserPasswordLessDTO> userDTOs = users.stream()
+                .map(userMapper::modelToPasswordLessDTO)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(userDTOs);
     }
 
     @PostMapping

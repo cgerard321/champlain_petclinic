@@ -19,6 +19,7 @@ package com.petclinic.authservice.datalayer.user;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -32,6 +33,10 @@ public interface UserRepo extends JpaRepository<User, Long> {
     User findUserByUserIdentifier_UserId(String userId);
 
     //Optional<User> findByUserId(String userId);
+    Optional<User> findById(String userId);
+
+    List<User> findByUsernameContaining(String username);
+
 
 }
 
