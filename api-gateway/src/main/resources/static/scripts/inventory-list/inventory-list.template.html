@@ -68,19 +68,22 @@
     </tr>
     </tr>
 </table>
-<table>
-    <tr>
-        <td>
-            <a class="btn btn-success btn-sm" ng-click="pageBefore()"><</a>
-        </td>
-        <td>
-            <span>{{$ctrl.realPage}}</span>
-        </td>
-        <td>
-            <a class="btn btn-success btn-sm" ng-click="pageAfter()">></a>
-        </td>
-    </tr>
-</table>
+<div class="text-center">
+    <table class="mx-auto">
+        <tr>
+            <td>
+                <a class="btn btn-success btn-sm" ng-click="pageBefore()"><</a>
+            </td>
+            <td>
+                <span>{{$ctrl.realPage}}</span>
+            </td>
+            <td>
+                <a class="btn btn-success btn-sm" ng-click="pageAfter()">></a>
+            </td>
+        </tr>
+    </table>
+</div>
+
 
 
 <div id="loadingObject" style="display: none;">Loading...</div> <!--This is the page loading element-->

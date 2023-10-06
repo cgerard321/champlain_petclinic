@@ -23,11 +23,11 @@ public interface ProductInventoryService {
     Mono<Void> deleteAllInventory();
     Mono<InventoryTypeResponseDTO> addInventoryType(Mono<InventoryTypeRequestDTO> inventoryTypeRequestDTO);
 
-    Flux<InventoryResponseDTO> searchInventories(String inventoryName, String inventoryType, String inventoryDescription);
+    Flux<InventoryResponseDTO> searchInventories(Pageable page, String inventoryName, String inventoryType, String inventoryDescription);
 
     Mono<ProductResponseDTO> getProductByProductIdInInventory(String inventoryId, String productId);
 
-    Flux<InventoryResponseDTO> getAllInventoryPage(Pageable page);
+    //Flux<InventoryResponseDTO> getAllInventoryPage(Pageable page);
 
 
 }

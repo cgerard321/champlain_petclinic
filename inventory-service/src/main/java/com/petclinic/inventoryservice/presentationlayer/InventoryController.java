@@ -64,11 +64,12 @@ public class InventoryController {
  */
 @GetMapping()
 public Flux<InventoryResponseDTO> searchInventories(
+        @RequestParam Optional<Integer> page, @RequestParam Optional<Integer> size,
         @RequestParam(name = "inventoryName", required = false) String inventoryName,
         @RequestParam(name = "inventoryType", required = false) String inventoryType,
         @RequestParam(name = "inventoryDescription", required = false) String inventoryDescription) {
 
-    return productInventoryService.searchInventories(inventoryName, inventoryType, inventoryDescription);
+    return productInventoryService.searchInventories(PageRequest.of(page.orElse(0),size.orElse(10)), inventoryName, inventoryType, inventoryDescription);
 }
 
 
@@ -133,11 +134,11 @@ public Flux<InventoryResponseDTO> searchInventories(
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/pages")
+   /* @GetMapping("/pages")
     public Flux<InventoryResponseDTO> getAllInventoryPage (@RequestParam Optional<Integer> page, @RequestParam Optional<Integer> size){
         return productInventoryService.getAllInventoryPage(
                 PageRequest.of(page.orElse(0),size.orElse(10)));
-    }
+    }*/
 
 }
 

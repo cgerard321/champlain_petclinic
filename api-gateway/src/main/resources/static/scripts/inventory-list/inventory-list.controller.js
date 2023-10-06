@@ -4,24 +4,29 @@ angular.module('inventoryList')
     .controller('InventoryListController', ['$http', '$scope', '$stateParams', '$state', function ($http, $scope, $stateParams, $state) {
         var self = this;
         self.currentPage = $stateParams.page = 0
-        self.listSize= $stateParams.size = 10
+        self.listSize = $stateParams.size = 10
         self.realPage = parseInt(self.currentPage) + 1
+        var numberOfPage
+        var name
+        var type
+        var desc
 
-        loadList()
-        function loadList(){
-            $state.transitionTo('inventoryList', {page: self.currentPage, size: self.listSize}, {notify: false});
+        getInventoryList()
 
-            $http.get('api/gateway/inventory/pages?page=' + self.currentPage + "&size=" + self.listSize).then(function (resp) {
-                self.inventoryList = resp.data;
-            });
-        }
-
-//search by inventory field
         $scope.searchInventory = function (inventoryName, inventoryType, inventoryDescription){
+            getInventoryList(inventoryName, inventoryType, inventoryDescription)
+        }
+//search by inventory field
+        function getInventoryList(inventoryName, inventoryType, inventoryDescription){
 
+            $state.transitionTo('inventoryList', {page: self.currentPage, size: self.listSize}, {notify: false});
             var queryString = '';
+            name = ""
+            type = ""
+            desc = ""
 
             if (inventoryName != null && inventoryName !== '') {
+                name = inventoryName
                 queryString += "inventoryName=" + inventoryName;
             }
 
@@ -29,6 +34,7 @@ angular.module('inventoryList')
                 if (queryString !== '') {
                     queryString += "&";
                 }
+                type = inventoryType
                 queryString += "inventoryType=" + inventoryType;
             }
 
@@ -36,12 +42,17 @@ angular.module('inventoryList')
                 if (queryString !== '') {
                     queryString += "&";
                 }
+                desc = inventoryDescription
                 queryString += "inventoryDescription=" + inventoryDescription;
             }
 
             if (queryString !== '') {
-                $http.get("api/gateway/inventory?" + queryString)
+                self.currentPage = 0
+                self.realPage = parseInt(self.currentPage) + 1
+
+                $http.get("api/gateway/inventory?page=" + self.currentPage + "&size=" + self.listSize + "&" + queryString)
                     .then(function(resp) {
+                        numberOfPage = Math.ceil(resp.data.length / 10)
                         self.inventoryList = resp.data;
                         arr = resp.data;
                     })
@@ -53,8 +64,9 @@ angular.module('inventoryList')
                         }
                     });
             } else {
-                $http.get("api/gateway/inventory")
+                $http.get("api/gateway/inventory?page=" + self.currentPage + "&size=" + self.listSize)
                     .then(function(resp) {
+                        numberOfPage = Math.ceil(resp.data.length / 10)
                         self.inventoryList = resp.data;
                         arr = resp.data;
                     })
@@ -119,15 +131,17 @@ $scope.fetchInventoryList = function() {
             if (self.currentPage - 1 >= 0){
                 self.currentPage = (parseInt(self.currentPage) - 1).toString();
                 self.realPage = parseInt(self.currentPage) + 1
-                loadList();
+
+                getInventoryList(name, type, desc)
             }
         }
 
         $scope.pageAfter = function () {
+            if (self.currentPage + 1 <= numberOfPage) {
                 self.currentPage = (parseInt(self.currentPage) + 1).toString();
                 self.realPage = parseInt(self.currentPage) + 1
-                loadList();
+
+                getInventoryList(name, type, desc)
+            }
         }
-
-
     }]);

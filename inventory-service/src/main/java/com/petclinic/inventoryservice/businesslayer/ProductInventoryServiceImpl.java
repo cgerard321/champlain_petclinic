@@ -227,12 +227,14 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     }
 */
     @Override
-    public Flux<InventoryResponseDTO>searchInventories(String inventoryName, String inventoryType, String inventoryDescription) {
+    public Flux<InventoryResponseDTO>searchInventories(Pageable page, String inventoryName, String inventoryType, String inventoryDescription) {
 
         if (inventoryName != null && inventoryType != null && inventoryDescription != null){
             return inventoryRepository
                     .findAllByInventoryNameAndInventoryTypeAndInventoryDescription(inventoryName, inventoryType, inventoryDescription)
                     .map(EntityDTOUtil::toInventoryResponseDTO)
+                    .skip(page.getPageNumber() * page.getPageSize())
+                    .take(page.getPageSize())
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Name: " + inventoryName +
                             ", Type: " + inventoryType + ", Description: " + inventoryDescription)));
         }
@@ -241,6 +243,8 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
             return inventoryRepository
                     .findAllByInventoryTypeAndInventoryDescription(inventoryType, inventoryDescription)
                     .map(EntityDTOUtil::toInventoryResponseDTO)
+                    .skip(page.getPageNumber() * page.getPageSize())
+                    .take(page.getPageSize())
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Type: " + inventoryType +
                             " and Description: " + inventoryDescription)));
         }
@@ -249,6 +253,8 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
             return inventoryRepository
                     .findAllByInventoryName(inventoryName)
                     .map(EntityDTOUtil::toInventoryResponseDTO)
+                    .skip(page.getPageNumber() * page.getPageSize())
+                    .take(page.getPageSize())
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Name: " + inventoryName)));
         }
 
@@ -256,6 +262,8 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
             return inventoryRepository
                     .findAllByInventoryType(inventoryType)
                     .map(EntityDTOUtil::toInventoryResponseDTO)
+                    .skip(page.getPageNumber() * page.getPageSize())
+                    .take(page.getPageSize())
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Type: " + inventoryType)));
         }
 
@@ -263,12 +271,16 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
             return inventoryRepository
                     .findAllByInventoryDescription(inventoryDescription)
                     .map(EntityDTOUtil::toInventoryResponseDTO)
+                    .skip(page.getPageNumber() * page.getPageSize())
+                    .take(page.getPageSize())
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Description: " + inventoryDescription)));
         }
 
         // Default - fetch all if no criteria provided.
         return inventoryRepository
                 .findAll()
+                .skip(page.getPageNumber() * page.getPageSize())
+                .take(page.getPageSize())
                 .map(EntityDTOUtil::toInventoryResponseDTO);
     }
 
@@ -292,13 +304,13 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
 
     }
 
-    @Override
+    /*@Override
     public Flux<InventoryResponseDTO> getAllInventoryPage(Pageable page) {
         return inventoryRepository.findAll()
                 .map(EntityDTOUtil::toInventoryResponseDTO)
                 .skip(page.getPageNumber() * page.getPageSize())
                 .take(page.getPageSize());
-    }
+    }*/
 
 
     //delete all products and delete all inventory
