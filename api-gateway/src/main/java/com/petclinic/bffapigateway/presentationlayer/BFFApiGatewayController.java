@@ -86,6 +86,24 @@ public class BFFApiGatewayController {
         return billServiceClient.getAllBilling();
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "bills/paid", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<BillResponseDTO> getAllPaidBilling() {
+        return billServiceClient.getAllPaidBilling();
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "bills/unpaid", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<BillResponseDTO> getAllUnpaidBilling() {
+        return billServiceClient.getAllUnpaidBilling();
+    }
+
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "bills/overdue", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<BillResponseDTO> getAllOverdueBilling() {
+        return billServiceClient.getAllOverdueBilling();
+    }
 
 
     @IsUserSpecific(idToMatch = {"customerId"}, bypassRoles = {Roles.ADMIN})
@@ -768,10 +786,19 @@ public class BFFApiGatewayController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER,Roles.VET})
     @GetMapping(value = "inventory")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<InventoryResponseDTO> searchInventory(@RequestParam(required = false) String inventoryName,
+    public Flux<InventoryResponseDTO> searchInventory(@RequestParam Optional<Integer> page,
+                                                      @RequestParam Optional<Integer> size,
+                                                      @RequestParam(required = false) String inventoryName,
                                                       @RequestParam(required = false) String inventoryType,
                                                       @RequestParam(required = false) String inventoryDescription){
-        return inventoryServiceClient.searchInventory(inventoryName, inventoryType, inventoryDescription);
+        if(page.isEmpty()){
+            page = Optional.of(0);
+        }
+
+        if (size.isEmpty()) {
+            size = Optional.of(10);
+        }
+        return inventoryServiceClient.searchInventory(page, size, inventoryName, inventoryType, inventoryDescription);
     }
     /*
     @GetMapping(value = "inventory")

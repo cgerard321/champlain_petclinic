@@ -7,6 +7,7 @@ import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.Auth.*;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
+import com.petclinic.bffapigateway.dtos.Bills.BillStatus;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.*;
@@ -1689,6 +1690,79 @@ class ApiGatewayControllerTest {
 
 
     //private static final int BILL_ID = 1;
+
+    @Test
+    void shouldGetAllBills() {
+        BillResponseDTO billResponseDTO = new BillResponseDTO("BillUUID","1","Test type","1",null,25.00, BillStatus.PAID);
+
+
+        BillResponseDTO billResponseDTO2 = new BillResponseDTO("BillUUID2","2","Test type","2",null,27.00, BillStatus.UNPAID);
+        when(billServiceClient.getAllBilling()).thenReturn(Flux.just(billResponseDTO,billResponseDTO2));
+
+        client.get()
+                .uri("/api/gateway/bills")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
+                .expectBodyList(BillResponseDTO.class)
+                .value((list)->assertEquals(list.size(),2));
+        Mockito.verify(billServiceClient,times(1)).getAllBilling();
+    }
+
+    @Test
+    void shouldGetAllPaidBills() {
+        BillResponseDTO billResponseDTO = new BillResponseDTO("BillUUID","1","Test type","1",null,25.00, BillStatus.PAID);
+
+        BillResponseDTO billResponseDTO2 = new BillResponseDTO("BillUUID2","2","Test type","2",null,27.00, BillStatus.PAID);
+        when(billServiceClient.getAllPaidBilling()).thenReturn(Flux.just(billResponseDTO,billResponseDTO2));
+
+        client.get()
+                .uri("/api/gateway/bills/paid")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
+                .expectBodyList(BillResponseDTO.class)
+                .value((list)->assertEquals(list.size(),2));
+        Mockito.verify(billServiceClient,times(1)).getAllPaidBilling();
+    }
+
+    @Test
+    void shouldGetAllUnpaidBills() {
+        BillResponseDTO billResponseDTO = new BillResponseDTO("BillUUID","1","Test type","1",null,25.00, BillStatus.UNPAID);
+
+        BillResponseDTO billResponseDTO2 = new BillResponseDTO("BillUUID2","2","Test type","2",null,27.00, BillStatus.UNPAID);
+        when(billServiceClient.getAllUnpaidBilling()).thenReturn(Flux.just(billResponseDTO,billResponseDTO2));
+
+        client.get()
+                .uri("/api/gateway/bills/unpaid")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
+                .expectBodyList(BillResponseDTO.class)
+                .value((list)->assertEquals(list.size(),2));
+        Mockito.verify(billServiceClient,times(1)).getAllUnpaidBilling();
+    }
+
+    @Test
+    void shouldGetAllOverdueBills() {
+        BillResponseDTO billResponseDTO = new BillResponseDTO("BillUUID","1","Test type","1",null,25.00, BillStatus.OVERDUE);
+
+        BillResponseDTO billResponseDTO2 = new BillResponseDTO("BillUUID2","2","Test type","2",null,27.00, BillStatus.OVERDUE);
+        when(billServiceClient.getAllOverdueBilling()).thenReturn(Flux.just(billResponseDTO,billResponseDTO2));
+
+        client.get()
+                .uri("/api/gateway/bills/overdue")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
+                .expectBodyList(BillResponseDTO.class)
+                .value((list)->assertEquals(list.size(),2));
+        Mockito.verify(billServiceClient,times(1)).getAllOverdueBilling();
+    }
 
     @Test
     public void getBillById(){
