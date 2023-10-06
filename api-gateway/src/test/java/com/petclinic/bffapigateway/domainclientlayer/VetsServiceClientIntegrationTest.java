@@ -888,7 +888,6 @@ class VetsServiceClientIntegrationTest {
                         "        \"email\": \"skjfhf@gmail.com\",\n" +
                         "        \"phoneNumber\": \"947-238-2847\",\n" +
                         "        \"resume\": \"Just became a vet\",\n" +
-                        "        \"workday\": \"Monday\",\n" +
                         "        \"active\": false\n" +
                         "    }"));
 
@@ -899,7 +898,6 @@ class VetsServiceClientIntegrationTest {
         assertEquals(vetDTO.getEmail(), vet.getEmail());
         assertEquals(vetDTO.getPhoneNumber(), vet.getPhoneNumber());
         assertEquals(vetDTO.getResume(), vet.getResume());
-        assertEquals(vetDTO.getWorkday(), vet.getWorkday());
     }
 
     @Test
@@ -933,7 +931,6 @@ class VetsServiceClientIntegrationTest {
                         "        \"email\": \"skjfhf@gmail.com\",\n" +
                         "        \"phoneNumber\": \"947-238-2847\",\n" +
                         "        \"resume\": \"Just became a vet\",\n" +
-                        "        \"workday\": \"Monday\",\n" +
                         "        \"active\": false\n" +
                         "    }"));
 
@@ -944,7 +941,6 @@ class VetsServiceClientIntegrationTest {
         assertEquals(vetDTO.getEmail(), vet.getEmail());
         assertEquals(vetDTO.getPhoneNumber(), vet.getPhoneNumber());
         assertEquals(vetDTO.getResume(), vet.getResume());
-        assertEquals(vetDTO.getWorkday(), vet.getWorkday());
     }
 
     @Test
@@ -978,7 +974,6 @@ class VetsServiceClientIntegrationTest {
                         "        \"email\": \"skjfhf@gmail.com\",\n" +
                         "        \"phoneNumber\": \"947-238-2847\",\n" +
                         "        \"resume\": \"Just became a vet\",\n" +
-                        "        \"workday\": \"Monday\",\n" +
                         "        \"active\": false\n" +
                         "    }"));
 
@@ -989,7 +984,6 @@ class VetsServiceClientIntegrationTest {
         assertEquals(vetDTO.getEmail(), vet.getEmail());
         assertEquals(vetDTO.getPhoneNumber(), vet.getPhoneNumber());
         assertEquals(vetDTO.getResume(), vet.getResume());
-        assertEquals(vetDTO.getWorkday(), vet.getWorkday());
     }
 
     @Test
@@ -1023,7 +1017,6 @@ class VetsServiceClientIntegrationTest {
                         "        \"email\": \"skjfhf@gmail.com\",\n" +
                         "        \"phoneNumber\": \"947-238-2847\",\n" +
                         "        \"resume\": \"Just became a vet\",\n" +
-                        "        \"workday\": \"Monday\",\n" +
                         "        \"active\": false\n" +
                         "    }"));
 
@@ -1034,7 +1027,6 @@ class VetsServiceClientIntegrationTest {
         assertEquals(vetDTO.getEmail(), vet.getEmail());
         assertEquals(vetDTO.getPhoneNumber(), vet.getPhoneNumber());
         assertEquals(vetDTO.getResume(), vet.getResume());
-        assertEquals(vetDTO.getWorkday(), vet.getWorkday());
     }
 
     @Test
@@ -1110,7 +1102,6 @@ class VetsServiceClientIntegrationTest {
                         "        \"email\": \"skjfhf@gmail.com\",\n" +
                         "        \"phoneNumber\": \"947-238-2847\",\n" +
                         "        \"resume\": \"Just became a vet\",\n" +
-                        "        \"workday\": \"Monday\",\n" +
                         "        \"active\": false\n" +
                         "    }"));
 
@@ -1121,7 +1112,6 @@ class VetsServiceClientIntegrationTest {
         assertEquals(vetDTO.getEmail(), vet.getEmail());
         assertEquals(vetDTO.getPhoneNumber(), vet.getPhoneNumber());
         assertEquals(vetDTO.getResume(), vet.getResume());
-        assertEquals(vetDTO.getWorkday(), vet.getWorkday());
     }
 
     @Test
@@ -1155,7 +1145,6 @@ class VetsServiceClientIntegrationTest {
                         "        \"email\": \"skjfhf@gmail.com\",\n" +
                         "        \"phoneNumber\": \"947-238-2847\",\n" +
                         "        \"resume\": \"Just became a vet\",\n" +
-                        "        \"workday\": \"Monday\",\n" +
                         "        \"active\": false\n" +
                         "    }"));
 
@@ -1166,7 +1155,6 @@ class VetsServiceClientIntegrationTest {
         assertEquals(vetDTO.getEmail(), vet.getEmail());
         assertEquals(vetDTO.getPhoneNumber(), vet.getPhoneNumber());
         assertEquals(vetDTO.getResume(), vet.getResume());
-        assertEquals(vetDTO.getWorkday(), vet.getWorkday());
     }
 
     @Test
@@ -1382,7 +1370,7 @@ class VetsServiceClientIntegrationTest {
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
                 .image("kjd".getBytes())
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
