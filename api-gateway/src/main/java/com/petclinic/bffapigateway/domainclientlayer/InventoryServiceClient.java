@@ -162,7 +162,7 @@ public class InventoryServiceClient {
                 // Consider adding error-handling logic here if needed.
                 .bodyToFlux(InventoryResponseDTO.class);
     }
-    
+
 
 
 
