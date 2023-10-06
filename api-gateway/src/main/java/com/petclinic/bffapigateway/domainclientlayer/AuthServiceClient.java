@@ -48,7 +48,7 @@ public class AuthServiceClient {
     }
 
 
-    public Mono<UserDetails> getUserById(String jwtToken, long userId) {
+    public Mono<UserDetails> getUserById(String jwtToken, String userId) {
         return webClientBuilder.build()
                 .get()
                 .uri(authServiceUrl + "/users/{userId}", userId)
@@ -62,16 +62,20 @@ public class AuthServiceClient {
                 .bodyToMono(UserDetails.class);
     }
 
+    public Flux<UserDetails> getUsersByUsername(String jwtToken, String username) {
+        return webClientBuilder
+                .baseUrl(authServiceUrl)
+                .build()
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/users/")
+                        .queryParam("username", username)
+                        .build())
+                .cookie("Bearer", jwtToken)
+                .retrieve()
+                .bodyToFlux(UserDetails.class);
+    }
 
-
-
-    //    public Mono<UserDetails> getUser(final long userId) {
-//        return webClientBuilder.build().get()
-//                .uri(authServiceUrl + "/users/{userId}", userId)
-//                .retrieve()
-//                .bodyToMono(UserDetails.class);
-//    }
-//
     public Flux<UserDetails> getUsers(String jwtToken) {
         return webClientBuilder.build().get()
                 .uri(authServiceUrl + "/users/withoutPages")
@@ -83,40 +87,39 @@ public class AuthServiceClient {
     /*
     This shit is beyond cursed, but I do not care. This works, I only spent 6 HOURS OF MY LIFE.
      */
-        public Mono<OwnerResponseDTO> createUser (Mono<Register> model) {
+    public Mono<OwnerResponseDTO> createUser (Mono<Register> model) {
 
-            String uuid = UUID.randomUUID().toString();
+        String uuid = UUID.randomUUID().toString();
 
-            return model.flatMap(register ->{
-                    register.setUserId(uuid);
-                    return webClientBuilder.build().post()
-                            .uri(authServiceUrl + "/users")
-                            .body(Mono.just(register), Register.class)
-                            .accept(MediaType.APPLICATION_JSON)
-                            .retrieve()
-                            .onStatus(HttpStatusCode::is4xxClientError,
-                                    n -> rethrower.rethrow(n,
-                                            x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
-                            )
-                            .bodyToMono(UserPasswordLessDTO.class)
-                            .flatMap(userDetails -> {
-                                OwnerRequestDTO ownerRequestDTO = OwnerRequestDTO.builder()
-                                        .firstName(register.getOwner().getFirstName())
-                                        .lastName(register.getOwner().getLastName())
-                                        .address(register.getOwner().getAddress())
-                                        .city(register.getOwner().getCity())
-                                        .province(register.getOwner().getProvince())
-                                        .telephone(register.getOwner().getTelephone())
-                                        .ownerId(uuid)
-                                        .build();
-                                return customersServiceClient.createOwner(ownerRequestDTO);
-                            }
-                            );
-            }
-            ).doOnError(throwable -> {
-                log.error("Error creating user: " + throwable.getMessage());
-                customersServiceClient.deleteOwner(uuid);
-            });
+        return model.flatMap(register ->{
+                register.setUserId(uuid);
+                return webClientBuilder.build().post()
+                        .uri(authServiceUrl + "/users")
+                        .body(Mono.just(register), Register.class)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .retrieve()
+                        .onStatus(HttpStatusCode::is4xxClientError,
+                                n -> rethrower.rethrow(n,
+                                        x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
+                        )
+                        .bodyToMono(UserPasswordLessDTO.class)
+                        .flatMap(userDetails -> {
+                            OwnerRequestDTO ownerRequestDTO = OwnerRequestDTO.builder()
+                                    .firstName(register.getOwner().getFirstName())
+                                    .lastName(register.getOwner().getLastName())
+                                    .address(register.getOwner().getAddress())
+                                    .city(register.getOwner().getCity())
+                                    .telephone(register.getOwner().getTelephone())
+                                    .ownerId(uuid)
+                                    .build();
+                            return customersServiceClient.createOwner(ownerRequestDTO);
+                        }
+                        );
+        }
+        ).doOnError(throwable -> {
+            log.error("Error creating user: " + throwable.getMessage());
+            customersServiceClient.deleteOwner(uuid);
+        });
 
         }
 
