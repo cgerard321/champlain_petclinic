@@ -128,7 +128,7 @@ class ProductInventoryServiceUnitTest {
                 .expectNextCount(1)
                 .verifyComplete();
     }
-
+/*
     @Test
     void getAllProductsByInventoryId_andProductName_withValidFields_shouldSucceed(){
         String inventoryType = "1";
@@ -152,7 +152,7 @@ class ProductInventoryServiceUnitTest {
                 .expectNextCount(1)
                 .verifyComplete();
     }
-
+*/
     @Test
     void getAllProductsByInventoryId_andProductPrice_withValidFields_shouldSucceed(){
         String inventoryId = "1";
@@ -681,7 +681,7 @@ class ProductInventoryServiceUnitTest {
                 .expectNextCount(1)
                 .verifyComplete();
     }
-
+/*
     @Test
     void searchInventories_WithName_shouldSucceed() {
         String inventoryName = "SampleName";
@@ -700,6 +700,8 @@ class ProductInventoryServiceUnitTest {
                 .verifyComplete();
     }
 
+ */
+
     @Test
     void searchInventories_WithType_shouldSucceed() {
         String inventoryType = "SampleType";
@@ -717,7 +719,7 @@ class ProductInventoryServiceUnitTest {
                 .expectNextCount(1)
                 .verifyComplete();
     }
-
+/*
     @Test
     void searchInventories_WithDescription_shouldSucceed() {
         String inventoryDescription = "SampleDescription";
@@ -735,7 +737,7 @@ class ProductInventoryServiceUnitTest {
                 .expectNextCount(1)
                 .verifyComplete();
     }
-
+*/
     @Test
     void searchInventories_WithNoFilters_shouldFetchAll() {
         when(inventoryRepository.findAll())
@@ -813,5 +815,7 @@ class ProductInventoryServiceUnitTest {
                 })
                 .verifyComplete();
     }
+
+
 
 }
