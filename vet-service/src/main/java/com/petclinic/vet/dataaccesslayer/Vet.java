@@ -34,7 +34,7 @@ public class Vet {
     private String phoneNumber;
     private String imageId;
     private String resume;
-    private String workday;
+    private Set<Workday> workday;
     private boolean active;
     private Set<Specialty> specialties;
 

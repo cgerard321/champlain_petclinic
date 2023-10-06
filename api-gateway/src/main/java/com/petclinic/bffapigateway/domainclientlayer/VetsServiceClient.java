@@ -59,6 +59,17 @@ public class VetsServiceClient {
                 .bodyToMono(Resource.class);
     }
 
+    public Mono<Resource> addPhotoToVet(String vetId, String photoName, Mono<Resource> image) {
+        log.debug("VetsServiceClient addPhoto");
+        return webClientBuilder
+                .build()
+                .post()
+                .uri(vetsServiceUrl + "/" + vetId + "/photos/" + photoName)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE)
+                .body(image, Resource.class)
+                .retrieve()
+                .bodyToMono(Resource.class);
+    }
 
 
     //Ratings

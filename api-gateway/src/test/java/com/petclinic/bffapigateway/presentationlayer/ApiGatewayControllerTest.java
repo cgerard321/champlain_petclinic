@@ -7,6 +7,7 @@ import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.Auth.*;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
+import com.petclinic.bffapigateway.dtos.Bills.BillStatus;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.*;
@@ -31,6 +32,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -99,6 +102,12 @@ class ApiGatewayControllerTest {
     @MockBean private AuthServiceClient authServiceClient;
     @MockBean private BillServiceClient billServiceClient;
     @MockBean private InventoryServiceClient inventoryServiceClient;
+
+    @InjectMocks
+    private BFFApiGatewayController apiGatewayController;
+
+    @Mock
+    private CustomersServiceClient customersServiceClientMock;
 
     VetDTO vetDTO = buildVetDTO();
     VetDTO vetDTO2 = buildVetDTO2();
@@ -592,8 +601,7 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.firstName").isEqualTo(vetDTO.getFirstName())
                 .jsonPath("$.email").isEqualTo(vetDTO.getEmail())
                 .jsonPath("$.image").isNotEmpty()
-                .jsonPath("$.active").isEqualTo(vetDTO.isActive())
-                .jsonPath("$.workday").isEqualTo(vetDTO.getWorkday());
+                .jsonPath("$.active").isEqualTo(vetDTO.isActive());
 
         Mockito.verify(vetsServiceClient, times(1))
                 .getVetByVetId(VET_ID);
@@ -722,8 +730,7 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.firstName").isEqualTo(vetDTO2.getFirstName())
                 .jsonPath("$.email").isEqualTo(vetDTO2.getEmail())
                 .jsonPath("$.image").isNotEmpty()
-                .jsonPath("$.active").isEqualTo(vetDTO2.isActive())
-                .jsonPath("$.workday").isEqualTo(vetDTO2.getWorkday());
+                .jsonPath("$.active").isEqualTo(vetDTO2.isActive());
 
         Mockito.verify(vetsServiceClient, times(1))
                 .updateVet(anyString(), any(Mono.class));
@@ -816,6 +823,29 @@ class ApiGatewayControllerTest {
                 .getPhotoByVetId(VET_ID);
     }
 
+    @Test
+    void addPhotoToVet() {
+        byte[] photo = {123, 23, 75, 34};
+        Resource resource = new ByteArrayResource(photo);
+
+        when(vetsServiceClient.addPhotoToVet(anyString(), anyString(), any(Mono.class)))
+                .thenReturn(Mono.just(resource));
+
+        client.post()
+                .uri("/api/gateway/vets/{vetId}/photos/{photoName}", VET_ID, "vet_photo.jpg")
+                .body(Mono.just(resource), Resource.class)
+                .accept(MediaType.APPLICATION_OCTET_STREAM)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .expectBody(Resource.class)
+                .consumeWith(response -> {
+                    assertEquals(resource, response.getResponseBody());
+                });
+
+        Mockito.verify(vetsServiceClient, times(1))
+                .addPhotoToVet(anyString(), anyString(), any(Mono.class));
+    }
     @Test
     void toStringBuilderVets() {
         System.out.println(VetDTO.builder());
@@ -1247,6 +1277,59 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.isActive").isEqualTo(pet.getIsActive());
 
     }
+    @Test
+    void shouldDeletePet() {
+        // Create a pet id that will be used in the test
+        String petId = "petId-123";
+
+        // Mock the deletePetByPetId method in the customersServiceClient
+        when(customersServiceClientMock.deletePetByPetId(petId))
+                .thenReturn(Mono.empty());
+
+        // Call the deletePetByPetId method in the ApiGatewayController
+        Mono<ResponseEntity<PetResponseDTO>> responseMono = apiGatewayController.deletePetByPetId(petId);
+
+        // Verify that the deletePetByPetId method in the customersServiceClient was called with the correct pet id
+        verify(customersServiceClientMock, times(1)).deletePetByPetId(petId);
+
+        // Verify that the response is as expected
+        StepVerifier.create(responseMono)
+                .assertNext(response -> {
+                    assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+                    assertNull(response.getBody());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void shouldPatchPet() {
+        // Create a pet id and a pet request DTO that will be used in the test
+        String petId = "petId-123";
+        PetRequestDTO petRequestDTO = new PetRequestDTO();
+        petRequestDTO.setPetId(petId);
+        petRequestDTO.setIsActive("true");
+
+        // Mock the patchPet method in the customersServiceClient
+        PetResponseDTO expectedPetResponse = new PetResponseDTO();
+        expectedPetResponse.setPetId(petId);
+        expectedPetResponse.setIsActive("true");
+        when(customersServiceClientMock.patchPet(petRequestDTO, petId))
+                .thenReturn(Mono.just(expectedPetResponse));
+
+        // Call the patchPet method in the ApiGatewayController
+        Mono<ResponseEntity<PetResponseDTO>> responseMono = apiGatewayController.patchPet(petRequestDTO, petId);
+
+        // Verify that the patchPet method in the customersServiceClient was called with the correct pet request DTO and pet id
+        verify(customersServiceClientMock, times(1)).patchPet(petRequestDTO, petId);
+
+        // Verify that the response is as expected
+        StepVerifier.create(responseMono)
+                .assertNext(response -> {
+                    assertEquals(HttpStatus.OK, response.getStatusCode());
+                    assertEquals(expectedPetResponse, response.getBody());
+                })
+                .verifyComplete();
+    }
 
 
     //
@@ -1607,6 +1690,79 @@ class ApiGatewayControllerTest {
 
 
     //private static final int BILL_ID = 1;
+
+    @Test
+    void shouldGetAllBills() {
+        BillResponseDTO billResponseDTO = new BillResponseDTO("BillUUID","1","Test type","1",null,25.00, BillStatus.PAID);
+
+
+        BillResponseDTO billResponseDTO2 = new BillResponseDTO("BillUUID2","2","Test type","2",null,27.00, BillStatus.UNPAID);
+        when(billServiceClient.getAllBilling()).thenReturn(Flux.just(billResponseDTO,billResponseDTO2));
+
+        client.get()
+                .uri("/api/gateway/bills")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
+                .expectBodyList(BillResponseDTO.class)
+                .value((list)->assertEquals(list.size(),2));
+        Mockito.verify(billServiceClient,times(1)).getAllBilling();
+    }
+
+    @Test
+    void shouldGetAllPaidBills() {
+        BillResponseDTO billResponseDTO = new BillResponseDTO("BillUUID","1","Test type","1",null,25.00, BillStatus.PAID);
+
+        BillResponseDTO billResponseDTO2 = new BillResponseDTO("BillUUID2","2","Test type","2",null,27.00, BillStatus.PAID);
+        when(billServiceClient.getAllPaidBilling()).thenReturn(Flux.just(billResponseDTO,billResponseDTO2));
+
+        client.get()
+                .uri("/api/gateway/bills/paid")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
+                .expectBodyList(BillResponseDTO.class)
+                .value((list)->assertEquals(list.size(),2));
+        Mockito.verify(billServiceClient,times(1)).getAllPaidBilling();
+    }
+
+    @Test
+    void shouldGetAllUnpaidBills() {
+        BillResponseDTO billResponseDTO = new BillResponseDTO("BillUUID","1","Test type","1",null,25.00, BillStatus.UNPAID);
+
+        BillResponseDTO billResponseDTO2 = new BillResponseDTO("BillUUID2","2","Test type","2",null,27.00, BillStatus.UNPAID);
+        when(billServiceClient.getAllUnpaidBilling()).thenReturn(Flux.just(billResponseDTO,billResponseDTO2));
+
+        client.get()
+                .uri("/api/gateway/bills/unpaid")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
+                .expectBodyList(BillResponseDTO.class)
+                .value((list)->assertEquals(list.size(),2));
+        Mockito.verify(billServiceClient,times(1)).getAllUnpaidBilling();
+    }
+
+    @Test
+    void shouldGetAllOverdueBills() {
+        BillResponseDTO billResponseDTO = new BillResponseDTO("BillUUID","1","Test type","1",null,25.00, BillStatus.OVERDUE);
+
+        BillResponseDTO billResponseDTO2 = new BillResponseDTO("BillUUID2","2","Test type","2",null,27.00, BillStatus.OVERDUE);
+        when(billServiceClient.getAllOverdueBilling()).thenReturn(Flux.just(billResponseDTO,billResponseDTO2));
+
+        client.get()
+                .uri("/api/gateway/bills/overdue")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.TEXT_EVENT_STREAM_VALUE+";charset=UTF-8")
+                .expectBodyList(BillResponseDTO.class)
+                .value((list)->assertEquals(list.size(),2));
+        Mockito.verify(billServiceClient,times(1)).getAllOverdueBilling();
+    }
 
     @Test
     public void getBillById(){
@@ -2801,7 +2957,7 @@ void deleteAllInventory_shouldSucceed() {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .image("kjd".getBytes())
                 .specialties(new HashSet<>())
                 .active(false)
@@ -2816,7 +2972,7 @@ void deleteAllInventory_shouldSucceed() {
                 .phoneNumber("947-238-2847")
                 .image("kjd".getBytes())
                 .resume("Just became a vet")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(true)
                 .build();

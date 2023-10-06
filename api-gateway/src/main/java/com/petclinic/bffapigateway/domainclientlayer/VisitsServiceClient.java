@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Visits.*;
 import com.petclinic.bffapigateway.exceptions.BadRequestException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -21,6 +22,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
+import static java.rmi.server.LogStream.log;
 import static java.util.stream.Collectors.joining;
 
 /**
@@ -29,6 +31,7 @@ import static java.util.stream.Collectors.joining;
  */
 
 @Component
+@Slf4j
 public class VisitsServiceClient {
 
     private final WebClient webClient;
@@ -140,20 +143,13 @@ public class VisitsServiceClient {
 
 
     public Mono<VisitResponseDTO> updateStatusForVisitByVisitId(String visitId, String status) {
-        Status newStatus;
-        switch (status){
-            case "CONFIRMED":
-                newStatus = Status.CONFIRMED;
-                break;
 
-            case "COMPLETED":
-                newStatus = Status.COMPLETED;
-                break;
+        Status newStatus = switch (status) {
+            case "CONFIRMED" -> Status.CONFIRMED;
+            case "COMPLETED" -> Status.COMPLETED;
+            default -> Status.CANCELLED;
+        };
 
-            default:
-                newStatus = Status.CANCELLED;
-                break;
-        }
         return webClient
                 .put()
                 .uri("/visits/"+ visitId +"/status/" + newStatus)

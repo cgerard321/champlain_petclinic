@@ -13,6 +13,7 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.util.FileCopyUtils;
@@ -878,6 +879,21 @@ class VetsServiceClientIntegrationTest {
     }
 
     @Test
+    void addPhotoToVet() throws IOException {
+        Mono<Resource> photoResource = Mono.just(new ByteArrayResource(new byte[]{12, 24, 52, 87}));
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "image/jpeg")
+                .setBody("    {\n" +
+                        "        {12, 24, 52, 87}" +
+                        "    }"));
+
+        final Resource photo = vetsServiceClient.addPhotoToVet("deb1950c-3c56-45dc-874b-89e352695eb7", "image/jpeg", photoResource).block();
+        byte[] photoBytes = FileCopyUtils.copyToByteArray(photo.getInputStream());
+
+        assertNotNull(photoBytes);
+    }
+
+    @Test
     void getAllVets() throws JsonProcessingException {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
@@ -888,7 +904,6 @@ class VetsServiceClientIntegrationTest {
                         "        \"email\": \"skjfhf@gmail.com\",\n" +
                         "        \"phoneNumber\": \"947-238-2847\",\n" +
                         "        \"resume\": \"Just became a vet\",\n" +
-                        "        \"workday\": \"Monday\",\n" +
                         "        \"active\": false\n" +
                         "    }"));
 
@@ -899,7 +914,6 @@ class VetsServiceClientIntegrationTest {
         assertEquals(vetDTO.getEmail(), vet.getEmail());
         assertEquals(vetDTO.getPhoneNumber(), vet.getPhoneNumber());
         assertEquals(vetDTO.getResume(), vet.getResume());
-        assertEquals(vetDTO.getWorkday(), vet.getWorkday());
     }
 
     @Test
@@ -933,7 +947,6 @@ class VetsServiceClientIntegrationTest {
                         "        \"email\": \"skjfhf@gmail.com\",\n" +
                         "        \"phoneNumber\": \"947-238-2847\",\n" +
                         "        \"resume\": \"Just became a vet\",\n" +
-                        "        \"workday\": \"Monday\",\n" +
                         "        \"active\": false\n" +
                         "    }"));
 
@@ -944,7 +957,6 @@ class VetsServiceClientIntegrationTest {
         assertEquals(vetDTO.getEmail(), vet.getEmail());
         assertEquals(vetDTO.getPhoneNumber(), vet.getPhoneNumber());
         assertEquals(vetDTO.getResume(), vet.getResume());
-        assertEquals(vetDTO.getWorkday(), vet.getWorkday());
     }
 
     @Test
@@ -978,7 +990,6 @@ class VetsServiceClientIntegrationTest {
                         "        \"email\": \"skjfhf@gmail.com\",\n" +
                         "        \"phoneNumber\": \"947-238-2847\",\n" +
                         "        \"resume\": \"Just became a vet\",\n" +
-                        "        \"workday\": \"Monday\",\n" +
                         "        \"active\": false\n" +
                         "    }"));
 
@@ -989,7 +1000,6 @@ class VetsServiceClientIntegrationTest {
         assertEquals(vetDTO.getEmail(), vet.getEmail());
         assertEquals(vetDTO.getPhoneNumber(), vet.getPhoneNumber());
         assertEquals(vetDTO.getResume(), vet.getResume());
-        assertEquals(vetDTO.getWorkday(), vet.getWorkday());
     }
 
     @Test
@@ -1023,7 +1033,6 @@ class VetsServiceClientIntegrationTest {
                         "        \"email\": \"skjfhf@gmail.com\",\n" +
                         "        \"phoneNumber\": \"947-238-2847\",\n" +
                         "        \"resume\": \"Just became a vet\",\n" +
-                        "        \"workday\": \"Monday\",\n" +
                         "        \"active\": false\n" +
                         "    }"));
 
@@ -1034,7 +1043,6 @@ class VetsServiceClientIntegrationTest {
         assertEquals(vetDTO.getEmail(), vet.getEmail());
         assertEquals(vetDTO.getPhoneNumber(), vet.getPhoneNumber());
         assertEquals(vetDTO.getResume(), vet.getResume());
-        assertEquals(vetDTO.getWorkday(), vet.getWorkday());
     }
 
     @Test
@@ -1110,7 +1118,6 @@ class VetsServiceClientIntegrationTest {
                         "        \"email\": \"skjfhf@gmail.com\",\n" +
                         "        \"phoneNumber\": \"947-238-2847\",\n" +
                         "        \"resume\": \"Just became a vet\",\n" +
-                        "        \"workday\": \"Monday\",\n" +
                         "        \"active\": false\n" +
                         "    }"));
 
@@ -1121,7 +1128,6 @@ class VetsServiceClientIntegrationTest {
         assertEquals(vetDTO.getEmail(), vet.getEmail());
         assertEquals(vetDTO.getPhoneNumber(), vet.getPhoneNumber());
         assertEquals(vetDTO.getResume(), vet.getResume());
-        assertEquals(vetDTO.getWorkday(), vet.getWorkday());
     }
 
     @Test
@@ -1155,7 +1161,6 @@ class VetsServiceClientIntegrationTest {
                         "        \"email\": \"skjfhf@gmail.com\",\n" +
                         "        \"phoneNumber\": \"947-238-2847\",\n" +
                         "        \"resume\": \"Just became a vet\",\n" +
-                        "        \"workday\": \"Monday\",\n" +
                         "        \"active\": false\n" +
                         "    }"));
 
@@ -1166,7 +1171,6 @@ class VetsServiceClientIntegrationTest {
         assertEquals(vetDTO.getEmail(), vet.getEmail());
         assertEquals(vetDTO.getPhoneNumber(), vet.getPhoneNumber());
         assertEquals(vetDTO.getResume(), vet.getResume());
-        assertEquals(vetDTO.getWorkday(), vet.getWorkday());
     }
 
     @Test
@@ -1382,7 +1386,7 @@ class VetsServiceClientIntegrationTest {
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
                 .image("kjd".getBytes())
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();

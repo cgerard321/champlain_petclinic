@@ -11,6 +11,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -39,6 +40,14 @@ public class DataSetupService implements CommandLineRunner {
         Specialty s3 = new Specialty("100003", "dentistry");
         Specialty s4 = new Specialty("100004", "general");
 
+        Set<Workday> workdays1 = EnumSet.of(Workday.Monday, Workday.Tuesday, Workday.Friday);
+        Set<Workday> workdays2 = EnumSet.of(Workday.Wednesday, Workday.Thursday);
+        Set<Workday> workdays3 = EnumSet.of(Workday.Monday, Workday.Wednesday, Workday.Thursday);
+        Set<Workday> workdays4 = EnumSet.of(Workday.Wednesday, Workday.Thursday, Workday.Friday);
+        Set<Workday> workdays5 = EnumSet.of(Workday.Monday, Workday.Tuesday, Workday.Wednesday, Workday.Thursday);
+        Set<Workday> workdays6 = EnumSet.of(Workday.Monday, Workday.Tuesday, Workday.Friday);
+
+
         Set<Specialty> set1 = new HashSet<>();
         set1.add(s1);
         set1.add(s3);
@@ -58,7 +67,7 @@ public class DataSetupService implements CommandLineRunner {
                 .phoneNumber("(514)-634-8276 #2384")
                 .imageId("1")
                 .resume("Practicing since 3 years")
-                .workday("Monday, Tuesday, Friday")
+                .workday(workdays1)
                 .active(true)
                 .specialties(set1)
                 .build();
@@ -71,7 +80,7 @@ public class DataSetupService implements CommandLineRunner {
                 .phoneNumber("(514)-634-8276 #2385")
                 .imageId("1")
                 .resume("Practicing since 10 years")
-                .workday("Wednesday, Thursday")
+                .workday(workdays2)
                 .active(true)
                 .specialties(set3)
                 .build();
@@ -84,7 +93,7 @@ public class DataSetupService implements CommandLineRunner {
                 .phoneNumber("(514)-634-8276 #2386")
                 .imageId("1")
                 .resume("Practicing since 5 years")
-                .workday("Monday, Wednesday, Thursday")
+                .workday(workdays3)
                 .active(true)
                 .specialties(set2)
                 .build();
@@ -97,7 +106,7 @@ public class DataSetupService implements CommandLineRunner {
                 .phoneNumber("(514)-634-8276 #2387")
                 .imageId("1")
                 .resume("Practicing since 8 years")
-                .workday("Wednesday, Thursday, Friday")
+                .workday(workdays4)
                 .active(false)
                 .specialties(set2)
                 .build();
@@ -110,7 +119,7 @@ public class DataSetupService implements CommandLineRunner {
                 .phoneNumber("(514)-634-8276 #2389")
                 .imageId("1")
                 .resume("Practicing since 1 years")
-                .workday("Monday, Tuesday, Wednesday, Thursday")
+                .workday(workdays5)
                 .active(false)
                 .specialties(set1)
                 .build();
@@ -123,7 +132,7 @@ public class DataSetupService implements CommandLineRunner {
                 .phoneNumber("(514)-634-8276 #2383")
                 .imageId("1")
                 .resume("Practicing since 6 years")
-                .workday("Monday, Tuesday, Friday")
+                .workday(workdays5)
                 .active(false)
                 .specialties(set1)
                 .build();
@@ -136,7 +145,7 @@ public class DataSetupService implements CommandLineRunner {
                 .phoneNumber("(514)-634-8276 #2363")
                 .imageId("1")
                 .resume("Practicing since 9 years")
-                .workday("Monday, Friday")
+                .workday(workdays6)
                 .active(true)
                 .specialties(set1)
                 .build();

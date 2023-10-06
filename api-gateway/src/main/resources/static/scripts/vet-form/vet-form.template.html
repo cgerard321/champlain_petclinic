@@ -42,41 +42,12 @@
 
                     <hr class="my-4"/>
 
-
-                    <div class="row g-3">
-                        <div class="col-sm-6">
-                            <h5 class="form-label">Profile Picture</h5>
-                            <span id="checkmarkPic" style="display: none">&#10003;</span>
-                            <input accept="image/*"
-                                   class="form-control"
-                                   id="profilePicture"
-                                   name="profilePicture"
-                                   ng-model="vet.profilePicture"
-                                   onchange="uploadPicture(event)"
-                                   type="file"/>
-                        </div>
-                        <div class="col-sm-6">
-                            <img alt="Profile picture preview" class="img-preview" height="130px" id="preview"
-                                 width="130px"/>
-                        </div>
+                    <div class="parent">
+                        <img alt="Profile picture preview" src="data:image/png;base64, {{$ctrl.vetPhoto}}" width="150" height="150" class="image1">
+                        <img alt="" src="data:image/jpeg;base64, {{$ctrl.PreviewImage}}" ng-show="$ctrl.PreviewImage != null" width="150" height="150" class="image2"/>
+                        <input type="file" accept="image/jpeg" class="fileInput" id="photoVet"/>
                     </div>
-                    <div class="col-sm-12">
-                        <span class="help-block" ng-show="vetForm.profilePicture.$error.required">Only .png, .pdf, .jpeg and .gif accepted</span>
-                    </div>
-
-                    <script>
-                        let uploadPicture = function (event) {
-                            let preview = document.getElementById('preview');
-                            let checkmark = document.getElementById('checkmarkPic');
-                            if (document.getElementById('profilePicture') != null) {
-                                checkmark.style.display = "inline";
-                            }
-                            preview.src = URL.createObjectURL(event.target.files[0]);
-                            preview.onload = function () {
-                                URL.revokeObjectURL(preview.src)
-                            }
-                        };
-                    </script>
+                      
                     <hr class="my-4"/>
 
                     <div class="col-sm-12">
@@ -129,12 +100,25 @@
                     <div class="col-sm-6">
                         <div class="my-3 check-align">
                             <h5 class="mb-3">Available Work Days</h5>
-                            <div class="col-sm-12">
-                                <input class="form-control" id="workDays" name="workday"
-                                       ng-model="vet.workday"
-                                       placeholder="ex:Monday, Tuesday"
-                                       title="Accepts only days of the week separated by commas."
-                                       type="text">
+                            <div class="form-check">
+                                <input class="form-check-input workday" id="Monday" type="checkbox" value='Monday'>
+                                <label class="form-check-label vet-label-input" for="Monday">Monday</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input workday" id="Tuesday" type="checkbox" value='Tuesday'>
+                                <label class="form-check-label vet-label-input" for="Tuesday">Tuesday</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input workday" id="Wednesday" type="checkbox" value='Wednesday'>
+                                <label class="form-check-label vet-label-input" for="Wednesday">Wednesday</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input workday" id="Thursday" type="checkbox" value='Thursday'>
+                                <label class="form-check-label vet-label-input" for="Thursday">Thursday</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input workday" id="Friday" type="checkbox" value='Friday'>
+                                <label class="form-check-label vet-label-input" for="Friday">Friday</label>
                             </div>
                         </div>
                     </div>

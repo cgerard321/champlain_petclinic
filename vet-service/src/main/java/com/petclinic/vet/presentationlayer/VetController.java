@@ -192,4 +192,11 @@ public class VetController {
                 .map(r -> ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE).body(r))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
+    @PostMapping("{vetId}/photos/{photoName}")
+    public Mono<ResponseEntity<Resource>> insertPhoto(@PathVariable String vetId, @PathVariable String photoName, @RequestBody Mono<Resource> photo){
+        return photoService.insertPhotoOfVet(vetId, photoName, photo)
+                .map(p -> ResponseEntity.status(HttpStatus.CREATED).body(p))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
 }

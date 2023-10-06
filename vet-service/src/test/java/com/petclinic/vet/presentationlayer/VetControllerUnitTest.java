@@ -2,6 +2,7 @@ package com.petclinic.vet.presentationlayer;
 
 import com.petclinic.vet.dataaccesslayer.Photo;
 import com.petclinic.vet.dataaccesslayer.Vet;
+import com.petclinic.vet.exceptions.InvalidInputException;
 import com.petclinic.vet.servicelayer.*;
 import com.petclinic.vet.servicelayer.education.EducationRequestDTO;
 import com.petclinic.vet.servicelayer.education.EducationResponseDTO;
@@ -298,8 +299,7 @@ class VetControllerUnitTest {
                 .jsonPath("$[0].firstName").isEqualTo(vetDTO.getFirstName())
                 .jsonPath("$[0].email").isEqualTo(vetDTO.getEmail())
                 .jsonPath("$[0].imageId").isNotEmpty()
-                .jsonPath("$[0].active").isEqualTo(vetDTO.isActive())
-                .jsonPath("$[0].workday").isEqualTo(vetDTO.getWorkday());
+                .jsonPath("$[0].active").isEqualTo(vetDTO.isActive());
 
         Mockito.verify(vetService, times(1))
                 .getAll();
@@ -325,8 +325,7 @@ class VetControllerUnitTest {
                 .jsonPath("$.firstName").isEqualTo(vet.getFirstName())
                 .jsonPath("$.email").isEqualTo(vet.getEmail())
                 .jsonPath("$.imageId").isNotEmpty()
-                .jsonPath("$.active").isEqualTo(vet.isActive())
-                .jsonPath("$.workday").isEqualTo(vet.getWorkday());
+                .jsonPath("$.active").isEqualTo(vet.isActive());
 
         Mockito.verify(vetService, times(1))
                 .getVetByVetId(VET_ID);
@@ -351,8 +350,7 @@ class VetControllerUnitTest {
                 .jsonPath("$.lastName").isEqualTo(vet.getLastName())
                 .jsonPath("$.firstName").isEqualTo(vet.getFirstName())
                 .jsonPath("$.email").isEqualTo(vet.getEmail())
-                .jsonPath("$.active").isEqualTo(vet.isActive())
-                .jsonPath("$.workday").isEqualTo(vet.getWorkday());
+                .jsonPath("$.active").isEqualTo(vet.isActive());
 
         Mockito.verify(vetService, times(1))
                 .getVetByVetBillId(VET_BILL_ID);
@@ -377,8 +375,7 @@ class VetControllerUnitTest {
                 .jsonPath("$[0].firstName").isEqualTo(vetDTO2.getFirstName())
                 .jsonPath("$[0].email").isEqualTo(vetDTO2.getEmail())
                 .jsonPath("$[0].imageId").isNotEmpty()
-                .jsonPath("$[0].active").isEqualTo(vetDTO2.isActive())
-                .jsonPath("$[0].workday").isEqualTo(vetDTO2.getWorkday());
+                .jsonPath("$[0].active").isEqualTo(vetDTO2.isActive());
 
         Mockito.verify(vetService, times(1))
                 .getVetByIsActive(vetDTO2.isActive());
@@ -424,8 +421,7 @@ class VetControllerUnitTest {
                 .jsonPath("$.firstName").isEqualTo(vetDTO.getFirstName())
                 .jsonPath("$.email").isEqualTo(vetDTO.getEmail())
                 .jsonPath("$.imageId").isNotEmpty()
-                .jsonPath("$.active").isEqualTo(vetDTO.isActive())
-                .jsonPath("$.workday").isEqualTo(vetDTO.getWorkday());
+                .jsonPath("$.active").isEqualTo(vetDTO.isActive());
 
         Mockito.verify(vetService, times(1))
                 .updateVet(anyString(), any(Mono.class));
@@ -450,8 +446,7 @@ class VetControllerUnitTest {
                 .jsonPath("$[0].firstName").isEqualTo(vetDTO.getFirstName())
                 .jsonPath("$[0].email").isEqualTo(vetDTO.getEmail())
                 .jsonPath("$[0].imageId").isNotEmpty()
-                .jsonPath("$[0].active").isEqualTo(vetDTO.isActive())
-                .jsonPath("$[0].workday").isEqualTo(vetDTO.getWorkday());
+                .jsonPath("$[0].active").isEqualTo(vetDTO.isActive());
 
         Mockito.verify(vetService, times(1))
                 .getVetByIsActive(vetDTO.isActive());
@@ -670,6 +665,34 @@ class VetControllerUnitTest {
                 .getPhotoByVetId(VET_ID);
     }
 
+    // test add photo
+    @Test
+    void addPhotoByVetId() {
+        Photo photo = buildPhoto();
+        Resource photoResource = buildPhotoData(photo);
+
+        when(photoService.insertPhotoOfVet(anyString(), anyString(), any(Mono.class)))
+                .thenReturn(Mono.just(photoResource));
+
+        client.post()
+                .uri("/vets/{vetId}/photos/{photoName}", VET_ID, photo.getFilename())
+                .bodyValue(photoResource) // Use the Resource here
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+
+        Mockito.verify(photoService, times(1))
+                .insertPhotoOfVet(anyString(), anyString(), any(Mono.class));
+    }
+
+    private Resource buildPhotoData(Photo photo) {
+        ByteArrayResource resource = new ByteArrayResource(photo.getData());
+        return resource;
+    }
+
+
     private Vet buildVet() {
         return Vet.builder()
                 .vetId("cf25e779-548b-4788-aefa-6d58621c2feb")
@@ -680,7 +703,7 @@ class VetControllerUnitTest {
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
                 .imageId("kjd")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -695,7 +718,7 @@ class VetControllerUnitTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .imageId("kjd")
                 .specialties(new HashSet<>())
                 .active(false)
@@ -711,7 +734,7 @@ class VetControllerUnitTest {
                 .phoneNumber("947-238-2847")
                 .imageId("kjd")
                 .resume("Just became a vet")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(true)
                 .build();
@@ -727,7 +750,7 @@ class VetControllerUnitTest {
                 .phoneNumber("543-201-2547")
                 .imageId("kjd")
                 .resume("Still a vet")
-                .workday("Tuesday")
+                .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(true)
                 .build();
@@ -781,7 +804,6 @@ class VetControllerUnitTest {
         ByteArrayResource resource = new ByteArrayResource(photo.getData());
         return resource;
     }
-
 
     private VetAverageRatingDTO buildVetAverageRatingDTO1(){
         return  VetAverageRatingDTO.builder()

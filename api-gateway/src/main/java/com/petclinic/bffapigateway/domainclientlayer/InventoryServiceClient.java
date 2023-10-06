@@ -108,7 +108,7 @@ public class InventoryServiceClient {
 
 
 
-    public Mono<ProductResponseDTO> updateProductInInventory(final ProductRequestDTO model, final String inventoryId, final String productId){
+    public Mono<ProductResponseDTO> updateProductInInventory(ProductRequestDTO model, String inventoryId, String productId){
         return webClient
                 .put()
                 .uri(inventoryServiceUrl + "/{inventoryId}/products/{productId}", inventoryId, productId)
@@ -145,11 +145,15 @@ public class InventoryServiceClient {
                 .bodyToFlux(ProductResponseDTO.class);
     }
     public Flux<InventoryResponseDTO> searchInventory(
+            final Optional<Integer> page,
+            final Optional<Integer> size,
             final String inventoryName,
             final String inventoryType,
             final String inventoryDescription
     ) {
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(inventoryServiceUrl)
+                .queryParamIfPresent("page", page)
+                .queryParamIfPresent("size", size)
                 .queryParamIfPresent("inventoryName", Optional.ofNullable(inventoryName))
                 .queryParamIfPresent("inventoryType", Optional.ofNullable(inventoryType))
                 .queryParamIfPresent("inventoryDescription", Optional.ofNullable(inventoryDescription));
@@ -162,19 +166,11 @@ public class InventoryServiceClient {
                 // Consider adding error-handling logic here if needed.
                 .bodyToFlux(InventoryResponseDTO.class);
     }
-    /*
 
 
 
-    public Flux<InventoryResponseDTO> getAllInventory(){
-        return webClient.get()
-                .uri(inventoryServiceUrl)
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .bodyToFlux(InventoryResponseDTO.class);
-    }
 
-     */
+
     //delete all
 
     public Mono<Void> deleteAllProductForInventory(final String inventoryId) {
@@ -207,6 +203,4 @@ public class InventoryServiceClient {
                 .retrieve()
                 .bodyToMono(Void.class);
     }
-
-
 }
