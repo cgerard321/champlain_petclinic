@@ -700,12 +700,8 @@ class VetControllerIntegrationTest {
                 .jsonPath("$[0].lastName").isEqualTo(vet.getLastName())
                 .jsonPath("$[0].firstName").isEqualTo(vet.getFirstName())
                 .jsonPath("$[0].email").isEqualTo(vet.getEmail())
-<<<<<<< HEAD
-                .jsonPath("$[0].active").isEqualTo(vet.isActive());
-=======
                 .jsonPath("$[0].active").isEqualTo(vet.isActive())
                 .jsonPath("$[0].workday").isEqualTo(vet.getWorkday());
->>>>>>> 8d8e3440 (Tests modified in vet-service)
     }
 
     @Test
@@ -780,14 +776,6 @@ class VetControllerIntegrationTest {
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-<<<<<<< HEAD
-                .jsonPath("$.vetId").isEqualTo(vetResponseDTO.getVetId())
-                .jsonPath("$.resume").isEqualTo(vetResponseDTO.getResume())
-                .jsonPath("$.lastName").isEqualTo(vetResponseDTO.getLastName())
-                .jsonPath("$.firstName").isEqualTo(vetResponseDTO.getFirstName())
-                .jsonPath("$.email").isEqualTo(vetResponseDTO.getEmail())
-                .jsonPath("$.active").isEqualTo(vetResponseDTO.isActive());
-=======
                 .jsonPath("$.vetId").isEqualTo(vetRequestDTO.getVetId())
                 .jsonPath("$.resume").isEqualTo(vetRequestDTO.getResume())
                 .jsonPath("$.lastName").isEqualTo(vetRequestDTO.getLastName())
@@ -795,7 +783,6 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.email").isEqualTo(vetRequestDTO.getEmail())
                 .jsonPath("$.active").isEqualTo(vetRequestDTO.isActive())
                 .jsonPath("$.workday").isEqualTo(vetRequestDTO.getWorkday());
->>>>>>> 8d8e3440 (Tests modified in vet-service)
 
     }
 
@@ -816,11 +803,7 @@ class VetControllerIntegrationTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-28479")
                 .resume("Just became a vet")
-<<<<<<< HEAD
                 .workday(new HashSet<>())
-=======
-                .workday("Monday")
->>>>>>> 8d8e3440 (Tests modified in vet-service)
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -854,11 +837,7 @@ class VetControllerIntegrationTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-28479")
                 .resume("Just became a vet")
-<<<<<<< HEAD
                 .workday(new HashSet<>())
-=======
-                .workday("Monday")
->>>>>>> 8d8e3440 (Tests modified in vet-service)
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -892,11 +871,7 @@ class VetControllerIntegrationTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-28479999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999")
                 .resume("Just became a vet")
-<<<<<<< HEAD
                 .workday(new HashSet<>())
-=======
-                .workday("Monday")
->>>>>>> 8d8e3440 (Tests modified in vet-service)
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -938,11 +913,7 @@ class VetControllerIntegrationTest {
                         "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm")
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Just became a vet")
-<<<<<<< HEAD
                 .workday(new HashSet<>())
-=======
-                .workday("Monday")
->>>>>>> 8d8e3440 (Tests modified in vet-service)
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -977,11 +948,7 @@ class VetControllerIntegrationTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Jo")
-<<<<<<< HEAD
                 .workday(new HashSet<>())
-=======
-                .workday("Monday")
->>>>>>> 8d8e3440 (Tests modified in vet-service)
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -1016,11 +983,7 @@ class VetControllerIntegrationTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("I've been a vet ever since I was a kid.")
-<<<<<<< HEAD
                 .workday(new HashSet<>())
-=======
-                .workday("Monday")
->>>>>>> 8d8e3440 (Tests modified in vet-service)
                 .specialties(null)
                 .active(false)
                 .build();
@@ -1059,12 +1022,8 @@ class VetControllerIntegrationTest {
                 .jsonPath("$[0].lastName").isEqualTo(vet2.getLastName())
                 .jsonPath("$[0].firstName").isEqualTo(vet2.getFirstName())
                 .jsonPath("$[0].email").isEqualTo(vet2.getEmail())
-<<<<<<< HEAD
-                .jsonPath("$[0].active").isEqualTo(vet2.isActive());
-=======
                 .jsonPath("$[0].active").isEqualTo(vet2.isActive())
                 .jsonPath("$[0].workday").isEqualTo(vet2.getWorkday());
->>>>>>> 8d8e3440 (Tests modified in vet-service)
     }
 
     @Test
@@ -1089,12 +1048,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$[0].lastName").isEqualTo(vet.getLastName())
                 .jsonPath("$[0].firstName").isEqualTo(vet.getFirstName())
                 .jsonPath("$[0].email").isEqualTo(vet.getEmail())
-<<<<<<< HEAD
-                .jsonPath("$[0].active").isEqualTo(vet.isActive());
-=======
-                .jsonPath("$[0].active").isEqualTo(vet.isActive())
                 .jsonPath("$[0].workday").isEqualTo(vet.getWorkday());
->>>>>>> 8d8e3440 (Tests modified in vet-service)
     }
 
 
@@ -1145,11 +1099,7 @@ class VetControllerIntegrationTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-28479999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999")
                 .resume("Just became a vet")
-<<<<<<< HEAD
                 .workday(new HashSet<>())
-=======
-                .workday("Monday")
->>>>>>> 8d8e3440 (Tests modified in vet-service)
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -1191,11 +1141,7 @@ class VetControllerIntegrationTest {
                         "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm")
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Just became a vet")
-<<<<<<< HEAD
                 .workday(new HashSet<>())
-=======
-                .workday("Monday")
->>>>>>> 8d8e3440 (Tests modified in vet-service)
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -1230,11 +1176,7 @@ class VetControllerIntegrationTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-28479")
                 .resume("Just became a vet")
-<<<<<<< HEAD
                 .workday(new HashSet<>())
-=======
-                .workday("Monday")
->>>>>>> 8d8e3440 (Tests modified in vet-service)
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -1269,11 +1211,7 @@ class VetControllerIntegrationTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Just became a vet")
-<<<<<<< HEAD
                 .workday(new HashSet<>())
-=======
-                .workday("Monday")
->>>>>>> 8d8e3440 (Tests modified in vet-service)
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -1308,11 +1246,7 @@ class VetControllerIntegrationTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Jo")
-<<<<<<< HEAD
                 .workday(new HashSet<>())
-=======
-                .workday("Monday")
->>>>>>> 8d8e3440 (Tests modified in vet-service)
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -1348,11 +1282,7 @@ class VetControllerIntegrationTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Just became a vet")
-<<<<<<< HEAD
                 .workday(new HashSet<>())
-=======
-                .workday("Monday")
->>>>>>> 8d8e3440 (Tests modified in vet-service)
                 .specialties(null)
                 .active(false)
                 .build();
@@ -1618,11 +1548,7 @@ class VetControllerIntegrationTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Just became a vet")
-<<<<<<< HEAD
                 .workday(new HashSet<>())
-=======
-                .workday("Monday")
->>>>>>> 8d8e3440 (Tests modified in vet-service)
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -1638,11 +1564,7 @@ class VetControllerIntegrationTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Just became a vet")
-<<<<<<< HEAD
                 .workday(new HashSet<>())
-=======
-                .workday("Monday")
->>>>>>> 8d8e3440 (Tests modified in vet-service)
                 .active(true)
                 .specialties(new HashSet<>())
                 .build();
@@ -1683,8 +1605,6 @@ class VetControllerIntegrationTest {
     //the extension number can only be 4 digits
     private VetResponseDTO buildVetResponseDTO(String extensionNum) {
         return VetResponseDTO.builder()
-<<<<<<< HEAD
-=======
                 .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
                 .vetBillId("ac90fcca-a79c-411d-93f2-b70a80da0c3a")
                 .firstName("Clementine")
@@ -1692,22 +1612,6 @@ class VetControllerIntegrationTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Just became a vet")
-                .workday("Monday")
-                .specialties(new HashSet<>())
-                .active(false)
-                .build();
-    }
-    private VetRequestDTO buildVetRequestDTO(String extensionNum) {
-        return VetRequestDTO.builder()
->>>>>>> 8d8e3440 (Tests modified in vet-service)
-                .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
-                .vetBillId("ac90fcca-a79c-411d-93f2-b70a80da0c3a")
-                .firstName("Clementine")
-                .lastName("LeBlanc")
-                .email("skjfhf@gmail.com")
-                .phoneNumber("(514)-634-8276 #"+extensionNum)
-                .resume("Just became a vet")
-<<<<<<< HEAD
                 .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
@@ -1723,9 +1627,6 @@ class VetControllerIntegrationTest {
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Just became a vet")
                 .workday(new HashSet<>())
-=======
-                .workday("Monday")
->>>>>>> 8d8e3440 (Tests modified in vet-service)
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();

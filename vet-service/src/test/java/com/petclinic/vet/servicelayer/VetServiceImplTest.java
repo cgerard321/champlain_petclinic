@@ -1,4 +1,3 @@
-/*
 package com.petclinic.vet.servicelayer;
 
 import com.petclinic.vet.dataaccesslayer.PhotoRepository;
@@ -224,11 +223,7 @@ class VetServiceImplTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
-<<<<<<< HEAD
                 .workday(new HashSet<>())
-=======
-                .workday("Monday")
->>>>>>> 8d8e3440 (Tests modified in vet-service)
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -242,7 +237,7 @@ class VetServiceImplTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -256,25 +251,7 @@ class VetServiceImplTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
-<<<<<<< HEAD
                 .workday(new HashSet<>())
-                .specialties(new HashSet<>())
-                .active(false)
-                .build();
-    }
-    private VetDTO buildVetDTO() {
-        return VetDTO.builder()
-                .vetId("d9d3a7ac-6817-4c13-9a09-c09da74fb65f")
-                .vetBillId("53c2d16e-1ba3-4dbc-8e31-6decd2eaa99a")
-                .firstName("Pauline")
-                .lastName("LeBlanc")
-                .email("skjfhf@gmail.com")
-                .phoneNumber("947-238-2847")
-                .resume("Just became a vet")
-                .workday(new HashSet<>())
-=======
-                .workday("Monday")
->>>>>>> 8d8e3440 (Tests modified in vet-service)
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -288,14 +265,9 @@ class VetServiceImplTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
-<<<<<<< HEAD
                 .workday(new HashSet<>())
-=======
-                .workday("Monday")
->>>>>>> 8d8e3440 (Tests modified in vet-service)
                 .specialties(new HashSet<>())
                 .active(true)
                 .build();
     }
 }
-*/

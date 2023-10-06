@@ -970,8 +970,7 @@ class ApiGatewayControllerTest {
 
 
     }
-    */
-/*@Test
+@Test
     void getOwnerDetails_withAvailableVisitsService() {
         OwnerResponseDTO owner = new OwnerResponseDTO();
         PetResponseDTO cat = new PetResponseDTO();
@@ -1001,7 +1000,7 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$.pets[0].name").isEqualTo("Garfield")
                 .jsonPath("$.pets[0].visits[0].description").isEqualTo("First visit");
-    }*//*
+    }
 
 //
 //    @Test
@@ -1538,8 +1537,6 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.message").isEqualTo("Request method 'POST' is not supported.");
     }
     //
-    */
-/*
     @Test
     void shouldCreateThenDeletePet(){
         OwnerResponseDTO od = new OwnerResponseDTO();
@@ -1576,7 +1573,7 @@ class ApiGatewayControllerTest {
 
 
     }
-    *//*
+
 
     //
     @Test
@@ -1983,18 +1980,16 @@ class ApiGatewayControllerTest {
     }
 
 
-    */
-/**
+*
      * Visits Methods
-     * **//*
+     * *
 
 
     String VISIT_ID = buildVisitResponseDTO().getVisitId();
 
 
 //todo fix
-    */
-/*@Test
+@Test
     void shouldCreateAVisitWithOwnerInfo(){
         OwnerResponseDTO owner = new OwnerResponseDTO();
         VisitRequestDTO visit = VisitRequestDTO.builder()
@@ -2033,7 +2028,7 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$.status").isEqualTo(false)
                 .jsonPath("$.practitionerId").isEqualTo(1);
-    }*//*
+    }
 
 
 
@@ -2079,8 +2074,7 @@ class ApiGatewayControllerTest {
 //        assertEquals(null, visitsServiceClient.getVisitsForPet(visit.getPetId()));
 //    }
 
-   */
-/* @Test
+ @Test
     void shouldUpdateAVisitsById() {
         VisitDetails visitDetailsToUpdate = VisitDetails.builder()
                 .visitDate(LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
@@ -2095,10 +2089,10 @@ class ApiGatewayControllerTest {
                 .thenReturn(Mono.just(visitDetailsToUpdate));
 
         client.put()
-                 .uri("/api/gateway/owners/**//*
-*/
-/*pets/{petId}/visits/{visitId}", "1", "1")
-               /* .accept(MediaType.APPLICATION_JSON)
+                 .uri("/api/gateway/owners/*
+pets/{petId}/visits/{visitId}", "1", "1")
+               */
+/* .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(visitDetailsToUpdate)
                 .exchange()
@@ -2111,7 +2105,7 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.status").isEqualTo(Status.UPCOMING.toString())
                 .jsonPath("$.practitionerId").isEqualTo(2);
         Mockito.verify(visitsServiceClient,times(1)).updateVisitForPet(visitDetailsToUpdate);
-    }*//*
+    }
 
 
     @Test
@@ -2224,8 +2218,6 @@ class ApiGatewayControllerTest {
                     assertEquals(list.get(0).getPractitionerId(),visit.getPractitionerId());
                 });
     }
-    */
-/*
     @Test
     void shouldGetAVisitByPractitionerIdAndMonth(){
         VisitDetails visit = new VisitDetails();
@@ -2250,7 +2242,7 @@ class ApiGatewayControllerTest {
                 .jsonPath("$[0].description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$[0].practitionerId").isEqualTo(1);
     }
-     *//*
+
 
 
     @Test
@@ -2530,10 +2522,9 @@ class ApiGatewayControllerTest {
                 .status(Status.UPCOMING)
                 .build();
     }
-    */
-/**
+*
      * End of Visits Methods
-     * **//*
+     * *
 
 
 
