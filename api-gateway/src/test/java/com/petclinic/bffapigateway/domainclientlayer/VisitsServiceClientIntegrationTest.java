@@ -72,6 +72,22 @@ class VisitsServiceClientIntegrationTest {
                 .expectNext(visitResponseDTO2)
                 .verifyComplete();
     }
+    @Test
+    void getAllVisits_400Error()throws IllegalArgumentException{
+        server.enqueue(new MockResponse().setResponseCode(400).addHeader("Content-Type", "application/json"));
+        Flux<VisitResponseDTO> visitResponseDTOFlux = visitsServiceClient.getAllVisits();
+        StepVerifier.create(visitResponseDTOFlux)
+            .expectErrorMatches(throwable -> throwable instanceof IllegalArgumentException && Objects.equals(throwable.getMessage(), "Something went wrong and we got a 400 error"))
+            .verify();
+    }
+    @Test
+    void getAllVisits_500Error()throws IllegalArgumentException{
+        server.enqueue(new MockResponse().setResponseCode(500).addHeader("Content-Type", "application/json"));
+        Flux<VisitResponseDTO> visitResponseDTOFlux = visitsServiceClient.getAllVisits();
+        StepVerifier.create(visitResponseDTOFlux)
+            .expectErrorMatches(throwable -> throwable instanceof IllegalArgumentException && Objects.equals(throwable.getMessage(), "Something went wrong and we got a 500 error"))
+            .verify();
+    }
 
     @Test
     void getVisitsForStatus() throws JsonProcessingException{
