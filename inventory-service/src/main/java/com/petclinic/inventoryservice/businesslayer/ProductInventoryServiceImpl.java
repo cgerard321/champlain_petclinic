@@ -160,21 +160,23 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
         }
         if (productPrice != null){
             return productRepository
-                    .findAllProductsByInventoryIdAndProductPrice(inventoryId, productPrice)
+                    .findAllProductsByInventoryIdAndProductPrice(inventoryId, productPrice )
                     .map(EntityDTOUtil::toProductResponseDTO)
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
                             "\nOr ProductPrice: " + productPrice)));
         }
         if (productQuantity != null){
             return productRepository
-                    .findAllProductsByInventoryIdAndProductQuantity(inventoryId, productQuantity)
+                    .findAllProductsByInventoryIdAndProductQuantity(inventoryId, productQuantity )
+
                     .map(EntityDTOUtil::toProductResponseDTO)
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
                             "\nOr ProductQuantity: " + productQuantity)));
         }
         if (productName != null){
+            char firstChar = productName.charAt(0);
             return productRepository
-                    .findAllProductsByInventoryIdAndProductName(inventoryId, productName)
+                    .findAllProductsByInventoryIdAndProductNameRegex(inventoryId,"(?i)^" + firstChar + ".*")
                     .map(EntityDTOUtil::toProductResponseDTO)
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
                             "\nOr ProductName: " + productName)));
@@ -184,11 +186,9 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
         return productRepository
                 .findAllProductsByInventoryId(inventoryId)
                 .map(EntityDTOUtil::toProductResponseDTO);
-                //where the 404 not found issue lies if we switchIfEmpty
+        //where the 404 not found issue lies if we switchIfEmpty
 
     }
-
-
 
 
     @Override
@@ -198,14 +198,8 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
             .map(EntityDTOUtil::toInventoryResponseDTO);
 
     }
-    /*
-    @Override
-    public Flux<InventoryResponseDTO> getAllInventory() {
-        return inventoryRepository.findAll()
-                .map(EntityDTOUtil::toInventoryResponseDTO);
-    }
 
-     */
+
     @Override
     public Mono<Void> deleteInventoryByInventoryId(String inventoryId) {
         return inventoryRepository.findInventoryByInventoryId(inventoryId)
@@ -214,17 +208,6 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                 .then();
     }
 
-    //delete all products and delete all inventory
-  /*  @Override
-    public Mono<Void> deleteAllProductInventory(String inventoryId) {
-        return inventoryRepository.findInventoryByInventoryId(inventoryId)
-                .flatMap(inventory -> {
-                    return productRepository.deleteByInventoryId(inventoryId);
-                })
-                .switchIfEmpty(Mono.error(new RuntimeException("Inventory not found")))
-                .then();
-    }
-*/
     @Override
     public Flux<InventoryResponseDTO>searchInventories(String inventoryName, String inventoryType, String inventoryDescription) {
 
@@ -245,8 +228,9 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
         }
 
         if (inventoryName != null){
+            char firstChar1 = inventoryName.charAt(0);
             return inventoryRepository
-                    .findAllByInventoryName(inventoryName)
+                    .findByInventoryNameRegex("(?i)^" + firstChar1 + ".*")
                     .map(EntityDTOUtil::toInventoryResponseDTO)
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Name: " + inventoryName)));
         }
@@ -259,8 +243,9 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
         }
 
         if (inventoryDescription != null){
+            char firstChar = inventoryDescription.charAt(0);
             return inventoryRepository
-                    .findAllByInventoryDescription(inventoryDescription)
+                    .findByInventoryDescriptionRegex("(?i)^" + firstChar + ".*")
                     .map(EntityDTOUtil::toInventoryResponseDTO)
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Description: " + inventoryDescription)));
         }
@@ -270,6 +255,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                 .findAll()
                 .map(EntityDTOUtil::toInventoryResponseDTO);
     }
+
 
 
     @Override

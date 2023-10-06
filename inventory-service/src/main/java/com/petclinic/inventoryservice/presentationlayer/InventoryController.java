@@ -51,13 +51,7 @@ public class InventoryController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-/*
-    @GetMapping()
-    public Flux<InventoryResponseDTO> getAllInventory(){
-        return productInventoryService.getAllInventory();
-    }
 
- */
 @GetMapping()
 public Flux<InventoryResponseDTO> searchInventories(
         @RequestParam(name = "inventoryName", required = false) String inventoryName,

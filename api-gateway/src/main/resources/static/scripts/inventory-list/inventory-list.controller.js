@@ -10,22 +10,21 @@ angular.module('inventoryList')
                     console.log("inventory list: " + self.inventoryList)
                 });
 //search by inventory field
-        $scope.searchInventory = function (inventoryName, inventoryType, inventoryDescription){
-
+        $scope.searchInventory = function (inventoryName, inventoryType, inventoryDescription) {
             var queryString = '';
 
-            if (inventoryName != null && inventoryName !== '') {
+            if (inventoryName) {
                 queryString += "inventoryName=" + inventoryName;
             }
 
-            if (inventoryType != null && inventoryType !== '') {
+            if (inventoryType) {
                 if (queryString !== '') {
                     queryString += "&";
                 }
                 queryString += "inventoryType=" + inventoryType;
             }
 
-            if (inventoryDescription != null && inventoryDescription !== '') {
+            if (inventoryDescription) {
                 if (queryString !== '') {
                     queryString += "&";
                 }
@@ -36,7 +35,7 @@ angular.module('inventoryList')
                 $http.get("api/gateway/inventory?" + queryString)
                     .then(function(resp) {
                         self.inventoryList = resp.data;
-                        arr = resp.data;
+                        arr = resp.data; // Ensure 'arr' is declared or handled accordingly
                     })
                     .catch(function(error) {
                         if (error.status === 404) {
@@ -49,7 +48,7 @@ angular.module('inventoryList')
                 $http.get("api/gateway/inventory")
                     .then(function(resp) {
                         self.inventoryList = resp.data;
-                        arr = resp.data;
+                        arr = resp.data; // Ensure 'arr' is declared or handled accordingly
                     })
                     .catch(function(error) {
                         if (error.status === 404) {

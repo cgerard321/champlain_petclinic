@@ -766,13 +766,7 @@ public class BFFApiGatewayController {
                                                       @RequestParam(required = false) String inventoryDescription){
         return inventoryServiceClient.searchInventory(inventoryName, inventoryType, inventoryDescription);
     }
-    /*
-    @GetMapping(value = "inventory")
-    public Flux<InventoryResponseDTO> getAllInventory(){
-        return inventoryServiceClient.getAllInventory();
-    }
 
-     */
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER})
