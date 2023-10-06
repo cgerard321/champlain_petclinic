@@ -14,37 +14,43 @@
         <form class="form-horizontal" ng-submit="$ctrl.add()" style="max-width: 100%;">
             <div class="form-group">
                 <label for="firstName">First Name</label>
-                <input id="firstName" class="form-control" ng-model="signup.firstName" name="firstName" ng-disabled="$ctrl.checked" required />
+                <input id="firstName" class="form-control" ng-model="signup.firstName" name="firstName" ng-disabled="$ctrl.checked" maxlength="50" pattern="^[\x20-\x7F]+$" required />
                 <span ng-show="ownerForm.firstName.$error.required" class="help-block">First name is required.</span>
             </div>
 
             <div class="form-group">
                 <label for="lastName">Last Name</label>
-                <input id="lastName" class="form-control" ng-model="signup.lastName" name="lastName" ng-disabled="$ctrl.checked" required />
+                <input id="lastName" class="form-control" ng-model="signup.lastName" name="lastName" ng-disabled="$ctrl.checked" maxlength="50" pattern="^[\x20-\x7F]+$" required />
                 <span ng-show="ownerForm.lastName.$error.required" class="help-block">Last name is required.</span>
             </div>
 
             <div class="form-group">
                 <label for="address">Address</label>
-                <input id="address" class="form-control" ng-model="signup.address" name="address" ng-disabled="$ctrl.checked" required />
+                <input id="address" class="form-control" ng-model="signup.address" name="address" ng-disabled="$ctrl.checked" maxlength="50" pattern="^[\x20-\x7F]+$" required />
                 <span ng-show="ownerForm.address.$error.required" class="help-block">Address is required.</span>
             </div>
 
             <div class="form-group">
                 <label for="city">City</label>
-                <input id="city" class="form-control" ng-model="signup.city" name="city" ng-disabled="$ctrl.checked" required />
+                <input id="city" class="form-control" ng-model="signup.city" name="city" ng-disabled="$ctrl.checked" maxlength="50" pattern="^[\x20-\x7F]+$" required />
                 <span ng-show="ownerForm.city.$error.required" class="help-block">City is required.</span>
             </div>
 
             <div class="form-group">
+                <label for="province">Province</label>
+                <input id="province" class="form-control" ng-model="signup.province" name="province" ng-disabled="$ctrl.checked" maxlength="50" pattern="^[\x20-\x7F]+$" required />
+                <span ng-show="ownerForm.province.$error.required" class="help-block">Province is required.</span>
+            </div>
+
+            <div class="form-group">
                 <label for="telephone">Telephone</label>
-                <input id="telephone" class="form-control" ng-model="signup.telephone" name="telephone" ng-disabled="$ctrl.checked" required />
+                <input id="telephone" class="form-control" ng-model="signup.telephone" name="telephone" ng-disabled="$ctrl.checked" maxlength="50" pattern="^[\x20-\x7F]+$" required />
                 <span ng-show="ownerForm.telephone.$error.required" class="help-block">Telephone is required.</span>
             </div>
 
             <div class="form-group">
                 <label for="username">Username</label>
-                <input id="username" class="form-control" ng-model="signup.username" name="username" required />
+                <input id="username" class="form-control" ng-model="signup.username" name="username" maxlength="50" pattern="^[\x20-\x7F]+$" required />
                 <span ng-show="signupForm.username.$error.required" class="help-block">Username is required.</span>
             </div>
 

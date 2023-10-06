@@ -1,29 +1,30 @@
 <style>
-
     .container {
         display: flex;
-        justify-content: space-between;
-        align-items: center;             /* This aligns items vertically */
-        width: 100%;
+        justify-content: flex-end;
+        align-items: center;
         margin-bottom: 20px;
     }
 
-    .original-button {
+    .delete-all-button{
         display: flex;
+        justify-content: flex-end;
         align-items: center;
-        justify-content: center;
-        line-height: 1;
-        text-decoration: none;
-        color: #ffffff;
+        margin-bottom: 20px;
+    }
+
+    
+    .original-button {
+        color: #fff;
+        background-color: #19d256;
+        border-color: #dc3545;
         font-size: 18px;
         border-radius: 5px;
         width: 200px;
         height: 40px;
         font-weight: bold;
-        border-bottom: 4px solid #179e43;
-        transition: 0.3s;
-        box-shadow: 0px 3px 5px 0px rgba(0, 0, 0, 0.4);
-        background-color: #19d256;
+
+
     }
 
     .original-button:hover {
@@ -31,13 +32,29 @@
         border-bottom-width: 2px;
         transform: translateY(2px);
     }
+
+    .button-wrapper {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+    }
+
 </style>
-<div class="container">
-    <h3 style="margin: 0;">Upcoming Visits</h3>
-    <a ui-sref="visitsNew">
-        <button class="original-button" id="addBtn">Create Visit</button>
-    </a>
+
+<div class="button-wrapper">
+    <div class="container">
+        <a ui-sref="visitsNew">
+            <button class="original-button" id="addBtn">Create Visit</button>
+        </a>
+    </div>
+    <div class="delete-all-button">
+        <button class="btn btn-danger" ng-click="deleteAllCancelledVisits()">Delete All Canceled Visits</button>
+    </div>
 </div>
+
+
+<h3 style="margin: 0;">Upcoming Visits</h3>
+
 <p>Type something in the input field to search throughout the table:</p>
 <input ng-model="search.visitId" placeholder="Filter by VisitID">
 <input ng-model="search.date" placeholder="Filter by Date">
@@ -46,6 +63,9 @@
 <input ng-model="search.petId" placeholder="Filter by PetId">
 <input ng-model="search.status" placeholder="Filter by Status">
 <input ng-model="search.billId" placeholder="Filter by Bill">
+
+
+
 <table class="table">
     <thead>
     <tr>
@@ -56,6 +76,7 @@
         <th> <button class="btn btn-default" id="sortByPetButtonUpcomingVisits" ng-click="$ctrl.SortTableByPet(true)" style="color: white">Sort by pet ⇅</button> </th>
         <th> <button class="btn btn-default" id="sortByStatusButtonUpcomingVisits" ng-click="$ctrl.SortTableByStatus(true)" style="color: white">Sort by status ⇅</button> </th>
         <th> <button class="btn btn-default" id="sortByBillIdUpcomingVisits" style="color: white">Bill ⇅</button> </th>
+        <th style="text-align:center; vertical-align:middle"><label>Confirm</label></th>
         <th style="text-align:center; vertical-align:middle"> <label>Cancel</label> </th>
         <th style="text-align:center; vertical-align:middle"> <label>Edit</label> </th>
         <th style="text-align:center; vertical-align:middle"> <label>Delete</label> </th>
@@ -71,7 +92,24 @@
         <td style="white-space: pre-line">{{v.petId}}</td>
         <td class="status-text" style="white-space: pre-line">{{v.status}}</td>
         <td class="status-text" style="white-space: pre-line"></td>
-        <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="cancelVisit(v.visitId, v.status)">Cancel Visit</a></td>
+        <td>
+            <a ng-class="{
+    'btn btn-success': v.status === 'UPCOMING',
+    'btn btn-info': v.status === 'CONFIRMED',
+    'btn btn-default': v.status === 'COMPLETED' || v.status === 'CANCELLED'
+  }"
+               href="javascript:void(0)"
+               ng-click="confirmVisit(v.visitId, v.status)">
+                {{ v.status === 'UPCOMING' ? 'Confirm Visit' : v.status === 'CONFIRMED' ? 'Complete Visit' : v.status === 'CANCELLED' ? 'Cannot Confirm Cancelled Visit' : 'Visit Completed!' }}
+            </a>
+        </td>
+
+        <td><a ng-class="{
+    'btn btn-danger': v.status === 'UPCOMING',
+    'btn btn-default': v.status === 'CANCELLED' || v.status === 'CONFIRMED' || v.status === 'COMPLETED'
+  }" href="javascript:void(0)" ng-click="cancelVisit(v.visitId, v.status)">
+            {{ v.status === 'UPCOMING' ? 'Cancel Visit' : v.status === 'CONFIRMED' ? 'Cannot Cancel Confirmed Visit' : v.status === 'COMPLETED' ? 'Cannot Cancel Completed Visit' : 'Visit Cancelled!' }}
+        </a></td>
         <td style="text-align:center; vertical-align:middle"><button class="btn btn-default" type="button" style="background-color: royalblue; color: white" ng-click="$ctrl.switchToUpdateForm($event, v.practitionerId, v.description, v.visitId, v.status)">Edit Visit</button></td>
         <!--<td style="text-align:center; vertical-align:middle"><button class="btn btn-danger" href="javascript:void(0)" ng-click="deleteVisit(v.visitId)">Delete visit</button></td> -->
         <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteVisit(v.visitId)">Delete Visit</a></td>
@@ -103,7 +141,7 @@
         <td class="col-sm-2">{{v.visitId}}</td>
         <td class="col-sm-2">{{visitsCtrl.visit.visitDate}}</td>
         <td style="white-space: pre-line">{{v.description}}</td>
-        <!--        <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>-->
+        <!-- <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>-->
         <td style="white-space: pre-line">{{v.practitionerId}}</td>
         <td style="white-space: pre-line">{{v.petId}}</td>
         <td class="status-text" style="white-space: pre-line">{{v.status}}</td>

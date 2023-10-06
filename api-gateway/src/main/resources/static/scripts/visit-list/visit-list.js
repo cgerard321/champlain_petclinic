@@ -9,6 +9,12 @@ angular.module('visitList', ['ui.router'])
                 template: '<visit-list></visit-list>'
             })
 
+            .state('confirmVisit', {
+                parent: 'app',
+                url: '/visits/:visitId',
+                template: '<visit-list></visit-list>'
+            })
+
             .state('cancelVisit', {
                 parent: 'app',
                 url: '/visits/:visitId',
@@ -18,6 +24,12 @@ angular.module('visitList', ['ui.router'])
             .state('deleteVisit', {
                 parent: 'app',
                 url: '/visits/:visitId/deleteVisit',
+                template: '<visit-list></visit-list>'
+            })
+
+            .state('deleteCancelledVisit', {
+                parent: 'app',
+                url: '/visits/cancelled',
                 template: '<visit-list></visit-list>'
             })
     }]);

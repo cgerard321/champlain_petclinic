@@ -13,8 +13,9 @@ angular.module('ownerDetails')
             console.log(self.owner);
 
             var petPromises = self.owner.pets.map(function (pet) {
-                return $http.get('api/gateway/pets/' + pet.petId);
+                return $http.get('api/gateway/pets/' + pet.petid, { cache: false });
             });
+
 
             $q.all(petPromises).then(function (responses) {
                 self.owner.pets = responses.map(function (response) {
@@ -24,6 +25,33 @@ angular.module('ownerDetails')
                 });
             });
         });
+        
+        self.deletePet = function (petId) {
+            var config = {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+            $http.delete('api/gateway/pets/' + petId, config)
+                .then(function (resp) {
+                    console.log("Pet deleted successfully");
+
+                  /*  $http.get('api/gateway/owners/' + $stateParams.ownerId).then(function (resp) {
+                        self.owner = resp.data;
+                    });
+                   */
+
+                    self.owner.pets = self.owner.pets.filter(function(pet) {
+                        return pet.petId !== petId;
+                    });
+
+                    $scope.$applyAsync();
+                    // Handle the success appropriately
+                }).catch(function (error) {
+                console.error("Error deleting pet:", error);
+                // Handle the error appropriately
+            });
+        };
 
 
 
@@ -46,6 +74,7 @@ angular.module('ownerDetails')
                 }, { headers: { 'Cache-Control': 'no-cache' } }).then(function (resp) {
                     console.log("Pet active status updated successfully");
                     self.pet = resp.data;
+                    $scope.$applyAsync()
                     $timeout(); // Manually trigger the $digest cycle to update the UI
                 }).catch(function (error) {
                     console.error("Error updating pet active status:", error);

@@ -1,9 +1,9 @@
 package com.petclinic.billing.presentationlayer;
 
 import com.petclinic.billing.businesslayer.BillService;
-import com.petclinic.billing.datalayer.BillDTO;
 import com.petclinic.billing.datalayer.BillRequestDTO;
 import com.petclinic.billing.datalayer.BillResponseDTO;
+import com.petclinic.billing.datalayer.BillStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,6 +39,23 @@ public class BillResource {
     @GetMapping(value = "/bills", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> findAllBills() {
         return SERVICE.GetAllBills();
+    }
+
+
+
+    @GetMapping(value = "/bills/paid", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<BillResponseDTO> findAllPaidBills() {
+        return SERVICE.GetAllBillsByStatus(BillStatus.PAID);
+    }
+
+    @GetMapping(value = "/bills/unpaid", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<BillResponseDTO> findAllUnpaidBills() {
+        return SERVICE.GetAllBillsByStatus(BillStatus.UNPAID);
+    }
+
+    @GetMapping(value = "/bills/overdue", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<BillResponseDTO> findAllOverdueBills() {
+        return SERVICE.GetAllBillsByStatus(BillStatus.OVERDUE);
     }
 
     @PutMapping(value ="/bills/{billId}")

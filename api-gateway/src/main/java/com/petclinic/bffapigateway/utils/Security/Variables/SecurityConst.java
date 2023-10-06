@@ -11,13 +11,11 @@ public class SecurityConst {
 
 
     private final long EXPIRATION_TIME_MINUTES;     // 1 hour
-    private final String SECRET;     // jwt secret
     private final String TOKEN_PREFIX;     // Bearer
 
 
-    public SecurityConst(@Value("${EXPIRATION_TIME_MINUTES}") long EXPIRATION_TIME_MINUTES,@Value("${SECRET_KEY}") String SECRET,@Value("${TOKEN_PREFIX}") String TOKEN_PREFIX) {
+    public SecurityConst(@Value("${EXPIRATION_TIME_MINUTES}") long EXPIRATION_TIME_MINUTES,@Value("${TOKEN_PREFIX}") String TOKEN_PREFIX) {
         this.EXPIRATION_TIME_MINUTES = EXPIRATION_TIME_MINUTES;
-        this.SECRET = SECRET;
         this.TOKEN_PREFIX = TOKEN_PREFIX;
     }
 }

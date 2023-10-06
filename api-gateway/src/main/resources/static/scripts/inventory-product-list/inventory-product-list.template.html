@@ -50,7 +50,9 @@
         <td><span>{{product.productQuantity}}</span></td>
         <td><span>{{product.productPrice}}</span></td>
         <td><span>{{product.productDescription}}</span></td>
-        <td><a class="btn btn-warning" href="javascript:void(0)" ng-click="">Edit</a></td>
+        <td><a ui-sref="updateProductInventory({inventoryId: $ctrl.inventoryProductList[0].inventoryId, productId: product.productId})">
+            <button class="add-bundle-button btn btn-success">Edit</button>
+        </a></td>
         <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteProduct(product)">Delete</a></td>
         <td></td>
     </tr>

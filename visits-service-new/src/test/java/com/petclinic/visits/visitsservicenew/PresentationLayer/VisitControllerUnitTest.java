@@ -50,7 +50,7 @@ class VisitControllerUnitTest {
 
 
     Set<SpecialtyDTO> set= new HashSet<>();
-
+    Set<Workday> workdaySet = new HashSet<>();
 
     VetDTO vet = VetDTO.builder()
             .vetId(uuidVet)
@@ -61,7 +61,7 @@ class VisitControllerUnitTest {
             .phoneNumber("(514)-634-8276 #2384")
             .imageId("1")
             .resume("Practicing since 3 years")
-            .workday("Monday, Tuesday, Friday")
+            .workday(workdaySet)
             .active(true)
             .specialties(set)
             .build();
@@ -245,6 +245,38 @@ class VisitControllerUnitTest {
                 .expectBody()
                 .jsonPath("$.message", "No visit was found with visitId: " + invalidVisitId);
     }
+
+    @Test
+    void deleteAllCancelledVisits_shouldSucceed(){
+        // Arrange
+        Mockito.when(visitService.deleteAllCancelledVisits()).thenReturn(Mono.empty());
+
+        // Act & Assert
+       webTestClient
+               .delete()
+               .uri("/visits/cancelled")
+               .exchange()
+               .expectStatus().isNoContent();
+
+       Mockito.verify(visitService, times(1)).deleteAllCancelledVisits();
+    }
+
+    @Test
+    void deleteAllCancelledVisits_shouldThrowRuntimeException() {
+        // Arrange
+        Mockito.when(visitService.deleteAllCancelledVisits())
+                .thenReturn(Mono.error(new RuntimeException("Failed to delete cancelled visits")));
+
+        // Act & Assert
+        webTestClient
+                .delete()
+                .uri("/visits/cancelled")
+                .exchange()
+                .expectStatus().is5xxServerError();
+
+        Mockito.verify(visitService, times(1)).deleteAllCancelledVisits();
+    }
+
 
     private Visit buildVisit(String uuid,String description, String vetId){
         return Visit.builder()

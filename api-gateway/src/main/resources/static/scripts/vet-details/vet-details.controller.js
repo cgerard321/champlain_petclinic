@@ -49,6 +49,65 @@ angular.module('vetDetails')
             }
         };
 
+        //update education
+        self.updateEducation = function (educationId) {
+            const btn = document.getElementById("updateEducationBtn" + educationId);
+            const updateContainer = document.getElementById("educationUpdate" + educationId);
+
+            let updatedDegree = document.getElementById("updateDegree" + educationId).value;
+            let updatedSchoolName = document.getElementById("updateSchoolName" + educationId).value;
+            let updatedFieldOfStudy = document.getElementById("updateFieldOfStudy" + educationId).value;
+            let updatedStartDate = document.getElementById("updateStartDate" + educationId).value;
+            let updatedEndDate = document.getElementById("updateEndDate" + educationId).value;
+
+            let updatedEducation = {
+                educationId: educationId,
+                degree: updatedDegree,
+                schoolName: updatedSchoolName,
+                vetId: $stateParams.vetId,
+                fieldOfStudy: updatedFieldOfStudy,
+                startDate: updatedStartDate,
+                endDate: updatedEndDate,
+            };
+
+            if (updateContainer.style.display === "none") {
+                // Show the update form
+                updateContainer.style.display = "block";
+                btn.textContent = "Save";
+            } else if (btn.textContent === "Save") {
+                if (
+                    updatedDegree === "" ||
+                    updatedSchoolName === "" ||
+                    updatedFieldOfStudy === "" ||
+                    updatedStartDate === "" ||
+                    updatedEndDate === ""
+                ) {
+                    alert("Please fill in all education fields.");
+                    return;
+                }
+
+                // Save the updated education
+                $http.put("api/gateway/vets/" + $stateParams.vetId + "/educations/" + educationId, updatedEducation).then(function (resp) {
+                    console.log(resp.data);
+                    self.updatedEducation = resp.data;
+                    alert('Your education was successfully updated!');
+
+                    // Refresh list
+                    $http.get('api/gateway/vets/' + $stateParams.vetId + '/educations').then(function (resp) {
+                        console.log(resp.data);
+                        self.educations = resp.data;
+                    });
+                });
+
+
+                // Hide the update form
+                updateContainer.style.display = "none";
+                btn.textContent = "Update";
+
+            }
+        };
+
+
         $http.get('api/gateway/vets/' + $stateParams.vetId + '/ratings/percentages')
             .then(function (resp) {
                 const ratingsData = resp.data;

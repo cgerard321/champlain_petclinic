@@ -3,25 +3,36 @@
 angular.module('vetForm')
     .controller('VetFormController', ["$http", '$state', '$stateParams', function ($http, $state, $stateParams) {
         var self = this;
+        document.getElementById("loaderDiv").style.display = "none";
+
         var vetId = $stateParams.vetId || 0;
         if (!vetId || vetId === 0) {
             document.getElementById("title").innerHTML = "New Vet Sign Up";
             self.vet = {};
 
+
         } else {
             $http.get("api/gateway/vets/" + $stateParams.vetId).then(function (resp) {
                 self.vet = resp.data;
+                console.log(self.vet);
                 document.getElementById("title").innerHTML = "Edit Vet";
                 document.getElementById("firstName").value = self.vet.firstName;
                 document.getElementById("lastName").value = self.vet.lastName;
-                document.getElementById("email").value = self.vet.email;
+                document.getElementById("email-info").style.display = "none";
                 document.getElementById("vetResume").value = self.vet.resume;
-                document.getElementById("workDays").value = self.vet.workday;
+                document.getElementById("user-info").style.display = "none";
 
                 const specialties = self.vet.specialties;
                 specialties.forEach(specs => {
                     document.getElementById(specs.name).checked = true;
                 })
+
+                const workdays = self.vet.workday;
+                workdays.forEach(work => {
+                    console.log(work);
+                    document.getElementById(work).checked = true;
+                });
+
 
                 let isAct = document.getElementsByClassName("isActiveRadio");
                 if (self.vet.active) {
@@ -35,7 +46,42 @@ angular.module('vetForm')
 
             });
         }
-        self.submitVetForm = function (vet) {
+
+        let uploadPhoto = function (vetId) {
+            const fileInput = document.querySelector('input[id="photoVet"]');
+            let vetPhoto = "";
+
+            const file = fileInput.files[0]; // Changed fileInput.target.files to fileInput.files
+            const reader = new FileReader();
+            var image = {};
+            reader.onloadend = () => {
+                vetPhoto = reader.result
+                    .replace('data:', '')
+                    .replace(/^.+,/, '');
+                self.PreviewImage = vetPhoto;
+                image = {
+                    name: file.name,
+                    type: "jpeg",
+                    photo: vetPhoto
+                };
+
+                // Use template literals for URL concatenation
+                $http.post(`api/gateway/vets/${vetId}/photos/${image.name}`, image) // Send the image object
+                    .then(function (response) {
+                        console.log("VET ID: " + vetId);
+                        console.log("RESPONSE: " + JSON.stringify(response.data)); // Access response data
+                    })
+                    .catch(function (error) {
+                        console.error(error);
+                    });
+            };
+            reader.readAsDataURL(file);
+        };
+
+        self.submitVetForm = function (vet = self.vet) {
+            console.log("vet please: " + vet);
+            document.getElementById("loaderDiv").style.display = "block";
+
             let specialtyList = document.getElementsByClassName("specialty")
             let selectedSpecialtiesList = [];
             let specialtiesStr = "[";
@@ -61,6 +107,21 @@ angular.module('vetForm')
             const specialties = JSON.parse(specialtiesStr);
             vet.specialties = specialties;
 
+            let workdayList = document.getElementsByClassName("workday");
+            let selectedWorkdayList = [];
+            for (let i = 0; i < workdayList.length; i++) {
+                if (workdayList[i].checked) {
+                    selectedWorkdayList.push(workdayList[i].value);
+                }
+            }
+            let workdaysArray = selectedWorkdayList; // Convert to an array
+
+            if (workdaysArray.length === 0) {
+                alert("vet should have at least one workday: " + workdaysArray);
+                return;
+            }
+            vet.workday = workdaysArray; // Assign the array to vet.workday
+
             vet.firstName = document.getElementById("firstName").value;
             var namePattern = /^[a-zA-Z -]+/;
             if (!namePattern.test(vet.firstName)) {
@@ -81,17 +142,17 @@ angular.module('vetForm')
                 alert("last name should be minimum 2 characters and maximum of 30 characters, only letters, spaces, and hyphens: "+vet.lastName)
                 return
             }
-
-            vet.email = document.getElementById("email").value;
+/*
             var emailPattern = /\b[\w.%-]+@[-.\w]+\.[A-Za-z]{2,3}\b/;
-            if (!emailPattern.test(vet.email)) {
+            if (!emailPattern.test(document.getElementById("email").value)) {
                 alert("email should be minimum 6 characters and maximum 320 characters. Top level domain should have 2 to 3 letters: "+vet.email)
                 return
             }
 
+ */
             let basePhoneNumber = "(514)-634-8276 #";
             let inputPhoneNumber=document.getElementById("phoneNumber").value;
-            if(inputPhoneNumber.length!=4){
+            if(inputPhoneNumber.length!==4){
                 alert("phoneNumber length not equal to 4: "+vet.phoneNumber)
                 return
             }
@@ -103,32 +164,34 @@ angular.module('vetForm')
                 return
             }
 
-            vet.workday = document.getElementById("workDays").value;
-            var inputElement = document.getElementById("workDays"); // Replace with your actual element reference
-            var inputValue = inputElement.value.toLowerCase();
-            var daysOfWeekPattern = /^(monday|tuesday|wednesday|thursday|friday|saturday|sunday)(, (?!.*\1)(monday|tuesday|wednesday|thursday|friday|saturday|sunday))*$/;
-
-            if (!daysOfWeekPattern.test(inputValue)) {
-                alert("Work day(s) must be valid days of the week separated by commas.")
-                return
-            }
-
             let isAct = document.getElementsByClassName("isActiveRadio");
             vet.active = isAct[0].checked;
 
             var req;
             if (id) {
                 req = $http.put("api/gateway/vets/" + vetId, vet);
+                $state.go('vets');
             } else {
-                req = $http.post("api/gateway/vets", vet);
+                req = $http.post("api/gateway/users/vets", {
+                    username: vet.username,
+                    password: vet.password,
+                    email: vet.email,
+                    vet:vet
+                });
                 console.log(self.vet)
-            }
 
-            req.then(function () {
+            req.then(function (response) {
+                var result = response.data;
+                console.log("Response data:", result);
+                console.log("Response vet id ", result.vetId);
+                uploadPhoto(result.vetId);
                 $state.go('vets');
             }, function (response) {
                 let error = "Missing fields, please fill out the form";
+                $state.go('vets');
                 alert(error);
+                console.error(error);
             });
-        };
+        }
+    }
     }]);

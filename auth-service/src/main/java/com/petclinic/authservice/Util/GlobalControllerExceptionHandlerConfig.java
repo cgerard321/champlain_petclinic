@@ -20,6 +20,12 @@ import static org.springframework.http.HttpStatus.*;
 @RestControllerAdvice
 public class GlobalControllerExceptionHandlerConfig {
 
+    @ExceptionHandler(value = UnverifiedUserException.class)
+    @ResponseStatus(value = UNAUTHORIZED)
+    public HTTPErrorMessage unverifiedUserException(UnverifiedUserException ex, WebRequest request) {
+
+        return new HTTPErrorMessage(UNAUTHORIZED.value(), ex.getMessage());
+    }
 
     @ExceptionHandler(value = IncorrectPasswordException.class)
     @ResponseStatus(value = UNAUTHORIZED)

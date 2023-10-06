@@ -5,6 +5,7 @@ import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
+import com.petclinic.bffapigateway.dtos.Pets.PetTypeResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -175,6 +176,13 @@ public class CustomersServiceClient {
                 .bodyToMono(PetResponseDTO.class);
     }
 
+    public Mono<PetResponseDTO> deletePetByPetId(final String petId) {
+        return webClientBuilder.build().delete()
+                .uri(customersServiceUrl + "/pet/{petId}", petId)
+                .retrieve()
+                .bodyToMono(PetResponseDTO.class);
+    }
+
     public Mono<OwnerResponseDTO> deleteOwner(final String ownerId) {
         return webClientBuilder.build().delete()
                 .uri(customersServiceUrl +"/owners/"+ ownerId)
@@ -194,5 +202,12 @@ public class CustomersServiceClient {
                 .uri(customersServiceUrl + ownerId + "/pets/photo/" + photoId)
                 .retrieve()
                 .bodyToMono(Void.class);
+    }
+
+    public Flux<PetTypeResponseDTO> getAllPetTypes() {
+        return webClientBuilder.build().get()
+                .uri(customersServiceUrl + "/owners/petTypes")
+                .retrieve()
+                .bodyToFlux(PetTypeResponseDTO.class);
     }
 }

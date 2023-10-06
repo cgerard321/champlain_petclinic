@@ -218,7 +218,7 @@ class VetServiceImplTest {
 
     private Vet buildVet() {
         return Vet.builder()
-                .vetId("678910")
+                .vetId("d9d3a7ac-6817-4c13-9a09-c09da74fb65f")
                 .vetBillId("1")
                 .firstName("Pauline")
                 .lastName("LeBlanc")
@@ -226,37 +226,37 @@ class VetServiceImplTest {
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
                 .imageId("kjd")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
     }
     private VetDTO buildVetDTO() {
         return VetDTO.builder()
-                .vetId("678910")
-                .vetBillId("1")
+                .vetId("d9d3a7ac-6817-4c13-9a09-c09da74fb65f")
+                .vetBillId("53c2d16e-1ba3-4dbc-8e31-6decd2eaa99a")
                 .firstName("Pauline")
                 .lastName("LeBlanc")
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
                 .imageId("kjd")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
     }
     private Vet buildVet2() {
         return Vet.builder()
-                .vetId("678910")
-                .vetBillId("2")
+                .vetId("d9d3a7ac-6817-4c13-9a09-c09da74fb65f")
+                .vetBillId("74cb3b00-2808-499c-9bf6-15e94d9eacc7")
                 .firstName("Pauline")
                 .lastName("LeBlanc")
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
                 .imageId("kjd")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(true)
                 .build();

@@ -22,26 +22,55 @@ angular.module('visitList')
             }
         }
 
-        $scope.cancelVisit = function (visitId, status){
-            console.log("Called Function")
+        function delayedReload() {
+            var loadingIndicator = document.getElementById('loadingIndicator');
+            loadingIndicator.style.display = 'block';
+            setTimeout(function() {
+                location.reload();
+            }, 500); //delay by 1 second
+        }
+
+        $scope.confirmVisit = function (visitId, status){
+
             console.log(status)
 
-            if (status === "CANCELLED") {
-                status = "CANCELLED"
-            }else if(status === "CONFIRMED"){
-                status = "CONFIRMED"
-            }else if(status === "IN_PROGRESS"){
-                status = "IN_PROGRESS"
-            }else if(status === "COMPLETED"){
-                status = "COMPLETED"
-            }else{
-                status = "CANCELLED"
+            switch(status){
+
+                case "UPCOMING":
+                    status = "CONFIRMED"
+                    break;
+
+                case "CONFIRMED":
+                    status = "COMPLETED"
+                    break;
+
+                default:
+                    break;
             }
-            console.log("Function Finished")
+
+            console.log(status)
 
             let putURL = 'api/gateway/visits/' + visitId + '/status/' + status;
 
-            console.log(putURL);
+            $http.put(putURL, status)
+                .then(successCallback, errorCallback)
+
+            function successCallback(response) {
+                $scope.errors = [];
+                alert(visitId + " visit was confirmed successfully");
+                console.log(response, 'res');
+                delayedReload();
+            }
+
+            function errorCallback(error) {
+                alert($scope.errors);
+                console.log(error, 'Could not receive data');
+            }
+        }
+
+        $scope.cancelVisit = function (visitId, status){
+
+            let putURL = 'api/gateway/visits/' + visitId + '/status/' + status;
 
             $http.put(putURL, status)
                 .then(successCallback, errorCallback)
@@ -58,6 +87,7 @@ angular.module('visitList')
                 console.log(error, 'Could not receive data');
             }
         }
+
 
         $scope.deleteVisit = function (visitId) {
             let varIsConf = confirm('You are about to delete visit ' + visitId + '. Is this what you want to do ? ');
@@ -78,15 +108,28 @@ angular.module('visitList')
                     console.log(error, 'Could not receive data');
                 }
             }
+        };
 
-            function delayedReload() {
-                var loadingIndicator = document.getElementById('loadingIndicator');
-                loadingIndicator.style.display = 'block';
-                setTimeout(function() {
-                    location.reload();
-                }, 1000); //delay by 1 second
+        $scope.deleteAllCancelledVisits = function () {
+            let varIsConf = confirm('You are about to delete all canceled visits. Is this what you want to do ? ');
+            if (varIsConf) {
+                $http.delete('api/gateway/visits/cancelled')
+                    .then(successCallback, errorCallback);
+
+                function successCallback(response) {
+                    $scope.errors = [];
+                    alert("All canceled visits were deleted successfully");
+                    console.log(response, 'res');
+                    delayedReload();
+                }
+
+                function errorCallback(error) {
+                    alert(data.errors);
+                    console.log(error, 'Could not receive data');
+                }
             }
         };
+
     }]);
 
 //     // self.sortFetchedVisits = function() {

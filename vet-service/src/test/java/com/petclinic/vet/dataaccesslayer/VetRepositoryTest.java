@@ -11,6 +11,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.util.EnumSet;
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 
@@ -218,11 +221,11 @@ class VetRepositoryTest {
     }
 
 
-
+    Set<Workday> workdays1 = EnumSet.of(Workday.Monday, Workday.Tuesday, Workday.Friday);
 
     private Vet buildVet() {
         return Vet.builder()
-                .vetId("678910")
+                .vetId("b3bf6ec1-62bb-4297-9b5e-070a00d4e08f")
                 .vetBillId("1")
                 .firstName("Pauline")
                 .lastName("LeBlanc")
@@ -230,13 +233,13 @@ class VetRepositoryTest {
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
                 .imageId("kjd")
-                .workday("Monday")
+                .workday(workdays1)
                 .active(true)
                 .build();
     }
     private Vet buildVet2() {
         return Vet.builder()
-                .vetId("678910")
+                .vetId("b3bf6ec1-62bb-4297-9b5e-070a00d4e08f")
                 .vetBillId("2")
                 .firstName("Pauline")
                 .lastName("LeBlanc")
@@ -244,7 +247,7 @@ class VetRepositoryTest {
                 .phoneNumber("947-238-2847")
                 .imageId("kjd")
                 .resume("Just became a vet")
-                .workday("Monday")
+                .workday(workdays1)
                 .active(false)
                 .build();
     }

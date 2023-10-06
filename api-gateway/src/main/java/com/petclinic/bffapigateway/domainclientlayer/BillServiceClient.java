@@ -54,6 +54,26 @@ public class BillServiceClient {
                 .bodyToFlux(BillResponseDTO.class);
     }
 
+    public Flux<BillResponseDTO> getAllPaidBilling() {
+        return webClientBuilder.build().get()
+                .uri(billServiceUrl + "/paid")
+                .retrieve()
+                .bodyToFlux(BillResponseDTO.class);
+    }
+
+    public Flux<BillResponseDTO> getAllUnpaidBilling() {
+        return webClientBuilder.build().get()
+                .uri(billServiceUrl + "/unpaid")
+                .retrieve()
+                .bodyToFlux(BillResponseDTO.class);
+    }
+
+    public Flux<BillResponseDTO> getAllOverdueBilling() {
+        return webClientBuilder.build().get()
+                .uri(billServiceUrl + "/overdue")
+                .retrieve()
+                .bodyToFlux(BillResponseDTO.class);
+    }
     public Mono<BillResponseDTO> createBill(final BillRequestDTO model){
         return webClientBuilder.build().post()
                 .uri(billServiceUrl)

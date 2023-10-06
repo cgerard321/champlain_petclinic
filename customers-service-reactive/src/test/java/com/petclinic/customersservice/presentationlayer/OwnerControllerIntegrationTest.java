@@ -87,6 +87,7 @@ class OwnerControllerIntegrationTest {
                 .lastName("LastName1")
                 .address("Test address1")
                 .city("test city1")
+                .province("province1")
                 .telephone("telephone1")
                 .build();
 
@@ -113,6 +114,7 @@ class OwnerControllerIntegrationTest {
                 .lastName("LastName1")
                 .address("Test address1")
                 .city("test city1")
+                .province("province1")
                 .telephone("telephone1")
                 .build();
 
@@ -154,6 +156,7 @@ class OwnerControllerIntegrationTest {
                     assertEquals(ownerResponseDTO.getLastName(),ownerEntity.getLastName());
                     assertEquals(ownerResponseDTO.getAddress(),ownerEntity.getAddress());
                     assertEquals(ownerResponseDTO.getCity(),ownerEntity.getCity());
+                    assertEquals(ownerResponseDTO.getProvince(),ownerEntity.getProvince());
                     assertEquals(ownerResponseDTO.getTelephone(),ownerEntity.getTelephone());
                 });
 //                .jsonPath("$.id").isEqualTo(ownerEntity.getId())
@@ -174,11 +177,12 @@ class OwnerControllerIntegrationTest {
           .exchange().expectStatus().isOk()
             .expectHeader().contentType(MediaType.APPLICATION_JSON)
               .expectBody()
-              .jsonPath("$.ownerId").isEqualTo(ownerEntity.getOwnerId())
+             .jsonPath("$.ownerId").isEqualTo(ownerEntity.getOwnerId())
             .jsonPath("$.firstName").isEqualTo(ownerEntity.getFirstName())
             .jsonPath("$.lastName").isEqualTo(ownerEntity.getLastName())
             .jsonPath("$.address").isEqualTo(ownerEntity.getAddress())
             .jsonPath("$.city").isEqualTo(ownerEntity.getCity())
+             .jsonPath("$.province").isEqualTo(ownerEntity.getProvince())
             .jsonPath("$.telephone").isEqualTo(ownerEntity.getTelephone());
              //.jsonPath("$.photoId").isEqualTo(ownerEntity.getPhotoId());
 
@@ -236,6 +240,7 @@ class OwnerControllerIntegrationTest {
                 .jsonPath("$.lastName").isEqualTo(ownerEntity.getLastName())
                 .jsonPath("$.address").isEqualTo(ownerEntity.getAddress())
                 .jsonPath("$.city").isEqualTo(ownerEntity.getCity())
+                .jsonPath("$.province").isEqualTo(ownerEntity.getProvince())
                 .jsonPath("$.telephone").isEqualTo(ownerEntity.getTelephone());
                 //.jsonPath("$.photoId").isEqualTo(ownerEntity.getPhotoId());
     }
@@ -259,6 +264,7 @@ class OwnerControllerIntegrationTest {
                 .lastName("LastName")
                 .address("Test address")
                 .city("test city")
+                .province("province")
                 .telephone("telephone")
                 //.photoId("1")
                 .build();
@@ -272,6 +278,7 @@ class OwnerControllerIntegrationTest {
                 .lastName("LastName")
                 .address("Test address")
                 .city("test city")
+                .province("province")
                 .telephone("telephone")
                 //.photoId("1")
                 .build();
@@ -284,6 +291,7 @@ class OwnerControllerIntegrationTest {
                 .lastName("LastName")
                 .address("Test address")
                 .city("test city")
+                .province("province")
                 .telephone("telephone")
                 //.photoId("1")
                 .build();

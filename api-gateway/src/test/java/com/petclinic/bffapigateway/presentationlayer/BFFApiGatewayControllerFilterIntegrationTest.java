@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.config.GlobalExceptionHandler;
 import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.Auth.Login;
+import com.petclinic.bffapigateway.dtos.Auth.TokenResponseDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.utils.Security.Filters.IsUserFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.JwtTokenFilter;
@@ -29,6 +30,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -92,10 +94,16 @@ class BFFApiGatewayControllerFilterIntegrationTest {
         Mockito.when(jwtTokenUtil.getTokenFromRequest(any(ServerWebExchange.class)))
                 .thenReturn("valid.token.signed");
 
-        Mono<ResponseEntity<Flux<String>>> validationResponse = Mono.just(ResponseEntity.ok().build());
+        TokenResponseDTO tokenResponseDTO = TokenResponseDTO.builder()
+                .userId("UUID")
+                .email("username")
+                .roles(List.of("ADMIN"))
+                .token("valid.token.signed")
+                .build();
+
+        Mono<ResponseEntity<TokenResponseDTO>> validationResponse = Mono.just(ResponseEntity.ok(tokenResponseDTO));
         Mockito.when(authServiceClient.validateToken(anyString()))
                 .thenReturn(validationResponse);
-
         
 
         client.get()
@@ -115,12 +123,18 @@ class BFFApiGatewayControllerFilterIntegrationTest {
         Mockito.when(jwtTokenUtil.getTokenFromRequest(any(ServerWebExchange.class)))
                 .thenReturn("valid.token.signed");
 
-        Mono<ResponseEntity<Flux<String>>> validationResponse = Mono.just(ResponseEntity.ok().build());
+        TokenResponseDTO tokenResponseDTO = TokenResponseDTO.builder()
+                .userId("UUID")
+                .email("username")
+                .roles(List.of("ADMIN"))
+                .token("valid.token.signed")
+                .build();
+
+        Mono<ResponseEntity<TokenResponseDTO>> validationResponse = Mono.just(ResponseEntity.ok(tokenResponseDTO));
         Mockito.when(authServiceClient.validateToken(anyString()))
                 .thenReturn(validationResponse);
 
-        Mockito.when(jwtTokenUtil.getIdFromToken(anyString()))
-                .thenReturn("BADUUID");
+
 
 
         client.get()

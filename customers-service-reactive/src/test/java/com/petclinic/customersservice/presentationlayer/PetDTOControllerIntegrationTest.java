@@ -28,16 +28,20 @@ class PetDTOControllerIntegrationTest {
 //        Publisher<PetDTO> setup = petDTOService.getPetDTOByPetId(Mono.just(petEntity));
 //    }
 
+    /*
+
     private PetResponseDTO petDTObuilder() throws ParseException {
         return PetResponseDTO.builder()
                 .name("felix")
                 .petTypeId("1")
                 .birthDate(new SimpleDateFormat( "yyyyMMdd" ).parse( "2000-11-30"))
-                .petTypeId(PetType.builder().id(1).name("TESTPETTYPE").build().toString())
+                .petTypeId(PetType.builder().id("1").name("TESTPETTYPE").build().toString())
                 .photoId(Photo.builder().id("1").photo("1").name("test").type("test").build().toString())
                 .ownerId("ownerId-123")
                 .isActive("true")
                 .build();
     }
+
+     */
 
 }

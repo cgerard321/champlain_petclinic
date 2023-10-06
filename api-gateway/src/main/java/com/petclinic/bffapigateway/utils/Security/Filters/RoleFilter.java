@@ -1,6 +1,7 @@
 package com.petclinic.bffapigateway.utils.Security.Filters;
 
 
+import com.petclinic.bffapigateway.dtos.Auth.TokenResponseDTO;
 import com.petclinic.bffapigateway.exceptions.ForbiddenAccessException;
 import com.petclinic.bffapigateway.exceptions.HandlerIsNullException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
@@ -82,9 +83,13 @@ public class RoleFilter implements WebFilter {
         if (rolesAllowed.isEmpty()) {
             return chain.filter(exchange);
         }
-        String token = jwtTokenUtil.getTokenFromRequest(exchange);
+        TokenResponseDTO tokenResponseDTO = (TokenResponseDTO) exchange.getAttribute("tokenValues");
 
-        List<String> roles = jwtTokenUtil.getRolesFromToken(token);
+        if (tokenResponseDTO == null) {
+            return Mono.error(new ForbiddenAccessException("No token attached to request"));
+        }
+
+        List<String> roles = tokenResponseDTO.getRoles();
 
 
         log.debug("Roles: {}", roles);
@@ -93,12 +98,6 @@ public class RoleFilter implements WebFilter {
         if (roles == null) {
             return Mono.error(new ForbiddenAccessException("No roles attached to token"));
         }
-
-//todo : ask other teams if they want admin to have carte blanche
-//        if (roles.contains(Roles.ADMIN.toString())) {
-//            return chain.filter(exchange);
-//        }
-
 
 
         for (String role : roles) {
