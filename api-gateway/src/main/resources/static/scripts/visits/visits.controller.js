@@ -190,10 +190,11 @@ angular.module('visits')
         });
 
         //get pets of owners
+        //whenever the owner is selected, this calls to the back end to get the pets of that owner
         self.loadOwnerInfo = function() {
             let ownerId = self.ownerId;
-            $http.get("api/gateway/owners/" + ownerId + "/pets").then(function(resp) {
-                self.pets = resp.data;
+            $http.get("api/gateway/owners/" + ownerId).then(function(resp) {
+                self.pets = resp.data.pets;
             });
         };
 
