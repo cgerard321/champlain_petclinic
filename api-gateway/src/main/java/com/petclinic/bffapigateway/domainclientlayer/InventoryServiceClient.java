@@ -145,6 +145,46 @@ public class InventoryServiceClient {
                         resp -> rethrower.rethrow(resp, ex -> new ProductListNotFoundException(ex.get("message").toString(), NOT_FOUND)))
                 .bodyToFlux(ProductResponseDTO.class);
     }
+
+    public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductFieldPagination(final String inventoryId,
+                                                                                                 final String productName,
+                                                                                                 final Double productPrice,
+                                                                                                 final Integer productQuantity,
+                                                                                                 final Optional<Integer> page,
+                                                                                                 final Optional<Integer> size){
+        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(inventoryServiceUrl + "/{inventoryType}/products")
+                .queryParamIfPresent("page", page)
+                .queryParamIfPresent("size", size)
+                .queryParamIfPresent("productName", Optional.ofNullable(productName))
+                .queryParamIfPresent("productPrice", Optional.ofNullable(productPrice))
+                .queryParamIfPresent("productQuantity", Optional.ofNullable(productQuantity));
+
+        return webClient.get()
+                .uri(uriBuilder.buildAndExpand(inventoryId).toUri())
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        resp -> rethrower.rethrow(resp, ex -> new ProductListNotFoundException(ex.get("message").toString(), NOT_FOUND)))
+                .bodyToFlux(ProductResponseDTO.class);
+    }
+
+    public Mono<Long> getTotalNumberOfProductsWithRequestParams(final String inventoryId,
+                                                                final String productName,
+                                                                final Double productPrice,
+                                                                final Integer productQuantity){
+        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(inventoryServiceUrl + "/{inventoryType}/products-count")
+                .queryParamIfPresent("productName", Optional.ofNullable(productName))
+                .queryParamIfPresent("productPrice", Optional.ofNullable(productPrice))
+                .queryParamIfPresent("productQuantity", Optional.ofNullable(productQuantity));
+
+        return webClient.get()
+                .uri(uriBuilder.buildAndExpand(inventoryId).toUri())
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        resp -> rethrower.rethrow(resp, ex -> new ProductListNotFoundException(ex.get("message").toString(), NOT_FOUND)))
+                .bodyToMono(Long.class);
+    }
     public Flux<InventoryResponseDTO> searchInventory(
             final Optional<Integer> page,
             final Optional<Integer> size,
