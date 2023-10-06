@@ -170,7 +170,6 @@ public class InventoryServiceClient {
 
 
 
-
     //delete all
 
     public Mono<Void> deleteAllProductForInventory(final String inventoryId) {
