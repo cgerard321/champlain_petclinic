@@ -92,17 +92,18 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                         .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with id: " + inventoryId)))
                         .flatMap(inventory -> {
                             if (requestDTO.getProductName() == null || requestDTO.getProductPrice() == null || requestDTO.getProductQuantity() == null) {
-                                return Mono.error(new InvalidInputException("Product must have an inventory id, product name, product price, and product quantity."));
+                                    return Mono.error(new InvalidInputException("Product must have an inventory id, product name, product price, and product quantity."));
                             } else if (requestDTO.getProductPrice() < 0 || requestDTO.getProductQuantity() < 0) {
                                 return Mono.error(new InvalidInputException("Product price and quantity must be greater than 0."));
                             } else {
                                 return productRepository.findProductByProductId(productId)
                                         .flatMap(existingProduct -> {
-                                            Product updatedProduct = EntityDTOUtil.toProductEntity(requestDTO);
-                                            updatedProduct.setProductId(existingProduct.getProductId());
-                                            updatedProduct.setInventoryId(existingProduct.getInventoryId());
+                                            existingProduct.setProductName(requestDTO.getProductName());
+                                            existingProduct.setProductDescription(requestDTO.getProductDescription());
+                                            existingProduct.setProductPrice(requestDTO.getProductPrice());
+                                            existingProduct.setProductQuantity(requestDTO.getProductQuantity());
 
-                                            return productRepository.save(updatedProduct)
+                                            return productRepository.save(existingProduct)
                                                     .map(EntityDTOUtil::toProductResponseDTO);
                                         })
                                         .switchIfEmpty(Mono.error(new NotFoundException("Product not found with id: " + productId)));
