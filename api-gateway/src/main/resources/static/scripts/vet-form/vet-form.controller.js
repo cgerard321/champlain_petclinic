@@ -20,7 +20,6 @@ angular.module('vetForm')
                 document.getElementById("lastName").value = self.vet.lastName;
                 document.getElementById("email-info").style.display = "none";
                 document.getElementById("vetResume").value = self.vet.resume;
-                document.getElementById("workDays").value = self.vet.workday;
                 document.getElementById("user-info").style.display = "none";
 
                 const specialties = self.vet.specialties;
@@ -47,6 +46,37 @@ angular.module('vetForm')
 
             });
         }
+
+        let uploadPhoto = function (vetId) {
+            const fileInput = document.querySelector('input[id="photoVet"]');
+            let vetPhoto = "";
+
+            const file = fileInput.files[0]; // Changed fileInput.target.files to fileInput.files
+            const reader = new FileReader();
+            var image = {};
+            reader.onloadend = () => {
+                vetPhoto = reader.result
+                    .replace('data:', '')
+                    .replace(/^.+,/, '');
+                self.PreviewImage = vetPhoto;
+                image = {
+                    name: file.name,
+                    type: "jpeg",
+                    photo: vetPhoto
+                };
+
+                // Use template literals for URL concatenation
+                $http.post(`api/gateway/vets/${vetId}/photos/${image.name}`, image) // Send the image object
+                    .then(function (response) {
+                        console.log("VET ID: " + vetId);
+                        console.log("RESPONSE: " + JSON.stringify(response.data)); // Access response data
+                    })
+                    .catch(function (error) {
+                        console.error(error);
+                    });
+            };
+            reader.readAsDataURL(file);
+        };
 
         self.submitVetForm = function (vet = self.vet) {
             console.log("vet please: " + vet);
@@ -120,7 +150,6 @@ angular.module('vetForm')
             }
 
  */
-
             let basePhoneNumber = "(514)-634-8276 #";
             let inputPhoneNumber=document.getElementById("phoneNumber").value;
             if(inputPhoneNumber.length!==4){
@@ -135,22 +164,13 @@ angular.module('vetForm')
                 return
             }
 
-            vet.workday = document.getElementById("workDays").value;
-            var inputElement = document.getElementById("workDays"); // Replace with your actual element reference
-            var inputValue = inputElement.value.toLowerCase();
-            var daysOfWeekPattern = /^(monday|tuesday|wednesday|thursday|friday|saturday|sunday)(, (?!.*\1)(monday|tuesday|wednesday|thursday|friday|saturday|sunday))*$/;
-
-            if (!daysOfWeekPattern.test(inputValue)) {
-                alert("Work day(s) must be valid days of the week separated by commas.")
-                return
-            }
-
             let isAct = document.getElementsByClassName("isActiveRadio");
             vet.active = isAct[0].checked;
 
             var req;
             if (id) {
                 req = $http.put("api/gateway/vets/" + vetId, vet);
+                $state.go('vets');
             } else {
                 req = $http.post("api/gateway/users/vets", {
                     username: vet.username,
