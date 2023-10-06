@@ -20,6 +20,7 @@
                 <label class="control-label text-center" for="date">Date</label>
                 <input class="form-control" id="date" ng-model="$ctrl.bill.date" name="date" type="date" required title="Please select a date."/>
             </div>
+
             <div class="col-sm-6 form-group">
                 <label class="control-label" for="visitType">Visit Type</label>
                 <select class="form-control" name="visitType" id="visitType" ng-model="$ctrl.bill.visitType" required title="Please select a visit type.">
@@ -40,6 +41,14 @@
                     <input class="form-control col-sm-4" ng-model="$ctrl.bill.amount" name="amount" id="amount" required data-type="currency" placeholder="0.00" title="Please enter the bill amount."/>
                     <span ng-show="billForm.amount.$error.required" class="help-block">Amount is required.</span>
                 </div>
+            </div>
+            <div class="col-sm-6 form-group">
+                <label class="control-label text-center" for="billStatus">Status</label>
+                <select class="form-control" name="billStatus" id="billStatus" ng-model="$ctrl.bill.billStatus" required title="Please select a status">
+                    <option value="PAID">Paid</option>
+                    <option value="UNPAID">Unpaid</option>
+                    <option value="OVERDUE">Overdue</option>
+                </select>
             </div>
         </div>
         <div class="form-group p-3">

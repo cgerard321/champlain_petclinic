@@ -19,8 +19,8 @@
         <td>
         <span>
             <select class="form-control col-sm-4" id="inventoryType" ng-model="inventoryType" name="inventoryType" required title="Please select the inventory type." ng-keyup="$event.keyCode == 13 && searchInventory(inventoryName, inventoryType, inventoryDescription)">
-                <option value="internal">internal</option>
-                <option value="sales">sales</option>
+                <option value="Internal">Internal</option>
+                <option value="Sales">sales</option>
             </select>
         </span>
         </td>
@@ -65,18 +65,25 @@
 
 
     </td>
-
-
-
     </tr>
-
-
-
-            <!--<td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteBundle(bundle.bundleUUID)">Delete Bundle</a></td>-->
-
-        <!--<td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteBundle(bundle.bundleUUID)">Delete Bundle</a></td>-->
     </tr>
 </table>
+<div class="text-center">
+    <table class="mx-auto">
+        <tr>
+            <td>
+                <a class="btn btn-success btn-sm" ng-click="pageBefore()"><</a>
+            </td>
+            <td>
+                <span>{{$ctrl.realPage}}</span>
+            </td>
+            <td>
+                <a class="btn btn-success btn-sm" ng-click="pageAfter()">></a>
+            </td>
+        </tr>
+    </table>
+</div>
+
 
 
 <div id="loadingObject" style="display: none;">Loading...</div> <!--This is the page loading element-->

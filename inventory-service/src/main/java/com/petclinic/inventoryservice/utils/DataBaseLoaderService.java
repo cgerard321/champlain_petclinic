@@ -34,11 +34,73 @@ public class DataBaseLoaderService  implements CommandLineRunner {
                 .type("Sales")
                 .build();
         Inventory inventory1 = Inventory.builder()
-                .inventoryId("1")
-                .inventoryName("Medication")
+                .inventoryId(UUID.randomUUID().toString())
+                .inventoryName("Medications for Dogs")
                 .inventoryType(inventoryType1.getType())
-                .inventoryDescription("Medication for procedures")
+                .inventoryDescription("Medications for canine patients")
                 .build();
+        Inventory inventory2 = Inventory.builder()
+                .inventoryId(UUID.randomUUID().toString())
+                .inventoryName("Surgical Instruments")
+                .inventoryType(inventoryType1.getType())
+                .inventoryDescription("Instruments for surgical procedures on pets")
+                .build();
+        Inventory inventory3 = Inventory.builder()
+                .inventoryId(UUID.randomUUID().toString())
+                .inventoryName("Pet Food")
+                .inventoryType(inventoryType2.getType())
+                .inventoryDescription("Various types of pet food for sale")
+                .build();
+        Inventory inventory4 = Inventory.builder()
+                .inventoryId(UUID.randomUUID().toString())
+                .inventoryName("X-ray Machine")
+                .inventoryType(inventoryType1.getType())
+                .inventoryDescription("X-ray machine for diagnosing pet conditions")
+                .build();
+        Inventory inventory5 = Inventory.builder()
+                .inventoryId(UUID.randomUUID().toString())
+                .inventoryName("Pet Carriers")
+                .inventoryType(inventoryType1.getType())
+                .inventoryDescription("Carriers for transporting pets")
+                .build();
+        Inventory inventory6 = Inventory.builder()
+                .inventoryId(UUID.randomUUID().toString())
+                .inventoryName("Lab Equipment")
+                .inventoryType(inventoryType1.getType())
+                .inventoryDescription("Laboratory equipment for pet diagnostics")
+                .build();
+        Inventory inventory7 = Inventory.builder()
+                .inventoryId(UUID.randomUUID().toString())
+                .inventoryName("Vaccines")
+                .inventoryType(inventoryType1.getType())
+                .inventoryDescription("Vaccines for preventing pet diseases")
+                .build();
+        Inventory inventory8 = Inventory.builder()
+                .inventoryId(UUID.randomUUID().toString())
+                .inventoryName("Pet Grooming Supplies")
+                .inventoryType(inventoryType2.getType())
+                .inventoryDescription("Supplies for grooming and hygiene of pets")
+                .build();
+        Inventory inventory9 = Inventory.builder()
+                .inventoryId(UUID.randomUUID().toString())
+                .inventoryName("Dental Care Products")
+                .inventoryType(inventoryType2.getType())
+                .inventoryDescription("Products for pet dental care")
+                .build();
+        Inventory inventory10 = Inventory.builder()
+                .inventoryId(UUID.randomUUID().toString())
+                .inventoryName("Pet Bedding")
+                .inventoryType(inventoryType2.getType())
+                .inventoryDescription("Bedding materials for pet comfort")
+                .build();
+        Inventory inventory11 = Inventory.builder()
+                .inventoryId(UUID.randomUUID().toString())
+                .inventoryName("Pet Leashes and Collars")
+                .inventoryType(inventoryType2.getType())
+                .inventoryDescription("Leashes and collars for pet restraint and identification")
+                .build();
+
+
         Product product1 = Product.builder()
                 .productName("Benzodiazepines")
                 .productId(UUID.randomUUID().toString())
@@ -59,7 +121,7 @@ public class DataBaseLoaderService  implements CommandLineRunner {
                 .flatMap(productRepository::insert)
                 .log()
                 .subscribe();
-        Mono.just(inventory1)
+        Flux.just(inventory1, inventory2, inventory3, inventory4, inventory5, inventory6, inventory7, inventory8, inventory9, inventory10, inventory11)
                 .flatMap(inventoryRepository::insert)
                 .log()
                 .subscribe();
