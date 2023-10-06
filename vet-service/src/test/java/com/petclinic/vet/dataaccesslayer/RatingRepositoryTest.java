@@ -1,10 +1,16 @@
 package com.petclinic.vet.dataaccesslayer;
 
+import com.petclinic.vet.dataaccesslayer.ratings.PredefinedDescription;
+import com.petclinic.vet.dataaccesslayer.ratings.Rating;
+import com.petclinic.vet.dataaccesslayer.ratings.RatingRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.r2dbc.init.R2dbcScriptDatabaseInitializer;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -14,6 +20,12 @@ import static org.junit.jupiter.api.Assertions.*;
 class RatingRepositoryTest {
     @Autowired
     RatingRepository ratingRepository;
+
+    //To counter missing bean error
+    @MockBean
+    ConnectionFactoryInitializer connectionFactoryInitializer;
+    @MockBean
+    R2dbcScriptDatabaseInitializer r2dbcScriptDatabaseInitializer;
 
     Rating rating1 = Rating.builder()
             .ratingId("1")
@@ -30,6 +42,16 @@ class RatingRepositoryTest {
             .rateDate("10/09/2023")
             .rateDescription("Vet very kind, but a bit slow.")
             .build();
+
+    Rating rating3 = Rating.builder()
+            .ratingId("3")
+            .vetId("3")
+            .rateScore(1.0)
+            .rateDate("11/19/2022")
+            .rateDescription("Vet very mean and slow.")
+            .build();
+
+
     @BeforeEach
     void setUp() {
         Publisher<Rating> setUp = ratingRepository.deleteAll()
@@ -70,12 +92,13 @@ class RatingRepositoryTest {
     }
 
     @Test
-    public void addRatingToAVet_ShouldSucced(){
+    public void addRatingToAVet_WithWrittenDescriptionOnly_ShouldSetRatingDescToItsValue(){
         Rating rating = Rating.builder()
                 .ratingId("3")
                 .vetId("1")
                 .rateScore(1.0)
                 .rateDescription("My dog wouldn't stop crying after his appointment")
+                .predefinedDescription(null)
                 .rateDate("13/09/2023")
                 .build();
 
@@ -106,6 +129,7 @@ class RatingRepositoryTest {
                 .vetId("2")
                 .rateScore(2.0)
                 .rateDescription("Vet cancelled last minute.")
+                .predefinedDescription(PredefinedDescription.POOR)
                 .rateDate("20/09/2023")
                 .build();
 
@@ -115,6 +139,7 @@ class RatingRepositoryTest {
                     assertEquals(rating.getVetId(), updatedRating.getVetId());
                     assertEquals(rating.getRateScore(), updatedRating.getRateScore());
                     assertEquals(rating.getRateDescription(), updatedRating.getRateDescription());
+                    assertEquals(rating.getPredefinedDescription(), updatedRating.getPredefinedDescription());
                     assertEquals(rating.getRateDate(), updatedRating.getRateDate());
                 })
                 .verifyComplete();

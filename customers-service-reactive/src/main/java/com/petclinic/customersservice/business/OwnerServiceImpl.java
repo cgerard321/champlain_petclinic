@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
 
@@ -64,5 +65,14 @@ public class OwnerServiceImpl implements OwnerService {
         return ownerRepo.findAll()
                 .map(EntityDTOUtil::toOwnerResponseDTO);
     }
+
+    @Override
+    public Flux<OwnerResponseDTO> getAllOwnersPagination(Pageable pageable){
+        return ownerRepo.findAll()
+                .map(EntityDTOUtil::toOwnerResponseDTO)
+                .skip(pageable.getPageNumber() * pageable.getPageSize())
+                .take(pageable.getPageSize());
+    }
+
 
 }

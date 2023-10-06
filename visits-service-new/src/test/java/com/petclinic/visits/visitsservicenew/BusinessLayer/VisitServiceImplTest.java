@@ -1,9 +1,9 @@
 package com.petclinic.visits.visitsservicenew.BusinessLayer;
 
+import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.*;
-import com.petclinic.visits.visitsservicenew.Exceptions.BadRequestException;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
@@ -18,8 +18,6 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
@@ -147,6 +145,25 @@ class VisitServiceImplTest {
                     assertEquals(visit1.getPractitionerId(), foundVisit.getPractitionerId());
                 }).verifyComplete();
     }
+
+    @Test
+    void getVisitsForStatus(){
+        when(visitRepo.findAllByStatus(anyString())).thenReturn(Flux.just(visit1));
+
+        Flux<VisitResponseDTO> visitResponseDTOFlux = visitService.getVisitsForStatus(anyString());
+
+        StepVerifier
+                .create(visitResponseDTOFlux)
+                .consumeNextWith(foundVisit -> {
+                    assertEquals(visit1.getVisitId(), foundVisit.getVisitId());
+                    assertEquals(visit1.getVisitDate(), foundVisit.getVisitDate());
+                    assertEquals(visit1.getDescription(), foundVisit.getDescription());
+                    assertEquals(visit1.getPetId(), foundVisit.getPetId());
+                    assertEquals(visit1.getPractitionerId(), foundVisit.getPractitionerId());
+                    assertEquals(visit1.getStatus(), foundVisit.getStatus());
+                }).verifyComplete();
+    }
+
     /*
     @Test
     void getVisitsByPractitionerIdAndMonth(){
@@ -180,6 +197,24 @@ class VisitServiceImplTest {
                     assertEquals(visit1.getPetId(), visitDTO1.getPetId());
                     assertEquals(visit1.getVisitDate(), visitDTO1.getVisitDate());
                     assertEquals(visit1.getPractitionerId(), visitDTO1.getPractitionerId());
+                }).verifyComplete();
+    }
+
+    @Test
+    void updateStatusForVisitByVisitId(){
+        String status = "CANCELLED";
+
+        when(visitRepo.save(any(Visit.class))).thenReturn(Mono.just(visit1));
+        when(visitRepo.findByVisitId(anyString())).thenReturn(Mono.just(visit1));
+
+        StepVerifier.create(visitService.updateStatusForVisitByVisitId(VISIT_ID, status))
+                .consumeNextWith(visitDTO1 -> {
+                    assertEquals(visit1.getVisitId(), visitDTO1.getVisitId());
+                    assertEquals(visit1.getDescription(), visitDTO1.getDescription());
+                    assertEquals(visit1.getPetId(), visitDTO1.getPetId());
+                    assertEquals(visit1.getVisitDate(), visitDTO1.getVisitDate());
+                    assertEquals(visit1.getPractitionerId(), visitDTO1.getPractitionerId());
+                    assertEquals(visit1.getStatus(), Status.CANCELLED);
                 }).verifyComplete();
     }
 
@@ -248,7 +283,7 @@ class VisitServiceImplTest {
                 .description(description)
                 .petId("2")
                 .practitionerId(vetId)
-                .status(true)
+                .status(Status.UPCOMING)
                 .build();
     }
     private VisitResponseDTO buildVisitResponseDTO(){
@@ -258,7 +293,7 @@ class VisitServiceImplTest {
                 .description("this is a dummy description")
                 .petId("2")
                 .practitionerId(UUID.randomUUID().toString())
-                .status(true)
+                .status(Status.REQUESTED)
                 .build();
     }
     private VisitRequestDTO buildVisitRequestDTO() {
@@ -267,7 +302,7 @@ class VisitServiceImplTest {
                     .description("this is a dummy description")
                     .petId("2")
                     .practitionerId(UUID.randomUUID().toString())
-                    .status(true)
+                    .status(Status.REQUESTED)
                     .build();
         }
 

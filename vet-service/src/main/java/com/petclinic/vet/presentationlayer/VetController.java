@@ -12,28 +12,33 @@ package com.petclinic.vet.presentationlayer;
  */
 
 import com.petclinic.vet.servicelayer.*;
+import com.petclinic.vet.servicelayer.education.EducationRequestDTO;
+import com.petclinic.vet.servicelayer.education.EducationResponseDTO;
+import com.petclinic.vet.servicelayer.education.EducationService;
+import com.petclinic.vet.servicelayer.ratings.RatingRequestDTO;
+import com.petclinic.vet.servicelayer.ratings.RatingResponseDTO;
+import com.petclinic.vet.servicelayer.ratings.RatingService;
 import com.petclinic.vet.util.EntityDtoUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("vets")
 public class VetController {
+    private final VetService vetService;
+    private final RatingService ratingService;
+    private final PhotoService photoService;
+    private final EducationService educationService;
 
-    @Autowired
-    VetService vetService;
-
-    @Autowired
-    RatingService ratingService;
-
-
-    @Autowired
-    EducationService educationService;
-
+    //Ratings
     @GetMapping("{vetId}/ratings")
     public Flux<RatingResponseDTO> getAllRatingsByVetId(@PathVariable String vetId) {
         return ratingService.getAllRatingsByVetId(EntityDtoUtil.verifyId(vetId));
@@ -68,6 +73,11 @@ public class VetController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("topVets")
+    public Flux<VetAverageRatingDTO> getTopThreeVetsWithHighestAverageRating() {
+        return ratingService.getTopThreeVetsWithHighestAverageRating();
+    }
+
     @PutMapping("{vetId}/ratings/{ratingId}")
     public Mono<ResponseEntity<RatingResponseDTO>> updateRatingByVetIdAndRatingId(@PathVariable String vetId,
                                                                                   @PathVariable String ratingId,
@@ -89,6 +99,14 @@ public class VetController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+   /*@GetMapping("{vetId}/ratings/{predefinedDescription}/count")
+   public Mono<ResponseEntity<Integer>> getCountOfRatingsByVetIdAndPredefinedDescription(@PathVariable String vetId, @PathVariable PredefinedDescription predefinedDescription){
+       return ratingService.getCountOfRatingsByVetIdAndPredefinedDescription(EntityDtoUtil.verifyId(vetId), predefinedDescription)
+               .map(ResponseEntity::ok)
+               .defaultIfEmpty(ResponseEntity.notFound().build());
+   }*/
+
+   //Vets
     @GetMapping()
     public Flux<VetDTO> getAllVets() {
         return vetService.getAll();
@@ -139,7 +157,7 @@ public class VetController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    //education
+    //Education
     @GetMapping("{vetId}/educations")
     public Flux<EducationResponseDTO> getAllEducationsByVetId(@PathVariable String vetId) {
         return educationService.getAllEducationsByVetId(EntityDtoUtil.verifyId(vetId));
@@ -152,5 +170,18 @@ public class VetController {
 
     }
 
+    @PostMapping("{vetId}/educations")
+    public Mono<EducationResponseDTO> addEducationToVet(@PathVariable String vetId, @RequestBody Mono<EducationRequestDTO> educationRequestDTOMono){
+        return educationService.addEducationToVet(vetId, educationRequestDTOMono);
+    }
 
+
+
+    //Photo
+    @GetMapping("{vetId}/photo")
+    public Mono<ResponseEntity<Resource>> getPhotoByVetId(@PathVariable String vetId){
+        return photoService.getPhotoByVetId(vetId)
+                .map(r -> ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE).body(r))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 }

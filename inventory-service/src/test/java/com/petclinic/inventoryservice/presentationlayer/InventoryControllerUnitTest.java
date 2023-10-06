@@ -14,12 +14,11 @@ import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.List;
-
-import static com.petclinic.inventoryservice.datalayer.Inventory.InventoryType.internal;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 @WebFluxTest(controllers = InventoryController.class)
 class InventoryControllerUnitTest {
@@ -65,14 +64,14 @@ class InventoryControllerUnitTest {
         String validInventoryId = "123";
         InventoryRequestDTO inventoryRequestDTO = InventoryRequestDTO.builder()
                 .inventoryName("Updated Internal")
-                .inventoryType(internal)
+                .inventoryType("Internal")
                 .inventoryDescription("Updated inventory_3")
                 .build();
 
         InventoryResponseDTO inventoryResponseDTO = InventoryResponseDTO.builder()
                 .inventoryId(validInventoryId)
                 .inventoryName("Updated Internal")
-                .inventoryType(internal)
+                .inventoryType("Internal")
                 .inventoryDescription("Updated inventory_3")
                 .build();
 
@@ -116,14 +115,14 @@ class InventoryControllerUnitTest {
     void addInventory_ValidRequest_ShouldReturnCreated() {
         InventoryRequestDTO inventoryRequestDTO = InventoryRequestDTO.builder()
                 .inventoryName("New Internal")
-                .inventoryType(internal)
+                .inventoryType("Internal")
                 .inventoryDescription("New inventory_4")
                 .build();
 
         InventoryResponseDTO inventoryResponseDTO = InventoryResponseDTO.builder()
                 .inventoryId("inventoryid1")
                 .inventoryName("New Internal")
-                .inventoryType(internal)
+                .inventoryType("Internal")
                 .inventoryDescription("New inventory_4")
                 .build();
 
@@ -287,12 +286,66 @@ class InventoryControllerUnitTest {
     }
 
     @Test
+    void getInventoryByInventoryId_ValidIdShouldSucceed(){
+        //arrange
+        InventoryResponseDTO inventoryResponseDTO = InventoryResponseDTO.builder()
+                .inventoryId("inventoryId_2")
+                .inventoryName("Pet food")
+                .inventoryType("internal")
+                .inventoryDescription("pet")
+                .build();
+
+        when(productInventoryService.getInventoryById(inventoryResponseDTO.getInventoryId()))
+                .thenReturn(Mono.just(inventoryResponseDTO));
+
+        webTestClient
+                .get()
+                .uri("/inventory/{inventoryId}", inventoryResponseDTO.getInventoryId())
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(APPLICATION_JSON)
+                .expectBody(InventoryResponseDTO.class)
+                .value(dto ->{
+                    assertNotNull(dto);
+                    assertEquals(inventoryResponseDTO.getInventoryId(), dto.getInventoryId());
+                    assertEquals(inventoryResponseDTO.getInventoryName(), dto.getInventoryName());
+                    assertEquals(inventoryResponseDTO.getInventoryType(), dto.getInventoryType());
+                    assertEquals(inventoryResponseDTO.getInventoryDescription(), dto.getInventoryDescription());
+                });
+
+        verify(productInventoryService, times(1))
+                .getInventoryById(inventoryResponseDTO.getInventoryId());
+
+    }
+
+
+
+    @Test
+    void getInventoryByInvalidInventoryId_ReturnNotFound() {
+
+        String invalidInventoryId = "invalid_id";
+        when(productInventoryService.getInventoryById(invalidInventoryId))
+                .thenReturn(Mono.empty());
+
+        webTestClient
+                .get()
+                .uri("/inventory/{inventoryId}", invalidInventoryId)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+
+        verify(productInventoryService, times(1))
+                .getInventoryById(invalidInventoryId);
+    }
+
+    @Test
     void updateInventory_InvalidId_ShouldReturnError() {
         // Arrange
         String invalidInventoryId = "invalid_id";
         InventoryRequestDTO inventoryRequestDTO = InventoryRequestDTO.builder()
                 .inventoryName("Updated Internal")
-                .inventoryType(internal)
+                .inventoryType("Internal")
                 .inventoryDescription("Updated inventory_3")
                 .build();
 
@@ -428,6 +481,9 @@ class InventoryControllerUnitTest {
         verify(productInventoryService, times(1))
                 .updateProductInInventory(any(), eq(inventoryId), eq(productId));
     }
+
+
+
 
     @Test
     void updateProductInInventory_InvalidInput_ShouldReturnBadRequest() {
@@ -581,5 +637,88 @@ class InventoryControllerUnitTest {
         verify(productInventoryService, times(1))
                 .addProductToInventory(any(), eq(inventoryId));
     }
+
+    @Test
+    public void deleteInventory_byInventoryId_shouldSucceed(){
+
+        String validInventoryId = "123";
+
+        InventoryResponseDTO inventoryResponseDTO = InventoryResponseDTO.builder()
+                .inventoryId(validInventoryId)
+                .inventoryName("Updated Internal")
+                .inventoryType("internal")
+                .inventoryDescription("Updated inventory_3")
+                .build();
+        //arrange
+        when(productInventoryService.deleteInventoryByInventoryId(inventoryResponseDTO.getInventoryId()))
+                .thenReturn(Mono.empty());
+
+        //act and assert
+        webTestClient.delete()
+                .uri("/inventory/{inventoryId}", inventoryResponseDTO.getInventoryId())
+                .exchange()
+                .expectStatus().isNoContent();
+
+        verify(productInventoryService, times(1))
+                .deleteInventoryByInventoryId( eq(validInventoryId));
+    }
+
+    @Test
+    public void deleteInventory_byInvalidInventoryId_shouldThrowNotFoundException(){
+
+        String invalidInventoryId = "nonExistentId";
+
+        //arrange
+        when(productInventoryService.deleteInventoryByInventoryId(invalidInventoryId))
+                .thenReturn(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + invalidInventoryId)));
+
+        //act and assert
+        webTestClient.delete()
+                .uri("/inventory/{inventoryId}", invalidInventoryId)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message","Inventory not found with InventoryId: " + invalidInventoryId);
+
+
+        verify(productInventoryService, times(1))
+                .deleteInventoryByInventoryId(eq(invalidInventoryId));
+    }
+
+    @Test
+    public void addInventoryType_shouldSucceed(){
+        InventoryTypeRequestDTO inventoryTypeRequestDTO = InventoryTypeRequestDTO.builder()
+                .type("Internal")
+                .build();
+
+        InventoryTypeResponseDTO inventoryTypeResponseDTO = InventoryTypeResponseDTO.builder()
+                .typeId("ee27f756-4790-447a-8ab9-37ce61ff3ffc")
+                .type("Internal")
+                .build();
+
+        when(productInventoryService.addInventoryType(any()))
+                .thenReturn(Mono.just(inventoryTypeResponseDTO));
+
+        // Act and Assert
+        webTestClient
+                .post()
+                .uri("/inventory/type")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(inventoryTypeRequestDTO)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectBody(InventoryTypeResponseDTO.class)
+                .value(dto -> {
+                    assertNotNull(dto);
+                    assertEquals(inventoryTypeResponseDTO.getType(), dto.getType());
+                });
+
+
+        verify(productInventoryService, times(1))
+                .addInventoryType(any());
+    }
+
+
+
 }
 

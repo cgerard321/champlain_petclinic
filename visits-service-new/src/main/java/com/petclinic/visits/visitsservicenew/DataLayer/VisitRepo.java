@@ -19,4 +19,6 @@ public interface VisitRepo extends ReactiveMongoRepository<Visit, String> {
     Mono<Void> deleteByVisitId(String visitId);
 
     Mono<Boolean> existsByVisitId(String visitId);
+
+    Flux<Visit> findAllByStatus(String status);
 }

@@ -1,7 +1,11 @@
 package com.petclinic.vet.servicelayer;
 
-//import com.petclinic.vet.dataaccesslayer.Photo;
 import com.petclinic.vet.dataaccesslayer.*;
+import com.petclinic.vet.dataaccesslayer.education.Education;
+import com.petclinic.vet.dataaccesslayer.education.EducationRepository;
+import com.petclinic.vet.dataaccesslayer.ratings.PredefinedDescription;
+import com.petclinic.vet.dataaccesslayer.ratings.Rating;
+import com.petclinic.vet.dataaccesslayer.ratings.RatingRepository;
 import com.petclinic.vet.util.EntityDtoUtil;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
@@ -144,21 +148,29 @@ public class DataSetupService implements CommandLineRunner {
                 .ratingId(UUID.randomUUID().toString())
                 .vetId(v1.getVetId())
                 .rateScore(5.0)
+                .rateDescription(null)
+                .predefinedDescription(PredefinedDescription.EXCELLENT)
                 .build();
         Rating r2 = Rating.builder()
                 .ratingId(UUID.randomUUID().toString())
                 .vetId(v2.getVetId())
                 .rateScore(4.0)
+                .predefinedDescription(null)
+                .rateDescription("Good vet.")
                 .build();
         Rating r3 = Rating.builder()
                 .ratingId(UUID.randomUUID().toString())
                 .vetId(v3.getVetId())
                 .rateScore(3.0)
+                .rateDescription("The vet is ok.")
+                .predefinedDescription(null)
                 .build();
         Rating r4 = Rating.builder()
                 .ratingId(UUID.randomUUID().toString())
                 .vetId(v3.getVetId())
                 .rateScore(4.0)
+                .rateDescription(null)
+                .predefinedDescription(PredefinedDescription.GOOD)
                 .build();
         Flux.just(r1, r2, r3, r4)
                 .flatMap(ratingRepository::insert)

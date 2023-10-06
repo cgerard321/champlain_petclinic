@@ -1,50 +1,74 @@
 'use strict';
 
 angular.module('inventoryForm')
-    .controller('InventoryFormController', ["$http", '$state', '$stateParams', function ($http, $state, $stateParams) {
+    .controller('InventoryFormController', ["$http", '$state', '$stateParams', '$scope', function ($http, $state, $stateParams, $scope) {
         var self = this;
-        var inventoryId = $stateParams.inventoryId;
-        var method = $stateParams.method;
         console.log("State params: " + $stateParams)
-
+        $scope.inventoryTypeFormSearch = "";
+        $scope.inventoryTypeOptions = ["New Type", "Internal", "Sales"] //get all form the inventory type repository but dont remove the New Type
+        $scope.selectedOption = $scope.inventoryTypeOptions[0]
 
         self.submitInventoryForm = function () {
+                var data;
+                if ($scope.selectedOption === "New Type" && $scope.inventoryTypeFormSearch === "") {
+                    alert("Search field cannot be empty when you want to add a new type")
+                }
+                else if ($scope.selectedOption === "New Type") {
+                    $scope.selectedOption = $scope.inventoryTypeFormSearch
 
-            var data = {
-                inventoryName: self.inventory.inventoryName,
-                inventoryType: self.inventory.inventoryType,
-                inventoryDescription: self.inventory.inventoryDescription
+                    data = {
+                        inventoryName: self.inventory.inventoryName,
+                        inventoryType: $scope.selectedOption,
+                        inventoryDescription: self.inventory.inventoryDescription
+                    }
+                    $http.post("api/gateway/inventory/type", {"type":$scope.selectedOption})
+                        .then(function (resp) {
+                            $http.post("api/gateway/inventory", data)
+                                .then(function (resp) {
+                                    console.log(resp)
+                                    $state.go('inventories');
+                                }, function (response) {
+                                    var error = response.data;
+                                    error.errors = error.errors || [];
+                                    alert(error.error + "\r\n" + error.errors.map(function (e) {
+                                       return e.field + ": " + e.defaultMessage;
+                                    }).join("\r\n"));
+                                });
+                        })
+                        .catch(function (error) {
+                            alert(error)
+                        })
+                }
+                else {
+                    data = {
+                        inventoryName: self.inventory.inventoryName,
+                        inventoryType: $scope.selectedOption,
+                        inventoryDescription: self.inventory.inventoryDescription
+                    }
+                    $http.post("api/gateway/inventory", data)
+                        .then(function (resp) {
+                            console.log(resp)
+                            $state.go('inventories');
+                        }, function (response) {
+                            var error = response.data;
+                            error.errors = error.errors || [];
+                            alert(error.error + "\r\n" + error.errors.map(function (e) {
+                               return e.field + ": " + e.defaultMessage;
+                            }).join("\r\n"));
+                        });
+                }
+            };
+        $scope.updateOption = function() {
+            var searchLowerCase = $scope.inventoryTypeFormSearch.toLowerCase();
+            $scope.selectedOption = $scope.inventoryTypeOptions[0];
+            for (var i = 0; i < $scope.inventoryTypeOptions.length; i++) {
+                var optionLowerCase = $scope.inventoryTypeOptions[i].toLowerCase();
+                if (optionLowerCase.indexOf(searchLowerCase) !== -1) {
+                    $scope.selectedOption = $scope.inventoryTypeOptions[i];
+                    break;
+                }
             }
-
-            if (method == 'edit') {
-                $http.put('/api/gateway/inventory/' + inventoryId, data)
-                    .then(function (response) {
-                        console.log(response);
-                        $state.go('inventories');
-
-                    }, function (response) {
-                        var error = response.data;
-                        error.errors = error.errors || [];
-                        alert(error.error + "\r\n" + error.errors.map(function (e) {
-                            return e.field + ": " + e.defaultMessage;
-                        }).join("\r\n"));
-                    });
-            }
-            else {
-                var req;
-                req = $http.post("api/gateway/inventory", self.inventory);
-                req.then(function () {
-                    $state.go('inventories');
-                }, function (response) {
-                    var error = response.data;
-                    error.errors = error.errors || [];
-                    alert(error.error + "\r\n" + error.errors.map(function (e) {
-                        return e.field + ": " + e.defaultMessage;
-                    }).join("\r\n"));
-                });
-
-            }
-        }
+        };
     }]);
 
 

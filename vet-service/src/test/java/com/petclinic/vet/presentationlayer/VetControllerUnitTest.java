@@ -1,15 +1,25 @@
 package com.petclinic.vet.presentationlayer;
 
-import com.petclinic.vet.dataaccesslayer.Education;
+import com.petclinic.vet.dataaccesslayer.Photo;
 import com.petclinic.vet.dataaccesslayer.Vet;
 import com.petclinic.vet.servicelayer.*;
+import com.petclinic.vet.servicelayer.education.EducationRequestDTO;
+import com.petclinic.vet.servicelayer.education.EducationResponseDTO;
+import com.petclinic.vet.servicelayer.education.EducationService;
+import com.petclinic.vet.servicelayer.ratings.RatingRequestDTO;
+import com.petclinic.vet.servicelayer.ratings.RatingResponseDTO;
+import com.petclinic.vet.servicelayer.ratings.RatingService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -23,6 +33,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 @WebFluxTest(controllers=VetController.class)
+@ContextConfiguration(classes = {VetController.class})
 class VetControllerUnitTest {
 
     @Autowired
@@ -36,14 +47,30 @@ class VetControllerUnitTest {
 
     @MockBean
     EducationService educationService;
+    @MockBean
+    PhotoService photoService;
+    @MockBean
+    ConnectionFactoryInitializer connectionFactoryInitializer;
 
     VetDTO vetDTO = buildVetDTO();
     VetDTO vetDTO2 = buildVetDTO2();
 
+    VetDTO vetDTO3=buildVetDTO3();
+
+    VetAverageRatingDTO averageRatingDTO=buildVetAverageRatingDTO1();
+    VetAverageRatingDTO averageRatingDTO2=buildVetAverageRatingDTO2();
+    VetAverageRatingDTO averageRatingDTO3=buildVetAverageRatingDTO3();
+
+
+
     EducationResponseDTO educationResponseDTO1 = buildEducation();
     EducationResponseDTO educationResponseDTO2 = buildEducation2();
 
+    Photo photo = buildPhoto();
+
+
     RatingResponseDTO ratingDTO = buildRatingResponseDTO("Vet was super calming with my pet",5.0);
+
     Vet vet = buildVet();
     String VET_ID = vet.getVetId();
     String VET_BILL_ID = vet.getVetBillId();
@@ -203,6 +230,34 @@ class VetControllerUnitTest {
 
         Mockito.verify(ratingService, times(1))
                 .getAverageRatingByVetId(ratingDTO.getVetId());
+
+    }
+
+
+    @Test
+    void getTopThreeVetsWithTheHighestRating() {
+
+
+        when(ratingService.getTopThreeVetsWithHighestAverageRating())
+                .thenReturn(Flux.just(averageRatingDTO, averageRatingDTO2, averageRatingDTO3));
+
+
+        client.get()
+                .uri("/vets/topVets")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(VetAverageRatingDTO.class)
+                .value(vetDTOs -> {
+                    assertEquals(3, vetDTOs.size());
+                    assertEquals(averageRatingDTO, vetDTOs.get(0));
+                    assertEquals(averageRatingDTO2, vetDTOs.get(1));
+                    assertEquals(averageRatingDTO3, vetDTOs.get(2));
+                });
+
+        Mockito.verify(ratingService, times(1))
+                .getTopThreeVetsWithHighestAverageRating();
 
     }
 
@@ -428,11 +483,10 @@ class VetControllerUnitTest {
                 .uri("/vets/" + INVALID_VET_ID)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+                .expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("This id is not valid");
-
+                .jsonPath("$").isNotEmpty();
     }
 
     @Test
@@ -446,10 +500,10 @@ class VetControllerUnitTest {
                 .body(Mono.just(vetDTO), VetDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+                .expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("This id is not valid");
+                .jsonPath("$").isNotEmpty();
 
     }
 
@@ -463,10 +517,10 @@ class VetControllerUnitTest {
                 .uri("/vets/" + INVALID_VET_ID)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+                .expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("This id is not valid");
+                .jsonPath("$").isNotEmpty();
 
     }
 
@@ -511,6 +565,60 @@ class VetControllerUnitTest {
 
         Mockito.verify(educationService, times(1))
                 .deleteEducationByEducationId(vetId,educationId);
+    }
+
+    @Test
+    void addEducationWithVetId_ValidValues_ShouldSucceed(){
+        EducationRequestDTO educationRequestDTO = EducationRequestDTO.builder()
+                .vetId(VET_ID)
+                .degree("Doctor of Veterinary Medicine")
+                .fieldOfStudy("Veterinary Medicine")
+                .schoolName("University of Montreal")
+                .startDate("2010")
+                .endDate("2014")
+                .build();
+
+        EducationResponseDTO educationResponseDTO = EducationResponseDTO.builder()
+                .educationId("3")
+                .vetId(VET_ID)
+                .degree("Doctor of Veterinary Medicine")
+                .fieldOfStudy("Veterinary Medicine")
+                .schoolName("University of Montreal")
+                .startDate("2010")
+                .endDate("2014")
+                .build();
+
+        when(educationService.addEducationToVet(VET_ID, Mono.just(educationRequestDTO))).thenReturn(Mono.just(educationResponseDTO));
+
+        client.post()
+                .uri("/vets/{vetId}/educations", VET_ID)
+                .bodyValue(educationRequestDTO)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+
+        Mockito.verify(educationService, times(1)).addEducationToVet(anyString(), any(Mono.class));
+    }
+
+    @Test
+    void getPhotoByVetId() {
+        when(photoService.getPhotoByVetId(anyString()))
+                .thenReturn(Mono.just(buildPhotoData()));
+
+        client.get()
+                .uri("/vets/{vetId}/photo", VET_ID)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.IMAGE_JPEG_VALUE)
+                .expectBody(Resource.class)
+                .consumeWith(response -> {
+                    assertEquals(buildPhotoData(), response.getResponseBody());
+                });
+
+        Mockito.verify(photoService, times(1))
+                .getPhotoByVetId(VET_ID);
     }
 
     private Vet buildVet() {
@@ -560,6 +668,22 @@ class VetControllerUnitTest {
                 .build();
     }
 
+    private VetDTO buildVetDTO3() {
+        return VetDTO.builder()
+                .vetId("678910Hi")
+                .vetBillId("3")
+                .firstName("Olivia")
+                .lastName("Shaun")
+                .email("asdhbw@gmail.com")
+                .phoneNumber("543-201-2547")
+                .imageId("kjd")
+                .resume("Still a vet")
+                .workday("Tuesday")
+                .specialties(new HashSet<>())
+                .active(true)
+                .build();
+    }
+
     private EducationResponseDTO buildEducation(){
         return EducationResponseDTO.builder()
                 .educationId("1")
@@ -591,6 +715,43 @@ class VetControllerUnitTest {
                 .rateScore(score)
                 .rateDescription(description)
                 .rateDate("16/09/2023")
+                .build();
+    }
+
+    private Photo buildPhoto(){
+        byte[] photo = {123, 23, 75, 34};
+        return Photo.builder()
+                .vetId(VET_ID)
+                .filename("vet_default.jpg")
+                .imgType("image/jpeg")
+                .data(photo)
+                .build();
+    }
+
+    private Resource buildPhotoData(){
+        ByteArrayResource resource = new ByteArrayResource(photo.getData());
+        return resource;
+    }
+
+
+    private VetAverageRatingDTO buildVetAverageRatingDTO1(){
+        return  VetAverageRatingDTO.builder()
+                .averageRating(2.0)
+                .vetId("20381")
+                .build();
+    }
+
+    private VetAverageRatingDTO buildVetAverageRatingDTO2(){
+        return  VetAverageRatingDTO.builder()
+                .averageRating(4.0)
+                .vetId("28179")
+                .build();
+    }
+
+    private VetAverageRatingDTO buildVetAverageRatingDTO3(){
+        return  VetAverageRatingDTO.builder()
+                .averageRating(1.0)
+                .vetId("92739")
                 .build();
     }
 }

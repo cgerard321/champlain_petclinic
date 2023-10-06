@@ -1,5 +1,6 @@
 package com.petclinic.visits.visitsservicenew.BusinessLayer;
 
+import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
 
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.PetResponseDTO;
@@ -36,6 +37,36 @@ public class VisitServiceImpl implements VisitService {
         return validatePetId(petId)
                 .thenMany(repo.findByPetId(petId)
                         .map(EntityDtoUtil::toVisitResponseDTO));
+    }
+
+    @Override
+    public Flux<VisitResponseDTO> getVisitsForStatus(String statusString) {
+        Status status;
+        switch (statusString){
+
+            case("UPCOMING"):
+                status = Status.UPCOMING;
+
+            case("REQUESTED"):
+                status = Status.REQUESTED;
+
+            case("CONFIRMED"):
+                status = Status.CONFIRMED;
+
+            case("CANCELLED"):
+                status = Status.CANCELLED;
+
+            case("IN_PROGRESS"):
+                status = Status.IN_PROGRESS;
+
+            case("COMPLETED"):
+                status = Status.COMPLETED;
+
+            default:
+                status = Status.CONFIRMED;
+        }
+        return repo.findAllByStatus(statusString)
+                .map(EntityDtoUtil::toVisitResponseDTO);
     }
 
     @Override
@@ -107,6 +138,34 @@ public class VisitServiceImpl implements VisitService {
                 .map(EntityDtoUtil::toVisitResponseDTO);
     }
 
+    @Override
+    public Mono<VisitResponseDTO> updateStatusForVisitByVisitId(String visitId, String status) {
+        Status newStatus;
+        Status newStatus1;
+        switch (status){
+            case "CONFIRMED":
+                newStatus1 = Status.CONFIRMED;
+                break;
+
+            case "IN_PROGRESS":
+                newStatus1 = Status.IN_PROGRESS;
+                break;
+
+            case "COMPLETED":
+                newStatus1 = Status.COMPLETED;
+                break;
+
+            default:
+                newStatus1 = Status.CANCELLED;
+                break;
+        }
+        newStatus = newStatus1;
+        return repo.findByVisitId(visitId)
+                .doOnNext(v -> v.setStatus(newStatus))
+                .flatMap(repo::save)
+                .map(EntityDtoUtil::toVisitResponseDTO);
+    }
+
 
     private Mono<PetResponseDTO> validatePetId(String petId) {
         return petsClient.getPetById(petId)
@@ -130,7 +189,11 @@ public class VisitServiceImpl implements VisitService {
             return Mono.error(new BadRequestException("PetId cannot be null or blank"));
         } else if ( dto.getPractitionerId() == null || dto.getPractitionerId().isBlank()) {
             return Mono.error(new BadRequestException("VetId cannot be null or blank"));
-        } else {
+        }
+        else if (dto.getStatus() != Status.REQUESTED){
+            return Mono.error(new BadRequestException("Status is being set wrong!"));
+        }
+        else {
             return Mono.just(dto);
         }
     }

@@ -34,7 +34,8 @@ public class PetServiceImpl implements PetService {
     @Override
     public Flux<PetResponseDTO> getPetsByOwnerId(String ownerId) {
         return petRepo.findAllPetByOwnerId(ownerId)
-                .map(EntityDTOUtil::toPetResponseDTO);
+                .flatMap(petEntity -> Mono.just(EntityDTOUtil.toPetResponseDTO(petEntity)))
+                .onErrorResume(e -> Flux.empty()); // Handle errors by returning an empty Flux
     }
 
     @Override

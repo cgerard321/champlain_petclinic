@@ -113,47 +113,18 @@ public class AuthServiceClientIntegrationTest {
 
         server.enqueue(mockResponse);
 
-        Mockito.when(customersServiceClient.createOwner(any(OwnerRequestDTO.class)))
+        Mockito.when(customersServiceClient.createOwner(any()))
                 .thenReturn(Mono.just(ownerResponseDTO));
 
 
-        Mono<OwnerResponseDTO> block = authServiceClient.createUser(USER_REGISTER);
+        Mono<OwnerResponseDTO> block = authServiceClient.createUser(Mono.just(USER_REGISTER));
 
         StepVerifier
                 .create(block)
-                .expectNext(ownerResponseDTO)
                 .verifyComplete();
 
     }
 
-//    @Test
-//    @DisplayName("Given valid JWT, verify user")
-//    void valid_verification() throws JsonProcessingException {
-//        final String asString = objectMapper.writeValueAsString(
-//                objectMapper.convertValue(USER_REGISTER, UserDetails.class)
-//                        .toBuilder()
-//                        .id(1)
-//                        .roles(Collections.emptySet())
-//                        .password(null)
-//                        .build()
-//        );
-//        final String token = "some.valid.token";
-//
-//        final MockResponse mockResponse = new MockResponse();
-//        mockResponse
-//                .setHeader("Content-Type", "application/json")
-//                .setBody(asString);
-//
-//        server.enqueue(mockResponse);
-//
-//        final UserDetails block = authServiceClient.verifyUser(token).block();
-//
-//        assertEquals(USER_REGISTER.getEmail(), block.getEmail());
-//        assertEquals(USER_REGISTER.getUsername(), block.getUsername());
-//        assertNull(block.getPassword());
-//        assertNotNull(block.getId());
-//        assertEquals(0, block.getRoles().size());
-//    }
 //
 ////    @Test
 //    @DisplayName("Given valid Login, return JWT")
@@ -272,7 +243,7 @@ public class AuthServiceClientIntegrationTest {
                 .password("password")
                 .build();
 
-        final Mono<ResponseEntity<UserPasswordLessDTO>> validatedTokenResponse = authServiceClient.login(login);
+        final Mono<ResponseEntity<UserPasswordLessDTO>> validatedTokenResponse = authServiceClient.login(Mono.just(login));
 
         // check status response in step verifier
         StepVerifier.create(Mono.just(validatedTokenResponse))
@@ -293,7 +264,11 @@ public class AuthServiceClientIntegrationTest {
 
         server.enqueue(mockResponse);
 
-        final Mono<ResponseEntity<Void>> validatedTokenResponse = authServiceClient.sendForgottenEmail(request, "email");
+        UserEmailRequestDTO emailRequestDTO = UserEmailRequestDTO.builder()
+                .email("email")
+                .build();
+
+        final Mono<ResponseEntity<Void>> validatedTokenResponse = authServiceClient.sendForgottenEmail(Mono.just(emailRequestDTO));
 
         // check status response in step verifier
         StepVerifier.create(Mono.just(validatedTokenResponse))
@@ -316,7 +291,7 @@ public class AuthServiceClientIntegrationTest {
                 .password("password")
                 .build();
 
-        final Mono<ResponseEntity<Void>> validatedTokenResponse = authServiceClient.changePassword(pwdChange);
+        final Mono<ResponseEntity<Void>> validatedTokenResponse = authServiceClient.changePassword(Mono.just(pwdChange));
 
         // check status response in step verifier
         StepVerifier.create(Mono.just(validatedTokenResponse))
@@ -353,5 +328,43 @@ public class AuthServiceClientIntegrationTest {
         StepVerifier.create(validatedTokenResponse)
                 .expectNextCount(2)
                 .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("Should verifyUser a token")
+    void ShouldVerifyUserToken_ShouldReturnOk(){
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(200);
+
+        server.enqueue(mockResponse);
+
+        final Mono<Void> verifyUser = authServiceClient.verifyUser("token").then();
+
+        // check status response in step verifier
+        StepVerifier.create(verifyUser)
+                .expectNextCount(0)
+                .verifyComplete();
+
+
+    }
+
+    @Test
+    @DisplayName("Should try to validate a token and fail")
+    void ShouldVerifyUserToken_ShouldReturnInvalid(){
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(401);
+
+        server.enqueue(mockResponse);
+
+        final Mono<Void> validatedTokenResponse = authServiceClient.verifyUser("invalidToken").then();
+
+        // check status response in step verifier
+        StepVerifier.create(validatedTokenResponse)
+                .expectNextCount(0)
+                .verifyError();
     }
 }

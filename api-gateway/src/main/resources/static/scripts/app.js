@@ -10,9 +10,11 @@ const whiteList = new Set([
 /* App Module */
 const petClinicApp = angular.module('petClinicApp', [
     'ui.router', 'layoutNav', 'layoutFooter', 'layoutWelcome', 'ownerList', 'ownerDetails', 'ownerForm', 'ownerRegister', 'petForm'
-    , 'visits', 'vetList', 'vetForm', 'vetDetails', 'visitList', 'billForm', 'billUpdateForm', 'loginForm', 'rolesDetails', 'signupForm',
-    'billDetails', 'billsByOwnerId', 'billHistory', 'billsByVetId', 'inventoryList', 'inventoryForm', 'productForm', 'inventoryProductList'
-    , 'verification', 'adminPanel', 'resetPwdForm', 'forgotPwdForm']);
+    , 'visits', 'vetList','vetForm','vetDetails', 'visitList', 'billForm', 'billUpdateForm', 'loginForm', 'rolesDetails', 'signupForm',
+    'billDetails', 'billsByOwnerId', 'billHistory','billsByVetId','inventoryList', 'inventoryForm', 'productForm','inventoryProductList', 'inventoryUpdateForm'
+    , 'verification' , 'adminPanel','resetPwdForm','forgotPwdForm']);
+
+
 
 
 petClinicApp.factory("authProvider", ["$window", function ($window) {
@@ -142,3 +144,5 @@ petClinicApp.config(['$stateProvider', '$urlRouterProvider', '$locationProvider'
         controller,
     });
 });
+
+

@@ -1,12 +1,10 @@
 package com.petclinic.inventoryservice.businesslayer;
 
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryRepository;
+import com.petclinic.inventoryservice.datalayer.Inventory.InventoryTypeRepository;
 import com.petclinic.inventoryservice.datalayer.Product.Product;
 import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
-import com.petclinic.inventoryservice.presentationlayer.InventoryResponseDTO;
-import com.petclinic.inventoryservice.presentationlayer.InventoryRequestDTO;
-import com.petclinic.inventoryservice.presentationlayer.ProductRequestDTO;
-import com.petclinic.inventoryservice.presentationlayer.ProductResponseDTO;
+import com.petclinic.inventoryservice.presentationlayer.*;
 import com.petclinic.inventoryservice.utils.EntityDTOUtil;
 import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
 import com.petclinic.inventoryservice.utils.exceptions.NotFoundException;
@@ -23,6 +21,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
 
     private final InventoryRepository inventoryRepository;
     private final ProductRepository productRepository;
+    private final InventoryTypeRepository inventoryTypeRepository;
 
     @Override
     public Mono<ProductResponseDTO> addProductToInventory(Mono<ProductRequestDTO> productRequestDTOMono, String inventoryId) {
@@ -180,17 +179,40 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                             "\nOr ProductName: " + productName)));
         }
 
+
         return productRepository
                 .findAllProductsByInventoryId(inventoryId)
                 .map(EntityDTOUtil::toProductResponseDTO);
                 //where the 404 not found issue lies if we switchIfEmpty
+
     }
 
+
+
+
+    @Override
+    public Mono<InventoryResponseDTO> getInventoryById(String inventoryId){
+    return inventoryRepository.findInventoryByInventoryId(inventoryId)
+            .switchIfEmpty(Mono.error(new NotFoundException("No inventory with this id was found" + inventoryId)))
+            .map(EntityDTOUtil::toInventoryResponseDTO);
+
+    }
+    /*
     @Override
     public Flux<InventoryResponseDTO> getAllInventory() {
         return inventoryRepository.findAll()
                 .map(EntityDTOUtil::toInventoryResponseDTO);
     }
+
+     */
+    @Override
+    public Mono<Void> deleteInventoryByInventoryId(String inventoryId) {
+        return inventoryRepository.findInventoryByInventoryId(inventoryId)
+                .switchIfEmpty(Mono.error(new RuntimeException("The InventoryId is invalid")))
+                .flatMapMany(inventory -> inventoryRepository.delete(inventory))
+                .then();
+    }
+
     //delete all products and delete all inventory
   /*  @Override
     public Mono<Void> deleteAllProductInventory(String inventoryId) {
@@ -202,6 +224,73 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                 .then();
     }
 */
+    @Override
+    public Flux<InventoryResponseDTO>searchInventories(String inventoryName, String inventoryType, String inventoryDescription) {
+
+        if (inventoryName != null && inventoryType != null && inventoryDescription != null){
+            return inventoryRepository
+                    .findAllByInventoryNameAndInventoryTypeAndInventoryDescription(inventoryName, inventoryType, inventoryDescription)
+                    .map(EntityDTOUtil::toInventoryResponseDTO)
+                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Name: " + inventoryName +
+                            ", Type: " + inventoryType + ", Description: " + inventoryDescription)));
+        }
+
+        if (inventoryType != null && inventoryDescription != null){
+            return inventoryRepository
+                    .findAllByInventoryTypeAndInventoryDescription(inventoryType, inventoryDescription)
+                    .map(EntityDTOUtil::toInventoryResponseDTO)
+                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Type: " + inventoryType +
+                            " and Description: " + inventoryDescription)));
+        }
+
+        if (inventoryName != null){
+            return inventoryRepository
+                    .findAllByInventoryName(inventoryName)
+                    .map(EntityDTOUtil::toInventoryResponseDTO)
+                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Name: " + inventoryName)));
+        }
+
+        if (inventoryType != null){
+            return inventoryRepository
+                    .findAllByInventoryType(inventoryType)
+                    .map(EntityDTOUtil::toInventoryResponseDTO)
+                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Type: " + inventoryType)));
+        }
+
+        if (inventoryDescription != null){
+            return inventoryRepository
+                    .findAllByInventoryDescription(inventoryDescription)
+                    .map(EntityDTOUtil::toInventoryResponseDTO)
+                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Description: " + inventoryDescription)));
+        }
+
+        // Default - fetch all if no criteria provided.
+        return inventoryRepository
+                .findAll()
+                .map(EntityDTOUtil::toInventoryResponseDTO);
+    }
+
+
+    @Override
+    public Mono<ProductResponseDTO> getProductByProductIdInInventory(String inventoryId, String productId) {
+     if(inventoryId == null ){
+        return Mono.error(new NotFoundException("Inventory id not found:" + inventoryId ));
+
+  }
+     else if (productId == null) {
+         return Mono.error(new NotFoundException("product id not found:" + productId ));
+     }
+
+
+        return productRepository
+                .findProductByInventoryIdAndProductId(inventoryId, productId)
+                .map(EntityDTOUtil::toProductResponseDTO)
+                .switchIfEmpty(Mono.error(new NotFoundException("Inventory id:" + inventoryId + "and product:" + productId + "are not found")));
+
+
+    }
+
+
     //delete all products and delete all inventory
     @Override
     public Mono<Void> deleteAllProductInventory (String inventoryId){
@@ -215,7 +304,17 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     public Mono<Void> deleteAllInventory () {
         return inventoryRepository.deleteAll();
 
+    }
 
+    @Override
+    public Mono<InventoryTypeResponseDTO> addInventoryType(Mono<InventoryTypeRequestDTO> inventoryTypeRequestDTO) {
+        return inventoryTypeRequestDTO
+                .map(EntityDTOUtil::toInventoryTypeEntity)
+                .doOnNext(e -> {
+                    e.setTypeId(EntityDTOUtil.generateUUID());
+                })
+                .flatMap(inventoryTypeRepository::insert)
+                .map(EntityDTOUtil::toInventoryTypeResponseDTO);
     }
 }
 

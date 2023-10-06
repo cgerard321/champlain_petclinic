@@ -9,10 +9,5 @@ angular.module('inventoryForm', ['ui.router'])
                 template: '<inventory-form></inventory-form>'
             })
 
-            .state('updateInventory', {
-                    parent: 'app',
-                    url: '/inventory/:inventoryId:method',
-                    template: '<inventory-form></inventory-form>'
-                }
-            )
+
     }]);

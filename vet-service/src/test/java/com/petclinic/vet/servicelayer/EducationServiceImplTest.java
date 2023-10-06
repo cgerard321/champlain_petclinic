@@ -1,13 +1,19 @@
 package com.petclinic.vet.servicelayer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.vet.dataaccesslayer.Education;
-import com.petclinic.vet.dataaccesslayer.EducationRepository;
+import com.petclinic.vet.dataaccesslayer.education.Education;
+import com.petclinic.vet.dataaccesslayer.education.EducationRepository;
+import com.petclinic.vet.dataaccesslayer.PhotoRepository;
+import com.petclinic.vet.servicelayer.education.EducationRequestDTO;
+import com.petclinic.vet.servicelayer.education.EducationResponseDTO;
+import com.petclinic.vet.servicelayer.education.EducationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.r2dbc.init.R2dbcScriptDatabaseInitializer;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -29,6 +35,14 @@ class EducationServiceImplTest {
 
     @MockBean
     ObjectMapper objectMapper;
+
+    //To counter missing bean error
+    @Autowired
+    PhotoRepository photoRepository;
+    @MockBean
+    ConnectionFactoryInitializer connectionFactoryInitializer;
+    @MockBean
+    R2dbcScriptDatabaseInitializer r2dbcScriptDatabaseInitializer;
 
     String Vet_Id = "1";
     Education education = buildEducation();
@@ -57,6 +71,34 @@ class EducationServiceImplTest {
         StepVerifier
                 .create(deletedEducation)
                 .verifyComplete();
+    }
+
+    @Test
+    void addEducationToVet() {
+        EducationRequestDTO educationRequestDTO = buildEducationRequestDTO();
+
+        educationService.addEducationToVet(education.getVetId(), Mono.just(educationRequestDTO))
+                .map(educationResponseDTO -> {
+                    assertEquals(educationResponseDTO.getVetId(), educationRequestDTO.getVetId());
+                    assertEquals(educationResponseDTO.getSchoolName(), educationRequestDTO.getSchoolName());
+                    assertEquals(educationResponseDTO.getDegree(), educationRequestDTO.getDegree());
+                    assertEquals(educationResponseDTO.getFieldOfStudy(), educationRequestDTO.getFieldOfStudy());
+                    assertEquals(educationResponseDTO.getStartDate(), educationRequestDTO.getStartDate());
+                    assertEquals(educationResponseDTO.getEndDate(), educationRequestDTO.getEndDate());
+                    assertNotNull(educationResponseDTO.getEducationId());
+                    return educationResponseDTO;
+                });
+    }
+
+    private EducationRequestDTO buildEducationRequestDTO() {
+        return EducationRequestDTO.builder()
+                .vetId("1")
+                .schoolName("test school")
+                .degree("test degree")
+                .fieldOfStudy("test field")
+                .startDate("test start year")
+                .endDate("test end year")
+                .build();
     }
 
     private Education buildEducation() {

@@ -1,22 +1,28 @@
 package com.petclinic.vet.presentationlayer;
 
 import com.petclinic.vet.dataaccesslayer.*;
-import com.petclinic.vet.servicelayer.EducationResponseDTO;
-import com.petclinic.vet.servicelayer.RatingRequestDTO;
-import com.petclinic.vet.servicelayer.RatingResponseDTO;
-import com.petclinic.vet.servicelayer.VetDTO;
+import com.petclinic.vet.dataaccesslayer.education.Education;
+import com.petclinic.vet.dataaccesslayer.education.EducationRepository;
+import com.petclinic.vet.dataaccesslayer.ratings.PredefinedDescription;
+import com.petclinic.vet.dataaccesslayer.ratings.Rating;
+import com.petclinic.vet.dataaccesslayer.ratings.RatingRepository;
+import com.petclinic.vet.servicelayer.*;
+import com.petclinic.vet.servicelayer.education.EducationResponseDTO;
+import com.petclinic.vet.servicelayer.ratings.RatingRequestDTO;
+import com.petclinic.vet.servicelayer.ratings.RatingResponseDTO;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
+import org.springframework.boot.r2dbc.init.R2dbcScriptDatabaseInitializer;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,7 +31,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
-@AutoConfigureWebTestClient
 class VetControllerIntegrationTest {
 
     @Autowired
@@ -40,12 +45,22 @@ class VetControllerIntegrationTest {
     @Autowired
     EducationRepository educationRepository;
 
+    //To counter missing bean error
+    @Autowired
+    PhotoRepository photoRepository;
+    @MockBean
+    ConnectionFactoryInitializer connectionFactoryInitializer;
+    @MockBean
+    R2dbcScriptDatabaseInitializer r2dbcScriptDatabaseInitializer;
+
     Education education1 = buildEducation();
     Education education2 = buildEducation2();
     Vet vet = buildVet("1234");
     Vet vet2 = buildVet2("2345");
     Rating rating1 = buildRating("12345", "678910", 5.0);
     Rating rating2 = buildRating("12346", "678910", 4.0);
+    Rating rating3 = buildRating("12347", "678910", 3.0);
+
     VetDTO vetDTO = buildVetDTO("3456");
     String VET_ID = "678910";
     String VET_BILL_ID = vet.getVetBillId();
@@ -141,7 +156,7 @@ class VetControllerIntegrationTest {
     }
 
     @Test
-    void addRatingToAVet_WithValidValues_ShouldSucceed() {
+    void addRatingToAVet_WithPredefinedDescriptionOnly_ShouldSetRateDescriptionToPredefinedDescription() {
         StepVerifier
                 .create(ratingRepository.deleteAll())
                 .expectNextCount(0)
@@ -149,9 +164,10 @@ class VetControllerIntegrationTest {
 
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
                 .vetId(VET_ID)
-                .rateScore(3.5)
-                .rateDescription("The vet was decent but lacked table manners.")
-                .rateDate("16/09/2023")
+                .rateScore(5.0)
+                .rateDescription(null)
+                .predefinedDescription(PredefinedDescription.GOOD)
+                .rateDate("21/09/2023")
                 .build();
 
         client.post()
@@ -163,17 +179,50 @@ class VetControllerIntegrationTest {
                 .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody(RatingResponseDTO.class)
-                .value(dto -> {
-                    assertNotNull(dto);
-                    assertNotNull(dto.getRatingId());
-                    assertThat(dto.getVetId()).isEqualTo(ratingRequestDTO.getVetId());
-                    assertThat(dto.getRateScore()).isEqualTo(ratingRequestDTO.getRateScore());
-                    assertThat(dto.getRateDescription()).isEqualTo(ratingRequestDTO.getRateDescription());
-                    assertThat(dto.getRateDate()).isEqualTo(ratingRequestDTO.getRateDate());
+                .value(ratingResponseDTO -> {
+                    assertNotNull(ratingResponseDTO);
+                    assertNotNull(ratingResponseDTO.getRatingId());
+                    assertThat(ratingResponseDTO.getVetId()).isEqualTo(ratingRequestDTO.getVetId());
+                    assertThat(ratingResponseDTO.getRateScore()).isEqualTo(ratingRequestDTO.getRateScore());
+                    assertThat(ratingResponseDTO.getRateDescription()).isEqualTo(ratingRequestDTO.getPredefinedDescription().name());
+                    assertThat(ratingResponseDTO.getPredefinedDescription()).isEqualTo(ratingRequestDTO.getPredefinedDescription());
+                    assertThat(ratingResponseDTO.getRateDate()).isEqualTo(ratingRequestDTO.getRateDate());
                 });
-
     }
+    @Test
+    void addRatingWithWrittenDescriptionAndPredefinedValue_ShouldSetRatingDescriptionToPredefinedValue(){
+        StepVerifier
+                .create(ratingRepository.deleteAll())
+                .expectNextCount(0)
+                .verifyComplete();
 
+        RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
+                .vetId(VET_ID)
+                .rateScore(5.0)
+                .rateDescription("Vet was very gentle with my hamster.")
+                .predefinedDescription(PredefinedDescription.GOOD)
+                .rateDate("21/09/2023")
+                .build();
+
+        client.post()
+                .uri("/vets/" + VET_ID + "/ratings")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(ratingRequestDTO)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(RatingResponseDTO.class)
+                .value(ratingResponseDTO -> {
+                    assertNotNull(ratingResponseDTO);
+                    assertNotNull(ratingResponseDTO.getRatingId());
+                    assertThat(ratingResponseDTO.getVetId()).isEqualTo(ratingRequestDTO.getVetId());
+                    assertThat(ratingResponseDTO.getRateScore()).isEqualTo(ratingRequestDTO.getRateScore());
+                    assertThat(ratingResponseDTO.getRateDescription()).isEqualTo(ratingRequestDTO.getPredefinedDescription().name());
+                    assertThat(ratingResponseDTO.getPredefinedDescription()).isEqualTo(ratingRequestDTO.getPredefinedDescription());
+                    assertThat(ratingResponseDTO.getRateDate()).isEqualTo(ratingRequestDTO.getRateDate());
+                });
+    }
     @Test
     void addRatingToAVet_WithInvalidVetId_ShouldNotSucceed() {
         StepVerifier
@@ -234,6 +283,41 @@ class VetControllerIntegrationTest {
     }
 
     @Test
+    void addRatingToVet_WithPredefinedDescription_ShouldSetRateDescriptionToPredefinedDescription() {
+        StepVerifier
+                .create(ratingRepository.deleteAll())
+                .expectNextCount(0)
+                .verifyComplete();
+
+        RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
+                .vetId(VET_ID)
+                .rateScore(5.0)
+                .rateDescription(null)
+                .predefinedDescription(PredefinedDescription.GOOD)
+                .rateDate("21/09/2023")
+                .build();
+
+        client.post()
+                .uri("/vets/" + VET_ID + "/ratings")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(ratingRequestDTO)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(RatingResponseDTO.class)
+                .value(ratingResponseDTO -> {
+                    assertNotNull(ratingResponseDTO);
+                    assertNotNull(ratingResponseDTO.getRatingId());
+                    assertThat(ratingResponseDTO.getVetId()).isEqualTo(ratingRequestDTO.getVetId());
+                    assertThat(ratingResponseDTO.getRateScore()).isEqualTo(ratingRequestDTO.getRateScore());
+                    assertThat(ratingResponseDTO.getRateDescription()).isEqualTo(ratingRequestDTO.getPredefinedDescription().name());
+                    assertThat(ratingResponseDTO.getPredefinedDescription()).isEqualTo(ratingRequestDTO.getPredefinedDescription());
+                    assertThat(ratingResponseDTO.getRateDate()).isEqualTo(ratingRequestDTO.getRateDate());
+                });
+    }
+
+    @Test
     void updateRating_withValidVetIdAndValidRatingId_shouldSucceed() {
         Publisher<Rating> setup = ratingRepository.deleteAll()
                 .thenMany(ratingRepository.save(rating1));
@@ -289,6 +373,46 @@ class VetControllerIntegrationTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("vetId not found: " + invalidVetId);
+    }
+
+    @Test
+    void updateRating_withPredefinedDescriptionOnly_ShouldSetRateDescriptionToPredefinedDescription() {
+        Publisher<Rating> setup = ratingRepository.deleteAll()
+                .thenMany(ratingRepository.save(rating1));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        String existingRatingId = rating1.getRatingId();
+
+        RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
+                .vetId(VET_ID)
+                .rateScore(5.0)
+                .rateDescription(null)
+                .predefinedDescription(PredefinedDescription.GOOD)
+                .rateDate("21/09/2023")
+                .build();
+
+        client.put()
+                .uri("/vets/" + VET_ID + "/ratings/" + existingRatingId)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(ratingRequestDTO)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(RatingResponseDTO.class)
+                .value(ratingResponseDTO -> {
+                    assertNotNull(ratingResponseDTO);
+                    assertNotNull(ratingResponseDTO.getRatingId());
+                    assertThat(ratingResponseDTO.getVetId()).isEqualTo(ratingRequestDTO.getVetId());
+                    assertThat(ratingResponseDTO.getRateScore()).isEqualTo(ratingRequestDTO.getRateScore());
+                    assertThat(ratingResponseDTO.getRateDescription()).isEqualTo(ratingRequestDTO.getPredefinedDescription().name());
+                    assertThat(ratingResponseDTO.getPredefinedDescription()).isEqualTo(ratingRequestDTO.getPredefinedDescription());
+                    assertThat(ratingResponseDTO.getRateDate()).isEqualTo(ratingRequestDTO.getRateDate());
+                });
     }
 
     @Test
@@ -432,7 +556,7 @@ class VetControllerIntegrationTest {
 
     @Test
     void getAverageRatingByVetId_ShouldSucceed() {
-
+        
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
                 .vetId(vet.getVetId())
                 .rateScore(rating1.getRateScore()).build();
@@ -451,7 +575,9 @@ class VetControllerIntegrationTest {
     }
 
     @Test
-    void getAverageRatingByVetId_withInvalidVetId_ShouldThrowNotFound() {
+    void getAverageRatingByVetId_withInvalidVetId_ShouldThrowNumberZero() {
+
+
         client
                 .get()
                 .uri("/vets/" + INVALID_VET_ID + "/ratings/average")
@@ -463,6 +589,44 @@ class VetControllerIntegrationTest {
                             assertEquals(0.0, avg);
                         }
                 );
+    }
+
+    @Test
+    void getTopThreeVetWithTheHighestRating_ShouldSucceed(){
+
+        VetAverageRatingDTO vetAverageRatingDTO1 = VetAverageRatingDTO.builder()
+                .averageRating(rating1.getRateScore())
+                .vetId(vet.getVetId())
+                .build();
+
+        VetAverageRatingDTO vetAverageRatingDTO2 = VetAverageRatingDTO.builder()
+                .averageRating(rating2.getRateScore())
+                .vetId(vet.getVetId())
+                .build();
+
+        VetAverageRatingDTO vetAverageRatingDTO3 = VetAverageRatingDTO.builder()
+                .averageRating(rating3.getRateScore())
+                .vetId(vet.getVetId())
+                .build();
+
+        client
+                .get()
+                .uri("/vets/" + "topVets")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(VetAverageRatingDTO.class)
+                .value(resp -> {
+                    assertEquals(rating1.getVetId(), vetAverageRatingDTO1.getVetId());
+                    assertEquals(rating2.getVetId(), vetAverageRatingDTO2.getVetId());
+                    assertEquals(rating3.getVetId(), vetAverageRatingDTO3.getVetId());
+                    assertEquals(rating1.getRateScore(), vetAverageRatingDTO1.getAverageRating());
+                    assertEquals(rating2.getRateScore(), vetAverageRatingDTO2.getAverageRating());
+                    assertEquals(rating3.getRateScore(), vetAverageRatingDTO3.getAverageRating());
+
+
+                });
     }
 
     @Test
@@ -1212,6 +1376,71 @@ class VetControllerIntegrationTest {
     }
 
     @Test
+    void addEducationToAVet_WithValidValues_shouldSucceed(){
+        Publisher<Education> setup = educationRepository.deleteAll()
+                .thenMany(educationRepository.save(education1));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        client.post()
+                .uri("/vets/" + vet.getVetId() + "/educations")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(education2)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(EducationResponseDTO.class)
+                .value(dto -> {
+                    assertNotNull(dto);
+                    assertNotNull(dto.getEducationId());
+                    assertThat(dto.getVetId()).isEqualTo(education2.getVetId());
+                    assertThat(dto.getDegree()).isEqualTo(education2.getDegree());
+                    assertThat(dto.getFieldOfStudy()).isEqualTo(education2.getFieldOfStudy());
+                    assertThat(dto.getSchoolName()).isEqualTo(education2.getSchoolName());
+                    assertThat(dto.getStartDate()).isEqualTo(education2.getStartDate());
+                    assertThat(dto.getEndDate()).isEqualTo(education2.getEndDate());
+                });
+    }
+
+    /*@Test
+    void getPhotoByVetId() {
+        Publisher<Photo> setup = photoRepository.deleteAll()
+                .thenMany(photoRepository.save(buildPhoto()));
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        byte[] photo = {123, 23, 75, 34};
+        Resource resource = new ByteArrayResource(photo);
+
+        client.get()
+                .uri("/api/gateway/vets/{vetId}/photo", VET_ID)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.IMAGE_JPEG_VALUE)
+                .expectBody(Resource.class)
+                .consumeWith(response -> {
+                    assertEquals(resource, response.getResponseBody());
+                });
+    }*/
+    @Test
+    void getPhotoByVetId_NoExistingPhoto_ShouldReturnNotFound() {
+        String emptyVetId = "1234567";
+        client.get()
+                .uri("/api/gateway/vets/{vetId}/photo", emptyVetId)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.NOT_FOUND)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.path").isEqualTo("/api/gateway/vets/" + emptyVetId + "/photo");
+    }
+
+    @Test
     void toStringBuilders() {
         System.out.println(Vet.builder());
         System.out.println(VetDTO.builder());
@@ -1365,5 +1594,14 @@ class VetControllerIntegrationTest {
                 .build();
     }
 
+    private Photo buildPhoto(){
+        byte[] photo = {123, 23, 75, 34};
+        return Photo.builder()
+                .vetId(VET_ID)
+                .filename("vet_default.jpg")
+                .imgType("image/jpeg")
+                .data(photo)
+                .build();
+    }
 
 }

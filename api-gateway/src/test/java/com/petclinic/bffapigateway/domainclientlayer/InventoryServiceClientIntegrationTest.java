@@ -2,9 +2,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
-import com.petclinic.bffapigateway.dtos.Inventory.ProductRequestDTO;
-import com.petclinic.bffapigateway.dtos.Inventory.ProductResponseDTO;
+import com.petclinic.bffapigateway.dtos.Inventory.*;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
@@ -92,6 +90,25 @@ class InventoryServiceClientIntegrationTest {
         Mono<ProductResponseDTO> productResponseDTOFlux = inventoryServiceClient
                 .addProductToInventory(new ProductRequestDTO(), productResponseDTO.getInventoryId());
         StepVerifier.create(productResponseDTOFlux)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
+    void addInventoryType() throws JsonProcessingException {
+        InventoryTypeResponseDTO inventoryTypeResponseDTO = new InventoryTypeResponseDTO(
+                "142f383f-9fbf-479b-95e3-6c928f6a290b",
+                "Internal"
+        );
+
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .setBody(objectMapper.writeValueAsString(inventoryTypeResponseDTO))
+                .addHeader("Content-Type", "application/json"));
+
+        Mono<InventoryTypeResponseDTO> inventoryTypeResponseDTOMono = inventoryServiceClient
+                .addInventoryType(new InventoryTypeRequestDTO());
+        StepVerifier.create(inventoryTypeResponseDTOMono)
                 .expectNextCount(1)
                 .verifyComplete();
     }
