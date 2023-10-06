@@ -100,7 +100,7 @@ class OwnerControllerIntegrationTest {
                 .expectBody(Long.class)
                 .value(total -> {
                     assertNotNull(total);
-                    assertEquals(1L, total); // Adjust the expected value based on your test data
+                    assertEquals(1L, total);
                 });
 
     }
@@ -136,6 +136,36 @@ class OwnerControllerIntegrationTest {
                     assertEquals(size,list.size());
                 });
 
+    }
+
+    @Test
+    void getTotalNumberOfOwnersWithFilters_shouldSucceed(){
+
+        String firstName = "FirstName1";
+        String city = "test city1";
+
+
+        Owner owner1 = Owner.builder()
+                .ownerId("ownerId-11")
+                .firstName("FirstName1")
+                .lastName("LastName1")
+                .address("Test address1")
+                .city("test city1")
+                .province("province1")
+                .telephone("telephone1")
+                .build();
+
+        StepVerifier.create(repo.deleteAll().thenMany(repo.save(owner1))).expectNextCount(1).verifyComplete();
+
+        client.get()
+                .uri("/owners/owners-filtered-count?&firstName="+firstName+"&city="+city)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Long.class)
+                .value(total -> {
+                    assertNotNull(total);
+                    assertEquals(1L, total);
+                });
     }
 
     @Test

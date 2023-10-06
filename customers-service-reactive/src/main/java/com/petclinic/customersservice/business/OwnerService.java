@@ -11,9 +11,11 @@ import org.springframework.data.domain.Pageable;
 public interface OwnerService {
     Flux<OwnerResponseDTO> getAllOwners();
 
+    Mono<Long> getTotalNumberOfOwnersWithFilters(String ownerId,String firstName,String lastName,String phoneNumber, String city);
+
     Flux<OwnerResponseDTO> getAllOwnersPagination(Pageable pageable);
 
-    public Flux<OwnerResponseDTO> getAllOwnersPaginationWithFilters(Pageable pageable, Long ownerId, String firstName, String lastName, String phoneNumber, String city);
+    public Flux<OwnerResponseDTO> getAllOwnersPaginationWithFilters(Pageable pageable, String ownerId, String firstName, String lastName, String phoneNumber, String city);
 
     Mono<Owner> insertOwner(Mono<Owner> ownerMono);
 

@@ -43,10 +43,21 @@ public class OwnerController {
                 PageRequest.of(page.orElse(0),size.orElse(5)));
     }
 
+    @GetMapping("/owners-filtered-count")
+    public Mono<Long> getTotalNumberOfOwnersWithFilters(
+            @RequestParam(required = false) String ownerId,
+            @RequestParam(required = false) String firstName,
+            @RequestParam(required = false) String lastName,
+            @RequestParam(required = false) String phoneNumber,
+            @RequestParam(required = false) String city) {
+
+        return ownerService.getTotalNumberOfOwnersWithFilters(ownerId,firstName,lastName,phoneNumber,city);
+    }
+
     @GetMapping("/owners-pagination/filters")
     Flux<OwnerResponseDTO> getAllOwnersPaginationWithFilters(@RequestParam Optional<Integer> page,
                                                              @RequestParam Optional<Integer> size,
-                                                             @RequestParam(required = false) Long ownerId,
+                                                             @RequestParam(required = false) String ownerId,
                                                              @RequestParam(required = false) String firstName,
                                                              @RequestParam(required = false) String lastName,
                                                              @RequestParam(required = false) String phoneNumber,

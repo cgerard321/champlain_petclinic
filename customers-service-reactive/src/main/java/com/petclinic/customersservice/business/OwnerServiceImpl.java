@@ -69,6 +69,21 @@ public class OwnerServiceImpl implements OwnerService {
     }
 
     @Override
+    public Mono<Long> getTotalNumberOfOwnersWithFilters(String ownerId, String firstName, String lastName, String phoneNumber, String city) {
+         Predicate<Owner> filterCriteria = owner ->
+                (ownerId == null || owner.getOwnerId().equals(ownerId)) &&
+                (firstName == null || owner.getFirstName().equals(firstName)) &&
+                (lastName == null || owner.getLastName().equals(lastName)) &&
+                (phoneNumber == null || owner.getTelephone().equals(phoneNumber)) &&
+                (city == null || owner.getCity().equals(city));
+
+        return ownerRepo.findAll()
+                .filter(filterCriteria) // Apply filtering
+                .map(EntityDTOUtil::toOwnerResponseDTO)
+                .count();
+    }
+
+    @Override
     public Flux<OwnerResponseDTO> getAllOwnersPagination(Pageable pageable){
         return ownerRepo.findAll()
                 .map(EntityDTOUtil::toOwnerResponseDTO)
@@ -79,7 +94,7 @@ public class OwnerServiceImpl implements OwnerService {
     @Override
     public Flux<OwnerResponseDTO> getAllOwnersPaginationWithFilters(
             Pageable pageable,
-            Long ownerId,
+            String ownerId,
             String firstName,
             String lastName,
             String phoneNumber,
