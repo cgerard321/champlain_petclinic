@@ -24,6 +24,8 @@ import reactor.test.StepVerifier;
 import java.util.List;
 
 import static com.mongodb.assertions.Assertions.assertTrue;
+
+import static com.mongodb.assertions.Assertions.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -956,7 +958,7 @@ class InventoryControllerIntegrationTest {
 
     @Test
     void getProductsInInventoryByInventoryIdAndProductFieldPagination_ShouldSucceed(){
-        StepVerifier.create(productRepository.deleteAll().thenMany(productRepository.save(buildProduct("productId_1", "inventoryId_3", "Benzodiazepines", "Sedative Medication", 100.00, 10))))
+        StepVerifier.create(productRepository.deleteAll().thenMany(productRepository.save(buildProduct("productId_1", "inventoryId_3", "Benzodiazepines", "Sedative Medication", 100.00, 150.0, 10))))
                 .expectNextCount(1)
                 .verifyComplete();
         webTestClient
@@ -1007,5 +1009,9 @@ class InventoryControllerIntegrationTest {
     }
 
  */
+
+
+
+
 
 }
