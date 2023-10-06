@@ -27,7 +27,5 @@ public interface ProductInventoryService {
 
     Mono<ProductResponseDTO> getProductByProductIdInInventory(String inventoryId, String productId);
 
-    //Flux<InventoryResponseDTO> getAllInventoryPage(Pageable page);
-
 
 }

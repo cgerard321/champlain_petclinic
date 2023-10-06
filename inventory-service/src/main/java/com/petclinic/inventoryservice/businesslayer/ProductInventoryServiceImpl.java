@@ -304,15 +304,6 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
 
     }
 
-    /*@Override
-    public Flux<InventoryResponseDTO> getAllInventoryPage(Pageable page) {
-        return inventoryRepository.findAll()
-                .map(EntityDTOUtil::toInventoryResponseDTO)
-                .skip(page.getPageNumber() * page.getPageSize())
-                .take(page.getPageSize());
-    }*/
-
-
     //delete all products and delete all inventory
     @Override
     public Mono<Void> deleteAllProductInventory (String inventoryId){

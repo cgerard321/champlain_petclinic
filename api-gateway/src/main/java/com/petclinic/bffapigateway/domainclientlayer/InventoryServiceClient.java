@@ -212,13 +212,4 @@ public class InventoryServiceClient {
                 .retrieve()
                 .bodyToMono(Void.class);
     }
-
-    /*public Flux<InventoryResponseDTO> getAllInventoryPage(Optional<Integer> page, Optional<Integer> size) {
-        return webClient.get()
-                .uri(inventoryServiceUrl + "/pages?page="+page.orElse(0)+"&size="+size.orElse(10))
-                .retrieve()
-                .bodyToFlux(InventoryResponseDTO.class);
-    }*/
-
-
 }
