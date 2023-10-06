@@ -17,6 +17,8 @@ import org.springframework.data.domain.Pageable;
 
 import java.util.regex.Pattern;
 
+import org.springframework.data.domain.Pageable;
+
 
 @Service
 @RequiredArgsConstructor
@@ -164,7 +166,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
         }
         if (productPrice != null){
             return productRepository
-                    .findAllProductsByInventoryIdAndProductPrice(inventoryId, productPrice )
+                    .findAllProductsByInventoryIdAndProductPrice(inventoryId, productPrice)
                     .map(EntityDTOUtil::toProductResponseDTO)
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
                             "\nOr ProductPrice: " + productPrice)));
@@ -209,6 +211,66 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
         return productRepository
                 .findAllProductsByInventoryId(inventoryId)
                 .map(EntityDTOUtil::toProductResponseDTO);
+        //where the 404 not found issue lies if we switchIfEmpty
+
+    }
+
+    @Override
+    public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductsFieldsPagination(String inventoryId, String productName, Double productPrice, Integer productQuantity, Pageable pageable) {
+
+        if (productName != null && productPrice != null && productQuantity != null){
+            return  productRepository
+                    .findAllProductsByInventoryIdAndProductNameAndProductPriceAndProductQuantity(inventoryId,
+                            productName, productPrice, productQuantity)
+                    .map(EntityDTOUtil::toProductResponseDTO)
+                    .skip((long) pageable.getPageNumber() * pageable.getPageSize())
+                    .take(pageable.getPageSize())
+                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
+                            "\nOr ProductName: " + productName + "\nOr ProductPrice: " + productPrice + "\nOr ProductQuantity: " + productQuantity)));
+        }
+        if (productPrice != null && productQuantity != null){
+            return productRepository
+                    .findAllProductsByInventoryIdAndProductPriceAndProductQuantity(inventoryId, productPrice, productQuantity)
+                    .map(EntityDTOUtil::toProductResponseDTO)
+                    .skip((long) pageable.getPageNumber() * pageable.getPageSize())
+                    .take(pageable.getPageSize())
+                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
+                            "\nOr ProductPrice: " + productPrice + "\nOr ProductQuantity: " + productQuantity)));
+        }
+        if (productPrice != null){
+            return productRepository
+                    .findAllProductsByInventoryIdAndProductPrice(inventoryId, productPrice)
+                    .map(EntityDTOUtil::toProductResponseDTO)
+                    .skip((long) pageable.getPageNumber() * pageable.getPageSize())
+                    .take(pageable.getPageSize())
+                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
+                            "\nOr ProductPrice: " + productPrice)));
+        }
+        if (productQuantity != null){
+            return productRepository
+                    .findAllProductsByInventoryIdAndProductQuantity(inventoryId, productQuantity)
+                    .map(EntityDTOUtil::toProductResponseDTO)
+                    .skip((long) pageable.getPageNumber() * pageable.getPageSize())
+                    .take(pageable.getPageSize())
+                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
+                            "\nOr ProductQuantity: " + productQuantity)));
+        }
+        if (productName != null){
+            return productRepository
+                    .findAllProductsByInventoryIdAndProductName(inventoryId, productName)
+                    .map(EntityDTOUtil::toProductResponseDTO)
+                    .skip((long) pageable.getPageNumber() * pageable.getPageSize())
+                    .take(pageable.getPageSize())
+                    .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
+                            "\nOr ProductName: " + productName)));
+        }
+
+
+        return productRepository
+                .findAllProductsByInventoryId(inventoryId)
+                .map(EntityDTOUtil::toProductResponseDTO)
+                .skip((long) pageable.getPageNumber() * pageable.getPageSize())
+                .take(pageable.getPageSize());
         //where the 404 not found issue lies if we switchIfEmpty
 
     }
