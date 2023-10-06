@@ -970,7 +970,11 @@ class ApiGatewayControllerTest {
 
 
     }
+<<<<<<< HEAD
 @Test
+=======
+@Test
+>>>>>>> ceef8eff (VetDTO split in apigateway)
     void getOwnerDetails_withAvailableVisitsService() {
         OwnerResponseDTO owner = new OwnerResponseDTO();
         PetResponseDTO cat = new PetResponseDTO();
@@ -1000,7 +1004,11 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$.pets[0].name").isEqualTo("Garfield")
                 .jsonPath("$.pets[0].visits[0].description").isEqualTo("First visit");
+<<<<<<< HEAD
     }
+=======
+    }
+>>>>>>> ceef8eff (VetDTO split in apigateway)
 
 //
 //    @Test
@@ -1537,6 +1545,9 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.message").isEqualTo("Request method 'POST' is not supported.");
     }
     //
+<<<<<<< HEAD
+=======
+>>>>>>> ceef8eff (VetDTO split in apigateway)
     @Test
     void shouldCreateThenDeletePet(){
         OwnerResponseDTO od = new OwnerResponseDTO();
@@ -1573,7 +1584,11 @@ class ApiGatewayControllerTest {
 
 
     }
+<<<<<<< HEAD
 
+=======
+
+>>>>>>> ceef8eff (VetDTO split in apigateway)
 
     //
     @Test
@@ -1980,16 +1995,26 @@ class ApiGatewayControllerTest {
     }
 
 
+<<<<<<< HEAD
 *
      * Visits Methods
      * *
+=======
+*
+     * Visits Methods
+     * *
+>>>>>>> ceef8eff (VetDTO split in apigateway)
 
 
     String VISIT_ID = buildVisitResponseDTO().getVisitId();
 
 
 //todo fix
+<<<<<<< HEAD
 @Test
+=======
+@Test
+>>>>>>> ceef8eff (VetDTO split in apigateway)
     void shouldCreateAVisitWithOwnerInfo(){
         OwnerResponseDTO owner = new OwnerResponseDTO();
         VisitRequestDTO visit = VisitRequestDTO.builder()
@@ -2028,7 +2053,11 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$.status").isEqualTo(false)
                 .jsonPath("$.practitionerId").isEqualTo(1);
+<<<<<<< HEAD
     }
+=======
+    }
+>>>>>>> ceef8eff (VetDTO split in apigateway)
 
 
 
@@ -2074,7 +2103,11 @@ class ApiGatewayControllerTest {
 //        assertEquals(null, visitsServiceClient.getVisitsForPet(visit.getPetId()));
 //    }
 
+<<<<<<< HEAD
  @Test
+=======
+ @Test
+>>>>>>> ceef8eff (VetDTO split in apigateway)
     void shouldUpdateAVisitsById() {
         VisitDetails visitDetailsToUpdate = VisitDetails.builder()
                 .visitDate(LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
@@ -2089,10 +2122,16 @@ class ApiGatewayControllerTest {
                 .thenReturn(Mono.just(visitDetailsToUpdate));
 
         client.put()
+<<<<<<< HEAD
+                 .uri("/api/gateway/owners/*
+pets/{petId}/visits/{visitId}", "1", "1")
+ .accept(MediaType.APPLICATION_JSON)
+=======
                  .uri("/api/gateway/owners/*
 pets/{petId}/visits/{visitId}", "1", "1")
                */
 /* .accept(MediaType.APPLICATION_JSON)
+>>>>>>> ceef8eff (VetDTO split in apigateway)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(visitDetailsToUpdate)
                 .exchange()
@@ -2105,7 +2144,11 @@ pets/{petId}/visits/{visitId}", "1", "1")
                 .jsonPath("$.status").isEqualTo(Status.UPCOMING.toString())
                 .jsonPath("$.practitionerId").isEqualTo(2);
         Mockito.verify(visitsServiceClient,times(1)).updateVisitForPet(visitDetailsToUpdate);
+<<<<<<< HEAD
     }
+=======
+    }
+>>>>>>> ceef8eff (VetDTO split in apigateway)
 
 
     @Test
@@ -2218,6 +2261,9 @@ pets/{petId}/visits/{visitId}", "1", "1")
                     assertEquals(list.get(0).getPractitionerId(),visit.getPractitionerId());
                 });
     }
+<<<<<<< HEAD
+=======
+>>>>>>> ceef8eff (VetDTO split in apigateway)
     @Test
     void shouldGetAVisitByPractitionerIdAndMonth(){
         VisitDetails visit = new VisitDetails();
@@ -2242,7 +2288,11 @@ pets/{petId}/visits/{visitId}", "1", "1")
                 .jsonPath("$[0].description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$[0].practitionerId").isEqualTo(1);
     }
+<<<<<<< HEAD
 
+=======
+
+>>>>>>> ceef8eff (VetDTO split in apigateway)
 
 
     @Test
@@ -2522,9 +2572,15 @@ pets/{petId}/visits/{visitId}", "1", "1")
                 .status(Status.UPCOMING)
                 .build();
     }
+<<<<<<< HEAD
 *
      * End of Visits Methods
      * *
+=======
+*
+     * End of Visits Methods
+     * *
+>>>>>>> ceef8eff (VetDTO split in apigateway)
 
 
 

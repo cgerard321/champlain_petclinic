@@ -1397,5 +1397,5 @@ class VetsServiceClientIntegrationTest {
                 .build();
     }
 
-
 }
+
