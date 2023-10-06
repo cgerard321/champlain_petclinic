@@ -176,7 +176,11 @@ class RatingServiceImplTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
+<<<<<<< HEAD
                 .workday(new HashSet<>())
+=======
+                .workday("Monday")
+>>>>>>> 8d8e3440 (Tests modified in vet-service)
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -189,7 +193,11 @@ class RatingServiceImplTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
+<<<<<<< HEAD
                 .workday(new HashSet<>())
+=======
+                .workday("Monday")
+>>>>>>> 8d8e3440 (Tests modified in vet-service)
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -202,7 +210,11 @@ class RatingServiceImplTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
+<<<<<<< HEAD
                 .workday(new HashSet<>())
+=======
+                .workday("Monday")
+>>>>>>> 8d8e3440 (Tests modified in vet-service)
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -308,7 +320,11 @@ class RatingServiceImplTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
+<<<<<<< HEAD
                 .workday(new HashSet<>())
+=======
+                .workday("Monday")
+>>>>>>> 8d8e3440 (Tests modified in vet-service)
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();

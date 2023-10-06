@@ -4,6 +4,8 @@ package com.petclinic.vet.servicelayer;
 import com.petclinic.vet.dataaccesslayer.PhotoRepository;
 import com.petclinic.vet.dataaccesslayer.Vet;
 import com.petclinic.vet.dataaccesslayer.VetRepository;
+import com.petclinic.vet.presentationlayer.VetRequestDTO;
+import com.petclinic.vet.presentationlayer.VetResponseDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.r2dbc.init.R2dbcScriptDatabaseInitializer;
@@ -38,17 +40,17 @@ class VetServiceImplTest {
     @MockBean
     R2dbcScriptDatabaseInitializer r2dbcScriptDatabaseInitializer;
 
-    VetDTO vetDTO = buildVetDTO();
+    VetResponseDTO vetResponseDTO = buildVetResponseDTO();
+    VetRequestDTO vetRequestDTO = buildVetRequestDTO();
     Vet vet = buildVet();
     String VET_ID = vet.getVetId();
     String VET_BILL_ID = vet.getVetBillId();
 
     @Test
     void getAllVets() {
-
         when(vetRepository.findAll()).thenReturn(Flux.just(vet));
 
-        Flux<VetDTO> vetDTO = vetService.getAll();
+        Flux<VetResponseDTO> vetDTO = vetService.getAll();
 
         StepVerifier
                 .create(vetDTO)
@@ -63,23 +65,21 @@ class VetServiceImplTest {
                     assertEquals(vet.getWorkday(), foundVet.getWorkday());
                     assertFalse(foundVet.isActive());
                 })
-
                 .verifyComplete();
     }
 
     @Test
     void createVet() {
-        vetService.insertVet(Mono.just(vetDTO))
+        vetService.insertVet(Mono.just(vetRequestDTO))
                 .map(vetDTO1 -> {
-                    assertEquals(vetDTO1.getVetId(), vetDTO.getVetId());
-                    assertEquals(vetDTO1.getEmail(), vetDTO.getEmail());
-                    assertEquals(vetDTO1.getResume(), vetDTO.getResume());
-                    assertNotNull(vetDTO1.getImageId());
-                    assertEquals(vetDTO1.getLastName(), vetDTO.getLastName());
-                    assertEquals(vetDTO1.getFirstName(), vetDTO.getFirstName());
-                    assertEquals(vetDTO1.getWorkday(), vetDTO.getWorkday());
-                    assertEquals(vetDTO1.getPhoneNumber(), vetDTO.getPhoneNumber());
-                    assertEquals(vetDTO1.getSpecialties(), vetDTO.getSpecialties());
+                    assertEquals(vetDTO1.getVetId(), vetRequestDTO.getVetId());
+                    assertEquals(vetDTO1.getEmail(), vetRequestDTO.getEmail());
+                    assertEquals(vetDTO1.getResume(), vetRequestDTO.getResume());
+                    assertEquals(vetDTO1.getLastName(), vetRequestDTO.getLastName());
+                    assertEquals(vetDTO1.getFirstName(), vetRequestDTO.getFirstName());
+                    assertEquals(vetDTO1.getWorkday(), vetRequestDTO.getWorkday());
+                    assertEquals(vetDTO1.getPhoneNumber(), vetRequestDTO.getPhoneNumber());
+                    assertEquals(vetDTO1.getSpecialties(), vetRequestDTO.getSpecialties());
                     return vetDTO1;
                 });
     }
@@ -90,28 +90,26 @@ class VetServiceImplTest {
         when(vetRepository.save(any(Vet.class))).thenReturn(Mono.just(vet));
 
         when(vetRepository.findVetByVetId(anyString())).thenReturn(Mono.just(vet));
-        vetService.updateVet(VET_ID, (Mono.just(vetDTO)))
+        vetService.updateVet(VET_ID, (Mono.just(vetRequestDTO)))
                 .map(vetDTO1 -> {
-                    assertEquals(vetDTO1.getVetId(), vetDTO.getVetId());
-                    assertEquals(vetDTO1.getEmail(), vetDTO.getEmail());
-                    assertEquals(vetDTO1.getResume(), vetDTO.getResume());
-                    assertNotNull(vetDTO1.getImageId());
-                    assertEquals(vetDTO1.getLastName(), vetDTO.getLastName());
-                    assertEquals(vetDTO1.getFirstName(), vetDTO.getFirstName());
-                    assertEquals(vetDTO1.getWorkday(), vetDTO.getWorkday());
-                    assertEquals(vetDTO1.getPhoneNumber(), vetDTO.getPhoneNumber());
-                    assertEquals(vetDTO1.getSpecialties(), vetDTO.getSpecialties());
+                    assertEquals(vetDTO1.getVetId(), vetRequestDTO.getVetId());
+                    assertEquals(vetDTO1.getEmail(), vetRequestDTO.getEmail());
+                    assertEquals(vetDTO1.getResume(), vetRequestDTO.getResume());
+                    assertEquals(vetDTO1.getLastName(), vetRequestDTO.getLastName());
+                    assertEquals(vetDTO1.getFirstName(), vetRequestDTO.getFirstName());
+                    assertEquals(vetDTO1.getWorkday(), vetRequestDTO.getWorkday());
+                    assertEquals(vetDTO1.getPhoneNumber(), vetRequestDTO.getPhoneNumber());
+                    assertEquals(vetDTO1.getSpecialties(), vetRequestDTO.getSpecialties());
                     return vetDTO1;
                 });
     }
-
 
     @Test
     void getVetByVetId() {
 
         when(vetRepository.findVetByVetId(anyString())).thenReturn(Mono.just(vet));
 
-        Mono<VetDTO> vetDTOMono = vetService.getVetByVetId(VET_ID);
+        Mono<VetResponseDTO> vetDTOMono = vetService.getVetByVetId(VET_ID);
 
 
         StepVerifier
@@ -136,7 +134,7 @@ class VetServiceImplTest {
 
         when(vetRepository.findVetByVetBillId(anyString())).thenReturn(Mono.just(vet));
 
-        Mono<VetDTO> vetDTOMono = vetService.getVetByVetBillId(VET_BILL_ID);
+        Mono<VetResponseDTO> vetDTOMono = vetService.getVetByVetBillId(VET_BILL_ID);
 
 
         StepVerifier
@@ -161,7 +159,7 @@ class VetServiceImplTest {
 
         when(vetRepository.findVetsByActive(anyBoolean())).thenReturn(Flux.just(vet));
 
-        Flux<VetDTO> vetDTO = vetService.getVetByIsActive(vet.isActive());
+        Flux<VetResponseDTO> vetDTO = vetService.getVetByIsActive(vet.isActive());
 
         StepVerifier
                 .create(vetDTO)
@@ -185,7 +183,7 @@ class VetServiceImplTest {
 
         when(vetRepository.findVetsByActive(anyBoolean())).thenReturn(Flux.just(vet));
 
-        Flux<VetDTO> vetDTO = vetService.getVetByIsActive(vet.isActive());
+        Flux<VetResponseDTO> vetDTO = vetService.getVetByIsActive(vet.isActive());
 
         StepVerifier
                 .create(vetDTO)
@@ -226,6 +224,39 @@ class VetServiceImplTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
+<<<<<<< HEAD
+                .workday(new HashSet<>())
+=======
+                .workday("Monday")
+>>>>>>> 8d8e3440 (Tests modified in vet-service)
+                .specialties(new HashSet<>())
+                .active(false)
+                .build();
+    }
+    private VetRequestDTO buildVetRequestDTO() {
+        return VetRequestDTO.builder()
+                .vetId("d9d3a7ac-6817-4c13-9a09-c09da74fb65f")
+                .vetBillId("53c2d16e-1ba3-4dbc-8e31-6decd2eaa99a")
+                .firstName("Pauline")
+                .lastName("LeBlanc")
+                .email("skjfhf@gmail.com")
+                .phoneNumber("947-238-2847")
+                .resume("Just became a vet")
+                .workday("Monday")
+                .specialties(new HashSet<>())
+                .active(false)
+                .build();
+    }
+    private VetResponseDTO buildVetResponseDTO() {
+        return VetResponseDTO.builder()
+                .vetId("d9d3a7ac-6817-4c13-9a09-c09da74fb65f")
+                .vetBillId("53c2d16e-1ba3-4dbc-8e31-6decd2eaa99a")
+                .firstName("Pauline")
+                .lastName("LeBlanc")
+                .email("skjfhf@gmail.com")
+                .phoneNumber("947-238-2847")
+                .resume("Just became a vet")
+<<<<<<< HEAD
                 .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
@@ -241,20 +272,9 @@ class VetServiceImplTest {
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
                 .workday(new HashSet<>())
-                .specialties(new HashSet<>())
-                .active(false)
-                .build();
-    }
-    private VetDTO buildVetDTO() {
-        return VetDTO.builder()
-                .vetId("d9d3a7ac-6817-4c13-9a09-c09da74fb65f")
-                .vetBillId("53c2d16e-1ba3-4dbc-8e31-6decd2eaa99a")
-                .firstName("Pauline")
-                .lastName("LeBlanc")
-                .email("skjfhf@gmail.com")
-                .phoneNumber("947-238-2847")
-                .resume("Just became a vet")
-                .workday(new HashSet<>())
+=======
+                .workday("Monday")
+>>>>>>> 8d8e3440 (Tests modified in vet-service)
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -268,7 +288,11 @@ class VetServiceImplTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
+<<<<<<< HEAD
                 .workday(new HashSet<>())
+=======
+                .workday("Monday")
+>>>>>>> 8d8e3440 (Tests modified in vet-service)
                 .specialties(new HashSet<>())
                 .active(true)
                 .build();
