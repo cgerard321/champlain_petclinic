@@ -3,6 +3,7 @@ package com.petclinic.bffapigateway.utils.Security.Filters;
 
 import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
 
+import com.petclinic.bffapigateway.dtos.Auth.TokenResponseDTO;
 import com.petclinic.bffapigateway.exceptions.HandlerIsNullException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
@@ -129,19 +130,20 @@ public class JwtTokenFilter implements WebFilter {
 
 
 
-        Mono<ResponseEntity<Flux<String>>> validationResponse = authValidationService.validateToken(token);
+        Mono<ResponseEntity<TokenResponseDTO>> validationResponse = authValidationService.validateToken(token);
 
 
         return validationResponse.flatMap(responseEntity -> {
             if (responseEntity.getStatusCode() == HttpStatus.OK && responseEntity.getBody() != null) {
                 // Token is valid, proceed with the request
+                exchange.getAttributes().put("tokenValues", responseEntity.getBody());
+
                 return chain.filter(exchange);
                 }
         else {
-            exchange.getResponse().setStatusCode(responseEntity.getStatusCode());
+            exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
 
             return exchange.getResponse().writeWith(Mono.just(exchange.getResponse().bufferFactory().wrap(("Authentication refused !\n"+ responseEntity.getBody()).getBytes() )));
-
         }
         });
 

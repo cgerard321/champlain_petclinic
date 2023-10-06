@@ -11,6 +11,7 @@ package com.petclinic.vet.util;
   * Ticket: feat(VVS-CPC-553): add veterinarian
  */
 
+import com.petclinic.vet.dataaccesslayer.Photo;
 import com.petclinic.vet.dataaccesslayer.education.Education;
 import com.petclinic.vet.dataaccesslayer.ratings.Rating;
 import com.petclinic.vet.dataaccesslayer.Specialty;
@@ -23,10 +24,13 @@ import com.petclinic.vet.servicelayer.ratings.RatingRequestDTO;
 import com.petclinic.vet.servicelayer.ratings.RatingResponseDTO;
 import lombok.Generated;
 import org.springframework.beans.BeanUtils;
+import org.springframework.core.io.Resource;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 
 public class EntityDtoUtil {
     @Generated
@@ -50,7 +54,7 @@ public class EntityDtoUtil {
 
     public static Vet toEntity(VetDTO dto) {
         Vet vet = new Vet();
-        vet.setVetId(generateVetId());
+        vet.setVetId(dto.getVetId());
         vet.setVetBillId(dto.getVetBillId());
         vet.setFirstName(dto.getFirstName());
         vet.setLastName(dto.getLastName());
@@ -65,9 +69,29 @@ public class EntityDtoUtil {
     }
 
     public static String generateVetId() {
-        Random random = new Random();
-        int number = random.nextInt(99999);
-        return "22" + (String.format("%05d", number));
+        return UUID.randomUUID().toString();
+    }
+
+    public static Photo toPhotoEntity(String vetId, String photoName, Resource resource) {
+        Photo photo = new Photo();
+        photo.setFilename(photoName);
+        //StreamUtils.copyToByteArray(resource.getInputStream())
+        try {
+            photo.setData(resource.getInputStream().readAllBytes());
+        } catch (IOException io){
+            throw new InvalidInputException("Picture does not exist" + io.getMessage());
+        }
+        photo.setVetId(vetId);
+        photo.setImgType("image/" + getPhotoType(photoName));
+
+        return photo;
+    }
+
+    public static String getPhotoType(String photoName){
+        String type = photoName.split("\\.")[1];
+        if(type.equals("jpg"))
+            type = "jpeg";
+        return type;
     }
 
     public static SpecialtyDTO toDTO(Specialty specialty) {
@@ -129,12 +153,8 @@ public class EntityDtoUtil {
     }
 
     public static String verifyId(String id) {
-        try {
-            Integer.parseInt(id);
-        }
-        catch(NumberFormatException e) {
-            throw new InvalidInputException ("This id is not valid");
-        }
+        if(id.length() != 36)
+            throw new InvalidInputException("This id is not valid");
         return id;
     }
 

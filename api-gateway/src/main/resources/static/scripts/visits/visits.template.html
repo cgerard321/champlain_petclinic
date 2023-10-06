@@ -482,49 +482,100 @@
 
         renderCalendar();
     });
-
-    //select dates
-    document.querySelector('.days').addEventListener('click',(event) => {
-
+/*    document.querySelector('.days').addEventListener('click', (event) => {
         let target = event.target.dataset.target;
 
         if(target !== undefined) {
             if (target.substring(0, 13) === "previous-page") {
                 selectedDate = target.substring(14, 16).trim();
-
                 date.setMonth(date.getMonth() - 1);
-
             } else if (target.substring(0, 9) === "next-page") {
                 selectedDate = target.substring(10, 12).trim();
-
                 date.setMonth(date.getMonth() + 1);
-
             } else {
                 selectedDate = target;
                 date.setDate(parseInt(target));
             }
-            selectedTime = "";
-        }
-        if (self) {
-            self.date = $filter('date')(date, "MM-dd-yyyy");
         }
 
+        // Access the AngularJS scope
+        let scope = angular.element(document.querySelector('.container-calendar')).scope();
+
+        // Update the chosenDate on the scope
+        scope.$apply(function() {
+            scope.$ctrl.chosenDate = date;
+        });
+
+        console.log("Broadcasting date:", date);
         $rootScope.$broadcast('selectedDateChanged', date);
 
         renderCalendar();
-    });
+    });*/
 
-    document.querySelector('.times').addEventListener('click',(event) => {
 
+        //select dates
+        document.querySelector('.days').addEventListener('click', (event) => {
+            let target = event.target.dataset.target;
+            let date = new Date(); // Assuming you have a date object initialized already
+
+            if(target !== undefined) {
+                if (target.substring(0, 13) === "previous-page") {
+                    selectedDate = target.substring(14, 16).trim();
+                    date.setMonth(date.getMonth() - 1);
+                } else if (target.substring(0, 9) === "next-page") {
+                    selectedDate = target.substring(10, 12).trim();
+                    date.setMonth(date.getMonth() + 1);
+                } else {
+                    selectedDate = target;
+                    date.setDate(parseInt(target));
+                }
+                selectedTime = "";
+            }
+
+            // Access the AngularJS scope
+            let scope = angular.element(document.querySelector('.container-calendar')).scope();
+
+            // Update the chosenDate on the scope
+            scope.$apply(function() {
+                scope.$ctrl.chosenDate = date;
+            });
+
+            console.log("Broadcasting date:", date);
+            $rootScope.$broadcast('selectedDateChanged', date);
+
+            renderCalendar();
+        });
+    document.querySelector('.times').addEventListener('click', (event) => {
         let selected = event.target.dataset.target;
 
         if(selected !== undefined) {
-            selectedTime = selected;
+            selectedTime = parseInt(selected); // Assuming the selected time is in hours
+
+            // Access the AngularJS scope
+            let scope = angular.element(document.querySelector('.container-calendar')).scope();
+
+            // Update the chosenDate's hours based on the selected time
+            scope.$apply(function() {
+                scope.$ctrl.chosenDate.setHours(selectedTime, 0, 0); // Set minutes and seconds to 0
+            });
         }
 
+        console.log("Time Broadcasting date:",selectedTime);
         renderCalendar();
     });
-    console.log(this.previousVisits)
+
+
+    /*    document.querySelector('.times').addEventListener('click',(event) => {
+
+            let selected = event.target.dataset.target;r
+
+            if(selected !== undefined) {
+                selectedTime = selected;
+            }
+            console.log("Time Broadcasting date:", selectedTime);
+            renderCalendar();
+        });
+        console.log(this.previousVisits)*/
 </script>
 
 <h2>Visits</h2>
@@ -635,23 +686,23 @@
 <h3 style="margin-top: 6px">Added Visits</h3>
 <table class="table">
     <thead>
-        <tr>
-            <th> <button class="btn btn-default" id="sortByDateButtonPreviousVisits" type="button" ng-click="$ctrl.SortTableByDate(false)" style="color: white">Sort by date ⇅</button> </th>
-            <th> <button class="btn btn-default" id="sortByDescButtonPreviousVisits" type="button" ng-click="$ctrl.SortTableByDesc(false)" style="color: white">Sort by description ⇅</button> </th>
-            <th> <button class="btn btn-default" id="sortByVetButtonPreviousVisits" type="button" ng-click="$ctrl.SortTableByVet(false)" style="color: white">Sort by veterinarian ⇅</button> </th>
-            <th> <button class="btn btn-default" id="sortByStatusButtonPreviousVisits" type="button" ng-click="$ctrl.SortTableByStatus(false)" style="color: white">Sort by status ⇅</button>  </th>
-            <th style="text-align:center; vertical-align:middle"> <label>Edit</label> </th>
-            <th style="text-align:center; vertical-align:middle"> <label>Delete</label> </th>
-        </tr>
+    <tr>
+        <th> <button class="btn btn-default" id="sortByDateButtonPreviousVisits" type="button" ng-click="$ctrl.SortTableByDate(false)" style="color: white">Sort by date ⇅</button> </th>
+        <th> <button class="btn btn-default" id="sortByDescButtonPreviousVisits" type="button" ng-click="$ctrl.SortTableByDesc(false)" style="color: white">Sort by description ⇅</button> </th>
+        <th> <button class="btn btn-default" id="sortByVetButtonPreviousVisits" type="button" ng-click="$ctrl.SortTableByVet(false)" style="color: white">Sort by veterinarian ⇅</button> </th>
+        <th> <button class="btn btn-default" id="sortByStatusButtonPreviousVisits" type="button" ng-click="$ctrl.SortTableByStatus(false)" style="color: white">Sort by status ⇅</button>  </th>
+        <th style="text-align:center; vertical-align:middle"> <label>Edit</label> </th>
+        <th style="text-align:center; vertical-align:middle"> <label>Delete</label> </th>
+    </tr>
     </thead>
     <tbody>
-        <tr ng-repeat="v in $ctrl.previousVisits" data-index="{{$index}}" data-table-name="previousVisits">
-            <td class="col-sm-2">{{v.date | date:'MM-dd-yyyy'}}</td>
-            <td style="white-space: pre-line">{{v.description}}</td>
-            <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>
-            <td class="status-text" style="white-space: pre-line">{{$ctrl.getStatus(v.status)}}</td>
-            <td style="text-align:center; vertical-align:middle"><button class="btn btn-default" style="background-color: royalblue; color: white" ng-click="$ctrl.switchToUpdateForm($event, v.practitionerId, v.date, v.description, v.visitId, v.status)">Edit Visit</button></td>
-            <td style="text-align:center; vertical-align:middle"><button class="btn btn-danger" ng-click="$ctrl.showConfirmationModal($event, v.visitId)">Delete visit</button></td>
-        </tr>
+    <tr ng-repeat="v in $ctrl.previousVisits" data-index="{{$index}}" data-table-name="previousVisits">
+        <td class="col-sm-2">{{v.visitDate | date:'yyyy-MM-ddTHH:mm:ss'}}</td>
+        <td style="white-space: pre-line">{{v.description}}</td>
+        <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>
+        <td class="status-text" style="white-space: pre-line">{{$ctrl.getStatus(v.status)}}</td>
+        <td style="text-align:center; vertical-align:middle"><button class="btn btn-default" style="background-color: royalblue; color: white" ng-click="$ctrl.switchToUpdateForm($event, v.practitionerId, v.date, v.description, v.visitId, v.status)">Edit Visit</button></td>
+        <td style="text-align:center; vertical-align:middle"><button class="btn btn-danger" ng-click="$ctrl.showConfirmationModal($event, v.visitId)">Delete visit</button></td>
+    </tr>
     </tbody>
 </table>

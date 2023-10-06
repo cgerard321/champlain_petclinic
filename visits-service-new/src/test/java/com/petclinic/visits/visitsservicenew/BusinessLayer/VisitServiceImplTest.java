@@ -23,10 +23,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port: 0"})
@@ -62,7 +59,7 @@ class VisitServiceImplTest {
     String uuidOwner = UUID.randomUUID().toString();
 
     Set<SpecialtyDTO> set= new HashSet<>();
-
+    Set<Workday> workdays = new HashSet<>();
 
     VetDTO vet = VetDTO.builder()
             .vetId(uuidVet)
@@ -73,7 +70,7 @@ class VisitServiceImplTest {
             .phoneNumber("(514)-634-8276 #2384")
             .imageId("1")
             .resume("Practicing since 3 years")
-            .workday("Monday, Tuesday, Friday")
+            .workday(workdays)
             .active(true)
             .specialties(set)
             .build();
@@ -217,11 +214,28 @@ class VisitServiceImplTest {
                     assertEquals(visit1.getStatus(), Status.CANCELLED);
                 }).verifyComplete();
     }
+    @Test
+    void updateVisit(){
+        when(visitRepo.save(any(Visit.class))).thenReturn(Mono.just(visit1));
+        when(visitRepo.findByVisitId(anyString())).thenReturn(Mono.just(visit1));
+        when(petsClient.getPetById(anyString())).thenReturn(Mono.just(petResponseDTO));
+        when(vetsClient.getVetByVetId(anyString())).thenReturn(Mono.just(vet));
+
+        StepVerifier.create(visitService.updateVisit(VISIT_ID, Mono.just(visitRequestDTO)))
+                .consumeNextWith(visitDTO1 -> {
+                    assertEquals(visit1.getVisitId(), visitDTO1.getVisitId());
+                    assertEquals(visit1.getDescription(), visitDTO1.getDescription());
+                    assertEquals(visit1.getPetId(), visitDTO1.getPetId());
+                    assertEquals(visit1.getVisitDate(), visitDTO1.getVisitDate());
+                    assertEquals(visit1.getPractitionerId(), visitDTO1.getPractitionerId());
+                }).verifyComplete();
+    }
+
 
     @Test
     void deleteVisitById_visitId_shouldSucceed(){
         //arrange
-        String visitId = uuidVisit1.toString();
+        String visitId = uuidVisit1;
 
         Mockito.when(visitRepo.existsByVisitId(visitId)).thenReturn(Mono.just(true));
         Mockito.when(visitRepo.deleteByVisitId(visitId)).thenReturn(Mono.empty());
@@ -250,31 +264,59 @@ class VisitServiceImplTest {
 
         // Assert
         StepVerifier.create(result)
-                .expectError(NotFoundException.class) // Expecting a NotFoundException
+                .expectError(NotFoundException.class) // Expecting NotFoundException
                 .verify();
 
-        // Verify that deleteByVisitId was not called
+        // Verify that deleteByVisitId was not called since is does not exist
         Mockito.verify(visitRepo, Mockito.never()).deleteByVisitId(visitId);
     }
 
-
     @Test
-    void updateVisit(){
-        when(visitRepo.save(any(Visit.class))).thenReturn(Mono.just(visit1));
-        when(visitRepo.findByVisitId(anyString())).thenReturn(Mono.just(visit1));
-        when(petsClient.getPetById(anyString())).thenReturn(Mono.just(petResponseDTO));
-        when(vetsClient.getVetByVetId(anyString())).thenReturn(Mono.just(vet));
+    void deleteAllCancelledVisits(){
 
-        StepVerifier.create(visitService.updateVisit(VISIT_ID, Mono.just(visitRequestDTO)))
-                .consumeNextWith(visitDTO1 -> {
-                    assertEquals(visit1.getVisitId(), visitDTO1.getVisitId());
-                    assertEquals(visit1.getDescription(), visitDTO1.getDescription());
-                    assertEquals(visit1.getPetId(), visitDTO1.getPetId());
-                    assertEquals(visit1.getVisitDate(), visitDTO1.getVisitDate());
-                    assertEquals(visit1.getPractitionerId(), visitDTO1.getPractitionerId());
-                }).verifyComplete();
+        // Arrange
+
+        List<Visit> cancelledVisits = new ArrayList<>();
+        cancelledVisits.add(buildVisit(uuidVisit1, "Cat is sick", vet.getVetId()));
+        cancelledVisits.add(buildVisit(uuidVisit2, "Cat is sick", vet.getVetId()));
+        cancelledVisits.forEach(visit -> visit.setStatus(Status.CANCELLED)); //set statuses to CANCELLED
+
+        Mockito.when(visitRepo.findAllByStatus("CANCELLED")).thenReturn(Flux.fromIterable(cancelledVisits));
+        Mockito.when(visitRepo.deleteAll(cancelledVisits)).thenReturn(Mono.empty());
+
+        // Act
+        Mono<Void> result = visitService.deleteAllCancelledVisits();
+
+        // Assert
+        StepVerifier.create(result)
+                .verifyComplete();
+
+        Mockito.verify(visitRepo, Mockito.times(1)).findAllByStatus("CANCELLED");
+        Mockito.verify(visitRepo, Mockito.times(1)).deleteAll(cancelledVisits);
     }
 
+    @Test
+    void deleteAllCanceledVisits_shouldThrowRuntimeException() {
+        // Arrange
+        List<Visit> cancelledVisits = new ArrayList<>();
+        cancelledVisits.add(buildVisit(uuidVisit1, "Cat is sick", vet.getVetId()));
+        cancelledVisits.add(buildVisit(uuidVisit2, "Cat is sick", vet.getVetId()));
+        cancelledVisits.forEach(visit -> visit.setStatus(Status.CANCELLED)); //set statuses to CANCELLED
+
+        Mockito.when(visitRepo.findAllByStatus("CANCELLED")).thenReturn(Flux.fromIterable(cancelledVisits));
+        Mockito.when(visitRepo.deleteAll(cancelledVisits)).thenReturn(Mono.error(new RuntimeException("Failed to delete visits")));
+
+        // Act
+        Mono<Void> result = visitService.deleteAllCancelledVisits();
+
+        // Assert
+        StepVerifier.create(result)
+                .expectError(RuntimeException.class)
+                .verify();
+
+        Mockito.verify(visitRepo, Mockito.times(1)).findAllByStatus("CANCELLED");
+        Mockito.verify(visitRepo, Mockito.times(1)).deleteAll(cancelledVisits);
+    }
 
     private Visit buildVisit(String uuid,String description, String vetId){
         return Visit.builder()
@@ -293,7 +335,7 @@ class VisitServiceImplTest {
                 .description("this is a dummy description")
                 .petId("2")
                 .practitionerId(UUID.randomUUID().toString())
-                .status(Status.REQUESTED)
+                .status(Status.UPCOMING)
                 .build();
     }
     private VisitRequestDTO buildVisitRequestDTO() {
@@ -302,7 +344,7 @@ class VisitServiceImplTest {
                     .description("this is a dummy description")
                     .petId("2")
                     .practitionerId(UUID.randomUUID().toString())
-                    .status(Status.REQUESTED)
+                    .status(Status.UPCOMING)
                     .build();
         }
 

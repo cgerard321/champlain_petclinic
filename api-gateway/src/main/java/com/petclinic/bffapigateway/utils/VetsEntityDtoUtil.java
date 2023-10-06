@@ -9,12 +9,8 @@ public class VetsEntityDtoUtil {
     public VetsEntityDtoUtil(){}
 
     public static String verifyId(String id) {
-        try {
-            Integer.parseInt(id);
-        }
-        catch(NumberFormatException e) {
+        if(id.length() != 36)
             throw new InvalidInputException("This id is not valid");
-        }
         return id;
     }
 }

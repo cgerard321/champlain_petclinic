@@ -13,9 +13,12 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+import java.util.Optional;
 import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -483,6 +486,31 @@ class ProductInventoryServiceUnitTest {
         // Assert
         assertTrue(exception.getMessage().contains("Product price and quantity must be greater than 0."));
     }
+
+    @Test
+    void updateProductInInventory_InvalidInputNull_ShouldThrowInvalidInputException() {
+        // Arrange
+        String inventoryId = "1";
+        String productId = "2";
+
+        ProductRequestDTO productRequestDTO = ProductRequestDTO.builder()
+                .productName(null)
+                .productPrice(null)
+                .productQuantity(null)
+                .build();
+
+        // Mock the behavior of the inventoryRepository to return a dummy Inventory object
+        when(inventoryRepository.findInventoryByInventoryId(eq(inventoryId)))
+                .thenReturn(Mono.just(new Inventory()));
+
+        // Act and Assert
+        StepVerifier.create(productInventoryService.updateProductInInventory(Mono.just(productRequestDTO), inventoryId, productId))
+                .expectError(InvalidInputException.class)
+                .verify();
+
+        // You can also assert the exception message here if needed
+    }
+
     public void deleteProduct_InvalidInventoryId_ShouldNotFound(){
         //arrange
         String invalidInventoryId = "invalid";
@@ -619,12 +647,14 @@ class ProductInventoryServiceUnitTest {
         String inventoryName = "SampleName";
         String inventoryType = "SampleType";
         String inventoryDescription = "SampleDescription";
+        Optional<Integer> page = Optional.of(0);
+        Optional<Integer> size = Optional.of(10);
 
         when(inventoryRepository
                 .findAllByInventoryNameAndInventoryTypeAndInventoryDescription(inventoryName, inventoryType, inventoryDescription))
                 .thenReturn(Flux.just(inventory));
 
-        Flux<InventoryResponseDTO> responseFlux = productInventoryService.searchInventories(inventoryName, inventoryType, inventoryDescription);
+        Flux<InventoryResponseDTO> responseFlux = productInventoryService.searchInventories(PageRequest.of(page.orElse(0),size.orElse(10)),inventoryName, inventoryType, inventoryDescription);
 
         StepVerifier
                 .create(responseFlux)
@@ -636,13 +666,15 @@ class ProductInventoryServiceUnitTest {
     void searchInventories_WithTypeAndDescription_shouldSucceed() {
         String inventoryType = "SampleType";
         String inventoryDescription = "SampleDescription";
+        Optional<Integer> page = Optional.of(0);
+        Optional<Integer> size = Optional.of(10);
 
         when(inventoryRepository
                 .findAllByInventoryTypeAndInventoryDescription(inventoryType, inventoryDescription))
                 .thenReturn(Flux.just(inventory));
 
         Flux<InventoryResponseDTO> responseFlux = productInventoryService
-                .searchInventories(null, inventoryType, inventoryDescription);
+                .searchInventories(PageRequest.of(page.orElse(0),size.orElse(10)), null, inventoryType, inventoryDescription);
 
         StepVerifier
                 .create(responseFlux)
@@ -653,12 +685,14 @@ class ProductInventoryServiceUnitTest {
     @Test
     void searchInventories_WithName_shouldSucceed() {
         String inventoryName = "SampleName";
+        Optional<Integer> page = Optional.of(0);
+        Optional<Integer> size = Optional.of(10);
 
         when(inventoryRepository.findAllByInventoryName(inventoryName))
                 .thenReturn(Flux.just(inventory));
 
         Flux<InventoryResponseDTO> responseFlux = productInventoryService
-                .searchInventories(inventoryName, null, null);
+                .searchInventories(PageRequest.of(page.orElse(0),size.orElse(10)), inventoryName, null, null);
 
         StepVerifier
                 .create(responseFlux)
@@ -669,12 +703,14 @@ class ProductInventoryServiceUnitTest {
     @Test
     void searchInventories_WithType_shouldSucceed() {
         String inventoryType = "SampleType";
+        Optional<Integer> page = Optional.of(0);
+        Optional<Integer> size = Optional.of(10);
 
         when(inventoryRepository.findAllByInventoryType(inventoryType))
                 .thenReturn(Flux.just(inventory));
 
         Flux<InventoryResponseDTO> responseFlux = productInventoryService
-                .searchInventories(null, inventoryType, null);
+                .searchInventories(PageRequest.of(page.orElse(0),size.orElse(10)),null, inventoryType, null);
 
         StepVerifier
                 .create(responseFlux)
@@ -685,12 +721,14 @@ class ProductInventoryServiceUnitTest {
     @Test
     void searchInventories_WithDescription_shouldSucceed() {
         String inventoryDescription = "SampleDescription";
+        Optional<Integer> page = Optional.of(0);
+        Optional<Integer> size = Optional.of(10);
 
         when(inventoryRepository.findAllByInventoryDescription(inventoryDescription))
                 .thenReturn(Flux.just(inventory));
 
         Flux<InventoryResponseDTO> responseFlux = productInventoryService
-                .searchInventories(null, null, inventoryDescription);
+                .searchInventories(PageRequest.of(page.orElse(0),size.orElse(10)),null, null, inventoryDescription);
 
         StepVerifier
                 .create(responseFlux)
@@ -702,9 +740,11 @@ class ProductInventoryServiceUnitTest {
     void searchInventories_WithNoFilters_shouldFetchAll() {
         when(inventoryRepository.findAll())
                 .thenReturn(Flux.just(inventory));
+        Optional<Integer> page = Optional.of(0);
+        Optional<Integer> size = Optional.of(10);
 
         Flux<InventoryResponseDTO> responseFlux = productInventoryService
-                .searchInventories(null, null, null);
+                .searchInventories(PageRequest.of(page.orElse(0),size.orElse(10)),null, null, null);
 
         StepVerifier
                 .create(responseFlux)

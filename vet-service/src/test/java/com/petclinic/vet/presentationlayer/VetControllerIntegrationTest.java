@@ -7,6 +7,7 @@ import com.petclinic.vet.dataaccesslayer.ratings.PredefinedDescription;
 import com.petclinic.vet.dataaccesslayer.ratings.Rating;
 import com.petclinic.vet.dataaccesslayer.ratings.RatingRepository;
 import com.petclinic.vet.servicelayer.*;
+import com.petclinic.vet.servicelayer.education.EducationRequestDTO;
 import com.petclinic.vet.servicelayer.education.EducationResponseDTO;
 import com.petclinic.vet.servicelayer.ratings.RatingRequestDTO;
 import com.petclinic.vet.servicelayer.ratings.RatingResponseDTO;
@@ -57,19 +58,28 @@ class VetControllerIntegrationTest {
     Education education2 = buildEducation2();
     Vet vet = buildVet("1234");
     Vet vet2 = buildVet2("2345");
-    Rating rating1 = buildRating("12345", "678910", 5.0);
-    Rating rating2 = buildRating("12346", "678910", 4.0);
-    Rating rating3 = buildRating("12347", "678910", 3.0);
+
+    Rating rating1 = buildRating("12345", "db0c8f13-89d2-4ef7-bcd5-3776a3734150", 5.0);
+    Rating rating2 = buildRating("12346", "db0c8f13-89d2-4ef7-bcd5-3776a3734150", 4.0);
+    Rating rating3 = buildRating("12347", "db0c8f13-89d2-4ef7-bcd5-3776a3734150", 3.0);
 
     VetDTO vetDTO = buildVetDTO("3456");
-    String VET_ID = "678910";
+    String VET_ID = "db0c8f13-89d2-4ef7-bcd5-3776a3734150";
     String VET_BILL_ID = vet.getVetBillId();
     String INVALID_VET_ID = "mjbedf";
     RatingRequestDTO updatedRating = RatingRequestDTO.builder()
             .rateScore(2.0)
-            .vetId("678910")
+            .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
             .rateDescription("Vet cancelled last minute.")
             .rateDate("20/09/2023")
+            .build();
+    EducationRequestDTO updatedEducation = EducationRequestDTO.builder()
+            .schoolName("McGill")
+            .vetId("678910")
+            .degree("Bachelor of Medicine")
+            .fieldOfStudy("Medicine")
+            .startDate("2010")
+            .endDate("2015")
             .build();
 
     @Test
@@ -104,10 +114,10 @@ class VetControllerIntegrationTest {
 
     @Test
     void getAllRatingsForAVet_WithInvalidVetId_ShouldNotSucceed() {
-        String invalidVetId="123";
+        String invalidVetId="ac90fcca-a79c-411d-93f2-b70a80da0c3a";
         client
                 .get()
-                .uri("/vets/" + 123 + "/ratings")
+                .uri("/vets/" + invalidVetId + "/ratings")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNotFound()
@@ -653,7 +663,7 @@ class VetControllerIntegrationTest {
 
     @Test
     void getPercentageOfRatingsByInvalidVetId_ShouldNotSucceed(){
-        String invalidVetId="123";
+        String invalidVetId="ac90fcca-a79c-411d-93f2-b70a80da0c3a";
 
         client.get()
                 .uri("/vets/" + invalidVetId + "/ratings" + "/percentages")
@@ -689,8 +699,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$[0].firstName").isEqualTo(vet.getFirstName())
                 .jsonPath("$[0].email").isEqualTo(vet.getEmail())
                 .jsonPath("$[0].imageId").isNotEmpty()
-                .jsonPath("$[0].active").isEqualTo(vet.isActive())
-                .jsonPath("$[0].workday").isEqualTo(vet.getWorkday());
+                .jsonPath("$[0].active").isEqualTo(vet.isActive());
     }
 
     @Test
@@ -716,15 +725,13 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.lastName").isEqualTo(vet.getLastName())
                 .jsonPath("$.firstName").isEqualTo(vet.getFirstName())
                 .jsonPath("$.email").isEqualTo(vet.getEmail())
-                .jsonPath("$.active").isEqualTo(vet.isActive())
-                .jsonPath("$.workday").isEqualTo(vet.getWorkday());
+                .jsonPath("$.active").isEqualTo(vet.isActive());
 
     }
 
     @Test
     void getVetByVetBillId() {
         Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet));
-        String uri = "/vets/vetBillId/{vetBillId}";
 
         StepVerifier
                 .create(setup)
@@ -745,8 +752,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.lastName").isEqualTo(vet.getLastName())
                 .jsonPath("$.firstName").isEqualTo(vet.getFirstName())
                 .jsonPath("$.email").isEqualTo(vet.getEmail())
-                .jsonPath("$.active").isEqualTo(vet.isActive())
-                .jsonPath("$.workday").isEqualTo(vet.getWorkday());
+                .jsonPath("$.active").isEqualTo(vet.isActive());
 
     }
 
@@ -774,8 +780,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.firstName").isEqualTo(vetDTO.getFirstName())
                 .jsonPath("$.email").isEqualTo(vetDTO.getEmail())
                 .jsonPath("$.imageId").isNotEmpty()
-                .jsonPath("$.active").isEqualTo(vetDTO.isActive())
-                .jsonPath("$.workday").isEqualTo(vetDTO.getWorkday());
+                .jsonPath("$.active").isEqualTo(vetDTO.isActive());
 
     }
 
@@ -789,7 +794,7 @@ class VetControllerIntegrationTest {
                 .verifyComplete();
 
         VetDTO updatedVet=VetDTO.builder()
-                .vetId("678910")
+                .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
                 .vetBillId("1")
                 .firstName("Clementineeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
                 .lastName("LeBlanc")
@@ -797,7 +802,7 @@ class VetControllerIntegrationTest {
                 .phoneNumber("947-238-28479")
                 .resume("Just became a vet")
                 .imageId("kjd")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -824,7 +829,7 @@ class VetControllerIntegrationTest {
                 .verifyComplete();
 
         VetDTO updatedVet=VetDTO.builder()
-                .vetId("678910")
+                .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
                 .vetBillId("1")
                 .firstName("Clementine")
                 .lastName("LeBlanccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc")
@@ -832,7 +837,7 @@ class VetControllerIntegrationTest {
                 .phoneNumber("947-238-28479")
                 .resume("Just became a vet")
                 .imageId("kjd")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -859,7 +864,7 @@ class VetControllerIntegrationTest {
                 .verifyComplete();
 
         VetDTO updatedVet=VetDTO.builder()
-                .vetId("678910")
+                .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
                 .vetBillId("1")
                 .firstName("Clementine")
                 .lastName("LeBlanc")
@@ -867,7 +872,7 @@ class VetControllerIntegrationTest {
                 .phoneNumber("947-238-28479999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999")
                 .resume("Just became a vet")
                 .imageId("kjd")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -895,7 +900,7 @@ class VetControllerIntegrationTest {
 
         String extensionNum="7654";
         VetDTO updatedVet=VetDTO.builder()
-                .vetId("678910")
+                .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
                 .vetBillId("1")
                 .firstName("Clementine")
                 .lastName("LeBlanc")
@@ -910,7 +915,7 @@ class VetControllerIntegrationTest {
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Just became a vet")
                 .imageId("kjd")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -938,7 +943,7 @@ class VetControllerIntegrationTest {
 
         String extensionNum="7920";
         VetDTO updatedVet=VetDTO.builder()
-                .vetId("678910")
+                .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
                 .vetBillId("1")
                 .firstName("Clementine")
                 .lastName("LeBlanc")
@@ -946,7 +951,7 @@ class VetControllerIntegrationTest {
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Jo")
                 .imageId("kjd")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -974,7 +979,7 @@ class VetControllerIntegrationTest {
 
         String extensionNum="7920";
         VetDTO updatedVet=VetDTO.builder()
-                .vetId("678910")
+                .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
                 .vetBillId("1")
                 .firstName("Clementine")
                 .lastName("LeBlanc")
@@ -982,7 +987,7 @@ class VetControllerIntegrationTest {
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("I've been a vet ever since I was a kid.")
                 .imageId("kjd")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(null)
                 .active(false)
                 .build();
@@ -1022,8 +1027,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$[0].firstName").isEqualTo(vet2.getFirstName())
                 .jsonPath("$[0].email").isEqualTo(vet2.getEmail())
                 .jsonPath("$[0].imageId").isNotEmpty()
-                .jsonPath("$[0].active").isEqualTo(vet2.isActive())
-                .jsonPath("$[0].workday").isEqualTo(vet2.getWorkday());
+                .jsonPath("$[0].active").isEqualTo(vet2.isActive());
     }
 
     @Test
@@ -1049,8 +1053,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$[0].firstName").isEqualTo(vet.getFirstName())
                 .jsonPath("$[0].email").isEqualTo(vet.getEmail())
                 .jsonPath("$[0].imageId").isNotEmpty()
-                .jsonPath("$[0].active").isEqualTo(vet.isActive())
-                .jsonPath("$[0].workday").isEqualTo(vet.getWorkday());
+                .jsonPath("$[0].active").isEqualTo(vet.isActive());
     }
 
 
@@ -1095,7 +1098,7 @@ class VetControllerIntegrationTest {
                 .verifyComplete();
 
         VetDTO newVet=VetDTO.builder()
-                .vetId("678910")
+                .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
                 .vetBillId("1")
                 .firstName("Clementine")
                 .lastName("LeBlanc")
@@ -1103,7 +1106,7 @@ class VetControllerIntegrationTest {
                 .phoneNumber("947-238-28479999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999")
                 .resume("Just became a vet")
                 .imageId("kjd")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -1131,7 +1134,7 @@ class VetControllerIntegrationTest {
 
         String extensionNum="4527";
         VetDTO newVet=VetDTO.builder()
-                .vetId("678910")
+                .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
                 .vetBillId("1")
                 .firstName("Clementine")
                 .lastName("LeBlanc")
@@ -1146,7 +1149,7 @@ class VetControllerIntegrationTest {
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Just became a vet")
                 .imageId("kjd")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -1174,7 +1177,7 @@ class VetControllerIntegrationTest {
                 .verifyComplete();
 
         VetDTO newVet=VetDTO.builder()
-                .vetId("678910")
+                .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
                 .vetBillId("1")
                 .firstName("Clementineeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
                 .lastName("LeBlanc")
@@ -1182,7 +1185,7 @@ class VetControllerIntegrationTest {
                 .phoneNumber("947-238-28479")
                 .resume("Just became a vet")
                 .imageId("kjd")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -1210,7 +1213,7 @@ class VetControllerIntegrationTest {
 
         String extensionNum="0987";
         VetDTO newVet=VetDTO.builder()
-                .vetId("678910")
+                .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
                 .vetBillId("1")
                 .firstName("Clementine")
                 .lastName("LeBlanccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc")
@@ -1218,7 +1221,7 @@ class VetControllerIntegrationTest {
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Just became a vet")
                 .imageId("kjd")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -1246,7 +1249,7 @@ class VetControllerIntegrationTest {
 
         String extensionNum="4527";
         VetDTO newVet=VetDTO.builder()
-                .vetId("678910")
+                .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
                 .vetBillId("1")
                 .firstName("Clementine")
                 .lastName("LeBlanc")
@@ -1254,7 +1257,7 @@ class VetControllerIntegrationTest {
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Jo")
                 .imageId("kjd")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -1283,7 +1286,7 @@ class VetControllerIntegrationTest {
 
         String extensionNum="4527";
         VetDTO newVet=VetDTO.builder()
-                .vetId("678910")
+                .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
                 .vetBillId("1")
                 .firstName("Clementine")
                 .lastName("LeBlanc")
@@ -1291,7 +1294,7 @@ class VetControllerIntegrationTest {
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Just became a vet")
                 .imageId("kjd")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(null)
                 .active(false)
                 .build();
@@ -1374,6 +1377,39 @@ class VetControllerIntegrationTest {
                 .expectStatus().isOk()
                 .expectBody();
     }
+    @Test
+    void updateEducation_withValidVetIdAndValidEducationId_shouldSucceed() {
+        Publisher<Education> setup = educationRepository.deleteAll()
+                .thenMany(educationRepository.save(education1));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        String existingEducationId = education1.getEducationId();
+
+        client.put()
+                .uri("/vets/" + VET_ID + "/educations/" + existingEducationId)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedEducation)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(EducationResponseDTO.class)
+                .value(educationResponseDTO -> {
+                    assertNotNull(educationResponseDTO);
+                    assertNotNull(educationResponseDTO.getEducationId());
+                    assertThat(educationResponseDTO.getEducationId()).isEqualTo(existingEducationId);
+                    assertThat(educationResponseDTO.getVetId()).isEqualTo(updatedEducation.getVetId());
+                    assertThat(educationResponseDTO.getSchoolName()).isEqualTo(updatedEducation.getSchoolName());
+                    assertThat(educationResponseDTO.getDegree()).isEqualTo(updatedEducation.getDegree());
+                    assertThat(educationResponseDTO.getFieldOfStudy()).isEqualTo(updatedEducation.getFieldOfStudy());
+                    assertThat(educationResponseDTO.getStartDate()).isEqualTo(updatedEducation.getStartDate());
+                    assertThat(educationResponseDTO.getEndDate()).isEqualTo(updatedEducation.getEndDate());
+                });
+    }
 
     @Test
     void addEducationToAVet_WithValidValues_shouldSucceed(){
@@ -1439,6 +1475,8 @@ class VetControllerIntegrationTest {
                 .expectBody()
                 .jsonPath("$.path").isEqualTo("/api/gateway/vets/" + emptyVetId + "/photo");
     }
+
+
 
     @Test
     void toStringBuilders() {
@@ -1514,14 +1552,14 @@ class VetControllerIntegrationTest {
     //the extension number can only be 4 digits
     private Vet buildVet(String extensionNum) {
         return Vet.builder()
-                .vetId("678910")
-                .vetBillId("1")
+                .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
+                .vetBillId("ac90fcca-a79c-411d-93f2-b70a80da0c3a")
                 .firstName("Pauline")
                 .lastName("LeBlanc")
                 .email("skjfhf@gmail.com")
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Just became a vet")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .imageId("kjd")
                 .specialties(new HashSet<>())
                 .active(false)
@@ -1531,7 +1569,7 @@ class VetControllerIntegrationTest {
     //the extension number can only be 4 digits
     private Vet buildVet2(String extensionNum) {
         return Vet.builder()
-                .vetId("678910")
+                .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
                 .vetBillId("2")
                 .firstName("Pauline")
                 .lastName("LeBlanc")
@@ -1539,7 +1577,7 @@ class VetControllerIntegrationTest {
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Just became a vet")
                 .imageId("kjd")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .active(true)
                 .specialties(new HashSet<>())
                 .build();
@@ -1556,7 +1594,7 @@ class VetControllerIntegrationTest {
     private Education buildEducation(){
         return Education.builder()
                 .educationId("1")
-                .vetId("678910")
+                .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
                 .degree("Doctor of Veterinary Medicine")
                 .fieldOfStudy("Veterinary Medicine")
                 .schoolName("University of Montreal")
@@ -1568,7 +1606,7 @@ class VetControllerIntegrationTest {
     private Education buildEducation2(){
         return  Education.builder()
                 .educationId("2")
-                .vetId("678910")
+                .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
                 .degree("Doctor of Veterinary Medicine")
                 .fieldOfStudy("Veterinary Medicine")
                 .schoolName("University of Veterinary Sciences")
@@ -1580,15 +1618,15 @@ class VetControllerIntegrationTest {
     //the extension number can only be 4 digits
     private VetDTO buildVetDTO(String extensionNum) {
         return VetDTO.builder()
-                .vetId("678910")
-                .vetBillId("1")
+                .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
+                .vetBillId("ac90fcca-a79c-411d-93f2-b70a80da0c3a")
                 .firstName("Clementine")
                 .lastName("LeBlanc")
                 .email("skjfhf@gmail.com")
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Just became a vet")
                 .imageId("kjd")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();

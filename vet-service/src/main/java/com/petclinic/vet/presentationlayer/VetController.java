@@ -169,6 +169,14 @@ public class VetController {
         return educationService.deleteEducationByEducationId(vetId, educationId);
 
     }
+    @PutMapping("{vetId}/educations/{educationId}")
+    public Mono<ResponseEntity<EducationResponseDTO>> updateEducationByVetIdAndEducationId(@PathVariable String vetId,
+                                                                                           @PathVariable String educationId,
+                                                                                           @RequestBody Mono<EducationRequestDTO> educationRequestDTOMono){
+        return educationService.updateEducationByVetIdAndEducationId(vetId, educationId, educationRequestDTOMono)
+                .map(e->ResponseEntity.status(HttpStatus.OK).body(e))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
 
     @PostMapping("{vetId}/educations")
     public Mono<EducationResponseDTO> addEducationToVet(@PathVariable String vetId, @RequestBody Mono<EducationRequestDTO> educationRequestDTOMono){
@@ -183,5 +191,12 @@ public class VetController {
         return photoService.getPhotoByVetId(vetId)
                 .map(r -> ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE).body(r))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("{vetId}/photos/{photoName}")
+    public Mono<ResponseEntity<Resource>> insertPhoto(@PathVariable String vetId, @PathVariable String photoName, @RequestBody Mono<Resource> photo){
+        return photoService.insertPhotoOfVet(vetId, photoName, photo)
+                .map(p -> ResponseEntity.status(HttpStatus.CREATED).body(p))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 }

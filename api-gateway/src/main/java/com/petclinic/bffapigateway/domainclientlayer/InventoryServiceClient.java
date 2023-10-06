@@ -108,7 +108,7 @@ public class InventoryServiceClient {
 
 
 
-    public Mono<ProductResponseDTO> updateProductInInventory(final ProductRequestDTO model, final String inventoryId, final String productId){
+    public Mono<ProductResponseDTO> updateProductInInventory(ProductRequestDTO model, String inventoryId, String productId){
         return webClient
                 .put()
                 .uri(inventoryServiceUrl + "/{inventoryId}/products/{productId}", inventoryId, productId)
@@ -145,11 +145,15 @@ public class InventoryServiceClient {
                 .bodyToFlux(ProductResponseDTO.class);
     }
     public Flux<InventoryResponseDTO> searchInventory(
+            final Optional<Integer> page,
+            final Optional<Integer> size,
             final String inventoryName,
             final String inventoryType,
             final String inventoryDescription
     ) {
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(inventoryServiceUrl)
+                .queryParamIfPresent("page", page)
+                .queryParamIfPresent("size", size)
                 .queryParamIfPresent("inventoryName", Optional.ofNullable(inventoryName))
                 .queryParamIfPresent("inventoryType", Optional.ofNullable(inventoryType))
                 .queryParamIfPresent("inventoryDescription", Optional.ofNullable(inventoryDescription));
@@ -207,6 +211,4 @@ public class InventoryServiceClient {
                 .retrieve()
                 .bodyToMono(Void.class);
     }
-
-
 }

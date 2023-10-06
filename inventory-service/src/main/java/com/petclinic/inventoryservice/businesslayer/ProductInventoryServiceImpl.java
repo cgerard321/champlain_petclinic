@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
+import org.springframework.data.domain.Pageable;
 
 
 @Service
@@ -92,17 +93,18 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                         .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with id: " + inventoryId)))
                         .flatMap(inventory -> {
                             if (requestDTO.getProductName() == null || requestDTO.getProductPrice() == null || requestDTO.getProductQuantity() == null) {
-                                return Mono.error(new InvalidInputException("Product must have an inventory id, product name, product price, and product quantity."));
+                                    return Mono.error(new InvalidInputException("Product must have an inventory id, product name, product price, and product quantity."));
                             } else if (requestDTO.getProductPrice() < 0 || requestDTO.getProductQuantity() < 0) {
                                 return Mono.error(new InvalidInputException("Product price and quantity must be greater than 0."));
                             } else {
                                 return productRepository.findProductByProductId(productId)
                                         .flatMap(existingProduct -> {
-                                            Product updatedProduct = EntityDTOUtil.toProductEntity(requestDTO);
-                                            updatedProduct.setProductId(existingProduct.getProductId());
-                                            updatedProduct.setInventoryId(existingProduct.getInventoryId());
+                                            existingProduct.setProductName(requestDTO.getProductName());
+                                            existingProduct.setProductDescription(requestDTO.getProductDescription());
+                                            existingProduct.setProductPrice(requestDTO.getProductPrice());
+                                            existingProduct.setProductQuantity(requestDTO.getProductQuantity());
 
-                                            return productRepository.save(updatedProduct)
+                                            return productRepository.save(existingProduct)
                                                     .map(EntityDTOUtil::toProductResponseDTO);
                                         })
                                         .switchIfEmpty(Mono.error(new NotFoundException("Product not found with id: " + productId)));
@@ -225,12 +227,14 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     }
 */
     @Override
-    public Flux<InventoryResponseDTO>searchInventories(String inventoryName, String inventoryType, String inventoryDescription) {
+    public Flux<InventoryResponseDTO>searchInventories(Pageable page, String inventoryName, String inventoryType, String inventoryDescription) {
 
         if (inventoryName != null && inventoryType != null && inventoryDescription != null){
             return inventoryRepository
                     .findAllByInventoryNameAndInventoryTypeAndInventoryDescription(inventoryName, inventoryType, inventoryDescription)
                     .map(EntityDTOUtil::toInventoryResponseDTO)
+                    .skip(page.getPageNumber() * page.getPageSize())
+                    .take(page.getPageSize())
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Name: " + inventoryName +
                             ", Type: " + inventoryType + ", Description: " + inventoryDescription)));
         }
@@ -239,6 +243,8 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
             return inventoryRepository
                     .findAllByInventoryTypeAndInventoryDescription(inventoryType, inventoryDescription)
                     .map(EntityDTOUtil::toInventoryResponseDTO)
+                    .skip(page.getPageNumber() * page.getPageSize())
+                    .take(page.getPageSize())
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Type: " + inventoryType +
                             " and Description: " + inventoryDescription)));
         }
@@ -247,6 +253,8 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
             return inventoryRepository
                     .findAllByInventoryName(inventoryName)
                     .map(EntityDTOUtil::toInventoryResponseDTO)
+                    .skip(page.getPageNumber() * page.getPageSize())
+                    .take(page.getPageSize())
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Name: " + inventoryName)));
         }
 
@@ -254,6 +262,8 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
             return inventoryRepository
                     .findAllByInventoryType(inventoryType)
                     .map(EntityDTOUtil::toInventoryResponseDTO)
+                    .skip(page.getPageNumber() * page.getPageSize())
+                    .take(page.getPageSize())
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Type: " + inventoryType)));
         }
 
@@ -261,12 +271,16 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
             return inventoryRepository
                     .findAllByInventoryDescription(inventoryDescription)
                     .map(EntityDTOUtil::toInventoryResponseDTO)
+                    .skip(page.getPageNumber() * page.getPageSize())
+                    .take(page.getPageSize())
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Description: " + inventoryDescription)));
         }
 
         // Default - fetch all if no criteria provided.
         return inventoryRepository
                 .findAll()
+                .skip(page.getPageNumber() * page.getPageSize())
+                .take(page.getPageSize())
                 .map(EntityDTOUtil::toInventoryResponseDTO);
     }
 
@@ -289,7 +303,6 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
 
 
     }
-
 
     //delete all products and delete all inventory
     @Override
