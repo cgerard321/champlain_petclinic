@@ -94,6 +94,8 @@
                                 <a style="color: rgba(0,0,0,0.5);" class="btn btn-light" ui-sref="editPet({ownerId: $ctrl.owner.ownerId, petId: pet.petId, method: 'edit'})">Edit Pet</a>
                                 <p>Name: {{ pet.name }}</p>
                                 <p>Pet Id: {{pet.petId}}</p>
+                                <p>Birth Date: {{ pet.birthDate | date:'yyyy-MM-dd' }}</p>
+                                <p>Type: {{pet.type.}}</p>
                                 <!-- Add more pet details as needed -->
                             </div>
                             <div class="border-5 rounded">

@@ -4,6 +4,7 @@ angular.module('ownerDetails')
         self.owner = {};
         self.pet = {};
 
+
         $http.get('api/gateway/owners/' + $stateParams.ownerId).then(function (resp) {
             self.owner = resp.data;
 
