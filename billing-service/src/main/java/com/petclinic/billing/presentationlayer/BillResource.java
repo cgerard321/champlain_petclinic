@@ -79,6 +79,13 @@ public class BillResource {
     }
 
     // Delete Bill //
+
+    @DeleteMapping()
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public Mono<Void> deleteAllBills(){
+        return SERVICE.DeleteAllBills();
+    }
+
     @DeleteMapping(value = "/bills/{billId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public Mono<Void> deleteBill(@PathVariable("billId") String billId){
