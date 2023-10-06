@@ -76,7 +76,6 @@ public class VisitsServiceClient {
                 .retrieve()
                 .bodyToFlux(VisitResponseDTO.class);
     }
-
 /*
     public Flux<VisitDetails> getPreviousVisitsForPet(final String petId) {
         return webClient
