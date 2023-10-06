@@ -20,6 +20,20 @@ angular.module('inventoryList')
             console.log("inventory list: " + self.inventoryList)
         });
 
+                $http.get('api/gateway/inventory').then(function (resp) {
+                    self.inventoryList = resp.data;
+                    console.log("Resp data: " + resp.data)
+                    console.log("inventory list: " + self.inventoryList)
+                });
+        //custom types handler
+        $scope.inventoryTypeOptions = ['',]
+        $http.get("api/gateway/inventory/type").then(function (resp) {
+            //Includes all types inside the array
+            resp.data.forEach(function (type) {
+                $scope.inventoryTypeOptions.push(type.type);
+            })});
+
+//search by inventory field
         $scope.searchInventory = function (inventoryName, inventoryType, inventoryDescription){
             getInventoryList(inventoryName, inventoryType, inventoryDescription)
         }

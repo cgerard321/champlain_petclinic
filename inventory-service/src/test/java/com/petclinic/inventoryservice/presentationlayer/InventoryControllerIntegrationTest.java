@@ -737,6 +737,16 @@ class InventoryControllerIntegrationTest {
                 });
     }
 
+    @Test
+    public void getAllInventoryTypes_shouldSucceed(){
+        webTestClient.get()
+                .uri("/inventory/type")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON);
+    }
+
     /*
     @Test
     public void deleteInventoryByInventoryId_withNotFoundInventoryId_shouldNotFound() {
