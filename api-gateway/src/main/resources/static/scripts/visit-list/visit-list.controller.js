@@ -5,17 +5,20 @@ angular.module('visitList')
         // Lists holding visits for the tables to display
         self.upcomingVisits = []
         self.previousVisits = []
-        // isAdmin: () =>  $window.localStorage.getItem("roles") != null && !!$window.localStorage.getItem("roles").includes("ADMIN")
-        var url = ""
+        let url
+        //sorted by order or most to least permissions
         if ($window.localStorage.getItem("roles")!=null){
-            if ($window.localStorage.getItem("roles").includes("ADMIN")||$window.localStorage.getItem("roles").includes("VET")){ url = "api/gateway/visits"}
-            //todo get implemented once vet signup completed
-
-            // if ($window.localStorage.getItem("roles").includes("VET")) url = "api/gateway/visits"
-            else if ($window.localStorage.getItem("roles").includes("OWNER")) {url = "api/gateway/visits/owner/"+$window.localStorage.getItem("ownerId")}
-
+            if ($window.localStorage.getItem("roles").includes("ADMIN")){
+                url = "api/gateway/visits"
+            }else if ($window.localStorage.getItem("roles").includes("VET")) {
+                url = "api/gateway/visits/vets/"+$window.localStorage.getItem("userId")
+            }
+            else if ($window.localStorage.getItem("roles").includes("OWNER")) {
+                url = "api/gateway/visits/owners/"+$window.localStorage.getItem("ownerId")
+            }else{
+                url = ""
+            }
         }
-
         let eventSource = new EventSource(url)
         eventSource.addEventListener('message', function (event){
             $scope.$apply(function(){
@@ -32,13 +35,6 @@ angular.module('visitList')
             }
         }
 
-        function delayedReload() {
-            var loadingIndicator = document.getElementById('loadingIndicator');
-            loadingIndicator.style.display = 'block';
-            setTimeout(function() {
-                location.reload();
-            }, 500); //delay by 1 second
-        }
 
         $scope.confirmVisit = function (visitId, status){
 
@@ -66,59 +62,49 @@ angular.module('visitList')
                 .then(successCallback, errorCallback)
 
             function successCallback(response) {
-                $scope.errors = [];
-                alert(visitId + " visit was confirmed successfully");
-                console.log(response, 'res');
-                delayedReload();
-            }
-
-            function errorCallback(error) {
-                alert($scope.errors);
-                console.log(error, 'Could not receive data');
+                $scope.errors = []
+                alert(visitId + " visit was confirmed successfully")
+                console.log(response, 'res')
+                delayedReload()
             }
         }
 
         $scope.cancelVisit = function (visitId, status){
 
-            let putURL = 'api/gateway/visits/' + visitId + '/status/' + status;
+            let putURL = 'api/gateway/visits/' + visitId + '/status/' + status
+
+            console.log(putURL)
 
             $http.put(putURL, status)
                 .then(successCallback, errorCallback)
 
             function successCallback(response) {
-                $scope.errors = [];
-                alert(visitId + " visit was cancelled successfully");
-                console.log(response, 'res');
-                delayedReload();
+                $scope.errors = []
+                alert(visitId + " visit was cancelled successfully")
+                console.log(response, 'res')
+                delayedReload()
             }
 
-            function errorCallback(error) {
-                alert($scope.errors);
-                console.log(error, 'Could not receive data');
-            }
         }
 
-
         $scope.deleteVisit = function (visitId) {
-            let varIsConf = confirm('You are about to delete visit ' + visitId + '. Is this what you want to do ? ');
+            let varIsConf = confirm('You are about to delete visit ' + visitId + '. Is this what you want to do ? ')
             if (varIsConf) {
 
                 $http.delete('api/gateway/visits/' + visitId)
                     .then(successCallback, errorCallback)
 
                 function successCallback(response) {
-                    $scope.errors = [];
-                    alert(visitId + " visit was deleted successfully");
-                    console.log(response, 'res');
-                    delayedReload();
+                    $scope.errors = []
+                    alert(visitId + " visit was deleted successfully")
+                    console.log(response, 'res')
+                    delayedReload()
                 }
 
-                function errorCallback(error) {
-                    alert(data.errors);
-                    console.log(error, 'Could not receive data');
-                }
             }
-        };
+        }
+
+
 
         $scope.deleteAllCancelledVisits = function () {
             let varIsConf = confirm('You are about to delete all canceled visits. Is this what you want to do ? ');
@@ -132,15 +118,23 @@ angular.module('visitList')
                     console.log(response, 'res');
                     delayedReload();
                 }
-
-                function errorCallback(error) {
-                    alert(data.errors);
-                    console.log(error, 'Could not receive data');
-                }
             }
-        };
+        }
 
-    }]);
+        function delayedReload() {
+            let loadingIndicator = document.getElementById('loadingIndicator')
+            loadingIndicator.style.display = 'block'
+            setTimeout(function() {
+                location.reload()
+            }, 1000) //delay by 1 second
+        }
+
+        function errorCallback(error) {
+            alert(error.errors)
+            console.log(error, 'Could not receive data')
+        }
+
+    }])
 
 //     // self.sortFetchedVisits = function() {
     //     //     let currentDate = getCurrentDate()

@@ -31,7 +31,6 @@ import static java.util.stream.Collectors.joining;
 @Component
 @Slf4j
 public class VisitsServiceClient {
-
     private final WebClient webClient;
 
     @Autowired
@@ -40,14 +39,14 @@ public class VisitsServiceClient {
             @Value("${app.visits-service-new.port}") String visitsServicePort
     ) {
         this.webClient = WebClient.builder()
-                .baseUrl("http://" + visitsServiceHost + ":" + visitsServicePort)
+                .baseUrl("http://" + visitsServiceHost + ":" + visitsServicePort + "/visits")
                 .build();
     }
 
     public Flux<VisitResponseDTO> getAllVisits(){
         return this.webClient
                 .get()
-                .uri("/visits")
+                .uri("")
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, error -> Mono.error(new IllegalArgumentException("Something went wrong and we got a 400 error")))
                 .onStatus(HttpStatusCode::is5xxServerError, error -> Mono.error(new IllegalArgumentException("Something went wrong and we got a 500 error")))
@@ -57,7 +56,7 @@ public class VisitsServiceClient {
     public Flux<VisitResponseDTO> getVisitsForStatus(final String status){
         return webClient
                 .get()
-                .uri("/visits/status/{status}", status)
+                .uri("/status/{status}", status)
                 .retrieve()
                 .bodyToFlux(VisitResponseDTO.class);
     }
@@ -66,10 +65,18 @@ public class VisitsServiceClient {
     public Flux<VisitResponseDTO> getVisitsForPet(final String petId){
         return webClient
                 .get()
-                .uri("/visits/pets/{petId}", petId)
+                .uri("/pets/{petId}", petId)
                 .retrieve()
                 .bodyToFlux(VisitResponseDTO.class);
     }
+    public Flux<VisitResponseDTO> getVisitByPractitionerId(final String practitionerId){
+        return webClient
+                .get()
+                .uri("/vets/{practitionerId}", practitionerId)
+                .retrieve()
+                .bodyToFlux(VisitResponseDTO.class);
+    }
+
 /*
     public Flux<VisitDetails> getPreviousVisitsForPet(final String petId) {
         return webClient
@@ -79,13 +86,6 @@ public class VisitsServiceClient {
                 .bodyToFlux(VisitDetails.class);
     }
 
-    public Flux<VisitDetails> getVisitForPractitioner(final int practitionerId){
-        return webClient
-                .get()
-                .uri("visits/vets/{practitionerId}", practitionerId)
-                .retrieve()
-                .bodyToFlux(VisitDetails.class);
-    }
 
 
     public Flux<VisitDetails> getScheduledVisitsForPet(final String petId) {
@@ -116,7 +116,7 @@ public class VisitsServiceClient {
     public Mono<VisitResponseDTO> getVisitByVisitId(String visitId) {
         return webClient
                 .get()
-                .uri("/visit/{visitId}", visitId)
+                .uri("/{visitId}", visitId)
                 .retrieve()
                 .bodyToMono(VisitResponseDTO.class);
     }
@@ -133,7 +133,7 @@ public class VisitsServiceClient {
 
         return webClient
             .put()
-            .uri("/visits/"+ visitId +"/status/" + newStatus)
+            .uri("/"+ visitId +"/status/" + newStatus)
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             .retrieve()
             .bodyToMono(VisitResponseDTO.class);
@@ -143,7 +143,7 @@ public class VisitsServiceClient {
     public Mono<VisitResponseDTO> createVisitForPet(VisitRequestDTO visit) {
         return webClient
             .post()
-            .uri("/visits")
+            .uri("")
             .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
             .body(Mono.just(visit), VisitRequestDTO.class)
             .retrieve()
@@ -173,7 +173,7 @@ public class VisitsServiceClient {
     public Mono<Void> deleteVisitByVisitId(String visitId){
         return webClient
                 .delete()
-                .uri("/visits/{visitId}", visitId)
+                .uri("/{visitId}", visitId)
                 .retrieve()
                 .bodyToMono(Void.class);
     }

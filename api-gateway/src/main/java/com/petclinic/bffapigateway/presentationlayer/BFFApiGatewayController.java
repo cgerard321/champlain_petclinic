@@ -31,7 +31,6 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
 import java.util.Optional;
 
 /**
@@ -234,10 +233,14 @@ public class BFFApiGatewayController {
 
 //    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET,Roles.OWNER})
     @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN,Roles.VET})
-    @GetMapping(value = "visits/owner/{ownerId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "visits/owners/{ownerId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VisitResponseDTO> getVisitsByOwnerId(@PathVariable String ownerId){
 //not ideal since returns complete pet dto
         return getPetsByOwnerId(ownerId).flatMap(petResponseDTO -> getVisitsForPet(petResponseDTO.getPetId()));
+    }
+    @GetMapping(value = "visits/vets/{practitionerId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<VisitResponseDTO> getVisitByPractitionerId(@PathVariable final String practitionerId){
+        return visitsServiceClient.getVisitByPractitionerId(practitionerId);
     }
 
     @GetMapping(value = "visits/pets/{petId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
@@ -292,10 +295,6 @@ public class BFFApiGatewayController {
         @GetMapping(value = "visits/scheduled/{petId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
         public Flux<VisitDetails> getScheduledVisitsForPet(@PathVariable final String petId) {
             return visitsServiceClient.getScheduledVisitsForPet(petId);
-        }
-        @GetMapping(value = "visits/vets/{practitionerId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-        public Flux<VisitDetails> getVisitForPractitioner(@PathVariable int practitionerId){
-            return visitsServiceClient.getVisitForPractitioner(practitionerId);
         }
 
         @GetMapping(value = "visits/calendar/{practitionerId}")
