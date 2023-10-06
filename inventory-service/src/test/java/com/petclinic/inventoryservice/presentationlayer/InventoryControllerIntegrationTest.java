@@ -938,6 +938,42 @@ class InventoryControllerIntegrationTest {
 
 
 
+    @Test
+    void getTotalNumberOfProductsWithRequestParams_ShouldSucceed(){
+        webTestClient
+                .get()
+                .uri("/inventory/{inventoryId}/products-count", "1")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(Long.class)
+                .value((count) -> {
+                    assertNotNull(count);
+                    assertEquals(3L, count);
+                });
+    }
+
+    @Test
+    void getProductsInInventoryByInventoryIdAndProductFieldPagination_ShouldSucceed(){
+        StepVerifier.create(productRepository.deleteAll().thenMany(productRepository.save(buildProduct("productId_1", "inventoryId_3", "Benzodiazepines", "Sedative Medication", 100.00, 10))))
+                .expectNextCount(1)
+                .verifyComplete();
+        webTestClient
+                .get()
+                .uri("/inventory/{inventoryId}/products?page={page}&size={size}", "1", 0, 2)
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .acceptCharset(java.nio.charset.StandardCharsets.UTF_8)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
+                .expectBodyList(ProductResponseDTO.class)
+                .value((list) -> {
+                    assertNotNull(list);
+                    assertEquals(1, list.size());
+                });
+    }
+
     /*
     @Test
     public void deleteInventoryByInventoryId_withNotFoundInventoryId_shouldNotFound() {
