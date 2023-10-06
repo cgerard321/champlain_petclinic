@@ -800,13 +800,7 @@ public class BFFApiGatewayController {
         }
         return inventoryServiceClient.searchInventory(page, size, inventoryName, inventoryType, inventoryDescription);
     }
-    /*
-    @GetMapping(value = "inventory")
-    public Flux<InventoryResponseDTO> getAllInventory(){
-        return inventoryServiceClient.getAllInventory();
-    }
 
-     */
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER})
