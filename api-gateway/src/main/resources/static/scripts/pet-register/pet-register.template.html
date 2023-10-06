@@ -26,26 +26,10 @@
   </div>
 
   <div class="form-group formColor">
-    <label class="col-sm-2 control-label">City</label>
-    <div class="owner col-sm-6">
-      <input class="form-control col-sm-4" ng-model="$ctrl.owner.city" name="city"
-             ng-disabled="$ctrl.checked" maxlength="50" pattern="^[\x20-\x7F]+$" required/>
-      <span ng-show="ownerForm.city.$error.required" class="help-block">City is required.</span>
-    </div>
-  </div>
-
-  <div class="form-group formColor">
-    <label class="col-sm-2 control-label">Telephone</label>
-    <div class="owner col-sm-6">
-      <input class="form-control col-sm-4" ng-model="$ctrl.owner.telephone" name="telephone"
-             ng-disabled="$ctrl.checked" maxlength="50" pattern="^[\x20-\x7F]+$" required/>
-      <span ng-show="ownerForm.telephone.$error.required" class="help-block">Telephone is required.</span>
-    </div>
-  </div>
-
-  <div class="form-group formColor">
-    <div class="owner marg col-sm-6">
-      <button id="newBtn" class="btn btn-default" type="submit" ng-disabled="ownerForm.$invalid">Submit</button>
+    <div class="pet marg col-sm-6 col-sm-offset-2">
+      <button id="newBtn" class="btn btn-default" type="submit">
+        Submit
+      </button>
     </div>
   </div>
 

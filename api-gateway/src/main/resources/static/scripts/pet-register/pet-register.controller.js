@@ -15,18 +15,18 @@ angular.module('petRegister')
 
 
         // Function to submit the form
-        self.submit = function () {
+        self.submitPetForm = function () {
             var petType = {
                 id: self.pet.type.id,
                 name: self.pet.type.name
             }
 
             var data = {
-                ownerId: $ctrl.ownerId,
-                petId: self.pet.petId,
+                ownerId: ownerId,
+                petId: "12345-12345-12345",
                 name: self.pet.name,
                 birthDate: self.pet.birthDate,
-                type: petType,
+                type: petType.id,
                 isActive : "true"
             }
 
