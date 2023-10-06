@@ -1476,6 +1476,8 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.path").isEqualTo("/api/gateway/vets/" + emptyVetId + "/photo");
     }
 
+
+
     @Test
     void toStringBuilders() {
         System.out.println(Vet.builder());

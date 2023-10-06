@@ -2,6 +2,7 @@ package com.petclinic.vet.presentationlayer;
 
 import com.petclinic.vet.dataaccesslayer.Photo;
 import com.petclinic.vet.dataaccesslayer.Vet;
+import com.petclinic.vet.exceptions.InvalidInputException;
 import com.petclinic.vet.servicelayer.*;
 import com.petclinic.vet.servicelayer.education.EducationRequestDTO;
 import com.petclinic.vet.servicelayer.education.EducationResponseDTO;
@@ -664,6 +665,34 @@ class VetControllerUnitTest {
                 .getPhotoByVetId(VET_ID);
     }
 
+    // test add photo
+    @Test
+    void addPhotoByVetId() {
+        Photo photo = buildPhoto();
+        Resource photoResource = buildPhotoData(photo);
+
+        when(photoService.insertPhotoOfVet(anyString(), anyString(), any(Mono.class)))
+                .thenReturn(Mono.just(photoResource));
+
+        client.post()
+                .uri("/vets/{vetId}/photos/{photoName}", VET_ID, photo.getFilename())
+                .bodyValue(photoResource) // Use the Resource here
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody();
+
+        Mockito.verify(photoService, times(1))
+                .insertPhotoOfVet(anyString(), anyString(), any(Mono.class));
+    }
+
+    private Resource buildPhotoData(Photo photo) {
+        ByteArrayResource resource = new ByteArrayResource(photo.getData());
+        return resource;
+    }
+
+
     private Vet buildVet() {
         return Vet.builder()
                 .vetId("cf25e779-548b-4788-aefa-6d58621c2feb")
@@ -775,7 +804,6 @@ class VetControllerUnitTest {
         ByteArrayResource resource = new ByteArrayResource(photo.getData());
         return resource;
     }
-
 
     private VetAverageRatingDTO buildVetAverageRatingDTO1(){
         return  VetAverageRatingDTO.builder()

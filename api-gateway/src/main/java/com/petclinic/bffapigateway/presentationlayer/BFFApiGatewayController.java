@@ -326,8 +326,10 @@ public class BFFApiGatewayController {
     }
 
     @PostMapping(value = "vets/{vetId}/photos/{photoName}")
-    public Mono<Resource> addPhoto(@PathVariable String vetId, @PathVariable String photoName, @RequestBody Mono<Resource> image) {
-        return vetsServiceClient.addPhotoToVet(vetId, photoName, image);
+    public Mono<ResponseEntity<Resource>> addPhoto(@PathVariable String vetId, @PathVariable String photoName, @RequestBody Mono<Resource> image) {
+        return vetsServiceClient.addPhotoToVet(vetId, photoName, image)
+                .map(r -> ResponseEntity.status(HttpStatus.CREATED).body(r))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
     //Ratings
