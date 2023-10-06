@@ -42,41 +42,12 @@
 
                     <hr class="my-4"/>
 
-
-                    <div class="row g-3">
-                        <div class="col-sm-6">
-                            <h5 class="form-label">Profile Picture</h5>
-                            <span id="checkmarkPic" style="display: none">&#10003;</span>
-                            <input accept="image/*"
-                                   class="form-control"
-                                   id="profilePicture"
-                                   name="profilePicture"
-                                   ng-model="vet.profilePicture"
-                                   onchange="uploadPicture(event)"
-                                   type="file"/>
-                        </div>
-                        <div class="col-sm-6">
-                            <img alt="Profile picture preview" class="img-preview" height="130px" id="preview"
-                                 width="130px"/>
-                        </div>
+                    <div class="parent">
+                        <img alt="Profile picture preview" src="data:image/png;base64, {{$ctrl.vetPhoto}}" width="150" height="150" class="image1">
+                        <img alt="" src="data:image/jpeg;base64, {{$ctrl.PreviewImage}}" ng-show="$ctrl.PreviewImage != null" width="150" height="150" class="image2"/>
+                        <input type="file" accept="image/jpeg" class="fileInput" id="photoVet"/>
                     </div>
-                    <div class="col-sm-12">
-                        <span class="help-block" ng-show="vetForm.profilePicture.$error.required">Only .png, .pdf, .jpeg and .gif accepted</span>
-                    </div>
-
-                    <script>
-                        let uploadPicture = function (event) {
-                            let preview = document.getElementById('preview');
-                            let checkmark = document.getElementById('checkmarkPic');
-                            if (document.getElementById('profilePicture') != null) {
-                                checkmark.style.display = "inline";
-                            }
-                            preview.src = URL.createObjectURL(event.target.files[0]);
-                            preview.onload = function () {
-                                URL.revokeObjectURL(preview.src)
-                            }
-                        };
-                    </script>
+                      
                     <hr class="my-4"/>
 
                     <div class="col-sm-12">

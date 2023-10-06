@@ -13,6 +13,7 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.util.FileCopyUtils;
@@ -872,6 +873,21 @@ class VetsServiceClientIntegrationTest {
                         "    }"));
 
         final Resource photo = vetsServiceClient.getPhotoByVetId("deb1950c-3c56-45dc-874b-89e352695eb7").block();
+        byte[] photoBytes = FileCopyUtils.copyToByteArray(photo.getInputStream());
+
+        assertNotNull(photoBytes);
+    }
+
+    @Test
+    void addPhotoToVet() throws IOException {
+        Mono<Resource> photoResource = Mono.just(new ByteArrayResource(new byte[]{12, 24, 52, 87}));
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "image/jpeg")
+                .setBody("    {\n" +
+                        "        {12, 24, 52, 87}" +
+                        "    }"));
+
+        final Resource photo = vetsServiceClient.addPhotoToVet("deb1950c-3c56-45dc-874b-89e352695eb7", "image/jpeg", photoResource).block();
         byte[] photoBytes = FileCopyUtils.copyToByteArray(photo.getInputStream());
 
         assertNotNull(photoBytes);

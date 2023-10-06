@@ -46,7 +46,38 @@ angular.module('vetForm')
 
             });
         }
-        
+
+        let uploadPhoto = function (vetId) {
+            const fileInput = document.querySelector('input[id="photoVet"]');
+            let vetPhoto = "";
+
+            const file = fileInput.files[0]; // Changed fileInput.target.files to fileInput.files
+            const reader = new FileReader();
+            var image = {};
+            reader.onloadend = () => {
+                vetPhoto = reader.result
+                    .replace('data:', '')
+                    .replace(/^.+,/, '');
+                self.PreviewImage = vetPhoto;
+                image = {
+                    name: file.name,
+                    type: "jpeg",
+                    photo: vetPhoto
+                };
+
+                // Use template literals for URL concatenation
+                $http.post(`api/gateway/vets/${vetId}/photos/${image.name}`, image) // Send the image object
+                    .then(function (response) {
+                        console.log("VET ID: " + vetId);
+                        console.log("RESPONSE: " + JSON.stringify(response.data)); // Access response data
+                    })
+                    .catch(function (error) {
+                        console.error(error);
+                    });
+            };
+            reader.readAsDataURL(file);
+        };
+
         self.submitVetForm = function (vet = self.vet) {
             console.log("vet please: " + vet);
             document.getElementById("loaderDiv").style.display = "block";
@@ -119,7 +150,6 @@ angular.module('vetForm')
             }
 
  */
-
             let basePhoneNumber = "(514)-634-8276 #";
             let inputPhoneNumber=document.getElementById("phoneNumber").value;
             if(inputPhoneNumber.length!==4){
@@ -140,6 +170,7 @@ angular.module('vetForm')
             var req;
             if (id) {
                 req = $http.put("api/gateway/vets/" + vetId, vet);
+                $state.go('vets');
             } else {
                 req = $http.post("api/gateway/users/vets", {
                     username: vet.username,
@@ -148,14 +179,19 @@ angular.module('vetForm')
                     vet:vet
                 });
                 console.log(self.vet)
-            }
 
-            req.then(function () {
+            req.then(function (response) {
+                var result = response.data;
+                console.log("Response data:", result);
+                console.log("Response vet id ", result.vetId);
+                uploadPhoto(result.vetId);
                 $state.go('vets');
             }, function (response) {
                 let error = "Missing fields, please fill out the form";
                 $state.go('vets');
                 alert(error);
+                console.error(error);
             });
-        };
+        }
+    }
     }]);
