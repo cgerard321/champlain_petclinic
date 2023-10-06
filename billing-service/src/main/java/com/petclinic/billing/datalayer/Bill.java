@@ -23,4 +23,6 @@ public class Bill {
     private LocalDate date;
     private double amount;
     private BillStatus billStatus;
+
+    private LocalDate dueDate;
 }

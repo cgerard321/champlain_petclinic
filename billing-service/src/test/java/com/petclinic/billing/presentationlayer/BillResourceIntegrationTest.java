@@ -16,6 +16,7 @@ import reactor.test.StepVerifier;
 import static reactor.core.publisher.Mono.just;
 
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.List;
@@ -363,8 +364,10 @@ class BillResourceIntegrationTest {
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate();
 
+        LocalDate dueDate = LocalDate.of(2022,Month.OCTOBER,15);
 
-        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.PAID).build();
+
+        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.PAID).dueDate(dueDate).build();
     }
 
     private Bill buildUnpaidBill(){
@@ -373,10 +376,12 @@ class BillResourceIntegrationTest {
         calendar.set(2022, Calendar.SEPTEMBER, 25);
         LocalDate date = calendar.getTime().toInstant()
                 .atZone(ZoneId.systemDefault())
-                .toLocalDate();;
+                .toLocalDate();
+
+        LocalDate dueDate = LocalDate.of(2022, Month.OCTOBER, 5);
 
 
-        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.UNPAID).build();
+        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.UNPAID).dueDate(dueDate).build();
     }
 
     private Bill buildOverdueBill(){
@@ -385,9 +390,11 @@ class BillResourceIntegrationTest {
         calendar.set(2022, Calendar.SEPTEMBER, 25);
         LocalDate date = calendar.getTime().toInstant()
                 .atZone(ZoneId.systemDefault())
-                .toLocalDate();;
+                .toLocalDate();
+
+        LocalDate dueDate = LocalDate.of(2022, Month.AUGUST, 15);
 
 
-        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.OVERDUE).build();
+        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.OVERDUE).dueDate(dueDate).build();
     }
 }
