@@ -77,16 +77,13 @@
                             <a style="color: rgba(0,0,0,0.5);" class="btn btn-light" ui-sref="petRegister({ownerId: $ctrl.owner.ownerId})">Add Pet</a>
                         </div>
                     </div>
-                </div>
-
 
                 <div>
                     <!-- Use ng-repeat to iterate through the owner's pets -->
-                    <div ng-repeat="pet in $ctrl.owner.pets" class="d-flex justify-content-between">
+                    <div ng-repeat="pet in $ctrl.pets" class="d-flex justify-content-between">
                         <div class="mt-3">
                             <a style="color: rgba(0,0,0,0.5);" class="btn btn-light" ui-sref="editPet({ownerId: $ctrl.owner.ownerId, petId: pet.petId, method: 'edit'})">Edit Pet</a>
                             <p>Name: {{ pet.name }}</p>
-                            <p>Pet Id: {{pet.petId}}</p>
                             <!-- Add more pet details as needed -->
                         </div>
                         <div class="border-5 rounded">
@@ -98,6 +95,10 @@
                     </div>
 
                 </div>
+                </div>
+
+
+
 
             </div>
 
