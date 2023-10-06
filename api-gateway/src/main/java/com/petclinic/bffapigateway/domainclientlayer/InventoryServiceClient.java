@@ -170,15 +170,7 @@ public class InventoryServiceClient {
 
 
 
-    public Flux<InventoryResponseDTO> getAllInventory(){
-        return webClient.get()
-                .uri(inventoryServiceUrl)
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .bodyToFlux(InventoryResponseDTO.class);
-    }
-
-     */
+  
     //delete all
 
     public Mono<Void> deleteAllProductForInventory(final String inventoryId) {
