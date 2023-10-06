@@ -162,11 +162,11 @@ public class InventoryServiceClient {
                 // Consider adding error-handling logic here if needed.
                 .bodyToFlux(InventoryResponseDTO.class);
     }
-    /*
+    
 
 
 
-  
+
     //delete all
 
     public Mono<Void> deleteAllProductForInventory(final String inventoryId) {
