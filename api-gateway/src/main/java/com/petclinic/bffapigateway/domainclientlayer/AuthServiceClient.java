@@ -86,6 +86,7 @@ public class AuthServiceClient {
                                         .lastName(register.getOwner().getLastName())
                                         .address(register.getOwner().getAddress())
                                         .city(register.getOwner().getCity())
+                                        .province(register.getOwner().getProvince())
                                         .telephone(register.getOwner().getTelephone())
                                         .ownerId(uuid)
                                         .build();

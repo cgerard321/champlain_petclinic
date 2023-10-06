@@ -8,6 +8,7 @@ angular.module('inventoryProductList', ['ui.router'])
                 url: '/inventory/:inventoryId/products',
                 template: '<inventory-product-list></inventory-product-list>'
             })
+
             .state('updateProduct', {
                     parent: 'app',
                     url: '/inventory/:inventoryId/products/:productId',

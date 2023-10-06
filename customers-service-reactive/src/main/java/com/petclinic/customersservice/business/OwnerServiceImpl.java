@@ -51,6 +51,7 @@ public class OwnerServiceImpl implements OwnerService {
                         existingOwner.setLastName(requestDTO.getLastName());
                         existingOwner.setAddress(requestDTO.getAddress());
                         existingOwner.setCity(requestDTO.getCity());
+                        existingOwner.setProvince(requestDTO.getProvince());
                         existingOwner.setTelephone(requestDTO.getTelephone());
                         return existingOwner;
                     } ))

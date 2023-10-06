@@ -13,6 +13,7 @@ import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
+import com.petclinic.bffapigateway.dtos.Pets.PetTypeResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.*;
 import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
@@ -207,6 +208,13 @@ public class BFFApiGatewayController {
     }
 
 
+    @DeleteMapping("pets/{petId}")
+    public Mono<ResponseEntity<PetResponseDTO>> deletePetByPetId(@PathVariable String petId){
+        return customersServiceClient.deletePetByPetId(petId).then(Mono.just(ResponseEntity.noContent().<PetResponseDTO>build()))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+
     @GetMapping(value = "owners/petTypes", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<PetType> getPetTypes(){
         return customersServiceClient.getPetTypes();
@@ -327,7 +335,7 @@ public class BFFApiGatewayController {
      **/
 
     //Photo
-    @IsUserSpecific(idToMatch = {"vetId"})
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping("vets/{vetId}/photo")
     public Mono<ResponseEntity<Resource>> getPhotoByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getPhotoByVetId(vetId)
@@ -435,7 +443,7 @@ public class BFFApiGatewayController {
         return vetsServiceClient.getVets();
     }
 
-    @IsUserSpecific(idToMatch = {"vetId"})
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping("/vets/{vetId}")
     public Mono<ResponseEntity<VetDTO>> getVetByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getVetByVetId(VetsEntityDtoUtil.verifyId(vetId))
@@ -748,7 +756,8 @@ public class BFFApiGatewayController {
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER})
     @PutMapping(value = "inventory/{inventoryId}/products/{productId}")
     public Mono<ResponseEntity<ProductResponseDTO>> updateProductInInventory(@RequestBody ProductRequestDTO model, @PathVariable String inventoryId, @PathVariable String productId){
-        return inventoryServiceClient.updateProductInInventory(model, inventoryId, productId).map(s -> ResponseEntity.status(HttpStatus.OK).body(s))
+        return inventoryServiceClient.updateProductInInventory(model, inventoryId, productId)
+                .map(s -> ResponseEntity.status(HttpStatus.OK).body(s))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER})
@@ -811,5 +820,15 @@ public class BFFApiGatewayController {
     @DeleteMapping(value = "inventory/{inventoryId}")
     public Mono<Void> deleteInventoryByInventoryId(@PathVariable String inventoryId) {
         return inventoryServiceClient.deleteInventoryByInventoryId(inventoryId);
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ALL})
+    @GetMapping(value = "owners/petTypes")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<PetTypeResponseDTO> getAllPetTypes() {
+        return customersServiceClient.getAllPetTypes();
+                /*.flatMap(n ->
+                        visitsServiceClient.getVisitsForPets(n.getPetIds())
+                                .map(addVisitsToOwner(n))
+                );*/
     }
 }

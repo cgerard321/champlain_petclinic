@@ -262,6 +262,7 @@ public class BillServiceImplTest {
 
     private Bill buildUnpaidBill(){
 
+        VetDTO vetDTO = buildVetDTO();
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);
         LocalDate date = calendar.getTime().toInstant()
@@ -270,6 +271,7 @@ public class BillServiceImplTest {
 
 
         return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.UNPAID).build();
+
     }
 
     private Bill buildOverdueBill(){
@@ -289,6 +291,9 @@ public class BillServiceImplTest {
     private BillRequestDTO buildBillRequestDTO(){
 
 
+
+        VetDTO vetDTO = buildVetDTO();
+
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);
         LocalDate date = calendar.getTime().toInstant()
@@ -296,7 +301,25 @@ public class BillServiceImplTest {
                 .toLocalDate();;
 
 
+
         return BillRequestDTO.builder().customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.PAID).build();
+
+    }
+
+    private VetDTO buildVetDTO() {
+        return VetDTO.builder()
+                .vetId("d9d3a7ac-6817-4c13-9a09-c09da74fb65f")
+                .vetBillId("53c2d16e-1ba3-4dbc-8e31-6decd2eaa99a")
+                .firstName("Pauline")
+                .lastName("LeBlanc")
+                .email("skjfhf@gmail.com")
+                .phoneNumber("947-238-2847")
+                .resume("Just became a vet")
+                .imageId("kjd")
+                .specialties(new HashSet<>())
+                .active(false)
+                .build();
+
     }
 
 

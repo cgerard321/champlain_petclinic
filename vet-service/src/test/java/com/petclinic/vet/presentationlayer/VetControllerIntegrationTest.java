@@ -699,8 +699,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$[0].firstName").isEqualTo(vet.getFirstName())
                 .jsonPath("$[0].email").isEqualTo(vet.getEmail())
                 .jsonPath("$[0].imageId").isNotEmpty()
-                .jsonPath("$[0].active").isEqualTo(vet.isActive())
-                .jsonPath("$[0].workday").isEqualTo(vet.getWorkday());
+                .jsonPath("$[0].active").isEqualTo(vet.isActive());
     }
 
     @Test
@@ -726,8 +725,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.lastName").isEqualTo(vet.getLastName())
                 .jsonPath("$.firstName").isEqualTo(vet.getFirstName())
                 .jsonPath("$.email").isEqualTo(vet.getEmail())
-                .jsonPath("$.active").isEqualTo(vet.isActive())
-                .jsonPath("$.workday").isEqualTo(vet.getWorkday());
+                .jsonPath("$.active").isEqualTo(vet.isActive());
 
     }
 
@@ -754,8 +752,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.lastName").isEqualTo(vet.getLastName())
                 .jsonPath("$.firstName").isEqualTo(vet.getFirstName())
                 .jsonPath("$.email").isEqualTo(vet.getEmail())
-                .jsonPath("$.active").isEqualTo(vet.isActive())
-                .jsonPath("$.workday").isEqualTo(vet.getWorkday());
+                .jsonPath("$.active").isEqualTo(vet.isActive());
 
     }
 
@@ -783,8 +780,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.firstName").isEqualTo(vetDTO.getFirstName())
                 .jsonPath("$.email").isEqualTo(vetDTO.getEmail())
                 .jsonPath("$.imageId").isNotEmpty()
-                .jsonPath("$.active").isEqualTo(vetDTO.isActive())
-                .jsonPath("$.workday").isEqualTo(vetDTO.getWorkday());
+                .jsonPath("$.active").isEqualTo(vetDTO.isActive());
 
     }
 
@@ -806,7 +802,7 @@ class VetControllerIntegrationTest {
                 .phoneNumber("947-238-28479")
                 .resume("Just became a vet")
                 .imageId("kjd")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -841,7 +837,7 @@ class VetControllerIntegrationTest {
                 .phoneNumber("947-238-28479")
                 .resume("Just became a vet")
                 .imageId("kjd")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -876,7 +872,7 @@ class VetControllerIntegrationTest {
                 .phoneNumber("947-238-28479999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999")
                 .resume("Just became a vet")
                 .imageId("kjd")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -919,7 +915,7 @@ class VetControllerIntegrationTest {
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Just became a vet")
                 .imageId("kjd")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -955,7 +951,7 @@ class VetControllerIntegrationTest {
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Jo")
                 .imageId("kjd")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -991,7 +987,7 @@ class VetControllerIntegrationTest {
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("I've been a vet ever since I was a kid.")
                 .imageId("kjd")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(null)
                 .active(false)
                 .build();
@@ -1031,8 +1027,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$[0].firstName").isEqualTo(vet2.getFirstName())
                 .jsonPath("$[0].email").isEqualTo(vet2.getEmail())
                 .jsonPath("$[0].imageId").isNotEmpty()
-                .jsonPath("$[0].active").isEqualTo(vet2.isActive())
-                .jsonPath("$[0].workday").isEqualTo(vet2.getWorkday());
+                .jsonPath("$[0].active").isEqualTo(vet2.isActive());
     }
 
     @Test
@@ -1058,8 +1053,7 @@ class VetControllerIntegrationTest {
                 .jsonPath("$[0].firstName").isEqualTo(vet.getFirstName())
                 .jsonPath("$[0].email").isEqualTo(vet.getEmail())
                 .jsonPath("$[0].imageId").isNotEmpty()
-                .jsonPath("$[0].active").isEqualTo(vet.isActive())
-                .jsonPath("$[0].workday").isEqualTo(vet.getWorkday());
+                .jsonPath("$[0].active").isEqualTo(vet.isActive());
     }
 
 
@@ -1112,7 +1106,7 @@ class VetControllerIntegrationTest {
                 .phoneNumber("947-238-28479999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999")
                 .resume("Just became a vet")
                 .imageId("kjd")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -1155,7 +1149,7 @@ class VetControllerIntegrationTest {
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Just became a vet")
                 .imageId("kjd")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -1191,7 +1185,7 @@ class VetControllerIntegrationTest {
                 .phoneNumber("947-238-28479")
                 .resume("Just became a vet")
                 .imageId("kjd")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -1227,7 +1221,7 @@ class VetControllerIntegrationTest {
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Just became a vet")
                 .imageId("kjd")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -1263,7 +1257,7 @@ class VetControllerIntegrationTest {
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Jo")
                 .imageId("kjd")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -1300,7 +1294,7 @@ class VetControllerIntegrationTest {
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Just became a vet")
                 .imageId("kjd")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(null)
                 .active(false)
                 .build();
@@ -1563,7 +1557,7 @@ class VetControllerIntegrationTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Just became a vet")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .imageId("kjd")
                 .specialties(new HashSet<>())
                 .active(false)
@@ -1581,7 +1575,7 @@ class VetControllerIntegrationTest {
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Just became a vet")
                 .imageId("kjd")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .active(true)
                 .specialties(new HashSet<>())
                 .build();
@@ -1630,7 +1624,7 @@ class VetControllerIntegrationTest {
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Just became a vet")
                 .imageId("kjd")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
