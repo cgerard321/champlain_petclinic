@@ -952,6 +952,7 @@ class ApiGatewayControllerTest {
 
     }
 
+
     /*@Test
     void getOwnerDetails_withAvailableVisitsService() {
         OwnerResponseDTO owner = new OwnerResponseDTO();
@@ -982,6 +983,14 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$.pets[0].name").isEqualTo("Garfield")
                 .jsonPath("$.pets[0].visits[0].description").isEqualTo("First visit");
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+    }
+=======
+    }
+>>>>>>> ceef8eff (VetDTO split in apigateway)
+>>>>>>> 0ee1ef7f (Merge conflicts part 3)
 
     }*/
 //
@@ -1967,8 +1976,6 @@ class ApiGatewayControllerTest {
     /**
      * Visits Methods
      * **/
-
-
     String VISIT_ID = buildVisitResponseDTO().getVisitId();
 
 
@@ -2012,7 +2019,11 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$.status").isEqualTo(false)
                 .jsonPath("$.practitionerId").isEqualTo(1);
+<<<<<<< HEAD
     }
+=======
+    }
+>>>>>>> ceef8eff (VetDTO split in apigateway)
 
 
     @Test
@@ -2029,6 +2040,7 @@ class ApiGatewayControllerTest {
 
 
 <<<<<<< HEAD
+<<<<<<< HEAD
         when(visitsServiceClient.createVisitForPet(visit))
                 .thenReturn(Mono.just(visit));
 
@@ -2037,7 +2049,12 @@ class ApiGatewayControllerTest {
                 .body(Mono.just(visit), VisitDetails.class)
                 .accept(MediaType.APPLICATION_JSON)
 =======
+=======
+>>>>>>> 0ee1ef7f (Merge conflicts part 3)
  @Test
+=======
+ @Test
+>>>>>>> ceef8eff (VetDTO split in apigateway)
     void shouldUpdateAVisitsById() {
         VisitDetails visitDetailsToUpdate = VisitDetails.builder()
                 .visitDate(LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
@@ -2052,10 +2069,16 @@ class ApiGatewayControllerTest {
                 .thenReturn(Mono.just(visitDetailsToUpdate));
 
         client.put()
+<<<<<<< HEAD
+                 .uri("/api/gateway/owners/*
+pets/{petId}/visits/{visitId}", "1", "1")
+ .accept(MediaType.APPLICATION_JSON)
+=======
                  .uri("/api/gateway/owners/*
 pets/{petId}/visits/{visitId}", "1", "1")
                */
 /* .accept(MediaType.APPLICATION_JSON)
+>>>>>>> ceef8eff (VetDTO split in apigateway)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(visitDetailsToUpdate)
 >>>>>>> e83dff95 (Merge conflicts part 2)
@@ -2077,8 +2100,15 @@ pets/{petId}/visits/{visitId}", "1", "1")
                 .jsonPath("$.status").isEqualTo(Status.UPCOMING.toString())
                 .jsonPath("$.practitionerId").isEqualTo(2);
         Mockito.verify(visitsServiceClient,times(1)).updateVisitForPet(visitDetailsToUpdate);
+<<<<<<< HEAD
     }
+<<<<<<< HEAD
 >>>>>>> e83dff95 (Merge conflicts part 2)
+=======
+=======
+    }
+>>>>>>> ceef8eff (VetDTO split in apigateway)
+>>>>>>> 0ee1ef7f (Merge conflicts part 3)
 
         client.delete()
                 .uri("/api/gateway/visits/{visitId}", visit.getVisitId())
@@ -2261,9 +2291,14 @@ pets/{petId}/visits/{visitId}", "1", "1")
                 });
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 =======
 >>>>>>> e83dff95 (Merge conflicts part 2)
+=======
+=======
+>>>>>>> ceef8eff (VetDTO split in apigateway)
+>>>>>>> 0ee1ef7f (Merge conflicts part 3)
     @Test
     void shouldGetAVisitByPractitionerIdAndMonth(){
         VisitDetails visit = new VisitDetails();
@@ -2571,9 +2606,12 @@ pets/{petId}/visits/{visitId}", "1", "1")
                 .build();
     }
 
+
     /**
      * End of Visits Methods
      * **/
+
+
 
     @Test
     @DisplayName("Given valid JWT, verify user with redirection")

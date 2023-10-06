@@ -1711,5 +1711,5 @@ class VetsServiceClientIntegrationTest {
                 .build();
     }
 
-
 }
+
