@@ -125,6 +125,12 @@ public class BFFApiGatewayController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @DeleteMapping()
+    public Mono<Void> deleteAllBills(){
+        return billServiceClient.deleteAllBills();
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @DeleteMapping(value = "bills/{billId}")
     public Mono<ResponseEntity<Void>> deleteBill(final @PathVariable String billId){
         return billServiceClient.deleteBill(billId).then(Mono.just(ResponseEntity.noContent().<Void>build()))

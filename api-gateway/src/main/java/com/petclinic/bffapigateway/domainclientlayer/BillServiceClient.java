@@ -93,6 +93,13 @@ public class BillServiceClient {
                 .bodyToMono(BillResponseDTO.class);
     }
 
+    public Mono<Void> deleteAllBills() {
+        return webClientBuilder.build()
+                .delete()
+                .uri(billServiceUrl)
+                .retrieve()
+                .bodyToMono(Void.class);
+    }
 
     public Mono<Void> deleteBill(final String billId) {
         return webClientBuilder.build()
