@@ -19,4 +19,5 @@ public class BillResponseDTO {
     private String vetId;
     private LocalDate date;
     private double amount;
+    private BillStatus billStatus;
 }
