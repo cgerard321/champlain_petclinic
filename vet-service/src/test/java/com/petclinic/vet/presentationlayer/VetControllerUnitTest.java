@@ -285,11 +285,7 @@ class VetControllerUnitTest {
     @Test
     void getAllVets() {
         when(vetService.getAll())
-<<<<<<< HEAD
                 .thenReturn(Flux.just(vetResponseDTO));
-=======
-                .thenReturn(Flux.just(vetResponseDTO, vetResponseDTO2));
->>>>>>> 8d8e3440 (Tests modified in vet-service)
 
         client
                 .get()
@@ -304,12 +300,8 @@ class VetControllerUnitTest {
                 .jsonPath("$[0].lastName").isEqualTo(vetResponseDTO.getLastName())
                 .jsonPath("$[0].firstName").isEqualTo(vetResponseDTO.getFirstName())
                 .jsonPath("$[0].email").isEqualTo(vetResponseDTO.getEmail())
-<<<<<<< HEAD
-                .jsonPath("$[0].active").isEqualTo(vetResponseDTO.isActive());
-=======
                 .jsonPath("$[0].active").isEqualTo(vetResponseDTO.isActive())
                 .jsonPath("$[0].workday").isEqualTo(vetResponseDTO.getWorkday());
->>>>>>> 8d8e3440 (Tests modified in vet-service)
 
         Mockito.verify(vetService, times(1))
                 .getAll();
@@ -334,12 +326,7 @@ class VetControllerUnitTest {
                 .jsonPath("$.lastName").isEqualTo(vet.getLastName())
                 .jsonPath("$.firstName").isEqualTo(vet.getFirstName())
                 .jsonPath("$.email").isEqualTo(vet.getEmail())
-<<<<<<< HEAD
-                .jsonPath("$.active").isEqualTo(vet.isActive());
-=======
-                .jsonPath("$.active").isEqualTo(vet.isActive())
                 .jsonPath("$.workday").isEqualTo(vet.getWorkday());
->>>>>>> 8d8e3440 (Tests modified in vet-service)
 
         Mockito.verify(vetService, times(1))
                 .getVetByVetId(VET_ID);
@@ -388,12 +375,8 @@ class VetControllerUnitTest {
                 .jsonPath("$[0].lastName").isEqualTo(vetResponseDTO2.getLastName())
                 .jsonPath("$[0].firstName").isEqualTo(vetResponseDTO2.getFirstName())
                 .jsonPath("$[0].email").isEqualTo(vetResponseDTO2.getEmail())
-<<<<<<< HEAD
-                .jsonPath("$[0].active").isEqualTo(vetResponseDTO2.isActive());
-=======
                 .jsonPath("$[0].active").isEqualTo(vetResponseDTO2.isActive())
                 .jsonPath("$[0].workday").isEqualTo(vetResponseDTO2.getWorkday());
->>>>>>> 8d8e3440 (Tests modified in vet-service)
 
         Mockito.verify(vetService, times(1))
                 .getVetByIsActive(vetResponseDTO2.isActive());
@@ -436,11 +419,7 @@ class VetControllerUnitTest {
         client
                 .put()
                 .uri("/vets/" + VET_ID)
-<<<<<<< HEAD
-                .body(Mono.just(vetResponseDTO), VetRequestDTO.class)
-=======
                 .body(Mono.just(vetRequestDTO), VetRequestDTO.class)
->>>>>>> 8d8e3440 (Tests modified in vet-service)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -451,12 +430,8 @@ class VetControllerUnitTest {
                 .jsonPath("$.lastName").isEqualTo(vetResponseDTO.getLastName())
                 .jsonPath("$.firstName").isEqualTo(vetResponseDTO.getFirstName())
                 .jsonPath("$.email").isEqualTo(vetResponseDTO.getEmail())
-<<<<<<< HEAD
-                .jsonPath("$.active").isEqualTo(vetResponseDTO.isActive());
-=======
                 .jsonPath("$.active").isEqualTo(vetResponseDTO.isActive())
                 .jsonPath("$.workday").isEqualTo(vetResponseDTO.getWorkday());
->>>>>>> 8d8e3440 (Tests modified in vet-service)
 
         Mockito.verify(vetService, times(1))
                 .updateVet(anyString(), any(Mono.class));
@@ -480,12 +455,8 @@ class VetControllerUnitTest {
                 .jsonPath("$[0].lastName").isEqualTo(vetResponseDTO.getLastName())
                 .jsonPath("$[0].firstName").isEqualTo(vetResponseDTO.getFirstName())
                 .jsonPath("$[0].email").isEqualTo(vetResponseDTO.getEmail())
-<<<<<<< HEAD
-                .jsonPath("$[0].active").isEqualTo(vetResponseDTO.isActive());
-=======
                 .jsonPath("$[0].active").isEqualTo(vetResponseDTO.isActive())
                 .jsonPath("$[0].workday").isEqualTo(vetResponseDTO.getWorkday());
->>>>>>> 8d8e3440 (Tests modified in vet-service)
 
         Mockito.verify(vetService, times(1))
                 .getVetByIsActive(vetResponseDTO.isActive());
@@ -770,11 +741,7 @@ class VetControllerUnitTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
-<<<<<<< HEAD
                 .workday(new HashSet<>())
-=======
-                .workday("Monday")
->>>>>>> 8d8e3440 (Tests modified in vet-service)
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -789,34 +756,13 @@ class VetControllerUnitTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
-<<<<<<< HEAD
                 .workday(new HashSet<>())
-=======
-                .workday("Monday")
->>>>>>> 8d8e3440 (Tests modified in vet-service)
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
     }
     private VetResponseDTO buildVetResponseDTO() {
         return VetResponseDTO.builder()
-<<<<<<< HEAD
-=======
-                .vetId("cf25e779-548b-4788-aefa-6d58621c2feb")
-                .vetBillId("d9d3a7ac-6817-4c13-9a09-c09da74fb65f")
-                .firstName("Pauline")
-                .lastName("LeBlanc")
-                .email("skjfhf@gmail.com")
-                .phoneNumber("947-238-2847")
-                .resume("Just became a vet")
-                .workday("Monday")
-                .specialties(new HashSet<>())
-                .active(false)
-                .build();
-    }
-    private VetResponseDTO buildVetResponseDTO2() {
-        return VetResponseDTO.builder()
->>>>>>> 8d8e3440 (Tests modified in vet-service)
                 .vetId("cf25e779-548b-4788-aefa-6d58621c2feb")
                 .vetBillId("d9d3a7ac-6817-4c13-9a09-c09da74fb65f")
                 .firstName("Pauline")
@@ -829,7 +775,6 @@ class VetControllerUnitTest {
                 .active(false)
                 .build();
     }
-<<<<<<< HEAD
     private VetResponseDTO buildVetResponseDTO2() {
         return VetResponseDTO.builder()
                 .vetId("cf25e779-548b-4788-aefa-6d58621c2feb")
@@ -841,12 +786,9 @@ class VetControllerUnitTest {
                 .resume("Just became a vet")
                 .workday(new HashSet<>())
                 .specialties(new HashSet<>())
-                .active(true)
+                .active(false)
                 .build();
     }
-=======
-
->>>>>>> 8d8e3440 (Tests modified in vet-service)
 
     private EducationResponseDTO buildEducation(){
         return EducationResponseDTO.builder()

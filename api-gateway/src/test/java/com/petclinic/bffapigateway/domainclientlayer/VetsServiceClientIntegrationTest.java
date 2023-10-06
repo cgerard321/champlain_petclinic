@@ -10,13 +10,11 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
-import org.springframework.http.MediaType;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -30,14 +28,9 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import static io.netty.handler.codec.http.HttpHeaders.setHeader;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.in;
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 
@@ -55,6 +48,7 @@ class VetsServiceClientIntegrationTest {
     VetResponseDTO vetResponseDTO = buildVetResponseDTO();
 
     ClassPathResource cpr=new ClassPathResource("static/images/full_food_bowl.png");
+
 
     @BeforeEach
     void setup() {
@@ -1401,6 +1395,7 @@ class VetsServiceClientIntegrationTest {
         assertEquals("Veterinary Medicine", education.getFieldOfStudy());
         assertEquals("2015", education.getStartDate());
         assertEquals("2019", education.getEndDate());
+
     }
 
     @Test
