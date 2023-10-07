@@ -25,8 +25,8 @@ angular.module('inventoryList')
                     console.log("Resp data: " + resp.data)
                     console.log("inventory list: " + self.inventoryList)
                 });
+        $scope.inventoryTypeOptions = []
         //custom types handler
-        $scope.inventoryTypeOptions = ['',]
         $http.get("api/gateway/inventory/type").then(function (resp) {
             //Includes all types inside the array
             resp.data.forEach(function (type) {
