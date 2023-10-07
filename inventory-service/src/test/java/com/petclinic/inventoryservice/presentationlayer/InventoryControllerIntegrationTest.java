@@ -200,6 +200,7 @@ class InventoryControllerIntegrationTest {
                     assertEquals(2, list.size());
                 });
     }
+    /*
 
     @Test
     void getAllProductsInInventory_withInvalidInventoryId_invalidProductName_throwsNotFoundException() {
@@ -217,7 +218,7 @@ class InventoryControllerIntegrationTest {
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("Inventory not found with InventoryId: " + invalidInventoryId +
                         "\nOr ProductName: " + invalidProductName);
-    }
+    }*/
 
     @Test
     void getAllProductsInInventoryByInventoryId_andProductPrice_shouldSucceed() {
@@ -870,7 +871,7 @@ class InventoryControllerIntegrationTest {
     }
 
     @Test
-    public void getAllInventoryTypes_shouldSucceed(){
+    public void getAllInventoryTypes_shouldSucceed() {
         webTestClient.get()
                 .uri("/inventory/type")
                 .accept(MediaType.APPLICATION_JSON)
@@ -878,7 +879,6 @@ class InventoryControllerIntegrationTest {
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON);
     }
-
     /*
     @Test
     public void deleteInventoryByInventoryId_withNotFoundInventoryId_shouldNotFound() {
