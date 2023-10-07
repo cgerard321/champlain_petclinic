@@ -2988,6 +2988,65 @@ void deleteAllInventory_shouldSucceed() {
 
 
     @Test
+    void getProductsInInventoryByInventoryIdAndProductFieldPagination(){
+        ProductResponseDTO expectedResponse = ProductResponseDTO.builder()
+                .id("sampleId")
+                .productId("1234")
+                .inventoryId("1")
+                .productName("testName")
+                .productDescription("testDescription")
+                .productPrice(65.00)
+                .productQuantity(3)
+                .build();
+        Optional<Integer> page = Optional.of(0);
+        Optional<Integer> size = Optional.of(2);
+        Flux<ProductResponseDTO> resp = Flux.just(expectedResponse);
+        when(inventoryServiceClient.getProductsInInventoryByInventoryIdAndProductFieldPagination("1", null,null,null, page, size))
+                .thenReturn(resp);
+        client.get()
+                .uri("/api/gateway/inventory/{inventoryId}/products-pagination?page={page}&size={size}","1", page.get(), size.get())
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .acceptCharset(StandardCharsets.UTF_8)
+                .exchange().expectStatus().isOk()
+                .expectHeader().valueEquals("Content-Type","text/event-stream;charset=UTF-8")
+                .expectBodyList(ProductResponseDTO.class)
+                .value((list)-> {
+                    assertEquals(1,list.size());
+                    assertEquals(list.get(0).getId(),expectedResponse.getId());
+                    assertEquals(list.get(0).getProductId(),expectedResponse.getProductId());
+                    assertEquals(list.get(0).getInventoryId(),expectedResponse.getInventoryId());
+                    assertEquals(list.get(0).getProductName(),expectedResponse.getProductName());
+                    assertEquals(list.get(0).getProductDescription(),expectedResponse.getProductDescription());
+                    assertEquals(list.get(0).getProductPrice(),expectedResponse.getProductPrice());
+                    assertEquals(list.get(0).getProductQuantity(),expectedResponse.getProductQuantity());
+                });
+    }
+
+    @Test
+    void getTotalNumberOfProductsWithRequestParams(){
+        ProductResponseDTO expectedResponse = ProductResponseDTO.builder()
+                .id("sampleId")
+                .productId("1234")
+                .inventoryId("1")
+                .productName("testName")
+                .productDescription("testDescription")
+                .productPrice(65.00)
+                .productQuantity(3)
+                .build();
+        when(inventoryServiceClient.getTotalNumberOfProductsWithRequestParams("1",null,null,null))
+                .thenReturn(Flux.just(expectedResponse).count());
+        client.get()
+                .uri("/api/gateway/inventory/{inventoryId}/products-count","1")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange().expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(Long.class)
+                .value((count)-> {
+                    assertEquals(1L,count.longValue());
+                });
+    }
+
+    @Test
     void testUpdateProductInInventory() {
         // Create a sample ProductRequestDTO
         ProductRequestDTO requestDTO = new ProductRequestDTO("Sample Product", "Sample Description", 10.0, 100, 15.99);

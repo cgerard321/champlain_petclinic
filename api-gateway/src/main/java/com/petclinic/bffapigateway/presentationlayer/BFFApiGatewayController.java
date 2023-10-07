@@ -784,7 +784,7 @@ public class BFFApiGatewayController {
      **/
 
     //Start of Inventory Methods
-    @GetMapping("/{inventoryId}/products-pagination")
+    @GetMapping("/inventory/{inventoryId}/products-pagination")
     public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductFieldPagination(@PathVariable String inventoryId,
                                                                                                  @RequestParam(required = false) String productName,
                                                                                                  @RequestParam(required = false) Double productPrice,
@@ -794,7 +794,7 @@ public class BFFApiGatewayController {
         return inventoryServiceClient.getProductsInInventoryByInventoryIdAndProductFieldPagination(inventoryId, productName, productPrice, productQuantity, page, size);
     }
 
-    @GetMapping("/{inventoryId}/products-count")
+    @GetMapping("/inventory/{inventoryId}/products-count")
     public Mono<ResponseEntity<Long>> getTotalNumberOfProductsWithRequestParams(@PathVariable String inventoryId,
                                                                                 @RequestParam(required = false) String productName,
                                                                                 @RequestParam(required = false) Double productPrice,
