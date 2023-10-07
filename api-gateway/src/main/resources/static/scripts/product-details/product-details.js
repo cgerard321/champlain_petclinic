@@ -5,7 +5,7 @@ angular.module('productDetails', ['ui.router'])
         $stateProvider
             .state('productDetails', {
                 parent: 'app',
-                url: '/inventory/:inventoryId/products/details/:productId',
+                url: '/inventory/:inventoryId/products/:productId',
                 template: '<product-details></product-details>'
             })
 
