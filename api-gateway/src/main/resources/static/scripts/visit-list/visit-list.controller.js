@@ -1,24 +1,22 @@
 'use strict';
 angular.module('visitList')
-    .controller('VisitListController', ['$http', '$scope', function ($http, $scope) {
+    .controller('VisitListController', ['$http', '$scope', '$window', function ($http, $scope, $window) {
         let self = this;
         // Lists holding visits for the tables to display
         self.upcomingVisits = []
         self.previousVisits = []
+        // console.log($window.localStorage.getItem("roles"))
+        // isAdmin: () =>  $window.localStorage.getItem("roles") != null && !!$window.localStorage.getItem("roles").includes("ADMIN")
         let url
         //sorted by order or most to least permissions
-        if ($window.localStorage.getItem("roles")!=null){
-            if ($window.localStorage.getItem("roles").includes("ADMIN")){
-                url = "api/gateway/visits"
-            }else if ($window.localStorage.getItem("roles").includes("VET")) {
-                url = "api/gateway/visits/vets/"+$window.localStorage.getItem("userId")
-            }
-            else if ($window.localStorage.getItem("roles").includes("OWNER")) {
-                url = "api/gateway/visits/owners/"+$window.localStorage.getItem("ownerId")
-            }else{
-                url = ""
-            }
-        }
+        if ($window.localStorage.getItem("roles").includes("ADMIN")){
+            url = "api/gateway/visits"
+        }else if ($window.localStorage.getItem("roles").includes("VET")) {
+            url = "api/gate way/visits/vets/"+$window.localStorage.getItem("UUID")
+        }else if ($window.localStorage.getItem("roles").includes("OWNER")) {
+            url = "api/gateway/visits/owners/"+$window.localStorage.getItem("UUID")
+        }else{url = ""}
+
         let eventSource = new EventSource(url)
         eventSource.addEventListener('message', function (event){
             $scope.$apply(function(){

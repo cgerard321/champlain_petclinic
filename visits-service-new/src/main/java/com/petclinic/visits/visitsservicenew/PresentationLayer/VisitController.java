@@ -21,8 +21,8 @@ public class VisitController {
         return visitService.getAllVisits();
     }
 
-    @GetMapping(value="vets/{practitionerId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<VisitResponseDTO> getVisitByVetId(@PathVariable final String practitionerId) {
+    @GetMapping(value="practitioner/{practitionerId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<VisitResponseDTO> getVisitsByPractitionerId(@PathVariable String practitionerId) {
         return visitService.getVisitsForPractitioner(practitionerId);
     }
     @GetMapping(value="/pets/{petId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)

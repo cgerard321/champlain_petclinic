@@ -1,10 +1,10 @@
 'use strict';
 
 angular.module('visits')
-    .controller('VisitsController', ['$http', '$state', '$stateParams', '$filter','$scope','$rootScope', function ($http, $state, $stateParams, $filter, $scope,$rootScope) {
+    .controller('VisitsController', ['$http', '$state', '$stateParams', '$filter','$scope','$rootScope', '$window', function ($http, $state, $stateParams, $filter, $scope,$rootScope, $window) {
         var self = this;
         var petId = $stateParams.petId || 0;
-        var postURL = "api/gateway/visit/owners/5fe81e29-1f1d-4f9d-b249-8d3e0cc0b7dd/pets/9/visits";
+        var postURL = "api/gateway/visit/owners/"+$window.localStorage.getItem("UUID")+"/pets/9/visits";
         var vetsUrl = "api/gateway/vets";
         var billsUrl = "api/gateway/bill";
         var visitId = 0;

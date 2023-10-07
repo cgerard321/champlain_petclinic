@@ -1,7 +1,5 @@
 package com.petclinic.bffapigateway.presentationlayer;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.config.GlobalExceptionHandler;
 import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.Auth.*;
@@ -14,6 +12,7 @@ import com.petclinic.bffapigateway.dtos.Inventory.*;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.ProductResponseDTO;
+import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.PetType;
 import com.petclinic.bffapigateway.dtos.Pets.PetTypeResponseDTO;
@@ -49,18 +48,16 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.server.ResponseStatusException;
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import static org.assertj.core.api.Assertions.assertThat;
-import static com.petclinic.bffapigateway.dtos.Inventory.InventoryType.internal;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.springframework.http.HttpStatus.*;
@@ -82,7 +79,6 @@ import static org.springframework.web.reactive.function.BodyInserters.fromValue;
         classes = {JwtTokenFilter.class,RoleFilter.class}),useDefaultFilters = false)
 @AutoConfigureWebTestClient
 class ApiGatewayControllerTest {
-//    @Autowired private ObjectMapper objectMapper;
     @Autowired private WebTestClient client;
     @MockBean private CustomersServiceClient customersServiceClient;
     @MockBean private VisitsServiceClient visitsServiceClient;
