@@ -239,22 +239,22 @@ public class BFFApiGatewayController {
         return getPetsByOwnerId(ownerId).flatMap(petResponseDTO -> getVisitsForPet(petResponseDTO.getPetId()));
     }
     @GetMapping(value = "visits/vets/{practitionerId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<VisitResponseDTO> getVisitByPractitionerId(@PathVariable final String practitionerId){
+    public Flux<VisitResponseDTO> getVisitByPractitionerId(@PathVariable String practitionerId){
         return visitsServiceClient.getVisitByPractitionerId(practitionerId);
     }
 
     @GetMapping(value = "visits/pets/{petId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<VisitResponseDTO> getVisitsForPet(final @PathVariable String petId){
+    public Flux<VisitResponseDTO> getVisitsForPet(@PathVariable String petId){
         return visitsServiceClient.getVisitsForPet(petId);
     }
 
     @GetMapping(value = "visits/status/{status}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<VisitResponseDTO> getVisitsForStatus(final @PathVariable String status){
+    public Flux<VisitResponseDTO> getVisitsForStatus(@PathVariable String status){
         return visitsServiceClient.getVisitsForStatus(status);
     }
 
     @GetMapping(value ="visits/{visitId}")
-    public Mono<VisitResponseDTO> getVisitByVisitId(final @PathVariable String visitId){
+    public Mono<VisitResponseDTO> getVisitByVisitId(@PathVariable String visitId){
         return visitsServiceClient.getVisitByVisitId(visitId);
     }
     @PostMapping(value = "visit/owners/{ownerId}/pets/{petId}/visits", consumes = "application/json", produces = "application/json")
@@ -269,7 +269,7 @@ public class BFFApiGatewayController {
         return visitsServiceClient.updateStatusForVisitByVisitId(visitId, status);
     }
     @DeleteMapping (value = "visits/{visitId}")
-    public Mono<ResponseEntity<Void>> deleteVisitsByVisitId(final @PathVariable String visitId){
+    public Mono<ResponseEntity<Void>> deleteVisitsByVisitId(@PathVariable String visitId){
         return visitsServiceClient.deleteVisitByVisitId(visitId).then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }

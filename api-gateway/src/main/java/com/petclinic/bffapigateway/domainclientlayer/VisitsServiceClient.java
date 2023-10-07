@@ -72,7 +72,7 @@ public class VisitsServiceClient {
     public Flux<VisitResponseDTO> getVisitByPractitionerId(final String practitionerId){
         return webClient
                 .get()
-                .uri("/vets/{practitionerId}", practitionerId)
+                .uri("/practitioner/{practitionerId}", practitionerId)
                 .retrieve()
                 .bodyToFlux(VisitResponseDTO.class);
     }

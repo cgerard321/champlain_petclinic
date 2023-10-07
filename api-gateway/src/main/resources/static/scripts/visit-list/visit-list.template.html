@@ -12,8 +12,9 @@
         align-items: center;
         margin-bottom: 20px;
     }
+    .sortorder:after {content: '\25b2';   /* BLACK UP-POINTING TRIANGLE */}
+    .sortorder.reverse:after {content: '\25bc';   /* BLACK DOWN-POINTING TRIANGLE */}
 
-    
     .original-button {
         color: #fff;
         background-color: #19d256;
@@ -41,7 +42,7 @@
 
 </style>
 
-<div class="button-wrapper">
+<div class="button-wrapper" ng-controller="VisitListController">
     <div class="container">
         <a ui-sref="visitsNew">
             <button class="original-button" id="addBtn">Create Visit</button>
@@ -65,17 +66,21 @@
 <input ng-model="search.billId" placeholder="Filter by Bill">
 
 
-
+<button ng-click="sortBy(null)">Set to unsorted</button>
 <table class="table">
     <thead>
     <tr>
-        <th> <button class="btn btn-default" id="sortByVisitIdUpcomingVisits" style="color: white">VisitId ⇅</button> </th>
-        <th> <button class="btn btn-default" id="sortByDateButtonUpcomingVisits" ng-click="$ctrl.SortTableByDate(true)" style="color: white">Sort by date ⇅</button> </th>
-        <th> <button class="btn btn-default" id="sortByDescButtonUpcomingVisits" ng-click="$ctrl.SortTableByDesc(true)" style="color: white">Sort by description ⇅</button> </th>
-        <th> <button class="btn btn-default" id="sortByVetButtonUpcomingVisits" ng-click="$ctrl.SortTableByVet(true)" style="color: white">Sort by veterinarian ⇅</button> </th>
-        <th> <button class="btn btn-default" id="sortByPetButtonUpcomingVisits" ng-click="$ctrl.SortTableByPet(true)" style="color: white">Sort by pet ⇅</button> </th>
-        <th> <button class="btn btn-default" id="sortByStatusButtonUpcomingVisits" ng-click="$ctrl.SortTableByStatus(true)" style="color: white">Sort by status ⇅</button> </th>
-        <th> <button class="btn btn-default" id="sortByBillIdUpcomingVisits" style="color: white">Bill ⇅</button> </th>
+        <th><button class="btn btn-default" ng-click="sortBy('visitId')" style="color: white">VisitId<span class="sortorder" ng-show="propertyName === 'visitId'" ng-class="{reverse: reverse}"></span></button></th>
+        <th><button class="btn btn-default" ng-click="sortBy('visitDate')" style="color: white">Sort by date<span class="sortorder" ng-show="propertyName === 'visitDate'" ng-class="{reverse: reverse}"></span></button></th>
+        <th><button class="btn btn-default" ng-click="sortBy('description')" style="color: white">Sort by description<span class="sortorder" ng-show="propertyName === 'description'" ng-class="{reverse: reverse}"></span></button></th>
+        <th><button class="btn btn-default" ng-click="sortBy('practitionerId')" style="color: white">Sort by veterinarian<span class="sortorder" ng-show="propertyName === 'practitionerId'" ng-class="{reverse: reverse}"></span></button></th>
+        <th><button class="btn btn-default" ng-click="sortBy('petId')" style="color: white">Sort by pet<span class="sortorder" ng-show="propertyName === 'petId'" ng-class="{reverse: reverse}"></span></button></th>
+        <th><button class="btn btn-default" ng-click="sortBy('status')" style="color: white">Sort by status<span class="sortorder" ng-show="propertyName === 'status'" ng-class="{reverse: reverse}"></span></button></th>
+        <th>
+            <button class="btn btn-default" style="color: white">Bill</button>
+<!--            <button class="btn btn-default" ng-click="sortBy('bill')" style="color: white">Sort by status</button>-->
+<!--            <span class="sortorder" ng-show="propertyName === 'bill'" ng-class="{reverse: reverse}"></span>-->
+        </th>
         <th style="text-align:center; vertical-align:middle"><label>Confirm</label></th>
         <th style="text-align:center; vertical-align:middle"> <label>Cancel</label> </th>
         <th style="text-align:center; vertical-align:middle"> <label>Edit</label> </th>
@@ -83,7 +88,8 @@
     </tr>
     </thead>
     <tbody id="upcomingTable">
-    <tr id="visitId" ng-repeat="v in $ctrl.upcomingVisits | filter:search:$ctrl.query track by v.visitId" data-table-name="upcomingVisits">
+<!--    <tr id="visitId" ng-repeat="v in $ctrl.upcomingVisits | filter:search:$ctrl.query track by v.visitId" data-table-name="upcomingVisits">-->
+    <tr id="visitId" ng-repeat="v in $ctrl.upcomingVisits | orderBy:propertyName:reverse | filter:search:$ctrl.query track by v.visitId" data-table-name="upcomingVisits">
         <td class="col-sm-2">{{v.visitId}}</td>
         <td class="col-sm-2">{{v.visitDate | date:'yyyy-MM-ddTHH:mm:ss'}}</td>
         <td style="white-space: pre-line">{{v.description}}</td>

@@ -1,18 +1,16 @@
 'use strict';
 angular.module('visitList')
-    .controller('VisitListController', ['$http', '$scope', '$window', function ($http, $scope, $window) {
+    .controller('VisitListController', ['$http', '$scope', '$window', 'orderByFilter', function ($http, $scope, $window, orderBy) {
         let self = this;
         // Lists holding visits for the tables to display
         self.upcomingVisits = []
         self.previousVisits = []
-        // console.log($window.localStorage.getItem("roles"))
-        // isAdmin: () =>  $window.localStorage.getItem("roles") != null && !!$window.localStorage.getItem("roles").includes("ADMIN")
         let url
         //sorted by order or most to least permissions
         if ($window.localStorage.getItem("roles").includes("ADMIN")){
             url = "api/gateway/visits"
         }else if ($window.localStorage.getItem("roles").includes("VET")) {
-            url = "api/gate way/visits/vets/"+$window.localStorage.getItem("UUID")
+            url = "api/gateway/visits/vets/"+$window.localStorage.getItem("practitionerIdAndMonth").split(",")[0]
         }else if ($window.localStorage.getItem("roles").includes("OWNER")) {
             url = "api/gateway/visits/owners/"+$window.localStorage.getItem("UUID")
         }else{url = ""}
@@ -33,31 +31,23 @@ angular.module('visitList')
             }
         }
 
-
         $scope.confirmVisit = function (visitId, status){
-
             console.log(status)
-
             switch(status){
-
                 case "UPCOMING":
                     status = "CONFIRMED"
                     break;
-
                 case "CONFIRMED":
                     status = "COMPLETED"
                     break;
-
                 default:
                     break;
             }
 
             console.log(status)
-
             let putURL = 'api/gateway/visits/' + visitId + '/status/' + status;
 
-            $http.put(putURL, status)
-                .then(successCallback, errorCallback)
+            $http.put(putURL, status).then(successCallback, errorCallback)
 
             function successCallback(response) {
                 $scope.errors = []
@@ -68,13 +58,9 @@ angular.module('visitList')
         }
 
         $scope.cancelVisit = function (visitId, status){
-
             let putURL = 'api/gateway/visits/' + visitId + '/status/' + status
-
             console.log(putURL)
-
-            $http.put(putURL, status)
-                .then(successCallback, errorCallback)
+            $http.put(putURL, status).then(successCallback, errorCallback)
 
             function successCallback(response) {
                 $scope.errors = []
@@ -82,15 +68,13 @@ angular.module('visitList')
                 console.log(response, 'res')
                 delayedReload()
             }
-
         }
 
         $scope.deleteVisit = function (visitId) {
             let varIsConf = confirm('You are about to delete visit ' + visitId + '. Is this what you want to do ? ')
             if (varIsConf) {
 
-                $http.delete('api/gateway/visits/' + visitId)
-                    .then(successCallback, errorCallback)
+                $http.delete('api/gateway/visits/' + visitId).then(successCallback, errorCallback)
 
                 function successCallback(response) {
                     $scope.errors = []
@@ -98,17 +82,13 @@ angular.module('visitList')
                     console.log(response, 'res')
                     delayedReload()
                 }
-
             }
         }
-
-
 
         $scope.deleteAllCancelledVisits = function () {
             let varIsConf = confirm('You are about to delete all canceled visits. Is this what you want to do ? ');
             if (varIsConf) {
-                $http.delete('api/gateway/visits/cancelled')
-                    .then(successCallback, errorCallback);
+                $http.delete('api/gateway/visits/cancelled').then(successCallback, errorCallback);
 
                 function successCallback(response) {
                     $scope.errors = [];
@@ -117,6 +97,19 @@ angular.module('visitList')
                     delayedReload();
                 }
             }
+        }
+
+        $scope.propertyName = 'visitId'
+        $scope.reverse = false
+        $scope.upcomingVisits = self.upcomingVisits
+        // self.upcomingVisits = orderBy(self.upcomingVisits, $scope.propertyName, $scope.reverse)
+        $scope.sortBy = function(propertyName){
+            // $scope.reverse = (propertyName !== null && $scope.propertyName === propertyName) ? !$scope.reverse : false
+            // $scope.propertyName = propertyName
+            // $scope.upcomingVisits = orderBy($scope.upcomingVisits, $scope.propertyName, $scope.reverse)
+            $scope.reverse = ($scope.propertyName === propertyName) ? !$scope.reverse : false
+            $scope.propertyName = propertyName
+            // $scope.upcomingVisits = orderBy($scope.upcomingVisits, $scope.propertyName, $scope.reverse)
         }
 
         function delayedReload() {
