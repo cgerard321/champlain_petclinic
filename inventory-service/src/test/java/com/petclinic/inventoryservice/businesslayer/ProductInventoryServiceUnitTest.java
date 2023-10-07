@@ -815,6 +815,7 @@ class ProductInventoryServiceUnitTest {
                 })
                 .verifyComplete();
     }
+
     @Test
     public void getAllInventoryTypes_ShouldSucceed(){
         when(inventoryTypeRepository.findAll())
@@ -827,6 +828,32 @@ class ProductInventoryServiceUnitTest {
                 .verifyComplete();
 
     }
+
+//search
+    /*
+    @Test
+    void testSearchInventories_TypeAndDescriptionGiven() {
+        // Given
+        String testType = "Internal";
+        String testDescription = "Medication for procedures";
+
+        when(inventoryRepository.findAllByInventoryTypeAndInventoryDescription(testType, testDescription))
+                .thenReturn(Flux.just(inventory));
+
+        // When
+        Flux<InventoryResponseDTO> result = productInventoryService.searchInventories(null, testType, testDescription);
+
+        // Then
+        StepVerifier.create(result)
+                .expectNextMatches(dto -> dto.getInventoryType().equals(testType) && dto.getInventoryDescription().equals(testDescription))
+                .verifyComplete();
+
+        verify(inventoryRepository, times(1))
+                .findAllByInventoryTypeAndInventoryDescription(testType, testDescription);
+    }
+
+
+*/
 
 
 

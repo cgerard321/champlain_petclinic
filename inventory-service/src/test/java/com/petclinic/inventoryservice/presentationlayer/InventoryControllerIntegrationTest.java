@@ -19,6 +19,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.test.StepVerifier;
 
+import java.util.List;
+
 import static com.mongodb.assertions.Assertions.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -734,6 +736,136 @@ class InventoryControllerIntegrationTest {
                 .value(dto -> {
                     assertNotNull(dto);
                     assertEquals(inventoryTypeRequestDTO.getType(), dto.getType());
+                });
+    }
+    @Test
+    public void testSearchByInventoryName_SingleChar() {
+        String name = "i";  // I've changed this to a single character that matches the start of "internal"
+
+        // Call the endpoint
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/inventory")
+                        .queryParam("inventoryName", name)
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(InventoryResponseDTO.class)
+                .consumeWith(response -> {
+                    List<InventoryResponseDTO> inventories = response.getResponseBody();
+                    assertNotNull(inventories);
+                    assertTrue(inventories.size() > 0);
+                    assertTrue(inventories.get(0).getInventoryName().toLowerCase().startsWith(name.toLowerCase())); // changed contains to startsWith for more accurate matching
+                });
+    }
+
+    @Test
+    public void testSearchByInventoryName_MultipleChars() {
+        String inventoryName = "internal";  // Sample name to match "internal" inventory
+
+        // Call the endpoint
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/inventory")
+                        .queryParam("inventoryName", inventoryName)
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(InventoryResponseDTO.class)
+                .consumeWith(response -> {
+                    List<InventoryResponseDTO> inventories = response.getResponseBody();
+                    assertNotNull(inventories);
+                    assertTrue(inventories.size() > 0);
+                    assertEquals(inventoryName, inventories.get(0).getInventoryName());
+                });
+    }
+
+
+
+    @Test
+    public void testSearchByInventoryDescription_SingleChar() {
+        String description = "i";  // I've changed this to a single character that matches the start of "inventoryDescription_3"
+
+        // Call the endpoint
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/inventory")
+                        .queryParam("inventoryDescription", description)
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(InventoryResponseDTO.class)
+                .consumeWith(response -> {
+                    List<InventoryResponseDTO> inventories = response.getResponseBody();
+                    assertNotNull(inventories);
+                    assertTrue(inventories.size() > 0);
+                    assertTrue(inventories.get(0).getInventoryDescription().toLowerCase().startsWith(description.toLowerCase())); // changed contains to startsWith for more accurate matching
+                });
+    }
+
+    @Test
+    public void testSearchByInventoryDescription_MultipleChars() {
+        String inventoryDescription = "inventoryDescription_3";  // Sample description to match
+
+        // Call the endpoint
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/inventory")
+                        .queryParam("inventoryDescription", inventoryDescription)
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(InventoryResponseDTO.class)
+                .consumeWith(response -> {
+                    List<InventoryResponseDTO> inventories = response.getResponseBody();
+                    assertNotNull(inventories);
+                    assertTrue(inventories.size() > 0);
+                    assertEquals(inventoryDescription, inventories.get(0).getInventoryDescription());
+                });
+    }
+
+    //product Name
+    @Test
+    public void testSearchByProductName_SingleChar() {
+        String inventoryId = "inventoryId_3";
+        String singleCharProductName = "B";
+
+        // Call the endpoint
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/inventory/{inventoryId}/products")
+                        .queryParam("productName", singleCharProductName)
+                        .build(inventoryId))   // Supply the inventoryId here
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProductResponseDTO.class)
+                .consumeWith(response -> {
+                    List<ProductResponseDTO> products = response.getResponseBody();
+                    assertNotNull(products);
+                    assertTrue(products.size() > 0);
+                    assertTrue(products.get(0).getProductName().toLowerCase().startsWith(singleCharProductName.toLowerCase()));
+                });
+    }
+
+    @Test
+    public void testSearchByProductName_MultipleChars() {
+        String inventoryId = "inventoryId_3";
+        String productName = "Benzodiazepines";
+
+        // Call the endpoint
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/inventory/{inventoryId}/products")
+                        .queryParam("productName", productName)
+                        .build(inventoryId))   // Supply the inventoryId here
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProductResponseDTO.class)
+                .consumeWith(response -> {
+                    List<ProductResponseDTO> products = response.getResponseBody();
+                    assertNotNull(products);
+                    assertTrue(products.size() > 0);
+                    assertEquals(productName, products.get(0).getProductName());
                 });
     }
 
