@@ -12,12 +12,14 @@ package com.petclinic.vet.util;
  */
 
 import com.petclinic.vet.dataaccesslayer.Photo;
+import com.petclinic.vet.dataaccesslayer.badges.Badge;
 import com.petclinic.vet.dataaccesslayer.education.Education;
 import com.petclinic.vet.dataaccesslayer.ratings.Rating;
 import com.petclinic.vet.dataaccesslayer.Specialty;
-import com.petclinic.vet.dataaccesslayer.Vet;
+import com.petclinic.vet.dataaccesslayer.*;
 import com.petclinic.vet.exceptions.InvalidInputException;
 import com.petclinic.vet.servicelayer.*;
+import com.petclinic.vet.servicelayer.badges.BadgeResponseDTO;
 import com.petclinic.vet.servicelayer.education.EducationRequestDTO;
 import com.petclinic.vet.servicelayer.education.EducationResponseDTO;
 import com.petclinic.vet.servicelayer.ratings.RatingRequestDTO;
@@ -27,8 +29,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.core.io.Resource;
 
 import java.io.IOException;
+import java.util.Base64;
 import java.util.HashSet;
-import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
@@ -150,6 +152,15 @@ public class EntityDtoUtil {
         }
 
         return specialties;
+    }
+
+    public static BadgeResponseDTO toBadgeResponseDTO(Badge badge){
+        BadgeResponseDTO badgeResponseDTO=new BadgeResponseDTO();
+        badgeResponseDTO.setBadgeDate(badge.getBadgeDate());
+        badgeResponseDTO.setBadgeTitle(badge.getBadgeTitle());
+        badgeResponseDTO.setVetId(badge.getVetId());
+        badgeResponseDTO.setResourceBase64(Base64.getEncoder().encodeToString(badge.getData()));
+        return badgeResponseDTO;
     }
 
     public static String verifyId(String id) {
