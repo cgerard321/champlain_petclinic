@@ -211,11 +211,19 @@ angular.module('vetDetails')
             }
         };
 
+        //badge
+        $http.get('api/gateway/vets/'+$stateParams.vetId+'/badge').then(function(resp){
+            self.badge=resp.data;
+            console.log(resp.data)
+        })
+        self.init = function (){
+            $http.get('api/gateway/vets/' + $stateParams.vetId + '/badge').then(function (resp) {
+                self.badge= resp.data;
+                console.log(resp.data)
+            });
+        }
+
         //photo
-        $http.get('api/gateway/vets/' + $stateParams.vetId+"/photo").then(function (resp) {
-            self.vetPhoto = resp.data;
-        });
-//photo
         $http.get('api/gateway/vets/' + $stateParams.vetId + '/photo').then(function (resp) {
             self.vetPhoto = resp.data;
         });
