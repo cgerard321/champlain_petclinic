@@ -815,6 +815,18 @@ class ProductInventoryServiceUnitTest {
                 })
                 .verifyComplete();
     }
+    @Test
+    public void getAllInventoryTypes_ShouldSucceed(){
+        when(inventoryTypeRepository.findAll())
+                .thenReturn(Flux.just(inventoryType));
+        Flux<InventoryTypeResponseDTO> inventoryTypeResponseDTOFlux = productInventoryService.getAllInventoryTypes();
+
+        StepVerifier
+                .create(inventoryTypeResponseDTOFlux)
+                .expectNextCount(1)
+                .verifyComplete();
+
+    }
 
 
 

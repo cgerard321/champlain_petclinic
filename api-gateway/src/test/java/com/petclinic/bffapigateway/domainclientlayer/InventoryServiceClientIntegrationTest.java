@@ -113,4 +113,23 @@ class InventoryServiceClientIntegrationTest {
                 .verifyComplete();
     }
 
+    @Test
+    void getInventoryTypes() throws JsonProcessingException{
+        InventoryTypeResponseDTO inventoryTypeResponseDTO = new InventoryTypeResponseDTO(
+                "142f383f-9fbf-479b-95e3-6c928f6a290b",
+                "Internal"
+        );
+
+        mockWebServer.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON)
+                .setBody(objectMapper.writeValueAsString(inventoryTypeResponseDTO))
+                .addHeader("Content-Type", "application/json"));
+
+        Flux<InventoryTypeResponseDTO> inventoryTypeResponseDTOFlux = inventoryServiceClient
+                .getAllInventoryTypes();
+        StepVerifier.create(inventoryTypeResponseDTOFlux)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
 }

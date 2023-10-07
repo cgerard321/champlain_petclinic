@@ -827,6 +827,12 @@ public class BFFApiGatewayController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER})
+
+    @GetMapping(value = "inventory/type")
+    public Flux<InventoryTypeResponseDTO> getAllInventoryTypes(){
+        return inventoryServiceClient.getAllInventoryTypes();
+    }
+
     @DeleteMapping(value = "inventory/{inventoryId}")
     public Mono<Void> deleteInventoryByInventoryId(@PathVariable String inventoryId) {
         return inventoryServiceClient.deleteInventoryByInventoryId(inventoryId);

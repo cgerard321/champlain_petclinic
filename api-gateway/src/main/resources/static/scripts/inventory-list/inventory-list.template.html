@@ -18,9 +18,7 @@
         </td>
         <td>
         <span>
-            <select class="form-control col-sm-4" id="inventoryType" ng-model="inventoryType" name="inventoryType" required title="Please select the inventory type." ng-keyup="$event.keyCode == 13 && searchInventory(inventoryName, inventoryType, inventoryDescription)">
-                <option value="internal">internal</option>
-                <option value="sales">sales</option>
+            <select class="form-control col-sm-4" id="inventoryType" ng-model="inventoryType" name="inventoryType" ng-options="type for type in inventoryTypeOptions" placeholder="None" required title="Please select the inventory type." ng-keyup="$event.keyCode == 13 && searchInventory(inventoryName, inventoryType, inventoryDescription)">
             </select>
         </span>
         </td>
