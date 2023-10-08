@@ -7,6 +7,7 @@ import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -17,11 +18,14 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.io.IOException;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -48,6 +52,7 @@ class VetsServiceClientIntegrationTest {
     private ObjectMapper mapper;
 
     VetDTO vetDTO = buildVetDTO();
+    ClassPathResource cpr=new ClassPathResource("static/images/full_food_bowl.png");
 
     @BeforeEach
     void setup() {
@@ -828,6 +833,7 @@ class VetsServiceClientIntegrationTest {
 
         assertNull(ratingResponseDTO);
     }
+
     @Test
     void updateEducationByVetIdAndEducationId() throws JsonProcessingException {
         EducationRequestDTO updatedEducation = EducationRequestDTO.builder()
@@ -891,6 +897,96 @@ class VetsServiceClientIntegrationTest {
         byte[] photoBytes = FileCopyUtils.copyToByteArray(photo.getInputStream());
 
         assertNotNull(photoBytes);
+    }
+
+    @Test
+    void getBadgeByVetId() throws IOException{
+        BadgeResponseDTO badgeResponseDTO = BadgeResponseDTO.builder()
+                .vetId("cf25e779-548b-4788-aefa-6d58621c2feb")
+                .badgeTitle(BadgeTitle.HIGHLY_RESPECTED)
+                .badgeDate("2017")
+                .resourceBase64(Base64.getEncoder().encodeToString(StreamUtils.copyToByteArray(cpr.getInputStream())))
+                .build();
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody("    {\n" +
+                        "        \"vetId\": \"cf25e779-548b-4788-aefa-6d58621c2feb\",\n" +
+                        "        \"badgeTitle\": \"" + badgeResponseDTO.getBadgeTitle() + "\",\n" +
+                        "        \"badgeDate\": \"2017\",\n" +
+                        "        \"resourceBase64\": \"" + badgeResponseDTO.getResourceBase64() + "\"\n" +
+                        "    }"));
+
+        StepVerifier.create(vetsServiceClient.getBadgeByVetId("cf25e779-548b-4788-aefa-6d58621c2feb"))
+                .consumeNextWith(responseDTO -> {
+                    assertEquals(badgeResponseDTO.getBadgeTitle(), responseDTO.getBadgeTitle());
+                    assertEquals(badgeResponseDTO.getBadgeDate(), responseDTO.getBadgeDate());
+                    assertEquals(badgeResponseDTO.getVetId(), responseDTO.getVetId());
+                    assertEquals(badgeResponseDTO.getResourceBase64(), responseDTO.getResourceBase64());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void getBadgeByInvalidVetId_shouldNotSucceed() throws NotFoundException{
+        String invalidVetId="123";
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(404)
+                .setBody("vetId not found: "+invalidVetId));
+
+        final BadgeResponseDTO badgeResponseDTO = vetsServiceClient.getBadgeByVetId(invalidVetId)
+                .onErrorResume(throwable -> {
+                    if (throwable instanceof NotFoundException && throwable.getMessage().equals("vetId not found: "+invalidVetId)) {
+                        return Mono.empty();
+                    } else {
+                        return Mono.error(throwable);
+                    }
+                })
+                .block();
+
+        assertNull(badgeResponseDTO);
+    }
+
+    @Test
+    void getBadgeByVetId_IllegalArgumentException400() throws IllegalArgumentException {
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(400)
+                .setBody("Something went wrong"));
+
+        final BadgeResponseDTO badgeResponseDTO = vetsServiceClient.getBadgeByVetId("cf25e779-548b-4788-aefa-6d58621c2feb")
+                .onErrorResume(throwable->{
+                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                        return Mono.empty();
+                    } else {
+                        return Mono.error(throwable);
+                    }
+                })
+                .block();
+
+        assertNull(badgeResponseDTO);
+    }
+
+    @Test
+    void getBadgeByVetId_IllegalArgumentException500() throws IllegalArgumentException {
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(500)
+                .setBody("Something went wrong"));
+
+        final BadgeResponseDTO badgeResponseDTO = vetsServiceClient.getBadgeByVetId("cf25e779-548b-4788-aefa-6d58621c2feb")
+                .onErrorResume(throwable->{
+                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                        return Mono.empty();
+                    } else {
+                        return Mono.error(throwable);
+                    }
+                })
+                .block();
+
+        assertNull(badgeResponseDTO);
     }
 
     @Test
