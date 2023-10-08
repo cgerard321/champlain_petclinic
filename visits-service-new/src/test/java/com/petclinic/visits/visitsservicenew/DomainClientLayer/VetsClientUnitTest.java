@@ -26,7 +26,7 @@ class VetsClientUnitTest {
     @MockBean
     private VetsClient vetsClient;
 
-    private final  ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private static MockWebServer mockBackEnd;
 
