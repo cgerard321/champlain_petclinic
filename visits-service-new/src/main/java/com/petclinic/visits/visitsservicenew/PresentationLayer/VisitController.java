@@ -21,6 +21,10 @@ public class VisitController {
         return visitService.getAllVisits();
     }
 
+    @GetMapping(value="practitioner/{practitionerId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<VisitResponseDTO> getVisitByPractitionerId(@PathVariable String practitionerId) {
+        return visitService.getVisitsForPractitioner(practitionerId);
+    }
     @GetMapping(value="/pets/{petId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VisitResponseDTO> getVisitsForPet(@PathVariable String petId){
         return visitService.getVisitsForPet(petId);
@@ -37,10 +41,7 @@ public class VisitController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-    @GetMapping(value="practitioner/{practitionerId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<VisitResponseDTO> getVisitByPractitionerId(@PathVariable String practitionerId) {
-        return visitService.getVisitsForPractitioner(practitionerId);
-    }
+
     /*
     @GetMapping(value="practitioner/{practitionerId}/{month}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VisitResponseDTO> getVisitsByPractitionerIdAndMonth(@PathVariable int practitionerId, @PathVariable int month){
