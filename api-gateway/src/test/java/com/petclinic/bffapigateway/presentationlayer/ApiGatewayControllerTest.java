@@ -48,6 +48,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.server.ServerWebExchange;
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -2132,6 +2133,39 @@ class ApiGatewayControllerTest {
                 .expectBodyList(VisitResponseDTO.class)
                 .value((list)->assertEquals(list.size(),2));
         Mockito.verify(visitsServiceClient,times(1)).getAllVisits();
+    }
+    @Test
+    void getVisitsByOwnerId_shouldReturnOk(){
+        //arrange
+        final String ownerId = "ownerId";
+        PetResponseDTO petResponseDTO1 = PetResponseDTO.builder().petId("petId1").build();
+        PetResponseDTO petResponseDTO2 = PetResponseDTO.builder().petId("petId2").build();
+        VisitResponseDTO visitResponseDTO1 = VisitResponseDTO.builder().visitId("visitId1").petId("petId1").build();
+        VisitResponseDTO visitResponseDTO2 = VisitResponseDTO.builder().visitId("visitId2").petId("petId1").build();
+        VisitResponseDTO visitResponseDTO3 = VisitResponseDTO.builder().visitId("visitId3").petId("petId2").build();
+        VisitResponseDTO visitResponseDTO4 = VisitResponseDTO.builder().visitId("visitId4").petId("petId2").build();
+        VisitResponseDTO visitResponseDTO5 = VisitResponseDTO.builder().visitId("visitId5").petId("petId1").build();
+
+        Mockito.when(customersServiceClient.getPetsByOwnerId(anyString())).thenReturn(Flux.just(petResponseDTO1, petResponseDTO2));
+
+        Mockito.when(visitsServiceClient.getVisitsForPet(petResponseDTO1.getPetId())).thenReturn(Flux.just(visitResponseDTO1, visitResponseDTO2, visitResponseDTO5));
+        Mockito.when(visitsServiceClient.getVisitsForPet(petResponseDTO2.getPetId())).thenReturn(Flux.just(visitResponseDTO3, visitResponseDTO4));
+
+        //act and assert
+        client
+                .get()
+                .uri("/api/gateway/visits/owners/{ownerId}",ownerId)
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .acceptCharset(StandardCharsets.UTF_8)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
+                .expectBodyList(VisitResponseDTO.class)
+                .value((list) -> {
+                    Assertions.assertNotNull(list);
+                    Assertions.assertEquals(5, list.size());
+                });
     }
     @Test
     void shouldGetAVisit() {

@@ -40,7 +40,7 @@ class VisitsServiceClientIntegrationTest {
 
     private static final String PET_ID = "1";
 
-    private static final String STATUS = "REQUESTED";
+    private static final String STATUS = "UPCOMING";
 
 
     @BeforeAll
