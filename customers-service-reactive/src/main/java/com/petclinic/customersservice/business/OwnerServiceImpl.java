@@ -84,23 +84,13 @@ public class OwnerServiceImpl implements OwnerService {
     }
 
     @Override
-    public Flux<OwnerResponseDTO> getAllOwnersPagination(Pageable pageable){
-        return ownerRepo.findAll()
-                .map(EntityDTOUtil::toOwnerResponseDTO)
-                .skip(pageable.getPageNumber() * pageable.getPageSize())
-                .take(pageable.getPageSize());
-    }
+    public Flux<OwnerResponseDTO> getAllOwnersPagination(Pageable pageable,
+                                                         String ownerId,
+                                                         String firstName,
+                                                         String lastName,
+                                                         String phoneNumber,
+                                                         String city){
 
-    @Override
-    public Flux<OwnerResponseDTO> getAllOwnersPaginationWithFilters(
-            Pageable pageable,
-            String ownerId,
-            String firstName,
-            String lastName,
-            String phoneNumber,
-            String city
-    ) {
-        // Create a filter function based on provided criteria
         Predicate<Owner> filterCriteria = owner ->
                 (ownerId == null || owner.getOwnerId().equals(ownerId)) &&
                 (firstName == null || owner.getFirstName().equals(firstName)) &&
@@ -108,11 +98,18 @@ public class OwnerServiceImpl implements OwnerService {
                 (phoneNumber == null || owner.getTelephone().equals(phoneNumber)) &&
                 (city == null || owner.getCity().equals(city));
 
-        return ownerRepo.findAll()
-                .filter(filterCriteria) // Apply filtering
-                .map(EntityDTOUtil::toOwnerResponseDTO)
-                .skip(pageable.getPageNumber() * pageable.getPageSize())
-                .take(pageable.getPageSize());
+        if(ownerId == null && firstName == null && lastName == null && phoneNumber == null && city == null){
+            return ownerRepo.findAll()
+                    .map(EntityDTOUtil::toOwnerResponseDTO)
+                    .skip(pageable.getPageNumber() * pageable.getPageSize())
+                    .take(pageable.getPageSize());
+        } else {
+            return ownerRepo.findAll()
+                    .filter(filterCriteria)
+                    .map(EntityDTOUtil::toOwnerResponseDTO)
+                    .skip(pageable.getPageNumber() * pageable.getPageSize())
+                    .take(pageable.getPageSize());
+        }
     }
 
 

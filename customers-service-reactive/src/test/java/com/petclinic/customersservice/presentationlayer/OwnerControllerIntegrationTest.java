@@ -168,39 +168,6 @@ class OwnerControllerIntegrationTest {
                 });
     }
 
-    @Test
-    void getOwnersByPaginationWithFilters_shouldSucceed(){
-
-        String firstName = "Marie";
-        String city = "New York";
-        int page = 0;
-        int size = 1;
-
-        Owner owner1 = Owner.builder()
-                .ownerId("ownerId-13")
-                .firstName("Marie")
-                .lastName("LastName1")
-                .address("Test address1")
-                .city("New York")
-                .telephone("telephone1")
-                .build();
-
-        StepVerifier.create(repo.deleteAll().thenMany(repo.save(owner1))).expectNextCount(1).verifyComplete();
-
-    client.get()
-                .uri("/owners/owners-pagination/filters?page="+page+"&size="+size+"&firstName="+firstName+"&city="+city)
-                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
-                .acceptCharset(StandardCharsets.UTF_8)
-                .exchange().expectStatus().isOk()
-                .expectHeader().valueEquals("Content-Type","text/event-stream;charset=UTF-8")
-                .expectBodyList(OwnerResponseDTO.class)
-                .value((list) -> {
-                    assertNotNull(list);
-                    assertEquals(size,list.size());
-                });
-    }
-
-
 
     @Test
     void getOwnerByOwnerId() {

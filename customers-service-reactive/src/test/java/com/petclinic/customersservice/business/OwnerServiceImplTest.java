@@ -99,7 +99,7 @@ class OwnerServiceImplTest {
         when(repo.findAll()).thenReturn(Flux.just(owner1, owner2, owner3));
 
         // Call the method under test
-        Flux<OwnerResponseDTO> owners = ownerService.getAllOwnersPagination(pageable);
+        Flux<OwnerResponseDTO> owners = ownerService.getAllOwnersPagination(pageable,null,null,null,null,null);
 
         // Verify the behavior using StepVerifier
         StepVerifier.create(owners)
@@ -111,40 +111,32 @@ class OwnerServiceImplTest {
     }
 
     @Test
-    void getOwnersPaginationWithFilters_ShouldSucceed(){
-        String city = "Madison";
+    void getOwnersPaginationWithFiltersApplied_ShouldSucceed(){
 
         Owner owner1 = Owner.builder()
                 .ownerId("ownerId-11")
                 .firstName("FirstName1")
                 .lastName("LastName1")
                 .address("Test address1")
-                .city("Madison")
+                .city("test city1")
+                .province("test province1")
                 .telephone("telephone1")
                 .build();
-        Owner owner2 = Owner.builder()
-                .ownerId("ownerId-17")
-                .firstName("FirstName2")
-                .lastName("LastName2")
-                .address("Test address2")
-                .city("Madison")
-                .telephone("telephone2")
-                .build();
-
 
         // Create a Pageable object for the first page with 2 items per page
         Pageable pageable = PageRequest.of(0, 2);
-
+        String city = "test city1";
+        String ownerId = "ownerId-11";
         // Mock the repository to return a Flux of owners
-        when(repo.findAll()).thenReturn(Flux.just(owner1, owner2));
+        when(repo.findAll()).thenReturn(Flux.just(owner1));
 
         // Call the method under test
-        Flux<OwnerResponseDTO> owners = ownerService.getAllOwnersPaginationWithFilters(pageable,null,null,null,null,city);
+        Flux<OwnerResponseDTO> owners = ownerService.getAllOwnersPagination(pageable,ownerId,null,null,null,city);
 
         // Verify the behavior using StepVerifier
         StepVerifier.create(owners)
-                .expectNextMatches(ownerDto1 -> ownerDto1.getCity().equals(city))
-                .expectNextMatches(ownerDto2 -> ownerDto2.getCity().equals(city))
+                .expectNextMatches(ownerDto1 -> ownerDto1.getOwnerId().equals(owner1.getOwnerId())
+                                            && ownerDto1.getCity().equals(owner1.getCity()))
                 .expectComplete()
                 .verify();
 
