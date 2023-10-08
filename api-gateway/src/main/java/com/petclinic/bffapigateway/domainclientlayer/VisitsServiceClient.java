@@ -17,12 +17,6 @@ import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.io.IOException;
-import java.net.URI;
-import java.util.List;
-
-import static java.rmi.server.LogStream.log;
-import static java.util.stream.Collectors.joining;
-
 /**
  * @author Maciej Szarlinski
  * Copied from https://github.com/spring-petclinic/spring-petclinic-microservices
@@ -76,41 +70,7 @@ public class VisitsServiceClient {
                 .retrieve()
                 .bodyToFlux(VisitResponseDTO.class);
     }
-/*
-    public Flux<VisitDetails> getPreviousVisitsForPet(final String petId) {
-        return webClient
-                .get()
-                .uri("/visits/previous/{petId}", petId)
-                .retrieve()
-                .bodyToFlux(VisitDetails.class);
-    }
 
-
-
-    public Flux<VisitDetails> getScheduledVisitsForPet(final String petId) {
-        return webClient
-                .get()
-                .uri("/visits/scheduled/{petId}", petId)
-                .retrieve()
-                .bodyToFlux(VisitDetails.class);
-    }
- */
-
-//    public Mono<VisitDetails> updateVisitForPet(VisitDetails visit) {
-//        URI uri = UriComponentsBuilder
-//                .fromPath("/owners/*/pets/{petId}/visits/{visitId}")
-//                .buildAndExpand(visit.getPetId(), visit.getVisitId())
-//                .toUri();
-//
-//        return webClient
-//                .put()
-//                .uri(uri)
-//                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-//                .body(Mono.just(visit), VisitDetails.class)
-//                .retrieve()
-//                .onStatus(HttpStatusCode::isError, response  -> Mono.error(new BadRequestException("Failed to update visit")))
-//                .bodyToMono(VisitDetails.class);
-//    }
 
     public Mono<VisitResponseDTO> getVisitByVisitId(String visitId) {
         return webClient
@@ -183,20 +143,55 @@ public class VisitsServiceClient {
                 .retrieve()
                 .bodyToMono(Void.class);
     }
-//    private String joinIds(List<Integer> petIds) {
-//        return petIds.stream().map(Object::toString).collect(joining(","));
-//    }
-
-
-//    public Mono<Visits> getVisitsForPets(final List<Integer> petIds) {
-//        return this.webClient
-//                .get()
-//                .uri("/pets/visits?petId={petId}", joinIds(petIds))
-//                .retrieve()
-//                .bodyToMono(Visits.class);
-//    }
 
     /*
+    public Flux<VisitDetails> getPreviousVisitsForPet(final String petId) {
+        return webClient
+                .get()
+                .uri("/visits/previous/{petId}", petId)
+                .retrieve()
+                .bodyToFlux(VisitDetails.class);
+    }
+
+
+
+    public Flux<VisitDetails> getScheduledVisitsForPet(final String petId) {
+        return webClient
+                .get()
+                .uri("/visits/scheduled/{petId}", petId)
+                .retrieve()
+                .bodyToFlux(VisitDetails.class);
+    }
+*/
+//    public Mono<VisitDetails> updateVisitForPet(VisitDetails visit) {
+//        URI uri = UriComponentsBuilder
+//                .fromPath("/owners/*/pets/{petId}/visits/{visitId}")
+//                .buildAndExpand(visit.getPetId(), visit.getVisitId())
+//                .toUri();
+/*
+        return webClient
+                .put()
+                .uri(uri)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(Mono.just(visit), VisitDetails.class)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, response  -> Mono.error(new BadRequestException("Failed to update visit")))
+                .bodyToMono(VisitDetails.class);
+    }
+
+    private String joinIds(List<Integer> petIds) {
+        return petIds.stream().map(Object::toString).collect(joining(","));
+    }
+
+
+    public Mono<Visits> getVisitsForPets(final List<Integer> petIds) {
+        return this.webClient
+                .get()
+                .uri("/pets/visits?petId={petId}", joinIds(petIds))
+                .retrieve()
+                .bodyToMono(Visits.class);
+    }
+
     public Flux<VisitDetails> getVisitsByPractitionerIdAndMonth(final int practitionerId, final String startDate, final String endDate) {
         return webClient
                 .get()
@@ -204,9 +199,7 @@ public class VisitsServiceClient {
                 .retrieve()
                 .bodyToFlux(VisitDetails.class);
     }
-     */
 
-/*    public Mono<VisitDetails> createVisitForPet(VisitDetails visit) {
         return webClient
                 .post()
                 .uri("/visits")
