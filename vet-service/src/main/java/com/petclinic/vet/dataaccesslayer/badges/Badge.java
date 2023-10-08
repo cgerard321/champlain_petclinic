@@ -13,13 +13,13 @@ import org.springframework.data.relational.core.mapping.Table;
 @Table("badges")
 public class Badge {
     @Id
-    private String id;
+    private Integer id;
     @Column("vet_id")
     private String vetId;
-    @Column("badge_date")
-    private String badgeDate;
     @Column("badge_title")
     private BadgeTitle badgeTitle;
+    @Column("badge_date")
+    private String badgeDate;
     @Column("img_data")
     private byte[] data;
 }
