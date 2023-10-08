@@ -1,12 +1,16 @@
 package com.petclinic.vet.presentationlayer;
 
 import com.petclinic.vet.dataaccesslayer.*;
+import com.petclinic.vet.dataaccesslayer.badges.Badge;
+import com.petclinic.vet.dataaccesslayer.badges.BadgeRepository;
+import com.petclinic.vet.dataaccesslayer.badges.BadgeTitle;
 import com.petclinic.vet.dataaccesslayer.education.Education;
 import com.petclinic.vet.dataaccesslayer.education.EducationRepository;
 import com.petclinic.vet.dataaccesslayer.ratings.PredefinedDescription;
 import com.petclinic.vet.dataaccesslayer.ratings.Rating;
 import com.petclinic.vet.dataaccesslayer.ratings.RatingRepository;
 import com.petclinic.vet.servicelayer.*;
+import com.petclinic.vet.servicelayer.badges.BadgeResponseDTO;
 import com.petclinic.vet.servicelayer.education.EducationRequestDTO;
 import com.petclinic.vet.servicelayer.education.EducationResponseDTO;
 import com.petclinic.vet.servicelayer.ratings.RatingRequestDTO;
@@ -17,13 +21,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.r2dbc.init.R2dbcScriptDatabaseInitializer;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.util.StreamUtils;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.io.IOException;
+import java.util.Base64;
 import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,6 +57,8 @@ class VetControllerIntegrationTest {
     //To counter missing bean error
     @Autowired
     PhotoRepository photoRepository;
+    @Autowired
+    BadgeRepository badgeRepository;
     @MockBean
     ConnectionFactoryInitializer connectionFactoryInitializer;
     @MockBean
@@ -81,6 +91,9 @@ class VetControllerIntegrationTest {
             .startDate("2010")
             .endDate("2015")
             .build();
+
+    //badge image
+    ClassPathResource cpr=new ClassPathResource("images/full_food_bowl.png");
 
     @Test
     void getAllRatingsForAVet_WithValidVetId_ShouldSucceed() {
@@ -1442,6 +1455,7 @@ class VetControllerIntegrationTest {
                 });
     }
 
+    //Spring Boot version incompatibility issue with postgresql r2dbc
     /*@Test
     void getPhotoByVetId() {
         Publisher<Photo> setup = photoRepository.deleteAll()
@@ -1476,7 +1490,46 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.path").isEqualTo("/api/gateway/vets/" + emptyVetId + "/photo");
     }
 
+    //Spring Boot version incompatibility issue with postgresql r2dbc
+    /*@Test
+    void getBadgeByVetId_shouldSucceed() throws IOException {
+        Badge badge=buildBadge();
 
+        Publisher<Badge> setup=badgeRepository.deleteAll()
+                .thenMany(badgeRepository.save(badge));
+
+        StepVerifier
+                .create(badgeRepository.deleteAll()
+                        .then(badgeRepository.save(badge)))
+                .expectNext(badge)  // Expect the saved badge
+                .verifyComplete();
+
+        client.get()
+                .uri("/api/gateway/vets/{vetId}/badge", VET_ID)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(BadgeResponseDTO.class)
+                .value(responseDTO -> {
+                    assertEquals(badge.getBadgeTitle(), responseDTO.getBadgeTitle());
+                    assertEquals(badge.getBadgeDate(), responseDTO.getBadgeDate());
+                    assertEquals(badge.getVetId(), responseDTO.getVetId());
+                    assertEquals(Base64.getEncoder().encodeToString(badge.getData()), responseDTO.getResourceBase64());
+                });
+    }*/
+
+    @Test
+    void getBadgeByInvalidVetId_shouldReturnNotFoundException(){
+        String invalidVetId = "1234567";
+        client.get()
+                .uri("/vets/{vetId}/badge", invalidVetId)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.NOT_FOUND)
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("vetId not found: "+invalidVetId);
+    }
 
     @Test
     void toStringBuilders() {
@@ -1642,4 +1695,12 @@ class VetControllerIntegrationTest {
                 .build();
     }
 
+    private Badge buildBadge() throws IOException {
+        return Badge.builder()
+                .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
+                .badgeTitle(BadgeTitle.HIGHLY_RESPECTED)
+                .badgeDate("2017")
+                .data(StreamUtils.copyToByteArray(cpr.getInputStream()))
+                .build();
+    }
 }
