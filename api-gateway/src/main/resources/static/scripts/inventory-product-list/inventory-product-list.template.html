@@ -59,9 +59,18 @@
         <td><span>{{product.productQuantity}}</span></td>
         <td><span>{{product.productPrice}}</span></td>
         <td><span>{{product.productDescription}}</span></td>
+
         <td><span>{{product.productSalePrice}}</span></td>
 
         <td><a href="http://localhost:8080/#!/inventory/{{ inventory.inventoryId }}/products/{{ product.productId }}">Get Product Details</a></td>
+
+        <td>
+            <a href="http://localhost:8080/#!/inventory/{{inventoryId}}/products/{{productId}}">Direct Link</a>
+        </td>
+        <td>
+            <a ng-href="#!/inventory/{{ inventory.inventoryId }}/products/{{ product.productId }}">Get Product Details</a>
+        </td>
+
 
         <td><a ui-sref="updateProductInventory({inventoryId: $ctrl.inventoryProductList[0].inventoryId, productId: product.productId})">
             <button class="add-bundle-button btn btn-warning">Edit</button>
