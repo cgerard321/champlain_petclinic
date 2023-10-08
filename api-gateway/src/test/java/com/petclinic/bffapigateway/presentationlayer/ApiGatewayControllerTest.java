@@ -1141,7 +1141,7 @@ class ApiGatewayControllerTest {
 
         Flux<OwnerResponseDTO> ownerResponseDTOFlux = Flux.just(owner);
 
-        when(customersServiceClient.getOwnersByPagination(page,size)).thenReturn(ownerResponseDTOFlux);
+        when(customersServiceClient.getOwnersByPagination(page,size,null,null,null,null,null)).thenReturn(ownerResponseDTOFlux);
 
         client.get()
                 .uri("/api/gateway/owners-pagination?page="+page.get()+"&size="+size.get())
@@ -1179,9 +1179,9 @@ class ApiGatewayControllerTest {
 
         Flux<OwnerResponseDTO> ownerResponseDTOFlux = Flux.just(owner);
 
-        when(customersServiceClient.getAllOwnersPaginationWithFilters(page,size,ownerId,firstName,lastName,phoneNumber,city)).thenReturn(ownerResponseDTOFlux);
+        when(customersServiceClient.getOwnersByPagination(page,size,ownerId,firstName,lastName,phoneNumber,city)).thenReturn(ownerResponseDTOFlux);
 
-        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("/api/gateway/owners-pagination/filters");
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("/api/gateway/owners-pagination");
 
         builder.queryParam("page", page);
         builder.queryParam("size", size);

@@ -54,29 +54,9 @@ public class CustomersServiceClient {
                 .bodyToFlux(OwnerResponseDTO.class);
     }
 
-    public Flux<OwnerResponseDTO> getOwnersByPagination(Optional<Integer> page, Optional<Integer> size) {
-        return webClientBuilder.build().get()
-                .uri(customersServiceUrl + "/owners/owners-pagination?page="+page.orElse(0)+"&size="+size.orElse(5))
-                .retrieve()
-                .bodyToFlux(OwnerResponseDTO.class);
-    }
+    public Flux<OwnerResponseDTO> getOwnersByPagination(Optional<Integer> page, Optional<Integer> size, String ownerId, String firstName, String lastName, String phoneNumber, String city) {
 
-    public Mono<Long> getTotalNumberOfOwners(){
-        return webClientBuilder.build().get()
-                .uri(customersServiceUrl + "/owners/owners-count")
-                .retrieve()
-                .bodyToMono(Long.class);
-    }
-
-    public Flux<OwnerResponseDTO> getAllOwnersPaginationWithFilters(Optional<Integer> page,
-                                                             Optional<Integer> size,
-                                                             String ownerId,
-                                                             String firstName,
-                                                             String lastName,
-                                                             String phoneNumber,
-                                                             String city) {
-
-        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(customersServiceUrl + "/owners/owners-pagination/filters");
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(customersServiceUrl + "/owners/owners-pagination");
 
         builder.queryParam("page", page);
         builder.queryParam("size",size);
@@ -98,19 +78,21 @@ public class CustomersServiceClient {
             builder.queryParam("city", city);
         }
 
-       return webClientBuilder.build()
+        return webClientBuilder.build()
                 .get()
                 .uri(builder.build().toUri())
                 .retrieve()
                 .bodyToFlux(OwnerResponseDTO.class);
     }
 
-    public Mono<Long> getTotalNumberOfOwnersWithFilters(
-                                                        String ownerId,
-                                                        String firstName,
-                                                        String lastName,
-                                                        String phoneNumber,
-                                                        String city){
+    public Mono<Long> getTotalNumberOfOwners(){
+        return webClientBuilder.build().get()
+                .uri(customersServiceUrl + "/owners/owners-count")
+                .retrieve()
+                .bodyToMono(Long.class);
+    }
+
+    public Mono<Long> getTotalNumberOfOwnersWithFilters(String ownerId, String firstName, String lastName, String phoneNumber, String city){
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(customersServiceUrl + "/owners/owners-filtered-count");
 
         // Add query parameters conditionally if they are not null or empty

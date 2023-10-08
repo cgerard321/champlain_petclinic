@@ -218,7 +218,7 @@ public class CustomerServiceClientIntegrationTest {
         Optional<Integer> page = Optional.of(0);
         Optional<Integer> size =  Optional.of(2);
 
-        final Flux<OwnerResponseDTO> ownersFlux = customersServiceClient.getOwnersByPagination(page,size);
+        final Flux<OwnerResponseDTO> ownersFlux = customersServiceClient.getOwnersByPagination(page,size,null,null,null,null,null);
 
         Long fluxSize = ownersFlux.count().block();
         Long predictedSize = (long) size.get();
@@ -228,7 +228,7 @@ public class CustomerServiceClientIntegrationTest {
     }
 
     @Test
-    void getAllOwnersByPaginationWithFilters() throws JsonProcessingException {
+    void getAllOwnersByPaginationWithFiltersApplied() throws JsonProcessingException {
         OwnerResponseDTO TEST_OWNER1 = OwnerResponseDTO.builder()
                 .ownerId("ownerId-1")
                 .firstName("FN1")
@@ -255,7 +255,7 @@ public class CustomerServiceClientIntegrationTest {
         String lastName = "LN1";
         String city = "C1";
         String phoneNumber = "T1";
-        final OwnerResponseDTO owner = customersServiceClient.getAllOwnersPaginationWithFilters(page,size,ownerId,firstName,lastName,phoneNumber,city).blockFirst();
+        final OwnerResponseDTO owner = customersServiceClient.getOwnersByPagination(page,size,ownerId,firstName,lastName,phoneNumber,city).blockFirst();
 
         assertEquals(ownerId, owner.getOwnerId());
         assertEquals(city, owner.getCity());
