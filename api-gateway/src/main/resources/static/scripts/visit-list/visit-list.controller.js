@@ -73,7 +73,6 @@ angular.module('visitList')
         $scope.deleteVisit = function (visitId) {
             let varIsConf = confirm('You are about to delete visit ' + visitId + '. Is this what you want to do ? ')
             if (varIsConf) {
-
                 $http.delete('api/gateway/visits/' + visitId).then(successCallback, errorCallback)
 
                 function successCallback(response) {
@@ -89,7 +88,6 @@ angular.module('visitList')
             let varIsConf = confirm('You are about to delete all canceled visits. Is this what you want to do ? ');
             if (varIsConf) {
                 $http.delete('api/gateway/visits/cancelled').then(successCallback, errorCallback);
-
                 function successCallback(response) {
                     $scope.errors = [];
                     alert("All canceled visits were deleted successfully");
@@ -102,16 +100,10 @@ angular.module('visitList')
         $scope.propertyName = 'visitId'
         $scope.reverse = false
         $scope.upcomingVisits = self.upcomingVisits
-        // self.upcomingVisits = orderBy(self.upcomingVisits, $scope.propertyName, $scope.reverse)
         $scope.sortBy = function(propertyName){
-            // $scope.reverse = (propertyName !== null && $scope.propertyName === propertyName) ? !$scope.reverse : false
-            // $scope.propertyName = propertyName
-            // $scope.upcomingVisits = orderBy($scope.upcomingVisits, $scope.propertyName, $scope.reverse)
             $scope.reverse = ($scope.propertyName === propertyName) ? !$scope.reverse : false
             $scope.propertyName = propertyName
-            // $scope.upcomingVisits = orderBy($scope.upcomingVisits, $scope.propertyName, $scope.reverse)
         }
-
         function delayedReload() {
             let loadingIndicator = document.getElementById('loadingIndicator')
             loadingIndicator.style.display = 'block'
@@ -119,12 +111,10 @@ angular.module('visitList')
                 location.reload()
             }, 1000) //delay by 1 second
         }
-
         function errorCallback(error) {
             alert(error.errors)
             console.log(error, 'Could not receive data')
         }
-
     }])
 
 //     // self.sortFetchedVisits = function() {
@@ -146,4 +136,3 @@ angular.module('visitList')
     //     //     return Date.parse(yyyy + '-' + mm + '-' + dd)
     //     // }
     // }])
-
