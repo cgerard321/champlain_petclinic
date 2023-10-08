@@ -52,7 +52,10 @@
     </thead>
     <tr ng-repeat="product in $ctrl.inventoryProductList | filter:$ctrl.query track by product.productId">
 
+
         <td> <a href="http://localhost:8080/#!/inventory/{{inventory.inventoryId}}/products/details{{product.productId}}"></a></td>
+
+
 
         <td><span>{{product.productName}}</span></td>
             <td><span>{{product.productId}}</span></td>
@@ -65,10 +68,11 @@
         <td><a href="http://localhost:8080/#!/inventory/{{ inventory.inventoryId }}/products/{{ product.productId }}">Get Product Details</a></td>
 
         <td>
-            <a href="http://localhost:8080/#!/inventory/{{inventoryId}}/products/{{productId}}">Direct Link</a>
-        </td>
-        <td>
-            <a ng-href="#!/inventory/{{ inventory.inventoryId }}/products/{{ product.productId }}">Get Product Details</a>
+
+            <a href="#!/inventory/{{$ctrl.inventory.inventoryId}}/products/{{product.productId}}">
+                Get Product Details
+            </a>
+
         </td>
 
 
