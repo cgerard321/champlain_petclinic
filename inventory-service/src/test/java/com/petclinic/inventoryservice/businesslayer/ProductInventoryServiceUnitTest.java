@@ -46,6 +46,7 @@ class ProductInventoryServiceUnitTest {
             .productDescription("Sedative Medication")
             .productPrice(100.00)
             .productQuantity(10)
+            .productSalePrice(15.99)
             .build();
     Product product = Product.builder()
             .productId("12345")
@@ -54,6 +55,7 @@ class ProductInventoryServiceUnitTest {
             .productDescription("Sedative Medication")
             .productPrice(100.00)
             .productQuantity(10)
+            .productSalePrice(15.99)
             .build();
     InventoryType inventoryType = InventoryType.builder()
             .id("1")
@@ -68,11 +70,12 @@ class ProductInventoryServiceUnitTest {
             .inventoryDescription("Medication for procedures")
             .build();
     ProductRequestDTO productRequestDTO = ProductRequestDTO.builder()
-              .productName("Benzodiazepines")
-                .productDescription("Sedative Medication")
-                .productPrice(100.00)
-                .productQuantity(10)
-                .build();
+            .productName("Benzodiazepines")
+            .productDescription("Sedative Medication")
+            .productPrice(100.00)
+            .productQuantity(10)
+            .productSalePrice(15.99)
+            .build();
 
 
     @Test
@@ -81,6 +84,7 @@ class ProductInventoryServiceUnitTest {
         String productName = "Benzodiazepines";
         Double productPrice = 100.00;
         Integer productQuantity = 10;
+
 
         when(productRepository
                 .findAllProductsByInventoryIdAndProductNameAndProductPriceAndProductQuantity(
@@ -385,6 +389,8 @@ class ProductInventoryServiceUnitTest {
                 .productName("Updated Product Name")
                 .productPrice(99.99)
                 .productQuantity(20)
+                .productDescription("Description")
+                .productSalePrice(15.99)
                 .build();
 
         Inventory inventory = Inventory.builder()
@@ -401,6 +407,7 @@ class ProductInventoryServiceUnitTest {
                 .productName("Original Product Name")
                 .productPrice(50.0)
                 .productQuantity(10)
+                .productSalePrice(10.10)
                 .build();
 
         Product updatedProduct = Product.builder()
@@ -410,6 +417,8 @@ class ProductInventoryServiceUnitTest {
                 .productName("Updated Product Name")
                 .productPrice(99.99)
                 .productQuantity(20)
+                .productDescription("Description")
+                .productSalePrice(10.10)
                 .build();
 
         when(inventoryRepository.findInventoryByInventoryId(anyString())).thenReturn(Mono.just(inventory));
@@ -427,6 +436,8 @@ class ProductInventoryServiceUnitTest {
                     assertEquals("Updated Product Name", responseDTO.getProductName());
                     assertEquals(99.99, responseDTO.getProductPrice());
                     assertEquals(20, responseDTO.getProductQuantity());
+                    assertEquals("Description",responseDTO.getProductDescription());
+                    assertEquals(10.10, responseDTO.getProductSalePrice());
                     return true;
                 })
                 .verifyComplete();
@@ -440,8 +451,10 @@ class ProductInventoryServiceUnitTest {
 
         ProductRequestDTO productRequestDTO = ProductRequestDTO.builder()
                 .productName("Updated Product Name")
-                .productPrice(99.99)
+                .productPrice(-99.99)
                 .productQuantity(20)
+                .productDescription("Description")
+                .productSalePrice(10.10)
                 .build();
 
         when(inventoryRepository.findInventoryByInventoryId(anyString())).thenReturn(Mono.empty());
@@ -466,6 +479,8 @@ class ProductInventoryServiceUnitTest {
                 .productName("Updated Product Name")
                 .productPrice(-99.99)
                 .productQuantity(20)
+                .productDescription("Description")
+                .productSalePrice(10.10)
                 .build();
 
         Inventory inventory = Inventory.builder()
@@ -497,6 +512,8 @@ class ProductInventoryServiceUnitTest {
                 .productName(null)
                 .productPrice(null)
                 .productQuantity(null)
+                .productDescription(null)
+                .productSalePrice(null)
                 .build();
 
         // Mock the behavior of the inventoryRepository to return a dummy Inventory object
@@ -596,6 +613,8 @@ class ProductInventoryServiceUnitTest {
                     assertEquals(productResponseDTO.getProductName(), productRequestDTO.getProductName());
                     assertEquals(productResponseDTO.getProductPrice(), productRequestDTO.getProductPrice());
                     assertEquals(productResponseDTO.getProductQuantity(), productRequestDTO.getProductQuantity());
+                    assertEquals(productResponseDTO.getProductDescription(),productRequestDTO.getProductDescription());
+                    assertEquals(productResponseDTO.getProductSalePrice(), productRequestDTO.getProductSalePrice());
                 })
                 .verifyComplete();
         Mockito.verify(productRepository, Mockito.times(1)).save(any(Product.class));
@@ -627,6 +646,8 @@ class ProductInventoryServiceUnitTest {
                 .productDescription("Sedative Medication")
                 .productPrice(-100.00)
                 .productQuantity(10)
+                .productDescription("Description")
+                .productSalePrice(10.10)
                 .build();
         Mockito.when(inventoryRepository.findInventoryByInventoryId(inventoryId))
                 .thenReturn(Mono.just(inventory));
@@ -815,6 +836,36 @@ class ProductInventoryServiceUnitTest {
                 })
                 .verifyComplete();
     }
+
+
+
+
+    @Test
+    public void getAllInventoryTypes_ShouldSucceed(){
+        when(inventoryTypeRepository.findAll())
+                .thenReturn(Flux.just(inventoryType));
+        Flux<InventoryTypeResponseDTO> inventoryTypeResponseDTOFlux = productInventoryService.getAllInventoryTypes();
+
+        StepVerifier
+                .create(inventoryTypeResponseDTOFlux)
+                .expectNextCount(1)
+                .verifyComplete();
+
+    }
+
+//search
+    /*
+    @Test
+    void testSearchInventories_TypeAndDescriptionGiven() {
+        // Given
+        String testType = "Internal";
+        String testDescription = "Medication for procedures";
+=======
+>>>>>>> d1e75733 (fixing a bit of code because of the quodana requirement)
+
+
+
+*/
 
 
 

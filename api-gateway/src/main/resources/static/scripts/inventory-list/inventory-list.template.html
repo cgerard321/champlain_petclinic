@@ -1,3 +1,10 @@
+<style>
+    .table-striped tbody tr:hover {
+        background-color: #D8D8D8;
+    }
+</style>
+
+
 <h2>Inventory</h2>
 
 <table class="table table-striped">
@@ -18,9 +25,7 @@
         </td>
         <td>
         <span>
-            <select class="form-control col-sm-4" id="inventoryType" ng-model="inventoryType" name="inventoryType" required title="Please select the inventory type." ng-keyup="$event.keyCode == 13 && searchInventory(inventoryName, inventoryType, inventoryDescription)">
-                <option value="internal">internal</option>
-                <option value="sales">sales</option>
+            <select class="form-control col-sm-4" id="inventoryType" ng-model="inventoryType" name="inventoryType" ng-options="type for type in inventoryTypeOptions" placeholder="None" required title="Please select the inventory type." ng-keyup="$event.keyCode == 13 && searchInventory(inventoryName, inventoryType, inventoryDescription)">
             </select>
         </span>
         </td>
@@ -39,7 +44,7 @@
     </tr>
     </thead>
 
-    <tr ng-repeat="inventory in $ctrl.inventoryList | filter:$ctrl.query track by inventory.inventoryId">
+    <tr ng-repeat="inventory in $ctrl.inventoryList | filter:$ctrl.query track by inventory.inventoryId" ui-sref="productList({ inventoryId: inventory.inventoryId })">
         <td><span>{{inventory.inventoryId}}</span></td>
         <td>
             <span>
@@ -52,17 +57,13 @@
 
     <td>
         <td>
-            <a class="btn btn-warning" ui-sref="updateInventory({inventoryId: inventory.inventoryId, method: 'edit'})"> Edit
+            <a class="btn btn-warning" ui-sref="updateInventory({inventoryId: inventory.inventoryId, method: 'edit'})" ng-click="$event.stopPropagation()">Edit</a>
 
-            </a>
         </td>
-
-
 
         <td>
-            <a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteInventory(inventory)">Delete</a>
+            <a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteInventory(inventory); $event.stopPropagation()">Delete</a>
         </td>
-
 
     </td>
     </tr>

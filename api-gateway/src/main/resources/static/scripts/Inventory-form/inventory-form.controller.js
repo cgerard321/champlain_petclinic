@@ -5,7 +5,12 @@ angular.module('inventoryForm')
         var self = this;
         console.log("State params: " + $stateParams)
         $scope.inventoryTypeFormSearch = "";
-        $scope.inventoryTypeOptions = ["New Type", "Internal", "Sales"] //get all form the inventory type repository but dont remove the New Type
+        $scope.inventoryTypeOptions = ["New Type"] //get all form the inventory type repository but dont remove the New Type
+        $http.get("api/gateway/inventory/type").then(function (resp) {
+            //Includes all types inside the array
+            resp.data.forEach(function (type) {
+                $scope.inventoryTypeOptions.push(type.type);
+            })});
         $scope.selectedOption = $scope.inventoryTypeOptions[0]
 
         self.submitInventoryForm = function () {
