@@ -2816,7 +2816,7 @@ void deleteAllInventory_shouldSucceed() {
     @Test
     void testUpdateProductInInventory() {
         // Create a sample ProductRequestDTO
-        ProductRequestDTO requestDTO = new ProductRequestDTO("Sample Product", "Sample Description", 10.0, 100);
+        ProductRequestDTO requestDTO = new ProductRequestDTO("Sample Product", "Sample Description", 10.0, 100, 15.99);
 
         // Define the expected response
         ProductResponseDTO expectedResponse = ProductResponseDTO.builder()
@@ -2874,7 +2874,7 @@ void deleteAllInventory_shouldSucceed() {
     @DisplayName("Given valid inventoryId and valid productRequest Post and return productResponse")
     void testAddProductToInventory_ShouldSucceed() {
         // Create a sample ProductRequestDTO
-        ProductRequestDTO requestDTO = new ProductRequestDTO("Sample Product", "Sample Description", 10.0, 100);
+        ProductRequestDTO requestDTO = new ProductRequestDTO("Sample Product", "Sample Description", 10.0, 100, 15.99);
 
         // Define the expected response
         ProductResponseDTO expectedResponse = ProductResponseDTO.builder()
@@ -2885,6 +2885,7 @@ void deleteAllInventory_shouldSucceed() {
                 .productDescription(requestDTO.getProductDescription())
                 .productPrice(requestDTO.getProductPrice())
                 .productQuantity(requestDTO.getProductQuantity())
+                .productSalePrice(requestDTO.getProductSalePrice())
                 .build();
 
         // Mock the behavior of the inventoryServiceClient
@@ -2906,6 +2907,7 @@ void deleteAllInventory_shouldSucceed() {
                     assertEquals(requestDTO.getProductDescription(), dto.getProductDescription());
                     assertEquals(requestDTO.getProductPrice(), dto.getProductPrice());
                     assertEquals(requestDTO.getProductQuantity(), dto.getProductQuantity());
+                    assertEquals(requestDTO.getProductSalePrice(), dto.getProductSalePrice());
                 });
 
         // Verify that the inventoryServiceClient method was called
@@ -2917,7 +2919,7 @@ void deleteAllInventory_shouldSucceed() {
     @DisplayName("Given invalid inventoryId and valid productRequest Post and return NotFoundException")
     void testAddProductToInventory_InvalidInventoryId_ShouldReturnNotFoundException() {
         // Create a sample ProductRequestDTO
-        ProductRequestDTO requestDTO = new ProductRequestDTO("Sample Product", "Sample Description", 10.0, 100);
+        ProductRequestDTO requestDTO = new ProductRequestDTO("Sample Product", "Sample Description", 10.0, 100,15.99);
 
         // Define the expected response
         ProductResponseDTO expectedResponse = ProductResponseDTO.builder()
@@ -2960,6 +2962,7 @@ void deleteAllInventory_shouldSucceed() {
                 .productDescription("Sedative Medication")
                 .productPrice(100.00)
                 .productQuantity(10)
+                .productSalePrice(15.99)
                 .build();
     }
 
