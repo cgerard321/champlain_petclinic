@@ -34,19 +34,19 @@ class VisitControllerUnitTest {
     private WebTestClient webTestClient;
 
 
-    @MockBean
-    private VetsClient vetsClient;
+//    @MockBean
+//    private VetsClient vetsClient;
+//
+//    @MockBean
+//    private PetsClient petsClient;
 
-    @MockBean
-    private PetsClient petsClient;
-
-    String uuidVisit1 = UUID.randomUUID().toString();
+//    String uuidVisit1 = UUID.randomUUID().toString();
     String uuidVet = UUID.randomUUID().toString();
-    String uuidPet = UUID.randomUUID().toString();
-    String uuidPhoto = UUID.randomUUID().toString();
-    String uuidOwner = UUID.randomUUID().toString();
+//    String uuidPet = UUID.randomUUID().toString();
+//    String uuidPhoto = UUID.randomUUID().toString();
+//    String uuidOwner = UUID.randomUUID().toString();
 
-    private final String STATUS = "COMPLETED";
+//    private final String STATUS = "COMPLETED";
 
 
     Set<SpecialtyDTO> set= new HashSet<>();
@@ -65,7 +65,7 @@ class VisitControllerUnitTest {
             .active(true)
             .specialties(set)
             .build();
-
+/*
     Date currentDate =new Date();
     PetResponseDTO petResponseDTO = PetResponseDTO.builder()
             .petTypeId(uuidPet)
@@ -74,8 +74,9 @@ class VisitControllerUnitTest {
             .photoId(uuidPhoto)
             .ownerId(uuidOwner)
             .build();
-
     Visit visit1 = buildVisit(uuidVisit1,"this is a dummy description",vet.getVetId());
+ */
+
     private final VisitResponseDTO visitResponseDTO = buildVisitResponseDto();
     private final VisitRequestDTO visitRequestDTO = buildVisitRequestDTO(vet.getVetId());
     private final String Visit_UUID_OK = visitResponseDTO.getVisitId();
@@ -123,7 +124,7 @@ class VisitControllerUnitTest {
         when(visitService.getVisitsForPractitioner(anyString())).thenReturn(Flux.just(visitResponseDTO));
 
         webTestClient.get()
-                .uri("/visits/practitioner/" + Practitioner_Id_OK)
+                .uri("/visits/practitioner/{practitionerId}", Practitioner_Id_OK)
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
@@ -262,7 +263,7 @@ class VisitControllerUnitTest {
     }
 
     @Test
-    void deleteAllCancelledVisits_shouldThrowRuntimeException() {
+    void deleteAllCancelledVisits_shouldThrowRuntimeException() throws RuntimeException {
         // Arrange
         Mockito.when(visitService.deleteAllCancelledVisits())
                 .thenReturn(Mono.error(new RuntimeException("Failed to delete cancelled visits")));
@@ -277,7 +278,7 @@ class VisitControllerUnitTest {
         Mockito.verify(visitService, times(1)).deleteAllCancelledVisits();
     }
 
-
+/*
     private Visit buildVisit(String uuid,String description, String vetId){
         return Visit.builder()
                 .visitId(uuid)
@@ -288,7 +289,7 @@ class VisitControllerUnitTest {
                 .status(Status.UPCOMING)
                 .build();
     }
-
+*/
 
     private VisitResponseDTO buildVisitResponseDto(){
         return VisitResponseDTO.builder()

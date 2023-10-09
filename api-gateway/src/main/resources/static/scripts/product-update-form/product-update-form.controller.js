@@ -24,7 +24,8 @@ angular.module('productUpdateForm')
                 productName: self.product.productName,
                 productDescription: self.product.productDescription,
                 productPrice: self.product.productPrice,
-                productQuantity: self.product.productQuantity
+                productQuantity: self.product.productQuantity,
+                productSalePrice: self.product.productSalePrice
             }
 
             $http.put('/api/gateway/inventory/' + inventoryId + '/products/' + productId, data)

@@ -38,6 +38,7 @@ class InventoryControllerUnitTest {
             .productDescription("Sedative Medication")
             .productPrice(100.00)
             .productQuantity(10)
+            .productSalePrice(15.99)
             .build();
     List<ProductResponseDTO> productResponseDTOS = Arrays.asList(
             ProductResponseDTO.builder()
@@ -48,6 +49,7 @@ class InventoryControllerUnitTest {
                     .productDescription("Sedative Medication")
                     .productPrice(100.00)
                     .productQuantity(10)
+                    .productSalePrice(15.99)
                     .build(),
             ProductResponseDTO.builder()
                     .id("1")
@@ -57,6 +59,7 @@ class InventoryControllerUnitTest {
                     .productDescription("Sedative Medication")
                     .productPrice(100.00)
                     .productQuantity(10)
+                    .productSalePrice(15.99)
                     .build()
     );
     List<InventoryTypeResponseDTO> typesDTOS = Arrays.asList(
@@ -427,6 +430,7 @@ class InventoryControllerUnitTest {
                 .productDescription("Updated Description")
                 .productPrice(200.00)
                 .productQuantity(20)
+                .productSalePrice(15.99)
                 .build();
 
         ProductResponseDTO responseDTO = ProductResponseDTO.builder()
@@ -436,6 +440,7 @@ class InventoryControllerUnitTest {
                 .productDescription("Updated Description")
                 .productPrice(200.00)
                 .productQuantity(20)
+                .productSalePrice(15.99)
                 .build();
 
         when(productInventoryService.updateProductInInventory(any(), eq(inventoryId), eq(productId)))
@@ -458,6 +463,7 @@ class InventoryControllerUnitTest {
                     assertEquals(responseDTO.getProductDescription(), dto.getProductDescription());
                     assertEquals(responseDTO.getProductPrice(), dto.getProductPrice());
                     assertEquals(responseDTO.getProductQuantity(), dto.getProductQuantity());
+                    assertEquals(responseDTO.getProductSalePrice(), dto.getProductSalePrice());
                 });
 
         verify(productInventoryService, times(1))
@@ -474,6 +480,7 @@ class InventoryControllerUnitTest {
                 .productDescription("Updated Description")
                 .productPrice(200.00)
                 .productQuantity(20)
+                .productSalePrice(15.99)
                 .build();
 
         when(productInventoryService.updateProductInInventory(any(), eq(inventoryId), eq(productId)))
@@ -507,6 +514,7 @@ class InventoryControllerUnitTest {
                 .productDescription("Updated Description")
                 .productPrice(200.00)
                 .productQuantity(20)
+                .productSalePrice(15.99)
                 .build();
 
         when(productInventoryService.updateProductInInventory(any(), eq(inventoryId), eq(productId)))
@@ -584,6 +592,7 @@ class InventoryControllerUnitTest {
                 .productDescription("New Description")
                 .productPrice(200.00)
                 .productQuantity(20)
+                .productSalePrice(15.99)
                 .build();
 
         ProductResponseDTO responseDTO = ProductResponseDTO.builder()
@@ -593,6 +602,7 @@ class InventoryControllerUnitTest {
                 .productDescription("New Description")
                 .productPrice(200.00)
                 .productQuantity(20)
+                .productSalePrice(15.99)
                 .build();
 
         when(productInventoryService.addProductToInventory(any(), eq(inventoryId)))
@@ -615,6 +625,7 @@ class InventoryControllerUnitTest {
                     assertEquals(responseDTO.getProductDescription(), dto.getProductDescription());
                     assertEquals(responseDTO.getProductPrice(), dto.getProductPrice());
                     assertEquals(responseDTO.getProductQuantity(), dto.getProductQuantity());
+                    assertEquals(responseDTO.getProductSalePrice(), dto.getProductSalePrice());
                 });
 
         verify(productInventoryService, times(1))
@@ -630,6 +641,7 @@ class InventoryControllerUnitTest {
                 .productDescription("New Description")
                 .productPrice(200.00)
                 .productQuantity(20)
+                .productSalePrice(15.99)
                 .build();
 
         when(productInventoryService.addProductToInventory(any(), eq(inventoryId)))
