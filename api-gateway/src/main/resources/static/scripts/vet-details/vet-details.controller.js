@@ -166,6 +166,12 @@ angular.module('vetDetails')
                     });
                     //refresh percentages
                     percentageOfRatings();
+
+                    //refresh badge
+                    $http.get('api/gateway/vets/'+$stateParams.vetId+'/badge').then(function(resp){
+                        self.badge=resp.data;
+                        console.log(resp.data)
+                    })
                 }
 
                 function errorCallback(error) {
@@ -222,6 +228,12 @@ angular.module('vetDetails')
 
                     // Refresh percentages
                     percentageOfRatings();
+
+                    //refresh badge
+                    $http.get('api/gateway/vets/'+$stateParams.vetId+'/badge').then(function(resp){
+                        self.badge=resp.data;
+                        console.log(resp.data)
+                    })
                 });
 
                 // Hide the update form
@@ -300,6 +312,12 @@ angular.module('vetDetails')
                             self.ratings = resp.data;
                             arr = resp.data;
                         });
+
+                        //refresh badge
+                        $http.get('api/gateway/vets/'+$stateParams.vetId+'/badge').then(function(resp){
+                            self.badge=resp.data;
+                            console.log(resp.data)
+                        })
                     })
                     .catch(function (error) {
                         let errorMessage = "An error occurred while adding the rating. Please try again.";
@@ -311,7 +329,7 @@ angular.module('vetDetails')
                     });
                 document.getElementById("ratingForm").reset();
             }
-                    }
+        }
 
         self.submitEducationForm = function (education) {
             education.vetId = $stateParams.vetId;
