@@ -886,6 +886,14 @@ class InventoryControllerIntegrationTest {
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON);
     }
+
+    //search Products by name
+
+
+
+
+
+
     /*
     @Test
     public void deleteInventoryByInventoryId_withNotFoundInventoryId_shouldNotFound() {

@@ -4,9 +4,12 @@ import com.petclinic.inventoryservice.businesslayer.ProductInventoryService;
 import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
 import com.petclinic.inventoryservice.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
@@ -758,8 +761,136 @@ class InventoryControllerUnitTest {
                     assertEquals(typesDTOS.size(), responseDTOs.size());
                 });
     }
+    @Test
+    void searchInventories_WithNameOnly_ShouldReturnMatchingInventories() {
+        // Arrange
+        Pageable page = PageRequest.of(0, 10);
+        String inventoryName = "SampleName";
 
+        InventoryResponseDTO sampleResponse = new InventoryResponseDTO();
 
+        when(productInventoryService.searchInventories(page, inventoryName, null, null))
+                .thenReturn(Flux.just(sampleResponse));
+
+        // Act and Assert
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder.path("/inventory")
+                        .queryParam("inventoryName", inventoryName)
+                        .build())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(InventoryResponseDTO.class)
+                .hasSize(1)
+                .contains(sampleResponse);
+    }
+    @Test
+    void searchInventories_WithOnlyType_ShouldReturnMatchingInventories() {
+        // Arrange
+        Pageable page = PageRequest.of(0, 10);
+        String inventoryType = "SampleType";
+        InventoryResponseDTO sampleResponse = new InventoryResponseDTO();
+
+        when(productInventoryService.searchInventories(page, null, inventoryType, null))
+                .thenReturn(Flux.just(sampleResponse));
+
+        // Act and Assert
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder.path("/inventory")
+                        .queryParam("inventoryType", inventoryType)
+                        .build())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(InventoryResponseDTO.class)
+                .hasSize(1)
+                .contains(sampleResponse);
+    }
+
+    @Test
+    void searchInventories_WithOnlyDescription_ShouldReturnMatchingInventories() {
+        // Arrange
+        Pageable page = PageRequest.of(0, 10);
+        String inventoryDescription = "SampleDescription";
+        InventoryResponseDTO sampleResponse = new InventoryResponseDTO();
+
+        when(productInventoryService.searchInventories(page, null, null, inventoryDescription))
+                .thenReturn(Flux.just(sampleResponse));
+
+        // Act and Assert
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder.path("/inventory")
+                        .queryParam("inventoryDescription", inventoryDescription)
+                        .build())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(InventoryResponseDTO.class)
+                .hasSize(1)
+                .contains(sampleResponse);
+    }
+    @Test
+    void searchInventories_WithNoParams_ShouldReturnAllInventories() {
+        // Arrange
+        Pageable page = PageRequest.of(0, 10);
+        InventoryResponseDTO sampleResponse = new InventoryResponseDTO();
+
+        when(productInventoryService.searchInventories(page, null, null, null))
+                .thenReturn(Flux.just(sampleResponse));
+
+        // Act and Assert
+        webTestClient
+                .get()
+                .uri("/inventory")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(InventoryResponseDTO.class)
+                .contains(sampleResponse);
+    }
+    @Test
+    void getProductsByInventoryIdAndProductName_withValidFields_shouldSucceed() {
+        String inventoryId = "1";
+        String productName = "B";
+        Mockito.when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(
+                anyString(),
+                anyString(),
+                Mockito.isNull(),
+                Mockito.isNull()
+        )).thenReturn(Flux.fromIterable(productResponseDTOS));
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/inventory/{inventoryId}/products")
+                        .queryParam("productName", productName)
+                        .build(inventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProductResponseDTO.class)
+                .hasSize(2);
+    }
+
+    @Test
+    void getAllProductsByInventoryId_withValidFields_shouldSucceed() {
+        String inventoryId = "1";
+        Mockito.when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(
+                anyString(),
+                Mockito.isNull(),
+                Mockito.isNull(),
+                Mockito.isNull()
+        )).thenReturn(Flux.fromIterable(productResponseDTOS));
+
+        webTestClient.get()
+                .uri("/inventory/{inventoryId}/products", inventoryId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProductResponseDTO.class)
+                .hasSize(2);
+    }
 
 }
+
+
+
 
