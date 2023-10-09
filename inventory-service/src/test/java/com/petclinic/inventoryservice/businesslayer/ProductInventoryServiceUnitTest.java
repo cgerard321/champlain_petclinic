@@ -14,12 +14,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.Optional;
 import java.util.UUID;
+import java.util.regex.Pattern;
+
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -867,6 +870,166 @@ class ProductInventoryServiceUnitTest {
 
 */
 
+    //search inventories
+
+    @Test
+    void searchInventories_withAllParams_shouldReturnResults() {
+        Pageable page = PageRequest.of(0, 5);  // Example pageable
+        String name = "Benzodiazepines";
+        String type = "Internal";
+        String description = "Medication for procedures";
+
+        when(inventoryRepository.findAllByInventoryNameAndInventoryTypeAndInventoryDescription(name, type, description))
+                .thenReturn(Flux.just(inventory));
+
+        Flux<InventoryResponseDTO> result = productInventoryService.searchInventories(page, name, type, description);
+
+        StepVerifier.create(result)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
+    void searchInventories_withTypeAndDescription_shouldReturnResults() {
+        Pageable page = PageRequest.of(0, 5);
+        String type = "Internal";
+        String description = "Medication for procedures";
+
+        when(inventoryRepository.findAllByInventoryTypeAndInventoryDescription(type, description))
+                .thenReturn(Flux.just(inventory));
+
+        Flux<InventoryResponseDTO> result =  productInventoryService.searchInventories(page, null, type, description);
+
+        StepVerifier.create(result)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    // Similarly, create other test methods for different combinations of parameters and scenarios...
+
+    @Test
+    void searchInventories_withOnlyName_shouldReturnResults() {
+        Pageable page = PageRequest.of(0, 5);
+        String name = "Benzodiazepines";
+
+        when(inventoryRepository.findByInventoryNameRegex(anyString()))
+                .thenReturn(Flux.just(inventory));
+
+        Flux<InventoryResponseDTO> result =  productInventoryService.searchInventories(page, name, null, null);
+
+        StepVerifier.create(result)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+    @Test
+    void searchInventories_withNameLengthOne_shouldReturnResults() {
+        Pageable page = PageRequest.of(0, 5);
+        String name = "B";  // Assuming 'B' is the starting letter for some inventory names
+
+        when(inventoryRepository.findByInventoryNameRegex(anyString()))
+                .thenReturn(Flux.just(inventory));
+
+        Flux<InventoryResponseDTO> result = productInventoryService.searchInventories(page, name, null, null);
+
+        StepVerifier.create(result)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
+    void searchInventories_withDescriptionLengthOne_shouldReturnResults() {
+        Pageable page = PageRequest.of(0, 5);
+        String description = "M";  // Assuming 'M' is the starting letter for some inventory descriptions
+
+        when(inventoryRepository.findByInventoryDescriptionRegex(anyString()))
+                .thenReturn(Flux.just(inventory));
+
+        Flux<InventoryResponseDTO> result = productInventoryService.searchInventories(page, null, null, description);
+
+        StepVerifier.create(result)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
+    void searchInventories_withDescriptionLongerThanOne_shouldReturnResults() {
+        Pageable page = PageRequest.of(0, 5);
+        String description = "Medication";  // Longer than one character
+
+        when(inventoryRepository.findByInventoryDescriptionRegex(anyString()))
+                .thenReturn(Flux.just(inventory));
+
+        Flux<InventoryResponseDTO> result = productInventoryService.searchInventories(page, null, null, description);
+
+        StepVerifier.create(result)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+
+    @Test
+    void searchInventories_withDescriptionNotExisting_shouldThrowError() {
+        Pageable page = PageRequest.of(0, 5);
+        String description = "NonExistingDescription";
+
+        when(inventoryRepository.findByInventoryDescriptionRegex(anyString()))
+                .thenReturn(Flux.empty());  // No inventory found
+
+        Flux<InventoryResponseDTO> result =productInventoryService.searchInventories(page, null, null, description);
+
+        StepVerifier.create(result)
+                .expectError(NotFoundException.class)
+                .verify();
+    }
+    @Test
+    void getProductsByInventoryIdAndProductName_withValidFields_shouldSucceed(){
+        String inventoryId = "1";
+        String productName = "B";
+        String regexPattern = "(?i)^" + Pattern.quote(productName) + ".*";
+
+        when(productRepository
+                .findAllProductsByInventoryIdAndProductNameRegex(
+                        inventoryId,
+                        regexPattern))
+                .thenReturn(Flux.just(product));
+
+        Flux<ProductResponseDTO> productResponseDTOMono = productInventoryService
+                .getProductsInInventoryByInventoryIdAndProductsField(
+                        inventoryId,
+                        productName,
+                        null,
+                        null);
+
+        StepVerifier
+                .create(productResponseDTOMono)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
+    void getAllProductsByInventoryId_withValidFields_shouldSucceed(){
+        String inventoryId = "1";
+
+        when(productRepository
+                .findAllProductsByInventoryId(inventoryId))
+                .thenReturn(Flux.just(product));
+
+        Flux<ProductResponseDTO> productResponseDTOMono = productInventoryService
+                .getProductsInInventoryByInventoryIdAndProductsField(
+                        inventoryId,
+                        null,
+                        null,
+                        null);
+
+        StepVerifier
+                .create(productResponseDTOMono)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
 
 
 }
+
+
+
+

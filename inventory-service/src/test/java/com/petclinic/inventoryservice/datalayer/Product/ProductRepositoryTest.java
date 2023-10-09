@@ -150,6 +150,55 @@ class ProductRepositoryTest {
                 })
                 .verifyComplete();
     }
+    @Test
+    public void shouldFindProductByInventoryIdAndOneCharNameRegex() {
+
+        String regexPattern = "(?i)^n.*";
+        Product product = buildProduct("inventoryId_1", "productId_1", "name", "Desc", 100.00, 10, 15.99);
+        productRepository.save(product).block();
+
+        // Act & Assert
+        StepVerifier
+                .create(productRepository.findAllProductsByInventoryIdAndProductNameRegex("inventoryId_1", regexPattern))
+                .expectNextMatches(result -> result.getProductId().equals("productId_1"))
+                .verifyComplete();
+    }
+    @Test
+    public void shouldFindProductByInventoryIdAndFullNameRegex() {
+
+        String regexPattern = "(?i)^name.*";
+        Product product = buildProduct("inventoryId_2", "productId_2", "name", "Desc", 100.00, 10, 15.99);
+        productRepository.save(product).block();
+
+
+        StepVerifier
+                .create(productRepository.findAllProductsByInventoryIdAndProductNameRegex("inventoryId_2", regexPattern))
+                .expectNextMatches(result -> result.getProductId().equals("productId_2"))
+                .verifyComplete();
+    }
+    @Test
+    public void shouldFindProductByInventoryId() {
+        // Arrange
+        Product product = buildProduct("inventoryId_3", "productId_3", "AnotherName", "Desc", 100.00, 10, 15.99);
+        productRepository.save(product).block();
+
+        // Act & Assert
+        StepVerifier
+                .create(productRepository.findAllProductsByInventoryId("inventoryId_3"))
+                .expectNextMatches(result -> result.getProductId().equals("productId_3"))
+                .verifyComplete();
+    }
+    @Test
+    public void shouldNotFindProductByInvalidInventoryId() {
+        // No products saved for this test
+
+        // Act & Assert
+        StepVerifier
+                .create(productRepository.findAllProductsByInventoryId("non_existent_id"))
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
 
     private Product buildProduct(String inventoryId, String productId, String productName, String productDescription, Double productPrice, Integer productQuantity, Double productSalePrice) {
         return Product.builder()
