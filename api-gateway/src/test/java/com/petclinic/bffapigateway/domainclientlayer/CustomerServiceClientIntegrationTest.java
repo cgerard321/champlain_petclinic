@@ -85,7 +85,7 @@ public class CustomerServiceClientIntegrationTest {
             .name("Cat")
             .birthDate(date)
             .petTypeId("5")
-            .photoId("2")
+          //  .photoId("2")
             .isActive("true")
             .build();
 
