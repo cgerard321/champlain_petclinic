@@ -167,10 +167,6 @@ public class InventoryServiceClient {
                 .bodyToFlux(InventoryResponseDTO.class);
     }
 
-
-
-
-
     //delete all
 
     public Mono<Void> deleteAllProductForInventory(final String inventoryId) {

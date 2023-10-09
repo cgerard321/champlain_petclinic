@@ -116,6 +116,7 @@ angular.module('inventoryProductList')
             }
         };
 
+
         $scope.fetchProductList = function() {
             let inventoryId = $stateParams.inventoryId;
             $http.get('api/gateway/inventory/' + inventoryId + '/products').then(function (resp) {

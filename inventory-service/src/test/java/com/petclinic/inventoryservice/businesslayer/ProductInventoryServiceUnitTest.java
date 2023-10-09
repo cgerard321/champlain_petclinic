@@ -815,6 +815,10 @@ class ProductInventoryServiceUnitTest {
                 })
                 .verifyComplete();
     }
+
+
+
+
     @Test
     public void getAllInventoryTypes_ShouldSucceed(){
         when(inventoryTypeRepository.findAll())
@@ -827,6 +831,20 @@ class ProductInventoryServiceUnitTest {
                 .verifyComplete();
 
     }
+
+//search
+    /*
+    @Test
+    void testSearchInventories_TypeAndDescriptionGiven() {
+        // Given
+        String testType = "Internal";
+        String testDescription = "Medication for procedures";
+=======
+>>>>>>> d1e75733 (fixing a bit of code because of the quodana requirement)
+
+
+
+*/
 
 
 
