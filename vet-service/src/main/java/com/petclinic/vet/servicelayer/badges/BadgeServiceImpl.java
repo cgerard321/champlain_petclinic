@@ -70,7 +70,7 @@ public class BadgeServiceImpl implements BadgeService{
             ClassPathResource cpr = new ClassPathResource(imagePath);
             return Mono.just(StreamUtils.copyToByteArray(cpr.getInputStream()));
         } catch (IOException io) {
-            return Mono.error(new InvalidInputException("Picture does not exist"));
+            return Mono.error(new InvalidInputException("Picture does not exist: " + io.getMessage()));
         }
     }
 }
