@@ -8,7 +8,7 @@
     <br>
 
     <div class="col-md-6 text-end">
-        <h3 class="inventory-id">Inventory ID: {{$ctrl.inventory.inventoryId}}</h3>
+        <h3 class="inventory-id">Inventory Id: {{$ctrl.product.inventoryId}}</h3>
     </div>
     <div class="row">
         <div class="col-md-6 text-end">
@@ -22,6 +22,13 @@
             <h5>Product Quantity: {{$ctrl.product.productQuantity}} </h5>
         </div>
 
+
+        <div class="col-md-10 text-center">
+             <a class="btn btn-primary" href="#!/inventory/{{$ctrl.product.inventoryId}}/products">
+                 Back to Products page
+        </a>
+
+        </div>
 
 
 
