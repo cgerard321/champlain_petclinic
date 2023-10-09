@@ -14,15 +14,10 @@ import java.time.LocalDateTime;
 @Builder
 public class VisitResponseDTO {
     private String visitId;
-/*    private int year;
-    private int month;
-    private int day;*/
 @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
 private LocalDateTime visitDate;
     private String description;
     private String petId;
     private String practitionerId;
-/*    private int petId;
-    private int practitionerId;*/
     private Status status;
 }

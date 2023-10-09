@@ -2,7 +2,6 @@ package com.petclinic.visits.visitsservicenew.DomainClientLayer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
-import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
@@ -16,13 +15,8 @@ import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.Date;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 
 @WebFluxTest(PetsClient.class)
 class PetsClientUnitTest {
@@ -33,7 +27,7 @@ class PetsClientUnitTest {
     @MockBean
     private PetsClient petsClient;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private static MockWebServer mockBackEnd;
 
