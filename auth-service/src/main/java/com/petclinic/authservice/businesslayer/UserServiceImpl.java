@@ -76,7 +76,7 @@ public class UserServiceImpl implements UserService {
                         format("User with e-mail %s already exists", userIDLessDTO.getEmail()));
             }
 
-
+// add exception when trying to create a user with existing username
 
             User user = userMapper.idLessRoleLessDTOToModel(userIDLessDTO);
 
