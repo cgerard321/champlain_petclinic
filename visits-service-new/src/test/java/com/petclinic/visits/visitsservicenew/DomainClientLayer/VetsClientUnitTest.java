@@ -15,10 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-
 import java.io.IOException;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @WebFluxTest(VetsClient.class)
 class VetsClientUnitTest {
@@ -29,7 +26,7 @@ class VetsClientUnitTest {
     @MockBean
     private VetsClient vetsClient;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private static MockWebServer mockBackEnd;
 

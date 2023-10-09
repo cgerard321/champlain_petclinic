@@ -167,10 +167,6 @@ public class InventoryServiceClient {
                 .bodyToFlux(InventoryResponseDTO.class);
     }
 
-
-
-
-
     //delete all
 
     public Mono<Void> deleteAllProductForInventory(final String inventoryId) {
@@ -195,6 +191,14 @@ public class InventoryServiceClient {
                 .body(Mono.just(inventoryTypeRequestDTO),InventoryTypeRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve().bodyToMono(InventoryTypeResponseDTO.class);
+    }
+
+    public Flux<InventoryTypeResponseDTO> getAllInventoryTypes(){
+        return webClient.get()
+                .uri(inventoryServiceUrl + "/type")
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToFlux(InventoryTypeResponseDTO.class);
     }
 
     public Mono<Void> deleteInventoryByInventoryId(final String inventoryId){
