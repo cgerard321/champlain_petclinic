@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS images(
 
 DROP TABLE IF EXISTS badges;
 CREATE TABLE IF NOT EXISTS badges (
-    id INT,
+    id SERIAL,
     vet_id varchar(255),
     badge_title varchar(255),
     badge_date varchar(255),
