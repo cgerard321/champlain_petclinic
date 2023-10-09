@@ -33,9 +33,9 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                 .flatMap(requestDTO -> inventoryRepository.findInventoryByInventoryId(inventoryId)
                         .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with id: " + inventoryId)))
                         .flatMap(inventory -> {
-                            if (requestDTO.getProductName() == null || requestDTO.getProductPrice() == null || requestDTO.getProductQuantity() == null) {
+                            if (requestDTO.getProductName() == null || requestDTO.getProductPrice() == null || requestDTO.getProductQuantity() == null || requestDTO.getProductSalePrice() == null) {
                                 return Mono.error(new InvalidInputException("Product must have an inventory id, product name, product price, and product quantity."));
-                            } else if (requestDTO.getProductPrice() < 0 || requestDTO.getProductQuantity() < 0) {
+                            } else if (requestDTO.getProductPrice() < 0 || requestDTO.getProductQuantity() < 0 || requestDTO.getProductSalePrice() < 0) {
                                 return Mono.error(new InvalidInputException("Product price and quantity must be greater than 0."));
                             } else {
                                 Product product = EntityDTOUtil.toProductEntity(requestDTO);
@@ -94,9 +94,9 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                 .flatMap(requestDTO -> inventoryRepository.findInventoryByInventoryId(inventoryId)
                         .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with id: " + inventoryId)))
                         .flatMap(inventory -> {
-                            if (requestDTO.getProductName() == null || requestDTO.getProductPrice() == null || requestDTO.getProductQuantity() == null) {
+                            if (requestDTO.getProductName() == null || requestDTO.getProductPrice() == null || requestDTO.getProductQuantity() == null || requestDTO.getProductSalePrice() == null) {
                                     return Mono.error(new InvalidInputException("Product must have an inventory id, product name, product price, and product quantity."));
-                            } else if (requestDTO.getProductPrice() < 0 || requestDTO.getProductQuantity() < 0) {
+                            } else if (requestDTO.getProductPrice() < 0 || requestDTO.getProductQuantity() < 0 || requestDTO.getProductSalePrice() < 0) {
                                 return Mono.error(new InvalidInputException("Product price and quantity must be greater than 0."));
                             } else {
                                 return productRepository.findProductByProductId(productId)
@@ -105,6 +105,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                                             existingProduct.setProductDescription(requestDTO.getProductDescription());
                                             existingProduct.setProductPrice(requestDTO.getProductPrice());
                                             existingProduct.setProductQuantity(requestDTO.getProductQuantity());
+                                            existingProduct.setProductSalePrice(requestDTO.getProductSalePrice());
 
                                             return productRepository.save(existingProduct)
                                                     .map(EntityDTOUtil::toProductResponseDTO);
