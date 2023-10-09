@@ -77,6 +77,7 @@ class InventoryControllerIntegrationTest {
                         .productDescription("Sedative Medication")
                         .productPrice(100.00)
                         .productQuantity(10)
+                        .productSalePrice(15.99)
                         .build()))
                 .thenMany(productRepository.save(Product.builder()
                         .inventoryId("1")
@@ -85,6 +86,7 @@ class InventoryControllerIntegrationTest {
                         .productDescription("Sedative Medication")
                         .productPrice(100.00)
                         .productQuantity(10)
+                        .productSalePrice(15.99)
                         .build()));
 
         StepVerifier
@@ -99,6 +101,7 @@ class InventoryControllerIntegrationTest {
                 .productDescription("Sedative Medication")
                 .productPrice(100.00)
                 .productQuantity(10)
+                .productSalePrice(15.99)
                 .build());
         StepVerifier
                 .create(productPublisher1)
@@ -114,6 +117,7 @@ class InventoryControllerIntegrationTest {
                 .productDescription("Sedative Medication")
                 .productPrice(100.00)
                 .productQuantity(10)
+                .productSalePrice(15.99)
                 .build();
         // Act and assert
         webTestClient
@@ -512,6 +516,7 @@ class InventoryControllerIntegrationTest {
                 .productDescription("Updated Sedative Medication")
                 .productPrice(150.00)
                 .productQuantity(20)
+                .productSalePrice(15.99)
                 .build();
 
         // Act and Assert
@@ -585,6 +590,7 @@ class InventoryControllerIntegrationTest {
                 .productDescription("Sedative Medication")
                 .productPrice(100.00)
                 .productQuantity(10)
+                .productSalePrice(15.99)
                 .build();
         // Act and assert
         webTestClient
@@ -602,6 +608,7 @@ class InventoryControllerIntegrationTest {
                     assertEquals(productRequestDTO.getProductDescription(), dto.getProductDescription());
                     assertEquals(productRequestDTO.getProductPrice(), dto.getProductPrice());
                     assertEquals(productRequestDTO.getProductQuantity(), dto.getProductQuantity());
+                    assertEquals(productRequestDTO.getProductSalePrice(), dto.getProductSalePrice());
                 });
     }
 

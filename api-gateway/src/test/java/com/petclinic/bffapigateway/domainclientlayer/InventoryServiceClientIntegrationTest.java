@@ -54,7 +54,9 @@ class InventoryServiceClientIntegrationTest {
                 "name",
                 "desc",
                 10.00,
-                2
+                2,
+                15.99
+
         );
 
         mockWebServer.enqueue(new MockResponse()
@@ -79,7 +81,8 @@ class InventoryServiceClientIntegrationTest {
                 "name",
                 "desc",
                 10.00,
-                2
+                2,
+                15.99
         );
 
         mockWebServer.enqueue(new MockResponse()

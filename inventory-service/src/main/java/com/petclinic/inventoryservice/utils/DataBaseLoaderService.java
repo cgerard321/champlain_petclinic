@@ -105,18 +105,23 @@ public class DataBaseLoaderService  implements CommandLineRunner {
                 .productName("Benzodiazepines")
                 .productId(UUID.randomUUID().toString())
                 .productPrice(100.00)
-                .inventoryId("1")
+                .inventoryId(inventory1.getInventoryId())
                 .productQuantity(10)
                 .productDescription("Drugs for sleep")
+                .productSalePrice(10.00)
                 .build();
+
+
         Product product2 = Product.builder()
                 .productName("Trazodone")
                 .productId(UUID.randomUUID().toString())
                 .productPrice(150.00)
-                .inventoryId("1")
+                .inventoryId(inventory1.getInventoryId())
                 .productQuantity(10)
                 .productDescription("Drugs for anxiety/stress")
+                .productSalePrice(10.00)
                 .build();
+
         Flux.just(product1, product2)
                 .flatMap(productRepository::insert)
                 .log()
