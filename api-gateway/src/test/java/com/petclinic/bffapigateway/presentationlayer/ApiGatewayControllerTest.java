@@ -2813,6 +2813,7 @@ void deleteAllInventory_shouldSucceed() {
     }
     //inventory tests
 
+
     @Test
     void testUpdateProductInInventory() {
         // Create a sample ProductRequestDTO
