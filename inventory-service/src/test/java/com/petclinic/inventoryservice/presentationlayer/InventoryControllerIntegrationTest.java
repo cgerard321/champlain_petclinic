@@ -461,6 +461,24 @@ class InventoryControllerIntegrationTest {
                 });
     }
 
+
+
+    @Test
+    void getProductInInventory_withInvalidInventoryId_invalidProductId_throwsNotFoundException() {
+        String invalidInventoryId = "123";
+        String invalidProductId = "897";
+
+        webTestClient.get()
+                .uri("/inventory/{inventoryId}/products/{productId}",
+                        invalidInventoryId, invalidProductId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Inventory id:" + invalidInventoryId + "and product:" + invalidProductId + "are not found");
+    }
+
     @Test
     public void updateInventory_withInvalidInventoryId() {
         String InvalidInventoryId = "inventoryId_234";

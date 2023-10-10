@@ -313,8 +313,8 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
 
     @Override
     public Mono<ProductResponseDTO> getProductByProductIdInInventory(String inventoryId, String productId) {
-     if(inventoryId == null ){
-        return Mono.error(new NotFoundException("Inventory id not found:" + inventoryId ));
+     if(inventoryId == null && productId == null ){
+        return Mono.error(new NotFoundException("Inventory id not found:" + inventoryId));
 
   }
      else if (productId == null) {
