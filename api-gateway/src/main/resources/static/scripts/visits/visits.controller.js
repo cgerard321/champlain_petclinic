@@ -75,8 +75,6 @@ angular.module('visits')
 
         // Lists holding visits for the table to display
         self.upcomingVisits = []
-        self.previousVisits = []
-
         self.sortFetchedVisits = function() {
             let currentDate = getCurrentDate()
 
@@ -85,8 +83,6 @@ angular.module('visits')
 
                 if(selectedVisitDate >= currentDate) {
                     self.upcomingVisits.push(visit)
-                } else {
-                    self.previousVisits.push(visit)
                 }
             })
         }
