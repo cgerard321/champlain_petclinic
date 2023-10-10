@@ -22,16 +22,26 @@
         <div class="pet col-sm-6">
             <input class="form-control" ng-model="$ctrl.pet.birthDate" name="dbo" required type="date" ng-disabled="$ctrl.checked"/>
             <span ng-show="petForm.name.$error.required" class="help-inline"> birth date is required.</span>
+            <p ng-hide="true">Current Birth Date: {{ $ctrl.pet.birthDate | date:'yyyy-MM-dd'}}</p>
         </div>
     </div>
 
     <div class="form-group formColor">
         <label class="col-sm-2 control-label">Type</label>
+        <!--<div class="pet col-sm-6">
+            <select class="form-control" ng-model="$ctrl.pet.petTypeId" name="type" ng-options="t.id as t.name for t in $ctrl.types track by t.id" ng-disabled="$ctrl.checked"></select>
+        </div>-->
         <div class="pet col-sm-6">
-            <select class="form-control" ng-model="$ctrl.pet.type" name="type" ng-options="t as t.name for t in $ctrl.types track by t.id" ng-disabled="$ctrl.checked"></select>
+            <select class="form-control" ng-model="$ctrl.pet.petTypeId" name="type" ng-disabled="$ctrl.checked">
+                <option value="1">Cat</option>
+                <option value="2">Dog</option>
+                <option value="3">Lizard</option>
+                <option value="4">Snake</option>
+                <option value="5">Bird</option>
+                <option value="6">Hamster</option>
+            </select>
         </div>
     </div>
-
     <div class="form-group formColor">
         <div class="pet marg col-sm-6 col-sm-offset-2">
             <button id="newBtn" class="btn btn-default" type="submit">

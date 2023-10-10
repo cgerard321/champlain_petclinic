@@ -4,13 +4,29 @@ angular.module('ownerDetails')
         self.owner = {};
         self.pet = {};
 
+        self.getPetTypeName = function(petTypeId) {
+            switch(petTypeId) {
+                case '1':
+                    return 'Cat';
+                case '2':
+                    return 'Dog';
+                case '3':
+                    return 'Lizard';
+                case '4':
+                    return 'Snake';
+                case '5':
+                    return 'Bird';
+                case '6':
+                    return 'Hamster';
+            }
+        };
 
-        $http.get('api/gateway/owners/' + $stateParams.ownerId).then(function (resp) {
+$http.get('api/gateway/owners/' + $stateParams.ownerId).then(function (resp) {
             self.owner = resp.data;
             console.log(self.owner);
 
             var petPromises = self.owner.pets.map(function (pet) {
-                return $http.get('api/gateway/pets/' + pet.petid, { cache: false });
+                return $http.get('api/gateway/pets/' + pet.petId, { cache: false });
             });
 
 
@@ -20,6 +36,17 @@ angular.module('ownerDetails')
                 });
             });
         });
+
+        /*$http.get('api/gateway/owners/' + $stateParams.ownerId).then(function (resp) {
+            self.owner = resp.data;
+            console.log(self.owner);
+        });
+        self.getPet = function (petId) {
+            $http.get('api/gateway/pets/' + petId).then(function (resp) {
+                self.pet = resp.data;
+                console.log(self.pet);
+            });
+        }*/
         
         self.deletePet = function (petId) {
             var config = {
