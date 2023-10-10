@@ -25,7 +25,9 @@ dependencies {
     implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.12.0'
     implementation 'org.springframework.boot:spring-boot-starter-data-r2dbc'
 
-    runtimeOnly 'org.postgresql:postgresql'
+    //need it for both runtime and compilation
+    implementation 'org.postgresql:postgresql'
+
     runtimeOnly 'org.postgresql:r2dbc-postgresql'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

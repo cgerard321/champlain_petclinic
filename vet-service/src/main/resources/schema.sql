@@ -8,3 +8,18 @@ CREATE TABLE IF NOT EXISTS images(
     img_data bytea,
     PRIMARY KEY (id)
 );
+
+DROP TABLE IF EXISTS badges;
+CREATE TABLE IF NOT EXISTS badges (
+    id SERIAL,
+    vet_id varchar(255),
+    badge_title varchar(255),
+    badge_date varchar(255),
+    img_data bytea,
+    PRIMARY KEY (id),
+    UNIQUE (vet_id)
+);
+
+
+
+

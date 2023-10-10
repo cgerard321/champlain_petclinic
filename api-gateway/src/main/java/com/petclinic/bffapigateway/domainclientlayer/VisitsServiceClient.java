@@ -139,7 +139,7 @@ public class VisitsServiceClient {
     public Mono<Void> deleteAllCancelledVisits(){
         return webClient
                 .delete()
-                .uri("/visits/cancelled")
+                .uri("/cancelled")
                 .retrieve()
                 .bodyToMono(Void.class);
     }

@@ -38,6 +38,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -45,6 +46,7 @@ import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -52,6 +54,8 @@ import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+import javax.print.attribute.standard.Media;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -98,7 +102,7 @@ class ApiGatewayControllerTest {
     String VET_ID = buildVetDTO().getVetId();
     String INVALID_VET_ID = "mjbedf";
 
-
+    ClassPathResource cpr=new ClassPathResource("static/images/full_food_bowl.png");
 
     @Test
     void getAllRatingsForVet_ValidId() {
@@ -830,6 +834,37 @@ class ApiGatewayControllerTest {
         Mockito.verify(vetsServiceClient, times(1))
                 .addPhotoToVet(anyString(), anyString(), any(Mono.class));
     }
+
+    @Test
+    void getBadgeByVetId() throws IOException {
+        BadgeResponseDTO badgeResponseDTO = BadgeResponseDTO.builder()
+                .vetId(VET_ID)
+                .badgeTitle(BadgeTitle.HIGHLY_RESPECTED)
+                .badgeDate("2017")
+                .resourceBase64(Base64.getEncoder().encodeToString(StreamUtils.copyToByteArray(cpr.getInputStream())))
+                .build();
+
+        when(vetsServiceClient.getBadgeByVetId(anyString()))
+                .thenReturn(Mono.just(badgeResponseDTO));
+
+        client.get()
+                .uri("/api/gateway/vets/{vetId}/badge", VET_ID)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(APPLICATION_JSON)
+                .expectBody(BadgeResponseDTO.class)
+                .value(responseDTO -> {
+                    Assertions.assertEquals(badgeResponseDTO.getBadgeTitle(), responseDTO.getBadgeTitle());
+                    Assertions.assertEquals(badgeResponseDTO.getBadgeDate(), responseDTO.getBadgeDate());
+                    Assertions.assertEquals(badgeResponseDTO.getVetId(), responseDTO.getVetId());
+                    Assertions.assertEquals(badgeResponseDTO.getResourceBase64(), responseDTO.getResourceBase64());
+                });
+
+        Mockito.verify(vetsServiceClient, times(1))
+                .getBadgeByVetId(VET_ID);
+    }
+
+
     @Test
     void toStringBuilderVets() {
         System.out.println(VetDTO.builder());
