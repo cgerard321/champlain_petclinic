@@ -228,6 +228,40 @@ public class CustomerServiceClientIntegrationTest {
     }
 
     @Test
+    void getAllOwnersByPaginationWithFilters() throws JsonProcessingException {
+        OwnerResponseDTO TEST_OWNER1 = OwnerResponseDTO.builder()
+                .ownerId("ownerId-1")
+                .firstName("FN1")
+                .lastName("LN1")
+                .address("Test")
+                .city("C1")
+                .province("Test")
+                .telephone("T1")
+                //.imageId(1)
+                .build();
+
+        Flux<OwnerResponseDTO> owners = Flux.just(TEST_OWNER1);
+
+        final String body = mapper.writeValueAsString(owners.collectList().block());
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(body));
+
+        Optional<Integer> page = Optional.of(0);
+        Optional<Integer> size =  Optional.of(1);
+        String ownerId = "ownerId-1";
+        String firstName = "FN1";
+        String lastName = "LN1";
+        String city = "C1";
+        String phoneNumber = "T1";
+        final OwnerResponseDTO owner = customersServiceClient.getAllOwnersPaginationWithFilters(page,size,ownerId,firstName,lastName,phoneNumber,city).blockFirst();
+
+        assertEquals(ownerId, owner.getOwnerId());
+        assertEquals(city, owner.getCity());
+    }
+
+    @Test
     void getTotalNumberOfOwners() throws Exception {
         // Simulate the expected total count
         long expectedCount = 0;
@@ -241,6 +275,23 @@ public class CustomerServiceClientIntegrationTest {
 
         assertEquals(expectedCount,response.block());
     }
+
+    @Test
+    void getTotalNumberOfOwnersWithFilters() throws Exception {
+        // Simulate the expected total count
+        long expectedCount = 0;
+
+        // Prepare the response with the expected count as a plain long value
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(String.valueOf(expectedCount)));
+
+        final Mono<Long> response = customersServiceClient.getTotalNumberOfOwnersWithFilters(null,null,null,null,null);
+
+        assertEquals(expectedCount,response.block());
+    }
+
+
 
     @Test
     void testUpdatePet() throws Exception {

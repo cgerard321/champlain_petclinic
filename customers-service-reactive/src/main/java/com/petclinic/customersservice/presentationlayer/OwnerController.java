@@ -55,7 +55,7 @@ public class OwnerController {
     }
 
     @GetMapping("/owners-pagination/filters")
-    Flux<OwnerResponseDTO> getAllOwnersPaginationWithFilters(@RequestParam Optional<Integer> page,
+    public Flux<OwnerResponseDTO> getAllOwnersPaginationWithFilters(@RequestParam Optional<Integer> page,
                                                              @RequestParam Optional<Integer> size,
                                                              @RequestParam(required = false) String ownerId,
                                                              @RequestParam(required = false) String firstName,

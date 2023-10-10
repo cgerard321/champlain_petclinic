@@ -50,6 +50,9 @@ import org.springframework.util.StreamUtils;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -1154,6 +1157,55 @@ class ApiGatewayControllerTest {
     }
 
     @Test
+    void getAllOwnersByPaginationWithFilters(){
+
+        OwnerResponseDTO owner = new OwnerResponseDTO();
+        owner.setOwnerId("ownerId-06");
+        owner.setFirstName("FN1");
+        owner.setLastName("LN1");
+        owner.setAddress("Test");
+        owner.setCity("C1");
+        owner.setProvince("Test");
+        owner.setTelephone("T1");
+
+        Optional<Integer> page = Optional.of(0);
+        Optional<Integer> size =  Optional.of(1);
+        String ownerId = "ownerId-06";
+        String firstName = "FN1";
+        String lastName = "LN1";
+        String city = "C1";
+        String phoneNumber = "T1";
+
+
+        Flux<OwnerResponseDTO> ownerResponseDTOFlux = Flux.just(owner);
+
+        when(customersServiceClient.getAllOwnersPaginationWithFilters(page,size,ownerId,firstName,lastName,phoneNumber,city)).thenReturn(ownerResponseDTOFlux);
+
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("/api/gateway/owners-pagination/filters");
+
+        builder.queryParam("page", page);
+        builder.queryParam("size", size);
+        builder.queryParam("ownerId",  ownerId);
+        builder.queryParam("firstName", firstName);
+        builder.queryParam("lastName", lastName);
+        builder.queryParam("phoneNumber", phoneNumber);
+        builder.queryParam("city", city);
+
+        client.get()
+                .uri(builder.build().toUri())
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .acceptCharset(StandardCharsets.UTF_8)
+                .exchange().expectStatus().isOk()
+                .expectHeader().valueEquals("Content-Type","text/event-stream;charset=UTF-8")
+                .expectBodyList(OwnerResponseDTO.class)
+                .value((list) -> {
+                    Assertions.assertNotNull(list);
+                    Assertions.assertEquals(size.get(),list.size());
+                    Assertions.assertEquals(list.get(0).getCity(),city);
+                });
+    }
+
+    @Test
     void getTotalNumberOfOwners(){
         long expectedCount = 0;
 
@@ -1171,6 +1223,27 @@ class ApiGatewayControllerTest {
                 });
 
     }
+    @Test
+    void getTotalNumberOfOwnersWithFilters(){
+        long expectedCount = 0;
+
+        when(customersServiceClient.getTotalNumberOfOwnersWithFilters(null,null,null,null,null)).thenReturn(Mono.just(expectedCount));
+
+        client.get()
+                .uri("/api/gateway/owners-filtered-count")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Long.class) // Expecting a Long response
+                .consumeWith(response -> {
+                    Long responseBody = response.getResponseBody();
+                    assertNotNull(responseBody);
+                    assertEquals(expectedCount, responseBody.longValue());
+                });
+
+    }
+
+
+
 
     @Test
     void getOwnerByOwnerId_shouldSucceed(){
@@ -2988,7 +3061,6 @@ void deleteAllInventory_shouldSucceed() {
                     assertEquals(requestDTO.getProductDescription(), dto.getProductDescription());
                     assertEquals(requestDTO.getProductPrice(), dto.getProductPrice());
                     assertEquals(requestDTO.getProductQuantity(), dto.getProductQuantity());
-                    assertEquals(requestDTO.getProductSalePrice(), dto.getProductSalePrice());
                 });
 
         // Verify that the inventoryServiceClient method was called

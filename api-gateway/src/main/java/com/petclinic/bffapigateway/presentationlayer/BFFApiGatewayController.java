@@ -578,6 +578,40 @@ public class BFFApiGatewayController {
         return customersServiceClient.getTotalNumberOfOwners();
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
+    @GetMapping(value = "/owners-pagination/filters")
+    public Flux<OwnerResponseDTO> getAllOwnersPaginationWithFilters(@RequestParam Optional<Integer> page,
+                                                                    @RequestParam Optional<Integer> size,
+                                                                    @RequestParam(required = false) String ownerId,
+                                                                    @RequestParam(required = false) String firstName,
+                                                                    @RequestParam(required = false) String lastName,
+                                                                    @RequestParam(required = false) String phoneNumber,
+                                                                    @RequestParam(required = false) String city) {
+
+        if(page.isEmpty()){
+            page = Optional.of(0);
+        }
+
+        if (size.isEmpty()) {
+            size = Optional.of(5);
+        }
+
+        return customersServiceClient.getAllOwnersPaginationWithFilters(page, size, ownerId,firstName,lastName,phoneNumber,city);
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
+    @GetMapping(value = "/owners-filtered-count")
+    public Mono<Long> getTotalNumberOfOwnersWithFilters (
+        @RequestParam(required = false) String ownerId,
+        @RequestParam(required = false) String firstName,
+        @RequestParam(required = false) String lastName,
+        @RequestParam(required = false) String phoneNumber,
+        @RequestParam(required = false) String city)
+    {
+        return customersServiceClient.getTotalNumberOfOwnersWithFilters(ownerId,firstName,lastName,phoneNumber,city);
+    }
+
+
 
     @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN})
     @GetMapping(value = "owners/{ownerId}")
