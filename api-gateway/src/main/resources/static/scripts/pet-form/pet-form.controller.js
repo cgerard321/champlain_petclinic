@@ -1,16 +1,13 @@
 'use strict';
 
 angular.module('petForm')
-    .controller('PetFormController', ['$http', '$state', '$stateParams', function ($http, $state, $stateParams) {
+    .controller('PetFormController', ['$http', '$state', '$stateParams', '$filter', '$q', function ($http, $state, $stateParams, $filter, $q) {
         var self = this;
         var ownerId = $stateParams.ownerId || 0;
-        var method = $stateParams.method;
         var petId = $stateParams.petId || 0;
-        var owner = "";
-        var myDate = new Date();
 
         // Clear the form fields
-        $ctrl.pet = {};
+        self.pet = {}; // Changed $ctrl.pet to self.pet
 
         $http.get('api/gateway/owners/petTypes').then(function (resp) {
             self.types = resp.data;
@@ -24,36 +21,41 @@ angular.module('petForm')
 
         $http.get('api/gateway/owners/' + ownerId).then(function (resp) {
             var ownerData = resp.data;
-            owner = ownerData.firstName + " " + ownerData.lastName;
-            self.pet = {
-                owner: owner
-            }
+            var owner = ownerData.firstName + " " + ownerData.lastName; // Added "var" before owner
+            self.pet.owner = owner; // Changed self.pet = { owner: owner } to self.pet.owner = owner
+        });
 
+        $q.all([
+            $http.get('api/gateway/pets/' + petId),
+            $http.get('api/gateway/owners/' + ownerId)
+        ]).then(function (responses) {
+            var petData = responses[0].data;
+            petData.birthDate = new Date(petData.birthDate);
+
+            var ownerData = responses[1].data;
+            petData.owner = ownerData.firstName + " " + ownerData.lastName;
+
+            self.pet = petData;
             self.checked = false;
         });
 
         // Function to submit the form
         self.submit = function () {
-            var petType = {
-                id: self.pet.type.id,
-                name: self.pet.type.name
-            }
-
             var data = {
                 petId: self.pet.petId,
                 name: self.pet.name,
-                birthDate: self.pet.birthDate,
+                birthDate: new Date(self.pet.birthDate).toISOString(),
                 ownerId: self.pet.ownerId,
-                type: petType
-            }
+                petTypeId: self.pet.petTypeId
+            };
 
             var req;
 
-            req = $http.put("api/gateway/" + "pets/" + petId, data);
+            req = $http.put("api/gateway/pets/" + petId, data);
 
             req.then(function () {
                 $state.go('ownerDetails', { ownerId: ownerId });
-            }, function (response) {
+            }).catch(function (response) { // Changed "function (response)" to ".catch(function (response))"
                 var error = response.data;
                 error.errors = error.errors || [];
                 alert(error.error + "\r\n" + error.errors.map(function (e) {

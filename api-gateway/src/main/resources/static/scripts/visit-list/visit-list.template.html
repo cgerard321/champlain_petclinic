@@ -1,24 +1,31 @@
 <style>
-    .container {
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        margin-bottom: 20px;
-    }
 
-    .delete-all-button{
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        margin-bottom: 20px;
-    }
     .sortorder:after {content: '\25b2';   /* BLACK UP-POINTING TRIANGLE */}
     .sortorder.reverse:after {content: '\25bc';   /* BLACK DOWN-POINTING TRIANGLE */}
 
-    .original-button {
+
+    .button-wrapper {
+        display: flex;
+        justify-content: flex-end; /* Align to the right */
+        align-items: center;
+    }
+
+    .delete-all-bttn{
+        color: #fff;
+        background-color: red;
+        border-color: red;
+        font-size: 15px;
+        border-radius: 5px;
+        width: 200px;
+        height: 40px;
+        font-weight: bold;
+        margin-left: 10px; /* Add some space between the buttons if needed */
+    }
+
+    .original-bttn {
         color: #fff;
         background-color: #19d256;
-        border-color: #dc3545;
+        border-color: #19d256;
         font-size: 18px;
         border-radius: 5px;
         width: 200px;
@@ -26,35 +33,32 @@
         font-weight: bold;
     }
 
-    .original-button:hover {
+    .original-bttn:hover {
         box-shadow: 0 0 rgba(0, 0, 0, 0.4);
         border-bottom-width: 2px;
         transform: translateY(2px);
     }
 
-    .button-wrapper {
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
+    .delete-all-bttn:hover {
+        box-shadow: 0 0 rgba(0, 0, 0, 0.4);
+        border-bottom-width: 2px;
+        transform: translateY(2px);
     }
+
+
 </style>
 
+<div id="loadingIndicator" style="display: none;">Loading...</div> <!--Page loading message-->
+
 <div class="button-wrapper" ng-controller="VisitListController">
-    <div class="container">
-        <a ui-sref="visitsNew">
-            <button class="original-button" id="addBtn">Create Visit</button>
-        </a>
-    </div>
-    <div class="delete-all-button">
-        <button class="btn btn-danger" ng-click="deleteAllCancelledVisits()">Delete All Canceled Visits</button>
-    </div>
+        <a ui-sref="visitsNew"> <button class="original-bttn" id="addBtn">Create Visit</button> </a>
+        <button class="delete-all-bttn" ng-click="deleteAllCancelledVisits()">Delete All Cancelled Visits</button>
 </div>
 
 
-<h3 style="margin: 0;">Visits</h3>
 
-
-<table class="table table-striped">
+<h3 style="margin: 0;" ng-show="$ctrl.upcomingVisits.length > 0">Upcoming Visits</h3>
+<table class="table table-striped" ng-show="$ctrl.upcomingVisits.length > 0">
     <thead>
     <tr>
         <th><button class="btn btn-default" ng-click="sortBy('visitId')" style="color: white">VisitId<span class="sortorder" ng-show="propertyName === 'visitId'" ng-class="{reverse: reverse}"></span></button></th>
@@ -62,11 +66,11 @@
         <th><button class="btn btn-default" ng-click="sortBy('description')" style="color: white">Sort by description<span class="sortorder" ng-show="propertyName === 'description'" ng-class="{reverse: reverse}"></span></button></th>
         <th><button class="btn btn-default" ng-click="sortBy('practitionerId')" style="color: white">Sort by veterinarian<span class="sortorder" ng-show="propertyName === 'practitionerId'" ng-class="{reverse: reverse}"></span></button></th>
         <th><button class="btn btn-default" ng-click="sortBy('petId')" style="color: white">Sort by pet<span class="sortorder" ng-show="propertyName === 'petId'" ng-class="{reverse: reverse}"></span></button></th>
-        <th><button class="btn btn-default" ng-click="sortBy('status')" style="color: white">Sort by status<span class="sortorder" ng-show="propertyName === 'status'" ng-class="{reverse: reverse}"></span></button></th>
         <th>
-            <button class="btn btn-default" style="color: white">Bill</button>
-<!--            <button class="btn btn-default" ng-click="sortBy('bill')" style="color: white">Sort by status</button><span class="sortorder" ng-show="propertyName === 'bill'" ng-class="{reverse: reverse}"></span>-->
+            <button class="btn btn-default" style="color: white">Sort by Bill</button>
+<!--            <button class="btn btn-default" ng-click="sortBy('bill')" style="color: white">Sort by Bill</button><span class="sortorder" ng-show="propertyName === 'bill'" ng-class="{reverse: reverse}"></span>-->
         </th>
+        <th style="text-align:center; vertical-align:middle"><label>Status</label></th>
         <th style="text-align:center; vertical-align:middle"><label>Confirm</label></th>
         <th style="text-align:center; vertical-align:middle"> <label>Cancel</label> </th>
         <th style="text-align:center; vertical-align:middle"> <label>Edit</label> </th>
@@ -81,7 +85,6 @@
         <td class="border"><input style="width:100%" ng-model="search.description" placeholder="Filter by Description"></td>
         <td class="border"><input style="width:100%" ng-model="search.vetId" placeholder="Filter by Veterinarian"></td>
         <td class="border"><input style="width:100%" ng-model="search.petId" placeholder="Filter by PetId"></td>
-        <td class="border"><input style="width:100%" ng-model="search.status" placeholder="Filter by Status"></td>
         <td class="border"><input ng-model="search.billId" placeholder="Filter by Bill"></td>
         <td class="border"></td>
         <td class="border"></td>
@@ -90,15 +93,15 @@
     </tr>
 
 <!--    <tr id="visitId" ng-repeat="v in $ctrl.upcomingVisits | filter:search:$ctrl.query track by v.visitId" data-table-name="upcomingVisits">-->
-    <tr id="visitId" ng-repeat="v in $ctrl.upcomingVisits | orderBy:propertyName:reverse | filter:search:$ctrl.query track by v.visitId" data-table-name="upcomingVisits">
+    <tr id="upcomingVisitId" ng-repeat="v in $ctrl.upcomingVisits | orderBy:propertyName:reverse | filter:search:$ctrl.query track by v.visitId" data-table-name="upcomingVisits">
         <td class="border">{{v.visitId}}</td>
         <td class="border">{{v.visitDate | date:'yyyy-MM-ddTHH:mm:ss'}}</td>
         <td class="border" style="white-space: pre-line">{{v.description}}</td>
 <!--        <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>-->
         <td class="border" style="white-space: pre-line">{{v.practitionerId}}</td>
         <td class="border" style="white-space: pre-line">{{v.petId}}</td>
-        <td class="status-text border" style="white-space: pre-line">{{v.status}}</td>
         <td class="status-text" style="white-space: pre-line"></td>
+        <td class="status-text border" style="white-space: pre-line">{{v.status}}</td>
         <td class="border">
             <a ng-class="{
                     'btn btn-success': v.status === 'UPCOMING',
@@ -108,6 +111,8 @@
                 {{ v.status === 'UPCOMING' ? 'Confirm Visit' : v.status === 'CONFIRMED' ? 'Complete Visit' : v.status === 'CANCELLED' ? 'Cannot Confirm Cancelled Visit' : 'Visit Completed!' }}
             </a>
         </td>
+
+
         <td class="border"><a ng-class="{
     'btn btn-danger': v.status === 'UPCOMING',
     'btn btn-default': v.status === 'CANCELLED' || v.status === 'CONFIRMED' || v.status === 'COMPLETED'
@@ -115,8 +120,174 @@
             {{ v.status === 'UPCOMING' ? 'Cancel Visit' : v.status === 'CONFIRMED' ? 'Cannot Cancel Confirmed Visit' : v.status === 'COMPLETED' ? 'Cannot Cancel Completed Visit' : 'Visit Cancelled!' }}
         </a></td>
         <td class="border" style="text-align:center; vertical-align:middle"><button class="btn btn-default" type="button" style="background-color: royalblue; color: white" ng-click="$ctrl.switchToUpdateForm($event, v.practitionerId, v.description, v.visitId, v.status)">Edit Visit</button></td>
-        <!--<td style="text-align:center; vertical-align:middle"><button class="btn btn-danger" href="javascript:void(0)" ng-click="deleteVisit(v.visitId)">Delete visit</button></td> -->
         <td class="border"><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteVisit(v.visitId)">Delete Visit</a></td>
     </tr>
     </tbody>
 </table>
+
+<br>
+<h3 style="margin: 0;" ng-show="$ctrl.confirmedVisits.length > 0">Confirmed Visits</h3>
+<table class="table table-striped" ng-show="$ctrl.confirmedVisits.length > 0">
+    <thead>
+    <tr>
+        <th><button class="btn btn-default" ng-click="sortBy('visitId')" style="color: white">VisitId<span class="sortorder" ng-show="propertyName === 'visitId'" ng-class="{reverse: reverse}"></span></button></th>
+        <th><button class="btn btn-default" ng-click="sortBy('visitDate')" style="color: white">Sort by date<span class="sortorder" ng-show="propertyName === 'visitDate'" ng-class="{reverse: reverse}"></span></button></th>
+        <th><button class="btn btn-default" ng-click="sortBy('description')" style="color: white">Sort by description<span class="sortorder" ng-show="propertyName === 'description'" ng-class="{reverse: reverse}"></span></button></th>
+        <th><button class="btn btn-default" ng-click="sortBy('practitionerId')" style="color: white">Sort by veterinarian<span class="sortorder" ng-show="propertyName === 'practitionerId'" ng-class="{reverse: reverse}"></span></button></th>
+        <th><button class="btn btn-default" ng-click="sortBy('petId')" style="color: white">Sort by pet<span class="sortorder" ng-show="propertyName === 'petId'" ng-class="{reverse: reverse}"></span></button></th>
+        <th>
+            <button class="btn btn-default" style="color: white">Sort by Bill</button>
+            <!--            <button class="btn btn-default" ng-click="sortBy('bill')" style="color: white">Sort by Bill</button><span class="sortorder" ng-show="propertyName === 'bill'" ng-class="{reverse: reverse}"></span>-->
+        </th>
+        <th style="text-align:center; vertical-align:middle"><label>Status</label></th>
+        <th style="text-align:center; vertical-align:middle"><label>Confirm</label></th>
+        <th style="text-align:center; vertical-align:middle"> <label>Cancel</label> </th>
+        <th style="text-align:center; vertical-align:middle"> <label>Edit</label> </th>
+        <th style="text-align:center; vertical-align:middle"> <label>Delete</label> </th>
+    </tr>
+    </thead>
+    <tbody id="confirmedTable">
+
+    <tr id="confirmedVisitId" ng-repeat="v in $ctrl.confirmedVisits | orderBy:propertyName:reverse | filter:search:$ctrl.query track by v.visitId" data-table-name="confirmedVisits">
+        <td class="border">{{v.visitId}}</td>
+        <td class="border">{{v.visitDate | date:'yyyy-MM-ddTHH:mm:ss'}}</td>
+        <td class="border" style="white-space: pre-line">{{v.description}}</td>
+        <!--        <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>-->
+        <td class="border" style="white-space: pre-line">{{v.practitionerId}}</td>
+        <td class="border" style="white-space: pre-line">{{v.petId}}</td>
+        <td class="status-text" style="white-space: pre-line"></td>
+        <td class="status-text border" style="white-space: pre-line">{{v.status}}</td>
+        <td class="border">
+            <a ng-class="{
+                    'btn btn-success': v.status === 'UPCOMING',
+                    'btn btn-info': v.status === 'CONFIRMED',
+                    'btn btn-default': v.status === 'COMPLETED' || v.status === 'CANCELLED'
+                }" href="javascript:void(0)" ng-click="confirmVisit(v.visitId, v.status)">
+                {{ v.status === 'UPCOMING' ? 'Confirm Visit' : v.status === 'CONFIRMED' ? 'Complete Visit' : v.status === 'CANCELLED' ? 'Cannot Confirm Cancelled Visit' : 'Visit Completed!' }}
+            </a>
+        </td>
+
+
+        <td class="border"><a ng-class="{
+    'btn btn-danger': v.status === 'UPCOMING',
+    'btn btn-default': v.status === 'CANCELLED' || v.status === 'CONFIRMED' || v.status === 'COMPLETED'
+  }" href="javascript:void(0)" ng-click="cancelVisit(v.visitId, v.status)">
+            {{ v.status === 'UPCOMING' ? 'Cancel Visit' : v.status === 'CONFIRMED' ? 'Cannot Cancel Confirmed Visit' : v.status === 'COMPLETED' ? 'Cannot Cancel Completed Visit' : 'Visit Cancelled!' }}
+        </a></td>
+        <td class="border" style="text-align:center; vertical-align:middle"><button class="btn btn-default" type="button" style="background-color: royalblue; color: white" ng-click="$ctrl.switchToUpdateForm($event, v.practitionerId, v.description, v.visitId, v.status)">Edit Visit</button></td>
+        <td class="border"><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteVisit(v.visitId)">Delete Visit</a></td>
+    </tr>
+    </tbody>
+</table>
+
+
+<br>
+<h3 style="margin: 0;" ng-show="$ctrl.cancelledVisits.length > 0">Cancelled Visits</h3>
+<table class="table table-striped" ng-show="$ctrl.cancelledVisits.length > 0">
+    <thead>
+    <tr>
+        <th><button class="btn btn-default" ng-click="sortBy('visitId')" style="color: white">VisitId<span class="sortorder" ng-show="propertyName === 'visitId'" ng-class="{reverse: reverse}"></span></button></th>
+        <th><button class="btn btn-default" ng-click="sortBy('visitDate')" style="color: white">Sort by date<span class="sortorder" ng-show="propertyName === 'visitDate'" ng-class="{reverse: reverse}"></span></button></th>
+        <th><button class="btn btn-default" ng-click="sortBy('description')" style="color: white">Sort by description<span class="sortorder" ng-show="propertyName === 'description'" ng-class="{reverse: reverse}"></span></button></th>
+        <th><button class="btn btn-default" ng-click="sortBy('practitionerId')" style="color: white">Sort by veterinarian<span class="sortorder" ng-show="propertyName === 'practitionerId'" ng-class="{reverse: reverse}"></span></button></th>
+        <th><button class="btn btn-default" ng-click="sortBy('petId')" style="color: white">Sort by pet<span class="sortorder" ng-show="propertyName === 'petId'" ng-class="{reverse: reverse}"></span></button></th>
+        <th>
+            <button class="btn btn-default" style="color: white">Sort by Bill</button>
+            <!--            <button class="btn btn-default" ng-click="sortBy('bill')" style="color: white">Sort by Bill</button><span class="sortorder" ng-show="propertyName === 'bill'" ng-class="{reverse: reverse}"></span>-->
+        </th>
+        <th style="text-align:center; vertical-align:middle"><label>Status</label></th>
+        <th style="text-align:center; vertical-align:middle"><label>Confirm</label></th>
+        <th style="text-align:center; vertical-align:middle"> <label>Cancel</label> </th>
+        <th style="text-align:center; vertical-align:middle"> <label>Edit</label> </th>
+        <th style="text-align:center; vertical-align:middle"> <label>Delete</label> </th>
+    </tr>
+    </thead>
+    <tbody id="cancelledTable">
+
+    <tr id="cancelledVisitId" ng-repeat="v in $ctrl.cancelledVisits | orderBy:propertyName:reverse | filter:search:$ctrl.query track by v.visitId" data-table-name="cancelledVisits">
+        <td class="border">{{v.visitId}}</td>
+        <td class="border">{{v.visitDate | date:'yyyy-MM-ddTHH:mm:ss'}}</td>
+        <td class="border" style="white-space: pre-line">{{v.description}}</td>
+        <!--        <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>-->
+        <td class="border" style="white-space: pre-line">{{v.practitionerId}}</td>
+        <td class="border" style="white-space: pre-line">{{v.petId}}</td>
+        <td class="status-text" style="white-space: pre-line"></td>
+        <td class="status-text border" style="white-space: pre-line">{{v.status}}</td>
+        <td class="border">
+            <a ng-class="{
+                    'btn btn-success': v.status === 'UPCOMING',
+                    'btn btn-info': v.status === 'CONFIRMED',
+                    'btn btn-default': v.status === 'COMPLETED' || v.status === 'CANCELLED'
+                }" href="javascript:void(0)" ng-click="confirmVisit(v.visitId, v.status)">
+                {{ v.status === 'UPCOMING' ? 'Confirm Visit' : v.status === 'CONFIRMED' ? 'Complete Visit' : v.status === 'CANCELLED' ? 'Cannot Confirm Cancelled Visit' : 'Visit Completed!' }}
+            </a>
+        </td>
+
+
+        <td class="border"><a ng-class="{
+    'btn btn-danger': v.status === 'UPCOMING',
+    'btn btn-default': v.status === 'CANCELLED' || v.status === 'CONFIRMED' || v.status === 'COMPLETED'
+  }" href="javascript:void(0)" ng-click="cancelVisit(v.visitId, v.status)">
+            {{ v.status === 'UPCOMING' ? 'Cancel Visit' : v.status === 'CONFIRMED' ? 'Cannot Cancel Confirmed Visit' : v.status === 'COMPLETED' ? 'Cannot Cancel Completed Visit' : 'Visit Cancelled!' }}
+        </a></td>
+        <td class="border" style="text-align:center; vertical-align:middle"><button class="btn btn-default" type="button" style="background-color: royalblue; color: white" ng-click="$ctrl.switchToUpdateForm($event, v.practitionerId, v.description, v.visitId, v.status)">Edit Visit</button></td>
+        <td class="border"><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteVisit(v.visitId)">Delete Visit</a></td>
+    </tr>
+    </tbody>
+</table>
+
+<br>
+<h3 style="margin: 0;" ng-show="$ctrl.completedVisits.length > 0">Completed Visits</h3>
+<table class="table table-striped" ng-show="$ctrl.completedVisits.length > 0">
+    <thead>
+    <tr>
+        <th><button class="btn btn-default" ng-click="sortBy('visitId')" style="color: white">VisitId<span class="sortorder" ng-show="propertyName === 'visitId'" ng-class="{reverse: reverse}"></span></button></th>
+        <th><button class="btn btn-default" ng-click="sortBy('visitDate')" style="color: white">Sort by date<span class="sortorder" ng-show="propertyName === 'visitDate'" ng-class="{reverse: reverse}"></span></button></th>
+        <th><button class="btn btn-default" ng-click="sortBy('description')" style="color: white">Sort by description<span class="sortorder" ng-show="propertyName === 'description'" ng-class="{reverse: reverse}"></span></button></th>
+        <th><button class="btn btn-default" ng-click="sortBy('practitionerId')" style="color: white">Sort by veterinarian<span class="sortorder" ng-show="propertyName === 'practitionerId'" ng-class="{reverse: reverse}"></span></button></th>
+        <th><button class="btn btn-default" ng-click="sortBy('petId')" style="color: white">Sort by pet<span class="sortorder" ng-show="propertyName === 'petId'" ng-class="{reverse: reverse}"></span></button></th>
+        <th>
+            <button class="btn btn-default" style="color: white">Sort by Bill</button>
+            <!--            <button class="btn btn-default" ng-click="sortBy('bill')" style="color: white">Sort by Bill</button><span class="sortorder" ng-show="propertyName === 'bill'" ng-class="{reverse: reverse}"></span>-->
+        </th>
+        <th style="text-align:center; vertical-align:middle"><label>Status</label></th>
+        <th style="text-align:center; vertical-align:middle"><label>Confirm</label></th>
+        <th style="text-align:center; vertical-align:middle"> <label>Cancel</label> </th>
+        <th style="text-align:center; vertical-align:middle"> <label>Edit</label> </th>
+        <th style="text-align:center; vertical-align:middle"> <label>Delete</label> </th>
+    </tr>
+    </thead>
+    <tbody id="completedTable">
+
+    <tr id="completedVisitId" ng-repeat="v in $ctrl.completedVisits | orderBy:propertyName:reverse | filter:search:$ctrl.query track by v.visitId" data-table-name="completedVisits">
+        <td class="border">{{v.visitId}}</td>
+        <td class="border">{{v.visitDate | date:'yyyy-MM-ddTHH:mm:ss'}}</td>
+        <td class="border" style="white-space: pre-line">{{v.description}}</td>
+        <!--        <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>-->
+        <td class="border" style="white-space: pre-line">{{v.practitionerId}}</td>
+        <td class="border" style="white-space: pre-line">{{v.petId}}</td>
+        <td class="status-text" style="white-space: pre-line"></td>
+        <td class="status-text border" style="white-space: pre-line">{{v.status}}</td>
+        <td class="border">
+            <a ng-class="{
+                    'btn btn-success': v.status === 'UPCOMING',
+                    'btn btn-info': v.status === 'CONFIRMED',
+                    'btn btn-default': v.status === 'COMPLETED' || v.status === 'CANCELLED'
+                }" href="javascript:void(0)" ng-click="confirmVisit(v.visitId, v.status)">
+                {{ v.status === 'UPCOMING' ? 'Confirm Visit' : v.status === 'CONFIRMED' ? 'Complete Visit' : v.status === 'CANCELLED' ? 'Cannot Confirm Cancelled Visit' : 'Visit Completed!' }}
+            </a>
+        </td>
+
+
+        <td class="border"><a ng-class="{
+    'btn btn-danger': v.status === 'UPCOMING',
+    'btn btn-default': v.status === 'CANCELLED' || v.status === 'CONFIRMED' || v.status === 'COMPLETED'
+  }" href="javascript:void(0)" ng-click="cancelVisit(v.visitId, v.status)">
+            {{ v.status === 'UPCOMING' ? 'Cancel Visit' : v.status === 'CONFIRMED' ? 'Cannot Cancel Confirmed Visit' : v.status === 'COMPLETED' ? 'Cannot Cancel Completed Visit' : 'Visit Cancelled!' }}
+        </a></td>
+        <td class="border" style="text-align:center; vertical-align:middle"><button class="btn btn-default" type="button" style="background-color: royalblue; color: white" ng-click="$ctrl.switchToUpdateForm($event, v.practitionerId, v.description, v.visitId, v.status)">Edit Visit</button></td>
+        <td class="border"><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteVisit(v.visitId)">Delete Visit</a></td>
+    </tr>
+    </tbody>
+</table>
+

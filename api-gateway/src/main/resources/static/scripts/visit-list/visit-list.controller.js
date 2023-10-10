@@ -4,7 +4,10 @@ angular.module('visitList')
         let self = this;
         // Lists holding visits for the tables to display
         self.upcomingVisits = []
-        self.previousVisits = []
+        self.confirmedVisits = []
+        self.cancelledVisits = []
+        self.completedVisits = []
+
         let url
         //sorted by order or most to least permissions
         if ($window.localStorage.getItem("roles").includes("ADMIN")){
@@ -19,9 +22,25 @@ angular.module('visitList')
         eventSource.addEventListener('message', function (event){
             $scope.$apply(function(){
                 console.log(event.data)
-                self.upcomingVisits.push(JSON.parse(event.data))
-            })
-        })
+                const visitData = JSON.parse(event.data);
+                switch (visitData.status) {
+                    case "UPCOMING":
+                        self.upcomingVisits.push(visitData);
+                        break;
+                    case "CONFIRMED":
+                        self.confirmedVisits.push(visitData);
+                        break;
+                    case "CANCELLED":
+                        self.cancelledVisits.push(visitData);
+                        break;
+                    case "COMPLETED":
+                        self.completedVisits.push(visitData);
+                        break;
+                    default:
+                        break;
+                }
+            });
+        });
         eventSource.onerror = (error) =>{
             if(eventSource.readyState === 0){
                 eventSource.close()
@@ -109,7 +128,7 @@ angular.module('visitList')
             loadingIndicator.style.display = 'block'
             setTimeout(function() {
                 location.reload()
-            }, 1000) //delay by 1 second
+            }, 150) //delay reload to be more graceful
         }
         function errorCallback(error) {
             alert(error.errors)

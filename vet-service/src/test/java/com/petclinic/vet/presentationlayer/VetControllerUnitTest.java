@@ -2,8 +2,12 @@ package com.petclinic.vet.presentationlayer;
 
 import com.petclinic.vet.dataaccesslayer.Photo;
 import com.petclinic.vet.dataaccesslayer.Vet;
+import com.petclinic.vet.dataaccesslayer.badges.Badge;
+import com.petclinic.vet.dataaccesslayer.badges.BadgeTitle;
 import com.petclinic.vet.exceptions.InvalidInputException;
 import com.petclinic.vet.servicelayer.*;
+import com.petclinic.vet.servicelayer.badges.BadgeResponseDTO;
+import com.petclinic.vet.servicelayer.badges.BadgeService;
 import com.petclinic.vet.servicelayer.education.EducationRequestDTO;
 import com.petclinic.vet.servicelayer.education.EducationResponseDTO;
 import com.petclinic.vet.servicelayer.education.EducationService;
@@ -16,15 +20,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.util.StreamUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.io.IOException;
+import java.util.Base64;
 import java.util.HashSet;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,14 +50,14 @@ class VetControllerUnitTest {
 
     @MockBean
     VetService vetService;
-
     @MockBean
     RatingService ratingService;
-
     @MockBean
     EducationService educationService;
     @MockBean
     PhotoService photoService;
+    @MockBean
+    BadgeService badgeService;
     @MockBean
     ConnectionFactoryInitializer connectionFactoryInitializer;
 
@@ -77,6 +85,7 @@ class VetControllerUnitTest {
     String VET_BILL_ID = vet.getVetBillId();
     String INVALID_VET_ID = "mjbedf";
 
+    ClassPathResource cpr=new ClassPathResource("images/full_food_bowl.png");
 
     @Test
     void getAllRatingForVetByVetId_ShouldSucceed() {
@@ -687,11 +696,40 @@ class VetControllerUnitTest {
                 .insertPhotoOfVet(anyString(), anyString(), any(Mono.class));
     }
 
+    @Test
+    void getBadgeByVetId_shouldSucceed() throws IOException {
+        BadgeResponseDTO badgeResponseDTO = buildBadgeResponseDTO();
+
+        when(badgeService.getBadgeByVetId(anyString()))
+                .thenReturn(Mono.just(badgeResponseDTO));
+
+        client.get()
+                .uri("/vets/{vetId}/badge", VET_ID)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(BadgeResponseDTO.class)
+                .value(responseDTO -> {
+                    assertEquals(badgeResponseDTO.getBadgeTitle(), responseDTO.getBadgeTitle());
+                    assertEquals(badgeResponseDTO.getBadgeDate(), responseDTO.getBadgeDate());
+                    assertEquals(badgeResponseDTO.getVetId(), responseDTO.getVetId());
+                    assertEquals(badgeResponseDTO.getResourceBase64(), responseDTO.getResourceBase64());
+                });
+    }
+
     private Resource buildPhotoData(Photo photo) {
         ByteArrayResource resource = new ByteArrayResource(photo.getData());
         return resource;
     }
 
+    private BadgeResponseDTO buildBadgeResponseDTO() throws IOException {
+        return BadgeResponseDTO.builder()
+                .vetId("cf25e779-548b-4788-aefa-6d58621c2feb")
+                .badgeTitle(BadgeTitle.HIGHLY_RESPECTED)
+                .badgeDate("2017")
+                .resourceBase64(Base64.getEncoder().encodeToString(StreamUtils.copyToByteArray(cpr.getInputStream())))
+                .build();
+    }
 
     private Vet buildVet() {
         return Vet.builder()

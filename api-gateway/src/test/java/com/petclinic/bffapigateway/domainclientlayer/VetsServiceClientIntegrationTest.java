@@ -7,6 +7,7 @@ import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -17,11 +18,14 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.MediaType;
 import org.springframework.util.FileCopyUtils;
+import org.springframework.util.StreamUtils;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.io.IOException;
+import java.util.Base64;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -48,6 +52,7 @@ class VetsServiceClientIntegrationTest {
     private ObjectMapper mapper;
 
     VetDTO vetDTO = buildVetDTO();
+    ClassPathResource cpr=new ClassPathResource("static/images/full_food_bowl.png");
 
     @BeforeEach
     void setup() {
@@ -828,41 +833,6 @@ class VetsServiceClientIntegrationTest {
 
         assertNull(ratingResponseDTO);
     }
-    @Test
-    void updateEducationByVetIdAndEducationId() throws JsonProcessingException {
-        EducationRequestDTO updatedEducation = EducationRequestDTO.builder()
-                .schoolName("McGill")
-                .vetId("678910")
-                .degree("Bachelor of Medicine")
-                .fieldOfStudy("Medicine")
-                .startDate("2010")
-                .endDate("2015")
-                .build();
-
-         prepareResponse(response -> response
-                        .setHeader("Content-Type", "application/json")
-                 .setHeader("Content-Type", "application/json")
-                 .setBody("    {\n" +
-                         "        \"educationId\": \"123456\",\n" +
-                         "        \"vetId\": \"678910\",\n" +
-                         "        \"schoolName\": \"McGill\",\n" +
-                         "        \"degree\": \"Bachelor of Medicine\",\n" +
-                         "        \"fieldOfStudy\": \"Medicine\",\n" +
-                         "        \"startDate\": \"2010\",\n" +
-                         "        \"endDate\": \"2015\"\n" +
-                         "    }"));
-
-        final EducationResponseDTO educationResponseDTO =
-                vetsServiceClient.updateEducationByVetIdAndByEducationId("678910","123456", Mono.just(updatedEducation)).block();
-        assertNotNull(educationResponseDTO);
-        assertNotNull(educationResponseDTO.getEducationId());
-        assertThat(educationResponseDTO.getVetId()).isEqualTo(updatedEducation.getVetId());
-        assertThat(educationResponseDTO.getSchoolName()).isEqualTo(updatedEducation.getSchoolName());
-        assertThat(educationResponseDTO.getDegree()).isEqualTo(updatedEducation.getDegree());
-        assertThat(educationResponseDTO.getFieldOfStudy()).isEqualTo(updatedEducation.getFieldOfStudy());
-        assertThat(educationResponseDTO.getStartDate()).isEqualTo(updatedEducation.getStartDate());
-        assertThat(educationResponseDTO.getEndDate()).isEqualTo(updatedEducation.getEndDate());
-    }
 
     @Test
     void getPhotoByVetId() throws IOException {
@@ -891,6 +861,96 @@ class VetsServiceClientIntegrationTest {
         byte[] photoBytes = FileCopyUtils.copyToByteArray(photo.getInputStream());
 
         assertNotNull(photoBytes);
+    }
+
+    @Test
+    void getBadgeByVetId() throws IOException{
+        BadgeResponseDTO badgeResponseDTO = BadgeResponseDTO.builder()
+                .vetId("cf25e779-548b-4788-aefa-6d58621c2feb")
+                .badgeTitle(BadgeTitle.HIGHLY_RESPECTED)
+                .badgeDate("2017")
+                .resourceBase64(Base64.getEncoder().encodeToString(StreamUtils.copyToByteArray(cpr.getInputStream())))
+                .build();
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody("    {\n" +
+                        "        \"vetId\": \"cf25e779-548b-4788-aefa-6d58621c2feb\",\n" +
+                        "        \"badgeTitle\": \"" + badgeResponseDTO.getBadgeTitle() + "\",\n" +
+                        "        \"badgeDate\": \"2017\",\n" +
+                        "        \"resourceBase64\": \"" + badgeResponseDTO.getResourceBase64() + "\"\n" +
+                        "    }"));
+
+        StepVerifier.create(vetsServiceClient.getBadgeByVetId("cf25e779-548b-4788-aefa-6d58621c2feb"))
+                .consumeNextWith(responseDTO -> {
+                    assertEquals(badgeResponseDTO.getBadgeTitle(), responseDTO.getBadgeTitle());
+                    assertEquals(badgeResponseDTO.getBadgeDate(), responseDTO.getBadgeDate());
+                    assertEquals(badgeResponseDTO.getVetId(), responseDTO.getVetId());
+                    assertEquals(badgeResponseDTO.getResourceBase64(), responseDTO.getResourceBase64());
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void getBadgeByInvalidVetId_shouldNotSucceed() throws NotFoundException{
+        String invalidVetId="123";
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(404)
+                .setBody("vetId not found: "+invalidVetId));
+
+        final BadgeResponseDTO badgeResponseDTO = vetsServiceClient.getBadgeByVetId(invalidVetId)
+                .onErrorResume(throwable -> {
+                    if (throwable instanceof NotFoundException && throwable.getMessage().equals("vetId not found: "+invalidVetId)) {
+                        return Mono.empty();
+                    } else {
+                        return Mono.error(throwable);
+                    }
+                })
+                .block();
+
+        assertNull(badgeResponseDTO);
+    }
+
+    @Test
+    void getBadgeByVetId_IllegalArgumentException400() throws IllegalArgumentException {
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(400)
+                .setBody("Something went wrong"));
+
+        final BadgeResponseDTO badgeResponseDTO = vetsServiceClient.getBadgeByVetId("cf25e779-548b-4788-aefa-6d58621c2feb")
+                .onErrorResume(throwable->{
+                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                        return Mono.empty();
+                    } else {
+                        return Mono.error(throwable);
+                    }
+                })
+                .block();
+
+        assertNull(badgeResponseDTO);
+    }
+
+    @Test
+    void getBadgeByVetId_IllegalArgumentException500() throws IllegalArgumentException {
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(500)
+                .setBody("Something went wrong"));
+
+        final BadgeResponseDTO badgeResponseDTO = vetsServiceClient.getBadgeByVetId("cf25e779-548b-4788-aefa-6d58621c2feb")
+                .onErrorResume(throwable->{
+                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                        return Mono.empty();
+                    } else {
+                        return Mono.error(throwable);
+                    }
+                })
+                .block();
+
+        assertNull(badgeResponseDTO);
     }
 
     @Test
@@ -1316,15 +1376,14 @@ class VetsServiceClientIntegrationTest {
 
         assertNull(empty);
     }
-    @Test
-    void deleteEducationsByEducationId() throws JsonProcessingException{
-        final String educationId = "794ac37f-1e07-43c2-93bc-61839e61d989";
 
+    @Test
+    void getAllEducationsOfVetId_ValidId() throws JsonProcessingException {
         prepareResponse(response -> response
                 .setHeader("Content-Type", "application/json")
                 .setBody("    {\n" +
                         "    \"educationId\": \"123456\",\n" +
-                        "    \"vetId\": \"deb1950c-3c56-45dc-874b-89e352695eb7\",\n" +
+                        "    \"vetId\": \"678910\",\n" +
                         "    \"schoolName\": \"University of Toronto\",\n" +
                         "    \"degree\": \"Doctor of Veterinary Medicine\",\n" +
                         "    \"fieldOfStudy\": \"Veterinary Medicine\",\n" +
@@ -1332,10 +1391,14 @@ class VetsServiceClientIntegrationTest {
                         "    \"endDate\": \"2019\"\n" +
                         "    }"));
 
-
-        final Mono<Void> empty = vetsServiceClient.deleteEducation(vetDTO.getVetId(), educationId);
-
-        assertEquals(empty.block(), null);
+        final EducationResponseDTO education = vetsServiceClient.getEducationsByVetId("678910").blockFirst();
+        assertNotNull(education.getEducationId());
+        assertEquals("678910", education.getVetId());
+        assertEquals("University of Toronto", education.getSchoolName());
+        assertEquals("Doctor of Veterinary Medicine", education.getDegree());
+        assertEquals("Veterinary Medicine", education.getFieldOfStudy());
+        assertEquals("2015", education.getStartDate());
+        assertEquals("2019", education.getEndDate());
     }
 
     @Test
@@ -1369,6 +1432,253 @@ class VetsServiceClientIntegrationTest {
         assertEquals(educationRequestDTO.getFieldOfStudy(), education.getFieldOfStudy());
         assertEquals(educationRequestDTO.getStartDate(), education.getStartDate());
         assertEquals(educationRequestDTO.getEndDate(), education.getEndDate());
+    }
+
+    @Test
+    void addEducationToVet_withInvalidVetId_shouldNotSucceed() throws ExistingVetNotFoundException {
+        EducationRequestDTO newEducation = EducationRequestDTO.builder()
+                .schoolName("McGill")
+                .vetId("678910")
+                .degree("Bachelor of Medicine")
+                .fieldOfStudy("Medicine")
+                .startDate("2010")
+                .endDate("2015")
+                .build();
+
+        String invalidVetId="123";
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(404)
+                .setBody("vetId not found: "+invalidVetId));
+
+        final EducationResponseDTO educationResponseDTO = vetsServiceClient.addEducationToAVet(invalidVetId, Mono.just(newEducation))
+                .onErrorResume(throwable -> {
+                    if (throwable instanceof ExistingVetNotFoundException && throwable.getMessage().equals("vetId not found: "+invalidVetId)) {
+                        return Mono.empty();
+                    } else {
+                        return Mono.error(throwable);
+                    }
+                })
+                .block();
+
+        assertNull(educationResponseDTO);
+    }
+
+    @Test
+    void addEducationToVet_IllegalArgumentException400() throws IllegalArgumentException {
+        EducationRequestDTO newEducation = EducationRequestDTO.builder()
+                .schoolName("McGill")
+                .vetId("678910")
+                .degree("Bachelor of Medicine")
+                .fieldOfStudy("Medicine")
+                .startDate("2010")
+                .endDate("2015")
+                .build();
+
+        String validVetId="678910";
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(400)
+                .setBody("Something went wrong"));
+
+        final EducationResponseDTO educationResponseDTO = vetsServiceClient.addEducationToAVet(validVetId, Mono.just(newEducation))
+                .onErrorResume(throwable -> {
+                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                        return Mono.empty();
+                    } else {
+                        return Mono.error(throwable);
+                    }
+                })
+                .block();
+
+        assertNull(educationResponseDTO);
+    }
+
+    @Test
+    void addEducationToVet_IllegalArgumentException500() throws IllegalArgumentException {
+        EducationRequestDTO newEducation = EducationRequestDTO.builder()
+                .schoolName("McGill")
+                .vetId("678910")
+                .degree("Bachelor of Medicine")
+                .fieldOfStudy("Medicine")
+                .startDate("2010")
+                .endDate("2015")
+                .build();
+
+        String validVetId="678910";
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(500)
+                .setBody("Something went wrong"));
+
+        final EducationResponseDTO educationResponseDTO = vetsServiceClient.addEducationToAVet(validVetId, Mono.just(newEducation))
+                .onErrorResume(throwable -> {
+                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                        return Mono.empty();
+                    } else {
+                        return Mono.error(throwable);
+                    }
+                })
+                .block();
+
+        assertNull(educationResponseDTO);
+    }
+
+    @Test
+    void updateEducationByVetIdAndEducationId() throws JsonProcessingException {
+        EducationRequestDTO updatedEducation = EducationRequestDTO.builder()
+                .schoolName("McGill")
+                .vetId("678910")
+                .degree("Bachelor of Medicine")
+                .fieldOfStudy("Medicine")
+                .startDate("2010")
+                .endDate("2015")
+                .build();
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setHeader("Content-Type", "application/json")
+                .setBody("    {\n" +
+                        "        \"educationId\": \"123456\",\n" +
+                        "        \"vetId\": \"678910\",\n" +
+                        "        \"schoolName\": \"McGill\",\n" +
+                        "        \"degree\": \"Bachelor of Medicine\",\n" +
+                        "        \"fieldOfStudy\": \"Medicine\",\n" +
+                        "        \"startDate\": \"2010\",\n" +
+                        "        \"endDate\": \"2015\"\n" +
+                        "    }"));
+
+        final EducationResponseDTO educationResponseDTO =
+                vetsServiceClient.updateEducationByVetIdAndByEducationId("678910","123456", Mono.just(updatedEducation)).block();
+        assertNotNull(educationResponseDTO);
+        assertNotNull(educationResponseDTO.getEducationId());
+        assertThat(educationResponseDTO.getVetId()).isEqualTo(updatedEducation.getVetId());
+        assertThat(educationResponseDTO.getSchoolName()).isEqualTo(updatedEducation.getSchoolName());
+        assertThat(educationResponseDTO.getDegree()).isEqualTo(updatedEducation.getDegree());
+        assertThat(educationResponseDTO.getFieldOfStudy()).isEqualTo(updatedEducation.getFieldOfStudy());
+        assertThat(educationResponseDTO.getStartDate()).isEqualTo(updatedEducation.getStartDate());
+        assertThat(educationResponseDTO.getEndDate()).isEqualTo(updatedEducation.getEndDate());
+    }
+
+    @Test
+    void updateEducationByInvalidVetIdAndValidEducationId_shouldNotSucceed() throws NotFoundException{
+        EducationRequestDTO updatedEducation = EducationRequestDTO.builder()
+                .schoolName("McGill")
+                .vetId("678910")
+                .degree("Bachelor of Medicine")
+                .fieldOfStudy("Medicine")
+                .startDate("2010")
+                .endDate("2015")
+                .build();
+
+        String invalidVetId="123";
+        String validEducationId="123456";
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(404)
+                .setBody("vetId not found: "+invalidVetId));
+
+        final EducationResponseDTO educationResponseDTO = vetsServiceClient.updateEducationByVetIdAndByEducationId(invalidVetId, validEducationId, Mono.just(updatedEducation))
+                .onErrorResume(throwable -> {
+                    if (throwable instanceof NotFoundException && throwable.getMessage().equals("Education not found for vetId: " + invalidVetId + " and educationId: " + validEducationId)) {
+                        return Mono.empty();
+                    } else {
+                        return Mono.error(throwable);
+                    }
+                })
+                .block();
+
+        assertNull(educationResponseDTO);
+    }
+
+    @Test
+    void updateEducationByValidVetIdAndValidEducationId_IllegalArgumentException400() throws IllegalArgumentException{
+        EducationRequestDTO updatedEducation = EducationRequestDTO.builder()
+                .schoolName("McGill")
+                .vetId("678910")
+                .degree("Bachelor of Medicine")
+                .fieldOfStudy("Medicine")
+                .startDate("2010")
+                .endDate("2015")
+                .build();
+
+        String validVetId="deb1950c-3c56-45dc-874b-89e352695eb7";
+        String validEducationId="123456";
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(400)
+                .setBody("Something went wrong"));
+
+        final EducationResponseDTO educationResponseDTO = vetsServiceClient.updateEducationByVetIdAndByEducationId(validVetId, validEducationId, Mono.just(updatedEducation))
+                .onErrorResume(throwable -> {
+                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                        return Mono.empty();
+                    } else {
+                        return Mono.error(throwable);
+                    }
+                })
+                .block();
+
+        assertNull(educationResponseDTO);
+    }
+
+    @Test
+    void updateEducationByValidVetIdAndValidEducationId_IllegalArgumentException500() throws IllegalArgumentException{
+        EducationRequestDTO updatedEducation = EducationRequestDTO.builder()
+                .schoolName("McGill")
+                .vetId("678910")
+                .degree("Bachelor of Medicine")
+                .fieldOfStudy("Medicine")
+                .startDate("2010")
+                .endDate("2015")
+                .build();
+
+        String validVetId="deb1950c-3c56-45dc-874b-89e352695eb7";
+        String validEducationId="123456";
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(500)
+                .setBody("Something went wrong"));
+
+        final EducationResponseDTO educationResponseDTO = vetsServiceClient.updateEducationByVetIdAndByEducationId(validVetId, validEducationId, Mono.just(updatedEducation))
+                .onErrorResume(throwable -> {
+                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                        return Mono.empty();
+                    } else {
+                        return Mono.error(throwable);
+                    }
+                })
+                .block();
+
+        assertNull(educationResponseDTO);
+    }
+
+    @Test
+    void deleteEducationsByEducationId() throws JsonProcessingException{
+        final String educationId = "794ac37f-1e07-43c2-93bc-61839e61d989";
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody("    {\n" +
+                        "    \"educationId\": \"123456\",\n" +
+                        "    \"vetId\": \"deb1950c-3c56-45dc-874b-89e352695eb7\",\n" +
+                        "    \"schoolName\": \"University of Toronto\",\n" +
+                        "    \"degree\": \"Doctor of Veterinary Medicine\",\n" +
+                        "    \"fieldOfStudy\": \"Veterinary Medicine\",\n" +
+                        "    \"startDate\": \"2015\",\n" +
+                        "    \"endDate\": \"2019\"\n" +
+                        "    }"));
+
+
+        final Mono<Void> empty = vetsServiceClient.deleteEducation(vetDTO.getVetId(), educationId);
+
+        assertEquals(empty.block(), null);
     }
 
     private void prepareResponse(Consumer<MockResponse> consumer) {
