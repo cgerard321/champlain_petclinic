@@ -65,8 +65,8 @@
                 Filters
             </div>
             <div class="d-flex flex-row gap-2">
-                <button style="color: gray;" class="border btn btn-light shadow-sm" type="submit">Search</button>
-                <button style="color: gray;" class="border btn btn-light shadow-sm" type="reset">Reset</button>
+                <button style="color: gray;" class="border btn btn-light shadow-sm" ng-click="$ctrl.searchOwnersByPaginationAndFilters()">Search</button>
+                <button style="color: gray;" class="border btn btn-light shadow-sm" ng-click="$ctrl.clearInputAndResetDefaultData()">Reset</button>
             </div>
         </div>
 
@@ -74,22 +74,22 @@
 
         <div class="d-flex gap-4 mb-3 flex-wrap">
             <div class="d-flex flex-column">
-                <input type="text" placeholder="Search...">
+                <input id="ownerIdInput" type="text" placeholder="Search...">
                 <label style="font-size: 13px; color: gray;">OwnerID</label>
             </div>
 
             <div class="d-flex flex-column">
-                <input type="text" placeholder="Search...">
+                <input id="firstNameInput" type="text" placeholder="Search...">
                 <label style="font-size: 13px; color: gray;">First Name</label>
             </div>
 
             <div class="d-flex flex-column">
-                <input type="text" placeholder="Search...">
+                <input id="lastNameInput" type="text" placeholder="Search...">
                 <label style="font-size: 13px; color: gray;">Last Name</label>
             </div>
 
             <div class="d-none d-sm-flex flex-column">
-                <input type="text" placeholder="Search...">
+                <input id="cityInput" type="text" placeholder="Search...">
                 <label style="font-size: 13px; color: gray;">City</label>
             </div>
 
@@ -97,15 +97,17 @@
 
         <div class="d-flex gap-4 mb-4 flex-wrap">
             <div class="d-none d-sm-flex flex-column">
-                <input type="text" placeholder="Search...">
+                <input id="phoneNumberInput" type="text" placeholder="Search...">
                 <label style="font-size: 13px; color: gray;">Phone Number</label>
             </div>
 
             <div class="d-flex flex-column">
-                <select style="width: 100px">
+                <select id="sizeInput" style="width: 100px">
+                    <option value=""> </option>
                     <option value="2">2</option>
                     <option value="5">5</option>
                     <option value="10">10</option>
+                    <option value="15">15</option>
                 </select>
                 <label style="font-size: 13px; color: gray;">Size</label>
             </div>
@@ -152,7 +154,7 @@
                 </li>
 
                 <li class="page-item">
-                    <a class="page-link text-dark" disabled>{{$ctrl.currentPageOnSite}}</a>
+                    <a class="page-link text-dark" disabled>Page-{{$ctrl.currentPageOnSite}}</a>
                 </li>
                 <li class="page-item">
                     <a class="page-link text-dark" aria-label="Next" ng-click="$ctrl.goNextPage()">
