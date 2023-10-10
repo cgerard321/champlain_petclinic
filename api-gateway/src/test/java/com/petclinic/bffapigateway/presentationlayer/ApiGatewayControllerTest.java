@@ -19,6 +19,7 @@ import com.petclinic.bffapigateway.dtos.Pets.PetTypeResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.*;
 import com.petclinic.bffapigateway.dtos.Visits.Status;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
+import com.petclinic.bffapigateway.dtos.Visits.*;
 import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import com.petclinic.bffapigateway.exceptions.GenericHttpException;
 import com.petclinic.bffapigateway.utils.Security.Filters.JwtTokenFilter;
@@ -651,7 +652,6 @@ class ApiGatewayControllerTest {
 
     @Test
     void createVet() {
-
         RegisterVet registerVet = RegisterVet.builder()
                 .userId(VET_ID)
                 .username("vet")
@@ -678,8 +678,6 @@ class ApiGatewayControllerTest {
                 .thenReturn((Mono.just(vetResponseDTO)));
 
 
-
-
         client
                 .post()
                 .uri("/api/gateway/users/vets")
@@ -689,7 +687,6 @@ class ApiGatewayControllerTest {
                 .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody();
-
     }
 
     @Test
@@ -983,14 +980,6 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$.pets[0].name").isEqualTo("Garfield")
                 .jsonPath("$.pets[0].visits[0].description").isEqualTo("First visit");
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-    }
-=======
-    }
->>>>>>> ceef8eff (VetDTO split in apigateway)
->>>>>>> 0ee1ef7f (Merge conflicts part 3)
 
     }*/
 //
@@ -1017,6 +1006,7 @@ class ApiGatewayControllerTest {
 //
 //        assertEquals(user.getId(), 1);
 //    }
+
 //
 //    @Test
 //    void createUser(){
@@ -1976,11 +1966,13 @@ class ApiGatewayControllerTest {
     /**
      * Visits Methods
      * **/
+
     String VISIT_ID = buildVisitResponseDTO().getVisitId();
 
 
 //todo fix
-    /*@Test
+    /*
+    @Test
     void shouldCreateAVisitWithOwnerInfo(){
         OwnerResponseDTO owner = new OwnerResponseDTO();
         VisitRequestDTO visit = VisitRequestDTO.builder()
@@ -2019,11 +2011,8 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$.status").isEqualTo(false)
                 .jsonPath("$.practitionerId").isEqualTo(1);
-<<<<<<< HEAD
+
     }
-=======
-    }
->>>>>>> ceef8eff (VetDTO split in apigateway)
 
 
     @Test
@@ -2039,8 +2028,6 @@ class ApiGatewayControllerTest {
         visit.setPractitionerId(1);
 
 
-<<<<<<< HEAD
-<<<<<<< HEAD
         when(visitsServiceClient.createVisitForPet(visit))
                 .thenReturn(Mono.just(visit));
 
@@ -2048,82 +2035,55 @@ class ApiGatewayControllerTest {
                 .uri("/api/gateway/visit/owners/{ownerId}/pets/{petId}/visits", owner.getId(), visit.getPetId())
                 .body(Mono.just(visit), VisitDetails.class)
                 .accept(MediaType.APPLICATION_JSON)
-=======
-=======
->>>>>>> 0ee1ef7f (Merge conflicts part 3)
- @Test
-=======
- @Test
->>>>>>> ceef8eff (VetDTO split in apigateway)
-    void shouldUpdateAVisitsById() {
-        VisitDetails visitDetailsToUpdate = VisitDetails.builder()
-                .visitDate(LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
-                .description("Charle's Richard dog has a paw infection.")
-                .petId("1")
-                .visitId("1")
-                .practitionerId(2)
-                .status(Status.UPCOMING)
-                .build();
 
-        when(visitsServiceClient.updateVisitForPet(visitDetailsToUpdate))
-                .thenReturn(Mono.just(visitDetailsToUpdate));
+    }*/
 
-        client.put()
-<<<<<<< HEAD
-                 .uri("/api/gateway/owners/*
-pets/{petId}/visits/{visitId}", "1", "1")
- .accept(MediaType.APPLICATION_JSON)
-=======
-                 .uri("/api/gateway/owners/*
-pets/{petId}/visits/{visitId}", "1", "1")
-               */
-/* .accept(MediaType.APPLICATION_JSON)
->>>>>>> ceef8eff (VetDTO split in apigateway)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(visitDetailsToUpdate)
->>>>>>> e83dff95 (Merge conflicts part 2)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-<<<<<<< HEAD
-                .jsonPath("$.visitId").isEqualTo(visit.getVisitId())
-                .jsonPath("$.petId").isEqualTo(1)
-                .jsonPath("$.date").isEqualTo("2021-12-12")
-                .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
-                .jsonPath("$.status").isEqualTo(false)
-                .jsonPath("$.practitionerId").isEqualTo(1);
-=======
-                .jsonPath("$.visitId").isEqualTo("1")
-                .jsonPath("$.petId").isEqualTo("1")
-                .jsonPath("$.description").isEqualTo("Charle's Richard dog has a paw infection.")
-                .jsonPath("$.status").isEqualTo(Status.UPCOMING.toString())
-                .jsonPath("$.practitionerId").isEqualTo(2);
-        Mockito.verify(visitsServiceClient,times(1)).updateVisitForPet(visitDetailsToUpdate);
-<<<<<<< HEAD
-    }
-<<<<<<< HEAD
->>>>>>> e83dff95 (Merge conflicts part 2)
-=======
-=======
-    }
->>>>>>> ceef8eff (VetDTO split in apigateway)
->>>>>>> 0ee1ef7f (Merge conflicts part 3)
 
-        client.delete()
-                .uri("/api/gateway/visits/{visitId}", visit.getVisitId())
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody();
-
-        assertEquals(null, visitsServiceClient.getVisitsForPet(visit.getPetId()));
-    }
-
-     */
 
 //    @Test
+//    void shouldDeleteAVisit() {
+//        VisitDetails visit = new VisitDetails();
+//        OwnerDetails owner = new OwnerDetails();
+//        owner.setId(1);
+//        visit.setVisitId(UUID.randomUUID().toString());
+//        visit.setPetId(1);
+//        visit.setDate("2021-12-12");
+//        visit.setDescription("Charle's Richard cat has a paw infection.");
+//        visit.setStatus(false);
+//        visit.setPractitionerId(1);
+//
+//
+//        when(visitsServiceClient.createVisitForPet(visit))
+//                .thenReturn(Mono.just(visit));
+//
+//        client.post()
+//                .uri("/api/gateway/visit/owners/{ownerId}/pets/{petId}/visits", owner.getId(), visit.getPetId())
+//                .body(Mono.just(visit), VisitDetails.class)
+//                .accept(MediaType.APPLICATION_JSON)
+//                .exchange()
+//                .expectStatus().isOk()
+//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+//                .expectBody()
+//                .jsonPath("$.visitId").isEqualTo(visit.getVisitId())
+//                .jsonPath("$.petId").isEqualTo(1)
+//                .jsonPath("$.date").isEqualTo("2021-12-12")
+//                .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
+//                .jsonPath("$.status").isEqualTo(false)
+//                .jsonPath("$.practitionerId").isEqualTo(1);
+//
+//        client.delete()
+//                .uri("/api/gateway/visits/{visitId}", visit.getVisitId())
+//                .accept(MediaType.APPLICATION_JSON)
+//                .exchange()
+//                .expectStatus()
+//                .isOk()
+//                .expectBody();
+//
+//        assertEquals(null, visitsServiceClient.getVisitsForPet(visit.getPetId()));
+//    }
+
+
+    //    @Test
 //    void shouldUpdateAVisitsById() {
 //        VisitDetails visitDetailsToUpdate = VisitDetails.builder()
 //                .visitDate(LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
@@ -2184,6 +2144,7 @@ pets/{petId}/visits/{visitId}", "1", "1")
         Mockito.verify(visitsServiceClient, times(1))
                 .updateStatusForVisitByVisitId(anyString(), anyString());
     }
+
     @Test
     void shouldGetAllVisits() {
         VisitResponseDTO visitResponseDTO = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", Status.UPCOMING);
@@ -2292,6 +2253,7 @@ pets/{petId}/visits/{visitId}", "1", "1")
     }
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 
 =======
 >>>>>>> e83dff95 (Merge conflicts part 2)
@@ -2299,6 +2261,10 @@ pets/{petId}/visits/{visitId}", "1", "1")
 =======
 >>>>>>> ceef8eff (VetDTO split in apigateway)
 >>>>>>> 0ee1ef7f (Merge conflicts part 3)
+=======
+
+    /*
+>>>>>>> 86926e9d2ebb0737289e63dcbeffc8a0232847c2
     @Test
     void shouldGetAVisitByPractitionerIdAndMonth(){
         VisitDetails visit = new VisitDetails();
@@ -2322,9 +2288,11 @@ pets/{petId}/visits/{visitId}", "1", "1")
                 .jsonPath("$[0].date").isEqualTo("2021-12-12")
                 .jsonPath("$[0].description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$[0].practitionerId").isEqualTo(1);
+
     }
 
      */
+
 
     @Test
     void getSingleVisit_Valid() {
@@ -2609,7 +2577,8 @@ pets/{petId}/visits/{visitId}", "1", "1")
 
     /**
      * End of Visits Methods
-     * **/
+     * */
+
 
 
 
@@ -3070,17 +3039,17 @@ pets/{petId}/visits/{visitId}", "1", "1")
     }
     private VetRequestDTO buildVetRequestDTO() {
         return VetRequestDTO.builder()
-                .vetId("181faeb5-c024-425c-9f08-663600008f06")
-                .firstName("Pauline")
-                .lastName("LeBlanc")
-                .email("skjfhf@gmail.com")
-                .phoneNumber("947-238-2847")
-                .resume("Just became a vet")
-                .workday(new HashSet<>())
-                .specialties(new HashSet<>())
-                .active(false)
-                .build();
-    }
+            .vetId("181faeb5-c024-425c-9f08-663600008f06")
+            .firstName("Pauline")
+            .lastName("LeBlanc")
+            .email("skjfhf@gmail.com")
+            .phoneNumber("947-238-2847")
+            .resume("Just became a vet")
+            .workday(new HashSet<>())
+            .specialties(new HashSet<>())
+            .active(false)
+            .build();
+            }
     private VetRequestDTO buildVetRequestDTO2() {
         return VetRequestDTO.builder()
                 .vetId("181faeb5-c024-425c-9f08-663600008f06")
@@ -3091,7 +3060,7 @@ pets/{petId}/visits/{visitId}", "1", "1")
                 .resume("Just became a vet")
                 .workday(new HashSet<>())
                 .specialties(new HashSet<>())
-                .active(true)
+                .active(false)
                 .build();
     }
 

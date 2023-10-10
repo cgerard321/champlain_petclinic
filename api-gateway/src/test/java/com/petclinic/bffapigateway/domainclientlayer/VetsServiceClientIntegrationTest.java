@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StreamUtils;
@@ -46,9 +45,12 @@ class VetsServiceClientIntegrationTest {
 
     VetRequestDTO vetRequestDTO = buildVetRequestDTO();
     VetResponseDTO vetResponseDTO = buildVetResponseDTO();
+<<<<<<< HEAD
 
     ClassPathResource cpr=new ClassPathResource("static/images/full_food_bowl.png");
 
+=======
+>>>>>>> 86926e9d2ebb0737289e63dcbeffc8a0232847c2
 
     @BeforeEach
     void setup() {
@@ -1396,6 +1398,12 @@ class VetsServiceClientIntegrationTest {
         assertEquals("2015", education.getStartDate());
         assertEquals("2019", education.getEndDate());
 
+<<<<<<< HEAD
+=======
+        final Mono<Void> empty = vetsServiceClient.deleteEducation(vetResponseDTO.getVetId(), educationId);
+
+        assertEquals(empty.block(), null);
+>>>>>>> 86926e9d2ebb0737289e63dcbeffc8a0232847c2
     }
 
     @Test

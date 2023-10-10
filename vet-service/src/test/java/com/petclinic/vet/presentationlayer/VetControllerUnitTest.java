@@ -300,8 +300,12 @@ class VetControllerUnitTest {
                 .jsonPath("$[0].lastName").isEqualTo(vetResponseDTO.getLastName())
                 .jsonPath("$[0].firstName").isEqualTo(vetResponseDTO.getFirstName())
                 .jsonPath("$[0].email").isEqualTo(vetResponseDTO.getEmail())
+<<<<<<< HEAD
                 .jsonPath("$[0].active").isEqualTo(vetResponseDTO.isActive())
                 .jsonPath("$[0].workday").isEqualTo(vetResponseDTO.getWorkday());
+=======
+                .jsonPath("$[0].active").isEqualTo(vetResponseDTO.isActive());
+>>>>>>> 86926e9d2ebb0737289e63dcbeffc8a0232847c2
 
         Mockito.verify(vetService, times(1))
                 .getAll();
@@ -326,7 +330,11 @@ class VetControllerUnitTest {
                 .jsonPath("$.lastName").isEqualTo(vet.getLastName())
                 .jsonPath("$.firstName").isEqualTo(vet.getFirstName())
                 .jsonPath("$.email").isEqualTo(vet.getEmail())
+<<<<<<< HEAD
                 .jsonPath("$.workday").isEqualTo(vet.getWorkday());
+=======
+                .jsonPath("$.active").isEqualTo(vet.isActive());
+>>>>>>> 86926e9d2ebb0737289e63dcbeffc8a0232847c2
 
         Mockito.verify(vetService, times(1))
                 .getVetByVetId(VET_ID);
@@ -375,8 +383,12 @@ class VetControllerUnitTest {
                 .jsonPath("$[0].lastName").isEqualTo(vetResponseDTO2.getLastName())
                 .jsonPath("$[0].firstName").isEqualTo(vetResponseDTO2.getFirstName())
                 .jsonPath("$[0].email").isEqualTo(vetResponseDTO2.getEmail())
+<<<<<<< HEAD
                 .jsonPath("$[0].active").isEqualTo(vetResponseDTO2.isActive())
                 .jsonPath("$[0].workday").isEqualTo(vetResponseDTO2.getWorkday());
+=======
+                .jsonPath("$[0].active").isEqualTo(vetResponseDTO2.isActive());
+>>>>>>> 86926e9d2ebb0737289e63dcbeffc8a0232847c2
 
         Mockito.verify(vetService, times(1))
                 .getVetByIsActive(vetResponseDTO2.isActive());
@@ -430,8 +442,12 @@ class VetControllerUnitTest {
                 .jsonPath("$.lastName").isEqualTo(vetResponseDTO.getLastName())
                 .jsonPath("$.firstName").isEqualTo(vetResponseDTO.getFirstName())
                 .jsonPath("$.email").isEqualTo(vetResponseDTO.getEmail())
+<<<<<<< HEAD
                 .jsonPath("$.active").isEqualTo(vetResponseDTO.isActive())
                 .jsonPath("$.workday").isEqualTo(vetResponseDTO.getWorkday());
+=======
+                .jsonPath("$.active").isEqualTo(vetResponseDTO.isActive());
+>>>>>>> 86926e9d2ebb0737289e63dcbeffc8a0232847c2
 
         Mockito.verify(vetService, times(1))
                 .updateVet(anyString(), any(Mono.class));
@@ -455,8 +471,12 @@ class VetControllerUnitTest {
                 .jsonPath("$[0].lastName").isEqualTo(vetResponseDTO.getLastName())
                 .jsonPath("$[0].firstName").isEqualTo(vetResponseDTO.getFirstName())
                 .jsonPath("$[0].email").isEqualTo(vetResponseDTO.getEmail())
+<<<<<<< HEAD
                 .jsonPath("$[0].active").isEqualTo(vetResponseDTO.isActive())
                 .jsonPath("$[0].workday").isEqualTo(vetResponseDTO.getWorkday());
+=======
+                .jsonPath("$[0].active").isEqualTo(vetResponseDTO.isActive());
+>>>>>>> 86926e9d2ebb0737289e63dcbeffc8a0232847c2
 
         Mockito.verify(vetService, times(1))
                 .getVetByIsActive(vetResponseDTO.isActive());

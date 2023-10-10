@@ -713,8 +713,12 @@ class VetControllerIntegrationTest {
                 .jsonPath("$[0].lastName").isEqualTo(vet.getLastName())
                 .jsonPath("$[0].firstName").isEqualTo(vet.getFirstName())
                 .jsonPath("$[0].email").isEqualTo(vet.getEmail())
+<<<<<<< HEAD
                 .jsonPath("$[0].active").isEqualTo(vet.isActive())
                 .jsonPath("$[0].workday").isEqualTo(vet.getWorkday());
+=======
+                .jsonPath("$[0].active").isEqualTo(vet.isActive());
+>>>>>>> 86926e9d2ebb0737289e63dcbeffc8a0232847c2
     }
 
     @Test
@@ -794,8 +798,12 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.lastName").isEqualTo(vetRequestDTO.getLastName())
                 .jsonPath("$.firstName").isEqualTo(vetRequestDTO.getFirstName())
                 .jsonPath("$.email").isEqualTo(vetRequestDTO.getEmail())
+<<<<<<< HEAD
                 .jsonPath("$.active").isEqualTo(vetRequestDTO.isActive())
                 .jsonPath("$.workday").isEqualTo(vetRequestDTO.getWorkday());
+=======
+                .jsonPath("$.active").isEqualTo(vetRequestDTO.isActive());
+>>>>>>> 86926e9d2ebb0737289e63dcbeffc8a0232847c2
 
     }
 
@@ -1035,8 +1043,12 @@ class VetControllerIntegrationTest {
                 .jsonPath("$[0].lastName").isEqualTo(vet2.getLastName())
                 .jsonPath("$[0].firstName").isEqualTo(vet2.getFirstName())
                 .jsonPath("$[0].email").isEqualTo(vet2.getEmail())
+<<<<<<< HEAD
                 .jsonPath("$[0].active").isEqualTo(vet2.isActive())
                 .jsonPath("$[0].workday").isEqualTo(vet2.getWorkday());
+=======
+                .jsonPath("$[0].active").isEqualTo(vet2.isActive());
+>>>>>>> 86926e9d2ebb0737289e63dcbeffc8a0232847c2
     }
 
     @Test
@@ -1061,7 +1073,11 @@ class VetControllerIntegrationTest {
                 .jsonPath("$[0].lastName").isEqualTo(vet.getLastName())
                 .jsonPath("$[0].firstName").isEqualTo(vet.getFirstName())
                 .jsonPath("$[0].email").isEqualTo(vet.getEmail())
+<<<<<<< HEAD
                 .jsonPath("$[0].workday").isEqualTo(vet.getWorkday());
+=======
+                .jsonPath("$[0].active").isEqualTo(vet.isActive());
+>>>>>>> 86926e9d2ebb0737289e63dcbeffc8a0232847c2
     }
 
 
