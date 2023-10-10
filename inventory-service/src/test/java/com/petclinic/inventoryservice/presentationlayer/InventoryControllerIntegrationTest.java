@@ -52,6 +52,8 @@ class InventoryControllerIntegrationTest {
             .type("Sales")
             .build();
 
+
+
     Inventory inventory1 = buildInventory("inventoryId_3", "internal", inventoryType1.getType(),"inventoryDescription_3");
 
     Inventory inventory2 = buildInventory("inventoryId_4", "sales", inventoryType2.getType() ,"inventoryDescription_4");
@@ -478,6 +480,25 @@ class InventoryControllerIntegrationTest {
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("Inventory id:" + invalidInventoryId + "and product:" + invalidProductId + "are not found");
     }
+
+
+
+    @Test
+    public void getProductInInventory_byProductId_ShouldSucceed() {
+
+
+        webTestClient.get()
+                .uri("/inventory/{inventoryId}/products/{productId}", "1", "123")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.productId").isEqualTo("123");
+    }
+
+
+
 
     @Test
     public void updateInventory_withInvalidInventoryId() {
