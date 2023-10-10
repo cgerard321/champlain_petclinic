@@ -56,58 +56,48 @@ angular.module('inventoryProductList')
             }
         }
 
-        $scope.searchProduct = function (productName, productQuantity, productPrice){
-
-            inventoryId = $stateParams.inventoryId;
-
+        $scope.searchProduct = function(productName, productQuantity, productPrice) {
+            var inventoryId = $stateParams.inventoryId;
             var queryString = '';
 
-            if (productName != null && productName !== '') {
+            if (productName) {
                 queryString += "productName=" + productName;
             }
 
-            if (productQuantity != null && productQuantity !== '') {
+            if (productQuantity) {
                 if (queryString !== '') {
                     queryString += "&";
                 }
                 queryString += "productQuantity=" + productQuantity;
             }
 
-            if (productPrice != null && productPrice !== '') {
+            if (productPrice) {
                 if (queryString !== '') {
                     queryString += "&";
                 }
                 queryString += "productPrice=" + productPrice;
             }
 
+            var apiUrl = "api/gateway/inventory/" + inventoryId + "/products";
             if (queryString !== '') {
-                $http.get("api/gateway/inventory/" + inventoryId + "/products?" + queryString)
-                    .then(function(resp) {
-                        self.inventoryProductList = resp.data;
-                        arr = resp.data;
-                    })
-                    .catch(function(error) {
-                        if (error.status === 404) {
-                            alert('Product not found.');
-                        } else {
-                            alert('An error occurred: ' + error.statusText);
-                        }
-                    });
-            } else {
-                $http.get("api/gateway/inventory/" + inventoryId + "/products")
-                    .then(function(resp) {
-                        self.inventoryProductList = resp.data;
-                        arr = resp.data;
-                    })
-                    .catch(function(error) {
-                        if (error.status === 404) {
-                            alert('Product not found.');
-                        } else {
-                            alert('An error occurred: ' + error.statusText);
-                        }
-                    });
+                apiUrl += "?" + queryString;
             }
+
+            $http.get(apiUrl)
+                .then(function(resp) {
+                    self.inventoryProductList = resp.data;
+                    // Just a heads-up: ensure 'arr' is declared elsewhere or handled accordingly
+                    arr = resp.data;
+                })
+                .catch(function(error) {
+                    if (error.status === 404) {
+                        alert('Product not found.');
+                    } else {
+                        alert('An error occurred: ' + error.statusText);
+                    }
+                });
         };
+
         $scope.deleteAllProducts = function () {
             let varIsConf = confirm('Are you sure you want to delete all products for this inventory?');
             if (varIsConf) {
@@ -125,6 +115,7 @@ angular.module('inventoryProductList')
                     });
             }
         };
+
 
         $scope.fetchProductList = function() {
             let inventoryId = $stateParams.inventoryId;

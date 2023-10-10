@@ -1,0 +1,67 @@
+
+<style>
+    h3.titleOwner {
+        color: #2f2b2b;
+        text-align: left;
+        padding-bottom: 20px;
+        padding-top: 20px;
+    }
+
+    .CurrentOwnersContainer {
+        margin: 20px;
+    }
+
+    .FilterOwnersLabel {
+        color: rgba(0, 0, 0, 0.5);
+    }
+
+    @media (max-width: 576px) {
+        /* Define styles for small screens */
+        .responsive-text {
+            font-size: 13px;
+        }
+    }
+
+    @media (min-width: 577px) and (max-width: 992px) {
+        /* Define styles for medium screens */
+        .responsive-text {
+            font-size: 15px;
+        }
+    }
+
+    @media (min-width: 993px) {
+        /* Define styles for large screens and above */
+        .responsive-text {
+            font-size: 17px;
+        }
+    }
+
+    .ownerTable thead tr th {
+        font-weight: 400;
+        color: gray;
+    }
+
+    input[type="Text"] {
+        font-size: 15px;
+    }
+</style>
+
+<div class="CurrentOwnersContainer" ng-app="petTypeList" ng-controller="PetTypeListController">
+    <h3 class="titleOwner">Current Pet Types</h3>
+    <table id="owner" class="table table-striped table-responsive ownerTable pb-3">
+        <thead class="bg-white">
+        <tr>
+            <th class="bg-white border">Pet Type ID</th>
+            <th class="bg-white border">Pet Type Name</th>
+            <th class="bg-white d-none d-sm-table-cell d-md-table-cell border">Description</th>
+        </tr>
+        </thead>
+        <tbody class="border">
+        <tr ng-repeat="petType in $ctrl.petTypes">
+            <td>{{petType.petTypeId }}</td>
+            <td class="responsive-text">{{ petType.name }}</td>
+            <td class="d-none d-sm-table-cell d-md-table-cell responsive-text">{{ petType.petTypeDescription }}</td>
+        </tr>
+        </tbody>
+    </table>
+</div>

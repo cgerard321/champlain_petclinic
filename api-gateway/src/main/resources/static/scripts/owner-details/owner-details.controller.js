@@ -1,104 +1,82 @@
 angular.module('ownerDetails')
-    .controller('OwnerDetailsController', ['$http', '$state', '$stateParams', '$scope', '$timeout', '$q', function ($http, $state, $stateParams, $scope, $timeout, $q) {
-        var self = this;
-        self.owner = {};
-        self.pet = {};
+    .controller('OwnerDetailsController', OwnerDetailsController);
 
-        self.getPetTypeName = function(petTypeId) {
-            switch(petTypeId) {
-                case '1':
-                    return 'Cat';
-                case '2':
-                    return 'Dog';
-                case '3':
-                    return 'Lizard';
-                case '4':
-                    return 'Snake';
-                case '5':
-                    return 'Bird';
-                case '6':
-                    return 'Hamster';
-            }
-        };
+OwnerDetailsController.$inject = ['$http', '$state', '$stateParams', '$scope', '$timeout', '$q'];
 
-$http.get('api/gateway/owners/' + $stateParams.ownerId).then(function (resp) {
-            self.owner = resp.data;
-            console.log(self.owner);
+function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $q) {
+    var vm = this; // Use 'vm' (short for ViewModel) instead of 'self'
 
-            var petPromises = self.owner.pets.map(function (pet) {
+    // Initialize properties
+    vm.owner = {};
+    vm.pet = {};
+    vm.pets = [];
+
+    // Function to get pet type name based on petTypeId
+    vm.getPetTypeName = function (petTypeId) {
+        switch (petTypeId) {
+            case '1':
+                return 'Cat';
+            case '2':
+                return 'Dog';
+            case '3':
+                return 'Lizard';
+            case '4':
+                return 'Snake';
+            case '5':
+                return 'Bird';
+            case '6':
+                return 'Hamster';
+            default:
+                return 'Unknown';
+        }
+    };
+
+    // Fetch owner data
+    $http.get('api/gateway/owners/' + $stateParams.ownerId)
+        .then(function (resp) {
+            vm.owner = resp.data;
+            console.log(vm.owner);
+
+            var petPromises = vm.owner.pets.map(function (pet) {
                 return $http.get('api/gateway/pets/' + pet.petId, { cache: false });
             });
 
-
             $q.all(petPromises).then(function (responses) {
-                self.owner.pets = responses.map(function (response) {
+                vm.owner.pets = responses.map(function (response) {
                     return response.data;
                 });
             });
+        })
+        .catch(function (error) {
+            console.error('Error fetching owner data:', error);
         });
 
-        /*$http.get('api/gateway/owners/' + $stateParams.ownerId).then(function (resp) {
-            self.owner = resp.data;
-            console.log(self.owner);
-        });
-        self.getPet = function (petId) {
-            $http.get('api/gateway/pets/' + petId).then(function (resp) {
-                self.pet = resp.data;
-                console.log(self.pet);
-            });
-        }*/
-        
-        self.deletePet = function (petId) {
-            var config = {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            };
-            $http.delete('api/gateway/pets/' + petId, config)
-                .then(function (resp) {
-                    console.log("Pet deleted successfully");
-
-                  /*  $http.get('api/gateway/owners/' + $stateParams.ownerId).then(function (resp) {
-                        self.owner = resp.data;
-                    });
-                   */
-
-                    self.owner.pets = self.owner.pets.filter(function(pet) {
-                        return pet.petId !== petId;
-                    });
-
-                    $scope.$applyAsync();
-                    // Handle the success appropriately
-                }).catch(function (error) {
-                console.error("Error deleting pet:", error);
-                // Handle the error appropriately
-            });
-        };
-
-        self.toggleActiveStatus = function (petId) {
-            $http.get('api/gateway/pets/' + petId + '?_=' + new Date().getTime(), { headers: { 'Cache-Control': 'no-cache' } }).then(function (resp) {
+    vm.toggleActiveStatus = function (petId) {
+        $http.get('api/gateway/pets/' + petId + '?_=' + new Date().getTime(), { headers: { 'Cache-Control': 'no-cache' } })
+            .then(function (resp) {
                 console.log("Pet id is " + petId);
                 console.log(resp.data);
-                self.pet = resp.data;
-                console.log("Pet id is " + self.pet.petId);
-                console.log(self.pet);
+                vm.pet = resp.data;
+                console.log("Pet id is " + vm.pet.petId);
+                console.log(vm.pet);
                 console.log("=====================================");
                 console.log(resp.data);
-                console.log("Active status before is:" + self.pet.isActive);
-                self.pet.isActive = self.pet.isActive === "true" ? "false" : "true";
-                console.log("Active status after is:" + self.pet.isActive);
+                console.log("Active status before is:" + vm.pet.isActive);
+                vm.pet.isActive = vm.pet.isActive === "true" ? "false" : "true";
+                console.log("Active status after is:" + vm.pet.isActive);
 
-                $http.patch('api/gateway/pet/' + petId, {
-                    isActive: self.pet.isActive
-                }, { headers: { 'Cache-Control': 'no-cache' } }).then(function (resp) {
-                    console.log("Pet active status updated successfully");
-                    self.pet = resp.data;
-                    $scope.$applyAsync()
-                    $timeout(); // Manually trigger the $digest cycle to update the UI
-                }).catch(function (error) {
-                    console.error("Error updating pet active status:", error);
-                    // Handle the error appropriately
-                });
+                return $http.patch('api/gateway/pet/' + petId, {
+                    isActive: vm.pet.isActive
+                }, { headers: { 'Cache-Control': 'no-cache' } });
+            })
+            .then(function (resp) {
+                console.log("Pet active status updated successfully");
+                vm.pet = resp.data;
+                $timeout(); // Manually trigger the $digest cycle to update the UI
+            })
+            .catch(function (error) {
+                console.error("Error updating pet active status:", error);
+                // Handle the error appropriately
             });
-        };
-    }]);
+    };
+}

@@ -24,6 +24,7 @@ public interface ProductInventoryService {
     Mono<InventoryTypeResponseDTO> addInventoryType(Mono<InventoryTypeRequestDTO> inventoryTypeRequestDTO);
 
     Flux<InventoryResponseDTO> searchInventories(Pageable page, String inventoryName, String inventoryType, String inventoryDescription);
+    Flux<InventoryTypeResponseDTO> getAllInventoryTypes();
 
     Mono<ProductResponseDTO> getProductByProductIdInInventory(String inventoryId, String productId);
 
