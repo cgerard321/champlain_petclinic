@@ -22,6 +22,7 @@ import com.petclinic.bffapigateway.utils.VetsEntityDtoUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.validation.annotation.Validated;
@@ -352,6 +353,14 @@ public class BFFApiGatewayController {
     public Mono<ResponseEntity<Resource>> addPhoto(@PathVariable String vetId, @PathVariable String photoName, @RequestBody Mono<Resource> image) {
         return vetsServiceClient.addPhotoToVet(vetId, photoName, image)
                 .map(r -> ResponseEntity.status(HttpStatus.CREATED).body(r))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    //Badge
+    @GetMapping("vets/{vetId}/badge")
+    public Mono<ResponseEntity<BadgeResponseDTO>> getBadgeByVetId(@PathVariable String vetId){
+        return vetsServiceClient.getBadgeByVetId(vetId)
+                .map(r->ResponseEntity.status(HttpStatus.OK).body(r))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 

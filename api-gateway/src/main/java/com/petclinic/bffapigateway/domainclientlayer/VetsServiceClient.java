@@ -71,6 +71,23 @@ public class VetsServiceClient {
                 .bodyToMono(Resource.class);
     }
 
+    //Badge
+    public Mono<BadgeResponseDTO> getBadgeByVetId(String vetId){
+        return webClientBuilder.build()
+                .get()
+                .uri(vetsServiceUrl + "/" + vetId+ "/badge")
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error->{
+                    HttpStatusCode statusCode = error.statusCode();
+                    if(statusCode.equals(HttpStatus.NOT_FOUND))
+                        return Mono.error(new NotFoundException("vetId not found: "+vetId));
+                    return Mono.error(new IllegalArgumentException("Something went wrong"));
+                })
+                .onStatus(HttpStatusCode::is5xxServerError, error->
+                        Mono.error(new IllegalArgumentException("Something went wrong"))
+                )
+                .bodyToMono(BadgeResponseDTO.class);
+    }
 
     //Ratings
     public Flux<RatingResponseDTO> getRatingsByVetId(String vetId) {

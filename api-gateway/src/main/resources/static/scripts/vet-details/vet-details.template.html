@@ -66,6 +66,22 @@
                 </div>
             </div>
             <div class="col-md-6">
+                <!-- Vet Badge Image -->
+                <div class="parent">
+                    <a style="text-decoration: none;"><span
+                            class="info v{{$ctrl.badge.vetId}}" ng-mouseenter="$ctrl.show($event,$ctrl.badge.vetId)"
+                            ng-mouseleave="$ctrl.hide($event,$ctrl.badge.vetId)">
+                        <img alt="Badge preview" src="data:image/*;base64, {{$ctrl.badge.resourceBase64}}" width="100" height="100" class="image1">
+                    </span></a>
+                </div>
+
+                <div class="modal m{{$ctrl.badge.vetId}} modalOff">
+                    <!--<span class="modal_image"><img ng-if="$ctrl.badge.resourceBase64 != null" src="data:image/png;base64,{{$ctrl.badge.resourceBase64}}"/><img
+                            ng-if="$ctrl.badge.resourceBase64 == null" src="images/empty_food_bowl.jpg"/></span>-->
+                    <span class="modal_title"><b>Title:</b> {{$ctrl.badge.badgeTitle}}</span>
+                    <span class="modal_date"><b>Date:</b> {{$ctrl.badge.badgeDate}}</span>
+                </div>
+
                 <!-- Vet Profile Image -->
                 <div class="parent">
                     <img alt="Profile picture preview" src="data:image/png;base64, {{$ctrl.vetPhoto.photo}}" width="150" height="150" class="image1">

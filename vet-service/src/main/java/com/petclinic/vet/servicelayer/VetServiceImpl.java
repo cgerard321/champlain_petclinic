@@ -11,14 +11,23 @@ package com.petclinic.vet.servicelayer;
   * Ticket: feat(VVS-CPC-553): add veterinarian
  */
 
+import com.petclinic.vet.dataaccesslayer.Vet;
 import com.petclinic.vet.dataaccesslayer.VetRepository;
+import com.petclinic.vet.dataaccesslayer.badges.Badge;
+import com.petclinic.vet.dataaccesslayer.badges.BadgeRepository;
+import com.petclinic.vet.dataaccesslayer.badges.BadgeTitle;
 import com.petclinic.vet.exceptions.InvalidInputException;
 import com.petclinic.vet.exceptions.NotFoundException;
 import com.petclinic.vet.util.EntityDtoUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StreamUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.io.IOException;
+import java.time.LocalDate;
 
 
 @Service
@@ -26,6 +35,7 @@ import reactor.core.publisher.Mono;
 public class VetServiceImpl implements VetService {
 
     private final VetRepository vetRepository;
+    private final BadgeRepository badgeRepository;
 
     @Override
     public Flux<VetDTO> getAll() {
@@ -52,7 +62,20 @@ public class VetServiceImpl implements VetService {
                     return Mono.just(requestDTO);
                 })
                 .map(vetDTO -> EntityDtoUtil.toEntity(vetDTO))
-                .flatMap((vetRepository::save))
+                .flatMap(newVet -> {
+                    Badge badge = Badge.builder()
+                            .vetId(newVet.getVetId())
+                            .badgeTitle(BadgeTitle.VALUED)
+                            .badgeDate(String.valueOf(LocalDate.now().getYear()))
+                            .data(loadBadgeImage("images/empty_food_bowl.png"))
+                            .build();
+
+                    //combine results of two Mono operations, creating a Tuple2
+                    //extract vet from it
+                    return badgeRepository.save(badge)
+                            .zipWith(vetRepository.save(newVet))
+                            .map(tuple -> tuple.getT2());
+                })
                 .map(EntityDtoUtil::toDTO);
     }
 
@@ -108,6 +131,15 @@ public class VetServiceImpl implements VetService {
         return vetRepository.findVetByVetId(vetId)
                 .switchIfEmpty(Mono.error(new NotFoundException("No vet with this vetId was found: " + vetId)))
                 .flatMap(vetRepository::delete);
+    }
+
+    private byte[] loadBadgeImage(String imagePath) {
+        try {
+            ClassPathResource cpr = new ClassPathResource(imagePath);
+            return StreamUtils.copyToByteArray(cpr.getInputStream());
+        } catch (IOException io) {
+            throw new InvalidInputException("Picture does not exist: " + io.getMessage());
+        }
     }
 
 
