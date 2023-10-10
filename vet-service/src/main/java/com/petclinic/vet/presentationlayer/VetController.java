@@ -65,7 +65,7 @@ public class VetController {
 
     @DeleteMapping("{vetId}/ratings/{ratingId}")
     public Mono<ResponseEntity<Void>> deleteRatingByRatingId(@PathVariable String vetId,
-                                             @PathVariable String ratingId){
+                                                             @PathVariable String ratingId){
         return ratingService.deleteRatingByRatingId(vetId, ratingId)
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
@@ -110,46 +110,46 @@ public class VetController {
                .defaultIfEmpty(ResponseEntity.notFound().build());
    }*/
 
-   //Vets
+    //Vets
     @GetMapping()
-    public Flux<VetDTO> getAllVets() {
+    public Flux<VetResponseDTO> getAllVets() {
         return vetService.getAll();
     }
 
     @GetMapping("{vetId}")
-    public Mono<ResponseEntity<VetDTO>> getVetByVetId(@PathVariable String vetId) {
+    public Mono<ResponseEntity<VetResponseDTO>> getVetByVetId(@PathVariable String vetId) {
         return vetService.getVetByVetId(EntityDtoUtil.verifyId(vetId))
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/vetBillId/{vetBillId}")
-    public Mono<ResponseEntity<VetDTO>> getVetByBillId(@PathVariable String vetBillId) {
+    public Mono<ResponseEntity<VetResponseDTO>> getVetByBillId(@PathVariable String vetBillId) {
         return vetService.getVetByVetBillId(EntityDtoUtil.verifyId(vetBillId))
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/active")
-    public Flux<VetDTO> getActiveVets() {
+    public Flux<VetResponseDTO> getActiveVets() {
         return vetService.getVetByIsActive(true);
     }
 
     @GetMapping("/inactive")
-    public Flux<VetDTO> getInactiveVets() {
+    public Flux<VetResponseDTO> getInactiveVets() {
         return vetService.getVetByIsActive(false);
     }
 
     @PostMapping
-    public Mono<ResponseEntity<VetDTO>> insertVet(@RequestBody Mono<VetDTO> vetDTOMono) {
-        return vetService.insertVet(vetDTOMono)
+    public Mono<ResponseEntity<VetResponseDTO>> insertVet(@RequestBody Mono<VetRequestDTO> vetRequestDTOMono) {
+        return vetService.insertVet(vetRequestDTOMono)
                 .map(v->ResponseEntity.status(HttpStatus.CREATED).body(v))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
     @PutMapping("{vetId}")
-    public Mono<ResponseEntity<VetDTO>> updateVetByVetId(@PathVariable String vetId, @RequestBody Mono<VetDTO> vetDTOMono) {
-        return vetService.updateVet(EntityDtoUtil.verifyId(vetId), vetDTOMono)
+    public Mono<ResponseEntity<VetResponseDTO>> updateVetByVetId(@PathVariable String vetId, @RequestBody Mono<VetRequestDTO> vetRequestDTOMono) {
+        return vetService.updateVet(EntityDtoUtil.verifyId(vetId), vetRequestDTOMono)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }

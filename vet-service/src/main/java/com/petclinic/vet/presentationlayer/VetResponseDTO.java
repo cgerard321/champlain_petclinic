@@ -1,39 +1,25 @@
-package com.petclinic.vet.servicelayer;
-/**
- @author Kamilah Hatteea & Brandon Levis : Vet-Service
-  * Worked together with (Code with Friends) on IntelliJ IDEA
-  * <p>
-  * User: @Kamilah Hatteea
-  * Date: 2022-09-22
-  * Ticket: feat(VVS-CPC-554): edit veterinarian
-  * User: Brandon Levis
-  * Date: 2022-09-22
-  * Ticket: feat(VVS-CPC-553): add veterinarian
- */
+package com.petclinic.vet.presentationlayer;
 
 import com.petclinic.vet.dataaccesslayer.Workday;
+import com.petclinic.vet.servicelayer.SpecialtyDTO;
 import lombok.*;
 
 import java.util.Set;
-
 
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class VetDTO {
+public class VetResponseDTO {
     private String vetId;
     private String vetBillId;
     private String firstName;
     private String lastName;
     private String email;
     private String phoneNumber;
-    private String imageId;
     private String resume;
     private Set<Workday> workday;
     private boolean active;
     private Set<SpecialtyDTO> specialties;
-
-
 }
