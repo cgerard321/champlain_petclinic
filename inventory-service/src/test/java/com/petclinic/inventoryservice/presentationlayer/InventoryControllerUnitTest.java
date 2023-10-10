@@ -34,7 +34,7 @@ class InventoryControllerUnitTest {
 
 
     ProductResponseDTO productResponseDTO = ProductResponseDTO.builder()
-            .id("1")
+           // .id("1")
             .inventoryId("1")
             .productId("123F567C9")
             .productName("Benzodiazepines")
@@ -303,6 +303,27 @@ class InventoryControllerUnitTest {
                 });
     }
 
+
+
+    @Test
+    void getProductInInventory_withValidInventoryId_andValidProductId_shouldSucceed() {
+        when(productInventoryService.getProductByProductIdInInventory("1" , "123F567C9")
+                .thenReturn(Flux.fromIterable(productResponseDTOS)));
+
+        webTestClient.get()
+                .uri("/inventory/{inventoryId}/products{productId}",
+                        "product123" , "123F567C9" )
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(ProductResponseDTO.class)
+                .value(responseDTOs -> {
+                    assertNotNull(responseDTOs);
+                    assertEquals(productResponseDTOS.size(), responseDTOs.size());
+                });
+    }
+
     @Test
     void getInventoryByInventoryId_ValidIdShouldSucceed(){
         //arrange
@@ -338,6 +359,46 @@ class InventoryControllerUnitTest {
     }
 
 
+
+    @Test
+    void getProductInInventoryWithValidInventoryIdAndProductId_ShouldSucceed() {
+        // Arrange
+        String inventoryId = "1";
+        String productId = "123F567C9";
+
+        ProductResponseDTO productInventoryResponseDTO = ProductResponseDTO.builder()
+                .inventoryId(inventoryId)
+                .productId(productId)
+                .productName("Pet Food")
+                .productDescription("High-quality pet food")
+                .build();
+
+        when(productInventoryService.getProductByProductIdInInventory(inventoryId, productId))
+                .thenReturn(Mono.just(productInventoryResponseDTO));
+
+        // Act and Assert
+        webTestClient
+                .get()
+                .uri("/inventory/{inventoryId}/product/{productId}", inventoryId, productId)
+                .accept(APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(APPLICATION_JSON)
+                .expectBody(ProductResponseDTO.class)
+                .value(dto -> {
+                    assertNotNull(dto);
+                    assertEquals(inventoryId, dto.getInventoryId());
+                    assertEquals(productId, dto.getProductId());
+                    assertEquals(productInventoryResponseDTO.getProductName(), dto.getProductName());
+                    assertEquals(productInventoryResponseDTO.getProductDescription(), dto.getProductDescription());
+                    assertEquals(productInventoryResponseDTO.getProductPrice(), dto.getProductPrice());
+                    assertEquals(productInventoryResponseDTO.getProductQuantity(), dto.getProductQuantity());
+                    assertEquals(productInventoryResponseDTO.getProductSalePrice(), dto.getProductSalePrice());
+                });
+
+        verify(productInventoryService, times(1))
+                .getProductByProductIdInInventory(inventoryId, productId);
+    }
 
     @Test
     void getInventoryByInvalidInventoryId_ReturnNotFound() {

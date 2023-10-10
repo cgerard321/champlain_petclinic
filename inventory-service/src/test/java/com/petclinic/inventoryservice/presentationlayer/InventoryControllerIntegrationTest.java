@@ -58,6 +58,7 @@ class InventoryControllerIntegrationTest {
 
     Inventory inventory2 = buildInventory("inventoryId_4", "sales", inventoryType2.getType() ,"inventoryDescription_4");
 
+    Product product1 = buildProduct("productId1", "inventoryId_3" , "drug" , "drug", 18.00, 30.00, 3);
 
     @BeforeEach
     public void dbSetup() {
@@ -488,13 +489,13 @@ class InventoryControllerIntegrationTest {
 
 
         webTestClient.get()
-                .uri("/inventory/{inventoryId}/products/{productId}", "1", "123")
+                .uri("/inventory/{inventoryId}/products/{productId}", "1", "123F567C9")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.productId").isEqualTo("123");
+                .jsonPath("$.productId").isEqualTo("123F567C9");
     }
 
 
@@ -577,13 +578,14 @@ class InventoryControllerIntegrationTest {
                 .build();
     }
 
-    private Product buildProduct(String productId, String inventoryId, String productName, String productDescription, Double productPrice, Integer productQuantity) {
+    private Product buildProduct(String productId, String inventoryId, String productName, String productDescription, Double productPrice, Double SalePrice,  Integer productQuantity) {
         return Product.builder()
                 .productId(productId)
                 .inventoryId(inventoryId)
                 .productName(productName)
                 .productDescription(productDescription)
                 .productPrice(productPrice)
+                .productSalePrice(SalePrice)
                 .productQuantity(productQuantity)
                 .build();
     }
