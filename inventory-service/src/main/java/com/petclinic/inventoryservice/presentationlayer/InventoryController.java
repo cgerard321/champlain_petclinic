@@ -55,13 +55,7 @@ public class InventoryController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-/*
-    @GetMapping()
-    public Flux<InventoryResponseDTO> getAllInventory(){
-        return productInventoryService.getAllInventory();
-    }
 
- */
 @GetMapping()
 public Flux<InventoryResponseDTO> searchInventories(
         @RequestParam Optional<Integer> page, @RequestParam Optional<Integer> size,
@@ -132,6 +126,11 @@ public Flux<InventoryResponseDTO> searchInventories(
         return productInventoryService.addInventoryType(inventoryTypeRequestDTO)
                 .map(inventoryTypeResponseDTO -> ResponseEntity.status(HttpStatus.CREATED).body(inventoryTypeResponseDTO))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/type")
+    public Flux<InventoryTypeResponseDTO> getAllInventoryTypes(){
+    return productInventoryService.getAllInventoryTypes();
     }
 
 }

@@ -19,4 +19,7 @@ public interface ProductRepository extends ReactiveMongoRepository<Product, Stri
 
     Mono<Boolean> deleteByInventoryId(String inventoryId);
 
+   //Regex
+    Flux<Product> findAllProductsByInventoryIdAndProductNameRegex(String inventoryId, String regex);
+
 }
