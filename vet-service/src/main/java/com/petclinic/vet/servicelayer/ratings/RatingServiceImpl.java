@@ -9,8 +9,8 @@ import com.petclinic.vet.exceptions.NotFoundException;
 
 import com.petclinic.vet.exceptions.InvalidInputException;
 
+import com.petclinic.vet.presentationlayer.VetResponseDTO;
 import com.petclinic.vet.servicelayer.VetAverageRatingDTO;
-import com.petclinic.vet.servicelayer.VetDTO;
 import com.petclinic.vet.util.EntityDtoUtil;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -118,8 +118,8 @@ public class RatingServiceImpl implements RatingService {
                 .take(3)
                 .publishOn(Schedulers.boundedElastic())
                 .flatMap(tuple -> {
-                    Mono<VetDTO> vetMono = vetRepository.findVetByVetId(tuple.getT1())
-                            .map(EntityDtoUtil::toDTO);
+                    Mono<VetResponseDTO> vetMono = vetRepository.findVetByVetId(tuple.getT1())
+                            .map(EntityDtoUtil::vetEntityToResponseDTO);
 
                     return vetMono.map(vetDTO ->
                             new VetAverageRatingDTO(vetDTO, tuple.getT1(), tuple.getT2()));

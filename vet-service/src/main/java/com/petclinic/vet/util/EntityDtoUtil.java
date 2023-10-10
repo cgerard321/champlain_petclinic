@@ -18,6 +18,8 @@ import com.petclinic.vet.dataaccesslayer.ratings.Rating;
 import com.petclinic.vet.dataaccesslayer.Specialty;
 import com.petclinic.vet.dataaccesslayer.*;
 import com.petclinic.vet.exceptions.InvalidInputException;
+import com.petclinic.vet.presentationlayer.VetRequestDTO;
+import com.petclinic.vet.presentationlayer.VetResponseDTO;
 import com.petclinic.vet.servicelayer.*;
 import com.petclinic.vet.servicelayer.badges.BadgeResponseDTO;
 import com.petclinic.vet.servicelayer.education.EducationRequestDTO;
@@ -38,15 +40,14 @@ public class EntityDtoUtil {
     @Generated
     public EntityDtoUtil(){}
 
-    public static VetDTO toDTO(Vet vet) {
-        VetDTO dto = new VetDTO();
+    public static VetResponseDTO vetEntityToResponseDTO(Vet vet) {
+        VetResponseDTO dto = new VetResponseDTO();
         dto.setVetId(vet.getVetId());
         dto.setVetBillId(vet.getVetBillId());
         dto.setFirstName(vet.getFirstName());
         dto.setLastName(vet.getLastName());
         dto.setEmail(vet.getEmail());
         dto.setPhoneNumber(vet.getPhoneNumber());
-        dto.setImageId(vet.getImageId());
         dto.setResume(vet.getResume());
         dto.setWorkday(vet.getWorkday());
         dto.setActive(vet.isActive());
@@ -54,7 +55,7 @@ public class EntityDtoUtil {
         return dto;
     }
 
-    public static Vet toEntity(VetDTO dto) {
+    public static Vet vetRequestDtoToEntity(VetRequestDTO dto) {
         Vet vet = new Vet();
         vet.setVetId(dto.getVetId());
         vet.setVetBillId(dto.getVetBillId());
@@ -62,7 +63,6 @@ public class EntityDtoUtil {
         vet.setLastName(dto.getLastName());
         vet.setEmail(dto.getEmail());
         vet.setPhoneNumber(dto.getPhoneNumber());
-        vet.setImageId(dto.getImageId());
         vet.setResume(dto.getResume());
         vet.setWorkday(dto.getWorkday());
         vet.setActive(dto.isActive());

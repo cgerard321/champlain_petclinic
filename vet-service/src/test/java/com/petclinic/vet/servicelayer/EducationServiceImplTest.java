@@ -157,7 +157,6 @@ class EducationServiceImplTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
-                .imageId("kjd")
                 .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)

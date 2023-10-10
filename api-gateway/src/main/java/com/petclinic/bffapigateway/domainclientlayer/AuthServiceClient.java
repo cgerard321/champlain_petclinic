@@ -3,7 +3,8 @@ package com.petclinic.bffapigateway.domainclientlayer;
 import com.petclinic.bffapigateway.dtos.Auth.*;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
-import com.petclinic.bffapigateway.dtos.Vets.VetDTO;
+import com.petclinic.bffapigateway.dtos.Vets.VetRequestDTO;
+import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
 import com.petclinic.bffapigateway.exceptions.*;
 import com.petclinic.bffapigateway.utils.Rethrower;
 import lombok.extern.slf4j.Slf4j;
@@ -102,7 +103,7 @@ public class AuthServiceClient {
         }
 
 
-        public Mono<VetDTO> createVetUser(Mono<RegisterVet> model){
+        public Mono<VetResponseDTO> createVetUser(Mono<RegisterVet> model){
 
             String uuid = UUID.randomUUID().toString();
             log.info("UUID: " + uuid);
@@ -120,11 +121,10 @@ public class AuthServiceClient {
                         )
                         .bodyToMono(UserPasswordLessDTO.class)
                         .flatMap(userDetails -> {
-                                    VetDTO vetDTO = VetDTO.builder()
+                                    VetRequestDTO vetDTO = VetRequestDTO.builder()
                                             .specialties(registerVet.getVet().getSpecialties())
                                             .active(registerVet.getVet().isActive())
                                             .email(registerVet.getEmail())
-                                            .image(registerVet.getVet().getImage())
                                             .resume(registerVet.getVet().getResume())
                                             .workday(registerVet.getVet().getWorkday())
                                             .phoneNumber(registerVet.getVet().getPhoneNumber())

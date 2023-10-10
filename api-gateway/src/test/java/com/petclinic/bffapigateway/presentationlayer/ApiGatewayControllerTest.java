@@ -38,7 +38,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -46,7 +45,6 @@ import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.util.StreamUtils;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -54,8 +52,6 @@ import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import javax.print.attribute.standard.Media;
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -97,12 +93,14 @@ class ApiGatewayControllerTest {
     @Mock
     private CustomersServiceClient customersServiceClientMock;
 
-    VetDTO vetDTO = buildVetDTO();
-    VetDTO vetDTO2 = buildVetDTO2();
-    String VET_ID = buildVetDTO().getVetId();
+    VetResponseDTO vetResponseDTO = buildVetResponseDTO();
+    VetRequestDTO vetRequestDTO = buildVetRequestDTO();
+    VetResponseDTO vetResponseDTO2 = buildVetResponseDTO2();
+    VetRequestDTO vetRequestDTO2 = buildVetRequestDTO2();
+    String VET_ID = buildVetResponseDTO().getVetId();
     String INVALID_VET_ID = "mjbedf";
 
-    ClassPathResource cpr=new ClassPathResource("static/images/full_food_bowl.png");
+
 
     @Test
     void getAllRatingsForVet_ValidId() {
@@ -238,7 +236,7 @@ class ApiGatewayControllerTest {
 
 
 
-   @Test
+    @Test
     void addRatingToAVet_withRateDescriptionAndPredefinedDesc_ShouldSetRateDescriptionToPredefinedDesc() {
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
                 .vetId(VET_ID)
@@ -543,7 +541,7 @@ class ApiGatewayControllerTest {
     @Test
     void getAllVets() {
         when(vetsServiceClient.getVets())
-                .thenReturn(Flux.just(vetDTO));
+                .thenReturn(Flux.just(vetResponseDTO));
 
         client
                 .get()
@@ -553,18 +551,17 @@ class ApiGatewayControllerTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
-                .expectBodyList(VetDTO.class)
+                .expectBodyList(VetResponseDTO.class)
                 .value(responseDTO -> {
                     Assertions.assertNotNull(responseDTO);
                     Assertions.assertNotNull(responseDTO.get(0).getVetId());
-                    assertThat(responseDTO.get(0).getVetId()).isEqualTo(vetDTO.getVetId());
-                    assertThat(responseDTO.get(0).getResume()).isEqualTo(vetDTO.getResume());
-                    assertThat(responseDTO.get(0).getLastName()).isEqualTo(vetDTO.getLastName());
-                    assertThat(responseDTO.get(0).getFirstName()).isEqualTo(vetDTO.getFirstName());
-                    assertThat(responseDTO.get(0).getEmail()).isEqualTo(vetDTO.getEmail());
-                    assertThat(responseDTO.get(0).getImage()).isNotEmpty();
-                    assertThat(responseDTO.get(0).isActive()).isEqualTo(vetDTO.isActive());
-                    assertThat(responseDTO.get(0).getWorkday()).isEqualTo(vetDTO.getWorkday());
+                    assertThat(responseDTO.get(0).getVetId()).isEqualTo(vetResponseDTO.getVetId());
+                    assertThat(responseDTO.get(0).getResume()).isEqualTo(vetResponseDTO.getResume());
+                    assertThat(responseDTO.get(0).getLastName()).isEqualTo(vetResponseDTO.getLastName());
+                    assertThat(responseDTO.get(0).getFirstName()).isEqualTo(vetResponseDTO.getFirstName());
+                    assertThat(responseDTO.get(0).getEmail()).isEqualTo(vetResponseDTO.getEmail());
+                    assertThat(responseDTO.get(0).isActive()).isEqualTo(vetResponseDTO.isActive());
+                    assertThat(responseDTO.get(0).getWorkday()).isEqualTo(vetResponseDTO.getWorkday());
                 });
         Mockito.verify(vetsServiceClient, times(1))
                 .getVets();
@@ -573,7 +570,7 @@ class ApiGatewayControllerTest {
     @Test
     void getVetByVetId() {
         when(vetsServiceClient.getVetByVetId(anyString()))
-                .thenReturn(Mono.just(vetDTO));
+                .thenReturn(Mono.just(vetResponseDTO));
 
         client
                 .get()
@@ -583,13 +580,12 @@ class ApiGatewayControllerTest {
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.vetId").isEqualTo(vetDTO.getVetId())
-                .jsonPath("$.resume").isEqualTo(vetDTO.getResume())
-                .jsonPath("$.lastName").isEqualTo(vetDTO.getLastName())
-                .jsonPath("$.firstName").isEqualTo(vetDTO.getFirstName())
-                .jsonPath("$.email").isEqualTo(vetDTO.getEmail())
-                .jsonPath("$.image").isNotEmpty()
-                .jsonPath("$.active").isEqualTo(vetDTO.isActive());
+                .jsonPath("$.vetId").isEqualTo(vetResponseDTO.getVetId())
+                .jsonPath("$.resume").isEqualTo(vetResponseDTO.getResume())
+                .jsonPath("$.lastName").isEqualTo(vetResponseDTO.getLastName())
+                .jsonPath("$.firstName").isEqualTo(vetResponseDTO.getFirstName())
+                .jsonPath("$.email").isEqualTo(vetResponseDTO.getEmail())
+                .jsonPath("$.active").isEqualTo(vetResponseDTO.isActive());
 
         Mockito.verify(vetsServiceClient, times(1))
                 .getVetByVetId(VET_ID);
@@ -598,7 +594,7 @@ class ApiGatewayControllerTest {
     @Test
     void getActiveVets() {
         when(vetsServiceClient.getActiveVets())
-                .thenReturn(Flux.just(vetDTO2));
+                .thenReturn(Flux.just(vetResponseDTO2));
 
         client
                 .get()
@@ -608,18 +604,17 @@ class ApiGatewayControllerTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
-                .expectBodyList(VetDTO.class)
+                .expectBodyList(VetResponseDTO.class)
                 .value(responseDTO -> {
                     Assertions.assertNotNull(responseDTO);
                     Assertions.assertNotNull(responseDTO.get(0).getVetId());
-                    assertThat(responseDTO.get(0).getVetId()).isEqualTo(vetDTO2.getVetId());
-                    assertThat(responseDTO.get(0).getResume()).isEqualTo(vetDTO2.getResume());
-                    assertThat(responseDTO.get(0).getLastName()).isEqualTo(vetDTO2.getLastName());
-                    assertThat(responseDTO.get(0).getFirstName()).isEqualTo(vetDTO2.getFirstName());
-                    assertThat(responseDTO.get(0).getEmail()).isEqualTo(vetDTO2.getEmail());
-                    assertThat(responseDTO.get(0).getImage()).isNotEmpty();
-                    assertThat(responseDTO.get(0).isActive()).isEqualTo(vetDTO2.isActive());
-                    assertThat(responseDTO.get(0).getWorkday()).isEqualTo(vetDTO2.getWorkday());
+                    assertThat(responseDTO.get(0).getVetId()).isEqualTo(vetResponseDTO2.getVetId());
+                    assertThat(responseDTO.get(0).getResume()).isEqualTo(vetResponseDTO2.getResume());
+                    assertThat(responseDTO.get(0).getLastName()).isEqualTo(vetResponseDTO2.getLastName());
+                    assertThat(responseDTO.get(0).getFirstName()).isEqualTo(vetResponseDTO2.getFirstName());
+                    assertThat(responseDTO.get(0).getEmail()).isEqualTo(vetResponseDTO2.getEmail());
+                    assertThat(responseDTO.get(0).isActive()).isEqualTo(vetResponseDTO2.isActive());
+                    assertThat(responseDTO.get(0).getWorkday()).isEqualTo(vetResponseDTO2.getWorkday());
                 });
         Mockito.verify(vetsServiceClient, times(1))
                 .getActiveVets();
@@ -628,7 +623,7 @@ class ApiGatewayControllerTest {
     @Test
     void getInactiveVets() {
         when(vetsServiceClient.getInactiveVets())
-                .thenReturn(Flux.just(vetDTO));
+                .thenReturn(Flux.just(vetResponseDTO));
 
         client
                 .get()
@@ -638,18 +633,17 @@ class ApiGatewayControllerTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
-                .expectBodyList(VetDTO.class)
+                .expectBodyList(VetResponseDTO.class)
                 .value(responseDTO -> {
                     Assertions.assertNotNull(responseDTO);
                     Assertions.assertNotNull(responseDTO.get(0).getVetId());
-                    assertThat(responseDTO.get(0).getVetId()).isEqualTo(vetDTO.getVetId());
-                    assertThat(responseDTO.get(0).getResume()).isEqualTo(vetDTO.getResume());
-                    assertThat(responseDTO.get(0).getLastName()).isEqualTo(vetDTO.getLastName());
-                    assertThat(responseDTO.get(0).getFirstName()).isEqualTo(vetDTO.getFirstName());
-                    assertThat(responseDTO.get(0).getEmail()).isEqualTo(vetDTO.getEmail());
-                    assertThat(responseDTO.get(0).getImage()).isNotEmpty();
-                    assertThat(responseDTO.get(0).isActive()).isEqualTo(vetDTO.isActive());
-                    assertThat(responseDTO.get(0).getWorkday()).isEqualTo(vetDTO.getWorkday());
+                    assertThat(responseDTO.get(0).getVetId()).isEqualTo(vetResponseDTO.getVetId());
+                    assertThat(responseDTO.get(0).getResume()).isEqualTo(vetResponseDTO.getResume());
+                    assertThat(responseDTO.get(0).getLastName()).isEqualTo(vetResponseDTO.getLastName());
+                    assertThat(responseDTO.get(0).getFirstName()).isEqualTo(vetResponseDTO.getFirstName());
+                    assertThat(responseDTO.get(0).getEmail()).isEqualTo(vetResponseDTO.getEmail());
+                    assertThat(responseDTO.get(0).isActive()).isEqualTo(vetResponseDTO.isActive());
+                    assertThat(responseDTO.get(0).getWorkday()).isEqualTo(vetResponseDTO.getWorkday());
                 });
         Mockito.verify(vetsServiceClient, times(1))
                 .getInactiveVets();
@@ -663,7 +657,7 @@ class ApiGatewayControllerTest {
                 .username("vet")
                 .email("vet@email.com")
                 .password("pwd")
-                .vet(vetDTO).build();
+                .vet(vetRequestDTO).build();
 
 
         Role role = Role.builder()
@@ -681,7 +675,7 @@ class ApiGatewayControllerTest {
         Mono<RegisterVet> dto = Mono.just(registerVet);
 
         when(authServiceClient.createVetUser(any(Mono.class)))
-                .thenReturn((Mono.just(vetDTO)));
+                .thenReturn((Mono.just(vetResponseDTO)));
 
 
 
@@ -701,24 +695,23 @@ class ApiGatewayControllerTest {
     @Test
     void updateVet() {
         when(vetsServiceClient.updateVet(anyString(), any(Mono.class)))
-                .thenReturn(Mono.just(vetDTO2));
+                .thenReturn(Mono.just(vetResponseDTO2));
 
         client
                 .put()
                 .uri("/api/gateway/vets/" + VET_ID)
-                .body(Mono.just(vetDTO2), VetDTO.class)
+                .body(Mono.just(vetResponseDTO2), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.vetId").isEqualTo(vetDTO2.getVetId())
-                .jsonPath("$.resume").isEqualTo(vetDTO2.getResume())
-                .jsonPath("$.lastName").isEqualTo(vetDTO2.getLastName())
-                .jsonPath("$.firstName").isEqualTo(vetDTO2.getFirstName())
-                .jsonPath("$.email").isEqualTo(vetDTO2.getEmail())
-                .jsonPath("$.image").isNotEmpty()
-                .jsonPath("$.active").isEqualTo(vetDTO2.isActive());
+                .jsonPath("$.vetId").isEqualTo(vetResponseDTO2.getVetId())
+                .jsonPath("$.resume").isEqualTo(vetResponseDTO2.getResume())
+                .jsonPath("$.lastName").isEqualTo(vetResponseDTO2.getLastName())
+                .jsonPath("$.firstName").isEqualTo(vetResponseDTO2.getFirstName())
+                .jsonPath("$.email").isEqualTo(vetResponseDTO2.getEmail())
+                .jsonPath("$.active").isEqualTo(vetResponseDTO2.isActive());
 
         Mockito.verify(vetsServiceClient, times(1))
                 .updateVet(anyString(), any(Mono.class));
@@ -743,7 +736,7 @@ class ApiGatewayControllerTest {
     @Test
     void getByVetId_Invalid() {
         when(vetsServiceClient.getVetByVetId(anyString()))
-                .thenReturn(Mono.just(vetDTO));
+                .thenReturn(Mono.just(vetResponseDTO));
 
         client
                 .get()
@@ -759,12 +752,12 @@ class ApiGatewayControllerTest {
     @Test
     void updateByVetId_Invalid() {
         when(vetsServiceClient.updateVet(anyString(), any(Mono.class)))
-                .thenReturn(Mono.just(vetDTO));
+                .thenReturn(Mono.just(vetResponseDTO));
 
         client
                 .put()
                 .uri("/api/gateway/vets/" + INVALID_VET_ID)
-                .body(Mono.just(vetDTO), VetDTO.class)
+                .body(Mono.just(vetRequestDTO), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isEqualTo(INTERNAL_SERVER_ERROR)
@@ -834,40 +827,10 @@ class ApiGatewayControllerTest {
         Mockito.verify(vetsServiceClient, times(1))
                 .addPhotoToVet(anyString(), anyString(), any(Mono.class));
     }
-
-    @Test
-    void getBadgeByVetId() throws IOException {
-        BadgeResponseDTO badgeResponseDTO = BadgeResponseDTO.builder()
-                .vetId(VET_ID)
-                .badgeTitle(BadgeTitle.HIGHLY_RESPECTED)
-                .badgeDate("2017")
-                .resourceBase64(Base64.getEncoder().encodeToString(StreamUtils.copyToByteArray(cpr.getInputStream())))
-                .build();
-
-        when(vetsServiceClient.getBadgeByVetId(anyString()))
-                .thenReturn(Mono.just(badgeResponseDTO));
-
-        client.get()
-                .uri("/api/gateway/vets/{vetId}/badge", VET_ID)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(APPLICATION_JSON)
-                .expectBody(BadgeResponseDTO.class)
-                .value(responseDTO -> {
-                    Assertions.assertEquals(badgeResponseDTO.getBadgeTitle(), responseDTO.getBadgeTitle());
-                    Assertions.assertEquals(badgeResponseDTO.getBadgeDate(), responseDTO.getBadgeDate());
-                    Assertions.assertEquals(badgeResponseDTO.getVetId(), responseDTO.getVetId());
-                    Assertions.assertEquals(badgeResponseDTO.getResourceBase64(), responseDTO.getResourceBase64());
-                });
-
-        Mockito.verify(vetsServiceClient, times(1))
-                .getBadgeByVetId(VET_ID);
-    }
-
-
     @Test
     void toStringBuilderVets() {
-        System.out.println(VetDTO.builder());
+        System.out.println(VetRequestDTO.builder());
+        System.out.println(VetResponseDTO.builder());
     }
 
 
@@ -905,7 +868,7 @@ class ApiGatewayControllerTest {
 //                .jsonPath("$.pets[0].visits[0].description").isEqualTo("First visit");
 //    }
 
-//    @Test
+    //    @Test
 //    void getUserDetails() {
 //        UserDetails user = new UserDetails();
 //        user.setId(1);
@@ -1974,7 +1937,7 @@ class ApiGatewayControllerTest {
     @Test
     void shouldDeleteBillById(){
         when(billServiceClient.deleteBill("9"))
-                    .thenReturn(Mono.empty());
+                .thenReturn(Mono.empty());
         client.delete()
                 .uri("/api/gateway/bills/9")
                 .accept(MediaType.APPLICATION_JSON)
@@ -2654,18 +2617,18 @@ class ApiGatewayControllerTest {
                         httpResponse
                 );
 
-         client.post()
+        client.post()
                 .uri("/api/gateway/users/login")
                 .accept(APPLICATION_JSON)
                 .body(Mono.just(login), Login.class)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(UserPasswordLessDTO.class)
-                 .value((res ->
-                 {
-                  assertEquals(res.getEmail(),userPasswordLessDTO.getEmail());
-                  
-                 }));
+                .value((res ->
+                {
+                    assertEquals(res.getEmail(),userPasswordLessDTO.getEmail());
+
+                }));
     }
 
     @Test
@@ -2699,14 +2662,14 @@ class ApiGatewayControllerTest {
 
 
 
-private InventoryResponseDTO buildInventoryDTO(){
+    private InventoryResponseDTO buildInventoryDTO(){
         return InventoryResponseDTO.builder()
                 .inventoryId("1")
                 .inventoryName("invt1")
                 .inventoryType("Internal")
                 .inventoryDescription("invtone")
                 .build();
-}
+    }
     @Test
     void addInventory_withValidValue_shouldSucceed() {
 
@@ -2806,24 +2769,24 @@ private InventoryResponseDTO buildInventoryDTO(){
 
 
     //delete all product inventory and delete all inventory
-@Test
-void deleteAllInventory_shouldSucceed() {
-    // Mock the service call to simulate the successful deletion of all inventories.
-    // Assuming your service client has a method called `deleteAllInventories`.
-    when(inventoryServiceClient.deleteAllInventories())
-            .thenReturn(Mono.empty());  // Using Mono.empty() to simulate a void return (successful deletion without a return value).
+    @Test
+    void deleteAllInventory_shouldSucceed() {
+        // Mock the service call to simulate the successful deletion of all inventories.
+        // Assuming your service client has a method called `deleteAllInventories`.
+        when(inventoryServiceClient.deleteAllInventories())
+                .thenReturn(Mono.empty());  // Using Mono.empty() to simulate a void return (successful deletion without a return value).
 
-    // Make the DELETE request to the API.
-    client.delete()
-            .uri("/api/gateway/inventory")  // Assuming the endpoint for deleting all inventories is the same without an ID.
-            .exchange()
-            .expectStatus().isNoContent()
-            .expectBody().isEmpty();
+        // Make the DELETE request to the API.
+        client.delete()
+                .uri("/api/gateway/inventory")  // Assuming the endpoint for deleting all inventories is the same without an ID.
+                .exchange()
+                .expectStatus().isNoContent()
+                .expectBody().isEmpty();
 
-    // Verify that the deleteAllInventories method on the service client was called exactly once.
-    verify(inventoryServiceClient, times(1))
-            .deleteAllInventories();
-}
+        // Verify that the deleteAllInventories method on the service client was called exactly once.
+        verify(inventoryServiceClient, times(1))
+                .deleteAllInventories();
+    }
 
     @Test
     void deleteAllProductInventory_shouldSucceed() {
@@ -2847,7 +2810,6 @@ void deleteAllInventory_shouldSucceed() {
                 .deleteAllProductForInventory(eq(inventoryId));
     }
     //inventory tests
-
 
     @Test
     void testUpdateProductInInventory() {
@@ -2921,7 +2883,6 @@ void deleteAllInventory_shouldSucceed() {
                 .productDescription(requestDTO.getProductDescription())
                 .productPrice(requestDTO.getProductPrice())
                 .productQuantity(requestDTO.getProductQuantity())
-                .productSalePrice(requestDTO.getProductSalePrice())
                 .build();
 
         // Mock the behavior of the inventoryServiceClient
@@ -2955,7 +2916,7 @@ void deleteAllInventory_shouldSucceed() {
     @DisplayName("Given invalid inventoryId and valid productRequest Post and return NotFoundException")
     void testAddProductToInventory_InvalidInventoryId_ShouldReturnNotFoundException() {
         // Create a sample ProductRequestDTO
-        ProductRequestDTO requestDTO = new ProductRequestDTO("Sample Product", "Sample Description", 10.0, 100,15.99);
+        ProductRequestDTO requestDTO = new ProductRequestDTO("Sample Product", "Sample Description", 10.0, 100, 15.99);
 
         // Define the expected response
         ProductResponseDTO expectedResponse = ProductResponseDTO.builder()
@@ -2998,12 +2959,11 @@ void deleteAllInventory_shouldSucceed() {
                 .productDescription("Sedative Medication")
                 .productPrice(100.00)
                 .productQuantity(10)
-                .productSalePrice(15.99)
                 .build();
     }
 
-    private VetDTO buildVetDTO() {
-        return VetDTO.builder()
+    private VetResponseDTO buildVetResponseDTO() {
+        return VetResponseDTO.builder()
                 .vetId("181faeb5-c024-425c-9f08-663600008f06")
                 .firstName("Pauline")
                 .lastName("LeBlanc")
@@ -3011,19 +2971,43 @@ void deleteAllInventory_shouldSucceed() {
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
                 .workday(new HashSet<>())
-                .image("kjd".getBytes())
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
     }
-    private VetDTO buildVetDTO2() {
-        return VetDTO.builder()
+    private VetResponseDTO buildVetResponseDTO2() {
+        return VetResponseDTO.builder()
                 .vetId("181faeb5-c024-425c-9f08-663600008f06")
                 .firstName("Pauline")
                 .lastName("LeBlanc")
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-2847")
-                .image("kjd".getBytes())
+                .resume("Just became a vet")
+                .workday(new HashSet<>())
+                .specialties(new HashSet<>())
+                .active(true)
+                .build();
+    }
+    private VetRequestDTO buildVetRequestDTO() {
+        return VetRequestDTO.builder()
+                .vetId("181faeb5-c024-425c-9f08-663600008f06")
+                .firstName("Pauline")
+                .lastName("LeBlanc")
+                .email("skjfhf@gmail.com")
+                .phoneNumber("947-238-2847")
+                .resume("Just became a vet")
+                .workday(new HashSet<>())
+                .specialties(new HashSet<>())
+                .active(false)
+                .build();
+    }
+    private VetRequestDTO buildVetRequestDTO2() {
+        return VetRequestDTO.builder()
+                .vetId("181faeb5-c024-425c-9f08-663600008f06")
+                .firstName("Pauline")
+                .lastName("LeBlanc")
+                .email("skjfhf@gmail.com")
+                .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
                 .workday(new HashSet<>())
                 .specialties(new HashSet<>())
@@ -3038,12 +3022,12 @@ void deleteAllInventory_shouldSucceed() {
                 .rateScore(4.0)
                 .build();
     }
-private VetAverageRatingDTO buildVetAverageRatingDTO(){
+    private VetAverageRatingDTO buildVetAverageRatingDTO(){
         return VetAverageRatingDTO.builder()
                 .vetId("678910")
                 .averageRating(2.0)
                 .build();
-}
+    }
     @Test
     void sendForgottenEmail_ShouldSucceed(){
         final UserEmailRequestDTO dto = UserEmailRequestDTO.builder()
@@ -3090,30 +3074,30 @@ private VetAverageRatingDTO buildVetAverageRatingDTO(){
                 .expectBody();
 
         verify(authServiceClient, times(1)).sendForgottenEmail(any());
-        }
+    }
 
 
-        @Test
-        void processResetPassword_ShouldSucceed(){
-            final UserPasswordAndTokenRequestModel dto = UserPasswordAndTokenRequestModel.builder()
-                    .password("password")
-                    .token("Valid token")
-                    .build();
+    @Test
+    void processResetPassword_ShouldSucceed(){
+        final UserPasswordAndTokenRequestModel dto = UserPasswordAndTokenRequestModel.builder()
+                .password("password")
+                .token("Valid token")
+                .build();
 
 
-            when(authServiceClient.changePassword(any()))
-                    .thenReturn(Mono.just(ResponseEntity.ok().build()));
+        when(authServiceClient.changePassword(any()))
+                .thenReturn(Mono.just(ResponseEntity.ok().build()));
 
 
-            client.post()
-                    .uri("/api/gateway/users/reset_password")
-                    .body(Mono.just(dto), UserPasswordAndTokenRequestModel.class)
-                    .exchange()
-                    .expectStatus().isOk()
-                    .expectBody();
+        client.post()
+                .uri("/api/gateway/users/reset_password")
+                .body(Mono.just(dto), UserPasswordAndTokenRequestModel.class)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody();
 
-            verify(authServiceClient, times(1)).changePassword(any());
-        }
+        verify(authServiceClient, times(1)).changePassword(any());
+    }
 
     @Test
     void getAllPetTypes_shouldSucceed(){
@@ -3198,10 +3182,10 @@ private VetAverageRatingDTO buildVetAverageRatingDTO(){
                 .build();
 
         UserDetails user2 = UserDetails.builder()
-                        .username("user2")
-                        .email("email2")
-                        .userId("hhvhvhvhuvul")
-                        .build();
+                .username("user2")
+                .email("email2")
+                .userId("hhvhvhvhuvul")
+                .build();
         String validToken = "IamValidTrustMe";
 
         when(authServiceClient.getUsers(validToken))

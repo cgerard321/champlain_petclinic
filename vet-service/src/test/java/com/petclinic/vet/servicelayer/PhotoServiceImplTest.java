@@ -91,7 +91,4 @@ class PhotoServiceImplTest {
                 .verifyComplete();
     }
 
-
-
-
 }

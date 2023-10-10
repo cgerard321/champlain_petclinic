@@ -232,7 +232,6 @@ class VetRepositoryTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
-                .imageId("kjd")
                 .workday(workdays1)
                 .active(true)
                 .build();
@@ -245,7 +244,6 @@ class VetRepositoryTest {
                 .lastName("LeBlanc")
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-2847")
-                .imageId("kjd")
                 .resume("Just became a vet")
                 .workday(workdays1)
                 .active(false)

@@ -73,7 +73,9 @@ class VetControllerIntegrationTest {
     Rating rating2 = buildRating("12346", "db0c8f13-89d2-4ef7-bcd5-3776a3734150", 4.0);
     Rating rating3 = buildRating("12347", "db0c8f13-89d2-4ef7-bcd5-3776a3734150", 3.0);
 
-    VetDTO vetDTO = buildVetDTO("3456");
+    VetResponseDTO vetResponseDTO = buildVetResponseDTO("3456");
+    VetRequestDTO vetRequestDTO = buildVetRequestDTO("3456");
+
     String VET_ID = "db0c8f13-89d2-4ef7-bcd5-3776a3734150";
     String VET_BILL_ID = vet.getVetBillId();
     String INVALID_VET_ID = "mjbedf";
@@ -711,7 +713,6 @@ class VetControllerIntegrationTest {
                 .jsonPath("$[0].lastName").isEqualTo(vet.getLastName())
                 .jsonPath("$[0].firstName").isEqualTo(vet.getFirstName())
                 .jsonPath("$[0].email").isEqualTo(vet.getEmail())
-                .jsonPath("$[0].imageId").isNotEmpty()
                 .jsonPath("$[0].active").isEqualTo(vet.isActive());
     }
 
@@ -781,19 +782,18 @@ class VetControllerIntegrationTest {
         client
                 .put()
                 .uri("/vets/" + VET_ID)
-                .body(Mono.just(vetDTO), VetDTO.class)
+                .body(Mono.just(vetRequestDTO), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.vetId").isEqualTo(vetDTO.getVetId())
-                .jsonPath("$.resume").isEqualTo(vetDTO.getResume())
-                .jsonPath("$.lastName").isEqualTo(vetDTO.getLastName())
-                .jsonPath("$.firstName").isEqualTo(vetDTO.getFirstName())
-                .jsonPath("$.email").isEqualTo(vetDTO.getEmail())
-                .jsonPath("$.imageId").isNotEmpty()
-                .jsonPath("$.active").isEqualTo(vetDTO.isActive());
+                .jsonPath("$.vetId").isEqualTo(vetResponseDTO.getVetId())
+                .jsonPath("$.resume").isEqualTo(vetResponseDTO.getResume())
+                .jsonPath("$.lastName").isEqualTo(vetResponseDTO.getLastName())
+                .jsonPath("$.firstName").isEqualTo(vetResponseDTO.getFirstName())
+                .jsonPath("$.email").isEqualTo(vetResponseDTO.getEmail())
+                .jsonPath("$.active").isEqualTo(vetResponseDTO.isActive());
 
     }
 
@@ -806,7 +806,7 @@ class VetControllerIntegrationTest {
                 .expectNextCount(1)
                 .verifyComplete();
 
-        VetDTO updatedVet=VetDTO.builder()
+        VetRequestDTO updatedVet = VetRequestDTO.builder()
                 .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
                 .vetBillId("1")
                 .firstName("Clementineeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
@@ -814,7 +814,6 @@ class VetControllerIntegrationTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-28479")
                 .resume("Just became a vet")
-                .imageId("kjd")
                 .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
@@ -823,7 +822,7 @@ class VetControllerIntegrationTest {
         client
                 .put()
                 .uri("/vets/" + VET_ID)
-                .body(Mono.just(updatedVet), VetDTO.class)
+                .body(Mono.just(updatedVet), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -841,7 +840,7 @@ class VetControllerIntegrationTest {
                 .expectNextCount(1)
                 .verifyComplete();
 
-        VetDTO updatedVet=VetDTO.builder()
+        VetRequestDTO updatedVet = VetRequestDTO.builder()
                 .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
                 .vetBillId("1")
                 .firstName("Clementine")
@@ -849,7 +848,6 @@ class VetControllerIntegrationTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-28479")
                 .resume("Just became a vet")
-                .imageId("kjd")
                 .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
@@ -858,7 +856,7 @@ class VetControllerIntegrationTest {
         client
                 .put()
                 .uri("/vets/" + VET_ID)
-                .body(Mono.just(updatedVet), VetDTO.class)
+                .body(Mono.just(updatedVet), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -876,7 +874,7 @@ class VetControllerIntegrationTest {
                 .expectNextCount(1)
                 .verifyComplete();
 
-        VetDTO updatedVet=VetDTO.builder()
+        VetRequestDTO updatedVet = VetRequestDTO.builder()
                 .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
                 .vetBillId("1")
                 .firstName("Clementine")
@@ -884,7 +882,6 @@ class VetControllerIntegrationTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-28479999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999")
                 .resume("Just became a vet")
-                .imageId("kjd")
                 .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
@@ -893,7 +890,7 @@ class VetControllerIntegrationTest {
         client
                 .put()
                 .uri("/vets/" + VET_ID)
-                .body(Mono.just(updatedVet), VetDTO.class)
+                .body(Mono.just(updatedVet), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -912,7 +909,7 @@ class VetControllerIntegrationTest {
                 .verifyComplete();
 
         String extensionNum="7654";
-        VetDTO updatedVet=VetDTO.builder()
+        VetRequestDTO updatedVet = VetRequestDTO.builder()
                 .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
                 .vetBillId("1")
                 .firstName("Clementine")
@@ -927,7 +924,6 @@ class VetControllerIntegrationTest {
                         "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm")
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Just became a vet")
-                .imageId("kjd")
                 .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
@@ -936,7 +932,7 @@ class VetControllerIntegrationTest {
         client
                 .put()
                 .uri("/vets/" + VET_ID)
-                .body(Mono.just(updatedVet), VetDTO.class)
+                .body(Mono.just(updatedVet), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -955,7 +951,7 @@ class VetControllerIntegrationTest {
                 .verifyComplete();
 
         String extensionNum="7920";
-        VetDTO updatedVet=VetDTO.builder()
+        VetRequestDTO updatedVet = VetRequestDTO.builder()
                 .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
                 .vetBillId("1")
                 .firstName("Clementine")
@@ -963,7 +959,6 @@ class VetControllerIntegrationTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Jo")
-                .imageId("kjd")
                 .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
@@ -972,7 +967,7 @@ class VetControllerIntegrationTest {
         client
                 .put()
                 .uri("/vets/" + VET_ID)
-                .body(Mono.just(updatedVet), VetDTO.class)
+                .body(Mono.just(updatedVet), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -991,7 +986,7 @@ class VetControllerIntegrationTest {
                 .verifyComplete();
 
         String extensionNum="7920";
-        VetDTO updatedVet=VetDTO.builder()
+        VetRequestDTO updatedVet = VetRequestDTO.builder()
                 .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
                 .vetBillId("1")
                 .firstName("Clementine")
@@ -999,7 +994,6 @@ class VetControllerIntegrationTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("I've been a vet ever since I was a kid.")
-                .imageId("kjd")
                 .workday(new HashSet<>())
                 .specialties(null)
                 .active(false)
@@ -1008,7 +1002,7 @@ class VetControllerIntegrationTest {
         client
                 .put()
                 .uri("/vets/" + VET_ID)
-                .body(Mono.just(updatedVet), VetDTO.class)
+                .body(Mono.just(updatedVet), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -1039,7 +1033,6 @@ class VetControllerIntegrationTest {
                 .jsonPath("$[0].lastName").isEqualTo(vet2.getLastName())
                 .jsonPath("$[0].firstName").isEqualTo(vet2.getFirstName())
                 .jsonPath("$[0].email").isEqualTo(vet2.getEmail())
-                .jsonPath("$[0].imageId").isNotEmpty()
                 .jsonPath("$[0].active").isEqualTo(vet2.isActive());
     }
 
@@ -1065,7 +1058,6 @@ class VetControllerIntegrationTest {
                 .jsonPath("$[0].lastName").isEqualTo(vet.getLastName())
                 .jsonPath("$[0].firstName").isEqualTo(vet.getFirstName())
                 .jsonPath("$[0].email").isEqualTo(vet.getEmail())
-                .jsonPath("$[0].imageId").isNotEmpty()
                 .jsonPath("$[0].active").isEqualTo(vet.isActive());
     }
 
@@ -1082,22 +1074,21 @@ class VetControllerIntegrationTest {
         client
                 .post()
                 .uri("/vets")
-                .body(Mono.just(vet), Vet.class)
+                .body(Mono.just(vetRequestDTO), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(VetDTO.class)
+                .expectBody(VetResponseDTO.class)
                 .value((dto) -> {
-                    assertThat(dto.getFirstName()).isEqualTo(vet.getFirstName());
-                    assertThat(dto.getLastName()).isEqualTo(vet.getLastName());
-                    assertThat(dto.getPhoneNumber()).isEqualTo(vet.getPhoneNumber());
-                    assertThat(dto.getResume()).isEqualTo(vet.getResume());
-                    assertThat(dto.getEmail()).isEqualTo(vet.getEmail());
-                    assertThat(dto.getWorkday()).isEqualTo(vet.getWorkday());
-                    assertThat(dto.getImageId()).isEqualTo(vet.getImageId());
-                    assertThat(dto.isActive()).isEqualTo(vet.isActive());
-                    assertThat(dto.getSpecialties()).isEqualTo(vet.getSpecialties());
+                    assertThat(dto.getFirstName()).isEqualTo(vetResponseDTO.getFirstName());
+                    assertThat(dto.getLastName()).isEqualTo(vetResponseDTO.getLastName());
+                    assertThat(dto.getPhoneNumber()).isEqualTo(vetResponseDTO.getPhoneNumber());
+                    assertThat(dto.getResume()).isEqualTo(vetResponseDTO.getResume());
+                    assertThat(dto.getEmail()).isEqualTo(vetResponseDTO.getEmail());
+                    assertThat(dto.getWorkday()).isEqualTo(vetResponseDTO.getWorkday());
+                    assertThat(dto.isActive()).isEqualTo(vetResponseDTO.isActive());
+                    assertThat(dto.getSpecialties()).isEqualTo(vetResponseDTO.getSpecialties());
                 });
     }
 
@@ -1110,7 +1101,7 @@ class VetControllerIntegrationTest {
                 .expectNextCount(0)
                 .verifyComplete();
 
-        VetDTO newVet=VetDTO.builder()
+        VetRequestDTO newVet = VetRequestDTO.builder()
                 .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
                 .vetBillId("1")
                 .firstName("Clementine")
@@ -1118,7 +1109,6 @@ class VetControllerIntegrationTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-28479999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999999")
                 .resume("Just became a vet")
-                .imageId("kjd")
                 .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
@@ -1127,7 +1117,7 @@ class VetControllerIntegrationTest {
         client
                 .post()
                 .uri("/vets")
-                .body(Mono.just(newVet), Vet.class)
+                .body(Mono.just(newVet), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -1146,7 +1136,7 @@ class VetControllerIntegrationTest {
                 .verifyComplete();
 
         String extensionNum="4527";
-        VetDTO newVet=VetDTO.builder()
+        VetRequestDTO newVet = VetRequestDTO.builder()
                 .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
                 .vetBillId("1")
                 .firstName("Clementine")
@@ -1161,7 +1151,6 @@ class VetControllerIntegrationTest {
                         "mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm")
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Just became a vet")
-                .imageId("kjd")
                 .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
@@ -1170,7 +1159,7 @@ class VetControllerIntegrationTest {
         client
                 .post()
                 .uri("/vets")
-                .body(Mono.just(newVet), Vet.class)
+                .body(Mono.just(newVet), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -1189,7 +1178,7 @@ class VetControllerIntegrationTest {
                 .expectNextCount(0)
                 .verifyComplete();
 
-        VetDTO newVet=VetDTO.builder()
+        VetRequestDTO newVet = VetRequestDTO.builder()
                 .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
                 .vetBillId("1")
                 .firstName("Clementineeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee")
@@ -1197,7 +1186,6 @@ class VetControllerIntegrationTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-28479")
                 .resume("Just became a vet")
-                .imageId("kjd")
                 .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
@@ -1206,7 +1194,7 @@ class VetControllerIntegrationTest {
         client
                 .post()
                 .uri("/vets")
-                .body(Mono.just(newVet), Vet.class)
+                .body(Mono.just(newVet), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -1225,7 +1213,7 @@ class VetControllerIntegrationTest {
                 .verifyComplete();
 
         String extensionNum="0987";
-        VetDTO newVet=VetDTO.builder()
+        VetRequestDTO newVet = VetRequestDTO.builder()
                 .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
                 .vetBillId("1")
                 .firstName("Clementine")
@@ -1233,7 +1221,6 @@ class VetControllerIntegrationTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Just became a vet")
-                .imageId("kjd")
                 .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
@@ -1242,7 +1229,7 @@ class VetControllerIntegrationTest {
         client
                 .post()
                 .uri("/vets")
-                .body(Mono.just(newVet), Vet.class)
+                .body(Mono.just(newVet), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -1261,7 +1248,7 @@ class VetControllerIntegrationTest {
                 .verifyComplete();
 
         String extensionNum="4527";
-        VetDTO newVet=VetDTO.builder()
+        VetRequestDTO newVet = VetRequestDTO.builder()
                 .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
                 .vetBillId("1")
                 .firstName("Clementine")
@@ -1269,7 +1256,6 @@ class VetControllerIntegrationTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Jo")
-                .imageId("kjd")
                 .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
@@ -1278,7 +1264,7 @@ class VetControllerIntegrationTest {
         client
                 .post()
                 .uri("/vets")
-                .body(Mono.just(newVet), Vet.class)
+                .body(Mono.just(newVet), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -1298,7 +1284,7 @@ class VetControllerIntegrationTest {
                 .verifyComplete();
 
         String extensionNum="4527";
-        VetDTO newVet=VetDTO.builder()
+        VetRequestDTO newVet = VetRequestDTO.builder()
                 .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
                 .vetBillId("1")
                 .firstName("Clementine")
@@ -1306,7 +1292,6 @@ class VetControllerIntegrationTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Just became a vet")
-                .imageId("kjd")
                 .workday(new HashSet<>())
                 .specialties(null)
                 .active(false)
@@ -1315,7 +1300,7 @@ class VetControllerIntegrationTest {
         client
                 .post()
                 .uri("/vets")
-                .body(Mono.just(newVet), Vet.class)
+                .body(Mono.just(newVet), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -1534,7 +1519,8 @@ class VetControllerIntegrationTest {
     @Test
     void toStringBuilders() {
         System.out.println(Vet.builder());
-        System.out.println(VetDTO.builder());
+        System.out.println(VetResponseDTO.builder());
+        System.out.println(VetRequestDTO.builder());
     }
 
 
@@ -1571,7 +1557,7 @@ class VetControllerIntegrationTest {
         client
                 .put()
                 .uri("/vets/" + INVALID_VET_ID)
-                .body(Mono.just(vetDTO), VetDTO.class)
+                .body(Mono.just(vetRequestDTO), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -1613,7 +1599,6 @@ class VetControllerIntegrationTest {
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Just became a vet")
                 .workday(new HashSet<>())
-                .imageId("kjd")
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -1629,7 +1614,6 @@ class VetControllerIntegrationTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Just became a vet")
-                .imageId("kjd")
                 .workday(new HashSet<>())
                 .active(true)
                 .specialties(new HashSet<>())
@@ -1669,8 +1653,8 @@ class VetControllerIntegrationTest {
     }
 
     //the extension number can only be 4 digits
-    private VetDTO buildVetDTO(String extensionNum) {
-        return VetDTO.builder()
+    private VetResponseDTO buildVetResponseDTO(String extensionNum) {
+        return VetResponseDTO.builder()
                 .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
                 .vetBillId("ac90fcca-a79c-411d-93f2-b70a80da0c3a")
                 .firstName("Clementine")
@@ -1678,7 +1662,20 @@ class VetControllerIntegrationTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Just became a vet")
-                .imageId("kjd")
+                .workday(new HashSet<>())
+                .specialties(new HashSet<>())
+                .active(false)
+                .build();
+    }
+    private VetRequestDTO buildVetRequestDTO(String extensionNum) {
+        return VetRequestDTO.builder()
+                .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
+                .vetBillId("ac90fcca-a79c-411d-93f2-b70a80da0c3a")
+                .firstName("Clementine")
+                .lastName("LeBlanc")
+                .email("skjfhf@gmail.com")
+                .phoneNumber("(514)-634-8276 #"+extensionNum)
+                .resume("Just became a vet")
                 .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
