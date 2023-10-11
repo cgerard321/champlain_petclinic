@@ -106,6 +106,21 @@ class ProductRepositoryTest {
                 .expectNextCount(2)
                 .verifyComplete();
     }
+
+
+    @Test
+    public void shouldGetSingleProductByProductIdAndInventoryId(){
+        StepVerifier
+                .create(productRepository.findProductByInventoryIdAndProductId(
+                        product1.getInventoryId(),
+                        product1.getProductId()
+                ))
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+
+
     @Test
     public void ShouldDeleteAllProducts() {
         // Arrange

@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.util.Arrays;
 import java.util.List;
@@ -303,6 +304,10 @@ class InventoryControllerUnitTest {
                 });
     }
 
+
+
+
+
     @Test
     void getInventoryByInventoryId_ValidIdShouldSucceed(){
         //arrange
@@ -339,6 +344,74 @@ class InventoryControllerUnitTest {
 
 
 
+
+
+
+    @Test
+    void getProductsInInventoryByInventoryIdAndProductId_ValidRequest_ShouldSucceed() {
+        // Arrange
+        String inventoryId = "1";
+        String productId = "123F567C9";
+        ProductResponseDTO productResponseDTO = ProductResponseDTO.builder()
+                .id("1")
+                .inventoryId(inventoryId)
+                .productId(productId)
+                .productName("Benzodiazepines")
+                .productDescription("Sedative Medication")
+                .productPrice(100.00)
+                .productQuantity(10)
+                .productSalePrice(15.99)
+                .build();
+
+        when(productInventoryService.getProductByProductIdInInventory(eq(inventoryId), eq(productId)))
+                .thenReturn(Mono.just(productResponseDTO));
+
+        // Act
+        Mono<ProductResponseDTO> productResponseDTOMono = productInventoryService.getProductByProductIdInInventory(inventoryId, productId);
+
+        // Assert
+        StepVerifier
+                .create(productResponseDTOMono)
+                .expectNextMatches(response -> {
+                    assertNotNull(response);
+                    assertEquals(productResponseDTO.getId(), response.getId());
+                    assertEquals(productResponseDTO.getInventoryId(), response.getInventoryId());
+                    assertEquals(productResponseDTO.getProductId(), response.getProductId());
+                    assertEquals(productResponseDTO.getProductName(), response.getProductName());
+                    assertEquals(productResponseDTO.getProductDescription(), response.getProductDescription());
+                    assertEquals(productResponseDTO.getProductPrice(), response.getProductPrice());
+                    assertEquals(productResponseDTO.getProductQuantity(), response.getProductQuantity());
+                    assertEquals(productResponseDTO.getProductSalePrice(), response.getProductSalePrice());
+                    return true;
+                })
+                .verifyComplete();
+
+        verify(productInventoryService, times(1))
+                .getProductByProductIdInInventory(eq(inventoryId), eq(productId));
+    }
+
+
+    @Test
+    void getProductsInInventoryByInventoryIdAndProductId_InvalidRequest_ShouldFail() {
+        // Arrange
+        String invalidInventoryId = "invalidInventoryId";
+        String invalidProductId = "invalidProductId";
+
+        when(productInventoryService.getProductByProductIdInInventory(eq(invalidInventoryId), eq(invalidProductId)))
+                .thenReturn(Mono.empty());
+
+        // Act
+        Mono<ProductResponseDTO> productResponseDTOMono = productInventoryService.getProductByProductIdInInventory(invalidInventoryId, invalidProductId);
+
+        // Assert
+        StepVerifier
+                .create(productResponseDTOMono)
+                .expectComplete()
+                .verify();
+
+        verify(productInventoryService, times(1))
+                .getProductByProductIdInInventory(eq(invalidInventoryId), eq(invalidProductId));
+    }
     @Test
     void getInventoryByInvalidInventoryId_ReturnNotFound() {
 
