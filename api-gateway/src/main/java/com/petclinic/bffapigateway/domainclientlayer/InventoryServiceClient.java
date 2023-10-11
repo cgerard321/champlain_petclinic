@@ -152,12 +152,20 @@ public class InventoryServiceClient {
                                                                                                  final Integer productQuantity,
                                                                                                  final Optional<Integer> page,
                                                                                                  final Optional<Integer> size){
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(inventoryServiceUrl + "/{inventoryType}/products")
-                .queryParamIfPresent("page", page)
-                .queryParamIfPresent("size", size)
-                .queryParamIfPresent("productName", Optional.ofNullable(productName))
-                .queryParamIfPresent("productPrice", Optional.ofNullable(productPrice))
-                .queryParamIfPresent("productQuantity", Optional.ofNullable(productQuantity));
+        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(inventoryServiceUrl + "/" + inventoryId + "/products-pagination");
+        if (page.isPresent() && size.isPresent()) {
+            uriBuilder.queryParam("page", page.get());
+            uriBuilder.queryParam("size", size.get());
+        }
+        if (productName != null) {
+            uriBuilder.queryParam("productName", productName);
+        }
+        if (productPrice != null) {
+            uriBuilder.queryParam("productPrice", productPrice);
+        }
+        if (productQuantity != null) {
+            uriBuilder.queryParam("productQuantity", productQuantity);
+        }
 
         return webClient.get()
                 .uri(uriBuilder.buildAndExpand(inventoryId).toUri())
@@ -172,7 +180,7 @@ public class InventoryServiceClient {
                                                                 final String productName,
                                                                 final Double productPrice,
                                                                 final Integer productQuantity){
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(inventoryServiceUrl + "/{inventoryType}/products-count")
+        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(inventoryServiceUrl + "/" + inventoryId + "/products-count")
                 .queryParamIfPresent("productName", Optional.ofNullable(productName))
                 .queryParamIfPresent("productPrice", Optional.ofNullable(productPrice))
                 .queryParamIfPresent("productQuantity", Optional.ofNullable(productQuantity));
