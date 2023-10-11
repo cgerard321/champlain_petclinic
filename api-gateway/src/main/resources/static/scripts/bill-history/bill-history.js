@@ -13,7 +13,15 @@ angular.module('billHistory', ['ui.router'])
                 url: '/bills/:billId/deleteBill',
                 template: '<bill-history></bill-history>'
             })
+
+            .state('deleteAllBills', {
+                parent: 'app',
+                url: '/bills/deleteAllBills',
+                template: '<bill-history></bill-history>'
+            })
     }]);
+
+
 
 // var expectedOwnerId = function (expectedOwnerId, key) {
 //     return element.all(by.repeater(key + ' in owners').column(key + '.customerId')).then(function (arr) {

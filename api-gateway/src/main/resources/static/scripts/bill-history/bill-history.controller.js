@@ -133,6 +133,31 @@ angular.module('billHistory')
             }
         };
 
+
+        $scope.deleteAllBills = function () {
+            let varIsConf = confirm('Are you sure you want to delete all the history of bills');
+            if (varIsConf) {
+                $http.delete('api/gateway/bills')
+                    .then(successCallback, errorCallback)
+
+                function successCallback(response) {
+                    $scope.errors = [];
+                    alert("bill history was deleted successfully");
+                    console.log(response, 'res');
+                    //refresh list
+                    $http.get('api/gateway/bills').then(function (resp) {
+                        self.billHistory = resp.data;
+                        arr = resp.data;
+                    });
+                }
+                function errorCallback(error) {
+                    alert(data.errors);
+                    console.log(error, 'Could not receive data');
+                }
+
+            }
+        }
+
         $scope.deleteBill = function (billId) {
             let varIsConf = confirm('You are about to delete billId ' + billId + '. Is it what you want to do ? ');
             if (varIsConf) {
