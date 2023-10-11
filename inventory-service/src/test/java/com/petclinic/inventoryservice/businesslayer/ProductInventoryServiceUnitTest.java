@@ -226,6 +226,42 @@ class ProductInventoryServiceUnitTest {
 
 
 
+    @Test
+    void getProductsByInventoryId_andProductId_withValidFields_shouldSucceed() {
+        String inventoryId = "1";
+        String productId = "12345";
+
+        when(productRepository
+                .findProductByInventoryIdAndProductId(inventoryId, productId))
+                .thenReturn(Mono.just(product));
+
+        Mono<ProductResponseDTO> productResponseDTOMono = productInventoryService
+                .getProductByProductIdInInventory(inventoryId, productId);
+
+        StepVerifier
+                .create(productResponseDTOMono)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+
+    @Test
+    void getProductsByInventoryId_andProductId_withInvalidFields_shouldReturnEmptyFlux() {
+        String invalidInventoryId = "999"; // Invalid inventory ID
+        String invalidProductId = "invalid123"; // Invalid product ID
+
+        when(productRepository
+                .findProductByInventoryIdAndProductId(invalidInventoryId, invalidProductId))
+                .thenReturn(Mono.empty());
+
+        Mono<ProductResponseDTO> productResponseDTOMono = productInventoryService
+                .getProductByProductIdInInventory(invalidInventoryId, invalidProductId);
+
+
+        StepVerifier.create(productResponseDTOMono)
+                .expectError(NotFoundException.class)
+                .verify();
+    }
 
 
     @Test
