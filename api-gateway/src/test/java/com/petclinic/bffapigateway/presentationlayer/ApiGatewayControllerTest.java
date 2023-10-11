@@ -2769,8 +2769,36 @@ private InventoryResponseDTO buildInventoryDTO(){
 
 
     @Test
-    void getInventoryByInventoryId_ValidId_shouldSucceed() {
+    void GetProductByInventoryIdAndProductId_InsideInventory() {
+        ProductResponseDTO productResponseDTO = buildProductDTO();
+        when(inventoryServiceClient.getProductByProductIdInInventory(productResponseDTO.getInventoryId(), productResponseDTO.getProductId()))
+                .thenReturn(Mono.just(productResponseDTO));
 
+        client.get()
+                .uri("/api/gateway/inventory/{inventoryId}/products/{productId}", productResponseDTO.getInventoryId(), productResponseDTO.getProductId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(ProductResponseDTO.class)
+                .value(dto -> {
+                    assertNotNull(dto);
+                    assertEquals(productResponseDTO.getInventoryId(), dto.getInventoryId());
+                    assertEquals(productResponseDTO.getProductId(), dto.getProductId());
+                    assertEquals(productResponseDTO.getProductName(), dto.getProductName());
+                    assertEquals(productResponseDTO.getProductDescription(), dto.getProductDescription());
+                    assertEquals(productResponseDTO.getProductPrice(), dto.getProductPrice());
+                    assertEquals(productResponseDTO.getProductQuantity(), dto.getProductQuantity());
+                    assertEquals(productResponseDTO.getProductSalePrice(), dto.getProductSalePrice());
+
+                });
+
+        verify(inventoryServiceClient, times(1))
+                .getProductByProductIdInInventory(productResponseDTO.getInventoryId(), productResponseDTO.getProductId());
+    }
+
+
+    @Test
+    void getInventoryByInventoryId_ValidId_shouldSucceed() {
         String validInventoryId = "inventoryId_1";
         InventoryResponseDTO inventoryResponseDTO = InventoryResponseDTO.builder()
                 .inventoryId(validInventoryId)
@@ -2986,6 +3014,9 @@ void deleteAllInventory_shouldSucceed() {
         verify(inventoryServiceClient, times(1))
                 .addProductToInventory(eq(requestDTO), eq("invalidInventoryId"));
     }
+
+
+
 
     private ProductResponseDTO buildProductDTO(){
         return ProductResponseDTO.builder()
