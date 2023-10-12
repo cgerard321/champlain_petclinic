@@ -276,7 +276,15 @@
                     </div>
                 </div>
             </div>
-
+<!--            RECENT & OLDER RATINGS-->
+            <form onsubmit="void(0)" style="max-width: 20em; margin-top: 2em;">
+                <div class="form-group">
+                    <input id="queryDate" class="form-control" ng-model="$ctrl.query" placeholder="Search" type="text"/>
+                </div>
+                <button class="btn btn-primary ratingButton" ng-click="getRecentRatingBasedOnDate()" type="submit">
+                    Search
+                </button>
+            </form>
 
             <!-- Ratings Chart -->
             <div class="col-md-12" ng-if="$ctrl.ratings.length > 0" style="margin-top: 5%">

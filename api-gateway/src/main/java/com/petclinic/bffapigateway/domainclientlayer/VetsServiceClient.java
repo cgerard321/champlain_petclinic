@@ -11,10 +11,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Map;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
@@ -213,6 +217,19 @@ public class VetsServiceClient {
                 .retrieve()
                 .bodyToFlux(VetAverageRatingDTO.class);
     }
+    public Flux<RatingResponseDTO> getRatingsOfAVetBasedOnDate(String vetId, Map<String,String> queryParams){
+        return webClientBuilder
+                .baseUrl(vetsServiceUrl)
+                .build()
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/" + vetId + "/ratings/date")
+                        .queryParam("year",queryParams.get("year"))
+                        .build())
+                .retrieve()
+                .bodyToFlux(RatingResponseDTO.class);
+    }
+
     public Mono<Double> getAverageRatingByVetId(String vetId) {
         return webClientBuilder
                 .build()
@@ -230,9 +247,6 @@ public class VetsServiceClient {
                 )
                 .bodyToMono(Double.class);
     }
-
-
-
     //Vets
     public Flux<VetResponseDTO> getVets() {
 
