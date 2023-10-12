@@ -1,6 +1,7 @@
 package com.petclinic.authservice.presentationlayer.User;
 
 import com.petclinic.authservice.Util.Exceptions.HTTPErrorMessage;
+import com.petclinic.authservice.datalayer.roles.Role;
 import com.petclinic.authservice.domainclientlayer.Mail.MailService;
 import com.petclinic.authservice.security.JwtTokenUtil;
 import com.petclinic.authservice.datalayer.user.*;
@@ -24,8 +25,10 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.util.Base64;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @AutoConfigureWebTestClient
@@ -51,6 +54,8 @@ class UserControllerIntegrationTest {
 
     @MockBean
     private MailService mailService;
+
+    private final String VALID_USER_ID = "7c0d42c2-0c2d-41ce-bd9c-6ca67478956f";
 
     @Before("setup")
     public void setup() {
@@ -448,6 +453,105 @@ class UserControllerIntegrationTest {
                 });
     }
 
+    @Test
+    void updateUserRole_validUserId() {
+        RolesChangeRequestDTO updatedUser = RolesChangeRequestDTO.builder()
+                .roles(Collections.singletonList("OWNER"))
+                .build();
+        String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
+
+        webTestClient
+                .patch()
+                .uri("/users/" + VALID_USER_ID)
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer",token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedUser)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(UserPasswordLessDTO.class)
+                .value(dto -> {
+                    assertNotNull(dto);
+                    List<String> actualRoleNames = dto.getRoles().stream()
+                            .map(Role::getName)  // Assuming the Role object has a getName() method
+                            .toList();
+                    assertEquals(updatedUser.getRoles(), actualRoleNames);
+                });
+    }
+
+    @Test
+    void updateUserRole_InvalidUserId() {
+        RolesChangeRequestDTO updatedUser = RolesChangeRequestDTO.builder()
+                .roles(Collections.singletonList("OWNER"))
+                .build();
+        String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
+        String invalidUserId = "invalidId";
+
+        webTestClient
+                .patch()
+                .uri("/users/" + invalidUserId)
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedUser)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void updateUserRole_NoCookie() {
+        RolesChangeRequestDTO updatedUser = RolesChangeRequestDTO.builder()
+                .roles(Collections.singletonList("OWNER"))
+                .build();
+
+        webTestClient
+                .patch()
+                .uri("/users/" + VALID_USER_ID)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedUser)
+                .exchange()
+                .expectStatus().isUnauthorized();
+    }
+
+    @Test
+    void updateUserRole_cannotChangeOwnRoles() {
+        String userId = "validUserId";
+        RolesChangeRequestDTO updatedUser = RolesChangeRequestDTO.builder()
+                .roles(Collections.singletonList("OWNER"))
+                .build();
+
+        String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
+
+        webTestClient
+                .patch()
+                .uri("/users/" + jwtService.getIdFromToken(token))
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedUser)
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
+    @Test
+    void updateUserRole_invalidRole() {
+        RolesChangeRequestDTO updatedUser = RolesChangeRequestDTO.builder()
+                .roles(Collections.singletonList("NOT_OWNER"))
+                .build();
+        String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
+
+        webTestClient
+                .patch()
+                .uri("/users/" + VALID_USER_ID)
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedUser)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
 
 
 

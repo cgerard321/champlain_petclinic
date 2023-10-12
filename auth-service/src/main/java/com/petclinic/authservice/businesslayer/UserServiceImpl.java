@@ -401,4 +401,36 @@ public class UserServiceImpl implements UserService {
         return userRepo.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("No account found for email: " + email));
     }
+
+    @Override
+    public UserPasswordLessDTO updateUserRole(String userId, RolesChangeRequestDTO roles, String token) {
+        User existingUser = userRepo.findUserByUserIdentifier_UserId(userId);
+
+        if(existingUser == null) {
+            throw new NotFoundException("No user was found with id : " + userId);
+        }
+
+
+        if (userId.equals(jwtService.getIdFromToken(token)))
+            throw new InvalidRequestException("You can't change your own roles !");
+
+
+
+        existingUser.setId(existingUser.getId());
+        existingUser.setUserIdentifier(new UserIdentifier(userId));
+
+        Set<Role> newRoles = new HashSet<>();
+        for (String role:
+             roles.getRoles()) {
+            Role newRole = roleRepo.findRoleByName(role);
+            if (newRole == null)
+                throw new NotFoundException("Role was not found with name : " + newRole);
+            newRoles.add(newRole);
+        }
+
+
+        existingUser.setRoles(newRoles);
+
+        return userMapper.modelToPasswordLessDTO(userRepo.save(existingUser));
+    }
 }

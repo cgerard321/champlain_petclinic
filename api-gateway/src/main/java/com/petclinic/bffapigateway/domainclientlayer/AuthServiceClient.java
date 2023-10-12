@@ -262,5 +262,18 @@ public class AuthServiceClient {
                 .toEntity(TokenResponseDTO.class);
     }
 
+    public Mono<UserResponseDTO> updateUsersRoles(String userId, RolesChangeRequestDTO rolesChangeRequestDTO, String jwToken) {
+        return webClientBuilder.build()
+                .patch()
+                .uri(authServiceUrl + "/users/{userId}", userId)
+                .bodyValue(rolesChangeRequestDTO)
+                .cookie("Bearer", jwToken)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, n -> rethrower.rethrow(n,
+                        x -> new GenericHttpException(x.get("message").toString(), (HttpStatus) n.statusCode())))
+                .bodyToMono(UserResponseDTO.class);
+    }
+
 }
 
