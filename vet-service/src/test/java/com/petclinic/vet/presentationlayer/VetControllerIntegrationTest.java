@@ -69,9 +69,10 @@ class VetControllerIntegrationTest {
     Vet vet = buildVet("1234");
     Vet vet2 = buildVet2("2345");
 
-    Rating rating1 = buildRating("12345", "db0c8f13-89d2-4ef7-bcd5-3776a3734150", 5.0);
-    Rating rating2 = buildRating("12346", "db0c8f13-89d2-4ef7-bcd5-3776a3734150", 4.0);
-    Rating rating3 = buildRating("12347", "db0c8f13-89d2-4ef7-bcd5-3776a3734150", 3.0);
+    Rating rating1 = buildRating("12345", "db0c8f13-89d2-4ef7-bcd5-3776a3734150", 5.0,"2023");
+    Rating rating2 = buildRating("12346", "db0c8f13-89d2-4ef7-bcd5-3776a3734150", 4.0,"2022");
+    Rating rating3 = buildRating("12347", "db0c8f13-89d2-4ef7-bcd5-3776a3734150", 3.0,"2024");
+
 
     VetResponseDTO vetResponseDTO = buildVetResponseDTO("3456");
     VetRequestDTO vetRequestDTO = buildVetRequestDTO("3456");
@@ -614,6 +615,99 @@ class VetControllerIntegrationTest {
                             assertEquals(0.0, avg);
                         }
                 );
+    }
+
+    @Test
+    void getRatingBasedOnYearDate_ShouldSucceed() {
+        Publisher<Rating> setup = ratingRepository.deleteAll()
+                .thenMany(ratingRepository.save(rating1))
+                .thenMany(ratingRepository.save(rating2));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        String existingDate = "2023";
+
+
+
+        RatingResponseDTO ratingWithDate = RatingResponseDTO.builder()
+                .date(rating1.getDate())
+                .ratingId(rating1.getRatingId())
+                .vetId(VET_ID)
+                .date(existingDate)
+                .rateScore(rating1.getRateScore())
+                .rateDescription(rating1.getRateDescription())
+                .predefinedDescription(rating1.getPredefinedDescription())
+                .build();
+
+        client
+                .get()
+                .uri("/vets/"+VET_ID+"/ratings/date?year={year}",existingDate)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(RatingResponseDTO.class)
+                .value((list) -> {
+                    assertEquals(2, list.size());
+                    assertEquals(rating1.getRatingId(),list.get(0).getRatingId());
+                    assertEquals(rating1.getVetId(),list.get(0).getVetId());
+                    assertEquals(rating1.getRateScore(),list.get(0).getRateScore());
+                    assertEquals(rating1.getRateDate(),list.get(0).getRateDate());
+                    assertEquals(rating1.getRateDescription(),list.get(0).getRateDescription());
+                    assertEquals(existingDate, list.get(0).getDate());
+                });
+    }
+
+    @Test
+    void getRatingBasedOnYearDateWithInvalidVetID_ShouldFail() {
+
+        Publisher<Rating> setup = ratingRepository.deleteAll().
+                thenMany(ratingRepository.save(rating1));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        String invalidVetId="123";
+        String existingDate = "2023";
+
+        client
+                .get()
+                .uri("/vets/"+invalidVetId+"/ratings/date?year={year}",existingDate)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("No valid ratings were found for "+invalidVetId);
+
+    }
+
+
+    @Test
+    void getRatingBasedOnYearDateWithInvalidYear_ShouldFail() {
+
+        Publisher<Rating> setup = ratingRepository.deleteAll().
+                thenMany(ratingRepository.save(rating1));
+
+        StepVerifier
+                .create(setup)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        String invalidYear="203q";
+
+        client
+                .get()
+                .uri("/vets/"+VET_ID+"/ratings/date?year="+ invalidYear)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Invalid year format. Please enter a valid year.");
+
     }
 
     @Test
@@ -1618,11 +1712,12 @@ class VetControllerIntegrationTest {
                 .build();
     }
 
-    private Rating buildRating(String ratingId, String vetId, Double rateScore) {
+    private Rating buildRating(String ratingId, String vetId, Double rateScore,String date) {
         return Rating.builder()
                 .ratingId(ratingId)
                 .vetId(vetId)
                 .rateScore(rateScore)
+                .date("2023")
                 .build();
     }
 

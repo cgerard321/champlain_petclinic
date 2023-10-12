@@ -10,11 +10,13 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.http.MediaType;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.util.StreamUtils;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -23,14 +25,17 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.io.IOException;
-import java.util.Base64;
-import java.util.HashSet;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 
+import static io.netty.handler.codec.http.HttpHeaders.setHeader;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.in;
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 
@@ -166,6 +171,30 @@ class VetsServiceClientIntegrationTest {
         assertEquals(4.5, averageRatingDTO.getAverageRating(),0.1);
         //its 0.0 because the vet doesn't have any ratings
     }
+    @Test
+    void getRatingBasedOnDate() throws JsonProcessingException{
+        Map<String, String> queryParams = new HashMap<>();
+        queryParams.put("year", "2023");
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody("{\n" +
+                        "    \"vetId\": \"deb1950c-3c56-45dc-874b-89e352695eb7\",\n" +
+                                "        \"ratingId\": \"123456\",\n" +
+                                "        \"vetId\": \"deb1950c-3c56-45dc-874b-89e352695eb7\",\n" +
+                                "        \"rateScore\": 4.5,\n" +
+                                "        \"date\": \"2023\" \n" +
+                        "}"));
+
+        final RatingResponseDTO ratingResponseDTO = vetsServiceClient.getRatingsOfAVetBasedOnDate(vetResponseDTO.getVetId(), queryParams).blockFirst();
+
+        System.out.print(ratingResponseDTO);
+        assertNotNull(ratingResponseDTO);
+        Assertions.assertEquals("2023", ratingResponseDTO.getDate());
+        Assertions.assertEquals("deb1950c-3c56-45dc-874b-89e352695eb7", ratingResponseDTO.getVetId());
+
+    }
+
     @Test
     void getNumberOfRatingsByInvalidVetId_shouldNotSucceed() throws ExistingVetNotFoundException{
         String invalidVetId="123";

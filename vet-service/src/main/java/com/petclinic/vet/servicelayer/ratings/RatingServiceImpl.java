@@ -19,6 +19,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import reactor.util.function.Tuples;
 
+import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -72,7 +73,10 @@ public class RatingServiceImpl implements RatingService {
                     return requestDto;
                 })
                 .map(EntityDtoUtil::toEntity)
-                .doOnNext(r -> r.setRatingId(UUID.randomUUID().toString()))
+                .doOnNext(r -> {
+                    r.setRatingId(UUID.randomUUID().toString());
+                    r.setDate(String.valueOf(LocalDate.now().getYear()));
+                })
                 .flatMap(ratingRepository::insert)
                 .map(EntityDtoUtil::toDTO);
     }
@@ -102,7 +106,15 @@ public class RatingServiceImpl implements RatingService {
                     }
                 });
     }
-
+    public Flux<RatingResponseDTO> getRatingsOfAVetBasedOnDate(String vetId, Map<String,String> queryParams) {
+        String year = queryParams.get("year");
+        return ratingRepository.findAllByVetId(vetId).mapNotNull(rating -> {
+                    if (Integer.parseInt(rating.getDate()) >= (Integer.parseInt(year)))
+                        return EntityDtoUtil.toDTO(rating);
+                    return null;
+                }).sort((o1, o2) -> Integer.compare(Integer.parseInt(o2.getDate()),Integer.parseInt(o1.getDate())))
+                .publishOn(Schedulers.boundedElastic());
+    }
 
     @Override
     public Flux<VetAverageRatingDTO> getTopThreeVetsWithHighestAverageRating() {
