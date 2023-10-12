@@ -357,6 +357,13 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
+    @PostMapping(value = "vets/{vetId}/photos/{photoName}")
+    public Mono<ResponseEntity<Resource>> updatePhotoByVetId(@PathVariable String vetId, @PathVariable String photoName, @RequestBody Mono<Resource> image) {
+        return vetsServiceClient.updatePhotoOfVet(vetId, photoName, image)
+                .map(r -> ResponseEntity.status(HttpStatus.CREATED).body(r))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
     //Badge
     @GetMapping("vets/{vetId}/badge")
     public Mono<ResponseEntity<BadgeResponseDTO>> getBadgeByVetId(@PathVariable String vetId){
