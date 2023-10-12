@@ -11,6 +11,7 @@ package com.petclinic.vet.presentationlayer;
   * Ticket: feat(VVS-CPC-553): add veterinarian
  */
 
+import com.petclinic.vet.exceptions.NotFoundException;
 import com.petclinic.vet.servicelayer.*;
 import com.petclinic.vet.servicelayer.badges.BadgeResponseDTO;
 import com.petclinic.vet.servicelayer.badges.BadgeService;
@@ -31,6 +32,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
@@ -76,6 +79,20 @@ public class VetController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+    @GetMapping("{vetId}/ratings/date")
+    public Flux<RatingResponseDTO> getRatingsOfAVetBasedOnDate(@PathVariable String vetId, @RequestParam Map<String,String> queryParams) {
+        if (queryParams.containsKey("year")) {
+            String year = queryParams.get("year");
+
+            //This regex signifies that it required 4 numbers input for the year
+            if (!year.matches("^\\d{4}$")) {
+                throw new NotFoundException("Invalid year format. Please enter a valid year.");
+            }
+        }
+        return ratingService.getRatingsOfAVetBasedOnDate(vetId, queryParams)
+                .switchIfEmpty(Mono.error(new NotFoundException("No valid ratings were found for " + vetId)));
+    }
+
 
     @GetMapping("topVets")
     public Flux<VetAverageRatingDTO> getTopThreeVetsWithHighestAverageRating() {

@@ -4,6 +4,8 @@ import com.petclinic.vet.dataaccesslayer.Photo;
 import com.petclinic.vet.dataaccesslayer.Vet;
 import com.petclinic.vet.dataaccesslayer.badges.Badge;
 import com.petclinic.vet.dataaccesslayer.badges.BadgeTitle;
+import com.petclinic.vet.dataaccesslayer.ratings.PredefinedDescription;
+import com.petclinic.vet.dataaccesslayer.ratings.Rating;
 import com.petclinic.vet.exceptions.InvalidInputException;
 import com.petclinic.vet.servicelayer.*;
 import com.petclinic.vet.servicelayer.badges.BadgeResponseDTO;
@@ -33,7 +35,9 @@ import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -66,6 +70,7 @@ class VetControllerUnitTest {
     VetResponseDTO vetResponseDTO2 = buildVetResponseDTO2();
 
 
+
     VetAverageRatingDTO averageRatingDTO=buildVetAverageRatingDTO1();
     VetAverageRatingDTO averageRatingDTO2=buildVetAverageRatingDTO2();
     VetAverageRatingDTO averageRatingDTO3=buildVetAverageRatingDTO3();
@@ -77,6 +82,12 @@ class VetControllerUnitTest {
 
 
     RatingResponseDTO ratingDTO = buildRatingResponseDTO("Vet was super calming with my pet",5.0);
+
+    RatingResponseDTO ratingDateResponseDTO=buildRatingResponseWithDate();
+    RatingResponseDTO ratingDateResponseDTO2=buildRatingResponseWithDate2();
+
+    Rating ratingWithDate=buildNewRatingWithDate();
+    Rating ratingWithDate2=buildNewRatingWithDate2();
 
     Vet vet = buildVet();
     String VET_ID = vet.getVetId();
@@ -261,6 +272,34 @@ class VetControllerUnitTest {
 
         Mockito.verify(ratingService, times(1))
                 .getTopThreeVetsWithHighestAverageRating();
+
+    }
+    @Test
+    void getRatingBasedOnDate() {
+
+
+        String exisingYearDate="2023";
+
+        Map<String, String> ratingQueryParams = new HashMap<>();
+        ratingQueryParams.put("year", exisingYearDate);
+
+        when(ratingService.getRatingsOfAVetBasedOnDate(vet.getVetId(),ratingQueryParams))
+                .thenReturn(Flux.just(ratingDateResponseDTO,ratingDateResponseDTO2));
+        client.get()
+                .uri("/vets/"+VET_ID+"/ratings/date?year={year}",exisingYearDate)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(RatingResponseDTO.class)
+                .value(ratingDTOs ->{
+                            assertEquals(2, ratingDTOs.size());
+                        }
+                );
+
+        Mockito.verify(ratingService, times(1))
+                .getRatingsOfAVetBasedOnDate(vet.getVetId(),ratingQueryParams);
+
 
     }
 
@@ -807,6 +846,27 @@ class VetControllerUnitTest {
                 .rateDate("16/09/2023")
                 .build();
     }
+    private RatingResponseDTO buildRatingResponseDTOWithDate(String description, double score) {
+        return RatingResponseDTO.builder()
+                .ratingId("2")
+                .vetId("cf25e779-548b-4788-aefa-6d58621c2feb")
+                .rateScore(score)
+                .rateDescription(description)
+                .rateDate("16/09/2023")
+                .date("2023")
+                .build();
+    }
+
+    private RatingResponseDTO buildRatingResponseDTOWithDate2(String description, double score) {
+        return RatingResponseDTO.builder()
+                .ratingId("2")
+                .vetId("cf25e779-548b-4788-aefa-6d58621c2feb")
+                .rateScore(score)
+                .rateDescription(description)
+                .rateDate("16/09/2023")
+                .date("2022")
+                .build();
+    }
 
     private Photo buildPhoto(){
         byte[] photo = {123, 23, 75, 34};
@@ -843,4 +903,50 @@ class VetControllerUnitTest {
                 .vetId("92739")
                 .build();
     }
+
+    private RatingResponseDTO buildRatingResponseWithDate(){
+        return RatingResponseDTO .builder()
+                .vetId("1232")
+                .date("2023")
+                .predefinedDescription(PredefinedDescription.GOOD)
+                .ratingId("1312")
+                .rateScore(2.0)
+                .rateDescription("This is a bad vet")
+                .build();
+    }
+    private RatingResponseDTO buildRatingResponseWithDate2(){
+        return RatingResponseDTO .builder()
+                .vetId("1232")
+                .date("2022")
+                .predefinedDescription(PredefinedDescription.POOR)
+                .ratingId("1234")
+                .rateScore(2.0)
+                .rateDescription("This is a bad vet")
+                .build();
+    }
+
+    private Rating buildNewRatingWithDate(){
+        return Rating.builder()
+                .vetId("1232")
+                .date("2023")
+                .id("1")
+                .rateScore(3.0)
+                .predefinedDescription(PredefinedDescription.POOR)
+                .rateDate("21")
+                .rateDescription("This is a medium vet")
+                .build();
+    }
+
+    private Rating buildNewRatingWithDate2(){
+        return Rating.builder()
+                .vetId("1281")
+                .date("2022")
+                .id("2")
+                .rateScore(1.0)
+                .predefinedDescription(PredefinedDescription.POOR)
+                .rateDate("10")
+                .rateDescription("This is a bad vet")
+                .build();
+    }
+
 }

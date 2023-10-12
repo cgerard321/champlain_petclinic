@@ -22,7 +22,6 @@ import com.petclinic.bffapigateway.utils.VetsEntityDtoUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.validation.annotation.Validated;
@@ -30,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -401,7 +401,14 @@ public class BFFApiGatewayController {
         return vetsServiceClient.getTopThreeVetsWithHighestAverageRating();
     }
 
+
+
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @GetMapping("vets/{vetId}/ratings/date")
+    public Flux<RatingResponseDTO> getRatingsOfAVetBasedOnDate(@PathVariable String vetId, @RequestParam Map<String,String> queryParams){
+        return vetsServiceClient.getRatingsOfAVetBasedOnDate(vetId,queryParams);
+    }
+
     @GetMapping(value = "vets/{vetId}/ratings/average")
     public Mono<ResponseEntity<Double>> getAverageRatingByVetId(@PathVariable String vetId){
         return vetsServiceClient.getAverageRatingByVetId(VetsEntityDtoUtil.verifyId(vetId))

@@ -199,6 +199,25 @@ class ApiGatewayControllerTest {
     }
 
     @Test
+    void getRatingsBasedOnDate(){
+        Map<String, String> queryParams = new HashMap<>();
+        queryParams.put("year", "2023");
+
+
+        when(vetsServiceClient.getRatingsOfAVetBasedOnDate(vetResponseDTO.getVetId(), queryParams))
+                .thenReturn(Flux.just(buildRatingResponseDTO(),buildRatingResponseDTO2()));
+        client
+                .get()
+                .uri("/api/gateway/vets/"+VET_ID+"/ratings/date?year="+queryParams.get("year"))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$[0].date").isEqualTo("2023");
+
+    }
+
+    @Test
     void getAverageRatingsByVetId(){
         RatingResponseDTO ratingResponseDTO = buildRatingResponseDTO();
 
@@ -3089,6 +3108,15 @@ void deleteAllInventory_shouldSucceed() {
                 .ratingId("123456")
                 .vetId("181faeb5-c024-425c-9f08-663600008f06")
                 .rateScore(4.0)
+                .date("2023")
+                .build();
+    }
+    private RatingResponseDTO buildRatingResponseDTO2() {
+        return RatingResponseDTO.builder()
+                .ratingId("123456")
+                .vetId("181faeb5-c024-425c-9f08-663600008f06")
+                .rateScore(4.0)
+                .date("2022")
                 .build();
     }
 private VetAverageRatingDTO buildVetAverageRatingDTO(){

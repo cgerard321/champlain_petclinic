@@ -28,6 +28,12 @@ import java.util.UUID;
 
 @Service
 public class DataSetupService implements CommandLineRunner {
+
+
+    String date3 = ("2023");
+    String date4 = ("2024");
+    String date2 = ("2022");
+    String date1 = ("2021");
     private final VetRepository vetRepository;
     private final RatingRepository ratingRepository;
     private final EducationRepository educationRepository;
@@ -166,6 +172,7 @@ public class DataSetupService implements CommandLineRunner {
                 .rateScore(5.0)
                 .rateDescription(null)
                 .predefinedDescription(PredefinedDescription.EXCELLENT)
+                .date(date1)
                 .build();
         Rating r2 = Rating.builder()
                 .ratingId(UUID.randomUUID().toString())
@@ -173,6 +180,7 @@ public class DataSetupService implements CommandLineRunner {
                 .rateScore(4.0)
                 .predefinedDescription(null)
                 .rateDescription("Good vet.")
+                .date(date2)
                 .build();
         Rating r3 = Rating.builder()
                 .ratingId(UUID.randomUUID().toString())
@@ -180,6 +188,7 @@ public class DataSetupService implements CommandLineRunner {
                 .rateScore(3.0)
                 .rateDescription("The vet is ok.")
                 .predefinedDescription(null)
+                .date(date3)
                 .build();
         Rating r4 = Rating.builder()
                 .ratingId(UUID.randomUUID().toString())
@@ -187,6 +196,7 @@ public class DataSetupService implements CommandLineRunner {
                 .rateScore(4.0)
                 .rateDescription(null)
                 .predefinedDescription(PredefinedDescription.GOOD)
+                .date(date4)
                 .build();
         Flux.just(r1, r2, r3, r4)
                 .flatMap(ratingRepository::insert)
