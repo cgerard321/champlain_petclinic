@@ -63,6 +63,7 @@ class BillServiceClientIntegrationTest {
             .visitType("Check up")
             .date( null)
             .billStatus(BillStatus.PAID)
+            .dueDate(null)
             .build();
 
     private final BillResponseDTO billResponseDTO2 = BillResponseDTO.builder()
@@ -73,6 +74,7 @@ class BillServiceClientIntegrationTest {
             .visitType("Check up")
             .date(null)
             .billStatus(BillStatus.UNPAID)
+            .dueDate(null)
             .build();
 
     private final BillResponseDTO billResponseDTO3 = BillResponseDTO.builder()
@@ -83,6 +85,7 @@ class BillServiceClientIntegrationTest {
             .visitType("Check up")
             .date(null)
             .billStatus(BillStatus.OVERDUE)
+            .dueDate(null)
             .build();
 
     @Test
@@ -126,6 +129,7 @@ class BillServiceClientIntegrationTest {
                 .customerId("2")
                 .date(null)
                 .billStatus(BillStatus.PAID)
+                .dueDate(null)
                 .amount(100)
                 .visitType("Check")
                 .build();
@@ -148,6 +152,7 @@ class BillServiceClientIntegrationTest {
                 .customerId("2")
                 .date(null)
                 .billStatus(BillStatus.UNPAID)
+                .dueDate(null)
                 .amount(100)
                 .visitType("Check")
                 .build();
@@ -172,6 +177,7 @@ class BillServiceClientIntegrationTest {
                 .customerId("2")
                 .date(null)
                 .billStatus(BillStatus.UNPAID)
+                .dueDate(null)
                 .amount(100)
                 .visitType("Check")
                 .build();
@@ -196,6 +202,7 @@ class BillServiceClientIntegrationTest {
         billRequest.setCustomerId("1");
         billRequest.setDate(null);
         billRequest.setBillStatus(BillStatus.PAID);
+        billRequest.setDueDate(null);
         billRequest.setAmount(100.0);
         billRequest.setVisitType("Check up");
 
@@ -328,6 +335,7 @@ class BillServiceClientIntegrationTest {
                 .vetId("New Vet ID")
                 .date(null)
                 .billStatus(BillStatus.UNPAID)
+                .dueDate(null)
                 .amount(200.0)
                 .build();
 
@@ -339,6 +347,7 @@ class BillServiceClientIntegrationTest {
                 .vetId("New Vet ID")
                 .date(null)
                 .billStatus(BillStatus.PAID)
+                .dueDate(null)
                 .amount(200.0)
                 .build();
 

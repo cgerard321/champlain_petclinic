@@ -28,6 +28,7 @@
         <td>Visit Type</td>
         <td>Amount</td>
         <td>Status</td>
+        <td>Due Date</td>
         <td>Date</td>
         <td>Details</td>
         <td>Delete</td>
@@ -46,6 +47,7 @@
         <td>{{paidBill.visitType}}</td>
         <td>{{paidBill.amount}}</td>
         <td>{{paidBill.billStatus}}</td>
+        <td>{{paidBill.dueDate}}</td>
         <td>{{paidBill.date}}</td>
         <td><a href="http://localhost:8080/#!/bills/details/{{paidBill.billId}}/owner/{{paidBill.customerId}}">Get Details</a></td>
         <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteBill(paidBill.billId)">Delete Bill</a></td>
@@ -65,6 +67,7 @@
         <td>Visit Type</td>
         <td>Amount</td>
         <td>Status</td>
+        <td>Due Date</td>
         <td>Date</td>
         <td>Details</td>
         <td>Delete</td>
@@ -83,6 +86,7 @@
         <td>{{unpaidBill.visitType}}</td>
         <td>{{unpaidBill.amount}}</td>
         <td>{{unpaidBill.billStatus}}</td>
+        <td>{{unpaidBill.dueDate}}</td>
         <td>{{unpaidBill.date}}</td>
         <td><a href="http://localhost:8080/#!/bills/details/{{unpaidBill.billId}}/owner/{{unpaidBill.customerId}}">Get Details</a></td>
         <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteBill(unpaidBill.billId)">Delete Bill</a></td>
@@ -103,6 +107,7 @@
         <td>Visit Type</td>
         <td>Amount</td>
         <td>Status</td>
+        <td>Due Date</td>
         <td>Date</td>
         <td>Details</td>
         <td>Delete</td>
@@ -121,6 +126,7 @@
         <td>{{overdueBill.visitType}}</td>
         <td>{{overdueBill.amount}}</td>
         <td>{{overdueBill.billStatus}}</td>
+        <td>{{overdueBill.dueDate}}</td>
         <td>{{overdueBill.date}}</td>
         <td><a href="http://localhost:8080/#!/bills/details/{{overdueBill.billId}}/owner/{{overdueBill.customerId}}">Get Details</a></td>
         <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteBill(overdueBill.billId)">Delete Bill</a></td>
@@ -140,6 +146,7 @@
             <td>Visit Type</td>
             <td>Amount</td>
             <td>Status</td>
+            <td>Due Date</td>
             <td>Date</td>
             <td>Details</td>
             <td>Delete</td>
@@ -159,6 +166,7 @@
         <td>{{bill.visitType}}</td>
         <td>{{bill.amount}}</td>
         <td>{{bill.billStatus}}</td>
+        <td>{{bill.dueDate}}</td>
         <td>{{bill.date}}</td>
         <td><a href="http://localhost:8080/#!/bills/details/{{bill.billId}}/owner/{{bill.customerId}}">Get Details</a></td>
         <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteBill(bill.billId)">Delete Bill</a></td>
