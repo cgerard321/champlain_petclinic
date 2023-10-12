@@ -204,6 +204,13 @@ public class VetController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
+    @PutMapping("{vetId}/photos/{photoName}")
+    public Mono<ResponseEntity<Resource>> updatePhotoByVetId(@PathVariable String vetId, @PathVariable String photoName, @RequestBody Mono<Resource> photo){
+        return photoService.updatePhotoByVetId(vetId, photoName, photo)
+                .map(p -> ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE).body(p))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
     //Badge
     @GetMapping("{vetId}/badge")
     public Mono<ResponseEntity<BadgeResponseDTO>> getBadgeByVetId(@PathVariable String vetId){

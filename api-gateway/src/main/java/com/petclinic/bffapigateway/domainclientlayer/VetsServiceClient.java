@@ -71,6 +71,17 @@ public class VetsServiceClient {
                 .bodyToMono(Resource.class);
     }
 
+    public Mono<Resource> updatePhotoOfVet(String vetId, String photoName, Mono<Resource> image){
+        return webClientBuilder
+                .build()
+                .put()
+                .uri(vetsServiceUrl+"/"+vetId+"/photos/"+photoName)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE)
+                .body(image, Resource.class)
+                .retrieve()
+                .bodyToMono(Resource.class);
+    }
+
     //Badge
     public Mono<BadgeResponseDTO> getBadgeByVetId(String vetId){
         return webClientBuilder.build()
