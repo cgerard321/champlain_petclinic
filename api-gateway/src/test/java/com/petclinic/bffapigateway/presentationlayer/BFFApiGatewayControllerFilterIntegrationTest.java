@@ -3,9 +3,7 @@ package com.petclinic.bffapigateway.presentationlayer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.config.GlobalExceptionHandler;
 import com.petclinic.bffapigateway.domainclientlayer.*;
-import com.petclinic.bffapigateway.dtos.Auth.Login;
 import com.petclinic.bffapigateway.dtos.Auth.TokenResponseDTO;
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.utils.Security.Filters.IsUserFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.JwtTokenFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.JwtTokenUtil;
@@ -13,31 +11,21 @@ import com.petclinic.bffapigateway.utils.Security.Filters.RoleFilter;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.web.server.ServerWebExchange;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static reactor.core.publisher.Mono.when;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {
@@ -57,23 +45,15 @@ import static reactor.core.publisher.Mono.when;
 @AutoConfigureWebTestClient
 class BFFApiGatewayControllerFilterIntegrationTest {
 
-    @Autowired
-    private ObjectMapper objectMapper;
+    @Autowired private ObjectMapper objectMapper;
     @Autowired private WebTestClient client;
-    @MockBean
-    private CustomersServiceClient customersServiceClient;
-    @MockBean
-    private VisitsServiceClient visitsServiceClient;
-    @MockBean
-    private VetsServiceClient vetsServiceClient;
-    @MockBean
-    private AuthServiceClient authServiceClient;
-    @MockBean
-    private BillServiceClient billServiceClient;
-    @MockBean
-    private InventoryServiceClient inventoryServiceClient;
-    @MockBean
-    private JwtTokenUtil jwtTokenUtil;
+    @MockBean private CustomersServiceClient customersServiceClient;
+    @MockBean private VisitsServiceClient visitsServiceClient;
+    @MockBean private VetsServiceClient vetsServiceClient;
+    @MockBean private AuthServiceClient authServiceClient;
+    @MockBean private BillServiceClient billServiceClient;
+    @MockBean private InventoryServiceClient inventoryServiceClient;
+    @MockBean private JwtTokenUtil jwtTokenUtil;
 
     @Test
     void testGetAllCustomers_ShouldReturnUnauthorized() {
@@ -89,8 +69,6 @@ class BFFApiGatewayControllerFilterIntegrationTest {
 
     @Test
     void testGetAllCustomers_ShouldReturnOk() {
-
-
         Mockito.when(jwtTokenUtil.getTokenFromRequest(any(ServerWebExchange.class)))
                 .thenReturn("valid.token.signed");
 
@@ -119,7 +97,6 @@ class BFFApiGatewayControllerFilterIntegrationTest {
 
     //@Test
     void getUserByIdWithWrongAccount_ShouldFail(){
-
         Mockito.when(jwtTokenUtil.getTokenFromRequest(any(ServerWebExchange.class)))
                 .thenReturn("valid.token.signed");
 
@@ -134,9 +111,6 @@ class BFFApiGatewayControllerFilterIntegrationTest {
         Mockito.when(authServiceClient.validateToken(anyString()))
                 .thenReturn(validationResponse);
 
-
-
-
         client.get()
                 .uri("/api/gateway/owners/UUID")
                 .accept(MediaType.valueOf(MediaType.APPLICATION_JSON_VALUE))
@@ -145,6 +119,4 @@ class BFFApiGatewayControllerFilterIntegrationTest {
                 .exchange()
                 .expectStatus().isUnauthorized();
     }
-
-
 }

@@ -17,4 +17,6 @@ public class ProductResponseDTO {
     private String productDescription;
     private Double productPrice;
     private Integer productQuantity;
+    private Double productSalePrice;
+
 }

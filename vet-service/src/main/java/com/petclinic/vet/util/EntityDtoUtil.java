@@ -12,12 +12,16 @@ package com.petclinic.vet.util;
  */
 
 import com.petclinic.vet.dataaccesslayer.Photo;
+import com.petclinic.vet.dataaccesslayer.badges.Badge;
 import com.petclinic.vet.dataaccesslayer.education.Education;
 import com.petclinic.vet.dataaccesslayer.ratings.Rating;
 import com.petclinic.vet.dataaccesslayer.Specialty;
-import com.petclinic.vet.dataaccesslayer.Vet;
+import com.petclinic.vet.dataaccesslayer.*;
 import com.petclinic.vet.exceptions.InvalidInputException;
+import com.petclinic.vet.presentationlayer.VetRequestDTO;
+import com.petclinic.vet.presentationlayer.VetResponseDTO;
 import com.petclinic.vet.servicelayer.*;
+import com.petclinic.vet.servicelayer.badges.BadgeResponseDTO;
 import com.petclinic.vet.servicelayer.education.EducationRequestDTO;
 import com.petclinic.vet.servicelayer.education.EducationResponseDTO;
 import com.petclinic.vet.servicelayer.ratings.RatingRequestDTO;
@@ -27,8 +31,8 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.core.io.Resource;
 
 import java.io.IOException;
+import java.util.Base64;
 import java.util.HashSet;
-import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 
@@ -36,15 +40,14 @@ public class EntityDtoUtil {
     @Generated
     public EntityDtoUtil(){}
 
-    public static VetDTO toDTO(Vet vet) {
-        VetDTO dto = new VetDTO();
+    public static VetResponseDTO vetEntityToResponseDTO(Vet vet) {
+        VetResponseDTO dto = new VetResponseDTO();
         dto.setVetId(vet.getVetId());
         dto.setVetBillId(vet.getVetBillId());
         dto.setFirstName(vet.getFirstName());
         dto.setLastName(vet.getLastName());
         dto.setEmail(vet.getEmail());
         dto.setPhoneNumber(vet.getPhoneNumber());
-        dto.setImageId(vet.getImageId());
         dto.setResume(vet.getResume());
         dto.setWorkday(vet.getWorkday());
         dto.setActive(vet.isActive());
@@ -52,7 +55,7 @@ public class EntityDtoUtil {
         return dto;
     }
 
-    public static Vet toEntity(VetDTO dto) {
+    public static Vet vetRequestDtoToEntity(VetRequestDTO dto) {
         Vet vet = new Vet();
         vet.setVetId(dto.getVetId());
         vet.setVetBillId(dto.getVetBillId());
@@ -60,7 +63,6 @@ public class EntityDtoUtil {
         vet.setLastName(dto.getLastName());
         vet.setEmail(dto.getEmail());
         vet.setPhoneNumber(dto.getPhoneNumber());
-        vet.setImageId(dto.getImageId());
         vet.setResume(dto.getResume());
         vet.setWorkday(dto.getWorkday());
         vet.setActive(dto.isActive());
@@ -133,7 +135,7 @@ public class EntityDtoUtil {
     public static Set<SpecialtyDTO> toDTOSet(Set<Specialty> specialties) {
         Set<SpecialtyDTO> specialtyDTOS = new HashSet<>();
         for (Specialty specialty:
-             specialties) {
+                specialties) {
             SpecialtyDTO specialtyDTO = toDTO(specialty);
             specialtyDTOS.add(specialtyDTO);
         }
@@ -144,12 +146,21 @@ public class EntityDtoUtil {
     public static Set<Specialty>  toEntitySet(Set<SpecialtyDTO> specialtyDTOS){
         Set<Specialty> specialties = new HashSet<>();
         for (SpecialtyDTO specialtyDTO:
-            specialtyDTOS) {
+                specialtyDTOS) {
             Specialty specialty = toEntity(specialtyDTO);
             specialties.add(specialty);
         }
 
         return specialties;
+    }
+
+    public static BadgeResponseDTO toBadgeResponseDTO(Badge badge){
+        BadgeResponseDTO badgeResponseDTO=new BadgeResponseDTO();
+        badgeResponseDTO.setBadgeDate(badge.getBadgeDate());
+        badgeResponseDTO.setBadgeTitle(badge.getBadgeTitle());
+        badgeResponseDTO.setVetId(badge.getVetId());
+        badgeResponseDTO.setResourceBase64(Base64.getEncoder().encodeToString(badge.getData()));
+        return badgeResponseDTO;
     }
 
     public static String verifyId(String id) {

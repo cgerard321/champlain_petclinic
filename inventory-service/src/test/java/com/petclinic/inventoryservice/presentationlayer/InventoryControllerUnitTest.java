@@ -4,16 +4,22 @@ import com.petclinic.inventoryservice.businesslayer.ProductInventoryService;
 import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
 import com.petclinic.inventoryservice.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -36,6 +42,7 @@ class InventoryControllerUnitTest {
             .productDescription("Sedative Medication")
             .productPrice(100.00)
             .productQuantity(10)
+            .productSalePrice(15.99)
             .build();
     List<ProductResponseDTO> productResponseDTOS = Arrays.asList(
             ProductResponseDTO.builder()
@@ -46,6 +53,7 @@ class InventoryControllerUnitTest {
                     .productDescription("Sedative Medication")
                     .productPrice(100.00)
                     .productQuantity(10)
+                    .productSalePrice(15.99)
                     .build(),
             ProductResponseDTO.builder()
                     .id("1")
@@ -55,6 +63,17 @@ class InventoryControllerUnitTest {
                     .productDescription("Sedative Medication")
                     .productPrice(100.00)
                     .productQuantity(10)
+                    .productSalePrice(15.99)
+                    .build()
+    );
+    List<InventoryTypeResponseDTO> typesDTOS = Arrays.asList(
+            InventoryTypeResponseDTO.builder()
+                    .type("Internal")
+                    .typeId(UUID.randomUUID().toString())
+                    .build(),
+            InventoryTypeResponseDTO.builder()
+                    .type("External")
+                    .typeId(UUID.randomUUID().toString())
                     .build()
     );
 
@@ -285,6 +304,10 @@ class InventoryControllerUnitTest {
                 });
     }
 
+
+
+
+
     @Test
     void getInventoryByInventoryId_ValidIdShouldSucceed(){
         //arrange
@@ -321,6 +344,74 @@ class InventoryControllerUnitTest {
 
 
 
+
+
+
+    @Test
+    void getProductsInInventoryByInventoryIdAndProductId_ValidRequest_ShouldSucceed() {
+        // Arrange
+        String inventoryId = "1";
+        String productId = "123F567C9";
+        ProductResponseDTO productResponseDTO = ProductResponseDTO.builder()
+                .id("1")
+                .inventoryId(inventoryId)
+                .productId(productId)
+                .productName("Benzodiazepines")
+                .productDescription("Sedative Medication")
+                .productPrice(100.00)
+                .productQuantity(10)
+                .productSalePrice(15.99)
+                .build();
+
+        when(productInventoryService.getProductByProductIdInInventory(eq(inventoryId), eq(productId)))
+                .thenReturn(Mono.just(productResponseDTO));
+
+        // Act
+        Mono<ProductResponseDTO> productResponseDTOMono = productInventoryService.getProductByProductIdInInventory(inventoryId, productId);
+
+        // Assert
+        StepVerifier
+                .create(productResponseDTOMono)
+                .expectNextMatches(response -> {
+                    assertNotNull(response);
+                    assertEquals(productResponseDTO.getId(), response.getId());
+                    assertEquals(productResponseDTO.getInventoryId(), response.getInventoryId());
+                    assertEquals(productResponseDTO.getProductId(), response.getProductId());
+                    assertEquals(productResponseDTO.getProductName(), response.getProductName());
+                    assertEquals(productResponseDTO.getProductDescription(), response.getProductDescription());
+                    assertEquals(productResponseDTO.getProductPrice(), response.getProductPrice());
+                    assertEquals(productResponseDTO.getProductQuantity(), response.getProductQuantity());
+                    assertEquals(productResponseDTO.getProductSalePrice(), response.getProductSalePrice());
+                    return true;
+                })
+                .verifyComplete();
+
+        verify(productInventoryService, times(1))
+                .getProductByProductIdInInventory(eq(inventoryId), eq(productId));
+    }
+
+
+    @Test
+    void getProductsInInventoryByInventoryIdAndProductId_InvalidRequest_ShouldFail() {
+        // Arrange
+        String invalidInventoryId = "invalidInventoryId";
+        String invalidProductId = "invalidProductId";
+
+        when(productInventoryService.getProductByProductIdInInventory(eq(invalidInventoryId), eq(invalidProductId)))
+                .thenReturn(Mono.empty());
+
+        // Act
+        Mono<ProductResponseDTO> productResponseDTOMono = productInventoryService.getProductByProductIdInInventory(invalidInventoryId, invalidProductId);
+
+        // Assert
+        StepVerifier
+                .create(productResponseDTOMono)
+                .expectComplete()
+                .verify();
+
+        verify(productInventoryService, times(1))
+                .getProductByProductIdInInventory(eq(invalidInventoryId), eq(invalidProductId));
+    }
     @Test
     void getInventoryByInvalidInventoryId_ReturnNotFound() {
 
@@ -415,6 +506,7 @@ class InventoryControllerUnitTest {
                 .productDescription("Updated Description")
                 .productPrice(200.00)
                 .productQuantity(20)
+                .productSalePrice(15.99)
                 .build();
 
         ProductResponseDTO responseDTO = ProductResponseDTO.builder()
@@ -424,6 +516,7 @@ class InventoryControllerUnitTest {
                 .productDescription("Updated Description")
                 .productPrice(200.00)
                 .productQuantity(20)
+                .productSalePrice(15.99)
                 .build();
 
         when(productInventoryService.updateProductInInventory(any(), eq(inventoryId), eq(productId)))
@@ -446,6 +539,7 @@ class InventoryControllerUnitTest {
                     assertEquals(responseDTO.getProductDescription(), dto.getProductDescription());
                     assertEquals(responseDTO.getProductPrice(), dto.getProductPrice());
                     assertEquals(responseDTO.getProductQuantity(), dto.getProductQuantity());
+                    assertEquals(responseDTO.getProductSalePrice(), dto.getProductSalePrice());
                 });
 
         verify(productInventoryService, times(1))
@@ -462,6 +556,7 @@ class InventoryControllerUnitTest {
                 .productDescription("Updated Description")
                 .productPrice(200.00)
                 .productQuantity(20)
+                .productSalePrice(15.99)
                 .build();
 
         when(productInventoryService.updateProductInInventory(any(), eq(inventoryId), eq(productId)))
@@ -495,6 +590,7 @@ class InventoryControllerUnitTest {
                 .productDescription("Updated Description")
                 .productPrice(200.00)
                 .productQuantity(20)
+                .productSalePrice(15.99)
                 .build();
 
         when(productInventoryService.updateProductInInventory(any(), eq(inventoryId), eq(productId)))
@@ -572,6 +668,7 @@ class InventoryControllerUnitTest {
                 .productDescription("New Description")
                 .productPrice(200.00)
                 .productQuantity(20)
+                .productSalePrice(15.99)
                 .build();
 
         ProductResponseDTO responseDTO = ProductResponseDTO.builder()
@@ -581,6 +678,7 @@ class InventoryControllerUnitTest {
                 .productDescription("New Description")
                 .productPrice(200.00)
                 .productQuantity(20)
+                .productSalePrice(15.99)
                 .build();
 
         when(productInventoryService.addProductToInventory(any(), eq(inventoryId)))
@@ -603,6 +701,7 @@ class InventoryControllerUnitTest {
                     assertEquals(responseDTO.getProductDescription(), dto.getProductDescription());
                     assertEquals(responseDTO.getProductPrice(), dto.getProductPrice());
                     assertEquals(responseDTO.getProductQuantity(), dto.getProductQuantity());
+                    assertEquals(responseDTO.getProductSalePrice(), dto.getProductSalePrice());
                 });
 
         verify(productInventoryService, times(1))
@@ -618,6 +717,7 @@ class InventoryControllerUnitTest {
                 .productDescription("New Description")
                 .productPrice(200.00)
                 .productQuantity(20)
+                .productSalePrice(15.99)
                 .build();
 
         when(productInventoryService.addProductToInventory(any(), eq(inventoryId)))
@@ -717,8 +817,153 @@ class InventoryControllerUnitTest {
         verify(productInventoryService, times(1))
                 .addInventoryType(any());
     }
+    @Test
+    public void getAllInventoryTypes_shouldSucceed(){
+        when(productInventoryService.getAllInventoryTypes())
+                .thenReturn(Flux.fromIterable(typesDTOS));
 
+        webTestClient.get()
+                .uri("/inventory/type")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(ProductResponseDTO.class)
+                .value(responseDTOs -> {
+                    assertNotNull(responseDTOs);
+                    assertEquals(typesDTOS.size(), responseDTOs.size());
+                });
+    }
+    @Test
+    void searchInventories_WithNameOnly_ShouldReturnMatchingInventories() {
+        // Arrange
+        Pageable page = PageRequest.of(0, 10);
+        String inventoryName = "SampleName";
 
+        InventoryResponseDTO sampleResponse = new InventoryResponseDTO();
+
+        when(productInventoryService.searchInventories(page, inventoryName, null, null))
+                .thenReturn(Flux.just(sampleResponse));
+
+        // Act and Assert
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder.path("/inventory")
+                        .queryParam("inventoryName", inventoryName)
+                        .build())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(InventoryResponseDTO.class)
+                .hasSize(1)
+                .contains(sampleResponse);
+    }
+    @Test
+    void searchInventories_WithOnlyType_ShouldReturnMatchingInventories() {
+        // Arrange
+        Pageable page = PageRequest.of(0, 10);
+        String inventoryType = "SampleType";
+        InventoryResponseDTO sampleResponse = new InventoryResponseDTO();
+
+        when(productInventoryService.searchInventories(page, null, inventoryType, null))
+                .thenReturn(Flux.just(sampleResponse));
+
+        // Act and Assert
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder.path("/inventory")
+                        .queryParam("inventoryType", inventoryType)
+                        .build())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(InventoryResponseDTO.class)
+                .hasSize(1)
+                .contains(sampleResponse);
+    }
+
+    @Test
+    void searchInventories_WithOnlyDescription_ShouldReturnMatchingInventories() {
+        // Arrange
+        Pageable page = PageRequest.of(0, 10);
+        String inventoryDescription = "SampleDescription";
+        InventoryResponseDTO sampleResponse = new InventoryResponseDTO();
+
+        when(productInventoryService.searchInventories(page, null, null, inventoryDescription))
+                .thenReturn(Flux.just(sampleResponse));
+
+        // Act and Assert
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder.path("/inventory")
+                        .queryParam("inventoryDescription", inventoryDescription)
+                        .build())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(InventoryResponseDTO.class)
+                .hasSize(1)
+                .contains(sampleResponse);
+    }
+    @Test
+    void searchInventories_WithNoParams_ShouldReturnAllInventories() {
+        // Arrange
+        Pageable page = PageRequest.of(0, 10);
+        InventoryResponseDTO sampleResponse = new InventoryResponseDTO();
+
+        when(productInventoryService.searchInventories(page, null, null, null))
+                .thenReturn(Flux.just(sampleResponse));
+
+        // Act and Assert
+        webTestClient
+                .get()
+                .uri("/inventory")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(InventoryResponseDTO.class)
+                .contains(sampleResponse);
+    }
+    @Test
+    void getProductsByInventoryIdAndProductName_withValidFields_shouldSucceed() {
+        String inventoryId = "1";
+        String productName = "B";
+        Mockito.when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(
+                anyString(),
+                anyString(),
+                Mockito.isNull(),
+                Mockito.isNull()
+        )).thenReturn(Flux.fromIterable(productResponseDTOS));
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/inventory/{inventoryId}/products")
+                        .queryParam("productName", productName)
+                        .build(inventoryId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProductResponseDTO.class)
+                .hasSize(2);
+    }
+
+    @Test
+    void getAllProductsByInventoryId_withValidFields_shouldSucceed() {
+        String inventoryId = "1";
+        Mockito.when(productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(
+                anyString(),
+                Mockito.isNull(),
+                Mockito.isNull(),
+                Mockito.isNull()
+        )).thenReturn(Flux.fromIterable(productResponseDTOS));
+
+        webTestClient.get()
+                .uri("/inventory/{inventoryId}/products", inventoryId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(ProductResponseDTO.class)
+                .hasSize(2);
+    }
 
 }
+
+
+
 

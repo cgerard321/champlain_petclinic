@@ -1,58 +1,58 @@
 'use strict';
 
 angular.module('visits')
-    .controller('VisitsController', ['$http', '$state', '$stateParams', '$filter','$scope','$rootScope', function ($http, $state, $stateParams, $filter, $scope,$rootScope) {
-        var self = this;
-        var petId = $stateParams.petId || 0;
-        var postURL = "api/gateway/visit/owners/5fe81e29-1f1d-4f9d-b249-8d3e0cc0b7dd/pets/9/visits";
-        var vetsUrl = "api/gateway/vets";
-        var billsUrl = "api/gateway/bill";
-        var visitId = 0;
-        self.practitionerId = 0;
-        self.date = new Date();
-        self.desc = "";
-        self.chosenDate = null;
-        self.chosenTime = null;
+    .controller('VisitsController', ['$http', '$state', '$stateParams', '$filter','$scope','$rootScope', '$window', function ($http, $state, $stateParams, $filter, $scope, $rootScope, $window) {
+        var self = this
+        var petId = $stateParams.petId || 0
+        var postURL = "api/gateway/visit/owners/"+$window.localStorage.getItem("UUID")+"/pets/9/visits"
+        var vetsUrl = "api/gateway/vets"
+        var billsUrl = "api/gateway/bill"
+        var visitId = 0
+        self.practitionerId = 0
+        // self.date = new Date()
+        self.desc = ""
+        self.chosenDate = null
+        self.chosenTime = null
 
 
 
 
-        $http.get("api/gateway/visits/"+petId).then(function (resp) {
-            self.visits = resp.data;
-            self.sortFetchedVisits();
-        });
+        // $http.get("api/gateway/visits/"+petId).then(function (resp) {
+        //     self.visits = resp.data;
+        //     self.sortFetchedVisits();
+        // });
 
         $scope.$on('selectedDateChanged', function(event, selectedDate) {
-            console.log("Received selected date:", selectedDate);
+            console.log("Received selected date:", selectedDate)
             // Set dateChosen to the received selected date
-            self.chosenDate = selectedDate;
-        });
+            self.chosenDate = selectedDate
+        })
 
         // Function to... get the current date ;)
         function getCurrentDate() {
-            let dateObj = new Date();
-            var dd = String(dateObj.getDate()).padStart(2, '0');
-            var mm = String(dateObj.getMonth() + 1).padStart(2, '0');
-            var yyyy = dateObj.getFullYear();
-            console.log("got currentDate");
-            return Date.parse(yyyy + '-' + mm + '-' + dd);
+            let dateObj = new Date()
+            var dd = String(dateObj.getDate()).padStart(2, '0')
+            var mm = String(dateObj.getMonth() + 1).padStart(2, '0')
+            var yyyy = dateObj.getFullYear()
+            console.log("got currentDate")
+            return Date.parse(yyyy + '-' + mm + '-' + dd)
         }
 
         //TODO: make a function to parse the date to localDate
         //----------------------------------------------------
         // Container div for all alerts
-        let alertsContainer = $('#alertsContainer');
+        let alertsContainer = $('#alertsContainer')
 
         // Function to delete last added alert
         function deleteAlertAfter(alertId, time) {
             setTimeout(function() {
                 if(alertsContainer.children().length === 1 && alertsContainer.children(".alert:first-child").attr("id") === alertId) {
-                    alertsContainer.children(".alert:first-child").remove();
+                    alertsContainer.children(".alert:first-child").remove()
                 }
-            }, time);
+            }, time)
         }
 
-        let alertId = 0;
+        let alertId = 0
         // Function to create alert
         function createAlert(alertType, alertMessage) {
             // Create an alert based on parameters
@@ -60,35 +60,31 @@ angular.module('visits')
                 "<div id=\"alert-"+ ++alertId +"\" class=\"alert alert-"+ alertType +"\" role=\"alert\">" +
                 "<p>" + alertMessage + "</p>" +
                 "</div>"
-            );
+            )
 
             // If there is already an alert make place for new one
             if(alertsContainer.children().length > 1) {
-                alertsContainer.children(".alert:first-child").remove();
+                alertsContainer.children(".alert:first-child").remove()
             }
 
-            console.log(alertsContainer.children().length);
+            console.log(alertsContainer.children().length)
 
             // Delete the alert after x amount of time (millis)
-            deleteAlertAfter("alert-" + alertId, 3000);
+            deleteAlertAfter("alert-" + alertId, 3000)
         }
 
         // Lists holding visits for the table to display
-        self.upcomingVisits = [];
-        self.previousVisits = [];
-
+        self.upcomingVisits = []
         self.sortFetchedVisits = function() {
-            let currentDate = getCurrentDate();
+            let currentDate = getCurrentDate()
 
             $.each(self.visits, function(i, visit) {
-                let selectedVisitDate = Date.parse(visit.date);
+                let selectedVisitDate = Date.parse(visit.date)
 
                 if(selectedVisitDate >= currentDate) {
-                    self.upcomingVisits.push(visit);
-                } else {
-                    self.previousVisits.push(visit);
+                    self.upcomingVisits.push(visit)
                 }
-            });
+            })
         }
         /*
         self.getVisitsForPractitionerIdAndMonth = function() {
@@ -125,61 +121,61 @@ angular.module('visits')
 
         $http.get(vetsUrl).then(function (resp) {
             self.vets = resp.data;
-        });
+        })
 
         self.loadVetInfo = function() {
-            let selectedVetsId = $("#selectedVet").val();
+            let selectedVetsId = $("#selectedVet").val()
 
-            let foundVet = false;
-            let vetPhoneNumber = "";
-            let vetEmailAddress = "";
-            let vetWorkdays = "";
-            let vetSpecialtiesObject = null;
+            let foundVet = false
+            let vetPhoneNumber = ""
+            let vetEmailAddress = ""
+            let vetWorkdays = ""
+            let vetSpecialtiesObject = null
 
             $.each(self.vets, function(i, vet) {
                 if(selectedVetsId == vet.vetId) {
-                    foundVet = true;
-                    vetPhoneNumber = vet.phoneNumber;
-                    vetEmailAddress = vet.email;
-                    vetSpecialtiesObject = vet.specialties;
-                    vetWorkdays = vet.workday;
+                    foundVet = true
+                    vetPhoneNumber = vet.phoneNumber
+                    vetEmailAddress = vet.email
+                    vetSpecialtiesObject = vet.specialties
+                    vetWorkdays = vet.workday
 
-                    return false;
+                    return false
                 }
-            });
+            })
 
-            let vetSpecialties = "";
+            let vetSpecialties = ""
             $.each(vetSpecialtiesObject, function(i, specialty) {
                 if(i < vetSpecialtiesObject.length - 1) {
-                    vetSpecialties += specialty.name + ", ";
+                    vetSpecialties += specialty.name + ", "
                 } else {
-                    vetSpecialties += specialty.name;
+                    vetSpecialties += specialty.name
                 }
-            });
+            })
 
             if(foundVet) {
-                $("#vetPhoneNumber").val(vetPhoneNumber);
-                $("#vetEmailAddress").val(vetEmailAddress);
-                $("#vetSpecialties").val(vetSpecialties);
-                $("#vetWorkdays").val(vetWorkdays).trigger("change");
+                $("#vetPhoneNumber").val(vetPhoneNumber)
+                $("#vetEmailAddress").val(vetEmailAddress)
+                $("#vetSpecialties").val(vetSpecialties)
+                $("#vetWorkdays").val(vetWorkdays).trigger("change")
             } else {
-                $("#vetPhoneNumber").val("");
-                $("#vetEmailAddress").val("");
-                $("#vetSpecialties").val("");
-                $("#vetWorkdays").val("");
+                $("#vetPhoneNumber").val("")
+                $("#vetEmailAddress").val("")
+                $("#vetSpecialties").val("")
+                $("#vetWorkdays").val("")
             }
         }
 
         self.getPractitionerName = function (id){
-            var practitionerName = "";
+            var practitionerName = ""
             $.each(self.vets, function (i, vet){
                 if (vet.vetId == id){
-                    practitionerName = vet.firstName + " " + vet.lastName;
-                    return false;
+                    practitionerName = vet.firstName + " " + vet.lastName
+                    return false
                 }
-            });
-            return practitionerName;
-        };
+            })
+            return practitionerName
+        }
 
         self.getVisitDate = function (id) {
             console.log("Getting date for visitId:", id);

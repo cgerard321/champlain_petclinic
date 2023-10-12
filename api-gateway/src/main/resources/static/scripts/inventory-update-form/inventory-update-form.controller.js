@@ -6,12 +6,23 @@ angular.module('inventoryUpdateForm')
         var inventoryId = $stateParams.inventoryId || "";
         var method = $stateParams.method;
         $scope.inventoryTypeFormUpdateSearch = "";
-        $scope.inventoryTypeUpdateOptions = ["New Type", "Internal", "Sales"] //get all form the inventory type repository but dont remove the New Type
-        $scope.selectedUpdateOption = $scope.inventoryTypeUpdateOptions[0]
-
+        $scope.inventoryTypeUpdateOptions = ["New Type"];
         $http.get('api/gateway/inventory/' + inventoryId).then(function (resp) {
             self.inventory = resp.data;
 
+            $http.get("api/gateway/inventory/type").then(function (typesResp) {
+
+                // Includes all types inside the array
+                typesResp.data.forEach(function (type) {
+                    $scope.inventoryTypeUpdateOptions.push(type.type);
+                });
+                var inventoryType = self.inventory.inventoryType;
+                if ($scope.inventoryTypeUpdateOptions.includes(inventoryType)) {
+                    $scope.selectedUpdateOption = inventoryType;
+                } else {
+                    $scope.inventoryTypeFormUpdateSearch = $scope.inventoryTypeUpdateOptions[0];
+                }
+            });
         });
 
         self.submitUpdateInventoryForm = function () {

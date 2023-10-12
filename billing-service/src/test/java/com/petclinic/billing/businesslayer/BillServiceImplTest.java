@@ -265,7 +265,7 @@ public class BillServiceImplTest {
 
     private Bill buildUnpaidBill(){
 
-        VetDTO vetDTO = buildVetDTO();
+        VetResponseDTO vetDTO = buildVetDTO();
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);
         LocalDate date = calendar.getTime().toInstant()
@@ -299,7 +299,7 @@ public class BillServiceImplTest {
 
 
 
-        VetDTO vetDTO = buildVetDTO();
+        VetResponseDTO vetDTO = buildVetDTO();
 
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);
@@ -315,8 +315,8 @@ public class BillServiceImplTest {
 
     }
 
-    private VetDTO buildVetDTO() {
-        return VetDTO.builder()
+    private VetResponseDTO buildVetDTO() {
+        return VetResponseDTO.builder()
                 .vetId("d9d3a7ac-6817-4c13-9a09-c09da74fb65f")
                 .vetBillId("53c2d16e-1ba3-4dbc-8e31-6decd2eaa99a")
                 .firstName("Pauline")
@@ -324,7 +324,6 @@ public class BillServiceImplTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
-                .imageId("kjd")
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();

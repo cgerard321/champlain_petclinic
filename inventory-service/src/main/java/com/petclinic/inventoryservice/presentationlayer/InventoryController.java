@@ -128,5 +128,10 @@ public Flux<InventoryResponseDTO> searchInventories(
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/type")
+    public Flux<InventoryTypeResponseDTO> getAllInventoryTypes(){
+    return productInventoryService.getAllInventoryTypes();
+    }
+
 }
 

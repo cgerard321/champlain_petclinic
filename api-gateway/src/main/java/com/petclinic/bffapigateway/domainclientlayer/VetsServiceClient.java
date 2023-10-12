@@ -71,6 +71,23 @@ public class VetsServiceClient {
                 .bodyToMono(Resource.class);
     }
 
+    //Badge
+    public Mono<BadgeResponseDTO> getBadgeByVetId(String vetId){
+        return webClientBuilder.build()
+                .get()
+                .uri(vetsServiceUrl + "/" + vetId+ "/badge")
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error->{
+                    HttpStatusCode statusCode = error.statusCode();
+                    if(statusCode.equals(HttpStatus.NOT_FOUND))
+                        return Mono.error(new NotFoundException("vetId not found: "+vetId));
+                    return Mono.error(new IllegalArgumentException("Something went wrong"));
+                })
+                .onStatus(HttpStatusCode::is5xxServerError, error->
+                        Mono.error(new IllegalArgumentException("Something went wrong"))
+                )
+                .bodyToMono(BadgeResponseDTO.class);
+    }
 
     //Ratings
     public Flux<RatingResponseDTO> getRatingsByVetId(String vetId) {
@@ -217,49 +234,49 @@ public class VetsServiceClient {
 
 
     //Vets
-    public Flux<VetDTO> getVets() {
+    public Flux<VetResponseDTO> getVets() {
 
         return webClientBuilder
-          .build()
-          .get()
-          .uri(vetsServiceUrl)
-          .retrieve()
-          .onStatus(HttpStatusCode::is5xxServerError,error->
-                  Mono.error(new IllegalArgumentException("Something went wrong"))
-          )
-          .bodyToFlux(VetDTO.class);
+                .build()
+                .get()
+                .uri(vetsServiceUrl)
+                .retrieve()
+                .onStatus(HttpStatusCode::is5xxServerError,error->
+                        Mono.error(new IllegalArgumentException("Something went wrong"))
+                )
+                .bodyToFlux(VetResponseDTO.class);
     }
 
-    public Mono<VetDTO> getVetByVetId(String vetId) {
+    public Mono<VetResponseDTO> getVetByVetId(String vetId) {
 
         return webClientBuilder
-          .build()
-          .get()
-          .uri(vetsServiceUrl + "/{vetId}", vetId)
-          .retrieve()
-          .onStatus(HttpStatusCode::is4xxClientError, error->{
-              HttpStatusCode statusCode = error.statusCode();
-              if(statusCode.equals(NOT_FOUND))
-                  return Mono.error(new ExistingVetNotFoundException("vetId not found: "+vetId, NOT_FOUND));
-              return Mono.error(new IllegalArgumentException("Something went wrong"));
-          })
-          .onStatus(HttpStatusCode::is5xxServerError,error->
-                  Mono.error(new IllegalArgumentException("Something went wrong"))
-          )
-          .bodyToMono(VetDTO.class);
+                .build()
+                .get()
+                .uri(vetsServiceUrl + "/{vetId}", vetId)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error->{
+                    HttpStatusCode statusCode = error.statusCode();
+                    if(statusCode.equals(NOT_FOUND))
+                        return Mono.error(new ExistingVetNotFoundException("vetId not found: "+vetId, NOT_FOUND));
+                    return Mono.error(new IllegalArgumentException("Something went wrong"));
+                })
+                .onStatus(HttpStatusCode::is5xxServerError,error->
+                        Mono.error(new IllegalArgumentException("Something went wrong"))
+                )
+                .bodyToMono(VetResponseDTO.class);
     }
 
-    public Mono<VetDTO> getVetByVetBillId(String vetBillId) {
+    public Mono<VetResponseDTO> getVetByVetBillId(String vetBillId) {
 
         return webClientBuilder
                 .build()
                 .get()
                 .uri(vetsServiceUrl + "/vetBillId/{vetBillId}", vetBillId)
                 .retrieve()
-                .bodyToMono(VetDTO.class);
+                .bodyToMono(VetResponseDTO.class);
     }
 
-    public Flux<VetDTO> getInactiveVets() {
+    public Flux<VetResponseDTO> getInactiveVets() {
 
         return webClientBuilder
                 .build()
@@ -269,10 +286,10 @@ public class VetsServiceClient {
                 .onStatus(HttpStatusCode::is5xxServerError,error->
                         Mono.error(new IllegalArgumentException("Something went wrong"))
                 )
-                .bodyToFlux(VetDTO.class);
+                .bodyToFlux(VetResponseDTO.class);
     }
 
-    public Flux<VetDTO> getActiveVets() {
+    public Flux<VetResponseDTO> getActiveVets() {
 
         return webClientBuilder
                 .build()
@@ -282,23 +299,23 @@ public class VetsServiceClient {
                 .onStatus(HttpStatusCode::is5xxServerError,error->
                         Mono.error(new IllegalArgumentException("Something went wrong"))
                 )
-                .bodyToFlux(VetDTO.class);
+                .bodyToFlux(VetResponseDTO.class);
     }
 
 
-    public Mono<VetDTO> createVet(Mono<VetDTO> model) {
+    public Mono<VetResponseDTO> createVet(Mono<VetRequestDTO> model) {
 
         return webClientBuilder
                 .build()
                 .post()
-        .uri(vetsServiceUrl)
-        .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-        .body(model, VetDTO.class)
-        .retrieve()
-        .onStatus(HttpStatusCode::is5xxServerError,error->
-                Mono.error(new IllegalArgumentException("Something went wrong"))
-        )
-        .bodyToMono(VetDTO.class);
+                .uri(vetsServiceUrl)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .body(model, VetRequestDTO.class)
+                .retrieve()
+                .onStatus(HttpStatusCode::is5xxServerError,error->
+                        Mono.error(new IllegalArgumentException("Something went wrong"))
+                )
+                .bodyToMono(VetResponseDTO.class);
     }
 
     public Mono<Void> deleteVet(String vetId) {
@@ -320,14 +337,14 @@ public class VetsServiceClient {
                 .bodyToMono(Void.class);
     }
 
-    public Mono<VetDTO> updateVet(String vetId,Mono<VetDTO> model) {
+    public Mono<VetResponseDTO> updateVet(String vetId,Mono<VetRequestDTO> model) {
 
         return webClientBuilder
                 .build()
                 .put()
                 .uri(vetsServiceUrl + "/{vetId}", vetId)
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .body(model, VetDTO.class)
+                .body(model, VetRequestDTO.class)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, error->{
                     HttpStatusCode statusCode = error.statusCode();
@@ -338,7 +355,7 @@ public class VetsServiceClient {
                 .onStatus(HttpStatusCode::is5xxServerError,error->
                         Mono.error(new IllegalArgumentException("Something went wrong"))
                 )
-                .bodyToMono(VetDTO.class);
+                .bodyToMono(VetResponseDTO.class);
     }
 
 
