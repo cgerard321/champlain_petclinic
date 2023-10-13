@@ -26,10 +26,11 @@ public class DatabaseLoaderService implements CommandLineRunner {
 
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         roleRepo.save(Role.builder().name("ADMIN").build());
         roleRepo.save(Role.builder().name("VET").build());
         roleRepo.save(Role.builder().name("OWNER").build());
+        roleRepo.save(Role.builder().name("INVENTORY_MANAGER").build());
 
 
         Set<Role> roles = new HashSet<>();
@@ -42,6 +43,7 @@ public class DatabaseLoaderService implements CommandLineRunner {
                 .password(passwordEncoder.encode("pwd"))
                 .verified(true)
                 .build();
+
         userRepo.save(admin);
 
 
@@ -56,7 +58,6 @@ public class DatabaseLoaderService implements CommandLineRunner {
                 .verified(true)
                 .build();
 
-
         userRepo.save(vet);
 
         Set<Role> owners = new HashSet<>();
@@ -70,7 +71,6 @@ public class DatabaseLoaderService implements CommandLineRunner {
                 .password(passwordEncoder.encode("pwd"))
                 .verified(true)
                 .build();
-
 
         User owner2 = User.builder()
                 .username("Owner2")
@@ -90,7 +90,6 @@ public class DatabaseLoaderService implements CommandLineRunner {
                 .verified(true)
                 .build();
 
-
         User owner4 = User.builder()
                 .username("Owner4")
                 .userIdentifier(new UserIdentifier("a6e0e5b0-5f60-45f0-8ac7-becd8b330486"))
@@ -99,8 +98,6 @@ public class DatabaseLoaderService implements CommandLineRunner {
                 .password(passwordEncoder.encode("pwd"))
                 .verified(true)
                 .build();
-
-
 
         User owner5 = User.builder()
                 .username("Owner5")
@@ -111,8 +108,6 @@ public class DatabaseLoaderService implements CommandLineRunner {
                 .verified(true)
                 .build();
 
-
-
         User owner6 = User.builder()
                 .username("Owner6")
                 .userIdentifier(new UserIdentifier("b3d09eab-4085-4b2d-a121-78a0a2f9e501"))
@@ -122,8 +117,6 @@ public class DatabaseLoaderService implements CommandLineRunner {
                 .verified(true)
                 .build();
 
-
-
         User owner7 = User.builder()
                 .username("Owner7")
                 .userIdentifier(new UserIdentifier("5fe81e29-1f1d-4f9d-b249-8d3e0cc0b7dd"))
@@ -132,8 +125,6 @@ public class DatabaseLoaderService implements CommandLineRunner {
                 .password(passwordEncoder.encode("pwd"))
                 .verified(true)
                 .build();
-
-
 
         User owner8 = User.builder()
                 .username("Owner8")
@@ -154,7 +145,6 @@ public class DatabaseLoaderService implements CommandLineRunner {
                 .password(passwordEncoder.encode("pwd"))
                 .verified(true)
                 .build();
-
 
         User owner10 = User.builder()
                 .username("Owner10")
@@ -227,7 +217,6 @@ public class DatabaseLoaderService implements CommandLineRunner {
                 .password(passwordEncoder.encode("pwd"))
                 .verified(true)
                 .build();
-
 
         userRepo.saveAll(List.of(vet, vet1, vet2, vet3, vet4, vet5, vet6, vet7));
 
