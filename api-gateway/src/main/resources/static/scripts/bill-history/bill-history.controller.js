@@ -135,7 +135,7 @@ angular.module('billHistory')
 
 
         $scope.deleteAllBills = function () {
-            let varIsConf = confirm('Are you sure you want to delete all the history of bills');
+            let varIsConf = confirm('Are you sure you want to delete all the bills in the bill history');
             if (varIsConf) {
                 $http.delete('api/gateway/bills')
                     .then(successCallback, errorCallback)
