@@ -111,7 +111,7 @@ class OwnerServiceImplTest {
     }
 
     @Test
-    void getOwnersPaginationWithFiltersApplied_ShouldSucceed(){
+    void getOwnersPaginationWithFiltersApplied1_ShouldSucceed(){
 
         Owner owner1 = Owner.builder()
                 .ownerId("ownerId-11")
@@ -141,6 +141,48 @@ class OwnerServiceImplTest {
                 .verify();
 
     }
+
+    @Test
+    void getOwnersPaginationWithFiltersApplied2_ShouldSucceed(){
+
+        Owner owner1 = Owner.builder()
+                .ownerId("ownerId-2")
+                .firstName("FirstName2")
+                .lastName("LastName2")
+                .address("Test address2")
+                .city("test city2")
+                .province("test province2")
+                .telephone("telephone2")
+                .build();
+
+        // Create a Pageable object for the first page with 2 items per page
+        Pageable pageable = PageRequest.of(0, 2);
+        String city = "test city2";
+        String ownerId = "ownerId-2";
+        String lastName = "LastName2";
+        String firstName = "FirstName2";
+        String phoneNumber = "telephone2";
+
+        // Mock the repository to return a Flux of owners
+        when(repo.findAll()).thenReturn(Flux.just(owner1));
+
+        // Call the method under test
+        Flux<OwnerResponseDTO> owners = ownerService.getAllOwnersPagination(pageable,ownerId,firstName,lastName,phoneNumber,city);
+
+        // Verify the behavior using StepVerifier
+        StepVerifier.create(owners)
+                .expectNextMatches(
+                        ownerDto1 -> ownerDto1.getOwnerId().equals(owner1.getOwnerId())
+                        && ownerDto1.getCity().equals(owner1.getCity())
+                        && ownerDto1.getTelephone().equals(owner1.getTelephone())
+                        && ownerDto1.getFirstName().equals(owner1.getFirstName())
+                        && ownerDto1.getLastName().equals(owner1.getLastName()))
+                .expectComplete()
+                .verify();
+
+    }
+
+
 
     @Test
     void insertOwner() {
