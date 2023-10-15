@@ -261,9 +261,9 @@
                                 </div>
                                 <div class="col-sm-12 form-label-rating">
                                     <label>Predefined Description:</label>
-                                    <input type="radio" name="predefinedDescription{{rating.ratingId}}" value="POOR" ng-model="rating.predefinedDescription"> Poor
-                                    <input type="radio" name="predefinedDescription{{rating.ratingId}}" value="GOOD" ng-model="rating.predefinedDescription"> Good
-                                    <input type="radio" name="predefinedDescription{{rating.ratingId}}" value="EXCELLENT" ng-model="rating.predefinedDescription"> Excellent
+                                    <input type="checkbox" name="predefinedDescriptionPOOR{{rating.ratingId}}" value="POOR" ng-model="rating.predefinedDescriptionPOOR" ng-click="togglePredefinedDescription(rating, 'POOR')"> Poor
+                                    <input type="checkbox" name="predefinedDescriptionGOOD{{rating.ratingId}}" value="GOOD" ng-model="rating.predefinedDescriptionGOOD" ng-click="togglePredefinedDescription(rating, 'GOOD')"> Good
+                                    <input type="checkbox" name="predefinedDescriptionEXCELLENT{{rating.ratingId}}" value="EXCELLENT" ng-model="rating.predefinedDescriptionEXCELLENT" ng-click="togglePredefinedDescription(rating, 'EXCELLENT')"> Excellent
                                 </div>
 
                                 <br />
@@ -326,9 +326,9 @@
                                                   title="Maximum of 350 characters."></textarea>
                                         <div class="col-sm-12 form-label-rating">
                                             <label>Predefined Description:</label>
-                                            <input type="radio" name="predefinedDescriptionUpdate{{rating.ratingId}}" value="POOR" ng-model="updatedRating.predefinedDescription"> Poor
-                                            <input type="radio" name="predefinedDescriptionUpdate{{rating.ratingId}}" value="GOOD" ng-model="updatedRating.predefinedDescription"> Good
-                                            <input type="radio" name="predefinedDescriptionUpdate{{rating.ratingId}}" value="EXCELLENT" ng-model="updatedRating.predefinedDescription"> Excellent
+                                            <input type="checkbox" name="predefinedDescriptionUpdate{{rating.ratingId}}" value="POOR" ng-click="$ctrl.handleCheckboxClick('POOR', rating.ratingId)"> Poor
+                                            <input type="checkbox" name="predefinedDescriptionUpdate{{rating.ratingId}}" value="GOOD" ng-click="$ctrl.handleCheckboxClick('GOOD', rating.ratingId)"> Good
+                                            <input type="checkbox" name="predefinedDescriptionUpdate{{rating.ratingId}}" value="EXCELLENT" ng-click="$ctrl.handleCheckboxClick('EXCELLENT', rating.ratingId)"> Excellent
                                         </div>
                                     </div>
                                 </form>
