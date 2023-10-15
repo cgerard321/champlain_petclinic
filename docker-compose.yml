@@ -12,6 +12,7 @@ services:
         environment:
             - SPRING_PROFILES_ACTIVE=docker
         depends_on:
+            - mailer-service
             - mongo2
 
 #    visits:

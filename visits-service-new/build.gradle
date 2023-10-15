@@ -29,7 +29,9 @@ dependencies {
     compileOnly "org.mapstruct:mapstruct-processor:${mapstructVersion}"
     annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
     testAnnotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
-
+    implementation 'com.squareup.retrofit2:retrofit:2.9.0'
+    testImplementation 'com.squareup.retrofit2:retrofit-mock:2.9.0'
+    implementation 'com.squareup.retrofit2:converter-jackson:2.9.0'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     implementation 'org.yaml:snakeyaml:2.2'
     testImplementation 'org.yaml:snakeyaml:2.2'

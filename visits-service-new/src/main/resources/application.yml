@@ -8,6 +8,9 @@ app:
   customers-service-reactive:
     host: localhost
     port: 8090
+  mailer-service:
+    host: localhost
+    port: 8888
 
 
 logging:
@@ -62,12 +65,14 @@ app:
   vet-service:
     host: vet-service
     port: 8080
-
   customers-service-reactive:
     host: customers-service-reactive
     port: 8080
+  mailer-service:
+    host: mailer-service
+    port: 8080
 
-logging:
-  level:
-    root: INFO
-    com.petclinic: DEBUG
+logging.level:
+  root: INFO
+  com.petclinic: DEBUG
+server.port: 8080
