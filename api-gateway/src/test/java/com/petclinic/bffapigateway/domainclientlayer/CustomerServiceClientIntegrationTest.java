@@ -291,6 +291,27 @@ public class CustomerServiceClientIntegrationTest {
         assertEquals(expectedCount,response.block());
     }
 
+    @Test
+    void getTotalNumberOfOwnersWithFilters_UnknownValue_ShouldReturnZeroOwners() throws Exception {
+        // Simulate the expected total count
+        long expectedCount = 0;
+
+        // Prepare the response with the expected count as a plain long value
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(String.valueOf(expectedCount)));
+
+        String ownerId = "unknown";
+        String firstName = "unknown";
+        String lastName = "unknown";
+        String city = "unknown";
+        String phoneNumber = "unknown";
+
+        final Mono<Long> response = customersServiceClient.getTotalNumberOfOwnersWithFilters(ownerId,firstName,lastName,phoneNumber,city);
+
+        assertEquals(expectedCount,response.block());
+    }
+
 
 
     @Test

@@ -1124,7 +1124,7 @@ class ApiGatewayControllerTest {
     }
 
     @Test
-    void getOwnersByPagination(){
+    void getAllOwnersByPagination(){
 
         OwnerResponseDTO owner = new OwnerResponseDTO();
         owner.setOwnerId("ownerId-09");
@@ -1153,6 +1153,26 @@ class ApiGatewayControllerTest {
                 .value((list) -> {
                     Assertions.assertNotNull(list);
                     Assertions.assertEquals(size.get(),list.size());
+                });
+    }
+
+    @Test
+    void getAllOwnersByPagination_pageEmpty_sizeEmpty(){
+
+        Flux<OwnerResponseDTO> ownerResponseDTOFlux = Flux.just();
+
+        when(customersServiceClient.getOwnersByPagination(null,null,null,null,null,null,null)).thenReturn(ownerResponseDTOFlux);
+
+        client.get()
+                .uri("/api/gateway/owners-pagination")
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .acceptCharset(StandardCharsets.UTF_8)
+                .exchange().expectStatus().isOk()
+                .expectHeader().valueEquals("Content-Type","text/event-stream;charset=UTF-8")
+                .expectBodyList(OwnerResponseDTO.class)
+                .value((list) -> {
+                    Assertions.assertNotNull(list);
+                    Assertions.assertEquals(0,list.size());
                 });
     }
 
