@@ -4,26 +4,29 @@ angular.module('inventoryProductList')
     .controller('InventoryProductController', ['$http', '$scope', '$stateParams','$window', 'InventoryService', function ($http, $scope, $stateParams, $window, InventoryService) {
         var self = this;
         var inventoryId
+        self.currentPage = $stateParams.page || 0;
+        self.pageSize = $stateParams.size || 2;
+        self.actualCurrentPageShown = parseInt(self.currentPage) + 1;
 
-        $http.get('api/gateway/inventory/' + $stateParams.inventoryId + '/products').then(function (resp) {
-            self.inventoryProductList = resp.data;
-            inventoryId = $stateParams.inventoryId;
-            InventoryService.setInventoryId(inventoryId);
-            if (resp.data.length === 0) {
-                // Handle if inventory is empty
-                console.log("The inventory is empty!");
-            }
+        fetchProductList();
 
-
-        }).catch(function (error) {
-            if (error.status === 404) {
-                console.clear()
-                console.log("State params: " + $stateParams)
-                console.log("Inventory is now empty.")
-            } else {
-                console.error('An error occurred:', error);
-            }
-        });
+        // $http.get('api/gateway/inventory/' + $stateParams.inventoryId + '/products-pagination?page=' + 0 + '&size=2').then(function (resp) {
+        //     self.inventoryProductList = resp.data;
+        //     inventoryId = $stateParams.inventoryId;
+        //     InventoryService.setInventoryId(inventoryId);
+        //     if (resp.data.length === 0) {
+        //         // Handle if inventory is empty
+        //         console.log("The inventory is empty!");
+        //     }
+        // }).catch(function (error) {
+        //     if (error.status === 404) {
+        //         console.clear()
+        //         console.log("State params: " + $stateParams)
+        //         console.log("Inventory is now empty.")
+        //     } else {
+        //         console.error('An error occurred:', error);
+        //     }
+        // });
 
 
             $scope.deleteProduct = function (product) {
@@ -118,7 +121,7 @@ angular.module('inventoryProductList')
                         alert("All products for this inventory have been deleted!");
 
 
-                        $scope.fetchProductList();
+                        fetchProductList();
                     }, function(error) {
                         alert(error.data.errors);
                         console.log(error, 'Failed to delete all products.');
@@ -126,10 +129,9 @@ angular.module('inventoryProductList')
             }
         };
 
-
-        $scope.fetchProductList = function() {
+        function fetchProductList() {
             let inventoryId = $stateParams.inventoryId;
-            $http.get('api/gateway/inventory/' + inventoryId + '/products').then(function (resp) {
+            $http.get('api/gateway/inventory/' + $stateParams.inventoryId + '/products-pagination?page='+ self.currentPage + '&size=' + self.pageSize).then(function (resp) {
                 self.inventoryProductList = resp.data;
                 inventoryId = $stateParams.inventoryId;
                 InventoryService.setInventoryId(inventoryId);
@@ -140,5 +142,43 @@ angular.module('inventoryProductList')
             }).catch(function (error) {
                 console.error('An error occurred:', error);
             });
-        };
+        }
+        self.nextPage = function () {
+            if (parseInt(self.currentPage) + 1 < self.totalPages) {
+
+                var currentPageInt = parseInt(self.currentPage) + 1
+                self.currentPage = currentPageInt.toString();
+                updateActualCurrentPageShown();
+                // Refresh the owner's list with the new page size
+                fetchProductList();
+            }
+        }
+
+        self.previousPage = function () {
+            console.log("Previous page called, current self.page: ")
+            if (self.currentPage - 1 >= 0) {
+                var currentPageInt = parseInt(self.currentPage) - 1
+                self.currentPage = currentPageInt.toString();
+                updateActualCurrentPageShown();
+                console.log("Called the previous page and the new current page " + self.currentPage)
+                // Refresh the owner's list with the new page size
+                fetchProductList();
+            }
+        }
+
+        function updateActualCurrentPageShown() {
+            self.actualCurrentPageShown = parseInt(self.currentPage) + 1;
+            console.log(self.currentPage);
+        }
+        function loadTotalItem() {
+            return $http.get('api/gateway/inventory/' + $stateParams.inventoryId + '/products-count')
+                .then(function (resp) {
+                    console.log(resp);
+                    return resp.data;
+                });
+        }
+        loadTotalItem().then(function (totalItems) {
+            self.totalItems = totalItems;
+            self.totalPages = Math.ceil(self.totalItems / parseInt(self.pageSize));
+        });
     }]);
