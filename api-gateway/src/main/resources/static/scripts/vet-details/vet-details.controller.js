@@ -29,6 +29,42 @@ angular.module('vetDetails')
             child.classList.add("modalOff");
         }
 
+        self.checkedCheckboxesUpdate = {};
+        self.handleCheckboxClick = function(value, ratingId) {
+            // Update the checked state for the specific ratingId.
+            self.checkedCheckboxesUpdate[ratingId] = value;
+            // Uncheck other checkboxes for the same ratingId.
+            const checkboxes = document.querySelectorAll('input[type="checkbox"][name="predefinedDescriptionUpdate' + ratingId + '"]');
+            checkboxes.forEach((checkbox) => {
+                if (checkbox.value !== value) {
+                    checkbox.checked = false;
+                }
+            });
+        };
+
+        const checkboxesForAddRating = document.querySelectorAll('.col-sm-12 input[type="checkbox"]');
+        let lastCheckedCheckbox = null;
+        checkboxesForAddRating.forEach(checkbox => {
+            checkbox.addEventListener('click', function () {
+                if (this !== lastCheckedCheckbox) {
+                    if (lastCheckedCheckbox) {
+                        lastCheckedCheckbox.checked = false;
+                    }
+                    lastCheckedCheckbox = this;
+                }
+                const value = lastCheckedCheckbox.checked ? lastCheckedCheckbox.value : null;
+                console.log('Last checked value:', value);
+            });
+        });
+        self.togglePredefinedDescription = function (rating, value) {
+            console.log("Toggling predefinedDescription: ", value);
+            if (rating['predefinedDescription' + value] === value) {
+                rating['predefinedDescription' + value] = null;
+            } else {
+                rating['predefinedDescription' + value] = value;
+            }
+        };
+
         /* added /{{vet.vetID}} in the url */
         $http.get('api/gateway/vets/' + $stateParams.vetId).then(function (resp) {
             self.vet = resp.data;
@@ -312,9 +348,13 @@ angular.module('vetDetails')
                 rateScore: parseFloat(document.getElementById("ratingScore").value),
                 rateDate: new Date().toLocaleDateString(),
                 rateDescription: document.getElementById("ratingDescription").value,
-                predefinedDescription: document.querySelector('input[name="predefinedDescription"]:checked')
-                    ? document.querySelector('input[name="predefinedDescription"]:checked').value
-                    : null,
+                predefinedDescription: document.querySelector('input[name="predefinedDescriptionPOOR"]:checked')
+                    ? document.querySelector('input[name="predefinedDescriptionPOOR"]:checked').value
+                    : document.querySelector('input[name="predefinedDescriptionGOOD"]:checked')
+                        ? document.querySelector('input[name="predefinedDescriptionGOOD"]:checked').value
+                        : document.querySelector('input[name="predefinedDescriptionEXCELLENT"]:checked')
+                            ? document.querySelector('input[name="predefinedDescriptionEXCELLENT"]:checked').value
+                            : null,
                 //ADDITION
                 ratingDate: document.querySelector('input[name="Year"]:checked')
                     ? document.querySelector('input[name="Year"]:checked').value: null,
