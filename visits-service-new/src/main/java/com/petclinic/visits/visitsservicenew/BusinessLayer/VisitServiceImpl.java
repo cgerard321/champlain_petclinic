@@ -86,7 +86,7 @@ public class VisitServiceImpl implements VisitService {
                 .doOnNext(x -> x.setVisitId(EntityDtoUtil.generateVisitIdString()))
                 .doOnNext(v -> System.out.println("Entity Date: " + v.getVisitDate())) // Debugging
                 .flatMap((repo::insert))
-                .doOnNext(v -> log.info(mailService.sendMail(generateMail())))
+//                .doOnNext(v -> log.info(mailService.sendMail(generateMail())))
                 .map(EntityDtoUtil::toVisitResponseDTO);
     }
 

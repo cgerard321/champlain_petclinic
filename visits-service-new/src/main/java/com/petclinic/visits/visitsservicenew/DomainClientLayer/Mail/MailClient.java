@@ -13,7 +13,7 @@ public class MailClient {
         this.webClient = WebClient.builder().baseUrl("http://"+mailURL+":"+mailPORT+"/mail").build();
     }
 
-    public Mono<String> sendEmail(Mail mail) {;
+    public Mono<String> sendEmail(Mail mail) {
 //    public String sendEmail(Mail mail) {
         return webClient
                 .post()

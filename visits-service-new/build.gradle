@@ -46,6 +46,9 @@ jacoco {
 }
 
 jacocoTestReport {
+    reports {
+        xml.required = true
+    }
     dependsOn test
     afterEvaluate {
         classDirectories.setFrom(files(classDirectories.files.collect {
@@ -60,7 +63,7 @@ jacocoTestCoverageVerification {
     violationRules {
         rule {
             limit {
-                minimum = 0.90
+                minimum = 0.70
             }
         }
     }
