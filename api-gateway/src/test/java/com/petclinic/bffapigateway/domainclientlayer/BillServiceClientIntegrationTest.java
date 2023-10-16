@@ -12,6 +12,7 @@ import org.junit.jupiter.api.*;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -367,6 +368,90 @@ class BillServiceClientIntegrationTest {
         StepVerifier.create(updatedBillResponseMono)
                 .expectNext(updatedResponse)
                 .verifyComplete();
+    }
+
+    @Test
+    void getNonExistentBillById() {
+        server.enqueue(new MockResponse().setResponseCode(404));
+
+        Mono<BillResponseDTO> billResponseDTOMono = billServiceClient.getBilling("nonexistentId");
+
+        StepVerifier.create(billResponseDTOMono)
+                .expectError(WebClientResponseException.NotFound.class)
+                .verify();
+    }
+
+    @Test
+    void getBillByInvalidVetId() {
+        server.enqueue(new MockResponse().setResponseCode(400));
+
+        Flux<BillResponseDTO> billResponseDTOMono = billServiceClient.getBillsByVetId("invalidVetId");
+
+        StepVerifier.create(billResponseDTOMono)
+                .expectError(WebClientResponseException.BadRequest.class)
+                .verify();
+    }
+
+    @Test
+    void getBillsByInvalidCustomerId() {
+        server.enqueue(new MockResponse().setResponseCode(500));
+
+        Flux<BillResponseDTO> billResponseDTOMono = billServiceClient.getBillsByOwnerId("invalidCustomerId");
+
+        StepVerifier.create(billResponseDTOMono)
+                .expectError(WebClientResponseException.InternalServerError.class)
+                .verify();
+    }
+
+    @Test
+    void deleteNonExistentBill() {
+        server.enqueue(new MockResponse().setResponseCode(404));
+
+        Mono<Void> empty = billServiceClient.deleteBill("nonexistentId");
+
+        StepVerifier.create(empty)
+                .expectError(WebClientResponseException.NotFound.class)
+                .verify();
+    }
+
+    @Test
+    void deleteBillWithInvalidVetId() {
+        server.enqueue(new MockResponse().setResponseCode(400));
+
+        Flux<Void> empty = billServiceClient.deleteBillsByVetId("invalidVetId");
+
+        StepVerifier.create(empty)
+                .expectError(WebClientResponseException.BadRequest.class)
+                .verify();
+    }
+
+    @Test
+    void deleteBillWithInvalidCustomerId() {
+        server.enqueue(new MockResponse().setResponseCode(500));
+
+        Flux<Void> empty = billServiceClient.deleteBillsByCustomerId("invalidCustomerId");
+
+        StepVerifier.create(empty)
+                .expectError(WebClientResponseException.InternalServerError.class)
+                .verify();
+    }
+
+    @Test
+    void createBillWithInvalidRequest() {
+        BillRequestDTO invalidRequest = new BillRequestDTO();
+        String requestJson = ""; 
+
+        prepareResponse(response -> response
+                .setResponseCode(400)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(requestJson)
+        );
+
+        Mono<BillResponseDTO> createdBillMono = billServiceClient.createBill(invalidRequest);
+
+        StepVerifier.create(createdBillMono)
+                .expectError(WebClientResponseException.BadRequest.class)
+                .verify();
     }
 
 
