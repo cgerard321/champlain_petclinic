@@ -559,7 +559,13 @@ public class BFFApiGatewayController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
     @GetMapping(value = "/owners-pagination")
-    public Flux<OwnerResponseDTO> getOwnersByPagination(@RequestParam Optional<Integer> page, @RequestParam Optional<Integer> size) {
+    public Flux<OwnerResponseDTO> getOwnersByPagination(@RequestParam Optional<Integer> page,
+                                                        @RequestParam Optional<Integer> size,
+                                                        @RequestParam(required = false) String ownerId,
+                                                        @RequestParam(required = false) String firstName,
+                                                        @RequestParam(required = false) String lastName,
+                                                        @RequestParam(required = false) String phoneNumber,
+                                                        @RequestParam(required = false) String city) {
 
         if(page.isEmpty()){
             page = Optional.of(0);
@@ -569,7 +575,7 @@ public class BFFApiGatewayController {
             size = Optional.of(5);
         }
 
-        return customersServiceClient.getOwnersByPagination(page,size);
+        return customersServiceClient.getOwnersByPagination(page,size,ownerId,firstName,lastName,phoneNumber,city);
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
@@ -577,6 +583,20 @@ public class BFFApiGatewayController {
     public Mono<Long> getTotalNumberOfOwners(){
         return customersServiceClient.getTotalNumberOfOwners();
     }
+
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
+    @GetMapping(value = "/owners-filtered-count")
+    public Mono<Long> getTotalNumberOfOwnersWithFilters (
+        @RequestParam(required = false) String ownerId,
+        @RequestParam(required = false) String firstName,
+        @RequestParam(required = false) String lastName,
+        @RequestParam(required = false) String phoneNumber,
+        @RequestParam(required = false) String city)
+    {
+        return customersServiceClient.getTotalNumberOfOwnersWithFilters(ownerId,firstName,lastName,phoneNumber,city);
+    }
+
 
 
     @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN})

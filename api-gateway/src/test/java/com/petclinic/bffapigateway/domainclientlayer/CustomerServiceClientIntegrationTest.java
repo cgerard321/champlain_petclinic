@@ -218,13 +218,47 @@ public class CustomerServiceClientIntegrationTest {
         Optional<Integer> page = Optional.of(0);
         Optional<Integer> size =  Optional.of(2);
 
-        final Flux<OwnerResponseDTO> ownersFlux = customersServiceClient.getOwnersByPagination(page,size);
+        final Flux<OwnerResponseDTO> ownersFlux = customersServiceClient.getOwnersByPagination(page,size,null,null,null,null,null);
 
         Long fluxSize = ownersFlux.count().block();
         Long predictedSize = (long) size.get();
 
 
         assertEquals(fluxSize, predictedSize);
+    }
+
+    @Test
+    void getAllOwnersByPaginationWithFiltersApplied() throws JsonProcessingException {
+        OwnerResponseDTO TEST_OWNER1 = OwnerResponseDTO.builder()
+                .ownerId("ownerId-1")
+                .firstName("FN1")
+                .lastName("LN1")
+                .address("Test")
+                .city("C1")
+                .province("Test")
+                .telephone("T1")
+                //.imageId(1)
+                .build();
+
+        Flux<OwnerResponseDTO> owners = Flux.just(TEST_OWNER1);
+
+        final String body = mapper.writeValueAsString(owners.collectList().block());
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(body));
+
+        Optional<Integer> page = Optional.of(0);
+        Optional<Integer> size =  Optional.of(1);
+        String ownerId = "ownerId-1";
+        String firstName = "FN1";
+        String lastName = "LN1";
+        String city = "C1";
+        String phoneNumber = "T1";
+        final OwnerResponseDTO owner = customersServiceClient.getOwnersByPagination(page,size,ownerId,firstName,lastName,phoneNumber,city).blockFirst();
+
+        assertEquals(ownerId, owner.getOwnerId());
+        assertEquals(city, owner.getCity());
     }
 
     @Test
@@ -241,6 +275,44 @@ public class CustomerServiceClientIntegrationTest {
 
         assertEquals(expectedCount,response.block());
     }
+
+    @Test
+    void getTotalNumberOfOwnersWithFilters() throws Exception {
+        // Simulate the expected total count
+        long expectedCount = 0;
+
+        // Prepare the response with the expected count as a plain long value
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(String.valueOf(expectedCount)));
+
+        final Mono<Long> response = customersServiceClient.getTotalNumberOfOwnersWithFilters(null,null,null,null,null);
+
+        assertEquals(expectedCount,response.block());
+    }
+
+    @Test
+    void getTotalNumberOfOwnersWithFilters_UnknownValue_ShouldReturnZeroOwners() throws Exception {
+        // Simulate the expected total count
+        long expectedCount = 0;
+
+        // Prepare the response with the expected count as a plain long value
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(String.valueOf(expectedCount)));
+
+        String ownerId = "unknown";
+        String firstName = "unknown";
+        String lastName = "unknown";
+        String city = "unknown";
+        String phoneNumber = "unknown";
+
+        final Mono<Long> response = customersServiceClient.getTotalNumberOfOwnersWithFilters(ownerId,firstName,lastName,phoneNumber,city);
+
+        assertEquals(expectedCount,response.block());
+    }
+
+
 
     @Test
     void testUpdatePet() throws Exception {
