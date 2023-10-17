@@ -14,7 +14,7 @@ public interface ProductInventoryService {
     Mono<InventoryResponseDTO> getInventoryById(String inventoryId);
     Mono<ProductResponseDTO> updateProductInInventory(Mono<ProductRequestDTO> productRequestDTOMono, String inventoryId, String productId);
     Mono<Void> deleteProductInInventory(String inventoryId, String productId);
-    Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductsField(String inventoryId, String productName, Double productPrice, Integer productQuantity);
+    Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductsField(String inventoryId, String productName, Double productPrice, Integer productQuantity, Double productSalePrice);
    // Flux<InventoryResponseDTO> getAllInventory();
 
     Mono<Void> deleteInventoryByInventoryId(String inventoryId);
