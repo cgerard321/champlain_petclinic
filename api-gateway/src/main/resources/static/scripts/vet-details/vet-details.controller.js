@@ -349,14 +349,13 @@ angular.module('vetDetails')
         //photo
         $http.get('api/gateway/vets/' + $stateParams.vetId + '/photo').then(function (resp) {
             self.vetPhoto = resp.data;
+            console.log(resp.data);
         });
-        //photo
+       /* //photo
         $http.get('api/gateway/vets/' + $stateParams.vetId + '/photo').then(function (resp) {
             self.vetPhoto = resp.data;
         });
-
-
-
+*/
 
         self.init = function (){
             $http.get('api/gateway/vets/' + $stateParams.vetId + '/photo').then(function (resp) {
