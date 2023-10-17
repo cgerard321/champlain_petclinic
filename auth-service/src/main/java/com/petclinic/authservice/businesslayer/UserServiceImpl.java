@@ -441,7 +441,7 @@ public class UserServiceImpl implements UserService {
         return userMapper.modelToPasswordLessDTO(userRepo.save(existingUser));
     }
     public User getUserByUserId(String userId) {
-        return userRepo.findUserByUserIdentifier_UserId(userId)
+        return userRepo.findOptionalUserByUserIdentifier_UserId(userId)
                 .orElseThrow(() -> new NotFoundException("No user with userId: " + userId));
     }
 

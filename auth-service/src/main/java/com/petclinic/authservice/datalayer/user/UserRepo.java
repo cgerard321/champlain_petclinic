@@ -32,7 +32,9 @@ public interface UserRepo extends JpaRepository<User, Long> {
 
     //Optional<User> findByUserId(String userId);
     Optional<User> findById(String userId);
-    Optional<User> findUserByUserIdentifier_UserId(String userId);
+    Optional<User> findOptionalUserByUserIdentifier_UserId(String userId);
+
+    User findUserByUserIdentifier_UserId(String userId);
 
     List<User> findByUsernameContaining(String username);
 
