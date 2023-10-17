@@ -52,10 +52,13 @@ class InventoryControllerIntegrationTest {
             .type("Sales")
             .build();
 
+
+
     Inventory inventory1 = buildInventory("inventoryId_3", "internal", inventoryType1.getType(),"inventoryDescription_3");
 
     Inventory inventory2 = buildInventory("inventoryId_4", "sales", inventoryType2.getType() ,"inventoryDescription_4");
 
+    Product product1 = buildProduct("productId1", "inventoryId_3" , "drug" , "drug", 18.00, 30.00, 3);
 
     @BeforeEach
     public void dbSetup() {
@@ -461,6 +464,43 @@ class InventoryControllerIntegrationTest {
                 });
     }
 
+
+
+    @Test
+    void getProductInInventory_withInvalidInventoryId_invalidProductId_throwsNotFoundException() {
+        String invalidInventoryId = "123";
+        String invalidProductId = "897";
+
+        webTestClient.get()
+                .uri("/inventory/{inventoryId}/products/{productId}",
+                        invalidInventoryId, invalidProductId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Inventory id:" + invalidInventoryId + "and product:" + invalidProductId + "are not found");
+    }
+
+
+
+    @Test
+    public void getProductInInventory_byProductId_ShouldSucceed() {
+
+
+        webTestClient.get()
+                .uri("/inventory/{inventoryId}/products/{productId}", "1", "123F567C9")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.productId").isEqualTo("123F567C9");
+    }
+
+
+
+
     @Test
     public void updateInventory_withInvalidInventoryId() {
         String InvalidInventoryId = "inventoryId_234";
@@ -538,13 +578,14 @@ class InventoryControllerIntegrationTest {
                 .build();
     }
 
-    private Product buildProduct(String productId, String inventoryId, String productName, String productDescription, Double productPrice, Integer productQuantity) {
+    private Product buildProduct(String productId, String inventoryId, String productName, String productDescription, Double productPrice, Double SalePrice,  Integer productQuantity) {
         return Product.builder()
                 .productId(productId)
                 .inventoryId(inventoryId)
                 .productName(productName)
                 .productDescription(productDescription)
                 .productPrice(productPrice)
+                .productSalePrice(SalePrice)
                 .productQuantity(productQuantity)
                 .build();
     }

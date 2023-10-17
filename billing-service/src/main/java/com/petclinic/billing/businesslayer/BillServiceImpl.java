@@ -63,22 +63,13 @@ public class BillServiceImpl implements BillService{
                             existingBill.setDate(r.getDate());
                             existingBill.setBillStatus(r.getBillStatus());
                             existingBill.setAmount(r.getAmount());
+                            existingBill.setDueDate(r.getDueDate());
 
                             return billRepository.save(existingBill);
                         })
                         .map(EntityDtoUtil::toBillResponseDto)
                 );
-                /*
-                billRepository.findByBillId(billId)
-                .flatMap(p -> billDTOMono
-                        .map(EntityDtoUtil::toEntity)
-                        .doOnNext(e -> e.setBillId(p.getBillId()))
-                        .doOnNext(e -> e.setId(p.getId()))
-                )
-                .flatMap(billRepository::save)
-                .map(EntityDtoUtil::toDto);
 
-                 */
     }
 
 

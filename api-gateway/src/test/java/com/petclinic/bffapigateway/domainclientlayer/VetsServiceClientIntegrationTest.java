@@ -25,9 +25,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.io.IOException;
-import java.util.Base64;
-import java.util.HashSet;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 
 import static io.netty.handler.codec.http.HttpHeaders.setHeader;
@@ -51,8 +49,11 @@ class VetsServiceClientIntegrationTest {
 
     private ObjectMapper mapper;
 
-    VetDTO vetDTO = buildVetDTO();
+    VetRequestDTO vetRequestDTO = buildVetRequestDTO();
+    VetResponseDTO vetResponseDTO = buildVetResponseDTO();
+
     ClassPathResource cpr=new ClassPathResource("static/images/full_food_bowl.png");
+
 
     @BeforeEach
     void setup() {
@@ -166,10 +167,34 @@ class VetsServiceClientIntegrationTest {
                         "    }"));
 
         final VetAverageRatingDTO averageRatingDTO = vetsServiceClient.getTopThreeVetsWithHighestAverageRating().blockFirst();
-        assertEquals("deb1950c-3c56-45dc-874b-89e352695eb7",vetDTO.getVetId());
+        assertEquals("deb1950c-3c56-45dc-874b-89e352695eb7", vetResponseDTO.getVetId());
         assertEquals(4.5, averageRatingDTO.getAverageRating(),0.1);
         //its 0.0 because the vet doesn't have any ratings
     }
+    @Test
+    void getRatingBasedOnDate() throws JsonProcessingException{
+        Map<String, String> queryParams = new HashMap<>();
+        queryParams.put("year", "2023");
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody("{\n" +
+                        "    \"vetId\": \"deb1950c-3c56-45dc-874b-89e352695eb7\",\n" +
+                                "        \"ratingId\": \"123456\",\n" +
+                                "        \"vetId\": \"deb1950c-3c56-45dc-874b-89e352695eb7\",\n" +
+                                "        \"rateScore\": 4.5,\n" +
+                                "        \"date\": \"2023\" \n" +
+                        "}"));
+
+        final RatingResponseDTO ratingResponseDTO = vetsServiceClient.getRatingsOfAVetBasedOnDate(vetResponseDTO.getVetId(), queryParams).blockFirst();
+
+        System.out.print(ratingResponseDTO);
+        assertNotNull(ratingResponseDTO);
+        Assertions.assertEquals("2023", ratingResponseDTO.getDate());
+        Assertions.assertEquals("deb1950c-3c56-45dc-874b-89e352695eb7", ratingResponseDTO.getVetId());
+
+    }
+
     @Test
     void getNumberOfRatingsByInvalidVetId_shouldNotSucceed() throws ExistingVetNotFoundException{
         String invalidVetId="123";
@@ -236,7 +261,7 @@ class VetsServiceClientIntegrationTest {
                 .setBody("4.5"));
 
         final Double averageRating =
-                vetsServiceClient.getAverageRatingByVetId(vetDTO.getVetId())
+                vetsServiceClient.getAverageRatingByVetId(vetResponseDTO.getVetId())
                         .onErrorResume(throwable -> {
                             if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
                                 return Mono.empty();
@@ -280,7 +305,7 @@ class VetsServiceClientIntegrationTest {
                 .setBody("Something went wrong"));
 
         final Double averageRating =
-                vetsServiceClient.getAverageRatingByVetId(vetDTO.getVetId())
+                vetsServiceClient.getAverageRatingByVetId(vetResponseDTO.getVetId())
                         .onErrorResume(throwable -> {
                             if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
                                 return Mono.empty();
@@ -300,7 +325,7 @@ class VetsServiceClientIntegrationTest {
                 .setBody("Something went wrong"));
 
         final Double averageRating =
-                vetsServiceClient.getAverageRatingByVetId(vetDTO.getVetId())
+                vetsServiceClient.getAverageRatingByVetId(vetResponseDTO.getVetId())
                         .onErrorResume(throwable -> {
                             if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
                                 return Mono.empty();
@@ -385,7 +410,7 @@ class VetsServiceClientIntegrationTest {
 
         assertNull(ratingPercentages);
     }
-  
+
     @Test
     void deleteRatingsByRatingId() throws JsonProcessingException{
         final String ratingId = "794ac37f-1e07-43c2-93bc-61839e61d989";
@@ -398,7 +423,7 @@ class VetsServiceClientIntegrationTest {
                         "        \"rateScore\": 4.5\n" +
                         "    }"));
 
-        final Mono<Void> empty = vetsServiceClient.deleteRating(vetDTO.getVetId(), ratingId);
+        final Mono<Void> empty = vetsServiceClient.deleteRating(vetResponseDTO.getVetId(), ratingId);
 
         assertEquals(empty.block(), null);
     }
@@ -967,13 +992,13 @@ class VetsServiceClientIntegrationTest {
                         "        \"active\": false\n" +
                         "    }"));
 
-        final VetDTO vet = vetsServiceClient.getVets().blockFirst();
+        final VetResponseDTO vet = vetsServiceClient.getVets().blockFirst();
         assertFalse(vet.isActive());
-        assertEquals(vetDTO.getFirstName(), vet.getFirstName());
-        assertEquals(vetDTO.getLastName(), vet.getLastName());
-        assertEquals(vetDTO.getEmail(), vet.getEmail());
-        assertEquals(vetDTO.getPhoneNumber(), vet.getPhoneNumber());
-        assertEquals(vetDTO.getResume(), vet.getResume());
+        assertEquals(vetResponseDTO.getFirstName(), vet.getFirstName());
+        assertEquals(vetResponseDTO.getLastName(), vet.getLastName());
+        assertEquals(vetResponseDTO.getEmail(), vet.getEmail());
+        assertEquals(vetResponseDTO.getPhoneNumber(), vet.getPhoneNumber());
+        assertEquals(vetResponseDTO.getResume(), vet.getResume());
     }
 
     @Test
@@ -983,7 +1008,7 @@ class VetsServiceClientIntegrationTest {
                 .setResponseCode(500)
                 .setBody("Something went wrong"));
 
-        final VetDTO vet = vetsServiceClient.getVets()
+        final VetResponseDTO vet = vetsServiceClient.getVets()
                 .onErrorResume(throwable -> {
                     if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
                         return Mono.empty();
@@ -1010,13 +1035,13 @@ class VetsServiceClientIntegrationTest {
                         "        \"active\": false\n" +
                         "    }"));
 
-        final VetDTO vet = vetsServiceClient.getActiveVets().blockFirst();
+        final VetResponseDTO vet = vetsServiceClient.getActiveVets().blockFirst();
         assertFalse(vet.isActive());
-        assertEquals(vetDTO.getFirstName(), vet.getFirstName());
-        assertEquals(vetDTO.getLastName(), vet.getLastName());
-        assertEquals(vetDTO.getEmail(), vet.getEmail());
-        assertEquals(vetDTO.getPhoneNumber(), vet.getPhoneNumber());
-        assertEquals(vetDTO.getResume(), vet.getResume());
+        assertEquals(vetResponseDTO.getFirstName(), vet.getFirstName());
+        assertEquals(vetResponseDTO.getLastName(), vet.getLastName());
+        assertEquals(vetResponseDTO.getEmail(), vet.getEmail());
+        assertEquals(vetResponseDTO.getPhoneNumber(), vet.getPhoneNumber());
+        assertEquals(vetResponseDTO.getResume(), vet.getResume());
     }
 
     @Test
@@ -1026,7 +1051,7 @@ class VetsServiceClientIntegrationTest {
                 .setResponseCode(500)
                 .setBody("Something went wrong"));
 
-        final VetDTO vet = vetsServiceClient.getActiveVets()
+        final VetResponseDTO vet = vetsServiceClient.getActiveVets()
                 .onErrorResume(throwable -> {
                     if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
                         return Mono.empty();
@@ -1053,13 +1078,13 @@ class VetsServiceClientIntegrationTest {
                         "        \"active\": false\n" +
                         "    }"));
 
-        final VetDTO vet = vetsServiceClient.getInactiveVets().blockFirst();
+        final VetResponseDTO vet = vetsServiceClient.getInactiveVets().blockFirst();
         assertFalse(vet.isActive());
-        assertEquals(vetDTO.getFirstName(), vet.getFirstName());
-        assertEquals(vetDTO.getLastName(), vet.getLastName());
-        assertEquals(vetDTO.getEmail(), vet.getEmail());
-        assertEquals(vetDTO.getPhoneNumber(), vet.getPhoneNumber());
-        assertEquals(vetDTO.getResume(), vet.getResume());
+        assertEquals(vetResponseDTO.getFirstName(), vet.getFirstName());
+        assertEquals(vetResponseDTO.getLastName(), vet.getLastName());
+        assertEquals(vetResponseDTO.getEmail(), vet.getEmail());
+        assertEquals(vetResponseDTO.getPhoneNumber(), vet.getPhoneNumber());
+        assertEquals(vetResponseDTO.getResume(), vet.getResume());
     }
 
     @Test
@@ -1069,7 +1094,7 @@ class VetsServiceClientIntegrationTest {
                 .setResponseCode(500)
                 .setBody("Something went wrong"));
 
-        final VetDTO vet = vetsServiceClient.getInactiveVets()
+        final VetResponseDTO vet = vetsServiceClient.getInactiveVets()
                 .onErrorResume(throwable -> {
                     if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
                         return Mono.empty();
@@ -1096,13 +1121,13 @@ class VetsServiceClientIntegrationTest {
                         "        \"active\": false\n" +
                         "    }"));
 
-        final VetDTO vet = vetsServiceClient.getVetByVetId("deb1950c-3c56-45dc-874b-89e352695eb7").block();
+        final VetResponseDTO vet = vetsServiceClient.getVetByVetId("deb1950c-3c56-45dc-874b-89e352695eb7").block();
         assertFalse(vet.isActive());
-        assertEquals(vetDTO.getFirstName(), vet.getFirstName());
-        assertEquals(vetDTO.getLastName(), vet.getLastName());
-        assertEquals(vetDTO.getEmail(), vet.getEmail());
-        assertEquals(vetDTO.getPhoneNumber(), vet.getPhoneNumber());
-        assertEquals(vetDTO.getResume(), vet.getResume());
+        assertEquals(vetResponseDTO.getFirstName(), vet.getFirstName());
+        assertEquals(vetResponseDTO.getLastName(), vet.getLastName());
+        assertEquals(vetResponseDTO.getEmail(), vet.getEmail());
+        assertEquals(vetResponseDTO.getPhoneNumber(), vet.getPhoneNumber());
+        assertEquals(vetResponseDTO.getResume(), vet.getResume());
     }
 
     @Test
@@ -1114,7 +1139,7 @@ class VetsServiceClientIntegrationTest {
                 .setResponseCode(404)
                 .setBody("vetId not found: "+invalidVetId));
 
-        final VetDTO vet = vetsServiceClient.getVetByVetId(invalidVetId)
+        final VetResponseDTO vet = vetsServiceClient.getVetByVetId(invalidVetId)
                 .onErrorResume(throwable -> {
                     if (throwable instanceof ExistingVetNotFoundException && throwable.getMessage().equals("vetId not found: "+invalidVetId)) {
                         return Mono.empty();
@@ -1134,7 +1159,7 @@ class VetsServiceClientIntegrationTest {
                 .setResponseCode(400)
                 .setBody("Something went wrong"));
 
-        final VetDTO vet = vetsServiceClient.getVetByVetId("deb1950c-3c56-45dc-874b-89e352695eb7")
+        final VetResponseDTO vet = vetsServiceClient.getVetByVetId("deb1950c-3c56-45dc-874b-89e352695eb7")
                 .onErrorResume(throwable -> {
                     if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
                         return Mono.empty();
@@ -1154,7 +1179,7 @@ class VetsServiceClientIntegrationTest {
                 .setResponseCode(500)
                 .setBody("Something went wrong"));
 
-        final VetDTO vet = vetsServiceClient.getVetByVetId("deb1950c-3c56-45dc-874b-89e352695eb7")
+        final VetResponseDTO vet = vetsServiceClient.getVetByVetId("deb1950c-3c56-45dc-874b-89e352695eb7")
                 .onErrorResume(throwable -> {
                     if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
                         return Mono.empty();
@@ -1181,13 +1206,13 @@ class VetsServiceClientIntegrationTest {
                         "        \"active\": false\n" +
                         "    }"));
 
-        final VetDTO vet = vetsServiceClient.createVet(Mono.just(vetDTO)).block();
+        final VetResponseDTO vet = vetsServiceClient.createVet(Mono.just(vetRequestDTO)).block();
         assertFalse(vet.isActive());
-        assertEquals(vetDTO.getFirstName(), vet.getFirstName());
-        assertEquals(vetDTO.getLastName(), vet.getLastName());
-        assertEquals(vetDTO.getEmail(), vet.getEmail());
-        assertEquals(vetDTO.getPhoneNumber(), vet.getPhoneNumber());
-        assertEquals(vetDTO.getResume(), vet.getResume());
+        assertEquals(vetResponseDTO.getFirstName(), vet.getFirstName());
+        assertEquals(vetResponseDTO.getLastName(), vet.getLastName());
+        assertEquals(vetResponseDTO.getEmail(), vet.getEmail());
+        assertEquals(vetResponseDTO.getPhoneNumber(), vet.getPhoneNumber());
+        assertEquals(vetResponseDTO.getResume(), vet.getResume());
     }
 
     @Test
@@ -1197,7 +1222,7 @@ class VetsServiceClientIntegrationTest {
                 .setResponseCode(500)
                 .setBody("Something went wrong"));
 
-        final VetDTO vet = vetsServiceClient.createVet(Mono.just(vetDTO))
+        final VetResponseDTO vet = vetsServiceClient.createVet(Mono.just(vetRequestDTO))
                 .onErrorResume(throwable -> {
                     if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
                         return Mono.empty();
@@ -1224,13 +1249,13 @@ class VetsServiceClientIntegrationTest {
                         "        \"active\": false\n" +
                         "    }"));
 
-        final VetDTO vet = vetsServiceClient.updateVet("deb1950c-3c56-45dc-874b-89e352695eb7", Mono.just(vetDTO)).block();
+        final VetResponseDTO vet = vetsServiceClient.updateVet("deb1950c-3c56-45dc-874b-89e352695eb7", Mono.just(vetRequestDTO)).block();
         assertFalse(vet.isActive());
-        assertEquals(vetDTO.getFirstName(), vet.getFirstName());
-        assertEquals(vetDTO.getLastName(), vet.getLastName());
-        assertEquals(vetDTO.getEmail(), vet.getEmail());
-        assertEquals(vetDTO.getPhoneNumber(), vet.getPhoneNumber());
-        assertEquals(vetDTO.getResume(), vet.getResume());
+        assertEquals(vetResponseDTO.getFirstName(), vet.getFirstName());
+        assertEquals(vetResponseDTO.getLastName(), vet.getLastName());
+        assertEquals(vetResponseDTO.getEmail(), vet.getEmail());
+        assertEquals(vetResponseDTO.getPhoneNumber(), vet.getPhoneNumber());
+        assertEquals(vetResponseDTO.getResume(), vet.getResume());
     }
 
     @Test
@@ -1242,7 +1267,7 @@ class VetsServiceClientIntegrationTest {
                 .setResponseCode(404)
                 .setBody("vetId not found: "+invalidVetId));
 
-        final VetDTO vet = vetsServiceClient.updateVet(invalidVetId, Mono.just(vetDTO))
+        final VetResponseDTO vet = vetsServiceClient.updateVet(invalidVetId, Mono.just(vetRequestDTO))
                 .onErrorResume(throwable -> {
                     if (throwable instanceof ExistingVetNotFoundException && throwable.getMessage().equals("vetId not found: "+invalidVetId)) {
                         return Mono.empty();
@@ -1262,7 +1287,7 @@ class VetsServiceClientIntegrationTest {
                 .setResponseCode(400)
                 .setBody("Something went wrong"));
 
-        final VetDTO vet = vetsServiceClient.updateVet("deb1950c-3c56-45dc-874b-89e352695eb7", Mono.just(vetDTO))
+        final VetResponseDTO vet = vetsServiceClient.updateVet("deb1950c-3c56-45dc-874b-89e352695eb7", Mono.just(vetRequestDTO))
                 .onErrorResume(throwable -> {
                     if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
                         return Mono.empty();
@@ -1282,7 +1307,7 @@ class VetsServiceClientIntegrationTest {
                 .setResponseCode(500)
                 .setBody("Something went wrong"));
 
-        final VetDTO vet = vetsServiceClient.updateVet("deb1950c-3c56-45dc-874b-89e352695eb7", Mono.just(vetDTO))
+        final VetResponseDTO vet = vetsServiceClient.updateVet("deb1950c-3c56-45dc-874b-89e352695eb7", Mono.just(vetRequestDTO))
                 .onErrorResume(throwable -> {
                     if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
                         return Mono.empty();
@@ -1310,7 +1335,7 @@ class VetsServiceClientIntegrationTest {
                         "        \"active\": false\n" +
                         "    }"));
 
-        final Mono<Void> empty = vetsServiceClient.deleteVet(vetDTO.getVetId());
+        final Mono<Void> empty = vetsServiceClient.deleteVet(vetResponseDTO.getVetId());
 
         assertEquals(empty.block(), null);
     }
@@ -1344,7 +1369,7 @@ class VetsServiceClientIntegrationTest {
                 .setResponseCode(400)
                 .setBody("Something went wrong"));
 
-        final Void empty = vetsServiceClient.deleteVet(vetDTO.getVetId())
+        final Void empty = vetsServiceClient.deleteVet(vetResponseDTO.getVetId())
                 .onErrorResume(throwable -> {
                     if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
                         return Mono.empty();
@@ -1364,7 +1389,7 @@ class VetsServiceClientIntegrationTest {
                 .setResponseCode(500)
                 .setBody("Something went wrong"));
 
-        final Void empty = vetsServiceClient.deleteVet(vetDTO.getVetId())
+        final Void empty = vetsServiceClient.deleteVet(vetResponseDTO.getVetId())
                 .onErrorResume(throwable -> {
                     if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
                         return Mono.empty();
@@ -1399,6 +1424,7 @@ class VetsServiceClientIntegrationTest {
         assertEquals("Veterinary Medicine", education.getFieldOfStudy());
         assertEquals("2015", education.getStartDate());
         assertEquals("2019", education.getEndDate());
+
     }
 
     @Test
@@ -1676,7 +1702,7 @@ class VetsServiceClientIntegrationTest {
                         "    }"));
 
 
-        final Mono<Void> empty = vetsServiceClient.deleteEducation(vetDTO.getVetId(), educationId);
+        final Mono<Void> empty = vetsServiceClient.deleteEducation(vetResponseDTO.getVetId(), educationId);
 
         assertEquals(empty.block(), null);
     }
@@ -1687,20 +1713,32 @@ class VetsServiceClientIntegrationTest {
         this.server.enqueue(response);
     }
 
-    private VetDTO buildVetDTO() {
-        return VetDTO.builder()
+    private VetResponseDTO buildVetResponseDTO() {
+        return VetResponseDTO.builder()
                 .vetId("deb1950c-3c56-45dc-874b-89e352695eb7")
                 .firstName("Clementine")
                 .lastName("LeBlanc")
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
-                .image("kjd".getBytes())
+                .workday(new HashSet<>())
+                .specialties(new HashSet<>())
+                .active(false)
+                .build();
+    }
+    private VetRequestDTO buildVetRequestDTO() {
+        return VetRequestDTO.builder()
+                .vetId("deb1950c-3c56-45dc-874b-89e352695eb7")
+                .firstName("Clementine")
+                .lastName("LeBlanc")
+                .email("skjfhf@gmail.com")
+                .phoneNumber("947-238-2847")
+                .resume("Just became a vet")
                 .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
     }
 
-
 }
+

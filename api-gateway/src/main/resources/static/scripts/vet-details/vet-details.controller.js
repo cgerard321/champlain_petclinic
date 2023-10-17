@@ -29,6 +29,42 @@ angular.module('vetDetails')
             child.classList.add("modalOff");
         }
 
+        self.checkedCheckboxesUpdate = {};
+        self.handleCheckboxClick = function(value, ratingId) {
+            // Update the checked state for the specific ratingId.
+            self.checkedCheckboxesUpdate[ratingId] = value;
+            // Uncheck other checkboxes for the same ratingId.
+            const checkboxes = document.querySelectorAll('input[type="checkbox"][name="predefinedDescriptionUpdate' + ratingId + '"]');
+            checkboxes.forEach((checkbox) => {
+                if (checkbox.value !== value) {
+                    checkbox.checked = false;
+                }
+            });
+        };
+
+        const checkboxesForAddRating = document.querySelectorAll('.col-sm-12 input[type="checkbox"]');
+        let lastCheckedCheckbox = null;
+        checkboxesForAddRating.forEach(checkbox => {
+            checkbox.addEventListener('click', function () {
+                if (this !== lastCheckedCheckbox) {
+                    if (lastCheckedCheckbox) {
+                        lastCheckedCheckbox.checked = false;
+                    }
+                    lastCheckedCheckbox = this;
+                }
+                const value = lastCheckedCheckbox.checked ? lastCheckedCheckbox.value : null;
+                console.log('Last checked value:', value);
+            });
+        });
+        self.togglePredefinedDescription = function (rating, value) {
+            console.log("Toggling predefinedDescription: ", value);
+            if (rating['predefinedDescription' + value] === value) {
+                rating['predefinedDescription' + value] = null;
+            } else {
+                rating['predefinedDescription' + value] = value;
+            }
+        };
+
         /* added /{{vet.vetID}} in the url */
         $http.get('api/gateway/vets/' + $stateParams.vetId).then(function (resp) {
             self.vet = resp.data;
@@ -147,6 +183,33 @@ angular.module('vetDetails')
                 ratingsContainer.innerHTML = html.slice(0, -2);
             });
 
+        $scope.getRecentRatingBasedOnDate = function () {
+            console.log("In function based on date")
+            const wrongYearPattern = /^\d{4}$/;
+
+            let yearQuery = document.getElementById("queryDate").value
+            let year = new Date().getFullYear()
+
+            if (!wrongYearPattern.test(yearQuery)) {
+                // Throw an exception with a custom error message
+               alert("Invalid year format. Please enter a valid year.");
+               return;
+            }
+           else if (self.query === undefined || self.query === ''){
+                let newYear = year - 2
+                $http.get('api/gateway/vets/'+$stateParams.vetId +'/ratings/date?year='+newYear).then(function (resp) {
+                    console.log(resp.data);
+                    self.ratings = resp.data;
+                    arr = resp.data;
+                });
+            }else{
+                $http.get('api/gateway/vets/'+$stateParams.vetId +'/ratings/date?year='+yearQuery).then(function (resp) {
+                    console.log(resp.data);
+                    self.ratings = resp.data;
+                    arr = resp.data;
+                });
+            }
+        };
 
         $scope.deleteVetRating = function (ratingId) { //added $scope in this class
             let varIsConf = confirm('Are you sure you want to delete this ratingId: ' + ratingId + '?');
@@ -200,6 +263,10 @@ angular.module('vetDetails')
                 ? document.querySelector('input[name="predefinedDescriptionUpdate' + ratingId + '"]:checked').value
                 : null;
 
+            //CHECK
+            const ratingDate = document.querySelector('input[name="Year' + ratingId + '"]:checked')
+                ? document.querySelector('input[name="Year' + ratingId + '"]:checked').value :null;
+
             let updatedRating = {
                 ratingId: ratingId,
                 rateScore: selectedValue,
@@ -244,6 +311,11 @@ angular.module('vetDetails')
                 document.querySelectorAll('input[name="predefinedDescriptionUpdate' + ratingId + '"]').forEach(function (radio) {
                     radio.checked = false;
                 });
+
+                //ADDTIION
+                document.querySelectorAll('input[name="Year:' + ratingId + '"]').forEach(function (radio) {
+                    radio.checked = true;
+                });
             }
         };
 
@@ -276,9 +348,18 @@ angular.module('vetDetails')
                 rateScore: parseFloat(document.getElementById("ratingScore").value),
                 rateDate: new Date().toLocaleDateString(),
                 rateDescription: document.getElementById("ratingDescription").value,
-                predefinedDescription: document.querySelector('input[name="predefinedDescription"]:checked')
-                    ? document.querySelector('input[name="predefinedDescription"]:checked').value
-                    : null,
+                predefinedDescription: document.querySelector('input[name="predefinedDescriptionPOOR"]:checked')
+                    ? document.querySelector('input[name="predefinedDescriptionPOOR"]:checked').value
+                    : document.querySelector('input[name="predefinedDescriptionGOOD"]:checked')
+                        ? document.querySelector('input[name="predefinedDescriptionGOOD"]:checked').value
+                        : document.querySelector('input[name="predefinedDescriptionEXCELLENT"]:checked')
+                            ? document.querySelector('input[name="predefinedDescriptionEXCELLENT"]:checked').value
+                            : null,
+                //ADDITION
+                ratingDate: document.querySelector('input[name="Year"]:checked')
+                    ? document.querySelector('input[name="Year"]:checked').value: null,
+
+
             };
             if (!rating.rateScore) {
                 alert("Please select a rating score");
@@ -411,4 +492,46 @@ angular.module('vetDetails')
             self.addEducationFormVisible = false; // Hide the education form
         };
 
+
     }]);
+
+// function getOlderRatingBasedOnDate(vet){
+//     let year = new Date().getFullYear()
+//
+//     let old = year - 4
+//
+//     $http.get('api/gateway/vets/{vetId}/ratings/date?year=' + old).then(function (resp) {
+//         console.log(resp.data);
+//         vet.showRating=true;
+//         vet.ratingDate = parseFloat(resp.data.toFixed(1));
+//
+//     });
+//
+// }
+
+    // $scope.refreshList = self.vetList;
+    //
+    // $scope.ReloadData = function () {
+    //     let url = 'api/gateway/vets/' + $stateParams.vetId + '/ratings/date?year=' + year;
+    //     let optionSelection = document.getElementById("filterOption").value;
+    //     if (optionSelection === "Recent") {
+    //         url+= '/date?year=2024';
+    //     } else if (optionSelection === "Old") {
+    //         url += '/date?year=2020';
+    //     }
+    //     self.selectedFilter=optionSelection;
+    //
+    //     $http.get(url).then(function (resp) {
+    //         self.vetList = resp.data;
+    //         arr = resp.data;
+    //         angular.forEach(self.vetList, function(vet) {
+    //             getRecentRatingBasedOnDate(vet)
+    //             // getOlderRatingBasedOnDate(ratingsOld)
+    //         });
+    //
+    //     });
+    //
+    // }
+
+
+

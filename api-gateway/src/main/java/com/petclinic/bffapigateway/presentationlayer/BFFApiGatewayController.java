@@ -22,7 +22,6 @@ import com.petclinic.bffapigateway.utils.VetsEntityDtoUtil;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.validation.annotation.Validated;
@@ -30,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -401,7 +401,14 @@ public class BFFApiGatewayController {
         return vetsServiceClient.getTopThreeVetsWithHighestAverageRating();
     }
 
+
+
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @GetMapping("vets/{vetId}/ratings/date")
+    public Flux<RatingResponseDTO> getRatingsOfAVetBasedOnDate(@PathVariable String vetId, @RequestParam Map<String,String> queryParams){
+        return vetsServiceClient.getRatingsOfAVetBasedOnDate(vetId,queryParams);
+    }
+
     @GetMapping(value = "vets/{vetId}/ratings/average")
     public Mono<ResponseEntity<Double>> getAverageRatingByVetId(@PathVariable String vetId){
         return vetsServiceClient.getAverageRatingByVetId(VetsEntityDtoUtil.verifyId(vetId))
@@ -460,13 +467,13 @@ public class BFFApiGatewayController {
     //Vets
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping(value = "vets")
-    public Flux<VetDTO> getAllVets() {
+    public Flux<VetResponseDTO> getAllVets() {
         return vetsServiceClient.getVets();
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping("/vets/{vetId}")
-    public Mono<ResponseEntity<VetDTO>> getVetByVetId(@PathVariable String vetId) {
+    public Mono<ResponseEntity<VetResponseDTO>> getVetByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getVetByVetId(VetsEntityDtoUtil.verifyId(vetId))
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
@@ -474,24 +481,24 @@ public class BFFApiGatewayController {
 
     @IsUserSpecific(idToMatch = {"vetId"})
     @GetMapping("/vets/vetBillId/{vetId}")
-    public Mono<ResponseEntity<VetDTO>> getVetByVetBillId(@PathVariable String vetBillId) {
+    public Mono<ResponseEntity<VetResponseDTO>> getVetByVetBillId(@PathVariable String vetBillId) {
         return vetsServiceClient.getVetByVetBillId(VetsEntityDtoUtil.verifyId(vetBillId))
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
     @GetMapping(value = "/vets/active")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<VetDTO> getActiveVets() {
+    public Flux<VetResponseDTO> getActiveVets() {
         return vetsServiceClient.getActiveVets();
     }
 
     @GetMapping(value = "/vets/inactive")//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<VetDTO> getInactiveVets() {
+    public Flux<VetResponseDTO> getInactiveVets() {
         return vetsServiceClient.getInactiveVets();
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @PostMapping(value = "/users/vets",consumes = "application/json",produces = "application/json")
-    public Mono<ResponseEntity<VetDTO>> insertVet(@RequestBody Mono<RegisterVet> vetDTOMono) {
+    public Mono<ResponseEntity<VetResponseDTO>> insertVet(@RequestBody Mono<RegisterVet> vetDTOMono) {
         return authServiceClient.createVetUser(vetDTOMono)
                 .map(v->ResponseEntity.status(HttpStatus.CREATED).body(v))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
@@ -499,7 +506,7 @@ public class BFFApiGatewayController {
 
     @IsUserSpecific(idToMatch = {"vetId"}, bypassRoles = {Roles.ADMIN})
     @PutMapping(value = "/vets/{vetId}",consumes = "application/json",produces = "application/json")
-    public Mono<ResponseEntity<VetDTO>> updateVetByVetId(@PathVariable String vetId, @RequestBody Mono<VetDTO> vetDTOMono) {
+    public Mono<ResponseEntity<VetResponseDTO>> updateVetByVetId(@PathVariable String vetId, @RequestBody Mono<VetRequestDTO> vetDTOMono) {
         return vetsServiceClient.updateVet(VetsEntityDtoUtil.verifyId(vetId), vetDTOMono)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
@@ -535,6 +542,7 @@ public class BFFApiGatewayController {
 //        return authServiceClient.updateUser(userId, model);
 //    }
 
+
     /**
      * Owners Methods
      **/
@@ -551,7 +559,13 @@ public class BFFApiGatewayController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
     @GetMapping(value = "/owners-pagination")
-    public Flux<OwnerResponseDTO> getOwnersByPagination(@RequestParam Optional<Integer> page, @RequestParam Optional<Integer> size) {
+    public Flux<OwnerResponseDTO> getOwnersByPagination(@RequestParam Optional<Integer> page,
+                                                        @RequestParam Optional<Integer> size,
+                                                        @RequestParam(required = false) String ownerId,
+                                                        @RequestParam(required = false) String firstName,
+                                                        @RequestParam(required = false) String lastName,
+                                                        @RequestParam(required = false) String phoneNumber,
+                                                        @RequestParam(required = false) String city) {
 
         if(page.isEmpty()){
             page = Optional.of(0);
@@ -561,7 +575,7 @@ public class BFFApiGatewayController {
             size = Optional.of(5);
         }
 
-        return customersServiceClient.getOwnersByPagination(page,size);
+        return customersServiceClient.getOwnersByPagination(page,size,ownerId,firstName,lastName,phoneNumber,city);
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
@@ -569,6 +583,20 @@ public class BFFApiGatewayController {
     public Mono<Long> getTotalNumberOfOwners(){
         return customersServiceClient.getTotalNumberOfOwners();
     }
+
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
+    @GetMapping(value = "/owners-filtered-count")
+    public Mono<Long> getTotalNumberOfOwnersWithFilters (
+        @RequestParam(required = false) String ownerId,
+        @RequestParam(required = false) String firstName,
+        @RequestParam(required = false) String lastName,
+        @RequestParam(required = false) String phoneNumber,
+        @RequestParam(required = false) String city)
+    {
+        return customersServiceClient.getTotalNumberOfOwnersWithFilters(ownerId,firstName,lastName,phoneNumber,city);
+    }
+
 
 
     @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN})
@@ -668,7 +696,7 @@ public class BFFApiGatewayController {
         return customersServiceClient.deleteOwner(ownerId).then(Mono.just(ResponseEntity.noContent().<OwnerResponseDTO>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-    
+
     /**
      * End of Owner Methods
      **/
@@ -701,6 +729,15 @@ public class BFFApiGatewayController {
     @GetMapping(value = "users", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<UserDetails> getAllUsers(@CookieValue("Bearer") String auth) {
         return authServiceClient.getUsers(auth);
+    }
+
+    @PatchMapping(value = "users/{userId}",
+            consumes = "application/json",
+            produces = "application/json")
+    public Mono<ResponseEntity<UserResponseDTO>> updateUserRoles(final @PathVariable String userId, @RequestBody RolesChangeRequestDTO roleChangeDTO, @CookieValue("Bearer") String auth) {
+        return authServiceClient.updateUsersRoles(userId, roleChangeDTO, auth)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})

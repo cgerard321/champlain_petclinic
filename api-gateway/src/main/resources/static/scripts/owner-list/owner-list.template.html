@@ -59,6 +59,62 @@
         </div>
     </form>-->
 
+    <form class="d-flex flex-column ng-pristine ng-valid">
+        <div class="d-flex flex-row justify-content-between align-items-end">
+            <div class="fw-bold">
+                Filters
+            </div>
+            <div class="d-flex flex-row gap-2">
+                <button style="color: gray;" class="border btn btn-light shadow-sm" ng-click="$ctrl.searchOwnersByPaginationAndFilters()">Search</button>
+                <button style="color: gray;" class="border btn btn-light shadow-sm" ng-click="$ctrl.clearInputAndResetDefaultData()">Reset</button>
+            </div>
+        </div>
+
+        <hr class="m-0 mb-3 mt-3">
+
+        <div class="d-flex gap-4 mb-3 flex-wrap">
+            <div class="d-flex flex-column">
+                <input id="ownerIdInput" type="text" placeholder="Search...">
+                <label style="font-size: 13px; color: gray;">OwnerID</label>
+            </div>
+
+            <div class="d-flex flex-column">
+                <input id="firstNameInput" type="text" placeholder="Search...">
+                <label style="font-size: 13px; color: gray;">First Name</label>
+            </div>
+
+            <div class="d-flex flex-column">
+                <input id="lastNameInput" type="text" placeholder="Search...">
+                <label style="font-size: 13px; color: gray;">Last Name</label>
+            </div>
+
+            <div class="d-none d-sm-flex flex-column">
+                <input id="cityInput" type="text" placeholder="Search...">
+                <label style="font-size: 13px; color: gray;">City</label>
+            </div>
+
+        </div>
+
+        <div class="d-flex gap-4 mb-4 flex-wrap">
+            <div class="d-none d-sm-flex flex-column">
+                <input id="phoneNumberInput" type="text" placeholder="Search...">
+                <label style="font-size: 13px; color: gray;">Phone Number</label>
+            </div>
+
+            <div class="d-flex flex-column">
+                <select id="sizeInput" style="width: 100px">
+                    <option value=""> </option>
+                    <option value="2">2</option>
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="15">15</option>
+                </select>
+                <label style="font-size: 13px; color: gray;">Size</label>
+            </div>
+        </div>
+
+    </form>
+
         <table id="owner" class="table table-striped table-responsive ownerTable pb-3">
             <thead class="bg-white">
                 <tr>
@@ -72,27 +128,6 @@
             </thead>
 
             <tbody class="border">
-
-                <tr>
-                    <td class="bg-white border" >
-                        <input class="ps-2" style="width:100%" type="text" placeholder="Search Filter...">
-                    </td>
-                    <td class="bg-white border">
-                        <input class="ps-2" type="text" placeholder="Search Filter...">
-                    </td>
-                    <td class="bg-white border d-none d-sm-table-cell d-md-table-cell">
-                        <input class="ps-2" type="text" placeholder="Search Filter...">
-                    </td>
-                    <td class="bg-white border d-none d-sm-table-cell d-md-table-cell">
-                        <input class="ps-2" type="text" size="15" placeholder="Search Filter...">
-                    </td>
-                    <td class="bg-white border d-none d-sm-table-cell d-md-table-cell">
-                        <input class="ps-2" type="text" size="15" placeholder="Search Filter...">
-                    </td>
-                    <td class="bg-white border d-none d-sm-table-cell d-md-table-cell">
-                        <input class="ps-2" type="text" size="10" placeholder="Search Filter...">
-                    </td>
-                </tr>
 
                 <tr class="" id="ownerTd" ng-repeat="owner in $ctrl.owners">
                     <td>
@@ -119,7 +154,7 @@
                 </li>
 
                 <li class="page-item">
-                    <a class="page-link text-dark" disabled>{{$ctrl.currentPageOnSite}}</a>
+                    <a class="page-link text-dark" disabled>Page-{{$ctrl.currentPageOnSite}}</a>
                 </li>
                 <li class="page-item">
                     <a class="page-link text-dark" aria-label="Next" ng-click="$ctrl.goNextPage()">

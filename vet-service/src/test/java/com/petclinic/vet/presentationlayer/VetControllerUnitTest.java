@@ -4,6 +4,8 @@ import com.petclinic.vet.dataaccesslayer.Photo;
 import com.petclinic.vet.dataaccesslayer.Vet;
 import com.petclinic.vet.dataaccesslayer.badges.Badge;
 import com.petclinic.vet.dataaccesslayer.badges.BadgeTitle;
+import com.petclinic.vet.dataaccesslayer.ratings.PredefinedDescription;
+import com.petclinic.vet.dataaccesslayer.ratings.Rating;
 import com.petclinic.vet.exceptions.InvalidInputException;
 import com.petclinic.vet.servicelayer.*;
 import com.petclinic.vet.servicelayer.badges.BadgeResponseDTO;
@@ -33,7 +35,9 @@ import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -61,24 +65,29 @@ class VetControllerUnitTest {
     @MockBean
     ConnectionFactoryInitializer connectionFactoryInitializer;
 
-    VetDTO vetDTO = buildVetDTO();
-    VetDTO vetDTO2 = buildVetDTO2();
+    VetRequestDTO vetRequestDTO = buildVetRequestDTO();
+    VetResponseDTO vetResponseDTO = buildVetResponseDTO();
+    VetResponseDTO vetResponseDTO2 = buildVetResponseDTO2();
 
-    VetDTO vetDTO3=buildVetDTO3();
+
 
     VetAverageRatingDTO averageRatingDTO=buildVetAverageRatingDTO1();
     VetAverageRatingDTO averageRatingDTO2=buildVetAverageRatingDTO2();
     VetAverageRatingDTO averageRatingDTO3=buildVetAverageRatingDTO3();
 
 
-
     EducationResponseDTO educationResponseDTO1 = buildEducation();
-    EducationResponseDTO educationResponseDTO2 = buildEducation2();
 
     Photo photo = buildPhoto();
 
 
     RatingResponseDTO ratingDTO = buildRatingResponseDTO("Vet was super calming with my pet",5.0);
+
+    RatingResponseDTO ratingDateResponseDTO=buildRatingResponseWithDate();
+    RatingResponseDTO ratingDateResponseDTO2=buildRatingResponseWithDate2();
+
+    Rating ratingWithDate=buildNewRatingWithDate();
+    Rating ratingWithDate2=buildNewRatingWithDate2();
 
     Vet vet = buildVet();
     String VET_ID = vet.getVetId();
@@ -129,11 +138,11 @@ class VetControllerUnitTest {
     @Test
     void addRatingWithVetId_ValidValues_ShouldSucceed() {
         RatingRequestDTO ratingRequestDTO = RatingRequestDTO.builder()
-                        .vetId(VET_ID)
-                        .rateScore(3.5)
-                        .rateDescription("The vet was decent but lacked table manners.")
-                        .rateDate("16/09/2023")
-                        .build();
+                .vetId(VET_ID)
+                .rateScore(3.5)
+                .rateDescription("The vet was decent but lacked table manners.")
+                .rateDate("16/09/2023")
+                .build();
         RatingResponseDTO rating = buildRatingResponseDTO(ratingRequestDTO.getRateDescription(), ratingRequestDTO.getRateScore());
 
         when(ratingService.addRatingToVet(anyString(), any(Mono.class)))
@@ -216,12 +225,11 @@ class VetControllerUnitTest {
 
     @Test
     void getAverageRatingForEachVetByVetId_ShouldSucceed(){
-
         String vetId = "cf25e779-548b-4788-aefa-6d58621c2feb";
         Double averageRating = 5.0;
 
         when(vetService.getVetByVetId(vetId))
-                .thenReturn(Mono.just(vetDTO));
+                .thenReturn(Mono.just(vetResponseDTO));
 
         when(ratingService.getAverageRatingByVetId(vetId))
                 .thenReturn(Mono.just(ratingDTO.getRateScore()));
@@ -240,17 +248,13 @@ class VetControllerUnitTest {
 
         Mockito.verify(ratingService, times(1))
                 .getAverageRatingByVetId(ratingDTO.getVetId());
-
     }
 
 
     @Test
     void getTopThreeVetsWithTheHighestRating() {
-
-
         when(ratingService.getTopThreeVetsWithHighestAverageRating())
                 .thenReturn(Flux.just(averageRatingDTO, averageRatingDTO2, averageRatingDTO3));
-
 
         client.get()
                 .uri("/vets/topVets")
@@ -268,6 +272,34 @@ class VetControllerUnitTest {
 
         Mockito.verify(ratingService, times(1))
                 .getTopThreeVetsWithHighestAverageRating();
+
+    }
+    @Test
+    void getRatingBasedOnDate() {
+
+
+        String exisingYearDate="2023";
+
+        Map<String, String> ratingQueryParams = new HashMap<>();
+        ratingQueryParams.put("year", exisingYearDate);
+
+        when(ratingService.getRatingsOfAVetBasedOnDate(vet.getVetId(),ratingQueryParams))
+                .thenReturn(Flux.just(ratingDateResponseDTO,ratingDateResponseDTO2));
+        client.get()
+                .uri("/vets/"+VET_ID+"/ratings/date?year={year}",exisingYearDate)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(RatingResponseDTO.class)
+                .value(ratingDTOs ->{
+                            assertEquals(2, ratingDTOs.size());
+                        }
+                );
+
+        Mockito.verify(ratingService, times(1))
+                .getRatingsOfAVetBasedOnDate(vet.getVetId(),ratingQueryParams);
+
 
     }
 
@@ -292,7 +324,7 @@ class VetControllerUnitTest {
     @Test
     void getAllVets() {
         when(vetService.getAll())
-                .thenReturn(Flux.just(vetDTO));
+                .thenReturn(Flux.just(vetResponseDTO));
 
         client
                 .get()
@@ -302,13 +334,12 @@ class VetControllerUnitTest {
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$[0].vetId").isEqualTo(vetDTO.getVetId())
-                .jsonPath("$[0].resume").isEqualTo(vetDTO.getResume())
-                .jsonPath("$[0].lastName").isEqualTo(vetDTO.getLastName())
-                .jsonPath("$[0].firstName").isEqualTo(vetDTO.getFirstName())
-                .jsonPath("$[0].email").isEqualTo(vetDTO.getEmail())
-                .jsonPath("$[0].imageId").isNotEmpty()
-                .jsonPath("$[0].active").isEqualTo(vetDTO.isActive());
+                .jsonPath("$[0].vetId").isEqualTo(vetResponseDTO.getVetId())
+                .jsonPath("$[0].resume").isEqualTo(vetResponseDTO.getResume())
+                .jsonPath("$[0].lastName").isEqualTo(vetResponseDTO.getLastName())
+                .jsonPath("$[0].firstName").isEqualTo(vetResponseDTO.getFirstName())
+                .jsonPath("$[0].email").isEqualTo(vetResponseDTO.getEmail())
+                .jsonPath("$[0].active").isEqualTo(vetResponseDTO.isActive());
 
         Mockito.verify(vetService, times(1))
                 .getAll();
@@ -317,7 +348,7 @@ class VetControllerUnitTest {
     @Test
     void getVetByVetId() {
         when(vetService.getVetByVetId(anyString()))
-                .thenReturn(Mono.just(vetDTO));
+                .thenReturn(Mono.just(vetResponseDTO));
 
         client
                 .get()
@@ -333,7 +364,6 @@ class VetControllerUnitTest {
                 .jsonPath("$.lastName").isEqualTo(vet.getLastName())
                 .jsonPath("$.firstName").isEqualTo(vet.getFirstName())
                 .jsonPath("$.email").isEqualTo(vet.getEmail())
-                .jsonPath("$.imageId").isNotEmpty()
                 .jsonPath("$.active").isEqualTo(vet.isActive());
 
         Mockito.verify(vetService, times(1))
@@ -343,7 +373,7 @@ class VetControllerUnitTest {
     @Test
     void getVetByVetBillId() {
         when(vetService.getVetByVetBillId(anyString()))
-                .thenReturn(Mono.just(vetDTO));
+                .thenReturn(Mono.just(vetResponseDTO));
 
         client
                 .get()
@@ -368,7 +398,7 @@ class VetControllerUnitTest {
     @Test
     void getActiveVets() {
         when(vetService.getVetByIsActive(anyBoolean()))
-                .thenReturn(Flux.just(vetDTO2));
+                .thenReturn(Flux.just(vetResponseDTO2));
 
         client
                 .get()
@@ -378,33 +408,41 @@ class VetControllerUnitTest {
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$[0].vetId").isEqualTo(vetDTO2.getVetId())
-                .jsonPath("$[0].resume").isEqualTo(vetDTO2.getResume())
-                .jsonPath("$[0].lastName").isEqualTo(vetDTO2.getLastName())
-                .jsonPath("$[0].firstName").isEqualTo(vetDTO2.getFirstName())
-                .jsonPath("$[0].email").isEqualTo(vetDTO2.getEmail())
-                .jsonPath("$[0].imageId").isNotEmpty()
-                .jsonPath("$[0].active").isEqualTo(vetDTO2.isActive());
+                .jsonPath("$[0].vetId").isEqualTo(vetResponseDTO2.getVetId())
+                .jsonPath("$[0].resume").isEqualTo(vetResponseDTO2.getResume())
+                .jsonPath("$[0].lastName").isEqualTo(vetResponseDTO2.getLastName())
+                .jsonPath("$[0].firstName").isEqualTo(vetResponseDTO2.getFirstName())
+                .jsonPath("$[0].email").isEqualTo(vetResponseDTO2.getEmail())
+                .jsonPath("$[0].active").isEqualTo(vetResponseDTO2.isActive());
 
         Mockito.verify(vetService, times(1))
-                .getVetByIsActive(vetDTO2.isActive());
+                .getVetByIsActive(vetResponseDTO2.isActive());
     }
 
     @Test
     void createVet() {
-        Mono<VetDTO> dto = Mono.just(vetDTO);
         when(vetService.insertVet(any(Mono.class)))
-                .thenReturn(dto);
+                .thenReturn(Mono.just(vetResponseDTO));
 
         client
                 .post()
                 .uri("/vets")
-                .body(dto, Vet.class)
+                .body(Mono.just(vetRequestDTO), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody();
+                .expectBody(VetResponseDTO.class)
+                .value((dto) -> {
+                    assertThat(dto.getFirstName()).isEqualTo(vetResponseDTO.getFirstName());
+                    assertThat(dto.getLastName()).isEqualTo(vetResponseDTO.getLastName());
+                    assertThat(dto.getPhoneNumber()).isEqualTo(vetResponseDTO.getPhoneNumber());
+                    assertThat(dto.getResume()).isEqualTo(vetResponseDTO.getResume());
+                    assertThat(dto.getEmail()).isEqualTo(vetResponseDTO.getEmail());
+                    assertThat(dto.getWorkday()).isEqualTo(vetResponseDTO.getWorkday());
+                    assertThat(dto.isActive()).isEqualTo(vetResponseDTO.isActive());
+                    assertThat(dto.getSpecialties()).isEqualTo(vetResponseDTO.getSpecialties());
+                });
 
         Mockito.verify(vetService, times(1))
                 .insertVet(any(Mono.class));
@@ -413,24 +451,23 @@ class VetControllerUnitTest {
     @Test
     void updateVet() {
         when(vetService.updateVet(anyString(), any(Mono.class)))
-                .thenReturn(Mono.just(vetDTO));
+                .thenReturn(Mono.just(vetResponseDTO));
 
         client
                 .put()
                 .uri("/vets/" + VET_ID)
-                .body(Mono.just(vetDTO), VetDTO.class)
+                .body(Mono.just(vetRequestDTO), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.vetId").isEqualTo(vetDTO.getVetId())
-                .jsonPath("$.resume").isEqualTo(vetDTO.getResume())
-                .jsonPath("$.lastName").isEqualTo(vetDTO.getLastName())
-                .jsonPath("$.firstName").isEqualTo(vetDTO.getFirstName())
-                .jsonPath("$.email").isEqualTo(vetDTO.getEmail())
-                .jsonPath("$.imageId").isNotEmpty()
-                .jsonPath("$.active").isEqualTo(vetDTO.isActive());
+                .jsonPath("$.vetId").isEqualTo(vetResponseDTO.getVetId())
+                .jsonPath("$.resume").isEqualTo(vetResponseDTO.getResume())
+                .jsonPath("$.lastName").isEqualTo(vetResponseDTO.getLastName())
+                .jsonPath("$.firstName").isEqualTo(vetResponseDTO.getFirstName())
+                .jsonPath("$.email").isEqualTo(vetResponseDTO.getEmail())
+                .jsonPath("$.active").isEqualTo(vetResponseDTO.isActive());
 
         Mockito.verify(vetService, times(1))
                 .updateVet(anyString(), any(Mono.class));
@@ -439,7 +476,7 @@ class VetControllerUnitTest {
     @Test
     void getInactiveVets() {
         when(vetService.getVetByIsActive(anyBoolean()))
-                .thenReturn(Flux.just(vetDTO));
+                .thenReturn(Flux.just(vetResponseDTO));
 
         client
                 .get()
@@ -449,16 +486,15 @@ class VetControllerUnitTest {
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$[0].vetId").isEqualTo(vetDTO.getVetId())
-                .jsonPath("$[0].resume").isEqualTo(vetDTO.getResume())
-                .jsonPath("$[0].lastName").isEqualTo(vetDTO.getLastName())
-                .jsonPath("$[0].firstName").isEqualTo(vetDTO.getFirstName())
-                .jsonPath("$[0].email").isEqualTo(vetDTO.getEmail())
-                .jsonPath("$[0].imageId").isNotEmpty()
-                .jsonPath("$[0].active").isEqualTo(vetDTO.isActive());
+                .jsonPath("$[0].vetId").isEqualTo(vetResponseDTO.getVetId())
+                .jsonPath("$[0].resume").isEqualTo(vetResponseDTO.getResume())
+                .jsonPath("$[0].lastName").isEqualTo(vetResponseDTO.getLastName())
+                .jsonPath("$[0].firstName").isEqualTo(vetResponseDTO.getFirstName())
+                .jsonPath("$[0].email").isEqualTo(vetResponseDTO.getEmail())
+                .jsonPath("$[0].active").isEqualTo(vetResponseDTO.isActive());
 
         Mockito.verify(vetService, times(1))
-                .getVetByIsActive(vetDTO.isActive());
+                .getVetByIsActive(vetResponseDTO.isActive());
     }
 
     @Test
@@ -480,7 +516,7 @@ class VetControllerUnitTest {
     @Test
     void getByVetId_Invalid() {
         when(vetService.getVetByVetId(anyString()))
-                .thenReturn(Mono.just(vetDTO));
+                .thenReturn(Mono.just(vetResponseDTO));
 
         client
                 .get()
@@ -496,12 +532,12 @@ class VetControllerUnitTest {
     @Test
     void updateByVetId_Invalid() {
         when(vetService.updateVet(anyString(), any(Mono.class)))
-                .thenReturn(Mono.just(vetDTO));
+                .thenReturn(Mono.just(vetResponseDTO));
 
         client
                 .put()
                 .uri("/vets/" + INVALID_VET_ID)
-                .body(Mono.just(vetDTO), VetDTO.class)
+                .body(Mono.just(vetRequestDTO), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -740,15 +776,14 @@ class VetControllerUnitTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
-                .imageId("kjd")
                 .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
     }
 
-    private VetDTO buildVetDTO() {
-        return VetDTO.builder()
+    private VetRequestDTO buildVetRequestDTO() {
+        return VetRequestDTO.builder()
                 .vetId("cf25e779-548b-4788-aefa-6d58621c2feb")
                 .vetBillId("d9d3a7ac-6817-4c13-9a09-c09da74fb65f")
                 .firstName("Pauline")
@@ -757,37 +792,33 @@ class VetControllerUnitTest {
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
                 .workday(new HashSet<>())
-                .imageId("kjd")
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
     }
-    private VetDTO buildVetDTO2() {
-        return VetDTO.builder()
+    private VetResponseDTO buildVetResponseDTO() {
+        return VetResponseDTO.builder()
                 .vetId("cf25e779-548b-4788-aefa-6d58621c2feb")
-                .vetBillId("2")
+                .vetBillId("d9d3a7ac-6817-4c13-9a09-c09da74fb65f")
                 .firstName("Pauline")
                 .lastName("LeBlanc")
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-2847")
-                .imageId("kjd")
                 .resume("Just became a vet")
                 .workday(new HashSet<>())
                 .specialties(new HashSet<>())
-                .active(true)
+                .active(false)
                 .build();
     }
-
-    private VetDTO buildVetDTO3() {
-        return VetDTO.builder()
-                .vetId("678910Hi")
-                .vetBillId("3")
-                .firstName("Olivia")
-                .lastName("Shaun")
-                .email("asdhbw@gmail.com")
-                .phoneNumber("543-201-2547")
-                .imageId("kjd")
-                .resume("Still a vet")
+    private VetResponseDTO buildVetResponseDTO2() {
+        return VetResponseDTO.builder()
+                .vetId("cf25e779-548b-4788-aefa-6d58621c2feb")
+                .vetBillId("d9d3a7ac-6817-4c13-9a09-c09da74fb65f")
+                .firstName("Pauline")
+                .lastName("LeBlanc")
+                .email("skjfhf@gmail.com")
+                .phoneNumber("947-238-2847")
+                .resume("Just became a vet")
                 .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(true)
@@ -806,18 +837,6 @@ class VetControllerUnitTest {
                 .build();
     }
 
-    private EducationResponseDTO buildEducation2(){
-        return  EducationResponseDTO.builder()
-                .educationId("2")
-                .vetId(VET_ID)
-                .degree("Doctor of Veterinary Medicine")
-                .fieldOfStudy("Veterinary Medicine")
-                .schoolName("University of Veterinary Sciences")
-                .startDate("2008")
-                .endDate("2013")
-                .build();
-    }
-
     private RatingResponseDTO buildRatingResponseDTO(String description, double score) {
         return RatingResponseDTO.builder()
                 .ratingId("2")
@@ -825,6 +844,27 @@ class VetControllerUnitTest {
                 .rateScore(score)
                 .rateDescription(description)
                 .rateDate("16/09/2023")
+                .build();
+    }
+    private RatingResponseDTO buildRatingResponseDTOWithDate(String description, double score) {
+        return RatingResponseDTO.builder()
+                .ratingId("2")
+                .vetId("cf25e779-548b-4788-aefa-6d58621c2feb")
+                .rateScore(score)
+                .rateDescription(description)
+                .rateDate("16/09/2023")
+                .date("2023")
+                .build();
+    }
+
+    private RatingResponseDTO buildRatingResponseDTOWithDate2(String description, double score) {
+        return RatingResponseDTO.builder()
+                .ratingId("2")
+                .vetId("cf25e779-548b-4788-aefa-6d58621c2feb")
+                .rateScore(score)
+                .rateDescription(description)
+                .rateDate("16/09/2023")
+                .date("2022")
                 .build();
     }
 
@@ -863,4 +903,50 @@ class VetControllerUnitTest {
                 .vetId("92739")
                 .build();
     }
+
+    private RatingResponseDTO buildRatingResponseWithDate(){
+        return RatingResponseDTO .builder()
+                .vetId("1232")
+                .date("2023")
+                .predefinedDescription(PredefinedDescription.GOOD)
+                .ratingId("1312")
+                .rateScore(2.0)
+                .rateDescription("This is a bad vet")
+                .build();
+    }
+    private RatingResponseDTO buildRatingResponseWithDate2(){
+        return RatingResponseDTO .builder()
+                .vetId("1232")
+                .date("2022")
+                .predefinedDescription(PredefinedDescription.POOR)
+                .ratingId("1234")
+                .rateScore(2.0)
+                .rateDescription("This is a bad vet")
+                .build();
+    }
+
+    private Rating buildNewRatingWithDate(){
+        return Rating.builder()
+                .vetId("1232")
+                .date("2023")
+                .id("1")
+                .rateScore(3.0)
+                .predefinedDescription(PredefinedDescription.POOR)
+                .rateDate("21")
+                .rateDescription("This is a medium vet")
+                .build();
+    }
+
+    private Rating buildNewRatingWithDate2(){
+        return Rating.builder()
+                .vetId("1281")
+                .date("2022")
+                .id("2")
+                .rateScore(1.0)
+                .predefinedDescription(PredefinedDescription.POOR)
+                .rateDate("10")
+                .rateDescription("This is a bad vet")
+                .build();
+    }
+
 }

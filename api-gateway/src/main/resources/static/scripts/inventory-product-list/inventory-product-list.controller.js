@@ -13,6 +13,8 @@ angular.module('inventoryProductList')
                 // Handle if inventory is empty
                 console.log("The inventory is empty!");
             }
+
+
         }).catch(function (error) {
             if (error.status === 404) {
                 console.clear()
@@ -24,7 +26,7 @@ angular.module('inventoryProductList')
         });
 
 
-        $scope.deleteProduct = function (product) {
+            $scope.deleteProduct = function (product) {
             let varIsConf = confirm('Are you sure you want to remove this product?');
             if (varIsConf) {
 

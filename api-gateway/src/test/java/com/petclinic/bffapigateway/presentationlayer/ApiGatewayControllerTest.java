@@ -50,6 +50,9 @@ import org.springframework.util.StreamUtils;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.util.UriComponentsBuilder;
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -97,9 +100,11 @@ class ApiGatewayControllerTest {
     @Mock
     private CustomersServiceClient customersServiceClientMock;
 
-    VetDTO vetDTO = buildVetDTO();
-    VetDTO vetDTO2 = buildVetDTO2();
-    String VET_ID = buildVetDTO().getVetId();
+    VetResponseDTO vetResponseDTO = buildVetResponseDTO();
+    VetRequestDTO vetRequestDTO = buildVetRequestDTO();
+    VetResponseDTO vetResponseDTO2 = buildVetResponseDTO2();
+    VetRequestDTO vetRequestDTO2 = buildVetRequestDTO2();
+    String VET_ID = buildVetResponseDTO().getVetId();
     String INVALID_VET_ID = "mjbedf";
 
     ClassPathResource cpr=new ClassPathResource("static/images/full_food_bowl.png");
@@ -194,6 +199,25 @@ class ApiGatewayControllerTest {
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$").isEqualTo(1);
+    }
+
+    @Test
+    void getRatingsBasedOnDate(){
+        Map<String, String> queryParams = new HashMap<>();
+        queryParams.put("year", "2023");
+
+
+        when(vetsServiceClient.getRatingsOfAVetBasedOnDate(vetResponseDTO.getVetId(), queryParams))
+                .thenReturn(Flux.just(buildRatingResponseDTO(),buildRatingResponseDTO2()));
+        client
+                .get()
+                .uri("/api/gateway/vets/"+VET_ID+"/ratings/date?year="+queryParams.get("year"))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$[0].date").isEqualTo("2023");
+
     }
 
     @Test
@@ -543,7 +567,7 @@ class ApiGatewayControllerTest {
     @Test
     void getAllVets() {
         when(vetsServiceClient.getVets())
-                .thenReturn(Flux.just(vetDTO));
+                .thenReturn(Flux.just(vetResponseDTO));
 
         client
                 .get()
@@ -553,18 +577,17 @@ class ApiGatewayControllerTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
-                .expectBodyList(VetDTO.class)
+                .expectBodyList(VetResponseDTO.class)
                 .value(responseDTO -> {
                     Assertions.assertNotNull(responseDTO);
                     Assertions.assertNotNull(responseDTO.get(0).getVetId());
-                    assertThat(responseDTO.get(0).getVetId()).isEqualTo(vetDTO.getVetId());
-                    assertThat(responseDTO.get(0).getResume()).isEqualTo(vetDTO.getResume());
-                    assertThat(responseDTO.get(0).getLastName()).isEqualTo(vetDTO.getLastName());
-                    assertThat(responseDTO.get(0).getFirstName()).isEqualTo(vetDTO.getFirstName());
-                    assertThat(responseDTO.get(0).getEmail()).isEqualTo(vetDTO.getEmail());
-                    assertThat(responseDTO.get(0).getImage()).isNotEmpty();
-                    assertThat(responseDTO.get(0).isActive()).isEqualTo(vetDTO.isActive());
-                    assertThat(responseDTO.get(0).getWorkday()).isEqualTo(vetDTO.getWorkday());
+                    assertThat(responseDTO.get(0).getVetId()).isEqualTo(vetResponseDTO.getVetId());
+                    assertThat(responseDTO.get(0).getResume()).isEqualTo(vetResponseDTO.getResume());
+                    assertThat(responseDTO.get(0).getLastName()).isEqualTo(vetResponseDTO.getLastName());
+                    assertThat(responseDTO.get(0).getFirstName()).isEqualTo(vetResponseDTO.getFirstName());
+                    assertThat(responseDTO.get(0).getEmail()).isEqualTo(vetResponseDTO.getEmail());
+                    assertThat(responseDTO.get(0).isActive()).isEqualTo(vetResponseDTO.isActive());
+                    assertThat(responseDTO.get(0).getWorkday()).isEqualTo(vetResponseDTO.getWorkday());
                 });
         Mockito.verify(vetsServiceClient, times(1))
                 .getVets();
@@ -573,7 +596,7 @@ class ApiGatewayControllerTest {
     @Test
     void getVetByVetId() {
         when(vetsServiceClient.getVetByVetId(anyString()))
-                .thenReturn(Mono.just(vetDTO));
+                .thenReturn(Mono.just(vetResponseDTO));
 
         client
                 .get()
@@ -583,13 +606,12 @@ class ApiGatewayControllerTest {
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.vetId").isEqualTo(vetDTO.getVetId())
-                .jsonPath("$.resume").isEqualTo(vetDTO.getResume())
-                .jsonPath("$.lastName").isEqualTo(vetDTO.getLastName())
-                .jsonPath("$.firstName").isEqualTo(vetDTO.getFirstName())
-                .jsonPath("$.email").isEqualTo(vetDTO.getEmail())
-                .jsonPath("$.image").isNotEmpty()
-                .jsonPath("$.active").isEqualTo(vetDTO.isActive());
+                .jsonPath("$.vetId").isEqualTo(vetResponseDTO.getVetId())
+                .jsonPath("$.resume").isEqualTo(vetResponseDTO.getResume())
+                .jsonPath("$.lastName").isEqualTo(vetResponseDTO.getLastName())
+                .jsonPath("$.firstName").isEqualTo(vetResponseDTO.getFirstName())
+                .jsonPath("$.email").isEqualTo(vetResponseDTO.getEmail())
+                .jsonPath("$.active").isEqualTo(vetResponseDTO.isActive());
 
         Mockito.verify(vetsServiceClient, times(1))
                 .getVetByVetId(VET_ID);
@@ -598,7 +620,7 @@ class ApiGatewayControllerTest {
     @Test
     void getActiveVets() {
         when(vetsServiceClient.getActiveVets())
-                .thenReturn(Flux.just(vetDTO2));
+                .thenReturn(Flux.just(vetResponseDTO2));
 
         client
                 .get()
@@ -608,18 +630,17 @@ class ApiGatewayControllerTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
-                .expectBodyList(VetDTO.class)
+                .expectBodyList(VetResponseDTO.class)
                 .value(responseDTO -> {
                     Assertions.assertNotNull(responseDTO);
                     Assertions.assertNotNull(responseDTO.get(0).getVetId());
-                    assertThat(responseDTO.get(0).getVetId()).isEqualTo(vetDTO2.getVetId());
-                    assertThat(responseDTO.get(0).getResume()).isEqualTo(vetDTO2.getResume());
-                    assertThat(responseDTO.get(0).getLastName()).isEqualTo(vetDTO2.getLastName());
-                    assertThat(responseDTO.get(0).getFirstName()).isEqualTo(vetDTO2.getFirstName());
-                    assertThat(responseDTO.get(0).getEmail()).isEqualTo(vetDTO2.getEmail());
-                    assertThat(responseDTO.get(0).getImage()).isNotEmpty();
-                    assertThat(responseDTO.get(0).isActive()).isEqualTo(vetDTO2.isActive());
-                    assertThat(responseDTO.get(0).getWorkday()).isEqualTo(vetDTO2.getWorkday());
+                    assertThat(responseDTO.get(0).getVetId()).isEqualTo(vetResponseDTO2.getVetId());
+                    assertThat(responseDTO.get(0).getResume()).isEqualTo(vetResponseDTO2.getResume());
+                    assertThat(responseDTO.get(0).getLastName()).isEqualTo(vetResponseDTO2.getLastName());
+                    assertThat(responseDTO.get(0).getFirstName()).isEqualTo(vetResponseDTO2.getFirstName());
+                    assertThat(responseDTO.get(0).getEmail()).isEqualTo(vetResponseDTO2.getEmail());
+                    assertThat(responseDTO.get(0).isActive()).isEqualTo(vetResponseDTO2.isActive());
+                    assertThat(responseDTO.get(0).getWorkday()).isEqualTo(vetResponseDTO2.getWorkday());
                 });
         Mockito.verify(vetsServiceClient, times(1))
                 .getActiveVets();
@@ -628,7 +649,7 @@ class ApiGatewayControllerTest {
     @Test
     void getInactiveVets() {
         when(vetsServiceClient.getInactiveVets())
-                .thenReturn(Flux.just(vetDTO));
+                .thenReturn(Flux.just(vetResponseDTO));
 
         client
                 .get()
@@ -638,18 +659,17 @@ class ApiGatewayControllerTest {
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
-                .expectBodyList(VetDTO.class)
+                .expectBodyList(VetResponseDTO.class)
                 .value(responseDTO -> {
                     Assertions.assertNotNull(responseDTO);
                     Assertions.assertNotNull(responseDTO.get(0).getVetId());
-                    assertThat(responseDTO.get(0).getVetId()).isEqualTo(vetDTO.getVetId());
-                    assertThat(responseDTO.get(0).getResume()).isEqualTo(vetDTO.getResume());
-                    assertThat(responseDTO.get(0).getLastName()).isEqualTo(vetDTO.getLastName());
-                    assertThat(responseDTO.get(0).getFirstName()).isEqualTo(vetDTO.getFirstName());
-                    assertThat(responseDTO.get(0).getEmail()).isEqualTo(vetDTO.getEmail());
-                    assertThat(responseDTO.get(0).getImage()).isNotEmpty();
-                    assertThat(responseDTO.get(0).isActive()).isEqualTo(vetDTO.isActive());
-                    assertThat(responseDTO.get(0).getWorkday()).isEqualTo(vetDTO.getWorkday());
+                    assertThat(responseDTO.get(0).getVetId()).isEqualTo(vetResponseDTO.getVetId());
+                    assertThat(responseDTO.get(0).getResume()).isEqualTo(vetResponseDTO.getResume());
+                    assertThat(responseDTO.get(0).getLastName()).isEqualTo(vetResponseDTO.getLastName());
+                    assertThat(responseDTO.get(0).getFirstName()).isEqualTo(vetResponseDTO.getFirstName());
+                    assertThat(responseDTO.get(0).getEmail()).isEqualTo(vetResponseDTO.getEmail());
+                    assertThat(responseDTO.get(0).isActive()).isEqualTo(vetResponseDTO.isActive());
+                    assertThat(responseDTO.get(0).getWorkday()).isEqualTo(vetResponseDTO.getWorkday());
                 });
         Mockito.verify(vetsServiceClient, times(1))
                 .getInactiveVets();
@@ -663,7 +683,7 @@ class ApiGatewayControllerTest {
                 .username("vet")
                 .email("vet@email.com")
                 .password("pwd")
-                .vet(vetDTO).build();
+                .vet(vetRequestDTO).build();
 
 
         Role role = Role.builder()
@@ -681,7 +701,7 @@ class ApiGatewayControllerTest {
         Mono<RegisterVet> dto = Mono.just(registerVet);
 
         when(authServiceClient.createVetUser(any(Mono.class)))
-                .thenReturn((Mono.just(vetDTO)));
+                .thenReturn((Mono.just(vetResponseDTO)));
 
 
 
@@ -701,24 +721,23 @@ class ApiGatewayControllerTest {
     @Test
     void updateVet() {
         when(vetsServiceClient.updateVet(anyString(), any(Mono.class)))
-                .thenReturn(Mono.just(vetDTO2));
+                .thenReturn(Mono.just(vetResponseDTO2));
 
         client
                 .put()
                 .uri("/api/gateway/vets/" + VET_ID)
-                .body(Mono.just(vetDTO2), VetDTO.class)
+                .body(Mono.just(vetResponseDTO2), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.vetId").isEqualTo(vetDTO2.getVetId())
-                .jsonPath("$.resume").isEqualTo(vetDTO2.getResume())
-                .jsonPath("$.lastName").isEqualTo(vetDTO2.getLastName())
-                .jsonPath("$.firstName").isEqualTo(vetDTO2.getFirstName())
-                .jsonPath("$.email").isEqualTo(vetDTO2.getEmail())
-                .jsonPath("$.image").isNotEmpty()
-                .jsonPath("$.active").isEqualTo(vetDTO2.isActive());
+                .jsonPath("$.vetId").isEqualTo(vetResponseDTO2.getVetId())
+                .jsonPath("$.resume").isEqualTo(vetResponseDTO2.getResume())
+                .jsonPath("$.lastName").isEqualTo(vetResponseDTO2.getLastName())
+                .jsonPath("$.firstName").isEqualTo(vetResponseDTO2.getFirstName())
+                .jsonPath("$.email").isEqualTo(vetResponseDTO2.getEmail())
+                .jsonPath("$.active").isEqualTo(vetResponseDTO2.isActive());
 
         Mockito.verify(vetsServiceClient, times(1))
                 .updateVet(anyString(), any(Mono.class));
@@ -743,7 +762,7 @@ class ApiGatewayControllerTest {
     @Test
     void getByVetId_Invalid() {
         when(vetsServiceClient.getVetByVetId(anyString()))
-                .thenReturn(Mono.just(vetDTO));
+                .thenReturn(Mono.just(vetResponseDTO));
 
         client
                 .get()
@@ -759,12 +778,12 @@ class ApiGatewayControllerTest {
     @Test
     void updateByVetId_Invalid() {
         when(vetsServiceClient.updateVet(anyString(), any(Mono.class)))
-                .thenReturn(Mono.just(vetDTO));
+                .thenReturn(Mono.just(vetResponseDTO));
 
         client
                 .put()
                 .uri("/api/gateway/vets/" + INVALID_VET_ID)
-                .body(Mono.just(vetDTO), VetDTO.class)
+                .body(Mono.just(vetRequestDTO), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isEqualTo(INTERNAL_SERVER_ERROR)
@@ -867,7 +886,8 @@ class ApiGatewayControllerTest {
 
     @Test
     void toStringBuilderVets() {
-        System.out.println(VetDTO.builder());
+        System.out.println(VetResponseDTO.builder());
+        System.out.println(VetRequestDTO.builder());
     }
 
 
@@ -1104,7 +1124,7 @@ class ApiGatewayControllerTest {
     }
 
     @Test
-    void getOwnersByPagination(){
+    void getAllOwnersByPagination(){
 
         OwnerResponseDTO owner = new OwnerResponseDTO();
         owner.setOwnerId("ownerId-09");
@@ -1121,7 +1141,7 @@ class ApiGatewayControllerTest {
 
         Flux<OwnerResponseDTO> ownerResponseDTOFlux = Flux.just(owner);
 
-        when(customersServiceClient.getOwnersByPagination(page,size)).thenReturn(ownerResponseDTOFlux);
+        when(customersServiceClient.getOwnersByPagination(page,size,null,null,null,null,null)).thenReturn(ownerResponseDTOFlux);
 
         client.get()
                 .uri("/api/gateway/owners-pagination?page="+page.get()+"&size="+size.get())
@@ -1133,6 +1153,75 @@ class ApiGatewayControllerTest {
                 .value((list) -> {
                     Assertions.assertNotNull(list);
                     Assertions.assertEquals(size.get(),list.size());
+                });
+    }
+
+    @Test
+    void getAllOwnersByPagination_pageEmpty_sizeEmpty(){
+
+        Flux<OwnerResponseDTO> ownerResponseDTOFlux = Flux.just();
+
+        when(customersServiceClient.getOwnersByPagination(null,null,null,null,null,null,null)).thenReturn(ownerResponseDTOFlux);
+
+        client.get()
+                .uri("/api/gateway/owners-pagination")
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .acceptCharset(StandardCharsets.UTF_8)
+                .exchange().expectStatus().isOk()
+                .expectHeader().valueEquals("Content-Type","text/event-stream;charset=UTF-8")
+                .expectBodyList(OwnerResponseDTO.class)
+                .value((list) -> {
+                    Assertions.assertNotNull(list);
+                    Assertions.assertEquals(0,list.size());
+                });
+    }
+
+    @Test
+    void getAllOwnersByPaginationWithFilters(){
+
+        OwnerResponseDTO owner = new OwnerResponseDTO();
+        owner.setOwnerId("ownerId-06");
+        owner.setFirstName("FN1");
+        owner.setLastName("LN1");
+        owner.setAddress("Test");
+        owner.setCity("C1");
+        owner.setProvince("Test");
+        owner.setTelephone("T1");
+
+        Optional<Integer> page = Optional.of(0);
+        Optional<Integer> size =  Optional.of(1);
+        String ownerId = "ownerId-06";
+        String firstName = "FN1";
+        String lastName = "LN1";
+        String city = "C1";
+        String phoneNumber = "T1";
+
+
+        Flux<OwnerResponseDTO> ownerResponseDTOFlux = Flux.just(owner);
+
+        when(customersServiceClient.getOwnersByPagination(page,size,ownerId,firstName,lastName,phoneNumber,city)).thenReturn(ownerResponseDTOFlux);
+
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("/api/gateway/owners-pagination");
+
+        builder.queryParam("page", page);
+        builder.queryParam("size", size);
+        builder.queryParam("ownerId",  ownerId);
+        builder.queryParam("firstName", firstName);
+        builder.queryParam("lastName", lastName);
+        builder.queryParam("phoneNumber", phoneNumber);
+        builder.queryParam("city", city);
+
+        client.get()
+                .uri(builder.build().toUri())
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .acceptCharset(StandardCharsets.UTF_8)
+                .exchange().expectStatus().isOk()
+                .expectHeader().valueEquals("Content-Type","text/event-stream;charset=UTF-8")
+                .expectBodyList(OwnerResponseDTO.class)
+                .value((list) -> {
+                    Assertions.assertNotNull(list);
+                    Assertions.assertEquals(size.get(),list.size());
+                    Assertions.assertEquals(list.get(0).getCity(),city);
                 });
     }
 
@@ -1154,6 +1243,27 @@ class ApiGatewayControllerTest {
                 });
 
     }
+    @Test
+    void getTotalNumberOfOwnersWithFilters(){
+        long expectedCount = 0;
+
+        when(customersServiceClient.getTotalNumberOfOwnersWithFilters(null,null,null,null,null)).thenReturn(Mono.just(expectedCount));
+
+        client.get()
+                .uri("/api/gateway/owners-filtered-count")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Long.class) // Expecting a Long response
+                .consumeWith(response -> {
+                    Long responseBody = response.getResponseBody();
+                    assertNotNull(responseBody);
+                    assertEquals(expectedCount, responseBody.longValue());
+                });
+
+    }
+
+
+
 
     @Test
     void getOwnerByOwnerId_shouldSucceed(){
@@ -1712,10 +1822,10 @@ class ApiGatewayControllerTest {
 
     @Test
     void shouldGetAllBills() {
-        BillResponseDTO billResponseDTO = new BillResponseDTO("BillUUID","1","Test type","1",null,25.00, BillStatus.PAID);
+        BillResponseDTO billResponseDTO = new BillResponseDTO("BillUUID","1","Test type","1",null,25.00, BillStatus.PAID,null);
 
 
-        BillResponseDTO billResponseDTO2 = new BillResponseDTO("BillUUID2","2","Test type","2",null,27.00, BillStatus.UNPAID);
+        BillResponseDTO billResponseDTO2 = new BillResponseDTO("BillUUID2","2","Test type","2",null,27.00, BillStatus.UNPAID,null);
         when(billServiceClient.getAllBilling()).thenReturn(Flux.just(billResponseDTO,billResponseDTO2));
 
         client.get()
@@ -1731,9 +1841,9 @@ class ApiGatewayControllerTest {
 
     @Test
     void shouldGetAllPaidBills() {
-        BillResponseDTO billResponseDTO = new BillResponseDTO("BillUUID","1","Test type","1",null,25.00, BillStatus.PAID);
+        BillResponseDTO billResponseDTO = new BillResponseDTO("BillUUID","1","Test type","1",null,25.00, BillStatus.PAID,null);
 
-        BillResponseDTO billResponseDTO2 = new BillResponseDTO("BillUUID2","2","Test type","2",null,27.00, BillStatus.PAID);
+        BillResponseDTO billResponseDTO2 = new BillResponseDTO("BillUUID2","2","Test type","2",null,27.00, BillStatus.PAID,null);
         when(billServiceClient.getAllPaidBilling()).thenReturn(Flux.just(billResponseDTO,billResponseDTO2));
 
         client.get()
@@ -1749,9 +1859,9 @@ class ApiGatewayControllerTest {
 
     @Test
     void shouldGetAllUnpaidBills() {
-        BillResponseDTO billResponseDTO = new BillResponseDTO("BillUUID","1","Test type","1",null,25.00, BillStatus.UNPAID);
+        BillResponseDTO billResponseDTO = new BillResponseDTO("BillUUID","1","Test type","1",null,25.00, BillStatus.UNPAID, null);
 
-        BillResponseDTO billResponseDTO2 = new BillResponseDTO("BillUUID2","2","Test type","2",null,27.00, BillStatus.UNPAID);
+        BillResponseDTO billResponseDTO2 = new BillResponseDTO("BillUUID2","2","Test type","2",null,27.00, BillStatus.UNPAID,null);
         when(billServiceClient.getAllUnpaidBilling()).thenReturn(Flux.just(billResponseDTO,billResponseDTO2));
 
         client.get()
@@ -1767,9 +1877,9 @@ class ApiGatewayControllerTest {
 
     @Test
     void shouldGetAllOverdueBills() {
-        BillResponseDTO billResponseDTO = new BillResponseDTO("BillUUID","1","Test type","1",null,25.00, BillStatus.OVERDUE);
+        BillResponseDTO billResponseDTO = new BillResponseDTO("BillUUID","1","Test type","1",null,25.00, BillStatus.OVERDUE,null);
 
-        BillResponseDTO billResponseDTO2 = new BillResponseDTO("BillUUID2","2","Test type","2",null,27.00, BillStatus.OVERDUE);
+        BillResponseDTO billResponseDTO2 = new BillResponseDTO("BillUUID2","2","Test type","2",null,27.00, BillStatus.OVERDUE, null);
         when(billServiceClient.getAllOverdueBilling()).thenReturn(Flux.just(billResponseDTO,billResponseDTO2));
 
         client.get()
@@ -2771,8 +2881,36 @@ private InventoryResponseDTO buildInventoryDTO(){
 
 
     @Test
-    void getInventoryByInventoryId_ValidId_shouldSucceed() {
+    void GetProductByInventoryIdAndProductId_InsideInventory() {
+        ProductResponseDTO productResponseDTO = buildProductDTO();
+        when(inventoryServiceClient.getProductByProductIdInInventory(productResponseDTO.getInventoryId(), productResponseDTO.getProductId()))
+                .thenReturn(Mono.just(productResponseDTO));
 
+        client.get()
+                .uri("/api/gateway/inventory/{inventoryId}/products/{productId}", productResponseDTO.getInventoryId(), productResponseDTO.getProductId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(ProductResponseDTO.class)
+                .value(dto -> {
+                    assertNotNull(dto);
+                    assertEquals(productResponseDTO.getInventoryId(), dto.getInventoryId());
+                    assertEquals(productResponseDTO.getProductId(), dto.getProductId());
+                    assertEquals(productResponseDTO.getProductName(), dto.getProductName());
+                    assertEquals(productResponseDTO.getProductDescription(), dto.getProductDescription());
+                    assertEquals(productResponseDTO.getProductPrice(), dto.getProductPrice());
+                    assertEquals(productResponseDTO.getProductQuantity(), dto.getProductQuantity());
+                    assertEquals(productResponseDTO.getProductSalePrice(), dto.getProductSalePrice());
+
+                });
+
+        verify(inventoryServiceClient, times(1))
+                .getProductByProductIdInInventory(productResponseDTO.getInventoryId(), productResponseDTO.getProductId());
+    }
+
+
+    @Test
+    void getInventoryByInventoryId_ValidId_shouldSucceed() {
         String validInventoryId = "inventoryId_1";
         InventoryResponseDTO inventoryResponseDTO = InventoryResponseDTO.builder()
                 .inventoryId(validInventoryId)
@@ -2943,7 +3081,6 @@ void deleteAllInventory_shouldSucceed() {
                     assertEquals(requestDTO.getProductDescription(), dto.getProductDescription());
                     assertEquals(requestDTO.getProductPrice(), dto.getProductPrice());
                     assertEquals(requestDTO.getProductQuantity(), dto.getProductQuantity());
-                    assertEquals(requestDTO.getProductSalePrice(), dto.getProductSalePrice());
                 });
 
         // Verify that the inventoryServiceClient method was called
@@ -2989,6 +3126,9 @@ void deleteAllInventory_shouldSucceed() {
                 .addProductToInventory(eq(requestDTO), eq("invalidInventoryId"));
     }
 
+
+
+
     private ProductResponseDTO buildProductDTO(){
         return ProductResponseDTO.builder()
                 .id("1")
@@ -3002,8 +3142,8 @@ void deleteAllInventory_shouldSucceed() {
                 .build();
     }
 
-    private VetDTO buildVetDTO() {
-        return VetDTO.builder()
+    private VetResponseDTO buildVetResponseDTO() {
+        return VetResponseDTO.builder()
                 .vetId("181faeb5-c024-425c-9f08-663600008f06")
                 .firstName("Pauline")
                 .lastName("LeBlanc")
@@ -3011,19 +3151,43 @@ void deleteAllInventory_shouldSucceed() {
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
                 .workday(new HashSet<>())
-                .image("kjd".getBytes())
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
     }
-    private VetDTO buildVetDTO2() {
-        return VetDTO.builder()
+    private VetResponseDTO buildVetResponseDTO2() {
+        return VetResponseDTO.builder()
                 .vetId("181faeb5-c024-425c-9f08-663600008f06")
                 .firstName("Pauline")
                 .lastName("LeBlanc")
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-2847")
-                .image("kjd".getBytes())
+                .resume("Just became a vet")
+                .workday(new HashSet<>())
+                .specialties(new HashSet<>())
+                .active(true)
+                .build();
+    }
+    private VetRequestDTO buildVetRequestDTO() {
+        return VetRequestDTO.builder()
+                .vetId("181faeb5-c024-425c-9f08-663600008f06")
+                .firstName("Pauline")
+                .lastName("LeBlanc")
+                .email("skjfhf@gmail.com")
+                .phoneNumber("947-238-2847")
+                .resume("Just became a vet")
+                .workday(new HashSet<>())
+                .specialties(new HashSet<>())
+                .active(false)
+                .build();
+    }
+    private VetRequestDTO buildVetRequestDTO2() {
+        return VetRequestDTO.builder()
+                .vetId("181faeb5-c024-425c-9f08-663600008f06")
+                .firstName("Pauline")
+                .lastName("LeBlanc")
+                .email("skjfhf@gmail.com")
+                .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
                 .workday(new HashSet<>())
                 .specialties(new HashSet<>())
@@ -3036,6 +3200,15 @@ void deleteAllInventory_shouldSucceed() {
                 .ratingId("123456")
                 .vetId("181faeb5-c024-425c-9f08-663600008f06")
                 .rateScore(4.0)
+                .date("2023")
+                .build();
+    }
+    private RatingResponseDTO buildRatingResponseDTO2() {
+        return RatingResponseDTO.builder()
+                .ratingId("123456")
+                .vetId("181faeb5-c024-425c-9f08-663600008f06")
+                .rateScore(4.0)
+                .date("2022")
                 .build();
     }
 private VetAverageRatingDTO buildVetAverageRatingDTO(){

@@ -1,8 +1,7 @@
 package com.petclinic.bffapigateway.dtos.Auth;
 
 
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
-import com.petclinic.bffapigateway.dtos.Vets.VetDTO;
+import com.petclinic.bffapigateway.dtos.Vets.VetRequestDTO;
 import com.petclinic.bffapigateway.utils.Security.Annotations.PasswordStrengthCheck;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import lombok.AllArgsConstructor;
@@ -21,5 +20,5 @@ public class RegisterVet {
     private final String defaultRole = Roles.VET.toString();
     @PasswordStrengthCheck
     private String password;
-    private VetDTO vet;
+    private VetRequestDTO vet;
 }

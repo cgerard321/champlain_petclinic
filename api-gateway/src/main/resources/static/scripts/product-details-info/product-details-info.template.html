@@ -1,0 +1,75 @@
+<link crossorigin="anonymous" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css"
+      integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<div class="bColor text-center"><h2 class="titleBundle form" id="title">Product Details Info</h2></div>
+<div class="container mt-5">
+  <div class="card">
+    <div class="card-body">
+      <div class="row">
+        <div class="col-md-6 text-end">
+          <h3 class="inventory-id">Inventory Id: </h3>
+        </div>
+        <div class="col-md-6">
+          <h3>{{$ctrl.product.inventoryId}}</h3>
+        </div>
+      </div>
+      <hr> <!-- Horizontal line -->
+      <div class="row">
+        <div class="col-md-6 text-end">
+          <h3 class="product-id">Product Id: </h3>
+        </div>
+        <div class="col-md-6">
+          <h3>{{$ctrl.product.productId}}</h3>
+        </div>
+      </div>
+      <hr> <!-- Horizontal line -->
+      <div class="row">
+        <div class="col-md-6 text-end">
+          <h5 class="product-description-label">Product Description:</h5>
+        </div>
+        <div class="col-md-6">
+          <h5>{{$ctrl.product.productDescription}}</h5>
+        </div>
+      </div>
+      <hr> <!-- Horizontal line -->
+      <div class="row">
+        <div class="col-md-6 text-end">
+          <h5 class="product-price-label">Product Price:</h5>
+        </div>
+        <div class="col-md-6">
+          <h5>{{$ctrl.product.productPrice}}</h5>
+        </div>
+
+
+
+      </div>
+      <hr> <!-- Horizontal line -->
+      <div class="row">
+        <div class="col-md-6 text-end">
+          <h5 class="product-price-label">Product SalePrice:</h5>
+        </div>
+        <div class="col-md-6">
+          <h5>{{$ctrl.product.productSalePrice}}</h5>
+        </div>
+
+      </div>
+
+      <hr> <!-- Horizontal line -->
+      <div class="row">
+        <div class="col-md-6 text-end">
+          <h5 class="product-quantity-label">Product Quantity:</h5>
+        </div>
+        <div class="col-md-6">
+          <h5>{{$ctrl.product.productQuantity}}</h5>
+        </div>
+      </div>
+      <hr> <!-- Horizontal line -->
+    </div>
+  </div>
+  <div class="text-center mt-4">
+    <a class="btn btn-primary" href="#!/inventory/{{$ctrl.product.inventoryId}}/products">
+      Back to Products page
+    </a>
+  </div>
+</div>

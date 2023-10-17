@@ -9,8 +9,9 @@ import com.petclinic.vet.exceptions.NotFoundException;
 
 import com.petclinic.vet.exceptions.InvalidInputException;
 
+import com.petclinic.vet.presentationlayer.VetRequestDTO;
+import com.petclinic.vet.presentationlayer.VetResponseDTO;
 import com.petclinic.vet.servicelayer.VetAverageRatingDTO;
-import com.petclinic.vet.servicelayer.VetDTO;
 import com.petclinic.vet.util.EntityDtoUtil;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -18,6 +19,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import reactor.util.function.Tuples;
 
+import java.time.LocalDate;
 import java.util.*;
 
 @Service
@@ -71,7 +73,10 @@ public class RatingServiceImpl implements RatingService {
                     return requestDto;
                 })
                 .map(EntityDtoUtil::toEntity)
-                .doOnNext(r -> r.setRatingId(UUID.randomUUID().toString()))
+                .doOnNext(r -> {
+                    r.setRatingId(UUID.randomUUID().toString());
+                    r.setDate(String.valueOf(LocalDate.now().getYear()));
+                })
                 .flatMap(ratingRepository::insert)
                 .map(EntityDtoUtil::toDTO);
     }
@@ -101,12 +106,18 @@ public class RatingServiceImpl implements RatingService {
                     }
                 });
     }
-
+    public Flux<RatingResponseDTO> getRatingsOfAVetBasedOnDate(String vetId, Map<String,String> queryParams) {
+        String year = queryParams.get("year");
+        return ratingRepository.findAllByVetId(vetId).mapNotNull(rating -> {
+                    if (Integer.parseInt(rating.getDate()) >= (Integer.parseInt(year)))
+                        return EntityDtoUtil.toDTO(rating);
+                    return null;
+                }).sort((o1, o2) -> Integer.compare(Integer.parseInt(o2.getDate()),Integer.parseInt(o1.getDate())))
+                .publishOn(Schedulers.boundedElastic());
+    }
 
     @Override
     public Flux<VetAverageRatingDTO> getTopThreeVetsWithHighestAverageRating() {
-
-
         return ratingRepository.findAll()
                 .groupBy(Rating::getVetId)
                 .flatMap(group -> {
@@ -118,8 +129,8 @@ public class RatingServiceImpl implements RatingService {
                 .take(3)
                 .publishOn(Schedulers.boundedElastic())
                 .flatMap(tuple -> {
-                    Mono<VetDTO> vetMono = vetRepository.findVetByVetId(tuple.getT1())
-                            .map(EntityDtoUtil::toDTO);
+                    Mono<VetResponseDTO> vetMono = vetRepository.findVetByVetId(tuple.getT1())
+                            .map(EntityDtoUtil::vetEntityToResponseDTO);
 
                     return vetMono.map(vetDTO ->
                             new VetAverageRatingDTO(vetDTO, tuple.getT1(), tuple.getT2()));

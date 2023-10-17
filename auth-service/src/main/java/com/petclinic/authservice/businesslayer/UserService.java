@@ -63,4 +63,5 @@ public interface UserService {
     void updatePassword(String newPassword, String token);
 
     void processResetPassword(UserResetPwdWithTokenRequestModel resetRequest);
+    UserPasswordLessDTO updateUserRole(String id, RolesChangeRequestDTO roles, String token);
 }

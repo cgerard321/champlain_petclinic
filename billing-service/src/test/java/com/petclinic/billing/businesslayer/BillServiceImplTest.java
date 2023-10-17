@@ -19,6 +19,7 @@ import org.springframework.beans.BeanUtils;
 import static org.mockito.ArgumentMatchers.*;
 
 import java.time.LocalDate;
+import java.time.Month;
 import java.time.ZoneId;
 import java.util.*;
 
@@ -254,23 +255,27 @@ public class BillServiceImplTest {
         calendar.set(2022, Calendar.SEPTEMBER, 25);
         LocalDate date = calendar.getTime().toInstant()
                 .atZone(ZoneId.systemDefault())
-                .toLocalDate();;
+                .toLocalDate();
+
+        LocalDate dueDate = LocalDate.of(2022,Month.OCTOBER,15);
 
 
-        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.PAID).build();
+        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.PAID).dueDate(dueDate).build();
     }
 
     private Bill buildUnpaidBill(){
 
-        VetDTO vetDTO = buildVetDTO();
+        VetResponseDTO vetDTO = buildVetDTO();
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);
         LocalDate date = calendar.getTime().toInstant()
                 .atZone(ZoneId.systemDefault())
-                .toLocalDate();;
+                .toLocalDate();
+
+        LocalDate dueDate = LocalDate.of(2022, Month.OCTOBER, 5);
 
 
-        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.UNPAID).build();
+        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.UNPAID).dueDate(dueDate).build();
 
     }
 
@@ -280,10 +285,12 @@ public class BillServiceImplTest {
         calendar.set(2022, Calendar.SEPTEMBER, 25);
         LocalDate date = calendar.getTime().toInstant()
                 .atZone(ZoneId.systemDefault())
-                .toLocalDate();;
+                .toLocalDate();
+
+        LocalDate dueDate = LocalDate.of(2022, Month.AUGUST, 15);
 
 
-        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.OVERDUE).build();
+        return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.OVERDUE).dueDate(dueDate).build();
     }
 
 
@@ -292,22 +299,24 @@ public class BillServiceImplTest {
 
 
 
-        VetDTO vetDTO = buildVetDTO();
+        VetResponseDTO vetDTO = buildVetDTO();
 
         Calendar calendar = Calendar.getInstance();
         calendar.set(2022, Calendar.SEPTEMBER, 25);
         LocalDate date = calendar.getTime().toInstant()
                 .atZone(ZoneId.systemDefault())
-                .toLocalDate();;
+                .toLocalDate();
+
+        LocalDate dueDate =LocalDate.of(2022, Month.OCTOBER, 10);
 
 
 
-        return BillRequestDTO.builder().customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.PAID).build();
+        return BillRequestDTO.builder().customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).billStatus(BillStatus.PAID).dueDate(dueDate).build();
 
     }
 
-    private VetDTO buildVetDTO() {
-        return VetDTO.builder()
+    private VetResponseDTO buildVetDTO() {
+        return VetResponseDTO.builder()
                 .vetId("d9d3a7ac-6817-4c13-9a09-c09da74fb65f")
                 .vetBillId("53c2d16e-1ba3-4dbc-8e31-6decd2eaa99a")
                 .firstName("Pauline")
@@ -315,7 +324,6 @@ public class BillServiceImplTest {
                 .email("skjfhf@gmail.com")
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
-                .imageId("kjd")
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();

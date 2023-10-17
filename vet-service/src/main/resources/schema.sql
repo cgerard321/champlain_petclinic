@@ -3,7 +3,7 @@ DROP TABLE IF EXISTS images;
 CREATE TABLE IF NOT EXISTS images(
     id SERIAL,
     vet_id varchar(36) unique,
-    filename varchar(255) unique,
+    filename varchar(255),
     img_type varchar(10),
     img_data bytea,
     PRIMARY KEY (id)

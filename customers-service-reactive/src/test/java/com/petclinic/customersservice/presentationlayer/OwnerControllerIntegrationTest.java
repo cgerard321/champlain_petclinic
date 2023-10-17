@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -100,7 +101,7 @@ class OwnerControllerIntegrationTest {
                 .expectBody(Long.class)
                 .value(total -> {
                     assertNotNull(total);
-                    assertEquals(1L, total); // Adjust the expected value based on your test data
+                    assertEquals(1L, total);
                 });
 
     }
@@ -138,6 +139,107 @@ class OwnerControllerIntegrationTest {
 
     }
 
+    @Test
+    void getTotalNumberOfOwnersWithFilters1_shouldSucceed(){
+
+        String firstName = "FirstName1";
+        String city = "test city1";
+
+
+        Owner owner1 = Owner.builder()
+                .ownerId("ownerId-1")
+                .firstName("FirstName1")
+                .lastName("LastName1")
+                .address("Test address1")
+                .city("test city1")
+                .province("province1")
+                .telephone("telephone1")
+                .build();
+
+        StepVerifier.create(repo.deleteAll().thenMany(repo.save(owner1))).expectNextCount(1).verifyComplete();
+
+        client.get()
+                .uri("/owners/owners-filtered-count?&firstName="+firstName+"&city="+city)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Long.class)
+                .value(total -> {
+                    assertNotNull(total);
+                    assertEquals(1L, total);
+                });
+    }
+
+    @Test
+    void getTotalNumberOfOwnersWithFilters2_shouldSucceed(){
+
+        String firstName = "FirstName2";
+        String ownerId = "ownerId-2";
+
+
+        Owner owner1 = Owner.builder()
+                .ownerId("ownerId-2")
+                .firstName("FirstName2")
+                .lastName("LastName2")
+                .address("Test address2")
+                .city("test city2")
+                .province("province2")
+                .telephone("telephone2")
+                .build();
+
+        StepVerifier.create(repo.deleteAll().thenMany(repo.save(owner1))).expectNextCount(1).verifyComplete();
+
+        client.get()
+                .uri("/owners/owners-filtered-count?&firstName="+firstName+"&ownerId="+ownerId)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Long.class)
+                .value(total -> {
+                    assertNotNull(total);
+                    assertEquals(1L, total);
+                });
+    }
+
+    @Test
+    void getTotalNumberOfOwnersWithFilters3_shouldSucceed(){
+
+        String firstName = "FirstName3";
+        String ownerId = "ownerId-3";
+        String lastname = "LastName3";
+        String city = "test city3";
+        String telephone = "telephone3";
+
+
+        Owner owner1 = Owner.builder()
+                .ownerId("ownerId-3")
+                .firstName("FirstName3")
+                .lastName("LastName3")
+                .address("Test address3")
+                .city("test city3")
+                .province("province3")
+                .telephone("telephone3")
+                .build();
+
+        StepVerifier.create(repo.deleteAll().thenMany(repo.save(owner1))).expectNextCount(1).verifyComplete();
+
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("/owners/owners-filtered-count");
+
+        builder.queryParam("ownerId", ownerId);
+        builder.queryParam("firstName", firstName);
+        builder.queryParam("lastName",lastname);
+        builder.queryParam("city", city);
+        builder.queryParam("phoneNumber", telephone);
+
+
+        client.get()
+                .uri(builder.build().toUri())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(Long.class)
+                .value(total -> {
+                    assertNotNull(total);
+                    assertEquals(1L, total);
+                });
+    }
 
 
     @Test
