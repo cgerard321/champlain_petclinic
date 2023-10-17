@@ -1,0 +1,72 @@
+<link href="/css/ownerdetail.css" rel="stylesheet" type="text/css"/>
+
+    <div ng-controller="PetDetailsController" ng-app="ownerDetails" class="d-flex justify-content-center mt-5 mb-5 gap-5">
+        <div class="d-flex flex-column">
+            <div class=" d-flex flex-column p-5 shadow">
+
+                <h3 class="">Pet Details</h3>
+
+                <div class="bg-white shadow-sm mt-3 mb-1" style="width: 75px; height: 75px; border-radius: 50px;">
+                    <img style="width: 100%; height: 100%; border-radius: 50px" src="../../images/default-owner-profile-picture.jpg"/>
+                </div>
+
+                <form action="" class="pt-3">
+
+                    <div class="d-flex flex-row gap-3 pt-1">
+                        <div class="d-flex flex-column">
+                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.pet.petId}}" size="50" readonly disabled/>
+                            <label class="inputLabel">Pet Id</label>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-row gap-3 pt-1">
+                        <div class="d-flex flex-column">
+                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.pet.ownerId}}" size="50" readonly disabled/>
+                            <label class="inputLabel">Owner Id</label>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-row gap-3 pt-1">
+                        <div class="d-flex flex-column">
+                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.pet.name}}" readonly disabled/>
+                            <label class="inputLabel">Name</label>
+                        </div>
+                        <div class="d-flex flex-column">
+                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.pet.birthDate}}" readonly disabled/>
+                            <label class="inputLabel">Birthday</label>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-row gap-3 pt-1">
+                        <div class="d-flex flex-column">
+                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.pet.petTypeId}}" readonly disabled/>
+                            <label class="inputLabel">Pet Type</label>
+                        </div>
+                        <div class="d-flex flex-column">
+                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.pet.isActive}}" readonly disabled/>
+                            <label class="inputLabel">Active Status</label>
+                        </div>
+                    </div>
+
+                    <div class="d-flex flex-row gap-3 justify-content-end">
+                        <div>
+                            <a style="color: rgba(0,0,0,0.5);" class="btn btn-light" ui-sref="ownerEdit({ownerId: $ctrl.owner.ownerId, method: 'edit'})">Edit</a>
+                        </div>
+                        <div>
+                            <a style="color: rgba(0,0,0,0.5);" class="btn btn-light" ui-sref="ownerEdit({ownerId: $ctrl.owner.ownerId, method: 'delete'})">Delete</a>
+                        </div>
+                    </div>
+
+                </form>
+
+            </div>
+
+        </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
