@@ -87,14 +87,17 @@ class ProductInventoryServiceUnitTest {
         String productName = "Benzodiazepines";
         Double productPrice = 100.00;
         Integer productQuantity = 10;
+        Double productSalePrice = 200.00;
+
 
 
         when(productRepository
-                .findAllProductsByInventoryIdAndProductNameAndProductPriceAndProductQuantity(
+                .findAllProductsByInventoryIdAndProductNameAndProductPriceAndProductQuantityAndProductSalePrice(
                         inventoryId,
                         productName,
                         productPrice,
-                        productQuantity))
+                        productQuantity,
+                        productSalePrice))
                 .thenReturn(Flux.just(product));
 
         Flux<ProductResponseDTO> productResponseDTOMono = productInventoryService
@@ -102,7 +105,8 @@ class ProductInventoryServiceUnitTest {
                         inventoryId,
                         productName,
                         productPrice,
-                        productQuantity);
+                        productQuantity,
+                        productSalePrice);
 
         StepVerifier
                 .create(productResponseDTOMono)
@@ -116,6 +120,7 @@ class ProductInventoryServiceUnitTest {
         Double productPrice = 100.00;
         Integer productQuantity = 10;
 
+
         when(productRepository
                 .findAllProductsByInventoryIdAndProductPriceAndProductQuantity(
                         inventoryId,
@@ -128,7 +133,9 @@ class ProductInventoryServiceUnitTest {
                         inventoryId,
                         null,
                         productPrice,
-                        productQuantity);
+                        productQuantity,
+                        null
+                        );
 
         StepVerifier
                 .create(productResponseDTOMono)
@@ -176,6 +183,7 @@ class ProductInventoryServiceUnitTest {
                         inventoryId,
                         null,
                         productPrice,
+                        null,
                         null);
 
         StepVerifier
@@ -200,13 +208,40 @@ class ProductInventoryServiceUnitTest {
                         inventoryId,
                         null,
                         null,
-                        productQuantity);
+                        productQuantity,
+                        null);
 
         StepVerifier
                 .create(productResponseDTOMono)
                 .expectNextCount(1)
                 .verifyComplete();
     }
+
+    @Test
+    void getAllProductsByInventoryId_andProductSalePrice_withValidFields_shouldSucceed(){
+        String inventoryId = "1";
+        Double productSalePrice = 20.00;
+
+        when(productRepository
+                .findAllProductsByInventoryIdAndProductSalePrice(
+                        inventoryId,
+                        productSalePrice))
+                .thenReturn(Flux.just(product));
+
+        Flux<ProductResponseDTO> productResponseDTOMono = productInventoryService
+                .getProductsInInventoryByInventoryIdAndProductsField(
+                        inventoryId,
+                        null,
+                        null,
+                        null,
+                        productSalePrice);
+
+        StepVerifier
+                .create(productResponseDTOMono)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
     @Test
     public void deleteProduct_validProductAndInventory_ShouldSucceed() {
         //arrange
@@ -1037,6 +1072,7 @@ class ProductInventoryServiceUnitTest {
                         inventoryId,
                         productName,
                         null,
+                        null,
                         null);
 
         StepVerifier
@@ -1056,6 +1092,7 @@ class ProductInventoryServiceUnitTest {
         Flux<ProductResponseDTO> productResponseDTOMono = productInventoryService
                 .getProductsInInventoryByInventoryIdAndProductsField(
                         inventoryId,
+                        null,
                         null,
                         null,
                         null);
