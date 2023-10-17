@@ -70,11 +70,18 @@ public class UserServiceImpl implements UserService {
     public User createUser(@Valid UserIDLessRoleLessDTO userIDLessDTO) {
 
             final Optional<User> byEmail = userRepo.findByEmail(userIDLessDTO.getEmail());
+            final Optional<User> byUsername = userRepo.findByUsername(userIDLessDTO.getUsername());
 
             if (byEmail.isPresent()) {
                 throw new EmailAlreadyExistsException(
                         format("User with e-mail %s already exists", userIDLessDTO.getEmail()));
             }
+
+            if (byUsername.isPresent()) {
+                throw new IllegalArgumentException(
+                        format("User with username %s already exists", userIDLessDTO.getUsername()));
+            }
+
 
 // add exception when trying to create a user with existing username
 
