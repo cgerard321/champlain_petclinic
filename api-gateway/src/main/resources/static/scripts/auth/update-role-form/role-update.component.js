@@ -5,7 +5,6 @@ angular.module('userModule')
         templateUrl: 'scripts/auth/update-role-form/role-update.template.html',
         controller: 'UpdateUserRoleController',
         bindings: {
-            userId: '<',
-            onUpdate: '&'
+            userId: '<'
         }
     });

@@ -1,5 +1,7 @@
 <div>
-  <label>Select Role:</label>
-  <select ng-model="selectedRole" ng-options="role for role in roles"></select>
-  <button ng-click="updateRole()">Update Role</button>
+  <label>Select Roles:</label>
+  <div ng-repeat="role in roles">
+    <input type="checkbox" ng-model="selectedRoles[role]" ng-true-value="'{{role}}'" ng-false-value="undefined">{{role}}
+  </div>
+  <button ng-click="updateRole()">Update Roles</button>
 </div>

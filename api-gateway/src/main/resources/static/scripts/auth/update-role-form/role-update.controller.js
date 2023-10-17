@@ -1,12 +1,50 @@
 'use strict';
 
 angular.module('userModule')
-    .controller('UpdateUserRoleController', ['$scope', 'UserService', function($scope, UserService) {
+    .controller('UpdateUserRoleController', ['$scope', '$http', 'UserService', function($scope, $http, UserService) {
+        var ctrl = this;  // Capture the controller instance
+
         $scope.roles = UserService.getAvailableRoles();
         $scope.selectedRole = {};
 
+        // Use $onInit lifecycle hook to set $scope.userId
+        ctrl.$onInit = function() {
+            $scope.userId = ctrl.userId;
+        };
+
+        $scope.selectedRoles = {};
+
         $scope.updateRole = function() {
-            // Here, you'll need to handle the role update logic as you see fit
-            $scope.onUpdate();
+            var rolesList = [];
+            for (var role in $scope.selectedRoles) {
+                if ($scope.selectedRoles[role]) {
+                    rolesList.push(role);
+                }
+            }
+
+            if (rolesList.length === 0) {
+                alert('Please select at least one role.');
+                return;
+            }
+
+            var rolesChangeRequest = {
+                roles: rolesList
+            };
+
+            // Send the PATCH request
+            $http({
+                method: 'PATCH',
+                url: 'api/gateway/users/' + $scope.userId,
+                data: rolesChangeRequest,
+                headers: {
+                    'Content-Type': 'application/json',
+                    // Add token headers if needed
+                }
+            })
+                .then(function successCallback(response) {
+                    alert('Roles updated successfully!');
+                }, function errorCallback(response) {
+                    alert('Failed to update roles. ' + response.data.message);
+                });
         };
     }]);
