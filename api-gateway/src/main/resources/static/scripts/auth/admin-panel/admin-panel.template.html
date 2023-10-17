@@ -25,6 +25,7 @@
         <td>{{user.email}}</td>
         <td>
             <input class="add-vet-button btn btn-success" type="button" value="Delete" ng-click="removeUser(user.userId)"/>
+            <button ui-sref="updateUserRole({ userId: user.userId })">Update Role</button>
         </td>
     </tr>
 

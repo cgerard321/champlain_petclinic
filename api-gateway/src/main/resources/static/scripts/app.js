@@ -12,7 +12,7 @@ const petClinicApp = angular.module('petClinicApp', [
     'ui.router', 'layoutNav', 'layoutFooter', 'layoutWelcome', 'ownerList', 'ownerDetails', 'ownerForm', 'ownerRegister', 'petRegister', 'petForm'
     , 'visits', 'visit', 'visitList' , 'vetList','vetForm','vetDetails', 'billForm', 'billUpdateForm', 'loginForm', 'rolesDetails', 'signupForm', 'productDetailsInfo',
     'billDetails', 'billsByOwnerId', 'billHistory','billsByVetId','inventoryList', 'inventoryForm', 'productForm','inventoryProductList', 'inventoryUpdateForm', 'productUpdateForm',
-     'verification' , 'adminPanel','resetPwdForm','forgotPwdForm','petTypeList', 'petDetails','userDetails','managerForm']);
+     'verification' , 'adminPanel','resetPwdForm','forgotPwdForm','petTypeList', 'petDetails','userDetails','managerForm','userModule']);
 
 
 
