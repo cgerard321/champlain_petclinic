@@ -7,6 +7,14 @@ angular.module('inventoryProductList')
         self.currentPage = $stateParams.page || 0;
         self.pageSize = $stateParams.size || 2;
         self.actualCurrentPageShown = parseInt(self.currentPage) + 1;
+        self.baseUrl = "api/gateway/inventory/" + $stateParams.inventoryId + "/products-pagination?page=" + self.currentPage + "&size=" + self.pageSize;
+        self.baseURLforTotalNumberOfProductsByFiltering = "api/gateway/inventory/" + $stateParams.inventoryId + "/products-count";
+        self.lastParams = {
+            productName: '',
+            productQuantity: '',
+            productPrice: '',
+            productSalePrice: ''
+        }
 
         fetchProductList();
 
@@ -67,6 +75,7 @@ angular.module('inventoryProductList')
 
             if (productName) {
                 queryString += "productName=" + productName;
+                self.lastParams.productName = productName;
             }
 
             if (productQuantity) {
@@ -74,6 +83,7 @@ angular.module('inventoryProductList')
                     queryString += "&";
                 }
                 queryString += "productQuantity=" + productQuantity;
+                self.lastParams.productQuantity = productQuantity;
             }
 
             if (productPrice) {
@@ -81,6 +91,7 @@ angular.module('inventoryProductList')
                     queryString += "&";
                 }
                 queryString += "productPrice=" + productPrice;
+                self.lastParams.productPrice = productPrice;
             }
 
             if (productSalePrice) {
@@ -88,6 +99,7 @@ angular.module('inventoryProductList')
                     queryString += "&";
                 }
                 queryString += "productSalePrice=" + productSalePrice;
+                self.lastParams.productSalePrice = productSalePrice;
             }
 
 
@@ -104,7 +116,11 @@ angular.module('inventoryProductList')
                 })
                 .catch(function(error) {
                     if (error.status === 404) {
-                        alert('Product not found.');
+                        //alert('Product not found.');
+                        self.inventoryProductList = [];
+                        self.currentPage = 0;
+                        updateActualCurrentPageShown();
+
                     } else {
                         alert('An error occurred: ' + error.statusText);
                     }
@@ -129,11 +145,24 @@ angular.module('inventoryProductList')
             }
         };
 
-        function fetchProductList() {
+        function fetchProductList(productName, productPrice, productQuantity, productSalePrice) {
+            if (productName || productPrice || productQuantity) {
+                self.searchProduct(productName, productPrice, productQuantity)
+                self.lastParams.productName = productName;
+                self.lastParams.productPrice = productPrice;
+                self.lastParams.productQuantity = productQuantity;
+                self.lastParams.productSalePrice = productSalePrice;
+            }
+            else {
+                self.lastParams.productName = '';
+                self.lastParams.productPrice = '';
+                self.lastParams.productQuantity = '';
+                self.lastParams.productSalePrice = '';
             let inventoryId = $stateParams.inventoryId;
             $http.get('api/gateway/inventory/' + $stateParams.inventoryId + '/products-pagination?page='+ self.currentPage + '&size=' + self.pageSize).then(function (resp) {
                 self.inventoryProductList = resp.data;
                 inventoryId = $stateParams.inventoryId;
+                    loadTotalItem(productName, productPrice, productQuantity, productSalePrice)
                 InventoryService.setInventoryId(inventoryId);
                 if (resp.data.length === 0) {
                     // Handle if inventory is empty
@@ -143,6 +172,7 @@ angular.module('inventoryProductList')
                 console.error('An error occurred:', error);
             });
         }
+        }
         self.nextPage = function () {
             if (parseInt(self.currentPage) + 1 < self.totalPages) {
 
@@ -150,7 +180,7 @@ angular.module('inventoryProductList')
                 self.currentPage = currentPageInt.toString();
                 updateActualCurrentPageShown();
                 // Refresh the owner's list with the new page size
-                fetchProductList();
+                fetchProductList(self.lastParams.productName, self.lastParams.productPrice, self.lastParams.productQuantity, self.lastParams.productSalePrice);
             }
         }
 
@@ -162,7 +192,7 @@ angular.module('inventoryProductList')
                 updateActualCurrentPageShown();
                 console.log("Called the previous page and the new current page " + self.currentPage)
                 // Refresh the owner's list with the new page size
-                fetchProductList();
+                fetchProductList(self.lastParams.productName, self.lastParams.productPrice, self.lastParams.productQuantity, self.lastParams.productSalePrice);
             }
         }
 
@@ -170,15 +200,40 @@ angular.module('inventoryProductList')
             self.actualCurrentPageShown = parseInt(self.currentPage) + 1;
             console.log(self.currentPage);
         }
-        function loadTotalItem() {
-            return $http.get('api/gateway/inventory/' + $stateParams.inventoryId + '/products-count')
+        function loadTotalItem(productName, productPrice, productQuantity, productSalePrice) {
+            var query = ''
+            if(productName){
+                if (query === ''){
+                    query +='?productName='+productName
+                } else{
+                    query += '&productName='+productName
+                }
+            }
+            if (productPrice){
+                if (query === ''){
+                    query +='?productPrice='+productPrice
+                } else{
+                    query += '&productPrice='+productPrice
+                }
+            }
+            if (productQuantity){
+                if (query === ''){
+                    query +='?productQuantity='+productQuantity
+                } else{
+                    query += '&productQuantity='+productQuantity
+                }
+            }
+            if (productSalePrice){
+                if (query === ''){
+                    query +='?productSalePrice='+productSalePrice
+                } else{
+                    query += '&productSalePrice='+productSalePrice
+                }
+            }
+            $http.get('api/gateway/inventory/' + $stateParams.inventoryId + '/products-count' + query)
                 .then(function (resp) {
-                    console.log(resp);
-                    return resp.data;
+                    self.totalItems = resp.data;
+                    self.totalPages = Math.ceil(self.totalItems / parseInt(self.pageSize));
                 });
         }
-        loadTotalItem().then(function (totalItems) {
-            self.totalItems = totalItems;
-            self.totalPages = Math.ceil(self.totalItems / parseInt(self.pageSize));
-        });
     }]);
