@@ -186,6 +186,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                             "\nOr ProductSalePrice: " + productSalePrice)));
         }
 
+
         if (productName != null) {
             String escapedInventoryName = Pattern.quote(productName);
 
