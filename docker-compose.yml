@@ -313,11 +313,7 @@ services:
             - ME_CONFIG_MONGODB_SERVER=mongo2
             - ME_CONFIG_MONGODB_ENABLE_ADMIN=true
         ports:
-<<<<<<< HEAD
-            - 9001:8081
-=======
             - 9005:8082
->>>>>>> cc12fe3e6 (Added ui elements to new visit form, drop down lists all owners)
         depends_on:
             - mongo2
             - visits-service-new
