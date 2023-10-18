@@ -18,6 +18,7 @@ angular.module('inventoryProductList')
 
         fetchProductList();
 
+
         // $http.get('api/gateway/inventory/' + $stateParams.inventoryId + '/products-pagination?page=' + 0 + '&size=2').then(function (resp) {
         //     self.inventoryProductList = resp.data;
         //     inventoryId = $stateParams.inventoryId;
@@ -72,6 +73,7 @@ angular.module('inventoryProductList')
         $scope.searchProduct = function(productName, productQuantity, productPrice, productSalePrice) {
             var inventoryId = $stateParams.inventoryId;
             var queryString = '';
+            resetDefaultValues()
 
             if (productName && productName !== '') {
                 queryString += "productName=" + productName;
@@ -135,8 +137,6 @@ angular.module('inventoryProductList')
                 $http.delete('api/gateway/inventory/' + inventoryId + '/products')
                     .then(function(response) {
                         alert("All products for this inventory have been deleted!");
-
-
                         fetchProductList();
                     }, function(error) {
                         alert(error.data.errors);
@@ -151,10 +151,9 @@ angular.module('inventoryProductList')
                 self.lastParams.productPrice = productPrice;
                 self.lastParams.productQuantity = productQuantity;
                 self.lastParams.productSalePrice = productSalePrice;
-                self.searchProduct(productName, productPrice, productQuantity)
+                self.searchProduct(productName, productPrice, productQuantity, productSalePrice)
             }
             else {
-
                 self.lastParams.productSalePrice = null;
                 self.lastParams.productName = null;
                 self.lastParams.productPrice = null;
@@ -195,6 +194,17 @@ angular.module('inventoryProductList')
                 fetchProductList(self.lastParams.productName, self.lastParams.productPrice, self.lastParams.productQuantity, self.lastParams.productSalePrice);
             }
         }
+        function resetDefaultValues() {
+            self.currentPage = 0;
+            self.pageSize = 2;
+            self.actualCurrentPageShown = parseInt(self.currentPage) + 1;
+            self.lastParams = {
+                productName: '',
+                productQuantity: '',
+                productPrice: ''
+            }
+
+        }
 
         function updateActualCurrentPageShown() {
             self.actualCurrentPageShown = parseInt(self.currentPage) + 1;
@@ -202,11 +212,9 @@ angular.module('inventoryProductList')
         }
         function loadTotalItem(productName, productPrice, productQuantity, productSalePrice) {
             var query = ''
-            if(productName){
+            if (productName) {
                 if (query === ''){
                     query +='?productName='+productName
-                } else{
-                    query += '&productName='+productName
                 }
             }
             if (productPrice){
