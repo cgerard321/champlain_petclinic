@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('visits')
-    .controller('VisitsController', ['$http', '$state', '$stateParams', '$filter','$scope','$rootScope', '$window', function ($http, $state, $stateParams, $filter, $scope, $rootScope, $window) {
+    .controller('VisitsController', ['$http', '$state', '$stateParams', '$filter','$scope','$rootScope', '$window','$location',  function ($http, $state, $stateParams, $filter, $scope, $rootScope, $window, $location) {
         var self = this
         //var petId = $stateParams.petId || 0
         var postURL = "api/gateway/visit/owners/"+$window.localStorage.getItem("UUID")+"/pets/9/visits"
@@ -210,6 +210,8 @@ angular.module('visits')
         self.loadOwnerInfo = function() {
             $http.get("api/gateway/owners/" + self.ownerId).then(function(resp) {
                 self.pets = resp.data.pets;
+                self.ownerId = $("#selectedOwner").val()
+                console.log(" Selected Owner ID:", self.ownerId);
             });
             let ownerIdI = self.ownerId
             console.log(self.ownerId);
@@ -217,6 +219,8 @@ angular.module('visits')
 
         self.logPetId = function() {
             let petIdI = self.petId
+            self.petId = $("#selectedPet").val()
+            console.log("S  Selected Pet ID:", self.petId);
             console.log("Selected Pet ID:", self.petId);
         };
 
@@ -333,6 +337,8 @@ angular.module('visits')
                     //date: $('#date_input').val(),
                     date: $filter('date')(self.date, "yyyy-MM-ddTHH:mm:ss"),
                     description: $('#description_textarea').val(),
+                    petId: $("#selectedPet").val(),
+                    ownerId: $("#selectedOwner").val(),
                     practitionerId: $("#selectedVet").val(),
                     status: visitStatus
                 };
@@ -730,10 +736,14 @@ angular.module('visits')
             console.log('Using ownerId in someFunction:', self.ownerId);
             console.log('Using petId in someFunction:', self.petId);
         };
+        $scope.goBack = function() {
+            $state.go('visitList');
+        };
 
         self.submit = function () {
             // Ensure ownerId and petId are set correctly when owner and pet are selected
             self.someFunction();
+
 
             // Check if ownerId and petId are set before creating the URL and proceeding with the POST request
             var postURL = "api/gateway/visit/owners/" + self.ownerId + "/pets/" + self.petId + "/visits";
@@ -769,18 +779,21 @@ angular.module('visits')
                 callLastSort(isForUpcomingVisitsTable);
 
                 createAlert("success", "Successfully created visit!");
+                $scope.goBack();
+
+
             }, function (errorResponse) {
                 console.log(errorResponse);
                 const errorMessage = errorResponse.data.message || "Unknown error";
 
                 createAlert("danger", "Failed to add visit: " + errorMessage);
             });
+            $scope.goBack();
 
             $http.post(billsUrl, billData).then(function () {
                 // Handle successful bill creation
             }, function (errorResponse) {
                 console.log("Failed to create corresponding bill!");
-                // Consider providing more detailed error information here
             });
         };
 
