@@ -9,7 +9,7 @@ angular.module('visitList')
         self.completedVisits = []
 
 
-        $scope.showUpcomingVisits = true;
+        $scope.showUpcomingVisits = true; //initialize to true to show automatically
         $scope.showConfirmedVisits = true;
         $scope.showCancelledVisits = true;
         $scope.showCompletedVisits = true;
