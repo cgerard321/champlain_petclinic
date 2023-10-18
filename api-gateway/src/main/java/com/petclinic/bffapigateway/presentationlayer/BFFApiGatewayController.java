@@ -715,6 +715,10 @@ public class BFFApiGatewayController {
      **/
 
 
+
+    /**
+     * Beginning of Auth Methods
+     **/
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping("/verification/{token}")
     public Mono<ResponseEntity<UserDetails>> verifyUser(@PathVariable final String token) {
@@ -799,6 +803,9 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
+    /**
+     * End of Auth Methods
+     **/
 
     //Start of Inventory Methods
     @GetMapping("/inventory/{inventoryId}/products-pagination")
