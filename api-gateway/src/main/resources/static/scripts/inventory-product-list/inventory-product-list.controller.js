@@ -16,29 +16,7 @@ angular.module('inventoryProductList')
             productPrice: '',
             productSalePrice: ''
         }
-
         fetchProductList();
-
-
-        // $http.get('api/gateway/inventory/' + $stateParams.inventoryId + '/products-pagination?page=' + 0 + '&size=2').then(function (resp) {
-        //     self.inventoryProductList = resp.data;
-        //     inventoryId = $stateParams.inventoryId;
-        //     InventoryService.setInventoryId(inventoryId);
-        //     if (resp.data.length === 0) {
-        //         // Handle if inventory is empty
-        //         console.log("The inventory is empty!");
-        //     }
-        // }).catch(function (error) {
-        //     if (error.status === 404) {
-        //         console.clear()
-        //         console.log("State params: " + $stateParams)
-        //         console.log("Inventory is now empty.")
-        //     } else {
-        //         console.error('An error occurred:', error);
-        //     }
-        // });
-
-
             $scope.deleteProduct = function (product) {
             let varIsConf = confirm('Are you sure you want to remove this product?');
             if (varIsConf) {
@@ -48,21 +26,8 @@ angular.module('inventoryProductList')
 
                 function successCallback(response) {
                     alert(product.productName + " Successfully Removed!");
-                    console.log(response, 'res');
                     //refresh list
-
-                    $http.get('api/gateway/inventory/' + product.inventoryId + '/products').then(function (resp) {
-                        self.inventoryProductList = resp.data;
-                        arr = resp.data;
-                        inventoryId = $stateParams.inventoryId;
-
-                    }).catch(function (error) {
-                        if (error.status === 404) {
-                            $window.location.reload();
-                        } else {
-                            console.error('An error occurred:', error);
-                        }
-                    });
+                    fetchProductList(self.lastParams.productName, self.lastParams.productPrice, self.lastParams.productQuantity, self.lastParams.productSalePrice);
                 }
                 function errorCallback(error) {
                     alert(error.errors);
