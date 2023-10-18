@@ -30,6 +30,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -702,6 +703,10 @@ public class BFFApiGatewayController {
      **/
 
 
+
+    /**
+     * Beginning of Auth Methods
+     **/
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping("/verification/{token}")
     public Mono<ResponseEntity<UserDetails>> verifyUser(@PathVariable final String token) {
@@ -727,8 +732,13 @@ public class BFFApiGatewayController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "users", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<UserDetails> getAllUsers(@CookieValue("Bearer") String auth) {
-        return authServiceClient.getUsers(auth);
+    public Flux<UserDetails> getAllUsers(@CookieValue("Bearer") String auth, @RequestParam Optional<String> username) {
+        if(username.isPresent()) {
+            return authServiceClient.getUsersByUsername(auth, username.get());
+        }
+        else {
+            return authServiceClient.getUsers(auth);
+        }
     }
 
     @PatchMapping(value = "users/{userId}",
@@ -739,6 +749,13 @@ public class BFFApiGatewayController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+    
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "users/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<UserDetails> getUserById(@PathVariable String userId, @CookieValue("Bearer") String auth) {
+        return authServiceClient.getUserById(auth, userId);
+    }
+
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @PostMapping(value = "/users/login",produces = "application/json;charset=utf-8;", consumes = "application/json")
@@ -756,14 +773,15 @@ public class BFFApiGatewayController {
     }
 
 
-
-
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @PostMapping("/users/reset_password")
     public Mono<ResponseEntity<Void>> processResetPassword(@RequestBody @Valid Mono<UserPasswordAndTokenRequestModel> resetRequest) {
         return authServiceClient.changePassword(resetRequest);
     }
 
+    /**
+     * End of Auth Methods
+     **/
 
     //Start of Inventory Methods
     @PostMapping(value = "inventory/{inventoryId}/products")
