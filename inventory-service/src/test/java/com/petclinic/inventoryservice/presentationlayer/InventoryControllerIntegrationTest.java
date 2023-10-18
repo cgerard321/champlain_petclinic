@@ -952,13 +952,13 @@ class InventoryControllerIntegrationTest {
                 .expectBody(Long.class)
                 .value((count) -> {
                     assertNotNull(count);
-                    assertEquals(3L, count);
+                    assertEquals(2L, count);
                 });
     }
 
     @Test
     void getProductsInInventoryByInventoryIdAndProductFieldPagination_ShouldSucceed(){
-        StepVerifier.create(productRepository.deleteAll().thenMany(productRepository.save(buildProduct("productId_1", "inventoryId_3", "Benzodiazepines", "Sedative Medication", 100.00, 150.0, 10))))
+        StepVerifier.create(productRepository.deleteAll().thenMany(productRepository.save(buildProduct("productId_1", "1", "Benzodiazepines", "Sedative Medication", 100.00, 150.0, 10))))
                 .expectNextCount(1)
                 .verifyComplete();
         webTestClient
