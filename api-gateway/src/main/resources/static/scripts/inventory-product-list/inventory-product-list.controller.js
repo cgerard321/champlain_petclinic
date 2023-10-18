@@ -4,8 +4,9 @@ angular.module('inventoryProductList')
     .controller('InventoryProductController', ['$http', '$scope', '$stateParams','$window', 'InventoryService', function ($http, $scope, $stateParams, $window, InventoryService) {
         var self = this;
         var inventoryId
+        const pageSize = 15;
         self.currentPage = $stateParams.page || 0;
-        self.pageSize = $stateParams.size || 2;
+        self.pageSize = $stateParams.size || pageSize;
         self.actualCurrentPageShown = parseInt(self.currentPage) + 1;
         self.baseUrl = "api/gateway/inventory/" + $stateParams.inventoryId + "/products-pagination?page=" + self.currentPage + "&size=" + self.pageSize;
         self.baseURLforTotalNumberOfProductsByFiltering = "api/gateway/inventory/" + $stateParams.inventoryId + "/products-count";
@@ -196,7 +197,7 @@ angular.module('inventoryProductList')
         }
         function resetDefaultValues() {
             self.currentPage = 0;
-            self.pageSize = 2;
+            self.pageSize = pageSize;
             self.actualCurrentPageShown = parseInt(self.currentPage) + 1;
             self.lastParams = {
                 productName: '',
