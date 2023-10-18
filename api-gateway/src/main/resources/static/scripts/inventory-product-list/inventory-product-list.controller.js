@@ -63,7 +63,7 @@ angular.module('inventoryProductList')
                     });
                 }
                 function errorCallback(error) {
-                    alert(data.errors);
+                    alert(error.errors);
                     console.log(error, 'Data is inaccessible.');
                 }
             }
@@ -73,12 +73,12 @@ angular.module('inventoryProductList')
             var inventoryId = $stateParams.inventoryId;
             var queryString = '';
 
-            if (productName) {
+            if (productName && productName !== '') {
                 queryString += "productName=" + productName;
                 self.lastParams.productName = productName;
             }
 
-            if (productQuantity) {
+            if (productQuantity && productQuantity !== '') {
                 if (queryString !== '') {
                     queryString += "&";
                 }
@@ -86,7 +86,7 @@ angular.module('inventoryProductList')
                 self.lastParams.productQuantity = productQuantity;
             }
 
-            if (productPrice) {
+            if (productPrice && productPrice !== '') {
                 if (queryString !== '') {
                     queryString += "&";
                 }
@@ -94,7 +94,7 @@ angular.module('inventoryProductList')
                 self.lastParams.productPrice = productPrice;
             }
 
-            if (productSalePrice) {
+            if (productSalePrice && productSalePrice !== '') {
                 if (queryString !== '') {
                     queryString += "&";
                 }
@@ -111,8 +111,8 @@ angular.module('inventoryProductList')
             $http.get(apiUrl)
                 .then(function(resp) {
                     self.inventoryProductList = resp.data;
-                    // Just a heads-up: ensure 'arr' is declared elsewhere or handled accordingly
-                    arr = resp.data;
+                    loadTotalItem(productName, productPrice, productQuantity)
+                    InventoryService.setInventoryId(inventoryId);
                 })
                 .catch(function(error) {
                     if (error.status === 404) {
@@ -147,39 +147,39 @@ angular.module('inventoryProductList')
 
         function fetchProductList(productName, productPrice, productQuantity, productSalePrice) {
             if (productName || productPrice || productQuantity) {
-                self.searchProduct(productName, productPrice, productQuantity)
                 self.lastParams.productName = productName;
                 self.lastParams.productPrice = productPrice;
                 self.lastParams.productQuantity = productQuantity;
                 self.lastParams.productSalePrice = productSalePrice;
+                self.searchProduct(productName, productPrice, productQuantity)
             }
             else {
-                self.lastParams.productName = '';
-                self.lastParams.productPrice = '';
-                self.lastParams.productQuantity = '';
-                self.lastParams.productSalePrice = '';
-            let inventoryId = $stateParams.inventoryId;
-            $http.get('api/gateway/inventory/' + $stateParams.inventoryId + '/products-pagination?page='+ self.currentPage + '&size=' + self.pageSize).then(function (resp) {
-                self.inventoryProductList = resp.data;
-                inventoryId = $stateParams.inventoryId;
+
+                self.lastParams.productSalePrice = null;
+                self.lastParams.productName = null;
+                self.lastParams.productPrice = null;
+                self.lastParams.productQuantity = null;
+                let inventoryId = $stateParams.inventoryId;
+                $http.get('api/gateway/inventory/' + $stateParams.inventoryId + '/products-pagination?page=' + self.currentPage + '&size=' + self.pageSize).then(function (resp) {
+                    self.inventoryProductList = resp.data;
+                    inventoryId = $stateParams.inventoryId;
                     loadTotalItem(productName, productPrice, productQuantity, productSalePrice)
-                InventoryService.setInventoryId(inventoryId);
-                if (resp.data.length === 0) {
-                    // Handle if inventory is empty
-                    console.log("The inventory is empty!");
-                }
-            }).catch(function (error) {
-                console.error('An error occurred:', error);
-            });
-        }
+                    InventoryService.setInventoryId(inventoryId);
+                    if (resp.data.length === 0) {
+                        // Handle if inventory is empty
+                        console.log("The inventory is empty!");
+                    }
+                }).catch(function (error) {
+                    console.error('An error occurred:', error);
+                });
+            }
         }
         self.nextPage = function () {
             if (parseInt(self.currentPage) + 1 < self.totalPages) {
-
                 var currentPageInt = parseInt(self.currentPage) + 1
                 self.currentPage = currentPageInt.toString();
                 updateActualCurrentPageShown();
-                // Refresh the owner's list with the new page size
+                //refresh product list
                 fetchProductList(self.lastParams.productName, self.lastParams.productPrice, self.lastParams.productQuantity, self.lastParams.productSalePrice);
             }
         }
