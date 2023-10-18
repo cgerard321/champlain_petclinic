@@ -83,6 +83,15 @@ public class VetsServiceClient {
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_OCTET_STREAM_VALUE)
                 .body(image, Resource.class)
                 .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error->{
+                    HttpStatusCode statusCode = error.statusCode();
+                    if(statusCode.equals(NOT_FOUND))
+                        return Mono.error(new NotFoundException("Photo for vet "+vetId + " not found"));
+                    return Mono.error(new IllegalArgumentException("Something went wrong"));
+                })
+                .onStatus(HttpStatusCode::is5xxServerError,error->
+                        Mono.error(new IllegalArgumentException("Something went wrong"))
+                )
                 .bodyToMono(Resource.class);
     }
 

@@ -855,6 +855,30 @@ class ApiGatewayControllerTest {
     }
 
     @Test
+    void updatePhotoToVet() {
+        byte[] photo = {123, 23, 75, 34};
+        Resource resource = new ByteArrayResource(photo);
+
+        when(vetsServiceClient.updatePhotoOfVet(anyString(), anyString(), any(Mono.class)))
+                .thenReturn(Mono.just(resource));
+
+        client.put()
+                .uri("/api/gateway/vets/{vetId}/photos/{photoName}", VET_ID, "vet_photo.jpg")
+                .body(Mono.just(resource), Resource.class)
+                .accept(MediaType.APPLICATION_OCTET_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.IMAGE_JPEG_VALUE)
+                .expectBody(Resource.class)
+                .consumeWith(response -> {
+                    assertEquals(resource, response.getResponseBody());
+                });
+
+        Mockito.verify(vetsServiceClient, times(1))
+                .updatePhotoOfVet(anyString(), anyString(), any(Mono.class));
+    }
+
+    @Test
     void getBadgeByVetId() throws IOException {
         BadgeResponseDTO badgeResponseDTO = BadgeResponseDTO.builder()
                 .vetId(VET_ID)

@@ -889,6 +889,89 @@ class VetsServiceClientIntegrationTest {
     }
 
     @Test
+    void updatePhotoByValidVetId_shouldSucceed() throws IOException {
+        Mono<Resource> photoResource = Mono.just(new ByteArrayResource(new byte[]{12, 24, 52, 87}));
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "image/jpeg")
+                .setBody("    {\n" +
+                        "        {12, 24, 52, 87}" +
+                        "    }"));
+
+        final Resource photo = vetsServiceClient.updatePhotoOfVet("deb1950c-3c56-45dc-874b-89e352695eb7", "image/jpeg", photoResource).block();
+        byte[] photoBytes = FileCopyUtils.copyToByteArray(photo.getInputStream());
+
+        assertNotNull(photoBytes);
+    }
+
+    @Test
+    void updatePhotoByInvalidVetId_shouldThrowNotFoundException() throws NotFoundException {
+        String invalidVetId="123";
+        Mono<Resource> photoResource = Mono.just(new ByteArrayResource(new byte[]{12, 24, 52, 87}));
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(404)
+                .setBody("Photo for vet "+invalidVetId + " not found"));
+
+        final Resource photo = vetsServiceClient.updatePhotoOfVet(invalidVetId, "image/jpeg", photoResource)
+                        .onErrorResume(throwable -> {
+                            if (throwable instanceof NotFoundException && throwable.getMessage().equals("Photo for vet "+invalidVetId + " not found")) {
+                                return Mono.empty();
+                            } else {
+                                return Mono.error(throwable);
+                            }
+                        })
+                        .block();
+
+        assertNull(photo);
+    }
+
+    @Test
+    void updatePhotoByValidVetId_IllegalArgumentException400() throws IllegalArgumentException {
+        Mono<Resource> photoResource = Mono.just(new ByteArrayResource(new byte[]{12, 24, 52, 87}));
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(400)
+                .setBody("Something went wrong"));
+
+        final Resource photo = vetsServiceClient.updatePhotoOfVet("deb1950c-3c56-45dc-874b-89e352695eb7", "image/jpeg", photoResource)
+                        .onErrorResume(throwable -> {
+                            if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                                return Mono.empty();
+                            } else {
+                                return Mono.error(throwable);
+                            }
+                        })
+                        .block();
+
+        assertNull(photo);
+    }
+
+    @Test
+    void updatePhotoByValidVetId_IllegalArgumentException500() throws IllegalArgumentException {
+        Mono<Resource> photoResource = Mono.just(new ByteArrayResource(new byte[]{12, 24, 52, 87}));
+
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(500)
+                .setBody("Something went wrong"));
+
+        final Resource photo = vetsServiceClient.updatePhotoOfVet("deb1950c-3c56-45dc-874b-89e352695eb7", "image/jpeg", photoResource)
+                        .onErrorResume(throwable -> {
+                            if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                                return Mono.empty();
+                            } else {
+                                return Mono.error(throwable);
+                            }
+                        })
+                        .block();
+
+        assertNull(photo);
+    }
+
+    @Test
     void getBadgeByVetId() throws IOException{
         BadgeResponseDTO badgeResponseDTO = BadgeResponseDTO.builder()
                 .vetId("cf25e779-548b-4788-aefa-6d58621c2feb")
