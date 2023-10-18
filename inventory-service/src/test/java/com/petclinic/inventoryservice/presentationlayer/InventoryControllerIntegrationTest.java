@@ -10,6 +10,7 @@ import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
 import com.petclinic.inventoryservice.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -17,6 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 import java.util.List;
@@ -171,23 +173,24 @@ class InventoryControllerIntegrationTest {
     }
 
     @Test
-    void getAllProductsInInventory_withInvalidInventoryId_invalidProductName_invalidProductPrice_invalidProductQuantity_throwsNotFoundException() {
+    void getAllProductsInInventory_withInvalidInventoryId_invalidProductName_invalidProductPrice_invalidProductQuantity_invalidProductSalePrice_throwsNotFoundException() {
         String invalidInventoryId = "123";
         String invalidProductName = "Meds";
         Double invalidProductPrice = 2833.0;
         Integer invalidProductQuantity = 2;
+        Double invalidProductSalePrice = 3000.00;
 
 
         webTestClient.get()
-                .uri("/inventory/{inventoryId}/products?productName={productName}&productPrice={productPrice}&productQuantity={productQuantity}",
-                        invalidInventoryId, invalidProductName, invalidProductPrice, invalidProductQuantity)
+                .uri("/inventory/{inventoryId}/products?productName={productName}&productPrice={productPrice}&productQuantity={productQuantity}&productSalePrice={productSalePrice}",
+                        invalidInventoryId, invalidProductName, invalidProductPrice, invalidProductQuantity, invalidProductSalePrice)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNotFound()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("Inventory not found with InventoryId: " + invalidInventoryId +
-                        "\nOr ProductName: " + invalidProductName + "\nOr ProductPrice: " + invalidProductPrice + "\nOr ProductQuantity: " + invalidProductQuantity);
+                        "\nOr ProductName: " + invalidProductName + "\nOr ProductPrice: " + invalidProductPrice + "\nOr ProductQuantity: " + invalidProductQuantity + "\nOr ProductSalePrice: " + invalidProductSalePrice);
     }
 
     @Test

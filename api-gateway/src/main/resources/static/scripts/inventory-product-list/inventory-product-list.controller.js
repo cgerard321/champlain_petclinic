@@ -58,7 +58,7 @@ angular.module('inventoryProductList')
             }
         }
 
-        $scope.searchProduct = function(productName, productQuantity, productPrice) {
+        $scope.searchProduct = function(productName, productQuantity, productPrice, productSalePrice) {
             var inventoryId = $stateParams.inventoryId;
             var queryString = '';
 
@@ -79,6 +79,14 @@ angular.module('inventoryProductList')
                 }
                 queryString += "productPrice=" + productPrice;
             }
+
+            if (productSalePrice) {
+                if (queryString !== '') {
+                    queryString += "&";
+                }
+                queryString += "productSalePrice=" + productSalePrice;
+            }
+
 
             var apiUrl = "api/gateway/inventory/" + inventoryId + "/products";
             if (queryString !== '') {

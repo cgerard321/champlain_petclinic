@@ -831,8 +831,9 @@ public class BFFApiGatewayController {
     public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndFields(@PathVariable String inventoryId,
                                                                                                  @RequestParam(required = false) String productName,
                                                                                                  @RequestParam(required = false) Double productPrice,
-                                                                                                 @RequestParam(required = false) Integer productQuantity){
-        return inventoryServiceClient.getProductsInInventoryByInventoryIdAndProductsField(inventoryId, productName, productPrice, productQuantity);
+                                                                                                 @RequestParam(required = false) Integer productQuantity,
+                                                                                                 @RequestParam(required = false) Double productSalePrice){
+        return inventoryServiceClient.getProductsInInventoryByInventoryIdAndProductsField(inventoryId, productName, productPrice, productQuantity, productSalePrice);
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER,Roles.VET})
