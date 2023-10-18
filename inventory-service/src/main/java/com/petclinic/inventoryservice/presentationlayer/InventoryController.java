@@ -62,8 +62,9 @@ public class InventoryController {
     public Mono<ResponseEntity<Long>> getTotalNumberOfProductsWithRequestParams(@PathVariable String inventoryId,
                                                                                @RequestParam(required = false) String productName,
                                                                                @RequestParam(required = false) Double productPrice,
-                                                                               @RequestParam(required = false) Integer productQuantity){
-        return productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(inventoryId, productName, productPrice, productQuantity).count()
+                                                                               @RequestParam(required = false) Integer productQuantity,
+                                                                                @RequestParam(required = false) Double productSalePrice){
+        return productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(inventoryId, productName, productPrice, productQuantity, productSalePrice).count()
                 .map(response -> ResponseEntity.status(HttpStatus.OK).body(response));
     }
 
