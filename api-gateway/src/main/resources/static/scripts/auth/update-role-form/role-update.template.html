@@ -3,5 +3,6 @@
   <div ng-repeat="role in roles">
     <input type="checkbox" ng-model="selectedRoles[role]" ng-true-value="'{{role}}'" ng-false-value="undefined">{{role}}
   </div>
-  <button ng-click="updateRole()">Update Roles</button>
+  <button class="btn btn-warning" ng-click="updateRole()">Update Roles</button>
+  <button class="btn btn-danger" ui-sref="AdminPanel" class="btn btn-secondary">Cancel</button>
 </div>

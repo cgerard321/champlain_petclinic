@@ -12,6 +12,7 @@
     <tr>
         <th>Username</th>
         <th>Email</th>
+        <th>Roles</th>
         <th>Options</th>
     </tr>
     </thead>
@@ -24,8 +25,14 @@
         </td>
         <td>{{user.email}}</td>
         <td>
+            <!-- Using a nested ng-repeat to loop over each role in the user.roles array -->
+            <span ng-repeat="role in user.roles">
+                {{ role.name }}<span ng-if="!$last">, </span>
+            </span>
+        </td>
+        <td>
             <input class="add-vet-button btn btn-success" type="button" value="Delete" ng-click="removeUser(user.userId)"/>
-            <button ui-sref="updateUserRole({ userId: user.userId })">Update Role</button>
+            <button class="btn btn-warning" ui-sref="updateUserRole({ userId: user.userId })">Update Role</button>
         </td>
     </tr>
 

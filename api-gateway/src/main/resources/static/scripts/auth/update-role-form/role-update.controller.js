@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('userModule')
-    .controller('UpdateUserRoleController', ['$scope', '$http', 'UserService', function($scope, $http, UserService) {
+    .controller('UpdateUserRoleController', ['$scope', '$http', 'UserService', '$state', function($scope, $http, UserService, $state) {
         var ctrl = this;  // Capture the controller instance
 
         $scope.roles = UserService.getAvailableRoles();
@@ -43,6 +43,7 @@ angular.module('userModule')
             })
                 .then(function successCallback(response) {
                     alert('Roles updated successfully!');
+                    $state.go('AdminPanel');
                 }, function errorCallback(response) {
                     alert('Failed to update roles. ' + response.data.message);
                 });
