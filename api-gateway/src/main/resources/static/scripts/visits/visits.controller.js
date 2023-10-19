@@ -1,9 +1,9 @@
 'use strict';
 
 angular.module('visits')
-    .controller('VisitsController', ['$http', '$state', '$stateParams', '$filter','$scope','$rootScope', '$window', function ($http, $state, $stateParams, $filter, $scope, $rootScope, $window) {
+    .controller('VisitsController', ['$http', '$state', '$stateParams', '$filter','$scope','$rootScope', '$window','$location',  function ($http, $state, $stateParams, $filter, $scope, $rootScope, $window, $location) {
         var self = this
-        var petId = $stateParams.petId || 0
+        //var petId = $stateParams.petId || 0
         var postURL = "api/gateway/visit/owners/"+$window.localStorage.getItem("UUID")+"/pets/9/visits"
         var vetsUrl = "api/gateway/vets"
         var billsUrl = "api/gateway/bill"
@@ -13,6 +13,8 @@ angular.module('visits')
         self.desc = ""
         self.chosenDate = null
         self.chosenTime = null
+        self.ownerId = 0
+        self.petId = 0
 
 
 
@@ -183,6 +185,50 @@ angular.module('visits')
             return practitionerName
         }
 
+        //Get Owners
+        var ownersUrl = "api/gateway/owners";
+        $http.get(ownersUrl).then(function (resp) {
+            self.owners = resp.data;
+            console.log(self.owners)
+        });
+
+        //get pets of owners
+        //whenever the owner is selected, this calls to the back end to get the pets of that owner
+/*        self.loadOwnerInfo = function() {
+            let ownerId = self.ownerId;
+            let petId = self.petId
+            $http.get("api/gateway/owners/" + ownerId).then(function(resp) {
+                self.pets = resp.data.pets;
+            });
+            console.log(ownerId)
+        };
+
+        self.logPetId = function() {
+            console.log("Selected Pet ID:", self.petId);
+        }*/
+
+        self.loadOwnerInfo = function() {
+            $http.get("api/gateway/owners/" + self.ownerId).then(function(resp) {
+                self.pets = resp.data.pets;
+                self.ownerId = $("#selectedOwner").val()
+                console.log(" Selected Owner ID:", self.ownerId);
+            });
+            let ownerIdI = self.ownerId
+            console.log(self.ownerId);
+        };
+
+        self.logPetId = function() {
+            let petIdI = self.petId
+            self.petId = $("#selectedPet").val()
+            console.log("S  Selected Pet ID:", self.petId);
+            console.log("Selected Pet ID:", self.petId);
+        };
+
+
+
+
+
+
         self.getVisitDate = function (id) {
             console.log("Getting date for visitId:", id);
             var visitDate = null;
@@ -291,6 +337,8 @@ angular.module('visits')
                     //date: $('#date_input').val(),
                     date: $filter('date')(self.date, "yyyy-MM-ddTHH:mm:ss"),
                     description: $('#description_textarea').val(),
+                    petId: $("#selectedPet").val(),
+                    ownerId: $("#selectedOwner").val(),
                     practitionerId: $("#selectedVet").val(),
                     status: visitStatus
                 };
@@ -641,7 +689,7 @@ angular.module('visits')
         });
 
 
-        self.submit = function () {
+        /*self.submit = function () {
             var data = {
                 visitDate: $filter('date')(self.chosenDate, "yyyy-MM-dd HH:mm"),
                 description: self.desc,
@@ -682,7 +730,73 @@ angular.module('visits')
             }, function () {
                 console.log("Failed to create corresponding bill!");
             });
-        }
+        }*/
+
+        self.someFunction = function() {
+            console.log('Using ownerId in someFunction:', self.ownerId);
+            console.log('Using petId in someFunction:', self.petId);
+        };
+        $scope.goBack = function() {
+            $state.go('visitList');
+        };
+
+        self.submit = function () {
+            // Ensure ownerId and petId are set correctly when owner and pet are selected
+            self.someFunction();
+
+
+            // Check if ownerId and petId are set before creating the URL and proceeding with the POST request
+            var postURL = "api/gateway/visit/owners/" + self.ownerId + "/pets/" + self.petId + "/visits";
+            var billsUrl = "api/gateway/bills"; // Replace with your actual URL for bill creation
+
+            var data = {
+                visitDate: $filter('date')(self.chosenDate, "yyyy-MM-dd HH:mm"),
+                description: self.desc,
+                petId: self.petId,
+                practitionerId: self.practitionerId,
+                status: 'UPCOMING'
+            };
+
+            var billData = {
+                ownerId: self.ownerId, // This should be the ownerId, as fetched from the selected owner
+                date: $filter('date')(self.chosenDate, "yyyy-MM-dd"),
+                visitType: $("#selectedVisitType").val() // Consider using AngularJS data binding instead of directly accessing the DOM with jQuery
+            }
+
+            // Proceed with your existing logic for the POST request and response handling
+            $http.post(postURL, data).then(function (response) {
+                console.log(response)
+                $state.go('visitList');
+/*                let currentDate = getCurrentDate();
+
+                // Add the visit to one of the lists depending on its date
+                let isForUpcomingVisitsTable = Date.parse(response.data.date) >= currentDate;
+                if(isForUpcomingVisitsTable) {
+                    self.upcomingVisits.push(response.data);
+                } else {
+                    self.previousVisits.push(response.data);
+                }
+
+                // Call the last sort after adding if there is one
+                callLastSort(isForUpcomingVisitsTable);
+
+                createAlert("success", "Successfully created visit!");*/
+
+
+            }, function (errorResponse) {
+                console.log(errorResponse);
+                const errorMessage = errorResponse.data.message || "Unknown error";
+
+                createAlert("danger", "Failed to add visit: " + errorMessage);
+            });
+
+            $http.post(billsUrl, billData).then(function () {
+                // Handle successful bill creation
+            }, function (errorResponse) {
+                console.log("Failed to create corresponding bill!");
+            });
+        };
+
 
         self.deleteVisit = function (visitId){
             $http.delete("api/gateway/visits/" + visitId).then(function () {
