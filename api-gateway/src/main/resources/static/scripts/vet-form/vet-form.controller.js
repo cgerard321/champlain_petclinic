@@ -78,6 +78,40 @@ angular.module('vetForm')
             reader.readAsDataURL(file);
         };
 
+        let updatePhoto = function (vetId) {
+            const fileInput = document.querySelector('input[id="photoVet"]');
+            let vetPhoto = "";
+
+            const file = fileInput.files[0]; // Changed fileInput.target.files to fileInput.files
+
+            console.log(fileInput)
+            const reader = new FileReader();
+            var image = {};
+            reader.onloadend = () => {
+                vetPhoto = reader.result
+                    .replace('data:', '')
+                    .replace(/^.+,/, '');
+                self.PreviewImage = vetPhoto;
+                image = {
+                    name: file.name,
+                    type: "jpeg",
+                    photo: vetPhoto
+                };
+                console.log(image)
+
+                // Use template literals for URL concatenation
+                $http.put(`api/gateway/vets/${vetId}/photos/${image.name}`, image) // Send the image object
+                    .then(function (response) {
+                        console.log("VET ID: " + vetId);
+                        console.log("RESPONSE: " + JSON.stringify(response.data)); // Access response data
+                    })
+                    .catch(function (error) {
+                        console.error(error);
+                    });
+            };
+            reader.readAsDataURL(file);
+        };
+
         self.submitVetForm = function (vet = self.vet) {
             console.log("vet please: " + vet);
             document.getElementById("loaderDiv").style.display = "block";
@@ -170,7 +204,20 @@ angular.module('vetForm')
             var req;
             if (id) {
                 req = $http.put("api/gateway/vets/" + vetId, vet);
-                $state.go('vets');
+
+                req.then(function (response) {
+                    var result = response.data;
+                    console.log("Response data:", result);
+                    console.log("Response vet id ", result.vetId);
+                    updatePhoto(result.vetId);
+                    console.log(result.vetId)
+                    $state.go('vets');
+                }, function (response) {
+                    let error = "Invalid vet fields";
+                    $state.go('vets');
+                    alert(error);
+                    console.error(error);
+                })
             } else {
                 req = $http.post("api/gateway/users/vets", {
                     username: vet.username,
@@ -180,18 +227,18 @@ angular.module('vetForm')
                 });
                 console.log(self.vet)
 
-            req.then(function (response) {
-                var result = response.data;
-                console.log("Response data:", result);
-                console.log("Response vet id ", result.vetId);
-                uploadPhoto(result.vetId);
-                $state.go('vets');
-            }, function (response) {
-                let error = "Missing fields, please fill out the form";
-                $state.go('vets');
-                alert(error);
-                console.error(error);
-            });
+                req.then(function (response) {
+                    var result = response.data;
+                    console.log("Response data:", result);
+                    console.log("Response vet id ", result.vetId);
+                    uploadPhoto(result.vetId);
+                    $state.go('vets');
+                }, function (response) {
+                    let error = "Invalid vet profile picture";
+                    $state.go('vets');
+                    alert(error);
+                    console.error(error);
+                });
+            }
         }
-    }
     }]);
