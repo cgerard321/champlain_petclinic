@@ -624,6 +624,22 @@
         <input id="vetWorkdays" disabled="disabled" style="background-color: #dbd9ce;" onchange=selectChanged() />
     </div>
 
+    <div class="form-group"> <!--ng-controller="VisitsController as $ctrl" ng-app="visitsApp"-->
+        <!--Owners Drop down-->
+        <label for="selectedOwner">Owner</label>
+        <select id="selectedOwner" ng-model="$ctrl.ownerId" ng-change="$ctrl.loadOwnerInfo()">
+            <option disabled selected value="">Please Select An Owner</option>
+            <option ng-repeat="o in $ctrl.owners" value="{{o.ownerId}}">{{o.firstName}} {{o.lastName}}</option>
+        </select>
+        <!--Display pets drop down-->
+        <label for="selectedPet">Pet</label>
+        <select id="selectedPet" ng-model="$ctrl.petId" ng-change="$ctrl.logPetId()">
+            <option disabled selected value="">Please Select a Pet</option>
+            <option ng-repeat="p in $ctrl.pets" value="{{p.petId}}">{{p.name}}</option>
+        </select>
+    </div>
+
+
     <div class="form-group" style="margin-top: 12px">
         <label for="selectedVisitType">Visit Type:</label>
         <select id="selectedVisitType" name="selectedVisitType" ng-model="$ctrl.visitType">
@@ -656,6 +672,7 @@
 <!-- Notifications Container-->
 <h3 style="margin-top: 12px">Notifications</h3>
 <div id="alertsContainer" class="form-group"></div>
+<button ng-click="goBack()" class="btn btn-default" type="button" style="border: 1px solid gray; border-radius: 4px">Back</button>
 <!--
 <h3 style="margin-top: 18px">Upcoming Visits</h3>
 <table class="table">
@@ -683,6 +700,7 @@
     </tbody>
 </table>
 -->
+<!--
 <h3 style="margin-top: 6px">Added Visits</h3>
 <table class="table">
     <thead>
@@ -705,6 +723,10 @@
         <td style="text-align:center; vertical-align:middle"><button class="btn btn-danger" ng-click="$ctrl.showConfirmationModal($event, v.visitId)">Delete visit</button></td>
     </tr>
     </tbody>
+<<<<<<< HEAD
 </table>
 <br>
 <button ng-click="goBack()" class="btn btn-default" type="button" style="border: 1px solid gray; border-radius: 4px">Back</button>
+=======
+</table>-->
+
