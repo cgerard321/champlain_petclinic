@@ -765,7 +765,9 @@ angular.module('visits')
 
             // Proceed with your existing logic for the POST request and response handling
             $http.post(postURL, data).then(function (response) {
-                let currentDate = getCurrentDate();
+                console.log(response)
+                $state.go('visitList');
+/*                let currentDate = getCurrentDate();
 
                 // Add the visit to one of the lists depending on its date
                 let isForUpcomingVisitsTable = Date.parse(response.data.date) >= currentDate;
@@ -778,8 +780,7 @@ angular.module('visits')
                 // Call the last sort after adding if there is one
                 callLastSort(isForUpcomingVisitsTable);
 
-                createAlert("success", "Successfully created visit!");
-                $scope.goBack();
+                createAlert("success", "Successfully created visit!");*/
 
 
             }, function (errorResponse) {
@@ -788,7 +789,6 @@ angular.module('visits')
 
                 createAlert("danger", "Failed to add visit: " + errorMessage);
             });
-            $scope.goBack();
 
             $http.post(billsUrl, billData).then(function () {
                 // Handle successful bill creation
