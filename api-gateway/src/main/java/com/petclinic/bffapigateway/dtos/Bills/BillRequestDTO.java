@@ -19,4 +19,6 @@ public class BillRequestDTO {
     private String vetId;
     private LocalDate date;
     private double amount;
+    private BillStatus billStatus;
+    private LocalDate dueDate;
 }

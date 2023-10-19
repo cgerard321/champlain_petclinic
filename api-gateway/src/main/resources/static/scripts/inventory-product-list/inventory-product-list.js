@@ -5,9 +5,12 @@ angular.module('inventoryProductList', ['ui.router'])
         $stateProvider
             .state('productList', {
                 parent: 'app',
-                url: '/inventory/:inventoryId/products',
-                template: '<inventory-product-list></inventory-product-list>'
+                url: '/inventory/:inventoryId/products-pagination?page&size',
+                template: '<inventory-product-list></inventory-product-list>',
+                controller: 'InventoryProductController',
+                controllerAs: 'self'
             })
+
             .state('updateProduct', {
                     parent: 'app',
                     url: '/inventory/:inventoryId/products/:productId',

@@ -8,7 +8,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import org.springframework.data.domain.PageRequest;
 
+import java.util.Optional;
 @RestController
 @AllArgsConstructor
 @RequestMapping("/inventory")
@@ -40,8 +42,30 @@ public class InventoryController {
     getProductsInInventoryByInventoryIdAndProductField(@PathVariable String inventoryId,
                                                        @RequestParam(required = false) String productName,
                                                        @RequestParam(required = false) Double productPrice,
-                                                       @RequestParam(required = false) Integer productQuantity){
-        return productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(inventoryId, productName, productPrice, productQuantity);
+                                                       @RequestParam(required = false) Integer productQuantity,
+                                                       @RequestParam(required = false) Double productSalePrice
+    ){
+        return productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(inventoryId, productName, productPrice, productQuantity, productSalePrice);
+    }
+
+    @GetMapping("/{inventoryId}/products-pagination")
+    public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductFieldPagination(@PathVariable String inventoryId,
+                                                                                                 @RequestParam(required = false) String productName,
+                                                                                                 @RequestParam(required = false) Double productPrice,
+                                                                                                 @RequestParam(required = false) Integer productQuantity,
+                                                                                                 @RequestParam Optional<Integer> page,
+                                                                                                 @RequestParam Optional<Integer> size){
+        return productInventoryService.getProductsInInventoryByInventoryIdAndProductsFieldsPagination(inventoryId, productName, productPrice, productQuantity, PageRequest.of(page.orElse(0),size.orElse(5)));
+    }
+
+    @GetMapping("/{inventoryId}/products-count")
+    public Mono<ResponseEntity<Long>> getTotalNumberOfProductsWithRequestParams(@PathVariable String inventoryId,
+                                                                               @RequestParam(required = false) String productName,
+                                                                               @RequestParam(required = false) Double productPrice,
+                                                                               @RequestParam(required = false) Integer productQuantity,
+                                                                                @RequestParam(required = false) Double productSalePrice){
+        return productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(inventoryId, productName, productPrice, productQuantity, productSalePrice).count()
+                .map(response -> ResponseEntity.status(HttpStatus.OK).body(response));
     }
 
     @GetMapping("/{inventoryId}/products/{productId}")
@@ -51,20 +75,15 @@ public class InventoryController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-/*
-    @GetMapping()
-    public Flux<InventoryResponseDTO> getAllInventory(){
-        return productInventoryService.getAllInventory();
-    }
 
- */
 @GetMapping()
 public Flux<InventoryResponseDTO> searchInventories(
+        @RequestParam Optional<Integer> page, @RequestParam Optional<Integer> size,
         @RequestParam(name = "inventoryName", required = false) String inventoryName,
         @RequestParam(name = "inventoryType", required = false) String inventoryType,
         @RequestParam(name = "inventoryDescription", required = false) String inventoryDescription) {
 
-    return productInventoryService.searchInventories(inventoryName, inventoryType, inventoryDescription);
+    return productInventoryService.searchInventories(PageRequest.of(page.orElse(0),size.orElse(10)), inventoryName, inventoryType, inventoryDescription);
 }
 
 
@@ -106,8 +125,11 @@ public Flux<InventoryResponseDTO> searchInventories(
 
 
 
+
     @PutMapping("/{inventoryId}/products/{productId}")
-    public Mono<ResponseEntity<ProductResponseDTO>> updateProductInInventory(@RequestBody Mono<ProductRequestDTO> productRequestDTOMono, @PathVariable String inventoryId, @PathVariable String productId){
+    public Mono<ResponseEntity<ProductResponseDTO>> updateProductInInventory(@RequestBody Mono<ProductRequestDTO> productRequestDTOMono,
+                                                                             @PathVariable String inventoryId,
+                                                                             @PathVariable String productId){
         return productInventoryService.updateProductInInventory(productRequestDTOMono, inventoryId, productId)
                 .map(productResponseDTO -> ResponseEntity.ok().body(productResponseDTO))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
@@ -124,6 +146,11 @@ public Flux<InventoryResponseDTO> searchInventories(
         return productInventoryService.addInventoryType(inventoryTypeRequestDTO)
                 .map(inventoryTypeResponseDTO -> ResponseEntity.status(HttpStatus.CREATED).body(inventoryTypeResponseDTO))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/type")
+    public Flux<InventoryTypeResponseDTO> getAllInventoryTypes(){
+    return productInventoryService.getAllInventoryTypes();
     }
 
 }

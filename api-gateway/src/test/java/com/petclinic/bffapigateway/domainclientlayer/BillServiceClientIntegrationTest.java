@@ -5,30 +5,23 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Bills.BillDetails;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
-import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
-import com.petclinic.bffapigateway.dtos.Visits.VisitDetails;
-import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
+import com.petclinic.bffapigateway.dtos.Bills.BillStatus;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.*;
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
-
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 
 class BillServiceClientIntegrationTest {
@@ -69,7 +62,9 @@ class BillServiceClientIntegrationTest {
             .customerId("1")
             .vetId("1")
             .visitType("Check up")
-            .date(null)
+            .date( null)
+            .billStatus(BillStatus.PAID)
+            .dueDate(null)
             .build();
 
     private final BillResponseDTO billResponseDTO2 = BillResponseDTO.builder()
@@ -79,6 +74,8 @@ class BillServiceClientIntegrationTest {
             .vetId("2")
             .visitType("Check up")
             .date(null)
+            .billStatus(BillStatus.UNPAID)
+            .dueDate(null)
             .build();
 
     private final BillResponseDTO billResponseDTO3 = BillResponseDTO.builder()
@@ -88,6 +85,8 @@ class BillServiceClientIntegrationTest {
             .vetId("3")
             .visitType("Check up")
             .date(null)
+            .billStatus(BillStatus.OVERDUE)
+            .dueDate(null)
             .build();
 
     @Test
@@ -130,6 +129,8 @@ class BillServiceClientIntegrationTest {
                 .vetId("15")
                 .customerId("2")
                 .date(null)
+                .billStatus(BillStatus.PAID)
+                .dueDate(null)
                 .amount(100)
                 .visitType("Check")
                 .build();
@@ -151,6 +152,8 @@ class BillServiceClientIntegrationTest {
                 .vetId("15")
                 .customerId("2")
                 .date(null)
+                .billStatus(BillStatus.UNPAID)
+                .dueDate(null)
                 .amount(100)
                 .visitType("Check")
                 .build();
@@ -174,6 +177,8 @@ class BillServiceClientIntegrationTest {
                 .vetId("15")
                 .customerId("2")
                 .date(null)
+                .billStatus(BillStatus.UNPAID)
+                .dueDate(null)
                 .amount(100)
                 .visitType("Check")
                 .build();
@@ -197,6 +202,8 @@ class BillServiceClientIntegrationTest {
         billRequest.setVetId("1");
         billRequest.setCustomerId("1");
         billRequest.setDate(null);
+        billRequest.setBillStatus(BillStatus.PAID);
+        billRequest.setDueDate(null);
         billRequest.setAmount(100.0);
         billRequest.setVisitType("Check up");
 
@@ -252,6 +259,75 @@ class BillServiceClientIntegrationTest {
     }
 
     @Test
+    void getAllPaidBills() throws JsonProcessingException {
+        // Prepare a list of bill responses as if they were returned from the service
+        List<BillResponseDTO> billResponseList = Arrays.asList(
+                billResponseDTO
+        );
+
+        final String body = mapper.writeValueAsString(billResponseList);
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(body));
+
+        Flux<BillResponseDTO> billResponseFlux = billServiceClient.getAllPaidBilling();
+
+        StepVerifier.create(billResponseFlux.collectList())
+                .expectNextMatches(returnedBillList -> {
+                    assertEquals(1, returnedBillList.size());
+                    assertTrue(returnedBillList.stream().anyMatch(bill -> "1".equals(bill.getBillId())));
+
+                    return true;
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void getAllUnpaidBills() throws JsonProcessingException {
+        List<BillResponseDTO> billResponseList = Arrays.asList(
+                billResponseDTO2
+        );
+
+        final String body = mapper.writeValueAsString(billResponseList);
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(body));
+
+        Flux<BillResponseDTO> billResponseFlux = billServiceClient.getAllUnpaidBilling();
+
+        StepVerifier.create(billResponseFlux.collectList())
+                .expectNextMatches(returnedBillList -> {
+                    assertEquals(1, returnedBillList.size());
+                    assertTrue(returnedBillList.stream().anyMatch(bill -> "2".equals(bill.getBillId())));
+
+                    return true;
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void getAllOverdueBills() throws JsonProcessingException {
+        List<BillResponseDTO> billResponseList = Arrays.asList(billResponseDTO3);
+        final String body = mapper.writeValueAsString(billResponseList);
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(body));
+
+        Flux<BillResponseDTO> billResponseFlux = billServiceClient.getAllOverdueBilling();
+
+        StepVerifier.create(billResponseFlux.collectList())
+                .expectNextMatches(returnedBillList -> {
+                    assertEquals(1, returnedBillList.size());
+                    assertTrue(returnedBillList.stream().anyMatch(bill -> "3".equals(bill.getBillId())));
+                    return true;
+                })
+                .verifyComplete();
+    }
+
+    @Test
     void shouldUpdateSpecificFieldsOfBill() throws Exception {
 
         BillRequestDTO updateRequest = BillRequestDTO.builder()
@@ -259,6 +335,8 @@ class BillServiceClientIntegrationTest {
                 .visitType("New Visit Type")
                 .vetId("New Vet ID")
                 .date(null)
+                .billStatus(BillStatus.UNPAID)
+                .dueDate(null)
                 .amount(200.0)
                 .build();
 
@@ -269,6 +347,8 @@ class BillServiceClientIntegrationTest {
                 .visitType("New Visit Type")
                 .vetId("New Vet ID")
                 .date(null)
+                .billStatus(BillStatus.PAID)
+                .dueDate(null)
                 .amount(200.0)
                 .build();
 
@@ -288,6 +368,90 @@ class BillServiceClientIntegrationTest {
         StepVerifier.create(updatedBillResponseMono)
                 .expectNext(updatedResponse)
                 .verifyComplete();
+    }
+
+    @Test
+    void getNonExistentBillById() {
+        server.enqueue(new MockResponse().setResponseCode(404));
+
+        Mono<BillResponseDTO> billResponseDTOMono = billServiceClient.getBilling("nonexistentId");
+
+        StepVerifier.create(billResponseDTOMono)
+                .expectError(WebClientResponseException.NotFound.class)
+                .verify();
+    }
+
+    @Test
+    void getBillByInvalidVetId() {
+        server.enqueue(new MockResponse().setResponseCode(400));
+
+        Flux<BillResponseDTO> billResponseDTOMono = billServiceClient.getBillsByVetId("invalidVetId");
+
+        StepVerifier.create(billResponseDTOMono)
+                .expectError(WebClientResponseException.BadRequest.class)
+                .verify();
+    }
+
+    @Test
+    void getBillsByInvalidCustomerId() {
+        server.enqueue(new MockResponse().setResponseCode(400));
+
+        Flux<BillResponseDTO> billResponseDTOMono = billServiceClient.getBillsByOwnerId("invalidCustomerId");
+
+        StepVerifier.create(billResponseDTOMono)
+                .expectError(WebClientResponseException.BadRequest.class)
+                .verify();
+    }
+
+    @Test
+    void deleteNonExistentBill() {
+        server.enqueue(new MockResponse().setResponseCode(404));
+
+        Mono<Void> empty = billServiceClient.deleteBill("nonexistentId");
+
+        StepVerifier.create(empty)
+                .expectError(WebClientResponseException.NotFound.class)
+                .verify();
+    }
+
+    @Test
+    void deleteBillWithInvalidVetId() {
+        server.enqueue(new MockResponse().setResponseCode(400));
+
+        Flux<Void> empty = billServiceClient.deleteBillsByVetId("invalidVetId");
+
+        StepVerifier.create(empty)
+                .expectError(WebClientResponseException.BadRequest.class)
+                .verify();
+    }
+
+    @Test
+    void deleteBillWithInvalidCustomerId() {
+        server.enqueue(new MockResponse().setResponseCode(400));
+
+        Flux<Void> empty = billServiceClient.deleteBillsByCustomerId("invalidCustomerId");
+
+        StepVerifier.create(empty)
+                .expectError(WebClientResponseException.BadRequest.class)
+                .verify();
+    }
+
+    @Test
+    void createBillWithInvalidRequest() {
+        BillRequestDTO invalidRequest = new BillRequestDTO();
+        String requestJson = "";
+
+        prepareResponse(response -> response
+                .setResponseCode(400)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(requestJson)
+        );
+
+        Mono<BillResponseDTO> createdBillMono = billServiceClient.createBill(invalidRequest);
+
+        StepVerifier.create(createdBillMono)
+                .expectError(WebClientResponseException.BadRequest.class)
+                .verify();
     }
 
 

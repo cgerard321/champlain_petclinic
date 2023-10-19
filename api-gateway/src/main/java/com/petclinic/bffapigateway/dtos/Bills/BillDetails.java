@@ -14,5 +14,6 @@ public class BillDetails {
     private String vetId;
     private String visitType;
     private double amount;
-
+    private BillStatus billStatus;
+    private LocalDate dueDate;
 }

@@ -7,18 +7,16 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class VetDTO {
+public class VetRequestDTO {
     private String vetId;
     private String vetBillId;
     private String firstName;
     private String lastName;
     private String email;
     private String phoneNumber;
-    private byte[] image;
     private String resume;
-    private String workday;
+    private Set<Workday> workday;
     private boolean active;
     private Set<SpecialtyDTO> specialties;
-
 
 }

@@ -18,7 +18,7 @@ public class PetRequestDTO {
     private String name;
     private Date birthDate;
     private String petTypeId;
-    private String photoId;
+    //private String photoId;
     private String isActive;
 
 }

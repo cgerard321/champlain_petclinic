@@ -16,29 +16,36 @@
         <td>Quantity</td>
         <td>Price</td>
         <td>Description</td>
+        <td>Sale Price</td>
     </tr>
     <tr>
         <td>
             <span>
-                <input type="text" ng-model="productName">
+                <input type="text" ng-model="productName" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, productPrice, productSalePrice)">
             </span>
         </td>
         <td></td>
         <td>
             <span>
-                <input type="number" min="0" ng-model="productQuantity">
+                <input type="number" min="0" ng-model="productQuantity" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, productPrice, productSalePrice)">
             </span>
         </td>
         <td>
             <span>
-                <input type="number" step="0.01" min="0" ng-model="productPrice">
+                <input type="number" step="0.01" min="0" ng-model="productPrice" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, productPrice, productSalePrice)">
+            </span>
+        </td>
+        <td></td>
+        <td>
+            <span>
+                <input type="number" step="0.01" min="0" ng-model="productSalePrice" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, productPrice, productSalePrice)">
             </span>
         </td>
         <td></td>
         <td></td>
         <td>
             <span>
-                <input class="btn btn-success" type="button" value="Search" ng-click="searchProduct(productName, productQuantity, productPrice)">
+                <input class="btn btn-success" type="button" value="Search" ng-click="searchProduct(productName, productQuantity, productPrice, productSalePrice)">
             </span>
         </td>
     </tr>
@@ -46,16 +53,53 @@
     </thead>
     <tr ng-repeat="product in $ctrl.inventoryProductList | filter:$ctrl.query track by product.productId">
         <td><span>{{product.productName}}</span></td>
-        <td><span>{{product.productId}}</span></td>
+            <td><span>{{product.productId}}</span></td>
         <td><span>{{product.productQuantity}}</span></td>
         <td><span>{{product.productPrice}}</span></td>
         <td><span>{{product.productDescription}}</span></td>
-        <td><a class="btn btn-warning" href="javascript:void(0)" ng-click="">Edit</a></td>
+        <td><span>{{product.productSalePrice}}</span></td>
+
+        <td>
+            <a href="#!/inventory/{{$ctrl.inventory.inventoryId}}/products/{{product.productId}}">
+                Get Product Details
+            </a>
+
+        </td>
+
+
+        <td><a ui-sref="updateProductInventory({inventoryId: $ctrl.inventoryProductList[0].inventoryId, productId: product.productId})">
+            <button class="add-bundle-button btn btn-warning">Edit</button>
+        </a></td>
+
+
+
+
         <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteProduct(product)">Delete</a></td>
         <td></td>
     </tr>
 </table>
-<a ui-sref="productNew({ inventoryId: $ctrl.inventoryProductList[0].inventoryId })">
+<div class="d-flex justify-content-center pb-3">
+    <nav aria-label="Page navigation example">
+        <ul class="pagination">
+            <li class="page-item">
+                <a class="page-link text-dark" aria-label="Previous" ng-click="$ctrl.previousPage()">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+
+            <li class="page-item">
+                <a class="page-link text-dark" disabled>Page-{{$ctrl.actualCurrentPageShown}}</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link text-dark" aria-label="Next" ng-click="$ctrl.nextPage()">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+<a ui-sref="productNew">
     <button class="add-bundle-button btn btn-success">Add Product</button>
 </a>
 <a ui-sref="inventories">

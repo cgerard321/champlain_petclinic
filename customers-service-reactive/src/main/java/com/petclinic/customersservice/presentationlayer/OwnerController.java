@@ -7,6 +7,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import java.util.Optional;
+
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,10 +37,26 @@ public class OwnerController {
     @GetMapping("/owners-pagination")
     public Flux<OwnerResponseDTO> getAllOwnersPagination(
             @RequestParam Optional<Integer> page,
-            @RequestParam Optional<Integer> size
+            @RequestParam Optional<Integer> size,
+            @RequestParam(required = false) String ownerId,
+            @RequestParam(required = false) String firstName,
+            @RequestParam(required = false) String lastName,
+            @RequestParam(required = false) String phoneNumber,
+            @RequestParam(required = false) String city
     ){
         return ownerService.getAllOwnersPagination(
-                PageRequest.of(page.orElse(0),size.orElse(5)));
+                PageRequest.of(page.orElse(0),size.orElse(5)),ownerId,firstName,lastName,phoneNumber,city);
+    }
+
+    @GetMapping("/owners-filtered-count")
+    public Mono<Long> getTotalNumberOfOwnersWithFilters(
+            @RequestParam(required = false) String ownerId,
+            @RequestParam(required = false) String firstName,
+            @RequestParam(required = false) String lastName,
+            @RequestParam(required = false) String phoneNumber,
+            @RequestParam(required = false) String city) {
+
+        return ownerService.getTotalNumberOfOwnersWithFilters(ownerId,firstName,lastName,phoneNumber,city);
     }
 
     @GetMapping("/{ownerId}")

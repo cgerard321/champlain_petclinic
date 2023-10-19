@@ -6,7 +6,7 @@ angular.module('ownerList', ['ui.router'])
         $stateProvider
             .state('owners', {
                 parent: 'app',
-                url: '/owners-pagination?page&size',
+                url: '/owners-pagination?page&size&ownerId&firstName&lastName&phoneNumber&city',
                 template: '<owner-list></owner-list>',
                 controller: 'OwnerListController',
                 controllerAs: 'vm'

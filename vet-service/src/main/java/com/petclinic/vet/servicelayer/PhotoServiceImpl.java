@@ -1,7 +1,9 @@
 package com.petclinic.vet.servicelayer;
 
+import com.petclinic.vet.dataaccesslayer.Photo;
 import com.petclinic.vet.dataaccesslayer.PhotoRepository;
 import com.petclinic.vet.exceptions.NotFoundException;
+import com.petclinic.vet.util.EntityDtoUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
@@ -25,6 +27,38 @@ public class PhotoServiceImpl implements PhotoService {
 
                     return resource;
                 });
+    }
+
+    @Override
+    public Mono<Resource> insertPhotoOfVet(String vetId, String photoName, Mono<Resource> photo) {
+        return photo
+                .map(p -> EntityDtoUtil.toPhotoEntity(vetId, photoName, p))
+                .flatMap(photoRepository::save)
+                .map(img -> {
+                    // Create a Resource from the photo's InputStream
+                    ByteArrayResource resource = new ByteArrayResource(img.getData());
+                    //log.debug("Picture byte array in vet-service toServiceImpl" + resource);
+
+                    return resource;
+                });
+    }
+
+    @Override
+    public Mono<Resource> updatePhotoByVetId(String vetId, String photoName, Mono<Resource> photo) {
+        return photoRepository.findByVetId(vetId)
+                .switchIfEmpty(Mono.error(new NotFoundException("Photo for vet " + vetId + " does not exist.")))
+                .flatMap(existingPhoto -> photo.map(resource -> {
+                            Photo updatedPhoto = EntityDtoUtil.toPhotoEntity(vetId, photoName, resource);
+                            updatedPhoto.setId(existingPhoto.getId());
+                            return updatedPhoto;
+                        })
+                        .flatMap(updatedPhoto -> {
+                            return photoRepository.save(updatedPhoto)
+                                    .map(savedPhoto -> {
+                                        ByteArrayResource savedResource = new ByteArrayResource(savedPhoto.getData());
+                                        return savedResource;
+                                    });
+                        }));
     }
 }
 

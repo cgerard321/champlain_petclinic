@@ -1,35 +1,49 @@
 package com.petclinic.vet.servicelayer;
 
 import com.petclinic.vet.dataaccesslayer.*;
+import com.petclinic.vet.dataaccesslayer.badges.Badge;
+import com.petclinic.vet.dataaccesslayer.badges.BadgeRepository;
+import com.petclinic.vet.dataaccesslayer.badges.BadgeTitle;
 import com.petclinic.vet.dataaccesslayer.education.Education;
 import com.petclinic.vet.dataaccesslayer.education.EducationRepository;
 import com.petclinic.vet.dataaccesslayer.ratings.PredefinedDescription;
 import com.petclinic.vet.dataaccesslayer.ratings.Rating;
 import com.petclinic.vet.dataaccesslayer.ratings.RatingRepository;
 import com.petclinic.vet.util.EntityDtoUtil;
+import org.postgresql.ds.PGSimpleDataSource;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StreamUtils;
 import reactor.core.publisher.Flux;
 
+import java.util.EnumSet;
+import javax.sql.DataSource;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
-
 
 @Service
 public class DataSetupService implements CommandLineRunner {
 
 
+    String date3 = ("2023");
+    String date4 = ("2024");
+    String date2 = ("2022");
+    String date1 = ("2021");
     private final VetRepository vetRepository;
-
     private final RatingRepository ratingRepository;
-
     private final EducationRepository educationRepository;
+    private final BadgeRepository badgeRepository;
 
-    public DataSetupService(VetRepository vetRepository, RatingRepository ratingRepository, EducationRepository educationRepository){
+    public DataSetupService(VetRepository vetRepository, RatingRepository ratingRepository, EducationRepository educationRepository, BadgeRepository badgeRepository){
         this.vetRepository = vetRepository;
         this.ratingRepository = ratingRepository;
         this.educationRepository = educationRepository;
+        this.badgeRepository=badgeRepository;
     }
 
     @Override
@@ -38,6 +52,14 @@ public class DataSetupService implements CommandLineRunner {
         Specialty s2 = new Specialty("100002", "surgery");
         Specialty s3 = new Specialty("100003", "dentistry");
         Specialty s4 = new Specialty("100004", "general");
+
+        Set<Workday> workdays1 = EnumSet.of(Workday.Monday, Workday.Tuesday, Workday.Friday);
+        Set<Workday> workdays2 = EnumSet.of(Workday.Wednesday, Workday.Thursday);
+        Set<Workday> workdays3 = EnumSet.of(Workday.Monday, Workday.Wednesday, Workday.Thursday);
+        Set<Workday> workdays4 = EnumSet.of(Workday.Wednesday, Workday.Thursday, Workday.Friday);
+        Set<Workday> workdays5 = EnumSet.of(Workday.Monday, Workday.Tuesday, Workday.Wednesday, Workday.Thursday);
+        Set<Workday> workdays6 = EnumSet.of(Workday.Monday, Workday.Tuesday, Workday.Friday);
+
 
         Set<Specialty> set1 = new HashSet<>();
         set1.add(s1);
@@ -58,7 +80,7 @@ public class DataSetupService implements CommandLineRunner {
                 .phoneNumber("(514)-634-8276 #2384")
                 .imageId("1")
                 .resume("Practicing since 3 years")
-                .workday("Monday, Tuesday, Friday")
+                .workday(workdays1)
                 .active(true)
                 .specialties(set1)
                 .build();
@@ -71,7 +93,7 @@ public class DataSetupService implements CommandLineRunner {
                 .phoneNumber("(514)-634-8276 #2385")
                 .imageId("1")
                 .resume("Practicing since 10 years")
-                .workday("Wednesday, Thursday")
+                .workday(workdays2)
                 .active(true)
                 .specialties(set3)
                 .build();
@@ -84,7 +106,7 @@ public class DataSetupService implements CommandLineRunner {
                 .phoneNumber("(514)-634-8276 #2386")
                 .imageId("1")
                 .resume("Practicing since 5 years")
-                .workday("Monday, Wednesday, Thursday")
+                .workday(workdays3)
                 .active(true)
                 .specialties(set2)
                 .build();
@@ -97,7 +119,7 @@ public class DataSetupService implements CommandLineRunner {
                 .phoneNumber("(514)-634-8276 #2387")
                 .imageId("1")
                 .resume("Practicing since 8 years")
-                .workday("Wednesday, Thursday, Friday")
+                .workday(workdays4)
                 .active(false)
                 .specialties(set2)
                 .build();
@@ -110,7 +132,7 @@ public class DataSetupService implements CommandLineRunner {
                 .phoneNumber("(514)-634-8276 #2389")
                 .imageId("1")
                 .resume("Practicing since 1 years")
-                .workday("Monday, Tuesday, Wednesday, Thursday")
+                .workday(workdays5)
                 .active(false)
                 .specialties(set1)
                 .build();
@@ -123,7 +145,7 @@ public class DataSetupService implements CommandLineRunner {
                 .phoneNumber("(514)-634-8276 #2383")
                 .imageId("1")
                 .resume("Practicing since 6 years")
-                .workday("Monday, Tuesday, Friday")
+                .workday(workdays5)
                 .active(false)
                 .specialties(set1)
                 .build();
@@ -136,7 +158,7 @@ public class DataSetupService implements CommandLineRunner {
                 .phoneNumber("(514)-634-8276 #2363")
                 .imageId("1")
                 .resume("Practicing since 9 years")
-                .workday("Monday, Friday")
+                .workday(workdays6)
                 .active(true)
                 .specialties(set1)
                 .build();
@@ -150,6 +172,7 @@ public class DataSetupService implements CommandLineRunner {
                 .rateScore(5.0)
                 .rateDescription(null)
                 .predefinedDescription(PredefinedDescription.EXCELLENT)
+                .date(date1)
                 .build();
         Rating r2 = Rating.builder()
                 .ratingId(UUID.randomUUID().toString())
@@ -157,6 +180,7 @@ public class DataSetupService implements CommandLineRunner {
                 .rateScore(4.0)
                 .predefinedDescription(null)
                 .rateDescription("Good vet.")
+                .date(date2)
                 .build();
         Rating r3 = Rating.builder()
                 .ratingId(UUID.randomUUID().toString())
@@ -164,6 +188,7 @@ public class DataSetupService implements CommandLineRunner {
                 .rateScore(3.0)
                 .rateDescription("The vet is ok.")
                 .predefinedDescription(null)
+                .date(date3)
                 .build();
         Rating r4 = Rating.builder()
                 .ratingId(UUID.randomUUID().toString())
@@ -171,6 +196,7 @@ public class DataSetupService implements CommandLineRunner {
                 .rateScore(4.0)
                 .rateDescription(null)
                 .predefinedDescription(PredefinedDescription.GOOD)
+                .date(date4)
                 .build();
         Flux.just(r1, r2, r3, r4)
                 .flatMap(ratingRepository::insert)
@@ -225,6 +251,99 @@ public class DataSetupService implements CommandLineRunner {
                 .flatMap(educationRepository::insert)
                 .log()
                 .subscribe();
+
+        ClassPathResource cpr1=new ClassPathResource("images/empty_food_bowl.png");
+        ClassPathResource cpr2=new ClassPathResource("images/half-full_food_bowl.png");
+        ClassPathResource cpr3=new ClassPathResource("images/full_food_bowl.png");
+
+        Badge b1 = Badge.builder()
+                .vetId(v1.getVetId())
+                .badgeTitle(BadgeTitle.HIGHLY_RESPECTED)
+                .badgeDate("2020")
+                .data(StreamUtils.copyToByteArray(cpr3.getInputStream()))
+                .build();
+        Badge b2 = Badge.builder()
+                .vetId(v2.getVetId())
+                .badgeTitle(BadgeTitle.HIGHLY_RESPECTED)
+                .badgeDate("2022")
+                .data(StreamUtils.copyToByteArray(cpr3.getInputStream()))
+                .build();
+        Badge b3 = Badge.builder()
+                .vetId(v3.getVetId())
+                .badgeTitle(BadgeTitle.MUCH_APPRECIATED)
+                .badgeDate("2023")
+                .data(StreamUtils.copyToByteArray(cpr2.getInputStream()))
+                .build();
+        Badge b4 = Badge.builder()
+                .vetId(v4.getVetId())
+                .badgeTitle(BadgeTitle.VALUED)
+                .badgeDate("2010")
+                .data(StreamUtils.copyToByteArray(cpr1.getInputStream()))
+                .build();
+        Badge b5 = Badge.builder()
+                .vetId(v5.getVetId())
+                .badgeTitle(BadgeTitle.VALUED)
+                .badgeDate("2013")
+                .data(StreamUtils.copyToByteArray(cpr1.getInputStream()))
+                .build();
+        Badge b6 = Badge.builder()
+                .vetId(v6.getVetId())
+                .badgeTitle(BadgeTitle.VALUED)
+                .badgeDate("2016")
+                .data(StreamUtils.copyToByteArray(cpr1.getInputStream()))
+                .build();
+        Badge b7 = Badge.builder()
+                .vetId(v7.getVetId())
+                .badgeTitle(BadgeTitle.VALUED)
+                .badgeDate("2018")
+                .data(StreamUtils.copyToByteArray(cpr1.getInputStream()))
+                .build();
+
+        // Use method defined to create datasource
+        DataSource dataSource = createDataSource();
+        try(
+            // get connection from datasource
+            Connection conn = dataSource.getConnection();
+
+            // Prepare INSERT statement
+            PreparedStatement insertStmt = conn.prepareStatement(
+                    "INSERT INTO badges (vet_id, badge_title, badge_date, img_data) " +
+                            "VALUES (?, ?, ?, ?)"
+        )) {
+
+            // Define Badge objects (b1, b2, ..., b7) and set parameters for PreparedStatement
+            Badge[] badges = {b1, b2, b3, b4, b5, b6, b7};
+
+            for (Badge badge : badges) {
+                insertStmt.setString(1, badge.getVetId());
+                insertStmt.setString(2, badge.getBadgeTitle().name());
+                insertStmt.setString(3, badge.getBadgeDate());
+
+                // Assuming badge.getData() returns image data as byte array
+                insertStmt.setBytes(4, badge.getData());
+
+                // Run insert query for each badge
+                int insertedRows = insertStmt.executeUpdate();
+
+                // Print out number of inserted rows for each badge
+                System.out.printf("Inserted %d badge(s)%n", insertedRows);
+            }
+
+            // Close PreparedStatement after use
+            insertStmt.close();
+        }
+        catch (SQLException e) {
+            // Handle any SQL exceptions
+            e.printStackTrace();
+        }
     }
 
+    private static DataSource createDataSource() {
+        // url specifies address of database along with username and password
+        final String url =
+                "jdbc:postgresql://postgres:5432/images?user=user&password=pwd";
+        final PGSimpleDataSource dataSource = new PGSimpleDataSource();
+        dataSource.setUrl(url);
+        return dataSource;
+    }
 }

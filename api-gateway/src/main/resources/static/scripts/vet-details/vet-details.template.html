@@ -58,17 +58,34 @@
                     <div class="col-md-12">
                         <h5 class="mb-3">Availabilities</h5>
                         <div>
-                            <p id="workDays">{{$ctrl.vet.workday}}</p>
+                            <ul>
+                                <li ng-repeat="workday in $ctrl.vet.workday">{{ workday }}</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="col-md-6">
+                <!-- Vet Badge Image -->
+                <div class="parent">
+                    <a style="text-decoration: none;"><span
+                            class="info v{{$ctrl.badge.vetId}}" ng-mouseenter="$ctrl.show($event,$ctrl.badge.vetId)"
+                            ng-mouseleave="$ctrl.hide($event,$ctrl.badge.vetId)">
+                        <img alt="Badge preview" src="data:image/*;base64, {{$ctrl.badge.resourceBase64}}" width="100" height="100" class="image1">
+                    </span></a>
+                </div>
+
+                <div class="modal m{{$ctrl.badge.vetId}} modalOff">
+                    <!--<span class="modal_image"><img ng-if="$ctrl.badge.resourceBase64 != null" src="data:image/png;base64,{{$ctrl.badge.resourceBase64}}"/><img
+                            ng-if="$ctrl.badge.resourceBase64 == null" src="images/empty_food_bowl.jpg"/></span>-->
+                    <span class="modal_title"><b>Title:</b> {{$ctrl.badge.badgeTitle}}</span>
+                    <span class="modal_date"><b>Date:</b> {{$ctrl.badge.badgeDate}}</span>
+                </div>
+
                 <!-- Vet Profile Image -->
                 <div class="parent">
                     <img alt="Profile picture preview" src="data:image/png;base64, {{$ctrl.vetPhoto.photo}}" width="150" height="150" class="image1">
                     <img alt="" src="data:image/png;base64, {{$ctrl.PreviewImage}}" ng-show="$ctrl.PreviewImage != null" width="150" height="150" class="image2"/>
-                    <input type="file" accept="image/jpeg" class="fileInput" id="photoVet"/>
                 </div>
                 <!-- Edit Vet Button -->
                 <div class="row g-3">
@@ -244,9 +261,9 @@
                                 </div>
                                 <div class="col-sm-12 form-label-rating">
                                     <label>Predefined Description:</label>
-                                    <input type="radio" name="predefinedDescription{{rating.ratingId}}" value="POOR" ng-model="rating.predefinedDescription"> Poor
-                                    <input type="radio" name="predefinedDescription{{rating.ratingId}}" value="GOOD" ng-model="rating.predefinedDescription"> Good
-                                    <input type="radio" name="predefinedDescription{{rating.ratingId}}" value="EXCELLENT" ng-model="rating.predefinedDescription"> Excellent
+                                    <input type="checkbox" name="predefinedDescriptionPOOR{{rating.ratingId}}" value="POOR" ng-model="rating.predefinedDescriptionPOOR" ng-click="togglePredefinedDescription(rating, 'POOR')"> Poor
+                                    <input type="checkbox" name="predefinedDescriptionGOOD{{rating.ratingId}}" value="GOOD" ng-model="rating.predefinedDescriptionGOOD" ng-click="togglePredefinedDescription(rating, 'GOOD')"> Good
+                                    <input type="checkbox" name="predefinedDescriptionEXCELLENT{{rating.ratingId}}" value="EXCELLENT" ng-model="rating.predefinedDescriptionEXCELLENT" ng-click="togglePredefinedDescription(rating, 'EXCELLENT')"> Excellent
                                 </div>
 
                                 <br />
@@ -259,7 +276,15 @@
                     </div>
                 </div>
             </div>
-
+<!--            RECENT & OLDER RATINGS-->
+            <form onsubmit="void(0)" style="max-width: 20em; margin-top: 2em;">
+                <div class="form-group">
+                    <input id="queryDate" class="form-control" ng-model="$ctrl.query" placeholder="Search" type="text"/>
+                </div>
+                <button class="btn btn-primary ratingButton" ng-click="getRecentRatingBasedOnDate()" type="submit">
+                    Search
+                </button>
+            </form>
 
             <!-- Ratings Chart -->
             <div class="col-md-12" ng-if="$ctrl.ratings.length > 0" style="margin-top: 5%">
@@ -301,9 +326,9 @@
                                                   title="Maximum of 350 characters."></textarea>
                                         <div class="col-sm-12 form-label-rating">
                                             <label>Predefined Description:</label>
-                                            <input type="radio" name="predefinedDescriptionUpdate{{rating.ratingId}}" value="POOR" ng-model="updatedRating.predefinedDescription"> Poor
-                                            <input type="radio" name="predefinedDescriptionUpdate{{rating.ratingId}}" value="GOOD" ng-model="updatedRating.predefinedDescription"> Good
-                                            <input type="radio" name="predefinedDescriptionUpdate{{rating.ratingId}}" value="EXCELLENT" ng-model="updatedRating.predefinedDescription"> Excellent
+                                            <input type="checkbox" name="predefinedDescriptionUpdate{{rating.ratingId}}" value="POOR" ng-click="$ctrl.handleCheckboxClick('POOR', rating.ratingId)"> Poor
+                                            <input type="checkbox" name="predefinedDescriptionUpdate{{rating.ratingId}}" value="GOOD" ng-click="$ctrl.handleCheckboxClick('GOOD', rating.ratingId)"> Good
+                                            <input type="checkbox" name="predefinedDescriptionUpdate{{rating.ratingId}}" value="EXCELLENT" ng-click="$ctrl.handleCheckboxClick('EXCELLENT', rating.ratingId)"> Excellent
                                         </div>
                                     </div>
                                 </form>

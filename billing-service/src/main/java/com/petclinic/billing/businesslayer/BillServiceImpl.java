@@ -25,6 +25,12 @@ public class BillServiceImpl implements BillService{
     }
 
     @Override
+    public Flux<BillResponseDTO> GetAllBillsByStatus(BillStatus status) {
+        return billRepository.findAllBillsByBillStatus(status).map(EntityDtoUtil::toBillResponseDto);
+    }
+
+
+    @Override
     public Flux<BillResponseDTO> GetAllBills() {
 
         return billRepository.findAll().map(EntityDtoUtil::toBillResponseDto);
@@ -55,23 +61,15 @@ public class BillServiceImpl implements BillService{
                             existingBill.setVisitType(r.getVisitType());
                             existingBill.setVetId(r.getVetId());
                             existingBill.setDate(r.getDate());
+                            existingBill.setBillStatus(r.getBillStatus());
                             existingBill.setAmount(r.getAmount());
+                            existingBill.setDueDate(r.getDueDate());
 
                             return billRepository.save(existingBill);
                         })
                         .map(EntityDtoUtil::toBillResponseDto)
                 );
-                /*
-                billRepository.findByBillId(billId)
-                .flatMap(p -> billDTOMono
-                        .map(EntityDtoUtil::toEntity)
-                        .doOnNext(e -> e.setBillId(p.getBillId()))
-                        .doOnNext(e -> e.setId(p.getId()))
-                )
-                .flatMap(billRepository::save)
-                .map(EntityDtoUtil::toDto);
 
-                 */
     }
 
 
