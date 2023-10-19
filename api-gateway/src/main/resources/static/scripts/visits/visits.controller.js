@@ -22,6 +22,12 @@ angular.module('visits')
         //     self.sortFetchedVisits();
         // });
 
+
+        //back button to visit list
+        $scope.goBack = function() {
+            $state.go('visitList');
+        };
+
         $scope.$on('selectedDateChanged', function(event, selectedDate) {
             console.log("Received selected date:", selectedDate)
             // Set dateChosen to the received selected date
