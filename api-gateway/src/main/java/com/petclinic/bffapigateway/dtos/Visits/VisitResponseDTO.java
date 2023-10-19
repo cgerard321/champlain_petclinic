@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Data
 @AllArgsConstructor
@@ -14,10 +15,17 @@ import java.time.LocalDateTime;
 @Builder
 public class VisitResponseDTO {
     private String visitId;
-@JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-private LocalDateTime visitDate;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    private LocalDateTime visitDate;
     private String description;
     private String petId;
+    private String petName;
+    private Date petBirthDate;
     private String practitionerId;
+    private String vetFirstName;
+    private String vetLastName;
+    private String vetEmail;
+    private String vetPhoneNumber;
     private Status status;
 }
