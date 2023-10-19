@@ -791,6 +791,24 @@ public class BFFApiGatewayController {
      **/
 
     //Start of Inventory Methods
+    @GetMapping("/inventory/{inventoryId}/products-pagination")
+    public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductFieldPagination(@PathVariable String inventoryId,
+                                                                                                 @RequestParam(required = false) String productName,
+                                                                                                 @RequestParam(required = false) Double productPrice,
+                                                                                                 @RequestParam(required = false) Integer productQuantity,
+                                                                                                 @RequestParam Optional<Integer> page,
+                                                                                                 @RequestParam Optional<Integer> size){
+        return inventoryServiceClient.getProductsInInventoryByInventoryIdAndProductFieldPagination(inventoryId, productName, productPrice, productQuantity, page, size);
+    }
+
+    @GetMapping("/inventory/{inventoryId}/products-count")
+    public Mono<ResponseEntity<Long>> getTotalNumberOfProductsWithRequestParams(@PathVariable String inventoryId,
+                                                                                @RequestParam(required = false) String productName,
+                                                                                @RequestParam(required = false) Double productPrice,
+                                                                                @RequestParam(required = false) Integer productQuantity){
+        return inventoryServiceClient.getTotalNumberOfProductsWithRequestParams(inventoryId, productName, productPrice, productQuantity)
+                .map(response -> ResponseEntity.status(HttpStatus.OK).body(response));
+    }
     @PostMapping(value = "inventory/{inventoryId}/products")
     public Mono<ResponseEntity<ProductResponseDTO>> addProductToInventory(@RequestBody ProductRequestDTO model, @PathVariable String inventoryId){
         return inventoryServiceClient.addProductToInventory(model, inventoryId)
