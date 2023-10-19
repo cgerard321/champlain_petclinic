@@ -61,7 +61,9 @@ jacoco {
 
 jacocoTestReport {
 	dependsOn test
-
+	reports {
+		xml.required = true
+	}
 	afterEvaluate {
 		classDirectories.setFrom(files(classDirectories.files.collect {
 			fileTree(dir: it, exclude: [
@@ -82,7 +84,8 @@ jacocoTestCoverageVerification {
 }
 
 test.finalizedBy jacocoTestReport
-
+//TODO this needs to be added back in because the api-gateway is currently only at 61% code coverage
+//check.dependsOn jacocoTestCoverageVerification
 test {
 	useJUnitPlatform()
 	testLogging {
