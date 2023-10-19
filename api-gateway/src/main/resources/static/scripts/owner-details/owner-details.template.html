@@ -88,9 +88,10 @@
                                 <!-- Add more pet details as needed -->
                             </div>
                             <div class="border-5 rounded">
-                                <input type="checkbox" ng-model="$ctrl.pet.isActive" ng-change="$ctrl.toggleActiveStatus(pet.petId)">
-                                <label ng-if="$ctrl.pet.isActive === 'true'" style="color: rgba(0,0,0,0.5);">Deactivate Pet</label>
-                                <label ng-if="$ctrl.pet.isActive !== 'true'" style="color: rgba(0,0,0,0.5);">Activate Pet</label>
+                                <input type="checkbox" ng-model="pet.isActive" ng-change="$ctrl.toggleActiveStatus(pet.petId)">
+                                <label ng-if="pet.isActive" style="color: rgba(0,0,0,0.5);">Deactivate Pet</label>
+                                <label ng-if="!pet.isActive" style="color: rgba(0,0,0,0.5);">Activate Pet</label>
+
                             </div>
                             <div class="border-5 rounded">
                                 <a style="color: rgba(0,0,0,0.5);" class="btn btn-light" ng-click="$ctrl.deletePet(pet.petId)">Delete Pet</a>

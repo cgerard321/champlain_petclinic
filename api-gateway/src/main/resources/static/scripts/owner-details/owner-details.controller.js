@@ -4,14 +4,25 @@ angular.module('ownerDetails')
         self.owner = {};
         self.pet = {};
 
-        $http.get('api/gateway/owners/' + $stateParams.ownerId).then(function (resp) {
+        $http.get('api/gateway/owners/' + $stateParams.ownerId, {
+            headers: {
+                'Cache-Control': 'no-cache'
+            }
+        }).then(function (resp) {
             self.owner = resp.data;
+            self.owner.pets.forEach(function(pet) {
+                pet.isActive = pet.isActive === "true";
+            });
             console.log(self.owner);
 
             var petPromises = self.owner.pets.map(function (pet) {
-                return $http.get('api/gateway/pets/' + pet.petid, { cache: false });
-            });
+                return $http.get('api/gateway/pets/' + pet.petid, {
+                    headers: {
+                        'Cache-Control': 'no-cache'
+                    }
 
+                });
+            });
 
             $q.all(petPromises).then(function (responses) {
                 self.owner.pets = responses.map(function (response) {
@@ -30,11 +41,6 @@ angular.module('ownerDetails')
                 .then(function (resp) {
                     console.log("Pet deleted successfully");
 
-                  /*  $http.get('api/gateway/owners/' + $stateParams.ownerId).then(function (resp) {
-                        self.owner = resp.data;
-                    });
-                   */
-
                     self.owner.pets = self.owner.pets.filter(function(pet) {
                         return pet.petId !== petId;
                     });
@@ -47,13 +53,12 @@ angular.module('ownerDetails')
             });
         };
 
-
-
-
-
-
         self.toggleActiveStatus = function (petId) {
-            $http.get('api/gateway/pets/' + petId + '?_=' + new Date().getTime(), { headers: { 'Cache-Control': 'no-cache' } }).then(function (resp) {
+            $http.get('api/gateway/pets/' + petId, {
+                headers: {
+                    'Cache-Control': 'no-cache'
+                }
+            }).then(function (resp) {
                 console.log("Pet id is " + petId);
                 console.log(resp.data);
                 self.pet = resp.data;
