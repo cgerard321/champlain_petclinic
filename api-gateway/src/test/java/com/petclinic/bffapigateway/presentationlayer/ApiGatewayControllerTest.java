@@ -855,6 +855,30 @@ class ApiGatewayControllerTest {
     }
 
     @Test
+    void updatePhotoToVet() {
+        byte[] photo = {123, 23, 75, 34};
+        Resource resource = new ByteArrayResource(photo);
+
+        when(vetsServiceClient.updatePhotoOfVet(anyString(), anyString(), any(Mono.class)))
+                .thenReturn(Mono.just(resource));
+
+        client.put()
+                .uri("/api/gateway/vets/{vetId}/photos/{photoName}", VET_ID, "vet_photo.jpg")
+                .body(Mono.just(resource), Resource.class)
+                .accept(MediaType.APPLICATION_OCTET_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.IMAGE_JPEG_VALUE)
+                .expectBody(Resource.class)
+                .consumeWith(response -> {
+                    assertEquals(resource, response.getResponseBody());
+                });
+
+        Mockito.verify(vetsServiceClient, times(1))
+                .updatePhotoOfVet(anyString(), anyString(), any(Mono.class));
+    }
+
+    @Test
     void getBadgeByVetId() throws IOException {
         BadgeResponseDTO badgeResponseDTO = BadgeResponseDTO.builder()
                 .vetId(VET_ID)
@@ -2988,6 +3012,65 @@ void deleteAllInventory_shouldSucceed() {
 
 
     @Test
+    void getProductsInInventoryByInventoryIdAndProductFieldPagination(){
+        ProductResponseDTO expectedResponse = ProductResponseDTO.builder()
+                .id("sampleId")
+                .productId("1234")
+                .inventoryId("1")
+                .productName("testName")
+                .productDescription("testDescription")
+                .productPrice(65.00)
+                .productQuantity(3)
+                .build();
+        Optional<Integer> page = Optional.of(0);
+        Optional<Integer> size = Optional.of(2);
+        Flux<ProductResponseDTO> resp = Flux.just(expectedResponse);
+        when(inventoryServiceClient.getProductsInInventoryByInventoryIdAndProductFieldPagination("1", null,null,null, page, size))
+                .thenReturn(resp);
+        client.get()
+                .uri("/api/gateway/inventory/{inventoryId}/products-pagination?page={page}&size={size}","1", page.get(), size.get())
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .acceptCharset(StandardCharsets.UTF_8)
+                .exchange().expectStatus().isOk()
+                .expectHeader().valueEquals("Content-Type","text/event-stream;charset=UTF-8")
+                .expectBodyList(ProductResponseDTO.class)
+                .value((list)-> {
+                    assertEquals(1,list.size());
+                    assertEquals(list.get(0).getId(),expectedResponse.getId());
+                    assertEquals(list.get(0).getProductId(),expectedResponse.getProductId());
+                    assertEquals(list.get(0).getInventoryId(),expectedResponse.getInventoryId());
+                    assertEquals(list.get(0).getProductName(),expectedResponse.getProductName());
+                    assertEquals(list.get(0).getProductDescription(),expectedResponse.getProductDescription());
+                    assertEquals(list.get(0).getProductPrice(),expectedResponse.getProductPrice());
+                    assertEquals(list.get(0).getProductQuantity(),expectedResponse.getProductQuantity());
+                });
+    }
+
+    @Test
+    void getTotalNumberOfProductsWithRequestParams(){
+        ProductResponseDTO expectedResponse = ProductResponseDTO.builder()
+                .id("sampleId")
+                .productId("1234")
+                .inventoryId("1")
+                .productName("testName")
+                .productDescription("testDescription")
+                .productPrice(65.00)
+                .productQuantity(3)
+                .build();
+        when(inventoryServiceClient.getTotalNumberOfProductsWithRequestParams("1",null,null,null))
+                .thenReturn(Flux.just(expectedResponse).count());
+        client.get()
+                .uri("/api/gateway/inventory/{inventoryId}/products-count","1")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange().expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(Long.class)
+                .value((count)-> {
+                    assertEquals(1L,count.longValue());
+                });
+    }
+
+    @Test
     void testUpdateProductInInventory() {
         // Create a sample ProductRequestDTO
         ProductRequestDTO requestDTO = new ProductRequestDTO("Sample Product", "Sample Description", 10.0, 100, 15.99);
@@ -3388,6 +3471,85 @@ private VetAverageRatingDTO buildVetAverageRatingDTO(){
                 .hasSize(2);
     }
 
+    @Test
+    public void getAllUsers_NoUsername_ShouldReturnAllUsers() {
+        UserDetails user1 = UserDetails.builder()
+                .userId("userId1")
+                .username("username1")
+                .email("email1")
+                .build();
+
+        UserDetails user2 = UserDetails.builder()
+                .userId("userId2")
+                .username("username2")
+                .email("email2")
+                .build();
+
+        when(authServiceClient.getUsers(anyString()))
+                .thenReturn(Flux.just(user1, user2));
+
+        client.get()
+                .uri("/api/gateway/users")
+                .cookie("Bearer", "validToken")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(UserDetails.class)
+                .hasSize(2);
+    }
+
+    @Test
+    public void getAllUsers_WithUsername_ShouldReturnUsersWithSpecificUsername() {
+        UserDetails user = UserDetails.builder()
+                .userId("userId")
+                .username("specificUsername")
+                .email("email")
+                .build();
+
+        UserDetails user2 = UserDetails.builder()
+                .userId("userId2")
+                .username("specificUsername2")
+                .email("email2")
+                .build();
+
+        when(authServiceClient.getUsersByUsername(anyString(), anyString()))
+                .thenReturn(Flux.just(user));
+
+        client.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/api/gateway/users")
+                        .queryParam("username", "specificUsername")
+                        .build())
+                .cookie("Bearer", "validToken")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(UserDetails.class)
+                .hasSize(1);
+    }
+
+    @Test
+    public void getUserById_ValidUserId_ShouldReturnUser() {
+        UserDetails userDetails = UserDetails.builder()
+                .userId("validUserId")
+                .username("validUsername")
+                .email("validEmail")
+                .build();
+
+        when(authServiceClient.getUserById(anyString(), anyString()))
+                .thenReturn(Mono.just(userDetails));
+
+        client.get()
+                .uri("/api/gateway/users/validUserId")
+                .cookie("Bearer", "validToken")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(UserDetails.class)
+                .value(u -> {
+                    assertNotNull(u);
+                    assertEquals(userDetails.getUserId(), u.getUserId());
+                    assertEquals(userDetails.getUsername(), u.getUsername());
+                    assertEquals(userDetails.getEmail(), u.getEmail());
+                });
+    }
     private EducationResponseDTO buildEducation(){
         return EducationResponseDTO.builder()
                 .educationId("1")

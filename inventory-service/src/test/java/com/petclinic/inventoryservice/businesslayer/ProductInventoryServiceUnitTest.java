@@ -60,6 +60,22 @@ class ProductInventoryServiceUnitTest {
             .productQuantity(10)
             .productSalePrice(15.99)
             .build();
+    Product product1 = Product.builder()
+            .productId("123456")
+            .inventoryId("1")
+            .productName("Antibenzo")
+            .productDescription("Sedative Medication")
+            .productPrice(768.00)
+            .productQuantity(100)
+            .build();
+    Product product2 = Product.builder()
+            .productId("1234567")
+            .inventoryId("1")
+            .productName("ibuprofen")
+            .productDescription("Sedative Medication")
+            .productPrice(200.00)
+            .productQuantity(50)
+            .build();
     InventoryType inventoryType = InventoryType.builder()
             .id("1")
             .typeId("81445f86-5329-4df6-badc-8f230ee07e75")
@@ -80,6 +96,22 @@ class ProductInventoryServiceUnitTest {
             .productSalePrice(15.99)
             .build();
 
+    @Test
+    void getProductsInInventoryByInventoryIdAndProductFieldPagination_ShouldSucceed(){
+        Pageable pageable = PageRequest.of(0, 2);
+
+        when(productRepository.findAllProductsByInventoryId(product.getInventoryId()))
+                .thenReturn(Flux.just(product, product2, product1));
+
+        Flux<ProductResponseDTO> productResponseDTOMono = productInventoryService
+                .getProductsInInventoryByInventoryIdAndProductsFieldsPagination(product.getInventoryId(), null,null, null,
+                        pageable);
+        StepVerifier.create(productResponseDTOMono)
+                .expectNextMatches(prod -> prod.getProductId().equals(product.getProductId()))
+                .expectNextMatches(prod -> prod.getProductId().equals(product2.getProductId()))
+                .expectComplete()
+                .verify();
+    }
 
     @Test
     void getAllProductsByInventoryId_andProductName_andProductPrice_andProductQuantity_withValidFields_shouldSucceed(){
@@ -87,14 +119,17 @@ class ProductInventoryServiceUnitTest {
         String productName = "Benzodiazepines";
         Double productPrice = 100.00;
         Integer productQuantity = 10;
+        Double productSalePrice = 200.00;
+
 
 
         when(productRepository
-                .findAllProductsByInventoryIdAndProductNameAndProductPriceAndProductQuantity(
+                .findAllProductsByInventoryIdAndProductNameAndProductPriceAndProductQuantityAndProductSalePrice(
                         inventoryId,
                         productName,
                         productPrice,
-                        productQuantity))
+                        productQuantity,
+                        productSalePrice))
                 .thenReturn(Flux.just(product));
 
         Flux<ProductResponseDTO> productResponseDTOMono = productInventoryService
@@ -102,7 +137,8 @@ class ProductInventoryServiceUnitTest {
                         inventoryId,
                         productName,
                         productPrice,
-                        productQuantity);
+                        productQuantity,
+                        productSalePrice);
 
         StepVerifier
                 .create(productResponseDTOMono)
@@ -116,6 +152,7 @@ class ProductInventoryServiceUnitTest {
         Double productPrice = 100.00;
         Integer productQuantity = 10;
 
+
         when(productRepository
                 .findAllProductsByInventoryIdAndProductPriceAndProductQuantity(
                         inventoryId,
@@ -128,7 +165,9 @@ class ProductInventoryServiceUnitTest {
                         inventoryId,
                         null,
                         productPrice,
-                        productQuantity);
+                        productQuantity,
+                        null
+                        );
 
         StepVerifier
                 .create(productResponseDTOMono)
@@ -176,6 +215,7 @@ class ProductInventoryServiceUnitTest {
                         inventoryId,
                         null,
                         productPrice,
+                        null,
                         null);
 
         StepVerifier
@@ -200,13 +240,40 @@ class ProductInventoryServiceUnitTest {
                         inventoryId,
                         null,
                         null,
-                        productQuantity);
+                        productQuantity,
+                        null);
 
         StepVerifier
                 .create(productResponseDTOMono)
                 .expectNextCount(1)
                 .verifyComplete();
     }
+
+    @Test
+    void getAllProductsByInventoryId_andProductSalePrice_withValidFields_shouldSucceed(){
+        String inventoryId = "1";
+        Double productSalePrice = 20.00;
+
+        when(productRepository
+                .findAllProductsByInventoryIdAndProductSalePrice(
+                        inventoryId,
+                        productSalePrice))
+                .thenReturn(Flux.just(product));
+
+        Flux<ProductResponseDTO> productResponseDTOMono = productInventoryService
+                .getProductsInInventoryByInventoryIdAndProductsField(
+                        inventoryId,
+                        null,
+                        null,
+                        null,
+                        productSalePrice);
+
+        StepVerifier
+                .create(productResponseDTOMono)
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
     @Test
     public void deleteProduct_validProductAndInventory_ShouldSucceed() {
         //arrange
@@ -1037,6 +1104,7 @@ class ProductInventoryServiceUnitTest {
                         inventoryId,
                         productName,
                         null,
+                        null,
                         null);
 
         StepVerifier
@@ -1056,6 +1124,7 @@ class ProductInventoryServiceUnitTest {
         Flux<ProductResponseDTO> productResponseDTOMono = productInventoryService
                 .getProductsInInventoryByInventoryIdAndProductsField(
                         inventoryId,
+                        null,
                         null,
                         null,
                         null);

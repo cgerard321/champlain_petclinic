@@ -48,7 +48,6 @@ angular.module('inventoryList')
 
             if (inventoryName != null && inventoryName !== '') {
                 name = inventoryName
-
                 queryString += "inventoryName=" + inventoryName;
             }
 

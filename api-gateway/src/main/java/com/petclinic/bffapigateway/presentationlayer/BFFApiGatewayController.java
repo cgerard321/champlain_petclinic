@@ -30,6 +30,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -353,6 +354,13 @@ public class BFFApiGatewayController {
     public Mono<ResponseEntity<Resource>> addPhoto(@PathVariable String vetId, @PathVariable String photoName, @RequestBody Mono<Resource> image) {
         return vetsServiceClient.addPhotoToVet(vetId, photoName, image)
                 .map(r -> ResponseEntity.status(HttpStatus.CREATED).body(r))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    @PutMapping(value = "vets/{vetId}/photos/{photoName}")
+    public Mono<ResponseEntity<Resource>> updatePhotoByVetId(@PathVariable String vetId, @PathVariable String photoName, @RequestBody Mono<Resource> image) {
+        return vetsServiceClient.updatePhotoOfVet(vetId, photoName, image)
+                .map(p -> ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE).body(p))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
@@ -702,6 +710,10 @@ public class BFFApiGatewayController {
      **/
 
 
+
+    /**
+     * Beginning of Auth Methods
+     **/
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping("/verification/{token}")
     public Mono<ResponseEntity<UserDetails>> verifyUser(@PathVariable final String token) {
@@ -727,8 +739,13 @@ public class BFFApiGatewayController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "users", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<UserDetails> getAllUsers(@CookieValue("Bearer") String auth) {
-        return authServiceClient.getUsers(auth);
+    public Flux<UserDetails> getAllUsers(@CookieValue("Bearer") String auth, @RequestParam Optional<String> username) {
+        if(username.isPresent()) {
+            return authServiceClient.getUsersByUsername(auth, username.get());
+        }
+        else {
+            return authServiceClient.getUsers(auth);
+        }
     }
 
     @PatchMapping(value = "users/{userId}",
@@ -739,6 +756,13 @@ public class BFFApiGatewayController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+    
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "users/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<UserDetails> getUserById(@PathVariable String userId, @CookieValue("Bearer") String auth) {
+        return authServiceClient.getUserById(auth, userId);
+    }
+
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @PostMapping(value = "/users/login",produces = "application/json;charset=utf-8;", consumes = "application/json")
@@ -756,16 +780,35 @@ public class BFFApiGatewayController {
     }
 
 
-
-
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @PostMapping("/users/reset_password")
     public Mono<ResponseEntity<Void>> processResetPassword(@RequestBody @Valid Mono<UserPasswordAndTokenRequestModel> resetRequest) {
         return authServiceClient.changePassword(resetRequest);
     }
 
+    /**
+     * End of Auth Methods
+     **/
 
     //Start of Inventory Methods
+    @GetMapping("/inventory/{inventoryId}/products-pagination")
+    public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductFieldPagination(@PathVariable String inventoryId,
+                                                                                                 @RequestParam(required = false) String productName,
+                                                                                                 @RequestParam(required = false) Double productPrice,
+                                                                                                 @RequestParam(required = false) Integer productQuantity,
+                                                                                                 @RequestParam Optional<Integer> page,
+                                                                                                 @RequestParam Optional<Integer> size){
+        return inventoryServiceClient.getProductsInInventoryByInventoryIdAndProductFieldPagination(inventoryId, productName, productPrice, productQuantity, page, size);
+    }
+
+    @GetMapping("/inventory/{inventoryId}/products-count")
+    public Mono<ResponseEntity<Long>> getTotalNumberOfProductsWithRequestParams(@PathVariable String inventoryId,
+                                                                                @RequestParam(required = false) String productName,
+                                                                                @RequestParam(required = false) Double productPrice,
+                                                                                @RequestParam(required = false) Integer productQuantity){
+        return inventoryServiceClient.getTotalNumberOfProductsWithRequestParams(inventoryId, productName, productPrice, productQuantity)
+                .map(response -> ResponseEntity.status(HttpStatus.OK).body(response));
+    }
     @PostMapping(value = "inventory/{inventoryId}/products")
     public Mono<ResponseEntity<ProductResponseDTO>> addProductToInventory(@RequestBody ProductRequestDTO model, @PathVariable String inventoryId){
         return inventoryServiceClient.addProductToInventory(model, inventoryId)
@@ -831,8 +874,9 @@ public class BFFApiGatewayController {
     public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndFields(@PathVariable String inventoryId,
                                                                                                  @RequestParam(required = false) String productName,
                                                                                                  @RequestParam(required = false) Double productPrice,
-                                                                                                 @RequestParam(required = false) Integer productQuantity){
-        return inventoryServiceClient.getProductsInInventoryByInventoryIdAndProductsField(inventoryId, productName, productPrice, productQuantity);
+                                                                                                 @RequestParam(required = false) Integer productQuantity,
+                                                                                                 @RequestParam(required = false) Double productSalePrice){
+        return inventoryServiceClient.getProductsInInventoryByInventoryIdAndProductsField(inventoryId, productName, productPrice, productQuantity, productSalePrice);
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER,Roles.VET})
