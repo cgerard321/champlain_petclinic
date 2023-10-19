@@ -394,12 +394,12 @@ class BillServiceClientIntegrationTest {
 
     @Test
     void getBillsByInvalidCustomerId() {
-        server.enqueue(new MockResponse().setResponseCode(500));
+        server.enqueue(new MockResponse().setResponseCode(400));
 
         Flux<BillResponseDTO> billResponseDTOMono = billServiceClient.getBillsByOwnerId("invalidCustomerId");
 
         StepVerifier.create(billResponseDTOMono)
-                .expectError(WebClientResponseException.InternalServerError.class)
+                .expectError(WebClientResponseException.BadRequest.class)
                 .verify();
     }
 
@@ -427,19 +427,19 @@ class BillServiceClientIntegrationTest {
 
     @Test
     void deleteBillWithInvalidCustomerId() {
-        server.enqueue(new MockResponse().setResponseCode(500));
+        server.enqueue(new MockResponse().setResponseCode(400));
 
         Flux<Void> empty = billServiceClient.deleteBillsByCustomerId("invalidCustomerId");
 
         StepVerifier.create(empty)
-                .expectError(WebClientResponseException.InternalServerError.class)
+                .expectError(WebClientResponseException.BadRequest.class)
                 .verify();
     }
 
     @Test
     void createBillWithInvalidRequest() {
         BillRequestDTO invalidRequest = new BillRequestDTO();
-        String requestJson = ""; 
+        String requestJson = "";
 
         prepareResponse(response -> response
                 .setResponseCode(400)
