@@ -46,9 +46,9 @@ jacoco {
 }
 
 jacocoTestReport {
-    reports {
-        xml.required = true
-    }
+//    reports {
+//        xml.required = true
+//    }
     dependsOn test
     afterEvaluate {
         classDirectories.setFrom(files(classDirectories.files.collect {
