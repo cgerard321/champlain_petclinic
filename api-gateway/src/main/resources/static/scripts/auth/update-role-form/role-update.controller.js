@@ -27,6 +27,11 @@ angular.module('userModule')
                 return;
             }
 
+            if (rolesList.length > 1) {
+                alert('Please select only one role.');
+                return;
+            }
+
             var rolesChangeRequest = {
                 roles: rolesList
             };
