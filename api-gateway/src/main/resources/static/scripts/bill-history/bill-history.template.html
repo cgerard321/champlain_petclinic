@@ -154,6 +154,32 @@
         </tr>
     </thead>
 
+    <tbody class="border">
+    <tr>
+        <td class="bg-white border" >
+            <input ng-model="search.billId" placeholder="Filter by Bill ID">
+
+        </td>
+        <td class="bg-white border d-none d-sm-table-cell d-md-table-cell">
+            <input class="ps-2" type="text" placeholder="Search Filter...">
+        </td>
+        <td class="bg-white border d-none d-sm-table-cell d-md-table-cell">
+            <input class="ps-2" type="text" size="15" placeholder="Search Filter...">
+        </td>
+        <td class="bg-white border d-none d-sm-table-cell d-md-table-cell">
+            <input class="ps-2" type="text" size="10" placeholder="Search Filter...">
+        </td>
+        <td class="bg-white border d-none d-sm-table-cell d-md-table-cell">
+            <input ng-model="search.visitType" placeholder="Filter by visit type">
+        </td>
+        <td class="bg-white border d-none d-sm-table-cell d-md-table-cell">
+            <input ng-model="search.amount" placeholder="Filter by amount">
+        </td>
+        <td class="bg-white border d-none d-sm-table-cell d-md-table-cell">
+            <input class="ps-2" type="text" size="10" placeholder="Search Filter...">
+        </td>
+    </tr>
+
     <tr id="billId" ng-repeat="bill in $ctrl.billHistory | filter:$ctrl.query track by bill.billId">
     <tr ng-repeat="bill in $ctrl.billHistory | filter:search:strict">
     <td><a href="http://localhost:8080/#!/bills/details/{{bill.billId}}/owner/{{bill.customerId}}">{{bill.billId}}</a></td>
@@ -173,6 +199,7 @@
         <td><a href="http://localhost:8080/#!/bills/details/{{bill.billId}}/owner/{{bill.customerId}}">Get Details</a></td>
         <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteBill(bill.billId)">Delete Bill</a></td>
     </tr>
+    </tbody>
 </table>
 
 <a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteAllBills()">Delete All Bills</a>
