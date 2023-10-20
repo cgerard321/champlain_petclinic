@@ -7,6 +7,7 @@ import com.petclinic.visits.visitsservicenew.DomainClientLayer.*;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
+import com.petclinic.visits.visitsservicenew.Utils.EntityDtoUtil;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,8 @@ class VisitServiceImplTest {
     @MockBean
     private PetsClient petsClient;
 
+    @MockBean
+    private EntityDtoUtil entityDtoUtil;
 
     private final Long dbSize = 2L;
 
@@ -126,21 +129,23 @@ class VisitServiceImplTest {
     }
 
     @Test
-    void getVisitsForPet(){
-        when(visitRepo.findByPetId(anyString())).thenReturn(Flux.just(visit1));
-        when(petsClient.getPetById(anyString())).thenReturn(Mono.just(petResponseDTO));
+    public void getVisitsForPet() {
+        // Arrange
+        String petId = "yourPetId";
+        Visit visit1 = buildVisit("yourVisitId", "Visit Description", "VetId");
+        VisitResponseDTO visitResponseDTO = buildVisitResponseDTO();
 
-        Flux<VisitResponseDTO> visitResponseDTOFlux = visitService.getVisitsForPet(PET_ID);
+        // Mock the behavior of dependencies
+        when(visitRepo.findByPetId(petId)).thenReturn(Flux.just(visit1));
+        when(entityDtoUtil.toVisitResponseDTO(visit1)).thenReturn(Mono.just(visitResponseDTO));
+        when(petsClient.getPetById(petId)).thenReturn(Mono.just(petResponseDTO));
+        // Act
+        Flux<VisitResponseDTO> result = visitService.getVisitsForPet(petId);
 
-        StepVerifier
-                .create(visitResponseDTOFlux)
-                .consumeNextWith(foundVisit -> {
-                    assertEquals(visit1.getVisitId(), foundVisit.getVisitId());
-                    assertEquals(visit1.getVisitDate(), foundVisit.getVisitDate());
-                    assertEquals(visit1.getDescription(), foundVisit.getDescription());
-                    assertEquals(visit1.getPetId(), foundVisit.getPetId());
-                    assertEquals(visit1.getPractitionerId(), foundVisit.getPractitionerId());
-                }).verifyComplete();
+        // Assert
+        StepVerifier.create(result)
+                .expectNext(visitResponseDTO)
+                .verifyComplete();
     }
 
     @Test
@@ -183,18 +188,26 @@ class VisitServiceImplTest {
      */
 
     @Test
-    void addVisit(){
-        when(visitRepo.insert(any(Visit.class))).thenReturn(Mono.just(visit1));
-        when(petsClient.getPetById(anyString())).thenReturn(Mono.just(petResponseDTO));
-        when(vetsClient.getVetByVetId(anyString())).thenReturn(Mono.just(vet));
+    public void testAddVisit() {
+        // Arrange
+        VisitRequestDTO requestDTO = buildVisitRequestDTO();
+        Visit visit = buildVisit("yourVisitId", requestDTO.getDescription(), requestDTO.getPractitionerId());
+        VisitResponseDTO visitResponseDTO = buildVisitResponseDTO();
 
-        StepVerifier.create(visitService.addVisit(Mono.just(visitRequestDTO)))
-                .consumeNextWith(visitDTO1 -> {
-                    assertEquals(visit1.getDescription(), visitDTO1.getDescription());
-                    assertEquals(visit1.getPetId(), visitDTO1.getPetId());
-                    assertEquals(visit1.getVisitDate(), visitDTO1.getVisitDate());
-                    assertEquals(visit1.getPractitionerId(), visitDTO1.getPractitionerId());
-                }).verifyComplete();
+        // Mock the behavior of dependencies
+
+        when(entityDtoUtil.toVisitEntity(requestDTO)).thenReturn(visit);
+        when(entityDtoUtil.generateVisitIdString()).thenReturn("yourVisitId");
+        when(visitRepo.insert(visit)).thenReturn(Mono.just(visit));
+        when(entityDtoUtil.toVisitResponseDTO(visit)).thenReturn(Mono.just(visitResponseDTO));
+
+        // Act
+        Mono<VisitResponseDTO> result = visitService.addVisit(Mono.just(requestDTO));
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNext(visitResponseDTO)
+                .verifyComplete();
     }
 
     @Test
@@ -323,7 +336,7 @@ class VisitServiceImplTest {
                 .visitId(uuid)
                 .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description(description)
-                .petId("2")
+                .petId("ecb109cd-57ea-4b85-b51e-99751fd1c349")
                 .practitionerId(vetId)
                 .status(Status.UPCOMING)
                 .build();
@@ -333,7 +346,7 @@ class VisitServiceImplTest {
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
                 .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("this is a dummy description")
-                .petId("2")
+                .petId("ecb109cd-57ea-4b85-b51e-99751fd1c349")
                 .practitionerId(UUID.randomUUID().toString())
                 .status(Status.UPCOMING)
                 .build();
@@ -342,7 +355,7 @@ class VisitServiceImplTest {
             return VisitRequestDTO.builder()
                     .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                     .description("this is a dummy description")
-                    .petId("2")
+                    .petId("ecb109cd-57ea-4b85-b51e-99751fd1c349")
                     .practitionerId(UUID.randomUUID().toString())
                     .status(Status.UPCOMING)
                     .build();
