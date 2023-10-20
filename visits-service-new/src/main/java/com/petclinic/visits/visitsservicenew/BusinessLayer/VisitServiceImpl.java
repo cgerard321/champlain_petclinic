@@ -85,19 +85,20 @@ public class VisitServiceImpl implements VisitService {
                 .doOnNext(x -> x.setVisitId(EntityDtoUtil.generateVisitIdString()))
                 .doOnNext(v -> System.out.println("Entity Date: " + v.getVisitDate())) // Debugging
                 .flatMap(visit ->
-                        repo.findByVisitDateAndPractitionerId(visit.getVisitDate(), visit.getPractitionerId()) // Find visits by visitDate and practitionerId
+                        repo.findByVisitDateAndPractitionerId(visit.getVisitDate(), visit.getPractitionerId()) // FindVisits method in repository
                                 .collectList()
                                 .flatMap(existingVisits -> {
-                                    if(existingVisits.isEmpty()) {
-                                        return repo.insert(visit); // Safe to insert
+                                    if(existingVisits.isEmpty()) {// If there are no existing visits
+                                        return repo.insert(visit); // Insert the visit
                                     } else {
-                                        // A visit with the same visitDate and practitionerId already exists, handle accordingly
+                                        //return exception if a visits already exists at the specific day and time for a specific practitioner
                                         return Mono.error(new DuplicateTimeException("A visit with the same time and practitioner already exists."));
                                     }
                                 })
                 )
                 .map(EntityDtoUtil::toVisitResponseDTO); // Convert the saved Visit entity to a DTO
     }
+
 
 
 

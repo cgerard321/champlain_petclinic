@@ -4,9 +4,11 @@ import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.*;
+import com.petclinic.visits.visitsservicenew.Exceptions.DuplicateTimeException;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
+import com.petclinic.visits.visitsservicenew.Utils.EntityDtoUtil;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -182,7 +184,7 @@ class VisitServiceImplTest {
     }
      */
 
-    @Test
+/*    @Test
     void addVisit(){
         when(visitRepo.insert(any(Visit.class))).thenReturn(Mono.just(visit1));
         when(petsClient.getPetById(anyString())).thenReturn(Mono.just(petResponseDTO));
@@ -195,7 +197,116 @@ class VisitServiceImplTest {
                     assertEquals(visit1.getVisitDate(), visitDTO1.getVisitDate());
                     assertEquals(visit1.getPractitionerId(), visitDTO1.getPractitionerId());
                 }).verifyComplete();
+    }*/
+
+    @Test
+    void addVisit() {
+        // Arrange
+        when(visitRepo.insert(any(Visit.class))).thenReturn(Mono.just(visit1));
+        when(petsClient.getPetById(anyString())).thenReturn(Mono.just(petResponseDTO));
+        when(vetsClient.getVetByVetId(anyString())).thenReturn(Mono.just(vet));
+        // This line ensures that a Flux<Visit> is returned, even if it's empty, to prevent NullPointerException
+        when(visitRepo.findByVisitDateAndPractitionerId(any(LocalDateTime.class), anyString())).thenReturn(Flux.empty());
+
+        // Act and Assert
+        StepVerifier.create(visitService.addVisit(Mono.just(visitRequestDTO)))
+                .consumeNextWith(visitDTO1 -> {
+                    assertEquals(visit1.getDescription(), visitDTO1.getDescription());
+                    assertEquals(visit1.getPetId(), visitDTO1.getPetId());
+                    assertEquals(visit1.getVisitDate(), visitDTO1.getVisitDate());
+                    assertEquals(visit1.getPractitionerId(), visitDTO1.getPractitionerId());
+                }).verifyComplete();
+
+        // Verify that the methods were called with the expected arguments
+        verify(visitRepo, times(1)).insert(any(Visit.class));
+        verify(petsClient, times(1)).getPetById(anyString());
+        verify(vetsClient, times(1)).getVetByVetId(anyString());
+        verify(visitRepo, times(1)).findByVisitDateAndPractitionerId(any(LocalDateTime.class), anyString());
     }
+
+    @Test
+    void addVisit_NoConflictingVisits_InsertsNewVisit() {
+        // Arrange
+        LocalDateTime visitDate = LocalDateTime.now().plusDays(1);
+        String description = "Test Description";
+        String petId = "TestId";
+        String practitionerId = "TestPractitionerId";
+        Status status = Status.UPCOMING;
+
+        VisitRequestDTO visitRequestDTO = new VisitRequestDTO();
+        // Assuming VisitRequestDTO has setters if the constructor is not available
+        visitRequestDTO.setVisitDate(visitDate);
+        visitRequestDTO.setDescription(description);
+        visitRequestDTO.setPetId(petId);
+        visitRequestDTO.setPractitionerId(practitionerId);
+        visitRequestDTO.setStatus(status);
+
+        Visit visit = new Visit(); // Create a Visit entity with appropriate data
+        VisitResponseDTO visitResponseDTO = new VisitResponseDTO(); // Create a VisitResponseDTO with appropriate data
+
+        // Mock the behavior of the methods
+        when(visitRepo.insert(any(Visit.class))).thenReturn(Mono.just(visit));
+        when(petsClient.getPetById(anyString())).thenReturn(Mono.just(new PetResponseDTO()));
+        when(vetsClient.getVetByVetId(anyString())).thenReturn(Mono.just(new VetDTO()));
+        when(visitRepo.findByVisitDateAndPractitionerId(any(LocalDateTime.class), anyString())).thenReturn(Flux.empty());
+        //when(EntityDtoUtil.toVisitResponseDTO(any(Visit.class))).thenReturn(visitResponseDTO); // Correct this line if toVisitResponseDTO is not a static method or if there's a compilation issue
+
+        // Act
+        Mono<VisitResponseDTO> result = visitService.addVisit(Mono.just(visitRequestDTO));
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextMatches(response -> response.equals(visitResponseDTO))
+                .verifyComplete();
+
+        verify(visitRepo, times(1)).insert(any(Visit.class));
+    }
+
+    @Test
+    void addVisit_ConflictingVisits_ThrowsDuplicateTimeException() {
+        // Arrange
+        LocalDateTime visitDate = LocalDateTime.now().plusDays(1);
+        String description = "Test Description";
+        String petId = "TestId";
+        String practitionerId = "TestPractitionerId";
+        Status status = Status.UPCOMING;
+
+        VisitRequestDTO visitRequestDTO = new VisitRequestDTO();
+        visitRequestDTO.setVisitDate(visitDate);
+        visitRequestDTO.setDescription(description);
+        visitRequestDTO.setPetId(petId);
+        visitRequestDTO.setPractitionerId(practitionerId);
+        visitRequestDTO.setStatus(status);
+
+        Visit existingVisit = new Visit(); // This represents the conflicting visit already in the database.
+        // ... set properties on existingVisit, especially the date and practitionerId, to match those of the new request
+
+        PetResponseDTO mockPetResponse = new PetResponseDTO(); // Adjust as necessary
+        VetDTO mockVetResponse = new VetDTO(); // Create a mock VetDTO, set any necessary fields if required
+
+        // Mock the behavior of the repository and clients
+        when(petsClient.getPetById(anyString())).thenReturn(Mono.just(mockPetResponse));
+        when(vetsClient.getVetByVetId(anyString())).thenReturn(Mono.just(mockVetResponse)); // This ensures a non-null Mono is returned
+        // Mock the behavior of the repository and clients
+        when(visitRepo.findByVisitDateAndPractitionerId(visitDate, practitionerId))
+                .thenReturn(Flux.just(existingVisit)); // This simulates finding a conflicting visit
+        // Other mocks remain the same if they are needed for this test scenario
+
+        // Act
+        Mono<VisitResponseDTO> result = visitService.addVisit(Mono.just(visitRequestDTO));
+
+        // Assert
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof DuplicateTimeException
+                        && throwable.getMessage().contains("A visit with the same time and practitioner already exists."))
+                .verify();
+
+        // Ensure no attempt was made to insert a new visit due to the conflict
+        verify(visitRepo, times(0)).insert(any(Visit.class));
+    }
+
+
+
 
     @Test
     void updateStatusForVisitByVisitId(){
