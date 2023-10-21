@@ -14,6 +14,8 @@ package com.petclinic.vet.dataaccesslayer;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 @Setter
@@ -35,6 +37,7 @@ public class Vet {
     private String imageId;
     private String resume;
     private Set<Workday> workday;
+    private Map<Workday, List<WorkHour>> workHours;
     private boolean active;
     private Set<Specialty> specialties;
 
