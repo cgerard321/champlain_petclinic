@@ -4,6 +4,10 @@
         box-shadow: 0 0 rgba(0, 0, 0, 2);
         border-bottom-width: 1px;
     }
+
+    .table-striped tbody tr:hover {
+        background-color: #D8D8D8;
+    }
 </style>
 
 <h2>Inventory Products</h2>
@@ -70,10 +74,7 @@
         <td><a ui-sref="updateProductInventory({inventoryId: $ctrl.inventoryProductList[0].inventoryId, productId: product.productId})">
             <button class="add-bundle-button btn btn-warning">Edit</button>
         </a></td>
-
-
-
-
+        
         <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteProduct(product)">Delete</a></td>
         <td></td>
     </tr>
