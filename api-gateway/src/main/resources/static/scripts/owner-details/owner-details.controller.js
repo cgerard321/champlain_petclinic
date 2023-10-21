@@ -12,24 +12,7 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
     vm.pets = [];
 
     // Function to get pet type name based on petTypeId
-    vm.getPetTypeName = function (petTypeId) {
-        switch (petTypeId) {
-            case '1':
-                return 'Cat';
-            case '2':
-                return 'Dog';
-            case '3':
-                return 'Lizard';
-            case '4':
-                return 'Snake';
-            case '5':
-                return 'Bird';
-            case '6':
-                return 'Hamster';
-            default:
-                return 'Unknown';
-        }
-    };
+
 
 
     // Fetch owner data
@@ -51,12 +34,12 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
         .then(function (response) {
             // Split the response by newline characters to get individual pet objects
             var petResponses = response.data.split('\n');
-
-// Parse each pet response as JSON, remove the "data:" prefix, and trim any leading/trailing whitespace
+            // Parse each pet response as JSON, remove the "data:" prefix, and trim any leading/trailing whitespace
             var petObjects = petResponses.map(function (petResponse) {
                 // Remove the "data:" prefix and trim any leading/trailing whitespace
                 var trimmedResponse = petResponse.replace(/^data:/, '').trim();
                 console.log("Trimmed results: ", trimmedResponse)
+
 
                 // Check if the trimmed response is empty
                 if (!trimmedResponse) {
@@ -71,11 +54,10 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
                 }
             });
 
-// Filter out any parsing errors (null values)
+            // Filter out any parsing errors (null values)
             petObjects = petObjects.filter(function (pet) {
                 return pet !== null;
             });
-
 
             // Assuming that each pet has a 'petId' property, you can create an array of promises to fetch detailed pet data
             var petPromises = petObjects.map(function (pet) {
@@ -130,6 +112,7 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
     };
 
 
+
     // Watch the pet.isActive property
     $scope.$watch('pet.isActive', function(newVal, oldVal) {
         if (newVal !== oldVal) {
@@ -171,3 +154,6 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
         });
     };
 }
+
+};
+

@@ -379,4 +379,14 @@ git stash pop
 ```
 
 ---
+## SSH Keys
+Note: This section is if you are using **SSH keys to clone your repo** and have already generated your GitHub SSH keys and ran your keygen in your terminal (console of your computer)
 
+A common problem you face when setting the SSH key on the Mac is that when you restart your computer the ssh key makes you authenticate with your passphrase. 
+To set the password and not make it ask for your passphrase everytime you run a command needing permissions. Run the command:
+```
+ssh-add
+```
+and enter your passphrase when prompted (Note: if you are not using the default filename, you'll need to specify your key filename `ssh-add ~/.ssh/myprivatekeyname)`. The system will print Identity Added if successful.
+
+---
