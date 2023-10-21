@@ -130,11 +130,12 @@ public class InventoryServiceClient {
     }
 
 
-    public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductsField(final String inventoryId, final String productName, final Double productPrice, final Integer productQuantity){
+    public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductsField(final String inventoryId, final String productName, final Double productPrice, final Integer productQuantity, final Double productSalePrice){
         UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString(inventoryServiceUrl + "/{inventoryType}/products")
                 .queryParamIfPresent("productName", Optional.ofNullable(productName))
                 .queryParamIfPresent("productPrice", Optional.ofNullable(productPrice))
-                .queryParamIfPresent("productQuantity", Optional.ofNullable(productQuantity));
+                .queryParamIfPresent("productQuantity", Optional.ofNullable(productQuantity))
+                .queryParamIfPresent("productSalePrice", Optional.ofNullable(productSalePrice));
 
         return webClient.get()
                 .uri(uriBuilder.buildAndExpand(inventoryId).toUri())

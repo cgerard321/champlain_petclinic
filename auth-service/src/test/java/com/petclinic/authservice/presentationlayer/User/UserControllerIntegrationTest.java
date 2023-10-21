@@ -6,6 +6,7 @@ import com.petclinic.authservice.domainclientlayer.Mail.MailService;
 import com.petclinic.authservice.security.JwtTokenUtil;
 import com.petclinic.authservice.datalayer.user.*;
 import org.aspectj.lang.annotation.Before;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -62,7 +63,6 @@ class UserControllerIntegrationTest {
         String baseUri = "http://localhost:" + "9200";
         this.webTestClient = WebTestClient.bindToServer().baseUrl(baseUri).build();
     }
-
 
 
     @Test
@@ -387,6 +387,8 @@ class UserControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isBadRequest();
         }
+
+
     @Test
     void verifyInvalidToken_ShouldReturnBadRequest(){
         User user = userRepo.findByEmail("admin@admin.com").get();
@@ -432,9 +434,43 @@ class UserControllerIntegrationTest {
                 .expectBody()
                 .jsonPath("$.message").isEqualTo(String.format("User with e-mail %s already exists", userDTO.getEmail()));
 
-
+            userRepo.delete(existingUser);
 
     }
+
+    @Test
+    void createUser_ShouldThrowUsernameAlreadyExistsException() {
+        UserIDLessRoleLessDTO userDTO = UserIDLessRoleLessDTO.builder()
+                .email("richard2004danon@gmail.com")
+                .password("pwd%jfjfjDkkkk8")
+                .username("Ric")
+                .build();
+
+        User existingUser = new User();
+        existingUser.setEmail("dab@gmail.com");
+        existingUser.setUsername("Ric");
+        existingUser.setPassword("pwd%jfjfjDkkkk8");
+
+
+        userRepo.save(existingUser);
+
+
+        webTestClient
+                .post()
+                .uri("/users")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(userDTO)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.BAD_REQUEST)
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo(String.format("User with username %s already exists", userDTO.getUsername()));
+
+        userRepo.delete(existingUser);
+    }
+
 
     @Test
     void getAllUsers_ShouldSucceed(){
@@ -443,6 +479,73 @@ class UserControllerIntegrationTest {
 
         webTestClient.get()
                 .uri("/users/withoutPages")
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer",token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(UserDetails.class)
+                .value(users -> {
+                    assertEquals(19,users.size());
+                });
+    }
+    @Test
+    public void getUserByUserId_ShouldReturnUser() {
+        String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
+
+        webTestClient.get()
+                .uri("/users/{userId}" , VALID_USER_ID)
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer",token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.userId").isEqualTo(VALID_USER_ID);
+    }
+
+    @Test
+    public void getUserByUserId_WithNonExistentUser_ShouldReturnNotFound() {
+        String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
+        String nonExistentUserId = "nonExistentUserId";
+
+        webTestClient.get()
+                .uri("/users/{userId}", nonExistentUserId)
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer",token)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("No user with userId: " + nonExistentUserId);
+    }
+    @Test
+    public void getUsersByUsernameContaining_ShouldReturnUsers() {
+        String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/users/")
+                        .queryParam("username", "adm")
+                        .build()
+                )
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer",token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(UserDetails.class)
+                .value(users -> {
+                    assertEquals(0,users.size());
+                });
+    }
+
+    @Test
+    public void getAllUsersWithoutUsernameParam_ShouldReturnAllUsers() {
+        String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/users/")
+                        .queryParam("", "")
+                        .build()
+                )
                 .accept(MediaType.APPLICATION_JSON)
                 .cookie("Bearer",token)
                 .exchange()

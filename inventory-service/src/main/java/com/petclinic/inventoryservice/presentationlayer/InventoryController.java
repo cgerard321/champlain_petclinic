@@ -44,8 +44,10 @@ public class InventoryController {
     getProductsInInventoryByInventoryIdAndProductField(@PathVariable String inventoryId,
                                                        @RequestParam(required = false) String productName,
                                                        @RequestParam(required = false) Double productPrice,
-                                                       @RequestParam(required = false) Integer productQuantity){
-        return productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(inventoryId, productName, productPrice, productQuantity);
+                                                       @RequestParam(required = false) Integer productQuantity,
+                                                       @RequestParam(required = false) Double productSalePrice
+    ){
+        return productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(inventoryId, productName, productPrice, productQuantity, productSalePrice);
     }
 
     @GetMapping("/{inventoryId}/products/{productId}")

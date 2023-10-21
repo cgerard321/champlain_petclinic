@@ -70,13 +70,20 @@ public class UserServiceImpl implements UserService {
     public User createUser(@Valid UserIDLessRoleLessDTO userIDLessDTO) {
 
             final Optional<User> byEmail = userRepo.findByEmail(userIDLessDTO.getEmail());
+            final Optional<User> byUsername = userRepo.findByUsername(userIDLessDTO.getUsername());
 
             if (byEmail.isPresent()) {
                 throw new EmailAlreadyExistsException(
                         format("User with e-mail %s already exists", userIDLessDTO.getEmail()));
             }
 
+            if (byUsername.isPresent()) {
+                throw new IllegalArgumentException(
+                        format("User with username %s already exists", userIDLessDTO.getUsername()));
+            }
 
+
+// add exception when trying to create a user with existing username
 
             User user = userMapper.idLessRoleLessDTOToModel(userIDLessDTO);
 
@@ -433,4 +440,14 @@ public class UserServiceImpl implements UserService {
 
         return userMapper.modelToPasswordLessDTO(userRepo.save(existingUser));
     }
+    public User getUserByUserId(String userId) {
+        return userRepo.findOptionalUserByUserIdentifier_UserId(userId)
+                .orElseThrow(() -> new NotFoundException("No user with userId: " + userId));
+    }
+
+    @Override
+    public List<UserDetails> getUsersByUsernameContaining(String username) {
+        return userMapper.modelToDetailsList(userRepo.findByUsernameContaining(username));
+    }
+
 }

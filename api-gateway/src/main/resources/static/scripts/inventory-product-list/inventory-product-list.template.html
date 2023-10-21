@@ -21,30 +21,31 @@
     <tr>
         <td>
             <span>
-                <input type="text" ng-model="productName" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, productPrice)">
+                <input type="text" ng-model="productName" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, productPrice, productSalePrice)">
             </span>
         </td>
         <td></td>
         <td>
             <span>
-                <input type="number" min="0" ng-model="productQuantity" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, productPrice)">
+                <input type="number" min="0" ng-model="productQuantity" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, productPrice, productSalePrice)">
             </span>
         </td>
         <td>
             <span>
-                <input type="number" step="0.01" min="0" ng-model="productPrice" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, productPrice)">
+                <input type="number" step="0.01" min="0" ng-model="productPrice" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, productPrice, productSalePrice)">
             </span>
         </td>
+        <td></td>
         <td>
             <span>
-                <input type="number" step="0.01" min="0" ng-model="productSalePrice" ng-keyup="$event.keyCode == 13">
+                <input type="number" step="0.01" min="0" ng-model="productSalePrice" ng-keyup="$event.keyCode == 13 && searchProduct(productName, productQuantity, productPrice, productSalePrice)">
             </span>
         </td>
         <td></td>
         <td></td>
         <td>
             <span>
-                <input class="btn btn-success" type="button" value="Search" ng-click="searchProduct(productName, productQuantity, productPrice)">
+                <input class="btn btn-success" type="button" value="Search" ng-click="searchProduct(productName, productQuantity, productPrice, productSalePrice)">
             </span>
         </td>
     </tr>

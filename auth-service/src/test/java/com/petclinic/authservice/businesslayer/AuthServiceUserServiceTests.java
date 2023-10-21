@@ -190,6 +190,28 @@ public class AuthServiceUserServiceTests {
         assertEquals(2,userService.findAllWithoutPage().size());
     }
 
+    @Test
+    @DisplayName("Get user by user ID should succeed")
+    void getUserByUserId_ShouldSucceed() {
+        // Arrange
+        User user = User.builder()
+                .username(USER)
+                .userIdentifier(new UserIdentifier())
+                .email(EMAIL)
+                .password(passwordEncoder.encode(PASS))
+                .verified(true)
+                .build();
+        userRepo.save(user);
+
+        when(userRepo.findOptionalUserByUserIdentifier_UserId(any()))
+                .thenReturn(Optional.of(user));
+
+        // Act
+        User result = userService.getUserByUserId(user.getUserIdentifier().getUserId());
+
+        // Assert
+        assertEquals(user, result);
+    }
 
     @Test
     public void testUpdateResetPasswordToken_Success() {

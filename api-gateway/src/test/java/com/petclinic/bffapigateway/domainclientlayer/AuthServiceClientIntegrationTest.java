@@ -13,6 +13,7 @@ import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.*;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
@@ -327,6 +328,65 @@ public class AuthServiceClientIntegrationTest {
                 .expectNextCount(2)
                 .verifyComplete();
     }
+
+    @Test
+    @DisplayName("Should return user details when valid userId is provided")
+    void shouldReturnUserDetails_WhenValidUserIdIsProvided() throws IOException {
+        // Arrange
+        UserDetails expectedUser = UserDetails.builder()
+                .username("username")
+                .userId("userId")
+                .email("email")
+                .build();
+        String jwtToken = "jwtToken";
+        String userId = "userId";
+
+        server.enqueue(new MockResponse()
+                .setHeader("Content-Type", "application/json")
+                .setBody(new ObjectMapper().writeValueAsString(expectedUser)));
+
+        // Act
+        Mono<UserDetails> result = authServiceClient.getUserById(jwtToken, userId);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNext(expectedUser)
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("Given valid username, get user details")
+    void valid_getUsersByUsername() throws Exception {
+        UserDetails user1 = UserDetails.builder()
+                .username("user1")
+                .userId("userId1")
+                .email("email1")
+                .build();
+
+        UserDetails user2 = UserDetails.builder()
+                .username("user2")
+                .userId("userId2")
+                .email("email2")
+                .build();
+
+        String userDetailsJson = new ObjectMapper().writeValueAsString(List.of(user1, user2));
+
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(200)
+                .setBody(userDetailsJson);
+
+        server.enqueue(mockResponse);
+
+        Flux<UserDetails> userDetailsFlux = authServiceClient.getUsersByUsername("jwtToken", "usernames");
+
+        StepVerifier.create(userDetailsFlux)
+                .expectNext(user1)
+                .expectNext(user2)
+                .verifyComplete();
+    }
+
 
     @Test
     @DisplayName("Should verifyUser a token")

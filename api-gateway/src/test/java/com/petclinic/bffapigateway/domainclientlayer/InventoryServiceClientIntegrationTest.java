@@ -66,7 +66,7 @@ class InventoryServiceClientIntegrationTest {
 
         Flux<ProductResponseDTO> productResponseDTOFlux = inventoryServiceClient
                 .getProductsInInventoryByInventoryIdAndProductsField(productResponseDTO.getInventoryId(),
-                        productResponseDTO.getProductName(), productResponseDTO.getProductPrice(), productResponseDTO.getProductQuantity());
+                        productResponseDTO.getProductName(), productResponseDTO.getProductPrice(), productResponseDTO.getProductQuantity(), productResponseDTO.getProductSalePrice());
         StepVerifier.create(productResponseDTOFlux)
                 .expectNextCount(1)
                 .verifyComplete();

@@ -8,6 +8,13 @@ angular.module('visitList')
         self.cancelledVisits = []
         self.completedVisits = []
 
+
+        $scope.showUpcomingVisits = true; //initialize to true to show automatically
+        $scope.showConfirmedVisits = true;
+        $scope.showCancelledVisits = true;
+        $scope.showCompletedVisits = true;
+
+
         let url
         //sorted by order or most to least permissions
         if ($window.localStorage.getItem("roles").includes("ADMIN")){
@@ -123,6 +130,8 @@ angular.module('visitList')
             $scope.reverse = ($scope.propertyName === propertyName) ? !$scope.reverse : false
             $scope.propertyName = propertyName
         }
+
+
         function delayedReload() {
             let loadingIndicator = document.getElementById('loadingIndicator')
             loadingIndicator.style.display = 'block'
@@ -137,21 +146,21 @@ angular.module('visitList')
     }])
 
 //     // self.sortFetchedVisits = function() {
-    //     //     let currentDate = getCurrentDate()
-    //     //     $.each(self.visits, function(i, visit) {
-    //     //         let selectedVisitDate = Date.parse(visit.date);
-    //     //         if(selectedVisitDate >= currentDate) {
-    //     //             self.upcomingVisits.push(visit)
-    //     //         } else {
-    //     //             self.previousVisits.push(visit)
-    //     //         }
-    //     //     })
-    //     // }
-    //     // function getCurrentDate() {
-    //     //     let dateObj = new Date()
-    //     //     var dd = String(dateObj.getDate()).padStart(2, '0')
-    //     //     var mm = String(dateObj.getMonth() + 1).padStart(2, '0')
-    //     //     var yyyy = dateObj.getFullYear()
-    //     //     return Date.parse(yyyy + '-' + mm + '-' + dd)
-    //     // }
-    // }])
+//     //     let currentDate = getCurrentDate()
+//     //     $.each(self.visits, function(i, visit) {
+//     //         let selectedVisitDate = Date.parse(visit.date);
+//     //         if(selectedVisitDate >= currentDate) {
+//     //             self.upcomingVisits.push(visit)
+//     //         } else {
+//     //             self.previousVisits.push(visit)
+//     //         }
+//     //     })
+//     // }
+//     // function getCurrentDate() {
+//     //     let dateObj = new Date()
+//     //     var dd = String(dateObj.getDate()).padStart(2, '0')
+//     //     var mm = String(dateObj.getMonth() + 1).padStart(2, '0')
+//     //     var yyyy = dateObj.getFullYear()
+//     //     return Date.parse(yyyy + '-' + mm + '-' + dd)
+//     // }
+// }])

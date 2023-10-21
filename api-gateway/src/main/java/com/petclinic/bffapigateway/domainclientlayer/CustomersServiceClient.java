@@ -193,7 +193,7 @@ public class CustomersServiceClient {
 
     public Flux<PetResponseDTO> getPetsByOwnerId(final String ownerId) {
         return webClientBuilder.build().get()
-                .uri(customersServiceUrl + "/pet/owner/" + ownerId)
+                .uri(customersServiceUrl + "/pet/owner/" + ownerId +"/pets")
                 .retrieve()
                 .bodyToFlux(PetResponseDTO.class);
     }

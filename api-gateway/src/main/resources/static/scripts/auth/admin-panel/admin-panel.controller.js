@@ -21,6 +21,12 @@ angular.module('adminPanel')
             }
         }
 
+        $scope.startsWith = function (actual, expected) {
+            let  lowerStr = (actual + "").toLowerCase();
+            let lowerExpected = (expected + "").toLowerCase();
+            return lowerStr.indexOf(lowerExpected) === 0;
+        };
+
 
         $scope.removeUser = function (userid) {
             $http.delete('api/gateway/users/' + userid, {
@@ -35,9 +41,3 @@ angular.module('adminPanel')
         };
     }
     ]);
-
-
-
-
-
-

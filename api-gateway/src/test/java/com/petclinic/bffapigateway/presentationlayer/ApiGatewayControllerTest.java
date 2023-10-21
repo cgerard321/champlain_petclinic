@@ -3388,6 +3388,85 @@ private VetAverageRatingDTO buildVetAverageRatingDTO(){
                 .hasSize(2);
     }
 
+    @Test
+    public void getAllUsers_NoUsername_ShouldReturnAllUsers() {
+        UserDetails user1 = UserDetails.builder()
+                .userId("userId1")
+                .username("username1")
+                .email("email1")
+                .build();
+
+        UserDetails user2 = UserDetails.builder()
+                .userId("userId2")
+                .username("username2")
+                .email("email2")
+                .build();
+
+        when(authServiceClient.getUsers(anyString()))
+                .thenReturn(Flux.just(user1, user2));
+
+        client.get()
+                .uri("/api/gateway/users")
+                .cookie("Bearer", "validToken")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(UserDetails.class)
+                .hasSize(2);
+    }
+
+    @Test
+    public void getAllUsers_WithUsername_ShouldReturnUsersWithSpecificUsername() {
+        UserDetails user = UserDetails.builder()
+                .userId("userId")
+                .username("specificUsername")
+                .email("email")
+                .build();
+
+        UserDetails user2 = UserDetails.builder()
+                .userId("userId2")
+                .username("specificUsername2")
+                .email("email2")
+                .build();
+
+        when(authServiceClient.getUsersByUsername(anyString(), anyString()))
+                .thenReturn(Flux.just(user));
+
+        client.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/api/gateway/users")
+                        .queryParam("username", "specificUsername")
+                        .build())
+                .cookie("Bearer", "validToken")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(UserDetails.class)
+                .hasSize(1);
+    }
+
+    @Test
+    public void getUserById_ValidUserId_ShouldReturnUser() {
+        UserDetails userDetails = UserDetails.builder()
+                .userId("validUserId")
+                .username("validUsername")
+                .email("validEmail")
+                .build();
+
+        when(authServiceClient.getUserById(anyString(), anyString()))
+                .thenReturn(Mono.just(userDetails));
+
+        client.get()
+                .uri("/api/gateway/users/validUserId")
+                .cookie("Bearer", "validToken")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(UserDetails.class)
+                .value(u -> {
+                    assertNotNull(u);
+                    assertEquals(userDetails.getUserId(), u.getUserId());
+                    assertEquals(userDetails.getUsername(), u.getUsername());
+                    assertEquals(userDetails.getEmail(), u.getEmail());
+                });
+    }
     private EducationResponseDTO buildEducation(){
         return EducationResponseDTO.builder()
                 .educationId("1")
