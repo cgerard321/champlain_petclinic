@@ -1,9 +1,12 @@
 package com.petclinic.vet.presentationlayer;
 
+import com.petclinic.vet.dataaccesslayer.WorkHour;
 import com.petclinic.vet.dataaccesslayer.Workday;
 import com.petclinic.vet.servicelayer.SpecialtyDTO;
 import lombok.*;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 
