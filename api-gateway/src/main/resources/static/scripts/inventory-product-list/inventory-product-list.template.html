@@ -53,7 +53,7 @@
         <td>
             <span>
 
-                <a class="btn btn-success" type="button" ng-click="searchProduct(productName, productQuantity, productPrice)">
+                <a class="btn btn-success" type="button" ng-click="searchProduct(productName, productQuantity, productPrice)" title="Search">
                     <lord-icon
                             src="https://cdn.lordicon.com/fkdzyfle.json"
                             trigger="hover"
@@ -75,7 +75,7 @@
         <td><span>{{product.productSalePrice}}$</span></td>
 
         <td>
-            <a class="btn btn-info" href="#!/inventory/{{$ctrl.inventory.inventoryId}}/products/{{product.productId}}">
+            <a class="btn btn-info" href="#!/inventory/{{$ctrl.inventory.inventoryId}}/products/{{product.productId}}" title="Details">
                 <lord-icon
                         src="https://cdn.lordicon.com/jnzhohhs.json"
                         trigger="hover"
@@ -86,7 +86,7 @@
         </td>
 
 
-        <td><a ui-sref="updateProductInventory({inventoryId: $ctrl.inventoryProductList[0].inventoryId, productId: product.productId})">
+        <td><a ui-sref="updateProductInventory({inventoryId: $ctrl.inventoryProductList[0].inventoryId, productId: product.productId})" title="Edit">
             <button class="add-bundle-button btn btn-warning">
 
                 <lord-icon
@@ -98,7 +98,9 @@
             </button>
         </a></td>
 
-        <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteProduct(product)">
+
+
+        <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteProduct(product)" title="Delete">
             <lord-icon
                     src="https://cdn.lordicon.com/skkahier.json"
                     trigger="hover"

@@ -47,7 +47,7 @@
         <td></td>
         <td>
         <span>
-            <a class="btn btn-success" type="button" ng-click="searchInventory(inventoryName, inventoryType, inventoryDescription)">
+            <a class="btn btn-success" type="button" ng-click="searchInventory(inventoryName, inventoryType, inventoryDescription)" title="Search">
                 <lord-icon
                         src="https://cdn.lordicon.com/fkdzyfle.json"
                         trigger="hover"
@@ -72,7 +72,7 @@
 
     <td>
         <td>
-            <a class="btn btn-warning" ui-sref="updateInventory({inventoryId: inventory.inventoryId, method: 'edit'})" ng-click="$event.stopPropagation()">
+            <a class="btn btn-warning" ui-sref="updateInventory({inventoryId: inventory.inventoryId, method: 'edit'})" ng-click="$event.stopPropagation()" title="Edit">
 
                 <lord-icon
                         src="https://cdn.lordicon.com/wkvacbiw.json"
@@ -85,7 +85,7 @@
         </td>
 
         <td>
-            <a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteInventory(inventory); $event.stopPropagation()">
+            <a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteInventory(inventory); $event.stopPropagation()" title="Delete">
 
                 <lord-icon
                         src="https://cdn.lordicon.com/skkahier.json"
