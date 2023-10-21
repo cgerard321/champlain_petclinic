@@ -8,10 +8,7 @@ import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.*;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
-import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
-import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
-import com.petclinic.bffapigateway.dtos.Pets.PetType;
-import com.petclinic.bffapigateway.dtos.Pets.PetTypeResponseDTO;
+import com.petclinic.bffapigateway.dtos.Pets.*;
 import com.petclinic.bffapigateway.dtos.Vets.*;
 import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
@@ -942,4 +939,42 @@ public class BFFApiGatewayController {
                                 .map(addVisitsToOwner(n))
                 );*/
     }
+
+    @IsUserSpecific(idToMatch = {"petTypeId"}, bypassRoles = {Roles.ALL})
+    @GetMapping(value = "owners/petTypes/{petTypeId}")
+    public Mono<ResponseEntity<PetTypeResponseDTO>> getPetTypeById(final @PathVariable String petTypeId) {
+        return customersServiceClient.getPetTypeByPetTypeId(petTypeId)
+                .map(petTypeResponseDTO -> ResponseEntity.status(HttpStatus.OK).body(petTypeResponseDTO))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+
+                /*.flatMap(owner ->
+                        visitsServiceClient.getVisitsForPets(owner.getPetIds())
+                                .map(addVisitsToOwner(owner))
+                );*/
+    }
+    @IsUserSpecific(idToMatch = {"petTypeId"}, bypassRoles = {Roles.ADMIN})
+    @DeleteMapping(value = "owners/petTypes/{petTypeId}")
+    public Mono<ResponseEntity<PetTypeResponseDTO>> deletePetTypeByPetTypeId(final @PathVariable String petTypeId){
+        return customersServiceClient.deletePetType(petTypeId).then(Mono.just(ResponseEntity.noContent().<PetTypeResponseDTO>build()))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @IsUserSpecific(idToMatch = {"petTypeId"})
+    @PutMapping("owners/petTypes/{petTypeId}")
+    public Mono<ResponseEntity<PetTypeResponseDTO>> updatePetType(
+            @PathVariable String petTypeId,
+            @RequestBody Mono<PetTypeRequestDTO> petTypeRequestMono) {
+        return petTypeRequestMono.flatMap(petTypeRequestDTO ->
+                customersServiceClient.updatePetType(petTypeId, Mono.just(petTypeRequestDTO))
+                        .map(updatedOwner -> ResponseEntity.ok().body(updatedOwner))
+                        .defaultIfEmpty(ResponseEntity.notFound().build())
+        );
+    }
+
+
+
+
+
+
+
 }
