@@ -60,6 +60,22 @@ class ProductInventoryServiceUnitTest {
             .productQuantity(10)
             .productSalePrice(15.99)
             .build();
+    Product product1 = Product.builder()
+            .productId("123456")
+            .inventoryId("1")
+            .productName("Antibenzo")
+            .productDescription("Sedative Medication")
+            .productPrice(768.00)
+            .productQuantity(100)
+            .build();
+    Product product2 = Product.builder()
+            .productId("1234567")
+            .inventoryId("1")
+            .productName("ibuprofen")
+            .productDescription("Sedative Medication")
+            .productPrice(200.00)
+            .productQuantity(50)
+            .build();
     InventoryType inventoryType = InventoryType.builder()
             .id("1")
             .typeId("81445f86-5329-4df6-badc-8f230ee07e75")
@@ -80,6 +96,22 @@ class ProductInventoryServiceUnitTest {
             .productSalePrice(15.99)
             .build();
 
+    @Test
+    void getProductsInInventoryByInventoryIdAndProductFieldPagination_ShouldSucceed(){
+        Pageable pageable = PageRequest.of(0, 2);
+
+        when(productRepository.findAllProductsByInventoryId(product.getInventoryId()))
+                .thenReturn(Flux.just(product, product2, product1));
+
+        Flux<ProductResponseDTO> productResponseDTOMono = productInventoryService
+                .getProductsInInventoryByInventoryIdAndProductsFieldsPagination(product.getInventoryId(), null,null, null,
+                        pageable);
+        StepVerifier.create(productResponseDTOMono)
+                .expectNextMatches(prod -> prod.getProductId().equals(product.getProductId()))
+                .expectNextMatches(prod -> prod.getProductId().equals(product2.getProductId()))
+                .expectComplete()
+                .verify();
+    }
 
     @Test
     void getAllProductsByInventoryId_andProductName_andProductPrice_andProductQuantity_withValidFields_shouldSucceed(){

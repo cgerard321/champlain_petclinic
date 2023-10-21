@@ -78,7 +78,28 @@
         <td></td>
     </tr>
 </table>
-<a ui-sref="productNew({ inventoryId: $ctrl.inventoryProductList[0].inventoryId })">
+<div class="d-flex justify-content-center pb-3">
+    <nav aria-label="Page navigation example">
+        <ul class="pagination">
+            <li class="page-item">
+                <a class="page-link text-dark" aria-label="Previous" ng-click="$ctrl.previousPage()">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+
+            <li class="page-item">
+                <a class="page-link text-dark" disabled>Page-{{$ctrl.actualCurrentPageShown}}</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link text-dark" aria-label="Next" ng-click="$ctrl.nextPage()">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+<a ui-sref="productNew">
     <button class="add-bundle-button btn btn-success">Add Product</button>
 </a>
 <a ui-sref="inventories">
