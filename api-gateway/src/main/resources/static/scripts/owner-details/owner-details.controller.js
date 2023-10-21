@@ -12,7 +12,7 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
     vm.pets = [];
 
     // Function to get pet type name based on petTypeId
-   /* vm.getPetTypeName = function (petTypeId) {
+    vm.getPetTypeName = function (petTypeId) {
         switch (petTypeId) {
             case '1':
                 return 'Cat';
@@ -29,7 +29,7 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
             default:
                 return 'Unknown';
         }
-    };*/
+    };
 
 
     // Fetch owner data
@@ -47,13 +47,7 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
         .then(function (response) {
             // Split the response by newline characters to get individual pet objects
             var petResponses = response.data.split('\n');
-
             // Parse each pet response as JSON, remove the "data:" prefix, and trim any leading/trailing whitespace
-            var petObjects = petResponses.map(function (petResponse) {
-                // Remove the "data:" prefix and trim any leading/trailing whitespace
-                var trimmedResponse = petResponse.replace(/^data:/, '').trim();
-                console.log("Trimmed results: ", trimmedResponse);
-// Parse each pet response as JSON, remove the "data:" prefix, and trim any leading/trailing whitespace
             var petObjects = petResponses.map(function (petResponse) {
                 // Remove the "data:" prefix and trim any leading/trailing whitespace
                 var trimmedResponse = petResponse.replace(/^data:/, '').trim();
@@ -124,4 +118,4 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
                 // Handle the error appropriately
             });
     };
-}
+};

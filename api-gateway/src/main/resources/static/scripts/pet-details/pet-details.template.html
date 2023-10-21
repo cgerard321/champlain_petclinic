@@ -32,7 +32,7 @@
                             <label class="inputLabel">Name</label>
                         </div>
                         <div class="d-flex flex-column">
-                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.pet.birthDate}}" readonly disabled/>
+                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.pet.birthDate | date:'yyyy-MM-dd'}}" readonly disabled/>
                             <label class="inputLabel">Birthday</label>
                         </div>
                     </div>
@@ -50,19 +50,16 @@
 
                     <div class="d-flex flex-row gap-3 justify-content-end">
                         <div>
-                            <a style="color: rgba(0,0,0,0.5);" class="btn btn-light" ui-sref="ownerEdit({ownerId: $ctrl.owner.ownerId, method: 'edit'})">Edit</a>
+                            <a style="color: rgba(0,0,0,0.5);" class="btn btn-light" ui-sref="editPet({ownerId: $ctrl.pet.ownerId, petId: pet.petId, method: 'edit'})">Edit Pet</a><!-- Add more pet details as needed -->
+
                         </div>
                         <div>
                             <a style="color: rgba(0,0,0,0.5);" class="btn btn-light" ui-sref="ownerEdit({ownerId: $ctrl.owner.ownerId, method: 'delete'})">Delete</a>
                         </div>
                     </div>
-
                 </form>
-
             </div>
-
         </div>
-
         </div>
 
     </div>
