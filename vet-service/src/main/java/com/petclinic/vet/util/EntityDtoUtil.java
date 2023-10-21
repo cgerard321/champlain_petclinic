@@ -74,6 +74,19 @@ public class EntityDtoUtil {
         return vet;
     }
 
+    public static Map<Workday, List<WorkHour>> deepCopyMap(Map<Workday, List<WorkHour>> originalMap) {
+        Map<Workday, List<WorkHour>> copy = new HashMap<>();
+
+        for (Map.Entry<Workday, List<WorkHour>> entry : originalMap.entrySet()) {
+            Workday key = entry.getKey();
+            List<WorkHour> value = new ArrayList<>(entry.getValue()); // Create a copy of the list
+
+            copy.put(key, value);
+        }
+
+        return copy;
+    }
+
     public static String generateVetId() {
         return UUID.randomUUID().toString();
     }
