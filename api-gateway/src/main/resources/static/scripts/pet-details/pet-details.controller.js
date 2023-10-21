@@ -89,13 +89,15 @@ function PetDetailsController($http, $state, $stateParams, $scope, $timeout, $q)
                   });
                  */
 
+
                 $scope.$applyAsync();
-                $state.go(ownerDetails)
+
                 // Handle the success appropriately
             }).catch(function (error) {
             console.error("Error deleting pet:", error);
             // Handle the error appropriately
         });
+        $state.go('ownerDetails', {ownerId: vm.pet.ownerId});
     };
 
 

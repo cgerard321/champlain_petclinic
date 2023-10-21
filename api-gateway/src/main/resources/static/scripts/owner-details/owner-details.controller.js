@@ -20,10 +20,6 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
         .then(function (resp) {
             vm.owner = resp.data;
             console.log(vm.owner);
-
-            vm.owner.pets.forEach(function(pet) {
-                pet.isActive = pet.isActive === "true";
-            });
         })
         .catch(function (error) {
             console.error('Error fetching owner data:', error);
@@ -44,6 +40,8 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
                 // Check if the trimmed response is empty
                 if (!trimmedResponse) {
                     return null; // Skip empty responses
+                } else {
+                    vm.pets = trimmedResponse;
                 }
 
                 try {
@@ -78,33 +76,5 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
             console.error('Error fetching pet data:', error);
         });
 
-
-    vm.deletePet = function (petId) {
-        var config = {
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        };
-
-        $http.delete('api/gateway/pets/' + petId, config)
-            .then(function (resp) {
-                console.log("Pet deleted successfully");
-
-                /*  $http.get('api/gateway/owners/' + $stateParams.ownerId).then(function (resp) {
-                      self.owner = resp.data;
-                  });
-                 */
-
-                vm.owner.pets = vm.owner.pets.filter(function(pet) {
-                    return pet.petId !== petId;
-                });
-
-                $scope.$applyAsync();
-                // Handle the success appropriately
-            }).catch(function (error) {
-            console.error("Error deleting pet:", error);
-            // Handle the error appropriately
-        });
-    };
 }
 
