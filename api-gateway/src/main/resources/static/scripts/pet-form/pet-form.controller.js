@@ -41,26 +41,31 @@ angular.module('petForm')
 
         // Function to submit the form
         self.submit = function () {
-            var data = {
-                petId: self.pet.petId,
-                name: self.pet.name,
-                birthDate: new Date(self.pet.birthDate).toISOString(),
-                ownerId: self.pet.ownerId,
-                petTypeId: self.pet.petTypeId
-            };
+            if (confirm("Are you sure you want to submit this form with the following details?\n\n" +
+                "Pet Name: " + self.pet.name + "\n" +
+                "Pet Birth Date: " + self.pet.birthDate + "\n" +
+                "Pet Type ID: " + self.pet.petTypeId)) {
+                var data = {
+                    petId: self.pet.petId,
+                    name: self.pet.name,
+                    birthDate: new Date(self.pet.birthDate).toISOString(),
+                    ownerId: self.pet.ownerId,
+                    petTypeId: self.pet.petTypeId
+                };
 
-            var req;
+                var req;
 
-            req = $http.put("api/gateway/pets/" + petId, data);
+                req = $http.put("api/gateway/pets/" + petId, data);
 
-            req.then(function () {
-                $state.go('ownerDetails', { ownerId: ownerId });
-            }).catch(function (response) { // Changed "function (response)" to ".catch(function (response))"
-                var error = response.data;
-                error.errors = error.errors || [];
-                alert(error.error + "\r\n" + error.errors.map(function (e) {
-                    return e.field + ": " + e.defaultMessage;
-                }).join("\r\n"));
-            });
+                req.then(function () {
+                    $state.go('ownerDetails', {ownerId: ownerId});
+                }).catch(function (response) {
+                    var error = response.data;
+                    error.errors = error.errors || [];
+                    alert(error.error + "\r\n" + error.errors.map(function (e) {
+                        return e.field + ": " + e.defaultMessage;
+                    }).join("\r\n"));
+                });
+            }
         };
     }]);

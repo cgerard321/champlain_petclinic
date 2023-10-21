@@ -31,15 +31,14 @@
             <select class="form-control" ng-model="$ctrl.pet.petTypeId" name="type" ng-options="t.id as t.name for t in $ctrl.types track by t.id" ng-disabled="$ctrl.checked"></select>
         </div>-->
         <div class="pet col-sm-6">
-            <select class="form-control" ng-model="$ctrl.pet.type" name="type" ng-options="t as t.name for t in $ctrl.types track by t.id" ng-disabled="$ctrl.checked"></select>
-            <!--<select class="form-control" ng-model="$ctrl.pet.petTypeId" name="type" ng-disabled="$ctrl.checked">
+            <select class="form-control" ng-model="$ctrl.pet.petTypeId" name="type" ng-disabled="$ctrl.checked">
                 <option value="1">Cat</option>
                 <option value="2">Dog</option>
                 <option value="3">Lizard</option>
                 <option value="4">Snake</option>
                 <option value="5">Bird</option>
                 <option value="6">Hamster</option>
-            </select>-->
+            </select>
         </div>
     </div>
     <div class="form-group formColor">
