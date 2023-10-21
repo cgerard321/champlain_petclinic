@@ -87,12 +87,6 @@
                                 <p>Pet Id: {{pet.petId}}</p>
                                 <!-- Add more pet details as needed -->
                             </div>
-                            <div class="border-5 rounded">
-                                <input type="checkbox" ng-model="pet.isActive" ng-click="$ctrl.toggleActiveStatus(pet.petId)">
-
-                                <label ng-if="pet.isActive" style="color: rgba(0,0,0,0.5);">Deactivate Pet</label>
-                                <label ng-if="!pet.isActive" style="color: rgba(0,0,0,0.5);">Activate Pet</label>
-                            </div>
 
 
                             <div class="border-5 rounded">

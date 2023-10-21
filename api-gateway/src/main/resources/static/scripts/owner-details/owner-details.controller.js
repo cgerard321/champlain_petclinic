@@ -79,53 +79,6 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
         });
 
 
-
-    // Toggle pet's active status
-    vm.toggleActiveStatus = function (petId) {
-        return $http.get('api/gateway/pets/' + petId + '?_=' + new Date().getTime(), { headers: { 'Cache-Control': 'no-cache' } })
-            .then(function (resp) {
-                console.log("Pet id is " + petId);
-                console.log(resp.data);
-                vm.pet = resp.data;
-                console.log("Pet id is " + vm.pet.petId);
-                console.log(vm.pet);
-                console.log("=====================================");
-                console.log(resp.data);
-                console.log("Active status before is:" + vm.pet.isActive);
-                vm.pet.isActive = vm.pet.isActive === "true" ? "false" : "true";
-                console.log("Active status after is:" + vm.pet.isActive);
-
-                return $http.patch('api/gateway/pet/' + petId, {
-                    isActive: vm.pet.isActive
-                }, { headers: { 'Cache-Control': 'no-cache' } });
-            })
-            .then(function (resp) {
-                console.log("Pet active status updated successfully");
-                vm.pet = resp.data;
-                // Schedule a function to be executed during the next digest cycle
-                $scope.$evalAsync();
-            })
-            .catch(function (error) {
-                console.error("Error updating pet active status:", error);
-                // Handle the error appropriately
-            });
-    };
-
-
-
-    // Watch the pet.isActive property
-    $scope.$watch('pet.isActive', function(newVal, oldVal) {
-        if (newVal !== oldVal) {
-            // The pet.isActive property has changed, update the UI
-            $scope.$apply();
-        }
-    });
-
-
-
-
-
-
     vm.deletePet = function (petId) {
         var config = {
             headers: {
