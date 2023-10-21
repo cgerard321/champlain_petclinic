@@ -26,10 +26,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-import java.util.Base64;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -648,7 +645,7 @@ class UserControllerIntegrationTest {
     @Test
     void updateUserRole_validUserId() {
         RolesChangeRequestDTO updatedUser = RolesChangeRequestDTO.builder()
-                .roles(Collections.singletonList("OWNER"))
+                .roles(Collections.singleton("OWNER"))
                 .build();
         String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
 
@@ -666,16 +663,19 @@ class UserControllerIntegrationTest {
                 .value(dto -> {
                     assertNotNull(dto);
                     List<String> actualRoleNames = dto.getRoles().stream()
-                            .map(Role::getName)  // Assuming the Role object has a getName() method
+                            .map(Role::getName)
                             .toList();
-                    assertEquals(updatedUser.getRoles(), actualRoleNames);
+
+                    Set<String> actualRolesSet = new HashSet<>(actualRoleNames);
+
+                    assertEquals(updatedUser.getRoles(), actualRolesSet);
                 });
     }
 
     @Test
     void updateUserRole_InvalidUserId() {
         RolesChangeRequestDTO updatedUser = RolesChangeRequestDTO.builder()
-                .roles(Collections.singletonList("OWNER"))
+                .roles(Collections.singleton("OWNER"))
                 .build();
         String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
         String invalidUserId = "invalidId";
@@ -694,7 +694,7 @@ class UserControllerIntegrationTest {
     @Test
     void updateUserRole_NoCookie() {
         RolesChangeRequestDTO updatedUser = RolesChangeRequestDTO.builder()
-                .roles(Collections.singletonList("OWNER"))
+                .roles(Collections.singleton("OWNER"))
                 .build();
 
         webTestClient
@@ -711,7 +711,7 @@ class UserControllerIntegrationTest {
     void updateUserRole_cannotChangeOwnRoles() {
         String userId = "validUserId";
         RolesChangeRequestDTO updatedUser = RolesChangeRequestDTO.builder()
-                .roles(Collections.singletonList("OWNER"))
+                .roles(Collections.singleton("OWNER"))
                 .build();
 
         String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
@@ -730,7 +730,7 @@ class UserControllerIntegrationTest {
     @Test
     void updateUserRole_invalidRole() {
         RolesChangeRequestDTO updatedUser = RolesChangeRequestDTO.builder()
-                .roles(Collections.singletonList("NOT_OWNER"))
+                .roles(Collections.singleton("NOT_OWNER"))
                 .build();
         String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
 
