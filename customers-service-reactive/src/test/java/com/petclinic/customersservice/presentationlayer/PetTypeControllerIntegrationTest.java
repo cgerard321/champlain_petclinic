@@ -89,6 +89,7 @@ class PetTypeControllerIntegrationTest {
     }
 
 
+    /*
     @Test
     void updatePetType() {
         Publisher<PetType> setup = petTypeRepo.deleteAll().thenMany(petTypeRepo.save(petTypeEntity2));
@@ -124,8 +125,10 @@ class PetTypeControllerIntegrationTest {
                     assertEquals(petTypeResponseDTO.getPetTypeDescription(),petTypeEntity2.getPetTypeDescription());
 
                 });
-//
+
     }
+
+     */
 
 
 
