@@ -8,9 +8,8 @@ function PetDetailsController($http, $state, $stateParams, $scope, $timeout, $q)
 
     // Initialize properties
     vm.pet = {};
-    vm.owner = {};
 
-    /*vm.getPetTypeName = function (petTypeId) {
+    vm.getPetTypeName = function (petTypeId) {
         switch (petTypeId) {
             case '1':
                 return 'Cat';
@@ -27,7 +26,7 @@ function PetDetailsController($http, $state, $stateParams, $scope, $timeout, $q)
             default:
                 return 'Unknown';
         }
-    };*/
+    };
     // Fetch owner data
     $http.get('api/gateway/pets/' + $stateParams.petId)
         .then(function (resp) {

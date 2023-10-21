@@ -12,24 +12,7 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
     vm.pets = [];
 
     // Function to get pet type name based on petTypeId
-    vm.getPetTypeName = function (petTypeId) {
-        switch (petTypeId) {
-            case '1':
-                return 'Cat';
-            case '2':
-                return 'Dog';
-            case '3':
-                return 'Lizard';
-            case '4':
-                return 'Snake';
-            case '5':
-                return 'Bird';
-            case '6':
-                return 'Hamster';
-            default:
-                return 'Unknown';
-        }
-    };
+
 
 
     // Fetch owner data
