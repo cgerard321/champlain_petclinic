@@ -61,4 +61,19 @@ class GlobalControllerExceptionHandlerTest {
         assertEquals("/api/resource", httpErrorInfo.getPath());
         assertEquals("Bad Request", httpErrorInfo.getMessage());
     }
+
+    @Test
+    void handleDuplicateTimeException_ReturnsHttpErrorInfo() {
+        // Arrange
+        DuplicateTimeException duplicateTimeException = new DuplicateTimeException("A visit with the same time and practitioner already exists.");
+        ServerHttpRequest serverHttpRequest = MockServerHttpRequest.get("/api/visits").build();
+
+        // Act
+        HttpErrorInfo httpErrorInfo = exceptionHandler.handleDuplicateTimeException(serverHttpRequest, duplicateTimeException);
+
+        // Assert
+        assertEquals(HttpStatus.CONFLICT, httpErrorInfo.getHttpStatus());
+        assertEquals("/api/visits", httpErrorInfo.getPath());
+        assertEquals("A visit with the same time and practitioner already exists.", httpErrorInfo.getMessage());
+    }
 }
