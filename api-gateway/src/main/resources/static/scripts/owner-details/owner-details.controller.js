@@ -155,5 +155,3 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
     };
 }
 
-};
-
