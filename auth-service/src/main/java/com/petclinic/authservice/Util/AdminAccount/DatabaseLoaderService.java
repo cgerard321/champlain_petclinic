@@ -33,6 +33,19 @@ public class DatabaseLoaderService implements CommandLineRunner {
         roleRepo.save(Role.builder().name("INVENTORY_MANAGER").build());
 
 
+        Set<Role> manager = new HashSet<>();
+        manager.add(roleRepo.findById(4L).get());
+        User inventoryManager = User.builder()
+                .username("InventoryManager")
+                .userIdentifier(new UserIdentifier())
+                .roles(manager)
+                .email("inventory@email.com")
+                .password(passwordEncoder.encode("pwd"))
+                .verified(true)
+                .build();
+
+        userRepo.save(inventoryManager);
+
         Set<Role> roles = new HashSet<>();
         roles.add(roleRepo.findById(1L).get());
         User admin = User.builder()
@@ -49,16 +62,6 @@ public class DatabaseLoaderService implements CommandLineRunner {
 
         Set<Role> roles2 = new HashSet<>();
         roles2.add(roleRepo.findById(2L).get());
-        User vet = User.builder()
-                .username("Vet")
-                .userIdentifier(new UserIdentifier())
-                .roles(roles2)
-                .email("dylan.brassard@outlook.com")
-                .password(passwordEncoder.encode("pwd"))
-                .verified(true)
-                .build();
-
-        userRepo.save(vet);
 
         Set<Role> owners = new HashSet<>();
         owners.add(roleRepo.findById(3L).get());
@@ -218,7 +221,7 @@ public class DatabaseLoaderService implements CommandLineRunner {
                 .verified(true)
                 .build();
 
-        userRepo.saveAll(List.of(vet, vet1, vet2, vet3, vet4, vet5, vet6, vet7));
+        userRepo.saveAll(List.of(vet1, vet2, vet3, vet4, vet5, vet6, vet7));
 
         userRepo.saveAll(List.of(owner1, owner2, owner3, owner4, owner5, owner6, owner7, owner8, owner9, owner10));
     }

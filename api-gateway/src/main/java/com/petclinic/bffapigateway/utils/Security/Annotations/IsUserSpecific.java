@@ -14,24 +14,25 @@ import java.lang.annotation.*;
  * <p>
  * When present, this annotation will require a valid token and will check if the user id in the token matches the id specified in the annotation.
  * You specify which fields need to match in the idToMatch field.
- * This means that if you specify the idToMatch field as {"ownerId"} it will match the path variable called ownerId and the JWS id field.
- * You can add as many fields as you want to the idToMatch field, this will check if the JWS id matched any of the path variables.
+ * This means that if you specify the idToMatch field as {"ownerId"} it will match the path variable called ownerId and the JWT id field.
+ * You can add as many fields as you want to the idToMatch field, this will check if the JWT id matched any of the path variables.
  *
  * </p>
- *
+ * <br>
  * <p>
  *  The bypass role field is used to specify which roles can bypass this annotation.
  *  This means if Vet is specified, any vet can access this endpoint, but any owners will need to be the concerned owner.
  *  If Admin is specified, any admin can access this endpoint, but any owners or vets will need to be the concerned owner.
+ *  <strong>If an empty array is specified, only the concerned owner can access this endpoint and no role will bypass this requirement.</strong>
  * </p>
- *
+ * <br>
  * <p>
  *   WARNING : If you specify ANONYMOUS or ALL this annotation is redundant.
  * </p>
  *
  * <p>
  *  If no roles are specified ADMIN is default.
- *  </p>
+ * </p>
  * @author Dylan Brassard
  * @since 2023-09-27
  * @see SecuredEndpoint

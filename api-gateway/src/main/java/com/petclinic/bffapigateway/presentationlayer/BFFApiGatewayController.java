@@ -715,10 +715,6 @@ public class BFFApiGatewayController {
      **/
 
 
-
-    /**
-     * Beginning of Auth Methods
-     **/
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping("/verification/{token}")
     public Mono<ResponseEntity<UserDetails>> verifyUser(@PathVariable final String token) {
@@ -761,7 +757,7 @@ public class BFFApiGatewayController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-    
+
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "users/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<UserDetails> getUserById(@PathVariable String userId, @CookieValue("Bearer") String auth) {
@@ -785,6 +781,8 @@ public class BFFApiGatewayController {
     }
 
 
+
+
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @PostMapping("/users/reset_password")
     public Mono<ResponseEntity<Void>> processResetPassword(@RequestBody @Valid Mono<UserPasswordAndTokenRequestModel> resetRequest) {
@@ -794,6 +792,13 @@ public class BFFApiGatewayController {
     /**
      * End of Auth Methods
      **/
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @PostMapping(value = "/users/inventoryManager")
+    public Mono<ResponseEntity<UserPasswordLessDTO>> createInventoryManager(@RequestBody @Valid Mono<RegisterInventoryManager> model) {
+        return authServiceClient.createInventoryMangerUser(model).map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
 
     //Start of Inventory Methods
     @GetMapping("/inventory/{inventoryId}/products-pagination")
@@ -835,6 +840,7 @@ public class BFFApiGatewayController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER,Roles.VET})
+
     @GetMapping(value ="inventory/{inventoryId}")
     public Mono<ResponseEntity<InventoryResponseDTO>> getInventoryById(@PathVariable String inventoryId){
         return inventoryServiceClient.getInventoryById(inventoryId)
@@ -858,6 +864,7 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
 
     }
+
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER})
@@ -918,6 +925,7 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER})
     @PostMapping(value = "inventory/type")
     public Mono<ResponseEntity<InventoryTypeResponseDTO>> addInventoryType(@RequestBody InventoryTypeRequestDTO inventoryTypeRequestDTO){
@@ -925,12 +933,14 @@ public class BFFApiGatewayController {
                 .map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER, Roles.VET})
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER})
+
     @GetMapping(value = "inventory/type")
     public Flux<InventoryTypeResponseDTO> getAllInventoryTypes(){
         return inventoryServiceClient.getAllInventoryTypes();
     }
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER})
+
     @DeleteMapping(value = "inventory/{inventoryId}")
     public Mono<Void> deleteInventoryByInventoryId(@PathVariable String inventoryId) {
         return inventoryServiceClient.deleteInventoryByInventoryId(inventoryId);
