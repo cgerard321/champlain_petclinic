@@ -7,6 +7,7 @@ import com.petclinic.visits.visitsservicenew.DomainClientLayer.PetsClient;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetsClient;
 import com.petclinic.visits.visitsservicenew.Exceptions.BadRequestException;
+import com.petclinic.visits.visitsservicenew.Exceptions.DuplicateTimeException;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
@@ -83,9 +84,24 @@ public class VisitServiceImpl implements VisitService {
                 .map(EntityDtoUtil::toVisitEntity)
                 .doOnNext(x -> x.setVisitId(EntityDtoUtil.generateVisitIdString()))
                 .doOnNext(v -> System.out.println("Entity Date: " + v.getVisitDate())) // Debugging
-                .flatMap((repo::insert))
-                .map(EntityDtoUtil::toVisitResponseDTO);
+                .flatMap(visit ->
+                        repo.findByVisitDateAndPractitionerId(visit.getVisitDate(), visit.getPractitionerId()) // FindVisits method in repository
+                                .collectList()
+                                .flatMap(existingVisits -> {
+                                    if(existingVisits.isEmpty()) {// If there are no existing visits
+                                        return repo.insert(visit); // Insert the visit
+                                    } else {
+                                        //return exception if a visits already exists at the specific day and time for a specific practitioner
+                                        return Mono.error(new DuplicateTimeException("A visit with the same time and practitioner already exists."));
+                                    }
+                                })
+                )
+                .map(EntityDtoUtil::toVisitResponseDTO); // Convert the saved Visit entity to a DTO
     }
+
+
+
+
 
     @Override
     public Mono<Void> deleteVisit(String visitId) {
