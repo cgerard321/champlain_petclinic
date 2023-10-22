@@ -49,11 +49,24 @@
             </span>
         </td>
         <td></td>
-        <td></td>
+        <td>
+             <span>
+
+                <a class="btn btn-success" type="button" ng-click="clearQueries()" title="Clear">
+                    <lord-icon
+                            src="https://cdn.lordicon.com/zxvuvcnc.json"
+                            trigger="hover"
+                            style="width:32px;height:32px">
+                    </lord-icon>
+                </a>
+
+            </span>
+
+        </td>
         <td>
             <span>
 
-                <a class="btn btn-success" type="button" ng-click="searchProduct(productName, productQuantity, productPrice)" title="Search">
+                <a class="btn btn-success" type="button" ng-click="searchProduct(productName, productQuantity, productPrice, productSalePrice)" title="Search">
                     <lord-icon
                             src="https://cdn.lordicon.com/fkdzyfle.json"
                             trigger="hover"
@@ -100,13 +113,15 @@
 
 
 
-        <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteProduct(product)" title="Delete">
+        <td><a ng-if="!product.isTemporarilyDeleted" class="btn btn-danger" href="javascript:void(0)" ng-click="deleteProduct(product); $event.stopPropagation()" title="Delete">
             <lord-icon
                     src="https://cdn.lordicon.com/skkahier.json"
                     trigger="hover"
                     style="width:32px;height:32px">
             </lord-icon>
-        </a></td>
+            <a ng-if="product.isTemporarilyDeleted"  class="btn btn-info" href="javascript:void(0)" ng-click="undoDelete(product); $event.stopPropagation()">Restore</a>
+        </a>
+        </td>
 
         <td></td>
     </tr>
@@ -132,6 +147,9 @@
     </nav>
 </div>
 
+<div id="notification" style="display: none; position: fixed; bottom: 10px; right: 10px; background-color: #4CAF50; color: white; padding: 10px; border-radius: 5px;">
+    Notification Text Here
+</div>
 <a ui-sref="productNew">
     <button class="add-bundle-button btn btn-success">Add Product</button>
 </a>
