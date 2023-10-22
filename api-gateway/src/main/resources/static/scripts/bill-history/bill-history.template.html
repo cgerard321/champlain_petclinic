@@ -41,7 +41,7 @@
         <td><a href="http://localhost:8080/#!/bills/details/{{paidBill.billId}}/owner/{{paidBill.customerId}}">{{paidBill.billId}}</a></td>
         <td>{{paidBill.customerId}}</td>
         <td>{{ getCustomerDetails(paidBill.customerId) }}</td>
-        <td><a href="http://localhost:8080/#!/owners/details/{{paidBill.customerId}}">Owner details</a></td>
+    <td><a href="http://localhost:8080/#!/owners/details/{{ getOwnerUUIDByCustomerId(paidBill.customerId) }}">Owner details</a></td>
         <td>{{paidBill.vetId}}</td>
         <td>{{ getVetDetails(paidBill.vetId) }}</td>
         <td>{{paidBill.visitType}}</td>
@@ -80,7 +80,7 @@
         <td><a href="http://localhost:8080/#!/bills/details/{{unpaidBill.billId}}/owner/{{unpaidBill.customerId}}">{{unpaidBill.billId}}</a></td>
         <td>{{unpaidBill.customerId}}</td>
         <td>{{ getCustomerDetails(unpaidBill.customerId) }}</td>
-        <td><a href="http://localhost:8080/#!/owners/details/{{unpaidBill.customerId}}">Owner details</a></td>
+    <td><a href="http://localhost:8080/#!/owners/details/{{ getOwnerUUIDByCustomerId(unpaidBill.customerId) }}">Owner details</a></td>
         <td>{{unpaidBill.vetId}}</td>
         <td>{{ getVetDetails(unpaidBill.vetId) }}</td>
         <td>{{unpaidBill.visitType}}</td>
@@ -120,7 +120,7 @@
         <td><a href="http://localhost:8080/#!/bills/details/{{overdueBill.billId}}/owner/{{overdueBill.customerId}}">{{overdueBill.billId}}</a></td>
         <td>{{overdueBill.customerId}}</td>
         <td>{{ getCustomerDetails(overdueBill.customerId) }}</td>
-        <td><a href="http://localhost:8080/#!/owners/details/{{overdueBill.customerId}}">Owner details</a></td>
+    <td><a href="http://localhost:8080/#!/owners/details/{{ getOwnerUUIDByCustomerId(overdueBill.customerId) }}">Owner details</a></td>
         <td>{{overdueBill.vetId}}</td>
         <td>{{ getVetDetails(overdueBill.vetId) }}</td>
         <td>{{overdueBill.visitType}}</td>
@@ -160,9 +160,11 @@
         <td>{{bill.customerId}}</td>
         <td>{{ getCustomerDetails(bill.customerId) }}</td>
 
-        <td><a href="http://localhost:8080/#!/owners/details/{{bill.customerId}}">Owner details</a></td>
+    <td><a href="http://localhost:8080/#!/owners/details/{{ getOwnerUUIDByCustomerId(bill.customerId) }}">Owner details</a></td>
+
+<!--    <td><a href="http://localhost:8080/#!/owners/details/{{bill.customerId}}">Owner details</a></td>-->
         <td>{{bill.vetId}}</td>
-<!--    <td>{{ getVetDetails(bill.vetId) }}</td>-->
+    <td>{{ getVetDetails(bill.vetId) }}</td>
         <td>{{bill.visitType}}</td>
         <td>{{bill.amount}}</td>
         <td>{{bill.billStatus}}</td>

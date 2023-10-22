@@ -9,25 +9,105 @@ angular.module('billHistory')
         self.unpaidBills = []
         self.overdueBills = []
 
-        // self.owners = [
-        //     { ownerId: '1', firstName: 'George', lastName: 'Franklin' },
-        //     { ownerId: '2', firstName: 'Betty', lastName: 'Davis' },
-        //     { ownerId: '3', firstName: 'Eduardo', lastName: 'Rodriguez' },
-        //     { ownerId: '4', firstName: 'Harold', lastName: 'Davis' },
-        //     { ownerId: '5', firstName: 'Peter', lastName: 'McTavish' },
-        //     { ownerId: '6', firstName: 'Jean', lastName: 'Coleman' },
-        //     { ownerId: '7', firstName: 'Jeff', lastName: 'Black' },
-        //     { ownerId: '8', firstName: 'Maria', lastName: 'Escobito' },
-        //     { ownerId: '9', firstName: 'David', lastName: 'Schroeder' },
-        //     { ownerId: '10', firstName: 'Carlos', lastName: 'Esteban' }
-        // ];
 
-        // self.customerNameMap = {};
+        self.owners = [
+            { ownerId: '1', firstName: 'George', lastName: 'Franklin' },
+            { ownerId: '2', firstName: 'Betty', lastName: 'Davis' },
+            { ownerId: '3', firstName: 'Eduardo', lastName: 'Rodriguez' },
+            { ownerId: '4', firstName: 'Harold', lastName: 'Davis' },
+            { ownerId: '5', firstName: 'Peter', lastName: 'McTavish' },
+            { ownerId: '6', firstName: 'Jean', lastName: 'Coleman' },
+            { ownerId: '7', firstName: 'Jeff', lastName: 'Black' },
+            { ownerId: '8', firstName: 'Maria', lastName: 'Escobito' },
+            { ownerId: '9', firstName: 'David', lastName: 'Schroeder' },
+            { ownerId: '10', firstName: 'Carlos', lastName: 'Esteban' }
+        ];
 
-        // self.owners.forEach(function (customer) {
-        //     // The customer's ownerId is used as the key, and their full name as the value
-        //     self.customerNameMap[customer.ownerId] = customer.firstName + ' ' + customer.lastName;
-        // });
+        $http.get('api/gateway/vets').then(function (resp) {
+            self.vetList = resp.data;
+            arr = resp.data;
+            console.log(resp)
+        });
+
+        $http.get('api/gateway/owners').then(function (owners) {
+            self.ownersInfoArray = owners.data;
+            // console.log(self.ownersInfoArray)
+            self.ownersInfoArray.forEach(function(owner) {
+                console.log(owner.ownerId);
+            });
+        });
+        // self.getOwnerUUIDByName = function(customerId) {
+        //     const owner = self.ownersInfoArray.find(function(owner) {
+        //         return owner.firstName === firstName && owner.lastName === lastName;
+        //     });
+        //
+        //     if (owner) {
+        //         return owner.ownerId;
+        //     }
+        //
+        //     return 'unknown-uuid';
+        // };
+
+        $scope.getOwnerUUIDByCustomerId = function(customerId) {
+            let foundOwner;
+
+            // Iterate through self.owners to find a matching customerId
+            self.owners.forEach(function(owner) {
+                console.log(customerId);
+                console.log(owner.ownerId);
+                if (owner.ownerId === customerId.toString()) {
+                    foundOwner = owner;
+                }
+            });
+
+            if (foundOwner) {
+                // Get the first and last name from the foundOwner
+                const firstName = foundOwner.firstName;
+                const lastName = foundOwner.lastName;
+
+                console.log('Found Owner:', foundOwner);
+                console.log('First Name:', firstName);
+                console.log('Last Name:', lastName);
+
+                // Find the corresponding owner in self.ownersInfoArray
+                const ownerInfo = self.ownersInfoArray.find(function(owner) {
+                    return owner.firstName === firstName && owner.lastName === lastName;
+                });
+
+                console.log('Owner Info:', ownerInfo);
+
+                if (ownerInfo) {
+                    return ownerInfo.ownerId;
+                }
+            }
+
+            return 'Unknown Owner';
+        };
+
+
+
+
+        self.getOwnerInfoByCustomerId = function (customerId) {
+            const owner = self.ownerIdToInfoMap[customerId];
+            return owner || {};
+        };
+
+        self.getOwnerFullName = function (customerId) {
+            const owner = self.ownerIdToInfoMap[customerId];
+            if (owner) {
+                return owner.firstName + ' ' + owner.lastName;
+            }
+            return 'Unknown Owner';
+        };
+
+        self.customerNameMap = {};
+
+        self.owners.forEach(function (customer) {
+            // The customer's ownerId is used as the key, and their full name as the value
+            self.customerNameMap[customer.ownerId] = customer.firstName + ' ' + customer.lastName;
+        });
+
+
 
         let eventSource = new EventSource("api/gateway/bills")
         eventSource.addEventListener('message',function (event){
@@ -92,28 +172,29 @@ angular.module('billHistory')
             }
         }
 
-        $http.get('api/gateway/vets').then(function (resp) {
-            self.vetList = resp.data;
-            // arr = resp.data;
-            console.log(resp)
-        });
+        // Assuming that self.owners is an array of owner objects
+        self.getOwnerById = function(ownerId) {
+            // Find and return the owner with the given ownerId
+            for (var i = 0; i < self.owners.length; i++) {
+                if (self.owners[i].ownerId === ownerId) {
+                    return self.owners[i];
+                }
+            }
+            return null; // Handle if owner not found
+        };
 
-        $http.get('api/gateway/owners').then(function (owners) {
-            self.owners = owners.data;
-            console.log(owners)
-        });
 
-        // $scope.getVetDetails = function(vetId) {
-        //     const vet = self.vetList.find(function(vet) {
-        //         return vet.vetBillId === vetId;
-        //     });
-        //
-        //     if (vet) {
-        //         return vet.firstName + ' ' + vet.lastName;
-        //     } else {
-        //         return 'Unknown Vet';
-        //     }
-        // };
+        $scope.getVetDetails = function(vetId) {
+            const vet = self.vetList.find(function(vet) {
+                return vet.vetBillId === vetId;
+            });
+
+            if (vet) {
+                return vet.firstName + ' ' + vet.lastName;
+            } else {
+                return 'Unknown Vet';
+            }
+        };
 
         // $scope.getCustomerDetails = function(customerId) {
         //     const customer = self.owners.find(function(customer) {
@@ -126,14 +207,14 @@ angular.module('billHistory')
         //         return 'Unknown Customer';
         //     }
         // }
-        // $scope.getCustomerDetails = function(customerId) {
-        //     const customerName = self.customerNameMap[customerId];
-        //     if (customerName) {
-        //         return customerName;
-        //     } else {
-        //         return 'Unknown Customer';
-        //     }
-        // };
+        $scope.getCustomerDetails = function(customerId) {
+            const customerName = self.customerNameMap[customerId];
+            if (customerName) {
+                return customerName;
+            } else {
+                return 'Unknown Customer';
+            }
+        };
 
 
         $scope.deleteAllBills = function () {

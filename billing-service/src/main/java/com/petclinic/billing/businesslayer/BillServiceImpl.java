@@ -45,11 +45,11 @@ public class BillServiceImpl implements BillService{
     public Mono<BillResponseDTO> CreateBill(Mono<BillRequestDTO> billRequestDTO) {
 
             return billRequestDTO
-                    .map(RequestContextAdd::new)
-                    .flatMap(this::vetRequestResponse)
-                    .flatMap(this::ownerRequestResponse)
-                    .map(EntityDtoUtil::toBillEntityRC)
-//                    .map(EntityDtoUtil::toBillEntity)
+//                    .map(RequestContextAdd::new)
+//                    .flatMap(this::vetRequestResponse)
+//                    .flatMap(this::ownerRequestResponse)
+//                    .map(EntityDtoUtil::toBillEntityRC)
+                    .map(EntityDtoUtil::toBillEntity)
                     .doOnNext(e -> e.setBillId(EntityDtoUtil.generateUUIDString()))
                     .flatMap(billRepository::insert)
                     .map(EntityDtoUtil::toBillResponseDto);
