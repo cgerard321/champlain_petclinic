@@ -920,7 +920,7 @@ public class BFFApiGatewayController {
                 .map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER, Roles.VET})
     @GetMapping(value = "inventory/type")
     public Flux<InventoryTypeResponseDTO> getAllInventoryTypes(){
         return inventoryServiceClient.getAllInventoryTypes();
