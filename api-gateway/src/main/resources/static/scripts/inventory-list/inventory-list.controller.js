@@ -33,6 +33,15 @@ angular.module('inventoryList')
                 $scope.inventoryTypeOptions.push(type.type);
             })});
 
+        //clear inventory queries
+        $scope.clearQueries = function (){
+            // Clear the input fields
+            $scope.inventoryName = '';
+            $scope.inventoryType = '';
+            $scope.inventoryDescription = '';
+            // Reset the list by searching all inventories again
+            $scope.searchInventory('', '', '');
+        }
 //search by inventory field
         $scope.searchInventory = function (inventoryName, inventoryType, inventoryDescription){
             getInventoryList(inventoryName, inventoryType, inventoryDescription)

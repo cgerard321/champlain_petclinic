@@ -76,6 +76,20 @@ angular.module('inventoryProductList')
         }
 
 
+        $scope.clearQueries = function (){
+            self.lastParams.productName = '';
+            self.lastParams.productQuantity = '';
+            self.lastParams.productPrice = '';
+            self.lastParams.productSalePrice = '';
+
+            // Clear the input fields
+            $scope.productName = '';
+            $scope.productQuantity = '';
+            $scope.productPrice = '';
+            $scope.productSalePrice = '';
+            $scope.searchProduct('', '', '', '');
+        }
+
         $scope.searchProduct = function(productName, productQuantity, productPrice, productSalePrice) {
             var inventoryId = $stateParams.inventoryId;
             var queryString = '';
