@@ -42,6 +42,20 @@ function PetDetailsController($http, $state, $stateParams, $scope, $timeout, $q)
         });
 
 
+
+    vm.getBirthday = function(birthday) {
+        if (birthday) {
+            var date = new Date(birthday);
+            var year = date.getUTCFullYear();
+            var month = (date.getUTCMonth() + 1).toString().padStart(2, '0'); // Months are zero-based, so we add 1
+            var day = date.getUTCDate().toString().padStart(2, '0');
+            return year + ' / ' + month + ' / ' + day;
+        } else {
+            return '';
+        }
+    };
+
+
     // Toggle pet's active status
     vm.toggleActiveStatus = function (petId) {
         return $http.get('api/gateway/pets/' +$stateParams.petId + '?_=' + new Date().getTime(), { headers: { 'Cache-Control': 'no-cache' } })
@@ -99,6 +113,5 @@ function PetDetailsController($http, $state, $stateParams, $scope, $timeout, $q)
         });
         $state.go('ownerDetails', {ownerId: vm.pet.ownerId});
     };
-
 
 }
