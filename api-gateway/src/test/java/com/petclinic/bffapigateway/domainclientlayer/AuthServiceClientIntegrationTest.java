@@ -13,10 +13,12 @@ import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.*;
 import org.mockito.Mockito;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
+import org.springframework.mock.http.server.reactive.MockServerHttpResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -250,7 +252,33 @@ public class AuthServiceClientIntegrationTest {
                 .verifyComplete();
         }
 
+    @Test
+    @DisplayName("Should logout a user")
+    void shouldLogoutUser_shouldReturnNoContent() throws Exception {
+        final MockResponse loginMockResponse = new MockResponse()
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(200);
+        server.enqueue(loginMockResponse);
+        ServerHttpRequest loginRequest = MockServerHttpRequest.post("/users/login").build();
+        Login login = Login.builder()
+                .email("email")
+                .password("password")
+                .build();
+        final Mono<ResponseEntity<UserPasswordLessDTO>> validatedTokenResponse = authServiceClient.login(Mono.just(login));
+        ServerHttpRequest logoutRequest = MockServerHttpRequest.post("/users/logout")
+                .cookie(new HttpCookie("Bearer", "some_valid_token"))
+                .build();
+        MockServerHttpResponse logoutMockResponse = new MockServerHttpResponse();
 
+        final Mono<ResponseEntity<Void>> logoutResponse = authServiceClient.logout(logoutRequest, logoutMockResponse);
+
+        StepVerifier.create(logoutResponse)
+                .consumeNextWith(responseEntity -> {
+                    // Verify the HTTP status code directly
+                    assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
+                })
+                .verifyComplete();
+    }
 
     @Test
     @DisplayName("Should send a forgotten email")

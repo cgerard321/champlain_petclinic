@@ -24,6 +24,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -770,6 +772,12 @@ public class BFFApiGatewayController {
         log.info("Entered controller /login");
         return authServiceClient.login(login);
 
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @PostMapping("/users/logout")
+    public Mono<ResponseEntity<Void>> logout(ServerHttpRequest request, ServerHttpResponse response) {
+        return authServiceClient.logout(request, response);
     }
 
 
