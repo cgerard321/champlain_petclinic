@@ -11,14 +11,15 @@ public interface ProductRepository extends ReactiveMongoRepository<Product, Stri
     Mono<Product> findProductByInventoryIdAndProductId(String inventoryId, String productId);
     Mono<Void> deleteByProductId(String productId);
     Flux<Product> findAllProductsByInventoryId(String inventoryId);
-    Flux<Product> findAllProductsByInventoryIdAndProductNameAndProductPriceAndProductQuantity(String inventoryId, String productName, Double productPrice, Integer productQuantity);
+    Flux<Product> findAllProductsByInventoryIdAndProductNameAndProductPriceAndProductQuantityAndProductSalePrice(String inventoryId, String productName, Double productPrice, Integer productQuantity,Double productSalePrice);
     Flux<Product> findAllProductsByInventoryIdAndProductPriceAndProductQuantity(String inventoryId, Double productPrice, Integer productQuantity);
     Flux<Product> findAllProductsByInventoryIdAndProductPrice(String inventoryId, Double productPrice);
     Flux<Product> findAllProductsByInventoryIdAndProductQuantity(String inventoryId, Integer productQuantity);
     Flux<Product> findAllProductsByInventoryIdAndProductName(String inventoryId, String productName);
+    Flux<Product> findAllProductsByInventoryIdAndProductSalePrice(String inventoryId, Double productSalePrice);
 
     Mono<Boolean> deleteByInventoryId(String inventoryId);
-
+    Flux<Product> findAllProductsByInventoryIdAndProductNameAndProductPriceAndProductQuantity(String inventoryId, String productName, Double productPrice, Integer productQuantity);
    //Regex
     Flux<Product> findAllProductsByInventoryIdAndProductNameRegex(String inventoryId, String regex);
 

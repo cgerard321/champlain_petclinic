@@ -39,6 +39,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/users")
@@ -59,6 +61,27 @@ public class UserController {
     @GetMapping("/withoutPages")
     public List<UserDetails> getUserWithoutPage() {
         return userService.findAllWithoutPage();
+    }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<UserDetails> getUserByUserId(@PathVariable String userId) {
+        User user = userService.getUserByUserId(userId);
+        return ResponseEntity.ok(userMapper.modelToDetails(user));
+    }
+
+    //add pagination to this method later
+    @GetMapping("/")
+    public ResponseEntity<List<UserDetails>> getAllUsers(@RequestParam Optional<String> username) {
+        List<UserDetails> users;
+
+        if(username.isPresent()) {
+            users = userService.getUsersByUsernameContaining(username.get());
+        }
+        else {
+            users = userService.findAllWithoutPage();
+        }
+
+        return ResponseEntity.ok(users);
     }
 
     @PostMapping

@@ -31,6 +31,12 @@ public class GlobalControllerExceptionHandler {
         return createHttpErrorInfo(BAD_REQUEST, request, ex);
     }
 
+    @ResponseStatus(HttpStatus.CONFLICT) // 409
+    @ExceptionHandler(DuplicateTimeException.class)
+    public HttpErrorInfo handleDuplicateTimeException(ServerHttpRequest request, Exception ex) {
+        return createHttpErrorInfo(HttpStatus.CONFLICT, request, ex);
+    }
+
     private HttpErrorInfo createHttpErrorInfo(HttpStatus httpStatus, ServerHttpRequest request, Exception ex) {
 
         final String path = request.getPath().value();

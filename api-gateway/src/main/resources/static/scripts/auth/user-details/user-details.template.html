@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body >
+    <div ng-controller="UserDetailsController as userDetails">
+        <h3>User Details for ID: {{ userDetails.userId }}</h3>
+        <p><strong>Username:</strong> {{ userDetails.user ? userDetails.user.username : 'N/A' }}</p>
+        <p><strong>Email:</strong> {{ userDetails.user ? userDetails.user.email : 'N/A' }}</p>
+
+
+        <!-- Map these fields so that display depending on the user's role -->
+
+<!--        &lt;!&ndash; Display different details based on the user's role &ndash;&gt;-->
+<!--        <div ng-if="userDetails.user && userDetails.user.roles === 'ADMIN'">-->
+<!--            <p><strong>Role:</strong> Admin</p>-->
+<!--            &lt;!&ndash; Add admin-specific details here &ndash;&gt;-->
+<!--        </div>-->
+
+<!--        <div ng-if="userDetails.user === userDetails.role.owner ">-->
+<!--            <p><strong>Role:</strong> Owner</p>-->
+<!--            &lt;!&ndash; Add customer-specific details here &ndash;&gt;-->
+<!--            <p><strong>First Name:</strong> {{ userDetails.user.owner.firstName || 'N/A' }}</p>-->
+<!--            <p><strong>Last Name:</strong> {{ userDetails.user.owner.lastName || 'N/A' }}</p>-->
+<!--            &lt;!&ndash; Add more customer-specific details here &ndash;&gt;-->
+<!--        </div>-->
+
+
+<!--        <div ng-if="userDetails.user === userDetails.role.vet ">-->
+<!--            <p><strong>Role:</strong> Vet</p>-->
+<!--            &lt;!&ndash; Add customer-specific details here &ndash;&gt;-->
+<!--            <p><strong>First Name:</strong> {{ userDetails.user.vet.firstName || 'N/A' }}</p>-->
+<!--            <p><strong>Last Name:</strong> {{ userDetails.user.vet.lastName || 'N/A' }}</p>-->
+<!--            &lt;!&ndash; Add more customer-specific details here &ndash;&gt;-->
+<!--        </div>-->
+
+    </div>
+
+</body>
+</html>

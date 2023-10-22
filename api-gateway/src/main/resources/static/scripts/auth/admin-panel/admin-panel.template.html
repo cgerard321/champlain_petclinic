@@ -16,8 +16,12 @@
     </tr>
     </thead>
 
-    <tr id="userTd" ng-repeat="user in $ctrl.users | filter:$ctrl.query track by user.userId">
-        <td>{{user.username}}</td>
+    <tr id="userId" ng-repeat="user in $ctrl.users | filter:$ctrl.query:startsWith track by user.userId">
+        <td>
+            <a style="text-decoration: none;" ui-sref="userDetails({ userId: user.userId })">
+                <span>{{ user.username }}</span>
+            </a>
+        </td>
         <td>{{user.email}}</td>
         <td>
             <input class="add-vet-button btn btn-success" type="button" value="Delete" ng-click="removeUser(user.id)"/>

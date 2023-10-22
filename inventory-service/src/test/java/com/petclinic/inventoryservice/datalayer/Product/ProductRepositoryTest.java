@@ -63,6 +63,20 @@ class ProductRepositoryTest {
     }
 
     @Test
+    public void shouldGetTwoProductsByInventoryIdAndProductDescriptionAndProductPriceAndProductQuantityAndProductSalePrice(){
+        StepVerifier
+                .create(productRepository.findAllProductsByInventoryIdAndProductNameAndProductPriceAndProductQuantityAndProductSalePrice(
+                        product1.getProductDescription(),
+                        product1.getInventoryId(),
+                        product1.getProductPrice(),
+                        product1.getProductQuantity(),
+                        product1.getProductSalePrice()
+                ))
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
+    @Test
     public void shouldGetTwoProductsByInventoryIdAndProductPriceAndProductQuantity(){
         StepVerifier
                 .create(productRepository.findAllProductsByInventoryIdAndProductPriceAndProductQuantity(
@@ -106,6 +120,18 @@ class ProductRepositoryTest {
                 .expectNextCount(2)
                 .verifyComplete();
     }
+
+    @Test
+    public void shouldGetTwoProductsByInventoryIdAndProductSalePrice(){
+        StepVerifier
+                .create(productRepository.findAllProductsByInventoryIdAndProductSalePrice(
+                        product1.getInventoryId(),
+                        product1.getProductSalePrice()
+                ))
+                .expectNextCount(2)
+                .verifyComplete();
+    }
+
 
 
     @Test

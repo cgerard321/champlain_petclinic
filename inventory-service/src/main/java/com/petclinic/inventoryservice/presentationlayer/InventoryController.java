@@ -3,7 +3,6 @@ package com.petclinic.inventoryservice.presentationlayer;
 import com.petclinic.inventoryservice.businesslayer.ProductInventoryService;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +11,6 @@ import reactor.core.publisher.Mono;
 import org.springframework.data.domain.PageRequest;
 
 import java.util.Optional;
-
 @RestController
 @AllArgsConstructor
 @RequestMapping("/inventory")
@@ -44,8 +42,30 @@ public class InventoryController {
     getProductsInInventoryByInventoryIdAndProductField(@PathVariable String inventoryId,
                                                        @RequestParam(required = false) String productName,
                                                        @RequestParam(required = false) Double productPrice,
-                                                       @RequestParam(required = false) Integer productQuantity){
-        return productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(inventoryId, productName, productPrice, productQuantity);
+                                                       @RequestParam(required = false) Integer productQuantity,
+                                                       @RequestParam(required = false) Double productSalePrice
+    ){
+        return productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(inventoryId, productName, productPrice, productQuantity, productSalePrice);
+    }
+
+    @GetMapping("/{inventoryId}/products-pagination")
+    public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductFieldPagination(@PathVariable String inventoryId,
+                                                                                                 @RequestParam(required = false) String productName,
+                                                                                                 @RequestParam(required = false) Double productPrice,
+                                                                                                 @RequestParam(required = false) Integer productQuantity,
+                                                                                                 @RequestParam Optional<Integer> page,
+                                                                                                 @RequestParam Optional<Integer> size){
+        return productInventoryService.getProductsInInventoryByInventoryIdAndProductsFieldsPagination(inventoryId, productName, productPrice, productQuantity, PageRequest.of(page.orElse(0),size.orElse(5)));
+    }
+
+    @GetMapping("/{inventoryId}/products-count")
+    public Mono<ResponseEntity<Long>> getTotalNumberOfProductsWithRequestParams(@PathVariable String inventoryId,
+                                                                               @RequestParam(required = false) String productName,
+                                                                               @RequestParam(required = false) Double productPrice,
+                                                                               @RequestParam(required = false) Integer productQuantity,
+                                                                                @RequestParam(required = false) Double productSalePrice){
+        return productInventoryService.getProductsInInventoryByInventoryIdAndProductsField(inventoryId, productName, productPrice, productQuantity, productSalePrice).count()
+                .map(response -> ResponseEntity.status(HttpStatus.OK).body(response));
     }
 
     @GetMapping("/{inventoryId}/products/{productId}")

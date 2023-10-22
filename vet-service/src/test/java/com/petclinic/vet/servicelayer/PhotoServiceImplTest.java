@@ -91,7 +91,29 @@ class PhotoServiceImplTest {
                 .verifyComplete();
     }
 
+    @Test
+    void updatePhotoOfVet() {
+        String photoName = "vet_default.jpg";
+        Mono<Resource> photoResource = Mono.just(new ByteArrayResource(photoData));
+        Photo savedPhoto = new Photo();
+        savedPhoto.setVetId(VET_ID);
+        savedPhoto.setFilename(photoName);
+        savedPhoto.setImgType("image/jpeg");
+        savedPhoto.setData(photoData);
 
+        when(photoRepository.save(any(Photo.class))).thenReturn(Mono.just(savedPhoto));
+        when(photoRepository.findByVetId(anyString())).thenReturn(Mono.just(savedPhoto));
 
+        Mono<Resource> savedPhotoMono = photoService.updatePhotoByVetId(VET_ID, photoName, photoResource);
 
+        StepVerifier
+                .create(savedPhotoMono)
+                .consumeNextWith(image -> {
+                    assertNotNull(image);
+
+                    Resource photo = savedPhotoMono.block();
+                    assertEquals(photo, image);
+                })
+                .verifyComplete();
+    }
 }

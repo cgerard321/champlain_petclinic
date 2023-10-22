@@ -53,6 +53,9 @@ public interface UserService {
 
     User getUserByEmail(String email) throws NotFoundException;
 
+    User getUserByUserId(String userIid);
+    List<UserDetails> getUsersByUsernameContaining(String username);
+
 
     void processForgotPassword(UserResetPwdRequestModel userResetPwdWithTokenRequestModel);
 

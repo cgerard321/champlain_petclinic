@@ -733,6 +733,30 @@ class VetControllerUnitTest {
     }
 
     @Test
+    void updatePhotoByVetId() {
+        Photo photo = buildPhoto();
+        Resource photoResource = buildPhotoData(photo);
+
+        when(photoService.updatePhotoByVetId(anyString(), anyString(), any(Mono.class)))
+                .thenReturn(Mono.just(photoResource));
+
+        client.put()
+                .uri("/vets/{vetId}/photos/{photoName}", VET_ID, photo.getFilename())
+                .bodyValue(photoResource)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.IMAGE_JPEG_VALUE)
+                .expectBody(Resource.class)
+                .consumeWith(response -> {
+                    assertEquals(buildPhotoData(), response.getResponseBody());
+                });
+
+        Mockito.verify(photoService, times(1))
+                .updatePhotoByVetId(anyString(), anyString(), any(Mono.class));
+    }
+
+    @Test
     void getBadgeByVetId_shouldSucceed() throws IOException {
         BadgeResponseDTO badgeResponseDTO = buildBadgeResponseDTO();
 
