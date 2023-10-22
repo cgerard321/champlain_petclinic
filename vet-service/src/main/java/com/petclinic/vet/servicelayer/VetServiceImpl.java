@@ -70,9 +70,9 @@ public class VetServiceImpl implements VetService {
                     return Mono.just(requestDTO);
                 })
                 .flatMap(vet -> {
-                    vet.setPhotoDefault(true);
+                    //vet.setPhotoDefault(true);
                    //log.debug("Vetserviceimpl " + vet);
-                    //log.debug("In vet backend before default: " +vet.isPhotoDefault());
+                    log.debug("In vet backend before default: " +vet.isPhotoDefault());
                     if(vet.isPhotoDefault()){
 
                         String defaultPhotoName = "vet_default.jpg";

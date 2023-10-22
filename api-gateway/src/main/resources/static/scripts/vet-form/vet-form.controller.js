@@ -47,8 +47,6 @@ angular.module('vetForm')
             });
         }
 
-        //self.vet.photoDefault = true
-
         let uploadPhoto = function (vetId) {
             console.log(vetId + " default before photo is: " + self.vet.photoDefault)
 
@@ -68,14 +66,11 @@ angular.module('vetForm')
                         type: "jpeg",
                         photo: vetPhoto
                     };
-                   /* if(self.vetPhoto.photo == null) {
-
-                        self.vet.photoDefault = true
+                    if(image.photo == null){
+                        self.vet.photoDefault = true;
                     }
-                    else {
-                        self.vet.photoDefault = false
-                    }*/
-                    console.log(vetId + " default after photo is: " + self.vet.photoDefault)
+
+                    //console.log(vetId + " default after photo is: " + self.vet.photoDefault)
                     // Use template literals for URL concatenation
                     $http.post(`api/gateway/vets/${vetId}/photos/${image.name}`, image) // Send the image object
                         .then(function (response) {
@@ -212,6 +207,14 @@ angular.module('vetForm')
             let isAct = document.getElementsByClassName("isActiveRadio");
             vet.active = isAct[0].checked;
 
+            let photoInput = document.getElementById("photoVet");
+            if (photoInput.files.length > 0) {
+                vet.photoDefault = false;
+            } else {
+                vet.photoDefault = true;
+            }
+            console.log("Before posting, photo is: " + vet.photoDefault);
+
             var req;
             if (id) {
                 req = $http.put("api/gateway/vets/" + vetId, vet);
@@ -236,7 +239,8 @@ angular.module('vetForm')
                     email: vet.email,
                     vet:vet
                 });
-                console.log(self.vet)
+                console.log(self.vet);
+                console.log(self.vet.photoDefault);
 
                 req.then(function (response) {
                     var result = response.data;

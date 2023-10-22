@@ -155,7 +155,8 @@ public class AuthServiceClient {
                                         .lastName(registerVet.getVet().getLastName())
                                         .vetId(uuid)
                                         .build();
-                                return vetsServiceClient.createVet((Mono.just(vetDTO)));
+                                log.debug("In Api, photo default is: " + vetDTO.isPhotoDefault());
+                        return vetsServiceClient.createVet((Mono.just(vetDTO)));
                             }
                     );
         }).doOnError(throwable -> {
