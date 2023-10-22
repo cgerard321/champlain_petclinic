@@ -28,7 +28,7 @@
     <div class="form-group formColor">
         <label class="col-sm-2 control-label"> Pet Weight (Kilograms) </label>
         <div class="pet col-sm-6">
-            <input class="form-control col-sm-4" ng-model="$ctrl.pet.weight" name="name" required type="text" ng-disabled="$ctrl.checked"/>
+            <input class="form-control col-sm-4" ng-model="$ctrl.pet.weight" name="weight" required type="text" ng-disabled="$ctrl.checked"/>
             <span ng-show="petForm.name.$error.required" class="help-inline">Weight is required.</span>
         </div>
     </div>
@@ -39,8 +39,6 @@
             <select class="form-control" ng-model="$ctrl.pet.petTypeId" name="type" ng-options="t.id as t.name for t in $ctrl.types track by t.id" ng-disabled="$ctrl.checked"></select>
         </div>-->
         <div class="pet col-sm-6">
-            <select class="form-control" ng-model="$ctrl.pet.type" name="type" ng-options="t as t.name for t in $ctrl.types track by t.id" ng-disabled="$ctrl.checked"></select>
-            <span ng-show="petForm.name.$error.required" class="help-inline"> Type is required.</span>
             <select class="form-control" ng-model="$ctrl.pet.petTypeId" name="type" ng-disabled="$ctrl.checked">
                 <option value="1">Cat</option>
                 <option value="2">Dog</option>
