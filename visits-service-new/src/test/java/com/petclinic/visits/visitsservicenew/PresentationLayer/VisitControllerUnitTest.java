@@ -3,8 +3,9 @@ package com.petclinic.visits.visitsservicenew.PresentationLayer;
 
 import com.petclinic.visits.visitsservicenew.BusinessLayer.VisitService;
 import com.petclinic.visits.visitsservicenew.DataLayer.Status;
-import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
-import com.petclinic.visits.visitsservicenew.DomainClientLayer.*;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.SpecialtyDTO;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetDTO;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.Workday;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -15,15 +16,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 @WebFluxTest(VisitController.class)
 class VisitControllerUnitTest {
