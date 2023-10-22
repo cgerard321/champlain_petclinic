@@ -9,9 +9,11 @@
             alert("Logout successful")
             localStorage.removeItem("username")
             localStorage.removeItem("email")
+            localStorage.removeItem("UUID")
+            localStorage.removeItem("roles")
             window.location.href = '/#!/login';
         }, function errorCallback(response) {
-            alert("Logout Error: Problem removing account cookies\n Session may have expired\n Redirecting to login page")
+            alert("Logout Error: Session may have expired. Redirecting to login page")
             localStorage.removeItem("username")
             localStorage.removeItem("email")
             localStorage.removeItem("UUID")
