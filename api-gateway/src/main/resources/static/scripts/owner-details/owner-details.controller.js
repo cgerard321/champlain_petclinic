@@ -31,6 +31,20 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
          }
      };*/
 
+
+    vm.getBirthday = function(birthday) {
+        if (birthday) {
+            var date = new Date(birthday);
+            var year = date.getUTCFullYear();
+            var month = (date.getUTCMonth() + 1).toString().padStart(2, '0'); // Months are zero-based, so we add 1
+            var day = date.getUTCDate().toString().padStart(2, '0');
+            return year + ' / ' + month + ' / ' + day;
+        } else {
+            return '';
+        }
+    };
+
+
     // Fetch owner data
     $http.get('api/gateway/owners/' + $stateParams.ownerId)
         .then(function (resp) {
@@ -40,6 +54,7 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
             vm.owner.pets.forEach(function (pet) {
                 pet.isActive = pet.isActive === "true";
             });
+
         })
         .catch(function (error) {
             console.error('Error fetching owner data:', error);
@@ -60,6 +75,8 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
                 // Check if the trimmed response is empty
                 if (!trimmedResponse) {
                     return null; // Skip empty responses
+                } else {
+                    vm.pets = trimmedResponse;
                 }
 
                 try {
@@ -164,4 +181,6 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
         });
     };
 };
+
+
 
