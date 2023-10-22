@@ -1,8 +1,12 @@
 <style>
-    .btn-danger:hover {
+    .btn:hover {
         transform: translateY(2px);
         box-shadow: 0 0 rgba(0, 0, 0, 2);
         border-bottom-width: 1px;
+    }
+
+    .table-striped tbody tr:hover {
+        background-color: #D8D8D8;
     }
 </style>
 
@@ -17,6 +21,9 @@
         <td>Price</td>
         <td>Description</td>
         <td>Sale Price</td>
+        <td></td>
+        <td></td>
+        <td></td>
     </tr>
     <tr>
         <td>
@@ -45,7 +52,15 @@
         <td></td>
         <td>
             <span>
-                <input class="btn btn-success" type="button" value="Search" ng-click="searchProduct(productName, productQuantity, productPrice, productSalePrice)">
+
+                <a class="btn btn-success" type="button" ng-click="searchProduct(productName, productQuantity, productPrice)" title="Search">
+                    <lord-icon
+                            src="https://cdn.lordicon.com/fkdzyfle.json"
+                            trigger="hover"
+                            style="width:32px;height:32px">
+                    </lord-icon>
+                </a>
+
             </span>
         </td>
     </tr>
@@ -53,28 +68,46 @@
     </thead>
     <tr ng-repeat="product in $ctrl.inventoryProductList | filter:$ctrl.query track by product.productId">
         <td><span>{{product.productName}}</span></td>
-            <td><span>{{product.productId}}</span></td>
+        <td><span>{{product.productId}}</span></td>
         <td><span>{{product.productQuantity}}</span></td>
-        <td><span>{{product.productPrice}}</span></td>
+        <td><span>{{product.productPrice}}$</span></td>
         <td><span>{{product.productDescription}}</span></td>
-        <td><span>{{product.productSalePrice}}</span></td>
+        <td><span>{{product.productSalePrice}}$</span></td>
 
         <td>
-            <a href="#!/inventory/{{$ctrl.inventory.inventoryId}}/products/{{product.productId}}">
-                Get Product Details
+            <a class="btn btn-info" href="#!/inventory/{{$ctrl.inventory.inventoryId}}/products/{{product.productId}}" title="Details">
+                <lord-icon
+                        src="https://cdn.lordicon.com/jnzhohhs.json"
+                        trigger="hover"
+                        style="width:32px;height:32px">
+                </lord-icon>
             </a>
 
         </td>
 
 
-        <td><a ui-sref="updateProductInventory({inventoryId: $ctrl.inventoryProductList[0].inventoryId, productId: product.productId})">
-            <button class="add-bundle-button btn btn-warning">Edit</button>
+        <td><a ui-sref="updateProductInventory({inventoryId: $ctrl.inventoryProductList[0].inventoryId, productId: product.productId})" title="Edit">
+            <button class="add-bundle-button btn btn-warning">
+
+                <lord-icon
+                        src="https://cdn.lordicon.com/wkvacbiw.json"
+                        trigger="hover"
+                        style="width:32px;height:32px">
+                </lord-icon>
+
+            </button>
         </a></td>
 
 
 
+        <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteProduct(product)" title="Delete">
+            <lord-icon
+                    src="https://cdn.lordicon.com/skkahier.json"
+                    trigger="hover"
+                    style="width:32px;height:32px">
+            </lord-icon>
+        </a></td>
 
-        <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteProduct(product)">Delete</a></td>
         <td></td>
     </tr>
 </table>

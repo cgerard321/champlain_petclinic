@@ -12,31 +12,34 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
     vm.pets = [];
 
     // Function to get pet type name based on petTypeId
-   /* vm.getPetTypeName = function (petTypeId) {
-        switch (petTypeId) {
-            case '1':
-                return 'Cat';
-            case '2':
-                return 'Dog';
-            case '3':
-                return 'Lizard';
-            case '4':
-                return 'Snake';
-            case '5':
-                return 'Bird';
-            case '6':
-                return 'Hamster';
-            default:
-                return 'Unknown';
-        }
-    };*/
-
+    /* vm.getPetTypeName = function (petTypeId) {
+         switch (petTypeId) {
+             case '1':
+                 return 'Cat';
+             case '2':
+                 return 'Dog';
+             case '3':
+                 return 'Lizard';
+             case '4':
+                 return 'Snake';
+             case '5':
+                 return 'Bird';
+             case '6':
+                 return 'Hamster';
+             default:
+                 return 'Unknown';
+         }
+     };*/
 
     // Fetch owner data
     $http.get('api/gateway/owners/' + $stateParams.ownerId)
         .then(function (resp) {
             vm.owner = resp.data;
             console.log(vm.owner);
+
+            vm.owner.pets.forEach(function (pet) {
+                pet.isActive = pet.isActive === "true";
+            });
         })
         .catch(function (error) {
             console.error('Error fetching owner data:', error);
@@ -47,13 +50,7 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
         .then(function (response) {
             // Split the response by newline characters to get individual pet objects
             var petResponses = response.data.split('\n');
-
             // Parse each pet response as JSON, remove the "data:" prefix, and trim any leading/trailing whitespace
-            var petObjects = petResponses.map(function (petResponse) {
-                // Remove the "data:" prefix and trim any leading/trailing whitespace
-                var trimmedResponse = petResponse.replace(/^data:/, '').trim();
-                console.log("Trimmed results: ", trimmedResponse);
-// Parse each pet response as JSON, remove the "data:" prefix, and trim any leading/trailing whitespace
             var petObjects = petResponses.map(function (petResponse) {
                 // Remove the "data:" prefix and trim any leading/trailing whitespace
                 var trimmedResponse = petResponse.replace(/^data:/, '').trim();
@@ -86,7 +83,9 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
             return $q.all(petPromises);
         })
         .then(function (responses) {
+
             vm.pets = responses.map(function (response) {
+
                 return response.data;
             });
             console.log("Pet Array:", vm.pets);
@@ -95,9 +94,10 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
             console.error('Error fetching pet data:', error);
         });
 
+
     // Toggle pet's active status
     vm.toggleActiveStatus = function (petId) {
-        $http.get('api/gateway/pets/' + petId + '?_=' + new Date().getTime(), { headers: { 'Cache-Control': 'no-cache' } })
+        return $http.get('api/gateway/pets/' + petId + '?_=' + new Date().getTime(), {headers: {'Cache-Control': 'no-cache'}})
             .then(function (resp) {
                 console.log("Pet id is " + petId);
                 console.log(resp.data);
@@ -112,16 +112,56 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
 
                 return $http.patch('api/gateway/pet/' + petId, {
                     isActive: vm.pet.isActive
-                }, { headers: { 'Cache-Control': 'no-cache' } });
+                }, {headers: {'Cache-Control': 'no-cache'}});
             })
             .then(function (resp) {
                 console.log("Pet active status updated successfully");
                 vm.pet = resp.data;
-                $timeout(); // Manually trigger the $digest cycle to update the UI
+                // Schedule a function to be executed during the next digest cycle
+                $scope.$evalAsync();
             })
             .catch(function (error) {
                 console.error("Error updating pet active status:", error);
                 // Handle the error appropriately
             });
     };
-}
+
+
+    // Watch the pet.isActive property
+    $scope.$watch('pet.isActive', function (newVal, oldVal) {
+        if (newVal !== oldVal) {
+            // The pet.isActive property has changed, update the UI
+            $scope.$apply();
+        }
+    });
+
+
+    vm.deletePet = function (petId) {
+        var config = {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        };
+
+        $http.delete('api/gateway/pets/' + petId, config)
+            .then(function (resp) {
+                console.log("Pet deleted successfully");
+
+                /*  $http.get('api/gateway/owners/' + $stateParams.ownerId).then(function (resp) {
+                      self.owner = resp.data;
+                  });
+                 */
+
+                vm.owner.pets = vm.owner.pets.filter(function (pet) {
+                    return pet.petId !== petId;
+                });
+
+                $scope.$applyAsync();
+                // Handle the success appropriately
+            }).catch(function (error) {
+            console.error("Error deleting pet:", error);
+            // Handle the error appropriately
+        });
+    };
+};
+
