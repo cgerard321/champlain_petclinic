@@ -447,6 +447,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public void deleteUser(String userId) {
+        User user = userRepo.findUserByUserIdentifier_UserId(userId);
+        if (user != null) {
+            userRepo.delete(user);
+        } else {
+            throw new NotFoundException("No user with userId: " + userId);
+        }
+    }
+
+
+    @Override
     public List<UserDetails> getUsersByUsernameContaining(String username) {
         return userMapper.modelToDetailsList(userRepo.findByUsernameContaining(username));
     }
