@@ -9,24 +9,25 @@ angular.module('billHistory')
         self.unpaidBills = []
         self.overdueBills = []
 
-        self.owners = [
-            { ownerId: '1', firstName: 'George', lastName: 'Franklin' },
-            { ownerId: '2', firstName: 'Betty', lastName: 'Davis' },
-            { ownerId: '3', firstName: 'Eduardo', lastName: 'Rodriguez' },
-            { ownerId: '4', firstName: 'Harold', lastName: 'Davis' },
-            { ownerId: '5', firstName: 'Peter', lastName: 'McTavish' },
-            { ownerId: '6', firstName: 'Jean', lastName: 'Coleman' },
-            { ownerId: '7', firstName: 'Jeff', lastName: 'Black' },
-            { ownerId: '8', firstName: 'Maria', lastName: 'Escobito' },
-            { ownerId: '9', firstName: 'David', lastName: 'Schroeder' },
-            { ownerId: '10', firstName: 'Carlos', lastName: 'Esteban' }
-        ];
+        // self.owners = [
+        //     { ownerId: '1', firstName: 'George', lastName: 'Franklin' },
+        //     { ownerId: '2', firstName: 'Betty', lastName: 'Davis' },
+        //     { ownerId: '3', firstName: 'Eduardo', lastName: 'Rodriguez' },
+        //     { ownerId: '4', firstName: 'Harold', lastName: 'Davis' },
+        //     { ownerId: '5', firstName: 'Peter', lastName: 'McTavish' },
+        //     { ownerId: '6', firstName: 'Jean', lastName: 'Coleman' },
+        //     { ownerId: '7', firstName: 'Jeff', lastName: 'Black' },
+        //     { ownerId: '8', firstName: 'Maria', lastName: 'Escobito' },
+        //     { ownerId: '9', firstName: 'David', lastName: 'Schroeder' },
+        //     { ownerId: '10', firstName: 'Carlos', lastName: 'Esteban' }
+        // ];
 
-        self.customerNameMap = {};
+        // self.customerNameMap = {};
 
-        self.owners.forEach(function (customer) {
-            self.customerNameMap[customer.ownerId] = customer.firstName + ' ' + customer.lastName;
-        });
+        // self.owners.forEach(function (customer) {
+        //     // The customer's ownerId is used as the key, and their full name as the value
+        //     self.customerNameMap[customer.ownerId] = customer.firstName + ' ' + customer.lastName;
+        // });
 
         let eventSource = new EventSource("api/gateway/bills")
         eventSource.addEventListener('message',function (event){
@@ -93,7 +94,8 @@ angular.module('billHistory')
 
         $http.get('api/gateway/vets').then(function (resp) {
             self.vetList = resp.data;
-            arr = resp.data;
+            // arr = resp.data;
+            console.log(resp)
         });
 
         $http.get('api/gateway/owners').then(function (owners) {
@@ -101,17 +103,17 @@ angular.module('billHistory')
             console.log(owners)
         });
 
-        $scope.getVetDetails = function(vetId) {
-            const vet = self.vetList.find(function(vet) {
-                return vet.vetBillId === vetId;
-            });
-
-            if (vet) {
-                return vet.firstName + ' ' + vet.lastName;
-            } else {
-                return 'Unknown Vet';
-            }
-        };
+        // $scope.getVetDetails = function(vetId) {
+        //     const vet = self.vetList.find(function(vet) {
+        //         return vet.vetBillId === vetId;
+        //     });
+        //
+        //     if (vet) {
+        //         return vet.firstName + ' ' + vet.lastName;
+        //     } else {
+        //         return 'Unknown Vet';
+        //     }
+        // };
 
         // $scope.getCustomerDetails = function(customerId) {
         //     const customer = self.owners.find(function(customer) {
@@ -124,14 +126,14 @@ angular.module('billHistory')
         //         return 'Unknown Customer';
         //     }
         // }
-        $scope.getCustomerDetails = function(customerId) {
-            const customerName = self.customerNameMap[customerId];
-            if (customerName) {
-                return customerName;
-            } else {
-                return 'Unknown Customer';
-            }
-        };
+        // $scope.getCustomerDetails = function(customerId) {
+        //     const customerName = self.customerNameMap[customerId];
+        //     if (customerName) {
+        //         return customerName;
+        //     } else {
+        //         return 'Unknown Customer';
+        //     }
+        // };
 
 
         $scope.deleteAllBills = function () {

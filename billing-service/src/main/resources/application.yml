@@ -54,13 +54,12 @@ spring:
 server.port: 8080
 app:
   vet-service:
-    host: localhost
+    host: vet-service
     port: 8080
   customers-service:
-    host: localhost
+    host: customers-service
     port: 8080
 # Without this section of code the microservice throws a 422 error
-# Only when the domainclientlayer is uncommented though ***
 logging:
   level:
     root: INFO
