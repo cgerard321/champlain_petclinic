@@ -46,7 +46,8 @@ angular.module('petForm')
                 name: self.pet.name,
                 birthDate: new Date(self.pet.birthDate).toISOString(),
                 ownerId: self.pet.ownerId,
-                petTypeId: self.pet.petTypeId
+                petTypeId: self.pet.petTypeId,
+                weight: self.pet.weight
             };
 
             var req;
