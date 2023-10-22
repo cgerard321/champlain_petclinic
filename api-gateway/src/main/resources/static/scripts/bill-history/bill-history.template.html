@@ -1,19 +1,9 @@
 <h2 class="titleOwner">Bill History</h2>
 
-<form>
-    <div>
-        <input type="text" placeholder="Search Filter..." class="form-control" ng-model="$ctrl.query">
-        <br>
-    </div>
-</form>
 <a ui-sref="billNew">
     <button class="add-bill-button btn btn-success">Add Bill</button>
 </a><br><br>
 
-
-<input ng-model="search.customerId" placeholder="Filter by Owner ID">
-<input ng-model="search.vetId" placeholder="Filter by Vet ID">
-<br><br>
 
 <button type="button" class="collapsible" data-section="Paid">Open Paid</button>
 <table class="content table table-striped">
@@ -138,10 +128,8 @@
     <thead>
         <tr>
             <td>Bill ID</td>
-            <td>Owner ID</td>
             <td>Owner Name</td>
             <td>Owner Details</td>
-            <td>Vet ID</td>
             <td>Vet Name</td>
             <td>Visit Type</td>
             <td>Amount</td>
@@ -160,24 +148,32 @@
             <input ng-model="search.billId" placeholder="Filter by Bill ID">
 
         </td>
-        <td class="bg-white border d-none d-sm-table-cell d-md-table-cell">
-            <input class="ps-2" type="text" placeholder="Search Filter...">
+
+        <td class="bg-white border">
+
         </td>
-        <td class="bg-white border d-none d-sm-table-cell d-md-table-cell">
-            <input class="ps-2" type="text" size="15" placeholder="Search Filter...">
+        <td class="border"></td>
+
+        <td class="bg-white border">
+
         </td>
-        <td class="bg-white border d-none d-sm-table-cell d-md-table-cell">
-            <input class="ps-2" type="text" size="10" placeholder="Search Filter...">
-        </td>
-        <td class="bg-white border d-none d-sm-table-cell d-md-table-cell">
+        <td class="bg-white border">
             <input ng-model="search.visitType" placeholder="Filter by visit type">
         </td>
-        <td class="bg-white border d-none d-sm-table-cell d-md-table-cell">
+        <td class="bg-white border">
             <input ng-model="search.amount" placeholder="Filter by amount">
         </td>
-        <td class="bg-white border d-none d-sm-table-cell d-md-table-cell">
-            <input class="ps-2" type="text" size="10" placeholder="Search Filter...">
+        <td class="bg-white border">
+            <input ng-model="search.billStatus" placeholder="Filter by status">
         </td>
+        <td class="bg-white border">
+            <input ng-model="search.dueDate" placeholder="Filter by due date">
+        </td>
+        <td class="bg-white border">
+            <input ng-model="search.date" placeholder="Filter by date">
+        </td>
+        <td class="border"></td>
+        <td class="border"></td>
     </tr>
 
     <tr id="billId" ng-repeat="bill in $ctrl.billHistory | filter:$ctrl.query track by bill.billId">
