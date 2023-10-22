@@ -85,13 +85,14 @@
         </td>
 
         <td>
-            <a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteInventory(inventory); $event.stopPropagation()" title="Delete">
+            <a ng-if="!inventory.isTemporarilyDeleted" class="btn btn-danger" href="javascript:void(0)" ng-click="deleteInventory(inventory); $event.stopPropagation()" title="Delete">
 
                 <lord-icon
                         src="https://cdn.lordicon.com/skkahier.json"
                         trigger="hover"
                         style="width:32px;height:32px">
                 </lord-icon>
+                <a ng-if="inventory.isTemporarilyDeleted"  class="btn btn-info" href="javascript:void(0)" ng-click="undoDelete(inventory); $event.stopPropagation()">Restore</a>
 
             </a>
         </td>
@@ -119,6 +120,10 @@
 
 
 <div id="loadingObject" style="display: none;">Loading...</div> <!--This is the page loading element-->
+
+<div id="notification" style="display: none; position: fixed; bottom: 10px; right: 10px; background-color: #4CAF50; color: white; padding: 10px; border-radius: 5px;">
+    Notification Text Here
+</div>
 
 
 <a ng-click="deleteAllInventories()">
