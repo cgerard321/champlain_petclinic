@@ -14,6 +14,18 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
     // Function to get pet type name based on petTypeId
 
 
+    vm.getBirthday = function(birthday) {
+        if (birthday) {
+            var date = new Date(birthday);
+            var year = date.getUTCFullYear();
+            var month = (date.getUTCMonth() + 1).toString().padStart(2, '0'); // Months are zero-based, so we add 1
+            var day = date.getUTCDate().toString().padStart(2, '0');
+            return year + ' / ' + month + ' / ' + day;
+        } else {
+            return '';
+        }
+    };
+
 
     // Fetch owner data
     $http.get('api/gateway/owners/' + $stateParams.ownerId)
@@ -40,6 +52,8 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
                 // Check if the trimmed response is empty
                 if (!trimmedResponse) {
                     return null; // Skip empty responses
+                } else {
+                    vm.pets = trimmedResponse;
                 }
 
                 try {
@@ -63,7 +77,9 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
             return $q.all(petPromises);
         })
         .then(function (responses) {
+
             vm.pets = responses.map(function (response) {
+
                 return response.data;
             });
             console.log("Pet Array:", vm.pets);
@@ -72,33 +88,5 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
             console.error('Error fetching pet data:', error);
         });
 
-    // Toggle pet's active status
-    vm.toggleActiveStatus = function (petId) {
-        $http.get('api/gateway/pets/' + petId + '?_=' + new Date().getTime(), { headers: { 'Cache-Control': 'no-cache' } })
-            .then(function (resp) {
-                console.log("Pet id is " + petId);
-                console.log(resp.data);
-                vm.pet = resp.data;
-                console.log("Pet id is " + vm.pet.petId);
-                console.log(vm.pet);
-                console.log("=====================================");
-                console.log(resp.data);
-                console.log("Active status before is:" + vm.pet.isActive);
-                vm.pet.isActive = vm.pet.isActive === "true" ? "false" : "true";
-                console.log("Active status after is:" + vm.pet.isActive);
+}
 
-                return $http.patch('api/gateway/pet/' + petId, {
-                    isActive: vm.pet.isActive
-                }, { headers: { 'Cache-Control': 'no-cache' } });
-            })
-            .then(function (resp) {
-                console.log("Pet active status updated successfully");
-                vm.pet = resp.data;
-                $timeout(); // Manually trigger the $digest cycle to update the UI
-            })
-            .catch(function (error) {
-                console.error("Error updating pet active status:", error);
-                // Handle the error appropriately
-            });
-    };
-};
