@@ -3,6 +3,8 @@ package com.petclinic.bffapigateway.domainclientlayer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Visits.*;
+import com.petclinic.bffapigateway.exceptions.BadRequestException;
+import com.petclinic.bffapigateway.exceptions.DuplicateTimeException;
 import com.petclinic.bffapigateway.utils.Security.Filters.JwtTokenFilter;
 import com.petclinic.bffapigateway.utils.Security.Filters.RoleFilter;
 import okhttp3.mockwebserver.MockResponse;
@@ -16,6 +18,7 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -133,6 +136,116 @@ class VisitsServiceClientIntegrationTest {
                 .verifyComplete();
 
     }
+
+    //DuplicateTime Exception Test
+    @Test
+    void createVisitForPet_DuplicateTime_ThrowsDuplicateTimeException() throws JsonProcessingException {
+        // Arrange
+        VisitRequestDTO visitRequestDTO = new VisitRequestDTO(
+                LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
+                "Test Visit",
+                "1",
+                "2"
+        );
+
+        String errorMessage = "{\"message\":\"A visit with the same time already exists.\"}";
+        // Mock the server response for duplicate time
+        server.enqueue(new MockResponse()
+                .setResponseCode(HttpStatus.CONFLICT.value()) // 409 status
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(errorMessage));
+
+        // Act
+        Mono<VisitResponseDTO> resultMono = visitsServiceClient.createVisitForPet(visitRequestDTO);
+
+        // Assert
+        StepVerifier.create(resultMono)
+                .expectErrorMatches(throwable -> throwable instanceof DuplicateTimeException
+                        && throwable.getMessage().contains("A visit with the same time already exists."))
+                .verify();
+    }
+
+    @Test
+    void createVisitForPet_NotFound_ThrowsNotFoundException() throws JsonProcessingException {
+        // Arrange
+        VisitRequestDTO visitRequestDTO = new VisitRequestDTO(
+                LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
+                "Test Visit",
+                "1",
+                "2"
+        );
+
+        String errorMessage = "{\"message\":\"Visit not found.\"}";
+        // Mock the server response for not found
+        server.enqueue(new MockResponse()
+                .setResponseCode(HttpStatus.NOT_FOUND.value()) // 404 status
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(errorMessage));
+
+        // Act
+        Mono<VisitResponseDTO> resultMono = visitsServiceClient.createVisitForPet(visitRequestDTO);
+
+        // Assert
+        StepVerifier.create(resultMono)
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException
+                        && throwable.getMessage().contains("Visit not found."))
+                .verify();
+    }
+
+    @Test
+    void createVisitForPet_BadRequest_ThrowsBadRequestException() throws JsonProcessingException {
+        // Arrange
+        VisitRequestDTO visitRequestDTO = new VisitRequestDTO(
+                LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
+                "Test Visit",
+                "1",
+                "2"
+        );
+
+        String errorMessage = "{\"message\":\"Invalid request.\"}";
+        // Mock the server response for bad request
+        server.enqueue(new MockResponse()
+                .setResponseCode(HttpStatus.BAD_REQUEST.value()) // 400 status
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(errorMessage));
+
+        // Act
+        Mono<VisitResponseDTO> resultMono = visitsServiceClient.createVisitForPet(visitRequestDTO);
+
+        // Assert
+        StepVerifier.create(resultMono)
+                .expectErrorMatches(throwable -> throwable instanceof BadRequestException
+                        && throwable.getMessage().contains("Invalid request."))
+                .verify();
+    }
+
+    @Test
+    void createVisitForPet_InvalidErrorResponse_ThrowsBadRequestException() throws JsonProcessingException {
+        // Arrange
+        VisitRequestDTO visitRequestDTO = new VisitRequestDTO(
+                LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
+                "Test Visit",
+                "1",
+                "2"
+        );
+
+        // Mock the server error response with a bad request status and non-JSON body, which should trigger an IOException during parsing
+        server.enqueue(new MockResponse()
+                .setResponseCode(HttpStatus.BAD_REQUEST.value()) // 400 status
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_VALUE) // setting non-JSON response type
+                .setBody("Invalid response"));
+
+        // Act
+        Mono<VisitResponseDTO> resultMono = visitsServiceClient.createVisitForPet(visitRequestDTO);
+
+        // Assert
+        StepVerifier.create(resultMono)
+                .expectErrorMatches(throwable -> throwable instanceof BadRequestException
+                        && throwable.getMessage().contains("Bad Request")) // checking that the error message is what's set in the IOException catch block
+                .verify();
+    }
+
+
     @Test
     void getVisitsForPet() throws Exception {
         VisitResponseDTO visitResponseDTO = new VisitResponseDTO("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee", LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", Status.UPCOMING);
