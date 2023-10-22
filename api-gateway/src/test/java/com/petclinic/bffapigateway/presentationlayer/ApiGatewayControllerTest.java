@@ -1846,10 +1846,10 @@ class ApiGatewayControllerTest {
 
     @Test
     void shouldGetAllBills() {
-        BillResponseDTO billResponseDTO = new BillResponseDTO("BillUUID","1","Test type","1",null,25.00, BillStatus.PAID,null);
+        BillResponseDTO billResponseDTO = new BillResponseDTO("BillUUID","1","Test type","1",null,25.00, 28.75,BillStatus.PAID,null);
 
 
-        BillResponseDTO billResponseDTO2 = new BillResponseDTO("BillUUID2","2","Test type","2",null,27.00, BillStatus.UNPAID,null);
+        BillResponseDTO billResponseDTO2 = new BillResponseDTO("BillUUID2","2","Test type","2",null,27.00, 31.05,BillStatus.UNPAID,null);
         when(billServiceClient.getAllBilling()).thenReturn(Flux.just(billResponseDTO,billResponseDTO2));
 
         client.get()
@@ -1865,9 +1865,9 @@ class ApiGatewayControllerTest {
 
     @Test
     void shouldGetAllPaidBills() {
-        BillResponseDTO billResponseDTO = new BillResponseDTO("BillUUID","1","Test type","1",null,25.00, BillStatus.PAID,null);
+        BillResponseDTO billResponseDTO = new BillResponseDTO("BillUUID","1","Test type","1",null,25.00, 28.75,BillStatus.PAID,null);
 
-        BillResponseDTO billResponseDTO2 = new BillResponseDTO("BillUUID2","2","Test type","2",null,27.00, BillStatus.PAID,null);
+        BillResponseDTO billResponseDTO2 = new BillResponseDTO("BillUUID2","2","Test type","2",null,27.00, 31.05, BillStatus.PAID,null);
         when(billServiceClient.getAllPaidBilling()).thenReturn(Flux.just(billResponseDTO,billResponseDTO2));
 
         client.get()
@@ -1883,9 +1883,9 @@ class ApiGatewayControllerTest {
 
     @Test
     void shouldGetAllUnpaidBills() {
-        BillResponseDTO billResponseDTO = new BillResponseDTO("BillUUID","1","Test type","1",null,25.00, BillStatus.UNPAID, null);
+        BillResponseDTO billResponseDTO = new BillResponseDTO("BillUUID","1","Test type","1",null,25.00, 28.75, BillStatus.UNPAID, null);
 
-        BillResponseDTO billResponseDTO2 = new BillResponseDTO("BillUUID2","2","Test type","2",null,27.00, BillStatus.UNPAID,null);
+        BillResponseDTO billResponseDTO2 = new BillResponseDTO("BillUUID2","2","Test type","2",null,27.00, 31.05,BillStatus.UNPAID,null);
         when(billServiceClient.getAllUnpaidBilling()).thenReturn(Flux.just(billResponseDTO,billResponseDTO2));
 
         client.get()
@@ -1901,9 +1901,9 @@ class ApiGatewayControllerTest {
 
     @Test
     void shouldGetAllOverdueBills() {
-        BillResponseDTO billResponseDTO = new BillResponseDTO("BillUUID","1","Test type","1",null,25.00, BillStatus.OVERDUE,null);
+        BillResponseDTO billResponseDTO = new BillResponseDTO("BillUUID","1","Test type","1",null,25.00, 28.75, BillStatus.OVERDUE,null);
 
-        BillResponseDTO billResponseDTO2 = new BillResponseDTO("BillUUID2","2","Test type","2",null,27.00, BillStatus.OVERDUE, null);
+        BillResponseDTO billResponseDTO2 = new BillResponseDTO("BillUUID2","2","Test type","2",null,27.00, 31.05, BillStatus.OVERDUE, null);
         when(billServiceClient.getAllOverdueBilling()).thenReturn(Flux.just(billResponseDTO,billResponseDTO2));
 
         client.get()

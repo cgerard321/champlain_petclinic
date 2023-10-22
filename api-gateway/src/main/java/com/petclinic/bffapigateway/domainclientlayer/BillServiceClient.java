@@ -33,7 +33,9 @@ public class BillServiceClient {
         return webClientBuilder.build().get()
                 .uri(billServiceUrl + "/{billId}", billId)
                 .retrieve()
-                .bodyToMono(BillResponseDTO.class);
+                .bodyToMono(BillResponseDTO.class)
+                .doOnNext(t -> t.setTaxedAmount(((t.getAmount() * 15)/100)+ t.getAmount()))
+                .doOnNext(t -> t.setTaxedAmount(Math.round(t.getTaxedAmount() * 100.0) / 100.0));
     }
     public Flux<BillResponseDTO> getBillsByOwnerId(final String customerId) {
         return webClientBuilder.build().get()
