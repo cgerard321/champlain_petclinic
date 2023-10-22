@@ -155,6 +155,8 @@ angular.module('billHistory')
                     console.log(error, 'Could not receive data');
                 }
 
+            } else {
+                return;
             }
         }
 
