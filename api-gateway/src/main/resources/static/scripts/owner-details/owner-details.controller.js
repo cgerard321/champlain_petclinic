@@ -20,10 +20,6 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
         .then(function (resp) {
             vm.owner = resp.data;
             console.log(vm.owner);
-
-            vm.owner.pets.forEach(function(pet) {
-                pet.isActive = pet.isActive === "true";
-            });
         })
         .catch(function (error) {
             console.error('Error fetching owner data:', error);
@@ -44,6 +40,8 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
                 // Check if the trimmed response is empty
                 if (!trimmedResponse) {
                     return null; // Skip empty responses
+                } else {
+                    vm.pets = trimmedResponse;
                 }
 
                 try {
@@ -78,82 +76,5 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
             console.error('Error fetching pet data:', error);
         });
 
-
-
-    // Toggle pet's active status
-    vm.toggleActiveStatus = function (petId) {
-        return $http.get('api/gateway/pets/' + petId + '?_=' + new Date().getTime(), { headers: { 'Cache-Control': 'no-cache' } })
-            .then(function (resp) {
-                console.log("Pet id is " + petId);
-                console.log(resp.data);
-                vm.pet = resp.data;
-                console.log("Pet id is " + vm.pet.petId);
-                console.log(vm.pet);
-                console.log("=====================================");
-                console.log(resp.data);
-                console.log("Active status before is:" + vm.pet.isActive);
-                vm.pet.isActive = vm.pet.isActive === "true" ? "false" : "true";
-                console.log("Active status after is:" + vm.pet.isActive);
-
-                return $http.patch('api/gateway/pet/' + petId, {
-                    isActive: vm.pet.isActive
-                }, { headers: { 'Cache-Control': 'no-cache' } });
-            })
-            .then(function (resp) {
-                console.log("Pet active status updated successfully");
-                vm.pet = resp.data;
-                // Schedule a function to be executed during the next digest cycle
-                $scope.$evalAsync();
-            })
-            .catch(function (error) {
-                console.error("Error updating pet active status:", error);
-                // Handle the error appropriately
-            });
-    };
-
-
-
-    // Watch the pet.isActive property
-    $scope.$watch('pet.isActive', function(newVal, oldVal) {
-        if (newVal !== oldVal) {
-            // The pet.isActive property has changed, update the UI
-            $scope.$apply();
-        }
-    });
-
-
-
-
-
-
-    vm.deletePet = function (petId) {
-        var config = {
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        };
-
-        $http.delete('api/gateway/pets/' + petId, config)
-            .then(function (resp) {
-                console.log("Pet deleted successfully");
-
-                /*  $http.get('api/gateway/owners/' + $stateParams.ownerId).then(function (resp) {
-                      self.owner = resp.data;
-                  });
-                 */
-
-                vm.owner.pets = vm.owner.pets.filter(function(pet) {
-                    return pet.petId !== petId;
-                });
-
-                $scope.$applyAsync();
-                // Handle the success appropriately
-            }).catch(function (error) {
-            console.error("Error deleting pet:", error);
-            // Handle the error appropriately
-        });
-    };
 }
-
-};
 
