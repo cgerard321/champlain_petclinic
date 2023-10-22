@@ -347,9 +347,21 @@ angular.module('vetDetails')
 
            });*/
         //photo
-        $http.get('api/gateway/vets/' + $stateParams.vetId + '/photo').then(function (resp) {
+        $http.get('api/gateway/vets/' + $stateParams.vetId + '/default-photo').then(function (resp) {
             self.vetPhoto = resp.data;
+            if(self.vetPhoto.filename == "vet_default.jpg")
+                self.vetPhoto.photo = self.vetPhoto.resourceBase64;
+            else
+                throw new Error();
             console.log(resp.data);
+        })
+        .catch(function (error) {
+            console.log(error);
+            $http.get('api/gateway/vets/' + $stateParams.vetId + '/photo').then(function (resp) {
+                self.vetPhoto = resp.data;
+                console.log(self.vetPhoto.photo);
+                console.log(resp.data);
+            });
         });
        /* //photo
         $http.get('api/gateway/vets/' + $stateParams.vetId + '/photo').then(function (resp) {

@@ -299,6 +299,13 @@ public class DataSetupService implements CommandLineRunner {
                 .data(StreamUtils.copyToByteArray(defaultPhoto.getInputStream()))
                 .build();
 
+        Photo photo7 = Photo.builder()
+                .vetId(v7.getVetId())
+                .filename(defaultPhotoName)
+                .imgType(defaultPhotoType)
+                .data(StreamUtils.copyToByteArray(defaultPhoto.getInputStream()))
+                .build();
+
 
         Badge b1 = Badge.builder()
                 .vetId(v1.getVetId())
@@ -344,7 +351,7 @@ public class DataSetupService implements CommandLineRunner {
                 .build();
 
         // Use method defined to create datasource
-        DataSource dataSource = createDataSource();
+        DataSource dataSource = EntityDtoUtil.createDataSource();
         try(
             // get connection from datasource
             Connection conn = dataSource.getConnection();
@@ -391,7 +398,7 @@ public class DataSetupService implements CommandLineRunner {
                                 "VALUES (?, ?, ?, ?)")
         ) {
 
-            Photo[] photos = {photo1,photo2,photo3,photo4,photo5,photo6};
+            Photo[] photos = {photo1,photo2,photo3,photo4,photo5,photo6, photo7};
 
             for (Photo photo : photos) {
                 insertStmt.setString(1, photo.getVetId());
@@ -411,12 +418,4 @@ public class DataSetupService implements CommandLineRunner {
         }
     }
 
-    private static DataSource createDataSource() {
-        // url specifies address of database along with username and password
-        final String url =
-                "jdbc:postgresql://postgres:5432/images?user=user&password=pwd";
-        final PGSimpleDataSource dataSource = new PGSimpleDataSource();
-        dataSource.setUrl(url);
-        return dataSource;
-    }
 }

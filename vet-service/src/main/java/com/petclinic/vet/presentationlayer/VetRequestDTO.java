@@ -23,5 +23,6 @@ public class VetRequestDTO {
     private Set<Workday> workday;
     private boolean active;
     private Set<SpecialtyDTO> specialties;
+    private boolean photoDefault;
 
 }

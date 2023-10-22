@@ -47,36 +47,47 @@ angular.module('vetForm')
             });
         }
 
+        //self.vet.photoDefault = true
+
         let uploadPhoto = function (vetId) {
+            console.log(vetId + " default before photo is: " + self.vet.photoDefault)
+
             const fileInput = document.querySelector('input[id="photoVet"]');
             let vetPhoto = "";
 
-            const file = fileInput.files[0]; // Changed fileInput.target.files to fileInput.files
-            const reader = new FileReader();
-            var image = {};
-            reader.onloadend = () => {
-                vetPhoto = reader.result
-                    .replace('data:', '')
-                    .replace(/^.+,/, '');
-                self.PreviewImage = vetPhoto;
-                image = {
-                    name: file.name,
-                    type: "jpeg",
-                    photo: vetPhoto
-                };
+                const file = fileInput.files[0]; // Changed fileInput.target.files to fileInput.files
+                const reader = new FileReader();
+                var image = {};
+                reader.onloadend = () => {
+                    vetPhoto = reader.result
+                        .replace('data:', '')
+                        .replace(/^.+,/, '');
+                    self.PreviewImage = vetPhoto;
+                    image = {
+                        name: file.name,
+                        type: "jpeg",
+                        photo: vetPhoto
+                    };
+                   /* if(self.vetPhoto.photo == null) {
 
-                // Use template literals for URL concatenation
-                $http.post(`api/gateway/vets/${vetId}/photos/${image.name}`, image) // Send the image object
-                    .then(function (response) {
-                        console.log("VET ID: " + vetId);
-                        console.log("RESPONSE: " + JSON.stringify(response.data)); // Access response data
-                    })
-                    .catch(function (error) {
-                        console.error(error);
-                    });
+                        self.vet.photoDefault = true
+                    }
+                    else {
+                        self.vet.photoDefault = false
+                    }*/
+                    console.log(vetId + " default after photo is: " + self.vet.photoDefault)
+                    // Use template literals for URL concatenation
+                    $http.post(`api/gateway/vets/${vetId}/photos/${image.name}`, image) // Send the image object
+                        .then(function (response) {
+                            console.log("VET ID: " + vetId);
+                            console.log("RESPONSE: " + JSON.stringify(response.data)); // Access response data
+                        })
+                        .catch(function (error) {
+                            console.error(error);
+                        });
+                };
+                reader.readAsDataURL(file);
             };
-            reader.readAsDataURL(file);
-        };
 
         let updatePhoto = function (vetId) {
             const fileInput = document.querySelector('input[id="photoVet"]');

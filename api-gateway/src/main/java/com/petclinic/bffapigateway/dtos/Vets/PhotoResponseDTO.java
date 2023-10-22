@@ -1,7 +1,7 @@
-package com.petclinic.vet.presentationlayer;
+package com.petclinic.bffapigateway.dtos.Vets;
 
 import lombok.*;
-import org.springframework.data.relational.core.mapping.Column;
+import org.springframework.core.io.Resource;
 
 @Getter
 @Setter
@@ -13,4 +13,5 @@ public class PhotoResponseDTO {
     private String filename;
     private String imgType;
     private String resourceBase64;
+    private byte[] resource;
 }

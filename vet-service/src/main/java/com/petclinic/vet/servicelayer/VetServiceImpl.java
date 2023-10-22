@@ -11,6 +11,8 @@ package com.petclinic.vet.servicelayer;
   * Ticket: feat(VVS-CPC-553): add veterinarian
  */
 
+import com.petclinic.vet.dataaccesslayer.Photo;
+import com.petclinic.vet.dataaccesslayer.PhotoRepository;
 import com.petclinic.vet.dataaccesslayer.VetRepository;
 import com.petclinic.vet.dataaccesslayer.badges.Badge;
 import com.petclinic.vet.dataaccesslayer.badges.BadgeRepository;
@@ -19,24 +21,29 @@ import com.petclinic.vet.exceptions.InvalidInputException;
 import com.petclinic.vet.exceptions.NotFoundException;
 import com.petclinic.vet.presentationlayer.VetRequestDTO;
 import com.petclinic.vet.presentationlayer.VetResponseDTO;
+import com.petclinic.vet.util.DatabaseInitializer;
 import com.petclinic.vet.util.EntityDtoUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.sql.DataSource;
 import java.io.IOException;
 import java.time.LocalDate;
 
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class VetServiceImpl implements VetService {
 
     private final VetRepository vetRepository;
     private final BadgeRepository badgeRepository;
+    private final PhotoRepository photoRepository;
 
     @Override
     public Flux<VetResponseDTO> getAll() {
@@ -61,6 +68,27 @@ public class VetServiceImpl implements VetService {
                     if(requestDTO.getSpecialties()==null)
                         return Mono.error(new InvalidInputException("invalid specialties"));
                     return Mono.just(requestDTO);
+                })
+                .flatMap(vet -> {
+                    vet.setPhotoDefault(true);
+                   //log.debug("Vetserviceimpl " + vet);
+                    //log.debug("In vet backend before default: " +vet.isPhotoDefault());
+                    if(vet.isPhotoDefault()){
+
+                        String defaultPhotoName = "vet_default.jpg";
+                        Photo photo = Photo.builder()
+                                .vetId(vet.getVetId())
+                                .filename(defaultPhotoName)
+                                .imgType("image/jpeg")
+                                .data(loadDefaultImage("images/vet_default.jpg"))
+                                .build();
+
+                         return photoRepository.save(photo)
+                                 .zipWith(Mono.just(vet))
+                                .map(tuple -> tuple.getT2());
+                    }
+                   // log.debug("In vet backend after default: " +vet.isPhotoDefault());
+                    return Mono.just(vet);
                 })
                 .map(EntityDtoUtil::vetRequestDtoToEntity)
                 .flatMap(newVet -> {
@@ -135,6 +163,14 @@ public class VetServiceImpl implements VetService {
     }
 
     private byte[] loadBadgeImage(String imagePath) {
+        try {
+            ClassPathResource cpr = new ClassPathResource(imagePath);
+            return StreamUtils.copyToByteArray(cpr.getInputStream());
+        } catch (IOException io) {
+            throw new InvalidInputException("Picture does not exist: " + io.getMessage());
+        }
+    }
+    private byte[] loadDefaultImage(String imagePath) {
         try {
             ClassPathResource cpr = new ClassPathResource(imagePath);
             return StreamUtils.copyToByteArray(cpr.getInputStream());

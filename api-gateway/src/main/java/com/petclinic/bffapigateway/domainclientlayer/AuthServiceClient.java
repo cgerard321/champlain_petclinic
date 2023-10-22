@@ -145,6 +145,7 @@ public class AuthServiceClient {
                                 VetRequestDTO vetDTO = VetRequestDTO.builder()
                                         .specialties(registerVet.getVet().getSpecialties())
                                         .active(registerVet.getVet().isActive())
+                                        .photoDefault(registerVet.getVet().isPhotoDefault())
                                         .email(registerVet.getEmail())
                                         .resume(registerVet.getVet().getResume())
                                         .workday(registerVet.getVet().getWorkday())

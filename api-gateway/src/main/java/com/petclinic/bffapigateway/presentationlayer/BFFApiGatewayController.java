@@ -349,6 +349,13 @@ public class BFFApiGatewayController {
                 .map(r -> ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE).body(r))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @GetMapping("vets/{vetId}/default-photo")
+    public Mono<ResponseEntity<PhotoResponseDTO>> getDefaultPhotoByVetId(@PathVariable String vetId) {
+        return vetsServiceClient.getDefaultPhotoByVetId(vetId)
+                .map(r -> ResponseEntity.ok().body(r))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 
     @PostMapping(value = "vets/{vetId}/photos/{photoName}")
     public Mono<ResponseEntity<Resource>> addPhoto(@PathVariable String vetId, @PathVariable String photoName, @RequestBody Mono<Resource> image) {
