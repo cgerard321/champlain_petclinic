@@ -1,6 +1,6 @@
 package com.petclinic.billing.domainclientlayer;
 
-import com.petclinic.billing.datalayer.VetDTO;
+import com.petclinic.billing.datalayer.VetResponseDTO;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -22,11 +22,11 @@ public class VetClient {
                 .build();
     }
 
-    public Mono<VetDTO> getVetByVetId(final String vetId) {
+    public Mono<VetResponseDTO> getVetByVetId(final String vetId) {
         return this.webClient
                 .get()
                 .uri("/{vetId}", vetId)
                 .retrieve()
-                .bodyToMono(VetDTO.class);
+                .bodyToMono(VetResponseDTO.class);
     }
 }
