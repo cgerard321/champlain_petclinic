@@ -75,10 +75,15 @@ angular.module('inventoryProductList')
             if (queryString !== '') {
                 apiUrl += "?" + queryString;
             }
-
+            let response = [];
             $http.get(apiUrl)
                 .then(function(resp) {
-                    self.inventoryProductList = resp.data;
+                    resp.data.forEach(function (current) {
+                        current.productPrice = current.productPrice.toFixed(2);
+                        current.productSalePrice = current.productSalePrice.toFixed(2);
+                        response.push(current);
+                    });
+                    self.inventoryProductList = response;
                     loadTotalItem(productName, productPrice, productQuantity)
                     InventoryService.setInventoryId(inventoryId);
                 })
@@ -125,8 +130,14 @@ angular.module('inventoryProductList')
                 self.lastParams.productPrice = null;
                 self.lastParams.productQuantity = null;
                 let inventoryId = $stateParams.inventoryId;
+                let response = [];
                 $http.get('api/gateway/inventory/' + $stateParams.inventoryId + '/products-pagination?page=' + self.currentPage + '&size=' + self.pageSize).then(function (resp) {
-                    self.inventoryProductList = resp.data;
+                    resp.data.forEach(function (current) {
+                        current.productPrice = current.productPrice.toFixed(2);
+                        current.productSalePrice = current.productSalePrice.toFixed(2);
+                        response.push(current);
+                    });
+                    self.inventoryProductList = response;
                     inventoryId = $stateParams.inventoryId;
                     loadTotalItem(productName, productPrice, productQuantity, productSalePrice)
                     InventoryService.setInventoryId(inventoryId);

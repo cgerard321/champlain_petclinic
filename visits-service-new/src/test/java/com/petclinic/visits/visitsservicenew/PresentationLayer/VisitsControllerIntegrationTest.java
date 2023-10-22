@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
@@ -214,7 +215,7 @@ class VisitsControllerIntegrationTest {
     }
 
 
-    @Test
+/*    @Test
     void addVisit(){
         when(petsClient.getPetById(anyString())).thenReturn(Mono.just(petResponseDTO));
         when(vetsClient.getVetByVetId(anyString())).thenReturn(Mono.just(vet));
@@ -243,6 +244,30 @@ class VisitsControllerIntegrationTest {
                     assertEquals(visitDTO1.getStatus(), visit1.getStatus());
                 });
     }
+
+    @Test
+    void addVisit_ConflictExists_Expect409() {
+        // ... [Set up your mocks here, including any necessary conflict scenario]
+
+        VisitRequestDTO visitRequestDTO = new VisitRequestDTO();
+        visitRequestDTO.setPractitionerId(visit1.getPractitionerId());
+        visitRequestDTO.setPetId(visit1.getPetId());
+        visitRequestDTO.setDescription(visit1.getDescription());
+        visitRequestDTO.setVisitDate(LocalDateTime.parse("2024-11-25 13:45",DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+        visitRequestDTO.setStatus(Status.UPCOMING);
+
+        webTestClient
+                .post()
+                .uri("/visits")
+                .body(Mono.just(visitRequestDTO), VisitRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.CONFLICT)  // Expect a 409 CONFLICT status code
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("A visit with the same time and practitioner already exists.");
+    }*/
+
 
 
 

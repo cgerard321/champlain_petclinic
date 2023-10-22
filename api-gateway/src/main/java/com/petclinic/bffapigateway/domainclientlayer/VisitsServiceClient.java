@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Visits.*;
 import com.petclinic.bffapigateway.exceptions.BadRequestException;
+import com.petclinic.bffapigateway.exceptions.DuplicateTimeException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -117,9 +118,14 @@ public class VisitsServiceClient {
 
                             if (httpStatus == HttpStatus.NOT_FOUND) {
                                 return Mono.error(new NotFoundException(message));
-                            } else {
+                            }
+                            else if (httpStatus == HttpStatus.CONFLICT){
+                                return Mono.error(new DuplicateTimeException(message));
+                            }
+                            else {
                                 return Mono.error(new BadRequestException(message));
                             }
+
                         } catch (IOException e) {
                             // Handle parsing error
                             return Mono.error(new BadRequestException("Bad Request"));
