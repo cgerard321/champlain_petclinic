@@ -253,7 +253,7 @@ class VisitControllerUnitTest {
         Mockito.when(visitService.deleteAllCancelledVisits()).thenReturn(Mono.empty());
 
         // Act & Assert
-       webTestClient
+        webTestClient
                .delete()
                .uri("/visits/cancelled")
                .exchange()
