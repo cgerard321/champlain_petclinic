@@ -82,17 +82,31 @@ class VetsClientUnitTest {
                 .expectErrorMatches(throwable -> throwable instanceof NotFoundException && throwable.getMessage().equals("No veterinarian was found with vetId: " + invalidVetId))
                 .verify();
     }
+    @Test
+    void getVetByVetId_Other4xx() {
+        String invalidVetId = "3333";
+        mockBackEnd.enqueue(new MockResponse()
+                .setResponseCode(400)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .addHeader("Content-Type", "application/json"));
+
+        Mono<VetDTO> result = vetsClient.getVetByVetId(invalidVetId);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong"))
+                .verify();
+    }
 
     @Test
-    void getVetById_Other5xx() {
-        String invalidId = "3333";
+    void getVetByVetId_Other5xx() {
+        String invalidVetId = "3333";
 
         mockBackEnd.enqueue(new MockResponse()
                 .setResponseCode(500)
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .addHeader("Content-Type", "application/json"));
 
-        Mono<VetDTO> result = vetsClient.getVetByVetId(invalidId);
+        Mono<VetDTO> result = vetsClient.getVetByVetId(invalidVetId);
 
 
         StepVerifier.create(result)
