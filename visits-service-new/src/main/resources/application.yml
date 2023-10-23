@@ -8,6 +8,9 @@ app:
   customers-service-reactive:
     host: localhost
     port: 8090
+  billing-service:
+    host: localhost
+    port: 7004
 
 
 logging:
@@ -67,7 +70,14 @@ app:
     host: customers-service-reactive
     port: 8080
 
+  billing-service:
+    host: billing-service
+    port: 8080
+
 logging:
   level:
     root: INFO
     com.petclinic: DEBUG
+
+server:
+  port: 8080

@@ -20,4 +20,6 @@ private LocalDateTime visitDate;
     private String petId;
     private String practitionerId;
     private Status status;
+    private String billId;
+    private String customerId;
 }
