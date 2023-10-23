@@ -25,17 +25,18 @@ public class VisitServiceImpl implements VisitService {
     private final VisitRepo repo;
     private final VetsClient vetsClient;
     private final PetsClient petsClient;
+    private final EntityDtoUtil entityDtoUtil;
 
     @Override
     public Flux<VisitResponseDTO> getAllVisits() {
-        return repo.findAll().map(EntityDtoUtil::toVisitResponseDTO);
+        return repo.findAll().flatMap(visit -> entityDtoUtil.toVisitResponseDTO(visit));
     }
 
     @Override
     public Flux<VisitResponseDTO> getVisitsForPet(String petId) {
         return validatePetId(petId)
                 .thenMany(repo.findByPetId(petId)
-                        .map(EntityDtoUtil::toVisitResponseDTO));
+                        .flatMap(visit -> entityDtoUtil.toVisitResponseDTO(visit)));
     }
 
     @Override
@@ -56,20 +57,20 @@ public class VisitServiceImpl implements VisitService {
                 status = Status.COMPLETED;
         }
         return repo.findAllByStatus(statusString)
-                .map(EntityDtoUtil::toVisitResponseDTO);
+                .flatMap(visit -> entityDtoUtil.toVisitResponseDTO(visit));
     }
 
     @Override
     public Flux<VisitResponseDTO> getVisitsForPractitioner(String vetId) {
         return validateVetId(vetId)
                 .thenMany(repo.findVisitsByPractitionerId(vetId))
-                .map(EntityDtoUtil::toVisitResponseDTO);
+                .flatMap(visit -> entityDtoUtil.toVisitResponseDTO(visit));
     }
 
     @Override
     public Mono<VisitResponseDTO> getVisitByVisitId(String visitId) {
         return repo.findByVisitId(visitId)
-                .map(EntityDtoUtil::toVisitResponseDTO);
+                .flatMap(visit -> entityDtoUtil.toVisitResponseDTO(visit));
     }
 
     @Override
@@ -81,8 +82,8 @@ public class VisitServiceImpl implements VisitService {
                         .then(Mono.just(visitRequestDTO))
                 )
                 .doOnNext(v -> System.out.println("Request Date: " + v.getVisitDate())) // Debugging
-                .map(EntityDtoUtil::toVisitEntity)
-                .doOnNext(x -> x.setVisitId(EntityDtoUtil.generateVisitIdString()))
+                .map(visitRequestDTO -> entityDtoUtil.toVisitEntity(visitRequestDTO))
+                .doOnNext(x -> x.setVisitId(entityDtoUtil.generateVisitIdString()))
                 .doOnNext(v -> System.out.println("Entity Date: " + v.getVisitDate())) // Debugging
                 .flatMap(visit ->
                         repo.findByVisitDateAndPractitionerId(visit.getVisitDate(), visit.getPractitionerId()) // FindVisits method in repository
@@ -96,7 +97,7 @@ public class VisitServiceImpl implements VisitService {
                                     }
                                 })
                 )
-                .map(EntityDtoUtil::toVisitResponseDTO); // Convert the saved Visit entity to a DTO
+                .flatMap(visit -> entityDtoUtil.toVisitResponseDTO(visit));
     }
 
 
@@ -147,13 +148,13 @@ public class VisitServiceImpl implements VisitService {
                         .flatMap(visitRequestDTO -> validatePetId(visitRequestDTO.getPetId())
                                 .then(validateVetId(visitRequestDTO.getPractitionerId()))
                                 .then(Mono.just(visitRequestDTO)))
-                        .map(EntityDtoUtil::toVisitEntity)
+                        .map(visitRequestDTO -> entityDtoUtil.toVisitEntity(visitRequestDTO))
                         .doOnNext(visitEntityToUpdate -> {
                             visitEntityToUpdate.setVisitId(visitEntity.getVisitId());
                             visitEntityToUpdate.setId(visitEntity.getId());
                         }))
                 .flatMap(repo::save)
-                .map(EntityDtoUtil::toVisitResponseDTO);
+                .flatMap(visit -> entityDtoUtil.toVisitResponseDTO(visit));
     }
 
     @Override
@@ -182,7 +183,7 @@ public class VisitServiceImpl implements VisitService {
         return repo.findByVisitId(visitId)
                 .doOnNext(v -> v.setStatus(newStatus))
                 .flatMap(repo::save)
-                .map(EntityDtoUtil::toVisitResponseDTO);
+                .flatMap(visit -> entityDtoUtil.toVisitResponseDTO(visit));
     }
 
 
