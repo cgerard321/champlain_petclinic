@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.*;
@@ -60,8 +61,34 @@ class VisitsServiceClientIntegrationTest {
 
     @Test
     void getAllVisits() throws JsonProcessingException {
-        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", Status.UPCOMING);
-        VisitResponseDTO visitResponseDTO2 = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", Status.UPCOMING);
+        VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
+                .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .description("this is a dummy description")
+                .petId("2")
+                .petName("YourPetNameHere")
+                .petBirthDate(new Date())
+                .practitionerId("2")
+                .vetFirstName("VetFirstNameHere")
+                .vetLastName("VetLastNameHere")
+                .vetEmail("vet@email.com")
+                .vetPhoneNumber("123-456-7890")
+                .status(Status.UPCOMING)
+                .build();
+        VisitResponseDTO visitResponseDTO2 = VisitResponseDTO.builder()
+                .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .description("this is a dummy description")
+                .petId("2")
+                .petName("YourPetNameHere")
+                .petBirthDate(new Date())
+                .practitionerId("2")
+                .vetFirstName("VetFirstNameHere")
+                .vetLastName("VetLastNameHere")
+                .vetEmail("vet@email.com")
+                .vetPhoneNumber("123-456-7890")
+                .status(Status.UPCOMING)
+                .build();
         server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setBody(objectMapper.writeValueAsString(Arrays.asList(visitResponseDTO, visitResponseDTO2))).addHeader("Content-Type", "application/json"));
 
@@ -90,7 +117,20 @@ class VisitsServiceClientIntegrationTest {
 
     @Test
     void getVisitsForStatus() throws JsonProcessingException{
-        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee", LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", Status.UPCOMING);
+        VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
+                .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .description("this is a dummy description")
+                .petId("2")
+                .petName("YourPetNameHere")
+                .petBirthDate(new Date())
+                .practitionerId("2")
+                .vetFirstName("VetFirstNameHere")
+                .vetLastName("VetLastNameHere")
+                .vetEmail("vet@email.com")
+                .vetPhoneNumber("123-456-7890")
+                .status(Status.UPCOMING)
+                .build();
         server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setBody(objectMapper.writeValueAsString(visitResponseDTO)).addHeader("Content-Type", "application/json"));
 
@@ -111,14 +151,20 @@ class VisitsServiceClientIntegrationTest {
         );
 
         // Mock the server response
-        VisitResponseDTO visitResponseDTO = new VisitResponseDTO(
-                "73b5c112-5703-4fb7-b7bc-ac8186811ae1",
-                LocalDateTime.parse("2024-11-25 14:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
-                "Test Visit",
-                "1",
-                "2",
-                Status.UPCOMING
-        );
+        VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
+                .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .description("this is a dummy description")
+                .petId("2")
+                .petName("YourPetNameHere")
+                .petBirthDate(new Date())
+                .practitionerId("2")
+                .vetFirstName("VetFirstNameHere")
+                .vetLastName("VetLastNameHere")
+                .vetEmail("vet@email.com")
+                .vetPhoneNumber("123-456-7890")
+                .status(Status.UPCOMING)
+                .build();
         server.enqueue(new MockResponse()
                 .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .setBody(objectMapper.writeValueAsString(visitResponseDTO))
@@ -135,7 +181,20 @@ class VisitsServiceClientIntegrationTest {
     }
     @Test
     void getVisitsForPet() throws Exception {
-        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee", LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", Status.UPCOMING);
+        VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
+                .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .description("this is a dummy description")
+                .petId("2")
+                .petName("YourPetNameHere")
+                .petBirthDate(new Date())
+                .practitionerId("2")
+                .vetFirstName("VetFirstNameHere")
+                .vetLastName("VetLastNameHere")
+                .vetEmail("vet@email.com")
+                .vetPhoneNumber("123-456-7890")
+                .status(Status.UPCOMING)
+                .build();
         server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).setBody(objectMapper.writeValueAsString(visitResponseDTO)).addHeader("Content-Type", "application/json"));
 
         Flux<VisitResponseDTO> visits = visitsServiceClient.getVisitsForPet("2");
@@ -145,7 +204,21 @@ class VisitsServiceClientIntegrationTest {
     }
     @Test
     void getVisitById() throws Exception {
-        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee", LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", Status.UPCOMING);
+        VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
+                .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .description("this is a dummy description")
+                .petId("2")
+                .petName("YourPetNameHere")  
+                .petBirthDate(new Date())
+                .practitionerId("2")
+                .vetFirstName("VetFirstNameHere")
+                .vetLastName("VetLastNameHere")
+                .vetEmail("vet@email.com")
+                .vetPhoneNumber("123-456-7890")
+                .status(Status.UPCOMING)
+                .build();
+
         server.enqueue(new MockResponse().setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE).setBody(objectMapper.writeValueAsString(visitResponseDTO)).addHeader("Content-Type", "application/json"));
 
         Mono<VisitResponseDTO> visitResponseDTOMono = visitsServiceClient.getVisitByVisitId("773fa7b2-e04e-47b8-98e7-4adf7cfaaeee");
