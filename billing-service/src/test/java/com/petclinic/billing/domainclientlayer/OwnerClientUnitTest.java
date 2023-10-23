@@ -3,6 +3,7 @@ package com.petclinic.billing.domainclientlayer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.billing.datalayer.OwnerResponseDTO;
+import com.petclinic.billing.exceptions.NotFoundException;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
@@ -18,6 +19,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.io.IOException;
+import java.rmi.ServerException;
 
 public class OwnerClientUnitTest {
     private OwnerClient ownerClient;
@@ -57,5 +59,56 @@ public class OwnerClientUnitTest {
         StepVerifier.create(ownerResponseDTOMono)
                 .expectNextMatches(ownerResponseDTO1 -> ownerResponseDTO1.getOwnerId().equals(ownerId))
                 .verifyComplete();
+    }
+
+    @Test
+    public void getOwnerByOwnerId_Invalid(){
+        String invalidId = "00000000";
+
+        mockBackEnd.enqueue(new MockResponse()
+                .setResponseCode(404)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .addHeader("Content-Type", "application/json"));
+
+        Mono<OwnerResponseDTO> result = ownerClient.getOwnerByOwnerId(invalidId);
+
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException && throwable.getMessage().equals("Owner not found with ownerId: " + invalidId))
+                .verify();
+    }
+
+    @Test
+    public void getOwnerByOwnerId_ClientError() {
+        String ownerId = "000";
+
+        // Simulate a 4xx client error, e.g., 400 Bad Request
+        mockBackEnd.enqueue(new MockResponse()
+                .setResponseCode(400)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .addHeader("Content-Type", "application/json"));
+
+        Mono<OwnerResponseDTO> result = ownerClient.getOwnerByOwnerId(ownerId);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Client error for ownerId: " + ownerId))
+                .verify();
+    }
+
+    @Test
+    public void getOwnerByOwnerId_ServerError() {
+        String ownerId = "000";
+
+        // Simulate a 5xx server error, e.g., 500 Internal Server Error
+        mockBackEnd.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .addHeader("Content-Type", "application/json"));
+
+        Mono<OwnerResponseDTO> result = ownerClient.getOwnerByOwnerId(ownerId);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof ServerException && throwable.getMessage().equals("Server error for ownerId: " + ownerId))
+                .verify();
     }
 }

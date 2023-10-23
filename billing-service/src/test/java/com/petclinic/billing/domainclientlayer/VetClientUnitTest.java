@@ -3,6 +3,7 @@ package com.petclinic.billing.domainclientlayer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.billing.datalayer.VetResponseDTO;
+import com.petclinic.billing.exceptions.NotFoundException;
 import okhttp3.mockwebserver.MockResponse;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -18,6 +19,7 @@ import reactor.test.StepVerifier;
 import okhttp3.mockwebserver.MockWebServer;
 
 import java.io.IOException;
+import java.rmi.ServerException;
 
 public class VetClientUnitTest {
 
@@ -61,5 +63,52 @@ public class VetClientUnitTest {
                         response.getFirstName().equals("John") &&
                         response.getLastName().equals("Doe"))
                 .verifyComplete();
+    }
+    @Test
+    public void getVetByVetId_Invalid(){
+        String invalidId = "00000000";
+
+        mockBackEnd.enqueue(new MockResponse()
+                        .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                        .setResponseCode(404)
+                        .addHeader("Content-Type", "application/json"));
+        Mono<VetResponseDTO> result = vetClient.getVetByVetId(invalidId);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException && throwable.getMessage().equals("Vet not found with vetId: " + invalidId))
+                .verify();
+    }
+    @Test
+    public void getVetByVetId_ClientError() {
+        String vetId = "456";
+
+        // Simulate a 4xx client error, e.g., 400 Bad Request
+        mockBackEnd.enqueue(new MockResponse()
+                .setResponseCode(400)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .addHeader("Content-Type", "application/json"));
+
+        Mono<VetResponseDTO> result = vetClient.getVetByVetId(vetId);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Client error for vetId: " + vetId))
+                .verify();
+    }
+
+    @Test
+    public void getVetByVetId_ServerError() {
+        String vetId = "789";
+
+        // Simulate a 5xx server error, e.g., 500 Internal Server Error
+        mockBackEnd.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .addHeader("Content-Type", "application/json"));
+
+        Mono<VetResponseDTO> result = vetClient.getVetByVetId(vetId);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof ServerException && throwable.getMessage().equals("Server error for vetId: " + vetId))
+                .verify();
     }
 }
