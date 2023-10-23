@@ -2,10 +2,11 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.bffapigateway.dtos.Visits.*;
+import com.petclinic.bffapigateway.dtos.Visits.Status;
+import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
+import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.exceptions.BadRequestException;
 import com.petclinic.bffapigateway.exceptions.DuplicateTimeException;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -24,10 +25,8 @@ import java.io.IOException;
  */
 
 @Component
-@Slf4j
 public class VisitsServiceClient {
     private final WebClient webClient;
-
     @Autowired
     public VisitsServiceClient(
             @Value("${app.visits-service-new.host}") String visitsServiceHost,
@@ -125,7 +124,6 @@ public class VisitsServiceClient {
                             else {
                                 return Mono.error(new BadRequestException(message));
                             }
-
                         } catch (IOException e) {
                             // Handle parsing error
                             return Mono.error(new BadRequestException("Bad Request"));
