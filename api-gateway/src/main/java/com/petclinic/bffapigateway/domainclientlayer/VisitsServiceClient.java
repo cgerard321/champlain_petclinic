@@ -2,7 +2,6 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.bffapigateway.BFFApiGatewayApplication;
 import com.petclinic.bffapigateway.dtos.Visits.*;
 import com.petclinic.bffapigateway.exceptions.BadRequestException;
 import com.petclinic.bffapigateway.exceptions.DuplicateTimeException;
@@ -25,10 +24,8 @@ import java.io.IOException;
  */
 
 @Component
-@Slf4j
 public class VisitsServiceClient {
     private final WebClient webClient;
-
     @Autowired
     public VisitsServiceClient(
             @Value("${app.visits-service-new.host}") String visitsServiceHost,
@@ -126,40 +123,12 @@ public class VisitsServiceClient {
                             else {
                                 return Mono.error(new BadRequestException(message));
                             }
-
                         } catch (IOException e) {
                             // Handle parsing error
                             return Mono.error(new BadRequestException("Bad Request"));
                         }
                     });
             })
-                .onStatus(HttpStatusCode::is2xxSuccessful, response -> {
-                    HttpStatusCode httpStatus = response.statusCode();
-                    if (httpStatus == HttpStatus.CREATED) {
-
-                        return null;
-//                        return response.bodyToMono(VisitResponseDTO.class);
-                    }
-                    return null;
-
-//                    return response.bodyToMono(String.class)
-//                        .flatMap(errorMessage -> {
-//                            try {
-//                                ObjectMapper objectMapper = new ObjectMapper();
-//                                JsonNode errorNode = objectMapper.readTree(errorMessage);
-//                                String message = errorNode.get("message").asText();
-//
-//                                if (httpStatus == HttpStatus.NOT_FOUND) {
-//                                    return Mono.error(new NotFoundException(message));
-//                                } else {
-//                                    return Mono.error(new BadRequestException(message));
-//                                }
-//                            } catch (IOException e) {
-//                                // Handle parsing error
-//                                return Mono.error(new BadRequestException("Bad Request"));
-//                            }
-//                        });
-                })
             .bodyToMono(VisitResponseDTO.class);
     }
 

@@ -1,4 +1,4 @@
-package com.petclinic.visits.visitsservicenew.DomainClientLayer;
+package com.petclinic.visits.visitsservicenew.DomainClientLayer.SimpleJavaMail;
 
 
 import lombok.NoArgsConstructor;
@@ -11,12 +11,7 @@ import org.simplejavamail.mailer.MailerBuilder;
 
 @NoArgsConstructor
 public class SimpleJavaMailClient {
-    private final Email email = EmailBuilder.startingBlank()
-            .from("From", "champlain.petclinic@gmail.com")
-            .to("William", "william.chalifoux@gmail.com")
-            .withSubject("Email test with simple java mail")
-            .withPlainText("Email Body")
-            .buildEmail();
+
 
     private final Mailer mailer = MailerBuilder
             .withSMTPServer("smtp.gmail.com", 587, "champlain.petclinic@gmail.com", System.getenv("SMTP_PASS")).withTransportStrategy(TransportStrategy.SMTP_TLS)
@@ -24,8 +19,7 @@ public class SimpleJavaMailClient {
             .buildMailer();
 
 
-    public void sendMail(){
-        /*Email email*/
+    public void sendMail(Email email){
         mailer.sendMail(email);
     }
 

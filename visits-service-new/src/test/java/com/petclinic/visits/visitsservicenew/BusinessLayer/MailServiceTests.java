@@ -1,10 +1,9 @@
-package com.petclinic.authservice.businesslayer;
+package com.petclinic.visits.visitsservicenew.BusinessLayer;
 
 
-import com.petclinic.authservice.domainclientlayer.Mail.Mail;
-import com.petclinic.authservice.domainclientlayer.Mail.MailService;
-
-import com.petclinic.authservice.domainclientlayer.Mail.MailServiceCall;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.Mailing.Mail;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.Mailing.MailService;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.Mailing.MailServiceCall;
 import okhttp3.MediaType;
 import okhttp3.ResponseBody;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,7 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.HttpClientErrorException;
 import retrofit2.Response;
 import retrofit2.mock.Calls;
@@ -23,13 +21,10 @@ import java.io.IOException;
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest
-@ActiveProfiles("test")
-public class AuthMailServiceTests {
-
+@SpringBootTest()
+public class MailServiceTests {
     @Autowired
     private MailService mailService;
 
@@ -44,12 +39,8 @@ public class AuthMailServiceTests {
 
     @BeforeEach
     void setUp(){
-
-        when(mockMailCall.sendMail(EMAIL_VALID))
-                .thenReturn(Calls.response(format("Message sent to %s", EMAIL_VALID.getTo())));
-
-        when(mockMailCall.sendMail(EMAIL_EMPTY_INVALID))
-                .thenReturn(Calls.response(Response.error(400, ResponseBody.create("Bad request", JSON))));
+        when(mockMailCall.sendMail(EMAIL_VALID)).thenReturn(Calls.response(format("Message sent to %s", EMAIL_VALID.getTo())));
+        when(mockMailCall.sendMail(EMAIL_EMPTY_INVALID)).thenReturn(Calls.response(Response.error(400, ResponseBody.create("Bad request", JSON))));
     }
 
     @Test
@@ -72,8 +63,7 @@ public class AuthMailServiceTests {
     @Test
     @DisplayName("IOException graceful handling")
     void io_exception_graceful_handling() {
-        when(mockMailCall.sendMail(EMAIL_EMPTY_INVALID))
-                .thenReturn(Calls.failure(new IOException()));
+        when(mockMailCall.sendMail(EMAIL_EMPTY_INVALID)).thenReturn(Calls.failure(new IOException()));
         HttpClientErrorException httpClientErrorException =
                 assertThrows(HttpClientErrorException.class, () -> mailService.sendMail(EMAIL_EMPTY_INVALID));
         assertEquals("500 Unable to send mail", httpClientErrorException.getMessage());
