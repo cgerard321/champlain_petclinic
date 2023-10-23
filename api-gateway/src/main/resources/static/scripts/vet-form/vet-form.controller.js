@@ -48,8 +48,6 @@ angular.module('vetForm')
         }
 
         let uploadPhoto = function (vetId) {
-            console.log(vetId + " default before photo is: " + self.vet.photoDefault)
-
             const fileInput = document.querySelector('input[id="photoVet"]');
             let vetPhoto = "";
 
@@ -213,8 +211,6 @@ angular.module('vetForm')
             } else {
                 vet.photoDefault = true;
             }
-            console.log("Before posting, photo is: " + vet.photoDefault);
-
             var req;
             if (id) {
                 req = $http.put("api/gateway/vets/" + vetId, vet);

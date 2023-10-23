@@ -3,6 +3,7 @@ package com.petclinic.vet.servicelayer;
 import com.petclinic.vet.dataaccesslayer.Photo;
 import com.petclinic.vet.dataaccesslayer.PhotoRepository;
 import com.petclinic.vet.exceptions.InvalidInputException;
+import com.petclinic.vet.presentationlayer.PhotoResponseDTO;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWeb
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.r2dbc.connection.init.ConnectionFactoryInitializer;
 import reactor.core.publisher.Mono;
@@ -63,6 +65,30 @@ class PhotoServiceImplTest {
 
                     Resource photo = photoMono.block();
                     assertEquals(photo, image);
+                })
+                .verifyComplete();
+    }
+    @Test
+    void getDefaultPhotoByValidVetId() {
+        String photoName = "vet_default.jpg";
+        Photo savedDefaultPhoto = new Photo();
+        savedDefaultPhoto.setVetId(VET_ID);
+        savedDefaultPhoto.setFilename(photoName);
+        savedDefaultPhoto.setImgType("image/jpeg");
+        savedDefaultPhoto.setData(photoData);
+        when(photoRepository.save(any(Photo.class))).thenReturn(Mono.just(savedDefaultPhoto));
+
+        when(photoRepository.findByVetId(anyString())).thenReturn(Mono.just(photo));
+
+        Mono<PhotoResponseDTO> defaultPhotoMono = photoService.getDefaultPhotoByVetId(VET_ID);
+
+        StepVerifier
+                .create(defaultPhotoMono)
+                .consumeNextWith(image -> {
+                    assertNotNull(image);
+
+                    PhotoResponseDTO photo = defaultPhotoMono.block();
+                    assertEquals(photo.getVetId(), image.getVetId());
                 })
                 .verifyComplete();
     }

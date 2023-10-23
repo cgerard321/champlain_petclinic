@@ -70,9 +70,6 @@ public class VetServiceImpl implements VetService {
                     return Mono.just(requestDTO);
                 })
                 .flatMap(vet -> {
-                    //vet.setPhotoDefault(true);
-                   //log.debug("Vetserviceimpl " + vet);
-                    log.debug("In vet backend before default: " +vet.isPhotoDefault());
                     if(vet.isPhotoDefault()){
 
                         String defaultPhotoName = "vet_default.jpg";
@@ -80,14 +77,13 @@ public class VetServiceImpl implements VetService {
                                 .vetId(vet.getVetId())
                                 .filename(defaultPhotoName)
                                 .imgType("image/jpeg")
-                                .data(loadDefaultImage("images/vet_default.jpg"))
+                                .data(loadImage("images/vet_default.jpg"))
                                 .build();
 
                          return photoRepository.save(photo)
                                  .zipWith(Mono.just(vet))
                                 .map(tuple -> tuple.getT2());
                     }
-                   // log.debug("In vet backend after default: " +vet.isPhotoDefault());
                     return Mono.just(vet);
                 })
                 .map(EntityDtoUtil::vetRequestDtoToEntity)
@@ -96,7 +92,7 @@ public class VetServiceImpl implements VetService {
                             .vetId(newVet.getVetId())
                             .badgeTitle(BadgeTitle.VALUED)
                             .badgeDate(String.valueOf(LocalDate.now().getYear()))
-                            .data(loadBadgeImage("images/empty_food_bowl.png"))
+                            .data(loadImage("images/empty_food_bowl.png"))
                             .build();
 
                     //combine results of two Mono operations, creating a Tuple2
@@ -162,15 +158,7 @@ public class VetServiceImpl implements VetService {
                 .flatMap(vetRepository::delete);
     }
 
-    private byte[] loadBadgeImage(String imagePath) {
-        try {
-            ClassPathResource cpr = new ClassPathResource(imagePath);
-            return StreamUtils.copyToByteArray(cpr.getInputStream());
-        } catch (IOException io) {
-            throw new InvalidInputException("Picture does not exist: " + io.getMessage());
-        }
-    }
-    private byte[] loadDefaultImage(String imagePath) {
+    private byte[] loadImage(String imagePath) {
         try {
             ClassPathResource cpr = new ClassPathResource(imagePath);
             return StreamUtils.copyToByteArray(cpr.getInputStream());

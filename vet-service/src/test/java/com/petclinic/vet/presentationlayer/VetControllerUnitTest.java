@@ -95,6 +95,7 @@ class VetControllerUnitTest {
     String INVALID_VET_ID = "mjbedf";
 
     ClassPathResource cpr=new ClassPathResource("images/full_food_bowl.png");
+    ClassPathResource cpr2=new ClassPathResource("images/vet_default.jpg");
 
     @Test
     void getAllRatingForVetByVetId_ShouldSucceed() {
@@ -776,6 +777,27 @@ class VetControllerUnitTest {
                     assertEquals(badgeResponseDTO.getResourceBase64(), responseDTO.getResourceBase64());
                 });
     }
+    @Test
+    void getDefaultPhotoByVetId_shouldSucceed() throws IOException {
+        PhotoResponseDTO photoResponseDTO = buildPhotoResponseDTO();
+
+        when(photoService.getDefaultPhotoByVetId(anyString()))
+                .thenReturn(Mono.just(photoResponseDTO));
+
+        client.get()
+                .uri("/vets/{vetId}/default-photo", VET_ID)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(PhotoResponseDTO.class)
+                .value(responseDTO -> {
+                    assertEquals(photoResponseDTO.getFilename(), responseDTO.getFilename());
+                    assertEquals(photoResponseDTO.getImgType(), responseDTO.getImgType());
+                    assertEquals(photoResponseDTO.getVetId(), responseDTO.getVetId());
+                    assertEquals(photoResponseDTO.getResourceBase64(), responseDTO.getResourceBase64());
+                });
+    }
+
 
     private Resource buildPhotoData(Photo photo) {
         ByteArrayResource resource = new ByteArrayResource(photo.getData());
@@ -788,6 +810,15 @@ class VetControllerUnitTest {
                 .badgeTitle(BadgeTitle.HIGHLY_RESPECTED)
                 .badgeDate("2017")
                 .resourceBase64(Base64.getEncoder().encodeToString(StreamUtils.copyToByteArray(cpr.getInputStream())))
+                .build();
+    }
+    private PhotoResponseDTO buildPhotoResponseDTO() throws IOException {
+        String defaultPhotoName = "vet_default.jpg";
+        return PhotoResponseDTO.builder()
+                .vetId("cf25e779-548b-4788-aefa-6d58621c2feb")
+                .filename(defaultPhotoName)
+                .imgType("image/jpeg")
+                .resourceBase64(Base64.getEncoder().encodeToString(StreamUtils.copyToByteArray(cpr2.getInputStream())))
                 .build();
     }
 
@@ -818,6 +849,7 @@ class VetControllerUnitTest {
                 .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
+                .photoDefault(true)
                 .build();
     }
     private VetResponseDTO buildVetResponseDTO() {
