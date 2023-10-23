@@ -98,7 +98,6 @@ public class VisitServiceImpl implements VisitService {
                                 })
                 )
                 .flatMap(visit -> entityDtoUtil.toVisitResponseDTO(visit));
-
     }
 
 
