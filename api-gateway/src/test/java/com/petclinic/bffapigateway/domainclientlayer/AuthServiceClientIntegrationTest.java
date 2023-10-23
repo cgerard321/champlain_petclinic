@@ -534,4 +534,23 @@ public class AuthServiceClientIntegrationTest {
                 .expectNextCount(0)
                 .verifyError();
     }
+
+    @Test
+    void deleteUser_ShouldReturnOk() throws Exception {
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setResponseCode(200);
+
+        server.enqueue(mockResponse);
+
+        String jwtToken = "jwtToken";
+        String userId = "userId";
+
+        final Mono<Void> validatedTokenResponse = authServiceClient.deleteUser(jwtToken, userId);
+
+        // check status response in step verifier
+        StepVerifier.create(Mono.just(validatedTokenResponse))
+                .expectNextCount(1)
+                .verifyComplete();
+    }
 }
