@@ -316,25 +316,6 @@ class BillResourceIntegrationTest {
     }
 
     @Test
-    void deleteAllBills() {
-        Bill billEntity = buildBill();
-
-        Publisher<Void> setup = repo.deleteAll().thenMany(repo.delete(billEntity));
-
-        StepVerifier.create(setup)
-                .expectNextCount(0)
-                .verifyComplete();
-
-        client.delete()
-                .uri("/bills")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNoContent()
-                .expectBody();
-
-    }
-
-    @Test
     void deleteBillByVetId() {
 
         Bill billEntity = buildBill();

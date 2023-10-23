@@ -29,6 +29,4 @@ public interface BillService {
 
     Mono<BillResponseDTO> updateBill(String billId, Mono<BillRequestDTO> billRequestDTO);
 
-    Mono<Void> DeleteAllBills();
-
 }
