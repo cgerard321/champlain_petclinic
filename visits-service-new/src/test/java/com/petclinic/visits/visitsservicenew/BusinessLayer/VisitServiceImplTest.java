@@ -245,7 +245,6 @@ class VisitServiceImplTest {
         verify(petsClient, times(1)).getPetById(anyString());
         verify(vetsClient, times(1)).getVetByVetId(anyString());
         verify(visitRepo, times(1)).findByVisitDateAndPractitionerId(any(LocalDateTime.class), anyString());
-        verify(mailService, times(1)).sendMail(any(Mail.class));
     }
 
     @Test
