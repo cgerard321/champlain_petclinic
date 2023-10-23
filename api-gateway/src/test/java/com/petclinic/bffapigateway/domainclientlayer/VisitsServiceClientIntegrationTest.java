@@ -150,6 +150,8 @@ class VisitsServiceClientIntegrationTest {
                 LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
                 "Test Visit",
                 "1",
+                "f470653d-05c5-4c45-b7a0-7d70f003d2ac",
+                "testJwtToken",
                 "2"
         );
 
@@ -178,6 +180,8 @@ class VisitsServiceClientIntegrationTest {
 
         // Assert
         StepVerifier.create(resultMono)
+                .expectNext()
+                .expectNext()
                 .expectNextMatches(visitResponse -> Objects.equals(visitResponse.getVisitId(), visitResponseDTO.getVisitId()))
                 .verifyComplete();
 
@@ -191,6 +195,8 @@ class VisitsServiceClientIntegrationTest {
                 LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
                 "Test Visit",
                 "1",
+                "f470653d-05c5-4c45-b7a0-7d70f003d2ac",
+                "testJwtToken",
                 "2"
         );
 
@@ -218,6 +224,8 @@ class VisitsServiceClientIntegrationTest {
                 LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
                 "Test Visit",
                 "1",
+                "f470653d-05c5-4c45-b7a0-7d70f003d2ac",
+                "testJwtToken",
                 "2"
         );
 
@@ -245,6 +253,8 @@ class VisitsServiceClientIntegrationTest {
                 LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
                 "Test Visit",
                 "1",
+                "f470653d-05c5-4c45-b7a0-7d70f003d2ac",
+                "testJwtToken",
                 "2"
         );
 
@@ -272,6 +282,8 @@ class VisitsServiceClientIntegrationTest {
                 LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
                 "Test Visit",
                 "1",
+                "f470653d-05c5-4c45-b7a0-7d70f003d2ac",
+                "testJwtToken",
                 "2"
         );
 
@@ -322,7 +334,7 @@ class VisitsServiceClientIntegrationTest {
                 .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("this is a dummy description")
                 .petId("2")
-                .petName("YourPetNameHere")  
+                .petName("YourPetNameHere")
                 .petBirthDate(new Date())
                 .practitionerId("2")
                 .vetFirstName("VetFirstNameHere")

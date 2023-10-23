@@ -4,6 +4,7 @@ import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.*;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.Mailing.MailService;
 import com.petclinic.visits.visitsservicenew.Exceptions.DuplicateTimeException;
 import com.petclinic.visits.visitsservicenew.Exceptions.BadRequestException;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
@@ -44,9 +45,10 @@ class VisitServiceImplTest {
 
     @MockBean
     private VetsClient vetsClient;
-    @MockBean private SimpleJavaMailClient simpleJavaMailClient;
     @MockBean
     private PetsClient petsClient;
+    @MockBean
+    private MailService mailService;
 
     @MockBean
     private EntityDtoUtil entityDtoUtil;
@@ -701,10 +703,4 @@ class VisitServiceImplTest {
         VisitRequestDTO requestDTO = buildVisitRequestDTO();
         return Mono.just(requestDTO);
     }
-
-
 }
-
-
-
-
