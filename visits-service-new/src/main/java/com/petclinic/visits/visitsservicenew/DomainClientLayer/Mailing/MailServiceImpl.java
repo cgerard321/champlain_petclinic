@@ -1,15 +1,14 @@
 package com.petclinic.visits.visitsservicenew.DomainClientLayer.Mailing;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import retrofit2.Response;
 
 import java.io.IOException;
-
-import lombok.extern.slf4j.Slf4j;
-@Slf4j //uncomment for debugging
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class MailServiceImpl implements MailService {
