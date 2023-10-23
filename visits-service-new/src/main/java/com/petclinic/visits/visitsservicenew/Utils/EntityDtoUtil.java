@@ -23,7 +23,7 @@ public class EntityDtoUtil {
     private final PetsClient petsClient;
 
     public Mono<VisitResponseDTO> toVisitResponseDTO(Visit visit) {
-        System.out.println("Entity Date in Mapping: " + visit.getVisitDate()); // Debugging
+       // System.out.println("Entity Date in Mapping: " + visit.getVisitDate()); // Debugging
 
         Mono<PetResponseDTO> petResponseDTOMono = petsClient.getPetById(visit.getPetId());
         Mono<VetDTO> vetResponseDTOMono = vetsClient.getVetByVetId(visit.getPractitionerId());
