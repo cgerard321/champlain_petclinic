@@ -21,6 +21,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -120,6 +122,11 @@ public class BFFApiGatewayController {
         return billServiceClient.updateBill(billId, billRequestDTO)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping(value = "bills")
+    public Mono<Void> deleteAllBills(){
+        return billServiceClient.deleteAllBills();
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
@@ -344,6 +351,13 @@ public class BFFApiGatewayController {
     public Mono<ResponseEntity<Resource>> getPhotoByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getPhotoByVetId(vetId)
                 .map(r -> ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE).body(r))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @GetMapping("vets/{vetId}/default-photo")
+    public Mono<ResponseEntity<PhotoResponseDTO>> getDefaultPhotoByVetId(@PathVariable String vetId) {
+        return vetsServiceClient.getDefaultPhotoByVetId(vetId)
+                .map(r -> ResponseEntity.ok().body(r))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
@@ -753,7 +767,7 @@ public class BFFApiGatewayController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-    
+
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "users/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<UserDetails> getUserById(@PathVariable String userId, @CookieValue("Bearer") String auth) {
@@ -769,6 +783,12 @@ public class BFFApiGatewayController {
 
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @PostMapping("/users/logout")
+    public Mono<ResponseEntity<Void>> logout(ServerHttpRequest request, ServerHttpResponse response) {
+        return authServiceClient.logout(request, response);
+    }
+
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @PostMapping(value = "/users/forgot_password")
@@ -777,10 +797,20 @@ public class BFFApiGatewayController {
     }
 
 
+
+
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @PostMapping("/users/reset_password")
     public Mono<ResponseEntity<Void>> processResetPassword(@RequestBody @Valid Mono<UserPasswordAndTokenRequestModel> resetRequest) {
         return authServiceClient.changePassword(resetRequest);
+    }
+
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @PostMapping(value = "/users/inventoryManager")
+    public Mono<ResponseEntity<UserPasswordLessDTO>> createInventoryManager(@RequestBody @Valid Mono<RegisterInventoryManager> model) {
+        return authServiceClient.createInventoryMangerUser(model).map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
     /**
@@ -789,6 +819,7 @@ public class BFFApiGatewayController {
 
     //Start of Inventory Methods
     @GetMapping("/inventory/{inventoryId}/products-pagination")
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER, Roles.VET})
     public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductFieldPagination(@PathVariable String inventoryId,
                                                                                                  @RequestParam(required = false) String productName,
                                                                                                  @RequestParam(required = false) Double productPrice,
@@ -799,6 +830,7 @@ public class BFFApiGatewayController {
     }
 
     @GetMapping("/inventory/{inventoryId}/products-count")
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER,Roles.VET})
     public Mono<ResponseEntity<Long>> getTotalNumberOfProductsWithRequestParams(@PathVariable String inventoryId,
                                                                                 @RequestParam(required = false) String productName,
                                                                                 @RequestParam(required = false) Double productPrice,
@@ -807,6 +839,7 @@ public class BFFApiGatewayController {
                 .map(response -> ResponseEntity.status(HttpStatus.OK).body(response));
     }
     @PostMapping(value = "inventory/{inventoryId}/products")
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER})
     public Mono<ResponseEntity<ProductResponseDTO>> addProductToInventory(@RequestBody ProductRequestDTO model, @PathVariable String inventoryId){
         return inventoryServiceClient.addProductToInventory(model, inventoryId)
                 .map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))

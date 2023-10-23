@@ -12,7 +12,37 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
     vm.pets = [];
 
     // Function to get pet type name based on petTypeId
+    /* vm.getPetTypeName = function (petTypeId) {
+         switch (petTypeId) {
+             case '1':
+                 return 'Cat';
+             case '2':
+                 return 'Dog';
+             case '3':
+                 return 'Lizard';
+             case '4':
+                 return 'Snake';
+             case '5':
+                 return 'Bird';
+             case '6':
+                 return 'Hamster';
+             default:
+                 return 'Unknown';
+         }
+     };*/
 
+
+    vm.getBirthday = function(birthday) {
+        if (birthday) {
+            var date = new Date(birthday);
+            var year = date.getUTCFullYear();
+            var month = (date.getUTCMonth() + 1).toString().padStart(2, '0'); // Months are zero-based, so we add 1
+            var day = date.getUTCDate().toString().padStart(2, '0');
+            return year + ' / ' + month + ' / ' + day;
+        } else {
+            return '';
+        }
+    };
 
 
     // Fetch owner data
@@ -21,9 +51,10 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
             vm.owner = resp.data;
             console.log(vm.owner);
 
-            vm.owner.pets.forEach(function(pet) {
+            vm.owner.pets.forEach(function (pet) {
                 pet.isActive = pet.isActive === "true";
             });
+
         })
         .catch(function (error) {
             console.error('Error fetching owner data:', error);
@@ -44,6 +75,8 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
                 // Check if the trimmed response is empty
                 if (!trimmedResponse) {
                     return null; // Skip empty responses
+                } else {
+                    vm.pets = trimmedResponse;
                 }
 
                 try {
@@ -79,10 +112,9 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
         });
 
 
-
     // Toggle pet's active status
     vm.toggleActiveStatus = function (petId) {
-        return $http.get('api/gateway/pets/' + petId + '?_=' + new Date().getTime(), { headers: { 'Cache-Control': 'no-cache' } })
+        return $http.get('api/gateway/pets/' + petId + '?_=' + new Date().getTime(), {headers: {'Cache-Control': 'no-cache'}})
             .then(function (resp) {
                 console.log("Pet id is " + petId);
                 console.log(resp.data);
@@ -97,7 +129,7 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
 
                 return $http.patch('api/gateway/pet/' + petId, {
                     isActive: vm.pet.isActive
-                }, { headers: { 'Cache-Control': 'no-cache' } });
+                }, {headers: {'Cache-Control': 'no-cache'}});
             })
             .then(function (resp) {
                 console.log("Pet active status updated successfully");
@@ -112,18 +144,13 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
     };
 
 
-
     // Watch the pet.isActive property
-    $scope.$watch('pet.isActive', function(newVal, oldVal) {
+    $scope.$watch('pet.isActive', function (newVal, oldVal) {
         if (newVal !== oldVal) {
             // The pet.isActive property has changed, update the UI
             $scope.$apply();
         }
     });
-
-
-
-
 
 
     vm.deletePet = function (petId) {
@@ -142,7 +169,7 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
                   });
                  */
 
-                vm.owner.pets = vm.owner.pets.filter(function(pet) {
+                vm.owner.pets = vm.owner.pets.filter(function (pet) {
                     return pet.petId !== petId;
                 });
 
@@ -153,7 +180,7 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
             // Handle the error appropriately
         });
     };
-}
-
 };
+
+
 

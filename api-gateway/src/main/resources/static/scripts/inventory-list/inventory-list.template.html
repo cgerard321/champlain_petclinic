@@ -2,6 +2,13 @@
     .table-striped tbody tr:hover {
         background-color: #D8D8D8;
     }
+
+     .btn:hover {
+         transform: translateY(2px);
+         box-shadow: 0 0 rgba(0, 0, 0, 2);
+         border-bottom-width: 1px;
+     }
+
 </style>
 
 
@@ -14,7 +21,9 @@
         <td>Name</td>
         <td>Type</td>
         <td>Description</td>
-
+        <td></td>
+        <td></td>
+        <td></td>
     </tr>
     <tr>
         <td>
@@ -35,10 +44,28 @@
         </span>
         </td>
         <td></td>
-        <td></td>
+        <td>
+            <span>
+
+                <a class="btn btn-success" type="button" ng-click="clearQueries()" title="Clear">
+                    <lord-icon
+                            src="https://cdn.lordicon.com/zxvuvcnc.json"
+                            trigger="hover"
+                            style="width:32px;height:32px">
+                    </lord-icon>
+                </a>
+
+            </span>
+        </td>
         <td>
         <span>
-            <input class="btn btn-success" type="button" value="Search" ng-click="searchInventory(inventoryName, inventoryType, inventoryDescription)">
+            <a class="btn btn-success" type="button" ng-click="searchInventory(inventoryName, inventoryType, inventoryDescription)" title="Search">
+                <lord-icon
+                        src="https://cdn.lordicon.com/fkdzyfle.json"
+                        trigger="hover"
+                        style="width:32px;height:32px">
+                </lord-icon>
+            </a>
         </span>
         </td>
     </tr>
@@ -57,12 +84,29 @@
 
     <td>
         <td>
-            <a class="btn btn-warning" ui-sref="updateInventory({inventoryId: inventory.inventoryId, method: 'edit'})" ng-click="$event.stopPropagation()">Edit</a>
+            <a class="btn btn-warning" ui-sref="updateInventory({inventoryId: inventory.inventoryId, method: 'edit'})" ng-click="$event.stopPropagation()" title="Edit">
+
+                <lord-icon
+                        src="https://cdn.lordicon.com/wkvacbiw.json"
+                        trigger="hover"
+                        style="width:32px;height:32px">
+                </lord-icon>
+
+            </a>
 
         </td>
 
         <td>
-            <a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteInventory(inventory); $event.stopPropagation()">Delete</a>
+            <a ng-if="!inventory.isTemporarilyDeleted" class="btn btn-danger" href="javascript:void(0)" ng-click="deleteInventory(inventory); $event.stopPropagation()" title="Delete">
+
+                <lord-icon
+                        src="https://cdn.lordicon.com/skkahier.json"
+                        trigger="hover"
+                        style="width:32px;height:32px">
+                </lord-icon>
+                <a ng-if="inventory.isTemporarilyDeleted"  class="btn btn-info" href="javascript:void(0)" ng-click="undoDelete(inventory); $event.stopPropagation()">Restore</a>
+
+            </a>
         </td>
 
     </td>
@@ -88,6 +132,10 @@
 
 
 <div id="loadingObject" style="display: none;">Loading...</div> <!--This is the page loading element-->
+
+<div id="notification" style="display: none; position: fixed; bottom: 10px; right: 10px; background-color: #4CAF50; color: white; padding: 10px; border-radius: 5px;">
+    Notification Text Here
+</div>
 
 
 <a ng-click="deleteAllInventories()">

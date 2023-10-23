@@ -38,12 +38,14 @@ public class DataSetupService implements CommandLineRunner {
     private final RatingRepository ratingRepository;
     private final EducationRepository educationRepository;
     private final BadgeRepository badgeRepository;
+    private final PhotoRepository photoRepository;
 
-    public DataSetupService(VetRepository vetRepository, RatingRepository ratingRepository, EducationRepository educationRepository, BadgeRepository badgeRepository){
+    public DataSetupService(VetRepository vetRepository, RatingRepository ratingRepository, EducationRepository educationRepository, BadgeRepository badgeRepository, PhotoRepository photoRepository){
         this.vetRepository = vetRepository;
         this.ratingRepository = ratingRepository;
         this.educationRepository = educationRepository;
         this.badgeRepository=badgeRepository;
+        this.photoRepository = photoRepository;
     }
 
     @Override
@@ -78,7 +80,6 @@ public class DataSetupService implements CommandLineRunner {
                 .lastName("Carter")
                 .email("carterjames@email.com")
                 .phoneNumber("(514)-634-8276 #2384")
-                .imageId("1")
                 .resume("Practicing since 3 years")
                 .workday(workdays1)
                 .active(true)
@@ -91,7 +92,6 @@ public class DataSetupService implements CommandLineRunner {
                 .lastName("Leary")
                 .email("learyhelen@email.com")
                 .phoneNumber("(514)-634-8276 #2385")
-                .imageId("1")
                 .resume("Practicing since 10 years")
                 .workday(workdays2)
                 .active(true)
@@ -104,7 +104,6 @@ public class DataSetupService implements CommandLineRunner {
                 .lastName("Douglas")
                 .email("douglaslinda@email.com")
                 .phoneNumber("(514)-634-8276 #2386")
-                .imageId("1")
                 .resume("Practicing since 5 years")
                 .workday(workdays3)
                 .active(true)
@@ -117,7 +116,6 @@ public class DataSetupService implements CommandLineRunner {
                 .lastName("Ortega")
                 .email("ortegarafael@email.com")
                 .phoneNumber("(514)-634-8276 #2387")
-                .imageId("1")
                 .resume("Practicing since 8 years")
                 .workday(workdays4)
                 .active(false)
@@ -130,7 +128,6 @@ public class DataSetupService implements CommandLineRunner {
                 .lastName("Stevens")
                 .email("stevenshenry@email.com")
                 .phoneNumber("(514)-634-8276 #2389")
-                .imageId("1")
                 .resume("Practicing since 1 years")
                 .workday(workdays5)
                 .active(false)
@@ -143,7 +140,6 @@ public class DataSetupService implements CommandLineRunner {
                 .lastName("Jenkins")
                 .email("jenkinssharon@email.com")
                 .phoneNumber("(514)-634-8276 #2383")
-                .imageId("1")
                 .resume("Practicing since 6 years")
                 .workday(workdays5)
                 .active(false)
@@ -156,7 +152,6 @@ public class DataSetupService implements CommandLineRunner {
                 .lastName("Doe")
                 .email("johndoe@email.com")
                 .phoneNumber("(514)-634-8276 #2363")
-                .imageId("1")
                 .resume("Practicing since 9 years")
                 .workday(workdays6)
                 .active(true)
@@ -256,6 +251,62 @@ public class DataSetupService implements CommandLineRunner {
         ClassPathResource cpr2=new ClassPathResource("images/half-full_food_bowl.png");
         ClassPathResource cpr3=new ClassPathResource("images/full_food_bowl.png");
 
+        //default photo
+        String defaultPhotoName = "vet_default.jpg";
+        String defaultPhotoType = "image/jpeg";
+
+        ClassPathResource defaultPhoto = new ClassPathResource("images/" + defaultPhotoName);
+
+        Photo photo1 = Photo.builder()
+                .vetId(v1.getVetId())
+                .filename(defaultPhotoName)
+                .imgType(defaultPhotoType)
+                .data(StreamUtils.copyToByteArray(defaultPhoto.getInputStream()))
+                .build();
+
+        Photo photo2 = Photo.builder()
+                .vetId(v2.getVetId())
+                .filename(defaultPhotoName)
+                .imgType(defaultPhotoType)
+                .data(StreamUtils.copyToByteArray(defaultPhoto.getInputStream()))
+                .build();
+
+        Photo photo3 = Photo.builder()
+                .vetId(v3.getVetId())
+                .filename(defaultPhotoName)
+                .imgType(defaultPhotoType)
+                .data(StreamUtils.copyToByteArray(defaultPhoto.getInputStream()))
+                .build();
+
+        Photo photo4 = Photo.builder()
+                .vetId(v4.getVetId())
+                .filename(defaultPhotoName)
+                .imgType(defaultPhotoType)
+                .data(StreamUtils.copyToByteArray(defaultPhoto.getInputStream()))
+                .build();
+
+        Photo photo5 = Photo.builder()
+                .vetId(v5.getVetId())
+                .filename(defaultPhotoName)
+                .imgType(defaultPhotoType)
+                .data(StreamUtils.copyToByteArray(defaultPhoto.getInputStream()))
+                .build();
+
+        Photo photo6 = Photo.builder()
+                .vetId(v6.getVetId())
+                .filename(defaultPhotoName)
+                .imgType(defaultPhotoType)
+                .data(StreamUtils.copyToByteArray(defaultPhoto.getInputStream()))
+                .build();
+
+        Photo photo7 = Photo.builder()
+                .vetId(v7.getVetId())
+                .filename(defaultPhotoName)
+                .imgType(defaultPhotoType)
+                .data(StreamUtils.copyToByteArray(defaultPhoto.getInputStream()))
+                .build();
+
+
         Badge b1 = Badge.builder()
                 .vetId(v1.getVetId())
                 .badgeTitle(BadgeTitle.HIGHLY_RESPECTED)
@@ -300,7 +351,7 @@ public class DataSetupService implements CommandLineRunner {
                 .build();
 
         // Use method defined to create datasource
-        DataSource dataSource = createDataSource();
+        DataSource dataSource = EntityDtoUtil.createDataSource();
         try(
             // get connection from datasource
             Connection conn = dataSource.getConnection();
@@ -308,8 +359,8 @@ public class DataSetupService implements CommandLineRunner {
             // Prepare INSERT statement
             PreparedStatement insertStmt = conn.prepareStatement(
                     "INSERT INTO badges (vet_id, badge_title, badge_date, img_data) " +
-                            "VALUES (?, ?, ?, ?)"
-        )) {
+                            "VALUES (?, ?, ?, ?)")
+        ) {
 
             // Define Badge objects (b1, b2, ..., b7) and set parameters for PreparedStatement
             Badge[] badges = {b1, b2, b3, b4, b5, b6, b7};
@@ -336,14 +387,35 @@ public class DataSetupService implements CommandLineRunner {
             // Handle any SQL exceptions
             e.printStackTrace();
         }
+
+        try(
+                // get connection from datasource
+                Connection conn = dataSource.getConnection();
+
+                // Prepare INSERT statement
+                PreparedStatement insertStmt = conn.prepareStatement(
+                        "INSERT INTO images (vet_id, filename, img_type, img_data) " +
+                                "VALUES (?, ?, ?, ?)")
+        ) {
+
+            Photo[] photos = {photo1,photo2,photo3,photo4,photo5,photo6, photo7};
+
+            for (Photo photo : photos) {
+                insertStmt.setString(1, photo.getVetId());
+                insertStmt.setString(2, photo.getFilename());
+                insertStmt.setString(3, photo.getImgType());
+                insertStmt.setBytes(4, photo.getData());
+
+                int insertedRows = insertStmt.executeUpdate();
+                System.out.printf("Inserted %d defaultPhoto(s)%n", insertedRows);
+            }
+
+            insertStmt.close();
+        }
+        catch (SQLException e) {
+            // Handle any SQL exceptions
+            e.printStackTrace();
+        }
     }
 
-    private static DataSource createDataSource() {
-        // url specifies address of database along with username and password
-        final String url =
-                "jdbc:postgresql://postgres:5432/images?user=user&password=pwd";
-        final PGSimpleDataSource dataSource = new PGSimpleDataSource();
-        dataSource.setUrl(url);
-        return dataSource;
-    }
 }

@@ -11,6 +11,8 @@ package com.petclinic.vet.util;
   * Ticket: feat(VVS-CPC-553): add veterinarian
  */
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.petclinic.vet.dataaccesslayer.Photo;
 import com.petclinic.vet.dataaccesslayer.badges.Badge;
 import com.petclinic.vet.dataaccesslayer.education.Education;
@@ -18,6 +20,7 @@ import com.petclinic.vet.dataaccesslayer.ratings.Rating;
 import com.petclinic.vet.dataaccesslayer.Specialty;
 import com.petclinic.vet.dataaccesslayer.*;
 import com.petclinic.vet.exceptions.InvalidInputException;
+import com.petclinic.vet.presentationlayer.PhotoResponseDTO;
 import com.petclinic.vet.presentationlayer.VetRequestDTO;
 import com.petclinic.vet.presentationlayer.VetResponseDTO;
 import com.petclinic.vet.servicelayer.*;
@@ -27,14 +30,13 @@ import com.petclinic.vet.servicelayer.education.EducationResponseDTO;
 import com.petclinic.vet.servicelayer.ratings.RatingRequestDTO;
 import com.petclinic.vet.servicelayer.ratings.RatingResponseDTO;
 import lombok.Generated;
+import org.postgresql.ds.PGSimpleDataSource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.core.io.Resource;
 
+import javax.sql.DataSource;
 import java.io.IOException;
-import java.util.Base64;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 public class EntityDtoUtil {
     @Generated
@@ -161,6 +163,28 @@ public class EntityDtoUtil {
         badgeResponseDTO.setVetId(badge.getVetId());
         badgeResponseDTO.setResourceBase64(Base64.getEncoder().encodeToString(badge.getData()));
         return badgeResponseDTO;
+    }
+
+    public static PhotoResponseDTO toPhotoResponseDTO(Photo photo){
+        PhotoResponseDTO photoResponseDTO = new PhotoResponseDTO();
+        photoResponseDTO.setVetId(photo.getVetId());
+        photoResponseDTO.setFilename(photo.getFilename());
+        photoResponseDTO.setImgType(photo.getImgType());
+        if(photo.getFilename().equals("vet_default.jpg"))
+            photoResponseDTO.setResourceBase64(Base64.getEncoder().encodeToString(photo.getData()));
+        else {
+            photoResponseDTO.setResource(photo.getData());
+        }
+        return photoResponseDTO;
+    }
+
+    public static DataSource createDataSource() {
+        // url specifies address of database along with username and password
+        final String url =
+                "jdbc:postgresql://postgres:5432/images?user=user&password=pwd";
+        final PGSimpleDataSource dataSource = new PGSimpleDataSource();
+        dataSource.setUrl(url);
+        return dataSource;
     }
 
     public static String verifyId(String id) {

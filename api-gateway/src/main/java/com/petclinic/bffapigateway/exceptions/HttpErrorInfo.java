@@ -1,6 +1,7 @@
 package com.petclinic.bffapigateway.exceptions;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.RequiredArgsConstructor;
 
 import java.time.ZoneOffset;
@@ -15,6 +16,7 @@ import java.time.format.DateTimeFormatter;
  * Ticket: feat(APIG-CPC-354)
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 @RequiredArgsConstructor
 public class HttpErrorInfo {
 

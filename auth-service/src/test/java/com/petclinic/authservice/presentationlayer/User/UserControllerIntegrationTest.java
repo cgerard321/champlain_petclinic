@@ -371,6 +371,47 @@ class UserControllerIntegrationTest {
         userRepo.delete(userRepo.findByEmail(userDTO.getEmail()).get());
     }
 
+    @Test
+    void createUserWithDefaultRole_ShouldSucceed() {
+        UserIDLessRoleLessDTO userDTO = UserIDLessRoleLessDTO.builder()
+                .email("richard2004danon@gmail.com")
+                .password("pwd%jfjfjDkkkk8")
+                .username("Ricky")
+                .defaultRole("INVENTORY_MANAGER")
+                .userId(new UserIdentifier().getUserId())
+                .build();
+
+        webTestClient.post()
+                .uri("/users")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(userDTO)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(UserPasswordLessDTO.class)
+                .value(user -> {
+                    assertEquals(userDTO.getEmail(), user.getEmail());
+                    assertEquals(userDTO.getUsername(),user.getUsername());
+
+                });
+
+        User user = userRepo.findByEmail(userDTO.getEmail()).get();
+
+        final String base64Token = Base64.getEncoder()
+                .withoutPadding()
+                .encodeToString(jwtService.generateToken(user).getBytes());
+
+        webTestClient.get()
+                .uri("/users/verification/"+base64Token)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk();
+
+        assertTrue(userRepo.findByEmail(userDTO.getEmail()).get().isVerified());
+
+        userRepo.delete(userRepo.findByEmail(userDTO.getEmail()).get());
+    }
+
+
 
     @Test
     void createUser_ShouldFail() {
@@ -388,7 +429,24 @@ class UserControllerIntegrationTest {
                 .expectStatus().isBadRequest();
         }
 
+    @Test
+    void createUserWithInvalidDefaultRole_ShouldFail() {
+        UserIDLessRoleLessDTO userDTO = UserIDLessRoleLessDTO.builder()
+                .email("email@email.com")
+                .password("GoodPwd!!222")
+                .username("Ricky")
+                .defaultRole("NOT_A_ROLE")
+                .build();
 
+        webTestClient.post()
+                .uri("/users")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(userDTO)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("No role with name: NOT_A_ROLE");
+    }
     @Test
     void verifyInvalidToken_ShouldReturnBadRequest(){
         User user = userRepo.findByEmail("admin@admin.com").get();

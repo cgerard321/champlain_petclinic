@@ -20,5 +20,6 @@ public class Pet {
     private String petTypeId;
     private String photoId;
     private String isActive;
+    private String weight;
 
 }

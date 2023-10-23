@@ -19,5 +19,5 @@ public class PetRequestDTO {
     private String petTypeId;
     //private String photoId;
     private String isActive;
-
+    private String weight;
 }
