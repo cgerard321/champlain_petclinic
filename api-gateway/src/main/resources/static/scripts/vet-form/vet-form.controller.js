@@ -51,32 +51,36 @@ angular.module('vetForm')
             const fileInput = document.querySelector('input[id="photoVet"]');
             let vetPhoto = "";
 
-            const file = fileInput.files[0]; // Changed fileInput.target.files to fileInput.files
-            const reader = new FileReader();
-            var image = {};
-            reader.onloadend = () => {
-                vetPhoto = reader.result
-                    .replace('data:', '')
-                    .replace(/^.+,/, '');
-                self.PreviewImage = vetPhoto;
-                image = {
-                    name: file.name,
-                    type: "jpeg",
-                    photo: vetPhoto
-                };
+                const file = fileInput.files[0]; // Changed fileInput.target.files to fileInput.files
+                const reader = new FileReader();
+                var image = {};
+                reader.onloadend = () => {
+                    vetPhoto = reader.result
+                        .replace('data:', '')
+                        .replace(/^.+,/, '');
+                    self.PreviewImage = vetPhoto;
+                    image = {
+                        name: file.name,
+                        type: "jpeg",
+                        photo: vetPhoto
+                    };
+                    if(image.photo == null){
+                        self.vet.photoDefault = true;
+                    }
 
-                // Use template literals for URL concatenation
-                $http.post(`api/gateway/vets/${vetId}/photos/${image.name}`, image) // Send the image object
-                    .then(function (response) {
-                        console.log("VET ID: " + vetId);
-                        console.log("RESPONSE: " + JSON.stringify(response.data)); // Access response data
-                    })
-                    .catch(function (error) {
-                        console.error(error);
-                    });
+                    //console.log(vetId + " default after photo is: " + self.vet.photoDefault)
+                    // Use template literals for URL concatenation
+                    $http.post(`api/gateway/vets/${vetId}/photos/${image.name}`, image) // Send the image object
+                        .then(function (response) {
+                            console.log("VET ID: " + vetId);
+                            console.log("RESPONSE: " + JSON.stringify(response.data)); // Access response data
+                        })
+                        .catch(function (error) {
+                            console.error(error);
+                        });
+                };
+                reader.readAsDataURL(file);
             };
-            reader.readAsDataURL(file);
-        };
 
         let updatePhoto = function (vetId) {
             const fileInput = document.querySelector('input[id="photoVet"]');
@@ -201,6 +205,12 @@ angular.module('vetForm')
             let isAct = document.getElementsByClassName("isActiveRadio");
             vet.active = isAct[0].checked;
 
+            let photoInput = document.getElementById("photoVet");
+            if (photoInput.files.length > 0) {
+                vet.photoDefault = false;
+            } else {
+                vet.photoDefault = true;
+            }
             var req;
             if (id) {
                 req = $http.put("api/gateway/vets/" + vetId, vet);
@@ -225,7 +235,8 @@ angular.module('vetForm')
                     email: vet.email,
                     vet:vet
                 });
-                console.log(self.vet)
+                console.log(self.vet);
+                console.log(self.vet.photoDefault);
 
                 req.then(function (response) {
                     var result = response.data;

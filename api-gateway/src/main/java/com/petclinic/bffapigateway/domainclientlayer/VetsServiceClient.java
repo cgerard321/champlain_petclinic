@@ -62,6 +62,22 @@ public class VetsServiceClient {
                 )
                 .bodyToMono(Resource.class);
     }
+    public Mono<PhotoResponseDTO> getDefaultPhotoByVetId(String vetId){
+        return webClientBuilder.build()
+                .get()
+                .uri(vetsServiceUrl + "/" + vetId + "/default-photo")
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error->{
+                    HttpStatusCode statusCode = error.statusCode();
+                    if(statusCode.equals(NOT_FOUND))
+                        return Mono.error(new ExistingVetNotFoundException("Photo for vet "+vetId + " not found", NOT_FOUND));
+                    return Mono.error(new IllegalArgumentException("Something went wrong"));
+                })
+                .onStatus(HttpStatusCode::is5xxServerError,error->
+                        Mono.error(new IllegalArgumentException("Something went wrong"))
+                )
+                .bodyToMono(PhotoResponseDTO.class);
+    }
 
     public Mono<Resource> addPhotoToVet(String vetId, String photoName, Mono<Resource> image) {
         log.debug("VetsServiceClient addPhoto");

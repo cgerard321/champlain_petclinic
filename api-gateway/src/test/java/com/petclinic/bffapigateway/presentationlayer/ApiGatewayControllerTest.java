@@ -42,6 +42,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -60,6 +61,7 @@ import reactor.test.StepVerifier;
 import javax.print.attribute.standard.Media;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -108,6 +110,7 @@ class ApiGatewayControllerTest {
     String INVALID_VET_ID = "mjbedf";
 
     ClassPathResource cpr=new ClassPathResource("static/images/full_food_bowl.png");
+    ClassPathResource cpr2=new ClassPathResource("static/images/vet_default.jpg");
 
     @Test
     void getAllRatingsForVet_ValidId() {
@@ -829,6 +832,35 @@ class ApiGatewayControllerTest {
         Mockito.verify(vetsServiceClient, times(1))
                 .getPhotoByVetId(VET_ID);
     }
+    @Test
+    void getDefaultPhotoByVetId() throws IOException {
+        PhotoResponseDTO photoResponseDTO = PhotoResponseDTO.builder()
+                .vetId(VET_ID)
+                .filename("vet_default.jpg")
+                .imgType("image/jpeg")
+                .resourceBase64(Base64.getEncoder().encodeToString(StreamUtils.copyToByteArray(cpr2.getInputStream())))
+                .build();
+
+        when(vetsServiceClient.getDefaultPhotoByVetId(anyString()))
+                .thenReturn(Mono.just(photoResponseDTO));
+
+        client.get()
+                .uri("/api/gateway/vets/{vetId}/default-photo", VET_ID)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(APPLICATION_JSON)
+                .expectBody(PhotoResponseDTO.class)
+                .value(responseDTO -> {
+                    Assertions.assertEquals(photoResponseDTO.getFilename(), responseDTO.getFilename());
+                    Assertions.assertEquals(photoResponseDTO.getImgType(), responseDTO.getImgType());
+                    Assertions.assertEquals(photoResponseDTO.getVetId(), responseDTO.getVetId());
+                    Assertions.assertEquals(photoResponseDTO.getResourceBase64(), responseDTO.getResourceBase64());
+                });
+
+        Mockito.verify(vetsServiceClient, times(1))
+                .getDefaultPhotoByVetId(VET_ID);
+    }
+
 
     @Test
     void addPhotoToVet() {
@@ -973,6 +1005,48 @@ class ApiGatewayControllerTest {
 //        assertEquals(user.getId(), 1);
 //    }
 //
+
+        @Test
+    void createUserInventoryManager_ShouldSucceed(){
+        String uuid = UUID.randomUUID().toString();
+        Role role = Role.builder()
+                .name(Roles.INVENTORY_MANAGER.name())
+                .build();
+        UserPasswordLessDTO userResponse = UserPasswordLessDTO
+                .builder()
+                .userId(uuid)
+                .email("email@email.com")
+                .roles(Set.of(role))
+                .build();
+
+        when(authServiceClient.createInventoryMangerUser(any()))
+                .thenReturn(Mono.just(userResponse));
+
+        RegisterInventoryManager register = RegisterInventoryManager.builder()
+                .userId(uuid)
+                .username("Johnny123")
+                .password("Password22##")
+                .email("email@email.com")
+                .build();
+
+        client.post()
+                .uri("/api/gateway/users/inventoryManager")
+                .body(Mono.just(register), RegisterInventoryManager.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(UserPasswordLessDTO.class)
+                .value(dto->{
+                    assertEquals(dto.getUserId(),userResponse.getUserId());
+                    assertEquals(dto.getEmail(),userResponse.getEmail());
+                    assertEquals(dto.getRoles(),userResponse.getRoles());
+                });
+
+
+
+    }
+
     @Test
     void createUser(){
         String uuid = UUID.randomUUID().toString();
@@ -2288,8 +2362,34 @@ class ApiGatewayControllerTest {
     }
     @Test
     void shouldGetAllVisits() {
-        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", Status.UPCOMING);
-        VisitResponseDTO visitResponseDTO2 = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", Status.UPCOMING);
+        VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
+                .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .description("this is a dummy description")
+                .petId("2")
+                .petName("YourPetNameHere")
+                .petBirthDate(new Date())
+                .practitionerId("2")
+                .vetFirstName("VetFirstNameHere")
+                .vetLastName("VetLastNameHere")
+                .vetEmail("vet@email.com")
+                .vetPhoneNumber("123-456-7890")
+                .status(Status.UPCOMING)
+                .build();
+        VisitResponseDTO visitResponseDTO2 = VisitResponseDTO.builder()
+                .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .description("this is a dummy description")
+                .petId("2")
+                .petName("YourPetNameHere")
+                .petBirthDate(new Date())
+                .practitionerId("2")
+                .vetFirstName("VetFirstNameHere")
+                .vetLastName("VetLastNameHere")
+                .vetEmail("vet@email.com")
+                .vetPhoneNumber("123-456-7890")
+                .status(Status.UPCOMING)
+                .build();
         when(visitsServiceClient.getAllVisits()).thenReturn(Flux.just(visitResponseDTO,visitResponseDTO2));
 
         client.get()
@@ -2337,7 +2437,20 @@ class ApiGatewayControllerTest {
     }
     @Test
     void shouldGetAVisit() {
-        VisitResponseDTO visit = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", Status.UPCOMING);
+        VisitResponseDTO visit = VisitResponseDTO.builder()
+                .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .description("this is a dummy description")
+                .petId("2")
+                .petName("YourPetNameHere")
+                .petBirthDate(new Date())
+                .practitionerId("2")
+                .vetFirstName("VetFirstNameHere")
+                .vetLastName("VetLastNameHere")
+                .vetEmail("vet@email.com")
+                .vetPhoneNumber("123-456-7890")
+                .status(Status.UPCOMING)
+                .build();
 
         when(visitsServiceClient.getVisitsForPet(visit.getPetId()))
                 .thenReturn(Flux.just(visit));
@@ -2421,7 +2534,20 @@ class ApiGatewayControllerTest {
 
     @Test
     void getSingleVisit_Valid() {
-        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", Status.UPCOMING);
+        VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
+                .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .description("this is a dummy description")
+                .petId("2")
+                .petName("YourPetNameHere")
+                .petBirthDate(new Date())
+                .practitionerId("2")
+                .vetFirstName("VetFirstNameHere")
+                .vetLastName("VetLastNameHere")
+                .vetEmail("vet@email.com")
+                .vetPhoneNumber("123-456-7890")
+                .status(Status.UPCOMING)
+                .build();
         when(visitsServiceClient.getVisitByVisitId(anyString())).thenReturn(Mono.just(visitResponseDTO));
 
         client.get()
@@ -2431,7 +2557,7 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$.visitId").isEqualTo(visitResponseDTO.getVisitId())
                 .jsonPath("$.petId").isEqualTo(visitResponseDTO.getPetId())
-                .jsonPath("$.visitDate").isEqualTo("2022-11-25 13:45")
+                .jsonPath("$.visitDate").isEqualTo("2024-11-25 13:45")
                 .jsonPath("$.description").isEqualTo(visitResponseDTO.getDescription())
                 .jsonPath("$.practitionerId").isEqualTo(visitResponseDTO.getPractitionerId());
     }
@@ -2832,6 +2958,35 @@ class ApiGatewayControllerTest {
     }
 
 
+    @Test
+    @DisplayName("Should Logout with a Valid Session, Clearing Bearer Cookie, and Returning 204")
+    void logout_shouldClearBearerCookie() {
+        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+        headers.add(HttpHeaders.COOKIE, "Bearer=some.token.value; Path=/; HttpOnly; SameSite=Lax");
+        when(authServiceClient.logout(any(ServerHttpRequest.class), any(ServerHttpResponse.class)))
+                .thenReturn(Mono.just(ResponseEntity.noContent().build()));
+        client.post()
+                .uri("/api/gateway/users/logout")
+                .headers(httpHeaders -> httpHeaders.putAll(headers))
+                .exchange()
+                .expectStatus().isNoContent()
+                .expectHeader().doesNotExist(HttpHeaders.SET_COOKIE);
+    }
+
+    @Test
+    @DisplayName("Given Expired Session, Logout Should Return 401")
+    void logout_shouldReturnUnauthorizedForExpiredSession() {
+        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+        when(authServiceClient.logout(any(ServerHttpRequest.class), any(ServerHttpResponse.class)))
+                .thenReturn(Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()));
+        client.post()
+                .uri("/api/gateway/users/logout")
+                .headers(httpHeaders -> httpHeaders.putAll(headers))
+                .exchange()
+                .expectStatus().isUnauthorized()
+                .expectHeader().doesNotExist(HttpHeaders.SET_COOKIE);
+    }
+
 
 private InventoryResponseDTO buildInventoryDTO(){
         return InventoryResponseDTO.builder()
@@ -3208,6 +3363,9 @@ void deleteAllInventory_shouldSucceed() {
         verify(inventoryServiceClient, times(1))
                 .addProductToInventory(eq(requestDTO), eq("invalidInventoryId"));
     }
+
+
+
 
 
 

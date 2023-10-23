@@ -25,7 +25,8 @@ angular.module('petRegister')
                 name: self.pet.name,
                 birthDate: self.pet.birthDate,
                 type: petType.id,
-                isActive : "true"
+                isActive : "true",
+                weight: self.pet.weight
             }
 
 
