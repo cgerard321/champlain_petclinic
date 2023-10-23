@@ -123,6 +123,23 @@ public class AuthServiceClient {
 
         }
 
+        public Mono<UserPasswordLessDTO> createInventoryMangerUser(Mono<RegisterInventoryManager> registerInventoryManagerMono){
+            String uuid = UUID.randomUUID().toString();
+            return registerInventoryManagerMono.flatMap(registerInventoryManager -> {
+                registerInventoryManager.setUserId(uuid);
+                return webClientBuilder.build().post()
+                        .uri(authServiceUrl + "/users")
+                        .body(Mono.just(registerInventoryManager), RegisterInventoryManager.class)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .retrieve()
+                        .onStatus(HttpStatusCode::is4xxClientError,
+                                n -> rethrower.rethrow(n,
+                                        x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
+                        )
+                        .bodyToMono(UserPasswordLessDTO.class);
+            });
+        }
+
 
     public Mono<VetResponseDTO> createVetUser(Mono<RegisterVet> model){
 
