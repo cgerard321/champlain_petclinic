@@ -2,10 +2,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
-import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
-import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
-import com.petclinic.bffapigateway.dtos.Pets.PetType;
-import com.petclinic.bffapigateway.dtos.Pets.PetTypeResponseDTO;
+import com.petclinic.bffapigateway.dtos.Pets.*;
 import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -263,4 +260,29 @@ public class CustomersServiceClient {
                 .retrieve()
                 .bodyToFlux(PetTypeResponseDTO.class);
     }
+    public Mono<PetTypeResponseDTO> getPetTypeByPetTypeId(String petTypeId) {
+        return webClientBuilder.build().get()
+                .uri(customersServiceUrl + "/owners/petTypes/" + petTypeId)
+                .retrieve()
+                .bodyToMono(PetTypeResponseDTO.class);
+    }
+
+    public Mono<PetTypeResponseDTO> deletePetType(final String petTypeId) {
+        return webClientBuilder.build().delete()
+                .uri(customersServiceUrl +"/owners/petTypes/"+ petTypeId)
+                .retrieve()
+                .bodyToMono(PetTypeResponseDTO.class);
+    }
+
+    public Mono<PetTypeResponseDTO> updatePetType(String petTypeId, Mono<PetTypeRequestDTO> petTypeRequestDTO) {
+        return petTypeRequestDTO.flatMap(requestDTO ->
+                webClientBuilder.build()
+                        .put()
+                        .uri(customersServiceUrl + "/owners/petTypes/" + petTypeId)
+                        .body(BodyInserters.fromValue(requestDTO))
+                        .retrieve()
+                        .bodyToMono(PetTypeResponseDTO.class)
+        );
+    }
+
 }
