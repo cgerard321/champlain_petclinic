@@ -12,7 +12,7 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
     vm.pets = [];
 
     // Function to get pet type name based on petTypeId
-    /* vm.getPetTypeName = function (petTypeId) {
+    vm.getPetTypeName = function (petTypeId) {
          switch (petTypeId) {
              case '1':
                  return 'Cat';
@@ -29,7 +29,7 @@ function OwnerDetailsController($http, $state, $stateParams, $scope, $timeout, $
              default:
                  return 'Unknown';
          }
-     };*/
+     };
 
 
     vm.getBirthday = function(birthday) {
