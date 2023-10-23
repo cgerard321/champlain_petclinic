@@ -100,7 +100,7 @@ public class VisitServiceImpl implements VisitService {
                 )
 //                .doOnNext(v -> System.out.println("Request Date: " + v.getVisitDate())) // Debugging
                 .map(visitRequestDTO -> entityDtoUtil.toVisitEntity(visitRequestDTO))
-//                .doOnNext(x -> x.setVisitId(entityDtoUtil.generateVisitIdString()))
+                .doOnNext(x -> x.setVisitId(entityDtoUtil.generateVisitIdString()))
 //                .doOnNext(v -> System.out.println("Entity Date: " + v.getVisitDate())) // Debugging
                 .flatMap(visit ->
                         repo.findByVisitDateAndPractitionerId(visit.getVisitDate(), visit.getPractitionerId()) // FindVisits method in repository
