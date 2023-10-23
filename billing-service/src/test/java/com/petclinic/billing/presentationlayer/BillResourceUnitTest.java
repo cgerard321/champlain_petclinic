@@ -185,6 +185,21 @@ class BillResourceUnitTest {
 
 
     }
+
+    @Test
+    void deleteAllBills() {
+        when(billService.DeleteAllBills()).thenReturn(Mono.empty());
+
+        client.delete()
+                .uri("/bills")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent()
+                .expectBody();
+
+        Mockito.verify(billService, times(1)).DeleteAllBills();
+    }
+
     @Test
     void deleteBill() {
 

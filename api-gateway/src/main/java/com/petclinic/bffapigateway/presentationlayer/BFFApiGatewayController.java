@@ -125,6 +125,11 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @DeleteMapping(value = "bills")
+    public Mono<Void> deleteAllBills(){
+        return billServiceClient.deleteAllBills();
+    }
+
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @DeleteMapping(value = "bills/{billId}")
     public Mono<ResponseEntity<Void>> deleteBill(final @PathVariable String billId){
