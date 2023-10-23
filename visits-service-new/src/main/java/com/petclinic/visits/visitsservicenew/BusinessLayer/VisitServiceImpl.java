@@ -2,6 +2,10 @@ package com.petclinic.visits.visitsservicenew.BusinessLayer;
 
 import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.Auth.AuthServiceClient;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.Auth.UserDetails;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.Mailing.Mail;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.Mailing.MailService;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.PetResponseDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.PetsClient;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetDTO;
@@ -18,6 +22,8 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.time.LocalDateTime;
 
+import static java.lang.String.format;
+
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +33,8 @@ public class VisitServiceImpl implements VisitService {
     private final PetsClient petsClient;
     private final EntityDtoUtil entityDtoUtil;
 
+    private final AuthServiceClient authServiceClient;
+    private final MailService mailService;
     @Override
     public Flux<VisitResponseDTO> getAllVisits() {
         return repo.findAll().flatMap(visit -> entityDtoUtil.toVisitResponseDTO(visit));
@@ -80,11 +88,20 @@ public class VisitServiceImpl implements VisitService {
                         .then(validatePetId(visitRequestDTO.getPetId()))
                         .then(validateVetId(visitRequestDTO.getPractitionerId()))
                         .then(Mono.just(visitRequestDTO))
+                        .doOnNext(s->{
+
+                            authServiceClient.getUserById(visitRequestDTO.getJwtToken(), visitRequestDTO.getOwnerId()).subscribe(user->mailService.sendMail(generateVisitRequestEmail(user, visitRequestDTO.getPetId(), visitRequestDTO.getVisitDate())));
+
+        //                    Mono<UserDetails> user = getUserById(auth, ownerId);
+        //                    try{
+        //                        simpleJavaMailClient.sendMail(emailBuilder("test@email.com"));
+        //                    }catch(Exception e){System.out.println("Email failed to send: "+e.getMessage());}
+                        })
                 )
-                .doOnNext(v -> System.out.println("Request Date: " + v.getVisitDate())) // Debugging
+//                .doOnNext(v -> System.out.println("Request Date: " + v.getVisitDate())) // Debugging
                 .map(visitRequestDTO -> entityDtoUtil.toVisitEntity(visitRequestDTO))
-                .doOnNext(x -> x.setVisitId(entityDtoUtil.generateVisitIdString()))
-                .doOnNext(v -> System.out.println("Entity Date: " + v.getVisitDate())) // Debugging
+//                .doOnNext(x -> x.setVisitId(entityDtoUtil.generateVisitIdString()))
+//                .doOnNext(v -> System.out.println("Entity Date: " + v.getVisitDate())) // Debugging
                 .flatMap(visit ->
                         repo.findByVisitDateAndPractitionerId(visit.getVisitDate(), visit.getPractitionerId()) // FindVisits method in repository
                                 .collectList()
@@ -99,10 +116,6 @@ public class VisitServiceImpl implements VisitService {
                 )
                 .flatMap(visit -> entityDtoUtil.toVisitResponseDTO(visit));
     }
-
-
-
-
 
     @Override
     public Mono<Void> deleteVisit(String visitId) {
@@ -216,5 +229,58 @@ public class VisitServiceImpl implements VisitService {
         else {
             return Mono.just(dto);
         }
+    }
+
+    private Mail generateVisitRequestEmail(UserDetails user, String petName, LocalDateTime visitDate) {
+        return Mail.builder()
+                .message(
+                    format("""
+                            <!DOCTYPE html>
+                            <html lang="en">
+                            <head>
+                                <meta charset="UTF-8">
+                                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                                <title>Email Verification</title>
+                                <style>
+                                    body {
+                                        font-family: Arial, sans-serif;
+                                        background-color: #f4f4f4;
+                                        margin: 0;
+                                        padding: 0;
+                                    }
+                                    .container {
+                                        max-width: 600px;
+                                        margin: 0 auto;
+                                        padding: 20px;
+                                        background-color: #fff;
+                                        border-radius: 5px;
+                                        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                                    }
+                                    h1 {
+                                        color: #333;
+                                    }
+                                    p {
+                                        color: #555;
+                                    }
+                                    a {
+                                        color: #007BFF;
+                                    }
+                                </style>
+                            </head>
+                            <body>
+                                <div class="container">
+                                    <h1>Dear %s,</h1>
+                                    <h3>We have received a request to schedule a visit for your pet with id: %s on the following date and time: %s.</h3>
+                                    \s
+                                    <p>If you do not wish to create an account, please disregard this email.</p>
+                                    \s
+                                    <p>Thank you for choosing Pet Clinic.</p>
+                                </div>
+                            </body>
+                            </html>
+                            """, user.getUsername(), petName, visitDate.toString()))
+                .subject("PetClinic Visit request")
+                .to(user.getEmail())
+                .build();
     }
 }

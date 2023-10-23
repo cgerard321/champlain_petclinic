@@ -6,7 +6,6 @@ import com.petclinic.visits.visitsservicenew.DomainClientLayer.PetsClient;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetsClient;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
-
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

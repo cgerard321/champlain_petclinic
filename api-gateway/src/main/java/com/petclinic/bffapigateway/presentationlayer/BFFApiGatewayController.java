@@ -29,7 +29,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -262,8 +261,9 @@ public class BFFApiGatewayController {
         return visitsServiceClient.getVisitByVisitId(visitId);
     }
     @PostMapping(value = "visit/owners/{ownerId}/pets/{petId}/visits", consumes = "application/json", produces = "application/json")
-    Mono<ResponseEntity<VisitResponseDTO>> addVisit(@RequestBody VisitRequestDTO visit, @PathVariable String ownerId, @PathVariable String petId) {
-        // visit.setPetId(petId);
+    Mono<ResponseEntity<VisitResponseDTO>> addVisit(@RequestBody VisitRequestDTO visit, @PathVariable String ownerId, /*@PathVariable String petId,*/ @CookieValue("Bearer") String auth) {
+        visit.setOwnerId(ownerId);
+        visit.setJwtToken(auth);
         return visitsServiceClient.createVisitForPet(visit).map(ResponseEntity.status(HttpStatus.CREATED)::body)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }

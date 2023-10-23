@@ -1,17 +1,19 @@
-package com.petclinic.authservice.presentationlayer.User;
+package com.petclinic.visits.visitsservicenew.DomainClientLayer.Mailing;
+
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-import java.util.Set;
-
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder(toBuilder = true)
-public class RolesChangeRequestDTO {
-    Set<String> roles;
+public class Mail {
+
+    private String
+            to,
+            subject,
+            message;
 }

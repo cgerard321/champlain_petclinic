@@ -3,18 +3,17 @@ package com.petclinic.visits.visitsservicenew.BusinessLayer;
 import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.Mailing.Mail;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.Mailing.MailService;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.*;
-import com.petclinic.visits.visitsservicenew.Exceptions.DuplicateTimeException;
 import com.petclinic.visits.visitsservicenew.Exceptions.BadRequestException;
+import com.petclinic.visits.visitsservicenew.Exceptions.DuplicateTimeException;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
 import com.petclinic.visits.visitsservicenew.Utils.EntityDtoUtil;
-import okhttp3.mockwebserver.MockResponse;
-import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,13 +22,13 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.*;
-import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
+import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port: 0"})
@@ -44,20 +43,21 @@ class VisitServiceImplTest {
 
     @MockBean
     private VetsClient vetsClient;
-
     @MockBean
     private PetsClient petsClient;
+    @MockBean
+    private MailService mailService;
 
     @MockBean
     private EntityDtoUtil entityDtoUtil;
 
-    private final Long dbSize = 2L;
+//    private final Long dbSize = 2L;
 
     private final VisitResponseDTO visitResponseDTO = buildVisitResponseDTO();
     private final VisitRequestDTO visitRequestDTO = buildVisitRequestDTO();
     private final String PRAC_ID = visitResponseDTO.getPractitionerId();
-    private final String PET_ID = visitResponseDTO.getPetId();
-    private final String VISIT_ID = visitResponseDTO.getVisitId();
+//    private final String PET_ID = visitResponseDTO.getPetId();
+//    private final String VISIT_ID = visitResponseDTO.getVisitId();
 
 
     String uuidVet = UUID.randomUUID().toString();
@@ -93,7 +93,7 @@ class VisitServiceImplTest {
 
 
     Visit visit1 = buildVisit("this is a dummy description");
-    Visit visit2 = buildVisit("this is a dummy description");
+//    Visit visit2 = buildVisit("this is a dummy description");
 
 
     @Test
@@ -638,7 +638,6 @@ class VisitServiceImplTest {
         Mockito.verify(visitRepo, Mockito.times(1)).deleteAll(cancelledVisits);
     }
 
-
     @Test
     void deleteAllCanceledVisits_shouldThrowRuntimeException () {
         // Arrange
@@ -696,10 +695,4 @@ class VisitServiceImplTest {
         VisitRequestDTO requestDTO = buildVisitRequestDTO();
         return Mono.just(requestDTO);
     }
-
-
 }
-
-
-
-
