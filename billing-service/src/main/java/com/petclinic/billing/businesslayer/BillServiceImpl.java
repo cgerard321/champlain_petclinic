@@ -113,16 +113,16 @@ public class BillServiceImpl implements BillService{
 
     }
 
-    private Mono<RequestContextAdd> vetRequestResponse(RequestContextAdd rc) {
-        return
-                this.vetClient.getVetByVetId(rc.getBillRequestDTO().getVetId())
-                        .doOnNext(rc::setVetDTO)
-                        .thenReturn(rc);
-    }
-    private Mono<RequestContextAdd> ownerRequestResponse(RequestContextAdd rc) {
-        return
-                this.ownerClient.getOwnerByOwnerId(rc.getBillRequestDTO().getCustomerId())
-                        .doOnNext(rc::setOwnerResponseDTO)
-                        .thenReturn(rc);
-    }
+//    private Mono<RequestContextAdd> vetRequestResponse(RequestContextAdd rc) {
+//        return
+//                this.vetClient.getVetByVetId(rc.getBillRequestDTO().getVetId())
+//                        .doOnNext(rc::setVetDTO)
+//                        .thenReturn(rc);
+//    }
+//    private Mono<RequestContextAdd> ownerRequestResponse(RequestContextAdd rc) {
+//        return
+//                this.ownerClient.getOwnerByOwnerId(rc.getBillRequestDTO().getCustomerId())
+//                        .doOnNext(rc::setOwnerResponseDTO)
+//                        .thenReturn(rc);
+//    }
 }

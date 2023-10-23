@@ -17,14 +17,13 @@ spring:
     embedded:
       version: 4.0.21
 
-#app:
-#  vet-service:
-#    host: localhost
-#    port: 7002
-#  customers-service:
-#    host: localhost
-#    port: 7003
-# Apparently not needed
+app:
+  vet-service:
+    host: localhost
+    port: 7002
+  customers-service:
+    host: customers-service-reactive
+    port: 8090
 ---
 spring:
   config:
@@ -57,9 +56,8 @@ app:
     host: vet-service
     port: 8080
   customers-service:
-    host: customers-service
+    host: customers-service-reactive
     port: 8080
-# Without this section of code the microservice throws a 422 error
 logging:
   level:
     root: INFO

@@ -11,8 +11,8 @@ public class OwnerClient {
     private final WebClient webClient;
     private final String ownerClientServiceBaseURL;
 
-    private OwnerClient(@Value("${app.customers-service.host}") String ownerServiceHost,
-                        @Value("${app.customers-service.port}") String ownerServicePort) {
+    OwnerClient(@Value("${app.customers-service.host}") String ownerServiceHost,
+                @Value("${app.customers-service.port}") String ownerServicePort) {
         ownerClientServiceBaseURL = "http://" + ownerServiceHost + ":" + ownerServicePort + "/owners";
         this.webClient = WebClient.builder()
                 .baseUrl(ownerClientServiceBaseURL).build();

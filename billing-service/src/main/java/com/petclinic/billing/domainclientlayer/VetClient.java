@@ -13,8 +13,8 @@ public class VetClient {
 
     private final String vetClientServiceBaseURL;
 
-    private VetClient(@Value("${app.vet-service.host}") String vetServiceHost,
-                      @Value("${app.vet-service.port}") String vetServicePort) {
+    VetClient(@Value("${app.vet-service.host}") String vetServiceHost,
+              @Value("${app.vet-service.port}") String vetServicePort) {
         vetClientServiceBaseURL = "http://" + vetServiceHost + ":" + vetServicePort + "/vets";
 
         this.webClient = WebClient.builder()
