@@ -17,23 +17,77 @@ angular.module('inventoryProductList')
             productSalePrice: ''
         }
         fetchProductList();
-            $scope.deleteProduct = function (product) {
-            let varIsConf = confirm('Are you sure you want to remove this product?');
-            if (varIsConf) {
 
-                $http.delete('api/gateway/inventory/' + product.inventoryId + '/products/' + product.productId)
-                    .then(successCallback, errorCallback)
+        $scope.deleteProduct = function(product) {
+            let ifConfirmed = confirm('Are you sure you want to remove this inventory?');
+            if (ifConfirmed) {
+                // Step 1: Mark as temporarily deleted on frontend.
+                product.isTemporarilyDeleted = true;
 
-                function successCallback(response) {
-                    alert(product.productName + " Successfully Removed!");
-                    //refresh list
-                    fetchProductList(self.lastParams.productName, self.lastParams.productPrice, self.lastParams.productQuantity, self.lastParams.productSalePrice);
-                }
-                function errorCallback(error) {
-                    alert(error.errors);
-                    console.log(error, 'Data is inaccessible.');
-                }
+                // Display an Undo button for say, 5 seconds.
+                setTimeout(function() {
+                    if (product.isTemporarilyDeleted) {
+                        // If it's still marked as deleted after 5 seconds, proceed with actual deletion.
+                        proceedToDelete(product);
+                    }
+                }, 5000);  // 5 seconds = 5000ms.
             }
+        };
+
+        $scope.undoDelete = function(product) {
+            product.isTemporarilyDeleted = false;
+            // Hide the undo button.
+        };
+
+        function proceedToDelete(product) {
+            if (!product.isTemporarilyDeleted) return;  // In case the user clicked undo just before the timeout.
+
+            $http.delete('api/gateway/inventory/' + product.inventoryId + '/products/' + product.productId)
+                .then(successCallback, errorCallback)
+
+            function showNotification(message) {
+                const notificationElement = document.getElementById('notification');
+                notificationElement.innerHTML = message;
+                notificationElement.style.display = 'block';
+
+                setTimeout(() => {
+                    notificationElement.style.display = 'none';
+                }, 5000);  // Hide after 5 seconds
+            }
+
+            function successCallback(response) {
+                $scope.errors = [];
+                console.log(response, 'res');
+
+                // After deletion, wait for a short moment (e.g., 1 second) before showing the notification
+                setTimeout(() => {
+                    showNotification(product.productName + " has been deleted successfully!");
+                    // Then, after displaying the notification for 5 seconds, reload the page
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                }, 1000);  // Wait for 1 second before showing notification
+            }
+            function errorCallback(error) {
+                // If the error message is nested under 'data.errors' in your API response:
+                alert(error.data.errors);
+                console.log(error, 'Data is inaccessible.');
+            }
+        }
+
+
+        $scope.clearQueries = function (){
+            self.lastParams.productName = '';
+            self.lastParams.productQuantity = '';
+            self.lastParams.productPrice = '';
+            self.lastParams.productSalePrice = '';
+
+            // Clear the input fields
+            $scope.productName = '';
+            $scope.productQuantity = '';
+            $scope.productPrice = '';
+            $scope.productSalePrice = '';
+            $scope.searchProduct('', '', '', '');
         }
 
         $scope.searchProduct = function(productName, productQuantity, productPrice, productSalePrice) {
@@ -75,10 +129,15 @@ angular.module('inventoryProductList')
             if (queryString !== '') {
                 apiUrl += "?" + queryString;
             }
-
+            let response = [];
             $http.get(apiUrl)
                 .then(function(resp) {
-                    self.inventoryProductList = resp.data;
+                    resp.data.forEach(function (current) {
+                        current.productPrice = current.productPrice.toFixed(2);
+                        current.productSalePrice = current.productSalePrice.toFixed(2);
+                        response.push(current);
+                    });
+                    self.inventoryProductList = response;
                     loadTotalItem(productName, productPrice, productQuantity)
                     InventoryService.setInventoryId(inventoryId);
                 })
@@ -125,8 +184,14 @@ angular.module('inventoryProductList')
                 self.lastParams.productPrice = null;
                 self.lastParams.productQuantity = null;
                 let inventoryId = $stateParams.inventoryId;
+                let response = [];
                 $http.get('api/gateway/inventory/' + $stateParams.inventoryId + '/products-pagination?page=' + self.currentPage + '&size=' + self.pageSize).then(function (resp) {
-                    self.inventoryProductList = resp.data;
+                    resp.data.forEach(function (current) {
+                        current.productPrice = current.productPrice.toFixed(2);
+                        current.productSalePrice = current.productSalePrice.toFixed(2);
+                        response.push(current);
+                    });
+                    self.inventoryProductList = response;
                     inventoryId = $stateParams.inventoryId;
                     loadTotalItem(productName, productPrice, productQuantity, productSalePrice)
                     InventoryService.setInventoryId(inventoryId);

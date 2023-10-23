@@ -11,12 +11,6 @@ angular.module('inventoryProductList', ['ui.router'])
                 controllerAs: 'self'
             })
 
-            .state('updateProduct', {
-                    parent: 'app',
-                    url: '/inventory/:inventoryId/products/:productId',
-                    template: '<inventory-product-item></inventory-product-item>'
-                }
-            )
             .state('deleteProduct', {
                 parent: 'app',
                 url: '/inventory/:inventoryId/products/:productId',

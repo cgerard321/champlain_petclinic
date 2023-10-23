@@ -6,8 +6,13 @@
 
                 <h3 class="">Pet Details</h3>
 
+                <div ng-if="!$ctrl.pet">
+                    <h3>No pet found</h3>
+                </div>
+
+
                 <div class="bg-white shadow-sm mt-3 mb-1" style="width: 75px; height: 75px; border-radius: 50px;">
-                    <img style="width: 100%; height: 100%; border-radius: 50px" src="../../images/default-owner-profile-picture.jpg"/>
+                    <img style="width: 100%; height: 100%; border-radius: 50px" src="../../images/animaldefault.png"/>
                 </div>
 
                 <form action="" class="pt-3">
@@ -32,14 +37,18 @@
                             <label class="inputLabel">Name</label>
                         </div>
                         <div class="d-flex flex-column">
-                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.pet.birthDate}}" readonly disabled/>
+                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.getBirthday($ctrl.pet.birthDate)}}" readonly disabled/>
                             <label class="inputLabel">Birthday</label>
+                        </div>
+                        <div class="d-flex flex-column">
+                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.pet.weight}}" readonly disabled/>
+                            <label class="inputLabel">Weight (KG)</label>
                         </div>
                     </div>
 
                     <div class="d-flex flex-row gap-3 pt-1">
                         <div class="d-flex flex-column">
-                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.pet.petTypeId}}" readonly disabled/>
+                            <input class="inputFieldsStyle bg-white" value="{{$ctrl.getPetTypeName($ctrl.pet.petTypeId)}}" readonly disabled/>
                             <label class="inputLabel">Pet Type</label>
                         </div>
                         <div class="d-flex flex-column">
@@ -49,20 +58,23 @@
                     </div>
 
                     <div class="d-flex flex-row gap-3 justify-content-end">
-                        <div>
-                            <a style="color: rgba(0,0,0,0.5);" class="btn btn-light" ui-sref="ownerEdit({ownerId: $ctrl.owner.ownerId, method: 'edit'})">Edit</a>
+
+                        <div class="border-5 rounded">
+                            <a style="color: rgba(0,0,0,0.5);" class="btn btn-light" ng-model="pet.isActive" ng-click="$ctrl.toggleActiveStatus(pet.petId)">Pet Status</a>
                         </div>
+
                         <div>
-                            <a style="color: rgba(0,0,0,0.5);" class="btn btn-light" ui-sref="ownerEdit({ownerId: $ctrl.owner.ownerId, method: 'delete'})">Delete</a>
+                            <a style="color: rgba(0,0,0,0.5);" class="btn btn-light" ui-sref="editPet({ownerId: $ctrl.pet.ownerId, petId: $ctrl.pet.petId, method: 'edit'})">Edit Pet</a><!-- Add more pet details as needed -->
+
+                        </div>
+
+                        <div class="border-5 rounded">
+                            <a style="color: rgba(0,0,0,0.5);" class="btn btn-light" ng-click="$ctrl.deletePet($ctrl.pet.petId)">Delete Pet</a>
                         </div>
                     </div>
-
                 </form>
-
             </div>
-
         </div>
-
         </div>
 
     </div>
