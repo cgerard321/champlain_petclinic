@@ -1,7 +1,7 @@
 'use strict';
 
 angular.module('userDetails')
-    .controller('UserDetailsController', ['$http', '$stateParams', function ($http, $stateParams, $scope) {
+    .controller('UserDetailsController', ['$http', '$stateParams', '$location', function ($http, $stateParams, $location) {
 
         let self = this;
         self.userId = $stateParams.userId;
@@ -14,5 +14,8 @@ angular.module('userDetails')
             .catch(function (error) {
                 $scope.errorMessages = n.data.message.split`\n`;
             });
-    }]);
 
+        self.goToAdminPanel = function() {
+            $location.path("/adminPanel");
+        }
+    }]);

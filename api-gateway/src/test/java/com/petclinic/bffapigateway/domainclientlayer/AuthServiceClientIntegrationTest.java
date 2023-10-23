@@ -534,4 +534,50 @@ public class AuthServiceClientIntegrationTest {
                 .expectNextCount(0)
                 .verifyError();
     }
+
+    @Test
+    @DisplayName("Should create a vet user")
+    void shouldCreateVetUser() throws IOException {
+        // Arrange
+        RegisterVet registerVet = RegisterVet.builder()
+                .username("username")
+                .password("password")
+                .email("email")
+                .build();
+        Mono<RegisterVet> registerVetMono = Mono.just(registerVet);
+
+        // Set up the MockWebServer to return a specific response
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(200);
+        server.enqueue(mockResponse);
+
+        // Act
+        Mono<VetResponseDTO> result = authServiceClient.createVetUser(registerVetMono);
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
+    @Test
+    void deleteUser_ShouldReturnOk() throws Exception {
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setResponseCode(200);
+
+        server.enqueue(mockResponse);
+
+        String jwtToken = "jwtToken";
+        String userId = "userId";
+
+        final Mono<Void> validatedTokenResponse = authServiceClient.deleteUser(jwtToken, userId);
+
+        // check status response in step verifier
+        StepVerifier.create(Mono.just(validatedTokenResponse))
+                .expectNextCount(1)
+                .verifyComplete();
+    }
 }
