@@ -1,11 +1,11 @@
 'use strict';
 
-angular.module('inventoryManagerSignup', ['ui.router'])
+angular.module('managerForm', ['ui.router'])
     .config(['$stateProvider', function ($stateProvider) {
         $stateProvider
-            .state('inventoryManagerSignup', {
+            .state('managerForm', {
                 parent: 'app',
-                url: '/inventoryManagerSignup',
+                url: '/manager',
                 template: '<manager-form></manager-form>'
             })
     }]);
