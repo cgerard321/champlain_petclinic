@@ -44,7 +44,7 @@ class VisitServiceImplTest {
 
     @MockBean
     private VetsClient vetsClient;
-
+    @MockBean private SimpleJavaMailClient simpleJavaMailClient;
     @MockBean
     private PetsClient petsClient;
 

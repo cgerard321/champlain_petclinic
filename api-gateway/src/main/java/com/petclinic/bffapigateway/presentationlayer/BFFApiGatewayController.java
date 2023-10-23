@@ -262,8 +262,9 @@ public class BFFApiGatewayController {
         return visitsServiceClient.getVisitByVisitId(visitId);
     }
     @PostMapping(value = "visit/owners/{ownerId}/pets/{petId}/visits", consumes = "application/json", produces = "application/json")
-    Mono<ResponseEntity<VisitResponseDTO>> addVisit(@RequestBody VisitRequestDTO visit, @PathVariable String ownerId, @PathVariable String petId) {
+    Mono<ResponseEntity<VisitResponseDTO>> addVisit(@RequestBody VisitRequestDTO visit, @PathVariable String ownerId, @PathVariable String petId, @CookieValue("Bearer") String auth) {
         // visit.setPetId(petId);
+        Mono<UserDetails> user = getUserById(auth, ownerId);
         return visitsServiceClient.createVisitForPet(visit).map(ResponseEntity.status(HttpStatus.CREATED)::body)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
