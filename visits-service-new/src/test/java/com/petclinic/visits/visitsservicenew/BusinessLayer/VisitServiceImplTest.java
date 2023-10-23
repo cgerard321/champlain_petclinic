@@ -640,7 +640,6 @@ class VisitServiceImplTest {
         Mockito.verify(visitRepo, Mockito.times(1)).deleteAll(cancelledVisits);
     }
 
-
     @Test
     void deleteAllCanceledVisits_shouldThrowRuntimeException () {
         // Arrange

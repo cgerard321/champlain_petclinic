@@ -13,7 +13,6 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 @Component
 public class Rethrower {
-
     private final ObjectMapper objectMapper;
     public Mono<? extends Throwable> rethrow(ClientResponse clientResponse, Function<Map, ? extends Throwable> exceptionProvider) {
         return clientResponse.createException().flatMap(n ->
@@ -23,7 +22,7 @@ public class Rethrower {
                         objectMapper.readValue(n.getResponseBodyAsString(), Map.class);
                 return Mono.error(exceptionProvider.apply(map));
             } catch (JsonProcessingException e) {
-                e.printStackTrace();
+//                e.printStackTrace();
                 return Mono.error(e);
             }
         });

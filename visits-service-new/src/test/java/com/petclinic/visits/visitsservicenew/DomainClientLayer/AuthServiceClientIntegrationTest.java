@@ -3,7 +3,6 @@ package com.petclinic.visits.visitsservicenew.DomainClientLayer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.Auth.AuthServiceClient;
-import com.petclinic.visits.visitsservicenew.DomainClientLayer.Auth.Rethrower;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.Auth.UserDetails;
 import lombok.RequiredArgsConstructor;
 import okhttp3.mockwebserver.MockResponse;

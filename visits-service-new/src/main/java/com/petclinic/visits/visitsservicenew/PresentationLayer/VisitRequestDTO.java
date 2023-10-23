@@ -3,7 +3,6 @@ package com.petclinic.visits.visitsservicenew.PresentationLayer;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.petclinic.visits.visitsservicenew.DataLayer.Status;
-import com.petclinic.visits.visitsservicenew.DomainClientLayer.Auth.UserDetails;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

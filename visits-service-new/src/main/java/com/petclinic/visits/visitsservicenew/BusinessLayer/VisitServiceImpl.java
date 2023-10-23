@@ -267,7 +267,7 @@ public class VisitServiceImpl implements VisitService {
                             <body>
                                 <div class="container">
                                     <h1>Dear %s,</h1>
-                                    <h3>We have received a request to schedule a visit for one of your pet: %s at the following date and time: %s.</h3>
+                                    <h3>We have received a request to schedule a visit for your pet with id: %s on the following date and time: %s.</h3>
                                     \s
                                     <p>If you do not wish to create an account, please disregard this email.</p>
                                     \s
