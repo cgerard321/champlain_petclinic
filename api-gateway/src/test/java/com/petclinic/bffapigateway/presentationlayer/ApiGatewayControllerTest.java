@@ -3708,6 +3708,26 @@ private VetAverageRatingDTO buildVetAverageRatingDTO(){
                     assertEquals(userDetails.getEmail(), u.getEmail());
                 });
     }
+
+    @Test
+    void deleteUserById_ValidUserId_ShouldDeleteUser() {
+        UserDetails userDetails = UserDetails.builder()
+                .userId("validUserId")
+                .username("validUsername")
+                .email("validEmail")
+                .build();
+
+        when(authServiceClient.deleteUser(anyString(), anyString()))
+                .thenReturn(Mono.empty());
+
+        client.delete()
+                .uri("/api/gateway/users/validUserId")
+                .cookie("Bearer", "validToken")
+                .exchange()
+                .expectStatus().isNoContent();
+    }
+
+
     private EducationResponseDTO buildEducation(){
         return EducationResponseDTO.builder()
                 .educationId("1")

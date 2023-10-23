@@ -82,9 +82,6 @@ public class UserServiceImpl implements UserService {
                         format("User with username %s already exists", userIDLessDTO.getUsername()));
             }
 
-
-// add exception when trying to create a user with existing username
-
             User user = userMapper.idLessRoleLessDTOToModel(userIDLessDTO);
 
             if (userIDLessDTO.getDefaultRole() == null|| userIDLessDTO.getDefaultRole().isEmpty()){
@@ -445,6 +442,17 @@ public class UserServiceImpl implements UserService {
         return userRepo.findOptionalUserByUserIdentifier_UserId(userId)
                 .orElseThrow(() -> new NotFoundException("No user with userId: " + userId));
     }
+
+    @Override
+    public void deleteUser(String userId) {
+        User user = userRepo.findUserByUserIdentifier_UserId(userId);
+        if (user != null) {
+            userRepo.delete(user);
+        } else {
+            throw new NotFoundException("No user with userId: " + userId);
+        }
+    }
+
 
     @Override
     public List<UserDetails> getUsersByUsernameContaining(String username) {

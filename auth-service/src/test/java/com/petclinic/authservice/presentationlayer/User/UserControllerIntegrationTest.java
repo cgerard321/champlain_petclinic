@@ -7,6 +7,7 @@ import com.petclinic.authservice.security.JwtTokenUtil;
 import com.petclinic.authservice.datalayer.user.*;
 import org.aspectj.lang.annotation.Before;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -57,6 +58,8 @@ class UserControllerIntegrationTest {
     private MailService mailService;
 
     private final String VALID_USER_ID = "7c0d42c2-0c2d-41ce-bd9c-6ca67478956f";
+
+    private final String VALID_USER_ID2 = "f470653d-05c5-4c45-b7a0-7d70f003d2ac";
 
     @Before("setup")
     public void setup() {
@@ -543,7 +546,7 @@ class UserControllerIntegrationTest {
                 .expectStatus().isOk()
                 .expectBodyList(UserDetails.class)
                 .value(users -> {
-                    assertEquals(19,users.size());
+                    assertEquals(18,users.size());
                 });
     }
     @Test
@@ -610,9 +613,37 @@ class UserControllerIntegrationTest {
                 .expectStatus().isOk()
                 .expectBodyList(UserDetails.class)
                 .value(users -> {
-                    assertEquals(19,users.size());
+                    assertEquals(18,users.size());
                 });
     }
+
+    @Test
+    void deleteUser_ShouldSucceed(){
+        String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
+
+        webTestClient.delete()
+                .uri("/users/{userId}" , VALID_USER_ID2)
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer",token)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        assertNull(userRepo.findUserByUserIdentifier_UserId(VALID_USER_ID2));
+    }
+
+    @Test
+    void deleteUser_ShouldThrowNotFoundException(){
+        String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
+        String nonExistingUserId = "nonExistingUserId";
+
+        webTestClient.delete()
+                .uri("/users/{userId}" , nonExistingUserId)
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer",token)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
 
     @Test
     void updateUserRole_validUserId() {

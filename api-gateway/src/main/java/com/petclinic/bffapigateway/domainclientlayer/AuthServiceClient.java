@@ -87,6 +87,16 @@ public class AuthServiceClient {
                 .retrieve()
                 .bodyToFlux(UserDetails.class);
     }
+
+    public Mono<Void> deleteUser(String jwtToken, String userId) {
+        return webClientBuilder.build()
+                .delete()
+                .uri(authServiceUrl + "/users/{userId}", userId)
+                .cookie("Bearer", jwtToken)
+                .retrieve()
+                .bodyToMono(void.class);
+    }
+
     //FUCK REACTIVE
     /*
     This shit is beyond cursed, but I do not care. This works, I only spent 6 HOURS OF MY LIFE.
@@ -200,15 +210,6 @@ public class AuthServiceClient {
 //                .bodyToMono(UserDetails.class);
 //    }
 //
-//    public Mono<UserDetails> deleteUser(String auth, final long userId) {
-//        return webClientBuilder.build()
-//                .delete()
-//                .uri(authServiceUrl + "/users/{userId}", userId)
-//                .header("Authorization", auth)
-//                .retrieve()
-//                .bodyToMono(UserDetails.class);
-//    }
-
     public Mono<ResponseEntity<UserDetails>> verifyUser(final String token) {
 
         return webClientBuilder.build()
