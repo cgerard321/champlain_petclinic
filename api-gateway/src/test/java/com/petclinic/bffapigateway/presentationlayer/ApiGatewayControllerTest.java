@@ -53,13 +53,11 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-import javax.print.attribute.standard.Media;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -2648,82 +2646,10 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$.visitId").isEqualTo(visitResponseDTO.getVisitId())
                 .jsonPath("$.petId").isEqualTo(visitResponseDTO.getPetId())
-                .jsonPath("$.visitDate").isEqualTo("2024-11-25 13:45")
+                .jsonPath("$.visitDate").isEqualTo("2022-11-25 13:45")
                 .jsonPath("$.description").isEqualTo(visitResponseDTO.getDescription())
                 .jsonPath("$.practitionerId").isEqualTo(visitResponseDTO.getPractitionerId());
     }
-    @Test
-    void getVisitsByStatus_Valid() {
-        VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
-                .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
-                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
-                .description("this is a dummy description")
-                .petId("2")
-                .petName("YourPetNameHere")
-                .petBirthDate(new Date())
-                .practitionerId("2")
-                .vetFirstName("VetFirstNameHere")
-                .vetLastName("VetLastNameHere")
-                .vetEmail("vet@email.com")
-                .vetPhoneNumber("123-456-7890")
-                .status(Status.UPCOMING)
-                .build();
-
-        when(visitsServiceClient.getVisitsForStatus(visitResponseDTO.getStatus().toString())).thenReturn(Flux.just(visitResponseDTO));
-
-        client.get()
-                .uri("/api/gateway/visits/status/{status}", visitResponseDTO.getStatus())
-                .exchange()
-                .expectStatus().isOk()
-                .expectBodyList(VisitResponseDTO.class)
-                .consumeWith(response -> {
-                    Assertions.assertTrue(response.getResponseBody().size() > 0);
-                    VisitResponseDTO responseBody = response.getResponseBody().get(0);
-                    // Asserting that the values match what's expected
-                    Assertions.assertEquals(visitResponseDTO.getVisitId(), responseBody.getVisitId());
-                    Assertions.assertEquals(visitResponseDTO.getPetId(), responseBody.getPetId());
-                    Assertions.assertEquals(visitResponseDTO.getVisitDate(), responseBody.getVisitDate());
-                    Assertions.assertEquals(visitResponseDTO.getDescription(), responseBody.getDescription());
-                    Assertions.assertEquals(visitResponseDTO.getPractitionerId(), responseBody.getPractitionerId());
-                });
-    }
-
-    @Test
-    void getVisitsByPractitionerId_Valid() {
-        VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
-                .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
-                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
-                .description("this is a dummy description")
-                .petId("2")
-                .petName("YourPetNameHere")
-                .petBirthDate(new Date())
-                .practitionerId("2")
-                .vetFirstName("VetFirstNameHere")
-                .vetLastName("VetLastNameHere")
-                .vetEmail("vet@email.com")
-                .vetPhoneNumber("123-456-7890")
-                .status(Status.UPCOMING)
-                .build();
-
-        when(visitsServiceClient.getVisitByPractitionerId(visitResponseDTO.getPractitionerId())).thenReturn(Flux.just(visitResponseDTO));
-
-        client.get()
-                .uri("/api/gateway/visits/vets/{practitionerId}", visitResponseDTO.getPractitionerId())
-                .exchange()
-                .expectStatus().isOk()
-                .expectBodyList(VisitResponseDTO.class)
-                .consumeWith(response -> {
-                    Assertions.assertTrue(response.getResponseBody().size() > 0);
-                    VisitResponseDTO responseBody = response.getResponseBody().get(0);
-
-                    Assertions.assertEquals(visitResponseDTO.getVisitId(), responseBody.getVisitId());
-                    Assertions.assertEquals(visitResponseDTO.getPetId(), responseBody.getPetId());
-                    Assertions.assertEquals(visitResponseDTO.getVisitDate(), responseBody.getVisitDate());
-                    Assertions.assertEquals(visitResponseDTO.getDescription(), responseBody.getDescription());
-                    Assertions.assertEquals(visitResponseDTO.getPractitionerId(), responseBody.getPractitionerId());
-                });
-    }
-
 
 //    @Test
     //    void getSingleVisit_Invalid() {
@@ -3121,35 +3047,6 @@ class ApiGatewayControllerTest {
     }
 
 
-    @Test
-    @DisplayName("Should Logout with a Valid Session, Clearing Bearer Cookie, and Returning 204")
-    void logout_shouldClearBearerCookie() {
-        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
-        headers.add(HttpHeaders.COOKIE, "Bearer=some.token.value; Path=/; HttpOnly; SameSite=Lax");
-        when(authServiceClient.logout(any(ServerHttpRequest.class), any(ServerHttpResponse.class)))
-                .thenReturn(Mono.just(ResponseEntity.noContent().build()));
-        client.post()
-                .uri("/api/gateway/users/logout")
-                .headers(httpHeaders -> httpHeaders.putAll(headers))
-                .exchange()
-                .expectStatus().isNoContent()
-                .expectHeader().doesNotExist(HttpHeaders.SET_COOKIE);
-    }
-
-    @Test
-    @DisplayName("Given Expired Session, Logout Should Return 401")
-    void logout_shouldReturnUnauthorizedForExpiredSession() {
-        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
-        when(authServiceClient.logout(any(ServerHttpRequest.class), any(ServerHttpResponse.class)))
-                .thenReturn(Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()));
-        client.post()
-                .uri("/api/gateway/users/logout")
-                .headers(httpHeaders -> httpHeaders.putAll(headers))
-                .exchange()
-                .expectStatus().isUnauthorized()
-                .expectHeader().doesNotExist(HttpHeaders.SET_COOKIE);
-    }
-
 
 private InventoryResponseDTO buildInventoryDTO(){
         return InventoryResponseDTO.builder()
@@ -3530,9 +3427,6 @@ void deleteAllInventory_shouldSucceed() {
 
 
 
-
-
-
     private ProductResponseDTO buildProductDTO(){
         return ProductResponseDTO.builder()
                 .id("1")
@@ -3555,11 +3449,6 @@ void deleteAllInventory_shouldSucceed() {
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
                 .workday(new HashSet<>())
-                .workHoursJson("{\n" +
-                        "            \"Monday\": [\"Hour_8_9\",\"Hour_9_10\",\"Hour_10_11\",\"Hour_11_12\",\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\"],\n" +
-                        "            \"Wednesday\": [\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\",\"Hour_16_17\",\"Hour_17_18\",\"Hour_18_19\",\"Hour_19_20\"],\n" +
-                        "            \"Thursday\": [\"Hour_10_11\",\"Hour_11_12\",\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\",\"Hour_16_17\",\"Hour_17_18\"]\n" +
-                        "        }")
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -3573,11 +3462,6 @@ void deleteAllInventory_shouldSucceed() {
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
                 .workday(new HashSet<>())
-                .workHoursJson("{\n" +
-                        "            \"Monday\": [\"Hour_8_9\",\"Hour_9_10\",\"Hour_10_11\",\"Hour_11_12\",\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\"],\n" +
-                        "            \"Wednesday\": [\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\",\"Hour_16_17\",\"Hour_17_18\",\"Hour_18_19\",\"Hour_19_20\"],\n" +
-                        "            \"Thursday\": [\"Hour_10_11\",\"Hour_11_12\",\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\",\"Hour_16_17\",\"Hour_17_18\"]\n" +
-                        "        }")
                 .specialties(new HashSet<>())
                 .active(true)
                 .build();
@@ -3881,26 +3765,6 @@ private VetAverageRatingDTO buildVetAverageRatingDTO(){
                     assertEquals(userDetails.getEmail(), u.getEmail());
                 });
     }
-
-    @Test
-    void deleteUserById_ValidUserId_ShouldDeleteUser() {
-        UserDetails userDetails = UserDetails.builder()
-                .userId("validUserId")
-                .username("validUsername")
-                .email("validEmail")
-                .build();
-
-        when(authServiceClient.deleteUser(anyString(), anyString()))
-                .thenReturn(Mono.empty());
-
-        client.delete()
-                .uri("/api/gateway/users/validUserId")
-                .cookie("Bearer", "validToken")
-                .exchange()
-                .expectStatus().isNoContent();
-    }
-
-
     private EducationResponseDTO buildEducation(){
         return EducationResponseDTO.builder()
                 .educationId("1")

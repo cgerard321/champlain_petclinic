@@ -8,6 +8,9 @@ app:
   customers-service-reactive:
     host: localhost
     port: 8090
+  billing-service:
+    host: localhost
+    port: 7004
   auth-service:
     host: localhost
     port: 7005
@@ -76,6 +79,10 @@ app:
     port: 8080
   mailer-service:
     host: mailer-service
+    port: 8080
+
+  billing-service:
+    host: billing-service
     port: 8080
 
 logging:

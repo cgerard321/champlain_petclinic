@@ -28,4 +28,8 @@ public class Visit {
 
     private Status status;
 
+    private String billId;
+
+    private String customerId;
+
 }

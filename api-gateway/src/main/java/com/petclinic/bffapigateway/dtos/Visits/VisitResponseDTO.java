@@ -28,4 +28,6 @@ public class VisitResponseDTO {
     private String vetEmail;
     private String vetPhoneNumber;
     private Status status;
+    private String billId;
+    private String customerId;
 }
