@@ -98,7 +98,7 @@ public class UserServiceImpl implements UserService {
                 Role role = roleRepo.findRoleByName(userIDLessDTO.getDefaultRole());
                 Set<Role> roleSet = new HashSet<>();
                 if(role == null)
-                    throw new NotFoundException("Role not found");
+                    throw new NotFoundException("No role with name: " + userIDLessDTO.getDefaultRole());
                 roleSet.add(role);
                 user.setRoles(roleSet);
             }

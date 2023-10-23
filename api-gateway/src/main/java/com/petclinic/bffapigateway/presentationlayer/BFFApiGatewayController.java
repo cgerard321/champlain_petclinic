@@ -793,9 +793,7 @@ public class BFFApiGatewayController {
         return authServiceClient.changePassword(resetRequest);
     }
 
-    /**
-     * End of Auth Methods
-     **/
+
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @PostMapping(value = "/users/inventoryManager")
     public Mono<ResponseEntity<UserPasswordLessDTO>> createInventoryManager(@RequestBody @Valid Mono<RegisterInventoryManager> model) {
