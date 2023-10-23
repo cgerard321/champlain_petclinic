@@ -283,6 +283,42 @@ public class AuthServiceUserServiceTests {
         verify(userRepo).findById(validToken.getUserIdentifier());
     }
 
+    @Test
+    @DisplayName("Delete user, should succeed")
+    void deleteUser_ShouldSucceed() {
+        // Arrange
+        User user = User.builder()
+                .username(USER)
+                .userIdentifier(new UserIdentifier())
+                .email(EMAIL)
+                .password(passwordEncoder.encode(PASS))
+                .verified(true)
+                .build();
+        userRepo.save(user);
+
+        when(userRepo.findUserByUserIdentifier_UserId(any()))
+                .thenReturn(user);
+
+        // Act
+        userService.deleteUser(user.getUserIdentifier().getUserId());
+
+        // Assert
+        verify(userRepo, times(1)).delete(user);
+    }
+
+    @Test
+    @DisplayName("Delete user, should throw NotFoundException")
+    void deleteUser_ShouldThrowNotFoundException() {
+        // Arrange
+        String nonExistentUserId = "nonExistentUserId";
+
+        when(userRepo.findUserByUserIdentifier_UserId(nonExistentUserId))
+                .thenReturn(null);
+
+        // Act and Assert
+        assertThrows(NotFoundException.class, () -> userService.deleteUser(nonExistentUserId));
+    }
+
 
 // Next Story
 //    @Test

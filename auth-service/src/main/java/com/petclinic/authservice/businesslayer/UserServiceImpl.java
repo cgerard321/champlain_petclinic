@@ -82,9 +82,6 @@ public class UserServiceImpl implements UserService {
                         format("User with username %s already exists", userIDLessDTO.getUsername()));
             }
 
-
-// add exception when trying to create a user with existing username
-
             User user = userMapper.idLessRoleLessDTOToModel(userIDLessDTO);
 
             if (userIDLessDTO.getDefaultRole() == null|| userIDLessDTO.getDefaultRole().isEmpty()){
