@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Auth.*;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
+import com.petclinic.bffapigateway.dtos.Vets.VetRequestDTO;
+import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
+import com.petclinic.bffapigateway.dtos.Vets.Workday;
 import com.petclinic.bffapigateway.utils.Security.Variables.SecurityConst;
 import com.petclinic.bffapigateway.utils.Utility;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +29,7 @@ import reactor.test.StepVerifier;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 import static junit.framework.TestCase.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -62,6 +66,11 @@ public class AuthServiceClientIntegrationTest {
 
     private AuthServiceClient authServiceClient;
 
+    private final RegisterInventoryManager REGISTER_INVENTORY_MANAGER = RegisterInventoryManager.builder()
+            .username("username")
+            .password("password")
+            .email("email")
+            .build();
     private final Register USER_REGISTER = Register.builder()
             .username("username")
             .password("password")
@@ -73,6 +82,23 @@ public class AuthServiceClientIntegrationTest {
                     .address("address")
                     .city("city")
                     .telephone("telephone")
+                    .build())
+            .build();
+
+
+    private final RegisterVet REGISTER_VETERINARIAN = RegisterVet.builder()
+            .username("username")
+            .password("password")
+            .email("email")
+            .vet(VetRequestDTO.builder()
+                    .vetId("UUID")
+                    .firstName("firstName")
+                    .lastName("lastName")
+                    .active(true)
+                    .vetBillId("UUID")
+                    .phoneNumber("phoneNumber")
+                    .workday(Set.of(Workday.Friday, Workday.Monday, Workday.Thursday, Workday.Tuesday, Workday.Wednesday))
+                    .resume("resume")
                     .build())
             .build();
 
@@ -92,6 +118,61 @@ public class AuthServiceClientIntegrationTest {
     @AfterEach
     void shutdown() throws IOException {
         server.shutdown();
+    }
+
+    @Test
+    @DisplayName("Given valid register information, register inventory manager")
+    void valid_register_inventory_manager(){
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(200);
+
+        server.enqueue(mockResponse);
+
+        Mono<UserPasswordLessDTO> block = authServiceClient.createInventoryMangerUser(Mono.just(REGISTER_INVENTORY_MANAGER));
+
+        StepVerifier
+                .create(block)
+                .verifyComplete();
+
+    }
+
+
+    @Test
+    @DisplayName("Given invalid register information, register inventory manager")
+    void invalid_register_inventory_manager(){
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(400);
+
+        server.enqueue(mockResponse);
+
+        Mono<UserPasswordLessDTO> block = authServiceClient.createInventoryMangerUser(Mono.just(REGISTER_INVENTORY_MANAGER));
+
+        StepVerifier
+                .create(block)
+                .verifyError();
+    }
+
+
+    @Test
+    @DisplayName("Given Valid Vet Register, register vet")
+    void valid_register_vet(){
+        final MockResponse mockResponse = new MockResponse();
+        mockResponse
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(200);
+
+        server.enqueue(mockResponse);
+
+        Mono<VetResponseDTO> block = authServiceClient.createVetUser(Mono.just(REGISTER_VETERINARIAN));
+
+        StepVerifier
+                .create(block)
+                .verifyComplete();
+
     }
 
     @Test

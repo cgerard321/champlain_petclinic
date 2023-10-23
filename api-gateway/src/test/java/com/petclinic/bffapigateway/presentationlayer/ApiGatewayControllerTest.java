@@ -975,6 +975,48 @@ class ApiGatewayControllerTest {
 //        assertEquals(user.getId(), 1);
 //    }
 //
+
+        @Test
+    void createUserInventoryManager_ShouldSucceed(){
+        String uuid = UUID.randomUUID().toString();
+        Role role = Role.builder()
+                .name(Roles.INVENTORY_MANAGER.name())
+                .build();
+        UserPasswordLessDTO userResponse = UserPasswordLessDTO
+                .builder()
+                .userId(uuid)
+                .email("email@email.com")
+                .roles(Set.of(role))
+                .build();
+
+        when(authServiceClient.createInventoryMangerUser(any()))
+                .thenReturn(Mono.just(userResponse));
+
+        RegisterInventoryManager register = RegisterInventoryManager.builder()
+                .userId(uuid)
+                .username("Johnny123")
+                .password("Password22##")
+                .email("email@email.com")
+                .build();
+
+        client.post()
+                .uri("/api/gateway/users/inventoryManager")
+                .body(Mono.just(register), RegisterInventoryManager.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(UserPasswordLessDTO.class)
+                .value(dto->{
+                    assertEquals(dto.getUserId(),userResponse.getUserId());
+                    assertEquals(dto.getEmail(),userResponse.getEmail());
+                    assertEquals(dto.getRoles(),userResponse.getRoles());
+                });
+
+
+
+    }
+
     @Test
     void createUser(){
         String uuid = UUID.randomUUID().toString();
