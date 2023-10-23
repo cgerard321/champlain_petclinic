@@ -2,10 +2,7 @@ package com.petclinic.visits.visitsservicenew.BusinessLayer;
 
 import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
-import com.petclinic.visits.visitsservicenew.DomainClientLayer.PetResponseDTO;
-import com.petclinic.visits.visitsservicenew.DomainClientLayer.PetsClient;
-import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetDTO;
-import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetsClient;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.*;
 import com.petclinic.visits.visitsservicenew.Exceptions.BadRequestException;
 import com.petclinic.visits.visitsservicenew.Exceptions.DuplicateTimeException;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
@@ -99,10 +96,6 @@ public class VisitServiceImpl implements VisitService {
                 )
                 .flatMap(visit -> entityDtoUtil.toVisitResponseDTO(visit));
     }
-
-
-
-
 
     @Override
     public Mono<Void> deleteVisit(String visitId) {
