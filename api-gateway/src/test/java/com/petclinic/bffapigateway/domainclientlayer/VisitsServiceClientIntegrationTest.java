@@ -623,4 +623,20 @@ class VisitsServiceClientIntegrationTest {
                 .verifyComplete();
     }
 
+    @Test
+    void deleteVisitByVisitId_shouldSucceed() {
+        // Declare a testUUID to pass
+        String testUUID = UUID.randomUUID().toString();
+
+        // Enqueue mock respons of delete
+        server.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setResponseCode(204)); // No Content
+
+        Mono<Void> result = visitsServiceClient.deleteVisitByVisitId(testUUID);
+
+        StepVerifier.create(result)
+                .verifyComplete();
+    }
+
 }
