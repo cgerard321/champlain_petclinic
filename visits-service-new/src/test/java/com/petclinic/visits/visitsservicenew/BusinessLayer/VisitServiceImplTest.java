@@ -257,7 +257,6 @@ class VisitServiceImplTest {
         Status status = Status.UPCOMING;
 
         VisitRequestDTO visitRequestDTO = new VisitRequestDTO();
-        // Assuming VisitRequestDTO has setters if the constructor is not available
         visitRequestDTO.setVisitDate(visitDate);
         visitRequestDTO.setDescription(description);
         visitRequestDTO.setPetId(petId);
@@ -276,7 +275,6 @@ class VisitServiceImplTest {
         when(entityDtoUtil.generateVisitIdString()).thenReturn("yourVisitId");
         when(visitRepo.insert(visit1)).thenReturn(Mono.just(visit1));
         when(entityDtoUtil.toVisitResponseDTO(any())).thenReturn(Mono.just(visitResponseDTO));
-        //when(EntityDtoUtil.toVisitResponseDTO(any(Visit.class))).thenReturn(visitResponseDTO); // Correct this line if toVisitResponseDTO is not a static method or if there's a compilation issue
 
         // Act
         Mono<VisitResponseDTO> result = visitService.addVisit(Mono.just(visitRequestDTO));
@@ -314,17 +312,14 @@ class VisitServiceImplTest {
         PetResponseDTO mockPetResponse = new PetResponseDTO(); // Adjust as necessary
         VetDTO mockVetResponse = new VetDTO(); // Create a mock VetDTO, set any necessary fields if required
 
-        // Mock the behavior of the repository and clients
         when(petsClient.getPetById(anyString())).thenReturn(Mono.just(mockPetResponse));
         when(vetsClient.getVetByVetId(anyString())).thenReturn(Mono.just(mockVetResponse)); // This ensures a non-null Mono is returned
-        // Mock the behavior of the repository and clients
         when(visitRepo.findByVisitDateAndPractitionerId(any(), any()))
-                .thenReturn(Flux.just(existingVisit)); // Return the existingVisit in case of conflict
+                .thenReturn(Flux.just(existingVisit)); // Return existingVisit in case of conflict
         when(entityDtoUtil.toVisitEntity(any())).thenReturn(visit1);
         when(entityDtoUtil.generateVisitIdString()).thenReturn("yourVisitId");
         when(visitRepo.insert(visit1)).thenReturn(Mono.just(visit1));
-        when(entityDtoUtil.toVisitResponseDTO(any())).thenReturn(Mono.just(visitResponseDTO));// This simulates finding a conflicting visit
-        // Other mocks remain the same if they are needed for this test scenario
+        when(entityDtoUtil.toVisitResponseDTO(any())).thenReturn(Mono.just(visitResponseDTO)); // This simulates finding a conflicting visit
 
         // Act
         Mono<VisitResponseDTO> result = visitService.addVisit(Mono.just(visitRequestDTO));
