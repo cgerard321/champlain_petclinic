@@ -261,6 +261,111 @@ public class BillServiceImplTest {
                 .verifyComplete();
     }
 
+    @Test
+    public void test_getBillByNonExistentBillId() {
+        String nonExistentBillId = "nonExistentId";
+
+        when(repo.findByBillId(nonExistentBillId)).thenReturn(Mono.empty());
+
+        Mono<BillResponseDTO> billDTOMono = billService.getBillByBillId(nonExistentBillId);
+
+        StepVerifier.create(billDTOMono)
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
+    @Test
+    public void test_updateNonExistentBillId() {
+        String nonExistentBillId = "nonExistentId";
+        double updatedAmount = 20.0;
+        BillRequestDTO updatedBillRequestDTO = buildBillRequestDTO();
+        updatedBillRequestDTO.setAmount(updatedAmount);
+        Mono<BillRequestDTO> updatedBillRequestMono = Mono.just(updatedBillRequestDTO);
+
+        when(repo.findByBillId(nonExistentBillId)).thenReturn(Mono.empty());
+
+        Mono<BillResponseDTO> updatedBillMono = billService.updateBill(nonExistentBillId, updatedBillRequestMono);
+
+        StepVerifier.create(updatedBillMono)
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
+
+    @Test
+    public void test_deleteNonExistentBillId() {
+        String nonExistentBillId = "nonExistentId";
+
+        when(repo.deleteBillByBillId(nonExistentBillId)).thenReturn(Mono.empty());
+
+        Mono<Void> deletedObj = billService.DeleteBill(nonExistentBillId);
+
+        StepVerifier.create(deletedObj)
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
+    @Test
+    public void test_updateBillWithInvalidRequest() {
+        String billId = "validBillId";
+        double updatedAmount = -5.0; // Negative amount, which is invalid
+        BillRequestDTO updatedBillRequestDTO = buildBillRequestDTO();
+        updatedBillRequestDTO.setAmount(updatedAmount);
+        Mono<BillRequestDTO> updatedBillRequestMono = Mono.just(updatedBillRequestDTO);
+
+        when(repo.findByBillId(billId)).thenReturn(Mono.just(buildBill()));
+
+        Mono<BillResponseDTO> updatedBillMono = billService.updateBill(billId, updatedBillRequestMono);
+
+        StepVerifier.create(updatedBillMono)
+                .expectError()
+                .verify();
+    }
+
+
+    @Test
+    public void test_GetBillByNonExistentCustomerId() {
+        String nonExistentCustomerId = "nonExistentId";
+
+
+        when(repo.findByCustomerId(nonExistentCustomerId)).thenReturn(Flux.empty());
+
+        Flux<BillResponseDTO> billDTOMono = billService.GetBillsByCustomerId(nonExistentCustomerId);
+
+        StepVerifier.create(billDTOMono)
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
+    @Test
+    public void test_CreateBillWithInvalidData() {
+        BillRequestDTO billDTO = buildInvalidBillRequestDTO(); // Create a BillRequestDTO with invalid data
+
+        Mono<BillRequestDTO> billRequestMono = Mono.just(billDTO);
+
+        when(repo.insert(any(Bill.class))).thenReturn(Mono.error(new RuntimeException("Invalid data")));
+
+        Mono<BillResponseDTO> returnedBill = billService.CreateBill(billRequestMono);
+
+        StepVerifier.create(returnedBill)
+                .expectError()
+                .verify();
+    }
+
+    private BillRequestDTO buildInvalidBillRequestDTO() {
+        LocalDate date = LocalDate.now();
+
+        return BillRequestDTO.builder()
+                .customerId("1")
+                .vetId("2")
+                .visitType("") // Empty visitType, which is considered invalid
+                .date(date)
+                .amount(100.0)
+                .billStatus(BillStatus.PAID)
+                .dueDate(date)
+                .build();
+    }
+
     private Bill buildBill(){
 
         Calendar calendar = Calendar.getInstance();
