@@ -2261,11 +2261,7 @@ class ApiGatewayControllerTest {
         String ownerId = "5fe81e29-1f1d-4f9d-b249-8d3e0cc0b7dd";
         String petId = "9";
         VisitRequestDTO visit = VisitRequestDTO.builder()
-<<<<<<< HEAD
                 .visitDate(LocalDateTime.parse("2021-12-12T14:00:00"))
-=======
-                .visitDate(LocalDateTime.parse("2021-12-12T14:00:00")) // ensure the format matches the one used in your DTOs
->>>>>>> b1931303 (added testing for missing methods)
                 .description("Charle's Richard cat has a paw infection.")
                 .petId(petId)
                 .practitionerId("1")
@@ -2285,11 +2281,7 @@ class ApiGatewayControllerTest {
                 .thenReturn(Mono.just(visitResponseDTO));
 
         client.post()
-<<<<<<< HEAD
                 .uri("/api/gateway/visit/owners/{ownerId}/pets/{petId}/visits", ownerId, petId)
-=======
-                .uri("/api/gateway/visit/owners/{ownerId}/pets/{petId}/visits", ownerId, petId) // correct way to set path variables
->>>>>>> b1931303 (added testing for missing methods)
                 .body(Mono.just(visit), VisitRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -2298,17 +2290,10 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$.visitId").isEqualTo(visitResponseDTO.getVisitId())
                 .jsonPath("$.petId").isEqualTo(petId)
-<<<<<<< HEAD
                 .jsonPath("$.visitDate").isEqualTo("2021-12-12 14:00")
                 .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$.status").isEqualTo("UPCOMING")
                 .jsonPath("$.practitionerId").isEqualTo("1");
-=======
-                .jsonPath("$.visitDate").isEqualTo("2021-12-12 14:00") // ensure this format matches your actual response
-                .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
-                .jsonPath("$.status").isEqualTo("UPCOMING")
-                .jsonPath("$.practitionerId").isEqualTo("1"); // practitionerId is likely a String, ensure this matches the type
->>>>>>> b1931303 (added testing for missing methods)
     }
 
 
