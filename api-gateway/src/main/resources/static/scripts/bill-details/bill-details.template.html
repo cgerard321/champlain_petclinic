@@ -30,8 +30,8 @@
     <div class="row g-5">
         <div class="col-md-6">
             <br>
-            <h5>Customer ID: {{$ctrl.bills.customerId}}</h5>
-            <h5>Customer Name: {{$ctrl.owner.firstName}} {{$ctrl.owner.lastName}}</h5>
+            <h5>Customer ID: {{getOwnerUUIDByCustomerId($ctrl.bills.customerId)}}</h5>
+            <h5>Customer Name: {{getCustomerDetails($ctrl.bills.customerId)}}</h5>
             <h5>Address: 505 Lincoln Str. Queens, New York</h5>
             <hr>
             <br>

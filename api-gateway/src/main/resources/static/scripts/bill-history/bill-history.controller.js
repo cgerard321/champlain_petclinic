@@ -26,15 +26,15 @@ angular.module('billHistory')
         $http.get('api/gateway/vets').then(function (resp) {
             self.vetList = resp.data;
             arr = resp.data;
-            console.log(resp)
+            // console.log(resp)
         });
 
         $http.get('api/gateway/owners').then(function (owners) {
             self.ownersInfoArray = owners.data;
             // console.log(self.ownersInfoArray)
-            self.ownersInfoArray.forEach(function(owner) {
-                console.log(owner.ownerId);
-            });
+            // self.ownersInfoArray.forEach(function(owner) {
+            //     console.log(owner.ownerId);
+            // });
         });
         // self.getOwnerUUIDByName = function(customerId) {
         //     const owner = self.ownersInfoArray.find(function(owner) {
@@ -53,8 +53,8 @@ angular.module('billHistory')
 
             // Iterate through self.owners to find a matching customerId
             self.owners.forEach(function(owner) {
-                console.log(customerId);
-                console.log(owner.ownerId);
+                // console.log(customerId);
+                // console.log(owner.ownerId);
                 if (owner.ownerId === customerId.toString()) {
                     foundOwner = owner;
                 }
@@ -65,16 +65,16 @@ angular.module('billHistory')
                 const firstName = foundOwner.firstName;
                 const lastName = foundOwner.lastName;
 
-                console.log('Found Owner:', foundOwner);
-                console.log('First Name:', firstName);
-                console.log('Last Name:', lastName);
+                // console.log('Found Owner:', foundOwner);
+                // console.log('First Name:', firstName);
+                // console.log('Last Name:', lastName);
 
                 // Find the corresponding owner in self.ownersInfoArray
                 const ownerInfo = self.ownersInfoArray.find(function(owner) {
                     return owner.firstName === firstName && owner.lastName === lastName;
                 });
 
-                console.log('Owner Info:', ownerInfo);
+                // console.log('Owner Info:', ownerInfo);
 
                 if (ownerInfo) {
                     return ownerInfo.ownerId;
@@ -118,7 +118,7 @@ angular.module('billHistory')
         eventSource.onerror = (error)=>{
             if(eventSource.readyState === 0){
                 eventSource.close()
-                console.log("Event source was closed by server succesfully. " + error)
+                console.log("Event source was closed by server successfully. " + error)
             }else{
                 console.log("EventSource error: "+error)
             }
@@ -134,7 +134,7 @@ angular.module('billHistory')
         eventSourcePaid.onerror = (error)=>{
             if(eventSourcePaid.readyState === 0){
                 eventSourcePaid.close()
-                console.log("Event source was closed by server succesfully. " + error)
+                console.log("Event source was closed by server successfully. " + error)
             }else{
                 console.log("EventSource error: "+error)
             }
@@ -150,7 +150,7 @@ angular.module('billHistory')
         eventSourceUnpaid.onerror = (error)=>{
             if(eventSourceUnpaid.readyState === 0){
                 eventSourceUnpaid.close()
-                console.log("Event source was closed by server succesfully. " + error)
+                console.log("Event source was closed by server successfully. " + error)
             }else{
                 console.log("EventSource error: "+error)
             }
@@ -166,7 +166,7 @@ angular.module('billHistory')
         eventSourceOverdue.onerror = (error)=>{
             if(eventSourceOverdue.readyState === 0){
                 eventSourceOverdue.close()
-                console.log("Event source was closed by server succesfully. " + error)
+                console.log("Event source was closed by server successfully. " + error)
             }else{
                 console.log("EventSource error: "+error)
             }
