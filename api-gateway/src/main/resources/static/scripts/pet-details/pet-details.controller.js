@@ -46,9 +46,11 @@ function PetDetailsController($http, $state, $stateParams, $scope, $timeout, $q)
     vm.getBirthday = function(birthday) {
         if (birthday) {
             var date = new Date(birthday);
-            var year = date.getUTCFullYear();
-            var month = (date.getUTCMonth() + 1).toString().padStart(2, '0'); // Months are zero-based, so we add 1
-            var day = date.getUTCDate().toString().padStart(2, '0');
+            var timezoneOffset = date.getTimezoneOffset() * 60000;
+            date = new Date(date.getTime() - timezoneOffset);
+            var year = date.getFullYear();
+            var month = (date.getMonth() + 1).toString().padStart(2, '0'); // Months are zero-based, so we add 1
+            var day = date.getDate().toString().padStart(2, '0');
             return year + ' / ' + month + ' / ' + day;
         } else {
             return '';
