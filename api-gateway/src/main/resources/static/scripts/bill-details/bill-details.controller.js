@@ -84,5 +84,16 @@ angular.module('billDetails')
                 return 'Unknown Customer';
             }
         };
+        $scope.getVetDetails = function(vetId) {
+            const vet = self.vetList.find(function(vet) {
+                return vet.vetBillId === vetId;
+            });
+
+            if (vet) {
+                return vet.firstName + ' ' + vet.lastName;
+            } else {
+                return 'Unknown Vet';
+            }
+        };
     }]);
 
