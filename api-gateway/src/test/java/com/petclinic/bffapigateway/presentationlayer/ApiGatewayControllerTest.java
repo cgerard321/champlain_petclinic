@@ -110,6 +110,7 @@ class ApiGatewayControllerTest {
     String INVALID_VET_ID = "mjbedf";
 
     ClassPathResource cpr=new ClassPathResource("static/images/full_food_bowl.png");
+    ClassPathResource cpr2=new ClassPathResource("static/images/vet_default.jpg");
 
     @Test
     void getAllRatingsForVet_ValidId() {
@@ -831,6 +832,35 @@ class ApiGatewayControllerTest {
         Mockito.verify(vetsServiceClient, times(1))
                 .getPhotoByVetId(VET_ID);
     }
+    @Test
+    void getDefaultPhotoByVetId() throws IOException {
+        PhotoResponseDTO photoResponseDTO = PhotoResponseDTO.builder()
+                .vetId(VET_ID)
+                .filename("vet_default.jpg")
+                .imgType("image/jpeg")
+                .resourceBase64(Base64.getEncoder().encodeToString(StreamUtils.copyToByteArray(cpr2.getInputStream())))
+                .build();
+
+        when(vetsServiceClient.getDefaultPhotoByVetId(anyString()))
+                .thenReturn(Mono.just(photoResponseDTO));
+
+        client.get()
+                .uri("/api/gateway/vets/{vetId}/default-photo", VET_ID)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(APPLICATION_JSON)
+                .expectBody(PhotoResponseDTO.class)
+                .value(responseDTO -> {
+                    Assertions.assertEquals(photoResponseDTO.getFilename(), responseDTO.getFilename());
+                    Assertions.assertEquals(photoResponseDTO.getImgType(), responseDTO.getImgType());
+                    Assertions.assertEquals(photoResponseDTO.getVetId(), responseDTO.getVetId());
+                    Assertions.assertEquals(photoResponseDTO.getResourceBase64(), responseDTO.getResourceBase64());
+                });
+
+        Mockito.verify(vetsServiceClient, times(1))
+                .getDefaultPhotoByVetId(VET_ID);
+    }
+
 
     @Test
     void addPhotoToVet() {

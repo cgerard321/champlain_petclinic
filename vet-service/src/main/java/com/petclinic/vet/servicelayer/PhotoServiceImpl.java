@@ -2,14 +2,22 @@ package com.petclinic.vet.servicelayer;
 
 import com.petclinic.vet.dataaccesslayer.Photo;
 import com.petclinic.vet.dataaccesslayer.PhotoRepository;
+import com.petclinic.vet.dataaccesslayer.badges.BadgeTitle;
+import com.petclinic.vet.exceptions.InvalidInputException;
 import com.petclinic.vet.exceptions.NotFoundException;
+import com.petclinic.vet.presentationlayer.PhotoResponseDTO;
 import com.petclinic.vet.util.EntityDtoUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StreamUtils;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.io.IOException;
 
 
 @Service
@@ -27,6 +35,13 @@ public class PhotoServiceImpl implements PhotoService {
 
                     return resource;
                 });
+    }
+
+    @Override
+    public Mono<PhotoResponseDTO> getDefaultPhotoByVetId(String vetId) {
+        return photoRepository.findByVetId(vetId)
+                .switchIfEmpty(Mono.error(new NotFoundException("vetId not found: " + vetId)))
+                .map(EntityDtoUtil::toPhotoResponseDTO);
     }
 
     @Override
@@ -61,4 +76,5 @@ public class PhotoServiceImpl implements PhotoService {
                         }));
     }
 }
+
 

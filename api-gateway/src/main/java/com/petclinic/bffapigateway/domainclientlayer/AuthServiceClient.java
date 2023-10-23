@@ -166,6 +166,7 @@ public class AuthServiceClient {
                                 VetRequestDTO vetDTO = VetRequestDTO.builder()
                                         .specialties(registerVet.getVet().getSpecialties())
                                         .active(registerVet.getVet().isActive())
+                                        .photoDefault(registerVet.getVet().isPhotoDefault())
                                         .email(registerVet.getEmail())
                                         .resume(registerVet.getVet().getResume())
                                         .workday(registerVet.getVet().getWorkday())
@@ -175,7 +176,8 @@ public class AuthServiceClient {
                                         .lastName(registerVet.getVet().getLastName())
                                         .vetId(uuid)
                                         .build();
-                                return vetsServiceClient.createVet((Mono.just(vetDTO)));
+                                log.debug("In Api, photo default is: " + vetDTO.isPhotoDefault());
+                        return vetsServiceClient.createVet((Mono.just(vetDTO)));
                             }
                     );
         }).doOnError(throwable -> {
