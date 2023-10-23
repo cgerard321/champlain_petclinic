@@ -20,11 +20,24 @@ angular.module('adminPanel')
                 console.log("EventSource error: "+error)
             }
         }
-
-        $scope.startsWith = function (actual, expected) {
-            let  lowerStr = (actual + "").toLowerCase();
-            let lowerExpected = (expected + "").toLowerCase();
-            return lowerStr.indexOf(lowerExpected) === 0;
+        
+        $scope.search = function () {
+            if ($scope.query === '') {
+                $http.get('api/gateway/users', {
+                    headers: {'Authorization': "Bearer " + authProvider.getUser().token}
+                })
+                    .then(function (resp) {
+                        self.users = resp.data;
+                    });
+            } else {
+                $http.get('api/gateway/users', {
+                    params: { username: $scope.query },
+                    headers: {'Authorization': "Bearer " + authProvider.getUser().token}
+                })
+                    .then(function (resp) {
+                        self.users = resp.data;
+                    });
+            }
         };
 
 

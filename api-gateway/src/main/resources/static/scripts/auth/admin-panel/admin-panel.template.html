@@ -16,7 +16,7 @@
     </tr>
     </thead>
 
-    <tr id="userId" ng-repeat="user in $ctrl.users | filter:$ctrl.query:startsWith track by user.userId">
+    <tr id="userId" ng-repeat="user in $ctrl.users | filter:{username:$ctrl.query}:startsWith track by user.userId">
         <td>
             <a style="text-decoration: none;" ui-sref="userDetails({ userId: user.userId })">
                 <span>{{ user.username }}</span>
