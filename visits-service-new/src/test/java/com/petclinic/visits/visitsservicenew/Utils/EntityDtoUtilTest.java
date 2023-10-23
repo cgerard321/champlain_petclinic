@@ -55,4 +55,14 @@ public class EntityDtoUtilTest {
         assertEquals(requestDTO.getDescription(), visit.getDescription());
         // Add more assertions for other properties
     }
+
+
+/*
+    @Test
+    public void testToVisitEntity_makeCallToVet
+
+
+
+*/
+
 }
