@@ -2214,9 +2214,10 @@ class ApiGatewayControllerTest {
 
 
 //todo fix
-    @Test
+    /*@Test
     void shouldCreateAVisitWithOwnerInfo(){
         String ownerId = "1";
+        String cookie = "aCookie";
         OwnerResponseDTO owner = new OwnerResponseDTO();
         VisitRequestDTO visit = VisitRequestDTO.builder()
                 .visitDate(LocalDateTime.parse("2021-12-12T14:00"))
@@ -2242,6 +2243,7 @@ class ApiGatewayControllerTest {
 
         client.post()
                 .uri("/api/gateway/visit/owners/" + ownerId + "/pets/" + visitResponseDTO.getPetId() + "/visits", owner.getOwnerId(), visit.getPetId())
+                .cookie("Bearer",cookie)
                 .body(Mono.just(visit), VisitRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -2254,6 +2256,48 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$.status").isEqualTo("UPCOMING")
                 .jsonPath("$.practitionerId").isEqualTo(1);
+    }*/
+
+    @Test
+    public void addVisit_ShouldReturnCreatedStatus() {
+        String ownerId = "owner1";
+        String petId = "pet1";
+        VisitRequestDTO visit = VisitRequestDTO.builder()
+                .visitDate(LocalDateTime.parse("2021-12-12T14:00"))
+                .description("Charle's Richard cat has a paw infection.")
+                .petId("1")
+                .practitionerId("1")
+                .status(Status.UPCOMING)
+                .build();
+
+        VisitResponseDTO visitResponseDTO =  VisitResponseDTO.builder()
+                .visitId(VISIT_ID)
+                .visitDate(LocalDateTime.parse("2021-12-12T14:00:00"))
+                .petId("1")
+                .description("Charle's Richard cat has a paw infection.")
+                .practitionerId("1")
+                .status(Status.UPCOMING)
+                .build();
+
+        when(visitsServiceClient.createVisitForPet(any(VisitRequestDTO.class)))
+                .thenReturn(Mono.just(visitResponseDTO));
+
+        client.post()
+                .uri("/api/gateway/visit/owners/{ownerId}/pets/{petId}/visits", ownerId, petId)
+                .cookie("Bearer", "your-auth-token") // Assuming "Bearer" is the name of the cookie
+                .body(Mono.just(visit), VisitRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                // Validate the response
+                .expectStatus().isCreated()
+                .expectBody()
+                .jsonPath("$.visitId").isEqualTo(visitResponseDTO.getVisitId())
+                .jsonPath("$.petId").isEqualTo("1")
+                .jsonPath("$.visitDate").isEqualTo("2021-12-12 14:00")
+                .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
+                .jsonPath("$.status").isEqualTo("UPCOMING")
+                .jsonPath("$.practitionerId").isEqualTo(1);
+
     }
 
     @Test
