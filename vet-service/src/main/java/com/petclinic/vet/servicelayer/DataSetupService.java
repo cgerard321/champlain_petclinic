@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 import reactor.core.publisher.Flux;
 
+import java.io.IOException;
 import java.util.*;
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -494,20 +495,6 @@ public class DataSetupService implements CommandLineRunner {
         catch (SQLException e) {
             // Handle any SQL exceptions
             e.printStackTrace();
-        }
-    }
-
-    /*private static Map<Workday, List<WorkHour>> getWorkHours(String workHoursJson) {
-        return getWorkHoursFromJson(workHoursJson);
-    }*/
-
-    //method that converts the work hours map to a string
-    private static String setWorkHours(Map<Workday, List<WorkHour>> workHours) {
-        try {
-            String workHoursJson = new ObjectMapper().writeValueAsString(workHours);
-            return workHoursJson;
-        } catch (JsonProcessingException e) {
-            throw new InvalidInputException("Work hours are invalid");
         }
     }
 
