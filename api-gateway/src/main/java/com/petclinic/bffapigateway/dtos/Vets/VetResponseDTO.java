@@ -22,7 +22,7 @@ public class VetResponseDTO {
     private String phoneNumber;
     private String resume;
     private Set<Workday> workday;
-    private Map<Workday, List<WorkHour>> workHours;
+    private String workHoursJson;
     private boolean active;
     private Set<SpecialtyDTO> specialties;
 }

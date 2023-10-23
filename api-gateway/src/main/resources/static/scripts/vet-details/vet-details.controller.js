@@ -65,10 +65,65 @@ angular.module('vetDetails')
             }
         };
 
+        self.workdayToWorkHours=new Map()
+
         /* added /{{vet.vetID}} in the url */
         $http.get('api/gateway/vets/' + $stateParams.vetId).then(function (resp) {
             self.vet = resp.data;
+            const workHoursObject = JSON.parse(self.vet.workHoursJson);
+
+            // Convert the JSON object into a Map
+            for (const key in workHoursObject) {
+                if (workHoursObject.hasOwnProperty(key)) {
+                    self.workdayToWorkHours.set(key, workHoursObject[key]);
+                }
+            }
+
+            console.log(self.workdayToWorkHours);
         });
+
+        // map of work hours
+        self.selectWorkday = function (selectedWorkday) {
+            self.workHours = [];
+
+            // Check if the selected workday exists in the mapping
+            if (self.workdayToWorkHours.has(selectedWorkday)) {
+                self.workHours = self.workdayToWorkHours.get(selectedWorkday);
+            } else {
+                // Handle the case when the workday is not found in the mapping
+                console.log('Workday not found in the mapping.');
+            }
+
+            // Get the table element by its ID
+            var table = document.getElementById("workHoursTable");
+            // Get all the <td> elements in the table
+            var tdElements = table.getElementsByTagName("td");
+            console.log(tdElements)
+
+            if(table.style.display==="none"){
+                table.style.display="block"
+            }
+            else{
+                table.style.display="none"
+            }
+
+            // Loop through the <td> elements to check if their IDs correspond with the elements in workHours
+            for (var i = 0; i < tdElements.length; i++) {
+                var td = tdElements[i];
+                var tdId = td.id;
+
+                // Check if the tdId is in the self.workHours array
+                if (self.workHours.includes(tdId)) {
+                    // This <td> corresponds to a work hour for the selected day
+                    // You can apply styling or any other actions you need here
+                    td.style.border = "2px solid green"; // For example, add a green border
+                } else {
+                    // This <td> is not in the workHours array
+                    // You can apply a different style for non-working hours
+                    td.style.border = "2px solid black"; // For example, add a black border
+                }
+            }
+        }
 
         $http.get("api/gateway/visits/vets/" + $stateParams.vetId).then(function (resp) {
             self.visitsList = resp.data;

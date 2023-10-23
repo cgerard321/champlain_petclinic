@@ -1,5 +1,8 @@
 package com.petclinic.vet.servicelayer;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.vet.dataaccesslayer.*;
 import com.petclinic.vet.dataaccesslayer.badges.Badge;
 import com.petclinic.vet.dataaccesslayer.badges.BadgeRepository;
@@ -9,7 +12,9 @@ import com.petclinic.vet.dataaccesslayer.education.EducationRepository;
 import com.petclinic.vet.dataaccesslayer.ratings.PredefinedDescription;
 import com.petclinic.vet.dataaccesslayer.ratings.Rating;
 import com.petclinic.vet.dataaccesslayer.ratings.RatingRepository;
+import com.petclinic.vet.exceptions.InvalidInputException;
 import com.petclinic.vet.util.EntityDtoUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.io.ClassPathResource;
@@ -17,12 +22,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 import reactor.core.publisher.Flux;
 
+import java.io.IOException;
 import java.util.*;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+@Slf4j
 @Service
 public class DataSetupService implements CommandLineRunner {
 
@@ -81,7 +88,6 @@ public class DataSetupService implements CommandLineRunner {
         for (int i = 0; i < workdayList1.size(); i++) {
             Workday workday = workdayList1.get(i);
             List<WorkHour> workHourList = workHourLists[i];
-
             workHours1.put(workday, workHourList);
         }
 
@@ -91,7 +97,6 @@ public class DataSetupService implements CommandLineRunner {
         for (int i = 0; i < workdayList2.size(); i++) {
             Workday workday = workdayList2.get(i);
             List<WorkHour> workHourList = workHourLists[i];
-
             workHours2.put(workday, workHourList);
         }
 
@@ -101,7 +106,6 @@ public class DataSetupService implements CommandLineRunner {
         for (int i = 0; i < workdayList3.size(); i++) {
             Workday workday = workdayList3.get(i);
             List<WorkHour> workHourList = workHourLists[i];
-
             workHours3.put(workday, workHourList);
         }
 
@@ -111,7 +115,6 @@ public class DataSetupService implements CommandLineRunner {
         for (int i = 0; i < workdayList4.size(); i++) {
             Workday workday = workdayList4.get(i);
             List<WorkHour> workHourList = workHourLists[i];
-
             workHours4.put(workday, workHourList);
         }
 
@@ -121,7 +124,6 @@ public class DataSetupService implements CommandLineRunner {
         for (int i = 0; i < workdayList5.size(); i++) {
             Workday workday = workdayList5.get(i);
             List<WorkHour> workHourList = workHourLists[i];
-
             workHours5.put(workday, workHourList);
         }
 
@@ -131,7 +133,6 @@ public class DataSetupService implements CommandLineRunner {
         for (int i = 0; i < workdayList6.size(); i++) {
             Workday workday = workdayList6.get(i);
             List<WorkHour> workHourList = workHourLists[i];
-
             workHours6.put(workday, workHourList);
         }
 
@@ -154,7 +155,7 @@ public class DataSetupService implements CommandLineRunner {
                 .phoneNumber("(514)-634-8276 #2384")
                 .resume("Practicing since 3 years")
                 .workday(workdays1)
-                .workHours(workHours1)
+                .workHoursJson(setWorkHours(workHours1))
                 .active(true)
                 .specialties(set1)
                 .build();
@@ -167,7 +168,7 @@ public class DataSetupService implements CommandLineRunner {
                 .phoneNumber("(514)-634-8276 #2385")
                 .resume("Practicing since 10 years")
                 .workday(workdays2)
-                .workHours(workHours2)
+                .workHoursJson(setWorkHours(workHours2))
                 .active(true)
                 .specialties(set3)
                 .build();
@@ -180,7 +181,7 @@ public class DataSetupService implements CommandLineRunner {
                 .phoneNumber("(514)-634-8276 #2386")
                 .resume("Practicing since 5 years")
                 .workday(workdays3)
-                .workHours(workHours3)
+                .workHoursJson(setWorkHours(workHours3))
                 .active(true)
                 .specialties(set2)
                 .build();
@@ -193,7 +194,7 @@ public class DataSetupService implements CommandLineRunner {
                 .phoneNumber("(514)-634-8276 #2387")
                 .resume("Practicing since 8 years")
                 .workday(workdays4)
-                .workHours(workHours4)
+                .workHoursJson(setWorkHours(workHours4))
                 .active(false)
                 .specialties(set2)
                 .build();
@@ -206,7 +207,7 @@ public class DataSetupService implements CommandLineRunner {
                 .phoneNumber("(514)-634-8276 #2389")
                 .resume("Practicing since 1 years")
                 .workday(workdays5)
-                .workHours(workHours5)
+                .workHoursJson(setWorkHours(workHours5))
                 .active(false)
                 .specialties(set1)
                 .build();
@@ -219,7 +220,7 @@ public class DataSetupService implements CommandLineRunner {
                 .phoneNumber("(514)-634-8276 #2383")
                 .resume("Practicing since 6 years")
                 .workday(workdays5)
-                .workHours(workHours2)
+                .workHoursJson(setWorkHours(workHours5))
                 .active(false)
                 .specialties(set1)
                 .build();
@@ -232,7 +233,7 @@ public class DataSetupService implements CommandLineRunner {
                 .phoneNumber("(514)-634-8276 #2363")
                 .resume("Practicing since 9 years")
                 .workday(workdays6)
-                .workHours(workHours6)
+                .workHoursJson(setWorkHours(workHours6))
                 .active(true)
                 .specialties(set1)
                 .build();
@@ -497,4 +498,28 @@ public class DataSetupService implements CommandLineRunner {
         }
     }
 
+    /*private static Map<Workday, List<WorkHour>> getWorkHours(String workHoursJson) {
+        return getWorkHoursFromJson(workHoursJson);
+    }*/
+
+    //method that converts the work hours map to a string
+    private static String setWorkHours(Map<Workday, List<WorkHour>> workHours) {
+        try {
+            String workHoursJson = new ObjectMapper().writeValueAsString(workHours);
+            return workHoursJson;
+        } catch (JsonProcessingException e) {
+            throw new InvalidInputException("Work hours are invalid");
+        }
+    }
+
+    //method to get the work hours string in json format to a map of work hours
+    /*private static Map<Workday, List<WorkHour>> getWorkHoursFromJson(String json) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.readValue(json, new TypeReference<>() {
+            });
+        } catch (IOException e) {
+            throw new InvalidInputException("Work hours are invalid");
+        }
+    }*/
 }
