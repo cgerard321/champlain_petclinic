@@ -100,16 +100,17 @@
         <td class="border"></td>
         <td class="border"></td>
         <td class="border"></td>
+        <td class="border"></td>
     </tr>
 
     <!--    <tr id="visitId" ng-repeat="v in $ctrl.upcomingVisits | filter:search:$ctrl.query track by v.visitId" data-table-name="upcomingVisits">-->
     <tr id="upcomingVisitId" ng-repeat="v in $ctrl.upcomingVisits | orderBy:propertyName:reverse | filter:search:$ctrl.query track by v.visitId" data-table-name="upcomingVisits">
-        <td class="border">{{v.visitId}}</td>
+        <td class="border"><a ui-sref="visitDetails({ visitId: v.visitId })"> {{ v.visitId }}</a></td>
         <td class="border">{{v.visitDate | date:'yyyy-MM-ddTHH:mm:ss'}}</td>
         <td class="border" style="white-space: pre-line">{{v.description}}</td>
         <!--        <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>-->
-        <td class="border" style="white-space: pre-line">{{v.practitionerId}}</td>
-        <td class="border" style="white-space: pre-line">{{v.petId}}</td>
+        <td class="border" style="white-space: pre-line">{{v.vetFirstName}} {{v.vetLastName}}</td>
+        <td class="border" style="white-space: pre-line">{{v.petName}}</td>
         <td class="status-text" style="white-space: pre-line"></td>
         <td class="status-text border" style="white-space: pre-line">{{v.status}}</td>
         <td class="border">
@@ -165,12 +166,12 @@
     <tbody id="confirmedTable">
 
     <tr id="confirmedVisitId" ng-repeat="v in $ctrl.confirmedVisits | orderBy:propertyName:reverse | filter:search:$ctrl.query track by v.visitId" data-table-name="confirmedVisits">
-        <td class="border">{{v.visitId}}</td>
+        <td class="border"><a ui-sref="visitDetails({ visitId: v.visitId })"> {{ v.visitId }}</a></td>
         <td class="border">{{v.visitDate | date:'yyyy-MM-ddTHH:mm:ss'}}</td>
         <td class="border" style="white-space: pre-line">{{v.description}}</td>
         <!--        <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>-->
-        <td class="border" style="white-space: pre-line">{{v.practitionerId}}</td>
-        <td class="border" style="white-space: pre-line">{{v.petId}}</td>
+        <td class="border" style="white-space: pre-line">{{v.vetFirstName}} {{v.vetLastName}}</td>
+        <td class="border" style="white-space: pre-line">{{v.petName}}</td>
         <td class="status-text" style="white-space: pre-line"></td>
         <td class="status-text border" style="white-space: pre-line">{{v.status}}</td>
         <td class="border">
@@ -227,12 +228,12 @@
     <tbody id="cancelledTable">
 
     <tr id="cancelledVisitId" ng-repeat="v in $ctrl.cancelledVisits | orderBy:propertyName:reverse | filter:search:$ctrl.query track by v.visitId" data-table-name="cancelledVisits">
-        <td class="border">{{v.visitId}}</td>
+        <td class="border"><a ui-sref="visitDetails({ visitId: v.visitId })"> {{ v.visitId }}</a></td>
         <td class="border">{{v.visitDate | date:'yyyy-MM-ddTHH:mm:ss'}}</td>
         <td class="border" style="white-space: pre-line">{{v.description}}</td>
         <!--        <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>-->
-        <td class="border" style="white-space: pre-line">{{v.practitionerId}}</td>
-        <td class="border" style="white-space: pre-line">{{v.petId}}</td>
+        <td class="border" style="white-space: pre-line">{{v.vetFirstName}} {{v.vetLastName}}</td>
+        <td class="border" style="white-space: pre-line">{{v.petName}}</td>
         <td class="status-text" style="white-space: pre-line"></td>
         <td class="status-text border" style="white-space: pre-line">{{v.status}}</td>
         <td class="border">
@@ -288,12 +289,12 @@
     <tbody id="completedTable">
 
     <tr id="completedVisitId" ng-repeat="v in $ctrl.completedVisits | orderBy:propertyName:reverse | filter:search:$ctrl.query track by v.visitId" data-table-name="completedVisits">
-        <td class="border">{{v.visitId}}</td>
+        <td class="border"><a ui-sref="visitDetails({ visitId: v.visitId })"> {{ v.visitId }}</a></td>
         <td class="border">{{v.visitDate | date:'yyyy-MM-ddTHH:mm:ss'}}</td>
         <td class="border" style="white-space: pre-line">{{v.description}}</td>
         <!--        <td style="white-space: pre-line">{{$ctrl.getPractitionerName(v.practitionerId)}}</td>-->
-        <td class="border" style="white-space: pre-line">{{v.practitionerId}}</td>
-        <td class="border" style="white-space: pre-line">{{v.petId}}</td>
+        <td class="border" style="white-space: pre-line">{{v.vetFirstName}} {{v.vetLastName}}</td>
+        <td class="border" style="white-space: pre-line">{{v.petName}}</td>
         <td class="status-text" style="white-space: pre-line"></td>
         <td class="status-text border" style="white-space: pre-line">{{v.status}}</td>
         <td class="border">

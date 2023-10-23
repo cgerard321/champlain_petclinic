@@ -24,7 +24,7 @@ public class PetResponseDTO {
     private String petTypeId;
     //private String photoId;
     private String isActive;
-
+    private String weight;
 
     //private final List<VisitDetails> visits = new ArrayList<>();
 

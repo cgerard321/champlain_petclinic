@@ -24,8 +24,7 @@ angular.module('petForm')
                     return 'Unknown';
             }
         };
-
-        // Clear the form fields
+ // Clear the form fields
         self.pet = {}; // Changed $ctrl.pet to self.pet
 
         $http.get('api/gateway/owners/petTypes').then(function (resp) {
@@ -68,13 +67,16 @@ angular.module('petForm')
             if (confirm("Are you sure you want to submit this form with the following details?\n\n" +
                 "Pet Name: " + self.pet.name + "\n" +
                 "Pet Birth Date: " + formattedBirthDate + "\n" +
+                "Weight: " + self.pet.weight + " KG" + "\n" +
                 "Pet Type: " + petTypeName)) {
                 var data = {
                     petId: self.pet.petId,
                     name: self.pet.name,
                     birthDate: new Date(self.pet.birthDate).toISOString(),
                     ownerId: self.pet.ownerId,
-                    petTypeId: self.pet.petTypeId
+                    petTypeId: self.pet.petTypeId,
+                    weight: self.pet.weight,
+                    isActive: self.pet.isActive
                 };
 
                 var req;

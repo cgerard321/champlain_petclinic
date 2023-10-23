@@ -125,6 +125,11 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @DeleteMapping(value = "bills")
+    public Mono<Void> deleteAllBills(){
+        return billServiceClient.deleteAllBills();
+    }
+
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @DeleteMapping(value = "bills/{billId}")
     public Mono<ResponseEntity<Void>> deleteBill(final @PathVariable String billId){
@@ -763,7 +768,7 @@ public class BFFApiGatewayController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-    
+
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "users/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<UserDetails> getUserById(@PathVariable String userId, @CookieValue("Bearer") String auth) {
@@ -787,10 +792,20 @@ public class BFFApiGatewayController {
     }
 
 
+
+
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @PostMapping("/users/reset_password")
     public Mono<ResponseEntity<Void>> processResetPassword(@RequestBody @Valid Mono<UserPasswordAndTokenRequestModel> resetRequest) {
         return authServiceClient.changePassword(resetRequest);
+    }
+
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @PostMapping(value = "/users/inventoryManager")
+    public Mono<ResponseEntity<UserPasswordLessDTO>> createInventoryManager(@RequestBody @Valid Mono<RegisterInventoryManager> model) {
+        return authServiceClient.createInventoryMangerUser(model).map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
     /**
@@ -799,6 +814,7 @@ public class BFFApiGatewayController {
 
     //Start of Inventory Methods
     @GetMapping("/inventory/{inventoryId}/products-pagination")
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER, Roles.VET})
     public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductFieldPagination(@PathVariable String inventoryId,
                                                                                                  @RequestParam(required = false) String productName,
                                                                                                  @RequestParam(required = false) Double productPrice,
@@ -809,6 +825,7 @@ public class BFFApiGatewayController {
     }
 
     @GetMapping("/inventory/{inventoryId}/products-count")
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER,Roles.VET})
     public Mono<ResponseEntity<Long>> getTotalNumberOfProductsWithRequestParams(@PathVariable String inventoryId,
                                                                                 @RequestParam(required = false) String productName,
                                                                                 @RequestParam(required = false) Double productPrice,
@@ -817,6 +834,7 @@ public class BFFApiGatewayController {
                 .map(response -> ResponseEntity.status(HttpStatus.OK).body(response));
     }
     @PostMapping(value = "inventory/{inventoryId}/products")
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER})
     public Mono<ResponseEntity<ProductResponseDTO>> addProductToInventory(@RequestBody ProductRequestDTO model, @PathVariable String inventoryId){
         return inventoryServiceClient.addProductToInventory(model, inventoryId)
                 .map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))

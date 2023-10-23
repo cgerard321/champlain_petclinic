@@ -88,16 +88,17 @@ public class UserServiceImpl implements UserService {
             User user = userMapper.idLessRoleLessDTOToModel(userIDLessDTO);
 
             if (userIDLessDTO.getDefaultRole() == null|| userIDLessDTO.getDefaultRole().isEmpty()){
-
+            log.info("No default role provided, setting default role to OWNER");
             Optional<Role> role = roleRepo.findById(3L);
             Set<Role> roleSet = new HashSet<>();
             role.ifPresent(roleSet::add);
             user.setRoles(roleSet);
             }else{
+                log.info("Default role provided, setting default role to {}", userIDLessDTO.getDefaultRole());
                 Role role = roleRepo.findRoleByName(userIDLessDTO.getDefaultRole());
                 Set<Role> roleSet = new HashSet<>();
                 if(role == null)
-                    throw new NotFoundException("Role not found");
+                    throw new NotFoundException("No role with name: " + userIDLessDTO.getDefaultRole());
                 roleSet.add(role);
                 user.setRoles(roleSet);
             }
