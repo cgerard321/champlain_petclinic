@@ -42,6 +42,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -60,6 +61,7 @@ import reactor.test.StepVerifier;
 import javax.print.attribute.standard.Media;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -2926,6 +2928,35 @@ class ApiGatewayControllerTest {
     }
 
 
+    @Test
+    @DisplayName("Should Logout with a Valid Session, Clearing Bearer Cookie, and Returning 204")
+    void logout_shouldClearBearerCookie() {
+        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+        headers.add(HttpHeaders.COOKIE, "Bearer=some.token.value; Path=/; HttpOnly; SameSite=Lax");
+        when(authServiceClient.logout(any(ServerHttpRequest.class), any(ServerHttpResponse.class)))
+                .thenReturn(Mono.just(ResponseEntity.noContent().build()));
+        client.post()
+                .uri("/api/gateway/users/logout")
+                .headers(httpHeaders -> httpHeaders.putAll(headers))
+                .exchange()
+                .expectStatus().isNoContent()
+                .expectHeader().doesNotExist(HttpHeaders.SET_COOKIE);
+    }
+
+    @Test
+    @DisplayName("Given Expired Session, Logout Should Return 401")
+    void logout_shouldReturnUnauthorizedForExpiredSession() {
+        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+        when(authServiceClient.logout(any(ServerHttpRequest.class), any(ServerHttpResponse.class)))
+                .thenReturn(Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()));
+        client.post()
+                .uri("/api/gateway/users/logout")
+                .headers(httpHeaders -> httpHeaders.putAll(headers))
+                .exchange()
+                .expectStatus().isUnauthorized()
+                .expectHeader().doesNotExist(HttpHeaders.SET_COOKIE);
+    }
+
 
 private InventoryResponseDTO buildInventoryDTO(){
         return InventoryResponseDTO.builder()
@@ -3302,6 +3333,9 @@ void deleteAllInventory_shouldSucceed() {
         verify(inventoryServiceClient, times(1))
                 .addProductToInventory(eq(requestDTO), eq("invalidInventoryId"));
     }
+
+
+
 
 
 

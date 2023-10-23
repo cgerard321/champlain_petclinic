@@ -11,12 +11,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
+import java.util.List;
 import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -239,6 +243,26 @@ public class AuthServiceClient {
                     .toEntity(UserPasswordLessDTO.class);
         } catch (HttpClientErrorException ex) {
             throw new InvalidInputException(ex.getMessage());
+        }
+    }
+
+    public Mono<ResponseEntity<Void>> logout(ServerHttpRequest request, ServerHttpResponse response) {
+        log.info("Entered AuthServiceClient logout method");
+        List<HttpCookie> cookies = request.getCookies().get("Bearer");
+        if (cookies != null && !cookies.isEmpty()) {
+            ResponseCookie cookie = ResponseCookie.from("Bearer", "")
+                    .httpOnly(true)
+                    .secure(true)
+                    .path("/api/gateway")
+                    .domain("localhost")
+                    .maxAge(Duration.ofSeconds(0))
+                    .sameSite("Lax").build();
+            response.addCookie(cookie);
+            log.info("Logout Success: Account session ended");
+            return Mono.just(ResponseEntity.noContent().build());
+        } else {
+            log.warn("Logout Error: Problem removing account cookies, Session may have expired, redirecting to login page");
+            return Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
         }
     }
 
