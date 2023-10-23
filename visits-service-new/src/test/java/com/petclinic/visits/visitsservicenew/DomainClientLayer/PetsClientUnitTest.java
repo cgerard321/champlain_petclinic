@@ -83,4 +83,38 @@ class PetsClientUnitTest {
                 .verify();
     }
 
+    @Test
+    void getPetById_Other4xx() {
+        String invalidId = "3333";
+
+        mockBackEnd.enqueue(new MockResponse()
+                .setResponseCode(423)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .addHeader("Content-Type", "application/json"));
+
+        Mono<PetResponseDTO> result = petsClient.getPetById(invalidId);
+
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong" ))
+                .verify();
+    }
+
+    @Test
+    void getPetById_Other5xx() {
+        String invalidId = "3333";
+
+        mockBackEnd.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .addHeader("Content-Type", "application/json"));
+
+        Mono<PetResponseDTO> result = petsClient.getPetById(invalidId);
+
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong" ))
+                .verify();
+    }
+
 }
