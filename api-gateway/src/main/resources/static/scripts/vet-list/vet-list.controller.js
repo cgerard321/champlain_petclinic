@@ -52,7 +52,7 @@ angular.module('vetList')
             $http.get('api/gateway/vets/' + vet.vetId + "/ratings/average").then(function (resp) {
                 console.log(resp.data);
                 vet.showRating = true;
-                vet.rating = parseFloat(resp.data.toFixed(1));
+                vet.rating = parseFloat(resp.data).toFixed(1);
             });
         }
 
@@ -60,7 +60,7 @@ angular.module('vetList')
             $http.get('api/gateway/vets/topVets').then(function (resp) {
                 console.log(resp.data);
                 vet.showRating=true;
-                vet.rating = parseFloat(resp.data.toFixed(1));
+                vet.rating = parseFloat(resp.data).toFixed(1);
 
             });
 
