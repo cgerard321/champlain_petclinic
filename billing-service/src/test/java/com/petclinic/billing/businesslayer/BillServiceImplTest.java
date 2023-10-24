@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -60,19 +62,71 @@ public class BillServiceImplTest {
                 .verifyComplete();
     }
 
+//    @Test
+//    public void test_GetAllBills() {
+//       Bill billEntity = buildBill();
+//
+//       when(repo.findAll()).thenReturn(Flux.just(billEntity));
+//
+//       Flux<BillResponseDTO> billDTOFlux = billService.GetAllBills();
+//
+//       StepVerifier.create(billDTOFlux)
+//               .consumeNextWith(foundBill -> {
+//                   assertNotNull(foundBill);
+//               })
+//               .verifyComplete();
+//    }
+
     @Test
-    public void test_GetAllBills() {
-       Bill billEntity = buildBill();
+    void getBillsByPage_ShouldSucceed(){
 
-       when(repo.findAll()).thenReturn(Flux.just(billEntity));
+        Bill bill1 = Bill.builder()
+                .billId("billId-1")
+                .customerId("customerId-1")
+                .ownerFirstName("ownerFirstName1")
+                .ownerLastName("ownerLastName1")
+                .visitType("operation")
+                .vetId("vetId1")
+                .vetFirstName("vetFirstName1")
+                .vetLastName("vetLastName1")
+                .build();
+        Bill bill2 = Bill.builder()
+                .billId("billId-2")
+                .customerId("customerId-2")
+                .ownerFirstName("ownerFirstName2")
+                .ownerLastName("ownerLastName2")
+                .visitType("general")
+                .vetId("vetId2")
+                .vetFirstName("vetFirstName2")
+                .vetLastName("vetLastName2")
+                .build();
+        Bill bill3 = Bill.builder()
+                .billId("billId-3")
+                .customerId("customerId-3")
+                .ownerFirstName("ownerFirstName3")
+                .ownerLastName("ownerLastName3")
+                .visitType("injury")
+                .vetId("vetId3")
+                .vetFirstName("vetFirstName3")
+                .vetLastName("vetLastName3")
+                .build();
 
-       Flux<BillResponseDTO> billDTOFlux = billService.GetAllBills();
+        Pageable pageable = PageRequest.of(0, 2);
 
-       StepVerifier.create(billDTOFlux)
-               .consumeNextWith(foundBill -> {
-                   assertNotNull(foundBill);
-               })
-               .verifyComplete();
+        // Mock the repository to return a Flux of owners
+        when(repo.findAll()).thenReturn(Flux.just(bill1, bill2, bill3));
+
+        // Call the method under test
+        Flux<BillResponseDTO> bills = billService.getAllBillsByPage(pageable,null,null,
+                null,null,null, null, null, null);
+
+        // Verify the behavior using StepVerifier
+        StepVerifier.create(bills)
+                .expectNextMatches(billDto1 -> billDto1.getBillId().equals(bill1.getBillId()))
+                .expectNextMatches(billDto2 -> billDto2.getBillId().equals(bill2.getBillId()))
+                .expectComplete()
+                .verify();
+
     }
 
     @Test

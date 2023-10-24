@@ -49,7 +49,7 @@ class BillResourceUnitTest {
 
 
     @Test
-    void findBillByBillId() {
+    void getBillByBillId() {
 
         when(billService.getBillByBillId(anyString())).thenReturn(Mono.just(responseDTO));
 
