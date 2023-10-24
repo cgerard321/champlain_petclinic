@@ -20,10 +20,6 @@
 </form>
 
 
-<a ng-if = "roles !== 'OWNER'"  ui-sref="vetsNew" style="float: right;margin-bottom: 1%">
-    <button ng-if = "roles !== 'OWNER'"  class="add-vet-button btn btn-success">Add Vet</button>
-</a>
-
 
 <div style="margin-bottom: 1%; margin-top: 1%">
     <label for="filterOption">Filter</label>
@@ -45,7 +41,7 @@
         <th class="vet_speciality">Specialties</th>
         <th class="getAverageRating">Average Rating</th>
         <th class="getCountOfRatings">Number of Ratings</th>
-        <th ng-if = "roles !== 'OWNER'" >Delete</th>
+        <th>Delete</th>
     </tr>
     </thead>
 
@@ -60,8 +56,13 @@
         <td class="vet_speciality"><span ng-repeat="specialty in vet.specialties">{{specialty.name + ' '}}</span></td>
         <td class="vet-rating v{{vet.vetId}} centered-count"><span>{{vet.rating}}</span></td>
         <td class="vet-rating v{{vet.vetId}} centered-count"><span>{{vet.count}}</span></td>
-        <td ng-if = "roles !== 'OWNER'" ><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteVet(vet.vetId)" >Delete Vet</a></td>
+        <td><a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteVet(vet.vetId)">Delete Vet</a></td>
     </tr>
+
+
+
+
+
 
     <div class="modal m{{vet.vetId}} modalOff" ng-repeat="vet in $ctrl.vetList" >
             <span class="modal_image"><img ng-if="vet.image != null" src="data:image/png;base64,{{vet.image}}"/><img

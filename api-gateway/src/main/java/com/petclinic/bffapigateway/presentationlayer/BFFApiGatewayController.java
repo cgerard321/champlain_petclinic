@@ -703,6 +703,12 @@ public class BFFApiGatewayController {
     }
 
 
+
+
+
+
+
+
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @DeleteMapping(value = "owners/{ownerId}")
     public Mono<ResponseEntity<OwnerResponseDTO>> deleteOwner(@PathVariable String ownerId){
