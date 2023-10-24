@@ -43,21 +43,14 @@ angular.module('petRegister')
         };
 
         function generateUUID() {
-            // Generate a random hexadecimal string of length 12
-            var randomHex = 'xxxxxxxxxxxx'.replace(/x/g, function () {
-                return (Math.random() * 16 | 0).toString(16);
+            // Generate a random hexadecimal string of length 32
+            var randomHex = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                var r = Math.random() * 16 | 0,
+                    v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
             });
 
-            // Format the UUID
-            var uuid = [
-                randomHex.substr(0, 8),
-                randomHex.substr(8, 4),
-                '4' + randomHex.substr(13, 3), // Set the version to 4 (random)
-                '89ab'[Math.floor(Math.random() * 4)] + randomHex.substr(17, 3), // Set the variant
-                randomHex.substr(20, 12)
-            ].join('-');
-
-            return uuid;
+            return randomHex;
         }
 
 // Example usage:
