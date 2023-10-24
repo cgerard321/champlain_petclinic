@@ -64,38 +64,25 @@ angular.module('billHistory')
 
         $scope.getOwnerUUIDByCustomerId = function(customerId) {
             let foundOwner;
-
             // Iterate through self.owners to find a matching customerId
             self.owners.forEach(function(owner) {
-                // console.log(customerId);
-                // console.log(owner.ownerId);
                 if (owner.ownerId === customerId.toString()) {
                     foundOwner = owner;
                 }
             });
-
             self.ownersUUID.forEach(function(owner) {
                 if (owner.ownerId === customerId.toString()) {
                     foundOwner = owner;
                 }
             });
-
             if (foundOwner) {
                 // Get the first and last name from the foundOwner
                 const firstName = foundOwner.firstName;
                 const lastName = foundOwner.lastName;
 
-                // console.log('Found Owner:', foundOwner);
-                // console.log('First Name:', firstName);
-                // console.log('Last Name:', lastName);
-
-                // Find the corresponding owner in self.ownersInfoArray
                 const ownerInfo = self.ownersInfoArray.find(function(owner) {
                     return owner.firstName === firstName && owner.lastName === lastName;
                 });
-
-                // console.log('Owner Info:', ownerInfo);
-
                 if (ownerInfo) {
                     return ownerInfo.ownerId;
                 }
