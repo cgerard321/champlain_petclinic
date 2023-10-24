@@ -7,6 +7,17 @@ services:
             - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
             - ./nginx/njs:/etc/nginx/njs
 
+    billing-service:
+      build: billing-service
+#      hostname: billing
+      #mem_limit: 350m
+      environment:
+        - SPRING_PROFILES_ACTIVE=docker
+      depends_on:
+        - mongo1
+  #            mysql5:
+  #                condition: service_healthy
+
     visits-service-new:
         build: visits-service-new
         environment:
@@ -65,16 +76,7 @@ services:
         environment:
             - SPRING_PROFILES_ACTIVE=docker
 
-    billing-service:
-        build: billing-service
-        hostname: billing
-        #mem_limit: 350m
-        environment:
-            - SPRING_PROFILES_ACTIVE=docker
-        depends_on:
-            - mongo1
-    #            mysql5:
-    #                condition: service_healthy
+
 
     mailer-service:
         build: mailer-service
