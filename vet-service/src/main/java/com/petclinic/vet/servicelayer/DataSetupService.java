@@ -1,5 +1,8 @@
 package com.petclinic.vet.servicelayer;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.vet.dataaccesslayer.*;
 import com.petclinic.vet.dataaccesslayer.badges.Badge;
 import com.petclinic.vet.dataaccesslayer.badges.BadgeRepository;
@@ -9,7 +12,9 @@ import com.petclinic.vet.dataaccesslayer.education.EducationRepository;
 import com.petclinic.vet.dataaccesslayer.ratings.PredefinedDescription;
 import com.petclinic.vet.dataaccesslayer.ratings.Rating;
 import com.petclinic.vet.dataaccesslayer.ratings.RatingRepository;
+import com.petclinic.vet.exceptions.InvalidInputException;
 import com.petclinic.vet.util.EntityDtoUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.io.ClassPathResource;
@@ -17,15 +22,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
 import reactor.core.publisher.Flux;
 
-import java.util.EnumSet;
+import java.util.*;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
 
+@Slf4j
 @Service
 public class DataSetupService implements CommandLineRunner {
 
@@ -62,6 +65,75 @@ public class DataSetupService implements CommandLineRunner {
         Set<Workday> workdays5 = EnumSet.of(Workday.Monday, Workday.Tuesday, Workday.Wednesday, Workday.Thursday);
         Set<Workday> workdays6 = EnumSet.of(Workday.Monday, Workday.Tuesday, Workday.Friday);
 
+        List<WorkHour> workHourList1=new ArrayList<>();
+        workHourList1.addAll(Arrays.asList(WorkHour.Hour_8_9, WorkHour.Hour_9_10, WorkHour.Hour_10_11, WorkHour.Hour_11_12, WorkHour.Hour_12_13, WorkHour.Hour_13_14, WorkHour.Hour_14_15, WorkHour.Hour_15_16));
+        List<WorkHour> workHourList2=new ArrayList<>();
+        workHourList2.addAll(Arrays.asList(WorkHour.Hour_12_13, WorkHour.Hour_13_14, WorkHour.Hour_14_15, WorkHour.Hour_15_16, WorkHour.Hour_16_17, WorkHour.Hour_17_18, WorkHour.Hour_18_19, WorkHour.Hour_19_20));
+        List<WorkHour> workHourList3=new ArrayList<>();
+        workHourList3.addAll(Arrays.asList(WorkHour.Hour_10_11, WorkHour.Hour_11_12, WorkHour.Hour_12_13, WorkHour.Hour_13_14, WorkHour.Hour_14_15, WorkHour.Hour_15_16, WorkHour.Hour_16_17, WorkHour.Hour_17_18));
+        List<WorkHour> workHourList4=new ArrayList<>();
+        workHourList4.addAll(Arrays.asList(WorkHour.Hour_8_9, WorkHour.Hour_9_10, WorkHour.Hour_10_11, WorkHour.Hour_11_12));
+        List<WorkHour> workHourList5=new ArrayList<>();
+        workHourList5.addAll(Arrays.asList(WorkHour.Hour_14_15, WorkHour.Hour_15_16, WorkHour.Hour_16_17, WorkHour.Hour_17_18));
+        List<WorkHour> workHourList6=new ArrayList<>();
+        workHourList6.addAll(Arrays.asList(WorkHour.Hour_16_17, WorkHour.Hour_17_18, WorkHour.Hour_18_19, WorkHour.Hour_19_20));
+
+        //list of the work hours
+        List<WorkHour>[] workHourLists = new List[] {workHourList1, workHourList2, workHourList3, workHourList4, workHourList5, workHourList6};
+
+        //work hours each day for vet 1
+        Map<Workday, List<WorkHour>> workHours1=new HashMap<>();
+        List<Workday> workdayList1 = new ArrayList<>(workdays1);
+        for (int i = 0; i < workdayList1.size(); i++) {
+            Workday workday = workdayList1.get(i);
+            List<WorkHour> workHourList = workHourLists[i];
+            workHours1.put(workday, workHourList);
+        }
+
+        //work hours each day for vet 2
+        Map<Workday, List<WorkHour>> workHours2=new HashMap<>();
+        List<Workday> workdayList2 = new ArrayList<>(workdays2);
+        for (int i = 0; i < workdayList2.size(); i++) {
+            Workday workday = workdayList2.get(i);
+            List<WorkHour> workHourList = workHourLists[i];
+            workHours2.put(workday, workHourList);
+        }
+
+        //work hours each day for vet 3
+        Map<Workday, List<WorkHour>> workHours3=new HashMap<>();
+        List<Workday> workdayList3 = new ArrayList<>(workdays3);
+        for (int i = 0; i < workdayList3.size(); i++) {
+            Workday workday = workdayList3.get(i);
+            List<WorkHour> workHourList = workHourLists[i];
+            workHours3.put(workday, workHourList);
+        }
+
+        //work hours each day for vet 4
+        Map<Workday, List<WorkHour>> workHours4=new HashMap<>();
+        List<Workday> workdayList4 = new ArrayList<>(workdays4);
+        for (int i = 0; i < workdayList4.size(); i++) {
+            Workday workday = workdayList4.get(i);
+            List<WorkHour> workHourList = workHourLists[i];
+            workHours4.put(workday, workHourList);
+        }
+
+        //work hours each day for vet 5
+        Map<Workday, List<WorkHour>> workHours5=new HashMap<>();
+        List<Workday> workdayList5 = new ArrayList<>(workdays5);
+        for (int i = 0; i < workdayList5.size(); i++) {
+            Workday workday = workdayList5.get(i);
+            List<WorkHour> workHourList = workHourLists[i];
+            workHours5.put(workday, workHourList);
+        }
+
+        //work hours each day for vet 6
+        Map<Workday, List<WorkHour>> workHours6=new HashMap<>();
+        List<Workday> workdayList6 = new ArrayList<>(workdays6);
+        for (int i = 0; i < workdayList6.size(); i++) {
+            Workday workday = workdayList6.get(i);
+            List<WorkHour> workHourList = workHourLists[i];
+            workHours6.put(workday, workHourList);
+        }
 
         Set<Specialty> set1 = new HashSet<>();
         set1.add(s1);
@@ -82,6 +154,7 @@ public class DataSetupService implements CommandLineRunner {
                 .phoneNumber("(514)-634-8276 #2384")
                 .resume("Practicing since 3 years")
                 .workday(workdays1)
+                .workHoursJson(setWorkHours(workHours1))
                 .active(true)
                 .specialties(set1)
                 .build();
@@ -94,6 +167,7 @@ public class DataSetupService implements CommandLineRunner {
                 .phoneNumber("(514)-634-8276 #2385")
                 .resume("Practicing since 10 years")
                 .workday(workdays2)
+                .workHoursJson(setWorkHours(workHours2))
                 .active(true)
                 .specialties(set3)
                 .build();
@@ -106,6 +180,7 @@ public class DataSetupService implements CommandLineRunner {
                 .phoneNumber("(514)-634-8276 #2386")
                 .resume("Practicing since 5 years")
                 .workday(workdays3)
+                .workHoursJson(setWorkHours(workHours3))
                 .active(true)
                 .specialties(set2)
                 .build();
@@ -118,6 +193,7 @@ public class DataSetupService implements CommandLineRunner {
                 .phoneNumber("(514)-634-8276 #2387")
                 .resume("Practicing since 8 years")
                 .workday(workdays4)
+                .workHoursJson(setWorkHours(workHours4))
                 .active(false)
                 .specialties(set2)
                 .build();
@@ -130,6 +206,7 @@ public class DataSetupService implements CommandLineRunner {
                 .phoneNumber("(514)-634-8276 #2389")
                 .resume("Practicing since 1 years")
                 .workday(workdays5)
+                .workHoursJson(setWorkHours(workHours5))
                 .active(false)
                 .specialties(set1)
                 .build();
@@ -142,6 +219,7 @@ public class DataSetupService implements CommandLineRunner {
                 .phoneNumber("(514)-634-8276 #2383")
                 .resume("Practicing since 6 years")
                 .workday(workdays5)
+                .workHoursJson(setWorkHours(workHours5))
                 .active(false)
                 .specialties(set1)
                 .build();
@@ -154,6 +232,7 @@ public class DataSetupService implements CommandLineRunner {
                 .phoneNumber("(514)-634-8276 #2363")
                 .resume("Practicing since 9 years")
                 .workday(workdays6)
+                .workHoursJson(setWorkHours(workHours6))
                 .active(true)
                 .specialties(set1)
                 .build();
@@ -418,4 +497,28 @@ public class DataSetupService implements CommandLineRunner {
         }
     }
 
+    /*private static Map<Workday, List<WorkHour>> getWorkHours(String workHoursJson) {
+        return getWorkHoursFromJson(workHoursJson);
+    }*/
+
+    //method that converts the work hours map to a string
+    private static String setWorkHours(Map<Workday, List<WorkHour>> workHours) {
+        try {
+            String workHoursJson = new ObjectMapper().writeValueAsString(workHours);
+            return workHoursJson;
+        } catch (JsonProcessingException e) {
+            throw new InvalidInputException("Work hours are invalid");
+        }
+    }
+
+    //method to get the work hours string in json format to a map of work hours
+    /*private static Map<Workday, List<WorkHour>> getWorkHoursFromJson(String json) {
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.readValue(json, new TypeReference<>() {
+            });
+        } catch (IOException e) {
+            throw new InvalidInputException("Work hours are invalid");
+        }
+    }*/
 }

@@ -1159,7 +1159,12 @@ class VetsServiceClientIntegrationTest {
                         "        \"email\": \"skjfhf@gmail.com\",\n" +
                         "        \"phoneNumber\": \"947-238-2847\",\n" +
                         "        \"resume\": \"Just became a vet\",\n" +
-                        "        \"active\": false\n" +
+                        "        \"active\": false,\n" +
+                        "        \"workHoursJson\": \"{\\n" +
+                        "            \\\"Monday\\\": [\\\"Hour_8_9\\\",\\\"Hour_9_10\\\",\\\"Hour_10_11\\\",\\\"Hour_11_12\\\",\\\"Hour_12_13\\\",\\\"Hour_13_14\\\",\\\"Hour_14_15\\\",\\\"Hour_15_16\\\"],\\n" +  // Escaped newline
+                        "            \\\"Wednesday\\\": [\\\"Hour_12_13\\\",\\\"Hour_13_14\\\",\\\"Hour_14_15\\\",\\\"Hour_15_16\\\",\\\"Hour_16_17\\\",\\\"Hour_17_18\\\",\\\"Hour_18_19\\\",\\\"Hour_19_20\\\"],\\n" +  // Escaped newline
+                        "            \\\"Thursday\\\": [\\\"Hour_10_11\\\",\\\"Hour_11_12\\\",\\\"Hour_12_13\\\",\\\"Hour_13_14\\\",\\\"Hour_14_15\\\",\\\"Hour_15_16\\\",\\\"Hour_16_17\\\",\\\"Hour_17_18\\\"]\\n" +  // Escaped newline
+                        "        }\"" +
                         "    }"));
 
         final VetResponseDTO vet = vetsServiceClient.getVets().blockFirst();
@@ -1169,6 +1174,7 @@ class VetsServiceClientIntegrationTest {
         assertEquals(vetResponseDTO.getEmail(), vet.getEmail());
         assertEquals(vetResponseDTO.getPhoneNumber(), vet.getPhoneNumber());
         assertEquals(vetResponseDTO.getResume(), vet.getResume());
+        assertEquals(vetResponseDTO.getWorkHoursJson(),vet.getWorkHoursJson());
     }
 
     @Test
@@ -1202,7 +1208,12 @@ class VetsServiceClientIntegrationTest {
                         "        \"email\": \"skjfhf@gmail.com\",\n" +
                         "        \"phoneNumber\": \"947-238-2847\",\n" +
                         "        \"resume\": \"Just became a vet\",\n" +
-                        "        \"active\": false\n" +
+                        "        \"active\": false,\n" +
+                        "        \"workHoursJson\": \"{\\n" +
+                        "            \\\"Monday\\\": [\\\"Hour_8_9\\\",\\\"Hour_9_10\\\",\\\"Hour_10_11\\\",\\\"Hour_11_12\\\",\\\"Hour_12_13\\\",\\\"Hour_13_14\\\",\\\"Hour_14_15\\\",\\\"Hour_15_16\\\"],\\n" +  // Escaped newline
+                        "            \\\"Wednesday\\\": [\\\"Hour_12_13\\\",\\\"Hour_13_14\\\",\\\"Hour_14_15\\\",\\\"Hour_15_16\\\",\\\"Hour_16_17\\\",\\\"Hour_17_18\\\",\\\"Hour_18_19\\\",\\\"Hour_19_20\\\"],\\n" +  // Escaped newline
+                        "            \\\"Thursday\\\": [\\\"Hour_10_11\\\",\\\"Hour_11_12\\\",\\\"Hour_12_13\\\",\\\"Hour_13_14\\\",\\\"Hour_14_15\\\",\\\"Hour_15_16\\\",\\\"Hour_16_17\\\",\\\"Hour_17_18\\\"]\\n" +  // Escaped newline
+                        "        }\"" +
                         "    }"));
 
         final VetResponseDTO vet = vetsServiceClient.getActiveVets().blockFirst();
@@ -1212,6 +1223,7 @@ class VetsServiceClientIntegrationTest {
         assertEquals(vetResponseDTO.getEmail(), vet.getEmail());
         assertEquals(vetResponseDTO.getPhoneNumber(), vet.getPhoneNumber());
         assertEquals(vetResponseDTO.getResume(), vet.getResume());
+        assertEquals(vetResponseDTO.getWorkHoursJson(),vet.getWorkHoursJson());
     }
 
     @Test
@@ -1245,7 +1257,12 @@ class VetsServiceClientIntegrationTest {
                         "        \"email\": \"skjfhf@gmail.com\",\n" +
                         "        \"phoneNumber\": \"947-238-2847\",\n" +
                         "        \"resume\": \"Just became a vet\",\n" +
-                        "        \"active\": false\n" +
+                        "        \"active\": false,\n" +
+                        "        \"workHoursJson\": \"{\\n" +
+                        "            \\\"Monday\\\": [\\\"Hour_8_9\\\",\\\"Hour_9_10\\\",\\\"Hour_10_11\\\",\\\"Hour_11_12\\\",\\\"Hour_12_13\\\",\\\"Hour_13_14\\\",\\\"Hour_14_15\\\",\\\"Hour_15_16\\\"],\\n" +  // Escaped newline
+                        "            \\\"Wednesday\\\": [\\\"Hour_12_13\\\",\\\"Hour_13_14\\\",\\\"Hour_14_15\\\",\\\"Hour_15_16\\\",\\\"Hour_16_17\\\",\\\"Hour_17_18\\\",\\\"Hour_18_19\\\",\\\"Hour_19_20\\\"],\\n" +  // Escaped newline
+                        "            \\\"Thursday\\\": [\\\"Hour_10_11\\\",\\\"Hour_11_12\\\",\\\"Hour_12_13\\\",\\\"Hour_13_14\\\",\\\"Hour_14_15\\\",\\\"Hour_15_16\\\",\\\"Hour_16_17\\\",\\\"Hour_17_18\\\"]\\n" +  // Escaped newline
+                        "        }\"" +
                         "    }"));
 
         final VetResponseDTO vet = vetsServiceClient.getInactiveVets().blockFirst();
@@ -1255,6 +1272,7 @@ class VetsServiceClientIntegrationTest {
         assertEquals(vetResponseDTO.getEmail(), vet.getEmail());
         assertEquals(vetResponseDTO.getPhoneNumber(), vet.getPhoneNumber());
         assertEquals(vetResponseDTO.getResume(), vet.getResume());
+        assertEquals(vetResponseDTO.getWorkHoursJson(),vet.getWorkHoursJson());
     }
 
     @Test
@@ -1288,7 +1306,12 @@ class VetsServiceClientIntegrationTest {
                         "        \"email\": \"skjfhf@gmail.com\",\n" +
                         "        \"phoneNumber\": \"947-238-2847\",\n" +
                         "        \"resume\": \"Just became a vet\",\n" +
-                        "        \"active\": false\n" +
+                        "        \"active\": false,\n" +
+                        "        \"workHoursJson\": \"{\\n" +
+                        "            \\\"Monday\\\": [\\\"Hour_8_9\\\",\\\"Hour_9_10\\\",\\\"Hour_10_11\\\",\\\"Hour_11_12\\\",\\\"Hour_12_13\\\",\\\"Hour_13_14\\\",\\\"Hour_14_15\\\",\\\"Hour_15_16\\\"],\\n" +  // Escaped newline
+                        "            \\\"Wednesday\\\": [\\\"Hour_12_13\\\",\\\"Hour_13_14\\\",\\\"Hour_14_15\\\",\\\"Hour_15_16\\\",\\\"Hour_16_17\\\",\\\"Hour_17_18\\\",\\\"Hour_18_19\\\",\\\"Hour_19_20\\\"],\\n" +  // Escaped newline
+                        "            \\\"Thursday\\\": [\\\"Hour_10_11\\\",\\\"Hour_11_12\\\",\\\"Hour_12_13\\\",\\\"Hour_13_14\\\",\\\"Hour_14_15\\\",\\\"Hour_15_16\\\",\\\"Hour_16_17\\\",\\\"Hour_17_18\\\"]\\n" +  // Escaped newline
+                        "        }\"" +
                         "    }"));
 
         final VetResponseDTO vet = vetsServiceClient.getVetByVetId("deb1950c-3c56-45dc-874b-89e352695eb7").block();
@@ -1298,6 +1321,7 @@ class VetsServiceClientIntegrationTest {
         assertEquals(vetResponseDTO.getEmail(), vet.getEmail());
         assertEquals(vetResponseDTO.getPhoneNumber(), vet.getPhoneNumber());
         assertEquals(vetResponseDTO.getResume(), vet.getResume());
+        assertEquals(vetResponseDTO.getWorkHoursJson(),vet.getWorkHoursJson());
     }
 
     @Test
@@ -1892,6 +1916,11 @@ class VetsServiceClientIntegrationTest {
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
                 .workday(new HashSet<>())
+                .workHoursJson("{\n" +
+                        "            \"Monday\": [\"Hour_8_9\",\"Hour_9_10\",\"Hour_10_11\",\"Hour_11_12\",\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\"],\n" +
+                        "            \"Wednesday\": [\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\",\"Hour_16_17\",\"Hour_17_18\",\"Hour_18_19\",\"Hour_19_20\"],\n" +
+                        "            \"Thursday\": [\"Hour_10_11\",\"Hour_11_12\",\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\",\"Hour_16_17\",\"Hour_17_18\"]\n" +
+                        "        }")
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();

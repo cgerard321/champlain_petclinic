@@ -158,7 +158,6 @@ public class AuthServiceClient {
     public Mono<VetResponseDTO> createVetUser(Mono<RegisterVet> model){
 
         String uuid = UUID.randomUUID().toString();
-        log.info("UUID: " + uuid);
 
         return model.flatMap(registerVet -> {
             registerVet.setUserId(uuid);
@@ -186,7 +185,6 @@ public class AuthServiceClient {
                                         .lastName(registerVet.getVet().getLastName())
                                         .vetId(uuid)
                                         .build();
-                                log.debug("In Api, photo default is: " + vetDTO.isPhotoDefault());
                         return vetsServiceClient.createVet((Mono.just(vetDTO)));
                             }
                     );

@@ -55,6 +55,7 @@ class VetRepositoryTest {
                     assertEquals(vet.getPhoneNumber(), foundVet.getPhoneNumber());
                     assertEquals(vet.getResume(), foundVet.getResume());
                     assertEquals(vet.getWorkday(), foundVet.getWorkday());
+                    assertEquals(vet.getWorkHoursJson(), foundVet.getWorkHoursJson());
                 })
                 .verifyComplete();
     }
@@ -104,6 +105,7 @@ class VetRepositoryTest {
                     assertEquals(vet.getPhoneNumber(), foundVet.getPhoneNumber());
                     assertEquals(vet.getResume(), foundVet.getResume());
                     assertEquals(vet.getWorkday(), foundVet.getWorkday());
+                    assertEquals(vet.getWorkHoursJson(), foundVet.getWorkHoursJson());
                 })
                 .verifyComplete();
     }
@@ -155,6 +157,7 @@ class VetRepositoryTest {
                     assertEquals(vet.getPhoneNumber(), foundVet.getPhoneNumber());
                     assertEquals(vet.getResume(), foundVet.getResume());
                     assertEquals(vet.getWorkday(), foundVet.getWorkday());
+                    assertEquals(vet.getWorkHoursJson(), foundVet.getWorkHoursJson());
                 })
                 .verifyComplete();
     }
@@ -185,6 +188,7 @@ class VetRepositoryTest {
                     assertEquals(vet.getPhoneNumber(), foundVet.getPhoneNumber());
                     assertEquals(vet.getResume(), foundVet.getResume());
                     assertEquals(vet.getWorkday(), foundVet.getWorkday());
+                    assertEquals(vet.getWorkHoursJson(), foundVet.getWorkHoursJson());
                 })
                 .verifyComplete();
     }
@@ -234,6 +238,11 @@ class VetRepositoryTest {
                 .resume("Just became a vet")
                 .imageId("kjd")
                 .workday(workdays1)
+                .workHoursJson("{\n" +
+                        "            \"Monday\": [\"Hour_8_9\",\"Hour_9_10\",\"Hour_10_11\",\"Hour_11_12\",\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\"],\n" +
+                        "            \"Wednesday\": [\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\",\"Hour_16_17\",\"Hour_17_18\",\"Hour_18_19\",\"Hour_19_20\"],\n" +
+                        "            \"Thursday\": [\"Hour_10_11\",\"Hour_11_12\",\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\",\"Hour_16_17\",\"Hour_17_18\"]\n" +
+                        "        }")
                 .active(true)
                 .build();
     }
@@ -248,6 +257,11 @@ class VetRepositoryTest {
                 .imageId("kjd")
                 .resume("Just became a vet")
                 .workday(workdays1)
+                .workHoursJson("{\n" +
+                        "            \"Monday\": [\"Hour_8_9\",\"Hour_9_10\",\"Hour_10_11\",\"Hour_11_12\",\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\"],\n" +
+                        "            \"Wednesday\": [\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\",\"Hour_16_17\",\"Hour_17_18\",\"Hour_18_19\",\"Hour_19_20\"],\n" +
+                        "            \"Thursday\": [\"Hour_10_11\",\"Hour_11_12\",\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\",\"Hour_16_17\",\"Hour_17_18\"]\n" +
+                        "        }")
                 .active(false)
                 .build();
     }

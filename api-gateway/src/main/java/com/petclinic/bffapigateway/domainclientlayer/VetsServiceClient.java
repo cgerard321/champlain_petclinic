@@ -80,7 +80,6 @@ public class VetsServiceClient {
     }
 
     public Mono<Resource> addPhotoToVet(String vetId, String photoName, Mono<Resource> image) {
-        log.debug("VetsServiceClient addPhoto");
         return webClientBuilder
                 .build()
                 .post()

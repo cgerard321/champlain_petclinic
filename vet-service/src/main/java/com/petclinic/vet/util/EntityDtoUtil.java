@@ -54,6 +54,7 @@ public class EntityDtoUtil {
         dto.setWorkday(vet.getWorkday());
         dto.setActive(vet.isActive());
         dto.setSpecialties(toDTOSet(vet.getSpecialties()));
+        dto.setWorkHoursJson(vet.getWorkHoursJson());
         return dto;
     }
 
@@ -69,6 +70,7 @@ public class EntityDtoUtil {
         vet.setWorkday(dto.getWorkday());
         vet.setActive(dto.isActive());
         vet.setSpecialties(toEntitySet(dto.getSpecialties()));
+        vet.setWorkHoursJson(dto.getWorkHoursJson());
         return vet;
     }
 

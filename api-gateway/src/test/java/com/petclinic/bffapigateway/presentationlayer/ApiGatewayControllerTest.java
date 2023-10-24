@@ -592,6 +592,7 @@ class ApiGatewayControllerTest {
                     assertThat(responseDTO.get(0).getEmail()).isEqualTo(vetResponseDTO.getEmail());
                     assertThat(responseDTO.get(0).isActive()).isEqualTo(vetResponseDTO.isActive());
                     assertThat(responseDTO.get(0).getWorkday()).isEqualTo(vetResponseDTO.getWorkday());
+                    assertThat(responseDTO.get(0).getWorkHoursJson()).isEqualTo(vetResponseDTO.getWorkHoursJson());
                 });
         Mockito.verify(vetsServiceClient, times(1))
                 .getVets();
@@ -615,7 +616,8 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.lastName").isEqualTo(vetResponseDTO.getLastName())
                 .jsonPath("$.firstName").isEqualTo(vetResponseDTO.getFirstName())
                 .jsonPath("$.email").isEqualTo(vetResponseDTO.getEmail())
-                .jsonPath("$.active").isEqualTo(vetResponseDTO.isActive());
+                .jsonPath("$.active").isEqualTo(vetResponseDTO.isActive())
+                .jsonPath("$.workHoursJson").isEqualTo(vetResponseDTO.getWorkHoursJson());
 
         Mockito.verify(vetsServiceClient, times(1))
                 .getVetByVetId(VET_ID);
@@ -645,6 +647,7 @@ class ApiGatewayControllerTest {
                     assertThat(responseDTO.get(0).getEmail()).isEqualTo(vetResponseDTO2.getEmail());
                     assertThat(responseDTO.get(0).isActive()).isEqualTo(vetResponseDTO2.isActive());
                     assertThat(responseDTO.get(0).getWorkday()).isEqualTo(vetResponseDTO2.getWorkday());
+                    assertThat(responseDTO.get(0).getWorkHoursJson()).isEqualTo(vetResponseDTO2.getWorkHoursJson());
                 });
         Mockito.verify(vetsServiceClient, times(1))
                 .getActiveVets();
@@ -674,6 +677,7 @@ class ApiGatewayControllerTest {
                     assertThat(responseDTO.get(0).getEmail()).isEqualTo(vetResponseDTO.getEmail());
                     assertThat(responseDTO.get(0).isActive()).isEqualTo(vetResponseDTO.isActive());
                     assertThat(responseDTO.get(0).getWorkday()).isEqualTo(vetResponseDTO.getWorkday());
+                    assertThat(responseDTO.get(0).getWorkHoursJson()).isEqualTo(vetResponseDTO.getWorkHoursJson());
                 });
         Mockito.verify(vetsServiceClient, times(1))
                 .getInactiveVets();
@@ -3551,6 +3555,11 @@ void deleteAllInventory_shouldSucceed() {
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
                 .workday(new HashSet<>())
+                .workHoursJson("{\n" +
+                        "            \"Monday\": [\"Hour_8_9\",\"Hour_9_10\",\"Hour_10_11\",\"Hour_11_12\",\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\"],\n" +
+                        "            \"Wednesday\": [\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\",\"Hour_16_17\",\"Hour_17_18\",\"Hour_18_19\",\"Hour_19_20\"],\n" +
+                        "            \"Thursday\": [\"Hour_10_11\",\"Hour_11_12\",\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\",\"Hour_16_17\",\"Hour_17_18\"]\n" +
+                        "        }")
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -3564,6 +3573,11 @@ void deleteAllInventory_shouldSucceed() {
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
                 .workday(new HashSet<>())
+                .workHoursJson("{\n" +
+                        "            \"Monday\": [\"Hour_8_9\",\"Hour_9_10\",\"Hour_10_11\",\"Hour_11_12\",\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\"],\n" +
+                        "            \"Wednesday\": [\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\",\"Hour_16_17\",\"Hour_17_18\",\"Hour_18_19\",\"Hour_19_20\"],\n" +
+                        "            \"Thursday\": [\"Hour_10_11\",\"Hour_11_12\",\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\",\"Hour_16_17\",\"Hour_17_18\"]\n" +
+                        "        }")
                 .specialties(new HashSet<>())
                 .active(true)
                 .build();
