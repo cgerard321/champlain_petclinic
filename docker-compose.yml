@@ -13,16 +13,7 @@ services:
             - SPRING_PROFILES_ACTIVE=docker
         depends_on:
             - mongo2
-
-#    visits:
-#        build: visits-service
-#        hostname: visits
-#        #mem_limit: 350m
-#        environment:
-#            - SPRING_PROFILES_ACTIVE=docker
-#        depends_on:
-#            mysql1:
-#                condition: service_healthy
+            - mailer-service
 
     inventory-service:
       build: inventory-service
@@ -46,16 +37,6 @@ services:
             - SPRING_PROFILES_ACTIVE=docker
         depends_on:
             - mongo-customers
-
-#    customers:
-#        build: customers-service
-#        hostname: customers
-#        #mem_limit: 350m
-#        environment:
-#            - SPRING_PROFILES_ACTIVE=docker
-#        depends_on:
-#            mysql3:
-#                condition: service_healthy
 
     api-gateway:
         build: api-gateway
@@ -101,6 +82,25 @@ services:
         env_file:
             - mailer.env
 
+#    visits:
+#        build: visits-service
+#        hostname: visits
+#        #mem_limit: 350m
+#        environment:
+#            - SPRING_PROFILES_ACTIVE=docker
+#        depends_on:
+#            mysql1:
+#                condition: service_healthy
+
+#    customers:
+#        build: customers-service
+#        hostname: customers
+#        #mem_limit: 350m
+#        environment:
+#            - SPRING_PROFILES_ACTIVE=docker
+#        depends_on:
+#            mysql3:
+#                condition: service_healthy
 
 #     mysql1:
 #         image: mysql:5.7

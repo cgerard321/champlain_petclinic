@@ -11,12 +11,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
+import java.util.List;
 import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -83,6 +87,16 @@ public class AuthServiceClient {
                 .retrieve()
                 .bodyToFlux(UserDetails.class);
     }
+
+    public Mono<Void> deleteUser(String jwtToken, String userId) {
+        return webClientBuilder.build()
+                .delete()
+                .uri(authServiceUrl + "/users/{userId}", userId)
+                .cookie("Bearer", jwtToken)
+                .retrieve()
+                .bodyToMono(void.class);
+    }
+
     //FUCK REACTIVE
     /*
     This shit is beyond cursed, but I do not care. This works, I only spent 6 HOURS OF MY LIFE.
@@ -123,6 +137,23 @@ public class AuthServiceClient {
 
         }
 
+        public Mono<UserPasswordLessDTO> createInventoryMangerUser(Mono<RegisterInventoryManager> registerInventoryManagerMono){
+            String uuid = UUID.randomUUID().toString();
+            return registerInventoryManagerMono.flatMap(registerInventoryManager -> {
+                registerInventoryManager.setUserId(uuid);
+                return webClientBuilder.build().post()
+                        .uri(authServiceUrl + "/users")
+                        .body(Mono.just(registerInventoryManager), RegisterInventoryManager.class)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .retrieve()
+                        .onStatus(HttpStatusCode::is4xxClientError,
+                                n -> rethrower.rethrow(n,
+                                        x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
+                        )
+                        .bodyToMono(UserPasswordLessDTO.class);
+            });
+        }
+
 
     public Mono<VetResponseDTO> createVetUser(Mono<RegisterVet> model){
 
@@ -145,6 +176,7 @@ public class AuthServiceClient {
                                 VetRequestDTO vetDTO = VetRequestDTO.builder()
                                         .specialties(registerVet.getVet().getSpecialties())
                                         .active(registerVet.getVet().isActive())
+                                        .photoDefault(registerVet.getVet().isPhotoDefault())
                                         .email(registerVet.getEmail())
                                         .resume(registerVet.getVet().getResume())
                                         .workday(registerVet.getVet().getWorkday())
@@ -154,7 +186,8 @@ public class AuthServiceClient {
                                         .lastName(registerVet.getVet().getLastName())
                                         .vetId(uuid)
                                         .build();
-                                return vetsServiceClient.createVet((Mono.just(vetDTO)));
+                                log.debug("In Api, photo default is: " + vetDTO.isPhotoDefault());
+                        return vetsServiceClient.createVet((Mono.just(vetDTO)));
                             }
                     );
         }).doOnError(throwable -> {
@@ -177,15 +210,6 @@ public class AuthServiceClient {
 //                .bodyToMono(UserDetails.class);
 //    }
 //
-//    public Mono<UserDetails> deleteUser(String auth, final long userId) {
-//        return webClientBuilder.build()
-//                .delete()
-//                .uri(authServiceUrl + "/users/{userId}", userId)
-//                .header("Authorization", auth)
-//                .retrieve()
-//                .bodyToMono(UserDetails.class);
-//    }
-
     public Mono<ResponseEntity<UserDetails>> verifyUser(final String token) {
 
         return webClientBuilder.build()
@@ -222,6 +246,26 @@ public class AuthServiceClient {
                     .toEntity(UserPasswordLessDTO.class);
         } catch (HttpClientErrorException ex) {
             throw new InvalidInputException(ex.getMessage());
+        }
+    }
+
+    public Mono<ResponseEntity<Void>> logout(ServerHttpRequest request, ServerHttpResponse response) {
+        log.info("Entered AuthServiceClient logout method");
+        List<HttpCookie> cookies = request.getCookies().get("Bearer");
+        if (cookies != null && !cookies.isEmpty()) {
+            ResponseCookie cookie = ResponseCookie.from("Bearer", "")
+                    .httpOnly(true)
+                    .secure(true)
+                    .path("/api/gateway")
+                    .domain("localhost")
+                    .maxAge(Duration.ofSeconds(0))
+                    .sameSite("Lax").build();
+            response.addCookie(cookie);
+            log.info("Logout Success: Account session ended");
+            return Mono.just(ResponseEntity.noContent().build());
+        } else {
+            log.warn("Logout Error: Problem removing account cookies, Session may have expired, redirecting to login page");
+            return Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
         }
     }
 

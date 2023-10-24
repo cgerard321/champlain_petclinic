@@ -12,11 +12,12 @@
     <tr>
         <th>Username</th>
         <th>Email</th>
+        <th>Role</th>
         <th>Options</th>
     </tr>
     </thead>
 
-    <tr id="userId" ng-repeat="user in $ctrl.users | filter:$ctrl.query:startsWith track by user.userId">
+    <tr id="userId" ng-repeat="user in $ctrl.users | filter:{username:$ctrl.query}:startsWith track by user.userId">
         <td>
             <a style="text-decoration: none;" ui-sref="userDetails({ userId: user.userId })">
                 <span>{{ user.username }}</span>
@@ -24,12 +25,22 @@
         </td>
         <td>{{user.email}}</td>
         <td>
-            <input class="add-vet-button btn btn-success" type="button" value="Delete" ng-click="removeUser(user.id)"/>
+            <!-- Using a nested ng-repeat to loop over each role in the user.roles array -->
+            <span ng-repeat="role in user.roles">
+                {{ role.name }}<span ng-if="!$last">, </span>
+            </span>
+        </td>
+        <td>
+            <input class="add-vet-button btn btn-success" type="button" value="Delete" ng-click="removeUser(user.userId)"/>
+            <button class="btn btn-warning" ui-sref="updateUserRole({ userId: user.userId })">Update Role</button>
         </td>
     </tr>
 
 
-    <a ui-sref="vetsNew" style="float: right;margin-bottom: 1%">
+    <a ui-sref="vetsNew" style="float: right;margin-bottom: 1%; margin-right: 10px;">
         <button class="add-vet-button btn btn-success">Add Vet</button>
+    </a>
+    <a ui-sref="managerForm" style="float: right;margin-bottom: 1%; margin-right: 10px; ">
+        <button class="btn btn-success">Add Inventory Manager</button>
     </a>
 </table>

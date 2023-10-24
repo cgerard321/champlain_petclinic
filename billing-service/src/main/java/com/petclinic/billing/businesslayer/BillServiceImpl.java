@@ -74,6 +74,11 @@ public class BillServiceImpl implements BillService{
 
     }
 
+    @Override
+    public Mono<Void> DeleteAllBills() {
+        return billRepository.deleteAll();
+    }
+
 
     @Override
     public Mono<Void> DeleteBill(String billId) {

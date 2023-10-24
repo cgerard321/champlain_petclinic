@@ -35,6 +35,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Base64;
 import java.util.HashMap;
@@ -176,6 +177,15 @@ public class UserController {
 
         return ResponseEntity.ok().build();
     }
+
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<Void> deleteUser(@PathVariable String userId) {
+
+        userService.deleteUser(userId);
+
+        return ResponseEntity.noContent().build();
+    }
+
 
     private boolean isValidBase64(String s) {
         try {

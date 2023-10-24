@@ -12,4 +12,4 @@ angular.module('signupForm', ['ui.router'])
                 url: '/signup',
                 template: '<signup-form></signup-form>'
             })
-    }]);
+    }])

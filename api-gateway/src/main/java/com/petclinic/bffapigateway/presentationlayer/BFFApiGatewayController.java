@@ -8,10 +8,7 @@ import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.*;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
-import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
-import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
-import com.petclinic.bffapigateway.dtos.Pets.PetType;
-import com.petclinic.bffapigateway.dtos.Pets.PetTypeResponseDTO;
+import com.petclinic.bffapigateway.dtos.Pets.*;
 import com.petclinic.bffapigateway.dtos.Vets.*;
 import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
@@ -24,13 +21,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -123,6 +121,11 @@ public class BFFApiGatewayController {
         return billServiceClient.updateBill(billId, billRequestDTO)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @DeleteMapping(value = "bills")
+    public Mono<Void> deleteAllBills(){
+        return billServiceClient.deleteAllBills();
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
@@ -258,8 +261,9 @@ public class BFFApiGatewayController {
         return visitsServiceClient.getVisitByVisitId(visitId);
     }
     @PostMapping(value = "visit/owners/{ownerId}/pets/{petId}/visits", consumes = "application/json", produces = "application/json")
-    Mono<ResponseEntity<VisitResponseDTO>> addVisit(@RequestBody VisitRequestDTO visit, @PathVariable String ownerId, @PathVariable String petId) {
-        // visit.setPetId(petId);
+    Mono<ResponseEntity<VisitResponseDTO>> addVisit(@RequestBody VisitRequestDTO visit, @PathVariable String ownerId, /*@PathVariable String petId,*/ @CookieValue("Bearer") String auth) {
+        visit.setOwnerId(ownerId);
+        visit.setJwtToken(auth);
         return visitsServiceClient.createVisitForPet(visit).map(ResponseEntity.status(HttpStatus.CREATED)::body)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
@@ -347,6 +351,13 @@ public class BFFApiGatewayController {
     public Mono<ResponseEntity<Resource>> getPhotoByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getPhotoByVetId(vetId)
                 .map(r -> ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE).body(r))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @GetMapping("vets/{vetId}/default-photo")
+    public Mono<ResponseEntity<PhotoResponseDTO>> getDefaultPhotoByVetId(@PathVariable String vetId) {
+        return vetsServiceClient.getDefaultPhotoByVetId(vetId)
+                .map(r -> ResponseEntity.ok().body(r))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
@@ -756,13 +767,20 @@ public class BFFApiGatewayController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-    
+
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "users/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<UserDetails> getUserById(@PathVariable String userId, @CookieValue("Bearer") String auth) {
         return authServiceClient.getUserById(auth, userId);
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @DeleteMapping(value = "users/{userId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<Void>> deleteUserById(@PathVariable String userId, @CookieValue("Bearer") String auth) {
+        return authServiceClient.deleteUser(auth, userId)
+                .then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @PostMapping(value = "/users/login",produces = "application/json;charset=utf-8;", consumes = "application/json")
@@ -770,6 +788,12 @@ public class BFFApiGatewayController {
         log.info("Entered controller /login");
         return authServiceClient.login(login);
 
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @PostMapping("/users/logout")
+    public Mono<ResponseEntity<Void>> logout(ServerHttpRequest request, ServerHttpResponse response) {
+        return authServiceClient.logout(request, response);
     }
 
 
@@ -780,10 +804,20 @@ public class BFFApiGatewayController {
     }
 
 
+
+
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @PostMapping("/users/reset_password")
     public Mono<ResponseEntity<Void>> processResetPassword(@RequestBody @Valid Mono<UserPasswordAndTokenRequestModel> resetRequest) {
         return authServiceClient.changePassword(resetRequest);
+    }
+
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @PostMapping(value = "/users/inventoryManager")
+    public Mono<ResponseEntity<UserPasswordLessDTO>> createInventoryManager(@RequestBody @Valid Mono<RegisterInventoryManager> model) {
+        return authServiceClient.createInventoryMangerUser(model).map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
     /**
@@ -792,6 +826,7 @@ public class BFFApiGatewayController {
 
     //Start of Inventory Methods
     @GetMapping("/inventory/{inventoryId}/products-pagination")
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER, Roles.VET})
     public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductFieldPagination(@PathVariable String inventoryId,
                                                                                                  @RequestParam(required = false) String productName,
                                                                                                  @RequestParam(required = false) Double productPrice,
@@ -802,6 +837,7 @@ public class BFFApiGatewayController {
     }
 
     @GetMapping("/inventory/{inventoryId}/products-count")
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER,Roles.VET})
     public Mono<ResponseEntity<Long>> getTotalNumberOfProductsWithRequestParams(@PathVariable String inventoryId,
                                                                                 @RequestParam(required = false) String productName,
                                                                                 @RequestParam(required = false) Double productPrice,
@@ -810,6 +846,7 @@ public class BFFApiGatewayController {
                 .map(response -> ResponseEntity.status(HttpStatus.OK).body(response));
     }
     @PostMapping(value = "inventory/{inventoryId}/products")
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER})
     public Mono<ResponseEntity<ProductResponseDTO>> addProductToInventory(@RequestBody ProductRequestDTO model, @PathVariable String inventoryId){
         return inventoryServiceClient.addProductToInventory(model, inventoryId)
                 .map(s -> ResponseEntity.status(HttpStatus.CREATED).body(s))
@@ -942,4 +979,42 @@ public class BFFApiGatewayController {
                                 .map(addVisitsToOwner(n))
                 );*/
     }
+
+    @IsUserSpecific(idToMatch = {"petTypeId"}, bypassRoles = {Roles.ALL})
+    @GetMapping(value = "owners/petTypes/{petTypeId}")
+    public Mono<ResponseEntity<PetTypeResponseDTO>> getPetTypeById(final @PathVariable String petTypeId) {
+        return customersServiceClient.getPetTypeByPetTypeId(petTypeId)
+                .map(petTypeResponseDTO -> ResponseEntity.status(HttpStatus.OK).body(petTypeResponseDTO))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+
+                /*.flatMap(owner ->
+                        visitsServiceClient.getVisitsForPets(owner.getPetIds())
+                                .map(addVisitsToOwner(owner))
+                );*/
+    }
+    @IsUserSpecific(idToMatch = {"petTypeId"}, bypassRoles = {Roles.ADMIN})
+    @DeleteMapping(value = "owners/petTypes/{petTypeId}")
+    public Mono<ResponseEntity<PetTypeResponseDTO>> deletePetTypeByPetTypeId(final @PathVariable String petTypeId){
+        return customersServiceClient.deletePetType(petTypeId).then(Mono.just(ResponseEntity.noContent().<PetTypeResponseDTO>build()))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @IsUserSpecific(idToMatch = {"petTypeId"})
+    @PutMapping("owners/petTypes/{petTypeId}")
+    public Mono<ResponseEntity<PetTypeResponseDTO>> updatePetType(
+            @PathVariable String petTypeId,
+            @RequestBody Mono<PetTypeRequestDTO> petTypeRequestMono) {
+        return petTypeRequestMono.flatMap(petTypeRequestDTO ->
+                customersServiceClient.updatePetType(petTypeId, Mono.just(petTypeRequestDTO))
+                        .map(updatedOwner -> ResponseEntity.ok().body(updatedOwner))
+                        .defaultIfEmpty(ResponseEntity.notFound().build())
+        );
+    }
+
+
+
+
+
+
+
 }

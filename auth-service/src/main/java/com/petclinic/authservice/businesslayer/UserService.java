@@ -38,11 +38,7 @@ public interface UserService {
 
     User createUser(UserIDLessRoleLessDTO user);
 
-
-
     List<UserDetails> findAllWithoutPage();
-
-    //void deleteUser(long id);
 
     Mail generateVerificationMail(User user);
 
@@ -50,12 +46,13 @@ public interface UserService {
 
     HashMap<String, Object> login(UserIDLessUsernameLessDTO user) throws IncorrectPasswordException;
 
-
     User getUserByEmail(String email) throws NotFoundException;
 
-    User getUserByUserId(String userIid);
-    List<UserDetails> getUsersByUsernameContaining(String username);
+    User getUserByUserId(String userId);
 
+    void deleteUser(String userId);
+
+    List<UserDetails> getUsersByUsernameContaining(String username);
 
     void processForgotPassword(UserResetPwdRequestModel userResetPwdWithTokenRequestModel);
 
@@ -66,5 +63,5 @@ public interface UserService {
     void updatePassword(String newPassword, String token);
 
     void processResetPassword(UserResetPwdWithTokenRequestModel resetRequest);
-    UserPasswordLessDTO updateUserRole(String id, RolesChangeRequestDTO roles, String token);
+    UserPasswordLessDTO updateUserRole(String userId, RolesChangeRequestDTO roles, String token);
 }

@@ -53,6 +53,7 @@ class VetsServiceClientIntegrationTest {
     VetResponseDTO vetResponseDTO = buildVetResponseDTO();
 
     ClassPathResource cpr=new ClassPathResource("static/images/full_food_bowl.png");
+    ClassPathResource cpr2=new ClassPathResource("static/images/vet_default.jpg");
 
 
     @BeforeEach
@@ -871,6 +872,92 @@ class VetsServiceClientIntegrationTest {
         byte[] photoBytes = FileCopyUtils.copyToByteArray(photo.getInputStream());
 
         assertNotNull(photoBytes);
+    }
+    @Test
+    void getDefaultPhotoByVetId() throws IOException {
+        PhotoResponseDTO photoResponseDTO = PhotoResponseDTO.builder()
+                .vetId("cf25e779-548b-4788-aefa-6d58621c2feb")
+                .filename("vet_default.jpg")
+                .imgType("image/jpeg")
+                .resourceBase64(Base64.getEncoder().encodeToString(StreamUtils.copyToByteArray(cpr2.getInputStream())))
+                .build();
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody("    {\n" +
+                        "        \"vetId\": \"" + photoResponseDTO.getVetId() + "\",\n" +
+                        "        \"filename\": \"" + photoResponseDTO.getFilename() + "\",\n" +
+                        "        \"imgType\": \"" + photoResponseDTO.getImgType() + "\",\n" +
+                        "        \"resourceBase64\": \"" + photoResponseDTO.getResourceBase64() + "\"\n" +
+                        "    }"));
+
+        StepVerifier.create(vetsServiceClient.getDefaultPhotoByVetId("cf25e779-548b-4788-aefa-6d58621c2feb"))
+                .consumeNextWith(responseDTO -> {
+                    assertEquals(photoResponseDTO.getFilename(), responseDTO.getFilename());
+                    assertEquals(photoResponseDTO.getImgType(), responseDTO.getImgType());
+                    assertEquals(photoResponseDTO.getVetId(), responseDTO.getVetId());
+                    assertEquals(photoResponseDTO.getResourceBase64(), responseDTO.getResourceBase64());
+                })
+                .verifyComplete();
+    }
+    @Test
+    void getDefaultPhotoByInvalidVetId_shouldNotSucceed() throws ExistingVetNotFoundException{
+        String invalidVetId="123";
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(404)
+                .setBody("Something went wrong"));
+
+        final PhotoResponseDTO defaultPhoto = vetsServiceClient.getDefaultPhotoByVetId(invalidVetId)
+                .onErrorResume(throwable -> {
+                    if (throwable instanceof ExistingVetNotFoundException && throwable.getMessage().equals("Photo for vet "+invalidVetId + " not found")) {
+                        return Mono.empty();
+                    } else {
+                        return Mono.error(throwable);
+                    }
+                })
+                .block();
+
+        assertNull(defaultPhoto);
+    }
+    @Test
+    void getDefaultPhotoByVetId_IllegalArgumentException400() throws IllegalArgumentException {
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(400)
+                .setBody("Something went wrong"));
+
+        final PhotoResponseDTO photoResponseDTO = vetsServiceClient.getDefaultPhotoByVetId("cf25e779-548b-4788-aefa-6d58621c2feb")
+                .onErrorResume(throwable->{
+                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                        return Mono.empty();
+                    } else {
+                        return Mono.error(throwable);
+                    }
+                })
+                .block();
+
+        assertNull(photoResponseDTO);
+    }
+    @Test
+    void getDefaultPhotoByVetId_IllegalArgumentException500() throws IllegalArgumentException {
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setResponseCode(500)
+                .setBody("Something went wrong"));
+
+        final PhotoResponseDTO photoResponseDTO = vetsServiceClient.getDefaultPhotoByVetId("cf25e779-548b-4788-aefa-6d58621c2feb")
+                .onErrorResume(throwable->{
+                    if (throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong")) {
+                        return Mono.empty();
+                    } else {
+                        return Mono.error(throwable);
+                    }
+                })
+                .block();
+
+        assertNull(photoResponseDTO);
     }
 
     @Test
@@ -1820,6 +1907,7 @@ class VetsServiceClientIntegrationTest {
                 .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
+                .photoDefault(true)
                 .build();
     }
 

@@ -14,14 +14,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 public class VisitRequestDTO {
-
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime visitDate;
-/*    private int year;
-    private int month;
-    private int day;*/
     private String description;
     private String petId;
+    private String ownerId;
+    private String jwtToken;//used to get the userDetails from the Auth-Service when sending visit emails
     private String practitionerId;
     private Status status;
 }

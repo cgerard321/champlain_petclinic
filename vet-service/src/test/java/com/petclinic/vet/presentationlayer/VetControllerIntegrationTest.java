@@ -15,6 +15,7 @@ import com.petclinic.vet.servicelayer.education.EducationRequestDTO;
 import com.petclinic.vet.servicelayer.education.EducationResponseDTO;
 import com.petclinic.vet.servicelayer.ratings.RatingRequestDTO;
 import com.petclinic.vet.servicelayer.ratings.RatingResponseDTO;
+import com.petclinic.vet.util.EntityDtoUtil;
 import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,7 +98,6 @@ class VetControllerIntegrationTest {
 
     //badge image
     ClassPathResource cpr=new ClassPathResource("images/full_food_bowl.png");
-
     @Test
     void getAllRatingsForAVet_WithValidVetId_ShouldSucceed() {
         Publisher<Rating> setup = ratingRepository.deleteAll()
@@ -1606,6 +1606,12 @@ class VetControllerIntegrationTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("vetId not found: "+invalidVetId);
+    }
+
+    @Test
+    void generateVetId(){
+        String vetId = EntityDtoUtil.generateVetId();
+        assertEquals(vetId.length(), 36);
     }
 
     @Test

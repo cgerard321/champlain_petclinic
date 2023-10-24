@@ -82,22 +82,20 @@ public class UserServiceImpl implements UserService {
                         format("User with username %s already exists", userIDLessDTO.getUsername()));
             }
 
-
-// add exception when trying to create a user with existing username
-
             User user = userMapper.idLessRoleLessDTOToModel(userIDLessDTO);
 
             if (userIDLessDTO.getDefaultRole() == null|| userIDLessDTO.getDefaultRole().isEmpty()){
-
+            log.info("No default role provided, setting default role to OWNER");
             Optional<Role> role = roleRepo.findById(3L);
             Set<Role> roleSet = new HashSet<>();
             role.ifPresent(roleSet::add);
             user.setRoles(roleSet);
             }else{
+                log.info("Default role provided, setting default role to {}", userIDLessDTO.getDefaultRole());
                 Role role = roleRepo.findRoleByName(userIDLessDTO.getDefaultRole());
                 Set<Role> roleSet = new HashSet<>();
                 if(role == null)
-                    throw new NotFoundException("Role not found");
+                    throw new NotFoundException("No role with name: " + userIDLessDTO.getDefaultRole());
                 roleSet.add(role);
                 user.setRoles(roleSet);
             }
@@ -444,6 +442,17 @@ public class UserServiceImpl implements UserService {
         return userRepo.findOptionalUserByUserIdentifier_UserId(userId)
                 .orElseThrow(() -> new NotFoundException("No user with userId: " + userId));
     }
+
+    @Override
+    public void deleteUser(String userId) {
+        User user = userRepo.findUserByUserIdentifier_UserId(userId);
+        if (user != null) {
+            userRepo.delete(user);
+        } else {
+            throw new NotFoundException("No user with userId: " + userId);
+        }
+    }
+
 
     @Override
     public List<UserDetails> getUsersByUsernameContaining(String username) {

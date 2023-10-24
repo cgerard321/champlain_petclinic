@@ -23,7 +23,6 @@ import java.io.IOException;
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @SpringBootTest
@@ -49,7 +48,7 @@ public class AuthMailServiceTests {
                 .thenReturn(Calls.response(format("Message sent to %s", EMAIL_VALID.getTo())));
 
         when(mockMailCall.sendMail(EMAIL_EMPTY_INVALID))
-                .thenReturn(Calls.response(Response.error(400, ResponseBody.create(JSON, "Bad request"))));
+                .thenReturn(Calls.response(Response.error(400, ResponseBody.create("Bad request", JSON))));
     }
 
     @Test

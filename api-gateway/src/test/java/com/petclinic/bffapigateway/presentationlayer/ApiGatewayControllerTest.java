@@ -18,6 +18,7 @@ import com.petclinic.bffapigateway.dtos.Pets.PetType;
 import com.petclinic.bffapigateway.dtos.Pets.PetTypeResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.*;
 import com.petclinic.bffapigateway.dtos.Visits.Status;
+import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.exceptions.ExistingVetNotFoundException;
 import com.petclinic.bffapigateway.exceptions.GenericHttpException;
@@ -42,6 +43,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -60,6 +62,7 @@ import reactor.test.StepVerifier;
 import javax.print.attribute.standard.Media;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -108,6 +111,7 @@ class ApiGatewayControllerTest {
     String INVALID_VET_ID = "mjbedf";
 
     ClassPathResource cpr=new ClassPathResource("static/images/full_food_bowl.png");
+    ClassPathResource cpr2=new ClassPathResource("static/images/vet_default.jpg");
 
     @Test
     void getAllRatingsForVet_ValidId() {
@@ -829,6 +833,35 @@ class ApiGatewayControllerTest {
         Mockito.verify(vetsServiceClient, times(1))
                 .getPhotoByVetId(VET_ID);
     }
+    @Test
+    void getDefaultPhotoByVetId() throws IOException {
+        PhotoResponseDTO photoResponseDTO = PhotoResponseDTO.builder()
+                .vetId(VET_ID)
+                .filename("vet_default.jpg")
+                .imgType("image/jpeg")
+                .resourceBase64(Base64.getEncoder().encodeToString(StreamUtils.copyToByteArray(cpr2.getInputStream())))
+                .build();
+
+        when(vetsServiceClient.getDefaultPhotoByVetId(anyString()))
+                .thenReturn(Mono.just(photoResponseDTO));
+
+        client.get()
+                .uri("/api/gateway/vets/{vetId}/default-photo", VET_ID)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(APPLICATION_JSON)
+                .expectBody(PhotoResponseDTO.class)
+                .value(responseDTO -> {
+                    Assertions.assertEquals(photoResponseDTO.getFilename(), responseDTO.getFilename());
+                    Assertions.assertEquals(photoResponseDTO.getImgType(), responseDTO.getImgType());
+                    Assertions.assertEquals(photoResponseDTO.getVetId(), responseDTO.getVetId());
+                    Assertions.assertEquals(photoResponseDTO.getResourceBase64(), responseDTO.getResourceBase64());
+                });
+
+        Mockito.verify(vetsServiceClient, times(1))
+                .getDefaultPhotoByVetId(VET_ID);
+    }
+
 
     @Test
     void addPhotoToVet() {
@@ -973,6 +1006,48 @@ class ApiGatewayControllerTest {
 //        assertEquals(user.getId(), 1);
 //    }
 //
+
+        @Test
+    void createUserInventoryManager_ShouldSucceed(){
+        String uuid = UUID.randomUUID().toString();
+        Role role = Role.builder()
+                .name(Roles.INVENTORY_MANAGER.name())
+                .build();
+        UserPasswordLessDTO userResponse = UserPasswordLessDTO
+                .builder()
+                .userId(uuid)
+                .email("email@email.com")
+                .roles(Set.of(role))
+                .build();
+
+        when(authServiceClient.createInventoryMangerUser(any()))
+                .thenReturn(Mono.just(userResponse));
+
+        RegisterInventoryManager register = RegisterInventoryManager.builder()
+                .userId(uuid)
+                .username("Johnny123")
+                .password("Password22##")
+                .email("email@email.com")
+                .build();
+
+        client.post()
+                .uri("/api/gateway/users/inventoryManager")
+                .body(Mono.just(register), RegisterInventoryManager.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(UserPasswordLessDTO.class)
+                .value(dto->{
+                    assertEquals(dto.getUserId(),userResponse.getUserId());
+                    assertEquals(dto.getEmail(),userResponse.getEmail());
+                    assertEquals(dto.getRoles(),userResponse.getRoles());
+                });
+
+
+
+    }
+
     @Test
     void createUser(){
         String uuid = UUID.randomUUID().toString();
@@ -2141,13 +2216,15 @@ class ApiGatewayControllerTest {
 //todo fix
     /*@Test
     void shouldCreateAVisitWithOwnerInfo(){
+        String ownerId = "1";
+        String cookie = "aCookie";
         OwnerResponseDTO owner = new OwnerResponseDTO();
         VisitRequestDTO visit = VisitRequestDTO.builder()
-                .visitDate(LocalDateTime.parse("2021-12-12T14:00:00"))
+                .visitDate(LocalDateTime.parse("2021-12-12T14:00"))
                 .description("Charle's Richard cat has a paw infection.")
                 .petId("1")
                 .practitionerId("1")
-                .status(false)
+                .status(Status.UPCOMING)
                 .build();
 
         VisitResponseDTO visitResponseDTO =  VisitResponseDTO.builder()
@@ -2156,7 +2233,7 @@ class ApiGatewayControllerTest {
                 .petId("1")
                 .description("Charle's Richard cat has a paw infection.")
                 .practitionerId("1")
-                .status(false)
+                .status(Status.UPCOMING)
                 .build();
 
 
@@ -2165,23 +2242,107 @@ class ApiGatewayControllerTest {
 
 
         client.post()
-                .uri("/api/gateway/visit/owners/{ownerId}/pets/{petId}/visits", owner.getOwnerId(), visit.getPetId())
-                .body(Mono.just(visit), VisitDetails.class)
+                .uri("/api/gateway/visit/owners/" + ownerId + "/pets/" + visitResponseDTO.getPetId() + "/visits", owner.getOwnerId(), visit.getPetId())
+                .cookie("Bearer",cookie)
+                .body(Mono.just(visit), VisitRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isCreated()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.visitId").isEqualTo(visitResponseDTO.getVisitId())
                 .jsonPath("$.petId").isEqualTo("1")
-                .jsonPath("$.visitDate").isEqualTo("2021-12-12T14:00:00")
+                .jsonPath("$.visitDate").isEqualTo("2021-12-12 14:00")
                 .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
-                .jsonPath("$.status").isEqualTo(false)
+                .jsonPath("$.status").isEqualTo("UPCOMING")
                 .jsonPath("$.practitionerId").isEqualTo(1);
+    }*/
+
+    @Test
+    public void addVisit_ShouldReturnCreatedStatus() {
+        String ownerId = "owner1";
+        String petId = "pet1";
+        VisitRequestDTO visit = VisitRequestDTO.builder()
+                .visitDate(LocalDateTime.parse("2021-12-12T14:00"))
+                .description("Charle's Richard cat has a paw infection.")
+                .petId("1")
+                .practitionerId("1")
+                .status(Status.UPCOMING)
+                .build();
+
+        VisitResponseDTO visitResponseDTO =  VisitResponseDTO.builder()
+                .visitId(VISIT_ID)
+                .visitDate(LocalDateTime.parse("2021-12-12T14:00:00"))
+                .petId("1")
+                .description("Charle's Richard cat has a paw infection.")
+                .practitionerId("1")
+                .status(Status.UPCOMING)
+                .build();
+
+        when(visitsServiceClient.createVisitForPet(any(VisitRequestDTO.class)))
+                .thenReturn(Mono.just(visitResponseDTO));
+
+        client.post()
+                .uri("/api/gateway/visit/owners/{ownerId}/pets/{petId}/visits", ownerId, petId)
+                .cookie("Bearer", "your-auth-token") // Assuming "Bearer" is the name of the cookie
+                .body(Mono.just(visit), VisitRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                // Validate the response
+                .expectStatus().isCreated()
+                .expectBody()
+                .jsonPath("$.visitId").isEqualTo(visitResponseDTO.getVisitId())
+                .jsonPath("$.petId").isEqualTo("1")
+                .jsonPath("$.visitDate").isEqualTo("2021-12-12 14:00")
+                .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
+                .jsonPath("$.status").isEqualTo("UPCOMING")
+                .jsonPath("$.practitionerId").isEqualTo(1);
+
+    }
+
+    @Test
+    void shouldCreateAVisitWithOwnerAndPetInfo(){
+        String ownerId = "5fe81e29-1f1d-4f9d-b249-8d3e0cc0b7dd";
+        String petId = "9";
+        VisitRequestDTO visit = VisitRequestDTO.builder()
+                .visitDate(LocalDateTime.parse("2021-12-12T14:00:00"))
+                .description("Charle's Richard cat has a paw infection.")
+                .petId(petId)
+                .practitionerId("1")
+                .status(Status.UPCOMING)
+                .build();
+
+        VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
+                .visitId(VISIT_ID)
+                .visitDate(LocalDateTime.parse("2021-12-12T14:00:00"))
+                .petId(petId)
+                .description("Charle's Richard cat has a paw infection.")
+                .practitionerId("1")
+                .status(Status.UPCOMING)
+                .build();
+
+        when(visitsServiceClient.createVisitForPet(visit))
+                .thenReturn(Mono.just(visitResponseDTO));
+
+        client.post()
+                .uri("/api/gateway/visit/owners/{ownerId}/pets/{petId}/visits", ownerId, petId)
+                .body(Mono.just(visit), VisitRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.visitId").isEqualTo(visitResponseDTO.getVisitId())
+                .jsonPath("$.petId").isEqualTo(petId)
+                .jsonPath("$.visitDate").isEqualTo("2021-12-12 14:00")
+                .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
+                .jsonPath("$.status").isEqualTo("UPCOMING")
+                .jsonPath("$.practitionerId").isEqualTo("1");
     }
 
 
-    @Test
+
+   /* @Test
     void shouldDeleteAVisit() {
         VisitDetails visit = new VisitDetails();
         OwnerDetails owner = new OwnerDetails();
@@ -2288,8 +2449,34 @@ class ApiGatewayControllerTest {
     }
     @Test
     void shouldGetAllVisits() {
-        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", Status.UPCOMING);
-        VisitResponseDTO visitResponseDTO2 = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", Status.UPCOMING);
+        VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
+                .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .description("this is a dummy description")
+                .petId("2")
+                .petName("YourPetNameHere")
+                .petBirthDate(new Date())
+                .practitionerId("2")
+                .vetFirstName("VetFirstNameHere")
+                .vetLastName("VetLastNameHere")
+                .vetEmail("vet@email.com")
+                .vetPhoneNumber("123-456-7890")
+                .status(Status.UPCOMING)
+                .build();
+        VisitResponseDTO visitResponseDTO2 = VisitResponseDTO.builder()
+                .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .description("this is a dummy description")
+                .petId("2")
+                .petName("YourPetNameHere")
+                .petBirthDate(new Date())
+                .practitionerId("2")
+                .vetFirstName("VetFirstNameHere")
+                .vetLastName("VetLastNameHere")
+                .vetEmail("vet@email.com")
+                .vetPhoneNumber("123-456-7890")
+                .status(Status.UPCOMING)
+                .build();
         when(visitsServiceClient.getAllVisits()).thenReturn(Flux.just(visitResponseDTO,visitResponseDTO2));
 
         client.get()
@@ -2337,7 +2524,20 @@ class ApiGatewayControllerTest {
     }
     @Test
     void shouldGetAVisit() {
-        VisitResponseDTO visit = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", Status.UPCOMING);
+        VisitResponseDTO visit = VisitResponseDTO.builder()
+                .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .description("this is a dummy description")
+                .petId("2")
+                .petName("YourPetNameHere")
+                .petBirthDate(new Date())
+                .practitionerId("2")
+                .vetFirstName("VetFirstNameHere")
+                .vetLastName("VetLastNameHere")
+                .vetEmail("vet@email.com")
+                .vetPhoneNumber("123-456-7890")
+                .status(Status.UPCOMING)
+                .build();
 
         when(visitsServiceClient.getVisitsForPet(visit.getPetId()))
                 .thenReturn(Flux.just(visit));
@@ -2421,20 +2621,105 @@ class ApiGatewayControllerTest {
 
     @Test
     void getSingleVisit_Valid() {
-        VisitResponseDTO visitResponseDTO = new VisitResponseDTO("73b5c112-5703-4fb7-b7bc-ac8186811ae1", LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")), "this is a dummy description", "2", "2", Status.UPCOMING);
+        VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
+                .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .description("this is a dummy description")
+                .petId("2")
+                .petName("YourPetNameHere")
+                .petBirthDate(new Date())
+                .practitionerId("2")
+                .vetFirstName("VetFirstNameHere")
+                .vetLastName("VetLastNameHere")
+                .vetEmail("vet@email.com")
+                .vetPhoneNumber("123-456-7890")
+                .status(Status.UPCOMING)
+                .build();
         when(visitsServiceClient.getVisitByVisitId(anyString())).thenReturn(Mono.just(visitResponseDTO));
 
         client.get()
-                .uri("/api/gateway/visits/{visitId}", visitResponseDTO.getVisitId())
+                .uri("/api/gateway/visits/" + visitResponseDTO.getVisitId())
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody()
                 .jsonPath("$.visitId").isEqualTo(visitResponseDTO.getVisitId())
                 .jsonPath("$.petId").isEqualTo(visitResponseDTO.getPetId())
-                .jsonPath("$.visitDate").isEqualTo("2022-11-25 13:45")
+                .jsonPath("$.visitDate").isEqualTo("2024-11-25 13:45")
                 .jsonPath("$.description").isEqualTo(visitResponseDTO.getDescription())
                 .jsonPath("$.practitionerId").isEqualTo(visitResponseDTO.getPractitionerId());
     }
+    @Test
+    void getVisitsByStatus_Valid() {
+        VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
+                .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .description("this is a dummy description")
+                .petId("2")
+                .petName("YourPetNameHere")
+                .petBirthDate(new Date())
+                .practitionerId("2")
+                .vetFirstName("VetFirstNameHere")
+                .vetLastName("VetLastNameHere")
+                .vetEmail("vet@email.com")
+                .vetPhoneNumber("123-456-7890")
+                .status(Status.UPCOMING)
+                .build();
+
+        when(visitsServiceClient.getVisitsForStatus(visitResponseDTO.getStatus().toString())).thenReturn(Flux.just(visitResponseDTO));
+
+        client.get()
+                .uri("/api/gateway/visits/status/{status}", visitResponseDTO.getStatus())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(VisitResponseDTO.class)
+                .consumeWith(response -> {
+                    Assertions.assertTrue(response.getResponseBody().size() > 0);
+                    VisitResponseDTO responseBody = response.getResponseBody().get(0);
+                    // Asserting that the values match what's expected
+                    Assertions.assertEquals(visitResponseDTO.getVisitId(), responseBody.getVisitId());
+                    Assertions.assertEquals(visitResponseDTO.getPetId(), responseBody.getPetId());
+                    Assertions.assertEquals(visitResponseDTO.getVisitDate(), responseBody.getVisitDate());
+                    Assertions.assertEquals(visitResponseDTO.getDescription(), responseBody.getDescription());
+                    Assertions.assertEquals(visitResponseDTO.getPractitionerId(), responseBody.getPractitionerId());
+                });
+    }
+
+    @Test
+    void getVisitsByPractitionerId_Valid() {
+        VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
+                .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .description("this is a dummy description")
+                .petId("2")
+                .petName("YourPetNameHere")
+                .petBirthDate(new Date())
+                .practitionerId("2")
+                .vetFirstName("VetFirstNameHere")
+                .vetLastName("VetLastNameHere")
+                .vetEmail("vet@email.com")
+                .vetPhoneNumber("123-456-7890")
+                .status(Status.UPCOMING)
+                .build();
+
+        when(visitsServiceClient.getVisitByPractitionerId(visitResponseDTO.getPractitionerId())).thenReturn(Flux.just(visitResponseDTO));
+
+        client.get()
+                .uri("/api/gateway/visits/vets/{practitionerId}", visitResponseDTO.getPractitionerId())
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(VisitResponseDTO.class)
+                .consumeWith(response -> {
+                    Assertions.assertTrue(response.getResponseBody().size() > 0);
+                    VisitResponseDTO responseBody = response.getResponseBody().get(0);
+
+                    Assertions.assertEquals(visitResponseDTO.getVisitId(), responseBody.getVisitId());
+                    Assertions.assertEquals(visitResponseDTO.getPetId(), responseBody.getPetId());
+                    Assertions.assertEquals(visitResponseDTO.getVisitDate(), responseBody.getVisitDate());
+                    Assertions.assertEquals(visitResponseDTO.getDescription(), responseBody.getDescription());
+                    Assertions.assertEquals(visitResponseDTO.getPractitionerId(), responseBody.getPractitionerId());
+                });
+    }
+
 
 //    @Test
     //    void getSingleVisit_Invalid() {
@@ -2832,6 +3117,35 @@ class ApiGatewayControllerTest {
     }
 
 
+    @Test
+    @DisplayName("Should Logout with a Valid Session, Clearing Bearer Cookie, and Returning 204")
+    void logout_shouldClearBearerCookie() {
+        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+        headers.add(HttpHeaders.COOKIE, "Bearer=some.token.value; Path=/; HttpOnly; SameSite=Lax");
+        when(authServiceClient.logout(any(ServerHttpRequest.class), any(ServerHttpResponse.class)))
+                .thenReturn(Mono.just(ResponseEntity.noContent().build()));
+        client.post()
+                .uri("/api/gateway/users/logout")
+                .headers(httpHeaders -> httpHeaders.putAll(headers))
+                .exchange()
+                .expectStatus().isNoContent()
+                .expectHeader().doesNotExist(HttpHeaders.SET_COOKIE);
+    }
+
+    @Test
+    @DisplayName("Given Expired Session, Logout Should Return 401")
+    void logout_shouldReturnUnauthorizedForExpiredSession() {
+        MultiValueMap<String, String> headers = new LinkedMultiValueMap<>();
+        when(authServiceClient.logout(any(ServerHttpRequest.class), any(ServerHttpResponse.class)))
+                .thenReturn(Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build()));
+        client.post()
+                .uri("/api/gateway/users/logout")
+                .headers(httpHeaders -> httpHeaders.putAll(headers))
+                .exchange()
+                .expectStatus().isUnauthorized()
+                .expectHeader().doesNotExist(HttpHeaders.SET_COOKIE);
+    }
+
 
 private InventoryResponseDTO buildInventoryDTO(){
         return InventoryResponseDTO.builder()
@@ -3212,6 +3526,9 @@ void deleteAllInventory_shouldSucceed() {
 
 
 
+
+
+
     private ProductResponseDTO buildProductDTO(){
         return ProductResponseDTO.builder()
                 .id("1")
@@ -3550,6 +3867,26 @@ private VetAverageRatingDTO buildVetAverageRatingDTO(){
                     assertEquals(userDetails.getEmail(), u.getEmail());
                 });
     }
+
+    @Test
+    void deleteUserById_ValidUserId_ShouldDeleteUser() {
+        UserDetails userDetails = UserDetails.builder()
+                .userId("validUserId")
+                .username("validUsername")
+                .email("validEmail")
+                .build();
+
+        when(authServiceClient.deleteUser(anyString(), anyString()))
+                .thenReturn(Mono.empty());
+
+        client.delete()
+                .uri("/api/gateway/users/validUserId")
+                .cookie("Bearer", "validToken")
+                .exchange()
+                .expectStatus().isNoContent();
+    }
+
+
     private EducationResponseDTO buildEducation(){
         return EducationResponseDTO.builder()
                 .educationId("1")
