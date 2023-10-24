@@ -5,6 +5,7 @@ import com.petclinic.billing.datalayer.BillRequestDTO;
 import com.petclinic.billing.datalayer.BillResponseDTO;
 import com.petclinic.billing.datalayer.BillStatus;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.MediaType;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import javax.validation.Valid;
+import java.util.Optional;
 
 @RestController
 @Slf4j
@@ -37,11 +39,24 @@ public class BillResource {
     }
 
     @GetMapping(value = "/bills", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<BillResponseDTO> findAllBills(@RequestParam(defaultValue = "0") int page,
-                                              @RequestParam(defaultValue = "10") int size) {
-        return SERVICE.GetAllBills(page, size);
+    public Flux<BillResponseDTO> findAllBills() {
+        return SERVICE.GetAllBills();
     }
 
+    //to be changed
+    @GetMapping("/bills-pagination")
+    public Flux<BillResponseDTO> getAllBillsByPage(@RequestParam Optional<Integer> page,
+                                                   @RequestParam Optional<Integer> size) {
+        return SERVICE.getAllBillsByPage(
+                PageRequest.of(page.orElse(0),size.orElse(5)));
+    }
+
+    //to be changed
+    @GetMapping("/bills-count")
+    public Mono<ResponseEntity<Long>> getTotalNumberOfBills(){
+        return SERVICE.GetAllBills().count()
+                .map(response -> ResponseEntity.status(HttpStatus.OK).body(response));
+    }
 
 
     @GetMapping(value = "/bills/paid", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
@@ -104,6 +119,5 @@ public class BillResource {
     public Flux<Void> deleteBillsByCustomerId (@PathVariable("customerId") String customerId){
         return SERVICE.DeleteBillsByCustomerId(customerId);
     }
-
 
 }

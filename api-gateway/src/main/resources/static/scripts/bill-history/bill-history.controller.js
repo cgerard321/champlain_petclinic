@@ -1,14 +1,67 @@
 'use strict';
 
-
 angular.module('billHistory')
-    .controller('BillHistoryController', ['$http','$scope', function ($http,$scope) {
+    .controller('BillHistoryController', ['$http','$stateParams', '$scope', '$state', function ($http,$stateParams, $scope, $state) {
         let self = this;
         self.billHistory = []
         self.paidBills = []
         self.unpaidBills = []
         self.overdueBills = []
 
+        // Pagination properties
+        self.currentPage = $stateParams.page || 0;
+        self.pageSize = $stateParams.size || 10; // Number of items per page
+        self.currentPageOnSite = parseInt(self.currentPage) + 1;
+
+        function loadTotalItem() {
+            return $http.get("api/gateway/bills-count")
+                .then(function (resp){
+                    console.log(resp);
+                    return resp.data;
+                });
+        }
+
+        loadTotalItem().then(function (totalItems) {
+            self.totalItems = totalItems;
+            self.totalPages = Math.ceil(self.totalItems / parseInt(self.pageSize));
+            generatePagesArray(); // generate the pages array
+        });
+
+        function loadData() {
+            $state.transitionTo('bills',
+                {page: self.currentPage, size: self.pageSize },
+                { notify: false});
+            $http.get("api/gateway/bills-pagination?page=" + self.currentPage + "&size=" + self.pageSize)
+                .then(function (resp) {
+                    self.bills = resp.data;
+                    console.log(resp);
+                });
+        }
+
+        loadData();
+
+        self.goNextPage = function() {
+            if(parseInt(self.currentPage) + 1 < self.totalPages) {
+                var currentPageInt = parseInt(self.currentPage) + 1;
+                self.currentPage = currentPageInt.toString();
+                updateCurrentPageOnSite();
+                loadData();
+            }
+        }
+
+        self.goPreviousPage = function () {
+            if (self.currentPage - 1 >= 0) {
+                var currentPageInt = parseInt(self.currentPage) - 1;
+                self.currentPage = currentPageInt.toString();
+                updateCurrentPageOnSite();
+                loadData();
+            }
+        }
+
+        function updateCurrentPageOnSite() {
+            self.currentPageOnSite = parseInt(self.currentPage) + 1;
+            console.log(self.currentPage);
+        }
 
         self.owners = [
             { ownerId: '1', firstName: 'George', lastName: 'Franklin' },
@@ -210,17 +263,6 @@ angular.module('billHistory')
             }
         };
 
-        // $scope.getCustomerDetails = function(customerId) {
-        //     const customer = self.owners.find(function(customer) {
-        //         return customer.ownerId === customerId;
-        //     });
-        //
-        //     if (customer) {
-        //         return customer.firstName + ' ' + customer.lastName;
-        //     } else {
-        //         return 'Unknown Customer';
-        //     }
-        // }
         $scope.getCustomerDetails = function(customerId) {
             const customerName = self.customerNameMap[customerId];
             const customerName2 = self.customerNameMap2[customerId];

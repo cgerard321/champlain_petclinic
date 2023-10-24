@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -74,6 +76,26 @@ public class BillServiceImplTest {
 //               })
 //               .verifyComplete();
 //    }
+
+    @Test
+    void getBillsByPage_ShouldSucceed(){
+        // Create a sample Pageable object
+        Pageable pageable = PageRequest.of(0, 5);
+
+        // Create a sample list of Bill entities
+        List<Bill> billList = Arrays.asList(buildBill(), buildBill(), buildBill());
+
+        // Mock the repository call to return the list of Bill entities
+        when(repo.findAll()).thenReturn(Flux.fromIterable(billList));
+
+        // Test the service method
+        Flux<BillResponseDTO> billDTOFlux = billService.getAllBillsByPage(pageable);
+
+        // Verify the results
+        StepVerifier.create(billDTOFlux)
+                .expectNextCount(3) // Adjust this count according to the number of expected results
+                .verifyComplete();
+    }
 
     @Test
     public void test_GetAllBillsByPaidStatus() {

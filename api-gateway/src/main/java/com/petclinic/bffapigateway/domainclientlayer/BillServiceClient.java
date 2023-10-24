@@ -2,13 +2,18 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.awt.print.Pageable;
+import java.util.Optional;
 
 
 @Component
@@ -54,6 +59,22 @@ public class BillServiceClient {
                 .uri(billServiceUrl)
                 .retrieve()
                 .bodyToFlux(BillResponseDTO.class);
+    }
+
+    //to be changed
+    public Flux<BillResponseDTO> getAllBillsByPage(Optional<Integer> page, Optional<Integer> size) {
+        return webClientBuilder.build().get()
+                .uri(billServiceUrl + "/bills-pagination?page="+page.orElse(0)+"&size="+size.orElse(5))
+                .retrieve()
+                .bodyToFlux(BillResponseDTO.class);
+    }
+
+    //to be changed
+    public Mono<Long> getTotalNumberOfBills() {
+        return webClientBuilder.build().get()
+                .uri(billServiceUrl + "/bills-count")
+                .retrieve()
+                .bodyToMono(Long.class);
     }
 
     public Flux<BillResponseDTO> getAllPaidBilling() {

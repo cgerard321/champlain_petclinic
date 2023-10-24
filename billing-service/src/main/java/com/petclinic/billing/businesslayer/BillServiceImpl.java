@@ -8,6 +8,7 @@ import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.util.EntityDtoUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -30,24 +31,31 @@ public class BillServiceImpl implements BillService{
     }
 
     @Override
-<<<<<<< HEAD
     public Flux<BillResponseDTO> GetAllBillsByStatus(BillStatus status) {
         return billRepository.findAllBillsByBillStatus(status).map(EntityDtoUtil::toBillResponseDto);
     }
 
-
     @Override
     public Flux<BillResponseDTO> GetAllBills() {
-
-        return billRepository.findAll().map(EntityDtoUtil::toBillResponseDto);
-
-=======
-    public Flux<BillResponseDTO> GetAllBills(int page, int size) {
-        PageRequest pageRequest = PageRequest.of(page, size);
-        return billRepository.findAllBy(pageRequest)
+        return billRepository.findAll()
                 .map(EntityDtoUtil::toBillResponseDto);
->>>>>>> 6b04c66b (Implementation of pagination - backend)
     }
+
+    //to be changed
+    @Override
+    public Flux<BillResponseDTO> getAllBillsByPage(Pageable pageable) {
+        return billRepository.findAll()
+                .map(EntityDtoUtil::toBillResponseDto)
+                .skip((long) pageable.getPageNumber() * pageable.getPageSize())
+                .take(pageable.getPageSize());
+    }
+
+    //to be changed
+    @Override
+    public Mono<Long> getNumberOfBills() {
+        return billRepository.count();
+    }
+
 
     @Override
     public Mono<BillResponseDTO> CreateBill(Mono<BillRequestDTO> billRequestDTO) {
@@ -61,7 +69,7 @@ public class BillServiceImpl implements BillService{
                     .doOnNext(e -> e.setBillId(EntityDtoUtil.generateUUIDString()))
                     .flatMap(billRepository::insert)
                     .map(EntityDtoUtil::toBillResponseDto);
-        }
+    }
 
 
     @Override

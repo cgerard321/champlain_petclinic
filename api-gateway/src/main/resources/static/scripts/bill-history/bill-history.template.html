@@ -2,8 +2,8 @@
 
 <a ui-sref="billNew">
     <button class="add-bill-button btn btn-success">Add Bill</button>
-</a><br><br>
-
+</a>
+<br><br>
 
 <button type="button" class="collapsible" data-section="Paid">Open Paid</button>
 <table class="content table table-striped">
@@ -157,22 +157,21 @@
     </tr>
     <ul class="pagination">
         <li ng-class="{disabled: $ctrl.currentPage === 1}">
-            <button class="btn btn-default" ng-click="$ctrl.setPage(1)">First</button>
+            <button class="btn btn-default" ng-click="$ctrl.goPreviousPage()">Previous</button>
         </li>
         <li ng-class="{disabled: $ctrl.currentPage === 1}">
-            <button class="btn btn-default" ng-click="$ctrl.setPage($ctrl.currentPage - 1)">Previous</button>
+            <button class="btn btn-default" ng-click="$ctrl.setPage(1)">First</button>
         </li>
-        <li ng-repeat="page in $ctrl.pages" ng-class="{active: $ctrl.isCurrentPage(page)}">
+        <li ng-repeat="page in $ctrl.pages" ng-class="{active: $ctrl.currentPageOnSite(page)}">
             <button class="btn btn-default" ng-click="$ctrl.setPage(page)">{{ page }}</button>
         </li>
         <li ng-class="{disabled: $ctrl.currentPage === $ctrl.totalPages}">
-            <button class="btn btn-default" ng-click="$ctrl.setPage($ctrl.currentPage + 1)">Next</button>
+            <button class="btn btn-default" ng-click="$ctrl.goNextPage()">Next</button>
         </li>
         <li ng-class="{disabled: $ctrl.currentPage === $ctrl.totalPages}">
             <button class="btn btn-default" ng-click="$ctrl.setPage($ctrl.totalPages)">Last</button>
         </li>
     </ul>
-
 
     <tr id="billId" ng-repeat="bill in $ctrl.billHistory | filter:$ctrl.query track by bill.billId">
     <tr ng-repeat="bill in $ctrl.billHistory | filter:search:strict">

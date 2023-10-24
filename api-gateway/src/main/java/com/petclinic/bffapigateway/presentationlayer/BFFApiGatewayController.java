@@ -29,6 +29,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
+import java.awt.print.Pageable;
 import java.util.Optional;
 
 /**
@@ -80,6 +81,31 @@ public class BFFApiGatewayController {
     public Flux<BillResponseDTO> getAllBilling() {
         return billServiceClient.getAllBilling();
     }
+
+    //to be changed
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/bills-pagination", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<BillResponseDTO> getAllBillingByPage(@RequestParam Optional<Integer> page, @RequestParam Optional<Integer> size) {
+        if(page.isEmpty()){
+            page = Optional.of(0);
+        }
+
+        if (size.isEmpty()) {
+            size = Optional.of(5);
+        }
+
+        return billServiceClient.getAllBillsByPage(page, size);
+    }
+
+    //to be changed
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
+    @GetMapping(value = "/bills-count")
+    public Mono<Long> getTotalNumberOfBills(){
+        return billServiceClient.getTotalNumberOfBills();
+    }
+
+
+
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "bills/paid", produces= MediaType.TEXT_EVENT_STREAM_VALUE)

@@ -4,6 +4,7 @@ package com.petclinic.billing.businesslayer;
 import com.petclinic.billing.datalayer.BillRequestDTO;
 import com.petclinic.billing.datalayer.BillResponseDTO;
 import com.petclinic.billing.datalayer.BillStatus;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import reactor.core.publisher.Flux;
@@ -12,14 +13,15 @@ import reactor.core.publisher.Mono;
 public interface BillService {
     Mono<BillResponseDTO> getBillByBillId(String billId);
 
-<<<<<<< HEAD
     Flux<BillResponseDTO> GetAllBillsByStatus(BillStatus status);
 
 
     Flux<BillResponseDTO> GetAllBills();
-=======
-    Flux<BillResponseDTO> GetAllBills(int page, int size);
->>>>>>> 6b04c66b (Implementation of pagination - backend)
+
+    //to be changed
+    Flux<BillResponseDTO> getAllBillsByPage(Pageable pageable);
+    //to be changed
+    Mono<Long> getNumberOfBills();
 
     Mono<BillResponseDTO> CreateBill(@RequestBody Mono<BillRequestDTO> model);
 
