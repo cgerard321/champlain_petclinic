@@ -3,14 +3,14 @@ package com.petclinic.billing.datalayer;
 
 import com.petclinic.billing.businesslayer.BillService;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 
 
-@Service
+@Component
 public class DataSetupService implements CommandLineRunner {
     private final BillService billService;
     public DataSetupService(BillService billService) {

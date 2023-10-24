@@ -1,12 +1,12 @@
 package com.petclinic.visits.visitsservicenew.DomainClientLayer;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 
 
-@Service
+@Component
 public class BillServiceClient {
 
     private final WebClient.Builder webClientBuilder;
@@ -23,13 +23,13 @@ public class BillServiceClient {
         billServiceUrl = "http://" + billingServiceHost + ":" + billingServicePort + "/bills";
 
     }
-
     public Flux<BillResponseDTO> getAllBilling() {
         return webClientBuilder.build().get()
                 .uri(billServiceUrl)
                 .retrieve()
                 .bodyToFlux(BillResponseDTO.class);
     }
+
 }
 
 

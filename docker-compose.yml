@@ -22,6 +22,7 @@ services:
 
     visits-service-new:
         build: visits-service-new
+        restart: always
         environment:
             - SPRING_PROFILES_ACTIVE=docker
         depends_on:
@@ -60,7 +61,6 @@ services:
         environment:
             - SPRING_PROFILES_ACTIVE=docker
         depends_on:
-            - billing-service
             - customers-service-reactive
             - vet-service
             - visits-service-new
