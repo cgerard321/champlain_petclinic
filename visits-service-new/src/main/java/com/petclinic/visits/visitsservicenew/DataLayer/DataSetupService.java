@@ -18,19 +18,22 @@ import java.util.List;
 @RequiredArgsConstructor
 public class DataSetupService implements CommandLineRunner {
     private final VisitRepo visitRepo;
+
+    List<String> billResponseList = new ArrayList<>();
+
+    List<String> customerResponseList = new ArrayList<>();
     @Autowired
     private BillServiceClient billServiceClient;
 
     @Override
     public void run(String... args) throws Exception {
 
-        List<String> billResponseList=new ArrayList<>();
-        List<String> customerResponseList=new ArrayList<>();
         billServiceClient.getAllBilling().flatMap(s -> {
             billResponseList.add(s.getBillId());
             customerResponseList.add(s.getCustomerId());
             return Mono.just(s);
-        }).subscribe(s->{
+        });
+
             Visit visit1 = buildVisit("visitId1", "2022-11-24 13:00", "this is a dummy description", "2", "69f852ca-625b-11ee-8c99-0242ac120002", Status.COMPLETED, billResponseList.get(1), customerResponseList.get(1));
             Visit visit2 = buildVisit("visitId2", "2022-03-01 13:00", "Dog Needs Meds", "1", "69f85766-625b-11ee-8c99-0242ac120002", Status.COMPLETED, billResponseList.get(2), customerResponseList.get(2));
             Visit visit3 = buildVisit("visitId3", "2020-07-19 13:00","Dog Needs Surgery After Meds", "1", "69f85bda-625b-11ee-8c99-0242ac120002", Status.COMPLETED, billResponseList.get(3), customerResponseList.get(3));
@@ -39,7 +42,6 @@ public class DataSetupService implements CommandLineRunner {
             Visit visit6 = buildVisit("visitId6", "2023-12-05 15:00", "Animals Needs Operation", "3", "ac9adeb8-625b-11ee-8c99-0242ac120002", Status.UPCOMING, billResponseList.get(1), customerResponseList.get(1));
             Visit visit7 = buildVisit("visitId7", "2022-05-20 09:00", "Cat Needs Check-Up", "4", "ac9adeb8-625b-11ee-8c99-0242ac120002", Status.CONFIRMED, billResponseList.get(2), customerResponseList.get(2));
             Flux.just(visit1, visit2, visit3, visit4, visit5, visit6, visit7).flatMap(x -> visitRepo.insert(Mono.just(x)).log(x.toString())).subscribe();
-        });
     }
 
     private Visit buildVisit(String visitId, String visitDate, String description, String petId, String practitionerId, Status status, String billId, String customerId){
