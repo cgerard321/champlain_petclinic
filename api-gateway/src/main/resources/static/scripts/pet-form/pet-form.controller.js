@@ -69,6 +69,7 @@ angular.module('petForm')
                 "Pet Birth Date: " + formattedBirthDate + "\n" +
                 "Weight: " + self.pet.weight + " KG" + "\n" +
                 "Pet Type: " + petTypeName)) {
+
                 var data = {
                     petId: self.pet.petId,
                     name: self.pet.name,
