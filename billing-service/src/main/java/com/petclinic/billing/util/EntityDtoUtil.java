@@ -1,7 +1,7 @@
 package com.petclinic.billing.util;
 
 
-import com.petclinic.billing.businesslayer.RequestContextAdd;
+//import com.petclinic.billing.businesslayer.RequestContextAdd;
 import com.petclinic.billing.datalayer.Bill;
 import com.petclinic.billing.datalayer.BillRequestDTO;
 import com.petclinic.billing.datalayer.BillResponseDTO;
@@ -30,9 +30,9 @@ public class EntityDtoUtil {
 //        return Bill.builder()
 //                .billId(generateUUIDString())
 //                .amount(rc.getBillRequestDTO().getAmount())
-//                .visitDate(rc.getBillRequestDTO().getDate())
+//                .date(rc.getBillRequestDTO().getDate())
 //                .visitType(rc.getBillRequestDTO().getVisitType())
-//                .ownerId(rc.getOwnerResponseDTO().getOwnerId())
+//                .customerId(rc.getOwnerResponseDTO().getOwnerId())
 //                .ownerFirstName(rc.getOwnerResponseDTO().getFirstName())
 //                .ownerLastName(rc.getOwnerResponseDTO().getLastName())
 //                .vetId(rc.getVetDTO().getVetId())

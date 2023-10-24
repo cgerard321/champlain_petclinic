@@ -4,6 +4,7 @@ import com.petclinic.bffapigateway.exceptions.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -15,6 +16,8 @@ import org.webjars.NotFoundException;
 import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.Map;
+
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 
 /**
@@ -128,5 +131,14 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.FORBIDDEN)
                 .body(new HttpErrorInfo(HttpStatus.FORBIDDEN.value(),ex.getMessage()));
     }
+
+    //I have no idea why but this method kills docker and specifically
+    //the api gateway as a service crashes on docker if you have this uncommented
+//    @ExceptionHandler(value = NotFoundException.class)
+//    public ResponseEntity<HttpErrorInfo>  handleNotFoundException(NotFoundException ex) {
+//        return ResponseEntity.status(NOT_FOUND)
+//                .body(new HttpErrorInfo(NOT_FOUND.value(),ex.getMessage()));
+//
+//    }
 
 }

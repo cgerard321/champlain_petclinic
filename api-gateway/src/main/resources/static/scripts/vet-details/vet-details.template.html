@@ -53,18 +53,62 @@
                     </div>
                 </div>
                 <br>
+
                 <!-- Work Day -->
                 <div class="row gy-3">
                     <div class="col-md-12">
                         <h5 class="mb-3">Availabilities</h5>
                         <div>
                             <ul>
-                                <li ng-repeat="workday in $ctrl.vet.workday">{{ workday }}</li>
+                                <li ng-repeat="workday in $ctrl.vet.workday" ng-click="$ctrl.selectWorkday(workday)">{{ workday }} </li>
                             </ul>
                         </div>
                     </div>
                 </div>
-            </div>
+
+                <!-- Work Hours -->
+                    <table id="workHoursTable" style="display: none; border-collapse: separate; border-spacing: 10px;">
+                        <tr>
+                            <th>Hours</th>
+                        </tr>
+                        <tr>
+                            <td id="Hour_8_9">8:00-9:00</td>
+                        </tr>
+                        <tr>
+                            <td id="Hour_9_10">9:00-10:00</td>
+                        </tr>
+                        <tr>
+                            <td id="Hour_10_11">10:00-11:00</td>
+                        </tr>
+                        <tr>
+                            <td id="Hour_11_12">11:00-12:00</td>
+                        </tr>
+                        <tr>
+                            <td id="Hour_12_13">12:00-13:00</td>
+                        </tr>
+                        <tr>
+                            <td id="Hour_13_14">13:00-14:00</td>
+                        </tr>
+                        <tr>
+                            <td id="Hour_14_15">14:00-15:00</td>
+                        </tr>
+                        <tr>
+                            <td id="Hour_15_16">15:00-16:00</td>
+                        </tr>
+                        <tr>
+                            <td id="Hour_16_17">16:00-17:00</td>
+                        </tr>
+                        <tr>
+                            <td id="Hour_17_18">17:00-18:00</td>
+                        </tr>
+                        <tr>
+                            <td id="Hour_18_19">18:00-19:00</td>
+                        </tr>
+                        <tr>
+                            <td id="Hour_19_20">19:00-20:00</td>
+                        </tr>
+                    </table>
+                </div>
             <div class="col-md-6">
                 <!-- Vet Badge Image -->
                 <div class="parent">
@@ -85,7 +129,7 @@
                 <!-- Vet Profile Image -->
                 <div class="parent">
                     <img alt="Profile picture preview" src="data:image/*;base64, {{$ctrl.vetPhoto.photo}}" width="150" height="150" class="image1">
-<!--                    <img alt="" src="data:image/png;base64, {{$ctrl.PreviewImage}}" ng-show="$ctrl.PreviewImage != null" width="150" height="150" class="image2"/>-->
+                    <!--                    <img alt="" src="data:image/png;base64, {{$ctrl.PreviewImage}}" ng-show="$ctrl.PreviewImage != null" width="150" height="150" class="image2"/>-->
                 </div>
                 <!-- Edit Vet Button -->
                 <div class="row g-3">
@@ -96,6 +140,9 @@
                     </div>
                 </div>
             </div>
+
+            </div>
+
         </div>
         <hr>
         <div class="row g-5">
