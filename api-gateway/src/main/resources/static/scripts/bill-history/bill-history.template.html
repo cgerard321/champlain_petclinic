@@ -2,8 +2,8 @@
 
 <a ui-sref="billNew">
     <button class="add-bill-button btn btn-success">Add Bill</button>
-</a><br><br>
-
+</a>
+<br><br>
 
 <button type="button" class="collapsible" data-section="Paid">Open Paid</button>
 <table class="content table table-striped">
@@ -114,7 +114,7 @@
 <h3>All Bills</h3>
 <table class="table table-striped">
     <thead>
-        <tr>
+        <tr ng-repeat="bill in $ctrl.billHistory | startFrom: ($ctrl.currentPage - 1) * $ctrl.pageSize | limitTo: $ctrl.pageSize track by bill.billId">
             <td>Bill ID</td>
             <td>Owner Name</td>
             <td>Owner Details</td>
@@ -126,7 +126,6 @@
             <td>Date</td>
             <td>Details</td>
             <td>Delete</td>
-
         </tr>
     </thead>
 
@@ -156,6 +155,17 @@
         <td class="bg-white border"></td>
         <td class="bg-white border"></td>
     </tr>
+    <ul class="pagination">
+        <li ng-class="{disabled: $ctrl.currentPage === 1}">
+            <button class="btn btn-default" ng-click="$ctrl.goPreviousPage()">Previous</button>
+        </li>
+        <li class="page-item">
+            <a class="page-link text-dark" disabled>{{$ctrl.currentPageOnSite}}</a>
+        </li>
+        <li ng-class="{disabled: $ctrl.currentPage === $ctrl.totalPages}">
+            <button class="btn btn-default" ng-click="$ctrl.goNextPage()">Next</button>
+        </li>
+    </ul>
 
     <tr id="billId" ng-repeat="bill in $ctrl.billHistory | filter:$ctrl.query track by bill.billId">
     <tr ng-repeat="bill in $ctrl.billHistory | filter:search:strict">

@@ -2,16 +2,26 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
+import com.petclinic.bffapigateway.dtos.Bills.BillStatus;
+import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.awt.print.Pageable;
+import java.time.LocalDate;
+import java.util.Optional;
+
 
 @Component
+@Slf4j
 public class BillServiceClient {
 
     private final WebClient.Builder webClientBuilder;
@@ -54,6 +64,102 @@ public class BillServiceClient {
                 .uri(billServiceUrl)
                 .retrieve()
                 .bodyToFlux(BillResponseDTO.class);
+    }
+
+    //to be changed
+//    public Flux<BillResponseDTO> getAllBillsByPage(Optional<Integer> page, Optional<Integer> size) {
+//        return webClientBuilder.build().get()
+//                .uri(billServiceUrl + "/bills-pagination?page="+page.orElse(0)+"&size="+size.orElse(5))
+//                .retrieve()
+//                .bodyToFlux(BillResponseDTO.class);
+//    }
+
+    public Flux<BillResponseDTO> getAllBillsByPage(Optional<Integer> page, Optional<Integer> size, String billId, String customerId,
+                                                    String ownerFirstName, String ownerLastName, String visitType,
+                                                    String vetId, String vetFirstName, String vetLastName) {
+
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(billServiceUrl + "/bills-pagination");
+
+        builder.queryParam("page", page);
+        builder.queryParam("size",size);
+
+        // Add query parameters conditionally if they are not null or empty
+        if (billId != null && !billId.isEmpty()) {
+            builder.queryParam("billId", billId);
+        }
+        if (customerId != null && !customerId.isEmpty()) {
+            builder.queryParam("customerId", customerId);
+        }
+        if (ownerFirstName != null && !ownerFirstName.isEmpty()) {
+            builder.queryParam("ownerFirstName", ownerFirstName);
+        }
+        if (ownerLastName != null && !ownerLastName.isEmpty()) {
+            builder.queryParam("ownerLastName", ownerLastName);
+        }
+        if (visitType != null && !visitType.isEmpty()) {
+            builder.queryParam("visitType", visitType);
+        }
+        if (vetId != null && !vetId.isEmpty()) {
+            builder.queryParam("vetId", vetId);
+        }
+        if (vetFirstName != null && !vetFirstName.isEmpty()) {
+            builder.queryParam("vetFirstName", vetFirstName);
+        }
+        if (vetLastName != null && !vetLastName.isEmpty()) {
+            builder.queryParam("vetLastName", vetLastName);
+        }
+
+        return webClientBuilder.build()
+                .get()
+                .uri(builder.build().toUri())
+                .retrieve()
+                .bodyToFlux(BillResponseDTO.class);
+    }
+
+    //to be changed
+    public Mono<Long> getTotalNumberOfBills() {
+        return webClientBuilder.build().get()
+                .uri(billServiceUrl + "/bills-count")
+                .retrieve()
+                .bodyToMono(Long.class);
+    }
+
+    public Mono<Long> getTotalNumberOfBillsWithFilters(String billId, String customerId,
+                                                       String ownerFirstName, String ownerLastName, String visitType,
+                                                       String vetId, String vetFirstName, String vetLastName){
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(billServiceUrl + "/bills-filtered-count");
+
+        // Add query parameters conditionally if they are not null or empty
+        if (billId != null && !billId.isEmpty()) {
+            builder.queryParam("billId", billId);
+        }
+        if (customerId != null && !customerId.isEmpty()) {
+            builder.queryParam("customerId", customerId);
+        }
+        if (ownerFirstName != null && !ownerFirstName.isEmpty()) {
+            builder.queryParam("ownerFirstName", ownerFirstName);
+        }
+        if (ownerLastName != null && !ownerLastName.isEmpty()) {
+            builder.queryParam("ownerLastName", ownerLastName);
+        }
+        if (visitType != null && !visitType.isEmpty()) {
+            builder.queryParam("visitType", visitType);
+        }
+        if (vetId != null && !vetId.isEmpty()) {
+            builder.queryParam("vetId", vetId);
+        }
+        if (vetFirstName != null && !vetFirstName.isEmpty()) {
+            builder.queryParam("vetFirstName", vetFirstName);
+        }
+        if (vetLastName != null && !vetLastName.isEmpty()) {
+            builder.queryParam("vetLastName", vetLastName);
+        }
+
+        return webClientBuilder.build()
+                .get()
+                .uri(builder.build().toUri())
+                .retrieve()
+                .bodyToMono(Long.class);
     }
 
     public Flux<BillResponseDTO> getAllPaidBilling() {

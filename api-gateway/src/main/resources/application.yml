@@ -56,7 +56,7 @@ app:
     host: customers-service-reactive
     port: 8080
   billing-service:
-    host: billing
+    host: billing-service
     port: 8080
   auth-service:
     host: auth

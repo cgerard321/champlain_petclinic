@@ -34,7 +34,7 @@ class BillResourceIntegrationTest {
     private BillRepository repo;
 
     @Test
-    void findBillByValidBillID() {
+    void getBillByValidBillID() {
 
         Bill billEntity = buildBill();
 
@@ -55,7 +55,6 @@ class BillResourceIntegrationTest {
                 .jsonPath("$.visitType").isEqualTo(billEntity.getVisitType())
                 .jsonPath("$.customerId").isEqualTo(billEntity.getCustomerId())
                 .jsonPath("$.amount").isEqualTo(billEntity.getAmount());
-
     }
 
     @Test

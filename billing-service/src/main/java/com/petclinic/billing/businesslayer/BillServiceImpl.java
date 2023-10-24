@@ -7,9 +7,14 @@ import com.petclinic.billing.domainclientlayer.OwnerClient;
 import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.util.EntityDtoUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.time.LocalDate;
+import java.util.function.Predicate;
 
 
 @Service
@@ -33,13 +38,61 @@ public class BillServiceImpl implements BillService{
         return billRepository.findAllBillsByBillStatus(status).map(EntityDtoUtil::toBillResponseDto);
     }
 
-
     @Override
     public Flux<BillResponseDTO> GetAllBills() {
-
-        return billRepository.findAll().map(EntityDtoUtil::toBillResponseDto);
-
+        return billRepository.findAll()
+                .map(EntityDtoUtil::toBillResponseDto);
     }
+
+    @Override
+    public Flux<BillResponseDTO> getAllBillsByPage(Pageable pageable, String billId, String customerId,
+                                                   String ownerFirstName, String ownerLastName, String visitType,
+                                                   String vetId, String vetFirstName, String vetLastName) {
+        Predicate<Bill> filterCriteria = bill ->
+                (billId == null || bill.getBillId().equals(billId)) &&
+                        (customerId == null || bill.getCustomerId().equals(customerId)) &&
+                        (ownerFirstName == null || bill.getOwnerFirstName().equals(ownerFirstName)) &&
+                        (ownerLastName == null || bill.getOwnerLastName().equals(ownerLastName)) &&
+                        (visitType == null || bill.getVisitType().equals(visitType)) &&
+                        (vetId == null || bill.getVetId().equals(vetId)) &&
+                        (vetFirstName == null || bill.getVetFirstName().equals(vetFirstName)) &&
+                        (vetLastName == null || bill.getVetLastName().equals(vetLastName));
+
+
+        if(billId == null && customerId == null && ownerFirstName == null && ownerLastName == null && visitType == null
+                && vetId == null && vetFirstName == null && vetLastName == null){
+            return billRepository.findAll()
+                    .map(EntityDtoUtil::toBillResponseDto)
+                    .skip(pageable.getPageNumber() * pageable.getPageSize())
+                    .take(pageable.getPageSize());
+        } else {
+            return billRepository.findAll()
+                    .filter(filterCriteria)
+                    .map(EntityDtoUtil::toBillResponseDto)
+                    .skip(pageable.getPageNumber() * pageable.getPageSize())
+                    .take(pageable.getPageSize());
+        }
+    }
+
+    @Override
+    public Mono<Long> getNumberOfBillsWithFilters(String billId, String customerId, String ownerFirstName, String ownerLastName,
+                                                  String visitType, String vetId, String vetFirstName, String vetLastName) {
+        Predicate<Bill> filterCriteria = bill ->
+                (billId == null || bill.getBillId().equals(billId)) &&
+                        (customerId == null || bill.getCustomerId().equals(customerId)) &&
+                        (ownerFirstName == null || bill.getOwnerFirstName().equals(ownerFirstName)) &&
+                        (ownerLastName == null || bill.getOwnerLastName().equals(ownerLastName)) &&
+                        (visitType == null || bill.getVisitType().equals(visitType)) &&
+                        (vetId == null || bill.getVetId().equals(vetId)) &&
+                        (vetFirstName == null || bill.getVetFirstName().equals(vetFirstName)) &&
+                        (vetLastName == null || bill.getVetLastName().equals(vetLastName));
+
+        return billRepository.findAll()
+                .filter(filterCriteria)
+                .map(EntityDtoUtil::toBillResponseDto)
+                .count();
+    }
+
 
     @Override
     public Mono<BillResponseDTO> CreateBill(Mono<BillRequestDTO> billRequestDTO) {
@@ -53,7 +106,7 @@ public class BillServiceImpl implements BillService{
                     .doOnNext(e -> e.setBillId(EntityDtoUtil.generateUUIDString()))
                     .flatMap(billRepository::insert)
                     .map(EntityDtoUtil::toBillResponseDto);
-        }
+    }
 
 
     @Override

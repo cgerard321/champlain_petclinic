@@ -1,16 +1,212 @@
 'use strict';
 
-
 angular.module('billHistory')
-    .controller('BillHistoryController', ['$http','$scope', function ($http,$scope) {
-        let self = this;
-        self.billHistory = []
-        self.paidBills = []
-        self.unpaidBills = []
-        self.overdueBills = []
+    .controller('BillHistoryController', ['$http','$stateParams', '$scope', '$state', function ($http,$stateParams, $scope, $state) {
+        var vm = this;
+        vm.billHistory = []
+        vm.paidBills = []
+        vm.unpaidBills = []
+        vm.overdueBills = []
+
+        // Pagination properties
+        vm.currentPage = $stateParams.page || 0;
+        vm.pageSize = $stateParams.size || 10; // Number of items per page
+        vm.currentPageOnSite = parseInt(vm.currentPage) + 1;
+
+        vm.billId = null;
+        vm.customerId = null;
+        vm.ownerFirstName = null;
+        vm.ownerLastName = null;
+        vm.visitType = null;
+        vm.vetId = null;
+        vm.vetFirstName = null;
+        vm.vetLastName = null;
+
+        vm.selectedSize = null;
+        vm.searchActive = false;
+
+        vm.baseURL = "api/gateway/bills/bills-pagination";
+        vm.baseURLforTotalNumberOfBillsByFiltering = "api/gateway/bills/bills-filtered-count"
+
+        loadDefaultData();
+
+            // Pageable pageable,
+            // String billId,
+            // String customerId,
+            // String ownerFirstName,
+            // String ownerLastName,
+            // String visitType,
+            // String vetId,
+            // String vetFirstName,
+            // String vetLastName
+
+        function loadTotalItemForDefaultData() {
+
+            return $http.get('api/gateway/bills/bills-count')
+                .then(function (resp) {
+                    console.log(resp);
+                    return resp.data;
+                });
+        }
+
+        function loadTotalItemForSearchData(searchURL) {
+            return $http.get(searchURL)
+                .then(function (resp) {
+                    console.log(resp);
+                    return resp.data;
+                });
+        }
+
+        function loadDefaultData() {
+            // $state.transitionTo('bills', { page: vm.currentPage, size: vm.pageSize}, { notify: false });
+
+            if(!vm.searchActive){
+                loadTotalItemForDefaultData().then(function (totalItems) {
+                    vm.totalItems = totalItems;
+                    vm.totalPages = Math.ceil(vm.totalItems / parseInt(vm.pageSize));
+                    $http.get('api/gateway/bills/bills-pagination?page=' + vm.currentPage + '&size=' + vm.pageSize)
+                        .then(function (resp) {
+                            vm.billHistory = resp.data;
+                            console.log(resp);
+                        });
+
+                    updateCurrentPageOnSite();
+                });
+            }
+        }
 
 
-        self.owners = [
+        vm.searchBillsByPaginationAndFilters = function (currentPage = 0, prevOrNextPressed = false) {
+            // Collect search parameters
+            vm.selectedSize = document.getElementById("sizeInput").value;
+
+            if(!prevOrNextPressed) {
+                vm.billId = document.getElementById("billIdInput").value;
+                vm.customerId = document.getElementById("customerIdInput").value;
+                vm.ownerFirstName = document.getElementById("ownerFirstNameInput").value;
+                vm.ownerLastName = document.getElementById("ownerLastNameInput").value;
+                vm.visitType = document.getElementById("visitTypeInput").value;
+                vm.vetId = document.getElementById("vetIdInput").value;
+                vm.vetFirstName = document.getElementById("vetFirstNameInput").value;
+                vm.vetLastName = document.getElementById("vetLastNameInput").value;
+
+                // Check if all input fields are empty
+                // if (checkIfAllInputFieldsAreEmptyOrNull(vm.billId, vm.customerId, vm.ownerFirstName, vm.ownerLastName,
+                //     vm.visitType, vm.vetId, vm.vetFirstName, vm.vetLastName, vm.selectedSize)) {
+                //     alert("Oops! It seems like you forgot to enter any filter criteria. Please provide some filter input to continue.");
+                //     return;
+                // }
+            }
+
+
+
+            vm.searchActive = true;
+
+            // Construct the search URL
+            var searchURL = vm.baseURL + "?page=" + currentPage.toString();
+            var loadTotalNumberOfDataURL  = vm.baseURLforTotalNumberOfBillsByFiltering + "?";
+
+            if (vm.selectedSize) {
+                searchURL += "&size=" + vm.selectedSize;
+                vm.pageSize = vm.selectedSize
+            } else {
+                searchURL += "&size=" + vm.pageSize;
+            }
+
+            if (vm.billId) {
+                searchURL += "&billId=" + vm.billId;
+                loadTotalNumberOfDataURL += "&billId=" + vm.billId;
+            }
+
+            if (vm.customerId) {
+                searchURL += "&customerId=" + vm.customerId;
+                loadTotalNumberOfDataURL += "&customerId=" + vm.customerId;
+            }
+
+            if (vm.ownerFirstName) {
+                searchURL += "&ownerFirstName=" + vm.ownerFirstName;
+                loadTotalNumberOfDataURL += "&ownerFirstName=" + vm.ownerFirstName;
+            }
+
+            if (vm.ownerLastName) {
+                searchURL += "&ownerLastName=" + vm.ownerLastName;
+                loadTotalNumberOfDataURL += "&ownerLastName=" + vm.ownerLastName;
+            }
+
+            if (vm.visitType) {
+                searchURL += "&visitType=" + vm.visitType;
+                loadTotalNumberOfDataURL += "&visitType=" + vm.visitType;
+            }
+
+            if (vm.vetId) {
+                searchURL += "&vetId=" + vm.vetId;
+                loadTotalNumberOfDataURL += "&vetId=" + vm.vetId;
+            }
+
+            if (vm.vetFirstName) {
+                searchURL += "&vetFirstName=" + vm.vetFirstName;
+                loadTotalNumberOfDataURL += "&vetFirstName=" + vm.vetFirstName;
+            }
+
+            if (vm.vetLastName) {
+                searchURL += "&vetLastName=" + vm.vetLastName;
+                loadTotalNumberOfDataURL += "&vetLastName=" + vm.vetLastName;
+            }
+
+            console.log(searchURL);
+
+            loadTotalItemForSearchData(loadTotalNumberOfDataURL).then(function (totalItems) {
+                vm.totalItems = totalItems;
+                vm.totalPages = Math.ceil(vm.totalItems / parseInt(vm.pageSize));
+            });
+
+            // Rest of your data loading logic
+            $http.get(searchURL)
+                .then(function (resp) {
+                    vm.billHistory = resp.data;
+                    console.log(resp);
+                });
+
+            updateCurrentPageOnSite();
+        }
+
+        vm.goNextPage = function () {
+            if (parseInt(vm.currentPage) + 1 < vm.totalPages) {
+
+                var currentPageInt = parseInt(vm.currentPage) + 1
+                vm.currentPage = currentPageInt.toString();
+                updateCurrentPageOnSite();
+
+                if(vm.searchActive){
+                    vm.searchBillsByPaginationAndFilters(currentPageInt,true)
+                } else {
+                    loadDefaultData();
+                }
+
+
+            }
+        }
+
+        vm.goPreviousPage = function () {
+            if (vm.currentPage - 1 >= 0) {
+                var currentPageInt = parseInt(vm.currentPage) - 1
+                vm.currentPage = currentPageInt.toString();
+                updateCurrentPageOnSite();
+
+                if(vm.searchActive){
+                    vm.searchBillsByPaginationAndFilters(currentPageInt,true)
+                } else {
+                    loadDefaultData();
+                }
+            }
+        }
+
+        function updateCurrentPageOnSite() {
+            vm.currentPageOnSite = parseInt(vm.currentPage) + 1;
+            console.log(vm.currentPage);
+        }
+
+        vm.owners = [
             { ownerId: '1', firstName: 'George', lastName: 'Franklin' },
             { ownerId: '2', firstName: 'Betty', lastName: 'Davis' },
             { ownerId: '3', firstName: 'Eduardo', lastName: 'Rodriguez' },
@@ -23,7 +219,7 @@ angular.module('billHistory')
             { ownerId: '10', firstName: 'Carlos', lastName: 'Esteban' }
         ];
 
-        self.ownersUUID = [
+        vm.ownersUUID = [
             { ownerId: 'f470653d-05c5-4c45-b7a0-7d70f003d2ac', firstName: 'George', lastName: 'Franklin' },
             { ownerId: 'e6c7398e-8ac4-4e10-9ee0-03ef33f0361a', firstName: 'Betty', lastName: 'Davis' },
             { ownerId: '3f59dca2-903e-495c-90c3-7f4d01f3a2aa', firstName: 'Eduardo', lastName: 'Rodriguez' },
@@ -38,20 +234,20 @@ angular.module('billHistory')
 
 
         $http.get('api/gateway/vets').then(function (resp) {
-            self.vetList = resp.data;
+            vm.vetList = resp.data;
             arr = resp.data;
             // console.log(resp)
         });
 
         $http.get('api/gateway/owners').then(function (owners) {
-            self.ownersInfoArray = owners.data;
-            // console.log(self.ownersInfoArray)
-            self.ownersInfoArray.forEach(function(owner) {
+            vm.ownersInfoArray = owners.data;
+            // console.log(vm.ownersInfoArray)
+            vm.ownersInfoArray.forEach(function(owner) {
                 console.log(owner.ownerId);
             });
         });
-        // self.getOwnerUUIDByName = function(customerId) {
-        //     const owner = self.ownersInfoArray.find(function(owner) {
+        // vm.getOwnerUUIDByName = function(customerId) {
+        //     const owner = vm.ownersInfoArray.find(function(owner) {
         //         return owner.firstName === firstName && owner.lastName === lastName;
         //     });
         //
@@ -64,13 +260,13 @@ angular.module('billHistory')
 
         $scope.getOwnerUUIDByCustomerId = function(customerId) {
             let foundOwner;
-            // Iterate through self.owners to find a matching customerId
-            self.owners.forEach(function(owner) {
+            // Iterate through vm.owners to find a matching customerId
+            vm.owners.forEach(function(owner) {
                 if (owner.ownerId === customerId.toString()) {
                     foundOwner = owner;
                 }
             });
-            self.ownersUUID.forEach(function(owner) {
+            vm.ownersUUID.forEach(function(owner) {
                 if (owner.ownerId === customerId.toString()) {
                     foundOwner = owner;
                 }
@@ -80,7 +276,7 @@ angular.module('billHistory')
                 const firstName = foundOwner.firstName;
                 const lastName = foundOwner.lastName;
 
-                const ownerInfo = self.ownersInfoArray.find(function(owner) {
+                const ownerInfo = vm.ownersInfoArray.find(function(owner) {
                     return owner.firstName === firstName && owner.lastName === lastName;
                 });
                 if (ownerInfo) {
@@ -94,35 +290,35 @@ angular.module('billHistory')
 
 
 
-        self.getOwnerInfoByCustomerId = function (customerId) {
-            const owner = self.ownerIdToInfoMap[customerId];
+        vm.getOwnerInfoByCustomerId = function (customerId) {
+            const owner = vm.ownerIdToInfoMap[customerId];
             return owner || {};
         };
 
-        self.getOwnerFullName = function (customerId) {
-            const owner = self.ownerIdToInfoMap[customerId];
+        vm.getOwnerFullName = function (customerId) {
+            const owner = vm.ownerIdToInfoMap[customerId];
             if (owner) {
                 return owner.firstName + ' ' + owner.lastName;
             }
             return 'Unknown Owner';
         };
 
-        self.customerNameMap = {};
-        self.customerNameMap2 = {};
+        vm.customerNameMap = {};
+        vm.customerNameMap2 = {};
 
-        self.owners.forEach(function (customer) {
+        vm.owners.forEach(function (customer) {
             // The customer's ownerId is used as the key, and their full name as the value
-            self.customerNameMap[customer.ownerId] = customer.firstName + ' ' + customer.lastName;
+            vm.customerNameMap[customer.ownerId] = customer.firstName + ' ' + customer.lastName;
         });
 
-        self.ownersUUID.forEach(function (customer) {
-            self.customerNameMap2[customer.ownerId] = customer.firstName + ' ' + customer.lastName;
+        vm.ownersUUID.forEach(function (customer) {
+            vm.customerNameMap2[customer.ownerId] = customer.firstName + ' ' + customer.lastName;
         });
 
         let eventSource = new EventSource("api/gateway/bills")
         eventSource.addEventListener('message',function (event){
             $scope.$apply(function (){
-                self.billHistory.push(JSON.parse(event.data))
+                vm.billHistory.push(JSON.parse(event.data))
             })
         })
         eventSource.onerror = (error)=>{
@@ -137,7 +333,7 @@ angular.module('billHistory')
         let eventSourcePaid = new EventSource("api/gateway/bills/paid")
         eventSourcePaid.addEventListener('message',function (event){
             $scope.$apply(function (){
-                self.paidBills.push(JSON.parse(event.data))
+                vm.paidBills.push(JSON.parse(event.data))
             })
         })
 
@@ -153,7 +349,7 @@ angular.module('billHistory')
         let eventSourceUnpaid = new EventSource("api/gateway/bills/unpaid")
         eventSourceUnpaid.addEventListener('message',function (event){
             $scope.$apply(function (){
-                self.unpaidBills.push(JSON.parse(event.data))
+                vm.unpaidBills.push(JSON.parse(event.data))
             })
         })
 
@@ -169,7 +365,7 @@ angular.module('billHistory')
         let eventSourceOverdue = new EventSource("api/gateway/bills/overdue")
         eventSourceOverdue.addEventListener('message',function (event){
             $scope.$apply(function (){
-                self.overdueBills.push(JSON.parse(event.data))
+                vm.overdueBills.push(JSON.parse(event.data))
             })
         })
 
@@ -182,12 +378,12 @@ angular.module('billHistory')
             }
         }
 
-        // Assuming that self.owners is an array of owner objects
-        self.getOwnerById = function(ownerId) {
+        // Assuming that vm.owners is an array of owner objects
+        vm.getOwnerById = function(ownerId) {
             // Find and return the owner with the given ownerId
-            for (var i = 0; i < self.owners.length; i++) {
-                if (self.owners[i].ownerId === ownerId) {
-                    return self.owners[i];
+            for (var i = 0; i < vm.owners.length; i++) {
+                if (vm.owners[i].ownerId === ownerId) {
+                    return vm.owners[i];
                 }
             }
             return null; // Handle if owner not found
@@ -195,10 +391,10 @@ angular.module('billHistory')
 
 
         $scope.getVetDetails = function(vetId) {
-            const vet = self.vetList.find(function(vet) {
+            const vet = vm.vetList.find(function(vet) {
                 return vet.vetBillId === vetId;
             });
-            const vet2 = self.vetList.find(function(vet) {
+            const vet2 = vm.vetList.find(function(vet) {
                 return vet.vetId === vetId;
             });
             if (vet) {
@@ -210,20 +406,9 @@ angular.module('billHistory')
             }
         };
 
-        // $scope.getCustomerDetails = function(customerId) {
-        //     const customer = self.owners.find(function(customer) {
-        //         return customer.ownerId === customerId;
-        //     });
-        //
-        //     if (customer) {
-        //         return customer.firstName + ' ' + customer.lastName;
-        //     } else {
-        //         return 'Unknown Customer';
-        //     }
-        // }
         $scope.getCustomerDetails = function(customerId) {
-            const customerName = self.customerNameMap[customerId];
-            const customerName2 = self.customerNameMap2[customerId];
+            const customerName = vm.customerNameMap[customerId];
+            const customerName2 = vm.customerNameMap2[customerId];
             if (customerName) {
                 return customerName;
             } else if (customerName2) {
@@ -246,7 +431,7 @@ angular.module('billHistory')
                     console.log(response, 'res');
                     //refresh list
                     $http.get('api/gateway/bills').then(function (resp) {
-                        self.billHistory = resp.data;
+                        vm.billHistory = resp.data;
                         arr = resp.data;
                     });
                 }
@@ -274,7 +459,7 @@ angular.module('billHistory')
                     //refresh list
                     location.reload()
                     $http.get('api/gateway/bills').then(function (resp) {
-                        self.billHistory = resp.data;
+                        vm.billHistory = resp.data;
                         arr = resp.data;
                     });
                 }

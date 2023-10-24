@@ -5,6 +5,7 @@ import com.petclinic.billing.datalayer.BillRequestDTO;
 import com.petclinic.billing.datalayer.BillResponseDTO;
 import com.petclinic.billing.datalayer.BillStatus;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.MediaType;
@@ -12,6 +13,8 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import javax.validation.Valid;
+import java.time.LocalDate;
+import java.util.Optional;
 
 @RestController
 @Slf4j
@@ -41,6 +44,54 @@ public class BillResource {
         return SERVICE.GetAllBills();
     }
 
+    //to be changed
+//    @GetMapping("/bills-pagination")
+//    public Flux<BillResponseDTO> getAllBillsByPage(@RequestParam Optional<Integer> page,
+//                                                   @RequestParam Optional<Integer> size,
+//                                                   ) {
+//        return SERVICE.getAllBillsByPage(
+//                PageRequest.of(page.orElse(0),size.orElse(5)));
+//    }
+//
+    //to be changed
+    @GetMapping("/bills/bills-count")
+    public Mono<ResponseEntity<Long>> getTotalNumberOfBills(){
+        return SERVICE.GetAllBills().count()
+                .map(response -> ResponseEntity.status(HttpStatus.OK).body(response));
+    }
+
+    @GetMapping("/bills/bills-pagination")
+    public Flux<BillResponseDTO> getAllBillsByPage(
+            @RequestParam Optional<Integer> page,
+            @RequestParam Optional<Integer> size,
+            @RequestParam(required = false) String billId,
+            @RequestParam(required = false) String customerId,
+            @RequestParam(required = false) String ownerFirstName,
+            @RequestParam(required = false) String ownerLastName,
+            @RequestParam(required = false) String visitType,
+            @RequestParam(required = false) String vetId,
+            @RequestParam(required = false) String vetFirstName,
+            @RequestParam(required = false) String vetLastName
+    ){
+        return SERVICE.getAllBillsByPage(
+                PageRequest.of(page.orElse(0),size.orElse(5)), billId, customerId, ownerFirstName, ownerLastName,
+                visitType, vetId, vetFirstName, vetLastName);
+    }
+
+    @GetMapping("/bills/bills-filtered-count")
+    public Mono<Long> getNumberOfBillsWithFilters(@RequestParam(required = false) String billId,
+                                                        @RequestParam(required = false) String customerId,
+                                                        @RequestParam(required = false) String ownerFirstName,
+                                                        @RequestParam(required = false) String ownerLastName,
+                                                        @RequestParam(required = false) String visitType,
+                                                        @RequestParam(required = false) String vetId,
+                                                        @RequestParam(required = false) String vetFirstName,
+                                                        @RequestParam(required = false) String vetLastName
+    ){
+
+        return SERVICE.getNumberOfBillsWithFilters(billId, customerId, ownerFirstName, ownerLastName, visitType, vetId,
+                vetFirstName, vetLastName);
+    }
 
 
     @GetMapping(value = "/bills/paid", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
@@ -103,6 +154,5 @@ public class BillResource {
     public Flux<Void> deleteBillsByCustomerId (@PathVariable("customerId") String customerId){
         return SERVICE.DeleteBillsByCustomerId(customerId);
     }
-
 
 }
