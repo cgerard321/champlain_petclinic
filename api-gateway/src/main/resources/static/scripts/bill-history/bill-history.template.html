@@ -28,12 +28,7 @@
     <tr ng-repeat="paidBill in $ctrl.paidBills | filter:search:strict">
         <td><a href="http://localhost:8080/#!/bills/details/{{paidBill.billId}}/owner/{{paidBill.customerId}}">{{paidBill.billId}}</a></td>
         <td>{{ getCustomerDetails(paidBill.customerId) }}</td>
-<<<<<<< HEAD
     <td><a href="http://localhost:8080/#!/owners/details/{{ getOwnerUUIDByCustomerId(paidBill.customerId) }}">Owner details</a></td>
-        <td>{{paidBill.vetId}}</td>
-=======
-        <td><a href="http://localhost:8080/#!/owners/details/{{paidBill.customerId}}">Owner details</a></td>
->>>>>>> c07f87c8 (removed vet and owner id from table display)
         <td>{{ getVetDetails(paidBill.vetId) }}</td>
         <td>{{paidBill.visitType}}</td>
         <td>{{paidBill.amount}}</td>
@@ -68,12 +63,7 @@
     <tr ng-repeat="unpaidBill in $ctrl.unpaidBills | filter:search:strict">
         <td><a href="http://localhost:8080/#!/bills/details/{{unpaidBill.billId}}/owner/{{unpaidBill.customerId}}">{{unpaidBill.billId}}</a></td>
         <td>{{ getCustomerDetails(unpaidBill.customerId) }}</td>
-<<<<<<< HEAD
     <td><a href="http://localhost:8080/#!/owners/details/{{ getOwnerUUIDByCustomerId(unpaidBill.customerId) }}">Owner details</a></td>
-        <td>{{unpaidBill.vetId}}</td>
-=======
-        <td><a href="http://localhost:8080/#!/owners/details/{{unpaidBill.customerId}}">Owner details</a></td>
->>>>>>> c07f87c8 (removed vet and owner id from table display)
         <td>{{ getVetDetails(unpaidBill.vetId) }}</td>
         <td>{{unpaidBill.visitType}}</td>
         <td>{{unpaidBill.amount}}</td>
@@ -109,12 +99,7 @@
     <tr ng-repeat="overdueBill in $ctrl.overdueBills | filter:search:strict">
         <td><a href="http://localhost:8080/#!/bills/details/{{overdueBill.billId}}/owner/{{overdueBill.customerId}}">{{overdueBill.billId}}</a></td>
         <td>{{ getCustomerDetails(overdueBill.customerId) }}</td>
-<<<<<<< HEAD
     <td><a href="http://localhost:8080/#!/owners/details/{{ getOwnerUUIDByCustomerId(overdueBill.customerId) }}">Owner details</a></td>
-        <td>{{overdueBill.vetId}}</td>
-=======
-        <td><a href="http://localhost:8080/#!/owners/details/{{overdueBill.customerId}}">Owner details</a></td>
->>>>>>> c07f87c8 (removed vet and owner id from table display)
         <td>{{ getVetDetails(overdueBill.vetId) }}</td>
         <td>{{overdueBill.visitType}}</td>
         <td>{{overdueBill.amount}}</td>
@@ -148,10 +133,11 @@
     <tbody class="bg-white border">
     <tr>
         <td class="bg-white border" ></td>
-        <td class="bg-white border"></td>
-        <td class="bg-white border"></td>
         <td class="bg-white border">
+         <!--   <input ng-model="$ctrl.query.bill.owner.firstName" placeholder="Filter by Customer Name"> -->
         </td>
+        <td class="bg-white border"></td>
+        <td class="bg-white border"></td>
         <td class="bg-white border">
             <input ng-model="search.visitType" placeholder="Filter by visit type">
         </td>
@@ -174,13 +160,11 @@
     <tr id="billId" ng-repeat="bill in $ctrl.billHistory | filter:$ctrl.query track by bill.billId">
     <tr ng-repeat="bill in $ctrl.billHistory | filter:search:strict">
     <td><a href="http://localhost:8080/#!/bills/details/{{bill.billId}}/owner/{{bill.customerId}}">{{bill.billId}}</a></td>
-        <td>{{bill.customerId}}</td>
         <td>{{ getCustomerDetails(bill.customerId) }}</td>
 
     <td><a href="http://localhost:8080/#!/owners/details/{{ getOwnerUUIDByCustomerId(bill.customerId) }}">Owner details</a></td>
 
 <!--    <td><a href="http://localhost:8080/#!/owners/details/{{bill.customerId}}">Owner details</a></td>-->
-        <td>{{bill.vetId}}</td>
     <td>{{ getVetDetails(bill.vetId) }}</td>
         <td>{{bill.visitType}}</td>
         <td>{{bill.amount}}</td>
@@ -194,9 +178,6 @@
 </table>
 
 <a class="btn btn-danger" href="javascript:void(0)" ng-click="deleteAllBills()">Delete All Bills</a>
-<!--<a ui-sref="deleteAllBills">-->
-<!--    <button class="delete-bundle-button btn btn-success">Delete All Bills</button>-->
-<!--</a>-->
 
 <style>
     .content {
