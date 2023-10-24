@@ -22,8 +22,8 @@ app:
     host: localhost
     port: 7002
   customers-service:
-    host: localhost
-    port: 7003
+    host: customers-service-reactive
+    port: 8090
 ---
 spring:
   config:
@@ -50,26 +50,25 @@ spring:
       username: root
       password: password
       authentication-database: admin
-#server.port: 8080
-#app:
-#  vet-service:
-#    host: localhost
-#    port: 8080
-#  customers-service:
-#    host: localhost
-#    port: 8080
-#
-#logging:
-#  level:
-#    root: INFO
-#    com.petclinic: DEBUG
+server.port: 8080
+app:
+  vet-service:
+    host: vet-service
+    port: 8080
+  customers-service:
+    host: customers-service-reactive
+    port: 8080
+logging:
+  level:
+    root: INFO
+    com.petclinic: DEBUG
 
-#server:
-#  error:
-#    include-message: always
+server:
+  error:
+    include-message: always
 
-#    org.hibernate.SQL: DEBUG
-#    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
 
 #---
 #spring.profiles: h2

@@ -3,6 +3,8 @@ package com.petclinic.billing.businesslayer;
 import com.petclinic.billing.datalayer.*;
 //import com.petclinic.billing.domainclientlayer.OwnerClient;
 //import com.petclinic.billing.domainclientlayer.VetClient;
+import com.petclinic.billing.domainclientlayer.OwnerClient;
+import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.util.EntityDtoUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,8 +17,8 @@ import reactor.core.publisher.Mono;
 public class BillServiceImpl implements BillService{
 
     private final BillRepository billRepository;
-//    private final VetClient vetClient;
-//    private final OwnerClient ownerClient;
+    private final VetClient vetClient;
+    private final OwnerClient ownerClient;
 
     @Override
     public Mono<BillResponseDTO> getBillByBillId(String billUUID) {
@@ -113,13 +115,13 @@ public class BillServiceImpl implements BillService{
 
 //    private Mono<RequestContextAdd> vetRequestResponse(RequestContextAdd rc) {
 //        return
-//                this.vetClient.getVetByVetId(rc.getVetDTO().getVetId())
+//                this.vetClient.getVetByVetId(rc.getBillRequestDTO().getVetId())
 //                        .doOnNext(rc::setVetDTO)
 //                        .thenReturn(rc);
 //    }
 //    private Mono<RequestContextAdd> ownerRequestResponse(RequestContextAdd rc) {
 //        return
-//                this.ownerClient.getOwnerByOwnerId(rc.getOwnerResponseDTO().getOwnerId())
+//                this.ownerClient.getOwnerByOwnerId(rc.getBillRequestDTO().getCustomerId())
 //                        .doOnNext(rc::setOwnerResponseDTO)
 //                        .thenReturn(rc);
 //    }
