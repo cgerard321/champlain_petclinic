@@ -23,8 +23,8 @@ app:
     host: localhost
     port: 7002
   customers-service:
-    host: customers-service-reactive
-    port: 8090
+    host: localhost
+    port: 7003
 ---
 spring:
   config:

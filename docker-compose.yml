@@ -61,6 +61,7 @@ services:
         environment:
             - SPRING_PROFILES_ACTIVE=docker
         depends_on:
+            - billing-service
             - customers-service-reactive
             - vet-service
             - visits-service-new
