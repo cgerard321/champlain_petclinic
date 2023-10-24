@@ -5,8 +5,10 @@ angular.module('billHistory', ['ui.router'])
         $stateProvider
             .state('bills', {
                 parent: 'app',
-                url: '/bills-pagination?page&size',
-                template: '<bill-history></bill-history>'
+                url: '/bills/bills-pagination?page&size&billId&customerId&customerFirstName&customerLastName',
+                template: '<bill-history></bill-history>',
+                controller: 'BillHistoryController',
+                controllerAs: 'vm'
             })
             .state('deleteBill', {
                 parent: 'app',
@@ -18,12 +20,8 @@ angular.module('billHistory', ['ui.router'])
                 parent: 'app',
                 url: '/bills/deleteAllBills',
                 template: '<bill-history></bill-history>'
-            //     controller: 'BillHistoryController',
-            //     controllerAs: 'self'
-            // 
             })
     }]);
-
 
 
 var expectedOwnerId = function (expectedOwnerId, key) {

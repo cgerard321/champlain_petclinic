@@ -159,17 +159,11 @@
         <li ng-class="{disabled: $ctrl.currentPage === 1}">
             <button class="btn btn-default" ng-click="$ctrl.goPreviousPage()">Previous</button>
         </li>
-        <li ng-class="{disabled: $ctrl.currentPage === 1}">
-            <button class="btn btn-default" ng-click="$ctrl.setPage(1)">First</button>
-        </li>
-        <li ng-repeat="page in $ctrl.pages" ng-class="{active: $ctrl.currentPageOnSite(page)}">
-            <button class="btn btn-default" ng-click="$ctrl.setPage(page)">{{ page }}</button>
+        <li class="page-item">
+            <a class="page-link text-dark" disabled>{{$ctrl.currentPageOnSite}}</a>
         </li>
         <li ng-class="{disabled: $ctrl.currentPage === $ctrl.totalPages}">
             <button class="btn btn-default" ng-click="$ctrl.goNextPage()">Next</button>
-        </li>
-        <li ng-class="{disabled: $ctrl.currentPage === $ctrl.totalPages}">
-            <button class="btn btn-default" ng-click="$ctrl.setPage($ctrl.totalPages)">Last</button>
         </li>
     </ul>
 

@@ -5,6 +5,7 @@ import com.petclinic.bffapigateway.domainclientlayer.*;
 import com.petclinic.bffapigateway.dtos.Auth.*;
 import com.petclinic.bffapigateway.dtos.Bills.BillRequestDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
+import com.petclinic.bffapigateway.dtos.Bills.BillStatus;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.*;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
 import java.util.Map;
 import java.awt.print.Pageable;
 import java.util.Optional;
@@ -84,8 +86,16 @@ public class BFFApiGatewayController {
 
     //to be changed
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "/bills-pagination", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Flux<BillResponseDTO> getAllBillingByPage(@RequestParam Optional<Integer> page, @RequestParam Optional<Integer> size) {
+    @GetMapping(value = "bills/bills-pagination", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<BillResponseDTO> getAllBillingByPage(@RequestParam Optional<Integer> page, @RequestParam Optional<Integer> size,
+                                                     @RequestParam(required = false) String billId,
+                                                     @RequestParam(required = false) String customerId,
+                                                     @RequestParam(required = false) String ownerFirstName,
+                                                     @RequestParam(required = false) String ownerLastName,
+                                                     @RequestParam(required = false) String visitType,
+                                                     @RequestParam(required = false) String vetId,
+                                                     @RequestParam(required = false) String vetFirstName,
+                                                     @RequestParam(required = false) String vetLastName) {
         if(page.isEmpty()){
             page = Optional.of(0);
         }
@@ -94,17 +104,32 @@ public class BFFApiGatewayController {
             size = Optional.of(5);
         }
 
-        return billServiceClient.getAllBillsByPage(page, size);
+        return billServiceClient.getAllBillsByPage(page, size, billId, customerId, ownerFirstName, ownerLastName, visitType,
+                vetId, vetFirstName, vetLastName);
     }
 
     //to be changed
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
-    @GetMapping(value = "/bills-count")
+    @GetMapping(value = "bills/bills-count")
     public Mono<Long> getTotalNumberOfBills(){
         return billServiceClient.getTotalNumberOfBills();
     }
 
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
+    @GetMapping(value = "bills/bills-filtered-count")
+    public Mono<Long> getTotalNumberOfBillsWithFilters (@RequestParam(required = false) String billId,
+                                                        @RequestParam(required = false) String customerId,
+                                                        @RequestParam(required = false) String ownerFirstName,
+                                                        @RequestParam(required = false) String ownerLastName,
+                                                        @RequestParam(required = false) String visitType,
+                                                        @RequestParam(required = false) String vetId,
+                                                        @RequestParam(required = false) String vetFirstName,
+                                                        @RequestParam(required = false) String vetLastName)
+    {
+        return billServiceClient.getTotalNumberOfBillsWithFilters(billId, customerId, ownerFirstName, ownerLastName, visitType,
+                vetId, vetFirstName, vetLastName);
+    }
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})

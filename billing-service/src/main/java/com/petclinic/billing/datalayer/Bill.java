@@ -6,7 +6,7 @@ import org.springframework.data.annotation.Id;
 import java.time.LocalDate;
 
 @Data
-@ToString
+@Getter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor

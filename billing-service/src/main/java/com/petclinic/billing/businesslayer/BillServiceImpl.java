@@ -13,6 +13,9 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
+import java.util.function.Predicate;
+
 
 @Service
 @RequiredArgsConstructor
@@ -41,19 +44,53 @@ public class BillServiceImpl implements BillService{
                 .map(EntityDtoUtil::toBillResponseDto);
     }
 
-    //to be changed
     @Override
-    public Flux<BillResponseDTO> getAllBillsByPage(Pageable pageable) {
-        return billRepository.findAll()
-                .map(EntityDtoUtil::toBillResponseDto)
-                .skip((long) pageable.getPageNumber() * pageable.getPageSize())
-                .take(pageable.getPageSize());
+    public Flux<BillResponseDTO> getAllBillsByPage(Pageable pageable, String billId, String customerId,
+                                                   String ownerFirstName, String ownerLastName, String visitType,
+                                                   String vetId, String vetFirstName, String vetLastName) {
+        Predicate<Bill> filterCriteria = bill ->
+                (billId == null || bill.getBillId().equals(billId)) &&
+                        (customerId == null || bill.getCustomerId().equals(customerId)) &&
+                        (ownerFirstName == null || bill.getOwnerFirstName().equals(ownerFirstName)) &&
+                        (ownerLastName == null || bill.getOwnerLastName().equals(ownerLastName)) &&
+                        (visitType == null || bill.getVisitType().equals(visitType)) &&
+                        (vetId == null || bill.getVetId().equals(vetId)) &&
+                        (vetFirstName == null || bill.getVetFirstName().equals(vetFirstName)) &&
+                        (vetLastName == null || bill.getVetLastName().equals(vetLastName));
+
+
+        if(billId == null && customerId == null && ownerFirstName == null && ownerLastName == null && visitType == null
+                && vetId == null && vetFirstName == null && vetLastName == null){
+            return billRepository.findAll()
+                    .map(EntityDtoUtil::toBillResponseDto)
+                    .skip(pageable.getPageNumber() * pageable.getPageSize())
+                    .take(pageable.getPageSize());
+        } else {
+            return billRepository.findAll()
+                    .filter(filterCriteria)
+                    .map(EntityDtoUtil::toBillResponseDto)
+                    .skip(pageable.getPageNumber() * pageable.getPageSize())
+                    .take(pageable.getPageSize());
+        }
     }
 
-    //to be changed
     @Override
-    public Mono<Long> getNumberOfBills() {
-        return billRepository.count();
+    public Mono<Long> getNumberOfBillsWithFilters(String billId, String customerId, String ownerFirstName, String ownerLastName,
+                                                  String visitType, String vetId, String vetFirstName, String vetLastName) {
+        Predicate<Bill> filterCriteria = bill ->
+                (billId == null || bill.getBillId().equals(billId)) &&
+                        (customerId == null || bill.getCustomerId().equals(customerId)) &&
+                        (ownerFirstName == null || bill.getOwnerFirstName().equals(ownerFirstName)) &&
+                        (ownerLastName == null || bill.getOwnerLastName().equals(ownerLastName)) &&
+                        (visitType == null || bill.getVisitType().equals(visitType)) &&
+                        (vetId == null || bill.getVetId().equals(vetId)) &&
+                        (vetFirstName == null || bill.getVetFirstName().equals(vetFirstName)) &&
+                        (vetLastName == null || bill.getVetLastName().equals(vetLastName));
+
+        return billRepository.findAll()
+                .filter(filterCriteria)
+                .map(EntityDtoUtil::toBillResponseDto)
+                .count();
     }
 
 

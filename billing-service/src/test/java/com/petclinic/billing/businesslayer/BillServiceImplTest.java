@@ -79,22 +79,54 @@ public class BillServiceImplTest {
 
     @Test
     void getBillsByPage_ShouldSucceed(){
-        // Create a sample Pageable object
-        Pageable pageable = PageRequest.of(0, 5);
 
-        // Create a sample list of Bill entities
-        List<Bill> billList = Arrays.asList(buildBill(), buildBill(), buildBill());
+        Bill bill1 = Bill.builder()
+                .billId("billId-1")
+                .customerId("customerId-1")
+                .ownerFirstName("ownerFirstName1")
+                .ownerLastName("ownerLastName1")
+                .visitType("operation")
+                .vetId("vetId1")
+                .vetFirstName("vetFirstName1")
+                .vetLastName("vetLastName1")
+                .build();
+        Bill bill2 = Bill.builder()
+                .billId("billId-2")
+                .customerId("customerId-2")
+                .ownerFirstName("ownerFirstName2")
+                .ownerLastName("ownerLastName2")
+                .visitType("general")
+                .vetId("vetId2")
+                .vetFirstName("vetFirstName2")
+                .vetLastName("vetLastName2")
+                .build();
+        Bill bill3 = Bill.builder()
+                .billId("billId-3")
+                .customerId("customerId-3")
+                .ownerFirstName("ownerFirstName3")
+                .ownerLastName("ownerLastName3")
+                .visitType("injury")
+                .vetId("vetId3")
+                .vetFirstName("vetFirstName3")
+                .vetLastName("vetLastName3")
+                .build();
 
-        // Mock the repository call to return the list of Bill entities
-        when(repo.findAll()).thenReturn(Flux.fromIterable(billList));
+        Pageable pageable = PageRequest.of(0, 2);
 
-        // Test the service method
-        Flux<BillResponseDTO> billDTOFlux = billService.getAllBillsByPage(pageable);
+        // Mock the repository to return a Flux of owners
+        when(repo.findAll()).thenReturn(Flux.just(bill1, bill2, bill3));
 
-        // Verify the results
-        StepVerifier.create(billDTOFlux)
-                .expectNextCount(3) // Adjust this count according to the number of expected results
-                .verifyComplete();
+        // Call the method under test
+        Flux<BillResponseDTO> bills = billService.getAllBillsByPage(pageable,null,null,
+                null,null,null, null, null, null);
+
+        // Verify the behavior using StepVerifier
+        StepVerifier.create(bills)
+                .expectNextMatches(billDto1 -> billDto1.getBillId().equals(bill1.getBillId()))
+                .expectNextMatches(billDto2 -> billDto2.getBillId().equals(bill2.getBillId()))
+                .expectComplete()
+                .verify();
+
     }
 
     @Test
