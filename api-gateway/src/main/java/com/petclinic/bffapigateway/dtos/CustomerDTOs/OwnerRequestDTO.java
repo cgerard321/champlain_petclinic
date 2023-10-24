@@ -16,6 +16,7 @@ public class OwnerRequestDTO {
     private String lastName;
     private String address;
     private String city;
+    private String province;
     private String telephone;
     //private List<PetResponseDTO> pets;
 }

@@ -2,6 +2,7 @@ package com.petclinic.authservice.businesslayer;
 
 import com.petclinic.authservice.Util.Exceptions.IncorrectPasswordException;
 import com.petclinic.authservice.Util.Exceptions.NotFoundException;
+import com.petclinic.authservice.Util.Exceptions.UnverifiedUserException;
 import com.petclinic.authservice.datalayer.roles.Role;
 import com.petclinic.authservice.datalayer.user.*;
 import com.petclinic.authservice.datamapperlayer.UserMapper;
@@ -142,6 +143,24 @@ public class AuthServiceUserServiceTests {
         verify(userRepo).findByUsername("username");
     }
 
+    @Test
+    void loginWithUnverifiedUser_ShouldThrowException() {
+        User user = User.builder()
+                .username(USER)
+                .email(EMAIL)
+                .password(passwordEncoder.encode(PASS))
+                .verified(false)
+                .build();
+        userRepo.save(user);
+
+        UserIDLessUsernameLessDTO user2 = new UserIDLessUsernameLessDTO(EMAIL, PASS);
+
+        when(userRepo.findByEmail(any()))
+                .thenReturn(Optional.of(user));
+
+        assertThrows(UnverifiedUserException.class, () -> userService.login(user2));
+    }
+
 
     @Test
     @DisplayName("Get all users, should succeed")
@@ -171,6 +190,28 @@ public class AuthServiceUserServiceTests {
         assertEquals(2,userService.findAllWithoutPage().size());
     }
 
+    @Test
+    @DisplayName("Get user by user ID should succeed")
+    void getUserByUserId_ShouldSucceed() {
+        // Arrange
+        User user = User.builder()
+                .username(USER)
+                .userIdentifier(new UserIdentifier())
+                .email(EMAIL)
+                .password(passwordEncoder.encode(PASS))
+                .verified(true)
+                .build();
+        userRepo.save(user);
+
+        when(userRepo.findOptionalUserByUserIdentifier_UserId(any()))
+                .thenReturn(Optional.of(user));
+
+        // Act
+        User result = userService.getUserByUserId(user.getUserIdentifier().getUserId());
+
+        // Assert
+        assertEquals(user, result);
+    }
 
     @Test
     public void testUpdateResetPasswordToken_Success() {
@@ -240,6 +281,42 @@ public class AuthServiceUserServiceTests {
         assertEquals("Could not find any customer with the token " + token, exception.getMessage());
 
         verify(userRepo).findById(validToken.getUserIdentifier());
+    }
+
+    @Test
+    @DisplayName("Delete user, should succeed")
+    void deleteUser_ShouldSucceed() {
+        // Arrange
+        User user = User.builder()
+                .username(USER)
+                .userIdentifier(new UserIdentifier())
+                .email(EMAIL)
+                .password(passwordEncoder.encode(PASS))
+                .verified(true)
+                .build();
+        userRepo.save(user);
+
+        when(userRepo.findUserByUserIdentifier_UserId(any()))
+                .thenReturn(user);
+
+        // Act
+        userService.deleteUser(user.getUserIdentifier().getUserId());
+
+        // Assert
+        verify(userRepo, times(1)).delete(user);
+    }
+
+    @Test
+    @DisplayName("Delete user, should throw NotFoundException")
+    void deleteUser_ShouldThrowNotFoundException() {
+        // Arrange
+        String nonExistentUserId = "nonExistentUserId";
+
+        when(userRepo.findUserByUserIdentifier_UserId(nonExistentUserId))
+                .thenReturn(null);
+
+        // Act and Assert
+        assertThrows(NotFoundException.class, () -> userService.deleteUser(nonExistentUserId));
     }
 
 

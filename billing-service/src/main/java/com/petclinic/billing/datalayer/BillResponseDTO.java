@@ -17,12 +17,9 @@ public class BillResponseDTO {
     private String vetId;
     private LocalDate date;
     private double amount;
+    private double taxedAmount;
+    private BillStatus billStatus;
+    private LocalDate dueDate;
 
-    public BillResponseDTO(String customerId, String visitType, String vetId, LocalDate date, double amount) {
-        this.customerId = customerId;
-        this.visitType = visitType;
-        this.vetId = vetId;
-        this.date = date;
-        this.amount = amount;
+
     }
-}

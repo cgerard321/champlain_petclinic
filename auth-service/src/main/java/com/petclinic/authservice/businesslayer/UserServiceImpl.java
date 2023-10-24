@@ -70,18 +70,35 @@ public class UserServiceImpl implements UserService {
     public User createUser(@Valid UserIDLessRoleLessDTO userIDLessDTO) {
 
             final Optional<User> byEmail = userRepo.findByEmail(userIDLessDTO.getEmail());
+            final Optional<User> byUsername = userRepo.findByUsername(userIDLessDTO.getUsername());
 
             if (byEmail.isPresent()) {
                 throw new EmailAlreadyExistsException(
                         format("User with e-mail %s already exists", userIDLessDTO.getEmail()));
             }
 
+            if (byUsername.isPresent()) {
+                throw new IllegalArgumentException(
+                        format("User with username %s already exists", userIDLessDTO.getUsername()));
+            }
+
             User user = userMapper.idLessRoleLessDTOToModel(userIDLessDTO);
 
+            if (userIDLessDTO.getDefaultRole() == null|| userIDLessDTO.getDefaultRole().isEmpty()){
+            log.info("No default role provided, setting default role to OWNER");
             Optional<Role> role = roleRepo.findById(3L);
             Set<Role> roleSet = new HashSet<>();
             role.ifPresent(roleSet::add);
             user.setRoles(roleSet);
+            }else{
+                log.info("Default role provided, setting default role to {}", userIDLessDTO.getDefaultRole());
+                Role role = roleRepo.findRoleByName(userIDLessDTO.getDefaultRole());
+                Set<Role> roleSet = new HashSet<>();
+                if(role == null)
+                    throw new NotFoundException("No role with name: " + userIDLessDTO.getDefaultRole());
+                roleSet.add(role);
+                user.setRoles(roleSet);
+            }
             user.setUserIdentifier(new UserIdentifier(userIDLessDTO.getUserId()));
             user.setPassword(passwordEncoder.encode(user.getPassword()));
 
@@ -389,4 +406,57 @@ public class UserServiceImpl implements UserService {
         return userRepo.findByEmail(email)
                 .orElseThrow(() -> new NotFoundException("No account found for email: " + email));
     }
+
+    @Override
+    public UserPasswordLessDTO updateUserRole(String userId, RolesChangeRequestDTO roles, String token) {
+        User existingUser = userRepo.findUserByUserIdentifier_UserId(userId);
+
+        if(existingUser == null) {
+            throw new NotFoundException("No user was found with id : " + userId);
+        }
+
+
+        if (userId.equals(jwtService.getIdFromToken(token)))
+            throw new InvalidRequestException("You can't change your own roles !");
+
+
+
+        existingUser.setId(existingUser.getId());
+        existingUser.setUserIdentifier(new UserIdentifier(userId));
+
+        Set<Role> newRoles = new HashSet<>();
+        for (String role:
+             roles.getRoles()) {
+            Role newRole = roleRepo.findRoleByName(role);
+            if (newRole == null)
+                throw new NotFoundException("Role was not found with name : " + newRole);
+            newRoles.add(newRole);
+        }
+
+
+        existingUser.setRoles(newRoles);
+
+        return userMapper.modelToPasswordLessDTO(userRepo.save(existingUser));
+    }
+    public User getUserByUserId(String userId) {
+        return userRepo.findOptionalUserByUserIdentifier_UserId(userId)
+                .orElseThrow(() -> new NotFoundException("No user with userId: " + userId));
+    }
+
+    @Override
+    public void deleteUser(String userId) {
+        User user = userRepo.findUserByUserIdentifier_UserId(userId);
+        if (user != null) {
+            userRepo.delete(user);
+        } else {
+            throw new NotFoundException("No user with userId: " + userId);
+        }
+    }
+
+
+    @Override
+    public List<UserDetails> getUsersByUsernameContaining(String username) {
+        return userMapper.modelToDetailsList(userRepo.findByUsernameContaining(username));
+    }
+
 }

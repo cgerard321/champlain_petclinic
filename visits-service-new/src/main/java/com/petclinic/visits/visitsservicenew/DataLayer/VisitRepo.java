@@ -6,6 +6,8 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
+
 @Repository
 public interface VisitRepo extends ReactiveMongoRepository<Visit, String> {
 
@@ -21,4 +23,7 @@ public interface VisitRepo extends ReactiveMongoRepository<Visit, String> {
     Mono<Boolean> existsByVisitId(String visitId);
 
     Flux<Visit> findAllByStatus(String status);
+
+    // In your VisitRepo interface
+    Flux<Visit> findByVisitDateAndPractitionerId(LocalDateTime visitDate, String practitionerId);
 }

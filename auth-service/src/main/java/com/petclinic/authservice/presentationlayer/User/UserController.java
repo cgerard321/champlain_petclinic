@@ -35,10 +35,13 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Mono;
 
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/users")
@@ -61,11 +64,37 @@ public class UserController {
         return userService.findAllWithoutPage();
     }
 
+    @GetMapping("/{userId}")
+    public ResponseEntity<UserDetails> getUserByUserId(@PathVariable String userId) {
+        User user = userService.getUserByUserId(userId);
+        return ResponseEntity.ok(userMapper.modelToDetails(user));
+    }
+
+    //add pagination to this method later
+    @GetMapping("/")
+    public ResponseEntity<List<UserDetails>> getAllUsers(@RequestParam Optional<String> username) {
+        List<UserDetails> users;
+
+        if(username.isPresent()) {
+            users = userService.getUsersByUsernameContaining(username.get());
+        }
+        else {
+            users = userService.findAllWithoutPage();
+        }
+
+        return ResponseEntity.ok(users);
+    }
+
     @PostMapping
     public ResponseEntity<UserPasswordLessDTO> createUser(@RequestBody @Valid UserIDLessRoleLessDTO dto){
         final User saved = userService.createUser(dto);
         return ResponseEntity.ok()
                 .body(userMapper.modelToPasswordLessDTO(saved));
+    }
+
+    @PatchMapping("/{userId}")
+    public ResponseEntity<UserPasswordLessDTO> updateUserRole (@PathVariable String userId, @RequestBody RolesChangeRequestDTO roleChanged,@CookieValue("Bearer") String token) {
+        return ResponseEntity.ok().body(userService.updateUserRole(userId, roleChanged, token));
     }
 
 
@@ -143,11 +172,20 @@ public class UserController {
 
 
     @PostMapping("/reset_password")
-    public ResponseEntity<Void> processResetPassword(@RequestBody @Valid UserResetPwdWithTokenRequestModel resetRequest) {
+    public ResponseEntity<Void> processResetPassword(@RequestBody @Valid UserResetPwdWithTokenRequestModel resetRequest)  {
         userService.processResetPassword(resetRequest);
 
         return ResponseEntity.ok().build();
     }
+
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<Void> deleteUser(@PathVariable String userId) {
+
+        userService.deleteUser(userId);
+
+        return ResponseEntity.noContent().build();
+    }
+
 
     private boolean isValidBase64(String s) {
         try {

@@ -1,5 +1,5 @@
 package com.petclinic.bffapigateway.dtos.Visits;
-
+/*
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,12 +7,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-
-/**
- * @author Maciej Szarlinski
- * Copied from https://github.com/spring-petclinic/spring-petclinic-microservices
+*/
+/*
+    @author Maciej Szarlinski
+    Copied from https://github.com/spring-petclinic/spring-petclinic-microservices
  */
-
+/*
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -34,3 +34,4 @@ public class VisitDetails {
 
     private Status status = null;
 }
+ */

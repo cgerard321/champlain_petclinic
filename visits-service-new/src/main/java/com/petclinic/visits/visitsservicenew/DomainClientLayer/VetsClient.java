@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import java.util.Objects;
+
 @Service
 public class VetsClient {
 
@@ -25,16 +27,14 @@ public class VetsClient {
     }
 
 
-
     public Mono<VetDTO> getVetByVetId(String vetId) {
-        Mono<VetDTO> vetDTOMono =
-                webClient
+                return webClient
                         .get()
                         .uri(vetClientServiceBaseURL + "/{vetId}", vetId)
                         .retrieve()
                         .onStatus(HttpStatusCode::is4xxClientError, error -> {
                             HttpStatusCode statusCode = error.statusCode();
-                            if (statusCode.equals(HttpStatus.NOT_FOUND))
+                            if (Objects.equals(statusCode, HttpStatus.NOT_FOUND))
                                 return Mono.error(new NotFoundException("No veterinarian was found with vetId: " + vetId));
                             return Mono.error(new IllegalArgumentException("Something went wrong"));
                         })
@@ -42,8 +42,5 @@ public class VetsClient {
                                 Mono.error(new IllegalArgumentException("Something went wrong"))
                         )
                         .bodyToMono(VetDTO.class);
-
-        return vetDTOMono;
     }
-
 }

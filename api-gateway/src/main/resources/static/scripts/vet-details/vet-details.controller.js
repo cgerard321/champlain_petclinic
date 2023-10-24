@@ -5,10 +5,125 @@ angular.module('vetDetails')
         var self = this;
         //var vetId = $stateParams.vetId || 0;
 
+        this.show = ($event, vetID) => {
+            let child = document.getElementsByClassName("m" + vetID)[0];
+            let left = $event.pageX;
+            let top = $event.clientY;
+            if (document.documentElement.clientWidth > 960) {
+                child.style.left = (left + 221) + 'px';
+            }
+            if (document.documentElement.clientWidth < 420) {
+                child.style.left = (170) + 'px';
+            } else if (document.documentElement.clientWidth < 510) {
+                child.style.left = (left + 334.5 / 2.5) + 'px';
+            } else {
+                child.style.left = (left + 200) + 'px';
+            }
+            child.style.top = (top) + 'px';
+            child.classList.remove("modalOff");
+            child.classList.add("modalOn");
+        }
+        this.hide = ($event, vetID) => {
+            let child = document.getElementsByClassName("m" + vetID)[0];
+            child.classList.remove("modalOn");
+            child.classList.add("modalOff");
+        }
+
+        self.checkedCheckboxesUpdate = {};
+        self.handleCheckboxClick = function(value, ratingId) {
+            // Update the checked state for the specific ratingId.
+            self.checkedCheckboxesUpdate[ratingId] = value;
+            // Uncheck other checkboxes for the same ratingId.
+            const checkboxes = document.querySelectorAll('input[type="checkbox"][name="predefinedDescriptionUpdate' + ratingId + '"]');
+            checkboxes.forEach((checkbox) => {
+                if (checkbox.value !== value) {
+                    checkbox.checked = false;
+                }
+            });
+        };
+
+        const checkboxesForAddRating = document.querySelectorAll('.col-sm-12 input[type="checkbox"]');
+        let lastCheckedCheckbox = null;
+        checkboxesForAddRating.forEach(checkbox => {
+            checkbox.addEventListener('click', function () {
+                if (this !== lastCheckedCheckbox) {
+                    if (lastCheckedCheckbox) {
+                        lastCheckedCheckbox.checked = false;
+                    }
+                    lastCheckedCheckbox = this;
+                }
+                const value = lastCheckedCheckbox.checked ? lastCheckedCheckbox.value : null;
+                console.log('Last checked value:', value);
+            });
+        });
+        self.togglePredefinedDescription = function (rating, value) {
+            console.log("Toggling predefinedDescription: ", value);
+            if (rating['predefinedDescription' + value] === value) {
+                rating['predefinedDescription' + value] = null;
+            } else {
+                rating['predefinedDescription' + value] = value;
+            }
+        };
+
+        self.workdayToWorkHours=new Map()
+
         /* added /{{vet.vetID}} in the url */
         $http.get('api/gateway/vets/' + $stateParams.vetId).then(function (resp) {
             self.vet = resp.data;
+            const workHoursObject = JSON.parse(self.vet.workHoursJson);
+
+            // Convert the JSON object into a Map
+            for (const key in workHoursObject) {
+                if (workHoursObject.hasOwnProperty(key)) {
+                    self.workdayToWorkHours.set(key, workHoursObject[key]);
+                }
+            }
+
+            console.log(self.workdayToWorkHours);
         });
+
+        // map of work hours
+        self.selectWorkday = function (selectedWorkday) {
+            self.workHours = [];
+
+            // Check if the selected workday exists in the mapping
+            if (self.workdayToWorkHours.has(selectedWorkday)) {
+                self.workHours = self.workdayToWorkHours.get(selectedWorkday);
+            } else {
+                // Handle the case when the workday is not found in the mapping
+                console.log('Workday not found in the mapping.');
+            }
+
+            // Get the table element by its ID
+            var table = document.getElementById("workHoursTable");
+            // Get all the <td> elements in the table
+            var tdElements = table.getElementsByTagName("td");
+            console.log(tdElements)
+
+            if(table.style.display==="none"){
+                table.style.display="block"
+            }
+            else{
+                table.style.display="none"
+            }
+
+            // Loop through the <td> elements to check if their IDs correspond with the elements in workHours
+            for (var i = 0; i < tdElements.length; i++) {
+                var td = tdElements[i];
+                var tdId = td.id;
+
+                // Check if the tdId is in the self.workHours array
+                if (self.workHours.includes(tdId)) {
+                    // This <td> corresponds to a work hour for the selected day
+                    // You can apply styling or any other actions you need here
+                    td.style.border = "2px solid green"; // For example, add a green border
+                } else {
+                    // This <td> is not in the workHours array
+                    // You can apply a different style for non-working hours
+                    td.style.border = "2px solid black"; // For example, add a black border
+                }
+            }
+        }
 
         $http.get("api/gateway/visits/vets/" + $stateParams.vetId).then(function (resp) {
             self.visitsList = resp.data;
@@ -49,6 +164,65 @@ angular.module('vetDetails')
             }
         };
 
+        //update education
+        self.updateEducation = function (educationId) {
+            const btn = document.getElementById("updateEducationBtn" + educationId);
+            const updateContainer = document.getElementById("educationUpdate" + educationId);
+
+            let updatedDegree = document.getElementById("updateDegree" + educationId).value;
+            let updatedSchoolName = document.getElementById("updateSchoolName" + educationId).value;
+            let updatedFieldOfStudy = document.getElementById("updateFieldOfStudy" + educationId).value;
+            let updatedStartDate = document.getElementById("updateStartDate" + educationId).value;
+            let updatedEndDate = document.getElementById("updateEndDate" + educationId).value;
+
+            let updatedEducation = {
+                educationId: educationId,
+                degree: updatedDegree,
+                schoolName: updatedSchoolName,
+                vetId: $stateParams.vetId,
+                fieldOfStudy: updatedFieldOfStudy,
+                startDate: updatedStartDate,
+                endDate: updatedEndDate,
+            };
+
+            if (updateContainer.style.display === "none") {
+                // Show the update form
+                updateContainer.style.display = "block";
+                btn.textContent = "Save";
+            } else if (btn.textContent === "Save") {
+                if (
+                    updatedDegree === "" ||
+                    updatedSchoolName === "" ||
+                    updatedFieldOfStudy === "" ||
+                    updatedStartDate === "" ||
+                    updatedEndDate === ""
+                ) {
+                    alert("Please fill in all education fields.");
+                    return;
+                }
+
+                // Save the updated education
+                $http.put("api/gateway/vets/" + $stateParams.vetId + "/educations/" + educationId, updatedEducation).then(function (resp) {
+                    console.log(resp.data);
+                    self.updatedEducation = resp.data;
+                    alert('Your education was successfully updated!');
+
+                    // Refresh list
+                    $http.get('api/gateway/vets/' + $stateParams.vetId + '/educations').then(function (resp) {
+                        console.log(resp.data);
+                        self.educations = resp.data;
+                    });
+                });
+
+
+                // Hide the update form
+                updateContainer.style.display = "none";
+                btn.textContent = "Update";
+
+            }
+        };
+
+
         $http.get('api/gateway/vets/' + $stateParams.vetId + '/ratings/percentages')
             .then(function (resp) {
                 const ratingsData = resp.data;
@@ -64,6 +238,33 @@ angular.module('vetDetails')
                 ratingsContainer.innerHTML = html.slice(0, -2);
             });
 
+        $scope.getRecentRatingBasedOnDate = function () {
+            console.log("In function based on date")
+            const wrongYearPattern = /^\d{4}$/;
+
+            let yearQuery = document.getElementById("queryDate").value
+            let year = new Date().getFullYear()
+
+            if (!wrongYearPattern.test(yearQuery)) {
+                // Throw an exception with a custom error message
+               alert("Invalid year format. Please enter a valid year.");
+               return;
+            }
+           else if (self.query === undefined || self.query === ''){
+                let newYear = year - 2
+                $http.get('api/gateway/vets/'+$stateParams.vetId +'/ratings/date?year='+newYear).then(function (resp) {
+                    console.log(resp.data);
+                    self.ratings = resp.data;
+                    arr = resp.data;
+                });
+            }else{
+                $http.get('api/gateway/vets/'+$stateParams.vetId +'/ratings/date?year='+yearQuery).then(function (resp) {
+                    console.log(resp.data);
+                    self.ratings = resp.data;
+                    arr = resp.data;
+                });
+            }
+        };
 
         $scope.deleteVetRating = function (ratingId) { //added $scope in this class
             let varIsConf = confirm('Are you sure you want to delete this ratingId: ' + ratingId + '?');
@@ -83,6 +284,12 @@ angular.module('vetDetails')
                     });
                     //refresh percentages
                     percentageOfRatings();
+
+                    //refresh badge
+                    $http.get('api/gateway/vets/'+$stateParams.vetId+'/badge').then(function(resp){
+                        self.badge=resp.data;
+                        console.log(resp.data)
+                    })
                 }
 
                 function errorCallback(error) {
@@ -110,6 +317,10 @@ angular.module('vetDetails')
             const predefinedDesc = document.querySelector('input[name="predefinedDescriptionUpdate' + ratingId + '"]:checked')
                 ? document.querySelector('input[name="predefinedDescriptionUpdate' + ratingId + '"]:checked').value
                 : null;
+
+            //CHECK
+            const ratingDate = document.querySelector('input[name="Year' + ratingId + '"]:checked')
+                ? document.querySelector('input[name="Year' + ratingId + '"]:checked').value :null;
 
             let updatedRating = {
                 ratingId: ratingId,
@@ -139,6 +350,12 @@ angular.module('vetDetails')
 
                     // Refresh percentages
                     percentageOfRatings();
+
+                    //refresh badge
+                    $http.get('api/gateway/vets/'+$stateParams.vetId+'/badge').then(function(resp){
+                        self.badge=resp.data;
+                        console.log(resp.data)
+                    })
                 });
 
                 // Hide the update form
@@ -149,17 +366,49 @@ angular.module('vetDetails')
                 document.querySelectorAll('input[name="predefinedDescriptionUpdate' + ratingId + '"]').forEach(function (radio) {
                     radio.checked = false;
                 });
+
+                //ADDTIION
+                document.querySelectorAll('input[name="Year:' + ratingId + '"]').forEach(function (radio) {
+                    radio.checked = true;
+                });
             }
         };
 
+
+        //badge
+        $http.get('api/gateway/vets/'+$stateParams.vetId+'/badge').then(function(resp){
+            self.badge=resp.data;
+            console.log(resp.data)
+        })
+        self.init = function (){
+            $http.get('api/gateway/vets/' + $stateParams.vetId + '/badge').then(function (resp) {
+                self.badge= resp.data;
+                console.log(resp.data)
+            });
+        }
+
         //photo
-        $http.get('api/gateway/vets/' + $stateParams.vetId+"/photo").then(function (resp) {
+        $http.get('api/gateway/vets/' + $stateParams.vetId + '/default-photo').then(function (resp) {
             self.vetPhoto = resp.data;
+            if(self.vetPhoto.filename == "vet_default.jpg")
+                self.vetPhoto.photo = self.vetPhoto.resourceBase64;
+            else
+                throw new Error();
+            console.log(resp.data);
+        })
+        .catch(function (error) {
+            console.log(error);
+            $http.get('api/gateway/vets/' + $stateParams.vetId + '/photo').then(function (resp) {
+                self.vetPhoto = resp.data;
+                console.log(self.vetPhoto.photo);
+                console.log(resp.data);
+            });
         });
-//photo
+       /* //photo
         $http.get('api/gateway/vets/' + $stateParams.vetId + '/photo').then(function (resp) {
             self.vetPhoto = resp.data;
         });
+*/
 
         self.init = function (){
             $http.get('api/gateway/vets/' + $stateParams.vetId + '/photo').then(function (resp) {
@@ -173,9 +422,18 @@ angular.module('vetDetails')
                 rateScore: parseFloat(document.getElementById("ratingScore").value),
                 rateDate: new Date().toLocaleDateString(),
                 rateDescription: document.getElementById("ratingDescription").value,
-                predefinedDescription: document.querySelector('input[name="predefinedDescription"]:checked')
-                    ? document.querySelector('input[name="predefinedDescription"]:checked').value
-                    : null,
+                predefinedDescription: document.querySelector('input[name="predefinedDescriptionPOOR"]:checked')
+                    ? document.querySelector('input[name="predefinedDescriptionPOOR"]:checked').value
+                    : document.querySelector('input[name="predefinedDescriptionGOOD"]:checked')
+                        ? document.querySelector('input[name="predefinedDescriptionGOOD"]:checked').value
+                        : document.querySelector('input[name="predefinedDescriptionEXCELLENT"]:checked')
+                            ? document.querySelector('input[name="predefinedDescriptionEXCELLENT"]:checked').value
+                            : null,
+                //ADDITION
+                ratingDate: document.querySelector('input[name="Year"]:checked')
+                    ? document.querySelector('input[name="Year"]:checked').value: null,
+
+
             };
             if (!rating.rateScore) {
                 alert("Please select a rating score");
@@ -209,6 +467,12 @@ angular.module('vetDetails')
                             self.ratings = resp.data;
                             arr = resp.data;
                         });
+
+                        //refresh badge
+                        $http.get('api/gateway/vets/'+$stateParams.vetId+'/badge').then(function(resp){
+                            self.badge=resp.data;
+                            console.log(resp.data)
+                        })
                     })
                     .catch(function (error) {
                         let errorMessage = "An error occurred while adding the rating. Please try again.";
@@ -220,7 +484,7 @@ angular.module('vetDetails')
                     });
                 document.getElementById("ratingForm").reset();
             }
-                    }
+        }
 
         self.submitEducationForm = function (education) {
             education.vetId = $stateParams.vetId;
@@ -302,4 +566,46 @@ angular.module('vetDetails')
             self.addEducationFormVisible = false; // Hide the education form
         };
 
+
     }]);
+
+// function getOlderRatingBasedOnDate(vet){
+//     let year = new Date().getFullYear()
+//
+//     let old = year - 4
+//
+//     $http.get('api/gateway/vets/{vetId}/ratings/date?year=' + old).then(function (resp) {
+//         console.log(resp.data);
+//         vet.showRating=true;
+//         vet.ratingDate = parseFloat(resp.data.toFixed(1));
+//
+//     });
+//
+// }
+
+    // $scope.refreshList = self.vetList;
+    //
+    // $scope.ReloadData = function () {
+    //     let url = 'api/gateway/vets/' + $stateParams.vetId + '/ratings/date?year=' + year;
+    //     let optionSelection = document.getElementById("filterOption").value;
+    //     if (optionSelection === "Recent") {
+    //         url+= '/date?year=2024';
+    //     } else if (optionSelection === "Old") {
+    //         url += '/date?year=2020';
+    //     }
+    //     self.selectedFilter=optionSelection;
+    //
+    //     $http.get(url).then(function (resp) {
+    //         self.vetList = resp.data;
+    //         arr = resp.data;
+    //         angular.forEach(self.vetList, function(vet) {
+    //             getRecentRatingBasedOnDate(vet)
+    //             // getOlderRatingBasedOnDate(ratingsOld)
+    //         });
+    //
+    //     });
+    //
+    // }
+
+
+

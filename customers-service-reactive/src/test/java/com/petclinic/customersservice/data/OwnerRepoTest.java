@@ -46,6 +46,7 @@ class OwnerRepoTest {
                     assertEquals(owner.getLastName(), foundOwner.getLastName());
                     assertEquals(owner.getAddress(), foundOwner.getAddress());
                     assertEquals(owner.getCity(), foundOwner.getCity());
+                    assertEquals(owner.getProvince(), foundOwner.getProvince());
                     assertEquals(owner.getTelephone(), foundOwner.getTelephone());
                     //assertEquals(owner.getPhotoId(), foundOwner.getPhotoId());
                 })
@@ -74,6 +75,7 @@ class OwnerRepoTest {
                 .lastName("Labrie")
                 .address("308 ave de Stanley")
                 .city("Saint-Lambert")
+                .province("Quebec")
                 .telephone("514-516-1191")
                 //.photoId("55")
                 .build();

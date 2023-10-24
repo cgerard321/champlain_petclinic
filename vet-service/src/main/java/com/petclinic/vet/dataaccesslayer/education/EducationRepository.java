@@ -10,4 +10,6 @@ public interface EducationRepository extends ReactiveMongoRepository<Education, 
 
     Flux<Education> findAllByVetId(String vetId);
     Mono<Education> findByVetIdAndEducationId(String vetId, String educationId);
+    Mono<Education> findByEducationId(String educationId);
+
 }

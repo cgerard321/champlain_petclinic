@@ -4,12 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
-import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
-import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
-import com.petclinic.bffapigateway.dtos.Pets.PetType;
+import com.petclinic.bffapigateway.dtos.Pets.*;
 import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
+import okhttp3.mockwebserver.RecordedRequest;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,8 +49,14 @@ public class CustomerServiceClientIntegrationTest {
             .lastName("Smith")
             .address("456 Elm")
             .city("Montreal")
+            .province("QC")
             .telephone("5553334444")
             //.imageId(1)
+            .build();
+
+    private final PetTypeRequestDTO TEST_PETTYPE = PetTypeRequestDTO.builder()
+            .name("Dog")
+            .petTypeDescription("Mammal")
             .build();
 
 
@@ -61,8 +66,15 @@ public class CustomerServiceClientIntegrationTest {
             .lastName("Smith")
             .address("456 Elm")
             .city("Montreal")
+            .province("QC")
             .telephone("5553334444")
             //.imageId(1)
+            .build();
+
+    private final PetTypeResponseDTO TEST_PETTYPE_RESPONSE = PetTypeResponseDTO.builder()
+            .petTypeId("petTypeId-123")
+            .name("Dog")
+            .petTypeDescription("Mammal")
             .build();
     PetType type = new PetType();
 
@@ -73,7 +85,7 @@ public class CustomerServiceClientIntegrationTest {
             .name("Cat")
             .birthDate(date)
             .petTypeId("5")
-            .photoId("2")
+          //  .photoId("2")
             .isActive("true")
             .build();
 
@@ -128,6 +140,7 @@ public class CustomerServiceClientIntegrationTest {
         assertEquals(ownerResponseDTO.getLastName(),TEST_OWNER.getLastName());
         assertEquals(ownerResponseDTO.getAddress(),TEST_OWNER.getAddress());
         assertEquals(ownerResponseDTO.getCity(),TEST_OWNER.getCity());
+        assertEquals(ownerResponseDTO.getProvince(),TEST_OWNER.getProvince());
         assertEquals(ownerResponseDTO.getTelephone(),TEST_OWNER.getTelephone());
         //assertEquals(ownerResponseDTO.getImageId(),TEST_OWNER.getImageId());
     }
@@ -169,6 +182,7 @@ public class CustomerServiceClientIntegrationTest {
                .lastName("Test")
                .address("Test")
                .city("Test")
+               .province("Test")
                .telephone("Test")
                 //.imageId(1)
                 .build();
@@ -178,6 +192,7 @@ public class CustomerServiceClientIntegrationTest {
                 .lastName("Test")
                 .address("Test")
                 .city("Test")
+                .province("Test")
                 .telephone("Test")
                 //.imageId(1)
                 .build();
@@ -187,6 +202,7 @@ public class CustomerServiceClientIntegrationTest {
                 .lastName("Test")
                 .address("Test")
                 .city("Test")
+                .province("Test")
                 .telephone("Test")
                 //.imageId(1)
                 .build();
@@ -202,13 +218,47 @@ public class CustomerServiceClientIntegrationTest {
         Optional<Integer> page = Optional.of(0);
         Optional<Integer> size =  Optional.of(2);
 
-        final Flux<OwnerResponseDTO> ownersFlux = customersServiceClient.getOwnersByPagination(page,size);
+        final Flux<OwnerResponseDTO> ownersFlux = customersServiceClient.getOwnersByPagination(page,size,null,null,null,null,null);
 
         Long fluxSize = ownersFlux.count().block();
         Long predictedSize = (long) size.get();
 
 
         assertEquals(fluxSize, predictedSize);
+    }
+
+    @Test
+    void getAllOwnersByPaginationWithFiltersApplied() throws JsonProcessingException {
+        OwnerResponseDTO TEST_OWNER1 = OwnerResponseDTO.builder()
+                .ownerId("ownerId-1")
+                .firstName("FN1")
+                .lastName("LN1")
+                .address("Test")
+                .city("C1")
+                .province("Test")
+                .telephone("T1")
+                //.imageId(1)
+                .build();
+
+        Flux<OwnerResponseDTO> owners = Flux.just(TEST_OWNER1);
+
+        final String body = mapper.writeValueAsString(owners.collectList().block());
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(body));
+
+        Optional<Integer> page = Optional.of(0);
+        Optional<Integer> size =  Optional.of(1);
+        String ownerId = "ownerId-1";
+        String firstName = "FN1";
+        String lastName = "LN1";
+        String city = "C1";
+        String phoneNumber = "T1";
+        final OwnerResponseDTO owner = customersServiceClient.getOwnersByPagination(page,size,ownerId,firstName,lastName,phoneNumber,city).blockFirst();
+
+        assertEquals(ownerId, owner.getOwnerId());
+        assertEquals(city, owner.getCity());
     }
 
     @Test
@@ -225,6 +275,44 @@ public class CustomerServiceClientIntegrationTest {
 
         assertEquals(expectedCount,response.block());
     }
+
+    @Test
+    void getTotalNumberOfOwnersWithFilters() throws Exception {
+        // Simulate the expected total count
+        long expectedCount = 0;
+
+        // Prepare the response with the expected count as a plain long value
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(String.valueOf(expectedCount)));
+
+        final Mono<Long> response = customersServiceClient.getTotalNumberOfOwnersWithFilters(null,null,null,null,null);
+
+        assertEquals(expectedCount,response.block());
+    }
+
+    @Test
+    void getTotalNumberOfOwnersWithFilters_UnknownValue_ShouldReturnZeroOwners() throws Exception {
+        // Simulate the expected total count
+        long expectedCount = 0;
+
+        // Prepare the response with the expected count as a plain long value
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(String.valueOf(expectedCount)));
+
+        String ownerId = "unknown";
+        String firstName = "unknown";
+        String lastName = "unknown";
+        String city = "unknown";
+        String phoneNumber = "unknown";
+
+        final Mono<Long> response = customersServiceClient.getTotalNumberOfOwnersWithFilters(ownerId,firstName,lastName,phoneNumber,city);
+
+        assertEquals(expectedCount,response.block());
+    }
+
+
 
     @Test
     void testUpdatePet() throws Exception {
@@ -275,6 +363,28 @@ public class CustomerServiceClientIntegrationTest {
         assertEquals(updatedPetResponse.getIsActive(), responseDTO.getIsActive()); // Check the isActive status
     }
 
+    @Test
+    void testDeletePetByPetId() throws Exception {
+        // Create a pet id that will be used in the test
+        String petId = "petId-123";
+
+        // Set up the mock server to return a 204 (No Content) status code when the deletePetById endpoint is hit
+        server.enqueue(new MockResponse()
+                .setResponseCode(204));
+
+        // Call the deletePetById method
+        Mono<PetResponseDTO> responseMono = customersServiceClient.deletePetByPetId(petId);
+
+        // Block the response for simplicity
+        responseMono.block();
+
+        // Verify that the deletePetById endpoint was hit with the correct pet id
+        RecordedRequest request = server.takeRequest();
+        assertEquals("/pet/" + petId, request.getPath());
+        assertEquals("DELETE", request.getMethod());
+    }
+
+
 
 
 
@@ -302,6 +412,22 @@ public class CustomerServiceClientIntegrationTest {
         assertEquals(updatedOwnerResponse.getOwnerId(), responseDTO.getOwnerId());
         assertEquals(updatedOwnerResponse.getFirstName(), responseDTO.getFirstName());
         assertEquals(updatedOwnerResponse.getLastName(), responseDTO.getLastName());
+    }
+
+
+    @Test
+    void getAllPetTypes() throws JsonProcessingException {
+        Flux<PetTypeResponseDTO> petTypes = Flux.just(TEST_PETTYPE_RESPONSE);
+
+        final String body = mapper.writeValueAsString(petTypes.collectList().block());
+
+        prepareResponse(response -> response
+                .setHeader("Content-Type", "application/json")
+                .setBody(body));
+
+        final PetTypeResponseDTO firstPetTypeFromFlux = customersServiceClient.getAllPetTypes().blockFirst();
+
+        assertEquals(firstPetTypeFromFlux.getName(), TEST_PETTYPE.getName());
     }
 
     /*@Test

@@ -21,6 +21,7 @@ angular.module('signupForm')
                     lastName: $scope.signup.lastName,
                     address: $scope.signup.address,
                     city: $scope.signup.city,
+                    province: $scope.signup.province,
                     telephone: $scope.signup.telephone
                 }
             })

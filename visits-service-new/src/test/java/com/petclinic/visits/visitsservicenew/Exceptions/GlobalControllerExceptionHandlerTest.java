@@ -9,9 +9,8 @@ import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.mock.http.server.reactive.MockServerHttpRequest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 
 @SpringBootTest
@@ -60,5 +59,20 @@ class GlobalControllerExceptionHandlerTest {
         assertEquals(HttpStatus.BAD_REQUEST, httpErrorInfo.getHttpStatus());
         assertEquals("/api/resource", httpErrorInfo.getPath());
         assertEquals("Bad Request", httpErrorInfo.getMessage());
+    }
+
+    @Test
+    void handleDuplicateTimeException_ReturnsHttpErrorInfo() {
+        // Arrange
+        DuplicateTimeException duplicateTimeException = new DuplicateTimeException("A visit with the same time and practitioner already exists.");
+        ServerHttpRequest serverHttpRequest = MockServerHttpRequest.get("/api/visits").build();
+
+        // Act
+        HttpErrorInfo httpErrorInfo = exceptionHandler.handleDuplicateTimeException(serverHttpRequest, duplicateTimeException);
+
+        // Assert
+        assertEquals(HttpStatus.CONFLICT, httpErrorInfo.getHttpStatus());
+        assertEquals("/api/visits", httpErrorInfo.getPath());
+        assertEquals("A visit with the same time and practitioner already exists.", httpErrorInfo.getMessage());
     }
 }

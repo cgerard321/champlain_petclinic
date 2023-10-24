@@ -45,6 +45,7 @@ class OwnerServiceImplTest {
                 .lastName("LastName")
                 .address("Test address")
                 .city("test city")
+                .province("test province")
                 .telephone("telephone")
                 .build();
 
@@ -69,6 +70,7 @@ class OwnerServiceImplTest {
                 .lastName("LastName1")
                 .address("Test address1")
                 .city("test city1")
+                .province("test province1")
                 .telephone("telephone1")
                 .build();
         Owner owner2 = Owner.builder()
@@ -77,6 +79,7 @@ class OwnerServiceImplTest {
                 .lastName("LastName2")
                 .address("Test address2")
                 .city("test city2")
+                .province("test province2")
                 .telephone("telephone2")
                 .build();
         Owner owner3 = Owner.builder()
@@ -85,6 +88,7 @@ class OwnerServiceImplTest {
                 .lastName("LastName3")
                 .address("Test address3")
                 .city("test city3")
+                .province("test province3")
                 .telephone("telephone3")
                 .build();
 
@@ -95,7 +99,7 @@ class OwnerServiceImplTest {
         when(repo.findAll()).thenReturn(Flux.just(owner1, owner2, owner3));
 
         // Call the method under test
-        Flux<OwnerResponseDTO> owners = ownerService.getAllOwnersPagination(pageable);
+        Flux<OwnerResponseDTO> owners = ownerService.getAllOwnersPagination(pageable,null,null,null,null,null);
 
         // Verify the behavior using StepVerifier
         StepVerifier.create(owners)
@@ -105,6 +109,80 @@ class OwnerServiceImplTest {
                 .verify();
 
     }
+
+    @Test
+    void getOwnersPaginationWithFiltersApplied1_ShouldSucceed(){
+
+        Owner owner1 = Owner.builder()
+                .ownerId("ownerId-11")
+                .firstName("FirstName1")
+                .lastName("LastName1")
+                .address("Test address1")
+                .city("test city1")
+                .province("test province1")
+                .telephone("telephone1")
+                .build();
+
+        // Create a Pageable object for the first page with 2 items per page
+        Pageable pageable = PageRequest.of(0, 2);
+        String city = "test city1";
+        String ownerId = "ownerId-11";
+        // Mock the repository to return a Flux of owners
+        when(repo.findAll()).thenReturn(Flux.just(owner1));
+
+        // Call the method under test
+        Flux<OwnerResponseDTO> owners = ownerService.getAllOwnersPagination(pageable,ownerId,null,null,null,city);
+
+        // Verify the behavior using StepVerifier
+        StepVerifier.create(owners)
+                .expectNextMatches(ownerDto1 -> ownerDto1.getOwnerId().equals(owner1.getOwnerId())
+                                            && ownerDto1.getCity().equals(owner1.getCity()))
+                .expectComplete()
+                .verify();
+
+    }
+
+    @Test
+    void getOwnersPaginationWithFiltersApplied2_ShouldSucceed(){
+
+        Owner owner1 = Owner.builder()
+                .ownerId("ownerId-2")
+                .firstName("FirstName2")
+                .lastName("LastName2")
+                .address("Test address2")
+                .city("test city2")
+                .province("test province2")
+                .telephone("telephone2")
+                .build();
+
+        // Create a Pageable object for the first page with 2 items per page
+        Pageable pageable = PageRequest.of(0, 2);
+        String city = "test city2";
+        String ownerId = "ownerId-2";
+        String lastName = "LastName2";
+        String firstName = "FirstName2";
+        String phoneNumber = "telephone2";
+
+        // Mock the repository to return a Flux of owners
+        when(repo.findAll()).thenReturn(Flux.just(owner1));
+
+        // Call the method under test
+        Flux<OwnerResponseDTO> owners = ownerService.getAllOwnersPagination(pageable,ownerId,firstName,lastName,phoneNumber,city);
+
+        // Verify the behavior using StepVerifier
+        StepVerifier.create(owners)
+                .expectNextMatches(
+                        ownerDto1 -> ownerDto1.getOwnerId().equals(owner1.getOwnerId())
+                        && ownerDto1.getCity().equals(owner1.getCity())
+                        && ownerDto1.getTelephone().equals(owner1.getTelephone())
+                        && ownerDto1.getFirstName().equals(owner1.getFirstName())
+                        && ownerDto1.getLastName().equals(owner1.getLastName()))
+                .expectComplete()
+                .verify();
+
+    }
+
+
 
     @Test
     void insertOwner() {
@@ -118,6 +196,7 @@ class OwnerServiceImplTest {
             assertEquals(ownerEntity.getLastName(), foundOwner.getLastName());
             assertEquals(ownerEntity.getAddress(), foundOwner.getAddress());
             assertEquals(ownerEntity.getCity(), foundOwner.getCity());
+            assertEquals(ownerEntity.getProvince(), foundOwner.getProvince());
             assertEquals(ownerEntity.getTelephone(), foundOwner.getTelephone());
             //assertEquals(ownerEntity.getPhotoId(), foundOwner.getPhotoId());
         })
@@ -138,6 +217,7 @@ class OwnerServiceImplTest {
                     assertEquals(ownerEntity.getLastName(), foundOwner.getLastName());
                     assertEquals(ownerEntity.getAddress(), foundOwner.getAddress());
                     assertEquals(ownerEntity.getCity(), foundOwner.getCity());
+                    assertEquals(ownerEntity.getProvince(), foundOwner.getProvince());
                     assertEquals(ownerEntity.getTelephone(), foundOwner.getTelephone());
                 })
                 .verifyComplete();
@@ -157,6 +237,7 @@ class OwnerServiceImplTest {
                     assertEquals(ownerEntity.getLastName(), foundOwner.getLastName());
                     assertEquals(ownerEntity.getAddress(), foundOwner.getAddress());
                     assertEquals(ownerEntity.getCity(), foundOwner.getCity());
+                    assertEquals(ownerEntity.getProvince(), foundOwner.getProvince());
                     assertEquals(ownerEntity.getTelephone(), foundOwner.getTelephone());
                     //assertEquals(ownerEntity.getPhotoId(), foundOwner.getPhotoId());
                 })
@@ -209,6 +290,7 @@ class OwnerServiceImplTest {
                 .lastName("LastName")
                 .address("Test address")
                 .city("test city")
+                .province("test province")
                 .telephone("telephone")
                 //.photoId("1")
                 .build();
@@ -225,6 +307,7 @@ class OwnerServiceImplTest {
         ownerRequestDTO.setLastName("Updated Last Name");
         ownerRequestDTO.setAddress("Updated Address");
         ownerRequestDTO.setCity("Updated City");
+        ownerRequestDTO.setProvince("Updated Province");
         ownerRequestDTO.setTelephone("5555555555");
 
         // Create a mock for an existing owner in the repository
@@ -234,6 +317,7 @@ class OwnerServiceImplTest {
         existingOwner.setLastName("Original Last Name");
         existingOwner.setAddress("Original Address");
         existingOwner.setCity("Original City");
+        existingOwner.setProvince("Original Province");
         existingOwner.setTelephone("1234567890");
 
         // Mock the repository behavior
@@ -251,6 +335,7 @@ class OwnerServiceImplTest {
                     assertEquals(ownerRequestDTO.getLastName(), updatedOwner.getLastName());
                     assertEquals(ownerRequestDTO.getAddress(), updatedOwner.getAddress());
                     assertEquals(ownerRequestDTO.getCity(), updatedOwner.getCity());
+                    assertEquals(ownerRequestDTO.getProvince(), updatedOwner.getProvince());
                     assertEquals(ownerRequestDTO.getTelephone(), updatedOwner.getTelephone());
                     return true;
                 })

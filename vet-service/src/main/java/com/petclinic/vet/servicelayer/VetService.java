@@ -11,15 +11,17 @@ package com.petclinic.vet.servicelayer;
   * Ticket: feat(VVS-CPC-553): add veterinarian
  */
 
+import com.petclinic.vet.presentationlayer.VetRequestDTO;
+import com.petclinic.vet.presentationlayer.VetResponseDTO;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 public interface VetService {
 
-    Flux<VetDTO> getAll();
-    Mono<VetDTO> insertVet(Mono<VetDTO> VetDTOMono);
-    Mono<VetDTO> updateVet(String vetId, Mono<VetDTO> VetDTOMono);
-    Mono<VetDTO> getVetByVetId(String vetId);
+    Flux<VetResponseDTO> getAll();
+    Mono<VetResponseDTO> insertVet(Mono<VetRequestDTO> vetRequestDto);
+    Mono<VetResponseDTO> updateVet(String vetId, Mono<VetRequestDTO> vetRequestDto);
+    Mono<VetResponseDTO> getVetByVetId(String vetId);
     Mono<Void> deleteVetByVetId(String vetId);
-    Flux<VetDTO> getVetByIsActive(boolean isActive);
-    Mono<VetDTO> getVetByVetBillId(String vetBillId);
+    Flux<VetResponseDTO> getVetByIsActive(boolean isActive);
+    Mono<VetResponseDTO> getVetByVetBillId(String vetBillId);
 }

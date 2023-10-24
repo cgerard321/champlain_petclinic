@@ -10,4 +10,5 @@ angular.module('inventoryUpdateForm', ['ui.router'])
                     template: '<inventory-update-form></inventory-update-form>'
                 }
             )
+
     }]);

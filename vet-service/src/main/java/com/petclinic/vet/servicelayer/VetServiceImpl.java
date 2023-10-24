@@ -11,30 +11,48 @@ package com.petclinic.vet.servicelayer;
   * Ticket: feat(VVS-CPC-553): add veterinarian
  */
 
+import com.petclinic.vet.dataaccesslayer.Photo;
+import com.petclinic.vet.dataaccesslayer.PhotoRepository;
 import com.petclinic.vet.dataaccesslayer.VetRepository;
+import com.petclinic.vet.dataaccesslayer.badges.Badge;
+import com.petclinic.vet.dataaccesslayer.badges.BadgeRepository;
+import com.petclinic.vet.dataaccesslayer.badges.BadgeTitle;
 import com.petclinic.vet.exceptions.InvalidInputException;
 import com.petclinic.vet.exceptions.NotFoundException;
+import com.petclinic.vet.presentationlayer.VetRequestDTO;
+import com.petclinic.vet.presentationlayer.VetResponseDTO;
+import com.petclinic.vet.util.DatabaseInitializer;
 import com.petclinic.vet.util.EntityDtoUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ByteArrayResource;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StreamUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.sql.DataSource;
+import java.io.IOException;
+import java.time.LocalDate;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class VetServiceImpl implements VetService {
 
     private final VetRepository vetRepository;
+    private final BadgeRepository badgeRepository;
+    private final PhotoRepository photoRepository;
 
     @Override
-    public Flux<VetDTO> getAll() {
+    public Flux<VetResponseDTO> getAll() {
         return vetRepository.findAll()
-                .map(EntityDtoUtil::toDTO);
+                .map(EntityDtoUtil::vetEntityToResponseDTO);
     }
 
     @Override
-    public Mono<VetDTO> insertVet(Mono<VetDTO> vetDTOMono) {
+    public Mono<VetResponseDTO> insertVet(Mono<VetRequestDTO> vetDTOMono) {
         return vetDTOMono
                 .flatMap(requestDTO->{
                     if(requestDTO.getFirstName().length()>30||requestDTO.getFirstName().length()<2)
@@ -51,14 +69,43 @@ public class VetServiceImpl implements VetService {
                         return Mono.error(new InvalidInputException("invalid specialties"));
                     return Mono.just(requestDTO);
                 })
-                .map(EntityDtoUtil::toEntity)
-                .doOnNext(e -> e.setVetId(EntityDtoUtil.generateVetId()))
-                .flatMap((vetRepository::save))
-                .map(EntityDtoUtil::toDTO);
+                .flatMap(vet -> {
+                    if(vet.isPhotoDefault()){
+
+                        String defaultPhotoName = "vet_default.jpg";
+                        Photo photo = Photo.builder()
+                                .vetId(vet.getVetId())
+                                .filename(defaultPhotoName)
+                                .imgType("image/jpeg")
+                                .data(loadImage("images/vet_default.jpg"))
+                                .build();
+
+                         return photoRepository.save(photo)
+                                 .zipWith(Mono.just(vet))
+                                .map(tuple -> tuple.getT2());
+                    }
+                    return Mono.just(vet);
+                })
+                .map(EntityDtoUtil::vetRequestDtoToEntity)
+                .flatMap(newVet -> {
+                    Badge badge = Badge.builder()
+                            .vetId(newVet.getVetId())
+                            .badgeTitle(BadgeTitle.VALUED)
+                            .badgeDate(String.valueOf(LocalDate.now().getYear()))
+                            .data(loadImage("images/empty_food_bowl.png"))
+                            .build();
+
+                    //combine results of two Mono operations, creating a Tuple2
+                    //extract vet from it
+                    return badgeRepository.save(badge)
+                            .zipWith(vetRepository.save(newVet))
+                            .map(tuple -> tuple.getT2());
+                })
+                .map(EntityDtoUtil::vetEntityToResponseDTO);
     }
 
     @Override
-    public Mono<VetDTO> updateVet(String vetId, Mono<VetDTO> vetDTOMono) {
+    public Mono<VetResponseDTO> updateVet(String vetId, Mono<VetRequestDTO> vetDTOMono) {
         return vetRepository.findVetByVetId(vetId)
                 .switchIfEmpty(Mono.error(new NotFoundException("No vet with this vetId was found: " + vetId)))
                 .flatMap(p -> vetDTOMono
@@ -77,31 +124,31 @@ public class VetServiceImpl implements VetService {
                                 return Mono.error(new InvalidInputException("invalid specialties"));
                             return Mono.just(requestDTO);
                         })
-                        .map(EntityDtoUtil::toEntity)
+                        .map(EntityDtoUtil::vetRequestDtoToEntity)
                         .doOnNext(e -> e.setVetId(p.getVetId()))
                         .doOnNext(e -> e.setId(p.getId()))
                 )
                 .flatMap(vetRepository::save)
-                .map(EntityDtoUtil::toDTO);
+                .map(EntityDtoUtil::vetEntityToResponseDTO);
     }
 
     @Override
-    public Mono<VetDTO> getVetByVetId(String vetId) {
+    public Mono<VetResponseDTO> getVetByVetId(String vetId) {
         return vetRepository.findVetByVetId(vetId)
                 .switchIfEmpty(Mono.error(new NotFoundException("No vet with this vetId was found: " + vetId)))
-                .map(EntityDtoUtil::toDTO);
+                .map(EntityDtoUtil::vetEntityToResponseDTO);
     }
 
     @Override
-    public Flux<VetDTO> getVetByIsActive(boolean isActive) {
+    public Flux<VetResponseDTO> getVetByIsActive(boolean isActive) {
         return vetRepository.findVetsByActive(isActive)
-                .map(EntityDtoUtil::toDTO);
+                .map(EntityDtoUtil::vetEntityToResponseDTO);
     }
 
     @Override
-    public Mono<VetDTO> getVetByVetBillId(String vetBillId) {
+    public Mono<VetResponseDTO> getVetByVetBillId(String vetBillId) {
         return  vetRepository.findVetByVetBillId(vetBillId)
-                .map(EntityDtoUtil::toDTO);
+                .map(EntityDtoUtil::vetEntityToResponseDTO);
     }
 
     @Override
@@ -111,6 +158,13 @@ public class VetServiceImpl implements VetService {
                 .flatMap(vetRepository::delete);
     }
 
-
+    private byte[] loadImage(String imagePath) {
+        try {
+            ClassPathResource cpr = new ClassPathResource(imagePath);
+            return StreamUtils.copyToByteArray(cpr.getInputStream());
+        } catch (IOException io) {
+            throw new InvalidInputException("Picture does not exist: " + io.getMessage());
+        }
+    }
 
 }

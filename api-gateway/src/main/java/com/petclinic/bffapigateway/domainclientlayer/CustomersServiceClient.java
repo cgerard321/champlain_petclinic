@@ -2,9 +2,7 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
-import com.petclinic.bffapigateway.dtos.Pets.PetRequestDTO;
-import com.petclinic.bffapigateway.dtos.Pets.PetResponseDTO;
-import com.petclinic.bffapigateway.dtos.Pets.PetType;
+import com.petclinic.bffapigateway.dtos.Pets.*;
 import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
 import com.petclinic.bffapigateway.exceptions.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -65,9 +64,33 @@ public class CustomersServiceClient {
                 .bodyToFlux(OwnerResponseDTO.class);
     }
 
-    public Flux<OwnerResponseDTO> getOwnersByPagination(Optional<Integer> page, Optional<Integer> size) {
-        return webClientBuilder.build().get()
-                .uri(customersServiceUrl + "/owners/owners-pagination?page="+page.orElse(0)+"&size="+size.orElse(5))
+    public Flux<OwnerResponseDTO> getOwnersByPagination(Optional<Integer> page, Optional<Integer> size, String ownerId, String firstName, String lastName, String phoneNumber, String city) {
+
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(customersServiceUrl + "/owners/owners-pagination");
+
+        builder.queryParam("page", page);
+        builder.queryParam("size",size);
+
+        // Add query parameters conditionally if they are not null or empty
+        if (ownerId != null && !ownerId.isEmpty()) {
+            builder.queryParam("ownerId", ownerId);
+        }
+        if (firstName != null && !firstName.isEmpty()) {
+            builder.queryParam("firstName", firstName);
+        }
+        if (lastName != null && !lastName.isEmpty()) {
+            builder.queryParam("lastName", lastName);
+        }
+        if (phoneNumber != null && !phoneNumber.isEmpty()) {
+            builder.queryParam("phoneNumber", phoneNumber);
+        }
+        if (city != null && !city.isEmpty()) {
+            builder.queryParam("city", city);
+        }
+
+        return webClientBuilder.build()
+                .get()
+                .uri(builder.build().toUri())
                 .retrieve()
                 .bodyToFlux(OwnerResponseDTO.class);
     }
@@ -78,6 +101,34 @@ public class CustomersServiceClient {
                 .retrieve()
                 .bodyToMono(Long.class);
     }
+
+    public Mono<Long> getTotalNumberOfOwnersWithFilters(String ownerId, String firstName, String lastName, String phoneNumber, String city){
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(customersServiceUrl + "/owners/owners-filtered-count");
+
+        // Add query parameters conditionally if they are not null or empty
+        if (ownerId != null && !ownerId.isEmpty()) {
+            builder.queryParam("ownerId", ownerId);
+        }
+        if (firstName != null && !firstName.isEmpty()) {
+            builder.queryParam("firstName", firstName);
+        }
+        if (lastName != null && !lastName.isEmpty()) {
+            builder.queryParam("lastName", lastName);
+        }
+        if (phoneNumber != null && !phoneNumber.isEmpty()) {
+            builder.queryParam("phoneNumber", phoneNumber);
+        }
+        if (city != null && !city.isEmpty()) {
+            builder.queryParam("city", city);
+        }
+
+        return webClientBuilder.build()
+                .get()
+                .uri(builder.build().toUri())
+                .retrieve()
+                .bodyToMono(Long.class);
+    }
+
 
     public Mono<OwnerResponseDTO> updateOwner(String ownerId, Mono<OwnerRequestDTO> ownerRequestDTO) {
         return ownerRequestDTO.flatMap(requestDTO ->
@@ -152,14 +203,14 @@ public class CustomersServiceClient {
 
     public Flux<PetResponseDTO> getPetsByOwnerId(final String ownerId) {
         return webClientBuilder.build().get()
-                .uri(customersServiceUrl + "/owners/" + ownerId + "/pets")
+                .uri(customersServiceUrl + "/pet/owner/" + ownerId +"/pets")
                 .retrieve()
                 .bodyToFlux(PetResponseDTO.class);
     }
 
     public Mono<PetResponseDTO> createPet(PetResponseDTO model, final String ownerId) {
         return webClientBuilder.build().post()
-                .uri(customersServiceUrl + "{ownerId}/pets", ownerId)
+                .uri(customersServiceUrl + "/pet", ownerId)
                 .body(just(model), PetResponseDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .retrieve().bodyToMono(PetResponseDTO.class);
@@ -188,6 +239,13 @@ public class CustomersServiceClient {
                 .bodyToMono(PetResponseDTO.class);
     }
 
+    public Mono<PetResponseDTO> deletePetByPetId(final String petId) {
+        return webClientBuilder.build().delete()
+                .uri(customersServiceUrl + "/pet/{petId}", petId)
+                .retrieve()
+                .bodyToMono(PetResponseDTO.class);
+    }
+
     public Mono<OwnerResponseDTO> deleteOwner(final String ownerId) {
         return webClientBuilder.build().delete()
                 .uri(customersServiceUrl +"/owners/"+ ownerId)
@@ -208,4 +266,36 @@ public class CustomersServiceClient {
                 .retrieve()
                 .bodyToMono(Void.class);
     }
+
+    public Flux<PetTypeResponseDTO> getAllPetTypes() {
+        return webClientBuilder.build().get()
+                .uri(customersServiceUrl + "/owners/petTypes")
+                .retrieve()
+                .bodyToFlux(PetTypeResponseDTO.class);
+    }
+    public Mono<PetTypeResponseDTO> getPetTypeByPetTypeId(String petTypeId) {
+        return webClientBuilder.build().get()
+                .uri(customersServiceUrl + "/owners/petTypes/" + petTypeId)
+                .retrieve()
+                .bodyToMono(PetTypeResponseDTO.class);
+    }
+
+    public Mono<PetTypeResponseDTO> deletePetType(final String petTypeId) {
+        return webClientBuilder.build().delete()
+                .uri(customersServiceUrl +"/owners/petTypes/"+ petTypeId)
+                .retrieve()
+                .bodyToMono(PetTypeResponseDTO.class);
+    }
+
+    public Mono<PetTypeResponseDTO> updatePetType(String petTypeId, Mono<PetTypeRequestDTO> petTypeRequestDTO) {
+        return petTypeRequestDTO.flatMap(requestDTO ->
+                webClientBuilder.build()
+                        .put()
+                        .uri(customersServiceUrl + "/owners/petTypes/" + petTypeId)
+                        .body(BodyInserters.fromValue(requestDTO))
+                        .retrieve()
+                        .bodyToMono(PetTypeResponseDTO.class)
+        );
+    }
+
 }

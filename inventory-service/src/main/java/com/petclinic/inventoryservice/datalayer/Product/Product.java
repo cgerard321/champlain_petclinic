@@ -15,6 +15,7 @@ public class Product {
     private String inventoryId;
     private String productName;
     private String productDescription;
-    private Double productPrice;
     private Integer productQuantity;
+    private Double productPrice;
+    private Double productSalePrice;
 }

@@ -209,4 +209,6 @@ public class BillServicePersistenceTests {
 
         return Bill.builder().id("Id").billId("BillUUID").customerId("1").vetId("1").visitType("Test Type").date(date).amount(13.37).build();
     }
+
+
 }

@@ -1,9 +1,11 @@
 package com.petclinic.customersservice.util;
 
+import com.petclinic.customersservice.data.PetType;
 import com.petclinic.customersservice.presentationlayer.OwnerResponseDTO;
 import com.petclinic.customersservice.data.Owner;
 import com.petclinic.customersservice.data.Pet;
 import com.petclinic.customersservice.presentationlayer.PetResponseDTO;
+import com.petclinic.customersservice.presentationlayer.PetTypeResponseDTO;
 import lombok.Generated;
 import org.springframework.beans.BeanUtils;
 
@@ -34,6 +36,12 @@ public class EntityDTOUtil {
         Pet pet = new Pet();
         BeanUtils.copyProperties(petResponseDTO, pet);
         return pet;
+    }
+
+    public static PetTypeResponseDTO toPetTypeResponseDTO(PetType petType) {
+        PetTypeResponseDTO petTypeResponseDTO = new PetTypeResponseDTO();
+        BeanUtils.copyProperties(petType, petTypeResponseDTO);
+        return petTypeResponseDTO;
     }
 
 }

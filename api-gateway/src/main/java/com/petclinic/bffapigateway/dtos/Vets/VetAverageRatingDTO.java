@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class VetAverageRatingDTO {
 
-    private VetDTO vetDTO;
+    private VetResponseDTO vetDTO;
     private String vetId;
     private double averageRating;
 

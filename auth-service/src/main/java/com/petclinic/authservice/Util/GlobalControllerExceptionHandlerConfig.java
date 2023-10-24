@@ -27,6 +27,13 @@ public class GlobalControllerExceptionHandlerConfig {
         return new HTTPErrorMessage(UNAUTHORIZED.value(), ex.getMessage());
     }
 
+    @ExceptionHandler(value = InvalidRequestException.class)
+    @ResponseStatus(value = BAD_REQUEST)
+    public HTTPErrorMessage invalidRequestException(InvalidRequestException ex, WebRequest request) {
+
+        return new HTTPErrorMessage(BAD_REQUEST.value(), ex.getMessage());
+    }
+
     @ExceptionHandler(value = IncorrectPasswordException.class)
     @ResponseStatus(value = UNAUTHORIZED)
     public HTTPErrorMessage incorrectPasswordException(IncorrectPasswordException ex, WebRequest request) {

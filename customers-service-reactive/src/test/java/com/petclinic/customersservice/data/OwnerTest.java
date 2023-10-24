@@ -16,10 +16,11 @@ class OwnerTest {
         owner.setFirstName("John");
         owner.setLastName("Smith");
         owner.setCity("MTL");
+        owner.setProvince("QC");
         owner.setAddress("9 rue des oiseaux");
         //owner.setPhotoId("0");
 
-        String expected = "Owner(id=1, ownerId=ownerId-123, firstName=John, lastName=Smith, address=9 rue des oiseaux, city=MTL, telephone=1234567890, pets=null)";
+        String expected = "Owner(id=1, ownerId=ownerId-123, firstName=John, lastName=Smith, address=9 rue des oiseaux, city=MTL, province=QC, telephone=1234567890, pets=null)";
 
         //Act
         String result = owner.toString();

@@ -3,10 +3,8 @@ package com.petclinic.bffapigateway.dtos.Visits;
 public enum Status {
 
     UPCOMING,
-    REQUESTED,
+    COMPLETED,
     CONFIRMED,
-    CANCELLED,
-    IN_PROGRESS,
-    COMPLETED
+    CANCELLED
 
 }

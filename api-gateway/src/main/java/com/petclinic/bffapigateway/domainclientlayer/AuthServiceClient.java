@@ -3,22 +3,28 @@ package com.petclinic.bffapigateway.domainclientlayer;
 import com.petclinic.bffapigateway.dtos.Auth.*;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
+import com.petclinic.bffapigateway.dtos.Vets.VetRequestDTO;
+import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
 import com.petclinic.bffapigateway.exceptions.*;
 import com.petclinic.bffapigateway.utils.Rethrower;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
+import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
+import java.util.List;
 import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static reactor.core.publisher.Mono.just;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Slf4j
 @Component
@@ -27,6 +33,9 @@ public class AuthServiceClient {
     private final WebClient.Builder webClientBuilder;
 
     private final CustomersServiceClient customersServiceClient;
+
+    private final VetsServiceClient vetsServiceClient;
+
     private final String authServiceUrl;
 
     @Autowired
@@ -34,21 +43,43 @@ public class AuthServiceClient {
 
     public AuthServiceClient(
             WebClient.Builder webClientBuilder,
-            CustomersServiceClient customersServiceClient, @Value("${app.auth-service.host}") String authServiceHost,
+            CustomersServiceClient customersServiceClient, VetsServiceClient vetsServiceClient, @Value("${app.auth-service.host}") String authServiceHost,
             @Value("${app.auth-service.port}") String authServicePort) {
         this.webClientBuilder = webClientBuilder;
         this.customersServiceClient = customersServiceClient;
+        this.vetsServiceClient = vetsServiceClient;
         authServiceUrl = "http://" + authServiceHost + ":" + authServicePort;
     }
 
 
-//    public Mono<UserDetails> getUser(final long userId) {
-//        return webClientBuilder.build().get()
-//                .uri(authServiceUrl + "/users/{userId}", userId)
-//                .retrieve()
-//                .bodyToMono(UserDetails.class);
-//    }
-//
+    public Mono<UserDetails> getUserById(String jwtToken, String userId) {
+        return webClientBuilder.build()
+                .get()
+                .uri(authServiceUrl + "/users/{userId}", userId)
+                .cookie("Bearer", jwtToken)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        n -> rethrower.rethrow(n,
+                                x -> new GenericHttpException(x.get("message").toString(), NOT_FOUND))
+
+                )
+                .bodyToMono(UserDetails.class);
+    }
+
+    public Flux<UserDetails> getUsersByUsername(String jwtToken, String username) {
+        return webClientBuilder
+                .baseUrl(authServiceUrl)
+                .build()
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/users/")
+                        .queryParam("username", username)
+                        .build())
+                .cookie("Bearer", jwtToken)
+                .retrieve()
+                .bodyToFlux(UserDetails.class);
+    }
+
     public Flux<UserDetails> getUsers(String jwtToken) {
         return webClientBuilder.build().get()
                 .uri(authServiceUrl + "/users/withoutPages")
@@ -56,45 +87,113 @@ public class AuthServiceClient {
                 .retrieve()
                 .bodyToFlux(UserDetails.class);
     }
+
+    public Mono<Void> deleteUser(String jwtToken, String userId) {
+        return webClientBuilder.build()
+                .delete()
+                .uri(authServiceUrl + "/users/{userId}", userId)
+                .cookie("Bearer", jwtToken)
+                .retrieve()
+                .bodyToMono(void.class);
+    }
+
     //FUCK REACTIVE
     /*
     This shit is beyond cursed, but I do not care. This works, I only spent 6 HOURS OF MY LIFE.
      */
-        public Mono<OwnerResponseDTO> createUser (Mono<Register> model) {
+    public Mono<OwnerResponseDTO> createUser (Mono<Register> model) {
 
-            String uuid = UUID.randomUUID().toString();
+        String uuid = UUID.randomUUID().toString();
 
-            return model.flatMap(register ->{
-                    register.setUserId(uuid);
-                    return webClientBuilder.build().post()
-                            .uri(authServiceUrl + "/users")
-                            .body(Mono.just(register), Register.class)
-                            .accept(MediaType.APPLICATION_JSON)
-                            .retrieve()
-                            .onStatus(HttpStatusCode::is4xxClientError,
-                                    n -> rethrower.rethrow(n,
-                                            x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
-                            )
-                            .bodyToMono(UserPasswordLessDTO.class)
-                            .flatMap(userDetails -> {
-                                OwnerRequestDTO ownerRequestDTO = OwnerRequestDTO.builder()
-                                        .firstName(register.getOwner().getFirstName())
-                                        .lastName(register.getOwner().getLastName())
-                                        .address(register.getOwner().getAddress())
-                                        .city(register.getOwner().getCity())
-                                        .telephone(register.getOwner().getTelephone())
-                                        .ownerId(uuid)
-                                        .build();
-                                return customersServiceClient.createOwner(ownerRequestDTO);
-                            }
-                            );
-            }
-            ).doOnError(throwable -> {
-                log.error("Error creating user: " + throwable.getMessage());
-                customersServiceClient.deleteOwner(uuid);
-            });
+        return model.flatMap(register ->{
+                register.setUserId(uuid);
+                return webClientBuilder.build().post()
+                        .uri(authServiceUrl + "/users")
+                        .body(Mono.just(register), Register.class)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .retrieve()
+                        .onStatus(HttpStatusCode::is4xxClientError,
+                                n -> rethrower.rethrow(n,
+                                        x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
+                        )
+                        .bodyToMono(UserPasswordLessDTO.class)
+                        .flatMap(userDetails -> {
+                            OwnerRequestDTO ownerRequestDTO = OwnerRequestDTO.builder()
+                                    .firstName(register.getOwner().getFirstName())
+                                    .lastName(register.getOwner().getLastName())
+                                    .address(register.getOwner().getAddress())
+                                    .city(register.getOwner().getCity())
+                                    .telephone(register.getOwner().getTelephone())
+                                    .ownerId(uuid)
+                                    .build();
+                            return customersServiceClient.createOwner(ownerRequestDTO);
+                        }
+                        );
+        }
+        ).doOnError(throwable -> {
+            log.error("Error creating user: " + throwable.getMessage());
+            customersServiceClient.deleteOwner(uuid);
+        });
 
         }
+
+        public Mono<UserPasswordLessDTO> createInventoryMangerUser(Mono<RegisterInventoryManager> registerInventoryManagerMono){
+            String uuid = UUID.randomUUID().toString();
+            return registerInventoryManagerMono.flatMap(registerInventoryManager -> {
+                registerInventoryManager.setUserId(uuid);
+                return webClientBuilder.build().post()
+                        .uri(authServiceUrl + "/users")
+                        .body(Mono.just(registerInventoryManager), RegisterInventoryManager.class)
+                        .accept(MediaType.APPLICATION_JSON)
+                        .retrieve()
+                        .onStatus(HttpStatusCode::is4xxClientError,
+                                n -> rethrower.rethrow(n,
+                                        x -> new GenericHttpException(x.get("message").toString(), BAD_REQUEST))
+                        )
+                        .bodyToMono(UserPasswordLessDTO.class);
+            });
+        }
+
+
+    public Mono<VetResponseDTO> createVetUser(Mono<RegisterVet> model){
+
+        String uuid = UUID.randomUUID().toString();
+
+        return model.flatMap(registerVet -> {
+            registerVet.setUserId(uuid);
+            return webClientBuilder.build().post()
+                    .uri(authServiceUrl + "/users")
+                    .body(Mono.just(registerVet), RegisterVet.class)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .retrieve()
+                    .onStatus(HttpStatusCode::is4xxClientError,
+                            n -> rethrower.rethrow(n,
+                                    x -> new GenericHttpException(x.get("message").toString(),(HttpStatus) n.statusCode()))
+                    )
+                    .bodyToMono(UserPasswordLessDTO.class)
+                    .flatMap(userDetails -> {
+                                VetRequestDTO vetDTO = VetRequestDTO.builder()
+                                        .specialties(registerVet.getVet().getSpecialties())
+                                        .active(registerVet.getVet().isActive())
+                                        .photoDefault(registerVet.getVet().isPhotoDefault())
+                                        .email(registerVet.getEmail())
+                                        .resume(registerVet.getVet().getResume())
+                                        .workday(registerVet.getVet().getWorkday())
+                                        .phoneNumber(registerVet.getVet().getPhoneNumber())
+                                        .vetBillId(registerVet.getVet().getVetBillId())
+                                        .firstName(registerVet.getVet().getFirstName())
+                                        .lastName(registerVet.getVet().getLastName())
+                                        .vetId(uuid)
+                                        .build();
+                        return vetsServiceClient.createVet((Mono.just(vetDTO)));
+                            }
+                    );
+        }).doOnError(throwable -> {
+            log.error("Error creating user: " + throwable.getMessage());
+            vetsServiceClient.deleteVet(uuid);
+        });
+    }
+
 
 //    public Mono<UserDetails> updateUser (final long userId, final Register model) {
 //        return webClientBuilder.build().put()
@@ -109,15 +208,6 @@ public class AuthServiceClient {
 //                .bodyToMono(UserDetails.class);
 //    }
 //
-//    public Mono<UserDetails> deleteUser(String auth, final long userId) {
-//        return webClientBuilder.build()
-//                .delete()
-//                .uri(authServiceUrl + "/users/{userId}", userId)
-//                .header("Authorization", auth)
-//                .retrieve()
-//                .bodyToMono(UserDetails.class);
-//    }
-
     public Mono<ResponseEntity<UserDetails>> verifyUser(final String token) {
 
         return webClientBuilder.build()
@@ -154,6 +244,26 @@ public class AuthServiceClient {
                     .toEntity(UserPasswordLessDTO.class);
         } catch (HttpClientErrorException ex) {
             throw new InvalidInputException(ex.getMessage());
+        }
+    }
+
+    public Mono<ResponseEntity<Void>> logout(ServerHttpRequest request, ServerHttpResponse response) {
+        log.info("Entered AuthServiceClient logout method");
+        List<HttpCookie> cookies = request.getCookies().get("Bearer");
+        if (cookies != null && !cookies.isEmpty()) {
+            ResponseCookie cookie = ResponseCookie.from("Bearer", "")
+                    .httpOnly(true)
+                    .secure(true)
+                    .path("/api/gateway")
+                    .domain("localhost")
+                    .maxAge(Duration.ofSeconds(0))
+                    .sameSite("Lax").build();
+            response.addCookie(cookie);
+            log.info("Logout Success: Account session ended");
+            return Mono.just(ResponseEntity.noContent().build());
+        } else {
+            log.warn("Logout Error: Problem removing account cookies, Session may have expired, redirecting to login page");
+            return Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
         }
     }
 
@@ -213,6 +323,19 @@ public class AuthServiceClient {
                 .onStatus(HttpStatusCode::is4xxClientError, clientResponse -> Mono.error(new InvalidTokenException("Invalid token")))
                 .onStatus(HttpStatusCode::is5xxServerError, clientResponse -> Mono.error(new InvalidInputException("Invalid token")))
                 .toEntity(TokenResponseDTO.class);
+    }
+
+    public Mono<UserResponseDTO> updateUsersRoles(String userId, RolesChangeRequestDTO rolesChangeRequestDTO, String jwToken) {
+        return webClientBuilder.build()
+                .patch()
+                .uri(authServiceUrl + "/users/{userId}", userId)
+                .bodyValue(rolesChangeRequestDTO)
+                .cookie("Bearer", jwToken)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, n -> rethrower.rethrow(n,
+                        x -> new GenericHttpException(x.get("message").toString(), (HttpStatus) n.statusCode())))
+                .bodyToMono(UserResponseDTO.class);
     }
 
 }

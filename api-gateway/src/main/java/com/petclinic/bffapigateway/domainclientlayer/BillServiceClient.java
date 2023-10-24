@@ -33,7 +33,9 @@ public class BillServiceClient {
         return webClientBuilder.build().get()
                 .uri(billServiceUrl + "/{billId}", billId)
                 .retrieve()
-                .bodyToMono(BillResponseDTO.class);
+                .bodyToMono(BillResponseDTO.class)
+                .doOnNext(t -> t.setTaxedAmount(((t.getAmount() * 15)/100)+ t.getAmount()))
+                .doOnNext(t -> t.setTaxedAmount(Math.round(t.getTaxedAmount() * 100.0) / 100.0));
     }
     public Flux<BillResponseDTO> getBillsByOwnerId(final String customerId) {
         return webClientBuilder.build().get()
@@ -54,6 +56,26 @@ public class BillServiceClient {
                 .bodyToFlux(BillResponseDTO.class);
     }
 
+    public Flux<BillResponseDTO> getAllPaidBilling() {
+        return webClientBuilder.build().get()
+                .uri(billServiceUrl + "/paid")
+                .retrieve()
+                .bodyToFlux(BillResponseDTO.class);
+    }
+
+    public Flux<BillResponseDTO> getAllUnpaidBilling() {
+        return webClientBuilder.build().get()
+                .uri(billServiceUrl + "/unpaid")
+                .retrieve()
+                .bodyToFlux(BillResponseDTO.class);
+    }
+
+    public Flux<BillResponseDTO> getAllOverdueBilling() {
+        return webClientBuilder.build().get()
+                .uri(billServiceUrl + "/overdue")
+                .retrieve()
+                .bodyToFlux(BillResponseDTO.class);
+    }
     public Mono<BillResponseDTO> createBill(final BillRequestDTO model){
         return webClientBuilder.build().post()
                 .uri(billServiceUrl)
@@ -73,6 +95,14 @@ public class BillServiceClient {
                 .bodyToMono(BillResponseDTO.class);
     }
 
+    public Mono<Void> deleteAllBills() {
+        return webClientBuilder.build()
+                .delete()
+                .uri(billServiceUrl)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(Void.class);
+    }
 
     public Mono<Void> deleteBill(final String billId) {
         return webClientBuilder.build()

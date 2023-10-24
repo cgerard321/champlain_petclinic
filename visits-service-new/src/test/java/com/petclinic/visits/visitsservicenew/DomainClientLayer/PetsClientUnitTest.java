@@ -2,7 +2,6 @@ package com.petclinic.visits.visitsservicenew.DomainClientLayer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
-import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 import org.junit.jupiter.api.AfterAll;
@@ -16,13 +15,8 @@ import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
-
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.Date;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 
 @WebFluxTest(PetsClient.class)
 class PetsClientUnitTest {
@@ -33,7 +27,7 @@ class PetsClientUnitTest {
     @MockBean
     private PetsClient petsClient;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     private static MockWebServer mockBackEnd;
 
@@ -86,6 +80,38 @@ class PetsClientUnitTest {
 
         StepVerifier.create(result)
                 .expectErrorMatches(throwable -> throwable instanceof NotFoundException && throwable.getMessage().equals("No pet was found with petId: " + invalidId))
+                .verify();
+    }
+
+    @Test
+    void getPetByVetId_Other4xx() {
+        String invalidPetId = "3333";
+
+        mockBackEnd.enqueue(new MockResponse()
+                .setResponseCode(400)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .addHeader("Content-Type", "application/json"));
+
+        Mono<PetResponseDTO> result = petsClient.getPetById(invalidPetId);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong"))
+                .verify();
+    }
+
+    @Test
+    void getPetByVetId_Other5xx() {
+        String invalidPetId = "3333";
+
+        mockBackEnd.enqueue(new MockResponse()
+                .setResponseCode(500)
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .addHeader("Content-Type", "application/json"));
+
+        Mono<PetResponseDTO> result = petsClient.getPetById(invalidPetId);
+
+        StepVerifier.create(result)
+                .expectErrorMatches(throwable -> throwable instanceof IllegalArgumentException && throwable.getMessage().equals("Something went wrong"))
                 .verify();
     }
 

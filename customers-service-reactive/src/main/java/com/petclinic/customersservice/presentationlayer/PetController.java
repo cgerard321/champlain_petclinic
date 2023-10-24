@@ -24,7 +24,7 @@ public class PetController {
                 .map(EntityDTOUtil::toPetResponseDTO);
     }
 
-    @GetMapping("/owner/{ownerId}")
+    @GetMapping("/owner/{ownerId}/pets")
     public Flux<PetResponseDTO> getPetsByOwnerId(@PathVariable String ownerId) {
         return petService.getPetsByOwnerId(ownerId);
     }

@@ -2,6 +2,7 @@ package com.petclinic.customersservice.business;
 
 import com.petclinic.customersservice.data.Pet;
 import com.petclinic.customersservice.data.PetRepo;
+import com.petclinic.customersservice.presentationlayer.PetRequestDTO;
 import com.petclinic.customersservice.presentationlayer.PetResponseDTO;
 import com.petclinic.customersservice.util.EntityDTOUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +59,8 @@ public class PetServiceImpl implements PetService {
     }
     @Override
     public Mono<Void> deletePetByPetId(String petId) {
-        return petRepo.deleteById(petId);
+        return petRepo.findPetByPetId(petId)
+                .flatMap(petRepo::delete);
     }
 
 }

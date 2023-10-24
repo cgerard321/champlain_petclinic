@@ -3,8 +3,9 @@ package com.petclinic.visits.visitsservicenew.PresentationLayer;
 
 import com.petclinic.visits.visitsservicenew.BusinessLayer.VisitService;
 import com.petclinic.visits.visitsservicenew.DataLayer.Status;
-import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
-import com.petclinic.visits.visitsservicenew.DomainClientLayer.*;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.SpecialtyDTO;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetDTO;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.Workday;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -15,15 +16,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.*;
 
 @WebFluxTest(VisitController.class)
 class VisitControllerUnitTest {
@@ -34,23 +34,23 @@ class VisitControllerUnitTest {
     private WebTestClient webTestClient;
 
 
-    @MockBean
-    private VetsClient vetsClient;
+//    @MockBean
+//    private VetsClient vetsClient;
+//
+//    @MockBean
+//    private PetsClient petsClient;
 
-    @MockBean
-    private PetsClient petsClient;
-
-    String uuidVisit1 = UUID.randomUUID().toString();
+//    String uuidVisit1 = UUID.randomUUID().toString();
     String uuidVet = UUID.randomUUID().toString();
-    String uuidPet = UUID.randomUUID().toString();
-    String uuidPhoto = UUID.randomUUID().toString();
-    String uuidOwner = UUID.randomUUID().toString();
+//    String uuidPet = UUID.randomUUID().toString();
+//    String uuidPhoto = UUID.randomUUID().toString();
+//    String uuidOwner = UUID.randomUUID().toString();
 
-    private final String STATUS = "COMPLETED";
+//    private final String STATUS = "COMPLETED";
 
 
     Set<SpecialtyDTO> set= new HashSet<>();
-
+    Set<Workday> workdaySet = new HashSet<>();
 
     VetDTO vet = VetDTO.builder()
             .vetId(uuidVet)
@@ -61,11 +61,11 @@ class VisitControllerUnitTest {
             .phoneNumber("(514)-634-8276 #2384")
             .imageId("1")
             .resume("Practicing since 3 years")
-            .workday("Monday, Tuesday, Friday")
+            .workday(workdaySet)
             .active(true)
             .specialties(set)
             .build();
-
+/*
     Date currentDate =new Date();
     PetResponseDTO petResponseDTO = PetResponseDTO.builder()
             .petTypeId(uuidPet)
@@ -74,8 +74,9 @@ class VisitControllerUnitTest {
             .photoId(uuidPhoto)
             .ownerId(uuidOwner)
             .build();
-
     Visit visit1 = buildVisit(uuidVisit1,"this is a dummy description",vet.getVetId());
+ */
+
     private final VisitResponseDTO visitResponseDTO = buildVisitResponseDto();
     private final VisitRequestDTO visitRequestDTO = buildVisitRequestDTO(vet.getVetId());
     private final String Visit_UUID_OK = visitResponseDTO.getVisitId();
@@ -123,7 +124,7 @@ class VisitControllerUnitTest {
         when(visitService.getVisitsForPractitioner(anyString())).thenReturn(Flux.just(visitResponseDTO));
 
         webTestClient.get()
-                .uri("/visits/practitioner/" + Practitioner_Id_OK)
+                .uri("/visits/practitioner/{practitionerId}", Practitioner_Id_OK)
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
@@ -246,6 +247,38 @@ class VisitControllerUnitTest {
                 .jsonPath("$.message", "No visit was found with visitId: " + invalidVisitId);
     }
 
+    @Test
+    void deleteAllCancelledVisits_shouldSucceed(){
+        // Arrange
+        Mockito.when(visitService.deleteAllCancelledVisits()).thenReturn(Mono.empty());
+
+        // Act & Assert
+        webTestClient
+               .delete()
+               .uri("/visits/cancelled")
+               .exchange()
+               .expectStatus().isNoContent();
+
+       Mockito.verify(visitService, times(1)).deleteAllCancelledVisits();
+    }
+
+    @Test
+    void deleteAllCancelledVisits_shouldThrowRuntimeException() throws RuntimeException {
+        // Arrange
+        Mockito.when(visitService.deleteAllCancelledVisits())
+                .thenReturn(Mono.error(new RuntimeException("Failed to delete cancelled visits")));
+
+        // Act & Assert
+        webTestClient
+                .delete()
+                .uri("/visits/cancelled")
+                .exchange()
+                .expectStatus().is5xxServerError();
+
+        Mockito.verify(visitService, times(1)).deleteAllCancelledVisits();
+    }
+
+/*
     private Visit buildVisit(String uuid,String description, String vetId){
         return Visit.builder()
                 .visitId(uuid)
@@ -256,7 +289,7 @@ class VisitControllerUnitTest {
                 .status(Status.UPCOMING)
                 .build();
     }
-
+*/
 
     private VisitResponseDTO buildVisitResponseDto(){
         return VisitResponseDTO.builder()

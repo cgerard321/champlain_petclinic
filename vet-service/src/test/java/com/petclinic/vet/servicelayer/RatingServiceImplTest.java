@@ -19,7 +19,9 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -177,7 +179,7 @@ class RatingServiceImplTest {
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
                 .imageId("kjd")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -191,7 +193,7 @@ class RatingServiceImplTest {
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
                 .imageId("kjd")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -205,7 +207,7 @@ class RatingServiceImplTest {
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
                 .imageId("kjd")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -230,6 +232,50 @@ class RatingServiceImplTest {
         StepVerifier
                 .create(averageRatingDTOFlux)
                 .expectNextCount(3)
+                .verifyComplete();
+
+    }
+    @Test
+    void getRatingBasedOnDate()throws JsonProcessingException{
+        rating.setRateScore(4.0);
+        rating.setDate("2021");
+        rating.setVetId("68790");
+        rating2.setRateScore(1.0);
+        rating2.setVetId("68792");
+        rating2.setDate("2022");
+        rating3.setRateScore(2.0);
+        rating3.setVetId("68793");
+        rating3.setDate("2023");
+
+
+        Vet vet1 = Vet.builder()
+                .vetId("vetId")
+                .vetBillId("1")
+                .firstName("Clementine")
+                .lastName("LeBlanc")
+                .email("skjfhf@gmail.com")
+                .phoneNumber("947-238-2847")
+                .resume("Just became a vet")
+                .imageId("kjd")
+                .workday(new HashSet<>())
+                .specialties(new HashSet<>())
+                .active(false)
+                .build();
+
+
+
+        Map<String, String> queryParams = new HashMap<>();
+        queryParams.put("year", "2023");
+
+        when(vetRepository.findVetByVetId(vet1.getVetId())).thenReturn(Mono.just(vet1));
+
+        when(ratingRepository.findAllByVetId(anyString())).thenReturn(Flux.just(rating, rating2, rating3));
+
+        Flux<RatingResponseDTO> ratingResponseDTOFlux = ratingService.getRatingsOfAVetBasedOnDate(vet1.getVetId(),queryParams);
+
+        StepVerifier
+                .create(ratingResponseDTOFlux)
+                .expectNextCount(1)
                 .verifyComplete();
     }
 
@@ -312,7 +358,7 @@ class RatingServiceImplTest {
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
                 .imageId("kjd")
-                .workday("Monday")
+                .workday(new HashSet<>())
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();

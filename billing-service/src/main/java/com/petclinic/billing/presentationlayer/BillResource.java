@@ -1,9 +1,9 @@
 package com.petclinic.billing.presentationlayer;
 
 import com.petclinic.billing.businesslayer.BillService;
-import com.petclinic.billing.datalayer.BillDTO;
 import com.petclinic.billing.datalayer.BillRequestDTO;
 import com.petclinic.billing.datalayer.BillResponseDTO;
+import com.petclinic.billing.datalayer.BillStatus;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,6 +41,23 @@ public class BillResource {
         return SERVICE.GetAllBills();
     }
 
+
+
+    @GetMapping(value = "/bills/paid", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<BillResponseDTO> findAllPaidBills() {
+        return SERVICE.GetAllBillsByStatus(BillStatus.PAID);
+    }
+
+    @GetMapping(value = "/bills/unpaid", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<BillResponseDTO> findAllUnpaidBills() {
+        return SERVICE.GetAllBillsByStatus(BillStatus.UNPAID);
+    }
+
+    @GetMapping(value = "/bills/overdue", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<BillResponseDTO> findAllOverdueBills() {
+        return SERVICE.GetAllBillsByStatus(BillStatus.OVERDUE);
+    }
+
     @PutMapping(value ="/bills/{billId}")
     public Mono<ResponseEntity<BillResponseDTO>> updateBill(@PathVariable String billId, @RequestBody Mono<BillRequestDTO> billRequestDTO){
         return SERVICE.updateBill(billId, billRequestDTO)
@@ -62,6 +79,13 @@ public class BillResource {
     }
 
     // Delete Bill //
+
+    @DeleteMapping(value = "/bills")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public Mono<Void> deleteAllBills(){
+        return SERVICE.DeleteAllBills();
+    }
+
     @DeleteMapping(value = "/bills/{billId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public Mono<Void> deleteBill(@PathVariable("billId") String billId){

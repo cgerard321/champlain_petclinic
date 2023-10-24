@@ -28,6 +28,25 @@
         </div>
 
         <div class="form-group">
+            <label class="control-label text-center" for="billStatus">Status</label>
+            <div class="col-sm-6">
+            <select class="form-control" name="billStatus" id="billStatus" ng-model="$ctrl.bill.billStatus" required title="Please select a status">
+                <option value="PAID">Paid</option>
+                <option value="UNPAID">Unpaid</option>
+                <option value="OVERDUE">Overdue</option>
+            </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-2 control-label">Due Date</label>
+            <div class="col-sm-6">
+                <input class="form-control" ng-model="$ctrl.bill.dueDate" name="dueDate" type="date" ng-disabled="$ctrl.checked" required />
+                <span ng-show="billForm.date.$error.required" class="help-block">Due Date is required.</span>
+            </div>
+        </div>
+
+        <div class="form-group">
             <label class="col-sm-2 control-label">Amount</label>
             <div class="col-sm-6">
                 <input class="form-control" ng-model="$ctrl.bill.amount" name="amount" ng-disabled="$ctrl.checked" required />

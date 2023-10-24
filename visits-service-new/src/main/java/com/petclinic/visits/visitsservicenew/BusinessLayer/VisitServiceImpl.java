@@ -2,12 +2,16 @@ package com.petclinic.visits.visitsservicenew.BusinessLayer;
 
 import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
-
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.Auth.AuthServiceClient;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.Auth.UserDetails;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.Mailing.Mail;
+import com.petclinic.visits.visitsservicenew.DomainClientLayer.Mailing.MailService;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.PetResponseDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.PetsClient;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetsClient;
 import com.petclinic.visits.visitsservicenew.Exceptions.BadRequestException;
+import com.petclinic.visits.visitsservicenew.Exceptions.DuplicateTimeException;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
@@ -16,8 +20,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
-
 import java.time.LocalDateTime;
+
+import static java.lang.String.format;
 
 
 @Service
@@ -26,17 +31,20 @@ public class VisitServiceImpl implements VisitService {
     private final VisitRepo repo;
     private final VetsClient vetsClient;
     private final PetsClient petsClient;
+    private final EntityDtoUtil entityDtoUtil;
 
+    private final AuthServiceClient authServiceClient;
+    private final MailService mailService;
     @Override
     public Flux<VisitResponseDTO> getAllVisits() {
-        return repo.findAll().map(EntityDtoUtil::toVisitResponseDTO);
+        return repo.findAll().flatMap(visit -> entityDtoUtil.toVisitResponseDTO(visit));
     }
 
     @Override
     public Flux<VisitResponseDTO> getVisitsForPet(String petId) {
         return validatePetId(petId)
                 .thenMany(repo.findByPetId(petId)
-                        .map(EntityDtoUtil::toVisitResponseDTO));
+                        .flatMap(visit -> entityDtoUtil.toVisitResponseDTO(visit)));
     }
 
     @Override
@@ -47,39 +55,30 @@ public class VisitServiceImpl implements VisitService {
             case("UPCOMING"):
                 status = Status.UPCOMING;
 
-            case("REQUESTED"):
-                status = Status.REQUESTED;
-
             case("CONFIRMED"):
                 status = Status.CONFIRMED;
 
             case("CANCELLED"):
                 status = Status.CANCELLED;
 
-            case("IN_PROGRESS"):
-                status = Status.IN_PROGRESS;
-
-            case("COMPLETED"):
-                status = Status.COMPLETED;
-
             default:
-                status = Status.CONFIRMED;
+                status = Status.COMPLETED;
         }
         return repo.findAllByStatus(statusString)
-                .map(EntityDtoUtil::toVisitResponseDTO);
+                .flatMap(visit -> entityDtoUtil.toVisitResponseDTO(visit));
     }
 
     @Override
     public Flux<VisitResponseDTO> getVisitsForPractitioner(String vetId) {
         return validateVetId(vetId)
                 .thenMany(repo.findVisitsByPractitionerId(vetId))
-                .map(EntityDtoUtil::toVisitResponseDTO);
+                .flatMap(visit -> entityDtoUtil.toVisitResponseDTO(visit));
     }
 
     @Override
     public Mono<VisitResponseDTO> getVisitByVisitId(String visitId) {
         return repo.findByVisitId(visitId)
-                .map(EntityDtoUtil::toVisitResponseDTO);
+                .flatMap(visit -> entityDtoUtil.toVisitResponseDTO(visit));
     }
 
     @Override
@@ -89,13 +88,33 @@ public class VisitServiceImpl implements VisitService {
                         .then(validatePetId(visitRequestDTO.getPetId()))
                         .then(validateVetId(visitRequestDTO.getPractitionerId()))
                         .then(Mono.just(visitRequestDTO))
+                        .doOnNext(s->{
+
+                            authServiceClient.getUserById(visitRequestDTO.getJwtToken(), visitRequestDTO.getOwnerId()).subscribe(user->mailService.sendMail(generateVisitRequestEmail(user, visitRequestDTO.getPetId(), visitRequestDTO.getVisitDate())));
+
+        //                    Mono<UserDetails> user = getUserById(auth, ownerId);
+        //                    try{
+        //                        simpleJavaMailClient.sendMail(emailBuilder("test@email.com"));
+        //                    }catch(Exception e){System.out.println("Email failed to send: "+e.getMessage());}
+                        })
                 )
-                .doOnNext(v -> System.out.println("Request Date: " + v.getVisitDate())) // Debugging
-                .map(EntityDtoUtil::toVisitEntity)
-                .doOnNext(x -> x.setVisitId(EntityDtoUtil.generateVisitIdString()))
-                .doOnNext(v -> System.out.println("Entity Date: " + v.getVisitDate())) // Debugging
-                .flatMap((repo::insert))
-                .map(EntityDtoUtil::toVisitResponseDTO);
+//                .doOnNext(v -> System.out.println("Request Date: " + v.getVisitDate())) // Debugging
+                .map(visitRequestDTO -> entityDtoUtil.toVisitEntity(visitRequestDTO))
+                .doOnNext(x -> x.setVisitId(entityDtoUtil.generateVisitIdString()))
+//                .doOnNext(v -> System.out.println("Entity Date: " + v.getVisitDate())) // Debugging
+                .flatMap(visit ->
+                        repo.findByVisitDateAndPractitionerId(visit.getVisitDate(), visit.getPractitionerId()) // FindVisits method in repository
+                                .collectList()
+                                .flatMap(existingVisits -> {
+                                    if(existingVisits.isEmpty()) {// If there are no existing visits
+                                        return repo.insert(visit); // Insert the visit
+                                    } else {
+                                        //return exception if a visits already exists at the specific day and time for a specific practitioner
+                                        return Mono.error(new DuplicateTimeException("A visit with the same time and practitioner already exists."));
+                                    }
+                                })
+                )
+                .flatMap(visit -> entityDtoUtil.toVisitResponseDTO(visit));
     }
 
     @Override
@@ -106,6 +125,19 @@ public class VisitServiceImpl implements VisitService {
                         return Mono.error(new NotFoundException("No visit was found with visitId: " + visitId));
                     } else {
                         return repo.deleteByVisitId(visitId);
+                    }
+                });
+    }
+
+    @Override
+    public Mono<Void> deleteAllCancelledVisits() {
+        return repo.findAllByStatus("CANCELLED")
+                .collectList()
+                .flatMap(canceledVisits ->{
+                    if(canceledVisits.isEmpty()){
+                        return Mono.empty();
+                    } else{
+                        return repo.deleteAll(canceledVisits);
                     }
                 });
     }
@@ -129,13 +161,13 @@ public class VisitServiceImpl implements VisitService {
                         .flatMap(visitRequestDTO -> validatePetId(visitRequestDTO.getPetId())
                                 .then(validateVetId(visitRequestDTO.getPractitionerId()))
                                 .then(Mono.just(visitRequestDTO)))
-                        .map(EntityDtoUtil::toVisitEntity)
+                        .map(visitRequestDTO -> entityDtoUtil.toVisitEntity(visitRequestDTO))
                         .doOnNext(visitEntityToUpdate -> {
                             visitEntityToUpdate.setVisitId(visitEntity.getVisitId());
                             visitEntityToUpdate.setId(visitEntity.getId());
                         }))
                 .flatMap(repo::save)
-                .map(EntityDtoUtil::toVisitResponseDTO);
+                .flatMap(visit -> entityDtoUtil.toVisitResponseDTO(visit));
     }
 
     @Override
@@ -143,12 +175,13 @@ public class VisitServiceImpl implements VisitService {
         Status newStatus;
         Status newStatus1;
         switch (status){
-            case "CONFIRMED":
-                newStatus1 = Status.CONFIRMED;
+
+            case "UPCOMING":
+                newStatus1 = Status.UPCOMING;
                 break;
 
-            case "IN_PROGRESS":
-                newStatus1 = Status.IN_PROGRESS;
+            case "CONFIRMED":
+                newStatus1 = Status.CONFIRMED;
                 break;
 
             case "COMPLETED":
@@ -163,7 +196,7 @@ public class VisitServiceImpl implements VisitService {
         return repo.findByVisitId(visitId)
                 .doOnNext(v -> v.setStatus(newStatus))
                 .flatMap(repo::save)
-                .map(EntityDtoUtil::toVisitResponseDTO);
+                .flatMap(visit -> entityDtoUtil.toVisitResponseDTO(visit));
     }
 
 
@@ -190,11 +223,64 @@ public class VisitServiceImpl implements VisitService {
         } else if ( dto.getPractitionerId() == null || dto.getPractitionerId().isBlank()) {
             return Mono.error(new BadRequestException("VetId cannot be null or blank"));
         }
-        else if (dto.getStatus() != Status.REQUESTED){
+        else if (dto.getStatus() != Status.UPCOMING){
             return Mono.error(new BadRequestException("Status is being set wrong!"));
         }
         else {
             return Mono.just(dto);
         }
+    }
+
+    private Mail generateVisitRequestEmail(UserDetails user, String petName, LocalDateTime visitDate) {
+        return Mail.builder()
+                .message(
+                    format("""
+                            <!DOCTYPE html>
+                            <html lang="en">
+                            <head>
+                                <meta charset="UTF-8">
+                                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                                <title>Email Verification</title>
+                                <style>
+                                    body {
+                                        font-family: Arial, sans-serif;
+                                        background-color: #f4f4f4;
+                                        margin: 0;
+                                        padding: 0;
+                                    }
+                                    .container {
+                                        max-width: 600px;
+                                        margin: 0 auto;
+                                        padding: 20px;
+                                        background-color: #fff;
+                                        border-radius: 5px;
+                                        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                                    }
+                                    h1 {
+                                        color: #333;
+                                    }
+                                    p {
+                                        color: #555;
+                                    }
+                                    a {
+                                        color: #007BFF;
+                                    }
+                                </style>
+                            </head>
+                            <body>
+                                <div class="container">
+                                    <h1>Dear %s,</h1>
+                                    <h3>We have received a request to schedule a visit for your pet with id: %s on the following date and time: %s.</h3>
+                                    \s
+                                    <p>If you do not wish to create an account, please disregard this email.</p>
+                                    \s
+                                    <p>Thank you for choosing Pet Clinic.</p>
+                                </div>
+                            </body>
+                            </html>
+                            """, user.getUsername(), petName, visitDate.toString()))
+                .subject("PetClinic Visit request")
+                .to(user.getEmail())
+                .build();
     }
 }

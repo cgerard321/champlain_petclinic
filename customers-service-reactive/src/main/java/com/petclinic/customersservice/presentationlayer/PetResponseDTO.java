@@ -1,9 +1,6 @@
 package com.petclinic.customersservice.presentationlayer;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Date;
 
@@ -18,7 +15,7 @@ public class PetResponseDTO {
     private String name;
     private Date birthDate;
     private String petTypeId;
-    private String photoId;
+  //  private String photoId;
     private String isActive;
-
+    private String weight;
 }

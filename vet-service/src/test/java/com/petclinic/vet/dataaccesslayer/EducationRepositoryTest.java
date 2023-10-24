@@ -86,8 +86,6 @@ class EducationRepositoryTest {
                 .expectNextCount(0)
                 .verifyComplete();
     }
-
-
     @Test
     public void addEducationToAVet_ShouldSucceed(){
         Education e3 = Education.builder()
@@ -109,6 +107,39 @@ class EducationRepositoryTest {
                     assertEquals(e3.getFieldOfStudy(), createdEducation.getFieldOfStudy());
                     assertEquals(e3.getStartDate(), createdEducation.getStartDate());
                     assertEquals(e3.getEndDate(), createdEducation.getEndDate());
+                });
+    }
+    @Test
+    public void updateEducationOfVet_ShouldSucceed(){
+        String existingEducationId="2";
+
+        Publisher<Education> existingEducation = educationRepository.findByEducationId(existingEducationId);
+
+        StepVerifier
+                .create(existingEducation)
+                .expectNextCount(1)
+                .verifyComplete();
+
+        Education education = Education.builder()
+                .educationId(existingEducationId)
+                .vetId("2")
+                .schoolName("McGill")
+                .vetId("678910")
+                .degree("Bachelor of Medicine")
+                .fieldOfStudy("Medicine")
+                .startDate("2010")
+                .endDate("2015")
+                .build();
+
+        StepVerifier.create(educationRepository.save(education))
+                .consumeNextWith(updatedEducation -> {
+                    assertEquals(education.getEducationId(), updatedEducation.getEducationId());
+                    assertEquals(education.getVetId(), updatedEducation.getVetId());
+                    assertEquals(education.getSchoolName(), updatedEducation.getSchoolName());
+                    assertEquals(education.getDegree(), updatedEducation.getDegree());
+                    assertEquals(education.getFieldOfStudy(), updatedEducation.getFieldOfStudy());
+                    assertEquals(education.getStartDate(), updatedEducation.getStartDate());
+                    assertEquals(education.getEndDate(), updatedEducation.getEndDate());
                 })
                 .verifyComplete();
     }

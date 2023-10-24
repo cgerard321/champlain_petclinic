@@ -1,6 +1,6 @@
 'use strict';
 angular.module('adminPanel')
-    .controller('AdminPanelController', ['$http', '$scope', "authProvider", function ($http, $scope, authProvider) {
+    .controller('AdminPanelController', ['$http', '$scope', "authProvider", "$window", function ($http, $scope, authProvider, $window) {
 
         var self = this;
         self.users = []
@@ -20,24 +20,41 @@ angular.module('adminPanel')
                 console.log("EventSource error: "+error)
             }
         }
+        
+        $scope.search = function () {
+            if ($scope.query === '') {
+                $http.get('api/gateway/users', {
+                    headers: {'Authorization': "Bearer " + authProvider.getUser().token}
+                })
+                    .then(function (resp) {
+                        self.users = resp.data;
+                    });
+            } else {
+                $http.get('api/gateway/users', {
+                    params: { username: $scope.query },
+                    headers: {'Authorization': "Bearer " + authProvider.getUser().token}
+                })
+                    .then(function (resp) {
+                        self.users = resp.data;
+                    });
+            }
+        };
 
 
         $scope.removeUser = function (userid) {
             $http.delete('api/gateway/users/' + userid, {
                 headers: {'Authorization': "Bearer " + authProvider.getUser().token}})
                 .then(function () {
-                $http.get('api/gateway/users', {
-                    headers: {'Authorization': "Bearer " + authProvider.getUser().token}})
-                    .then(function (resp) {
-                    self.users = resp.data;
+                    $http.get('api/gateway/users', {
+                        headers: {'Authorization': "Bearer " + authProvider.getUser().token}})
+                        .then(function (resp) {
+                            self.users = resp.data;
+                            alert("User has been deleted successfully.");
+                            $window.location.reload();
+                        });
                 });
-            });
         };
+
+
     }
     ]);
-
-
-
-
-
-

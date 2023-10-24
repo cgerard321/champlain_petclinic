@@ -10,7 +10,8 @@ angular.module('productForm')
                 productName: self.product.productName,
                 productDescription: self.product.productDescription,
                 productPrice: self.product.productPrice,
-                productQuantity: self.product.productQuantity
+                productQuantity: self.product.productQuantity,
+                productSalePrice: self.product.productSalePrice
             }
             var inventoryId = InventoryService.getInventoryId();
             console.log("InventoryId: " + inventoryId);

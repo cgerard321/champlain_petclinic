@@ -3,6 +3,8 @@ package com.petclinic.billing.businesslayer;
 import com.petclinic.billing.datalayer.*;
 //import com.petclinic.billing.domainclientlayer.OwnerClient;
 //import com.petclinic.billing.domainclientlayer.VetClient;
+import com.petclinic.billing.domainclientlayer.OwnerClient;
+import com.petclinic.billing.domainclientlayer.VetClient;
 import com.petclinic.billing.util.EntityDtoUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,14 +17,22 @@ import reactor.core.publisher.Mono;
 public class BillServiceImpl implements BillService{
 
     private final BillRepository billRepository;
-//    private final VetClient vetClient;
-//    private final OwnerClient ownerClient;
+    private final VetClient vetClient;
+    private final OwnerClient ownerClient;
 
     @Override
     public Mono<BillResponseDTO> getBillByBillId(String billUUID) {
 
-        return billRepository.findByBillId(billUUID).map(EntityDtoUtil::toBillResponseDto);
+        return billRepository.findByBillId(billUUID).map(EntityDtoUtil::toBillResponseDto)
+                .doOnNext(t -> t.setTaxedAmount(((t.getAmount() * 15)/100)+ t.getAmount()))
+                .doOnNext(t -> t.setTaxedAmount(Math.round(t.getTaxedAmount() * 100.0) / 100.0));
     }
+
+    @Override
+    public Flux<BillResponseDTO> GetAllBillsByStatus(BillStatus status) {
+        return billRepository.findAllBillsByBillStatus(status).map(EntityDtoUtil::toBillResponseDto);
+    }
+
 
     @Override
     public Flux<BillResponseDTO> GetAllBills() {
@@ -55,23 +65,20 @@ public class BillServiceImpl implements BillService{
                             existingBill.setVisitType(r.getVisitType());
                             existingBill.setVetId(r.getVetId());
                             existingBill.setDate(r.getDate());
+                            existingBill.setBillStatus(r.getBillStatus());
                             existingBill.setAmount(r.getAmount());
+                            existingBill.setDueDate(r.getDueDate());
 
                             return billRepository.save(existingBill);
                         })
                         .map(EntityDtoUtil::toBillResponseDto)
                 );
-                /*
-                billRepository.findByBillId(billId)
-                .flatMap(p -> billDTOMono
-                        .map(EntityDtoUtil::toEntity)
-                        .doOnNext(e -> e.setBillId(p.getBillId()))
-                        .doOnNext(e -> e.setId(p.getId()))
-                )
-                .flatMap(billRepository::save)
-                .map(EntityDtoUtil::toDto);
 
-                 */
+    }
+
+    @Override
+    public Mono<Void> DeleteAllBills() {
+        return billRepository.deleteAll();
     }
 
 
@@ -108,13 +115,13 @@ public class BillServiceImpl implements BillService{
 
 //    private Mono<RequestContextAdd> vetRequestResponse(RequestContextAdd rc) {
 //        return
-//                this.vetClient.getVetByVetId(rc.getVetDTO().getVetId())
+//                this.vetClient.getVetByVetId(rc.getBillRequestDTO().getVetId())
 //                        .doOnNext(rc::setVetDTO)
 //                        .thenReturn(rc);
 //    }
 //    private Mono<RequestContextAdd> ownerRequestResponse(RequestContextAdd rc) {
 //        return
-//                this.ownerClient.getOwnerByOwnerId(rc.getOwnerResponseDTO().getOwnerId())
+//                this.ownerClient.getOwnerByOwnerId(rc.getBillRequestDTO().getCustomerId())
 //                        .doOnNext(rc::setOwnerResponseDTO)
 //                        .thenReturn(rc);
 //    }

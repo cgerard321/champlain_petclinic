@@ -1,4 +1,5 @@
 <script>
+
     function purgeUser() {
         localStorage.removeItem("username")
         localStorage.removeItem("email")
@@ -9,6 +10,29 @@
     //access the roles title and make sure it exists
     const userRoles = localStorage.getItem('roles')
     console.log(userRoles);
+
+    function logoutUser() {
+        logoutUser.$inject = ['$http'];
+        var $http = angular.injector(['ng']).get('$http');
+        $http({
+            method: 'POST',
+            url: '/api/gateway/users/logout'
+        }).then(function successCallback(response) {
+            alert("Logout successful")
+            localStorage.removeItem("username")
+            localStorage.removeItem("email")
+            localStorage.removeItem("UUID")
+            localStorage.removeItem("roles")
+            window.location.href = '/#!/login';
+        }, function errorCallback(response) {
+            alert("Logout Error: Session may have expired. Redirecting to login page")
+            localStorage.removeItem("username")
+            localStorage.removeItem("email")
+            localStorage.removeItem("UUID")
+            localStorage.removeItem("roles")
+            window.location.href = '/#!/login';
+        });    }
+
 </script>
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -31,7 +55,12 @@
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <a class="nav-link" ui-sref="owners">Owners</a>
+
                         <a class="nav-link" ui-sref="ownerDetails({ ownerId: UUID })" ng-if = "roles == 'OWNER'" >Edit Account</a>
+
+                        <a class="nav-link" ui-sref="ownerDetails({ ownerId: UUID })">Edit Account</a>
+                        <a class="nav-link" ui-sref="petTypes">Pet Types</a>
+
                     </div>
                 </li>
                 <li class="nav-item" ng-if = "roles !== 'OWNER'">
@@ -54,7 +83,7 @@
                     <a class="nav-link" ui-sref="AdminPanel" >Admin-Panel</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" onclick="purgeUser()" style="cursor:pointer" ui-sref="login">Logout</a>
+                    <a class="nav-link" onclick="logoutUser()" style="cursor:pointer">Logout</a>
                 </li>
             </ul>
         <ul class="navbar-nav mr-auto justify-content-end" ng-if="!isLoggedIn">

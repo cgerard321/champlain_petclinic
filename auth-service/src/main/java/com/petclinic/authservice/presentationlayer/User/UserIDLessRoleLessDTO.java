@@ -38,4 +38,6 @@ public class UserIDLessRoleLessDTO {
     private String password;
 
     private String email;
+
+    private String defaultRole;
 }

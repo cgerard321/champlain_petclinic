@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
+import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 import java.util.UUID;
@@ -101,6 +102,40 @@ class InventoryRepositoryTest {
                 .expectNextMatches(result -> result.getInventoryId().equals("inventoryId_3"))
                 .verifyComplete();
     }
+
+
+
+    @Test
+    public void shouldFindInventoryByNameRegex() {
+        // Arrange
+        Inventory inventory = buildInventory("inventoryId_4", "Benzodiazepines", "Internal", "SomeDescription");
+        inventoryRepository.save(inventory).block();
+
+        String regexPattern = "(?i)^B.*";  // Just for this example since we know the name starts with 'B'
+
+        // Act & Assert
+        StepVerifier
+                .create(inventoryRepository.findByInventoryNameRegex(regexPattern))
+                .expectNextMatches(result -> result.getInventoryId().equals("inventoryId_4"))
+                .verifyComplete();
+    }
+
+    @Test
+    public void shouldFindInventoryByDescriptionRegex() {
+        // Arrange
+        Inventory inventory = buildInventory("inventoryId_5", "SomeName", "Internal", "Medication");
+        inventoryRepository.save(inventory).block();
+
+        String regexPattern = "(?i)^M.*";  // Since we know the description starts with 'M'
+
+        // Act & Assert
+        StepVerifier
+                .create(inventoryRepository.findByInventoryDescriptionRegex(regexPattern))
+                .expectNextMatches(result -> result.getInventoryId().equals("inventoryId_5"))
+                .verifyComplete();
+    }
+
+
 
 
 

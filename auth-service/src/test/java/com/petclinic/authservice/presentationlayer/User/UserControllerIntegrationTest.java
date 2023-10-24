@@ -1,11 +1,13 @@
 package com.petclinic.authservice.presentationlayer.User;
 
 import com.petclinic.authservice.Util.Exceptions.HTTPErrorMessage;
-import com.petclinic.authservice.businesslayer.UserService;
+import com.petclinic.authservice.datalayer.roles.Role;
 import com.petclinic.authservice.domainclientlayer.Mail.MailService;
 import com.petclinic.authservice.security.JwtTokenUtil;
 import com.petclinic.authservice.datalayer.user.*;
 import org.aspectj.lang.annotation.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
@@ -17,7 +19,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.test.web.servlet.MockMvc;
 
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -25,9 +26,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-import java.util.Base64;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @AutoConfigureWebTestClient
@@ -54,12 +54,15 @@ class UserControllerIntegrationTest {
     @MockBean
     private MailService mailService;
 
+    private final String VALID_USER_ID = "7c0d42c2-0c2d-41ce-bd9c-6ca67478956f";
+
+    private final String VALID_USER_ID2 = "f470653d-05c5-4c45-b7a0-7d70f003d2ac";
+
     @Before("setup")
     public void setup() {
         String baseUri = "http://localhost:" + "9200";
         this.webTestClient = WebTestClient.bindToServer().baseUrl(baseUri).build();
     }
-
 
 
     @Test
@@ -368,6 +371,47 @@ class UserControllerIntegrationTest {
         userRepo.delete(userRepo.findByEmail(userDTO.getEmail()).get());
     }
 
+    @Test
+    void createUserWithDefaultRole_ShouldSucceed() {
+        UserIDLessRoleLessDTO userDTO = UserIDLessRoleLessDTO.builder()
+                .email("richard2004danon@gmail.com")
+                .password("pwd%jfjfjDkkkk8")
+                .username("Ricky")
+                .defaultRole("INVENTORY_MANAGER")
+                .userId(new UserIdentifier().getUserId())
+                .build();
+
+        webTestClient.post()
+                .uri("/users")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(userDTO)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody(UserPasswordLessDTO.class)
+                .value(user -> {
+                    assertEquals(userDTO.getEmail(), user.getEmail());
+                    assertEquals(userDTO.getUsername(),user.getUsername());
+
+                });
+
+        User user = userRepo.findByEmail(userDTO.getEmail()).get();
+
+        final String base64Token = Base64.getEncoder()
+                .withoutPadding()
+                .encodeToString(jwtService.generateToken(user).getBytes());
+
+        webTestClient.get()
+                .uri("/users/verification/"+base64Token)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk();
+
+        assertTrue(userRepo.findByEmail(userDTO.getEmail()).get().isVerified());
+
+        userRepo.delete(userRepo.findByEmail(userDTO.getEmail()).get());
+    }
+
+
 
     @Test
     void createUser_ShouldFail() {
@@ -384,6 +428,25 @@ class UserControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isBadRequest();
         }
+
+    @Test
+    void createUserWithInvalidDefaultRole_ShouldFail() {
+        UserIDLessRoleLessDTO userDTO = UserIDLessRoleLessDTO.builder()
+                .email("email@email.com")
+                .password("GoodPwd!!222")
+                .username("Ricky")
+                .defaultRole("NOT_A_ROLE")
+                .build();
+
+        webTestClient.post()
+                .uri("/users")
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(userDTO)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("No role with name: NOT_A_ROLE");
+    }
     @Test
     void verifyInvalidToken_ShouldReturnBadRequest(){
         User user = userRepo.findByEmail("admin@admin.com").get();
@@ -398,8 +461,6 @@ class UserControllerIntegrationTest {
 
 
     }
-
-
 
     @Test
     void createUser_ShouldThrowEmailAlreadyExistsException() {
@@ -431,9 +492,43 @@ class UserControllerIntegrationTest {
                 .expectBody()
                 .jsonPath("$.message").isEqualTo(String.format("User with e-mail %s already exists", userDTO.getEmail()));
 
-
+            userRepo.delete(existingUser);
 
     }
+
+    @Test
+    void createUser_ShouldThrowUsernameAlreadyExistsException() {
+        UserIDLessRoleLessDTO userDTO = UserIDLessRoleLessDTO.builder()
+                .email("richard2004danon@gmail.com")
+                .password("pwd%jfjfjDkkkk8")
+                .username("Ric")
+                .build();
+
+        User existingUser = new User();
+        existingUser.setEmail("dab@gmail.com");
+        existingUser.setUsername("Ric");
+        existingUser.setPassword("pwd%jfjfjDkkkk8");
+
+
+        userRepo.save(existingUser);
+
+
+        webTestClient
+                .post()
+                .uri("/users")
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(userDTO)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.BAD_REQUEST)
+                .expectHeader()
+                .contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo(String.format("User with username %s already exists", userDTO.getUsername()));
+
+        userRepo.delete(existingUser);
+    }
+
 
     @Test
     void getAllUsers_ShouldSucceed(){
@@ -448,10 +543,207 @@ class UserControllerIntegrationTest {
                 .expectStatus().isOk()
                 .expectBodyList(UserDetails.class)
                 .value(users -> {
-                    assertEquals(12,users.size());
+                    assertEquals(18,users.size());
+                });
+    }
+    @Test
+    public void getUserByUserId_ShouldReturnUser() {
+        String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
+
+        webTestClient.get()
+                .uri("/users/{userId}" , VALID_USER_ID)
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer",token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.userId").isEqualTo(VALID_USER_ID);
+    }
+
+    @Test
+    public void getUserByUserId_WithNonExistentUser_ShouldReturnNotFound() {
+        String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
+        String nonExistentUserId = "nonExistentUserId";
+
+        webTestClient.get()
+                .uri("/users/{userId}", nonExistentUserId)
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer",token)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("No user with userId: " + nonExistentUserId);
+    }
+    @Test
+    public void getUsersByUsernameContaining_ShouldReturnUsers() {
+        String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/users/")
+                        .queryParam("username", "adm")
+                        .build()
+                )
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer",token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(UserDetails.class)
+                .value(users -> {
+                    assertEquals(0,users.size());
                 });
     }
 
+    @Test
+    public void getAllUsersWithoutUsernameParam_ShouldReturnAllUsers() {
+        String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/users/")
+                        .queryParam("", "")
+                        .build()
+                )
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer",token)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(UserDetails.class)
+                .value(users -> {
+                    assertEquals(18,users.size());
+                });
+    }
+
+    @Test
+    void deleteUser_ShouldSucceed(){
+        String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
+
+        webTestClient.delete()
+                .uri("/users/{userId}" , VALID_USER_ID2)
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer",token)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        assertNull(userRepo.findUserByUserIdentifier_UserId(VALID_USER_ID2));
+    }
+
+    @Test
+    void deleteUser_ShouldThrowNotFoundException(){
+        String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
+        String nonExistingUserId = "nonExistingUserId";
+
+        webTestClient.delete()
+                .uri("/users/{userId}" , nonExistingUserId)
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer",token)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+
+    @Test
+    void updateUserRole_validUserId() {
+        RolesChangeRequestDTO updatedUser = RolesChangeRequestDTO.builder()
+                .roles(Collections.singleton("OWNER"))
+                .build();
+        String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
+
+        webTestClient
+                .patch()
+                .uri("/users/" + VALID_USER_ID)
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer",token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedUser)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(UserPasswordLessDTO.class)
+                .value(dto -> {
+                    assertNotNull(dto);
+                    List<String> actualRoleNames = dto.getRoles().stream()
+                            .map(Role::getName)
+                            .toList();
+
+                    Set<String> actualRolesSet = new HashSet<>(actualRoleNames);
+
+                    assertEquals(updatedUser.getRoles(), actualRolesSet);
+                });
+    }
+
+    @Test
+    void updateUserRole_InvalidUserId() {
+        RolesChangeRequestDTO updatedUser = RolesChangeRequestDTO.builder()
+                .roles(Collections.singleton("OWNER"))
+                .build();
+        String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
+        String invalidUserId = "invalidId";
+
+        webTestClient
+                .patch()
+                .uri("/users/" + invalidUserId)
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedUser)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+    @Test
+    void updateUserRole_NoCookie() {
+        RolesChangeRequestDTO updatedUser = RolesChangeRequestDTO.builder()
+                .roles(Collections.singleton("OWNER"))
+                .build();
+
+        webTestClient
+                .patch()
+                .uri("/users/" + VALID_USER_ID)
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedUser)
+                .exchange()
+                .expectStatus().isUnauthorized();
+    }
+
+    @Test
+    void updateUserRole_cannotChangeOwnRoles() {
+        String userId = "validUserId";
+        RolesChangeRequestDTO updatedUser = RolesChangeRequestDTO.builder()
+                .roles(Collections.singleton("OWNER"))
+                .build();
+
+        String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
+
+        webTestClient
+                .patch()
+                .uri("/users/" + jwtService.getIdFromToken(token))
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedUser)
+                .exchange()
+                .expectStatus().isBadRequest();
+    }
+
+    @Test
+    void updateUserRole_invalidRole() {
+        RolesChangeRequestDTO updatedUser = RolesChangeRequestDTO.builder()
+                .roles(Collections.singleton("NOT_OWNER"))
+                .build();
+        String token = jwtTokenUtil.generateToken(userRepo.findAll().get(0));
+
+        webTestClient
+                .patch()
+                .uri("/users/" + VALID_USER_ID)
+                .accept(MediaType.APPLICATION_JSON)
+                .cookie("Bearer", token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(updatedUser)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
 
 
 
