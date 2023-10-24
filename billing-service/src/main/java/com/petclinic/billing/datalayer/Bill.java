@@ -22,6 +22,7 @@ public class Bill {
     private String vetLastName;
     private LocalDate date;
     private double amount;
+    private double taxedAmount;
     private BillStatus billStatus;
 
     private LocalDate dueDate;

@@ -21,7 +21,9 @@ public class BillServiceImpl implements BillService{
     @Override
     public Mono<BillResponseDTO> getBillByBillId(String billUUID) {
 
-        return billRepository.findByBillId(billUUID).map(EntityDtoUtil::toBillResponseDto);
+        return billRepository.findByBillId(billUUID).map(EntityDtoUtil::toBillResponseDto)
+                .doOnNext(t -> t.setTaxedAmount(((t.getAmount() * 15)/100)+ t.getAmount()))
+                .doOnNext(t -> t.setTaxedAmount(Math.round(t.getTaxedAmount() * 100.0) / 100.0));
     }
 
     @Override
