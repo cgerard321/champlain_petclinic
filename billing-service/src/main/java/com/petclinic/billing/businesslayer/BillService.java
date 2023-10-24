@@ -12,8 +12,6 @@ import reactor.core.publisher.Mono;
 public interface BillService {
     Mono<BillResponseDTO> getBillByBillId(String billId);
 
-    //Mono<BillResponseDTO> getTaxedAmountByBillIdAndBillAmount(String billId, Double amount);
-
     Flux<BillResponseDTO> GetAllBillsByStatus(BillStatus status);
 
 
