@@ -807,7 +807,8 @@ class VetControllerIntegrationTest {
                 .jsonPath("$[0].lastName").isEqualTo(vet.getLastName())
                 .jsonPath("$[0].firstName").isEqualTo(vet.getFirstName())
                 .jsonPath("$[0].email").isEqualTo(vet.getEmail())
-                .jsonPath("$[0].active").isEqualTo(vet.isActive());
+                .jsonPath("$[0].active").isEqualTo(vet.isActive())
+                .jsonPath("$[0].workHoursJson").isEqualTo(vet.getWorkHoursJson());
     }
 
     @Test
@@ -833,7 +834,8 @@ class VetControllerIntegrationTest {
                 .jsonPath("$.lastName").isEqualTo(vet.getLastName())
                 .jsonPath("$.firstName").isEqualTo(vet.getFirstName())
                 .jsonPath("$.email").isEqualTo(vet.getEmail())
-                .jsonPath("$.active").isEqualTo(vet.isActive());
+                .jsonPath("$.active").isEqualTo(vet.isActive())
+                .jsonPath("$.workHoursJson").isEqualTo(vet.getWorkHoursJson());
 
     }
 
@@ -1125,7 +1127,8 @@ class VetControllerIntegrationTest {
                 .jsonPath("$[0].lastName").isEqualTo(vet2.getLastName())
                 .jsonPath("$[0].firstName").isEqualTo(vet2.getFirstName())
                 .jsonPath("$[0].email").isEqualTo(vet2.getEmail())
-                .jsonPath("$[0].active").isEqualTo(vet2.isActive());
+                .jsonPath("$[0].active").isEqualTo(vet2.isActive())
+                .jsonPath("$[0].workHoursJson").isEqualTo(vet2.getWorkHoursJson());
     }
 
     @Test
@@ -1150,7 +1153,8 @@ class VetControllerIntegrationTest {
                 .jsonPath("$[0].lastName").isEqualTo(vet.getLastName())
                 .jsonPath("$[0].firstName").isEqualTo(vet.getFirstName())
                 .jsonPath("$[0].email").isEqualTo(vet.getEmail())
-                .jsonPath("$[0].active").isEqualTo(vet.isActive());
+                .jsonPath("$[0].active").isEqualTo(vet.isActive())
+                .jsonPath("$[0].workHoursJson").isEqualTo(vet.getWorkHoursJson());
     }
 
 
@@ -1697,6 +1701,11 @@ class VetControllerIntegrationTest {
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Just became a vet")
                 .workday(new HashSet<>())
+                .workHoursJson("{\n" +
+                        "            \"Monday\": [\"Hour_8_9\",\"Hour_9_10\",\"Hour_10_11\",\"Hour_11_12\",\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\"],\n" +
+                        "            \"Wednesday\": [\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\",\"Hour_16_17\",\"Hour_17_18\",\"Hour_18_19\",\"Hour_19_20\"],\n" +
+                        "            \"Thursday\": [\"Hour_10_11\",\"Hour_11_12\",\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\",\"Hour_16_17\",\"Hour_17_18\"]\n" +
+                        "        }")
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -1713,6 +1722,11 @@ class VetControllerIntegrationTest {
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Just became a vet")
                 .workday(new HashSet<>())
+                .workHoursJson("{\n" +
+                        "            \"Monday\": [\"Hour_8_9\",\"Hour_9_10\",\"Hour_10_11\",\"Hour_11_12\",\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\"],\n" +
+                        "            \"Wednesday\": [\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\",\"Hour_16_17\",\"Hour_17_18\",\"Hour_18_19\",\"Hour_19_20\"],\n" +
+                        "            \"Thursday\": [\"Hour_10_11\",\"Hour_11_12\",\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\",\"Hour_16_17\",\"Hour_17_18\"]\n" +
+                        "        }")
                 .specialties(new HashSet<>())
                 .active(true)
                 .build();
@@ -1762,6 +1776,11 @@ class VetControllerIntegrationTest {
                 .phoneNumber("(514)-634-8276 #"+extensionNum)
                 .resume("Just became a vet")
                 .workday(new HashSet<>())
+                .workHoursJson("{\n" +
+                        "            \"Monday\": [\"Hour_8_9\",\"Hour_9_10\",\"Hour_10_11\",\"Hour_11_12\",\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\"],\n" +
+                        "            \"Wednesday\": [\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\",\"Hour_16_17\",\"Hour_17_18\",\"Hour_18_19\",\"Hour_19_20\"],\n" +
+                        "            \"Thursday\": [\"Hour_10_11\",\"Hour_11_12\",\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\",\"Hour_16_17\",\"Hour_17_18\"]\n" +
+                        "        }")
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();

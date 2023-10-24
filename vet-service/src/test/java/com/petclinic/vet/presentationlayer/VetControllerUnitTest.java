@@ -340,7 +340,8 @@ class VetControllerUnitTest {
                 .jsonPath("$[0].lastName").isEqualTo(vetResponseDTO.getLastName())
                 .jsonPath("$[0].firstName").isEqualTo(vetResponseDTO.getFirstName())
                 .jsonPath("$[0].email").isEqualTo(vetResponseDTO.getEmail())
-                .jsonPath("$[0].active").isEqualTo(vetResponseDTO.isActive());
+                .jsonPath("$[0].active").isEqualTo(vetResponseDTO.isActive())
+                .jsonPath("$[0].workHoursJson").isEqualTo(vetResponseDTO.getWorkHoursJson());
 
         Mockito.verify(vetService, times(1))
                 .getAll();
@@ -365,7 +366,9 @@ class VetControllerUnitTest {
                 .jsonPath("$.lastName").isEqualTo(vet.getLastName())
                 .jsonPath("$.firstName").isEqualTo(vet.getFirstName())
                 .jsonPath("$.email").isEqualTo(vet.getEmail())
-                .jsonPath("$.active").isEqualTo(vet.isActive());
+                .jsonPath("$.active").isEqualTo(vet.isActive())
+                .jsonPath("$.workHoursJson").isEqualTo(vet.getWorkHoursJson());
+
 
         Mockito.verify(vetService, times(1))
                 .getVetByVetId(VET_ID);
@@ -414,7 +417,8 @@ class VetControllerUnitTest {
                 .jsonPath("$[0].lastName").isEqualTo(vetResponseDTO2.getLastName())
                 .jsonPath("$[0].firstName").isEqualTo(vetResponseDTO2.getFirstName())
                 .jsonPath("$[0].email").isEqualTo(vetResponseDTO2.getEmail())
-                .jsonPath("$[0].active").isEqualTo(vetResponseDTO2.isActive());
+                .jsonPath("$[0].active").isEqualTo(vetResponseDTO2.isActive())
+                .jsonPath("$[0].workHoursJson").isEqualTo(vetResponseDTO2.getWorkHoursJson());
 
         Mockito.verify(vetService, times(1))
                 .getVetByIsActive(vetResponseDTO2.isActive());
@@ -492,7 +496,8 @@ class VetControllerUnitTest {
                 .jsonPath("$[0].lastName").isEqualTo(vetResponseDTO.getLastName())
                 .jsonPath("$[0].firstName").isEqualTo(vetResponseDTO.getFirstName())
                 .jsonPath("$[0].email").isEqualTo(vetResponseDTO.getEmail())
-                .jsonPath("$[0].active").isEqualTo(vetResponseDTO.isActive());
+                .jsonPath("$[0].active").isEqualTo(vetResponseDTO.isActive())
+                .jsonPath("$[0].workHoursJson").isEqualTo(vetResponseDTO.getWorkHoursJson());
 
         Mockito.verify(vetService, times(1))
                 .getVetByIsActive(vetResponseDTO.isActive());
@@ -832,6 +837,11 @@ class VetControllerUnitTest {
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
                 .workday(new HashSet<>())
+                .workHoursJson("{\n" +
+                        "            \"Monday\": [\"Hour_8_9\",\"Hour_9_10\",\"Hour_10_11\",\"Hour_11_12\",\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\"],\n" +
+                        "            \"Wednesday\": [\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\",\"Hour_16_17\",\"Hour_17_18\",\"Hour_18_19\",\"Hour_19_20\"],\n" +
+                        "            \"Thursday\": [\"Hour_10_11\",\"Hour_11_12\",\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\",\"Hour_16_17\",\"Hour_17_18\"]\n" +
+                        "        }")
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -862,6 +872,11 @@ class VetControllerUnitTest {
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
                 .workday(new HashSet<>())
+                .workHoursJson("{\n" +
+                        "            \"Monday\": [\"Hour_8_9\",\"Hour_9_10\",\"Hour_10_11\",\"Hour_11_12\",\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\"],\n" +
+                        "            \"Wednesday\": [\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\",\"Hour_16_17\",\"Hour_17_18\",\"Hour_18_19\",\"Hour_19_20\"],\n" +
+                        "            \"Thursday\": [\"Hour_10_11\",\"Hour_11_12\",\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\",\"Hour_16_17\",\"Hour_17_18\"]\n" +
+                        "        }")
                 .specialties(new HashSet<>())
                 .active(false)
                 .build();
@@ -876,6 +891,11 @@ class VetControllerUnitTest {
                 .phoneNumber("947-238-2847")
                 .resume("Just became a vet")
                 .workday(new HashSet<>())
+                .workHoursJson("{\n" +
+                        "            \"Monday\": [\"Hour_8_9\",\"Hour_9_10\",\"Hour_10_11\",\"Hour_11_12\",\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\"],\n" +
+                        "            \"Wednesday\": [\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\",\"Hour_16_17\",\"Hour_17_18\",\"Hour_18_19\",\"Hour_19_20\"],\n" +
+                        "            \"Thursday\": [\"Hour_10_11\",\"Hour_11_12\",\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\",\"Hour_16_17\",\"Hour_17_18\"]\n" +
+                        "        }")
                 .specialties(new HashSet<>())
                 .active(true)
                 .build();
