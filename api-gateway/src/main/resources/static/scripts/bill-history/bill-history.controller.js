@@ -457,6 +457,7 @@ angular.module('billHistory')
                     alert(billId + " bill was deleted successfully");
                     console.log(response, 'res');
                     //refresh list
+                    location.reload()
                     $http.get('api/gateway/bills').then(function (resp) {
                         vm.billHistory = resp.data;
                         arr = resp.data;
