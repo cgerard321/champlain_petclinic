@@ -4,11 +4,8 @@ import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerRequestDTO;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.*;
 import com.petclinic.bffapigateway.dtos.Vets.PhotoDetails;
-import com.petclinic.bffapigateway.exceptions.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -44,16 +41,6 @@ public class CustomersServiceClient {
         return webClientBuilder.build().get()
                 .uri(customersServiceUrl + "/owners/" + ownerId)
                 .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, error->{
-                    HttpStatusCode statusCode = error.statusCode();
-
-                    if (statusCode.equals(HttpStatus.NOT_FOUND))
-                        return Mono.error(new NotFoundException("Course id not found:" + ownerId));
-                    return Mono.error(new IllegalArgumentException("Something went wrong(owner Client)"));
-                })
-                .onStatus(HttpStatusCode::is5xxServerError, error-> {
-                    return Mono.error(new IllegalArgumentException("Something went wrong(owner Client"));
-                })
                 .bodyToMono(OwnerResponseDTO.class);
     }
 

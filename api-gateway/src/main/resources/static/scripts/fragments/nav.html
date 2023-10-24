@@ -1,16 +1,4 @@
 <script>
-
-    function purgeUser() {
-        localStorage.removeItem("username")
-        localStorage.removeItem("email")
-        localStorage.removeItem("UUID")
-        localStorage.removeItem("roles")
-    }
-
-    //access the roles title and make sure it exists
-    const userRoles = localStorage.getItem('roles')
-    console.log(userRoles);
-
     function logoutUser() {
         logoutUser.$inject = ['$http'];
         var $http = angular.injector(['ng']).get('$http');
@@ -32,7 +20,6 @@
             localStorage.removeItem("roles")
             window.location.href = '/#!/login';
         });    }
-
 </script>
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
@@ -55,22 +42,16 @@
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <a class="nav-link" ui-sref="owners">Owners</a>
-
-                        <a class="nav-link" ui-sref="ownerDetails({ ownerId: UUID })" ng-if = "roles == 'OWNER'" >Edit Account</a>
-
                         <a class="nav-link" ui-sref="ownerDetails({ ownerId: UUID })">Edit Account</a>
                         <a class="nav-link" ui-sref="petTypes">Pet Types</a>
-
                     </div>
                 </li>
-                <li class="nav-item" ng-if = "roles !== 'OWNER'">
+                <li class="nav-item">
                         <a class="nav-link" ui-sref="bills">Bills</a>
                 </li>
-
-                <li class="nav-item" ng-if = "roles !== 'OWNER'">
+                <li class="nav-item">
                     <a class="nav-link" ui-sref="visitList">Visits</a>
                 </li>
-
                 <li class="nav-item">
                     <a class="nav-link" ui-sref="inventories">Inventory</a>
                 </li>
@@ -94,5 +75,7 @@
                 <a class="nav-link" ui-sref="login">Login</a>
             </li>
         </ul>
+
+
     </div>
 </nav>
