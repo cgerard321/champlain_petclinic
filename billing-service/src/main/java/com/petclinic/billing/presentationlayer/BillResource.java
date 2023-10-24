@@ -14,6 +14,7 @@ import reactor.core.publisher.Mono;
 import javax.validation.Valid;
 
 @RestController
+@RequestMapping("")
 @Slf4j
 public class BillResource {
     private final BillService SERVICE;
