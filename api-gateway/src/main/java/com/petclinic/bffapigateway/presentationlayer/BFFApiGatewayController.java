@@ -46,6 +46,7 @@ import java.util.Optional;
 @Slf4j
 @RequestMapping("/api/gateway")
 @Validated
+@CrossOrigin(origins = "http://localhost:3000")
 public class BFFApiGatewayController {
 
     private final CustomersServiceClient customersServiceClient;
