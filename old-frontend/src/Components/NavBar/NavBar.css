@@ -1,8 +1,0 @@
-.navBarContainer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background-color: #f8f9fa;
-  padding: 0.5rem 1rem;
-  border-bottom: 1px solid #e3e7ea;
-}
