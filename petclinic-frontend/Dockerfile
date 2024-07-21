@@ -1,23 +1,35 @@
-# Stage 1 - Build the React application
-FROM node:18-alpine as react-build
-WORKDIR /petclinic-frontend/
-COPY public /petclinic-frontend/public/
-COPY src/ /petclinic-frontend/src
-COPY package.json /frontend/
-COPY package.json .
-COPY package-lock.json .
+# Use an official Node.js Runtime as a base image
+FROM node:21 AS build
+
+# Set the working directory inside the container
+WORKDIR /application
+
+# Install Project dependencies
 RUN npm install
+
+# Copy the rest of the application code to the working directory
+COPY . .
+
+# audit the installed packages
+RUN npm audit
+
+# Build the React app
 RUN npm run build
 
-# Stage 2 - Serve the React application using NGINX
-FROM nginx:1.19.0
-WORKDIR /usr/share/nginx/html
+# Use a smaller, lightweight base image for the final image
+FROM nginx:alpine
 
-# Copy the built React application from the first stage
-COPY --from=react-build /petclinic-frontend/build/ /usr/share/nginx/html
+# Adjust permissions for Nginx
+RUN chown -R nginx:nginx /var/cache/nginx /var/run /var/log/nginx
+RUN chown -R nginx:0 /usr/share/nginx/html && \
+    chmod -R g+r+rwX /usr/share/nginx/html
 
-# Optionally, if you have a custom NGINX configuration (nginx.conf), uncomment and modify this line:
-# COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY --from=build /app/dist /usr/share/nginx/html
+# Copy the default Nginx configuration file
+COPY nginx.conf /etc/nginx/nginx.conf
 
-# Configure NGINX to serve the application
-ENTRYPOINT ["nginx", "-g", "daemon off;"]
+# Expose port 3000 for the NGINX web server
+EXPOSE 3000
+
+# Command to run NGINX
+CMD ["nginx", "-g", "daemon off;"]
