@@ -17,7 +17,7 @@ export default defineConfig(() => {
       '@/': new URL('./src/', import.meta.url).pathname,
     }
   },
-  envDir: 'src/environments',
+  envDir: 'src/environments/',
   builds:{
     modulePReload: false,
     target: 'esnext',
