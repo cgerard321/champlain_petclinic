@@ -87,7 +87,7 @@ func TestMailerControllerImpl_Unmarshalls(t *testing.T) {
 		assert.Equal(t, http.StatusOK, w.Code)
 		body, err := ioutil.ReadAll(w.Result().Body)
 		assert.Nil(t, err)
-		assert.Contains(t, string(body), "Message sent to " + email)
+		assert.Contains(t, string(body), "Message sent to "+email)
 		return true
 	})
 }
@@ -118,13 +118,12 @@ func TestMailerControllerImpl_ValidateInValidEmail(t *testing.T) {
 
 		assert.Nil(t, err)
 		assert.Equal(t,
-			"\"Key: 'Mail.To' Error:Field validation for 'To' failed on the 'required' tag" +
+			"\"Key: 'Mail.To' Error:Field validation for 'To' failed on the 'required' tag"+
 				"\\nKey: 'Mail.Message' Error:Field validation for 'Message' failed on the 'required' tag\"",
 			string(body))
 
 		return true
 	})
-
 
 }
 
@@ -163,30 +162,42 @@ func TestHandleMailPOST_NilMail(t *testing.T) {
 	assert.Equal(t, "\"Unable to parse e-mail from body\"", recorder.Body.String())
 }
 
+func getRandomPort() int {
+	s, e := net.Listen("tcp", ":0")
+	if s == nil || e != nil {
+		panic("Unable to create a new port")
+	}
+	defer s.Close()
+
+	return s.Addr().(*net.TCPAddr).Port
+}
+
 func TestHandleMailPOST_Full(t *testing.T) {
 
-	get, err := startMockSMTPServer(2000)
+	port := getRandomPort()
+	get, err := startMockSMTPServer(port)
+	fmt.Println(err)
 	assert.Nil(t, err)
 
-	fullTestEnv(t, func (engine *gin.Engine, req *http.Request, m *mailer.Mail) {
+	fullTestEnv(t, port, func(engine *gin.Engine, req *http.Request, m *mailer.Mail) {
 
 		testHTTPResponse(t, engine, req, func(w *httptest.ResponseRecorder) bool {
 
-				assert.Equal(t, http.StatusOK, w.Code)
-				got, err := get()
-				assert.Nil(t, err)
-				assert.Contains(t, got, "To: " + m.To)
-				assert.Contains(t, got, "Subject: " + m.Subject)
-				assert.Contains(t, got, m.Subject)
-				assert.Equal(t, fmt.Sprintf("\"Message sent to %s\"", m.To), w.Body.String())
-				return true
+			assert.Equal(t, http.StatusOK, w.Code)
+			got, err := get()
+			assert.Nil(t, err)
+			assert.Contains(t, got, "To: "+m.To)
+			assert.Contains(t, got, "Subject: "+m.Subject)
+			assert.Contains(t, got, m.Subject)
+			assert.Equal(t, fmt.Sprintf("\"Message sent to %s\"", m.To), w.Body.String())
+			return true
 		})
 	})
 }
 
 func TestHandleMailPOST_FullInValid(t *testing.T) {
 
-	fullTestEnv(t, func (engine *gin.Engine, req *http.Request, _ *mailer.Mail) {
+	fullTestEnv(t, getRandomPort(), func(engine *gin.Engine, req *http.Request, _ *mailer.Mail) {
 
 		testHTTPResponse(t, engine, req, func(w *httptest.ResponseRecorder) bool {
 
@@ -197,10 +208,10 @@ func TestHandleMailPOST_FullInValid(t *testing.T) {
 	})
 }
 
-
 // Absolute legend https://titanwolf.org/Network/Articles/Article?AID=5749f0a3-9be8-4add-a1d3-9699e7554251#gsc.tab=0
 
 type receivedMailTextGetter func() (string, error)
+
 func startMockSMTPServer(port int, serverResponses ...string) (receivedMailTextGetter, error) {
 	if len(serverResponses) == 0 {
 		// default server responses
@@ -289,12 +300,12 @@ func startMockSMTPServer(port int, serverResponses ...string) (receivedMailTextG
 	return getReceivedData, nil
 }
 
-func fullTestEnv(t *testing.T, f func(e *gin.Engine, r *http.Request, m *mailer.Mail)) {
+func fullTestEnv(t *testing.T, port int, f func(e *gin.Engine, r *http.Request, m *mailer.Mail)) {
 
 	engine := gin.Default()
 
 	mS := service.MailerServiceImpl{}
-	dialer := mailer.CreateDialer("localhost", "a@b.c", "pass", 2000)
+	dialer := mailer.CreateDialer("localhost", "a@b.c", "pass", port)
 	mS.New(dialer)
 
 	mC := MailerControllerImpl{}
