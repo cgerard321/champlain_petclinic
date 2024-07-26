@@ -15,10 +15,10 @@
     "sourceType": "module",
     "project": "./tsconfig.json"
   },
-  "plugins": ["@typescript-eslint", "react", "prettier"],
+  "plugins": ["react","@typescript-eslint", "prettier"],
   "rules":{
     "react/react-in-jsx-scope": "off",
-    "eslint-plugin-import/prefer-default-export": "off",
+    "import/prefer-default-export": "off",
     "no-console": ["error", { "allow": ["warn", "error"] }],
     "no-unused-vars": "error",
     "@typescript-eslint/explicit-function-return-type": [

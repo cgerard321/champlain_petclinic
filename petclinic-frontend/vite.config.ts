@@ -18,8 +18,8 @@ export default defineConfig(() => {
     }
   },
   envDir: 'src/environments/',
-  builds:{
-    modulePReload: false,
+  build:{
+    modulePreload: false,
     target: 'esnext',
     assestsDir: 'src/assets'
   }

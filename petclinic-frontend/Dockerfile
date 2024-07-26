@@ -2,7 +2,10 @@
 FROM node:21 AS build
 
 # Set the working directory inside the container
-WORKDIR /application
+WORKDIR /app
+
+# Copy package.json and package-lock.json to the working directory
+COPY package*.json ./
 
 # Install Project dependencies
 RUN npm install
