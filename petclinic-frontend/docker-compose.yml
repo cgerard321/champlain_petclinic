@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  petclinicFrontend:
+    image: petclinic-frontend
+    container_name: petclinic-frontend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./src:/app/src
