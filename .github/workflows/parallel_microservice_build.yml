@@ -25,10 +25,10 @@ jobs:
         distribution: 'temurin'
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
-    - name: Change Directory to api-gateway #Note that if the name of the microservice changes this pipeline will break
-      run: cd api-gateway
+
     - name: Build with Gradle Wrapper
       run: ./gradlew clean build
+      working-directory: ./api-gateway # Note that if the name of the parent folder changes this pipeline will break
 
   visits_service_test:
     runs-on: ubuntu-latest
@@ -42,10 +42,9 @@ jobs:
         java-version: 17
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
-    - name: Change Directory to visits-service-new #Note that if the name of the microservice changes this pipeline will break
-      run: cd visits-service-new
     - name: Build with Gradle
       run: ./gradlew clean build
+      working-directory: ./visits-service-new  # Note that if the name of the parent folder changes this pipeline will break
 
   vet_service_test:
     runs-on: ubuntu-latest
@@ -59,10 +58,9 @@ jobs:
         java-version: 17
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
-    - name: Change Directory to vet-service #Note that if the name of the microservice changes this pipeline will break
-      run: cd vet-service
     - name: Build with Gradle
       run: ./gradlew clean build
+      working-directory: ./vet-service  # Note that if the name of the parent folder changes this pipeline will break
 
   customers_service_reactive_test:
     runs-on: ubuntu-latest
@@ -76,10 +74,10 @@ jobs:
         java-version: 17
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
-    - name: Change Directory to customers-service-reactive #Note that if the name of the microservice changes this pipeline will break
-      run: cd customers-service-reactive
     - name: Build with Gradle
       run: ./gradlew clean build
+      working-directory: ./customers-service-reactive  # Note that if the name of the parent folder changes this pipeline will break
+      
   
   billing_service_test:
     runs-on: ubuntu-latest
@@ -93,10 +91,9 @@ jobs:
         java-version: 17
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
-    - name: Change Directory to billing-service #Note that if the name of the microservice changes this pipeline will break
-      run: cd billing-service
     - name: Build with Gradle
       run: ./gradlew clean build
+      working-directory: ./billing-service  # Note that if the name of the parent folder changes this pipeline will break
 
   auth_service_test:
     runs-on: ubuntu-latest
@@ -110,10 +107,10 @@ jobs:
         java-version: 17
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
-    - name: Change Directory to auth-service #Note that if the name of the microservice changes this pipeline will break
-      run: cd auth-service
     - name: Build with Gradle
       run: ./gradlew clean build
+      working-directory: ./auth-service  # Note that if the name of the parent folder changes this pipeline will break
+      
   
   inventory_service_test:
     runs-on: ubuntu-latest
@@ -127,10 +124,9 @@ jobs:
         java-version: 17
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
-    - name: Change Directory to inventory-service #Note that if the name of the microservice changes this pipeline will break
-      run: cd inventory-service
     - name: Build with Gradle
       run: ./gradlew clean build
+      working-directory: ./inventory-service  # Note that if the name of the parent folder changes this pipeline will break
     
         
     
