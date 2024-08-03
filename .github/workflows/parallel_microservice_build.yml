@@ -13,6 +13,121 @@ on:
   pull_request:
     branches: [ "main" ]
 
+# jobs:
+#   api_gateway_test:
+#     runs-on: ubuntu-latest
+#     steps:
+#     - uses: actions/checkout@v4
+#     - name: Set up JDK 17
+#       uses: actions/setup-java@v4
+#       with:
+#         java-version: '17'
+#         distribution: 'temurin'
+#     - name: Setup Gradle
+#       uses: gradle/actions/setup-gradle@v3
+
+#     - name: Build with Gradle Wrapper
+#       run: ./gradlew clean build
+#       working-directory: ./api-gateway # Note that if the name of the parent folder changes this pipeline will break
+
+#   visits_service_test:
+#     runs-on: ubuntu-latest
+#     steps:
+#     - name: Checkout sources
+#       uses: actions/checkout@v4
+#     - name: Setup Java
+#       uses: actions/setup-java@v4
+#       with:
+#         distribution: 'temurin'
+#         java-version: 17
+#     - name: Setup Gradle
+#       uses: gradle/actions/setup-gradle@v3
+#     - name: Build with Gradle
+#       run: ./gradlew clean build
+#       working-directory: ./visits-service-new  # Note that if the name of the parent folder changes this pipeline will break
+
+#   vet_service_test:
+#     runs-on: ubuntu-latest
+#     steps:
+#     - name: Checkout sources
+#       uses: actions/checkout@v4
+#     - name: Setup Java
+#       uses: actions/setup-java@v4
+#       with:
+#         distribution: 'temurin'
+#         java-version: 17
+#     - name: Setup Gradle
+#       uses: gradle/actions/setup-gradle@v3
+#     - name: Build with Gradle
+#       run: ./gradlew clean build
+#       working-directory: ./vet-service  # Note that if the name of the parent folder changes this pipeline will break
+
+#   customers_service_reactive_test:
+#     runs-on: ubuntu-latest
+#     steps:
+#     - name: Checkout sources
+#       uses: actions/checkout@v4
+#     - name: Setup Java
+#       uses: actions/setup-java@v4
+#       with:
+#         distribution: 'temurin'
+#         java-version: 17
+#     - name: Setup Gradle
+#       uses: gradle/actions/setup-gradle@v3
+#     - name: Build with Gradle
+#       run: ./gradlew clean build
+#       working-directory: ./customers-service-reactive  # Note that if the name of the parent folder changes this pipeline will break
+      
+  
+#   billing_service_test:
+#     runs-on: ubuntu-latest
+#     steps:
+#     - name: Checkout sources
+#       uses: actions/checkout@v4
+#     - name: Setup Java
+#       uses: actions/setup-java@v4
+#       with:
+#         distribution: 'temurin'
+#         java-version: 17
+#     - name: Setup Gradle
+#       uses: gradle/actions/setup-gradle@v3
+#     - name: Build with Gradle
+#       run: ./gradlew clean build
+#       working-directory: ./billing-service  # Note that if the name of the parent folder changes this pipeline will break
+
+#   auth_service_test:
+#     runs-on: ubuntu-latest
+#     steps:
+#     - name: Checkout sources
+#       uses: actions/checkout@v4
+#     - name: Setup Java
+#       uses: actions/setup-java@v4
+#       with:
+#         distribution: 'temurin'
+#         java-version: 17
+#     - name: Setup Gradle
+#       uses: gradle/actions/setup-gradle@v3
+#     - name: Build with Gradle
+#       run: ./gradlew clean build
+#       working-directory: ./auth-service  # Note that if the name of the parent folder changes this pipeline will break
+      
+  
+#   inventory_service_test:
+#     runs-on: ubuntu-latest
+#     steps:
+#     - name: Checkout sources
+#       uses: actions/checkout@v4
+#     - name: Setup Java
+#       uses: actions/setup-java@v4
+#       with:
+#         distribution: 'temurin'
+#         java-version: 17
+#     - name: Setup Gradle
+#       uses: gradle/actions/setup-gradle@v3
+#     - name: Build with Gradle
+#       run: ./gradlew clean build
+#       working-directory: ./inventory-service  # Note that if the name of the parent folder changes this pipeline will break
+
 jobs:
   api_gateway_test:
     runs-on: ubuntu-latest
@@ -25,10 +140,12 @@ jobs:
         distribution: 'temurin'
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
-
+    - name: Make gradlew executable
+      run: chmod +x ./gradlew
+      working-directory: ./api-gateway
     - name: Build with Gradle Wrapper
       run: ./gradlew clean build
-      working-directory: ./api-gateway # Note that if the name of the parent folder changes this pipeline will break
+      working-directory: ./api-gateway
 
   visits_service_test:
     runs-on: ubuntu-latest
@@ -42,9 +159,12 @@ jobs:
         java-version: 17
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
+    - name: Make gradlew executable
+      run: chmod +x ./gradlew
+      working-directory: ./visits-service-new
     - name: Build with Gradle
       run: ./gradlew clean build
-      working-directory: ./visits-service-new  # Note that if the name of the parent folder changes this pipeline will break
+      working-directory: ./visits-service-new
 
   vet_service_test:
     runs-on: ubuntu-latest
@@ -58,9 +178,12 @@ jobs:
         java-version: 17
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
+    - name: Make gradlew executable
+      run: chmod +x ./gradlew
+      working-directory: ./vet-service
     - name: Build with Gradle
       run: ./gradlew clean build
-      working-directory: ./vet-service  # Note that if the name of the parent folder changes this pipeline will break
+      working-directory: ./vet-service
 
   customers_service_reactive_test:
     runs-on: ubuntu-latest
@@ -74,11 +197,13 @@ jobs:
         java-version: 17
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
+    - name: Make gradlew executable
+      run: chmod +x ./gradlew
+      working-directory: ./customers-service-reactive
     - name: Build with Gradle
       run: ./gradlew clean build
-      working-directory: ./customers-service-reactive  # Note that if the name of the parent folder changes this pipeline will break
-      
-  
+      working-directory: ./customers-service-reactive
+
   billing_service_test:
     runs-on: ubuntu-latest
     steps:
@@ -91,9 +216,12 @@ jobs:
         java-version: 17
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
+    - name: Make gradlew executable
+      run: chmod +x ./gradlew
+      working-directory: ./billing-service
     - name: Build with Gradle
       run: ./gradlew clean build
-      working-directory: ./billing-service  # Note that if the name of the parent folder changes this pipeline will break
+      working-directory: ./billing-service
 
   auth_service_test:
     runs-on: ubuntu-latest
@@ -107,11 +235,13 @@ jobs:
         java-version: 17
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
+    - name: Make gradlew executable
+      run: chmod +x ./gradlew
+      working-directory: ./auth-service
     - name: Build with Gradle
       run: ./gradlew clean build
-      working-directory: ./auth-service  # Note that if the name of the parent folder changes this pipeline will break
-      
-  
+      working-directory: ./auth-service
+
   inventory_service_test:
     runs-on: ubuntu-latest
     steps:
@@ -124,11 +254,13 @@ jobs:
         java-version: 17
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
+    - name: Make gradlew executable
+      run: chmod +x ./gradlew
+      working-directory: ./inventory-service
     - name: Build with Gradle
       run: ./gradlew clean build
-      working-directory: ./inventory-service  # Note that if the name of the parent folder changes this pipeline will break
-    
-        
+      working-directory: ./inventory-service
+
     
   dependency-submission:
 
