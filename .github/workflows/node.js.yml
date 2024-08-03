@@ -59,6 +59,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
+        cache-dependency-path: petclinic-frontend/package-lock.json
     - name: Run npm lint to ensure frontend code is linted
       run: npm run lint
       working-directory: ./petclinic-frontend
