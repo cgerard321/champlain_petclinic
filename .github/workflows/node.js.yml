@@ -27,8 +27,8 @@ jobs:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
     - name: Change to the frontend directory
-    - run: cd petclinic-frontend
+      run: cd petclinic-frontend
     - name: Run npm lint to ensure frontend code is linted
-    - run: npm lint
+      run: npm lint
     - name: Run build to ensure no build errors
-    - run: npm run build
+      run: npm run build
