@@ -20,14 +20,15 @@ jobs:
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
+    - name: Change to the frontend directory
+      run: cd petclinic-frontend
     - uses: actions/checkout@v4
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    - name: Change to the frontend directory
-      run: cd petclinic-frontend
+
     - name: Run npm lint to ensure frontend code is linted
       run: npm lint
     - name: Run build to ensure no build errors
