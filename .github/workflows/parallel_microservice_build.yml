@@ -166,6 +166,24 @@ jobs:
       run: ./gradlew clean build
       working-directory: ./visits-service-new
 
+  # vet_service_test:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #   - name: Checkout sources
+  #     uses: actions/checkout@v4
+  #   - name: Setup Java
+  #     uses: actions/setup-java@v4
+  #     with:
+  #       distribution: 'temurin'
+  #       java-version: 17
+  #   - name: Setup Gradle
+  #     uses: gradle/actions/setup-gradle@v3
+  #   - name: Make gradlew executable
+  #     run: chmod +x ./gradlew
+  #     working-directory: ./vet-service
+  #   - name: Build with Gradle
+  #     run: ./gradlew clean build
+  #     working-directory: ./vet-service
   vet_service_test:
     runs-on: ubuntu-latest
     steps:
@@ -178,12 +196,12 @@ jobs:
         java-version: 17
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
-    - name: Make gradlew executable
-      run: chmod +x ./gradlew
-      working-directory: ./vet-service
+    - name: Change directory
+      run: cd vet-service
+      # working-directory: ./vet-service
     - name: Build with Gradle
       run: ./gradlew clean build
-      working-directory: ./vet-service
+      # working-directory: ./vet-service
 
   customers_service_reactive_test:
     runs-on: ubuntu-latest
