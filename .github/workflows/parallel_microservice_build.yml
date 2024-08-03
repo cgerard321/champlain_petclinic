@@ -25,7 +25,6 @@ jobs:
         distribution: 'temurin'
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
-    - name: Change Directory to visits-service-new #Note that if the name of the microservice changes this pipeline will break
     - name: Change Directory to api-gateway #Note that if the name of the microservice changes this pipeline will break
       run: cd api-gateway
     - name: Build with Gradle Wrapper
