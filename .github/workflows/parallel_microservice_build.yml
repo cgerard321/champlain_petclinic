@@ -16,7 +16,6 @@ on:
 jobs:
   api_gateway_test:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v4
     - name: Set up JDK 17
@@ -24,12 +23,9 @@ jobs:
       with:
         java-version: '17'
         distribution: 'temurin'
-
-    # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
-    # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
     - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@dbbdc275be76ac10734476cc723d82dfe7ec6eda # v3.4.2
-
+      uses: gradle/actions/setup-gradle@v3
+    - name: Change Directory to visits-service-new #Note that if the name of the microservice changes this pipeline will break
     - name: Change Directory to api-gateway #Note that if the name of the microservice changes this pipeline will break
       run: cd api-gateway
     - name: Build with Gradle Wrapper
@@ -51,6 +47,92 @@ jobs:
       run: cd visits-service-new
     - name: Build with Gradle
       run: ./gradlew clean build
+
+  vet_service_test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout sources
+      uses: actions/checkout@v4
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: 17
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v3
+    - name: Change Directory to vet-service #Note that if the name of the microservice changes this pipeline will break
+      run: cd vet-service
+    - name: Build with Gradle
+      run: ./gradlew clean build
+
+  customers_service_reactive_test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout sources
+      uses: actions/checkout@v4
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: 17
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v3
+    - name: Change Directory to customers-service-reactive #Note that if the name of the microservice changes this pipeline will break
+      run: cd customers-service-reactive
+    - name: Build with Gradle
+      run: ./gradlew clean build
+  
+  billing_service_test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout sources
+      uses: actions/checkout@v4
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: 17
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v3
+    - name: Change Directory to billing-service #Note that if the name of the microservice changes this pipeline will break
+      run: cd billing-service
+    - name: Build with Gradle
+      run: ./gradlew clean build
+
+  auth_service_test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout sources
+      uses: actions/checkout@v4
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: 17
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v3
+    - name: Change Directory to auth-service #Note that if the name of the microservice changes this pipeline will break
+      run: cd auth-service
+    - name: Build with Gradle
+      run: ./gradlew clean build
+  
+  inventory_service_test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout sources
+      uses: actions/checkout@v4
+    - name: Setup Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'temurin'
+        java-version: 17
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v3
+    - name: Change Directory to inventory-service #Note that if the name of the microservice changes this pipeline will break
+      run: cd inventory-service
+    - name: Build with Gradle
+      run: ./gradlew clean build
+    
         
     
   dependency-submission:
