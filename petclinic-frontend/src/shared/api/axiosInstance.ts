@@ -4,6 +4,8 @@ import axiosErrorResponseHandler from '@/shared/api/axiosErrorResponseHandler.ts
 
 axios.defaults.withCredentials = true;
 
+
+
 const axiosInstance: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_URL,
   headers: {
@@ -11,16 +13,16 @@ const axiosInstance: AxiosInstance = axios.create({
   },
 });
 
-axiosInstance.interceptors.request.use(
-  async config => {
-    const token = 'Bearer '; //get id token
-    config.headers.Authorization = token;
-    return config;
-  },
-  error => {
-    return error;
-  }
-);
+// axiosInstance.interceptors.request.use(
+//   async config => {
+//     const token = 'Bearer '; //get id token
+//     config.headers.Authorization = token;
+//     return config;
+//   },
+//   error => {
+//     return error;
+//   }
+// );
 
 axiosInstance.interceptors.response.use(
   response => {

@@ -224,9 +224,10 @@ public class UserServiceImpl implements UserService {
             ResponseCookie token = ResponseCookie.from(securityConst.getTOKEN_PREFIX(), jwtService.generateToken(loggedInUser))
                     .httpOnly(true)
                     .secure(true)
-                    .path("/api/gateway")
                     .maxAge(Duration.ofHours(1))
-                    .sameSite("Lax").build();
+                    .path("/")
+                    .sameSite("None")
+                    .build();
 
 
 

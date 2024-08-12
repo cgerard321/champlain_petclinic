@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -77,8 +78,16 @@ public class JwtTokenFilter implements WebFilter {
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         String path = exchange.getRequest().getURI().getPath();
 
+        exchange.getResponse().getHeaders().add("Access-Control-Allow-Origin", "http://localhost:3000");
+
+        exchange.getResponse().getHeaders().add("Access-Control-Allow-Credentials", "true");
+
+        exchange.getResponse().getHeaders().add("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS");
+
+        exchange.getResponse().getHeaders().add("Access-Control-Allow-Headers","Content-Type");
         //todo optimize this
-       if (AUTH_WHITELIST.keySet().stream().anyMatch(pattern -> antPathMatcher.match(pattern, path))) {
+       if (exchange.getRequest().getMethod().equals(HttpMethod.OPTIONS) ||
+               AUTH_WHITELIST.keySet().stream().anyMatch(pattern -> antPathMatcher.match(pattern, path))) {
             exchange.getAttributes().put("whitelisted", true);
 
             return chain.filter(exchange);
@@ -107,9 +116,6 @@ public class JwtTokenFilter implements WebFilter {
         }
 
 
-        exchange.getResponse().getHeaders().add("Access-Control-Allow-Origin", "*");
-
-        exchange.getResponse().getHeaders().add("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS");
 
         if (handler.getMethod().getAnnotation(SecuredEndpoint.class) != null) {
             if(Arrays.asList(handler.getMethod().getAnnotation(SecuredEndpoint.class).allowedRoles()).contains(Roles.ANONYMOUS))
