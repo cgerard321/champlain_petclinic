@@ -1,11 +1,11 @@
 services:
-#    app:
-#      container_name: petclinic-frontend
-#      image: docker-react-i
-#      build:
-#        context: ./petclinic-frontend
-#      ports:
-#        - 3000:80
+   app:
+     container_name: petclinic-frontend
+     image: docker-react-i
+     build:
+       context: ./petclinic-frontend
+     ports:
+       - 3000:80
     janus:
         image: nginx
         ports:
