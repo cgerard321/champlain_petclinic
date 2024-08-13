@@ -11,12 +11,13 @@ export default function Login(): JSX.Element {
       emailInput: HTMLInputElement;
       passwordInput: HTMLInputElement;
     };
-    const userData: UserResponseModel = await axiosInstance.post<
-      ApiResponse<UserResponseModel>
-    >(axiosInstance.defaults.baseURL + 'users/login', {
-      email: formElements.emailInput.value,
-      password: formElements.passwordInput.value,
-    });
+    await axiosInstance.post<ApiResponse<UserResponseModel>>(
+      axiosInstance.defaults.baseURL + 'users/login',
+      {
+        email: formElements.emailInput.value,
+        password: formElements.passwordInput.value,
+      }
+    );
   };
   return (
     <div>

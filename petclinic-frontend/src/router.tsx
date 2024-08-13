@@ -27,9 +27,9 @@ const router = createBrowserRouter([
       //       path: AppRoutePaths.Unauthorized,
       //       element: /* UnauthorizedComponent */
       //   }
-      { path: AppRoutePaths.login, element: <Login /> },
     ],
   },
+  { path: AppRoutePaths.login, element: <Login /> },
   //   {path: '*', element: /* PageNotFoundComponent */},
 ]);
 export default router;

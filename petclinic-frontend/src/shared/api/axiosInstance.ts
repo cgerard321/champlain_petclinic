@@ -4,8 +4,6 @@ import axiosErrorResponseHandler from '@/shared/api/axiosErrorResponseHandler.ts
 
 axios.defaults.withCredentials = true;
 
-
-
 const axiosInstance: AxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_BACKEND_URL,
   headers: {

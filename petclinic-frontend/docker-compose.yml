@@ -1,4 +1,4 @@
-version: '3.8'
+# version: '3.8'
 
 services:
   petclinicFrontend:
@@ -7,6 +7,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        - BUILD_MODE=development
     ports:
       - '3000:3000'
     volumes:

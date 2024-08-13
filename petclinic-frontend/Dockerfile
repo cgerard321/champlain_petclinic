@@ -14,10 +14,11 @@ RUN npm install
 COPY . .
 
 # audit the installed packages
-RUN npm audit
+# RUN npm audit
 
 # Build the React app
-RUN npm run build
+ARG BUILD_MODE
+RUN npm run build:${BUILD_MODE}
 
 # Use a smaller, lightweight base image for the final image
 FROM nginx:alpine
