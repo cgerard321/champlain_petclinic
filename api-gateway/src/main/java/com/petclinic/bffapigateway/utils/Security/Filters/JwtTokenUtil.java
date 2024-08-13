@@ -24,15 +24,11 @@ import java.util.*;
 public class JwtTokenUtil implements Serializable {
 
 
-
     private final SecurityConst securityConst;
 
 
-
-
-    public String getTokenFromRequest(ServerWebExchange exchange){
+    public String getTokenFromRequest(ServerWebExchange exchange) {
         final List<String> cookies = exchange.getRequest().getHeaders().get("Cookie");
-
 
 
         if (cookies == null) {
@@ -48,8 +44,7 @@ public class JwtTokenUtil implements Serializable {
         token = Arrays.stream(allCookies).filter(cookie -> cookie.contains(securityConst.getTOKEN_PREFIX())).findFirst().orElseThrow(() -> new InvalidTokenException("Token is invalid"));
 
 
-
-        token = token.replace(securityConst.getTOKEN_PREFIX()+"=", "");
+        token = token.replace(securityConst.getTOKEN_PREFIX() + "=", "");
         token = token.replace(";", "");
         token = token.replace(" ", "");
 

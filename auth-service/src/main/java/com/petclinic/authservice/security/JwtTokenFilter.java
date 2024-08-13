@@ -2,7 +2,6 @@ package com.petclinic.authservice.security;
 
 import com.petclinic.authservice.datalayer.user.User;
 import com.petclinic.authservice.datalayer.user.UserRepo;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -39,15 +38,13 @@ public class JwtTokenFilter extends OncePerRequestFilter {
     private final JwtTokenUtil jwtTokenUtil;
 
     private final UserRepo userRepo;
-    private final ObjectMapper objectMapper;
 
 
     public JwtTokenFilter(SecurityConst securityConst, JwtTokenUtil jwtTokenUtil
-            , UserRepo userRepo, ObjectMapper objectMapper) {
+            , UserRepo userRepo) {
         this.securityConst = securityConst;
         this.jwtTokenUtil = jwtTokenUtil;
         this.userRepo = userRepo;
-        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -56,10 +53,6 @@ public class JwtTokenFilter extends OncePerRequestFilter {
                                     @NotNull FilterChain chain)
             throws ServletException, IOException {
 
-
-        response.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
-        response.setHeader("Access-Control-Allow-Credentials", "true");
-        response.setHeader("Access-Control-Allow-Headers","*");
         log.warn("Entered Filter");
         // Get authorization header and validate
         final Cookie[] cookies = request.getCookies();

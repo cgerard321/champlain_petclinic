@@ -3,22 +3,19 @@ package com.petclinic.bffapigateway.utils.Security.Filters;
 
 import com.petclinic.bffapigateway.dtos.Auth.TokenResponseDTO;
 import com.petclinic.bffapigateway.exceptions.ForbiddenAccessException;
-import com.petclinic.bffapigateway.exceptions.HandlerIsNullException;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.exceptions.InvalidTokenException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
-import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
+import com.petclinic.bffapigateway.utils.Utility;
 import lombok.Generated;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.reactive.HandlerMapping;
-import org.springframework.web.reactive.result.method.annotation.RequestMappingHandlerMapping;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
@@ -27,8 +24,6 @@ import reactor.core.publisher.Mono;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 
 @Slf4j
 @Component
@@ -37,11 +32,9 @@ import java.util.concurrent.ExecutionException;
 @Generated
 public class IsUserFilter implements WebFilter {
 
-    private final JwtTokenUtil jwtTokenUtil;
+    private final Utility utility;
 
-    private final RequestMappingHandlerMapping requestMappingHandlerMapping;
-
-
+    @SuppressWarnings("NullableProblems")
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
 
@@ -51,16 +44,7 @@ public class IsUserFilter implements WebFilter {
             }
         }
 
-        HandlerMethod handler;
-        try {
-            handler = (HandlerMethod) requestMappingHandlerMapping.getHandler(exchange).toFuture().get();
-        } catch (InterruptedException | ExecutionException e) {
-            throw new HandlerIsNullException(e.getMessage());
-        }
-
-        if (handler == null) {
-            throw new HandlerIsNullException("Handler is null, check if the endpoint is valid");
-        }
+        HandlerMethod handler = utility.getHandler(exchange);
 
         if (handler.getMethod().getAnnotation(IsUserSpecific.class) == null) {
             return chain.filter(exchange);
@@ -74,12 +58,11 @@ public class IsUserFilter implements WebFilter {
                 log.error("Endpoint is not secured, anyone can access it and annotation is redundant. This is likely caused because the bypassRoles array contains ANONYMOUS.");
 
 
-            return chain.filter(exchange);
         }
         else {
 
 
-            TokenResponseDTO tokenResponseDTO = (TokenResponseDTO) exchange.getAttribute("tokenValues");
+            TokenResponseDTO tokenResponseDTO = exchange.getAttribute("tokenValues");
 
 
             if (tokenResponseDTO == null) {
@@ -120,11 +103,6 @@ public class IsUserFilter implements WebFilter {
                 throw new ForbiddenAccessException("You are not allowed to access this resource");
             }
 
-
-
-
-
-
             String tokenId = tokenResponseDTO.getUserId();
 
 
@@ -137,10 +115,9 @@ public class IsUserFilter implements WebFilter {
                 }
             }
 
-            return chain.filter(exchange);
-
 
         }
+        return chain.filter(exchange);
 
     }
 }
