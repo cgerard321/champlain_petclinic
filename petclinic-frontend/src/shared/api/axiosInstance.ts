@@ -11,17 +11,6 @@ const axiosInstance: AxiosInstance = axios.create({
   },
 });
 
-// axiosInstance.interceptors.request.use(
-//   async config => {
-//     const token = 'Bearer '; //get id token
-//     config.headers.Authorization = token;
-//     return config;
-//   },
-//   error => {
-//     return error;
-//   }
-// );
-
 axiosInstance.interceptors.response.use(
   response => {
     return response;
