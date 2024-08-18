@@ -16,10 +16,13 @@ export default function Login(): JSX.Element {
       passwordInput: HTMLInputElement;
     };
     await axiosInstance
-      .post<UserResponseModel>(axiosInstance.defaults.baseURL + 'users/login', {
-        email: formElements.emailInput.value,
-        password: formElements.passwordInput.value,
-      })
+      .post<UserResponseModel>(
+        'http://localhost:8080/api/gateway/' + 'users/login',
+        {
+          email: formElements.emailInput.value,
+          password: formElements.passwordInput.value,
+        }
+      )
       .then(response => {
         setUser(response.data);
         //TODO: update to navigate to the home page

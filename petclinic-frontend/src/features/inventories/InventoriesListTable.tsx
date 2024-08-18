@@ -1,56 +1,79 @@
 import { useState, useEffect, JSX } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { Inventory } from '@/features/inventories/models/Inventory.ts';
+import { InventoryType } from '@/features/inventories/models/InventoryType.ts';
+import useSearchInventories from '@/features/inventories/hooks/useSearchInventories.ts';
+import { getAllInventoryTypes } from '@/features/inventories/api/getAllInventoryTypes.ts';
+import deleteAllInventories from '@/features/inventories/api/deleteAllInventories.ts';
+import './InventoriesListTable.css';
+import deleteInventory from '@/features/inventories/api/deleteInventory.ts';
 
+//TODO: create add inventory form component and change the component being shown on the inventories page on the onClick event of the add inventory button
 export default function InventoriesListTable(): JSX.Element {
-  const [inventoryList, setInventoryList] = useState<Inventory[]>([]);
+  // const [inventoryList, setInventoryList] = useState<Inventory[]>([]);
   const [inventoryName, setInventoryName] = useState('');
   const [inventoryType, setInventoryType] = useState('');
+  const [inventoryTypeList, setInventoryTypeList] = useState<InventoryType[]>(
+    []
+  );
   const [inventoryDescription, setInventoryDescription] = useState('');
-  const [realPage, setRealPage] = useState(1);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    // Fetch inventory list from API
-    axiosInstance
-      .get<Inventory[]>(axiosInstance.defaults.baseURL + 'inventory')
-      .then(response => {
-        setInventoryList(response.data);
-      });
-    // axios.get('/api/inventory').then(response => {
-    //   setInventoryList(response.data);
-    // });
-  }, []);
+  const {
+    inventoryList,
+    setInventoryList,
+    currentPage,
+    realPage,
+    getInventoryList,
+    setCurrentPage,
+  } = useSearchInventories();
 
-  const searchInventory = (): void => {
-    // Implement search logic here
-  };
+  useEffect(() => {
+    getInventoryList('', '', '');
+    fetchAllInventoryTypes();
+  }, [currentPage]);
 
   const clearQueries = (): void => {
     setInventoryName('');
     setInventoryType('');
     setInventoryDescription('');
+    getInventoryList('', '', '');
   };
 
   const pageBefore = (): void => {
-    setRealPage(prevPage => Math.max(prevPage - 1, 1));
+    setCurrentPage(prevPage => Math.max(prevPage - 1, 0));
   };
 
   const pageAfter = (): void => {
-    setRealPage(prevPage => prevPage + 1);
+    setCurrentPage(prevPage => prevPage + 1);
   };
 
-  const deleteInventory = (inventory: Inventory): void => {
-    // Implement delete logic here
+  const deleteInventoryHandler = (inventoryToDelete: Inventory): void => {
+    deleteInventory(inventoryToDelete);
+    const updatedInventoryList = inventoryList.filter(
+      inventory => inventory.inventoryId !== inventoryToDelete.inventoryId
+    );
+    setInventoryList(updatedInventoryList);
   };
 
-  const undoDelete = (inventoryId: Inventory): void => {
-    // Implement undo delete logic here
+  const handleDeleteAllInventories = (confirm: boolean): void => {
+    if (confirm) {
+      setInventoryList([]);
+      deleteAllInventories();
+      setShowConfirmDialog(false);
+    } else {
+      if (showConfirmDialog) {
+        setShowConfirmDialog(false);
+        return;
+      }
+      setShowConfirmDialog(true);
+    }
   };
 
-  const deleteAllInventories = (): void => {
-    // Implement delete all logic here
+  const fetchAllInventoryTypes = async (): Promise<void> => {
+    const data = await getAllInventoryTypes();
+    setInventoryTypeList(data);
   };
 
   return (
@@ -73,7 +96,14 @@ export default function InventoriesListTable(): JSX.Element {
                 type="text"
                 value={inventoryName}
                 onChange={e => setInventoryName(e.target.value)}
-                onKeyUp={e => e.key === 'Enter' && searchInventory()}
+                onKeyUp={e =>
+                  e.key === 'Enter' &&
+                  getInventoryList(
+                    inventoryName,
+                    inventoryType,
+                    inventoryDescription
+                  )
+                }
               />
             </td>
             <td>
@@ -81,12 +111,19 @@ export default function InventoriesListTable(): JSX.Element {
                 className="form-control col-sm-4"
                 value={inventoryType}
                 onChange={e => setInventoryType(e.target.value)}
-                onKeyUp={e => e.key === 'Enter' && searchInventory()}
+                onKeyUp={e =>
+                  e.key === 'Enter' &&
+                  getInventoryList(
+                    inventoryName,
+                    inventoryType,
+                    inventoryDescription
+                  )
+                }
               >
-                {/* Replace with your inventory type options */}
                 <option value="">None</option>
-                <option value="Type1">Type1</option>
-                <option value="Type2">Type2</option>
+                {inventoryTypeList.map(type => (
+                  <option key={type.type}>{type.type}</option>
+                ))}
               </select>
             </td>
             <td>
@@ -94,44 +131,57 @@ export default function InventoriesListTable(): JSX.Element {
                 type="text"
                 value={inventoryDescription}
                 onChange={e => setInventoryDescription(e.target.value)}
-                onKeyUp={e => e.key === 'Enter' && searchInventory()}
+                onKeyUp={e =>
+                  e.key === 'Enter' &&
+                  getInventoryList(
+                    inventoryName,
+                    inventoryType,
+                    inventoryDescription
+                  )
+                }
               />
             </td>
-            <td></td>
             <td>
               <button
                 className="btn btn-success"
                 onClick={clearQueries}
                 title="Clear"
               >
-                <img
-                  src="https://cdn.lordicon.com/zxvuvcnc.json"
-                  alt="icon"
-                  style={{ width: '32px', height: '32px' }}
-                />
-                {/*<lord-icon*/}
-                {/*  src="https://cdn.lordicon.com/zxvuvcnc.json"*/}
-                {/*  trigger="hover"*/}
-                {/*  style={{ width: '32px', height: '32px' }}*/}
-                {/*></lord-icon>*/}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="32"
+                  height="32"
+                  fill="white"
+                  className="bi bi-x-circle"
+                  viewBox="0 0 16 16"
+                >
+                  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                  <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708" />
+                </svg>
               </button>
             </td>
             <td>
               <button
                 className="btn btn-success"
-                onClick={searchInventory}
+                onClick={() =>
+                  getInventoryList(
+                    inventoryName,
+                    inventoryType,
+                    inventoryDescription
+                  )
+                }
                 title="Search"
               >
-                <img
-                  src="https://cdn.lordicon.com/fkdzyfle.json"
-                  alt="icon"
-                  style={{ width: '32px', height: '32px' }}
-                />
-                {/*<lord-icon*/}
-                {/*  src="https://cdn.lordicon.com/fkdzyfle.json"*/}
-                {/*  trigger="hover"*/}
-                {/*  style={{ width: '32px', height: '32px' }}*/}
-                {/*></lord-icon>*/}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="32"
+                  height="32"
+                  fill="white"
+                  className="bi bi-search"
+                  viewBox="0 0 16 16"
+                >
+                  <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
+                </svg>
               </button>
             </td>
           </tr>
@@ -162,51 +212,39 @@ export default function InventoriesListTable(): JSX.Element {
                   }}
                   title="Edit"
                 >
-                  {/*<lord-icon*/}
-                  {/*  src="https://cdn.lordicon.com/wkvacbiw.json"*/}
-                  {/*  trigger="hover"*/}
-                  {/*  style={{ width: '32px', height: '32px' }}*/}
-                  {/*></lord-icon>*/}
-                  <img
-                    src="https://cdn.lordicon.com/wkvacbiw.json"
-                    alt="icon"
-                    style={{ width: '32px', height: '32px' }}
-                  />
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="32px"
+                    height="32px"
+                    fill="white"
+                    className="bi bi-pencil text-white"
+                    viewBox="0 0 16 16"
+                  >
+                    <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325" />
+                  </svg>
                 </button>
               </td>
               <td>
-                {!inventory.isTemporarilyDeleted ? (
-                  <button
-                    className="btn btn-danger"
-                    onClick={e => {
-                      e.stopPropagation();
-                      deleteInventory(inventory);
-                    }}
-                    title="Delete"
+                <button
+                  className="btn btn-danger"
+                  onClick={e => {
+                    e.stopPropagation();
+                    deleteInventoryHandler(inventory);
+                  }}
+                  title="Delete"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="32"
+                    height="32"
+                    fill="currentColor"
+                    className="bi bi-trash"
+                    viewBox="0 0 16 16"
                   >
-                    <img
-                      src="https://cdn.lordicon.com/skkahier.json"
-                      alt="icon"
-                      style={{ width: '32px', height: '32px' }}
-                    />
-                    {/*<icon*/}
-                    {/*  src="https://cdn.lordicon.com/skkahier.json"*/}
-                    {/*  trigger="hover"*/}
-                    {/*  style={{ width: '32px', height: '32px' }}*/}
-                    {/*></icon>*/}
-                  </button>
-                ) : (
-                  <button
-                    className="btn btn-info"
-                    onClick={e => {
-                      e.stopPropagation();
-                      undoDelete(inventory);
-                    }}
-                    title="Restore"
-                  >
-                    Restore
-                  </button>
-                )}
+                    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
+                    <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
+                  </svg>
+                </button>
               </td>
             </tr>
           ))}
@@ -250,17 +288,42 @@ export default function InventoriesListTable(): JSX.Element {
         Notification Text Here
       </div>
       <button
-        className="delete-bundle-button btn btn-success"
-        onClick={deleteAllInventories}
+        className="delete-bundle-button btn btn-success mx-1"
+        onClick={() => {
+          handleDeleteAllInventories(false);
+        }}
       >
-        Delete All Inventory
+        Delete All Inventories
       </button>
       <button
         className="add-inventory-button btn btn-success"
-        onClick={() => navigate('/inventoryNew')}
+        onClick={() => {}}
       >
         Add Inventory
       </button>
+      {showConfirmDialog && (
+        <>
+          <div
+            className="overlay"
+            onClick={() => setShowConfirmDialog(false)}
+          ></div>
+          <div className="confirm-dialog">
+            <p>Are you sure you want to delete all inventories?</p>
+            <button
+              className={'btn-danger mx-1'}
+              onClick={() => handleDeleteAllInventories(true)}
+            >
+              Yes
+            </button>
+            <button
+              className={'btn-warning mx-1'}
+              onClick={() => setShowConfirmDialog(false)}
+            >
+              No
+            </button>
+          </div>
+        </>
+      )}
     </div>
   );
 }
