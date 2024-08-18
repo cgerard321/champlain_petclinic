@@ -1,0 +1,82 @@
+services:
+#  petclinicFrontend:
+#    image: petclinic-frontend
+#    container_name: petclinic-frontend
+#    build:
+#      context: ./petclinic-frontend
+#      dockerfile: Dockerfile
+#      args:
+#        - BUILD_MODE=development
+#    ports:
+#      - "3000:3000"
+#    volumes:
+#      - .petclinic-frontend/src:/app/src
+
+  auth-service:
+    build: auth-service
+    hostname: auth
+    depends_on:
+      mysql4:
+        condition: service_healthy
+      mailer-service:
+        condition: service_started
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+  mailer-service:
+    build: mailer-service
+    environment:
+      - SMTP_USER=champlain.petclinic@gmail.com
+      - SMTP_SERVER=smtp.gmail.com
+    env_file:
+      - mailer.env
+
+
+  mysql4:
+    image: mysql:5.7
+    platform: linux/amd64 # for M1 Macs
+    ports:
+      - "3310:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpwd
+      - MYSQL_DATABASE=auth-db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=pwd
+    volumes:
+      - ./data/mysql4:/var/lib/mysql4
+      - ./data/init.d:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-uuser", "-ppwd", "-h", "localhost" ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+
+  inventory-service:
+    build: inventory-service
+    hostname: inventory
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - mongo-inventory
+  mongo-inventory:
+    image: mongo
+    container_name: mongo-inventory
+    restart: always
+    ports:
+      - 27020:27017
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: password
+
+
+  api-gateway:
+    build: api-gateway
+    #mem_limit: 350m
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      - inventory-service
+      - auth-service

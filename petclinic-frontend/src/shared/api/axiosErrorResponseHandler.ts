@@ -1,9 +1,8 @@
 import { AxiosError } from 'axios';
-import { ApiResponse } from '@/shared/models/ApiResponse.ts';
 import router from '@/router';
 
 export default function axiosErrorResponseHandler(
-  error: ApiResponse<AxiosError>,
+  error: AxiosError,
   statusCode: number
 ): void {
   switch (statusCode) {
