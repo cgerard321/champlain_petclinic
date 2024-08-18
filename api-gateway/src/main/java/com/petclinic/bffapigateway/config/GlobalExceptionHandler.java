@@ -110,7 +110,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = InventoryNotFoundException.class)
     public ResponseEntity<HttpErrorInfo> inventoryNotFoundException(InventoryNotFoundException ex){
-        return ResponseEntity.status(ex.getHttpStatus())
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new HttpErrorInfo(ex.getHttpStatus().value(), ex.getMessage()));
     }
     @ExceptionHandler(value = ProductListNotFoundException.class)

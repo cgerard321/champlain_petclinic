@@ -51,10 +51,7 @@ export default function InventoriesListTable(): JSX.Element {
 
   const deleteInventoryHandler = (inventoryToDelete: Inventory): void => {
     deleteInventory(inventoryToDelete);
-    const updatedInventoryList = inventoryList.filter(
-      inventory => inventory.inventoryId !== inventoryToDelete.inventoryId
-    );
-    setInventoryList(updatedInventoryList);
+    getInventoryList(inventoryName, inventoryType, inventoryDescription);
   };
 
   const handleDeleteAllInventories = (confirm: boolean): void => {

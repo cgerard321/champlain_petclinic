@@ -27,7 +27,7 @@ public class InventoryController {
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER,Roles.VET})
     @GetMapping()//, produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     @ResponseHeader(name = "Search Inventory & Get All Inventories pagination", description = "Total number of items available")
-    public Flux<InventoryResponseDTO> searchInventory(@RequestParam Optional<Integer> page,
+    public ResponseEntity<Flux<InventoryResponseDTO>> searchInventory(@RequestParam Optional<Integer> page,
                                                       @RequestParam Optional<Integer> size,
                                                       @RequestParam(required = false) String inventoryName,
                                                       @RequestParam(required = false) String inventoryType,
@@ -39,21 +39,26 @@ public class InventoryController {
         if (size.isEmpty()) {
             size = Optional.of(10);
         }
-        return inventoryServiceClient.searchInventory(page, size, inventoryName, inventoryType, inventoryDescription);
+        return ResponseEntity.ok().body(inventoryServiceClient.searchInventory(page, size, inventoryName, inventoryType, inventoryDescription));
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER})
     @GetMapping(value = "/types")
     @ResponseHeader(name = "Get All Inventory Types", description = "All available inventory types")
-    public Flux<InventoryTypeResponseDTO> getAllInventoryTypes(){
-        return inventoryServiceClient.getAllInventoryTypes();
+    public ResponseEntity<Flux<InventoryTypeResponseDTO>> getAllInventoryTypes(){
+        return ResponseEntity.ok().body(inventoryServiceClient.getAllInventoryTypes());
     }
-
     @DeleteMapping(value = "/{inventoryId}")
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER})
     @ResponseHeader(name = "Delete Inventory by Inventory Id", description = "Deletes an inventory by inventory id")
-    public Mono<Void> deleteInventoryByInventoryId(@PathVariable String inventoryId) {
-        return inventoryServiceClient.deleteInventoryByInventoryId(inventoryId);
+    public Mono<ResponseEntity<Void>> deleteInventoryByInventoryId(@PathVariable String inventoryId) {
+        try {
+            return inventoryServiceClient.deleteInventoryByInventoryId(inventoryId).then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                    .defaultIfEmpty(ResponseEntity.notFound().build());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Mono.just(ResponseEntity.notFound().build());
+        }
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.INVENTORY_MANAGER})
