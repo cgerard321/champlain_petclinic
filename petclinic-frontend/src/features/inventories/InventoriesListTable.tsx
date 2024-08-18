@@ -10,7 +10,6 @@ import deleteInventory from '@/features/inventories/api/deleteInventory.ts';
 
 //TODO: create add inventory form component and change the component being shown on the inventories page on the onClick event of the add inventory button
 export default function InventoriesListTable(): JSX.Element {
-  // const [inventoryList, setInventoryList] = useState<Inventory[]>([]);
   const [inventoryName, setInventoryName] = useState('');
   const [inventoryType, setInventoryType] = useState('');
   const [inventoryTypeList, setInventoryTypeList] = useState<InventoryType[]>(
@@ -32,7 +31,7 @@ export default function InventoriesListTable(): JSX.Element {
   useEffect(() => {
     getInventoryList('', '', '');
     fetchAllInventoryTypes();
-  }, [currentPage]);
+  }, [currentPage, getInventoryList]);
 
   const clearQueries = (): void => {
     setInventoryName('');
@@ -249,21 +248,23 @@ export default function InventoriesListTable(): JSX.Element {
       </table>
       <div className="text-center">
         <table className="mx-auto">
-          <tr>
-            <td>
-              <button className="btn btn-success btn-sm" onClick={pageBefore}>
-                &lt;
-              </button>
-            </td>
-            <td>
-              <span>{realPage}</span>
-            </td>
-            <td>
-              <button className="btn btn-success btn-sm" onClick={pageAfter}>
-                &gt;
-              </button>
-            </td>
-          </tr>
+          <tbody>
+            <tr>
+              <td>
+                <button className="btn btn-success btn-sm" onClick={pageBefore}>
+                  &lt;
+                </button>
+              </td>
+              <td>
+                <span>{realPage}</span>
+              </td>
+              <td>
+                <button className="btn btn-success btn-sm" onClick={pageAfter}>
+                  &gt;
+                </button>
+              </td>
+            </tr>
+          </tbody>
         </table>
       </div>
       <div id="loadingObject" style={{ display: 'none' }}>
