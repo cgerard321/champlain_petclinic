@@ -904,7 +904,7 @@ class ProductInventoryServiceUnitTest {
     }
 
     @Test
-    public void deleteInventoryByInventoryId_invalidInventory_ShouldThrowRuntimeException() {
+    public void deleteInventoryByInventoryId_invalidInventory_ShouldThrowNotFoundException() {
         // Arrange
         String invalidInventoryId = "nonexistentId";
 
@@ -912,7 +912,7 @@ class ProductInventoryServiceUnitTest {
 
         // Act & Assert
         StepVerifier.create(productInventoryService.deleteInventoryByInventoryId(invalidInventoryId))
-                .expectErrorMatches(throwable -> throwable instanceof RuntimeException && throwable.getMessage().equals("The InventoryId is invalid"))
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException && throwable.getMessage().equals("The Inventory with the inventoryId: " + invalidInventoryId + " is invalid. Please enter a valid inventory id."))
                 .verify();
 
         verify(inventoryRepository).findInventoryByInventoryId(invalidInventoryId);
