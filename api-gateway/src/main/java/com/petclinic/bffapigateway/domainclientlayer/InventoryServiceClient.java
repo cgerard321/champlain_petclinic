@@ -18,6 +18,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
+import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -251,10 +252,12 @@ public class InventoryServiceClient {
                 .bodyToFlux(InventoryTypeResponseDTO.class);
     }
 
-    public Mono<Void> deleteInventoryByInventoryId(final String inventoryId){
+    public Mono<Void> deleteInventoryByInventoryId(String inventoryId){
         return webClient.delete()
                 .uri(inventoryServiceUrl + "/{inventoryId}", inventoryId)
+                .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, resp -> rethrower.rethrow(resp, ex -> new NotFoundException(ex.get("message").toString())))
                 .bodyToMono(Void.class);
     }
 }

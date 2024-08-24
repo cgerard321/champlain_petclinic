@@ -1,12 +1,21 @@
 import { createBrowserRouter } from 'react-router-dom';
 import { AppRoutePaths } from './shared/models/path.routes';
 import Login from './pages/Login/Login';
+import Inventories from '@/pages/Inventory/Inventories.tsx';
+import { ProtectedRoute } from '@/shared/components/ProtectedRouteProps.tsx';
 
 const router = createBrowserRouter([
   {
     path: AppRoutePaths.Default,
     children: [
-      //   {path: AppRoutePaths.Inventories, element: /* InventoryComponent */},
+      {
+        path: AppRoutePaths.Inventories,
+        element: (
+          <ProtectedRoute>
+            <Inventories />
+          </ProtectedRoute>
+        ),
+      },
       //   {
       //       path: AppRoutePaths.PageNotFound,
       //       element: /* PageNotFoundComponent */

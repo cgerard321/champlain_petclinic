@@ -1,9 +1,13 @@
 import axiosInstance from '@/shared/api/axiosInstance';
-import { ApiResponse } from '@/shared/models/ApiResponse';
 import { UserResponseModel } from '@/shared/models/UserResponseModel';
 import { FormEvent } from 'react';
+import { useSetUser } from '@/context/UserContext.tsx';
+import { useNavigate } from 'react-router-dom';
+import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 
 export default function Login(): JSX.Element {
+  const setUser = useSetUser();
+  const navigate = useNavigate();
   const login = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
     const form = event.currentTarget;
@@ -11,13 +15,21 @@ export default function Login(): JSX.Element {
       emailInput: HTMLInputElement;
       passwordInput: HTMLInputElement;
     };
-    await axiosInstance.post<ApiResponse<UserResponseModel>>(
-      axiosInstance.defaults.baseURL + 'users/login',
-      {
-        email: formElements.emailInput.value,
-        password: formElements.passwordInput.value,
-      }
-    );
+    await axiosInstance
+      .post<UserResponseModel>(
+        'http://localhost:8080/api/gateway/' + 'users/login',
+        {
+          email: formElements.emailInput.value,
+          password: formElements.passwordInput.value,
+        }
+      )
+      .then(response => {
+        setUser(response.data);
+        //TODO: update to navigate to the home page
+        if (response.data.userId !== '') {
+          navigate(AppRoutePaths.Inventories);
+        }
+      });
   };
   return (
     <div>

@@ -288,8 +288,8 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     @Override
     public Mono<Void> deleteInventoryByInventoryId(String inventoryId) {
         return inventoryRepository.findInventoryByInventoryId(inventoryId)
-                .switchIfEmpty(Mono.error(new RuntimeException("The InventoryId is invalid")))
-                .flatMapMany(inventory -> inventoryRepository.delete(inventory))
+                .switchIfEmpty(Mono.error(new NotFoundException("The Inventory with the inventoryId: " + inventoryId + " is invalid. Please enter a valid inventory id.")))
+                .flatMapMany(inventoryRepository::delete)
                 .then();
     }
 
