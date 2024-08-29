@@ -1,10 +1,10 @@
 plugins {
-	id 'org.springframework.boot' version '3.1.3'
-	id 'io.spring.dependency-management' version '1.1.3'
-	id 'java'
-	id "io.freefair.lombok" version "6.6.1"
-	//id "com.bertramlabs.asset-pipeline" version "3.4.4"
-	id 'jacoco'
+    id 'org.springframework.boot' version '3.1.3'
+    id 'io.spring.dependency-management' version '1.1.3'
+    id 'java'
+    id "io.freefair.lombok" version "6.6.1"
+    //id "com.bertramlabs.asset-pipeline" version "3.4.4"
+    id 'jacoco'
 }
 
 group = 'com.petclinic.bffapigateway'
@@ -12,73 +12,73 @@ version = '1.0.0-SNAPSHOT'
 
 
 java {
-	sourceCompatibility = '17'
+    sourceCompatibility = '17'
 }
 
 repositories {
-	mavenCentral()
+    mavenCentral()
 }
 
 
 dependencies {
-	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.2', 'io.jsonwebtoken:jjwt-jackson:0.11.2'
 
-	implementation 'org.webjars:bootstrap:5.1.0', // https://mvnrepository.com/artifact/org.webjars/bootstrap
-			'org.springframework.boot:spring-boot-starter-webflux',
-			'org.springframework.boot:spring-boot-starter-actuator',
-			'org.springframework.boot:spring-boot-starter-validation',
-			'io.jsonwebtoken:jjwt-api:0.11.2',
-			'org.webjars:jquery:3.7.1', // https://mvnrepository.com/artifact/org.webjars/jquery
-			'org.webjars:angularjs:2.0.0-alpha.22', // https://mvnrepository.com/artifact/org.webjars/angularjs
-			'org.webjars.bower:angular-ui-router:1.0.28', // https://mvnrepository.com/artifact/org.webjars.bower/angular-ui-router
-			'org.webjars:webjars-locator-core:0.47', // https://mvnrepository.com/artifact/org.webjars/webjars-locator-core
-			'ro.isdc.wro4j:wro4j-core:1.10.1', // https://mvnrepository.com/artifact/ro.isdc.wro4j/wro4j-core
-			'com.github.houbie:lesscss-gradle-plugin:1.0.3-less-1.7.0', // https://mvnrepository.com/artifact/com.github.houbie/lesscss-gradle-plugin
-			'org.jolokia:jolokia-core:1.7.0', // https://mvnrepository.com/artifact/org.jolokia/jolokia-core
-			'io.springfox:springfox-boot-starter:3.0.0',
-			'com.fasterxml.jackson.datatype:jackson-datatype-jsr310',	//for serializing and deserializing java.time.LocalDateTime
-			'org.yaml:snakeyaml:2.2'
+    runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.2', 'io.jsonwebtoken:jjwt-jackson:0.11.2'
 
-	testImplementation('org.springframework.boot:spring-boot-starter-test') {
-		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
-	}
+    implementation 'org.webjars:bootstrap:5.1.0', // https://mvnrepository.com/artifact/org.webjars/bootstrap
+            'org.springframework.boot:spring-boot-starter-webflux',
+            'org.springframework.boot:spring-boot-starter-actuator',
+            'org.springframework.boot:spring-boot-starter-validation',
+            'io.jsonwebtoken:jjwt-api:0.11.2',
+            'org.webjars:webjars-locator-core:0.47', // https://mvnrepository.com/artifact/org.webjars/webjars-locator-core
+            'ro.isdc.wro4j:wro4j-core:1.10.1', // https://mvnrepository.com/artifact/ro.isdc.wro4j/wro4j-core
+            'com.github.houbie:lesscss-gradle-plugin:1.0.3-less-1.7.0', // https://mvnrepository.com/artifact/com.github.houbie/lesscss-gradle-plugin
+            'org.jolokia:jolokia-core:1.7.0', // https://mvnrepository.com/artifact/org.jolokia/jolokia-core
+            'com.fasterxml.jackson.datatype:jackson-datatype-jsr310',    //for serializing and deserializing java.time.LocalDateTime
+            'org.yaml:snakeyaml:2.2'
 
-	testImplementation 'com.squareup.okhttp3:okhttp:4.11.0',
-			'com.squareup.okhttp3:mockwebserver:4.11.0',
-			'io.projectreactor:reactor-test'
+    implementation 'org.springdoc:springdoc-openapi-starter-webflux-api:2.6.0'
+    implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.6.0'
+
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+
+    testImplementation 'com.squareup.okhttp3:okhttp:4.11.0',
+            'com.squareup.okhttp3:mockwebserver:4.11.0',
+            'io.projectreactor:reactor-test'
 }
 
 jacoco {
-	toolVersion = "0.8.10"
+    toolVersion = "0.8.10"
 }
 
 jacocoTestReport {
-	dependsOn test
+    dependsOn test
 
-	afterEvaluate {
-		classDirectories.setFrom(files(classDirectories.files.collect {
-			fileTree(dir: it, exclude: [
-					"com/petclinic/**/BFFApiGatewayApplication.class"
-			])
-		}))
-	}
+    afterEvaluate {
+        classDirectories.setFrom(files(classDirectories.files.collect {
+            fileTree(dir: it, exclude: [
+                    "com/petclinic/**/BFFApiGatewayApplication.class"
+            ])
+        }))
+    }
 }
 
 jacocoTestCoverageVerification {
-	violationRules {
-		rule {
-			limit {
-				minimum = 0.90
-			}
-		}
-	}
+    violationRules {
+        rule {
+            limit {
+                minimum = 0.90
+            }
+        }
+    }
 }
 
 test.finalizedBy jacocoTestReport
 
 test {
-	useJUnitPlatform()
-	testLogging {
-		events "passed", "skipped", "failed"
-	}
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
 }

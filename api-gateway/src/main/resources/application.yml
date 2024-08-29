@@ -67,6 +67,6 @@ app:
 
 logging:
   level:
-    root: INFO
+    root: DEBUG
     com.petclinic: DEBUG
 
