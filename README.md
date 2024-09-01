@@ -266,10 +266,10 @@ git rebase --continue
 - After that, the rebase has made a new local commit with all your changes, only one step left which is to force push:
 
 ```
-git push -f
+git push -force-with-lease
 ```
 
-- This is just shorthand for `git push --force`
+- This is just shorthand for this is done to only force push if the branch locally is not up to date with origin to not erase another persons commit if their on the same branch as you.
 
 - **If you don't force push you'll get a bunch of red and yellow text like in the image below, which looks like you messed up, but it's fine. It didn't actually do anything just redo the command but with the `-f`**
 
