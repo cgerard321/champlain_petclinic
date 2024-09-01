@@ -50,14 +50,17 @@ public class JwtTokenFilter implements WebFilter {
         this.jwtTokenUtil = jwtTokenUtil;
         this.utility = utility;
         //All white listed endpoints
-        AUTH_WHITELIST.put("/v2/api-docs", "/v2/api-docs");
+        AUTH_WHITELIST.put("/context-path/swagger-ui", "/context-path/swagger-ui");
+        AUTH_WHITELIST.put("/custom/swagger-ui.html", "/custom/swagger-ui.html");
         AUTH_WHITELIST.put("/swagger-resources", "/swagger-resources");
         AUTH_WHITELIST.put("/swagger-resources/**", "/swagger-resources/**");
         AUTH_WHITELIST.put("/configuration/ui", "/configuration/ui");
         AUTH_WHITELIST.put("/configuration/security", "/configuration/security");
         AUTH_WHITELIST.put("/swagger-ui.html", "/swagger-ui.html");
         AUTH_WHITELIST.put("/webjars/**", "/webjars/**");
-        AUTH_WHITELIST.put("/v3/api-docs/**", "/v3/api-docs/**");
+        AUTH_WHITELIST.put("/api-docs", "/api-docs");
+        AUTH_WHITELIST.put("/api-docs/**", "/api-docs/**");
+
         AUTH_WHITELIST.put("/swagger-ui/**", "/swagger-ui/**");
         AUTH_WHITELIST.put("/scripts/**", "/scripts/**");
         AUTH_WHITELIST.put("/css/**", "/css/**");

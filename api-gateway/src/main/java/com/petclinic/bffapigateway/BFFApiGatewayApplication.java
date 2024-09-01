@@ -8,13 +8,13 @@ import org.springframework.web.client.RestTemplate;
 @SpringBootApplication
 public class BFFApiGatewayApplication {
 
-	@Bean
-	RestTemplate restTemplate()
-	{
-		return new RestTemplate();
-	}
-	public static void main(String[] args) {
-		SpringApplication.run(BFFApiGatewayApplication.class, args);
-	}
+    @Bean
+    RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+
+    public static void main(String[] args) {
+        SpringApplication.run(BFFApiGatewayApplication.class, args);
+    }
 
 }

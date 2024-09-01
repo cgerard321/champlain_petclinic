@@ -17,6 +17,7 @@ import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import com.petclinic.bffapigateway.utils.VetsEntityDtoUtil;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -834,6 +835,7 @@ public class BFFApiGatewayController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @Operation()
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @PostMapping(value = "/users/login",produces = "application/json;charset=utf-8;", consumes = "application/json")
     public Mono<ResponseEntity<UserPasswordLessDTO>> login(@RequestBody Mono<Login> login) throws Exception {
