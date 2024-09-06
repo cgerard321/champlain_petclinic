@@ -30,32 +30,40 @@ Once you have cloned the repo (see the setup instructions below), you need to do
 In the project's top-level folder, you will need to create a file called mailer.env. It will contain SMTP_PASS property set to the hashed password of the mailing service you will be using. 
 My students: I'll provide this to you. 
 
-### H2 Profile (for testing with H2 database outside of Docker)
-```
-./gradlew customers-service:build
-java –jar -Dspring.profiles.active=h2 customers-service/build/libs/*.jar &
-```
-(repeat the above two commands for each service you want to compile)
 
-Test with curl:
-```
-curl localhost:7003/owners | jq
-```
-To view H2 database in browser: 
-```
-localhost:7003/h2-console
-```
-Database is: jdbc:h2:mem:customers-db (note this db is service specific)
-
-
-### Docker Profile (for running with Docker or Docker-compose with a MySQL or other database)
+### Docker Profile (for running with docker-compose with ALL SERVICES)
+Must be used prior to issuing a PR and in Sprint Reviews.
 ```
 docker-compose build
 docker-compose up -d
 docker-compose logs -f
+
+or
+
+docker-compose up --build
 ```
 
-Test in browser:
+### Docker Profile (for running with docker-compose with all services but NO FRONTEND)
+This can be used during development to avoid having to rebuild everything whenever you make a change to the frontend. 
+```
+docker-compose -f docker-compose_no_FE.yml build
+docker-compose -f docker-compose_no_FE.yml up -d
+docker-compose logs -f
+
+or
+
+docker-compose -f docker-compose_no_FE.yml up --build
+```
+### Bring up Frontend
+React frontend:
+```
+localhost:3000/
+```
+Until it is fixed, to login on React frontend, use need to enter the following URI:
+```
+localhost:3000/users/login
+```
+Angular frontend:
 ```
 localhost:8080/
 ```

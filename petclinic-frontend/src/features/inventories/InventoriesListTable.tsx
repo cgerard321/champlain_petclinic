@@ -31,7 +31,7 @@ export default function InventoriesListTable(): JSX.Element {
   useEffect(() => {
     getInventoryList('', '', '');
     fetchAllInventoryTypes();
-  }, [currentPage, getInventoryList]);
+  }, [currentPage]);
 
   const clearQueries = (): void => {
     setInventoryName('');

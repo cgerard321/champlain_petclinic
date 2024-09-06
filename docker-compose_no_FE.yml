@@ -1,17 +1,16 @@
 services:
-  petclinicFrontend:
-    image: petclinic-frontend
-    container_name: petclinic-frontend
-    build:
-      context: ./petclinic-frontend
-      dockerfile: Dockerfile
-      args:
-        - BUILD_MODE=development
-    ports:
-      - "3000:3000"
-    volumes:
-      - .petclinic-frontend/src:/app/src
-
+#  petclinicFrontend:
+#    image: petclinic-frontend
+#    container_name: petclinic-frontend
+#    build:
+#      context: ./petclinic-frontend
+#      dockerfile: Dockerfile
+#      args:
+#        - BUILD_MODE=development
+#    ports:
+#      - "3000:3000"
+#    volumes:
+#      - .petclinic-frontend/src:/app/src
   janus:
     image: nginx
     ports:
