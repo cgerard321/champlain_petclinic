@@ -31,7 +31,8 @@ export default function InventoriesListTable(): JSX.Element {
   useEffect(() => {
     getInventoryList('', '', '');
     fetchAllInventoryTypes();
-  }, [currentPage, getInventoryList]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage]);
 
   const clearQueries = (): void => {
     setInventoryName('');
