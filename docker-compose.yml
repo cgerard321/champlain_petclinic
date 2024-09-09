@@ -62,6 +62,7 @@ services:
       - customers-service-reactive
       - vet-service
       - visits-service-new
+      - products-service
   #            - visits
   #            - inventory-service
 
@@ -95,6 +96,11 @@ services:
     env_file:
       - mailer.env
 
+  products-service:
+    build: products-service
+    hostname: products
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
   #    visits:
   #        build: visits-service
   #        hostname: visits
