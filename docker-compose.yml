@@ -101,6 +101,8 @@ services:
     hostname: products
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+
+
   #    visits:
   #        build: visits-service
   #        hostname: visits
