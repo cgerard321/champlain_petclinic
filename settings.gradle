@@ -1,5 +1,3 @@
-
-include 'cart-service'
 //include 'customers-service'
 include 'customers-service-reactive'
 //include 'vets-service'
@@ -12,4 +10,3 @@ include 'inventory-service'
 include 'petclinic-frontend'
 include 'products-service'
 //include 'visits-service'
-
