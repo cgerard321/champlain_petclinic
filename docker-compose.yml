@@ -95,6 +95,18 @@ services:
     env_file:
       - mailer.env
 
+
+  cart-service:
+    build: cart-service
+    hostname: cart
+    depends_on:
+      mysql5:
+        condition: service_healthy
+      mailer-service:
+        condition: service_started
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
   #    visits:
   #        build: visits-service
   #        hostname: visits
@@ -188,6 +200,26 @@ services:
       - ./data/init.d:/docker-entrypoint-initdb.d
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-uuser", "-ppwd", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+
+  mysql5:
+    image: mysql:5.7
+    platform: linux/amd64 # for M1 Macs
+    ports:
+      - "3311:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=rootpwd
+      - MYSQL_DATABASE=auth-db
+      - MYSQL_USER=user
+      - MYSQL_PASSWORD=pwd
+    volumes:
+      - ./data/mysql4:/var/lib/mysql4
+      - ./data/init.d:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-uuser", "-ppwd", "-h", "localhost" ]
       interval: 10s
       timeout: 5s
       retries: 10
