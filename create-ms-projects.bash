@@ -36,17 +36,3 @@ spring init \
 --version=1.0.0-SNAPSHOT \
 auth-service
 
-spring init \
---boot-version=3.2.3 \
---build=gradle \
---type=gradle-project \
---java-version=19 \
---packaging=jar \
---name=cart-service \
---package-name=com.petclinic.cart \
---groupId=com.petclinic.cart \
---dependencies=actuator,webflux,security \
---version=1.0.0-SNAPSHOT \
-cart-service
-
-
