@@ -62,6 +62,7 @@ services:
       - customers-service-reactive
       - vet-service
       - visits-service-new
+      - products-service
   #            - visits
   #            - inventory-service
 
@@ -94,18 +95,23 @@ services:
       - SMTP_SERVER=smtp.gmail.com
     env_file:
       - mailer.env
+      
+cart-service:
+  build: cart-service
+  hostname: cart
+  depends_on:
+    mysql5:
+      condition: service_healthy
+    mailer-service:
+      condition: service_started
+  environment:
+    - SPRING_PROFILES_ACTIVE=docker
 
-
-  cart-service:
-    build: cart-service
-    hostname: cart
-    depends_on:
-      mysql5:
-        condition: service_healthy
-      mailer-service:
-        condition: service_started
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
+products-service:
+  build: products-service
+  hostname: products
+  environment:
+    - SPRING_PROFILES_ACTIVE=docker
 
   #    visits:
   #        build: visits-service
