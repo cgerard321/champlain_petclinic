@@ -28,18 +28,39 @@ import static java.lang.String.format;
 @Service
 @RequiredArgsConstructor
 public class VisitServiceImpl implements VisitService {
+    /**
+     * Access the hardcoded values created in DataSetupService. We have access to VisitRepo commands. LOOK AT DATALAYER
+     */
     private final VisitRepo repo;
+    /**
+     * We can use this to access externally the vets Service and get information from it through http request
+     */
     private final VetsClient vetsClient;
+    /**
+     * We can use this to access externally the pets Service and get information from it through http request
+     */
     private final PetsClient petsClient;
+    /**
+     * Access to the util class to change one datatype to another
+     */
     private final EntityDtoUtil entityDtoUtil;
-
     private final AuthServiceClient authServiceClient;
     private final MailService mailService;
+
+    /**
+     * Get all visits from the repo
+     * @return all Visits as Flux
+     */
     @Override
     public Flux<VisitResponseDTO> getAllVisits() {
         return repo.findAll().flatMap(visit -> entityDtoUtil.toVisitResponseDTO(visit));
     }
 
+    /**
+     * Gets all the visits that a single pet ever had or will have
+     * @param petId
+     * @return
+     */
     @Override
     public Flux<VisitResponseDTO> getVisitsForPet(String petId) {
         return validatePetId(petId)
@@ -47,11 +68,16 @@ public class VisitServiceImpl implements VisitService {
                         .flatMap(visit -> entityDtoUtil.toVisitResponseDTO(visit)));
     }
 
+    /**
+     * Returns all the visit with the corresponding status
+     * @param statusString Accept a Status Enumerator ( See DataLayer/Status )
+     * @return Flux VisitResponseDTO
+     */
     @Override
     public Flux<VisitResponseDTO> getVisitsForStatus(String statusString) {
         Status status;
-        switch (statusString){
 
+        switch (statusString){ // Transform string back into enumerator
             case("UPCOMING"):
                 status = Status.UPCOMING;
 
@@ -68,6 +94,11 @@ public class VisitServiceImpl implements VisitService {
                 .flatMap(visit -> entityDtoUtil.toVisitResponseDTO(visit));
     }
 
+    /**
+     * Gets all the visits my their corresponding Vets
+     * @param vetId The id of the vet we want to get all their visits
+     * @return Returns all visit who have the same vet
+     */
     @Override
     public Flux<VisitResponseDTO> getVisitsForPractitioner(String vetId) {
         return validateVetId(vetId)
@@ -75,33 +106,62 @@ public class VisitServiceImpl implements VisitService {
                 .flatMap(visit -> entityDtoUtil.toVisitResponseDTO(visit));
     }
 
+    /**
+     *  We get a single visit by its VisitId
+     * @param visitId The visit ID we search with
+     * @return Return a single visit with the corresponding ID
+     */
     @Override
     public Mono<VisitResponseDTO> getVisitByVisitId(String visitId) {
         return repo.findByVisitId(visitId)
                 .flatMap(visit -> entityDtoUtil.toVisitResponseDTO(visit));
     }
 
+    /**
+     * Safe add visit. Need authentication to work and uses JwtToken
+     * @param visitRequestDTOMono The visit request model DTO
+     * @return Added visit
+     */
     @Override
     public Mono<VisitResponseDTO> addVisit(Mono<VisitRequestDTO> visitRequestDTOMono) {
         return visitRequestDTOMono
                 .flatMap(visitRequestDTO -> validateVisitRequest(visitRequestDTO)
-                        .then(validatePetId(visitRequestDTO.getPetId()))
-                        .then(validateVetId(visitRequestDTO.getPractitionerId()))
-                        .then(Mono.just(visitRequestDTO))
+                        .then(validatePetId(visitRequestDTO.getPetId()))//Validate the pet
+                        .then(validateVetId(visitRequestDTO.getPractitionerId()))// Validate the Vet
+                        .then(Mono.just(visitRequestDTO)) // Used to say we are continuing work with the RequestDTO
                         .doOnNext(s->{
 
-                            authServiceClient.getUserById(visitRequestDTO.getJwtToken(), visitRequestDTO.getOwnerId()).subscribe(user->mailService.sendMail(generateVisitRequestEmail(user, visitRequestDTO.getPetId(), visitRequestDTO.getVisitDate())));
+                            authServiceClient.getUserById(
+                                    visitRequestDTO.getJwtToken(),
+                                    visitRequestDTO.getOwnerId())
+                                        .subscribe(
+                                                //WILL HAVE TO BET MODIFIED IN ORDER TO USE THE NEW MAIL SERVICE
+                                                user->mailService
+                                                        .sendMail(
+                                                                generateVisitRequestEmail(
+                                                                        user,
+                                                                        visitRequestDTO
+                                                                                .getPetId(),
+                                                                        visitRequestDTO
+                                                                                .getVisitDate()
+                                                                )
+                                                        )
+                                        );
 
-        //                    Mono<UserDetails> user = getUserById(auth, ownerId);
-        //                    try{
-        //                        simpleJavaMailClient.sendMail(emailBuilder("test@email.com"));
-        //                    }catch(Exception e){System.out.println("Email failed to send: "+e.getMessage());}
+                                            //                    Mono<UserDetails> user = getUserById(auth, ownerId);
+                                            //                    try{
+                                            //                        simpleJavaMailClient.sendMail(emailBuilder("test@email.com"));
+                                            //                    }catch(Exception e){System.out.println("Email failed to send: "+e.getMessage());}
                         })
                 )
 //                .doOnNext(v -> System.out.println("Request Date: " + v.getVisitDate())) // Debugging
+
+                //Converts Request DTO ( JSON ) into an entity
                 .map(visitRequestDTO -> entityDtoUtil.toVisitEntity(visitRequestDTO))
+                //Creating a new ID for the visit
                 .doOnNext(x -> x.setVisitId(entityDtoUtil.generateVisitIdString()))
 //                .doOnNext(v -> System.out.println("Entity Date: " + v.getVisitDate())) // Debugging
+                //FLATENS THE MONO
                 .flatMap(visit ->
                         repo.findByVisitDateAndPractitionerId(visit.getVisitDate(), visit.getPractitionerId()) // FindVisits method in repository
                                 .collectList()
@@ -117,6 +177,12 @@ public class VisitServiceImpl implements VisitService {
                 .flatMap(visit -> entityDtoUtil.toVisitResponseDTO(visit));
     }
 
+    /**
+     * Delete a visit with the visit ID.
+     * InvalidException implemented
+     * @param visitId The string VisitID
+     * @return Deleted Visit
+     */
     @Override
     public Mono<Void> deleteVisit(String visitId) {
         return repo.existsByVisitId(visitId)
@@ -129,6 +195,10 @@ public class VisitServiceImpl implements VisitService {
                 });
     }
 
+    /**
+     * Delete all visits who are Cancelled in the DataLayer.Status.
+     * @return Returns all the deleted Visits
+     */
     @Override
     public Mono<Void> deleteAllCancelledVisits() {
         return repo.findAllByStatus("CANCELLED")
@@ -154,10 +224,20 @@ public class VisitServiceImpl implements VisitService {
 //    }
 //
 
+    /**
+     * Modify a Visit by its ID. Does verification for existing Vet and pets before replacing
+     * @param visitId The visit ID to modify
+     * @param visitRequestDTOMono Visit Request DTO
+     * @return Updated visit
+     */
     @Override
     public Mono<VisitResponseDTO> updateVisit(String visitId, Mono<VisitRequestDTO> visitRequestDTOMono) {
+        //Find the visit by the ID
         return repo.findByVisitId(visitId)
+                //VisitEntity becomes a reference to the found Visit
+                //Removes nested Structure  ( Mono<Mono<(...)>> )
                 .flatMap(visitEntity -> visitRequestDTOMono
+                        //Validate Pet and Vet
                         .flatMap(visitRequestDTO -> validatePetId(visitRequestDTO.getPetId())
                                 .then(validateVetId(visitRequestDTO.getPractitionerId()))
                                 .then(Mono.just(visitRequestDTO)))
@@ -166,10 +246,17 @@ public class VisitServiceImpl implements VisitService {
                             visitEntityToUpdate.setVisitId(visitEntity.getVisitId());
                             visitEntityToUpdate.setId(visitEntity.getId());
                         }))
+                //Save
                 .flatMap(repo::save)
                 .flatMap(visit -> entityDtoUtil.toVisitResponseDTO(visit));
     }
 
+    /**
+     * Change the status of any saved Visits by their ID
+     * @param visitId The ID of the visit we want to change the status
+     * @param status The new Status ( Enum : DataLayer/Status )
+     * @return Updated Visit
+     */
     @Override
     public Mono<VisitResponseDTO> updateStatusForVisitByVisitId(String visitId, String status) {
         Status newStatus;
@@ -200,16 +287,30 @@ public class VisitServiceImpl implements VisitService {
     }
 
 
+    /**
+     * Validate if a pet exist. If it doesn't exist, returns 404 NotFound
+     * @param petId Pet Id to verify
+     * @return That specific Pet
+     */
     private Mono<PetResponseDTO> validatePetId(String petId) {
         return petsClient.getPetById(petId)
                 .switchIfEmpty(Mono.error(new NotFoundException("No pet was found with petId: " + petId)));
     }
-
+    /**
+     * Validate if a vet exist. If it doesn't exist, returns 404 NotFound
+     * @param vetId Vet Id to verify
+     * @return That specific Pet
+     */
     private Mono<VetDTO> validateVetId(String vetId) {
         return vetsClient.getVetByVetId(vetId)
                 .switchIfEmpty(Mono.error(new NotFoundException("No vet was found with vetId: " + vetId)));
     }
 
+    /**
+     * Validates if the content of a message is usable to create a new Visit or to modify one
+     * @param dto The VisitRequest DTO that will be validated
+     * @return The DTO as Mono or BadRequestException if it doesn't respect the needed format
+     */
     private Mono<VisitRequestDTO> validateVisitRequest(VisitRequestDTO dto) {
         if (dto.getDescription() == null || dto.getDescription().isBlank()) {
             return Mono.error(new BadRequestException("Please enter a description for this visit"));
@@ -231,6 +332,13 @@ public class VisitServiceImpl implements VisitService {
         }
     }
 
+    /**
+     * Generates an email through an already defined template. Uses the mailer Service through
+     * @param user UserDetails from DomainClientLayer/Auth/UserDetails
+     * @param petName The Pet name
+     * @param visitDate The Date of the visit
+     * @return The email built from the message
+     */
     private Mail generateVisitRequestEmail(UserDetails user, String petName, LocalDateTime visitDate) {
         return Mail.builder()
                 .message(
