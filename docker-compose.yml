@@ -63,6 +63,7 @@ services:
       - vet-service
       - visits-service-new
       - products-service
+      - cart-service
   #            - visits
   #            - inventory-service
 
@@ -99,6 +100,12 @@ services:
   products-service:
     build: products-service
     hostname: products
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+  cart-service:
+    build: cart-service
+    hostname: cart
     environment:
       - SPRING_PROFILES_ACTIVE=docker
 
