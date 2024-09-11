@@ -1,7 +1,12 @@
+using emailing_system.BackgroundTask;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+// This is responsible for starting our recurrent background service
+builder.Services.AddHostedService<RecurringJobService>();
 
 var app = builder.Build();
 
