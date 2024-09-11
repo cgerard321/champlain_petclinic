@@ -26,5 +26,7 @@ public interface VetRepository extends ReactiveMongoRepository<Vet, String> {
 
     Mono<Vet> findVetByVetBillId(String vetBillId);
 
+    Mono<Vet> findVetByFirstNameAndLastName(String firstName, String lastName);
+
 
 }

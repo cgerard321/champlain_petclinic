@@ -152,6 +152,11 @@ public class VetServiceImpl implements VetService {
     }
 
     @Override
+    public Mono<VetResponseDTO> getVetByVetName(String firstName,String lastName) {
+        return vetRepository.findVetByFirstNameAndLastName(firstName,lastName).map(EntityDtoUtil::vetEntityToResponseDTO);
+    }
+
+    @Override
     public Mono<Void> deleteVetByVetId(String vetId) {
         return vetRepository.findVetByVetId(vetId)
                 .switchIfEmpty(Mono.error(new NotFoundException("No vet with this vetId was found: " + vetId)))
