@@ -44,9 +44,7 @@ public class VisitServiceImpl implements VisitService {
      * Access to the util class to change one datatype to another
      */
     private final EntityDtoUtil entityDtoUtil;
-    //TODO COME BACK HERE
     private final AuthServiceClient authServiceClient;
-    //TODO COME BACK HERE
     private final MailService mailService;
 
     /**
@@ -115,7 +113,6 @@ public class VisitServiceImpl implements VisitService {
      */
     @Override
     public Mono<VisitResponseDTO> getVisitByVisitId(String visitId) {
-        //TODO MAKE SURE TO TEST FOR ERRORS : NotFoundException, InvalidInputException
         return repo.findByVisitId(visitId)
                 .flatMap(visit -> entityDtoUtil.toVisitResponseDTO(visit));
     }
