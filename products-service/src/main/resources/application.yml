@@ -1,0 +1,52 @@
+server:
+  port: 7007
+
+  error:
+    include-message: always
+
+logging:
+  level:
+    root: INFO
+    com.petclinic: DEBUG
+
+---
+# for test
+
+spring:
+  config:
+    activate:
+      on-profile: test
+
+  data:
+    mongodb:
+      username: root
+      password: password
+      host: localhost
+      port: 0
+      database: products
+      authentication-database: admin
+      auto-index-creation: true
+
+de:
+  flapdoodle:
+    mongodb:
+      embedded:
+        version: 5.0.5
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: docker
+
+  data:
+    mongodb:
+      host: mongo-products
+      port: 27017
+      database: products
+      username: root
+      password: password
+      authentication-database: admin
+
+server.port: 8080
