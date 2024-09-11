@@ -97,6 +97,41 @@ services:
     env_file:
       - mailer.env
 
+  emailing-service:
+    image: emailing-service
+    container_name: emailing-service-container
+    build:
+      context: ./emailing-system
+      dockerfile: Dockerfile
+    ports:
+      - "5000:80" # Map port 5000 on the host to port 80 in the container
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Server=db;Database=MyAppDb;User=root;Password=Your_password123;
+    depends_on:
+      - emailing-service-mysql-db
+
+  emailing-service-mysql-db:
+    image: mysql:8.0
+    container_name: emailing-service-mysql-db
+    environment:
+      - MYSQL_ROOT_PASSWORD=Your_password123
+      - MYSQL_DATABASE=MyAppDb
+    ports:
+      - "3306:3306"
+  phpmyadmin-emailing-service:
+    image: phpmyadmin/phpmyadmin
+    container_name: phpmyadmin-emailing-service
+    restart: always
+    ports:
+      - "8080:80"
+    environment:
+      - PMA_HOST=db
+      - MYSQL_ROOT_PASSWORD=Your_password123
+    depends_on:
+      - emailing-service-mysql-db
+
+
   products-service:
     build: products-service
     hostname: products-service
