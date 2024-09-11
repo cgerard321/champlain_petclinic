@@ -101,8 +101,8 @@ services:
     image: emailing-service
     container_name: emailing-service-container
     build:
-      context: ./emailing-system
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: emailing-system/Dockerfile
     ports:
       - "5000:80" # Map port 5000 on the host to port 80 in the container
     environment:

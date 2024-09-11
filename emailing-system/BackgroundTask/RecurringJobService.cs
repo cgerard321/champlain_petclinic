@@ -60,7 +60,6 @@ public class RecurringJobService : BackgroundService
             int minutesToNextInterval = 30 - minutesPast;
             nextExecutionTime = TimeSpan.FromMinutes(minutesToNextInterval);
         }
-
         // Return the calculated delay
         return nextExecutionTime;
     }
