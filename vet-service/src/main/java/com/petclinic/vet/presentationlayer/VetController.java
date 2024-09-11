@@ -59,6 +59,7 @@ public class VetController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+
     @PostMapping("/{vetId}/ratings")
     public Mono<ResponseEntity<RatingResponseDTO>> addRatingToVet(@PathVariable String vetId, @RequestBody Mono<RatingRequestDTO> ratingRequest) {
         return ratingService.addRatingToVet(vetId, ratingRequest)
@@ -139,6 +140,14 @@ public class VetController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
+    @GetMapping("/firstName/{firstName}/lastName/{lastName}")
+    public Mono<ResponseEntity<VetResponseDTO>> getVetByVetName(@PathVariable String firstName, @PathVariable String lastName) {
+        return vetService.getVetByVetName(firstName, lastName)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+    //bills
 
     @GetMapping("/vetBillId/{vetBillId}")
     public Mono<ResponseEntity<VetResponseDTO>> getVetByBillId(@PathVariable String vetBillId) {
