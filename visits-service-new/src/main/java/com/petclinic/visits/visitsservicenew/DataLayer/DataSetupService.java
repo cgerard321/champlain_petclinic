@@ -12,6 +12,11 @@ import java.time.format.DateTimeFormatter;
 @RequiredArgsConstructor
 public class DataSetupService implements CommandLineRunner {
     private final VisitRepo visitRepo;
+
+    /**
+     * This is an event function ran at the start to populate visitRepo. Sort of like a main
+     * @throws Exception
+     */
     @Override
     public void run(String... args) throws Exception {
         Visit visit1 = buildVisit("visitId1", "2022-11-24 13:00", "this is a dummy description", "ecb109cd-57ea-4b85-b51e-99751fd1c349", "69f852ca-625b-11ee-8c99-0242ac120002", Status.COMPLETED);
@@ -25,8 +30,18 @@ public class DataSetupService implements CommandLineRunner {
         Flux.just(visit1, visit2, visit3, visit4, visit5, visit6, visit7).flatMap(x -> visitRepo.insert(Mono.just(x)).log(x.toString())).subscribe();
     }
 
+    /**
+     * Acts like a constructor for visit with a date formatter integrated
+     * @param visitId
+     * @param visitDate
+     * @param description
+     * @param petId
+     * @param practitionerId
+     * @param status
+     * @return
+     */
     private Visit buildVisit(String visitId, String visitDate, String description, String petId, String practitionerId, Status status){
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"); // Does a pattern for the Date
         LocalDateTime parsedVisitDate = LocalDateTime.parse(visitDate, formatter);
 
         return Visit.builder()

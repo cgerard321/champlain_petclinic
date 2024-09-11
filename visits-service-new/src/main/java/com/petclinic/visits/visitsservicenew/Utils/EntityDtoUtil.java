@@ -15,6 +15,9 @@ import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 
+/**
+ * Change one type to another
+ */
 @Component
 @RequiredArgsConstructor
 public class EntityDtoUtil {
@@ -22,6 +25,10 @@ public class EntityDtoUtil {
     private final VetsClient vetsClient;
     private final PetsClient petsClient;
 
+    /**
+     * Transform a visit into a Mono<VisitResponseDTO>
+     * @param visit The visit to transform
+     */
     public Mono<VisitResponseDTO> toVisitResponseDTO(Visit visit) {
        // System.out.println("Entity Date in Mapping: " + visit.getVisitDate()); // Debugging
 
@@ -50,12 +57,21 @@ public class EntityDtoUtil {
                 });
     }
 
+    /**
+     * Transform a Request DTO into a Visit
+     * @param visitRequestDTO The DTO to transform
+     * @return The transformed DTO into a Visit
+     */
     public Visit toVisitEntity(VisitRequestDTO visitRequestDTO) {
         Visit visit = new Visit();
         BeanUtils.copyProperties(visitRequestDTO, visit);
         return visit;
     }
 
+    /**
+     * Generate a random UUID and returns it. IS NOT ERROR FREEa
+     * @return The UUID as a string
+     */
     public String generateVisitIdString() {
         return UUID.randomUUID().toString();
     }

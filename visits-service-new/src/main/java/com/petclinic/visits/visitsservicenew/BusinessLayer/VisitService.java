@@ -5,6 +5,9 @@ import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+/**
+ * Simple interface for all the request controller. Implemented in VisitServiceImpl
+ */
 public interface VisitService {
     Flux<VisitResponseDTO> getAllVisits();
     Flux<VisitResponseDTO> getVisitsForPet(String petId);

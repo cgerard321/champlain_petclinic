@@ -15,7 +15,9 @@ import lombok.*;
 
 import java.util.Set;
 
-
+/**
+ * The vetDTO for the Vet-Service
+ */
 @Getter
 @Setter
 @Builder

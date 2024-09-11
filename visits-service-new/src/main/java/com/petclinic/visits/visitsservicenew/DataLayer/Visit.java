@@ -5,6 +5,9 @@ import lombok.*;
 import org.springframework.data.annotation.Id;
 import java.time.LocalDateTime;
 
+/**
+ * Visit Entity
+ */
 @Builder
 @Data
 @ToString

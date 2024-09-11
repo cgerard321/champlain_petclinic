@@ -9,6 +9,9 @@ import reactor.core.publisher.Mono;
 
 import java.util.Objects;
 
+/**
+ * Access point to the Vets
+ */
 @Service
 public class VetsClient {
 
@@ -26,7 +29,11 @@ public class VetsClient {
 
     }
 
-
+    /**
+     * We are accessing the vet-service/src/main/java/com/petclinic/vet/servicelayer/VetServiceImpl.java --  getVetByVetId()
+     * @param vetId Vet ID to search for
+     * @return The pet response DTO of the string we searched
+     */
     public Mono<VetDTO> getVetByVetId(String vetId) {
                 return webClient
                         .get()
