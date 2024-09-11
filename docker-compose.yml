@@ -95,26 +95,6 @@ services:
       - SMTP_SERVER=smtp.gmail.com
     env_file:
       - mailer.env
-<<<<<<< Updated upstream
-
-  products-service:
-    build: products-service
-    hostname: products
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
-
-=======
-      
-#cart-service:
-#  build: cart-service
-#  hostname: cart
-#  depends_on:
-#    mysql5:
-#      condition: service_healthy
-#    mailer-service:
-#      condition: service_started
-#  environment:
-#    - SPRING_PROFILES_ACTIVE=docker
 
   products-service:
     build: products-service
@@ -123,7 +103,6 @@ services:
       - mongo-products
     environment:
       - SPRING_PROFILES_ACTIVE=docker
->>>>>>> Stashed changes
 
   #    visits:
   #        build: visits-service
