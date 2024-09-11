@@ -1,0 +1,28 @@
+server:
+  port: 7007
+
+  error:
+    include-message: always
+
+logging:
+  level:
+    root: INFO
+    com.petclinic: DEBUG
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: docker
+
+  data:
+    mongodb:
+      host: mongo-products
+      port: 27017
+      database: products
+      username: root
+      password: password
+      authentication-database: admin
+
+server.port: 8080
