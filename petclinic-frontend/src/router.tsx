@@ -27,7 +27,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: AppRoutePaths.Vet, // Define the route path for Vets
+        path: AppRoutePaths.Vet, 
         element: (
           <ProtectedRoute>
             <Vet />

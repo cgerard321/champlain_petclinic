@@ -1,7 +1,7 @@
 export enum AppRoutePaths {
   Default = '/',
   Inventories = '/inventories',
-  Vet = '/vet', //added vet's route path
+  Vet = '/vet',
   PageNotFound = '/page-not-found',
   Unauthorized = '/unauthorized',
   ServiceTimeout = '/service-timeout',
