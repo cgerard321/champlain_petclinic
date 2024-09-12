@@ -1,5 +1,6 @@
 package com.petclinic.products.businesslayer;
 
+import com.petclinic.products.datalayer.Product;
 import com.petclinic.products.utils.EntityModelUtil;
 import com.petclinic.products.datalayer.ProductRepository;
 import com.petclinic.products.presentationlayer.ProductRequestModel;
@@ -58,5 +59,15 @@ public class ProductServiceImpl implements ProductService{
                 .flatMap(found -> productRepository.delete(found)
                         .then(Mono.just(found)))
                 .map(EntityModelUtil::toProductResponseModel);
+    }
+
+    @Override
+    public Mono<Void> requestCount(String productId) {
+        return productRepository.findProductByProductId(productId)
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Product id was not found: " + productId))))
+                .flatMap(product -> {
+                    product.setRequestCount(product.getRequestCount() + 1); // Increment the request count
+                    return productRepository.save(product).then(); // Save and complete
+                });
     }
 }

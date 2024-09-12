@@ -33,6 +33,11 @@ public class ProductController {
                 .map(ResponseEntity::ok);
     }
 
+    @PatchMapping(value = "/{productId}")
+    public Mono<ResponseEntity<Void>> incrementRequestCount(@PathVariable String productId) {
+        return productService.requestCount(productId).then(Mono.just(ResponseEntity.noContent().build()));
+    }
+
     @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ProductResponseModel>> addProduct(@RequestBody Mono<ProductRequestModel> productRequestModel) {
         return productService.addProduct(productRequestModel)
