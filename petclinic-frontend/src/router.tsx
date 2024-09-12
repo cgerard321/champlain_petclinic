@@ -2,7 +2,7 @@ import { createBrowserRouter } from 'react-router-dom';
 import { AppRoutePaths } from './shared/models/path.routes';
 import Login from './pages/Login/Login';
 import Inventories from '@/pages/Inventory/Inventories.tsx';
-import Vet from '@/pages/Vet/Vet.tsx'; //added import
+import Vet from '@/pages/Vet/Vet.tsx';
 import { ProtectedRoute } from '@/shared/components/ProtectedRouteProps.tsx';
 import Home from '@/pages/Home/Home.tsx';
 
@@ -27,7 +27,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: AppRoutePaths.Vet, 
+        path: AppRoutePaths.Vet,
         element: (
           <ProtectedRoute>
             <Vet />
