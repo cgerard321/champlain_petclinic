@@ -63,6 +63,7 @@ services:
       - vet-service
       - visits-service-new
       - products-service
+      - cart-service
   #            - visits
   #            - inventory-service
 
@@ -101,6 +102,12 @@ services:
     hostname: products-service
     depends_on:
       - mongo-products
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+  cart-service:
+    build: cart-service
+    hostname: cart
     environment:
       - SPRING_PROFILES_ACTIVE=docker
 
