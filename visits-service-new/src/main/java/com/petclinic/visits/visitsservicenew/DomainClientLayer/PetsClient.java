@@ -9,7 +9,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
-
+/**
+ * Access point to the Pets
+ */
 @Service
 public class PetsClient {
 
@@ -27,8 +29,12 @@ public class PetsClient {
 
         }
 
-
-        public Mono<PetResponseDTO> getPetById( final String petId){
+    /**
+     * We are accessing customers-service-reactive/src/main/java/com.petclinic.customerservice/business/PetServiceImpl
+     * @param petId Pet ID to search for
+     * @return The pet response DTO of the string we searched
+     */
+    public Mono<PetResponseDTO> getPetById( final String petId){
             return webClient
                     .get()
                     .uri(petClientServiceBaseURL + "/{petId}",petId)
