@@ -29,11 +29,11 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.Vet, // Define the route path for Vets
         element: (
-            <ProtectedRoute>
-              <Vet />
-            </ProtectedRoute>
-        )
-      }//   {
+          <ProtectedRoute>
+            <Vet />
+          </ProtectedRoute>
+        ),
+      }, //   {
       //       path: AppRoutePaths.PageNotFound,
       //       element: /* PageNotFoundComponent */
       //   },
