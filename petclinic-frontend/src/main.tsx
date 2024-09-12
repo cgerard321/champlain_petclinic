@@ -10,8 +10,4 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <App />
     </UserProvider>
   </React.StrictMode>
-
-
-
-
 );
