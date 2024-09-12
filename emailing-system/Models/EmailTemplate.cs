@@ -46,6 +46,10 @@ public class EmailTemplate
         {
             if (header != "")
             {
+                if (header.Contains("%%EMAIL_HEADER%%"))
+                {
+                    throw new EmailStringContainsPlaceholder(nameof(header),"%%EMAIL_HEADER%%");
+                }
                 emailContent = emailContent.Replace("%%EMAIL_HEADER%%", header);
             }
             else
@@ -58,6 +62,10 @@ public class EmailTemplate
         {
             if (body != "")
             {
+                if (header.Contains("%%EMAIL_BODY%%"))
+                {
+                    throw new EmailStringContainsPlaceholder(nameof(body), "%%EMAIL_BODY%%");
+                }
                 emailContent = emailContent.Replace("%%EMAIL_BODY%%", body);
             }
             else
@@ -70,6 +78,10 @@ public class EmailTemplate
         {
             if (footer != "")
             {
+                if (header.Contains("%%EMAIL_FOOTER%%"))
+                {
+                    throw new EmailStringContainsPlaceholder(nameof(footer), "%%EMAIL_FOOTER%%");
+                }
                 emailContent = emailContent.Replace("%%EMAIL_FOOTER%%", footer);
             }
             else
@@ -82,6 +94,10 @@ public class EmailTemplate
         {
             if (correspondentName != "")
             {
+                if (header.Contains("%%EMAIL_NAME%%"))
+                {
+                    throw new EmailStringContainsPlaceholder(nameof(correspondentName), "%%EMAIL_NAME%%");
+                }
                 emailContent = emailContent.Replace("%%EMAIL_NAME%%", correspondentName);
             }
             else
@@ -94,6 +110,10 @@ public class EmailTemplate
         {
             if (sender != "")
             {
+                if (header.Contains("%%EMAIL_SENDER%%"))
+                {
+                    throw new EmailStringContainsPlaceholder(nameof(sender), "%%EMAIL_SENDER%%");
+                }
                 emailContent = emailContent.Replace("%%EMAIL_SENDER%%", sender);
             }
             else
