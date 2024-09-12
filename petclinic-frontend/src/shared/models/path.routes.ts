@@ -1,10 +1,8 @@
-
-
 export enum AppRoutePaths {
   Default = '/',
   Inventories = '/inventories',
   Vet = '/vet',
-  CustomerBills = '/bills/customers/:userId',
+  CustomerBills = '/bills/customer/:userId',
   PageNotFound = '/page-not-found',
   Unauthorized = '/unauthorized',
   ServiceTimeout = '/service-timeout',

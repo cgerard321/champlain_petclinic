@@ -3,30 +3,53 @@ import { Bill } from '@/features/bills/models/Bill.ts';
 import { useUser } from '@/context/UserContext';
 
 export default function BillsListTable(): JSX.Element {
-    const { user } = useUser();
-    const [bills, setBills] = useState<Bill[]>([]);
-    const [error, setError] = useState<string | null>(null);
+    const { user } = useUser();  // Get user info from context
+    const [bills, setBills] = useState<Bill[]>([]);  // Store the bills
+    const [error, setError] = useState<string | null>(null);  // Error handling
 
     useEffect(() => {
         if (!user.userId) return;
 
-        // Use EventSource to handle the Flux stream
-        const eventSource = new EventSource(`${user.userId}`);
+        // Fetch bills using the fetch API to handle streaming
+        const fetchBills = async () => {
+            try {
+                const response = await fetch(`http://localhost:8080/api/gateway/bills/customer/1`, {
+                    headers: {
+                        'Accept': 'text/event-stream',  // Ensure the correct headers for SSE
+                    },
+                });
 
-        eventSource.onmessage = (event) => {
-            const newBill: Bill = JSON.parse(event.data);
-            setBills((prevBills) => [...prevBills, newBill]); // Append new bills to the state
+                const reader = response.body?.getReader();
+                const decoder = new TextDecoder('utf-8');
+
+                let done = false;
+                let billsArray: Bill[] = [];
+
+                while (!done) {
+                    const { value, done: streamDone } = await reader?.read() || {};
+                    done = streamDone || true;
+
+                    if (value) {
+                        const chunk = decoder.decode(value, { stream: true });
+                        // Process each chunk of data (which contains a new bill)
+                        if (chunk) {
+                            try {
+                                const newBill: Bill = JSON.parse(chunk);  // Parse the chunked JSON string
+                                billsArray.push(newBill);  // Add to bills array
+                                setBills([...billsArray]);  // Update state with new bill
+                            } catch (e) {
+                                console.error('Error parsing chunk:', e);
+                            }
+                        }
+                    }
+                }
+            } catch (err) {
+                console.error('Error fetching bills:', err);
+                setError('Failed to fetch bills');
+            }
         };
 
-        eventSource.onerror = (err) => {
-            console.error('Error receiving SSE:', err);
-            setError('Failed to fetch bills');
-            eventSource.close();
-        };
-
-        return () => {
-            eventSource.close(); // Close the event source when the component unmounts
-        };
+        fetchBills();
     }, [user.userId]);
 
     return (

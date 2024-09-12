@@ -3,7 +3,7 @@ import { Bill } from '@/features/bills/models/Bill.ts';
 
 export async function getAllBillsByCustomer(customerId: string): Promise<Bill[]> {
     const response = await axiosInstance.get<Bill[]>(
-        `${axiosInstance.defaults.baseURL}bills/customer/${customerId}`
+        `bills/customer/${customerId}`
     );
     return response.data;
 }
