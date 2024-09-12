@@ -36,7 +36,7 @@ out/
 /.nb-gradle/
 
 ### VS Code ###
-.vscode/
+#.vscode/
 .vs/
 .vs/VSWorkspaceState.json
 .vs/champlain_petclinic/v16/.suo
