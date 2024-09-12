@@ -1,8 +1,9 @@
-import { createBrowserRouter } from 'react-router-dom';
-import { AppRoutePaths } from './shared/models/path.routes';
+import {createBrowserRouter} from 'react-router-dom';
+import {AppRoutePaths} from './shared/models/path.routes';
 import Login from './pages/Login/Login';
 import Inventories from '@/pages/Inventory/Inventories.tsx';
-import { ProtectedRoute } from '@/shared/components/ProtectedRouteProps.tsx';
+import {ProtectedRoute} from '@/shared/components/ProtectedRouteProps.tsx';
+import Products from "@/pages/Product/Products.tsx";
 
 const router = createBrowserRouter([
   {
@@ -16,6 +17,14 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+      {
+        path: AppRoutePaths.Products,
+        element: (
+            <ProtectedRoute>
+              <Products/>
+            </ProtectedRoute>
+        )
+      }
       //   {
       //       path: AppRoutePaths.PageNotFound,
       //       element: /* PageNotFoundComponent */
