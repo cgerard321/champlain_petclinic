@@ -141,12 +141,21 @@ public class VetController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/firstName/{firstName}/lastName/{lastName}")
-    public Mono<ResponseEntity<VetResponseDTO>> getVetByVetName(@PathVariable String firstName, @PathVariable String lastName) {
-        return vetService.getVetByVetName(firstName, lastName)
+    @GetMapping("/firstName/{firstName}")
+    public Mono<ResponseEntity<VetResponseDTO>> getVetByFirstName(@PathVariable String firstName) {
+        return vetService.getVetByFirstName(firstName)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
+    @GetMapping("/lastName/{lastName}")
+    public Mono<ResponseEntity<VetResponseDTO>> getVetByLastName(@PathVariable String lastName) {
+        return vetService.getVetByLastName(lastName)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+
     //bills
 
     @GetMapping("/vetBillId/{vetBillId}")
