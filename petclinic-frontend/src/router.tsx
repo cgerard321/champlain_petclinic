@@ -5,6 +5,7 @@ import Inventories from '@/pages/Inventory/Inventories.tsx';
 import Vet from '@/pages/Vet/Vet.tsx';
 import { ProtectedRoute } from '@/shared/components/ProtectedRouteProps.tsx';
 import Home from '@/pages/Home/Home.tsx';
+import ProfileEdit from "@/pages/Customer/ProfileEdit.tsx";
 
 const router = createBrowserRouter([
   {
@@ -33,7 +34,16 @@ const router = createBrowserRouter([
             <Vet />
           </ProtectedRoute>
         ),
-      }, //   {
+      },
+      {
+        path: AppRoutePaths.CustomerProfileEdit,
+        element: (
+            <ProtectedRoute>
+              <ProfileEdit />
+            </ProtectedRoute>
+        ),
+      },
+      //   {
       //       path: AppRoutePaths.PageNotFound,
       //       element: /* PageNotFoundComponent */
       //   },
