@@ -13,7 +13,7 @@ export default function BillsListTable(): JSX.Element {
 
         const fetchBills = async () => {
             try {
-                const response = await fetch(`http://localhost:8080/api/gateway/bills/customer/1`, {
+                const response = await fetch(`http://localhost:8080/api/gateway/bills/customer/${user.userId}`, {
                     headers: {
                         'Accept': 'text/event-stream',
                     },
@@ -37,18 +37,21 @@ export default function BillsListTable(): JSX.Element {
                     if (value) {
                         const chunk = decoder.decode(value, { stream: true });
 
-                        const formattedChunk = chunk.trim().replace(/^data:\s*/, '');
+                        const formattedChunks = chunk.trim().split(/\n\n/);
 
+                        formattedChunks.forEach(formattedChunk => {
+                            const cleanChunk = formattedChunk.trim().replace(/^data:\s*/, '');
 
-                        if (formattedChunk) {
-                            try {
-                                const newBill: Bill = JSON.parse(formattedChunk);
-                                billsArray.push(newBill);
-                                setBills([...billsArray]);
-                            } catch (e) {
-                                console.error('Error parsing chunk:', e);
+                            if (cleanChunk) {
+                                try {
+                                    const newBill: Bill = JSON.parse(cleanChunk);
+                                    billsArray.push(newBill);
+                                    setBills([...billsArray]);
+                                } catch (e) {
+                                    console.error('Error parsing chunk:', e);
+                                }
                             }
-                        }
+                        });
                     }
                 }
             } catch (err) {
