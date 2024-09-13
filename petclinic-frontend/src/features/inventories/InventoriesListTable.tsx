@@ -78,7 +78,7 @@ export default function InventoriesListTable(): JSX.Element {
       <table className="table table-striped">
         <thead>
           <tr>
-            <td>Inventory ID</td>
+            {/*<td>Inventory ID</td>*/}
             <td>Name</td>
             <td>Type</td>
             <td>Description</td>
@@ -184,16 +184,15 @@ export default function InventoriesListTable(): JSX.Element {
           </tr>
         </thead>
         <tbody>
-          {inventoryList.map(inventory => (
+        {inventoryList.map(inventory => (
             <tr
-              key={inventory.inventoryId}
-              onClick={() => navigate(`/productList/${inventory.inventoryId}`)}
+                key={inventory.inventoryName}
+                onClick={() => navigate(`/productList/${inventory.inventoryName}`)}
             >
-              <td>{inventory.inventoryId}</td>
               <td>
                 <a
-                  style={{ textDecoration: 'none' }}
-                  href={`/productList/${inventory.inventoryId}`}
+                    style={{ textDecoration: 'none' }}
+                    href={`/productList/${inventory.inventoryName}`}
                 >
                   {inventory.inventoryName}
                 </a>
@@ -202,20 +201,20 @@ export default function InventoriesListTable(): JSX.Element {
               <td>{inventory.inventoryDescription}</td>
               <td>
                 <button
-                  className="btn btn-warning"
-                  onClick={e => {
-                    e.stopPropagation();
-                    navigate(`/updateInventory/${inventory.inventoryId}/edit`);
-                  }}
-                  title="Edit"
+                    className="btn btn-warning"
+                    onClick={e => {
+                      e.stopPropagation();
+                      navigate(`/updateInventory/${inventory.inventoryName}/edit`);
+                    }}
+                    title="Edit"
                 >
                   <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="32px"
-                    height="32px"
-                    fill="white"
-                    className="bi bi-pencil text-white"
-                    viewBox="0 0 16 16"
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="32px"
+                      height="32px"
+                      fill="white"
+                      className="bi bi-pencil text-white"
+                      viewBox="0 0 16 16"
                   >
                     <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325" />
                   </svg>
@@ -223,20 +222,20 @@ export default function InventoriesListTable(): JSX.Element {
               </td>
               <td>
                 <button
-                  className="btn btn-danger"
-                  onClick={e => {
-                    e.stopPropagation();
-                    deleteInventoryHandler(inventory);
-                  }}
-                  title="Delete"
+                    className="btn btn-danger"
+                    onClick={e => {
+                      e.stopPropagation();
+                      deleteInventoryHandler(inventory);
+                    }}
+                    title="Delete"
                 >
                   <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="32"
-                    height="32"
-                    fill="currentColor"
-                    className="bi bi-trash"
-                    viewBox="0 0 16 16"
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="32"
+                      height="32"
+                      fill="currentColor"
+                      className="bi bi-trash"
+                      viewBox="0 0 16 16"
                   >
                     <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z" />
                     <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z" />
@@ -244,8 +243,9 @@ export default function InventoriesListTable(): JSX.Element {
                 </button>
               </td>
             </tr>
-          ))}
+        ))}
         </tbody>
+
       </table>
       <div className="text-center">
         <table className="mx-auto">
