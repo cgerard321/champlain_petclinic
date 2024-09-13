@@ -26,7 +26,7 @@ export default function Login(): JSX.Element {
       .then(response => {
         setUser(response.data);
         if (response.data.userId !== '') {
-          navigate(AppRoutePaths.Default);
+          navigate(AppRoutePaths.Home);
         }
       });
   };
