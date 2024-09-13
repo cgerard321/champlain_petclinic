@@ -3,9 +3,9 @@ import { Bill } from '@/features/bills/models/Bill.ts';
 import { useUser } from '@/context/UserContext';
 
 export default function BillsListTable(): JSX.Element {
-    const { user } = useUser();  // Get user info from context
-    const [bills, setBills] = useState<Bill[]>([]);  // Store the bills
-    const [error, setError] = useState<string | null>(null);  // Error handling
+    const { user } = useUser();
+    const [bills, setBills] = useState<Bill[]>([]);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         if (!user.userId) return;
