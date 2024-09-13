@@ -27,7 +27,7 @@ export default function Login(): JSX.Element {
         setUser(response.data);
         //TODO: update to navigate to the home page
         if (response.data.userId !== '') {
-          navigate(AppRoutePaths.Inventories);
+          navigate(AppRoutePaths.Default);
         }
       });
   };
