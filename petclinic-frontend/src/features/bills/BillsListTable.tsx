@@ -10,14 +10,19 @@ export default function BillsListTable(): JSX.Element {
     useEffect(() => {
         if (!user.userId) return;
 
-        // Fetch bills using the fetch API to handle streaming
+
         const fetchBills = async () => {
             try {
                 const response = await fetch(`http://localhost:8080/api/gateway/bills/customer/1`, {
                     headers: {
-                        'Accept': 'text/event-stream',  // Ensure the correct headers for SSE
+                        'Accept': 'text/event-stream',
                     },
+                    credentials: "include",
                 });
+
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.status} ${response.statusText}`);
+                }
 
                 const reader = response.body?.getReader();
                 const decoder = new TextDecoder('utf-8');
@@ -31,12 +36,15 @@ export default function BillsListTable(): JSX.Element {
 
                     if (value) {
                         const chunk = decoder.decode(value, { stream: true });
-                        // Process each chunk of data (which contains a new bill)
-                        if (chunk) {
+
+                        const formattedChunk = chunk.trim().replace(/^data:\s*/, '');
+
+
+                        if (formattedChunk) {
                             try {
-                                const newBill: Bill = JSON.parse(chunk);  // Parse the chunked JSON string
-                                billsArray.push(newBill);  // Add to bills array
-                                setBills([...billsArray]);  // Update state with new bill
+                                const newBill: Bill = JSON.parse(formattedChunk);
+                                billsArray.push(newBill);
+                                setBills([...billsArray]);
                             } catch (e) {
                                 console.error('Error parsing chunk:', e);
                             }
