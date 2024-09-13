@@ -1,4 +1,4 @@
-package com.petclinic.products.presentationlayer;
+package com.petclinic.cartsservice.domainclientlayer;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

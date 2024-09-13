@@ -1,4 +1,4 @@
-package com.petclinic.products.utils.exceptions;
+package com.petclinic.cartsservice.utils.exceptions;
 
 public class NotFoundException extends RuntimeException{
 

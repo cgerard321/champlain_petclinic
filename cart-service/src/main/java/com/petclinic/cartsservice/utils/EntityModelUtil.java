@@ -1,26 +1,28 @@
-package com.petclinic.products.utils;
+package com.petclinic.cartsservice.utils;
 
-import com.petclinic.products.datalayer.Product;
-import com.petclinic.products.presentationlayer.ProductRequestModel;
-import com.petclinic.products.presentationlayer.ProductResponseModel;
+
+import com.petclinic.cartsservice.dataaccesslayer.Cart;
+import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
+import com.petclinic.cartsservice.presentationlayer.CartRequestModel;
+import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
 import org.springframework.beans.BeanUtils;
 
+import java.util.List;
 import java.util.UUID;
 
 public class EntityModelUtil {
 
-    public static ProductResponseModel toProductResponseModel(Product product) {
-        ProductResponseModel productResponseModel = new ProductResponseModel();
-        BeanUtils.copyProperties(product, productResponseModel);
-        return productResponseModel;
+    public static CartResponseModel toCartResponseModel(Cart cart, List<ProductResponseModel> products) {
+        CartResponseModel cartResponseModel = new CartResponseModel();
+        BeanUtils.copyProperties(cart, cartResponseModel);
+        cartResponseModel.setProducts(products);
+        return cartResponseModel;
     }
 
-    public static Product toProductEntity(ProductRequestModel productRequestModel) {
-        return Product.builder()
-                .productId(generateUUIDString())
-                .productName(productRequestModel.getProductName())
-                .productDescription(productRequestModel.getProductDescription())
-                .productSalePrice(productRequestModel.getProductSalePrice())
+    public static Cart toCartEntity(CartRequestModel cartRequestModel) {
+        return Cart.builder()
+                .cartId(generateUUIDString())
+                .customerId(cartRequestModel.getCustomerId())
                 .build();
     }
 

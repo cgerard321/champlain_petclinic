@@ -1,7 +1,8 @@
-package com.petclinic.products.utils;
+package com.petclinic.cartsservice.utils;
 
-import com.petclinic.products.utils.exceptions.InvalidInputException;
-import com.petclinic.products.utils.exceptions.NotFoundException;
+
+import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
+import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;

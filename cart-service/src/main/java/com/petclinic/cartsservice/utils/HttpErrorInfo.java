@@ -1,4 +1,4 @@
-package com.petclinic.products.utils;
+package com.petclinic.cartsservice.utils;
 
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
