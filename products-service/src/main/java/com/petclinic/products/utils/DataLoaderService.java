@@ -25,6 +25,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productName("Dog Food")
                 .productDescription("Premium dry food for adult dogs")
                 .productSalePrice(45.99)
+                .averageRating(0.0)
             .build();
 
         Product product2 = Product.builder()
@@ -32,6 +33,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productName("Cat Litter")
                 .productDescription("Clumping cat litter with odor control")
                 .productSalePrice(12.99)
+                .averageRating(0.0)
                 .build();
 
         Product product3 = Product.builder()
@@ -39,6 +41,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productName("Flea Collar")
                 .productDescription("Flea and tick prevention for small dogs")
                 .productSalePrice(9.99)
+                .averageRating(0.0)
                 .build();
 
         Product product4 = Product.builder()
@@ -46,6 +49,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productName("Bird Cage")
                 .productDescription("Spacious cage for small birds like parakeets")
                 .productSalePrice(29.99)
+                .averageRating(0.0)
                 .build();
 
         Product product5 = Product.builder()
@@ -53,6 +57,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productName("Aquarium Filter")
                 .productDescription("Filter system for small to medium-sized aquariums")
                 .productSalePrice(19.99)
+                .averageRating(0.0)
                 .build();
 
         Product product6 = Product.builder()
@@ -60,6 +65,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productName("Horse Saddle")
                 .productDescription("Lightweight saddle for riding horses")
                 .productSalePrice(199.99)
+                .averageRating(0.0)
                 .build();
 
         Product product7 = Product.builder()
@@ -67,6 +73,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productName("Rabbit Hutch")
                 .productDescription("Outdoor wooden hutch for rabbits")
                 .productSalePrice(79.99)
+                .averageRating(0.0)
                 .build();
 
         Product product8 = Product.builder()
@@ -74,6 +81,7 @@ public class DataLoaderService implements CommandLineRunner {
                 .productName("Fish Tank Heater")
                 .productDescription("Submersible heater for tropical fish tanks")
                 .productSalePrice(14.99)
+                .averageRating(0.0)
                 .build();
 
         Flux.just(product1, product2, product3, product4, product5, product6, product7, product8)
