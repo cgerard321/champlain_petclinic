@@ -1,7 +1,8 @@
 package com.petclinic.products.utils;
 
-import com.petclinic.products.datalayer.Product;
-import com.petclinic.products.datalayer.ProductRepository;
+import com.petclinic.products.datalayer.products.Product;
+import com.petclinic.products.datalayer.products.ProductRepository;
+import com.petclinic.products.datalayer.ratings.RatingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
@@ -14,9 +15,11 @@ public class DataLoaderService implements CommandLineRunner {
     @Autowired
     ProductRepository productRepository;
 
+    @Autowired
+    RatingRepository ratingRepository;
+
     @Override
     public void run(String... args) throws Exception {
-
         Product product1 = Product.builder()
                 .productId("06a7d573-bcab-4db3-956f-773324b92a80")
                 .productName("Dog Food")

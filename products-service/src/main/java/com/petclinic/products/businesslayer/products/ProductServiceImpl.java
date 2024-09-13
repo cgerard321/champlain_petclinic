@@ -1,16 +1,18 @@
-package com.petclinic.products.businesslayer;
+package com.petclinic.products.businesslayer.products;
 
 import com.petclinic.products.utils.EntityModelUtil;
-import com.petclinic.products.datalayer.ProductRepository;
-import com.petclinic.products.presentationlayer.ProductRequestModel;
-import com.petclinic.products.presentationlayer.ProductResponseModel;
+import com.petclinic.products.datalayer.products.ProductRepository;
+import com.petclinic.products.presentationlayer.products.ProductRequestModel;
+import com.petclinic.products.presentationlayer.products.ProductResponseModel;
 import com.petclinic.products.utils.exceptions.NotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
-public class ProductServiceImpl implements ProductService{
+@Slf4j
+public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
 
@@ -26,6 +28,9 @@ public class ProductServiceImpl implements ProductService{
 
     @Override
     public Mono<ProductResponseModel> getProductByProductId(String productId) {
+        log.debug(productId);
+        productRepository.findProductByProductId(productId)
+                .doOnNext(v -> log.debug(v.toString()));
         return productRepository.findProductByProductId(productId)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Product id was not found: " + productId))))
                 .map(EntityModelUtil::toProductResponseModel);
