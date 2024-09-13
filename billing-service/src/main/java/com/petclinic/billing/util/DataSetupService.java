@@ -1,7 +1,9 @@
-package com.petclinic.billing.datalayer;
+package com.petclinic.billing.util;
 
 
 import com.petclinic.billing.businesslayer.BillService;
+import com.petclinic.billing.datalayer.BillRequestDTO;
+import com.petclinic.billing.datalayer.BillStatus;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -22,7 +24,7 @@ public class DataSetupService implements CommandLineRunner {
     public void run(String... args) throws Exception {
 
 
-        BillRequestDTO b1 = new BillRequestDTO( "f470653d-05c5-4c45-b7a0-7d70f003d2ac", "general", "1", LocalDate.of(2023,9,19),59.99,BillStatus.PAID, LocalDate.of(2023, 10,3));
+        BillRequestDTO b1 = new BillRequestDTO( "f470653d-05c5-4c45-b7a0-7d70f003d2ac", "general", "1", LocalDate.of(2023,9,19),59.99, BillStatus.PAID, LocalDate.of(2023, 10,3));
         BillRequestDTO b3 = new BillRequestDTO( "f470653d-05c5-4c45-b7a0-7d70f003d2ac", "operation", "1", LocalDate.of(2023,9,27), 199.99,BillStatus.PAID,LocalDate.of(2023, 10,11));
         BillRequestDTO b4 = new BillRequestDTO( "f470653d-05c5-4c45-b7a0-7d70f003d2ac", "injury", "1",  LocalDate.of(2023,10,11), 199.99,BillStatus.UNPAID,LocalDate.of(2023, 10,25));
         BillRequestDTO b2 = new BillRequestDTO( "f470653d-05c5-4c45-b7a0-7d70f003d2ac", "operation", "2", LocalDate.of(2023,10,6), 199.99,BillStatus.OVERDUE,LocalDate.of(2023, 10,20));
