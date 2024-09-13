@@ -7,4 +7,5 @@ import reactor.core.publisher.Mono;
 public interface RatingRepository extends ReactiveMongoRepository<Rating, String>{
     Flux<Rating> findRatingsByProductId(String productId);
     Mono<Rating> findRatingByCustomerIdAndProductId(String customerId, String productId);
+    Flux<Rating> deleteRatingsByProductId(String productId);
 }
