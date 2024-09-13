@@ -48,6 +48,8 @@ dependencies {
     testImplementation 'com.squareup.okhttp3:okhttp:4.11.0',
             'com.squareup.okhttp3:mockwebserver:4.11.0',
             'io.projectreactor:reactor-test'
+
+    testImplementation group: 'org.mock-server', name: 'mockserver-netty', version: '5.15.0'
 }
 
 jacoco {
