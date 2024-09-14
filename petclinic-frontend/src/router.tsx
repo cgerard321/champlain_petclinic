@@ -6,7 +6,7 @@ import Vet from '@/pages/Vet/Vet.tsx';
 import { ProtectedRoute } from '@/shared/components/ProtectedRouteProps.tsx';
 import Home from '@/pages/Home/Home.tsx';
 import ProfileEdit from '@/pages/Customer/ProfileEdit.tsx';
-import CustomerBillingPage from "@/pages/Bills/CostumerBills.tsx";
+import CustomerBillingPage from '@/pages/Bills/CostumerBills.tsx';
 
 const router = createBrowserRouter([
   {
@@ -15,41 +15,41 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.Home,
         element: (
-            <ProtectedRoute>
-              <Home />
-            </ProtectedRoute>
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
         ),
       },
       {
         path: AppRoutePaths.Inventories,
         element: (
-            <ProtectedRoute>
-              <Inventories />
-            </ProtectedRoute>
+          <ProtectedRoute>
+            <Inventories />
+          </ProtectedRoute>
         ),
       },
       {
         path: AppRoutePaths.Vet,
         element: (
-            <ProtectedRoute>
-              <Vet />
-            </ProtectedRoute>
+          <ProtectedRoute>
+            <Vet />
+          </ProtectedRoute>
         ),
       },
       {
         path: AppRoutePaths.CustomerProfileEdit,
         element: (
-            <ProtectedRoute>
-              <ProfileEdit />
-            </ProtectedRoute>
+          <ProtectedRoute>
+            <ProfileEdit />
+          </ProtectedRoute>
         ),
       },
       {
         path: AppRoutePaths.CustomerBills,
         element: (
-            <ProtectedRoute>
-              <CustomerBillingPage />
-            </ProtectedRoute>
+          <ProtectedRoute>
+            <CustomerBillingPage />
+          </ProtectedRoute>
         ),
       },
       //   {
