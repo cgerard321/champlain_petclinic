@@ -12,7 +12,7 @@ const router = createBrowserRouter([
     path: AppRoutePaths.Default,
     children: [
       {
-        path: AppRoutePaths.Default,
+        path: AppRoutePaths.Home,
         element: (
           <ProtectedRoute>
             <Home />
