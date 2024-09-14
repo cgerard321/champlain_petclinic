@@ -9,4 +9,5 @@ export enum AppRoutePaths {
   ServiceUnavailable = '/service-unavailable',
   login = '/users/login',
   CustomerProfileEdit = 'customer/profile/edit',
+  Home = '/home',
 }
