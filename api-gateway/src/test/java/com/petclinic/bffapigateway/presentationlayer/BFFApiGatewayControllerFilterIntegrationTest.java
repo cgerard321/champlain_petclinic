@@ -100,7 +100,7 @@ class BFFApiGatewayControllerFilterIntegrationTest {
 
 
 
-    //@Test
+//    @Test
     void getUserByIdWithWrongAccount_ShouldFail(){
         Mockito.when(jwtTokenUtil.getTokenFromRequest(any(ServerWebExchange.class)))
                 .thenReturn("valid.token.signed");
