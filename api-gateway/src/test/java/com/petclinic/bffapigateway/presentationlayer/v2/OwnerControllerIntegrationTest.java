@@ -138,7 +138,7 @@ class OwnerControllerIntegrationTest {
 
         Mono<OwnerResponseDTO> result = webTestClient.post()
                 .uri("/api/v2/gateway/owners")
-                .cookie("Bearer", jwtTokenForValidAdmin) // Ensure this token is valid
+                .cookie("Bearer", jwtTokenForValidAdmin)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(newOwnerRequestDTO), OwnerRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)

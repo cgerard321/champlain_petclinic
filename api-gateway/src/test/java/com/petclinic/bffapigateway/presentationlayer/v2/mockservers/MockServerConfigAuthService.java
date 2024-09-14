@@ -65,8 +65,8 @@ public class MockServerConfigAuthService {
                 )
                 .respond(
                         response()
-                                .withStatusCode(201)
-                                .withBody(json("{\"token\":\"valid-test-token\",\"userId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"roles\":[\"ADMIN\"]}"))
+                                .withStatusCode(200)
+                                .withBody(json("{\"token\":\"valid-test-token\",\"userId\":\"cb6701ef-22cf-465c-be59-b1ef71cd4f2e\",\"roles\":[\"ADMIN\"]}"))
                 );
     }
 
