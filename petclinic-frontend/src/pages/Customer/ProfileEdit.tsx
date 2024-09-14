@@ -70,7 +70,7 @@ const ProfileEdit: React.FC = (): JSX.Element => {
     try {
       const response = await updateOwner(user.userId, owner);
       if (response.status === 200) {
-        navigate(AppRoutePaths.Default);
+        navigate(AppRoutePaths.Home);
       } else {
       }
     } catch (error) {

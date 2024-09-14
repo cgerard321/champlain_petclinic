@@ -19,6 +19,10 @@ public class MockServerConfigAuthService {
 
     public static final String jwtTokenForInvalidOwnerId = "valid-test-token-for-invalid-owner-id";
 
+    public static final String jwtTokenForValidAdmin = "valid-test-token-for-valid-admin";
+
+
+
     public MockServerConfigAuthService() {
         this.clientAndServer = ClientAndServer.startClientAndServer(AUTH_SERVICE_SERVER_PORT);
     }
@@ -48,6 +52,21 @@ public class MockServerConfigAuthService {
                         response()
                                 .withStatusCode(200)
                                 .withBody(json("{\"token\":\"valid-test-token\",\"userId\":\"invalid-owner-id\",\"roles\":[\"OWNER\"]}"))
+                );
+    }
+
+    public void registerValidateTokenForAdminEndpoint() {
+        mockServerClient_AuthService
+                .when(
+                        request()
+                                .withMethod("POST")
+                                .withPath("/users/validate-token")
+                                .withCookie("Bearer", jwtTokenForValidAdmin)
+                )
+                .respond(
+                        response()
+                                .withStatusCode(201)
+                                .withBody(json("{\"token\":\"valid-test-token\",\"userId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"roles\":[\"ADMIN\"]}"))
                 );
     }
 

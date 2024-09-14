@@ -8,6 +8,7 @@ export enum AppRoutePaths {
   InternalServer = '/internal-server',
   ServiceUnavailable = '/service-unavailable',
   login = '/users/login',
-  CustomerProfileEdit = 'customer/profile/edit',
+  CustomerProfileEdit = '/customer/profile/edit',
+  AddingCustomer = '/customer/add',
   Home = '/home',
 }
