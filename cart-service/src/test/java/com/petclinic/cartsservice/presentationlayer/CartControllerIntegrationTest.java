@@ -9,6 +9,7 @@ import org.reactivestreams.Publisher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
@@ -18,6 +19,8 @@ import reactor.test.StepVerifier;
 import java.util.List;
 
 
+import static com.mongodb.assertions.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 @SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port = 0"})
@@ -78,21 +81,21 @@ class CartControllerIntegrationTest {
     }
 
 //    @Test
-//    void whenGetCartByCartId_thenReturnCartResponseModel(){
-//        webTestClient.get()
-//                .uri("/api/v1/carts/" + cart1.getCartId())
-//                .accept(MediaType.APPLICATION_JSON)
-//                .exchange()
-//                .expectStatus().isOk()
-//                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-//                .expectBody(CartResponseModel.class)
-//                .value(result -> {
-//                    assertNotNull(cartResponseModel);
-//                    assertEquals(cart1.getCartId(), result.getCartId());
-//                    assertEquals(cart1.getCustomerId(), result.getCustomerId());
-//                    assertEquals(cart1.getProductIds().size(), result.getProducts().size());
-//                    assertEquals(cart1.getProductIds().get(0), result.getProducts().get(0).getProductId());
-//                });
-//    }
+    void whenGetCartByCartId_thenReturnCartResponseModel(){
+        webTestClient.get()
+                .uri("/api/v1/carts/" + cart1.getCartId())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(CartResponseModel.class)
+                .value(result -> {
+                    assertNotNull(cartResponseModel);
+                    assertEquals(cart1.getCartId(), result.getCartId());
+                    assertEquals(cart1.getCustomerId(), result.getCustomerId());
+                    assertEquals(cart1.getProductIds().size(), result.getProducts().size());
+                    assertEquals(cart1.getProductIds().get(0), result.getProducts().get(0).getProductId());
+                });
+    }
 
 }
