@@ -18,11 +18,6 @@ export function NavBar(): JSX.Element {
     });
   };
 
-  const customerBillsUrl = AppRoutePaths.CustomerBills.replace(
-    ':userId',
-    user.userId
-  );
-
   return (
     <nav className="navbar">
       <a className="navbar-brand" href="#">
@@ -74,7 +69,7 @@ export function NavBar(): JSX.Element {
                 </li>
               )}
               <li className="nav-item">
-                <Link className="nav-link" to={customerBillsUrl}>
+                <Link className="nav-link" to={AppRoutePaths.CustomerBills}>
                   Bills
                 </Link>
               </li>

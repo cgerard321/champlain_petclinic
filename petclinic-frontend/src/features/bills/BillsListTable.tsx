@@ -13,7 +13,7 @@ export default function BillsListTable(): JSX.Element {
     const fetchBills = async (): Promise<void> => {
       try {
         const response = await fetch(
-          `http://localhost:8080/api/gateway/bills/customer/${user.userId}`,
+          `http://localhost:8080/api/v2/gateway/bills/customer/${user.userId}`,
           {
             headers: {
               Accept: 'text/event-stream',
