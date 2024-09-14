@@ -29,12 +29,12 @@ export function NavBar(): JSX.Element {
           <>
             <ul className="navbar-nav">
               <li className="nav-item active">
-                <Link className="nav-link" to="">
+                <Link className="nav-link" to={AppRoutePaths.Default}>
                   Home
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link" to="">
+                <Link className="nav-link" to={AppRoutePaths.Vet}>
                   Veterinarians
                 </Link>
               </li>

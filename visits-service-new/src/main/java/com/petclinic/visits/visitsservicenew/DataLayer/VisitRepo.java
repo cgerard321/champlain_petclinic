@@ -8,6 +8,9 @@ import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
 
+/**
+ * Interface not implemented. Basically use Mongo for a smart search throughout a database. Calling a function here will have result on the database.
+ */
 @Repository
 public interface VisitRepo extends ReactiveMongoRepository<Visit, String> {
 

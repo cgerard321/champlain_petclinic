@@ -7,6 +7,9 @@ import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
+/**
+ * The pet DTO for the customers-service-reactive
+ */
 @Data
 @NoArgsConstructor
 @Builder
