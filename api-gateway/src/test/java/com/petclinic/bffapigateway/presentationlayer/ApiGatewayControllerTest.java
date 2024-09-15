@@ -2293,11 +2293,10 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$.visitId").isEqualTo(visitResponseDTO.getVisitId())
                 .jsonPath("$.petId").isEqualTo("1")
-                .jsonPath("$.visitStartDate").isEqualTo("2021-12-12 14:00")
+                .jsonPath("$.visitDate").isEqualTo("2021-12-12 14:00")
                 .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$.status").isEqualTo("UPCOMING")
-                .jsonPath("$.practitionerId").isEqualTo(1)
-                .jsonPath("$.visitEndDate").isEqualTo("2021-12-12 14:30");
+                .jsonPath("$.practitionerId").isEqualTo(1);
 
     }
 
@@ -2308,7 +2307,7 @@ class ApiGatewayControllerTest {
         String ownerId = "5fe81e29-1f1d-4f9d-b249-8d3e0cc0b7dd";
         String petId = "9";
         VisitRequestDTO visit = VisitRequestDTO.builder()
-                .visitStartDate(LocalDateTime.parse("2021-12-12T14:00:00"))
+                .visitDate(LocalDateTime.parse("2021-12-12T14:00:00"))
                 .description("Charle's Richard cat has a paw infection.")
                 .petId(petId)
                 .practitionerId("1")
@@ -2665,7 +2664,7 @@ class ApiGatewayControllerTest {
     void getVisitsByStatus_Valid() {
         VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
-                .visitStartDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("this is a dummy description")
                 .petId("2")
                 .petName("YourPetNameHere")
