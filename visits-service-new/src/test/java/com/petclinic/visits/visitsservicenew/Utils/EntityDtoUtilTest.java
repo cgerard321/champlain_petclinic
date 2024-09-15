@@ -56,12 +56,12 @@ public class EntityDtoUtilTest {
     public void testToVisitEntity() {
 
         VisitRequestDTO requestDTO = new VisitRequestDTO();
-        requestDTO.setVisitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+        requestDTO.setVisitStartDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
         requestDTO.setDescription("Sample description");
 
         Visit visit = entityDtoUtil.toVisitEntity(requestDTO);
 
-        assertEquals(requestDTO.getVisitDate(), visit.getVisitDate());
+        assertEquals(requestDTO.getVisitStartDate(), visit.getVisitStartDate());
         assertEquals(requestDTO.getDescription(), visit.getDescription());
     }
 
@@ -90,7 +90,7 @@ public class EntityDtoUtilTest {
         // Create visit
         Visit visit = new Visit();
         visit.setVisitId(UUID.randomUUID().toString());
-        visit.setVisitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
+        visit.setVisitStartDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")));
 
         visit.setDescription("Test description");
         visit.setPetId(testPetUUID); // passing pre-defined testPetUUID

@@ -17,7 +17,7 @@ public class VisitResponseDTO {
     private String visitId;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-    private LocalDateTime visitDate;
+    private LocalDateTime visitStartDate;
     private String description;
     private String petId;
     private String petName;
@@ -28,4 +28,6 @@ public class VisitResponseDTO {
     private String vetEmail;
     private String vetPhoneNumber;
     private Status status;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    private LocalDateTime visitEndDate;
 }
