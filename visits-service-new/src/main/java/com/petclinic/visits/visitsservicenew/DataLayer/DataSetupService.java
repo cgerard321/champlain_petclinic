@@ -50,7 +50,6 @@ public class DataSetupService implements CommandLineRunner {
         Visit visit7 = buildVisit("visitId7", "2022-05-20 09:00", "Cat Needs Check-Up", "7056652d-f2fd-4873-a480-5d2e86bed641", "ac9adeb8-625b-11ee-8c99-0242ac120002", Status.CONFIRMED, LocalDateTime.parse("2022-05-20 09:00", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")).plusHours(1));
 
         Flux.just(visit1, visit2, visit3, visit4, visit5, visit6, visit7).flatMap(x -> visitRepo.insert(Mono.just(x)).log(x.toString())).subscribe();
-
     }
 
     private Visit buildVisit(String visitId, String visitStartDate, String description, String petId, String practitionerId, Status status, LocalDateTime visitEndDate){
@@ -80,4 +79,3 @@ public class DataSetupService implements CommandLineRunner {
                 .build();
     }
 }
-//VLAD
