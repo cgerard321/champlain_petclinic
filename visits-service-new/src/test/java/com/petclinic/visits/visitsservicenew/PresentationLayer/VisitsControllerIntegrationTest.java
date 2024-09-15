@@ -142,7 +142,7 @@ class VisitsControllerIntegrationTest {
                 .jsonPath("$.practitionerId").isEqualTo(visit1.getPractitionerId())
                 .jsonPath("$.petId").isEqualTo(visit1.getPetId())
                 .jsonPath("$.description").isEqualTo(visit1.getDescription())
-                .jsonPath("$.visitDate").isEqualTo("2024-11-25 13:45")
+                .jsonPath("$.visitStartDate").isEqualTo("2024-11-25 13:45")
                 .jsonPath("$.status").isEqualTo("UPCOMING");
     }
     @Test
@@ -166,7 +166,7 @@ class VisitsControllerIntegrationTest {
                     assertEquals(list.get(0).getPractitionerId(), visit1.getPractitionerId());
                     assertEquals(list.get(0).getPetId(), visit1.getPetId());
                     assertEquals(list.get(0).getDescription(), visit1.getDescription());
-                    assertEquals(list.get(0).getVisitDate(), visit1.getVisitDate());
+                    assertEquals(list.get(0).getVisitStartDate(), visit1.getVisitStartDate());
                     assertEquals(list.get(0).getStatus(), visit1.getStatus());
                 });
     }
@@ -190,7 +190,7 @@ class VisitsControllerIntegrationTest {
                     assertEquals(list.get(0).getPractitionerId(), visit1.getPractitionerId());
                     assertEquals(list.get(0).getPetId(), visit1.getPetId());
                     assertEquals(list.get(0).getDescription(), visit1.getDescription());
-                    assertEquals(list.get(0).getVisitDate(), visit1.getVisitDate());
+                    assertEquals(list.get(0).getVisitStartDate(), visit1.getVisitStartDate());
                     assertEquals(list.get(0).getStatus(), visit1.getStatus());
                 });
     }
@@ -217,7 +217,7 @@ class VisitsControllerIntegrationTest {
                     assertEquals(list.get(0).getPractitionerId(), visit1.getPractitionerId());
                     assertEquals(list.get(0).getPetId(), visit1.getPetId());
                     assertEquals(list.get(0).getDescription(), visit1.getDescription());
-                    assertEquals(list.get(0).getVisitDate(), visit1.getVisitDate());
+                    assertEquals(list.get(0).getVisitStartDate(), visit1.getVisitStartDate());
                     assertEquals(list.get(0).getStatus().toString(), "UPCOMING");
                 });
     }
@@ -279,7 +279,7 @@ class VisitsControllerIntegrationTest {
                 .jsonPath("$.practitionerId").isEqualTo(visit1.getPractitionerId())
                 .jsonPath("$.petId").isEqualTo(visit1.getPetId())
                 .jsonPath("$.description").isEqualTo(visit1.getDescription())
-                .jsonPath("$.visitDate").isEqualTo("2024-11-25 13:45")
+                .jsonPath("$.visitStartDate").isEqualTo("2024-11-25 13:45")
                 .jsonPath("$.status").isEqualTo("UPCOMING");
     }
 
@@ -301,7 +301,7 @@ class VisitsControllerIntegrationTest {
                 .jsonPath("$.practitionerId").isEqualTo(visit1.getPractitionerId())
                 .jsonPath("$.petId").isEqualTo(visit1.getPetId())
                 .jsonPath("$.description").isEqualTo(visit1.getDescription())
-                .jsonPath("$.visitDate").isEqualTo("2024-11-25 13:45")
+                .jsonPath("$.visitStartDate").isEqualTo("2024-11-25 13:45")
                 .jsonPath("$.status").isEqualTo("UPCOMING");
     }
 
@@ -337,7 +337,7 @@ class VisitsControllerIntegrationTest {
         return Visit.builder()
                 .visitId(uuid)
 
-                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .visitStartDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description(description)
                 .petId("2")
                 .practitionerId(vetId)
@@ -349,7 +349,7 @@ class VisitsControllerIntegrationTest {
         return Visit.builder()
                 .visitId(uuid)
 
-                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .visitStartDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description(description)
                 .petId("2")
                 .practitionerId(vetId)
@@ -360,7 +360,7 @@ class VisitsControllerIntegrationTest {
     private VisitResponseDTO buildVisitResponseDto(String visitId,String vetId){
         return VisitResponseDTO.builder()
                 .visitId(visitId)
-                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .visitStartDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("this is a dummy description")
                 .petId("2")
                 .practitionerId(vetId)
@@ -369,7 +369,7 @@ class VisitsControllerIntegrationTest {
     }
     private VisitRequestDTO buildVisitRequestDto(String vetId){
         return VisitRequestDTO.builder()
-                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .visitStartDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("this is a dummy description")
                 .petId("2")
                 .practitionerId(vetId)

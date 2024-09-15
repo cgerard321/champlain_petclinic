@@ -143,7 +143,7 @@ public class VisitServiceImpl implements VisitService {
                                                                         visitRequestDTO
                                                                                 .getPetId(),
                                                                         visitRequestDTO
-                                                                                .getVisitDate()
+                                                                                .getVisitStartDate()
                                                                 )
                                                         )
                                         );
@@ -163,7 +163,7 @@ public class VisitServiceImpl implements VisitService {
 //                .doOnNext(v -> System.out.println("Entity Date: " + v.getVisitDate())) // Debugging
                 //FLATENS THE MONO
                 .flatMap(visit ->
-                        repo.findByVisitDateAndPractitionerId(visit.getVisitDate(), visit.getPractitionerId()) // FindVisits method in repository
+                        repo.findByVisitStartDateAndPractitionerId(visit.getVisitStartDate(), visit.getPractitionerId()) // FindVisits method in repository
                                 .collectList()
                                 .flatMap(existingVisits -> {
                                     if(existingVisits.isEmpty()) {// If there are no existing visits
@@ -314,10 +314,10 @@ public class VisitServiceImpl implements VisitService {
     private Mono<VisitRequestDTO> validateVisitRequest(VisitRequestDTO dto) {
         if (dto.getDescription() == null || dto.getDescription().isBlank()) {
             return Mono.error(new BadRequestException("Please enter a description for this visit"));
-        } else if (dto.getVisitDate() == null) {
+        } else if (dto.getVisitStartDate() == null) {
             return Mono.error(new BadRequestException("Please choose a date for your appointment"));
         }
-        if(dto.getVisitDate().isBefore(LocalDateTime.now())) {
+        if(dto.getVisitStartDate().isBefore(LocalDateTime.now())) {
             return Mono.error(new BadRequestException("Appointment cannot be scheduled in the past"));
         } else if (dto.getPetId() == null || dto.getPetId().isBlank()) {
             return Mono.error(new BadRequestException("PetId cannot be null or blank"));
@@ -336,10 +336,10 @@ public class VisitServiceImpl implements VisitService {
      * Generates an email through an already defined template. Uses the mailer Service through
      * @param user UserDetails from DomainClientLayer/Auth/UserDetails
      * @param petName The Pet name
-     * @param visitDate The Date of the visit
+     * @param visitStartDate The Date of the visit
      * @return The email built from the message
      */
-    private Mail generateVisitRequestEmail(UserDetails user, String petName, LocalDateTime visitDate) {
+    private Mail generateVisitRequestEmail(UserDetails user, String petName, LocalDateTime visitStartDate) {
         return Mail.builder()
                 .message(
                     format("""
@@ -386,7 +386,7 @@ public class VisitServiceImpl implements VisitService {
                                 </div>
                             </body>
                             </html>
-                            """, user.getUsername(), petName, visitDate.toString()))
+                            """, user.getUsername(), petName, visitStartDate.toString()))
                 .subject("PetClinic Visit request")
                 .to(user.getEmail())
                 .build();

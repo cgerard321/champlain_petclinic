@@ -21,7 +21,7 @@ public class Visit {
     private String visitId;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-    LocalDateTime visitDate;
+    LocalDateTime visitStartDate;
 
     private String description;
 
@@ -30,5 +30,8 @@ public class Visit {
     private String practitionerId;
 
     private Status status;
+
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    private LocalDateTime visitEndDate;
 
 }

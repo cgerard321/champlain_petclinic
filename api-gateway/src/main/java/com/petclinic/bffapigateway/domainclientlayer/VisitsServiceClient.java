@@ -100,10 +100,10 @@ public class VisitsServiceClient {
 
     public Mono<VisitResponseDTO> addVisit(Mono<VisitRequestDTO> visitRequestDTO){
         return visitRequestDTO.flatMap(visitRequestDTO1 -> {
-            if (visitRequestDTO1.getVisitDate() != null) {
-                LocalDateTime originalDate = visitRequestDTO1.getVisitDate();
+            if (visitRequestDTO1.getVisitStartDate() != null) {
+                LocalDateTime originalDate = visitRequestDTO1.getVisitStartDate();
                 LocalDateTime adjustedDate = originalDate.minusHours(4);
-                visitRequestDTO1.setVisitDate(adjustedDate);
+                visitRequestDTO1.setVisitStartDate(adjustedDate);
             } else {
                 throw new BadRequestException("Visit date is required");
             }

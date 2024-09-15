@@ -40,7 +40,7 @@ class VisitRepoTest {
                 .consumeNextWith(gotVisit -> {
                     assertEquals(visit1.getVisitId(), gotVisit.getVisitId());
                     assertEquals(visit1.getPetId(), gotVisit.getPetId());
-                    assertEquals(visit1.getVisitDate(), gotVisit.getVisitDate());
+                    assertEquals(visit1.getVisitStartDate(), gotVisit.getVisitStartDate());
                     assertEquals(visit1.getPractitionerId(), gotVisit.getPractitionerId());
                     assertEquals(visit1.getStatus(), gotVisit.getStatus());
                 }).verifyComplete();
@@ -80,7 +80,7 @@ class VisitRepoTest {
                 .consumeNextWith(gotVisit -> {
                     assertEquals(visit1.getVisitId(), gotVisit.getVisitId());
                     assertEquals(visit1.getPetId(), gotVisit.getPetId());
-                    assertEquals(visit1.getVisitDate(), gotVisit.getVisitDate());
+                    assertEquals(visit1.getVisitStartDate(), gotVisit.getVisitStartDate());
                     assertEquals(visit1.getPractitionerId(), gotVisit.getPractitionerId());
                     assertEquals(visit1.getStatus(), gotVisit.getStatus());
                 }).then(this::deleteVisitByVisitId).verifyComplete();
@@ -92,7 +92,7 @@ class VisitRepoTest {
     private Visit buildVisit(String uuid,String description, String vetId){
         return Visit.builder()
                 .visitId(uuid)
-                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .visitStartDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description(description)
                 .petId("2")
                 .practitionerId(vetId)
