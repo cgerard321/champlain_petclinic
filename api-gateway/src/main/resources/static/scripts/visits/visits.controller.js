@@ -87,9 +87,9 @@ angular.module('visits')
             let currentDate = getCurrentDate()
 
             $.each(self.visits, function(i, visit) {
-                let selectedVisitDate = Date.parse(visit.date)
+                let selectedVisitStartDate = Date.parse(visit.date)
 
-                if(selectedVisitDate >= currentDate) {
+                if(selectedVisitStartDate >= currentDate) {
                     self.upcomingVisits.push(visit)
                 }
             })
@@ -229,17 +229,17 @@ angular.module('visits')
 
 
 
-        self.getVisitDate = function (id) {
+        self.getVisitStartDate = function (id) {
             console.log("Getting date for visitId:", id);
-            var visitDate = null;
+            var visitStartDate = null;
             $.each(self.visits, function (i, visit) {
                 if (visit.visitId == id) {
-                    visitDate = visit.visitDate;
-                    console.log("Found date:", visitDate);
+                    visitStartDate = visit.visitStartDate;
+                    console.log("Found date:", visitStartDate);
                     return false;
                 }
             });
-            return visitDate;
+            return visitStartDate;
         };
 
 
@@ -274,7 +274,7 @@ angular.module('visits')
                 if(buttonText.toLowerCase().includes("cancel")) {
                     modalConfirmButton.data("targetStatus", status);
                     modalConfirmButton.data("targetPractitionerId", practitionerId);
-                    modalConfirmButton.data("targetDate", visitDate);
+                    modalConfirmButton.data("targetDate", visitStartDate);
                     modalConfirmButton.data("targetDescription", description);
                     modalConfirmButton.data("cancel-index", $(e.target).closest("tr").data("index"));
                 }
@@ -750,7 +750,7 @@ angular.module('visits')
             var billsUrl = "api/gateway/bills"; // Replace with your actual URL for bill creation
 
             var data = {
-                visitDate: $filter('date')(self.chosenDate, "yyyy-MM-dd HH:mm"),
+                visitStartDate: $filter('date')(self.chosenDate, "yyyy-MM-dd HH:mm"),
                 description: self.desc,
                 petId: self.petId,
                 practitionerId: self.practitionerId,
@@ -835,20 +835,20 @@ angular.module('visits')
             return statusText;
         };
 
-        self.cancelVisit = function (id, visitStatus, visitPractitionerId, visitDate, visitDescription){
+        self.cancelVisit = function (id, visitStatus, visitPractitionerId, visitStartDate, visitDescription){
             visitId = id;
             var data = {};
 
             if (visitStatus) {
                 data = {
-                    date: visitDate,
+                    date: visitStartDate,
                     description: visitDescription,
                     practitionerId: visitPractitionerId,
                     status: false
                 };
             }else {
                 data = {
-                    date: visitDate,
+                    date: visitStartDate,
                     description: visitDescription,
                     practitionerId: visitPractitionerId,
                     status: true

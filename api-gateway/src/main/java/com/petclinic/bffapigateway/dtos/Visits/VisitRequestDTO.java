@@ -16,16 +16,18 @@ import java.time.LocalDateTime;
 public class VisitRequestDTO {
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
-    private LocalDateTime visitDate;
+    private LocalDateTime visitStartDate;
     private String description;
     private String petId;
     private String ownerId;
     private String jwtToken;//used to get the userDetails from the Auth-Service when sending visit emails
     private String practitionerId;
     private Status status;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+    private LocalDateTime visitEndDate;
 
     public VisitRequestDTO(LocalDateTime now, String description, String petId, String ownerId, String jwtToken, String practitionerId) {
-        this.visitDate = now;
+        this.visitStartDate = now;
         this.description = description;
         this.petId =  petId;
         this.ownerId = ownerId;

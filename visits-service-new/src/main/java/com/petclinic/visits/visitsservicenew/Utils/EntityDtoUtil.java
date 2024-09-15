@@ -42,7 +42,7 @@ public class EntityDtoUtil {
 
                     return Mono.just(VisitResponseDTO.builder()
                             .visitId(visit.getVisitId())
-                            .visitDate(visit.getVisitDate())
+                            .visitStartDate(visit.getVisitStartDate())
                             .description(visit.getDescription())
                             .petId(visit.getPetId())
                             .petName(petResponseDTO.getName())
@@ -53,6 +53,7 @@ public class EntityDtoUtil {
                             .vetEmail(vetResponseDTO.getEmail())
                             .vetPhoneNumber(vetResponseDTO.getPhoneNumber())
                             .status(visit.getStatus())
+                            .visitEndDate(visit.getVisitStartDate().plusHours(1))
                             .build());
                 });
     }

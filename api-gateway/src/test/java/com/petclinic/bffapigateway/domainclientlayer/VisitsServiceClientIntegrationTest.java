@@ -66,7 +66,7 @@ class VisitsServiceClientIntegrationTest {
     void getAllVisits() throws JsonProcessingException {
         VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
-                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .visitStartDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("this is a dummy description")
                 .petId("2")
                 .petName("YourPetNameHere")
@@ -80,7 +80,7 @@ class VisitsServiceClientIntegrationTest {
                 .build();
         VisitResponseDTO visitResponseDTO2 = VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
-                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .visitStartDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("this is a dummy description")
                 .petId("2")
                 .petName("YourPetNameHere")
@@ -122,7 +122,7 @@ class VisitsServiceClientIntegrationTest {
     void getVisitsForStatus() throws JsonProcessingException{
         VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
-                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .visitStartDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("this is a dummy description")
                 .petId("2")
                 .petName("YourPetNameHere")
@@ -147,7 +147,7 @@ class VisitsServiceClientIntegrationTest {
     void getVisitByPractitionerId() throws JsonProcessingException {
         VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
-                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .visitStartDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("this is a dummy description")
                 .petId("2")
                 .petName("YourPetNameHere")
@@ -183,7 +183,7 @@ class VisitsServiceClientIntegrationTest {
         // Mock the server response
         VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
-                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .visitStartDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("this is a dummy description")
                 .petId("2")
                 .petName("YourPetNameHere")
@@ -333,7 +333,7 @@ class VisitsServiceClientIntegrationTest {
     void getVisitsForPet() throws Exception {
         VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
-                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .visitStartDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("this is a dummy description")
                 .petId("2")
                 .petName("YourPetNameHere")
@@ -356,7 +356,7 @@ class VisitsServiceClientIntegrationTest {
     void getVisitById() throws Exception {
         VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
-                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .visitStartDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("this is a dummy description")
                 .petId("2")
                 .petName("YourPetNameHere")
@@ -416,7 +416,7 @@ class VisitsServiceClientIntegrationTest {
     void shouldCreateVisitForPet() throws JsonProcessingException {
         // Given
         final VisitRequestDTO visitRequest = VisitRequestDTO.builder()
-                .visitDate(LocalDateTime.parse("2023-10-01T13:00:00"))
+                .visitStartDate(LocalDateTime.parse("2023-10-01T13:00:00"))
                 .description("Dog needs grooming")
                 .petId(PET_ID)
                 .practitionerId("3")
@@ -425,7 +425,7 @@ class VisitsServiceClientIntegrationTest {
 
         final VisitResponseDTO expectedVisitResponse = VisitResponseDTO.builder()
                 .visitId(UUID.randomUUID().toString())
-                .visitDate(visitRequest.getVisitDate())
+                .visitStartDate(visitRequest.getVisitStartDate())
                 .description(visitRequest.getDescription())
                 .petId(visitRequest.getPetId())
                 .practitionerId(visitRequest.getPractitionerId())
@@ -447,7 +447,7 @@ class VisitsServiceClientIntegrationTest {
 
         // Then
         assertEquals(expectedVisitResponse.getVisitId(), actualVisitResponse.getVisitId());
-        assertEquals(expectedVisitResponse.getVisitDate(), actualVisitResponse.getVisitDate());
+        assertEquals(expectedVisitResponse.getVisitStartDate(), actualVisitResponse.getVisitStartDate());
         assertEquals(expectedVisitResponse.getDescription(), actualVisitResponse.getDescription());
         assertEquals(expectedVisitResponse.getPetId(), actualVisitResponse.getPetId());
         assertEquals(expectedVisitResponse.getPractitionerId(), actualVisitResponse.getPractitionerId());

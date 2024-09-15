@@ -2268,7 +2268,7 @@ class ApiGatewayControllerTest {
         String ownerId = "owner1";
         String petId = "pet1";
         VisitRequestDTO visit = VisitRequestDTO.builder()
-                .visitDate(LocalDateTime.parse("2021-12-12T14:00"))
+                .visitStartDate(LocalDateTime.parse("2021-12-12T14:00"))
                 .description("Charle's Richard cat has a paw infection.")
                 .petId("1")
                 .practitionerId("1")
@@ -2277,7 +2277,7 @@ class ApiGatewayControllerTest {
 
         VisitResponseDTO visitResponseDTO =  VisitResponseDTO.builder()
                 .visitId(VISIT_ID)
-                .visitDate(LocalDateTime.parse("2021-12-12T14:00:00"))
+                .visitStartDate(LocalDateTime.parse("2021-12-12T14:00:00"))
                 .petId("1")
                 .description("Charle's Richard cat has a paw infection.")
                 .practitionerId("1")
@@ -2298,7 +2298,7 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$.visitId").isEqualTo(visitResponseDTO.getVisitId())
                 .jsonPath("$.petId").isEqualTo("1")
-                .jsonPath("$.visitDate").isEqualTo("2021-12-12 14:00")
+                .jsonPath("$.visitStartDate").isEqualTo("2021-12-12 14:00")
                 .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$.status").isEqualTo("UPCOMING")
                 .jsonPath("$.practitionerId").isEqualTo(1);
@@ -2310,7 +2310,7 @@ class ApiGatewayControllerTest {
         String ownerId = "5fe81e29-1f1d-4f9d-b249-8d3e0cc0b7dd";
         String petId = "9";
         VisitRequestDTO visit = VisitRequestDTO.builder()
-                .visitDate(LocalDateTime.parse("2021-12-12T14:00:00"))
+                .visitStartDate(LocalDateTime.parse("2021-12-12T14:00:00"))
                 .description("Charle's Richard cat has a paw infection.")
                 .petId(petId)
                 .practitionerId("1")
@@ -2319,7 +2319,7 @@ class ApiGatewayControllerTest {
 
         VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
                 .visitId(VISIT_ID)
-                .visitDate(LocalDateTime.parse("2021-12-12T14:00:00"))
+                .visitStartDate(LocalDateTime.parse("2021-12-12T14:00:00"))
                 .petId(petId)
                 .description("Charle's Richard cat has a paw infection.")
                 .practitionerId("1")
@@ -2339,7 +2339,7 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$.visitId").isEqualTo(visitResponseDTO.getVisitId())
                 .jsonPath("$.petId").isEqualTo(petId)
-                .jsonPath("$.visitDate").isEqualTo("2021-12-12 14:00")
+                .jsonPath("$.visitStartDate").isEqualTo("2021-12-12 14:00")
                 .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$.status").isEqualTo("UPCOMING")
                 .jsonPath("$.practitionerId").isEqualTo("1");
@@ -2427,7 +2427,7 @@ class ApiGatewayControllerTest {
         String status = "CANCELLED";
         VisitResponseDTO visit = VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
-                .visitDate(LocalDateTime.parse("2022-11-25T13:45:00"))
+                .visitStartDate(LocalDateTime.parse("2022-11-25T13:45:00"))
                 .description("this is a dummy description")
                 .practitionerId("2")
                 .petId("2")
@@ -2446,7 +2446,7 @@ class ApiGatewayControllerTest {
                 .jsonPath("$.practitionerId").isEqualTo(visit.getPractitionerId())
                 .jsonPath("$.petId").isEqualTo(visit.getPetId())
                 .jsonPath("$.description").isEqualTo(visit.getDescription())
-                .jsonPath("$.visitDate").isEqualTo("2022-11-25 13:45")
+                .jsonPath("$.visitStartDate").isEqualTo("2022-11-25 13:45")
                 .jsonPath("$.status").isEqualTo("CANCELLED");
 
         Mockito.verify(visitsServiceClient, times(1))
@@ -2456,7 +2456,7 @@ class ApiGatewayControllerTest {
     void shouldGetAllVisits() {
         VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
-                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .visitStartDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("this is a dummy description")
                 .petId("2")
                 .petName("YourPetNameHere")
@@ -2470,7 +2470,7 @@ class ApiGatewayControllerTest {
                 .build();
         VisitResponseDTO visitResponseDTO2 = VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
-                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .visitStartDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("this is a dummy description")
                 .petId("2")
                 .petName("YourPetNameHere")
@@ -2531,7 +2531,7 @@ class ApiGatewayControllerTest {
     void shouldGetAVisit() {
         VisitResponseDTO visit = VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
-                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .visitStartDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("this is a dummy description")
                 .petId("2")
                 .petName("YourPetNameHere")
@@ -2559,7 +2559,7 @@ class ApiGatewayControllerTest {
                     assertEquals(list.size(),1);
                     assertEquals(list.get(0).getVisitId(),visit.getVisitId());
                     assertEquals(list.get(0).getPetId(),visit.getPetId());
-                    assertEquals(list.get(0).getVisitDate(),visit.getVisitDate());
+                    assertEquals(list.get(0).getVisitStartDate(),visit.getVisitStartDate());
                     assertEquals(list.get(0).getDescription(),visit.getDescription());
                     assertEquals(list.get(0).getStatus(),visit.getStatus());
                     assertEquals(list.get(0).getPractitionerId(),visit.getPractitionerId());
@@ -2628,7 +2628,7 @@ class ApiGatewayControllerTest {
     void getSingleVisit_Valid() {
         VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
-                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .visitStartDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("this is a dummy description")
                 .petId("2")
                 .petName("YourPetNameHere")
@@ -2649,7 +2649,7 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$.visitId").isEqualTo(visitResponseDTO.getVisitId())
                 .jsonPath("$.petId").isEqualTo(visitResponseDTO.getPetId())
-                .jsonPath("$.visitDate").isEqualTo("2024-11-25 13:45")
+                .jsonPath("$.visitStartDate").isEqualTo("2024-11-25 13:45")
                 .jsonPath("$.description").isEqualTo(visitResponseDTO.getDescription())
                 .jsonPath("$.practitionerId").isEqualTo(visitResponseDTO.getPractitionerId());
     }
@@ -2657,7 +2657,7 @@ class ApiGatewayControllerTest {
     void getVisitsByStatus_Valid() {
         VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
-                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .visitStartDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("this is a dummy description")
                 .petId("2")
                 .petName("YourPetNameHere")
@@ -2683,7 +2683,7 @@ class ApiGatewayControllerTest {
                     // Asserting that the values match what's expected
                     Assertions.assertEquals(visitResponseDTO.getVisitId(), responseBody.getVisitId());
                     Assertions.assertEquals(visitResponseDTO.getPetId(), responseBody.getPetId());
-                    Assertions.assertEquals(visitResponseDTO.getVisitDate(), responseBody.getVisitDate());
+                    Assertions.assertEquals(visitResponseDTO.getVisitStartDate(), responseBody.getVisitStartDate());
                     Assertions.assertEquals(visitResponseDTO.getDescription(), responseBody.getDescription());
                     Assertions.assertEquals(visitResponseDTO.getPractitionerId(), responseBody.getPractitionerId());
                 });
@@ -2693,7 +2693,7 @@ class ApiGatewayControllerTest {
     void getVisitsByPractitionerId_Valid() {
         VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
-                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .visitStartDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("this is a dummy description")
                 .petId("2")
                 .petName("YourPetNameHere")
@@ -2719,7 +2719,7 @@ class ApiGatewayControllerTest {
 
                     Assertions.assertEquals(visitResponseDTO.getVisitId(), responseBody.getVisitId());
                     Assertions.assertEquals(visitResponseDTO.getPetId(), responseBody.getPetId());
-                    Assertions.assertEquals(visitResponseDTO.getVisitDate(), responseBody.getVisitDate());
+                    Assertions.assertEquals(visitResponseDTO.getVisitStartDate(), responseBody.getVisitStartDate());
                     Assertions.assertEquals(visitResponseDTO.getDescription(), responseBody.getDescription());
                     Assertions.assertEquals(visitResponseDTO.getPractitionerId(), responseBody.getPractitionerId());
                 });
@@ -2981,7 +2981,7 @@ class ApiGatewayControllerTest {
     private VisitResponseDTO buildVisitResponseDTO(){
         return VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
-                .visitDate(LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .visitStartDate(LocalDateTime.parse("2022-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("this is a dummy description")
                 .petId("2")
                 .practitionerId(UUID.randomUUID().toString())
