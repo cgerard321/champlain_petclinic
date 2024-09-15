@@ -6,6 +6,7 @@ import Vet from '@/pages/Vet/Vet.tsx';
 import { ProtectedRoute } from '@/shared/components/ProtectedRouteProps.tsx';
 import Home from '@/pages/Home/Home.tsx';
 import ProfileEdit from '@/pages/Customer/ProfileEdit.tsx';
+import AddingCustomer from '@/pages/Customer/AddingCustomer.tsx';
 import CustomerBillingPage from '@/pages/Bills/CostumerBills.tsx';
 
 const router = createBrowserRouter([
@@ -41,6 +42,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <ProfileEdit />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.AddingCustomer,
+        element: (
+          <ProtectedRoute>
+            <AddingCustomer />
           </ProtectedRoute>
         ),
       },
