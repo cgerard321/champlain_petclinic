@@ -80,4 +80,3 @@ public class DataSetupService implements CommandLineRunner {
                 .build();
     }
 }
-//VLAD
