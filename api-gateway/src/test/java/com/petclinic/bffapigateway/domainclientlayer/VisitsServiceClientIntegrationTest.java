@@ -185,6 +185,7 @@ class VisitsServiceClientIntegrationTest {
                 "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
         );
 
+
         // Mock the server response
         VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")

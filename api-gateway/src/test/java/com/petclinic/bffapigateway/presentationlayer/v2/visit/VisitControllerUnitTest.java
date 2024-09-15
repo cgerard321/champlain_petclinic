@@ -67,6 +67,7 @@ public class VisitControllerUnitTest {
             .vetEmail("john.doe@example.com")
             .vetPhoneNumber("555-1234")
             .status(Status.COMPLETED)
+            .visitEndDate(LocalDate.of(2021, 5, 1).atStartOfDay())
             .build();
 
 
@@ -161,6 +162,7 @@ public class VisitControllerUnitTest {
                 .petId(newVisitRequestDTO.getPetId())
                 .practitionerId(newVisitRequestDTO.getPractitionerId())
                 .status(newVisitRequestDTO.getStatus())
+                .visitEndDate(newVisitRequestDTO.getVisitStartDate())
                 .build();
 
         // Mock the visitsServiceClient to return the expected Mono

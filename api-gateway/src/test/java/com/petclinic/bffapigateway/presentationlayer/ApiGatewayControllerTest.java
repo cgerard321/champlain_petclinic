@@ -2293,10 +2293,11 @@ class ApiGatewayControllerTest {
                 .expectBody()
                 .jsonPath("$.visitId").isEqualTo(visitResponseDTO.getVisitId())
                 .jsonPath("$.petId").isEqualTo("1")
-                .jsonPath("$.visitDate").isEqualTo("2021-12-12 14:00")
+                .jsonPath("$.visitStartDate").isEqualTo("2021-12-12 14:00")
                 .jsonPath("$.description").isEqualTo("Charle's Richard cat has a paw infection.")
                 .jsonPath("$.status").isEqualTo("UPCOMING")
-                .jsonPath("$.practitionerId").isEqualTo(1);
+                .jsonPath("$.practitionerId").isEqualTo(1)
+                .jsonPath("$.visitEndDate").isEqualTo("2021-12-12 14:30");
 
     }
 
