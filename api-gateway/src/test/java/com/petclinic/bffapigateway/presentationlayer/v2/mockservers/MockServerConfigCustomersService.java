@@ -50,6 +50,12 @@ public class MockServerConfigCustomersService {
     }
 
     public void registerGetAllOwnersEndpoint() {
+        String responseBody = "["
+                + "{\"ownerId\":\"owner1\",\"firstName\":\"John\",\"lastName\":\"Does\",\"address\":\"123 Main St\",\"city\":\"Springfield\",\"province\":\"Chicago\",\"telephone\":\"1234567890\"},"
+                + "{\"ownerId\":\"owner2\",\"firstName\":\"Jane\",\"lastName\":\"Doew\",\"address\":\"456 Maple St\",\"city\":\"Shelbyville\",\"province\":\"Illinois\",\"telephone\":\"0987654321\"},"
+                + "{\"ownerId\":\"owner3\",\"firstName\":\"Jim\",\"lastName\":\"Doee\",\"address\":\"789 Oak St\",\"city\":\"Capital City\",\"province\":\"Longueuil\",\"telephone\":\"1122334455\"}"
+                + "]";
+
         mockServerClient_CustomersService
                 .when(
                         request()
@@ -59,7 +65,7 @@ public class MockServerConfigCustomersService {
                 .respond(
                         response()
                                 .withStatusCode(200)
-                                .withBody(json("[{\"ownerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"firstName\":\"Betty\",\"lastName\":\"Davis\",\"address\":\"638 Cardinal Ave.\",\"city\":\"Sun Prairie\",\"province\":\"Quebec\",\"telephone\":\"6085551749\",\"pets\":null}]"))
+                                .withBody(json(responseBody))
                 );
     }
 

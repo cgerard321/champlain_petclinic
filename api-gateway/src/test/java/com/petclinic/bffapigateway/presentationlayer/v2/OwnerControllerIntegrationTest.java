@@ -42,6 +42,7 @@ class OwnerControllerIntegrationTest {
         mockServerConfigAuthService = new MockServerConfigAuthService();
         mockServerConfigAuthService.registerValidateTokenForOwnerEndpoint();
         mockServerConfigAuthService.registerValidateTokenForAdminEndpoint();
+        mockServerConfigAuthService.registerValidateTokenForVetEndpoint();
 
     }
 
@@ -201,6 +202,30 @@ class OwnerControllerIntegrationTest {
                 .returnResult(OwnerResponseDTO.class)
                 .getResponseBody();
 
+        StepVerifier
+                .create(result)
+                .expectNextCount(3)
+                .verifyComplete();
+
+
+    }
+
+    @Test
+    void whenGetAllOwners_asVet_thenReturnAllOwners() {
+        Flux<OwnerResponseDTO> result = webTestClient.get()
+                .uri("/api/v2/gateway/owners")
+                .cookie("Bearer", jwtTokenForValidVet)  // Token for a vet user
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType("text/event-stream;charset=UTF-8")
+                .returnResult(OwnerResponseDTO.class)
+                .getResponseBody();
+
+        StepVerifier
+                .create(result)
+                .expectNextCount(3)
+                .verifyComplete();
     }
 
 
