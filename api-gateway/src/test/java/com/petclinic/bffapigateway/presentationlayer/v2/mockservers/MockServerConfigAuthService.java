@@ -55,22 +55,13 @@ public class MockServerConfigAuthService {
                 );
     }
 
-<<<<<<< HEAD
-=======
-    public static final String jwtTokenForAdmin2 = "valid-test-token-for-admin";
-
->>>>>>> 07eed8d4 (Created a getall customers)
     public void registerValidateTokenForAdminEndpoint() {
         mockServerClient_AuthService
                 .when(
                         request()
                                 .withMethod("POST")
                                 .withPath("/users/validate-token")
-<<<<<<< HEAD
                                 .withCookie("Bearer", jwtTokenForValidAdmin)
-=======
-                                .withCookie( "Bearer",jwtTokenForAdmin2)
->>>>>>> 07eed8d4 (Created a getall customers)
                 )
                 .respond(
                         response()
@@ -79,10 +70,6 @@ public class MockServerConfigAuthService {
                 );
     }
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 07eed8d4 (Created a getall customers)
     public void stopMockServer() {
         if(clientAndServer != null)
             this.clientAndServer.stop();

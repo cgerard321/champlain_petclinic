@@ -34,7 +34,6 @@ public class MockServerConfigCustomersService {
                 );
     }
 
-<<<<<<< HEAD
     public void registerAddOwnerEndpoint() {
         mockServerClient_CustomersService
                 .when(
@@ -50,7 +49,6 @@ public class MockServerConfigCustomersService {
                 );
     }
 
-=======
     public void registerGetAllOwnersEndpoint() {
         mockServerClient_CustomersService
                 .when(
@@ -64,7 +62,7 @@ public class MockServerConfigCustomersService {
                                 .withBody(json("[{\"ownerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\",\"firstName\":\"Betty\",\"lastName\":\"Davis\",\"address\":\"638 Cardinal Ave.\",\"city\":\"Sun Prairie\",\"province\":\"Quebec\",\"telephone\":\"6085551749\",\"pets\":null}]"))
                 );
     }
->>>>>>> 07eed8d4 (Created a getall customers)
+
     public void stopMockServer() {
         if(clientAndServer != null)
             this.clientAndServer.stop();
