@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 public class VetAverageRatingDTO {
 
     private VetResponseDTO vetDTO;
-    private String vetId;
     private double averageRating;
 
 }
