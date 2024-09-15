@@ -33,7 +33,7 @@ public class VetController {
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<VetResponseDTO>> addVet(@RequestBody Mono<VetRequestDTO> vetRequestDTO){
-        return vetsServiceClient.createVet(vetRequestDTO)
+        return vetsServiceClient.addVet(vetRequestDTO)
                 .map(v -> ResponseEntity.status(HttpStatus.CREATED).body(v))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }

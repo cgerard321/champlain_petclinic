@@ -9,8 +9,10 @@ import java.util.Set;
 @Getter
 @Builder
 @NoArgsConstructor
+@Setter
 @AllArgsConstructor
 public class VetRequestDTO {
+    private String vetId;
     private String vetBillId;
     private String firstName;
     private String lastName;
