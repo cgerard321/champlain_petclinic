@@ -21,10 +21,6 @@ public class DataSetupService implements CommandLineRunner {
     private final VisitRepo visitRepo;
     private final ReviewRepository reviewRepository;
 
-    /**
-     * This is an event function ran at the start to populate visitRepo. Sort of like a main
-     * @throws Exception
-     */
     @Override
     public void run(String... args) throws Exception {
        setupVisits();
@@ -80,4 +76,3 @@ public class DataSetupService implements CommandLineRunner {
                 .build();
     }
 }
-//VLAD
