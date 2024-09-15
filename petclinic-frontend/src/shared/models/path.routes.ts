@@ -9,5 +9,5 @@ export enum AppRoutePaths {
   login = '/users/login',
   CustomerProfileEdit = 'customer/profile/edit',
   Home = '/home',
-  Vet = '/vet',
+  Vet = '/vet'
 }

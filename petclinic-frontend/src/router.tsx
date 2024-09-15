@@ -6,6 +6,7 @@ import Vet from '@/pages/Vet/Vet.tsx';
 import { ProtectedRoute } from '@/shared/components/ProtectedRouteProps.tsx';
 import Home from '@/pages/Home/Home.tsx';
 import ProfileEdit from '@/pages/Customer/ProfileEdit.tsx';
+import AddVet from '@/pages/Vet/AddVet.tsx';
 
 const router = createBrowserRouter([
   {

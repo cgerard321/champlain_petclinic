@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "@types/react-bootstrap": "^0.32.37",
+    "bootstrap": "^5.3.3",
+    "react-bootstrap": "^2.10.4"
+  }
+}
