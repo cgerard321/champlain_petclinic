@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RatingRequestDTO {
-    private String vetId;
     private Double rateScore;
     private String rateDescription;
     private String rateDate;
