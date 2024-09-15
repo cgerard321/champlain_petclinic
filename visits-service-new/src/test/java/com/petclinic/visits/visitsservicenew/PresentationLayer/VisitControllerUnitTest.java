@@ -116,7 +116,7 @@ class VisitControllerUnitTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.visitId").isEqualTo(visitResponseDTO.getVisitId())
-                .jsonPath("$.visitDate").isEqualTo("2024-11-25 13:45")
+                .jsonPath("$.visitStartDate").isEqualTo("2024-11-25 13:45")
                 .jsonPath("$.description").isEqualTo(visitResponseDTO.getDescription())
                 .jsonPath("$.petId").isEqualTo(visitResponseDTO.getPetId())
                 .jsonPath("$.practitionerId").isEqualTo(visitResponseDTO.getPractitionerId())
@@ -300,7 +300,7 @@ class VisitControllerUnitTest {
     private VisitResponseDTO buildVisitResponseDto(){
         return VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
-                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .visitStartDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("this is a dummy description")
                 .petId("2")
                 .practitionerId(UUID.randomUUID().toString())
@@ -309,7 +309,7 @@ class VisitControllerUnitTest {
     }
     private VisitRequestDTO buildVisitRequestDTO(String vetId){
         return VisitRequestDTO.builder()
-                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .visitStartDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("this is a dummy description")
                 .petId("2")
                 .practitionerId(vetId)
