@@ -2,17 +2,71 @@ import { createBrowserRouter } from 'react-router-dom';
 import { AppRoutePaths } from './shared/models/path.routes';
 import Login from './pages/Login/Login';
 import Inventories from '@/pages/Inventory/Inventories.tsx';
+import Vet from '@/pages/Vet/Vet.tsx';
 import { ProtectedRoute } from '@/shared/components/ProtectedRouteProps.tsx';
+import Home from '@/pages/Home/Home.tsx';
+import ProfileEdit from '@/pages/Customer/ProfileEdit.tsx';
+import AddingCustomer from '@/pages/Customer/AddingCustomer.tsx';
+import CustomerBillingPage from '@/pages/Bills/CostumerBills.tsx';
+import AllOwners from '@/pages/Customer/AllOwners.tsx';
 
 const router = createBrowserRouter([
   {
     path: AppRoutePaths.Default,
     children: [
       {
+        path: AppRoutePaths.Home,
+        element: (
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: AppRoutePaths.Inventories,
         element: (
           <ProtectedRoute>
             <Inventories />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.Vet,
+        element: (
+          <ProtectedRoute>
+            <Vet />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.CustomerProfileEdit,
+        element: (
+          <ProtectedRoute>
+            <ProfileEdit />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.AddingCustomer,
+        element: (
+          <ProtectedRoute>
+            <AddingCustomer />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.CustomerBills,
+        element: (
+          <ProtectedRoute>
+            <CustomerBillingPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.AllCustomers,
+        element: (
+          <ProtectedRoute>
+            <AllOwners />
           </ProtectedRoute>
         ),
       },
@@ -33,7 +87,7 @@ const router = createBrowserRouter([
       //       element: /* ServiceUnavailableComponent */
       //   },
       //   {
-      //       path: AppRoutePaths.Unauthorized
+      //       path: AppRoutePaths.Unauthorized,
       //       element: /* UnauthorizedComponent */
       //   }
     ],
@@ -41,4 +95,5 @@ const router = createBrowserRouter([
   { path: AppRoutePaths.login, element: <Login /> },
   //   {path: '*', element: /* PageNotFoundComponent */},
 ]);
+
 export default router;
