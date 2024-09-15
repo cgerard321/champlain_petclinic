@@ -28,5 +28,5 @@ public interface VisitRepo extends ReactiveMongoRepository<Visit, String> {
     Flux<Visit> findAllByStatus(String status);
 
     // In your VisitRepo interface
-    Flux<Visit> findByVisitDateAndPractitionerId(LocalDateTime visitDate, String practitionerId);
+    Flux<Visit> findByVisitStartDateAndPractitionerId(LocalDateTime visitStartDate, String practitionerId);
 }

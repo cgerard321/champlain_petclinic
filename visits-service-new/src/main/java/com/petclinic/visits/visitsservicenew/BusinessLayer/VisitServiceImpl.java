@@ -145,21 +145,21 @@ public class VisitServiceImpl implements VisitService {
                         .doOnNext(s -> {
 
                             authServiceClient.getUserById(
-                                            visitRequestDTO.getJwtToken(),
-                                            visitRequestDTO.getOwnerId())
-                                    .subscribe(
-                                            //WILL HAVE TO BET MODIFIED IN ORDER TO USE THE NEW MAIL SERVICE
-                                            user -> mailService
-                                                    .sendMail(
-                                                            generateVisitRequestEmail(
-                                                                    user,
-                                                                    visitRequestDTO
-                                                                            .getPetId(),
-                                                                    visitRequestDTO
-                                                                            .getVisitDate()
-                                                            )
-                                                    )
-                                    );
+                                    visitRequestDTO.getJwtToken(),
+                                    visitRequestDTO.getOwnerId())
+                                        .subscribe(
+                                                //WILL HAVE TO BET MODIFIED IN ORDER TO USE THE NEW MAIL SERVICE
+                                                user->mailService
+                                                        .sendMail(
+                                                                generateVisitRequestEmail(
+                                                                        user,
+                                                                        visitRequestDTO
+                                                                                .getPetId(),
+                                                                        visitRequestDTO
+                                                                                .getVisitStartDate()
+                                                                )
+                                                        )
+                                        );
 
                             //                    Mono<UserDetails> user = getUserById(auth, ownerId);
                             //                    try{
@@ -176,7 +176,7 @@ public class VisitServiceImpl implements VisitService {
 //                .doOnNext(v -> System.out.println("Entity Date: " + v.getVisitDate())) // Debugging
                 //FLATENS THE MONO
                 .flatMap(visit ->
-                        repo.findByVisitDateAndPractitionerId(visit.getVisitDate(), visit.getPractitionerId()) // FindVisits method in repository
+                        repo.findByVisitStartDateAndPractitionerId(visit.getVisitStartDate(), visit.getPractitionerId()) // FindVisits method in repository
                                 .collectList()
                                 .flatMap(existingVisits -> {
                                     if (existingVisits.isEmpty()) {// If there are no existing visits
@@ -207,7 +207,6 @@ public class VisitServiceImpl implements VisitService {
 
     /**
      * Delete all visits who are Cancelled in the DataLayer.Status.
-     *
      * @return Returns all the deleted Visits
      */
     @Override
@@ -233,8 +232,7 @@ public class VisitServiceImpl implements VisitService {
 
     /**
      * Modify a Visit by its ID. Does verification for existing Vet and pets before replacing
-     *
-     * @param visitId             The visit ID to modify
+     * @param visitId The visit ID to modify
      * @param visitRequestDTOMono Visit Request DTO
      * @return Updated visit
      */
@@ -331,10 +329,10 @@ public class VisitServiceImpl implements VisitService {
     private Mono<VisitRequestDTO> validateVisitRequest(VisitRequestDTO dto) {
         if (dto.getDescription() == null || dto.getDescription().isBlank()) {
             return Mono.error(new BadRequestException("Please enter a description for this visit"));
-        } else if (dto.getVisitDate() == null) {
+        } else if (dto.getVisitStartDate() == null) {
             return Mono.error(new BadRequestException("Please choose a date for your appointment"));
         }
-        if (dto.getVisitDate().isBefore(LocalDateTime.now())) {
+        if(dto.getVisitStartDate().isBefore(LocalDateTime.now())) {
             return Mono.error(new BadRequestException("Appointment cannot be scheduled in the past"));
         } else if (dto.getPetId() == null || dto.getPetId().isBlank()) {
             return Mono.error(new BadRequestException("PetId cannot be null or blank"));
@@ -349,60 +347,59 @@ public class VisitServiceImpl implements VisitService {
 
     /**
      * Generates an email through an already defined template. Uses the mailer Service through
-     *
-     * @param user      UserDetails from DomainClientLayer/Auth/UserDetails
-     * @param petName   The Pet name
-     * @param visitDate The Date of the visit
+     * @param user UserDetails from DomainClientLayer/Auth/UserDetails
+     * @param petName The Pet name
+     * @param visitStartDate The Date of the visit
      * @return The email built from the message
      */
-    private Mail generateVisitRequestEmail(UserDetails user, String petName, LocalDateTime visitDate) {
+    private Mail generateVisitRequestEmail(UserDetails user, String petName, LocalDateTime visitStartDate) {
         return Mail.builder()
                 .message(
-                        format("""
-                                <!DOCTYPE html>
-                                <html lang="en">
-                                <head>
-                                    <meta charset="UTF-8">
-                                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                                    <title>Email Verification</title>
-                                    <style>
-                                        body {
-                                            font-family: Arial, sans-serif;
-                                            background-color: #f4f4f4;
-                                            margin: 0;
-                                            padding: 0;
-                                        }
-                                        .container {
-                                            max-width: 600px;
-                                            margin: 0 auto;
-                                            padding: 20px;
-                                            background-color: #fff;
-                                            border-radius: 5px;
-                                            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-                                        }
-                                        h1 {
-                                            color: #333;
-                                        }
-                                        p {
-                                            color: #555;
-                                        }
-                                        a {
-                                            color: #007BFF;
-                                        }
-                                    </style>
-                                </head>
-                                <body>
-                                    <div class="container">
-                                        <h1>Dear %s,</h1>
-                                        <h3>We have received a request to schedule a visit for your pet with id: %s on the following date and time: %s.</h3>
-                                        \s
-                                        <p>If you do not wish to create an account, please disregard this email.</p>
-                                        \s
-                                        <p>Thank you for choosing Pet Clinic.</p>
-                                    </div>
-                                </body>
-                                </html>
-                                """, user.getUsername(), petName, visitDate.toString()))
+                    format("""
+                            <!DOCTYPE html>
+                            <html lang="en">
+                            <head>
+                                <meta charset="UTF-8">
+                                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                                <title>Email Verification</title>
+                                <style>
+                                    body {
+                                        font-family: Arial, sans-serif;
+                                        background-color: #f4f4f4;
+                                        margin: 0;
+                                        padding: 0;
+                                    }
+                                    .container {
+                                        max-width: 600px;
+                                        margin: 0 auto;
+                                        padding: 20px;
+                                        background-color: #fff;
+                                        border-radius: 5px;
+                                        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+                                    }
+                                    h1 {
+                                        color: #333;
+                                    }
+                                    p {
+                                        color: #555;
+                                    }
+                                    a {
+                                        color: #007BFF;
+                                    }
+                                </style>
+                            </head>
+                            <body>
+                                <div class="container">
+                                    <h1>Dear %s,</h1>
+                                    <h3>We have received a request to schedule a visit for your pet with id: %s on the following date and time: %s.</h3>
+                                    \s
+                                    <p>If you do not wish to create an account, please disregard this email.</p>
+                                    \s
+                                    <p>Thank you for choosing Pet Clinic.</p>
+                                </div>
+                            </body>
+                            </html>
+                            """, user.getUsername(), petName, visitStartDate.toString()))
                 .subject("PetClinic Visit request")
                 .to(user.getEmail())
                 .build();

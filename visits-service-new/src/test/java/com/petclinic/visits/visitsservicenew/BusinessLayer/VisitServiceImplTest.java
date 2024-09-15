@@ -3,7 +3,6 @@ package com.petclinic.visits.visitsservicenew.BusinessLayer;
 import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DataLayer.VisitRepo;
-import com.petclinic.visits.visitsservicenew.DomainClientLayer.Mailing.Mail;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.Mailing.MailService;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.*;
 import com.petclinic.visits.visitsservicenew.Exceptions.BadRequestException;
@@ -224,7 +223,7 @@ class VisitServiceImplTest {
         when(petsClient.getPetById(anyString())).thenReturn(Mono.just(petResponseDTO));
         when(vetsClient.getVetByVetId(anyString())).thenReturn(Mono.just(vet));
         // This line ensures that a Flux<Visit> is returned, even if it's empty, to prevent NullPointerException
-        when(visitRepo.findByVisitDateAndPractitionerId(any(LocalDateTime.class), anyString())).thenReturn(Flux.empty());
+        when(visitRepo.findByVisitStartDateAndPractitionerId(any(LocalDateTime.class), anyString())).thenReturn(Flux.empty());
         when(entityDtoUtil.toVisitEntity(any())).thenReturn(visit1);
 
 
@@ -236,7 +235,7 @@ class VisitServiceImplTest {
                 .consumeNextWith(visitDTO1 -> {
                     assertEquals(visit1.getDescription(), visitDTO1.getDescription());
                     assertEquals(visit1.getPetId(), visitDTO1.getPetId());
-                    assertEquals(visit1.getVisitDate(), visitDTO1.getVisitDate());
+                    assertEquals(visit1.getVisitStartDate(), visitDTO1.getVisitStartDate());
                     assertEquals(visitResponseDTO.getPractitionerId(), visitDTO1.getPractitionerId());
                 }).verifyComplete();
 
@@ -244,20 +243,20 @@ class VisitServiceImplTest {
         verify(visitRepo, times(1)).insert(any(Visit.class));
         verify(petsClient, times(1)).getPetById(anyString());
         verify(vetsClient, times(1)).getVetByVetId(anyString());
-        verify(visitRepo, times(1)).findByVisitDateAndPractitionerId(any(LocalDateTime.class), anyString());
+        verify(visitRepo, times(1)).findByVisitStartDateAndPractitionerId(any(LocalDateTime.class), anyString());
     }
 
     @Test
     void addVisit_NoConflictingVisits_InsertsNewVisit () {
         // Arrange
-        LocalDateTime visitDate = LocalDateTime.now().plusDays(1);
+        LocalDateTime visitStartDate = LocalDateTime.now().plusDays(1);
         String description = "Test Description";
         String petId = "TestId";
         String practitionerId = "TestPractitionerId";
         Status status = Status.UPCOMING;
 
         VisitRequestDTO visitRequestDTO = new VisitRequestDTO();
-        visitRequestDTO.setVisitDate(visitDate);
+        visitRequestDTO.setVisitStartDate(visitStartDate);
         visitRequestDTO.setDescription(description);
         visitRequestDTO.setPetId(petId);
         visitRequestDTO.setPractitionerId(practitionerId);
@@ -270,7 +269,7 @@ class VisitServiceImplTest {
         when(visitRepo.insert(any(Visit.class))).thenReturn(Mono.just(visit));
         when(petsClient.getPetById(anyString())).thenReturn(Mono.just(new PetResponseDTO()));
         when(vetsClient.getVetByVetId(anyString())).thenReturn(Mono.just(new VetDTO()));
-        when(visitRepo.findByVisitDateAndPractitionerId(any(LocalDateTime.class), anyString())).thenReturn(Flux.empty());
+        when(visitRepo.findByVisitStartDateAndPractitionerId(any(LocalDateTime.class), anyString())).thenReturn(Flux.empty());
         when(entityDtoUtil.toVisitEntity(any())).thenReturn(visit1);
         when(entityDtoUtil.generateVisitIdString()).thenReturn("yourVisitId");
         when(visitRepo.insert(visit1)).thenReturn(Mono.just(visit1));
@@ -290,14 +289,14 @@ class VisitServiceImplTest {
     @Test
     void addVisit_ConflictingVisits_ThrowsDuplicateTimeException () {
         // Arrange
-        LocalDateTime visitDate = LocalDateTime.now().plusDays(1);
+        LocalDateTime visitStartDate = LocalDateTime.now().plusDays(1);
         String description = "Test Description";
         String petId = "TestId";
         String practitionerId = "TestPractitionerId";
         Status status = Status.UPCOMING;
 
         VisitRequestDTO visitRequestDTO = new VisitRequestDTO();
-        visitRequestDTO.setVisitDate(visitDate);
+        visitRequestDTO.setVisitStartDate(visitStartDate);
         visitRequestDTO.setDescription(description);
         visitRequestDTO.setPetId(petId);
         visitRequestDTO.setPractitionerId(practitionerId);
@@ -305,7 +304,7 @@ class VisitServiceImplTest {
 
         // Create an instance of existingVisit with required properties
         Visit existingVisit = buildVisit("meow");
-        existingVisit.setVisitDate(visitDate); // Set the visit date to match the new request
+        existingVisit.setVisitStartDate(visitStartDate); // Set the visit date to match the new request
         existingVisit.setPractitionerId(practitionerId); // Set the practitioner ID to match the new request
 
 
@@ -314,7 +313,7 @@ class VisitServiceImplTest {
 
         when(petsClient.getPetById(anyString())).thenReturn(Mono.just(mockPetResponse));
         when(vetsClient.getVetByVetId(anyString())).thenReturn(Mono.just(mockVetResponse)); // This ensures a non-null Mono is returned
-        when(visitRepo.findByVisitDateAndPractitionerId(any(), any()))
+        when(visitRepo.findByVisitStartDateAndPractitionerId(any(), any()))
                 .thenReturn(Flux.just(existingVisit)); // Return existingVisit in case of conflict
         when(entityDtoUtil.toVisitEntity(any())).thenReturn(visit1);
         when(entityDtoUtil.generateVisitIdString()).thenReturn("yourVisitId");
@@ -366,7 +365,7 @@ class VisitServiceImplTest {
         Visit visit = buildVisit(requestDTO.getDescription());
         VisitResponseDTO visitResponseDTO = buildVisitResponseDTO();
 
-        requestDTO.setVisitDate(null);
+        requestDTO.setVisitStartDate(null);
         // Mock the behavior of dependencies
 
         when(petsClient.getPetById(anyString())).thenReturn(Mono.just(petResponseDTO));
@@ -391,7 +390,7 @@ class VisitServiceImplTest {
         Visit visit = buildVisit(requestDTO.getDescription());
         VisitResponseDTO visitResponseDTO = buildVisitResponseDTO();
 
-        requestDTO.setVisitDate(LocalDateTime.parse("2023-10-12T14:30"));
+        requestDTO.setVisitStartDate(LocalDateTime.parse("2023-10-12T14:30"));
 
         // Mock the behavior of dependencies
 
@@ -665,7 +664,7 @@ class VisitServiceImplTest {
     private Visit buildVisit (String description){
         return Visit.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
-                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .visitStartDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description(description)
                 .petId("ecb109cd-57ea-4b85-b51e-99751fd1c349")
                 .practitionerId("ecb109cd-57ea-4b85-b51e-99751fd1c342")
@@ -675,7 +674,7 @@ class VisitServiceImplTest {
     private VisitResponseDTO buildVisitResponseDTO () {
         return VisitResponseDTO.builder()
                 .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
-                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .visitStartDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("this is a dummy description")
                 .petId("ecb109cd-57ea-4b85-b51e-99751fd1c349")
                 .practitionerId("ecb109cd-57ea-4b85-b51e-99751fd1c342")
@@ -684,7 +683,7 @@ class VisitServiceImplTest {
     }
     private VisitRequestDTO buildVisitRequestDTO () {
         return VisitRequestDTO.builder()
-                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .visitStartDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
                 .description("this is a dummy description")
                 .petId("ecb109cd-57ea-4b85-b51e-99751fd1c349")
                 .practitionerId("ecb109cd-57ea-4b85-b51e-99751fd1c342")

@@ -56,7 +56,7 @@ public class VisitControllerUnitTest {
     //VisitResponseDTO Objects for testing purposes
     private final VisitResponseDTO visitResponseDTO1 = VisitResponseDTO.builder()
             .visitId("V001")
-            .visitDate(LocalDate.of(2021, 5, 1).atStartOfDay())
+            .visitStartDate(LocalDate.of(2021, 5, 1).atStartOfDay())
             .description("Routine check-up")
             .petId("P001")
             .petName("Buddy")
@@ -67,6 +67,7 @@ public class VisitControllerUnitTest {
             .vetEmail("john.doe@example.com")
             .vetPhoneNumber("555-1234")
             .status(Status.COMPLETED)
+            .visitEndDate(LocalDate.of(2021, 5, 1).atStartOfDay())
             .build();
 
 
@@ -147,7 +148,7 @@ public class VisitControllerUnitTest {
     void whenAddVisit_asAdmin_thenReturnCreatedVisitDTO() {
         // Arrange
         VisitRequestDTO newVisitRequestDTO = VisitRequestDTO.builder()
-                .visitDate(LocalDateTime.of(2023, 10, 10, 10, 0))
+                .visitStartDate(LocalDateTime.of(2023, 10, 10, 10, 0))
                 .description("Routine check-up")
                 .petId("P001")
                 .practitionerId("PR001")
@@ -156,11 +157,12 @@ public class VisitControllerUnitTest {
 
         VisitResponseDTO createdVisitResponseDTO = VisitResponseDTO.builder()
                 .visitId("V001")
-                .visitDate(newVisitRequestDTO.getVisitDate())
+                .visitStartDate(newVisitRequestDTO.getVisitStartDate())
                 .description(newVisitRequestDTO.getDescription())
                 .petId(newVisitRequestDTO.getPetId())
                 .practitionerId(newVisitRequestDTO.getPractitionerId())
                 .status(newVisitRequestDTO.getStatus())
+                .visitEndDate(newVisitRequestDTO.getVisitStartDate())
                 .build();
 
         // Mock the visitsServiceClient to return the expected Mono
@@ -186,7 +188,7 @@ public class VisitControllerUnitTest {
                 .expectNextMatches(visitResponseDTO -> {
                     assertNotNull(visitResponseDTO);
                     assertNotNull(visitResponseDTO.getVisitId());
-                    assertEquals(newVisitRequestDTO.getVisitDate(), visitResponseDTO.getVisitDate());
+                    assertEquals(newVisitRequestDTO.getVisitStartDate(), visitResponseDTO.getVisitStartDate());
                     assertEquals(newVisitRequestDTO.getDescription(), visitResponseDTO.getDescription());
                     assertEquals(newVisitRequestDTO.getPetId(), visitResponseDTO.getPetId());
                     assertEquals(newVisitRequestDTO.getPractitionerId(), visitResponseDTO.getPractitionerId());
