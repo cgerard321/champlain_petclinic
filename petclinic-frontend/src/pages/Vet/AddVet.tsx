@@ -1,9 +1,13 @@
-import React, { FormEvent, useState } from 'react';
-import { addVet } from '@/features/veterinarians/api/addVet.ts'; // Adjust import path as needed
+import * as React from 'react';
+import { FormEvent, useState, ChangeEvent } from 'react';
+import { addVet } from '@/features/veterinarians/api/addVet.ts';
+import { VetRequestModel } from '@/features/veterinarians/models/VetRequestModel.ts';
 import { useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes';
-import { VetRequestModel } from '@/features/veterinarians/models/VetRequestModel.ts'; // Adjust import path as needed
-import { Workday } from '@/features/veterinarians/models/Workday.ts'; // Adjust import path as needed
+import { Button, Modal, Form } from 'react-bootstrap';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { Workday } from '@/features/veterinarians/models/Workday.ts';
+
 
 const AddVet: React.FC = (): JSX.Element => {
   const navigate = useNavigate();
@@ -17,40 +21,23 @@ const AddVet: React.FC = (): JSX.Element => {
     resume: '',
     workday: [],
     workHoursJson: '',
-    active: true,
+    active: false,
     specialties: [],
     photoDefault: false,
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [specialtyInput, setSpecialtyInput] = useState<{ specialtyId: string; name: string }>({ specialtyId: '', name: '' });
+  const [show, setShow] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
+  const handleChange = (
+    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ): void => {
     const { name, value } = e.target;
-    setVet(prev => ({ ...prev, [name]: value }));
+    setVet({ ...vet, [name]: value });
   };
 
-
-  const handleWorkdayChange = (e: React.ChangeEvent<HTMLSelectElement>): void => {
-    const value = e.target.value as Workday;
-    setVet(prev => ({
-      ...prev,
-      workday: prev.workday.includes(value) ? prev.workday.filter(day => day !== value) : [...prev.workday, value]
-    }));
-  };
-
-  const handleSpecialtyChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    const { name, value } = e.target;
-    setSpecialtyInput({ ...specialtyInput, [name]: value });
-  };
-
-  const addSpecialty = (): void => {
-    if (specialtyInput.specialtyId && specialtyInput.name) {
-      setVet(prev => ({
-        ...prev,
-        specialties: [...prev.specialties, { ...specialtyInput }]
-      }));
-      setSpecialtyInput({ specialtyId: '', name: '' });
-    }
+  const handleCheckboxChange = (e: ChangeEvent<HTMLInputElement>): void => {
+    const { name, checked } = e.target;
+    setVet({ ...vet, [name]: checked });
   };
 
   const validate = (): boolean => {
@@ -60,141 +47,222 @@ const AddVet: React.FC = (): JSX.Element => {
     if (!vet.email) newErrors.email = 'Email is required';
     if (!vet.phoneNumber) newErrors.phoneNumber = 'Phone number is required';
     if (!vet.resume) newErrors.resume = 'Resume is required';
-    if (vet.workday.length === 0) newErrors.workday = 'At least one workday must be selected';
-    if (!vet.workHoursJson) newErrors.workHoursJson = 'Work hours JSON is required';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
+  const handleSubmit = async (
+    event: FormEvent<HTMLFormElement>
+  ): Promise<void> => {
     event.preventDefault();
     if (!validate()) return;
 
     try {
       const response = await addVet(vet);
-      if (response.status === 201) {
-        navigate(AppRoutePaths.Home);
+      if (response.status === 200) {
+        navigate(AppRoutePaths.Vet);
       } else {
-        console.error('Failed to add vet');
       }
     } catch (error) {
       console.error('Error:', error);
     }
+    setShow(false);
+  };
+
+  // Modal control functions
+  const handleClose = () => setShow(false);
+  const handleShow = () => setShow(true);
+
+  const handleWorkdayChange = (e: ChangeEvent<HTMLInputElement>): void => {
+    const { value, checked } = e.target;
+
+    const selectedDay = value as Workday;
+
+    if (checked) {
+      setVet((prevVet) => ({
+        ...prevVet,
+        workday: [...prevVet.workday, selectedDay],
+      }));
+    } else {
+      setVet((prevVet) => ({
+        ...prevVet,
+        workday: prevVet.workday.filter((day) => day !== selectedDay),
+      }));
+    }
+  };
+
+  const handleSpecialtiesChange = (e: ChangeEvent<any>): void => {
+    const selectElement = e.target as HTMLSelectElement;
+    const selectedOptions = Array.from(selectElement.selectedOptions);
+
+    const selectedSpecialties = selectedOptions.map(option => ({
+      specialtyId: option.value,
+      name: option.textContent || ''
+    }));
+
+    setVet((prevVet) => ({
+      ...prevVet,
+      specialties: selectedSpecialties,
+    }));
   };
 
   return (
-    <div className="form-container">
-      <h2>Add Vet</h2>
-      <form onSubmit={handleSubmit}>
-        <label>First Name: </label>
-        <input
-          type="text"
-          name="firstName"
-          value={vet.firstName}
-          onChange={handleChange}
-        />
-        {errors.firstName && <span className="error">{errors.firstName}</span>}
-        <br />
-        <label>Last Name: </label>
-        <input
-          type="text"
-          name="lastName"
-          value={vet.lastName}
-          onChange={handleChange}
-        />
-        {errors.lastName && <span className="error">{errors.lastName}</span>}
-        <br />
-        <label>Email: </label>
-        <input
-          type="email"
-          name="email"
-          value={vet.email}
-          onChange={handleChange}
-        />
-        {errors.email && <span className="error">{errors.email}</span>}
-        <br />
-        <label>Phone Number: </label>
-        <input
-          type="text"
-          name="phoneNumber"
-          value={vet.phoneNumber}
-          onChange={handleChange}
-        />
-        {errors.phoneNumber && <span className="error">{errors.phoneNumber}</span>}
-        <br />
-        <label>Resume: </label>
-        <textarea
-          name="resume"
-          value={vet.resume}
-          onChange={handleChange}
-        />
-        {errors.resume && <span className="error">{errors.resume}</span>}
-        <br />
-        <label>Workdays: </label>
-        <select multiple onChange={handleWorkdayChange}>
-          {Object.values(Workday).map(day => (
-            <option key={day} value={day}>
-              {day}
-            </option>
-          ))}
-        </select>
-        {errors.workday && <span className="error">{errors.workday}</span>}
-        <br />
-        <label>Work Hours JSON: </label>
-        <input
-          type="text"
-          name="workHoursJson"
-          value={vet.workHoursJson}
-          onChange={handleChange}
-        />
-        {errors.workHoursJson && <span className="error">{errors.workHoursJson}</span>}
-        <br />
-        <label>Active: </label>
-        <input
-          type="checkbox"
-          name="active"
-          checked={vet.active}
-          onChange={() => setVet(prev => ({ ...prev, active: !prev.active }))}
-        />
-        <br />
-        <label>Photo Default: </label>
-        <input
-          type="checkbox"
-          name="photoDefault"
-          checked={vet.photoDefault}
-          onChange={() => setVet(prev => ({ ...prev, photoDefault: !prev.photoDefault }))}
-        />
-        <br />
-        <div>
-          <h3>Add Specialty</h3>
-          <label>Specialty ID: </label>
-          <input
-            type="text"
-            name="specialtyId"
-            value={specialtyInput.specialtyId}
-            onChange={handleSpecialtyChange}
-          />
-          <br />
-          <label>Specialty Name: </label>
-          <input
-            type="text"
-            name="name"
-            value={specialtyInput.name}
-            onChange={handleSpecialtyChange}
-          />
-          <button type="button" onClick={addSpecialty}>
-            Add Specialty
-          </button>
-        </div>
-        <div>
-          <h3>Specialties</h3>
-          {vet.specialties.map(spec => (
-            <div key={spec.specialtyId}>{spec.name}</div>
-          ))}
-        </div>
-        <button type="submit">Add Vet</button>
-      </form>
-    </div>
+    <>
+      <Button variant="primary" onClick={handleShow}>
+        Add Vet
+      </Button>
+
+      <Modal show={show} onHide={handleClose} backdrop="static" keyboard={false}>
+        <Modal.Header closeButton>
+          <Modal.Title>Add New Vet</Modal.Title>
+        </Modal.Header>
+
+        <Modal.Body>
+          <Form id="addVetForm" onSubmit={handleSubmit}>
+            <Form.Group className="mb-3">
+              <Form.Label>First Name</Form.Label>
+              <Form.Control
+                type="text"
+                name="firstName"
+                value={vet.firstName}
+                onChange={handleChange}
+                isInvalid={!!errors.firstName}
+              />
+              <Form.Control.Feedback type="invalid">
+                {errors.firstName}
+              </Form.Control.Feedback>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Specialties</Form.Label>
+              <Form.Control
+                as="select"
+                multiple
+                name="specialties"
+                value={vet.specialties.map(s => s.specialtyId)}
+                onChange={handleSpecialtiesChange}
+              >
+                <option value="1">Surgery</option>
+                <option value="2">Dentistry</option>
+                <option value="3">Dermatology</option>
+              </Form.Control>
+            </Form.Group>
+
+
+            <Form.Group className="mb-3">
+              <Form.Label>Work Days</Form.Label>
+              {Object.values(Workday).map((day) => (
+                <Form.Check
+                  key={day}
+                  type="checkbox"
+                  label={day}
+                  name="workday"
+                  value={day}
+                  checked={vet.workday.includes(day)}
+                  onChange={handleWorkdayChange}
+                />
+              ))}
+            </Form.Group>
+
+
+            <Form.Group className="mb-3">
+              <Form.Label>Last Name</Form.Label>
+              <Form.Control
+                type="text"
+                name="lastName"
+                value={vet.lastName}
+                onChange={handleChange}
+                isInvalid={!!errors.lastName}
+              />
+              <Form.Control.Feedback type="invalid">
+                {errors.lastName}
+              </Form.Control.Feedback>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Email</Form.Label>
+              <Form.Control
+                type="email"
+                name="email"
+                value={vet.email}
+                onChange={handleChange}
+                isInvalid={!!errors.email}
+              />
+              <Form.Control.Feedback type="invalid">
+                {errors.email}
+              </Form.Control.Feedback>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Phone Number</Form.Label>
+              <Form.Control
+                type="text"
+                name="phoneNumber"
+                value={vet.phoneNumber}
+                onChange={handleChange}
+                isInvalid={!!errors.phoneNumber}
+              />
+              <Form.Control.Feedback type="invalid">
+                {errors.phoneNumber}
+              </Form.Control.Feedback>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Resume</Form.Label>
+              <Form.Control
+                as="textarea"
+                name="resume"
+                value={vet.resume}
+                onChange={handleChange}
+                isInvalid={!!errors.resume}
+              />
+              <Form.Control.Feedback type="invalid">
+                {errors.resume}
+              </Form.Control.Feedback>
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Label>Work Hours JSON</Form.Label>
+              <Form.Control
+                type="text"
+                name="workHoursJson"
+                value={vet.workHoursJson}
+                onChange={handleChange}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Check
+                type="checkbox"
+                label="Active"
+                name="active"
+                checked={vet.active}
+                onChange={handleCheckboxChange}
+              />
+            </Form.Group>
+
+            <Form.Group className="mb-3">
+              <Form.Check
+                type="checkbox"
+                label="Photo Default"
+                name="photoDefault"
+                checked={vet.photoDefault}
+                onChange={handleCheckboxChange}
+              />
+            </Form.Group>
+          </Form>
+        </Modal.Body>
+
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleClose}>
+            Close
+          </Button>
+          <Button form="addVetForm" variant="primary" type="submit">
+            Add Vet
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </>
   );
 };
 
