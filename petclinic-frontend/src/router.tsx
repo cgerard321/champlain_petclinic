@@ -8,6 +8,7 @@ import Home from '@/pages/Home/Home.tsx';
 import ProfileEdit from '@/pages/Customer/ProfileEdit.tsx';
 import AddingCustomer from '@/pages/Customer/AddingCustomer.tsx';
 import CustomerBillingPage from '@/pages/Bills/CostumerBills.tsx';
+import AllOwners from '@/pages/Customer/AllOwners.tsx';
 
 const router = createBrowserRouter([
   {
@@ -58,6 +59,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <CustomerBillingPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.AllCustomers,
+        element: (
+          <ProtectedRoute>
+            <AllOwners />
           </ProtectedRoute>
         ),
       },

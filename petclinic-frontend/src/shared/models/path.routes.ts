@@ -11,5 +11,6 @@ export enum AppRoutePaths {
   login = '/users/login',
   CustomerProfileEdit = '/customer/profile/edit',
   AddingCustomer = '/customer/add',
+  AllCustomers = '/customers',
   Home = '/home',
 }
