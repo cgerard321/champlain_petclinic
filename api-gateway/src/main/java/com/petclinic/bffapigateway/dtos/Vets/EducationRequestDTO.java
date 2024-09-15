@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class EducationRequestDTO {
+    private String vetId;
     private String schoolName;
     private String degree;
     private String fieldOfStudy;
