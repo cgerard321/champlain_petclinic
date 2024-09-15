@@ -1,7 +1,9 @@
 package com.petclinic.cartsservice.businesslayer;
 
+import com.petclinic.cartsservice.dataaccesslayer.Cart;
 import com.petclinic.cartsservice.dataaccesslayer.CartRepository;
 import com.petclinic.cartsservice.domainclientlayer.ProductClient;
+import com.petclinic.cartsservice.presentationlayer.CartRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
 import com.petclinic.cartsservice.utils.EntityModelUtil;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
@@ -11,6 +13,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -37,4 +40,20 @@ public class CartServiceImpl implements CartService {
                             .map(products -> EntityModelUtil.toCartResponseModel(cart, products));
                 });
     }
+
+    @Override
+    public Mono<CartResponseModel> CreateNewCart(CartRequestModel cartRequestModel) {
+        Cart cart = new Cart();
+        cart.setCustomerId(cartRequestModel.getCustomerId());
+        cart.setCartId(UUID.randomUUID().toString());
+        Mono<CartResponseModel> cartRequestModelMono = cartRepository.save(cart)
+                .map(savedCart -> {
+                    CartResponseModel cartResponseModel = new CartResponseModel();
+                    cartResponseModel.setCustomerId(savedCart.getCustomerId());
+                    cartResponseModel.setCartId(savedCart.getCartId());
+                    return cartResponseModel;
+                });
+        return cartRequestModelMono;
+    }
+
 }
