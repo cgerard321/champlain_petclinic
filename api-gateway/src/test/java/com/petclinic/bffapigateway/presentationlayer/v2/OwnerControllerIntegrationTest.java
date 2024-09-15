@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -36,10 +37,12 @@ class OwnerControllerIntegrationTest {
         mockServerConfigCustomersService = new MockServerConfigCustomersService();
         mockServerConfigCustomersService.registerUpdateOwnerEndpoint();
         mockServerConfigCustomersService.registerAddOwnerEndpoint();
+        mockServerConfigCustomersService.registerGetAllOwnersEndpoint();
 
         mockServerConfigAuthService = new MockServerConfigAuthService();
         mockServerConfigAuthService.registerValidateTokenForOwnerEndpoint();
         mockServerConfigAuthService.registerValidateTokenForAdminEndpoint();
+        mockServerConfigAuthService.registerValidateTokenForVetEndpoint();
 
     }
 
@@ -125,6 +128,7 @@ class OwnerControllerIntegrationTest {
                 .verifyComplete();
     }
 
+
     @Test
     void whenAddOwner_asAdmin_thenReturnCreatedOwnerResponseDTO() {
         OwnerRequestDTO newOwnerRequestDTO = OwnerRequestDTO.builder()
@@ -185,5 +189,44 @@ class OwnerControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isForbidden();
     }
+
+    @Test
+    void whenGetAllOwners_asAdmin_thenReturnAllOwners() {
+        Flux<OwnerResponseDTO> result = webTestClient.get()
+                .uri("/api/v2/gateway/owners")
+                .cookie("Bearer", jwtTokenForValidAdmin)  // Token for an admin user
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType("text/event-stream;charset=UTF-8")
+                .returnResult(OwnerResponseDTO.class)
+                .getResponseBody();
+
+        StepVerifier
+                .create(result)
+                .expectNextCount(3)
+                .verifyComplete();
+
+
+    }
+
+    @Test
+    void whenGetAllOwners_asVet_thenReturnAllOwners() {
+        Flux<OwnerResponseDTO> result = webTestClient.get()
+                .uri("/api/v2/gateway/owners")
+                .cookie("Bearer", jwtTokenForValidVet)  // Token for a vet user
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType("text/event-stream;charset=UTF-8")
+                .returnResult(OwnerResponseDTO.class)
+                .getResponseBody();
+
+        StepVerifier
+                .create(result)
+                .expectNextCount(3)
+                .verifyComplete();
+    }
+
 
 }
