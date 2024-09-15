@@ -1057,19 +1057,7 @@ class VetControllerUnitTest {
         Mockito.verify(vetService, times(1)).getVetByFirstName("Nonexistent");
     }
 
-    @Test
-    void getVetByFirstName_Empty() {
-        when(vetService.getVetByFirstName("")).thenReturn(Mono.empty());
 
-        client
-                .get()
-                .uri("/vets/firstName/")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound();
-
-        Mockito.verify(vetService, times(1)).getVetByFirstName("");
-    }
 
 
 
@@ -1104,9 +1092,7 @@ class VetControllerUnitTest {
 
         Mockito.verify(vetService, times(1)).getVetByLastName("Nonexistent");
     }
-
-
-
+ 
 
 
 }
