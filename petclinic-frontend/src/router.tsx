@@ -6,6 +6,7 @@ import Vet from '@/pages/Vet/Vet.tsx';
 import { ProtectedRoute } from '@/shared/components/ProtectedRouteProps.tsx';
 import Home from '@/pages/Home/Home.tsx';
 import ProfileEdit from '@/pages/Customer/ProfileEdit.tsx';
+import CustomerBillingPage from '@/pages/Bills/CostumerBills.tsx';
 
 const router = createBrowserRouter([
   {
@@ -43,6 +44,14 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+      {
+        path: AppRoutePaths.CustomerBills,
+        element: (
+          <ProtectedRoute>
+            <CustomerBillingPage />
+          </ProtectedRoute>
+        ),
+      },
       //   {
       //       path: AppRoutePaths.PageNotFound,
       //       element: /* PageNotFoundComponent */
@@ -60,7 +69,7 @@ const router = createBrowserRouter([
       //       element: /* ServiceUnavailableComponent */
       //   },
       //   {
-      //       path: AppRoutePaths.Unauthorized
+      //       path: AppRoutePaths.Unauthorized,
       //       element: /* UnauthorizedComponent */
       //   }
     ],
@@ -68,4 +77,5 @@ const router = createBrowserRouter([
   { path: AppRoutePaths.login, element: <Login /> },
   //   {path: '*', element: /* PageNotFoundComponent */},
 ]);
+
 export default router;
