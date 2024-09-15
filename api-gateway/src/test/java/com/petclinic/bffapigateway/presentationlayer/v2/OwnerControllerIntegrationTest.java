@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -35,7 +36,11 @@ class OwnerControllerIntegrationTest {
     public void startMockServer() {
         mockServerConfigCustomersService = new MockServerConfigCustomersService();
         mockServerConfigCustomersService.registerUpdateOwnerEndpoint();
+<<<<<<< HEAD
         mockServerConfigCustomersService.registerAddOwnerEndpoint();
+=======
+        mockServerConfigCustomersService.registerGetAllOwnersEndpoint();
+>>>>>>> 07eed8d4 (Created a getall customers)
 
         mockServerConfigAuthService = new MockServerConfigAuthService();
         mockServerConfigAuthService.registerValidateTokenForOwnerEndpoint();
@@ -125,6 +130,7 @@ class OwnerControllerIntegrationTest {
                 .verifyComplete();
     }
 
+<<<<<<< HEAD
     @Test
     void whenAddOwner_asAdmin_thenReturnCreatedOwnerResponseDTO() {
         OwnerRequestDTO newOwnerRequestDTO = OwnerRequestDTO.builder()
@@ -185,5 +191,23 @@ class OwnerControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isForbidden();
     }
+=======
+
+
+@Test
+void whenGetAllOwners_asAdmin_thenReturnAllOwners() {
+    Flux<OwnerResponseDTO> result = webTestClient.get()
+            .uri("/api/v2/gateway/owners")
+            .cookie("Bearer", jwtTokenForAdmin2)  // Token for an admin user
+            .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+            .exchange()
+            .expectStatus().isOk()
+            .expectHeader().contentType("text/event-stream;charset=UTF-8")
+            .returnResult(OwnerResponseDTO.class)
+            .getResponseBody();
+
+}
+
+>>>>>>> 07eed8d4 (Created a getall customers)
 
 }

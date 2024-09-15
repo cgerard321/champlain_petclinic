@@ -6,8 +6,12 @@ import Vet from '@/pages/Vet/Vet.tsx';
 import { ProtectedRoute } from '@/shared/components/ProtectedRouteProps.tsx';
 import Home from '@/pages/Home/Home.tsx';
 import ProfileEdit from '@/pages/Customer/ProfileEdit.tsx';
+<<<<<<< HEAD
 import AddingCustomer from '@/pages/Customer/AddingCustomer.tsx';
 import CustomerBillingPage from '@/pages/Bills/CostumerBills.tsx';
+=======
+import AllOwners from '@/pages/Customer/AllOwners.tsx';
+>>>>>>> 07eed8d4 (Created a getall customers)
 
 const router = createBrowserRouter([
   {
@@ -46,6 +50,7 @@ const router = createBrowserRouter([
         ),
       },
       {
+<<<<<<< HEAD
         path: AppRoutePaths.AddingCustomer,
         element: (
           <ProtectedRoute>
@@ -60,6 +65,15 @@ const router = createBrowserRouter([
             <CustomerBillingPage />
           </ProtectedRoute>
         ),
+=======
+        path: AppRoutePaths.AllCustomers,
+    element: (
+        <ProtectedRoute>
+            <AllOwners />
+        </ProtectedRoute>
+    )
+
+>>>>>>> 07eed8d4 (Created a getall customers)
       },
       //   {
       //       path: AppRoutePaths.PageNotFound,
