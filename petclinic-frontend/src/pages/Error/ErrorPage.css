@@ -6,16 +6,18 @@
     align-items: center;
     height: 100vh;
     margin: 0;
+    padding: 20px;
 }
 
 .error-container {
     text-align: center;
     background-color: #fff;
     padding: 40px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 15px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
     max-width: 700px;
     width: 100%;
+    transition: transform 0.3s;
 }
 
 .error-container h1 {
