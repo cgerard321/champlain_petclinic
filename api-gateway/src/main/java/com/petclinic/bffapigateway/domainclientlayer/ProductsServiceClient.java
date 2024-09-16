@@ -66,4 +66,13 @@ public class ProductsServiceClient {
                 .retrieve()
                 .bodyToMono(ProductResponseDTO.class);
     }
+
+    public Mono<Void> requestCount(final String productId) {
+        return webClientBuilder.build()
+                .patch()
+                .uri(productsServiceUrl + "/" + productId)
+                .retrieve()
+                .bodyToMono(Void.class);
+
+    }
 }

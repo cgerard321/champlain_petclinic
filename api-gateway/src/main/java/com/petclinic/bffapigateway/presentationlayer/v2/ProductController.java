@@ -39,6 +39,13 @@ public class ProductController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @PatchMapping(value = "{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<Void>> incrementRequestCount(@PathVariable String productId) {
+        return productsServiceClient.requestCount(productId).then(Mono.just(ResponseEntity.noContent().build()));
+    }
+
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ProductResponseDTO>> addProduct(@RequestBody ProductRequestDTO productRequestDTO) {
         return productsServiceClient.createProduct(productRequestDTO)
