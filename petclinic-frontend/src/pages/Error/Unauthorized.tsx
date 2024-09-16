@@ -14,7 +14,7 @@ const Unauthorized: React.FC = () => {
     <div className="error-wrapper">
       <div className="error-container">
         <h1>401</h1>
-        <p>You are not authorized to view this page.</p>
+        <p>You are not authorized to access this page or resource.</p>
         <button onClick={handleGoHome}>Go Back Home</button>
       </div>
     </div>
