@@ -18,3 +18,10 @@
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 999;
 }
+
+.table {
+    padding-top: 20px;
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+}
