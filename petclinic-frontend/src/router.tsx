@@ -74,7 +74,7 @@ const router = createBrowserRouter([
         path: AppRoutePaths.Home,
         element: (
             <ProtectedRoute>
-              <Home/>
+              <Home />
             </ProtectedRoute>
         ),
       },
@@ -143,16 +143,16 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: AppRoutePaths.PageNotFound,
+        element: <PageNotFound />,
+      },
+      {
         path: AppRoutePaths.Forbidden,
         element: <Forbidden />,
       },
       {
         path: AppRoutePaths.Unauthorized,
         element: <Unauthorized />,
-      },
-      {
-        path: AppRoutePaths.PageNotFound,
-        element: <PageNotFound />,
       },
       {
         path: AppRoutePaths.InternalServerError,
