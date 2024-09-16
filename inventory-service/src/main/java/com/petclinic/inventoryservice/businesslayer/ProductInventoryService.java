@@ -29,5 +29,7 @@ public interface ProductInventoryService {
 
     Mono<ProductResponseDTO> getProductByProductIdInInventory(String inventoryId, String productId);
 
+    Mono<InventoryResponseDTO> addSupplyToInventoryByInventoryType(String inventoryType, Mono<SupplyRequestDTO> supplyRequestDTOMono);
+
 
 }

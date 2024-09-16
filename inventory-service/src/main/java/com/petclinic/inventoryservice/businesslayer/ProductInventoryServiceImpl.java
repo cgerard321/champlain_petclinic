@@ -4,9 +4,11 @@ import com.petclinic.inventoryservice.datalayer.Inventory.InventoryRepository;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryTypeRepository;
 import com.petclinic.inventoryservice.datalayer.Product.Product;
 import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
+import com.petclinic.inventoryservice.datalayer.Supply.Supply;
 import com.petclinic.inventoryservice.presentationlayer.*;
 import com.petclinic.inventoryservice.utils.EntityDTOUtil;
 import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
+import com.petclinic.inventoryservice.utils.exceptions.InventoryNotFoundException;
 import com.petclinic.inventoryservice.utils.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,7 +17,9 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Pageable;
 
@@ -389,6 +393,52 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                 .findProductByInventoryIdAndProductId(inventoryId, productId)
                 .map(EntityDTOUtil::toProductResponseDTO)
                 .switchIfEmpty(Mono.error(new NotFoundException("Inventory id:" + inventoryId + "and product:" + productId + "are not found")));
+    }
+
+    @Override
+    public Mono<InventoryResponseDTO> addSupplyToInventoryByInventoryType(String inventoryType, Mono<SupplyRequestDTO> supplyRequestDTOMono) {
+
+        return supplyRequestDTOMono
+                .flatMap(supplyRequestDTO ->
+                        inventoryRepository.findByType(inventoryType)
+                                .switchIfEmpty(Mono.error(new InventoryNotFoundException("No inventory found for type: " + inventoryType)))
+                                .flatMap(inventory -> {
+                                    Supply supply = new Supply(
+                                            null,
+                                            null,
+                                            inventory.getId(),
+                                            supplyRequestDTO.getSupplyName(),
+                                            supplyRequestDTO.getSupplyDescription(),
+                                            supplyRequestDTO.getSupplyQuantity(),
+                                            supplyRequestDTO.getSupplyPrice(),
+                                            supplyRequestDTO.getSupplySalePrice()
+                                    );
+
+                                    inventory.addSupply(supply);
+                                    return inventoryRepository.save(inventory);
+                                })
+                                .map(updatedInventory -> {
+
+                                    List<SupplyResponseDTO> supplyResponseDTOs = updatedInventory.getSupplies().stream()
+                                            .map(supply -> new SupplyResponseDTO(
+                                                    supply.getSupplyId(),
+                                                    supply.getSupplyName(),
+                                                    supply.getSupplyDescription(),
+                                                    supply.getSupplyQuantity(),
+                                                    supply.getSupplyPrice(),
+                                                    supply.getSupplySalePrice()
+                                            ))
+                                            .collect(Collectors.toList());
+
+                                    return new InventoryResponseDTO(
+                                            updatedInventory.getInventoryId(),
+                                            updatedInventory.getInventoryName(),
+                                            updatedInventory.getInventoryType(),
+                                            updatedInventory.getInventoryDescription(),
+                                            supplyResponseDTOs
+                                    );
+                                })
+                );
     }
 
     //delete all products and delete all inventory
