@@ -10,7 +10,6 @@ import ProfileEdit from '@/pages/Customer/ProfileEdit.tsx';
 import Products from '@/pages/Product/Products.tsx';
 import AddingCustomer from '@/pages/Customer/AddingCustomer.tsx';
 import CustomerBillingPage from '@/pages/Bills/CostumerBills.tsx';
-
 import AllOwners from '@/pages/Customer/AllOwners.tsx';
 import PageNotFound from '@/pages/Error/PageNotFound.tsx';
 import Forbidden from '@/pages/Error/Forbidden.tsx';
@@ -24,57 +23,52 @@ import EditReviewForm from './features/visits/Review/EditReviewForm';
 import Review from './pages/Review/Review';
 import EditInventory from '@/features/inventories/EditInventory.tsx';
 //import path from 'path';
-
-
 import VetDetails from "@/pages/Vet/VetDetails.tsx";
+
 
 const router = createBrowserRouter([
   {
     children: [
-
       {
         path: AppRoutePaths.EditInventory,
         element: (
-          <ProtectedRoute>
-            <EditInventory />
-          </ProtectedRoute>
+            <ProtectedRoute>
+              <EditInventory />
+            </ProtectedRoute>
         ),
       },
       {
         path: AppRoutePaths.Form,
         element: (
-          <ProtectedRoute>
-            <AddReviewForm />
-          </ProtectedRoute>
+            <ProtectedRoute>
+              <AddReviewForm />
+            </ProtectedRoute>
         ),
       },
-
       {
         path: AppRoutePaths.Review,
         element: (
-          <ProtectedRoute>
-            <Review />
-          </ProtectedRoute>
+            <ProtectedRoute>
+              <Review />
+            </ProtectedRoute>
         ),
       },
       {
         path: AppRoutePaths.UpdateReview,
         element: (
-          <ProtectedRoute>
-            <EditReviewForm />
-          </ProtectedRoute>
+            <ProtectedRoute>
+              <EditReviewForm />
+            </ProtectedRoute>
         ),
       },
-
-        {
-            path: AppRoutePaths.Home,
-            element: (
-                <ProtectedRoute>
-                    <Home/>
-                </ProtectedRoute>
-            ),
-        },
-
+      {
+        path: AppRoutePaths.Home,
+        element: (
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+        ),
+      },
       {
         path: AppRoutePaths.Inventories,
         element: (
@@ -86,9 +80,9 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.InventoryProducts,
         element: (
-          <ProtectedRoute>
-            <InventoryProducts />
-          </ProtectedRoute>
+            <ProtectedRoute>
+              <InventoryProducts />
+            </ProtectedRoute>
         ),
       },
       {
@@ -107,43 +101,41 @@ const router = createBrowserRouter([
             </ProtectedRoute>
         ),
       },
-
       {
         path: AppRoutePaths.CustomerProfileEdit,
         element: (
-
-          <ProtectedRoute roles={['OWNER']}>
-            <ProfileEdit />
-          </ProtectedRoute>
-
+            <ProtectedRoute roles={['OWNER']}>
+              <ProfileEdit />
+            </ProtectedRoute>
         ),
       },
       {
         path: AppRoutePaths.AddingCustomer,
         element: (
-          <ProtectedRoute roles={['ADMIN']}>
-            <AddingCustomer />
-          </ProtectedRoute>
-
+            <ProtectedRoute roles={['ADMIN']}>
+              <AddingCustomer />
+            </ProtectedRoute>
         ),
       },
       {
         path: AppRoutePaths.CustomerBills,
         element: (
-
-          <ProtectedRoute>
-            <CustomerBillingPage />
-          </ProtectedRoute>
+            <ProtectedRoute>
+              <CustomerBillingPage />
+            </ProtectedRoute>
         ),
       },
       {
         path: AppRoutePaths.AllCustomers,
         element: (
-          <ProtectedRoute roles={['ADMIN', 'VET']}>
-            <AllOwners />
-          </ProtectedRoute>
-
+            <ProtectedRoute roles={['ADMIN', 'VET']}>
+              <AllOwners />
+            </ProtectedRoute>
         ),
+      },
+      {
+        path: AppRoutePaths.PageNotFound,
+        element: <PageNotFound />,
       },
       {
         path: AppRoutePaths.Forbidden,
@@ -152,10 +144,6 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.Unauthorized,
         element: <Unauthorized />,
-      },
-      {
-        path: AppRoutePaths.PageNotFound,
-        element: <PageNotFound />,
       },
       {
         path: AppRoutePaths.InternalServerError,
@@ -168,6 +156,10 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.ServiceUnavailable,
         element: <ServiceUnavailable />,
+      },
+      {
+        path: '*',
+        element: <PageNotFound />,
       },
       {
         path: AppRoutePaths.Products,
@@ -183,14 +175,6 @@ const router = createBrowserRouter([
             <ProtectedRoute>
               <Visits />
             </ProtectedRoute>
-        ),
-      },
-      {
-        path: AppRoutePaths.Visits,
-        element: (
-          <ProtectedRoute>
-            <Visits />
-          </ProtectedRoute>
         ),
       },
     ],
