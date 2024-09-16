@@ -2,7 +2,7 @@ import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { OwnerResponseModel } from '@/features/customers/models/OwnerResponseModel';
 import './AllOwners.css';
-
+import { NavBar } from '@/layouts/AppNavBar.tsx';
 const AllOwners: React.FC = (): JSX.Element => {
   const [owners, setOwners] = useState<OwnerResponseModel[]>([]);
 
@@ -38,6 +38,8 @@ const AllOwners: React.FC = (): JSX.Element => {
   }, []);
 
   return (
+    <div>
+    <NavBar/>
     <div className="owners-container">
       <h1>Owners</h1>
       <table>
@@ -64,6 +66,7 @@ const AllOwners: React.FC = (): JSX.Element => {
           ))}
         </tbody>
       </table>
+    </div>
     </div>
   );
 };
