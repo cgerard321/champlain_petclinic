@@ -153,5 +153,14 @@ public Flux<InventoryResponseDTO> searchInventories(
     return productInventoryService.getAllInventoryTypes();
     }
 
+    @PostMapping("/{inventoryType}/supplies")
+    public Mono<ResponseEntity<InventoryResponseDTO>> addSupplyToInventoryByType(
+            @PathVariable String inventoryType,
+            @RequestBody Mono<SupplyRequestDTO> supplyRequestDTO) {
+        return productInventoryService.addSupplyToInventoryByInventoryType(inventoryType, supplyRequestDTO)
+                .map(inventoryResponseDTO -> ResponseEntity.status(HttpStatus.CREATED).body(inventoryResponseDTO))
+                .onErrorResume(e -> Mono.just(ResponseEntity.notFound().build()));
+    }
+
 }
 

@@ -400,13 +400,13 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
 
         return supplyRequestDTOMono
                 .flatMap(supplyRequestDTO ->
-                        inventoryRepository.findByType(inventoryType)
+                        inventoryRepository.findByInventoryType(inventoryType)  // Updated method name
                                 .switchIfEmpty(Mono.error(new InventoryNotFoundException("No inventory found for type: " + inventoryType)))
                                 .flatMap(inventory -> {
                                     Supply supply = new Supply(
-                                            null,
-                                            null,
-                                            inventory.getId(),
+                                            null, // supplyId
+                                            null, // supplyName
+                                            inventory.getId(), // inventoryId
                                             supplyRequestDTO.getSupplyName(),
                                             supplyRequestDTO.getSupplyDescription(),
                                             supplyRequestDTO.getSupplyQuantity(),
@@ -418,7 +418,6 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                                     return inventoryRepository.save(inventory);
                                 })
                                 .map(updatedInventory -> {
-
                                     List<SupplyResponseDTO> supplyResponseDTOs = updatedInventory.getSupplies().stream()
                                             .map(supply -> new SupplyResponseDTO(
                                                     supply.getSupplyId(),
