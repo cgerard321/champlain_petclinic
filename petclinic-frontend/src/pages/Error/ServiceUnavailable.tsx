@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 import { useNavigate } from 'react-router-dom';
 import './ErrorPage.css';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
@@ -6,7 +6,7 @@ import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 const ServiceUnavailable: React.FC = () => {
   const navigate = useNavigate();
 
-  const handleGoHome = () => {
+  const handleGoHome = (): void => {
     navigate(AppRoutePaths.Home);
   };
 
