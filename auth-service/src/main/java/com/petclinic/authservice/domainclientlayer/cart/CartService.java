@@ -1,4 +1,5 @@
-package com.petclinic.authservice.domainclientlayer.Cart;
+package com.petclinic.authservice.domainclientlayer.cart;
 
-public class DomainClientCart {
+public interface CartService {
+   CartResponse createCart(CartRequest cartRequest);
 }

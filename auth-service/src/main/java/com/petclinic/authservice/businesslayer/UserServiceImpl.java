@@ -14,6 +14,9 @@ import com.petclinic.authservice.datalayer.roles.RoleRepo;
 import com.petclinic.authservice.datamapperlayer.UserMapper;
 import com.petclinic.authservice.domainclientlayer.Mail.Mail;
 import com.petclinic.authservice.domainclientlayer.Mail.MailService;
+import com.petclinic.authservice.domainclientlayer.cart.CartRequest;
+import com.petclinic.authservice.domainclientlayer.cart.CartResponse;
+import com.petclinic.authservice.domainclientlayer.cart.CartService;
 import com.petclinic.authservice.presentationlayer.User.*;
 import com.petclinic.authservice.security.JwtTokenUtil;
 import com.petclinic.authservice.security.SecurityConst;
@@ -51,6 +54,7 @@ public class UserServiceImpl implements UserService {
     private final MailService mailService;
     private final JwtTokenUtil jwtService;
     private final AuthenticationManager authenticationManager;
+    private final CartService cartService;
     private final String salt = BCrypt.gensalt(10);
 
 
@@ -103,11 +107,13 @@ public class UserServiceImpl implements UserService {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
 
             log.info("Sending email to {}...", userIDLessDTO.getEmail());
-            log.info(mailService.sendMail(generateVerificationMail(user)));
+           // log.info(mailService.sendMail(generateVerificationMail(user)));
             log.info("Email sent to {}", userIDLessDTO.getEmail());
 
-            return userRepo.save(user);
+            User savedUser = userRepo.save(user);
+            CartResponse cartResponse = cartService.createCart(new CartRequest(savedUser.getUserIdentifier().getUserId()));
 
+            return savedUser;
     }
 
 //    @Override
