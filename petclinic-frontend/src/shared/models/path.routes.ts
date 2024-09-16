@@ -13,4 +13,5 @@ export enum AppRoutePaths {
   AddingCustomer = '/customer/add',
   AllCustomers = '/customers',
   Home = '/home',
+  Products = '/products',
 }
