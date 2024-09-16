@@ -68,8 +68,3 @@ spring:
       username: root
       password: password
       authentication-database: admin
-
-server.port: 8080
-
-
-
