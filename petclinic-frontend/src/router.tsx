@@ -6,7 +6,7 @@ import Vet from '@/pages/Vet/Vet.tsx';
 import { ProtectedRoute } from '@/shared/components/ProtectedRouteProps.tsx';
 import Home from '@/pages/Home/Home.tsx';
 import ProfileEdit from '@/pages/Customer/ProfileEdit.tsx';
-import Products from "@/pages/Product/Products.tsx";
+import Products from '@/pages/Product/Products.tsx';
 import AddingCustomer from '@/pages/Customer/AddingCustomer.tsx';
 import CustomerBillingPage from '@/pages/Bills/CostumerBills.tsx';
 import AllOwners from '@/pages/Customer/AllOwners.tsx';
@@ -74,11 +74,11 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.Products,
         element: (
-            <ProtectedRoute>
-              <Products/>
-            </ProtectedRoute>
-        )
-      }
+          <ProtectedRoute>
+            <Products />
+          </ProtectedRoute>
+        ),
+      },
       //   {
       //       path: AppRoutePaths.PageNotFound,
       //       element: /* PageNotFoundComponent */
