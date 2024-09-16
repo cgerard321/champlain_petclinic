@@ -104,12 +104,14 @@ services:
       context: .
       dockerfile: emailing-system/Dockerfile
     ports:
-      - "5000:80" # Map port 5000 on the host to port 80 in the container
+      - "5000:5115" # Map port 5000 on the host to port 80 in the container
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Server=db;Database=MyAppDb;User=root;Password=Your_password123;
     depends_on:
       - emailing-service-mysql-db
+    env_file:
+      - mailer.env
 
   emailing-service-mysql-db:
     image: mysql:8.0

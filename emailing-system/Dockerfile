@@ -1,8 +1,8 @@
 ﻿FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-USER $APP_UID
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
+EXPOSE 5115
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
@@ -20,5 +20,5 @@ RUN dotnet publish "emailing-system.csproj" -c $BUILD_CONFIGURATION -o /app/publ
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+# The HTML file should now be in /app/publish/Views if your .csproj is set up correctly
 ENTRYPOINT ["dotnet", "emailing-system.dll"]
-CMD ["dotnet", "emailing-system.dll"]
