@@ -62,10 +62,4 @@ public class ProductController {
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "/display", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Flux<ProductResponseDTO> getAllDisplayedProducts() {
-        return productsServiceClient.getAllDisplayedProducts();
-    }
 }

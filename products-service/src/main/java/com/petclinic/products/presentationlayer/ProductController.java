@@ -61,8 +61,4 @@ public class ProductController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-    @GetMapping(value = "/{display}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Flux<ProductResponseModel> getAllDisplayedProducts() {
-        return productService.getAllDisplayedProducts();
-    }
 }

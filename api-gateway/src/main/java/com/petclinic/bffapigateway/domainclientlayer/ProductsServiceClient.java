@@ -66,12 +66,4 @@ public class ProductsServiceClient {
                 .retrieve()
                 .bodyToMono(ProductResponseDTO.class);
     }
-    public Flux<ProductResponseDTO> getAllDisplayedProducts () {
-        return webClientBuilder.build()
-                .get()
-                .uri(productsServiceUrl)
-                .retrieve()
-                .bodyToFlux(ProductResponseDTO.class);
-
-    }
 }

@@ -59,9 +59,5 @@ public class ProductServiceImpl implements ProductService{
                         .then(Mono.just(found)))
                 .map(EntityModelUtil::toProductResponseModel);
     }
-    @Override
-    public Flux<ProductResponseModel> getAllDisplayedProducts() {
-        return productRepository.findAll()
-                .map(EntityModelUtil::toProductResponseModel);
-    }
+
 }
