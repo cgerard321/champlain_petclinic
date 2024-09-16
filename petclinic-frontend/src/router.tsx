@@ -9,6 +9,12 @@ import ProfileEdit from '@/pages/Customer/ProfileEdit.tsx';
 import AddingCustomer from '@/pages/Customer/AddingCustomer.tsx';
 import CustomerBillingPage from '@/pages/Bills/CostumerBills.tsx';
 import AllOwners from '@/pages/Customer/AllOwners.tsx';
+import PageNotFound from '@/pages/Error/PageNotFound.tsx';
+import Forbidden from '@/pages/Error/Forbidden.tsx';
+import Unauthorized from '@/pages/Error/Unauthorized.tsx';
+import InternalServerError from '@/pages/Error/InternalServerError.tsx';
+import RequestTimeout from '@/pages/Error/RequestTimeout.tsx';
+import ServiceUnavailable from '@/pages/Error/ServiceUnavailable.tsx';
 
 const router = createBrowserRouter([
   {
@@ -67,6 +73,62 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <AllOwners />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.PageNotFound,
+        element: (
+          <ProtectedRoute>
+            <PageNotFound />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.Forbidden,
+        element: (
+          <ProtectedRoute>
+            <Forbidden />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.Unauthorized,
+        element: (
+          <ProtectedRoute>
+            <Unauthorized />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.InternalServerError,
+        element: (
+          <ProtectedRoute>
+            <InternalServerError />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.RequestTimeout,
+        element: (
+          <ProtectedRoute>
+            <RequestTimeout />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.ServiceUnavailable,
+        element: (
+          <ProtectedRoute>
+            <ServiceUnavailable />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: '*',
+        element: (
+          <ProtectedRoute>
+            <PageNotFound />
           </ProtectedRoute>
         ),
       },

@@ -1,4 +1,4 @@
-.not-found-wrapper {
+.error-wrapper {
     background-color: #f0f0f0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     display: flex;
@@ -8,30 +8,30 @@
     margin: 0;
 }
 
-.not-found-container {
+.error-container {
     text-align: center;
     background-color: #fff;
     padding: 40px;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    max-width: 500px;
+    max-width: 700px;
     width: 100%;
 }
 
-.not-found-container h1 {
+.error-container h1 {
     font-size: 6em;
     margin: 0;
     color: #ff6f61;
     animation: pulse 1.5s infinite;
 }
 
-.not-found-container p {
+.error-container p {
     font-size: 1.5em;
     color: #333;
     margin: 20px 0;
 }
 
-.not-found-container button {
+.error-container button {
     display: inline-block;
     margin-top: 20px;
     padding: 10px 20px;
@@ -45,7 +45,7 @@
     cursor: pointer;
 }
 
-.not-found-container button:hover {
+.error-container button:hover {
     background-color: #ff3b2f;
     transform: scale(1.05);
 }
