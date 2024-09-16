@@ -83,6 +83,11 @@ export function NavBar(): JSX.Element {
                   Inventories
                 </Link>
               </li>
+              <li className="nav-item">
+                <Link className="nav-link" to={AppRoutePaths.Products}>
+                  Products
+                </Link>
+              </li>
             </ul>
             <ul className="navbar-nav justify-content-end">
               <li className="nav-item">

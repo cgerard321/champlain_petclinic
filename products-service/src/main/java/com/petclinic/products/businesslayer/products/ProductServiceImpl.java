@@ -92,4 +92,5 @@ public class ProductServiceImpl implements ProductService {
                 )
                 .map(EntityModelUtil::toProductResponseModel);
     }
+
 }
