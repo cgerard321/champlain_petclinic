@@ -1,48 +1,24 @@
 import * as React from 'react';
-import { FormEvent, useEffect, useState } from 'react';
-import { updateOwner, getOwner } from '@/features/customers/api/updateOwner.ts';
-import { OwnerRequestModel } from '@/features/customers/models/OwnerRequestModel.ts';
-import { OwnerResponseModel } from '@/features/customers/models/OwnerResponseModel.ts';
+import { FormEvent, useState } from 'react';
+import { addOwner } from '@/features/customers/api/addOwner.ts';
 import { useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes';
-import { useUser } from '@/context/UserContext';
 import './ProfileEdit.css';
+import { OwnerModel } from '@/features/customers/models/OwnerModel.ts';
 
-const ProfileEdit: React.FC = (): JSX.Element => {
+const AddingCustomer: React.FC = (): JSX.Element => {
   const navigate = useNavigate();
-  const { user } = useUser();
-  const [owner, setOwner] = useState<OwnerRequestModel>({
+  const [owner, setOwner] = useState<OwnerModel>({
+    ownerId: '',
     firstName: '',
     lastName: '',
     address: '',
     city: '',
     province: '',
     telephone: '',
+    pets: [],
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-
-  useEffect(() => {
-    const fetchOwnerData = async (): Promise<void> => {
-      try {
-        const response = await getOwner(user.userId);
-        const ownerData: OwnerResponseModel = response.data;
-        setOwner({
-          firstName: ownerData.firstName,
-          lastName: ownerData.lastName,
-          address: ownerData.address,
-          city: ownerData.city,
-          province: ownerData.province,
-          telephone: ownerData.telephone,
-        });
-      } catch (error) {
-        console.error('Error fetching owner data:', error);
-      }
-    };
-
-    fetchOwnerData().catch(error =>
-      console.error('Error in fetchOwnerData:', error)
-    );
-  }, [user.userId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
@@ -68,10 +44,11 @@ const ProfileEdit: React.FC = (): JSX.Element => {
     if (!validate()) return;
 
     try {
-      const response = await updateOwner(user.userId, owner);
-      if (response.status === 200) {
+      const response = await addOwner(owner);
+      if (response.status === 201) {
         navigate(AppRoutePaths.Home);
       } else {
+        console.error('Failed to add owner');
       }
     } catch (error) {
       console.error('Error:', error);
@@ -80,7 +57,7 @@ const ProfileEdit: React.FC = (): JSX.Element => {
 
   return (
     <div className="profile-edit">
-      <h1>Edit Profile</h1>
+      <h1>Add Customer</h1>
       <form onSubmit={handleSubmit}>
         <label>First Name: </label>
         <input
@@ -136,10 +113,10 @@ const ProfileEdit: React.FC = (): JSX.Element => {
         />
         {errors.telephone && <span className="error">{errors.telephone}</span>}
         <br />
-        <button type="submit">Update</button>
+        <button type="submit">Add</button>
       </form>
     </div>
   );
 };
 
-export default ProfileEdit;
+export default AddingCustomer;

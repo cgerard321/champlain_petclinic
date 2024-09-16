@@ -3,7 +3,7 @@ DROP TABLE IF EXISTS billings;
 CREATE TABLE IF NOT EXISTS billings (
     id INT(7) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
     bill_id Int,
-    customer_id INT,
+    customer_id VARCHAR(80),
     visit_type VARCHAR(80),
     visit_date DATE,
     amount DOUBLE

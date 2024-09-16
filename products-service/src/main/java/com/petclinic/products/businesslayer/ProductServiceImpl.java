@@ -61,13 +61,15 @@ public class ProductServiceImpl implements ProductService{
                 .map(EntityModelUtil::toProductResponseModel);
     }
 
+
     @Override
     public Mono<Void> requestCount(String productId) {
         return productRepository.findProductByProductId(productId)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Product id was not found: " + productId))))
                 .flatMap(product -> {
-                    product.setRequestCount(product.getRequestCount() + 1); // Increment the request count
+                    product.setRequestCount(product.getRequestCount() + 1);
                     return productRepository.save(product).then(); // Save and complete
                 });
     }
+
 }

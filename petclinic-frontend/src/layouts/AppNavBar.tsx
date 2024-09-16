@@ -61,8 +61,15 @@ export function NavBar(): JSX.Element {
                   </Link>
                 </div>
               </li>
+              {IsAdmin() && (
+                <li className="nav-item">
+                  <Link className="nav-link" to="">
+                    Bills
+                  </Link>
+                </li>
+              )}
               <li className="nav-item">
-                <Link className="nav-link" to="">
+                <Link className="nav-link" to={AppRoutePaths.CustomerBills}>
                   Bills
                 </Link>
               </li>
@@ -74,6 +81,11 @@ export function NavBar(): JSX.Element {
               <li className="nav-item">
                 <Link className="nav-link" to={AppRoutePaths.Inventories}>
                   Inventories
+                </Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" to={AppRoutePaths.Products}>
+                  Products
                 </Link>
               </li>
             </ul>
