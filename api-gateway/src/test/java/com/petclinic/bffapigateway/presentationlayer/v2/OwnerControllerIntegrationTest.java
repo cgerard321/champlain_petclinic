@@ -12,11 +12,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService.jwtTokenForInvalidOwnerId;
-import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService.jwtTokenForValidOwnerId;
+import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -36,9 +36,13 @@ class OwnerControllerIntegrationTest {
     public void startMockServer() {
         mockServerConfigCustomersService = new MockServerConfigCustomersService();
         mockServerConfigCustomersService.registerUpdateOwnerEndpoint();
+        mockServerConfigCustomersService.registerAddOwnerEndpoint();
+        mockServerConfigCustomersService.registerGetAllOwnersEndpoint();
 
         mockServerConfigAuthService = new MockServerConfigAuthService();
         mockServerConfigAuthService.registerValidateTokenForOwnerEndpoint();
+        mockServerConfigAuthService.registerValidateTokenForAdminEndpoint();
+        mockServerConfigAuthService.registerValidateTokenForVetEndpoint();
 
     }
 
@@ -123,5 +127,106 @@ class OwnerControllerIntegrationTest {
                 })
                 .verifyComplete();
     }
+
+
+    @Test
+    void whenAddOwner_asAdmin_thenReturnCreatedOwnerResponseDTO() {
+        OwnerRequestDTO newOwnerRequestDTO = OwnerRequestDTO.builder()
+                .firstName("Betty")
+                .lastName("Davis")
+                .address("638 Cardinal Ave.")
+                .city("Sun Prairie")
+                .province("Quebec")
+                .telephone("6085551749")
+                .build();
+
+        Mono<OwnerResponseDTO> result = webTestClient.post()
+                .uri("/api/v2/gateway/owners")
+                .cookie("Bearer", jwtTokenForValidAdmin)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(newOwnerRequestDTO), OwnerRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .returnResult(OwnerResponseDTO.class)
+                .getResponseBody()
+                .single();
+
+        StepVerifier
+                .create(result)
+                .expectNextMatches(ownerResponseDTO -> {
+                    assertNotNull(ownerResponseDTO);
+                    assertNotNull(ownerResponseDTO.getOwnerId());
+                    assertEquals(newOwnerRequestDTO.getFirstName(), ownerResponseDTO.getFirstName());
+                    assertEquals(newOwnerRequestDTO.getLastName(), ownerResponseDTO.getLastName());
+                    assertEquals(newOwnerRequestDTO.getAddress(), ownerResponseDTO.getAddress());
+                    assertEquals(newOwnerRequestDTO.getCity(), ownerResponseDTO.getCity());
+                    assertEquals(newOwnerRequestDTO.getProvince(), ownerResponseDTO.getProvince());
+                    assertEquals(newOwnerRequestDTO.getTelephone(), ownerResponseDTO.getTelephone());
+                    return true;
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void whenAddOwner_asCustomer_thenReturnForbidden() {
+        OwnerRequestDTO newOwnerRequestDTO = OwnerRequestDTO.builder()
+                .firstName("Betty")
+                .lastName("Davis")
+                .address("638 Cardinal Ave.")
+                .city("Sun Prairie")
+                .province("Quebec")
+                .telephone("6085551749")
+                .build();
+
+        webTestClient.post()
+                .uri("/api/v2/gateway/owners")
+                .cookie("Bearer", jwtTokenForValidOwnerId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(newOwnerRequestDTO), OwnerRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isForbidden();
+    }
+
+    @Test
+    void whenGetAllOwners_asAdmin_thenReturnAllOwners() {
+        Flux<OwnerResponseDTO> result = webTestClient.get()
+                .uri("/api/v2/gateway/owners")
+                .cookie("Bearer", jwtTokenForValidAdmin)  // Token for an admin user
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType("text/event-stream;charset=UTF-8")
+                .returnResult(OwnerResponseDTO.class)
+                .getResponseBody();
+
+        StepVerifier
+                .create(result)
+                .expectNextCount(3)
+                .verifyComplete();
+
+
+    }
+
+    @Test
+    void whenGetAllOwners_asVet_thenReturnAllOwners() {
+        Flux<OwnerResponseDTO> result = webTestClient.get()
+                .uri("/api/v2/gateway/owners")
+                .cookie("Bearer", jwtTokenForValidVet)  // Token for a vet user
+                .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType("text/event-stream;charset=UTF-8")
+                .returnResult(OwnerResponseDTO.class)
+                .getResponseBody();
+
+        StepVerifier
+                .create(result)
+                .expectNextCount(3)
+                .verifyComplete();
+    }
+
 
 }
