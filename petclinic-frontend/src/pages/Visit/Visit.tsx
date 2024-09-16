@@ -1,3 +1,4 @@
+import VisitListTable from '@/features/visits/VisitListTable';
 import { NavBar } from '@/layouts/AppNavBar';
 
 export default function Visits(): JSX.Element {
@@ -5,6 +6,7 @@ export default function Visits(): JSX.Element {
     <div>
       <NavBar />
       <h1>This is the Visits Page</h1>
+      <VisitListTable />
     </div>
   );
 }

@@ -17,6 +17,7 @@ import Unauthorized from '@/pages/Error/Unauthorized.tsx';
 import InternalServerError from '@/pages/Error/InternalServerError.tsx';
 import RequestTimeout from '@/pages/Error/RequestTimeout.tsx';
 import ServiceUnavailable from '@/pages/Error/ServiceUnavailable.tsx';
+import Visits from './pages/Visit/Visit';
 
 const router = createBrowserRouter([
   {
@@ -148,6 +149,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <Products />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.Visits,
+        element: (
+          <ProtectedRoute>
+            <Visits />
           </ProtectedRoute>
         ),
       },

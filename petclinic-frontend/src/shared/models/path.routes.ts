@@ -16,4 +16,5 @@ export enum AppRoutePaths {
   Home = '/home',
   Forbidden = '/forbidden',
   Products = '/products',
+  Visits = '/visits',
 }

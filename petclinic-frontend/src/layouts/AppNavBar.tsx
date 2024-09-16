@@ -74,7 +74,7 @@ export function NavBar(): JSX.Element {
                 </Link>
               </li>
               <li className="nav-item">
-                <Link className="nav-link" to="">
+                <Link className="nav-link" to={AppRoutePaths.Visits}>
                   Visits
                 </Link>
               </li>
