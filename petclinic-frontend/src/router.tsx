@@ -25,6 +25,8 @@ import EditInventory from '@/features/inventories/EditInventory.tsx';
 import VisitByVisitId from './features/visits/visits/VisitByVisitId';
 import AddingVisit from './features/visits/models/AddingVisit';
 import ProfilePage from '@/pages/Customer/ProfilePage.tsx';
+import VetDetails from "@/pages/Vet/VetDetails.tsx";
+
 
 const router = createBrowserRouter([
   {
@@ -92,6 +94,14 @@ const router = createBrowserRouter([
           <ProtectedRoute>
             <Vet />
           </ProtectedRoute>
+        ),
+      },
+      {
+        path: `${AppRoutePaths.Vet}/:vetId`,
+        element: (
+            <ProtectedRoute>
+              <VetDetails />
+            </ProtectedRoute>
         ),
       },
       {
