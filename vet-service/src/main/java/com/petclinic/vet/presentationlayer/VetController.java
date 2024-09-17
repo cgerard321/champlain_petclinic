@@ -11,6 +11,7 @@ package com.petclinic.vet.presentationlayer;
   * Ticket: feat(VVS-CPC-553): add veterinarian
  */
 
+import com.petclinic.vet.exceptions.InvalidInputException;
 import com.petclinic.vet.exceptions.NotFoundException;
 import com.petclinic.vet.servicelayer.*;
 import com.petclinic.vet.servicelayer.badges.BadgeResponseDTO;
@@ -133,11 +134,24 @@ public class VetController {
         return vetService.getAll();
     }
 
-    @GetMapping("{vetId}")
+    //@GetMapping("{vetId}")
+    @GetMapping(value = "/{vetId}",produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<VetResponseDTO>> getVetByVetId(@PathVariable String vetId) {
+
+        /*
         return vetService.getVetByVetId(EntityDtoUtil.verifyId(vetId))
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
+        */
+
+
+
+        return Mono.just(vetId)
+                .filter(id -> id.length() == 36) //Validate the course id
+                .switchIfEmpty(Mono.error(new InvalidInputException("Provided vet id is invalid:" + vetId)))
+                .flatMap(vetService::getVetByVetId)
+                .map(ResponseEntity::ok);
+
     }
 
     @GetMapping("/vetBillId/{vetBillId}")

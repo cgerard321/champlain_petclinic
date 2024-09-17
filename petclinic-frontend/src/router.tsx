@@ -10,6 +10,7 @@ import Products from '@/pages/Product/Products.tsx';
 import AddingCustomer from '@/pages/Customer/AddingCustomer.tsx';
 import CustomerBillingPage from '@/pages/Bills/CostumerBills.tsx';
 import AllOwners from '@/pages/Customer/AllOwners.tsx';
+import VetDetails from "@/pages/Vet/VetDetails.tsx";
 
 const router = createBrowserRouter([
   {
@@ -37,6 +38,14 @@ const router = createBrowserRouter([
           <ProtectedRoute>
             <Vet />
           </ProtectedRoute>
+        ),
+      },
+      {
+        path: `${AppRoutePaths.Vet}/:vetId`,
+        element: (
+            <ProtectedRoute>
+              <VetDetails />
+            </ProtectedRoute>
         ),
       },
       {
