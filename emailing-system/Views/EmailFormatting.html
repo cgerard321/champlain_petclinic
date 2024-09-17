@@ -81,14 +81,17 @@
         <h1>%%EMAIL_HEADER%%</h1>
     </div>
     <div class="email-body">
-        <p>Dear %%PATIENT_NAME%%,</p>
+        <p>Dear %%EMAIL_NAME%%,</p>
         <p>%%EMAIL_BODY%%</p>
-        <p>Regards,<br>Your Name</p>
+        <p>Regards,<br>%%EMAIL_SENDER%%</p>
+        <!--
+            For example, we could add a link!. We can even add Html formatted string in one of the placeholders
         <a href="#" class="email-button">Call to Action</a>
+        -->
     </div>
     <div class="email-footer">
         <p>%%EMAIL_FOOTER%%</p>
-        <a href="#">Privacy Policy</a></p>
+        <a href="#">Privacy Policy</a>
     </div>
 </div>
 </body>

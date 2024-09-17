@@ -25,33 +25,46 @@ public static class EmailUtils
         return Regex.IsMatch(email, emailPattern);
     }
 
+    /// <summary>
+    /// Configured for mailsend
+    /// </summary>
+    /// <param name="to"></param>
+    /// <param name="subject"></param>
+    /// <param name="body"></param>
+    /// <param name="isBodyHtml"></param>
     public static async Task SendEmailAsync(string to, string subject, string body, bool isBodyHtml = true)
     {
         var fromAddress = new MailAddress(emailConnectionString.Email, emailConnectionString.DisplayName);
         var toAddress = new MailAddress(to);
 
-        var smtpClient = new SmtpClient(emailConnectionString.SmtpServer, emailConnectionString.Port)
+        using (var smtpClient = new SmtpClient(emailConnectionString.SmtpServer, emailConnectionString.Port)
+               {
+                   Credentials = new NetworkCredential(emailConnectionString.Username, emailConnectionString.Password),
+                   EnableSsl = true,
+                   UseDefaultCredentials = false, // Ensure we're not using system defaults
+                   Timeout = 10000 // Set a reasonable timeout
+               })
         {
-            Credentials = new NetworkCredential(emailConnectionString.Username, emailConnectionString.Password),
-            EnableSsl = false
-        };
-
-        var mailMessage = new MailMessage(fromAddress, toAddress)
-        {
-            Subject = subject,
-            Body = body,
-            IsBodyHtml = isBodyHtml
-        };
-
-        try
-        {
-            await smtpClient.SendMailAsync(mailMessage);
-            Console.WriteLine("Email sent successfully.");
-        }
-        catch (System.Exception ex)
-        {
-            Console.WriteLine($"Failed to send email: {ex.Message}");
+            using (var mailMessage = new MailMessage(fromAddress, toAddress)
+                   {
+                       Subject = subject,
+                       Body = body,
+                       IsBodyHtml = isBodyHtml
+                   })
+            {
+                try
+                {
+                    await smtpClient.SendMailAsync(mailMessage);
+                    Console.WriteLine("Email sent successfully.");
+                }
+                catch (System.Exception ex)
+                {
+                    Console.WriteLine($"Failed to send email: {ex.Message}");
+                }
+            }
         }
     }
+
+
 
 }
