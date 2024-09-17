@@ -189,12 +189,14 @@ export default function InventoriesListTable(): JSX.Element {
           {inventoryList.map(inventory => (
             <tr
               key={inventory.inventoryId}
-              onClick={() => navigate(`/productList/${inventory.inventoryId}`)}
+              onClick={() =>
+                navigate(`/inventory/${inventory.inventoryId}/products`)
+              }
             >
               <td>{inventory.inventoryId}</td>
               <td
                 onClick={() =>
-                  navigate(`/productList/${inventory.inventoryId}`)
+                  navigate(`/inventory/${inventory.inventoryId}/products`)
                 }
                 style={{
                   cursor: 'pointer',
