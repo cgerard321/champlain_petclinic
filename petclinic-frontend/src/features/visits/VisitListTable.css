@@ -1,43 +1,16 @@
-.visit-actions {
-  display: flex;
-  justify-content: space-around;
-  margin-bottom: 20px;
-}
-
-.visit-table-section {
-  margin-top: 40px;
-}
-
-.btn {
-  padding: 10px 20px;
-  margin: 5px;
-  font-size: 14px;
-  cursor: pointer;
-}
-
 table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-table th, table td {
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
+td,
+th {
+  padding: 10px;
+  background-color: #f1f1f1;
+  border: 1px solid black;
+  text-align: center;
+<<<<<<< HEAD
+=======
+  
+>>>>>>> b67680bd (feat/(VIST-CPC-1119 ): Display Visits  (#652))
 }
-
-table th {
-  background-color: #f2f2f2;
-}
-
-table tr:hover {
-  background-color: #f5f5f5;
-}
-
-h1, h2 {
-  font-size: 24px;
-  margin-bottom: 15px;
-}
-
-

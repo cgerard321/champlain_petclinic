@@ -26,7 +26,6 @@ import VisitByVisitId from './features/visits/visits/VisitByVisitId';
 import AddingVisit from './features/visits/models/AddingVisit';
 import VetDetails from "@/pages/Vet/VetDetails.tsx";
 
-// Router configuration with combined paths from both branches
 const router = createBrowserRouter([
   {
     children: [
@@ -187,6 +186,14 @@ const router = createBrowserRouter([
         element: (
             <ProtectedRoute>
               <AddingVisit />
+            </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.Visits,
+        element: (
+            <ProtectedRoute>
+              <Visits />
             </ProtectedRoute>
         ),
       },
