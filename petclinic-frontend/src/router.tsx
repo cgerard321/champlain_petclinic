@@ -22,6 +22,7 @@ import AddReviewForm from './features/visits/Review/AddReviewForm';
 import EditReviewForm from './features/visits/Review/EditReviewForm';
 import Review from './pages/Review/Review';
 import EditInventory from '@/features/inventories/EditInventory.tsx';
+import VetDetails from "@/pages/Vet/VetDetails.tsx";
 
 const router = createBrowserRouter([
   {
@@ -81,6 +82,14 @@ const router = createBrowserRouter([
           <ProtectedRoute>
             <Vet />
           </ProtectedRoute>
+        ),
+      },
+      {
+        path: `${AppRoutePaths.Vet}/:vetId`,
+        element: (
+            <ProtectedRoute>
+              <VetDetails />
+            </ProtectedRoute>
         ),
       },
       {

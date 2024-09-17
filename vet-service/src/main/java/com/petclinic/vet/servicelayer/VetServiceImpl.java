@@ -94,7 +94,9 @@ public class VetServiceImpl implements VetService {
     public Mono<VetResponseDTO> getVetByVetId(String vetId) {
         return vetRepository.findVetByVetId(vetId)
                 .switchIfEmpty(Mono.error(new NotFoundException("No vet with this vetId was found: " + vetId)))
-                .map(EntityDtoUtil::vetEntityToResponseDTO);
+                .doOnNext(i -> log.debug("The vet entity is: " + i.toString()))
+                .map(EntityDtoUtil::vetEntityToResponseDTO)
+                .log();
     }
 
     @Override
