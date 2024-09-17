@@ -22,14 +22,6 @@ public class RatingsServiceClient {
         this.baseURL = "http://" + host + ":" + port + "/api/v1/ratings";
     }
 
-    public Flux<RatingResponseModel> getAllRatingsForProductId(final String productId){
-        return webClientBuilder.build()
-                .get()
-                .uri(baseURL)
-                .retrieve()
-                .bodyToFlux(RatingResponseModel.class);
-    }
-
     public Mono<RatingResponseModel> getRatingForProductIdAndCustomerId(final String productId, final String customerId){
         return webClientBuilder.build()
                 .get()

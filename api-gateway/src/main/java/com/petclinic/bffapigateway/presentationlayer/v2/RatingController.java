@@ -2,7 +2,6 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 
 import com.petclinic.bffapigateway.domainclientlayer.AuthServiceClient;
 import com.petclinic.bffapigateway.domainclientlayer.RatingsServiceClient;
-import com.petclinic.bffapigateway.dtos.Auth.UserResponseDTO;
 import com.petclinic.bffapigateway.dtos.Ratings.RatingRequestModel;
 import com.petclinic.bffapigateway.dtos.Ratings.RatingResponseModel;
 import com.petclinic.bffapigateway.exceptions.InvalidCredentialsException;
@@ -27,12 +26,6 @@ public class RatingController {
     private final AuthServiceClient authServiceClient;
 
     @SecuredEndpoint(allowedRoles = {Roles.ALL})
-    @GetMapping(value = "/{productId}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<RatingResponseModel> getAllRatingsForProductId(@PathVariable String productId){
-        return ratingsServiceClient.getAllRatingsForProductId(productId);
-    }
-
-    @SecuredEndpoint(allowedRoles = {Roles.ALL})
     @GetMapping(value = "/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<RatingResponseModel>> getRatingForProductIdAndCustomerId(
             @PathVariable String productId,
@@ -45,7 +38,7 @@ public class RatingController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ALL})
-    @GetMapping(
+    @PostMapping(
             value = "/{productId}",
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
@@ -81,7 +74,7 @@ public class RatingController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ALL})
-    @GetMapping(value = "/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    @DeleteMapping(value = "/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<RatingResponseModel>> deleteRatingForProductIdAndCustomerId(
             @PathVariable String productId,
             @CookieValue("Bearer") String jwt
