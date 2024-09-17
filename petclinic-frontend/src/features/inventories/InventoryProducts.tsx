@@ -37,20 +37,20 @@ const InventoryProducts: React.FC = () => {
   }, [inventoryId]);
 
   // Render loading, error, and product table
-  if (loading) return <p>Loading products...</p>;
+  if (loading) return <p>Loading supplies...</p>;
   if (error) return <p>{error}</p>;
 
   return (
-    <div className="inventory-products">
-      <h2>Products in Inventory: {inventoryId}</h2>
+    <div className="inventory-supplies">
+      <h2>Supplies in Inventory: {inventoryId}</h2>
 
       {/* Product Table */}
       {products.length > 0 ? (
         <table className="table table-striped">
           <thead>
             <tr>
-              <th>Product ID</th>
-              <th>Product Name</th>
+              <th>SupplyId</th>
+              <th>SupplyName</th>
               <th>Description</th>
               <th>Price</th>
               <th>Quantity</th>
@@ -68,7 +68,7 @@ const InventoryProducts: React.FC = () => {
           </tbody>
         </table>
       ) : (
-        <p>No products found for this inventory.</p>
+        <p>No supplies found for this inventory.</p>
       )}
     </div>
   );
