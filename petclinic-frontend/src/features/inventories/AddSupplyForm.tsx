@@ -21,7 +21,7 @@ const AddSupplyForm: React.FC<SupplyFormProps> = ({ onClose, onSubmit }) => {
   const [salePrice, setSalePrice] = useState(0);
 
   useEffect(() => {
-    // Function to fetch inventory types
+    // Function to fetch inventory typess
     // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     const fetchInventoryTypes = async () => {
       try {
