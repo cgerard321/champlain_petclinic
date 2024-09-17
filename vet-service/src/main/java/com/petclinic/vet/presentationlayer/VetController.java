@@ -126,14 +126,16 @@ public class VetController {
         return vetService.getAll();
     }
 
-    @GetMapping(value = "/{vetId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    //@GetMapping("{vetId}")
+    @GetMapping(value = "/{vetId}",produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<VetResponseDTO>> getVetByVetId(@PathVariable String vetId) {
 
         return Mono.just(vetId)
-                .filter(id -> id.length() == 36) // Validate the vet id
+                .filter(id -> id.length() == 36) //Validate the course id
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided vet id is invalid:" + vetId)))
                 .flatMap(vetService::getVetByVetId)
                 .map(ResponseEntity::ok);
+
     }
 
     @GetMapping("/firstName/{firstName}")
