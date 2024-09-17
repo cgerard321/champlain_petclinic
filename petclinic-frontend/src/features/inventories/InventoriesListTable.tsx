@@ -8,6 +8,7 @@ import deleteAllInventories from '@/features/inventories/api/deleteAllInventorie
 import './InventoriesListTable.css';
 import deleteInventory from '@/features/inventories/api/deleteInventory.ts';
 import EditInventory from '@/features/inventories/EditInventory.tsx';
+import AddSupplyForm from '@/features/inventories/AddSupplyForm.tsx';
 
 //TODO: create add inventory form component and change the component being shown on the inventories page on the onClick event of the add inventory button
 export default function InventoriesListTable(): JSX.Element {
@@ -18,7 +19,12 @@ export default function InventoriesListTable(): JSX.Element {
   );
   const [inventoryDescription, setInventoryDescription] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showAddSupplyModal, setShowAddSupplyModal] = useState(false);
   const navigate = useNavigate();
+
+  const toggleAddSupplyModal = (): void => {
+    setShowAddSupplyModal(prev => !prev);
+  };
 
   const {
     inventoryList,
@@ -34,7 +40,6 @@ export default function InventoriesListTable(): JSX.Element {
     fetchAllInventoryTypes();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage]);
-
   const clearQueries = (): void => {
     setInventoryName('');
     setInventoryType('');
@@ -45,7 +50,6 @@ export default function InventoriesListTable(): JSX.Element {
   const pageBefore = (): void => {
     setCurrentPage(prevPage => Math.max(prevPage - 1, 0));
   };
-
   const pageAfter = (): void => {
     setCurrentPage(prevPage => prevPage + 1);
   };
@@ -72,6 +76,20 @@ export default function InventoriesListTable(): JSX.Element {
   const fetchAllInventoryTypes = async (): Promise<void> => {
     const data = await getAllInventoryTypes();
     setInventoryTypeList(data);
+  };
+
+  // const handleAddSupplySubmit = (inventory: {
+  //   name: string;
+  //   description: string;
+  //   price: number;
+  //   quantity: number;
+  //   salePrice: number;
+  // }): void => {
+  //   setShowAddSupplyModal(false);
+  // };
+
+  const handleAddSupplySubmit = (): void => {
+    setShowAddSupplyModal(false);
   };
 
   return (
@@ -297,12 +315,6 @@ export default function InventoriesListTable(): JSX.Element {
       >
         Delete All Inventories
       </button>
-      <button
-        className="add-inventory-button btn btn-success"
-        onClick={() => {}}
-      >
-        Add Inventory
-      </button>
       {showConfirmDialog && (
         <>
           <div
@@ -325,6 +337,15 @@ export default function InventoriesListTable(): JSX.Element {
             </button>
           </div>
         </>
+      )}
+      <button className="btn btn-primary" onClick={toggleAddSupplyModal}>
+        Add Supply
+      </button>
+      {showAddSupplyModal && (
+        <AddSupplyForm
+          onClose={toggleAddSupplyModal}
+          onSubmit={handleAddSupplySubmit}
+        />
       )}
     </div>
   );
