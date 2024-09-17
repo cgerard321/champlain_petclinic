@@ -25,6 +25,7 @@ import EditInventory from '@/features/inventories/EditInventory.tsx';
 import VetDetails from "@/pages/Vet/VetDetails.tsx";
 
 
+
 const router = createBrowserRouter([
   {
     children: [
@@ -172,6 +173,36 @@ const router = createBrowserRouter([
             </ProtectedRoute>
         ),
       },
+
+      {
+        path: AppRoutePaths.Visits,
+        element: (
+          <ProtectedRoute>
+            <Visits />
+          </ProtectedRoute>
+        ),
+      },
+      //   {
+      //       path: AppRoutePaths.PageNotFound,
+      //       element: /* PageNotFoundComponent */
+      //   },
+      //   {
+      //       path: AppRoutePaths.InternalServer,
+      //       element: /* InternalServerErrorComponent */
+      //   },
+      //   {
+      //       path: AppRoutePaths.ServiceTimeout,
+      //       element: /* ServiceTimeoutComponent */
+      //   },
+      //   {
+      //       path: AppRoutePaths.ServiceUnavailable,
+      //       element: /* ServiceUnavailableComponent */
+      //   },
+      //   {
+      //       path: AppRoutePaths.Unauthorized,
+      //       element: /* UnauthorizedComponent */
+      //   }
+
     ],
   },
   {

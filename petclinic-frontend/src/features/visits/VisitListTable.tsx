@@ -10,10 +10,10 @@ export default function VisitListTable(): JSX.Element {
   // Real-time updates (SEE)
   useEffect(() => {
     const eventSource = new EventSource(
-      'http://localhost:8080/api/v2/gateway/visits',
-      {
-        withCredentials: true,
-      }
+        'http://localhost:8080/api/v2/gateway/visits',
+        {
+          withCredentials: true,
+        }
     );
 
     eventSource.onmessage = event => {
@@ -43,25 +43,25 @@ export default function VisitListTable(): JSX.Element {
   }, []);
 
   return (
-    <div>
-      <button
-        className="btn btn-warning"
-        onClick={() => navigate('/forms')}
-        title="Let a review"
-      >
-        Leave a Review
-      </button>
-      <p> </p>
-      <button
-        className="btn btn-dark"
-        onClick={() => navigate('/reviews')}
-        title="View review"
-      >
-        View Reviews
-      </button>
-      <h1>Visits List</h1>
-      <table>
-        <thead>
+      <div>
+        <button
+            className="btn btn-warning"
+            onClick={() => navigate('/forms')}
+            title="Let a review"
+        >
+          Leave a Review
+        </button>
+        <p> </p>
+        <button
+            className="btn btn-dark"
+            onClick={() => navigate('/reviews')}
+            title="View review"
+        >
+          View Reviews
+        </button>
+        <h1>Visits List</h1>
+        <table>
+          <thead>
           <tr>
             <th>Visit Id</th>
             <th>Visit Date</th>
@@ -72,35 +72,35 @@ export default function VisitListTable(): JSX.Element {
             <th>Vet Email</th>
             <th>Status</th>
           </tr>
-        </thead>
-        <tbody>
+          </thead>
+          <tbody>
           {visitsList.map(visit => (
-            <tr key={visit.visitId}>
-              <td>{visit.visitId}</td>
-              <td>{visit.visitDate}</td>
-              <td>{visit.description}</td>
-              <td>{visit.petName}</td>
-              <td>{visit.vetFirstName}</td>
-              <td>{visit.vetLastName}</td>
-              <td>{visit.vetEmail}</td>
-              <td
-                style={{
-                  color:
-                    visit.status === 'CONFIRMED'
-                      ? 'green'
-                      : visit.status === 'UPCOMING'
-                        ? 'orange'
-                        : visit.status === 'COMPLETED'
-                          ? 'blue'
-                          : 'inherit',
-                }}
-              >
-                {visit.status}
-              </td>
-            </tr>
+              <tr key={visit.visitId}>
+                <td>{visit.visitId}</td>
+                <td>{visit.visitDate}</td>
+                <td>{visit.description}</td>
+                <td>{visit.petName}</td>
+                <td>{visit.vetFirstName}</td>
+                <td>{visit.vetLastName}</td>
+                <td>{visit.vetEmail}</td>
+                <td
+                    style={{
+                      color:
+                          visit.status === 'CONFIRMED'
+                              ? 'green'
+                              : visit.status === 'UPCOMING'
+                                  ? 'orange'
+                                  : visit.status === 'COMPLETED'
+                                      ? 'blue'
+                                      : 'inherit',
+                    }}
+                >
+                  {visit.status}
+                </td>
+              </tr>
           ))}
-        </tbody>
-      </table>
-    </div>
+          </tbody>
+        </table>
+      </div>
   );
 }
