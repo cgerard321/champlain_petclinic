@@ -21,10 +21,10 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/api/v2/gateway/vets")
 @Validated
 @CrossOrigin(origins = "http://localhost:3000, http://localhost:80")
+
 public class VetController {
 
     private final VetsServiceClient vetsServiceClient;
-
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping()
@@ -49,5 +49,8 @@ public class VetController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
 
     }
+
 }
+
+
 

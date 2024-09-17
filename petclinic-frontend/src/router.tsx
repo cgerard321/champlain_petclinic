@@ -68,14 +68,6 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: AppRoutePaths.Home,
-        element: (
-            <ProtectedRoute>
-              <Home />
-            </ProtectedRoute>
-        ),
-      },
-      {
         path: AppRoutePaths.Inventories,
         element: (
             <ProtectedRoute>
@@ -145,19 +137,35 @@ const router = createBrowserRouter([
       },
       {
         path: AppRoutePaths.Forbidden,
-        element: <Forbidden />,
+        element: (
+            <ProtectedRoute>
+              <Forbidden />
+            </ProtectedRoute>
+        ),
       },
       {
         path: AppRoutePaths.Unauthorized,
-        element: <Unauthorized />,
+        element: (
+            <ProtectedRoute>
+              <Unauthorized />
+            </ProtectedRoute>
+        ),
       },
       {
         path: AppRoutePaths.InternalServerError,
-        element: <InternalServerError />,
+        element: (
+            <ProtectedRoute>
+              <InternalServerError />
+            </ProtectedRoute>
+        ),
       },
       {
         path: AppRoutePaths.RequestTimeout,
-        element: <RequestTimeout />,
+        element: (
+            <ProtectedRoute>
+              <RequestTimeout />
+            </ProtectedRoute>
+        ),
       },
       {
         path: AppRoutePaths.ServiceUnavailable,
@@ -172,14 +180,6 @@ const router = createBrowserRouter([
         element: (
             <ProtectedRoute>
               <Products />
-            </ProtectedRoute>
-        ),
-      },
-      {
-        path: AppRoutePaths.Visits,
-        element: (
-            <ProtectedRoute>
-              <Visits />
             </ProtectedRoute>
         ),
       },
