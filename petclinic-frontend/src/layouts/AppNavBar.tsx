@@ -19,6 +19,7 @@ export function NavBar(): JSX.Element {
   const [navbarOpen, setNavbarOpen] = useState(false);
 
   const logoutUser = (): void => {
+
     axiosInstance
       .post('http://localhost:8080/api/gateway/users/logout')
       .then(() => {
@@ -29,6 +30,15 @@ export function NavBar(): JSX.Element {
 
   const toggleNavbar = (): void => {
     setNavbarOpen(prevNavbarOpen => !prevNavbarOpen);
+
+    axiosInstance.post(axiosInstance.defaults.baseURL + 'logout').then(() => {
+      navigate(AppRoutePaths.Login);
+      localStorage.removeItem('username');
+      localStorage.removeItem('email');
+      localStorage.removeItem('UUID');
+      localStorage.removeItem('roles');
+    });
+
   };
 
   return (
@@ -115,6 +125,7 @@ export function NavBar(): JSX.Element {
                   style={{ cursor: 'pointer' }}
                 >
                   Logout
+
                 </NavDropdown.Item>
               </NavDropdown>
             ) : (

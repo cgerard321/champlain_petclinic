@@ -22,7 +22,6 @@ import AddReviewForm from './features/visits/Review/AddReviewForm';
 import EditReviewForm from './features/visits/Review/EditReviewForm';
 import Review from './pages/Review/Review';
 import EditInventory from '@/features/inventories/EditInventory.tsx';
-//import path from 'path';
 import VetDetails from "@/pages/Vet/VetDetails.tsx";
 
 
@@ -156,10 +155,6 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.ServiceUnavailable,
         element: <ServiceUnavailable />,
-      },
-      {
-        path: '*',
-        element: <PageNotFound />,
       },
       {
         path: AppRoutePaths.Products,
