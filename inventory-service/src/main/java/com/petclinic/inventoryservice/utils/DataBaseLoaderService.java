@@ -1,11 +1,9 @@
 package com.petclinic.inventoryservice.utils;
 
-import com.petclinic.inventoryservice.datalayer.Inventory.Inventory;
-import com.petclinic.inventoryservice.datalayer.Inventory.InventoryRepository;
-import com.petclinic.inventoryservice.datalayer.Inventory.InventoryType;
-import com.petclinic.inventoryservice.datalayer.Inventory.InventoryTypeRepository;
+import com.petclinic.inventoryservice.datalayer.Inventory.*;
 import com.petclinic.inventoryservice.datalayer.Product.Product;
 import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
+import com.petclinic.inventoryservice.datalayer.Product.Status;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Service;
@@ -122,6 +120,7 @@ public class DataBaseLoaderService  implements CommandLineRunner {
                 .productQuantity(10)
                 .productDescription("Drugs for sleep")
                 .productSalePrice(10.00)
+                // No need to set the status here, it will be determined by quantity
                 .build();
 
 

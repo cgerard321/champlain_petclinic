@@ -79,7 +79,7 @@ export default function InventoriesListTable(): JSX.Element {
       <table className="table table-striped">
         <thead>
           <tr>
-            {/*<td>Inventory ID</td>*/}
+            <td>Inventory ID</td>
             <td>Name</td>
             <td>Type</td>
             <td>Description</td>
