@@ -18,6 +18,7 @@ interface VetResponseType {
 }
 
 export default function VetDetails(): JSX.Element {
+
     const { vetId } = useParams<{ vetId: string }>();
     const [vet, setVet] = useState<VetResponseType | null>(null);
     const [loading, setLoading] = useState(true);

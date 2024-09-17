@@ -65,7 +65,7 @@ class VetControllerIntegrationTest {
     private static final String VET_ENDPOINT = "/api/v2/gateway/vets";
 
     private static final String BEARER_TOKEN = "Bearer " + jwtTokenForValidAdmin;
-    
+
     //#region Dummy data
     Set<Workday> workdaySet = Set.of(Workday.Wednesday);
 
