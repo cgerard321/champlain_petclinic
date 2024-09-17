@@ -1,29 +1,96 @@
 // eslint-disable-next-line import/default
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 interface SupplyFormProps {
   onClose: () => void;
-  onSubmit: (inventory: {
-    name: string;
-    description: string;
-    price: number;
-    quantity: number;
-    salePrice: number;
-  }) => void;
+  onSubmit: () => void;
 }
 
-// eslint-disable-next-line react/prop-types
+interface InventoryType {
+  typeId: string;
+  type: string;
+}
+
 const AddSupplyForm: React.FC<SupplyFormProps> = ({ onClose, onSubmit }) => {
+  const [inventoryType, setInventoryType] = useState('');
+  const [inventoryTypes, setInventoryTypes] = useState<InventoryType[]>([]);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState(0);
   const [quantity, setQuantity] = useState(0);
   const [salePrice, setSalePrice] = useState(0);
 
+  useEffect(() => {
+    // Function to fetch inventory types
+    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+    const fetchInventoryTypes = async () => {
+      try {
+        const response = await fetch(
+          'http://localhost:8080/api/v2/gateway/inventories/types',
+          {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer YOUR_TOKEN_HERE`,
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+        if (response.ok) {
+          const data: InventoryType[] = await response.json();
+          setInventoryTypes(data);
+        } else {
+          console.error('Failed to fetch inventory types');
+        }
+      } catch (error) {
+        console.error('Error fetching inventory types:', error);
+      }
+    };
+
+    fetchInventoryTypes();
+  }, []);
+
+  // Function to handle adding the supply
+  // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+  const handleAddSupplySubmit = async () => {
+    const inventory = {
+      inventoryType,
+      name,
+      description,
+      price,
+      quantity,
+      salePrice,
+    };
+
+    try {
+      const response = await fetch(
+        `http://localhost:8080/api/v2/gateway/inventories/${inventory.inventoryType}/supplies`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(inventory),
+        }
+      );
+
+      if (response.ok) {
+        // eslint-disable-next-line no-console
+        console.log('Supply added successfully');
+        onSubmit();
+      } else {
+        // eslint-disable-next-line no-console
+        console.error('Failed to add supply');
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error adding supply:', error);
+    }
+  };
+
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit({ name, description, price, quantity, salePrice });
+    handleAddSupplySubmit();
     onClose();
   };
 
@@ -35,6 +102,24 @@ const AddSupplyForm: React.FC<SupplyFormProps> = ({ onClose, onSubmit }) => {
           Close
         </button>
         <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="inventoryType">Inventory Type:</label>
+            <select
+              id="inventoryType"
+              value={inventoryType}
+              onChange={e => setInventoryType(e.target.value)}
+              className="form-control"
+              required
+            >
+              <option value="">Select Inventory Type</option>
+              {inventoryTypes.map(({ typeId, type }) => (
+                <option key={typeId} value={typeId}>
+                  {type}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="form-group">
             <label htmlFor="supplyName">Enter a name for the supply:</label>
             <input
