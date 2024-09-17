@@ -29,3 +29,8 @@ C:\Users\Admin\Desktop\PetClinic\champlain_petclinic\emailing-system\obj\Debug\n
 C:\Users\Admin\Desktop\PetClinic\champlain_petclinic\emailing-system\obj\Debug\net8.0\emailing-system.pdb
 C:\Users\Admin\Desktop\PetClinic\champlain_petclinic\emailing-system\obj\Debug\net8.0\emailing-system.genruntimeconfig.cache
 C:\Users\Admin\Desktop\PetClinic\champlain_petclinic\emailing-system\obj\Debug\net8.0\ref\emailing-system.dll
+C:\Users\Admin\Desktop\PetClinic\champlain_petclinic\emailing-system\bin\Debug\net8.0\DotNetEnv.dll
+C:\Users\Admin\Desktop\PetClinic\champlain_petclinic\emailing-system\bin\Debug\net8.0\Sprache.dll
+C:\Users\Admin\Desktop\PetClinic\champlain_petclinic\emailing-system\obj\Debug\net8.0\emailing-system.csproj.AssemblyReference.cache
+C:\Users\Admin\Desktop\PetClinic\champlain_petclinic\emailing-system\obj\Debug\net8.0\emailing.52B64AB0.Up2Date
+C:\Users\Admin\Desktop\PetClinic\champlain_petclinic\emailing-system\bin\Debug\net8.0\Views\EmailFormatting.html

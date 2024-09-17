@@ -1,9 +1,8 @@
 using System.ComponentModel.DataAnnotations;
-using System.Runtime.InteropServices.JavaScript;
 
-namespace emailing_system.Models;
+namespace emailing_system.Models.EmailType;
 
-public class EmailRecipient
+public class ReminderEmailModel
 {
     [Key]
     public int Id { get; set; }

@@ -38,7 +38,8 @@ public class EmailTemplate
         string body = "", 
         string footer = "", 
         string correspondentName = "", 
-        string sender = "")
+        string sender = ""
+        )
     {
         
         string emailContent = HtmlFormat;

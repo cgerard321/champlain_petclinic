@@ -13,5 +13,13 @@
         <Link>.dockerignore</Link>
       </Content>
     </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="DotNetEnv" Version="3.1.1" />
+    </ItemGroup>
 
+    <ItemGroup>
+        <Content Include="Views\EmailFormatting.html">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </Content>
+    </ItemGroup>
 </Project>
