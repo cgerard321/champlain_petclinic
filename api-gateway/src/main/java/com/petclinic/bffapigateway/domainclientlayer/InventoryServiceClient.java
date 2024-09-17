@@ -22,6 +22,8 @@ import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+
+import java.nio.channels.FileChannel;
 import java.util.Optional;
 
 import static org.springframework.http.HttpStatus.*;
@@ -260,4 +262,28 @@ public class InventoryServiceClient {
                 .onStatus(HttpStatusCode::is4xxClientError, resp -> rethrower.rethrow(resp, ex -> new NotFoundException(ex.get("message").toString())))
                 .bodyToMono(Void.class);
     }
+
+    /*
+    public Mono<InventoryResponseDTO> addSupplyToInventoryByType(String inventoryType, SupplyRequestDTO supplyRequestDTO) {
+        return webClient.post()
+                .uri(inventoryServiceUrl + "/{inventoryType}/supplies", inventoryType)
+                .body(Mono.just(supplyRequestDTO), SupplyRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, resp ->
+                        Mono.error(new RuntimeException("Failed to add supply: " + resp.statusCode()))
+                )
+                .bodyToMono(InventoryResponseDTO.class);
+    }
+
+*/
+    public Mono<InventoryResponseDTO> addSupplyToInventoryByType(String inventoryType, SupplyRequestDTO supplyRequestDTO) {
+        return webClient.post()
+                .uri(inventoryServiceUrl + "/{inventoryType}/supplies", inventoryType)
+                .body(Mono.just(supplyRequestDTO), SupplyRequestDTO.class)
+                .retrieve()
+                .bodyToMono(InventoryResponseDTO.class);
+    }
+
+
 }

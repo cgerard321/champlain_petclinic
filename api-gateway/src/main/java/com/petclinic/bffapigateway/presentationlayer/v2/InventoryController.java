@@ -3,6 +3,8 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 import com.petclinic.bffapigateway.domainclientlayer.InventoryServiceClient;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryTypeResponseDTO;
+import com.petclinic.bffapigateway.dtos.Inventory.SupplyRequestDTO;
+import com.petclinic.bffapigateway.dtos.Inventory.SupplyResponseDTO;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -71,4 +74,44 @@ public class InventoryController {
         return inventoryServiceClient.deleteAllInventories().then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
+    /*
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @PostMapping("/{inventoryType}/supplies")
+    @ApiResponses(value = {
+            @ApiResponse(description = "Add a supply to inventory by type", responseCode = "201"),
+            @ApiResponse(description = "Inventory type not found", responseCode = "404")
+    })
+    public Mono<ResponseEntity<InventoryResponseDTO>> addSupplyToInventoryByType(
+            @PathVariable String inventoryType,
+            @RequestBody Mono<SupplyRequestDTO> supplyRequestDTOMono) {
+
+        return supplyRequestDTOMono.flatMap(supplyRequestDTO ->
+                inventoryServiceClient.addSupplyToInventoryByType(inventoryType, supplyRequestDTO)
+                        .map(inventoryResponseDTO -> ResponseEntity.status(HttpStatus.CREATED).body(inventoryResponseDTO))
+                        .onErrorResume(e -> Mono.just(ResponseEntity.notFound().build()))
+        );
+    }
+*/
+
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @PostMapping("/{inventoryType}/supplies")
+    @ApiResponses(value = {
+            @ApiResponse(description = "Add a supply to inventory by type", responseCode = "201"),
+            @ApiResponse(description = "Inventory type not found", responseCode = "404")
+    })
+    public Mono<ResponseEntity<InventoryResponseDTO>> addSupplyToInventoryByType(
+            @PathVariable String inventoryType,
+            @RequestBody Mono<SupplyRequestDTO> supplyRequestDTOMono) {
+
+        return supplyRequestDTOMono.flatMap(supplyRequestDTO ->
+                inventoryServiceClient.addSupplyToInventoryByType(inventoryType, supplyRequestDTO)
+                        .map(inventoryResponseDTO -> ResponseEntity.status(HttpStatus.CREATED).body(inventoryResponseDTO))
+                        .onErrorResume(e -> Mono.just(ResponseEntity.notFound().build()))
+        );
+    }
+
+
+
 }
