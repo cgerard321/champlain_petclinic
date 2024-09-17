@@ -1,7 +1,7 @@
-package com.petclinic.products.businesslayer;
+package com.petclinic.products.businesslayer.products;
 
-import com.petclinic.products.presentationlayer.ProductRequestModel;
-import com.petclinic.products.presentationlayer.ProductResponseModel;
+import com.petclinic.products.presentationlayer.products.ProductRequestModel;
+import com.petclinic.products.presentationlayer.products.ProductResponseModel;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
