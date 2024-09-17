@@ -1,5 +1,9 @@
 package com.petclinic.bffapigateway.presentationlayer.v2;
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 1becaac1 (feat(TEAM4-CPC-1074): Did the frontend for the GetVetByVetId, Added my method to the api-gateway and changed my backend in vet-service)
 import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
 import com.petclinic.bffapigateway.dtos.Vets.VetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
@@ -21,10 +25,10 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/api/v2/gateway/vets")
 @Validated
 @CrossOrigin(origins = "http://localhost:3000, http://localhost:80")
+
 public class VetController {
 
     private final VetsServiceClient vetsServiceClient;
-
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping()
@@ -50,6 +54,7 @@ public class VetController {
 
     }
 
+<<<<<<< HEAD
 
 <<<<<<< HEAD
 }
@@ -57,12 +62,15 @@ public class VetController {
 
 
 =======
+=======
+>>>>>>> 1becaac1 (feat(TEAM4-CPC-1074): Did the frontend for the GetVetByVetId, Added my method to the api-gateway and changed my backend in vet-service)
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<VetResponseDTO>> addVet(@RequestBody Mono<VetRequestDTO> vetRequestDTO){
+    public Mono<ResponseEntity<VetResponseDTO>> addVet(@RequestBody Mono<VetRequestDTO> vetRequestDTO) {
         return vetsServiceClient.addVet(vetRequestDTO)
                 .map(v -> ResponseEntity.status(HttpStatus.CREATED).body(v))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
+
     }
 
 }
