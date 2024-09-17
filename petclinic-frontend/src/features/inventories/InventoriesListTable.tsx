@@ -100,6 +100,7 @@ export default function InventoriesListTable(): JSX.Element {
                     inventoryName,
                     inventoryType,
                     inventoryDescription
+
                   )
                 }
               />
