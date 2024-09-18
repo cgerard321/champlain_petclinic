@@ -9,8 +9,8 @@ import Home from '@/pages/Home/Home.tsx';
 import ProfileEdit from '@/pages/Customer/ProfileEdit.tsx';
 import Products from '@/pages/Product/Products.tsx';
 import AddingCustomer from '@/pages/Customer/AddingCustomer.tsx';
-import CustomerBillingPage from '@/pages/Bills/CostumerBills.tsx';
 import AllOwners from '@/pages/Customer/AllOwners.tsx';
+import CustomerBillingPage from '@/pages/Bills/CostumerBills.tsx';
 import VetDetails from "@/pages/Vet/VetDetails.tsx";
 import Review from './pages/Review/Review';
 import EditReviewForm from './features/visits/Review/EditReviewForm';
@@ -25,7 +25,6 @@ import AddReviewForm from './features/visits/Review/AddReviewForm';
 import EditInventory from '@/features/inventories/EditInventory.tsx';
 import VisitByVisitId from './features/visits/visits/VisitByVisitId';
 import AddingVisit from './features/visits/models/AddingVisit';
-
 
 const router = createBrowserRouter([
   {
