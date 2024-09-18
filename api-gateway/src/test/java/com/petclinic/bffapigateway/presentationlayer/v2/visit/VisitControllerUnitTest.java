@@ -3,18 +3,25 @@ package com.petclinic.bffapigateway.presentationlayer.v2.visit;
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
 import com.petclinic.bffapigateway.dtos.Visits.Status;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
+import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewRequestDTO;
+import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewResponseDTO;
 import com.petclinic.bffapigateway.presentationlayer.v2.VisitController;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -32,6 +39,9 @@ import static org.mockito.Mockito.*;
 public class VisitControllerUnitTest {
     @Autowired
     private WebTestClient webTestClient;
+
+    @InjectMocks
+    private VisitController visitController;
 
     @MockBean
     private VisitsServiceClient visitsServiceClient;
@@ -87,5 +97,8 @@ public class VisitControllerUnitTest {
         // Assert
         verify(visitsServiceClient, times(1)).getAllVisits();
     }
+
+
+
 
 }
