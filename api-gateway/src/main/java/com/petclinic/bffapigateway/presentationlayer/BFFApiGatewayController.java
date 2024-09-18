@@ -167,7 +167,7 @@ public class BFFApiGatewayController {
     }
 
     @IsUserSpecific(idToMatch = {"vetId"}, bypassRoles = {Roles.ADMIN})
-    @GetMapping(value = "bills/vet/{vetId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "bills/vets/{vetId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getBillsByVetId(final @PathVariable String vetId)
     {
         return billServiceClient.getBillsByVetId(vetId);
@@ -194,7 +194,7 @@ public class BFFApiGatewayController {
     }
 
     @IsUserSpecific(idToMatch = {"vetId"}, bypassRoles = {Roles.ADMIN})
-    @DeleteMapping(value = "bills/vet/{vetId}")
+    @DeleteMapping(value = "bills/vets/{vetId}")
     public Mono<ResponseEntity<Void>> deleteBillsByVetId(final @PathVariable String vetId){
         return billServiceClient.deleteBillsByVetId(vetId).then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
