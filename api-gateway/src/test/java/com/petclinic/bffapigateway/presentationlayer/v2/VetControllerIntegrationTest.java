@@ -28,7 +28,6 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
 
-
 import static com.google.common.net.HttpHeaders.AUTHORIZATION;
 import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService.jwtTokenForInvalidOwnerId;
 import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService.jwtTokenForValidAdmin;
@@ -50,27 +49,17 @@ class VetControllerIntegrationTest {
     @BeforeAll
     public void startMockServer() {
         mockServerConfigVetService = new MockServerConfigVetService();
-<<<<<<< HEAD
         mockServerConfigVetService.registerAddVetEndpoint();
         mockServerConfigVetService.registerGetVetsEndpoint();
         mockServerConfigVetService.registerGetVetsEndpoint_withNoVets();
-=======
-
->>>>>>> 438c882f (feat(VETS-CPC-1078): add a vet by filling a form as an admin (#654))
-        mockServerConfigAuthService = new MockServerConfigAuthService();
-
-        mockServerConfigAuthService.registerValidateTokenForAdminEndpoint();
-        mockServerConfigAuthService.registerValidateTokenForVetEndpoint();
-
-        mockServerConfigVetService.registerAddVetEndpoint();
 
         mockServerConfigAuthService = new MockServerConfigAuthService();
         mockServerConfigAuthService.registerValidateTokenForAdminEndpoint();
         mockServerConfigAuthService.registerValidateTokenForVetEndpoint();
-
     }
 
     String validVetId = "ac9adeb8-625b-11ee-8c99-0242ac120002";
+
     @AfterAll
     public void stopMockServer() {
         mockServerConfigVetService.stopMockServer();
@@ -78,7 +67,6 @@ class VetControllerIntegrationTest {
     }
 
     private static final String VET_ENDPOINT = "/api/v2/gateway/vets";
-
     private static final String BEARER_TOKEN = "Bearer " + jwtTokenForValidAdmin;
 
     //#region Dummy data
@@ -116,12 +104,12 @@ class VetControllerIntegrationTest {
     @Test
     public void whenGetVets_withNoVets_thenReturnNotFound() {
 
-            webTestClient.get()
-                    .uri("/vets")
-                    .cookie("Bearer", jwtTokenForValidAdmin)
-                    .accept(MediaType.APPLICATION_JSON)
-                    .exchange()
-                    .expectStatus().isNotFound();
+        webTestClient.get()
+                .uri("/vets")
+                .cookie("Bearer", jwtTokenForValidAdmin)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
     }
 
     @Test
@@ -173,8 +161,6 @@ class VetControllerIntegrationTest {
                 .expectStatus().isUnauthorized();
     }
 
-
-
     @Test
     void whenGetVetByFirstName_notExists_thenReturnNotFound() {
         String firstName = "Unknown";
@@ -187,6 +173,7 @@ class VetControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isNotFound();
     }
+
     @Test
     void whenGetVetByLastName_notExists_thenReturnNotFound() {
         String lastName = "Unknown";
@@ -227,7 +214,6 @@ class VetControllerIntegrationTest {
                                 .build()))
                 .build();
 
-
         webTestClient.get()
                 .uri(VET_ENDPOINT + "/" + validVetId)
                 .header(AUTHORIZATION, BEARER_TOKEN)
@@ -256,6 +242,7 @@ class VetControllerIntegrationTest {
 
         String validVetId = "ac9adeb8-625b-11ee-8c99-0242ac120002";
     }
+
     @Test
     public void getVetByVetId_InvalidId_ReturnsNotFound() {
 
@@ -275,77 +262,4 @@ class VetControllerIntegrationTest {
                 });
 
     }
-
-
-    //#region Dummy data
-    Set<Workday> workdaySet = Set.of(Workday.Wednesday);
-
-    VetRequestDTO newVetRequestDTO = VetRequestDTO.builder()
-            .vetBillId("bill001")
-            .firstName("John")
-            .lastName("Doe")
-            .email("john.doe@example.com")
-            .phoneNumber("1234567890")
-            .resume("Specialist in dermatology")
-            .workday(workdaySet)
-            .workHoursJson("08:00-16:00")
-            .active(true)
-            .specialties(Set.of(SpecialtyDTO.builder().specialtyId("dermatology").name("Dermatology").build()))
-            .photoDefault(false)
-            .build();
-    //#endregion
-
-    @Test
-    void whenAddVet_asAdmin_thenReturnCreatedVetResponseDTO() {
-
-        Mono<VetResponseDTO> result = webTestClient.post()
-                .uri("/api/v2/gateway/vet")
-                .cookie("Bearer", jwtTokenForValidAdmin)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(Mono.just(newVetRequestDTO), VetRequestDTO.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isCreated()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .returnResult(VetResponseDTO.class)
-                .getResponseBody()
-                .single();
-
-        StepVerifier
-                .create(result)
-                .expectNextMatches(vetResponseDTO -> {
-                    assertNotNull(vetResponseDTO);
-                    assertNotNull(vetResponseDTO.getVetId());
-                    assertEquals(newVetRequestDTO.getVetBillId(), vetResponseDTO.getVetBillId());
-                    assertEquals(newVetRequestDTO.getFirstName(), vetResponseDTO.getFirstName());
-                    assertEquals(newVetRequestDTO.getLastName(), vetResponseDTO.getLastName());
-                    assertEquals(newVetRequestDTO.getEmail(), vetResponseDTO.getEmail());
-                    assertEquals(newVetRequestDTO.getPhoneNumber(), vetResponseDTO.getPhoneNumber());
-                    assertEquals(newVetRequestDTO.getResume(), vetResponseDTO.getResume());
-                    assertEquals(newVetRequestDTO.getWorkday(), vetResponseDTO.getWorkday());
-                    assertEquals(newVetRequestDTO.getWorkHoursJson(), vetResponseDTO.getWorkHoursJson());
-                    assertEquals(newVetRequestDTO.isActive(), vetResponseDTO.isActive());
-                    assertEquals(newVetRequestDTO.getSpecialties(), vetResponseDTO.getSpecialties());
-                    return true;
-                })
-                .verifyComplete();
-    }
-
-    @Test
-    void whenAddVet_asARoleOtherThanAdmin_thenReturnIsUnauthorized() {
-
-        webTestClient.post()
-                .uri("/api/v2/gateway/vet")
-                .cookie("Bearer", jwtTokenForInvalidOwnerId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(Mono.just(newVetRequestDTO), VetRequestDTO.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isUnauthorized();
-    }
-
-
-
-
 }
-

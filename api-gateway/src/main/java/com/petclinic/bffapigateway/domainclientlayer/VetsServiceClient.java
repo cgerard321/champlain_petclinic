@@ -47,7 +47,7 @@ public class VetsServiceClient {
         vetsServiceUrl = "http://" + vetsServiceHost + ":" + vetsServicePort;
     }
 
-    //Photo
+    // Photo
     public Mono<Resource> getPhotoByVetId(String vetId){
         return webClientBuilder.build()
                 .get()
@@ -112,7 +112,7 @@ public class VetsServiceClient {
                 .bodyToMono(Resource.class);
     }
 
-    //Badge
+    // Badge
     public Mono<BadgeResponseDTO> getBadgeByVetId(String vetId){
         return webClientBuilder.build()
                 .get()
@@ -130,7 +130,7 @@ public class VetsServiceClient {
                 .bodyToMono(BadgeResponseDTO.class);
     }
 
-    //Ratings
+    // Ratings
     public Flux<RatingResponseDTO> getRatingsByVetId(String vetId) {
 
         return webClientBuilder
@@ -284,7 +284,8 @@ public class VetsServiceClient {
                 )
                 .bodyToMono(Double.class);
     }
-    //Vets
+
+    // Vets
     public Flux<VetResponseDTO> getVets() {
 
         return webClientBuilder
@@ -316,6 +317,7 @@ public class VetsServiceClient {
                 )
                 .bodyToMono(VetResponseDTO.class);
     }
+
     public Mono<VetResponseDTO> getVetByFirstName(String firstName) {
 
         return webClientBuilder
@@ -334,6 +336,7 @@ public class VetsServiceClient {
                 )
                 .bodyToMono(VetResponseDTO.class);
     }
+
     public Mono<VetResponseDTO> getVetByLastName(String lastName) {
 
         return webClientBuilder
@@ -352,9 +355,6 @@ public class VetsServiceClient {
                 )
                 .bodyToMono(VetResponseDTO.class);
     }
-
-
-
 
     public Mono<VetResponseDTO> getVetByVetBillId(String vetBillId) {
 
@@ -399,17 +399,12 @@ public class VetsServiceClient {
             return webClientBuilder
                     .build()
                     .post()
-<<<<<<< HEAD
                     .uri(vetsServiceUrl)
-=======
-                    .uri(vetsServiceUrl+"/vet")
->>>>>>> 438c882f (feat(VETS-CPC-1078): add a vet by filling a form as an admin (#654))
                     .body(BodyInserters.fromValue(request))
                     .retrieve()
                     .bodyToMono(VetResponseDTO.class);
         });
     }
-
 
     public Mono<VetResponseDTO> createVet(Mono<VetRequestDTO> model) {
 
@@ -466,8 +461,7 @@ public class VetsServiceClient {
                 .bodyToMono(VetResponseDTO.class);
     }
 
-
-    //Education
+    // Education
     public Flux<EducationResponseDTO> getEducationsByVetId(String vetId) {
 
         return webClientBuilder

@@ -1,6 +1,9 @@
 /* AddReviewForm.css */
 .add-review-form {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 14730eb4 (feat(INVT-CPC-1052): Fix Edit Inventory (#670))
   background-color: #f8f9fa; /* Light background */
   padding: 20px;
   border-radius: 10px;
@@ -106,6 +109,7 @@ button[type='submit']:hover {
   font-size: 14px;
   margin-top: -10px;
 }
+<<<<<<< HEAD
 =======
     background-color: #f8f9fa; /* Light background */
     padding: 20px;
@@ -214,3 +218,5 @@ button[type='submit']:hover {
   }
   
 >>>>>>> 8c3ffa24 (Feat/vist cpc 1117 add reviews section in admin page (#665))
+=======
+>>>>>>> 14730eb4 (feat(INVT-CPC-1052): Fix Edit Inventory (#670))

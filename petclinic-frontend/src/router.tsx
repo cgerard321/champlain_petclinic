@@ -24,7 +24,6 @@ import Visits from './pages/Visit/Visit';
 import AddReviewForm from './features/visits/Review/AddReviewForm';
 import EditInventory from '@/features/inventories/EditInventory.tsx';
 
-
 const router = createBrowserRouter([
   {
     children: [
