@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Visit } from './models/Visit';
 import './VisitListTable.css';
+import { useNavigate } from 'react-router-dom';
 
 export default function VisitListTable(): JSX.Element {
   const [visitsList, setVisitsList] = useState<Visit[]>([]);
+  const navigate = useNavigate();
 
   // Real-time updates (SEE)
   useEffect(() => {
@@ -42,6 +44,21 @@ export default function VisitListTable(): JSX.Element {
 
   return (
     <div>
+      <button
+        className="btn btn-warning"
+        onClick={() => navigate('/forms')}
+        title="Let a review"
+      >
+        Leave a Review
+      </button>
+      <p> </p>
+      <button
+        className="btn btn-dark"
+        onClick={() => navigate('/reviews')}
+        title="View review"
+      >
+        View Reviews
+      </button>
       <h1>Visits List</h1>
       <table>
         <thead>
