@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
 import * as React from 'react';
 import { FormEvent, useState, ChangeEvent } from 'react';
 import { addVet } from '@/features/veterinarians/api/addVet.ts';
@@ -6,7 +8,6 @@ import { useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 import { Button, Modal, Form } from 'react-bootstrap';
 import { Workday } from '@/features/veterinarians/models/Workday.ts';
-
 
 const AddVet: React.FC = (): JSX.Element => {
   const navigate = useNavigate();
@@ -79,14 +80,14 @@ const AddVet: React.FC = (): JSX.Element => {
     const selectedDay = value as Workday;
 
     if (checked) {
-      setVet((prevVet) => ({
+      setVet(prevVet => ({
         ...prevVet,
         workday: [...prevVet.workday, selectedDay],
       }));
     } else {
-      setVet((prevVet) => ({
+      setVet(prevVet => ({
         ...prevVet,
-        workday: prevVet.workday.filter((day) => day !== selectedDay),
+        workday: prevVet.workday.filter(day => day !== selectedDay),
       }));
     }
   };
@@ -97,10 +98,10 @@ const AddVet: React.FC = (): JSX.Element => {
 
     const selectedSpecialties = selectedOptions.map(option => ({
       specialtyId: option.value,
-      name: option.textContent || ''
+      name: option.textContent || '',
     }));
 
-    setVet((prevVet) => ({
+    setVet(prevVet => ({
       ...prevVet,
       specialties: selectedSpecialties,
     }));
@@ -112,7 +113,12 @@ const AddVet: React.FC = (): JSX.Element => {
         Add Vet
       </Button>
 
-      <Modal show={show} onHide={handleClose} backdrop="static" keyboard={false}>
+      <Modal
+        show={show}
+        onHide={handleClose}
+        backdrop="static"
+        keyboard={false}
+      >
         <Modal.Header closeButton>
           <Modal.Title>Add New Vet</Modal.Title>
         </Modal.Header>
@@ -148,10 +154,9 @@ const AddVet: React.FC = (): JSX.Element => {
               </Form.Control>
             </Form.Group>
 
-
             <Form.Group className="mb-3">
               <Form.Label>Work Days</Form.Label>
-              {Object.values(Workday).map((day) => (
+              {Object.values(Workday).map(day => (
                 <Form.Check
                   key={day}
                   type="checkbox"
@@ -163,7 +168,6 @@ const AddVet: React.FC = (): JSX.Element => {
                 />
               ))}
             </Form.Group>
-
 
             <Form.Group className="mb-3">
               <Form.Label>Last Name</Form.Label>
