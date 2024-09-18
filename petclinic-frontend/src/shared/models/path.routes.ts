@@ -19,7 +19,7 @@ export enum AppRoutePaths {
   CustomerProfileEdit = '/customer/profile/edit',
   AddingCustomer = '/customer/add',
   AllCustomers = '/customers',
-  Home = '/home',
+  Home = '/home', 
   Forbidden = '/forbidden',
   Products = '/products',
   Visits = '/visits',
