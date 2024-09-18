@@ -1,4 +1,3 @@
-
 import axios from 'axios';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import AddVet from '@/pages/Vet/AddVet.tsx';
@@ -108,7 +107,6 @@ export default function Vet(): JSX.Element {
                 </button>
                 {formVisible && <AddVet />}
 
-
                 <input
                     type="text"
                     value={searchQuery}
@@ -150,7 +148,4 @@ export default function Vet(): JSX.Element {
             </div>
         </div>
     );
-
-
- 
 }
