@@ -20,7 +20,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Models\EmailType\" />
       <Folder Include="Utils\Exception\" />
     </ItemGroup>
 
