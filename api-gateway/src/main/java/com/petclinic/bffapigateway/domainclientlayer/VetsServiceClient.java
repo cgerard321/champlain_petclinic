@@ -13,12 +13,14 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
+import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
@@ -349,6 +351,20 @@ public class VetsServiceClient {
                         Mono.error(new IllegalArgumentException("Something went wrong"))
                 )
                 .bodyToFlux(VetResponseDTO.class);
+    }
+
+    public Mono<VetResponseDTO> addVet(Mono<VetRequestDTO> vetRequestDTO){
+        String vetId = UUID.randomUUID().toString();
+        return vetRequestDTO.flatMap(request ->{
+            request.setVetId(vetId);
+            return webClientBuilder
+                    .build()
+                    .post()
+                    .uri(vetsServiceUrl+"/vet")
+                    .body(BodyInserters.fromValue(request))
+                    .retrieve()
+                    .bodyToMono(VetResponseDTO.class);
+        });
     }
 
 

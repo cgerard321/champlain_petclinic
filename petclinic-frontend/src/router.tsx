@@ -9,35 +9,36 @@ import ProfileEdit from '@/pages/Customer/ProfileEdit.tsx';
 import Products from '@/pages/Product/Products.tsx';
 import AddingCustomer from '@/pages/Customer/AddingCustomer.tsx';
 import CustomerBillingPage from '@/pages/Bills/CostumerBills.tsx';
-import AllOwners from '@/pages/Customer/AllOwners.tsx';
+//import path from 'path';
+import Visits from './pages/Visit/Visit';
 import VetDetails from "@/pages/Vet/VetDetails.tsx";
 
 const router = createBrowserRouter([
   {
     path: AppRoutePaths.Default,
     children: [
-      {
-        path: AppRoutePaths.Home,
-        element: (
-          <ProtectedRoute>
-            <Home />
-          </ProtectedRoute>
-        ),
-      },
+        {
+            path: AppRoutePaths.Home,
+            element: (
+                <ProtectedRoute>
+                    <Home/>
+                </ProtectedRoute>
+            ),
+        },
       {
         path: AppRoutePaths.Inventories,
         element: (
-          <ProtectedRoute>
-            <Inventories />
-          </ProtectedRoute>
+            <ProtectedRoute>
+              <Inventories />
+            </ProtectedRoute>
         ),
       },
       {
         path: AppRoutePaths.Vet,
         element: (
-          <ProtectedRoute>
-            <Vet />
-          </ProtectedRoute>
+            <ProtectedRoute>
+              <Vet />
+            </ProtectedRoute>
         ),
       },
       {
@@ -48,44 +49,45 @@ const router = createBrowserRouter([
             </ProtectedRoute>
         ),
       },
+
       {
         path: AppRoutePaths.CustomerProfileEdit,
         element: (
-          <ProtectedRoute>
-            <ProfileEdit />
-          </ProtectedRoute>
+            <ProtectedRoute>
+              <ProfileEdit />
+            </ProtectedRoute>
         ),
       },
       {
         path: AppRoutePaths.AddingCustomer,
         element: (
-          <ProtectedRoute>
-            <AddingCustomer />
-          </ProtectedRoute>
+            <ProtectedRoute>
+              <AddingCustomer />
+            </ProtectedRoute>
         ),
       },
       {
         path: AppRoutePaths.CustomerBills,
         element: (
-          <ProtectedRoute>
-            <CustomerBillingPage />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: AppRoutePaths.AllCustomers,
-        element: (
-          <ProtectedRoute>
-            <AllOwners />
-          </ProtectedRoute>
+            <ProtectedRoute>
+              <CustomerBillingPage />
+            </ProtectedRoute>
         ),
       },
       {
         path: AppRoutePaths.Products,
         element: (
-          <ProtectedRoute>
-            <Products />
-          </ProtectedRoute>
+            <ProtectedRoute>
+              <Products />
+            </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.Visits,
+        element: (
+            <ProtectedRoute>
+              <Visits />
+            </ProtectedRoute>
         ),
       },
       //   {
