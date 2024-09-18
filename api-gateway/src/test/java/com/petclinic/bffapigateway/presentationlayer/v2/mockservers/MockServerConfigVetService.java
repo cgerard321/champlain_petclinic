@@ -1,7 +1,12 @@
 package com.petclinic.bffapigateway.presentationlayer.v2.mockservers;
 
+<<<<<<< HEAD
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+=======
+
+import com.petclinic.bffapigateway.dtos.Vets.SpecialtyDTO;
+>>>>>>> 438c882f (feat(VETS-CPC-1078): add a vet by filling a form as an admin (#654))
 import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.SpecialtyDTO;
 import com.petclinic.bffapigateway.dtos.Vets.Workday;
@@ -10,6 +15,9 @@ import org.mockserver.integration.ClientAndServer;
 
 import java.util.Set;
 
+import org.mockserver.client.MockServerClient;
+import org.mockserver.integration.ClientAndServer;
+
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonBody.json;
@@ -17,11 +25,14 @@ import static org.mockserver.model.JsonBody.json;
 public class MockServerConfigVetService {
 
     private static final Integer VET_SERVICE_SERVER_PORT = 7002;
+
     private final ClientAndServer clientAndServer;
+
     private final MockServerClient mockServerClient_VetService = new MockServerClient("localhost", VET_SERVICE_SERVER_PORT);
 
     public MockServerConfigVetService() {
         this.clientAndServer = ClientAndServer.startClientAndServer(VET_SERVICE_SERVER_PORT);
+
 
         mockServerClient_VetService
                 .when(request()
@@ -52,6 +63,7 @@ public class MockServerConfigVetService {
                         .withBody("{\"statusCode\":404,\"message\":\"vetId not found: invalid-id\",\"timestamp\":\"" + java.time.Instant.now() + "\"}"));
     }
 
+<<<<<<< HEAD
     public void registerGetVetsEndpoint() {
         mockServerClient_VetService
                 .when(
@@ -122,12 +134,18 @@ public class MockServerConfigVetService {
                 );
     }
 
+=======
+>>>>>>> 438c882f (feat(VETS-CPC-1078): add a vet by filling a form as an admin (#654))
     public void registerAddVetEndpoint() {
         mockServerClient_VetService
                 .when(
                         request()
                                 .withMethod("POST")
+<<<<<<< HEAD
                                 .withPath("/vets")
+=======
+                                .withPath("/vet")
+>>>>>>> 438c882f (feat(VETS-CPC-1078): add a vet by filling a form as an admin (#654))
                                 .withBody(json("{"
                                         + "\"vetBillId\":\"bill001\","
                                         + "\"firstName\":\"John\","
@@ -173,6 +191,7 @@ public class MockServerConfigVetService {
                                         + "]"
                                         + "}"))
                 );
+<<<<<<< HEAD
     }
 
     public void stopMockServer() {
@@ -235,5 +254,13 @@ public class MockServerConfigVetService {
                 );
     }
 
+=======
+    }
+
+    public void stopMockServer() {
+        if(clientAndServer != null)
+            this.clientAndServer.stop();
+    }
+>>>>>>> 438c882f (feat(VETS-CPC-1078): add a vet by filling a form as an admin (#654))
 }
 
