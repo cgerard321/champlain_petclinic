@@ -129,7 +129,7 @@ public class MockServerConfigVetService {
                 .when(
                         request()
                                 .withMethod("POST")
-                                .withPath("/vets") // Retain the correct path according to the team's decision
+                                .withPath("/vets")
                                 .withBody(json("{"
                                         + "\"vetBillId\":\"bill001\","
                                         + "\"firstName\":\"John\","

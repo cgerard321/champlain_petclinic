@@ -47,10 +47,14 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RestController
 <<<<<<< HEAD
+<<<<<<< HEAD
 @RequestMapping("/vets")
 =======
 @RequestMapping("vet")
 >>>>>>> 438c882f (feat(VETS-CPC-1078): add a vet by filling a form as an admin (#654))
+=======
+@RequestMapping("vets")
+>>>>>>> fd807b1b (feat(VETS-CPC-1147): fix vet endpoints (#680))
 public class VetController {
     private final VetService vetService;
     private final RatingService ratingService;
