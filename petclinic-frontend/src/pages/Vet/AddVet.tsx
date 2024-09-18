@@ -5,7 +5,6 @@ import { VetRequestModel } from '@/features/veterinarians/models/VetRequestModel
 import { useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes';
 import { Button, Modal, Form } from 'react-bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import { Workday } from '@/features/veterinarians/models/Workday.ts';
 
 
@@ -28,6 +27,25 @@ const AddVet: React.FC = (): JSX.Element => {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [show, setShow] = useState(false);
 
+  const handleSubmit = async (
+    event: FormEvent<HTMLFormElement>
+  ): Promise<void> => {
+    event.preventDefault();
+    if (!validate()) return;
+
+    try {
+      const response = await addVet(vet);
+      if (response.status === 201) {
+        handleClose();
+        navigate(AppRoutePaths.Vet);
+      } else {
+        console.error('Failed to add vet');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  };
+
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ): void => {
@@ -49,24 +67,6 @@ const AddVet: React.FC = (): JSX.Element => {
     if (!vet.resume) newErrors.resume = 'Resume is required';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (
-    event: FormEvent<HTMLFormElement>
-  ): Promise<void> => {
-    event.preventDefault();
-    if (!validate()) return;
-
-    try {
-      const response = await addVet(vet);
-      if (response.status === 200) {
-        navigate(AppRoutePaths.Vet);
-      } else {
-      }
-    } catch (error) {
-      console.error('Error:', error);
-    }
-    setShow(false);
   };
 
   // Modal control functions
