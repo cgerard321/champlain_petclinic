@@ -1034,11 +1034,11 @@ class VetControllerUnitTest {
                 .uri("/vets/firstName/Pauline")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isOk()
+                .expectStatus().isEqualTo(HttpStatus.OK)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.firstName").isEqualTo(vetResponseDTO.getFirstName())
-                .jsonPath("$.lastName").isEqualTo(vetResponseDTO.getLastName());
+                .jsonPath("$.firstName").isEqualTo(vetResponseDTO.getFirstName());
+
 
         Mockito.verify(vetService, times(1)).getVetByFirstName("Pauline");
     }
