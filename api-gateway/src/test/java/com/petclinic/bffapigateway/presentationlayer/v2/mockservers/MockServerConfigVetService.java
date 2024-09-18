@@ -131,26 +131,27 @@ public class MockServerConfigVetService {
                         request()
                                 .withMethod("POST")
                                 .withPath("/vets")
-                                .withBody(json("{" +
-                                        "\"vetBillId\":\"bill001\"," +
-                                        "\"firstName\":\"John\"," +
-                                        "\"lastName\":\"Doe\"," +
-                                        "\"email\":\"john.doe@example.com\"," +
-                                        "\"phoneNumber\":\"1234567890\"," +
-                                        "\"resume\":\"Specialist in dermatology\"," +
-                                        "\"workday\":[" +
-                                        "\"Wednesday\"" +
-                                        "]," +
-                                        "\"workHoursJson\":\"08:00-16:00\"," +
-                                        "\"active\":true," +
-                                        "\"specialties\":[" +
-                                        "{" +
-                                        "\"specialtyId\":\"dermatology\"," +
-                                        "\"name\":\"Dermatology\"" +
-                                        "}" +
-                                        "]," +
-                                        "\"photoDefault\":false" +
-                                        "}"))
+                                .withBody(json("{"
+                                        + "\"vetBillId\":\"bill001\","
+                                        + "\"firstName\":\"John\","
+                                        + "\"lastName\":\"Doe\","
+                                        + "\"email\":\"john.doe@example.com\","
+                                        + "\"phoneNumber\":\"1234567890\","
+                                        + "\"resume\":\"Specialist in dermatology\","
+                                        + "\"workday\":["
+                                        + "\"Wednesday\""
+                                        + "],"
+                                        + "\"workHoursJson\":\"08:00-16:00\","
+                                        + "\"active\":true,"
+                                        + "\"specialties\":["
+                                        + "{"
+                                        + "\"specialtyId\":\"dermatology\","
+                                        + "\"name\":\"Dermatology\""
+                                        + "}"
+                                        + "],"
+                                        + "\"photoDefault\":false"
+                                        + "}"))
+
                 )
                 .respond(
                         response()

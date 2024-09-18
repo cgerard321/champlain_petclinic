@@ -6,16 +6,23 @@
   "devDependencies": {
     "@types/react-bootstrap": "^0.32.37",
 <<<<<<< HEAD
+<<<<<<< HEAD
     "@types/react-router-dom": "^5.3.3",
     "bootstrap": "^5.3.3",
     "eslint": "^9.11.0",
     "react-bootstrap": "^2.10.4"
 =======
+=======
+>>>>>>> fcbcf1d3 (feat(VETS-CPC-1147): fix vet endpoints (#680))
 <<<<<<< HEAD
     "bootstrap": "^5.3.3",
     "react-bootstrap": "^2.10.4",
 =======
 >>>>>>> 14730eb4 (feat(INVT-CPC-1052): Fix Edit Inventory (#670))
+=======
+    "bootstrap": "^5.3.3",
+    "react-bootstrap": "^2.10.4",
+>>>>>>> fd807b1b (feat(VETS-CPC-1147): fix vet endpoints (#680))
     "@types/react-router-dom": "^5.3.3"
 >>>>>>> 8a843cf0 (feat(INVT-CPC-1052): Fix Edit Inventory (#670))
   }
