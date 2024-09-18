@@ -61,6 +61,5 @@ public class CartServiceImpl implements CartService {
                             .collectList()
                             .map(products -> EntityModelUtil.toCartResponseModel(cart, products));
                 });
-
     }
 }
