@@ -26,8 +26,16 @@
   border-spacing: 0;
 }
 
+<<<<<<< HEAD
 .add-inventorytype-button {
   text-align: right;
   float: right;
   margin-right: 25px;
+=======
+
+.add-inventorytype-button{
+    text-align: right;
+    float: right;
+    margin-right: 25px;
+>>>>>>> 14730eb4 (feat(INVT-CPC-1052): Fix Edit Inventory (#670))
 }
