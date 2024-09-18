@@ -9,11 +9,11 @@ import Home from '@/pages/Home/Home.tsx';
 import ProfileEdit from '@/pages/Customer/ProfileEdit.tsx';
 import Products from '@/pages/Product/Products.tsx';
 import AddingCustomer from '@/pages/Customer/AddingCustomer.tsx';
-import AllOwners from '@/pages/Customer/AllOwners.tsx';
 import CustomerBillingPage from '@/pages/Bills/CostumerBills.tsx';
 import VetDetails from "@/pages/Vet/VetDetails.tsx";
 import Review from './pages/Review/Review';
 import EditReviewForm from './features/visits/Review/EditReviewForm';
+import AllOwners from '@/pages/Customer/AllOwners.tsx';
 import PageNotFound from '@/pages/Error/PageNotFound.tsx';
 import Forbidden from '@/pages/Error/Forbidden.tsx';
 import Unauthorized from '@/pages/Error/Unauthorized.tsx';
@@ -24,6 +24,7 @@ import Visits from './pages/Visit/Visit';
 import AddReviewForm from './features/visits/Review/AddReviewForm';
 import EditInventory from '@/features/inventories/EditInventory.tsx';
 
+
 const router = createBrowserRouter([
   {
     children: [
@@ -32,6 +33,14 @@ const router = createBrowserRouter([
         element: (
             <ProtectedRoute>
               <EditInventory />
+            </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.Home,
+        element: (
+            <ProtectedRoute>
+              <Home />
             </ProtectedRoute>
         ),
       },
@@ -160,6 +169,14 @@ const router = createBrowserRouter([
         element: (
             <ProtectedRoute>
               <Products />
+            </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.Visits,
+        element: (
+            <ProtectedRoute>
+              <Visits />
             </ProtectedRoute>
         ),
       },
