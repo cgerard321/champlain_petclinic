@@ -128,7 +128,7 @@ public class VetController {
     //@GetMapping("{vetId}")
     @GetMapping(value = "/{vetId}",produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<VetResponseDTO>> getVetByVetId(@PathVariable String vetId) {
-        
+
         return Mono.just(vetId)
                 .filter(id -> id.length() == 36) //Validate the course id
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided vet id is invalid:" + vetId)))

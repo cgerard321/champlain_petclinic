@@ -7,10 +7,10 @@ import java.util.Set;
 
 
 @Getter
-@Builder
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class VetRequestDTO {
     private String vetId;
     private String vetBillId;
