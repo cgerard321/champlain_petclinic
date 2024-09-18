@@ -1,11 +1,14 @@
 package com.petclinic.visits.visitsservicenew.Utils;
 
 
+import com.petclinic.visits.visitsservicenew.DataLayer.Review.Review;
 import com.petclinic.visits.visitsservicenew.DataLayer.Visit;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.PetResponseDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.PetsClient;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetsClient;
+import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewRequestDTO;
+import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewResponseDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitRequestDTO;
 import com.petclinic.visits.visitsservicenew.PresentationLayer.VisitResponseDTO;
 import lombok.RequiredArgsConstructor;
@@ -68,6 +71,23 @@ public class EntityDtoUtil {
         return visit;
     }
 
+    public static ReviewResponseDTO toReviewResponseDTO(Review review) {
+        ReviewResponseDTO reviewResponseDTO  = new ReviewResponseDTO ();
+        BeanUtils.copyProperties(review, reviewResponseDTO);
+        return reviewResponseDTO;
+    }
+
+    public static Review toReviewEntity(ReviewRequestDTO reviewRequestDTO){
+        return Review.builder()
+                .reviewId(generateReviewIdString())
+                .rating(reviewRequestDTO.getRating())
+                .reviewerName(reviewRequestDTO.getReviewerName())
+                .review(reviewRequestDTO.getReview())
+                .dateSubmitted(reviewRequestDTO.getDateSubmitted())
+                .build();
+    }
+
+
     /**
      * Generate a random UUID and returns it. IS NOT ERROR FREEa
      * @return The UUID as a string
@@ -75,4 +95,10 @@ public class EntityDtoUtil {
     public String generateVisitIdString() {
         return UUID.randomUUID().toString();
     }
+
+    public static String generateReviewIdString() {
+        return UUID.randomUUID().toString();
+    }
+
+
 }
