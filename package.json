@@ -5,8 +5,18 @@
   },
   "devDependencies": {
     "@types/react-bootstrap": "^0.32.37",
+<<<<<<< HEAD
+    "@types/react-router-dom": "^5.3.3",
+    "bootstrap": "^5.3.3",
+    "eslint": "^9.11.0",
+    "react-bootstrap": "^2.10.4"
+=======
+<<<<<<< HEAD
     "bootstrap": "^5.3.3",
     "react-bootstrap": "^2.10.4",
+=======
+>>>>>>> 14730eb4 (feat(INVT-CPC-1052): Fix Edit Inventory (#670))
     "@types/react-router-dom": "^5.3.3"
+>>>>>>> 8a843cf0 (feat(INVT-CPC-1052): Fix Edit Inventory (#670))
   }
 }
