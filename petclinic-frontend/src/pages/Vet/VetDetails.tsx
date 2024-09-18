@@ -19,7 +19,7 @@ interface VetResponseType {
 }
 
 export default function VetDetails(): JSX.Element {
-    const { vetId } = useParams<{ vetId: string }>(); // Grabs vetId from the URL
+    const { vetId } = useParams<{ vetId: string }>();
     const [vet, setVet] = useState<VetResponseType | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -44,7 +44,7 @@ export default function VetDetails(): JSX.Element {
         fetchVetDetails();
     }, [vetId]);
 
-    // Helper function to render work hours
+
     const renderWorkHours = (workHoursJson: string) => {
         try {
             const workHours = JSON.parse(workHoursJson);
