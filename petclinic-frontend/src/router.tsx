@@ -59,7 +59,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.CustomerProfileEdit,
         element: (
-          <ProtectedRoute roles={['OWNER', 'ADMIN']}>
+          <ProtectedRoute roles={['OWNER']}>
             <ProfileEdit />
           </ProtectedRoute>
         ),
