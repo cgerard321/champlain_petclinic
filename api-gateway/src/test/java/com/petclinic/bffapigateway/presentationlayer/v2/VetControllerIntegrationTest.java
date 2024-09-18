@@ -61,7 +61,7 @@ class VetControllerIntegrationTest {
         mockServerConfigAuthService.stopMockServer();
     }
 
-    private static final String VET_ENDPOINT = "/api/v2/gateway/vet";
+    private static final String VET_ENDPOINT = "/api/v2/gateway/vets";
     private static final String BEARER_TOKEN = jwtTokenForValidAdmin;
 
     //#region Dummy data
@@ -86,7 +86,7 @@ class VetControllerIntegrationTest {
     void whenAddVet_asAdmin_thenReturnCreatedVetResponseDTO() {
 
         Mono<VetResponseDTO> result = webTestClient.post()
-                .uri("/api/v2/gateway/vet")
+                .uri(VET_ENDPOINT)
                 .cookie("Bearer", jwtTokenForValidAdmin)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(newVetRequestDTO), VetRequestDTO.class)
@@ -122,7 +122,7 @@ class VetControllerIntegrationTest {
     void whenAddVet_asARoleOtherThanAdmin_thenReturnIsUnauthorized() {
 
         webTestClient.post()
-                .uri("/api/v2/gateway/vet")
+                .uri(VET_ENDPOINT)
                 .cookie("Bearer", jwtTokenForInvalidOwnerId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(newVetRequestDTO), VetRequestDTO.class)
