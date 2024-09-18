@@ -1,10 +1,12 @@
 {
   "dependencies": {
+    "react-bootstrap": "^2.10.4",
+    "react-router-dom": "^6.26.2"
+  },
+  "devDependencies": {
     "@types/react-bootstrap": "^0.32.37",
-<<<<<<< HEAD
-=======
     "bootstrap": "^5.3.3",
->>>>>>> ec88c268 (add vet form has been reworked to be visible on the veterinarian page. build issues because react-bootstrap is not being found for now.)
     "react-bootstrap": "^2.10.4"
+    "@types/react-router-dom": "^5.3.3"
   }
 }

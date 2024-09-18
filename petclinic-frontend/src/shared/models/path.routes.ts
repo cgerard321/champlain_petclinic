@@ -1,5 +1,6 @@
 export enum AppRoutePaths {
   Default = '/',
+  EditInventory = 'inventories/inventory/:inventoryId/edit',
   Review = '/reviews',
   UpdateReview = '/updateReview/:reviewId/edit',
   Form = '/forms',

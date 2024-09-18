@@ -359,7 +359,7 @@ class InventoryControllerIntegrationTest {
 
 
     @Test
-    public void getInventoryByInventoryId_withValidInventoryId_Should_Succed(){
+    public void getInventoryByInventoryId_withValidInventoryId_Should_Succeed(){
         webTestClient.get()
                 .uri("/inventory/{inventoryId}" , inventory1.getInventoryId())
                 .accept(MediaType.APPLICATION_JSON)
@@ -975,6 +975,56 @@ class InventoryControllerIntegrationTest {
                     assertEquals(1, list.size());
                 });
     }
+
+    @Test
+    public void searchInventoryByInventoryNameAndInventoryTypeAndInventoryDescription_shouldSucceed() {
+        String inventoryName = "internal";
+        String inventoryType = "Internal";
+        String inventoryDescription = "inventoryDescription_3";
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/inventory")
+                        .queryParam("inventoryName", inventoryName)
+                        .queryParam("inventoryType", inventoryType)
+                        .queryParam("inventoryDescription", inventoryDescription)
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(InventoryResponseDTO.class)
+                .consumeWith(response -> {
+                    List<InventoryResponseDTO> inventories = response.getResponseBody();
+                    assertNotNull(inventories);
+                    assertTrue(inventories.size() > 0);
+                    assertEquals(inventoryName, inventories.get(0).getInventoryName());
+                    assertEquals(inventoryType, inventories.get(0).getInventoryType());
+                    assertEquals(inventoryDescription, inventories.get(0).getInventoryDescription());
+                });
+    }
+
+    @Test
+    public void searchInventoryByInventoryNameAndInventoryType_shouldSucceed() {
+        String inventoryName = "internal";
+        String inventoryType = "Internal";
+
+        webTestClient.get()
+                .uri(uriBuilder -> uriBuilder.path("/inventory")
+                        .queryParam("inventoryName", inventoryName)
+                        .queryParam("inventoryType", inventoryType)
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBodyList(InventoryResponseDTO.class)
+                .consumeWith(response -> {
+                    List<InventoryResponseDTO> inventories = response.getResponseBody();
+                    assertNotNull(inventories);
+                    assertTrue(inventories.size() > 0);
+                    assertEquals(inventoryName, inventories.get(0).getInventoryName());
+                    assertEquals(inventoryType, inventories.get(0).getInventoryType());
+                });
+    }
+
 
     /*
     @Test

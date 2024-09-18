@@ -49,7 +49,15 @@ export default function VisitListTable(): JSX.Element {
         onClick={() => navigate('/forms')}
         title="Let a review"
       >
-        Let a Review
+        Leave a Review
+      </button>
+      <p> </p>
+      <button
+        className="btn btn-dark"
+        onClick={() => navigate('/reviews')}
+        title="View review"
+      >
+        View Reviews
       </button>
       <h1>Visits List</h1>
       <table>

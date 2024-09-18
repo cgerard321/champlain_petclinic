@@ -10,9 +10,7 @@ import ProfileEdit from '@/pages/Customer/ProfileEdit.tsx';
 import Products from '@/pages/Product/Products.tsx';
 import AddingCustomer from '@/pages/Customer/AddingCustomer.tsx';
 import CustomerBillingPage from '@/pages/Bills/CostumerBills.tsx';
-//import path from 'path';
-import Review from './pages/Review/Review';
-import EditReviewForm from './features/visits/Review/EditReviewForm';
+import AllOwners from '@/pages/Customer/AllOwners.tsx';
 import PageNotFound from '@/pages/Error/PageNotFound.tsx';
 import Forbidden from '@/pages/Error/Forbidden.tsx';
 import Unauthorized from '@/pages/Error/Unauthorized.tsx';
@@ -21,6 +19,9 @@ import RequestTimeout from '@/pages/Error/RequestTimeout.tsx';
 import ServiceUnavailable from '@/pages/Error/ServiceUnavailable.tsx';
 import Visits from './pages/Visit/Visit';
 import AddReviewForm from './features/visits/Review/AddReviewForm';
+import EditReviewForm from './features/visits/Review/EditReviewForm';
+import Review from './pages/Review/Review';
+import EditInventory from '@/features/inventories/EditInventory.tsx';
 
 const router = createBrowserRouter([
   {
@@ -31,6 +32,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <Home />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.EditInventory,
+        element: (
+          <ProtectedRoute>
+            <EditInventory />
           </ProtectedRoute>
         ),
       },
@@ -75,7 +84,6 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-
       {
         path: AppRoutePaths.Vet,
         element: (
@@ -87,7 +95,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.CustomerProfileEdit,
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute roles={['OWNER']}>
             <ProfileEdit />
           </ProtectedRoute>
         ),
@@ -95,7 +103,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.AddingCustomer,
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute roles={['ADMIN']}>
             <AddingCustomer />
           </ProtectedRoute>
         ),
@@ -109,10 +117,10 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: AppRoutePaths.PageNotFound,
+        path: AppRoutePaths.AllCustomers,
         element: (
-          <ProtectedRoute>
-            <PageNotFound />
+          <ProtectedRoute roles={['ADMIN', 'VET']}>
+            <AllOwners />
           </ProtectedRoute>
         ),
       },
@@ -157,14 +165,6 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: '*',
-        element: (
-          <ProtectedRoute>
-            <PageNotFound />
-          </ProtectedRoute>
-        ),
-      },
-      {
         path: AppRoutePaths.Products,
         element: (
           <ProtectedRoute>
@@ -180,30 +180,13 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-      //   {
-      //       path: AppRoutePaths.PageNotFound,
-      //       element: /* PageNotFoundComponent */
-      //   },
-      //   {
-      //       path: AppRoutePaths.InternalServer,
-      //       element: /* InternalServerErrorComponent */
-      //   },
-      //   {
-      //       path: AppRoutePaths.ServiceTimeout,
-      //       element: /* ServiceTimeoutComponent */
-      //   },
-      //   {
-      //       path: AppRoutePaths.ServiceUnavailable,
-      //       element: /* ServiceUnavailableComponent */
-      //   },
-      //   {
-      //       path: AppRoutePaths.Unauthorized,
-      //       element: /* UnauthorizedComponent */
-      //   }
     ],
   },
   { path: AppRoutePaths.login, element: <Login /> },
-  //   {path: '*', element: /* PageNotFoundComponent */},
+  {
+    path: '*',
+    element: <PageNotFound />,
+  },
 ]);
 
 export default router;
