@@ -79,7 +79,7 @@ export default function InventoriesListTable(): JSX.Element {
       <table className="table table-striped">
         <thead>
           <tr>
-            {/*<td>Inventory ID</td>*/}
+            {/* <td>Inventory ID</td> */}
             <td>Name</td>
             <td>Type</td>
             <td>Description</td>
@@ -88,7 +88,7 @@ export default function InventoriesListTable(): JSX.Element {
             <td></td>
           </tr>
           <tr>
-            <td></td>
+            {/* <td></td> */}
             <td>
               <input
                 type="text"
@@ -188,12 +188,14 @@ export default function InventoriesListTable(): JSX.Element {
           {inventoryList.map(inventory => (
             <tr
               key={inventory.inventoryId}
-              onClick={() => navigate(`/productList/${inventory.inventoryId}`)}
+              onClick={() =>
+                navigate(`/inventory/${inventory.inventoryId}/products`)
+              }
             >
-              <td>{inventory.inventoryId}</td>
+              {/* <td>{inventory.inventoryId}</td> */}
               <td
                 onClick={() =>
-                  navigate(`/productList/${inventory.inventoryId}`)
+                  navigate(`/inventory/${inventory.inventoryId}/products`)
                 }
                 style={{
                   cursor: 'pointer',

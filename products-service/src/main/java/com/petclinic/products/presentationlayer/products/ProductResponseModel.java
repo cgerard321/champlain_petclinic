@@ -1,4 +1,4 @@
-package com.petclinic.products.presentationlayer;
+package com.petclinic.products.presentationlayer.products;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,4 +15,5 @@ public class ProductResponseModel {
     private String productName;
     private String productDescription;
     private Double productSalePrice;
+    private Double averageRating;
 }
