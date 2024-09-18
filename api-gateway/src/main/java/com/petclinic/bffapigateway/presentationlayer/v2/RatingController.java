@@ -7,7 +7,10 @@ import com.petclinic.bffapigateway.dtos.Ratings.RatingResponseModel;
 import com.petclinic.bffapigateway.exceptions.InvalidCredentialsException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +18,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.HashMap;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,15 +30,58 @@ public class RatingController {
     private final RatingsServiceClient ratingsServiceClient;
     private final AuthServiceClient authServiceClient;
 
+    private class UserCache{
+        private String userId;
+        private long lastUsed;
+
+        public UserCache(String userId){
+            this.userId = userId;
+            this.lastUsed = System.currentTimeMillis();
+        }
+
+        public String getUserId() {
+            this.lastUsed = System.currentTimeMillis();
+            return userId;
+        }
+
+        public long getLastUsed() {
+            return lastUsed;
+        }
+    }
+
+    // Ghetto User Cache
+    private HashMap<String, UserCache> jwtUserCache = new HashMap<>();
+
+    // Caches JWT to a UserID so we don't have to call Auth all the time
+    private Mono<String> getFromJWTUserId(String jwt){
+        if(jwtUserCache.containsKey(jwt)){
+            return Mono.just(jwtUserCache.get(jwt).getUserId());
+        }else{
+            return authServiceClient.validateToken(jwt)
+                    .switchIfEmpty(Mono.error(new InvalidCredentialsException("Invalid credentials")))
+                    .doOnNext(user -> jwtUserCache.put(jwt, new UserCache(user.getBody().getUserId())))
+                    .flatMap(u -> Mono.just(u.getBody().getUserId()));
+        }
+    }
+
+    // Goes through HashMap and cleans if was not used within 5 minutes.
+    private void cleanCache(){
+        jwtUserCache.entrySet().iterator().forEachRemaining(entry -> {
+            if(System.currentTimeMillis() - entry.getValue().lastUsed > 300000){
+                jwtUserCache.remove(entry.getKey());
+            }
+        });
+    }
+
     @SecuredEndpoint(allowedRoles = {Roles.ALL})
     @GetMapping(value = "/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<RatingResponseModel>> getRatingForProductIdAndCustomerId(
             @PathVariable String productId,
             @CookieValue("Bearer") String jwt
     ){
-        return authServiceClient.verifyUser(jwt)
-                .switchIfEmpty(Mono.error(new InvalidCredentialsException("Could not verify user")))
-                .flatMap(user -> ratingsServiceClient.getRatingForProductIdAndCustomerId(productId, user.getBody().getUserId()))
+        return getFromJWTUserId(jwt)
+                .doOnNext(e -> cleanCache())
+                .flatMap(user -> ratingsServiceClient.getRatingForProductIdAndCustomerId(productId, user))
                 .map(ResponseEntity::ok);
     }
 
@@ -48,9 +96,9 @@ public class RatingController {
             @RequestBody Mono<RatingRequestModel> requestModel,
             @CookieValue("Bearer") String jwt
     ){
-        return authServiceClient.verifyUser(jwt)
-                .switchIfEmpty(Mono.error(new InvalidCredentialsException("Could not verify user")))
-                .flatMap(user -> ratingsServiceClient.addRatingForProductIdAndCustomerId(productId, user.getBody().getUserId(), requestModel))
+        return getFromJWTUserId(jwt)
+                .doOnNext(e -> cleanCache())
+                .flatMap(user -> ratingsServiceClient.addRatingForProductIdAndCustomerId(productId, user, requestModel))
                 .map(c -> ResponseEntity.status(HttpStatus.CREATED).body(c))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
@@ -66,10 +114,10 @@ public class RatingController {
             @RequestBody Mono<RatingRequestModel> requestModel,
             @CookieValue("Bearer") String jwt
     ){
-        return authServiceClient.verifyUser(jwt)
-                .switchIfEmpty(Mono.error(new InvalidCredentialsException("Could not verify user")))
-                .flatMap(user -> ratingsServiceClient.updateRatingForProductIdAndCustomerId(productId, user.getBody().getUserId(), requestModel))
-                .map(c -> ResponseEntity.status(HttpStatus.CREATED).body(c))
+        return getFromJWTUserId(jwt)
+                .doOnNext(e -> cleanCache())
+                .flatMap(user -> ratingsServiceClient.updateRatingForProductIdAndCustomerId(productId, user, requestModel))
+                .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
@@ -79,9 +127,9 @@ public class RatingController {
             @PathVariable String productId,
             @CookieValue("Bearer") String jwt
     ){
-        return authServiceClient.verifyUser(jwt)
-                .switchIfEmpty(Mono.error(new InvalidCredentialsException("Could not verify user")))
-                .flatMap(user -> ratingsServiceClient.deleteRatingFromProductIdAssociatedToCustomerId(productId, user.getBody().getUserId()))
+        return getFromJWTUserId(jwt)
+                .doOnNext(e -> cleanCache())
+                .flatMap(user -> ratingsServiceClient.deleteRatingFromProductIdAssociatedToCustomerId(productId, user))
                 .map(ResponseEntity::ok);
     }
 }

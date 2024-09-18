@@ -7,7 +7,7 @@ import { getAllInventoryTypes } from '@/features/inventories/api/getAllInventory
 import deleteAllInventories from '@/features/inventories/api/deleteAllInventories.ts';
 import './InventoriesListTable.css';
 import deleteInventory from '@/features/inventories/api/deleteInventory.ts';
-import EditInventory from '@/features/inventories/EditInventory.tsx';
+import AddInventoryType from '@/features/inventories/AddInventoryType.tsx';
 
 //TODO: create add inventory form component and change the component being shown on the inventories page on the onClick event of the add inventory button
 export default function InventoriesListTable(): JSX.Element {
@@ -18,6 +18,7 @@ export default function InventoriesListTable(): JSX.Element {
   );
   const [inventoryDescription, setInventoryDescription] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showAddTypeForm, setShowAddTypeForm] = useState(false); // Add state to control the form visibility
   const navigate = useNavigate();
 
   const {
@@ -32,6 +33,12 @@ export default function InventoriesListTable(): JSX.Element {
   useEffect(() => {
     getInventoryList('', '', '');
     fetchAllInventoryTypes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage]);
+
+  useEffect(() => {
+    getInventoryList('', '', '');
+    refreshInventoryTypes();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage]);
 
@@ -72,6 +79,10 @@ export default function InventoriesListTable(): JSX.Element {
   const fetchAllInventoryTypes = async (): Promise<void> => {
     const data = await getAllInventoryTypes();
     setInventoryTypeList(data);
+  };
+
+  const refreshInventoryTypes = async (): Promise<void> => {
+    await fetchAllInventoryTypes();
   };
 
   return (
@@ -211,19 +222,11 @@ export default function InventoriesListTable(): JSX.Element {
                 <button
                   onClick={e => {
                     e.stopPropagation();
+                    navigate(`inventory/${inventory.inventoryId}/edit`);
                   }}
+                  className="btn btn-warning"
                 >
-                  <EditInventory
-                    inventory={inventory}
-                    updateInventory={(updatedInventory: Inventory) => {
-                      const updatedList = inventoryList.map(inv =>
-                        inv.inventoryId === updatedInventory.inventoryId
-                          ? updatedInventory
-                          : inv
-                      );
-                      setInventoryList(updatedList); // Update the list after editing
-                    }}
-                  />
+                  Edit
                 </button>
               </td>
               <td>
@@ -305,6 +308,20 @@ export default function InventoriesListTable(): JSX.Element {
       >
         Add Inventory
       </button>
+      <button
+        className="add-inventorytype-button btn btn-primary"
+        onClick={() => setShowAddTypeForm(true)} // Show the form when clicked
+      >
+        Add InventoryType
+      </button>
+      {showAddTypeForm && (
+        <AddInventoryType
+          show={showAddTypeForm}
+          handleClose={() => setShowAddTypeForm(false)}
+          refreshInventoryTypes={refreshInventoryTypes} // Pass the function to refresh inventory types
+        />
+      )}
+
       {showConfirmDialog && (
         <>
           <div
