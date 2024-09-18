@@ -49,6 +49,26 @@ public class MockServerConfigCustomersService {
                 );
     }
 
+    public void registerGetAllOwnersEndpoint() {
+        String responseBody = "["
+                + "{\"ownerId\":\"owner1\",\"firstName\":\"John\",\"lastName\":\"Does\",\"address\":\"123 Main St\",\"city\":\"Springfield\",\"province\":\"Chicago\",\"telephone\":\"1234567890\"},"
+                + "{\"ownerId\":\"owner2\",\"firstName\":\"Jane\",\"lastName\":\"Doew\",\"address\":\"456 Maple St\",\"city\":\"Shelbyville\",\"province\":\"Illinois\",\"telephone\":\"0987654321\"},"
+                + "{\"ownerId\":\"owner3\",\"firstName\":\"Jim\",\"lastName\":\"Doee\",\"address\":\"789 Oak St\",\"city\":\"Capital City\",\"province\":\"Longueuil\",\"telephone\":\"1122334455\"}"
+                + "]";
+
+        mockServerClient_CustomersService
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/owners")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withBody(json(responseBody))
+                );
+    }
+
     public void stopMockServer() {
         if(clientAndServer != null)
             this.clientAndServer.stop();

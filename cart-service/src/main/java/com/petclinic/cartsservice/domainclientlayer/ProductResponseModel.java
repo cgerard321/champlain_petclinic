@@ -1,4 +1,4 @@
-package com.petclinic.products.presentationlayer;
+package com.petclinic.cartsservice.domainclientlayer;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,8 +9,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductRequestModel {
+public class ProductResponseModel {
 
+    private String productId;
     private String productName;
     private String productDescription;
     private Double productSalePrice;

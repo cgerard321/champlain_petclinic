@@ -1,6 +1,6 @@
-package com.petclinic.products.presentationlayer;
+package com.petclinic.products.presentationlayer.products;
 
-import com.petclinic.products.businesslayer.ProductService;
+import com.petclinic.products.businesslayer.products.ProductService;
 import com.petclinic.products.utils.exceptions.InvalidInputException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -60,4 +60,5 @@ public class ProductController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
+
 }
