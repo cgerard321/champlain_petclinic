@@ -8,6 +8,7 @@ import java.util.Set;
 
 @Getter
 @Builder
+@Setter
 @NoArgsConstructor
 @Setter
 @AllArgsConstructor
