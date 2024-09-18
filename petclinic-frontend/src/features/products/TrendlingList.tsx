@@ -15,15 +15,14 @@ export default function TrendingList(){
         fetchProducts();
       }, []);
 
-      const sortMostTrending = trendingList.sort((a,b) => b.requestCount - a.requestCount);
-
-      const topThreeTrending = sortMostTrending.slice(0,4);
+      const sortMostTrending = [...trendingList].sort((a, b) => b.requestCount - a.requestCount);
+      const topFourTrending = sortMostTrending.slice(0,4);
 
 
       return (
         <div>
           <div className="grid">
-            {topThreeTrending
+            {topFourTrending
               .map(
                 (product: {
                   productId: string;

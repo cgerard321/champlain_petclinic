@@ -27,7 +27,7 @@ export default function ProductList(): JSX.Element {
 
       const product = await getProductByProductId(productId);
 
-      console.log(product.requestCount);
+      console.log("HERE IS THE PRODUCTS REQUEST COUNT: " + product.requestCount);
       // First, execute patchGetProduct
       // await patchGetProduct(productId);
   
