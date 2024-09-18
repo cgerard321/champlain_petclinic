@@ -17,9 +17,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
@@ -53,7 +51,6 @@ class VetControllerIntegrationTest {
         mockServerConfigVetService.registerAddVetEndpoint();
         mockServerConfigVetService.registerGetVetsEndpoint();
         mockServerConfigVetService.registerGetVetsEndpoint_withNoVets();
-
         mockServerConfigAuthService = new MockServerConfigAuthService();
         mockServerConfigAuthService.registerValidateTokenForAdminEndpoint();
         mockServerConfigAuthService.registerValidateTokenForVetEndpoint();
@@ -67,6 +64,7 @@ class VetControllerIntegrationTest {
     }
 
     private static final String VET_ENDPOINT = "/api/v2/gateway/vets";
+
     private static final String BEARER_TOKEN = jwtTokenForValidAdmin;
 
     //#region Dummy data
@@ -187,9 +185,5 @@ class VetControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isNotFound();
     }
-
-
-
-
 
 }

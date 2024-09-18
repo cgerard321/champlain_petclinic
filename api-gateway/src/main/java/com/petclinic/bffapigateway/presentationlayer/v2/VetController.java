@@ -31,7 +31,6 @@ import java.io.IOException;
 @RequestMapping("/api/v2/gateway/vets")
 @Validated
 @CrossOrigin(origins = "http://localhost:3000, http://localhost:80")
-
 public class VetController {
 
 
@@ -63,7 +62,6 @@ public class VetController {
 
     }
 
-
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @DeleteMapping(value = "{vetId}")
     public Mono<ResponseEntity<Void>> deleteVet(@PathVariable String vetId) {
@@ -89,7 +87,7 @@ public class VetController {
     }
 
 
-
-
 }
+
+
 
