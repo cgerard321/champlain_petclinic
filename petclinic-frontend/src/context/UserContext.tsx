@@ -84,3 +84,21 @@ export const IsOwner = (): boolean => {
     Array.from(context.user.roles).some((role: Role) => role.name === 'OWNER')
   );
 };
+
+export const IsVet = (): boolean => {
+  const context = useUser();
+  return (
+    context.user?.roles !== undefined &&
+    Array.from(context.user.roles).some((role: Role) => role.name === 'VET')
+  );
+};
+
+export const IsInventoryManager = (): boolean => {
+  const context = useUser();
+  return (
+    context.user?.roles !== undefined &&
+    Array.from(context.user.roles).some(
+      (role: Role) => role.name === 'INVENTORY_MANAGER'
+    )
+  );
+};

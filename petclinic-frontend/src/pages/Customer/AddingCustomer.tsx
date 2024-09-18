@@ -56,7 +56,7 @@ const AddingCustomer: React.FC = (): JSX.Element => {
   };
 
   return (
-    <div className="update-customer-form">
+    <div className="add-customer-form">
       <h1>Add Customer</h1>
       <form onSubmit={handleSubmit}>
         <label>First Name: </label>

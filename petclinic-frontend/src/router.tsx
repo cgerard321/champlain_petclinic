@@ -59,7 +59,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.CustomerProfileEdit,
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute roles={['OWNER', 'ADMIN']}>
             <ProfileEdit />
           </ProtectedRoute>
         ),
@@ -67,7 +67,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.AddingCustomer,
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute roles={['ADMIN']}>
             <AddingCustomer />
           </ProtectedRoute>
         ),
@@ -83,7 +83,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.AllCustomers,
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute roles={['ADMIN', 'VET']}>
             <AllOwners />
           </ProtectedRoute>
         ),
@@ -160,26 +160,6 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-      //   {
-      //       path: AppRoutePaths.PageNotFound,
-      //       element: /* PageNotFoundComponent */
-      //   },
-      //   {
-      //       path: AppRoutePaths.InternalServer,
-      //       element: /* InternalServerErrorComponent */
-      //   },
-      //   {
-      //       path: AppRoutePaths.ServiceTimeout,
-      //       element: /* ServiceTimeoutComponent */
-      //   },
-      //   {
-      //       path: AppRoutePaths.ServiceUnavailable,
-      //       element: /* ServiceUnavailableComponent */
-      //   },
-      //   {
-      //       path: AppRoutePaths.Unauthorized,
-      //       element: /* UnauthorizedComponent */
-      //   }
     ],
   },
   { path: AppRoutePaths.login, element: <Login /> },
