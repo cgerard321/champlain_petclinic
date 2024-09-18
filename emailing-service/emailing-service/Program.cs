@@ -45,10 +45,20 @@ catch (Exception ex)
 // Get the path for the default HTML file from configuration
 string? pathOfDefaultHtml = builder.Configuration["HtmlFilePath"];
 
-if (!string.IsNullOrEmpty(pathOfDefaultHtml))
+try
 {
-    EmailUtils.EmailTemplates.Add(new EmailTemplate("Default", File.ReadAllText(pathOfDefaultHtml)));
+    if (!string.IsNullOrEmpty(pathOfDefaultHtml))
+    {
+        EmailUtils.EmailTemplates.Add(new EmailTemplate("Default", File.ReadAllText(pathOfDefaultHtml)));
+    }
 }
+catch (DirectoryNotFoundException e)
+{
+    Console.WriteLine(e);
+    Console.WriteLine("Could not load HTML file. This means that we do not have the default template loaded");
+    throw;
+}
+
 
 // Add services to the container
 builder.Services.AddControllersWithViews();

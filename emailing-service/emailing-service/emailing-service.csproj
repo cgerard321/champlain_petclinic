@@ -23,4 +23,10 @@
       <Folder Include="Utils\Exception\" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="Properties\EmailDefaultTemplate.html">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
 </Project>

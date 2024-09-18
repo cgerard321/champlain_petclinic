@@ -1,4 +1,4 @@
-using emailing_service.Models;
+
 
 namespace emailing_service.Utils;
 
@@ -8,7 +8,7 @@ using System.Net;
 using System.Net.Mail;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
-
+using emailing_service.Models;
 
 public static class EmailUtils
 {
