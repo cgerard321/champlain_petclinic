@@ -19,11 +19,13 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("/api/v2/gateway/vets")
+
 @Validated
 @CrossOrigin(origins = "http://localhost:3000, http://localhost:80")
 public class VetController {
 
     private final VetsServiceClient vetsServiceClient;
+
 
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping()
@@ -50,7 +52,20 @@ public class VetController {
     }
 
 
+<<<<<<< HEAD
 }
 
 
 
+=======
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<VetResponseDTO>> addVet(@RequestBody Mono<VetRequestDTO> vetRequestDTO){
+        return vetsServiceClient.addVet(vetRequestDTO)
+                .map(v -> ResponseEntity.status(HttpStatus.CREATED).body(v))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+}
+
+>>>>>>> 438c882f (feat(VETS-CPC-1078): add a vet by filling a form as an admin (#654))
