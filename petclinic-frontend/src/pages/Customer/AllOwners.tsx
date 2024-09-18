@@ -59,7 +59,6 @@ const AllOwners: React.FC = (): JSX.Element => {
     };
   }, []);
 
-
   interface AxiosErrorResponse {
     response?: {
       data?: {
@@ -144,7 +143,6 @@ const AllOwners: React.FC = (): JSX.Element => {
     '5': 'Bird',
     '6': 'Hamster',
   };
-
 
   function isKeyOfOwnerResponseModel(
     key: string
@@ -284,7 +282,6 @@ const AllOwners: React.FC = (): JSX.Element => {
       </div>
       <div className="owners-container">
         <h1>Owners</h1>
-
 
         {/* All Owners */}
 
