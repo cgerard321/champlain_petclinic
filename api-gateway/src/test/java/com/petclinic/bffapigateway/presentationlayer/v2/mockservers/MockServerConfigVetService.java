@@ -260,6 +260,7 @@ public class MockServerConfigVetService {
                                                 new SpecialtyDTO("surgery", "surgery"),
                                                 new SpecialtyDTO("radiology", "radiology")
                                         )
+
                                 ))));
     }
 
@@ -267,5 +268,6 @@ public class MockServerConfigVetService {
         if (clientAndServer != null) {
             this.clientAndServer.stop();
         }
+
     }
 }

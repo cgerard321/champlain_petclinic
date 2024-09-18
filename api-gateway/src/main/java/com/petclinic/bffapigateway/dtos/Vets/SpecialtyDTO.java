@@ -5,12 +5,11 @@ import lombok.*;
 
 
 
+
+@Data
 @Getter
 @Builder
 @NoArgsConstructor
-@AllArgsConstructor
-
-@Data
 
 public class SpecialtyDTO {
     private String specialtyId;
