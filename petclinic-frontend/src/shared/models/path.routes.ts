@@ -1,11 +1,12 @@
 export enum AppRoutePaths {
   Default = '/',
+  EditInventory = 'inventories/inventory/:inventoryId/edit',
   Review = '/reviews',
   UpdateReview = '/updateReview/:reviewId/edit',
   Form = '/forms',
   Inventories = '/inventories',
+  Vet = '/vets',
   InventoryProducts = '/inventory/:inventoryId/products',
-  Vet = '/vet',
   CustomerBills = '/bills/customer',
   PageNotFound = '/page-not-found',
   Unauthorized = '/unauthorized',

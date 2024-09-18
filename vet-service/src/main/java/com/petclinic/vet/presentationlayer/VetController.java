@@ -37,7 +37,7 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 @RestController
-@RequestMapping("vet")
+@RequestMapping("vets")
 public class VetController {
     private final VetService vetService;
     private final RatingService ratingService;
