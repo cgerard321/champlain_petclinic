@@ -1,4 +1,4 @@
-import { ProductModel } from '@/features/inventories/models/ProductModels/ProductModel';
+import { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
 import { JSX, useEffect, useState } from 'react';
 import { getUserRating } from '../api/getUserRating';
 import StarRating from './StarRating';

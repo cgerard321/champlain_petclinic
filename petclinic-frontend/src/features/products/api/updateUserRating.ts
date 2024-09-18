@@ -1,4 +1,4 @@
-import { RatingModel } from '@/features/inventories/models/ProductModels/RatingModel';
+import { RatingModel } from '@/features/products/models/ProductModels/RatingModel';
 import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { getUserRating } from './getUserRating';
 
