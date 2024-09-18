@@ -11,9 +11,9 @@ interface ProtectedRouteProps {
 }
 
 export const ProtectedRoute = ({
-  children,
-  roles,
-}: ProtectedRouteProps): JSX.Element => {
+                                 children,
+                                 roles,
+                               }: ProtectedRouteProps): JSX.Element => {
   const navigate = useNavigate();
   const hasRequiredRole = useHasRequiredRole(roles);
 

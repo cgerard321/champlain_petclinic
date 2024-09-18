@@ -40,7 +40,7 @@ const AddingCustomer: React.FC = (): JSX.Element => {
   };
 
   const handleSubmit = async (
-    event: FormEvent<HTMLFormElement>
+      event: FormEvent<HTMLFormElement>
   ): Promise<void> => {
     event.preventDefault();
     if (!validate()) return;
@@ -58,73 +58,73 @@ const AddingCustomer: React.FC = (): JSX.Element => {
   };
 
   return (
-    <div>
-      <NavBar />
-      <div className="add-customer-form">
-        <h1>Add Customer</h1>
-        <form onSubmit={handleSubmit}>
-          <label>First Name: </label>
-          <input
-            type="text"
-            name="firstName"
-            value={owner.firstName}
-            onChange={handleChange}
-          />
-          {errors.firstName && (
-            <span className="error">{errors.firstName}</span>
-          )}
-          <br />
-          <label>Last Name: </label>
-          <input
-            type="text"
-            name="lastName"
-            value={owner.lastName}
-            onChange={handleChange}
-          />
-          {errors.lastName && <span className="error">{errors.lastName}</span>}
-          <br />
-          <label>Address: </label>
-          <input
-            type="text"
-            name="address"
-            value={owner.address}
-            onChange={handleChange}
-          />
-          {errors.address && <span className="error">{errors.address}</span>}
-          <br />
-          <label>City: </label>
-          <input
-            type="text"
-            name="city"
-            value={owner.city}
-            onChange={handleChange}
-          />
-          {errors.city && <span className="error">{errors.city}</span>}
-          <br />
-          <label>Province: </label>
-          <input
-            type="text"
-            name="province"
-            value={owner.province}
-            onChange={handleChange}
-          />
-          {errors.province && <span className="error">{errors.province}</span>}
-          <br />
-          <label>Telephone: </label>
-          <input
-            type="text"
-            name="telephone"
-            value={owner.telephone}
-            onChange={handleChange}
-          />
-          {errors.telephone && (
-            <span className="error">{errors.telephone}</span>
-          )}
-          <br />
-          <button type="submit">Add</button>
-        </form>
+      <div>
+        <NavBar />
+        <div className="add-customer-form">
+          <h1>Add Customer</h1>
+          <form onSubmit={handleSubmit}>
+            <label>First Name: </label>
+            <input
+                type="text"
+                name="firstName"
+                value={owner.firstName}
+                onChange={handleChange}
+            />
+            {errors.firstName && (
+                <span className="error">{errors.firstName}</span>
+            )}
+            <br />
+            <label>Last Name: </label>
+            <input
+                type="text"
+                name="lastName"
+                value={owner.lastName}
+                onChange={handleChange}
+            />
+            {errors.lastName && <span className="error">{errors.lastName}</span>}
+            <br />
+            <label>Address: </label>
+            <input
+                type="text"
+                name="address"
+                value={owner.address}
+                onChange={handleChange}
+            />
+            {errors.address && <span className="error">{errors.address}</span>}
+            <br />
+            <label>City: </label>
+            <input
+                type="text"
+                name="city"
+                value={owner.city}
+                onChange={handleChange}
+            />
+            {errors.city && <span className="error">{errors.city}</span>}
+            <br />
+            <label>Province: </label>
+            <input
+                type="text"
+                name="province"
+                value={owner.province}
+                onChange={handleChange}
+            />
+            {errors.province && <span className="error">{errors.province}</span>}
+            <br />
+            <label>Telephone: </label>
+            <input
+                type="text"
+                name="telephone"
+                value={owner.telephone}
+                onChange={handleChange}
+            />
+            {errors.telephone && (
+                <span className="error">{errors.telephone}</span>
+            )}
+            <br />
+            <button type="submit">Add</button>
+          </form>
+        </div>
       </div>
-    </div>
   );
 };
 
