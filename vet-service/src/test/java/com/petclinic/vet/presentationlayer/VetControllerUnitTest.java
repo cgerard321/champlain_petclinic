@@ -381,7 +381,7 @@ class VetControllerUnitTest {
 
         client
                 .get()
-                .uri("/vets/vetsBillId/" + VET_BILL_ID)
+                .uri("/vets/vetBillId/" + VET_BILL_ID)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
