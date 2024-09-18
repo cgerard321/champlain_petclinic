@@ -3,6 +3,7 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 import com.petclinic.bffapigateway.domainclientlayer.InventoryServiceClient;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
+import com.petclinic.bffapigateway.dtos.Inventory.InventoryTypeRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryTypeResponseDTO;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
@@ -54,6 +55,15 @@ public class InventoryController {
     @ApiResponses(value = {@ApiResponse(description = "All available inventory types", responseCode = "200")})
     public ResponseEntity<Flux<InventoryTypeResponseDTO>> getAllInventoryTypes() {
         return ResponseEntity.ok().body(inventoryServiceClient.getAllInventoryTypes());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @PostMapping(value = "/types")
+    @ApiResponses(value = {@ApiResponse(description = "Creates a new inventory type", responseCode = "201"), @ApiResponse(description = "Creates a new inventory type with invalid data", responseCode = "400")})
+    public Mono<ResponseEntity<InventoryTypeResponseDTO>> createInventoryType(@RequestBody InventoryTypeRequestDTO inventoryTypeRequestDTO) {
+        return inventoryServiceClient.addInventoryType(inventoryTypeRequestDTO)
+                .map(inventoryTypeResponseDTO -> ResponseEntity.status(201).body(inventoryTypeResponseDTO))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
     @DeleteMapping(value = "/{inventoryId}")
