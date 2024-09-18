@@ -23,14 +23,14 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/api/v2/gateway/vet")
+@RequestMapping("/api/v2/gateway/vets")
 @Validated
 @CrossOrigin(origins = "http://localhost:3000, http://localhost:80")
 public class VetController {
 
     private final VetsServiceClient vetsServiceClient;
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping(value = "{vetId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<VetResponseDTO>> getVetByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getVetByVetId(vetId)
