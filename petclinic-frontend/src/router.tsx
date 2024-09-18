@@ -21,6 +21,7 @@ import RequestTimeout from '@/pages/Error/RequestTimeout.tsx';
 import ServiceUnavailable from '@/pages/Error/ServiceUnavailable.tsx';
 import Visits from './pages/Visit/Visit';
 import AddReviewForm from './features/visits/Review/AddReviewForm';
+import EditInventory from '@/features/inventories/EditInventory.tsx';
 
 const router = createBrowserRouter([
   {
@@ -57,6 +58,14 @@ const router = createBrowserRouter([
           <ProtectedRoute>
             <EditReviewForm />
           </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.EditInventory,
+        element: (
+            <ProtectedRoute>
+              <EditInventory />
+            </ProtectedRoute>
         ),
       },
       {

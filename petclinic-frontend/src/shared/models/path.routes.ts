@@ -17,6 +17,7 @@ export enum AppRoutePaths {
   AddingCustomer = '/customer/add',
   AllCustomers = '/customers',
   Home = '/home',
+  EditInventory = 'inventories/inventory/:inventoryId/edit',
   Forbidden = '/forbidden',
   Products = '/products',
   Visits = '/visits',
