@@ -44,7 +44,7 @@ public class VetsServiceClient {
             @Value("${app.vet-service.port}") String vetsServicePort
     ) {
         this.webClientBuilder = webClientBuilder;
-        vetsServiceUrl = "http://" + vetsServiceHost + ":" + vetsServicePort + "/vet";
+        vetsServiceUrl = "http://" + vetsServiceHost + ":" + vetsServicePort;
     }
 
     //Photo
@@ -353,19 +353,18 @@ public class VetsServiceClient {
                 .bodyToFlux(VetResponseDTO.class);
     }
 
-    public Mono<VetResponseDTO> addVet(Mono<VetRequestDTO> model) {
-
-        return webClientBuilder
-                .build()
-                .post()
-                .uri(vetsServiceUrl)
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .body(model, VetRequestDTO.class)
-                .retrieve()
-                .onStatus(HttpStatusCode::is5xxServerError,error->
-                        Mono.error(new IllegalArgumentException("Something went wrong"))
-                )
-                .bodyToMono(VetResponseDTO.class);
+    public Mono<VetResponseDTO> addVet(Mono<VetRequestDTO> vetRequestDTO){
+        String vetId = UUID.randomUUID().toString();
+        return vetRequestDTO.flatMap(request ->{
+            request.setVetId(vetId);
+            return webClientBuilder
+                    .build()
+                    .post()
+                    .uri(vetsServiceUrl+"/vet")
+                    .body(BodyInserters.fromValue(request))
+                    .retrieve()
+                    .bodyToMono(VetResponseDTO.class);
+        });
     }
 
 
