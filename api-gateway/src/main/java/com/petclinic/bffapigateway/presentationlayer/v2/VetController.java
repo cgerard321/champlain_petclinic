@@ -54,13 +54,13 @@ public class VetController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping(value = "{vetId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<VetResponseDTO>> getVetByVetId(@PathVariable String vetId) {
         return vetsServiceClient.getVetByVetId(vetId)
                 .map(vet -> ResponseEntity.status(HttpStatus.OK).body(vet))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
+
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
