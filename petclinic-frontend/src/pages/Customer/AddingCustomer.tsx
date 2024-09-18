@@ -3,7 +3,7 @@ import { FormEvent, useState } from 'react';
 import { addOwner } from '@/features/customers/api/addOwner.ts';
 import { useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes';
-import './ProfileEdit';
+import '@/features/customers/components/UpdateCustomerForm.css';
 import { OwnerModel } from '@/features/customers/models/OwnerModel.ts';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 
