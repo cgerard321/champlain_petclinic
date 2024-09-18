@@ -3,5 +3,5 @@ export enum Workday {
   Tuesday = 'Tuesday',
   Wednesday = 'Wednesday',
   Thursday = 'Thursday',
-  Friday = 'Friday'
+  Friday = 'Friday',
 }

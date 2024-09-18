@@ -44,7 +44,7 @@ public class VetsServiceClient {
             @Value("${app.vet-service.port}") String vetsServicePort
     ) {
         this.webClientBuilder = webClientBuilder;
-        vetsServiceUrl = "http://" + vetsServiceHost + ":" + vetsServicePort + "/vets";
+        vetsServiceUrl = "http://" + vetsServiceHost + ":" + vetsServicePort;
     }
 
     //Photo
@@ -360,7 +360,7 @@ public class VetsServiceClient {
             return webClientBuilder
                     .build()
                     .post()
-                    .uri(vetsServiceUrl)
+                    .uri(vetsServiceUrl+"/vet")
                     .body(BodyInserters.fromValue(request))
                     .retrieve()
                     .bodyToMono(VetResponseDTO.class);
