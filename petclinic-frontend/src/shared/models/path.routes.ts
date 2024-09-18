@@ -16,4 +16,5 @@ export enum AppRoutePaths {
   Forbidden = '/forbidden',
   Products = '/products',
   EditInventory = 'inventories/inventory/:inventoryId/edit',
+  Visits = '/visits',
 }

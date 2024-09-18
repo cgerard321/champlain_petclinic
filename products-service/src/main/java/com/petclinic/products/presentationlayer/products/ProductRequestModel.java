@@ -1,4 +1,4 @@
-package com.petclinic.products.presentationlayer;
+package com.petclinic.products.presentationlayer.products;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

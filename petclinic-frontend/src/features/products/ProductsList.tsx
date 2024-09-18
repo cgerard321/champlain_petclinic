@@ -20,20 +20,15 @@ export default function ProductList(): JSX.Element {
       <div className="grid">
         {productList
           .filter(data => data != null)
-          .map(
-            (product: {
-              productId: string;
-              productName: string;
-              productDescription: string;
-              productSalePrice: number;
-            }) => (
-              <div className="card" key={product.productId}>
-                <h2>{product.productName}</h2>
-                <p>{product.productDescription}</p>
-                <p>Price: ${product.productSalePrice.toFixed(2)}</p>
-              </div>
-            )
-          )}
+          .map((product: ProductModel) => (
+            <div className="card" key={product.productId}>
+              <h2>{product.productName}</h2>
+              <p>{product.productDescription}</p>
+              <p>Price: ${product.productSalePrice.toFixed(2)}</p>
+              <p>Quantity: {product.productQuantity}</p>
+              <p>Status: {product.status}</p>
+            </div>
+          ))}
       </div>
     </div>
   );
