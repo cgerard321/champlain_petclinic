@@ -1,6 +1,7 @@
 export enum AppRoutePaths {
   Default = '/',
   Inventories = '/inventories',
+  InventoryProducts = '/inventory/:inventoryId/products',
   Vet = '/vet',
   CustomerBills = '/bills/customer',
   PageNotFound = '/page-not-found',
@@ -15,4 +16,5 @@ export enum AppRoutePaths {
   Home = '/home',
   Forbidden = '/forbidden',
   Products = '/products',
+  Visits = '/visits',
 }
