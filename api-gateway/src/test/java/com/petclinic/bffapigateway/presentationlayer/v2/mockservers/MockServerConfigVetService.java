@@ -24,7 +24,7 @@ public class MockServerConfigVetService {
                 .when(
                         request()
                                 .withMethod("POST")
-                                .withPath("/vet")
+                                .withPath("/vets")
                                 .withBody(json("{"
                                         + "\"vetBillId\":\"bill001\","
                                         + "\"firstName\":\"John\","

@@ -4,7 +4,7 @@ export enum AppRoutePaths {
   UpdateReview = '/updateReview/:reviewId/edit',
   Form = '/forms',
   Inventories = '/inventories',
-  Vet = '/vet',
+  Vet = '/vets',
   InventoryProducts = '/inventory/:inventoryId/products',
   CustomerBills = '/bills/customer',
   PageNotFound = '/page-not-found',
