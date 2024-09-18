@@ -65,6 +65,8 @@ export default function Vet(): JSX.Element {
         }
     };
 
+    const [formVisible, setFormVisible] = useState(false);
+
     const parseWorkHours = (workHoursJson: string): string => {
         try {
             const workHours: WorkHoursData = JSON.parse(workHoursJson);
@@ -101,6 +103,12 @@ export default function Vet(): JSX.Element {
         <div style={{ padding: '20px' }}>
             <NavBar />
             <div style={{ marginBottom: '20px', textAlign: 'right' }}>
+                <button onClick={() => setFormVisible(prev => !prev)}>
+                    {formVisible ? 'Cancel' : 'Add Vet'}
+                </button>
+                {formVisible && <AddVet />}
+
+
                 <input
                     type="text"
                     value={searchQuery}
