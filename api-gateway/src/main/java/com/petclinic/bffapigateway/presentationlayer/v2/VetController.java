@@ -69,6 +69,7 @@ public class VetController {
         return vetsServiceClient.getVetByVetId(vetId)
                 .map(vet -> ResponseEntity.status(HttpStatus.OK).body(vet))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
+
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
