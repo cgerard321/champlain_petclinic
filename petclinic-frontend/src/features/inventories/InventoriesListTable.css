@@ -25,3 +25,10 @@
     border-collapse: collapse;
     border-spacing: 0;
 }
+
+
+.add-inventorytype-button{
+    text-align: right;
+    float: right;
+    margin-right: 25px;
+}

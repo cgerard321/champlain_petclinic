@@ -17,6 +17,7 @@ export default function InventoriesListTable(): JSX.Element {
   );
   const [inventoryDescription, setInventoryDescription] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showAddTypeForm, setShowAddTypeForm] = useState(false); // Add state to control the form visibility
   const navigate = useNavigate();
 
   const {
@@ -31,6 +32,12 @@ export default function InventoriesListTable(): JSX.Element {
   useEffect(() => {
     getInventoryList('', '', '');
     fetchAllInventoryTypes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage]);
+
+  useEffect(() => {
+    getInventoryList('', '', '');
+    refreshInventoryTypes();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage]);
 
@@ -71,6 +78,10 @@ export default function InventoriesListTable(): JSX.Element {
   const fetchAllInventoryTypes = async (): Promise<void> => {
     const data = await getAllInventoryTypes();
     setInventoryTypeList(data);
+  };
+
+  const refreshInventoryTypes = async (): Promise<void> => {
+    await fetchAllInventoryTypes();
   };
 
   return (
@@ -296,6 +307,20 @@ export default function InventoriesListTable(): JSX.Element {
       >
         Add Inventory
       </button>
+      <button
+        className="add-inventorytype-button btn btn-primary"
+        onClick={() => setShowAddTypeForm(true)} // Show the form when clicked
+      >
+        Add InventoryType
+      </button>
+      {showAddTypeForm && (
+        <AddInventoryType
+          show={showAddTypeForm}
+          handleClose={() => setShowAddTypeForm(false)}
+          refreshInventoryTypes={refreshInventoryTypes} // Pass the function to refresh inventory types
+        />
+      )}
+
       {showConfirmDialog && (
         <>
           <div
