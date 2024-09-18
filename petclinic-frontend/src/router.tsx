@@ -84,7 +84,6 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-
       {
         path: AppRoutePaths.Vet,
         element: (
@@ -122,14 +121,6 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <AllOwners />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: AppRoutePaths.PageNotFound,
-        element: (
-          <ProtectedRoute>
-            <PageNotFound />
           </ProtectedRoute>
         ),
       },
@@ -174,14 +165,6 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: '*',
-        element: (
-          <ProtectedRoute>
-            <PageNotFound />
-          </ProtectedRoute>
-        ),
-      },
-      {
         path: AppRoutePaths.Products,
         element: (
           <ProtectedRoute>
@@ -200,7 +183,10 @@ const router = createBrowserRouter([
     ],
   },
   { path: AppRoutePaths.login, element: <Login /> },
-  //   {path: '*', element: /* PageNotFoundComponent */},
+  {
+    path: '*',
+    element: <PageNotFound />,
+  },
 ]);
 
 export default router;
