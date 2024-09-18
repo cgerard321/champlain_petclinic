@@ -18,6 +18,9 @@ import InternalServerError from '@/pages/Error/InternalServerError.tsx';
 import RequestTimeout from '@/pages/Error/RequestTimeout.tsx';
 import ServiceUnavailable from '@/pages/Error/ServiceUnavailable.tsx';
 import Visits from './pages/Visit/Visit';
+import AddReviewForm from './features/visits/Review/AddReviewForm';
+import EditReviewForm from './features/visits/Review/EditReviewForm';
+import Review from './pages/Review/Review';
 
 const router = createBrowserRouter([
   {
@@ -28,6 +31,32 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <Home />
+          </ProtectedRoute>
+        ),
+      },
+
+      {
+        path: AppRoutePaths.Form,
+        element: (
+          <ProtectedRoute>
+            <AddReviewForm />
+          </ProtectedRoute>
+        ),
+      },
+
+      {
+        path: AppRoutePaths.Review,
+        element: (
+          <ProtectedRoute>
+            <Review />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.UpdateReview,
+        element: (
+          <ProtectedRoute>
+            <EditReviewForm />
           </ProtectedRoute>
         ),
       },

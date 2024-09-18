@@ -3,7 +3,7 @@ import { FormEvent, useState } from 'react';
 import { addOwner } from '@/features/customers/api/addOwner.ts';
 import { useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes';
-import './ProfileEdit.css';
+import '@/features/customers/components/UpdateCustomerForm.css';
 import { OwnerModel } from '@/features/customers/models/OwnerModel.ts';
 
 const AddingCustomer: React.FC = (): JSX.Element => {
@@ -56,7 +56,7 @@ const AddingCustomer: React.FC = (): JSX.Element => {
   };
 
   return (
-    <div className="profile-edit">
+    <div className="add-customer-form">
       <h1>Add Customer</h1>
       <form onSubmit={handleSubmit}>
         <label>First Name: </label>
