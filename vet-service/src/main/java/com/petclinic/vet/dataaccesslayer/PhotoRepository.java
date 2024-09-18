@@ -9,4 +9,5 @@ import java.util.Optional;
 public interface PhotoRepository extends ReactiveCrudRepository<Photo, Integer> {
     Mono<Photo> findByVetId(String vetId);
 
+    Mono<Long> deleteByVetId(String vetId);
 }

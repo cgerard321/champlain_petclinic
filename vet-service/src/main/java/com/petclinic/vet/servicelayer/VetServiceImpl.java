@@ -18,6 +18,8 @@ import com.petclinic.vet.dataaccesslayer.VetRepository;
 import com.petclinic.vet.dataaccesslayer.badges.Badge;
 import com.petclinic.vet.dataaccesslayer.badges.BadgeRepository;
 import com.petclinic.vet.dataaccesslayer.badges.BadgeTitle;
+import com.petclinic.vet.dataaccesslayer.education.EducationRepository;
+import com.petclinic.vet.dataaccesslayer.ratings.RatingRepository;
 import com.petclinic.vet.exceptions.InvalidInputException;
 import com.petclinic.vet.exceptions.NotFoundException;
 import com.petclinic.vet.presentationlayer.VetRequestDTO;
@@ -29,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StreamUtils;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -45,6 +48,8 @@ public class VetServiceImpl implements VetService {
     private final VetRepository vetRepository;
     private final BadgeRepository badgeRepository;
     private final PhotoRepository photoRepository;
+    private final RatingRepository ratingRepository;
+    private final EducationRepository educationRepository;
 
     @Override
     public Flux<VetResponseDTO> getAll() {
@@ -109,12 +114,25 @@ public class VetServiceImpl implements VetService {
                 .map(EntityDtoUtil::vetEntityToResponseDTO);
     }
 
+    @Transactional
     @Override
     public Mono<Void> deleteVetByVetId(String vetId) {
         return vetRepository.findVetByVetId(vetId)
                 .switchIfEmpty(Mono.error(new NotFoundException("No vet with this vetId was found: " + vetId)))
-                .flatMap(vetRepository::delete);
+                .flatMap(vet -> {
+                    log.info("Deleting associated data for vetId: {}", vetId);
+                    Mono<Long> deleteBadges = badgeRepository.deleteByVetId(vetId);
+                    Mono<Long> deletePhotos = photoRepository.deleteByVetId(vetId);
+                    Mono<Long> deleteRatings = ratingRepository.deleteByVetId(vetId);
+                    Mono<Long> deleteEducations = educationRepository.deleteByVetId(vetId);
+
+                    return Mono.when(deleteBadges, deletePhotos, deleteRatings, deleteEducations)
+                            .then(vetRepository.delete(vet))
+                            .doOnSuccess(unused -> log.info("Successfully deleted vetId: {}", vetId))
+                            .doOnError(error -> log.error("Error deleting vetId: {}", vetId, error));
+                });
     }
+
 
     private byte[] loadImage(String imagePath) {
         try {
