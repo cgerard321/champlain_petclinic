@@ -2,7 +2,7 @@ import axios from 'axios';
 import { ProductModel } from '@/features/inventories/models/ProductModels/ProductModel.ts';
 
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:8080/api/v2/gateway', // Adjust this to match your API's base URL
+  baseURL: 'http://localhost:8080/api/v2/gateway', 
   headers: {
     'Content-Type': 'application/json',
   },
