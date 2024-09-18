@@ -149,6 +149,7 @@ public class MockServerConfigVetService {
         if(clientAndServer != null)
             this.clientAndServer.stop();
     }
+
     public void registerGetVetByFirstNameEndpoint(String firstName, VetResponseDTO responseDTO) throws JsonProcessingException {
         mockServerClient_VetService
                 .when(
@@ -204,3 +205,4 @@ public class MockServerConfigVetService {
     }
 
 }
+
