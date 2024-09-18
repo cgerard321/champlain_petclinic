@@ -10,8 +10,10 @@ export async function getUserRating(productId: string): Promise<number> {
       return res.data.rating == null ? 0 : res.data.rating;
     case 422:
       console.error('IDs are invalid');
+      return 0;
     case 401:
       console.error('Could not get token, unauthorized..');
+      return 0;
     default:
       return 0;
   }
