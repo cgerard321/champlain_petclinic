@@ -4,6 +4,7 @@ import { getProductByProductId } from '@/features/products/api/getProductByProdu
 import { ProductModel } from '@/features/inventories/models/ProductModels/ProductModel.ts';
 import './ProductList.css';
 // import { patchGetProduct } from './api/patchGetProduct';
+// import { patchGetProduct } from './api/patchGetProduct';
 
 export default function ProductList(): JSX.Element {
   const [productList, setProductList] = useState<ProductModel[]>([]); // List of all products
@@ -25,6 +26,8 @@ export default function ProductList(): JSX.Element {
     try {
 
       const product = await getProductByProductId(productId);
+
+      console.log(product.requestCount);
       // First, execute patchGetProduct
       // await patchGetProduct(productId);
   
