@@ -180,6 +180,7 @@ class VetControllerIntegrationTest {
     @Test
     public void getVetById_ValidId_ReturnsVet() {
         String validVetId = "ac9adeb8-625b-11ee-8c99-0242ac120002";
+
         VetResponseDTO expectedVetResponse = VetResponseDTO.builder()
                 .vetId(validVetId)
                 .vetBillId("5")
@@ -203,7 +204,7 @@ class VetControllerIntegrationTest {
                                 .name("surgery")
                                 .build(),
                         SpecialtyDTO.builder()
-                                .specialtyId("100001")
+                                .specialtyId("radiology")
                                 .name("radiology")
                                 .build()))
                 .build();
@@ -224,6 +225,11 @@ class VetControllerIntegrationTest {
                     assertEquals(expectedVetResponse.getEmail(), vetResponse.getEmail());
                     assertEquals(expectedVetResponse.getPhoneNumber(), vetResponse.getPhoneNumber());
                     assertEquals(expectedVetResponse.getResume(), vetResponse.getResume());
+                    assertEquals("Henry", vetResponse.getFirstName());
+                    assertEquals("Stevens", vetResponse.getLastName());
+                    assertEquals("stevenshenry@email.com", vetResponse.getEmail());
+                    assertEquals("(514)-634-8276 #2389", vetResponse.getPhoneNumber());
+                    assertEquals("Practicing since 1 years", vetResponse.getResume());
                     assertEquals(expectedVetResponse.getWorkday(), vetResponse.getWorkday());
                     assertEquals(expectedVetResponse.getWorkHoursJson(), vetResponse.getWorkHoursJson());
                     assertEquals(expectedVetResponse.isActive(), vetResponse.isActive());
@@ -247,7 +253,7 @@ class VetControllerIntegrationTest {
                 .consumeWith(response -> {
                     String responseBody = response.getResponseBody();
                     assertNotNull(responseBody);
-                    assertTrue(responseBody.contains("vetId not found: " + invalidVetId));
+                    assertTrue(responseBody.contains("vetId not found: ac9adeb8-625b-11ee-8c99-0242ac12000200000"));
                 });
     }
 }
