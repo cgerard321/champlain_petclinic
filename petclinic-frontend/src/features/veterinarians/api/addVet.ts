@@ -5,5 +5,7 @@ import { VetResponseModel } from '@/features/veterinarians/models/VetResponseMod
 export const addVet = async (
   vet: VetResponseModel
 ): Promise<AxiosResponse<void>> => {
+
   return await axiosInstance.post<void>('/vets', vet);
+
 };
