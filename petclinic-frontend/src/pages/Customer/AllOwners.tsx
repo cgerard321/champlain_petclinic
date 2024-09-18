@@ -110,6 +110,22 @@ const AllOwners: React.FC = (): JSX.Element => {
     }
   };
 
+  const calculateAge = (birthDate: Date): number => {
+    const birth = new Date(birthDate);
+    const ageDiffMs = Date.now() - birth.getTime();
+    const ageDate = new Date(ageDiffMs);
+    return Math.abs(ageDate.getUTCFullYear() - 1970);
+  };
+
+  const petTypeMapping: { [key: string]: string } = {
+    '1': 'Cat',
+    '2': 'Dog',
+    '3': 'Lizard',
+    '4': 'Snake',
+    '5': 'Bird',
+    '6': 'Hamster',
+  };
+
   return (
     <div>
       <NavBar />
@@ -158,6 +174,35 @@ const AllOwners: React.FC = (): JSX.Element => {
                 </tr>
               </tbody>
             </table>
+
+            {/* Pets */}
+            {searchResult.pets && searchResult.pets.length > 0 && (
+              <div className="pets-container">
+                <h3>Pets</h3>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Pet Id</th>
+                      <th>Name</th>
+                      <th>Species</th>
+                      <th>Age</th>
+                      <th>Weight</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {searchResult.pets.map(pet => (
+                      <tr key={pet.petId}>
+                        <td>{pet.petId}</td>
+                        <td>{pet.name}</td>
+                        <td>{petTypeMapping[pet.petTypeId] || 'Unknown'}</td>
+                        <td>{calculateAge(pet.birthDate)}</td>
+                        <td>{pet.weight}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
 
             {/* Bills */}
             {bills.length > 0 && (
