@@ -208,11 +208,11 @@ export default function InventoriesListTable(): JSX.Element {
               <td>{inventory.inventoryDescription}</td>
               <td>
                 <button
-                    onClick={e => {
-                      e.stopPropagation();
-                      navigate(`inventory/${inventory.inventoryId}/edit`);
-                    }}
-                    className="btn btn-warning"
+                  onClick={e => {
+                    e.stopPropagation();
+                    navigate(`inventory/${inventory.inventoryId}/edit`);
+                  }}
+                  className="btn btn-warning"
                 >
                   Edit
                 </button>

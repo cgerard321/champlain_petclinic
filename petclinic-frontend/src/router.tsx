@@ -21,7 +21,7 @@ import Visits from './pages/Visit/Visit';
 import AddReviewForm from './features/visits/Review/AddReviewForm';
 import EditReviewForm from './features/visits/Review/EditReviewForm';
 import Review from './pages/Review/Review';
-import EditInventory from "@/features/inventories/EditInventory.tsx";
+import EditInventory from '@/features/inventories/EditInventory.tsx';
 
 const router = createBrowserRouter([
   {
@@ -38,9 +38,9 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.EditInventory,
         element: (
-            <ProtectedRoute>
-              <EditInventory />
-            </ProtectedRoute>
+          <ProtectedRoute>
+            <EditInventory />
+          </ProtectedRoute>
         ),
       },
       {

@@ -1,12 +1,9 @@
 import * as React from 'react';
 import { FormEvent, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import {
-  getInventory,
-  updateInventory
-} from "@/shared/api/EditInventory.ts";
-import {InventoryResponseModel} from "@/features/inventories/models/InventoryModels/InventoryResponseModel.ts";
-import {InventoryRequestModel} from "@/features/inventories/models/InventoryModels/InventoryRequestModel.ts";
+import { getInventory, updateInventory } from '@/shared/api/EditInventory.ts';
+import { InventoryResponseModel } from '@/features/inventories/models/InventoryModels/InventoryResponseModel.ts';
+import { InventoryRequestModel } from '@/features/inventories/models/InventoryModels/InventoryRequestModel.ts';
 
 interface ApiError {
   message: string;
@@ -32,7 +29,7 @@ const EditReviewForm: React.FC = (): JSX.Element => {
       if (inventoryId) {
         try {
           const response: InventoryResponseModel =
-              await getInventory(inventoryId);
+            await getInventory(inventoryId);
           setInventory({
             inventoryName: response.inventoryName,
             inventoryType: response.inventoryType,
@@ -40,15 +37,15 @@ const EditReviewForm: React.FC = (): JSX.Element => {
           });
         } catch (error) {
           console.error(
-              `Error fetching inventory with ID ${inventoryId}:`,
-              error
+            `Error fetching inventory with ID ${inventoryId}:`,
+            error
           );
         }
       }
     };
 
     fetchInventoryData().catch(error =>
-        console.error('Error in fetchReviewData:', error)
+      console.error('Error in fetchReviewData:', error)
     );
   }, [inventoryId]);
 
@@ -58,10 +55,10 @@ const EditReviewForm: React.FC = (): JSX.Element => {
       newError.inventoryName = 'Inventory name is required';
     }
     if (
-        inventory.inventoryType != 'Equipment' &&
-        inventory.inventoryType != 'Injections' &&
-        inventory.inventoryType != 'Medications' &&
-        inventory.inventoryType != 'Bandages'
+      inventory.inventoryType != 'Equipment' &&
+      inventory.inventoryType != 'Injections' &&
+      inventory.inventoryType != 'Medications' &&
+      inventory.inventoryType != 'Bandages'
     ) {
       newError.inventoryType = 'Inventory type is required';
     }
@@ -73,7 +70,7 @@ const EditReviewForm: React.FC = (): JSX.Element => {
   };
 
   const handleSubmit = async (
-      event: FormEvent<HTMLFormElement>
+    event: FormEvent<HTMLFormElement>
   ): Promise<void> => {
     event.preventDefault();
     if (!validate()) return;
@@ -101,105 +98,105 @@ const EditReviewForm: React.FC = (): JSX.Element => {
   };
 
   return (
-      <div className="edit-inventory-form">
-        <h3 className="text-center">
-          Inventories &nbsp;
-          <small className="text-muted">Edit Form</small>
-        </h3>
-        {loading && <div className="loader">Loading...</div>}
-        <br />
-        <div className="container">
-          <form onSubmit={handleSubmit} className="text-center">
-            <div className="row">
-              <div className="col-4">
-                <div className="form-group">
-                  <label>Inventory Name</label>
-                  <input
-                      type="text"
-                      name="inventoryName"
-                      placeholder="Inventory Name"
-                      className="form-control"
-                      value={inventory.inventoryName}
-                      onChange={e =>
-                          setInventory({
-                            ...inventory,
-                            inventoryName: e.target.value,
-                          })
-                      }
-                      required
-                  />
-                  {error.inventoryName && (
-                      <span className="error">{error.inventoryName}</span>
-                  )}
-                </div>
-              </div>
-              <div className="col-4">
-                <div className="form-group">
-                  <label>Inventory Type</label>
-                  <select
-                      name="inventoryType"
-                      className="form-control"
-                      value={inventory.inventoryType}
-                      onChange={e =>
-                          setInventory({
-                            ...inventory,
-                            inventoryType: e.target.value,
-                          })
-                      }
-                      required
-                  >
-                    <option value="" disabled>
-                      Select inventory type
-                    </option>
-                    <option value="Equipment">Equipment</option>
-                    <option value="Injections">Injections</option>
-                    <option value="Medications">Medications</option>
-                    <option value="Bandages">Bandages</option>
-                  </select>
-                  {error.inventoryType && (
-                      <span className="error">{error.inventoryType}</span>
-                  )}
-                </div>
-              </div>
-              <div className="col-4">
-                <div className="form-group">
-                  <label>Inventory Description</label>
-                  <input
-                      type="text"
-                      name="inventoryDescription"
-                      className="form-control"
-                      placeholder="Inventory Description"
-                      value={inventory.inventoryDescription}
-                      onChange={e =>
-                          setInventory({
-                            ...inventory,
-                            inventoryDescription: e.target.value,
-                          })
-                      }
-                      required
-                  />
-                  {error.inventoryDescription && (
-                      <span className="error">{error.inventoryDescription}</span>
-                  )}
-                </div>
+    <div className="edit-inventory-form">
+      <h3 className="text-center">
+        Inventories &nbsp;
+        <small className="text-muted">Edit Form</small>
+      </h3>
+      {loading && <div className="loader">Loading...</div>}
+      <br />
+      <div className="container">
+        <form onSubmit={handleSubmit} className="text-center">
+          <div className="row">
+            <div className="col-4">
+              <div className="form-group">
+                <label>Inventory Name</label>
+                <input
+                  type="text"
+                  name="inventoryName"
+                  placeholder="Inventory Name"
+                  className="form-control"
+                  value={inventory.inventoryName}
+                  onChange={e =>
+                    setInventory({
+                      ...inventory,
+                      inventoryName: e.target.value,
+                    })
+                  }
+                  required
+                />
+                {error.inventoryName && (
+                  <span className="error">{error.inventoryName}</span>
+                )}
               </div>
             </div>
-            <br />
-            <div className="row">
-              <button type="submit" className="btn btn-info">
-                Update
-              </button>
+            <div className="col-4">
+              <div className="form-group">
+                <label>Inventory Type</label>
+                <select
+                  name="inventoryType"
+                  className="form-control"
+                  value={inventory.inventoryType}
+                  onChange={e =>
+                    setInventory({
+                      ...inventory,
+                      inventoryType: e.target.value,
+                    })
+                  }
+                  required
+                >
+                  <option value="" disabled>
+                    Select inventory type
+                  </option>
+                  <option value="Equipment">Equipment</option>
+                  <option value="Injections">Injections</option>
+                  <option value="Medications">Medications</option>
+                  <option value="Bandages">Bandages</option>
+                </select>
+                {error.inventoryType && (
+                  <span className="error">{error.inventoryType}</span>
+                )}
+              </div>
             </div>
-          </form>
-        </div>
-        {successMessage && <p className="success-message">{successMessage}</p>}
-        {errorMessage && <p className="error-message">{errorMessage}</p>}
-        {showNotification && (
-            <div className="notification">
-              <p>Inventory updated successfully</p>
+            <div className="col-4">
+              <div className="form-group">
+                <label>Inventory Description</label>
+                <input
+                  type="text"
+                  name="inventoryDescription"
+                  className="form-control"
+                  placeholder="Inventory Description"
+                  value={inventory.inventoryDescription}
+                  onChange={e =>
+                    setInventory({
+                      ...inventory,
+                      inventoryDescription: e.target.value,
+                    })
+                  }
+                  required
+                />
+                {error.inventoryDescription && (
+                  <span className="error">{error.inventoryDescription}</span>
+                )}
+              </div>
             </div>
-        )}
+          </div>
+          <br />
+          <div className="row">
+            <button type="submit" className="btn btn-info">
+              Update
+            </button>
+          </div>
+        </form>
       </div>
+      {successMessage && <p className="success-message">{successMessage}</p>}
+      {errorMessage && <p className="error-message">{errorMessage}</p>}
+      {showNotification && (
+        <div className="notification">
+          <p>Inventory updated successfully</p>
+        </div>
+      )}
+    </div>
   );
 };
 export default EditReviewForm;
