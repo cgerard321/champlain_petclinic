@@ -161,7 +161,11 @@ const router = createBrowserRouter([
       },
       {
         path: AppRoutePaths.ServiceUnavailable,
-        element: <ServiceUnavailable />,
+        element: (
+            <ProtectedRoute>
+              <ServiceUnavailable />
+            </ProtectedRoute>
+        ),
       },
       {
         path: AppRoutePaths.Products,
