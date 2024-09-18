@@ -1,4 +1,5 @@
-package com.petclinic.products.datalayer;
+package com.petclinic.products.datalayer.ratings;
+
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,17 +8,18 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Document(collection = "products")
+@Document(collection = "product_ratings")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Product {
-
+public class Rating {
     @Id
     private String id;
+
     private String productId;
-    private String productName;
-    private String productDescription;
-    private Double productSalePrice;
+
+    private String customerId;
+
+    private Byte rating;
 }

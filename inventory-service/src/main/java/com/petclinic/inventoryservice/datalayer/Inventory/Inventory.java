@@ -15,4 +15,5 @@ public class Inventory {
     private String inventoryName;
     private String inventoryType;
     private String inventoryDescription;
+
 }
