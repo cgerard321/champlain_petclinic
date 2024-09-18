@@ -27,6 +27,9 @@ app:
   products-service:
     host: localhost
     port: 7007
+  emailing-service:
+    host: localhost
+    port: 5115
 
 logging:
   level:
@@ -70,6 +73,10 @@ app:
   products-service:
     host: products-service
     port: 8080
+  emailing-service:
+    host: emailing-service
+    port: 8080
+
 
 logging:
   level:

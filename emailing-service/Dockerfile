@@ -7,18 +7,18 @@ EXPOSE 5115
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["emailing-system/emailing-system.csproj", "emailing-system/"]
-RUN dotnet restore "emailing-system/emailing-system.csproj"
+COPY ["emailing-service/emailing-service.csproj", "emailing-service/"]
+RUN dotnet restore "emailing-service/emailing-service.csproj"
 COPY . .
-WORKDIR "/src/emailing-system"
-RUN dotnet build "emailing-system.csproj" -c $BUILD_CONFIGURATION -o /app/build
+WORKDIR "/src/emailing-service"
+RUN dotnet build "emailing-service.csproj" -c $BUILD_CONFIGURATION -o /app/build
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "emailing-system.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+RUN dotnet publish "emailing-service.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
 # The HTML file should now be in /app/publish/Views if your .csproj is set up correctly
-ENTRYPOINT ["dotnet", "emailing-system.dll"]
+ENTRYPOINT ["dotnet", "emailing-service.dll"]

@@ -26,7 +26,7 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/api/v2/gateway/inventories")
+@RequestMapping("/api/v2/gateway/mailing")
 @Validated
 @CrossOrigin(origins = "http://localhost:3000, http://localhost:80")
 public class InventoryController {
