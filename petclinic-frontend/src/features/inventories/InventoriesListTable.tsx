@@ -7,7 +7,6 @@ import { getAllInventoryTypes } from '@/features/inventories/api/getAllInventory
 import deleteAllInventories from '@/features/inventories/api/deleteAllInventories.ts';
 import './InventoriesListTable.css';
 import deleteInventory from '@/features/inventories/api/deleteInventory.ts';
-import EditInventory from '@/features/inventories/EditInventory.tsx';
 
 //TODO: create add inventory form component and change the component being shown on the inventories page on the onClick event of the add inventory button
 export default function InventoriesListTable(): JSX.Element {
@@ -209,21 +208,13 @@ export default function InventoriesListTable(): JSX.Element {
               <td>{inventory.inventoryDescription}</td>
               <td>
                 <button
-                  onClick={e => {
-                    e.stopPropagation();
-                  }}
-                >
-                  <EditInventory
-                    inventory={inventory}
-                    updateInventory={(updatedInventory: Inventory) => {
-                      const updatedList = inventoryList.map(inv =>
-                        inv.inventoryId === updatedInventory.inventoryId
-                          ? updatedInventory
-                          : inv
-                      );
-                      setInventoryList(updatedList); // Update the list after editing
+                    onClick={e => {
+                      e.stopPropagation();
+                      navigate(`inventory/${inventory.inventoryId}/edit`);
                     }}
-                  />
+                    className="btn btn-warning"
+                >
+                  Edit
                 </button>
               </td>
               <td>
