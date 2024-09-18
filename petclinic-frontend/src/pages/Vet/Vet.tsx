@@ -2,7 +2,6 @@ import { useState } from 'react';
 import axios from 'axios';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 
-
 // Define the interfaces for the DTOs
 interface SpecialtyDTO {
     specialtyId: string;
@@ -37,17 +36,19 @@ interface WorkHoursData {
 
 export default function Vet(): JSX.Element {
     const [searchQuery, setSearchQuery] = useState('');
-    const [searchType, setSearchType] = useState<'firstName' | 'lastName'>('firstName');
+    const [searchType, setSearchType] = useState<'firstName' | 'lastName'>(
+        'firstName'
+    );
     const [result, setResult] = useState<VetResponseDTO | null>(null);
     const [error, setError] = useState<string | null>(null);
 
+    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
     const handleSearch = async () => {
         try {
             setError(null);
-            const response = await axios.get(`http://localhost:8080/api/gateway/vets/${searchType}/${searchQuery}`);
-
-            // Log response data for debugging
-            console.log('Response Data:', response.data);
+            const response = await axios.get(
+                `http://localhost:8080/api/gateway/vets/${searchType}/${searchQuery}`
+            );
 
             if (response.status === 200) {
                 const data: VetResponseDTO = response.data;
@@ -55,7 +56,7 @@ export default function Vet(): JSX.Element {
             } else if (response.status === 404) {
                 setResult(null);
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Error during fetch:', err); // Log error for debugging
             setError('An error occurred while fetching the data.');
             setResult(null);
@@ -101,13 +102,15 @@ export default function Vet(): JSX.Element {
                 <input
                     type="text"
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={e => setSearchQuery(e.target.value)}
                     placeholder={`Search by ${searchType}`}
                     style={{ marginRight: '10px' }}
                 />
                 <select
                     value={searchType}
-                    onChange={(e) => setSearchType(e.target.value as 'firstName' | 'lastName')}
+                    onChange={e =>
+                        setSearchType(e.target.value as 'firstName' | 'lastName')
+                    }
                     style={{ marginRight: '10px' }}
                 >
                     <option value="firstName">First Name</option>
