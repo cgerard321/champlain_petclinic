@@ -276,7 +276,6 @@ class VetControllerIntegrationTest {
 
     }
 
-
     //#region Dummy data
     Set<Workday> workdaySet = Set.of(Workday.Wednesday);
 
@@ -299,7 +298,7 @@ class VetControllerIntegrationTest {
     void whenAddVet_asAdmin_thenReturnCreatedVetResponseDTO() {
 
         Mono<VetResponseDTO> result = webTestClient.post()
-                .uri("/api/v2/gateway/vet")
+                .uri(VET_ENDPOINT)
                 .cookie("Bearer", jwtTokenForValidAdmin)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(newVetRequestDTO), VetRequestDTO.class)
@@ -335,7 +334,7 @@ class VetControllerIntegrationTest {
     void whenAddVet_asARoleOtherThanAdmin_thenReturnIsUnauthorized() {
 
         webTestClient.post()
-                .uri("/api/v2/gateway/vet")
+                .uri(VET_ENDPOINT)
                 .cookie("Bearer", jwtTokenForInvalidOwnerId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(newVetRequestDTO), VetRequestDTO.class)

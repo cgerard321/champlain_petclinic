@@ -142,10 +142,14 @@ public class MockServerConfigVetService {
                         request()
                                 .withMethod("POST")
 <<<<<<< HEAD
+<<<<<<< HEAD
                                 .withPath("/vets")
 =======
                                 .withPath("/vet")
 >>>>>>> 438c882f (feat(VETS-CPC-1078): add a vet by filling a form as an admin (#654))
+=======
+                                .withPath("/vets")
+>>>>>>> fd807b1b (feat(VETS-CPC-1147): fix vet endpoints (#680))
                                 .withBody(json("{"
                                         + "\"vetBillId\":\"bill001\","
                                         + "\"firstName\":\"John\","

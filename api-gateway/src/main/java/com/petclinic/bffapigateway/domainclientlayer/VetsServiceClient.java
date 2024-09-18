@@ -400,10 +400,14 @@ public class VetsServiceClient {
                     .build()
                     .post()
 <<<<<<< HEAD
+<<<<<<< HEAD
                     .uri(vetsServiceUrl)
 =======
                     .uri(vetsServiceUrl+"/vet")
 >>>>>>> 438c882f (feat(VETS-CPC-1078): add a vet by filling a form as an admin (#654))
+=======
+                    .uri(vetsServiceUrl+"/vets")
+>>>>>>> fd807b1b (feat(VETS-CPC-1147): fix vet endpoints (#680))
                     .body(BodyInserters.fromValue(request))
                     .retrieve()
                     .bodyToMono(VetResponseDTO.class);
