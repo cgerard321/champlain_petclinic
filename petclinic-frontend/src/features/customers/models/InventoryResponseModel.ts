@@ -1,7 +1,6 @@
-
 export interface InventoryResponseModel {
-    inventoryId: string;
-    inventoryName: string;
-    inventoryType: string;
-    inventoryDescription: string;
+  inventoryId: string;
+  inventoryName: string;
+  inventoryType: string;
+  inventoryDescription: string;
 }

@@ -1,6 +1,5 @@
-
 export interface InventoryRequestModel {
-    inventoryName : string;
-    inventoryType : string;
-    inventoryDescription: string;
+  inventoryName: string;
+  inventoryType: string;
+  inventoryDescription: string;
 }
