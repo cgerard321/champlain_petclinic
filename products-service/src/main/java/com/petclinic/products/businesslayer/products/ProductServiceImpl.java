@@ -93,4 +93,11 @@ public class ProductServiceImpl implements ProductService {
                 .map(EntityModelUtil::toProductResponseModel);
     }
 
+    @Override
+    public Flux<ProductResponseModel> filterProductsByPrice(Double minPrice, Double maxPrice) {
+        return productRepository.findByProductSalePriceBetween(minPrice, maxPrice)
+                .flatMap(this::getAverageRating)
+                .map(EntityModelUtil::toProductResponseModel);
+    }
+
 }

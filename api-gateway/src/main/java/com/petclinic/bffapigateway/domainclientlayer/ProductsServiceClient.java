@@ -40,6 +40,19 @@ public class ProductsServiceClient {
                 .bodyToMono(ProductResponseDTO.class);
     }
 
+    public Flux<ProductResponseDTO> filterProductsByPrice(Double minPrice, Double maxPrice) {
+        return webClientBuilder.build()
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path(productsServiceUrl + "/filterByPrice")
+                        .queryParam("minPrice", minPrice)
+                        .queryParam("maxPrice", maxPrice)
+                        .build())
+                .retrieve()
+                .bodyToFlux(ProductResponseDTO.class);
+    }
+
+
     public Mono<ProductResponseDTO> createProduct(final ProductRequestDTO productRequestDTO) {
         return webClientBuilder.build()
                 .post()

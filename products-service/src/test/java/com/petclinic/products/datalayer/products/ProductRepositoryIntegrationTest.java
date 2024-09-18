@@ -156,4 +156,52 @@ class ProductRepositoryIntegrationTest {
                 .expectNextCount(0)
                 .verifyComplete();
     }
+    @Test
+    void testFilterProductsByPrice(){
+        Product product1 = Product.builder()
+                .productId(UUID.randomUUID().toString())
+                .productName("Sample Product")
+                .productDescription("Sample Description")
+                .productSalePrice(20.00)
+                .averageRating(5.00)
+                .build();
+
+        Product product2 = Product.builder()
+                .productId(UUID.randomUUID().toString())
+                .productName("Sample Product")
+                .productDescription("Sample Description")
+                .productSalePrice(50.00)
+                .averageRating(5.00)
+                .build();
+
+        Product product3 = Product.builder()
+                .productId(UUID.randomUUID().toString())
+                .productName("Sample Product")
+                .productDescription("Sample Description")
+                .productSalePrice(100.00)
+                .averageRating(5.00)
+                .build();
+
+        StepVerifier.create(productRepository.save(product1))
+                .consumeNextWith(insEnrollement -> {
+                    assertNotNull(insEnrollement);
+                    assertEquals(product1.getProductId(), insEnrollement.getProductId());
+                })
+                .verifyComplete();
+        StepVerifier.create(productRepository.save(product2))
+                .consumeNextWith(insEnrollement -> {
+                    assertNotNull(insEnrollement);
+                    assertEquals(product2.getProductId(), insEnrollement.getProductId());
+                })
+                .verifyComplete();
+        StepVerifier.create(productRepository.save(product3))
+                .consumeNextWith(insEnrollement -> {
+                    assertNotNull(insEnrollement);
+                    assertEquals(product3.getProductId(), insEnrollement.getProductId());
+                })
+                .verifyComplete();
+        StepVerifier.create(productRepository.findByProductSalePriceBetween(30.00, 70.00))
+                .expectNextCount(1)
+                .verifyComplete();
+    }
 }

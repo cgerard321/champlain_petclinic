@@ -33,6 +33,13 @@ public class ProductController {
                 .map(ResponseEntity::ok);
     }
 
+    @GetMapping(value = "/filterByPrice", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ProductResponseModel> filterProductsByPrice(
+            @RequestParam Double minPrice,
+            @RequestParam Double maxPrice) {
+        return productService.filterProductsByPrice(minPrice, maxPrice);
+    }
+
     @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ProductResponseModel>> addProduct(@RequestBody Mono<ProductRequestModel> productRequestModel) {
         return productService.addProduct(productRequestModel)

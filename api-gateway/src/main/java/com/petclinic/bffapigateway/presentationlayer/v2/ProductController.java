@@ -39,6 +39,14 @@ public class ProductController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "/filterByPrice", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ProductResponseDTO> filterProductsByPrice(
+            @RequestParam Double minPrice,
+            @RequestParam Double maxPrice) {
+        return productsServiceClient.filterProductsByPrice(minPrice, maxPrice);
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ProductResponseDTO>> addProduct(@RequestBody ProductRequestDTO productRequestDTO) {
         return productsServiceClient.createProduct(productRequestDTO)
