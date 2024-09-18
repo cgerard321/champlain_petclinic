@@ -64,6 +64,14 @@ class CartRepositoryUnitTest {
                 .verifyComplete();
     }
 
+    @Test
+    void updateCartByCartId_withNonExistingId_thenReturnEmpty(){
+        StepVerifier
+                .create(cartRepository.findCartByCartId(nonExistentCartId))
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
 
 
     @Test
