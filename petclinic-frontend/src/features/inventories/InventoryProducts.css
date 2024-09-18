@@ -1,11 +1,11 @@
 .status-reorder {
-    color: #F4A460;
+  color: #f4a460;
 }
 
 .status-out-of-stock {
-    color: red;
+  color: red;
 }
 
 .status-available {
-    color: green;
+  color: green;
 }
