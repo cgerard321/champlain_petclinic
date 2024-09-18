@@ -14,5 +14,5 @@ public class ProductRequestDTO {
     private Double productPrice;
     private Integer productQuantity;
     private Double productSalePrice;
-
+    private Status status;
 }
