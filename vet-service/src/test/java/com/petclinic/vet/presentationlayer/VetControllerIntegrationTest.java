@@ -1625,7 +1625,6 @@ class VetControllerIntegrationTest {
         System.out.println(VetRequestDTO.builder());
     }
 
-
     @Test
     void getByVetId_Invalid() {
         Publisher<Vet> setup = vetRepository.deleteAll().thenMany(vetRepository.save(vet));
@@ -1643,9 +1642,9 @@ class VetControllerIntegrationTest {
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("This id is not valid");
-
+                .jsonPath("$.message").isEqualTo("Provided vet id is invalid:" + INVALID_VET_ID);
     }
+
 
     @Test
     void updateByVetId_Invalid() {
