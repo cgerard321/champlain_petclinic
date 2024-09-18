@@ -2,7 +2,11 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.petclinic.bffapigateway.dtos.Ratings.RatingRequestModel;
 import com.petclinic.bffapigateway.dtos.Ratings.RatingResponseModel;
+import com.petclinic.bffapigateway.exceptions.GenericHttpException;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
@@ -26,8 +30,18 @@ public class RatingsServiceClient {
         return webClientBuilder.build()
                 .get()
                 .uri(baseURL + "/" + productId + "/" + customerId)
+                .accept(MediaType.APPLICATION_JSON)
                 .retrieve()
-                .bodyToMono(RatingResponseModel.class);
+                .onStatus(
+                    HttpStatusCode::is4xxClientError, clientResponse -> {
+                        if(clientResponse.statusCode() == HttpStatus.NOT_FOUND) {
+                            return Mono.empty();
+                        }
+                        return Mono.error(new GenericHttpException("Client error while fetching ratings", HttpStatus.BAD_REQUEST));
+                    }
+                )
+                .bodyToMono(RatingResponseModel.class)
+                .defaultIfEmpty(RatingResponseModel.builder().rating((byte) 0).build());
     }
 
     public Mono<RatingResponseModel> addRatingForProductIdAndCustomerId(final String productId, final String customerId, final Mono<RatingRequestModel> requestModel){
