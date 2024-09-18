@@ -9,11 +9,8 @@ import Home from '@/pages/Home/Home.tsx';
 import ProfileEdit from '@/pages/Customer/ProfileEdit.tsx';
 import Products from '@/pages/Product/Products.tsx';
 import AddingCustomer from '@/pages/Customer/AddingCustomer.tsx';
-import AllOwners from '@/pages/Customer/AllOwners.tsx';
 import CustomerBillingPage from '@/pages/Bills/CostumerBills.tsx';
-//import path from 'path';
-import Review from './pages/Review/Review';
-import EditReviewForm from './features/visits/Review/EditReviewForm';
+import AllOwners from '@/pages/Customer/AllOwners.tsx';
 import PageNotFound from '@/pages/Error/PageNotFound.tsx';
 import Forbidden from '@/pages/Error/Forbidden.tsx';
 import Unauthorized from '@/pages/Error/Unauthorized.tsx';
@@ -22,6 +19,8 @@ import RequestTimeout from '@/pages/Error/RequestTimeout.tsx';
 import ServiceUnavailable from '@/pages/Error/ServiceUnavailable.tsx';
 import Visits from './pages/Visit/Visit';
 import AddReviewForm from './features/visits/Review/AddReviewForm';
+import EditReviewForm from './features/visits/Review/EditReviewForm';
+import Review from './pages/Review/Review';
 
 const router = createBrowserRouter([
   {
@@ -35,6 +34,7 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+
       {
         path: AppRoutePaths.Form,
         element: (
@@ -76,6 +76,7 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+
       {
         path: AppRoutePaths.Vet,
         element: (
@@ -87,7 +88,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.CustomerProfileEdit,
         element: (
-          <ProtectedRoute roles={['OWNER']}>
+          <ProtectedRoute>
             <ProfileEdit />
           </ProtectedRoute>
         ),
@@ -95,7 +96,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.AddingCustomer,
         element: (
-          <ProtectedRoute roles={['ADMIN']}>
+          <ProtectedRoute>
             <AddingCustomer />
           </ProtectedRoute>
         ),
@@ -111,7 +112,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.AllCustomers,
         element: (
-          <ProtectedRoute roles={['ADMIN', 'VET']}>
+          <ProtectedRoute>
             <AllOwners />
           </ProtectedRoute>
         ),
@@ -188,6 +189,26 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+      //   {
+      //       path: AppRoutePaths.PageNotFound,
+      //       element: /* PageNotFoundComponent */
+      //   },
+      //   {
+      //       path: AppRoutePaths.InternalServer,
+      //       element: /* InternalServerErrorComponent */
+      //   },
+      //   {
+      //       path: AppRoutePaths.ServiceTimeout,
+      //       element: /* ServiceTimeoutComponent */
+      //   },
+      //   {
+      //       path: AppRoutePaths.ServiceUnavailable,
+      //       element: /* ServiceUnavailableComponent */
+      //   },
+      //   {
+      //       path: AppRoutePaths.Unauthorized,
+      //       element: /* UnauthorizedComponent */
+      //   }
     ],
   },
   { path: AppRoutePaths.login, element: <Login /> },

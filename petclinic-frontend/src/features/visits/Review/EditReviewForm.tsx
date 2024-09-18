@@ -4,6 +4,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { getReview, updateReview } from './Api/editReview';
 import { ReviewRequestDTO } from './Model/ReviewRequestDTO';
 import { ReviewResponseDTO } from './Model/ReviewResponseDTO';
+import './EditForm.css';
 
 // Define an interface for the error if known
 interface ApiError {
