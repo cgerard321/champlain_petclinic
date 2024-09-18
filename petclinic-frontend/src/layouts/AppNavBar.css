@@ -13,6 +13,7 @@
   text-decoration: none;
 }
 
+
 .navbar-collapse {
   display: flex;
   flex-basis: 90%;
@@ -71,4 +72,16 @@
 
 .justify-content-end {
   margin-left: auto;
+}
+
+.navbar-nav .dropdown-menu {
+  display: none;
+  position: absolute;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  z-index: 1000;
+}
+
+.navbar-nav .dropdown-menu.show {
+  display: block;
 }
