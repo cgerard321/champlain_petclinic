@@ -54,6 +54,7 @@ const InventoryProducts: React.FC = () => {
               <th>Description</th>
               <th>Price</th>
               <th>Quantity</th>
+              <th>Status</th>
             </tr>
           </thead>
           <tbody>
@@ -63,6 +64,8 @@ const InventoryProducts: React.FC = () => {
                 <td>{product.productName}</td>
                 <td>{product.productDescription}</td>
                 <td>${product.productSalePrice}</td>
+                <td>{product.productQuantity}</td>
+                <td>{product.status}</td>
               </tr>
             ))}
           </tbody>
