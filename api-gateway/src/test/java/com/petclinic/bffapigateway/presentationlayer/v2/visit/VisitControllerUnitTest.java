@@ -297,7 +297,10 @@ public class VisitControllerUnitTest {
 
 
 
+<<<<<<< HEAD
 
 
 
+=======
+>>>>>>> 27ded3de (Created a review entity in Visit, created the service and service imp… (#653))
 }

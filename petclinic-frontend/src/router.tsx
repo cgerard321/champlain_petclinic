@@ -11,6 +11,9 @@ import Products from '@/pages/Product/Products.tsx';
 import AddingCustomer from '@/pages/Customer/AddingCustomer.tsx';
 import CustomerBillingPage from '@/pages/Bills/CostumerBills.tsx';
 import AllOwners from '@/pages/Customer/AllOwners.tsx';
+import VetDetails from "@/pages/Vet/VetDetails.tsx";
+import Review from './pages/Review/Review';
+import EditReviewForm from './features/visits/Review/EditReviewForm';
 import PageNotFound from '@/pages/Error/PageNotFound.tsx';
 import Forbidden from '@/pages/Error/Forbidden.tsx';
 import Unauthorized from '@/pages/Error/Unauthorized.tsx';
@@ -19,12 +22,10 @@ import RequestTimeout from '@/pages/Error/RequestTimeout.tsx';
 import ServiceUnavailable from '@/pages/Error/ServiceUnavailable.tsx';
 import Visits from './pages/Visit/Visit';
 import AddReviewForm from './features/visits/Review/AddReviewForm';
-import EditReviewForm from './features/visits/Review/EditReviewForm';
-import Review from './pages/Review/Review';
 import EditInventory from '@/features/inventories/EditInventory.tsx';
 import VisitByVisitId from './features/visits/visits/VisitByVisitId';
 import AddingVisit from './features/visits/models/AddingVisit';
-import VetDetails from "@/pages/Vet/VetDetails.tsx";
+
 
 const router = createBrowserRouter([
   {
