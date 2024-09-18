@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { ProductModel } from './models/ProductModels/ProductModel';
 import './InventoriesListTable.css';
+import './InventoryProducts.css';
 
 const InventoryProducts: React.FC = () => {
   const { inventoryId } = useParams<{ inventoryId: string }>();
@@ -54,17 +55,38 @@ const InventoryProducts: React.FC = () => {
               <th>Description</th>
               <th>Price</th>
               <th>Quantity</th>
+              <th>Status</th>
             </tr>
           </thead>
           <tbody>
-            {products.map((product: ProductModel) => (
-              <tr key={product.productId}>
-                <td>{product.productId}</td>
-                <td>{product.productName}</td>
-                <td>{product.productDescription}</td>
-                <td>${product.productSalePrice}</td>
-              </tr>
-            ))}
+            {products.map((product: ProductModel) => {
+              let statusClass = '';
+
+              switch (product.status) {
+                case 'RE_ORDER':
+                  statusClass = 'status-reorder';
+                  break;
+                case 'OUT_OF_STOCK':
+                  statusClass = 'status-out-of-stock';
+                  break;
+                case 'AVAILABLE':
+                  statusClass = 'status-available';
+                  break;
+                default:
+                  statusClass = '';
+              }
+
+              return (
+                <tr key={product.productId}>
+                  <td>{product.productId}</td>
+                  <td>{product.productName}</td>
+                  <td>{product.productDescription}</td>
+                  <td>${product.productSalePrice}</td>
+                  <td>{product.productQuantity}</td>
+                  <td className={statusClass}>{product.status}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       ) : (

@@ -1,24 +1,48 @@
 import * as React from 'react';
-import { FormEvent, useState } from 'react';
-import { addOwner } from '@/features/customers/api/addOwner.ts';
+import { FormEvent, useEffect, useState } from 'react';
+import { updateOwner, getOwner } from '@/features/customers/api/updateOwner.ts';
+import { OwnerRequestModel } from '@/features/customers/models/OwnerRequestModel.ts';
+import { OwnerResponseModel } from '@/features/customers/models/OwnerResponseModel.ts';
 import { useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes';
-import '@/features/customers/components/UpdateCustomerForm.css';
-import { OwnerModel } from '@/features/customers/models/OwnerModel.ts';
+import { useUser } from '@/context/UserContext';
+import './UpdateCustomerForm.css';
 
-const AddingCustomer: React.FC = (): JSX.Element => {
+const UpdateCustomerForm: React.FC = (): JSX.Element => {
   const navigate = useNavigate();
-  const [owner, setOwner] = useState<OwnerModel>({
-    ownerId: '',
+  const { user } = useUser();
+  const [owner, setOwner] = useState<OwnerRequestModel>({
     firstName: '',
     lastName: '',
     address: '',
     city: '',
     province: '',
     telephone: '',
-    pets: [],
   });
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+
+  useEffect(() => {
+    const fetchOwnerData = async (): Promise<void> => {
+      try {
+        const response = await getOwner(user.userId);
+        const ownerData: OwnerResponseModel = response.data;
+        setOwner({
+          firstName: ownerData.firstName,
+          lastName: ownerData.lastName,
+          address: ownerData.address,
+          city: ownerData.city,
+          province: ownerData.province,
+          telephone: ownerData.telephone,
+        });
+      } catch (error) {
+        console.error('Error fetching owner data:', error);
+      }
+    };
+
+    fetchOwnerData().catch(error =>
+      console.error('Error in fetchOwnerData:', error)
+    );
+  }, [user.userId]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
     const { name, value } = e.target;
@@ -44,11 +68,10 @@ const AddingCustomer: React.FC = (): JSX.Element => {
     if (!validate()) return;
 
     try {
-      const response = await addOwner(owner);
-      if (response.status === 201) {
+      const response = await updateOwner(user.userId, owner);
+      if (response.status === 200) {
         navigate(AppRoutePaths.Home);
       } else {
-        console.error('Failed to add owner');
       }
     } catch (error) {
       console.error('Error:', error);
@@ -56,8 +79,8 @@ const AddingCustomer: React.FC = (): JSX.Element => {
   };
 
   return (
-    <div className="add-customer-form">
-      <h1>Add Customer</h1>
+    <div className="update-customer-form">
+      <h1>Edit Profile</h1>
       <form onSubmit={handleSubmit}>
         <label>First Name: </label>
         <input
@@ -113,10 +136,10 @@ const AddingCustomer: React.FC = (): JSX.Element => {
         />
         {errors.telephone && <span className="error">{errors.telephone}</span>}
         <br />
-        <button type="submit">Add</button>
+        <button type="submit">Update</button>
       </form>
     </div>
   );
 };
 
-export default AddingCustomer;
+export default UpdateCustomerForm;
