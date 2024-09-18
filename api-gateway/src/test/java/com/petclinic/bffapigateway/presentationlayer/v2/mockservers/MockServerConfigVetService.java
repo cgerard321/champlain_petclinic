@@ -1,22 +1,14 @@
 package com.petclinic.bffapigateway.presentationlayer.v2.mockservers;
 
-<<<<<<< HEAD
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-=======
-
 import com.petclinic.bffapigateway.dtos.Vets.SpecialtyDTO;
->>>>>>> 438c882f (feat(VETS-CPC-1078): add a vet by filling a form as an admin (#654))
 import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
-import com.petclinic.bffapigateway.dtos.Vets.SpecialtyDTO;
 import com.petclinic.bffapigateway.dtos.Vets.Workday;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
 
 import java.util.Set;
-
-import org.mockserver.client.MockServerClient;
-import org.mockserver.integration.ClientAndServer;
 
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
@@ -32,7 +24,6 @@ public class MockServerConfigVetService {
 
     public MockServerConfigVetService() {
         this.clientAndServer = ClientAndServer.startClientAndServer(VET_SERVICE_SERVER_PORT);
-
 
         mockServerClient_VetService
                 .when(request()
@@ -63,7 +54,6 @@ public class MockServerConfigVetService {
                         .withBody("{\"statusCode\":404,\"message\":\"vetId not found: invalid-id\",\"timestamp\":\"" + java.time.Instant.now() + "\"}"));
     }
 
-<<<<<<< HEAD
     public void registerGetVetsEndpoint() {
         mockServerClient_VetService
                 .when(
@@ -134,18 +124,12 @@ public class MockServerConfigVetService {
                 );
     }
 
-=======
->>>>>>> 438c882f (feat(VETS-CPC-1078): add a vet by filling a form as an admin (#654))
     public void registerAddVetEndpoint() {
         mockServerClient_VetService
                 .when(
                         request()
                                 .withMethod("POST")
-<<<<<<< HEAD
-                                .withPath("/vets")
-=======
-                                .withPath("/vet")
->>>>>>> 438c882f (feat(VETS-CPC-1078): add a vet by filling a form as an admin (#654))
+                                .withPath("/vets") // Retain the correct path according to the team's decision
                                 .withBody(json("{"
                                         + "\"vetBillId\":\"bill001\","
                                         + "\"firstName\":\"John\","
@@ -191,13 +175,6 @@ public class MockServerConfigVetService {
                                         + "]"
                                         + "}"))
                 );
-<<<<<<< HEAD
-    }
-
-    public void stopMockServer() {
-        if (clientAndServer != null) {
-            this.clientAndServer.stop();
-        }
     }
 
     public void registerGetVetByFirstNameEndpoint(String firstName, VetResponseDTO responseDTO) throws JsonProcessingException {
@@ -254,13 +231,9 @@ public class MockServerConfigVetService {
                 );
     }
 
-=======
-    }
-
     public void stopMockServer() {
-        if(clientAndServer != null)
+        if (clientAndServer != null) {
             this.clientAndServer.stop();
+        }
     }
->>>>>>> 438c882f (feat(VETS-CPC-1078): add a vet by filling a form as an admin (#654))
 }
-

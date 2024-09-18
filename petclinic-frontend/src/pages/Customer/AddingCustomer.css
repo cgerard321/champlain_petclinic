@@ -1,5 +1,8 @@
 .add-customer-form {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 14730eb4 (feat(INVT-CPC-1052): Fix Edit Inventory (#670))
   max-width: 600px;
   margin: 50px auto;
   padding: 20px;
@@ -7,6 +10,7 @@
   border-radius: 10px;
   background-color: #ffffff;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+<<<<<<< HEAD
 }
 
 .add-customer-form h1 {
@@ -72,62 +76,70 @@
     border-radius: 10px;
     background-color: #ffffff;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+=======
+>>>>>>> 14730eb4 (feat(INVT-CPC-1052): Fix Edit Inventory (#670))
 }
 
 .add-customer-form h1 {
-    text-align: center;
-    margin-bottom: 20px;
-    color: #333;
-    font-family: 'Arial', sans-serif;
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+  font-family: 'Arial', sans-serif;
 }
 
 .add-customer-form form {
-    display: flex;
-    flex-direction: column;
+  display: flex;
+  flex-direction: column;
 }
 
 .add-customer-form label {
-    margin-bottom: 15px;
-    font-family: 'Arial', sans-serif;
-    color: #555;
+  margin-bottom: 15px;
+  font-family: 'Arial', sans-serif;
+  color: #555;
 }
 
 .add-customer-form input {
-    padding: 10px;
-    margin-top: 5px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-family: 'Arial', sans-serif;
-    font-size: 16px;
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-family: 'Arial', sans-serif;
+  font-size: 16px;
 }
 
 .add-customer-form button {
-    padding: 12px;
-    background-color: #28a745;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-top: 20px;
-    font-family: 'Arial', sans-serif;
-    font-size: 16px;
-    transition: background-color 0.3s ease;
+  padding: 12px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  margin-top: 20px;
+  font-family: 'Arial', sans-serif;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
 }
 
 .add-customer-form button:hover {
-    background-color: #218838;
+  background-color: #218838;
 }
 
 .error {
-    color: red;
-    font-size: 0.8em;
-    margin-top: 5px;
-    font-family: 'Arial', sans-serif;
+  color: red;
+  font-size: 0.8em;
+  margin-top: 5px;
+  font-family: 'Arial', sans-serif;
 }
 
 .add-customer-form input:focus {
+<<<<<<< HEAD
     border-color: #28a745;
     box-shadow: 0 0 5px rgba(40, 167, 69, 0.5);
     outline: none;
 >>>>>>> 76386949 (feat/(CUST-CPC-1134): Render pages based on user roles (#656))
+=======
+  border-color: #28a745;
+  box-shadow: 0 0 5px rgba(40, 167, 69, 0.5);
+  outline: none;
+>>>>>>> 14730eb4 (feat(INVT-CPC-1052): Fix Edit Inventory (#670))
 }
