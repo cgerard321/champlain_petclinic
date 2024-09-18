@@ -1,8 +1,11 @@
 package com.petclinic.bffapigateway.presentationlayer.v2;
 
 import com.petclinic.bffapigateway.domainclientlayer.InventoryServiceClient;
+import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryTypeResponseDTO;
+import com.petclinic.bffapigateway.dtos.Products.ProductResponseDTO;
+import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,6 +13,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -69,6 +74,28 @@ public class InventoryController {
     @ApiResponses(value = {@ApiResponse(useReturnTypeSchema = true, description = "Deletes all inventories", responseCode = "204")})
     public Mono<ResponseEntity<Void>> deleteAllInventories() {
         return inventoryServiceClient.deleteAllInventories().then(Mono.just(ResponseEntity.noContent().<Void>build()))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @PutMapping(value = "/{inventoryId}")
+    public Mono<ResponseEntity<InventoryResponseDTO>> updateInventory(
+            @PathVariable String inventoryId,
+            @RequestBody InventoryRequestDTO inventoryRequestDTO) {
+
+        return Mono.just(inventoryId)
+                .filter(id -> id.length() == 36) // Validate the review ID length
+                .switchIfEmpty(Mono.error(new InvalidInputException("Provided inventory ID is invalid: " + inventoryId)))
+                .flatMap(id -> inventoryServiceClient.updateInventory( inventoryRequestDTO,id)) // Assuming `updateReview` method exists in `visitsServiceClient`
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
+    @GetMapping(value = "{inventoryId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<InventoryResponseDTO>> getInventoryById(@PathVariable String inventoryId) {
+        return inventoryServiceClient.getInventoryById(inventoryId)
+                .map(product -> ResponseEntity.status(HttpStatus.OK).body(product))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 }

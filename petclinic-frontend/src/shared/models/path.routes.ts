@@ -15,4 +15,5 @@ export enum AppRoutePaths {
   Home = '/home',
   Forbidden = '/forbidden',
   Products = '/products',
+  EditInventory = 'inventories/inventory/:inventoryId/edit',
 }

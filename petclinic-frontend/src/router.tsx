@@ -16,6 +16,7 @@ import Unauthorized from '@/pages/Error/Unauthorized.tsx';
 import InternalServerError from '@/pages/Error/InternalServerError.tsx';
 import RequestTimeout from '@/pages/Error/RequestTimeout.tsx';
 import ServiceUnavailable from '@/pages/Error/ServiceUnavailable.tsx';
+import EditInventory from "@/features/inventories/EditInventory.tsx";
 
 const router = createBrowserRouter([
   {
@@ -139,6 +140,14 @@ const router = createBrowserRouter([
           <ProtectedRoute>
             <Products />
           </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.EditInventory,
+        element: (
+            <ProtectedRoute>
+              <EditInventory/>
+            </ProtectedRoute>
         ),
       },
       //   {
