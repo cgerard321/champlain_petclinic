@@ -1,6 +1,8 @@
-import { useState } from 'react';
+
 import axios from 'axios';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
+import AddVet from '@/pages/Vet/AddVet.tsx';
+import { useState } from 'react';
 
 // Define the interfaces for the DTOs
 interface SpecialtyDTO {
@@ -63,6 +65,8 @@ export default function Vet(): JSX.Element {
         }
     };
 
+    const [formVisible, setFormVisible] = useState(false);
+
     const parseWorkHours = (workHoursJson: string): string => {
         try {
             const workHours: WorkHoursData = JSON.parse(workHoursJson);
@@ -99,6 +103,12 @@ export default function Vet(): JSX.Element {
         <div style={{ padding: '20px' }}>
             <NavBar />
             <div style={{ marginBottom: '20px', textAlign: 'right' }}>
+                <button onClick={() => setFormVisible(prev => !prev)}>
+                    {formVisible ? 'Cancel' : 'Add Vet'}
+                </button>
+                {formVisible && <AddVet />}
+
+
                 <input
                     type="text"
                     value={searchQuery}
@@ -140,4 +150,7 @@ export default function Vet(): JSX.Element {
             </div>
         </div>
     );
+
+
+ 
 }

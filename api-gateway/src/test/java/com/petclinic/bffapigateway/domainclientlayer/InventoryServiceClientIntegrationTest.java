@@ -57,7 +57,9 @@ class InventoryServiceClientIntegrationTest {
                 "desc",
                 10.00,
                 2,
-                15.99
+                15.99,
+                Status.OUT_OF_STOCK
+
 
         );
 
@@ -84,7 +86,9 @@ class InventoryServiceClientIntegrationTest {
                 "desc",
                 10.00,
                 2,
-                15.99
+                15.99,
+                Status.OUT_OF_STOCK
+
         );
 
         mockWebServer.enqueue(new MockResponse()
@@ -147,7 +151,10 @@ class InventoryServiceClientIntegrationTest {
                 "desc",
                 10.00,
                 2,
-                15.99
+                15.99,
+                Status.OUT_OF_STOCK
+
+
         );
         ProductResponseDTO productResponseDTO1 = new ProductResponseDTO(
                 "1",
@@ -157,7 +164,11 @@ class InventoryServiceClientIntegrationTest {
                 "desc",
                 10.00,
                 2,
-                15.99
+                15.99,
+                Status.OUT_OF_STOCK
+
+
+
         );
 
         Flux<ProductResponseDTO> productFlux = Flux.just(productResponseDTO, productResponseDTO1);
