@@ -49,6 +49,7 @@ function Product({ product }: { product: ProductModel }): JSX.Element {
 
   useEffect(() => {
     fetchRating();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
