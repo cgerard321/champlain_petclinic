@@ -392,6 +392,7 @@ public class VetsServiceClient {
                 .bodyToFlux(VetResponseDTO.class);
     }
 
+
     public Mono<VetResponseDTO> addVet(Mono<VetRequestDTO> vetRequestDTO){
         String vetId = UUID.randomUUID().toString();
         return vetRequestDTO.flatMap(request ->{

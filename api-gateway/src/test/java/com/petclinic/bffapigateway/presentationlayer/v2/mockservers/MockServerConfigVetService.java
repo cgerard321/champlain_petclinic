@@ -17,9 +17,7 @@ import static org.mockserver.model.JsonBody.json;
 public class MockServerConfigVetService {
 
     private static final Integer VET_SERVICE_SERVER_PORT = 7002;
-
     private final ClientAndServer clientAndServer;
-
     private final MockServerClient mockServerClient_VetService = new MockServerClient("localhost", VET_SERVICE_SERVER_PORT);
 
     public MockServerConfigVetService() {
@@ -266,6 +264,7 @@ public class MockServerConfigVetService {
                                                 new SpecialtyDTO("radiology", "radiology")
                                         )
                                 )))
+
                 );
     }
 }

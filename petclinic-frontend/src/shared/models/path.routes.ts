@@ -21,6 +21,5 @@ export enum AppRoutePaths {
   Forbidden = '/forbidden',
   Products = '/products',
   Visits = '/visits',
-  VetDetails ='/vets/{vetId}'
-
+  VetDetails = '/vets/{vetId}'
 }
