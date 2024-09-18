@@ -95,7 +95,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.CustomerProfileEdit,
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute roles={['OWNER']}>
             <ProfileEdit />
           </ProtectedRoute>
         ),
@@ -103,7 +103,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.AddingCustomer,
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute roles={['ADMIN']}>
             <AddingCustomer />
           </ProtectedRoute>
         ),
@@ -119,7 +119,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.AllCustomers,
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute roles={['ADMIN', 'VET']}>
             <AllOwners />
           </ProtectedRoute>
         ),
