@@ -105,7 +105,7 @@ class VetControllerIntegrationTest {
     public void whenGetVets_withNoVets_thenReturnNotFound() {
 
         webTestClient.get()
-                .uri("/vets")
+                .uri(VET_ENDPOINT)
                 .cookie("Bearer", jwtTokenForValidAdmin)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -152,7 +152,7 @@ class VetControllerIntegrationTest {
     void whenAddVet_asARoleOtherThanAdmin_thenReturnIsUnauthorized() {
 
         webTestClient.post()
-                .uri("/api/v2/gateway/vets")
+                .uri(VET_ENDPOINT)
                 .cookie("Bearer", jwtTokenForInvalidOwnerId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(newVetRequestDTO), VetRequestDTO.class)
@@ -168,7 +168,7 @@ class VetControllerIntegrationTest {
         mockServerConfigVetService.registerGetVetByFirstNameEndpointNotFound(firstName);
 
         webTestClient.get()
-                .uri("/api/v2/gateway/vets/firstName/{firstName}", firstName)
+                .uri(VET_ENDPOINT + "/firstName/{firstName}", firstName)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNotFound();
@@ -181,7 +181,7 @@ class VetControllerIntegrationTest {
         mockServerConfigVetService.registerGetVetByLastNameEndpointNotFound(lastName);
 
         webTestClient.get()
-                .uri("/api/v2/gateway/vets/lastName/{lastName}", lastName)
+                .uri(VET_ENDPOINT + "/lastName/{lastName}", lastName)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNotFound();
@@ -260,6 +260,5 @@ class VetControllerIntegrationTest {
                     assertNotNull(responseBody);
                     assertTrue(responseBody.contains("vetId not found: ac9adeb8-625b-11ee-8c99-0242ac12000200000"));
                 });
-
     }
 }
