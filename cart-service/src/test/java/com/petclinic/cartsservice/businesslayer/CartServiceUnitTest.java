@@ -19,8 +19,12 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.List;
+import java.util.Arrays;
 
 import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 class CartServiceUnitTest {
@@ -90,5 +94,26 @@ class CartServiceUnitTest {
                 .verify();
     }
 
+    @Test
+    public void clearCart_Success() {
+        Cart mockCart = new Cart("1", "cart1", Arrays.asList("prod1", "prod2"), "customer1");
 
+        when(cartRepository.findCartByCartId("cart1")).thenReturn(Mono.just(mockCart));
+        when(cartRepository.save(any(Cart.class))).thenReturn(Mono.just(mockCart));
+
+        StepVerifier.create(cartService.clearCart("cart1"))
+                .expectComplete()
+                .verify();
+
+        verify(cartRepository, times(1)).save(mockCart);
+    }
+
+    @Test
+    public void clearCart_CartNotFound() {
+        when(cartRepository.findCartByCartId("cart1")).thenReturn(Mono.empty());
+
+        StepVerifier.create(cartService.clearCart("cart1"))
+                .expectError(NotFoundException.class)
+                .verify();
+    }
 }
