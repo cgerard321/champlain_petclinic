@@ -18,6 +18,7 @@ import reactor.core.scheduler.Schedulers;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -400,13 +401,13 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
 
         return supplyRequestDTOMono
                 .flatMap(supplyRequestDTO ->
-                        inventoryRepository.findByInventoryType(inventoryType)  // Updated method name
+                        inventoryRepository.findByInventoryType(inventoryType)
                                 .switchIfEmpty(Mono.error(new InventoryNotFoundException("No inventory found for type: " + inventoryType)))
                                 .flatMap(inventory -> {
                                     Supply supply = new Supply(
-                                            null, // supplyId
-                                            null, // supplyName
-                                            inventory.getId(), // inventoryId
+                                            UUID.randomUUID().toString(),
+                                            UUID.randomUUID().toString(),
+                                            inventory.getId(),
                                             supplyRequestDTO.getSupplyName(),
                                             supplyRequestDTO.getSupplyDescription(),
                                             supplyRequestDTO.getSupplyQuantity(),

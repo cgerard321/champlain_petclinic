@@ -10,7 +10,7 @@ import lombok.*;
 public class SupplyRequestDTO {
     private String supplyName;
     private String supplyDescription;
-    private Double supplyPrice;
     private Integer supplyQuantity;
+    private Double supplyPrice;
     private Double supplySalePrice;
 }

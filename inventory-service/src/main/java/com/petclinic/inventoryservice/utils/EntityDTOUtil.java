@@ -6,8 +6,10 @@ import com.petclinic.inventoryservice.datalayer.Product.Product;
 import com.petclinic.inventoryservice.presentationlayer.*;
 import org.springframework.beans.BeanUtils;
 
+import java.util.List;
 import java.util.Random;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class EntityDTOUtil {
     public static ProductResponseDTO toProductResponseDTO(Product product){
@@ -23,6 +25,16 @@ public class EntityDTOUtil {
     public static InventoryResponseDTO toInventoryResponseDTO(Inventory inventory){
         InventoryResponseDTO inventoryResponseDTO = new InventoryResponseDTO();
         BeanUtils.copyProperties(inventory, inventoryResponseDTO);
+        List<SupplyResponseDTO> supplyResponseDTOs = inventory.getSupplies().stream()
+                .map(supply -> new SupplyResponseDTO(
+                        supply.getSupplyId(),
+                        supply.getSupplyName(),
+                        supply.getSupplyDescription(),
+                        supply.getSupplyQuantity(),
+                        supply.getSupplyPrice(),
+                        supply.getSupplySalePrice()))
+                .collect(Collectors.toList());
+        inventoryResponseDTO.setSupplies(supplyResponseDTOs);
         return inventoryResponseDTO;
     }
     public static Inventory toInventoryEntity(InventoryRequestDTO inventoryResponseDTO){

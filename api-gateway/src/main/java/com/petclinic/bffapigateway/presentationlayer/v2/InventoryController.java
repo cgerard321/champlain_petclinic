@@ -75,25 +75,6 @@ public class InventoryController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    /*
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
-    @PostMapping("/{inventoryType}/supplies")
-    @ApiResponses(value = {
-            @ApiResponse(description = "Add a supply to inventory by type", responseCode = "201"),
-            @ApiResponse(description = "Inventory type not found", responseCode = "404")
-    })
-    public Mono<ResponseEntity<InventoryResponseDTO>> addSupplyToInventoryByType(
-            @PathVariable String inventoryType,
-            @RequestBody Mono<SupplyRequestDTO> supplyRequestDTOMono) {
-
-        return supplyRequestDTOMono.flatMap(supplyRequestDTO ->
-                inventoryServiceClient.addSupplyToInventoryByType(inventoryType, supplyRequestDTO)
-                        .map(inventoryResponseDTO -> ResponseEntity.status(HttpStatus.CREATED).body(inventoryResponseDTO))
-                        .onErrorResume(e -> Mono.just(ResponseEntity.notFound().build()))
-        );
-    }
-*/
-
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
     @PostMapping("/{inventoryType}/supplies")

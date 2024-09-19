@@ -263,20 +263,6 @@ public class InventoryServiceClient {
                 .bodyToMono(Void.class);
     }
 
-    /*
-    public Mono<InventoryResponseDTO> addSupplyToInventoryByType(String inventoryType, SupplyRequestDTO supplyRequestDTO) {
-        return webClient.post()
-                .uri(inventoryServiceUrl + "/{inventoryType}/supplies", inventoryType)
-                .body(Mono.just(supplyRequestDTO), SupplyRequestDTO.class)
-                .accept(MediaType.APPLICATION_JSON)
-                .retrieve()
-                .onStatus(HttpStatusCode::is4xxClientError, resp ->
-                        Mono.error(new RuntimeException("Failed to add supply: " + resp.statusCode()))
-                )
-                .bodyToMono(InventoryResponseDTO.class);
-    }
-
-*/
     public Mono<InventoryResponseDTO> addSupplyToInventoryByType(String inventoryType, SupplyRequestDTO supplyRequestDTO) {
         return webClient.post()
                 .uri(inventoryServiceUrl + "/{inventoryType}/supplies", inventoryType)
