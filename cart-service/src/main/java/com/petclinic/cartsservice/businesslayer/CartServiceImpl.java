@@ -37,4 +37,11 @@ public class CartServiceImpl implements CartService {
                             .map(products -> EntityModelUtil.toCartResponseModel(cart, products));
                 });
     }
+
+    @Override
+    public Mono<Integer> getCartItemCount(String cartId) {
+        return cartRepository.findCartByCartId(cartId)
+                .map(cart -> cart.getProductIds().size()) // Count the number of product IDs in the cart
+                .switchIfEmpty(Mono.empty()); // Return empty Mono if the cart is not found
+    }
 }
