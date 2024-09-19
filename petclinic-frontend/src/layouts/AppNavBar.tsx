@@ -1,5 +1,11 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { IsAdmin, IsOwner, IsVet, useUser } from '@/context/UserContext';
+import {
+  IsAdmin,
+  IsInventoryManager,
+  IsOwner,
+  IsVet,
+  useUser,
+} from '@/context/UserContext';
 import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 import { useState } from 'react';
@@ -40,7 +46,7 @@ export function NavBar(): JSX.Element {
             </Nav.Link>
             {user.userId !== '' && (
               <>
-                {!IsOwner() && (
+                {(IsAdmin() || IsVet()) && (
                   <Nav.Link as={Link} to={AppRoutePaths.Vet}>
                     Veterinarians
                   </Nav.Link>
@@ -60,22 +66,26 @@ export function NavBar(): JSX.Element {
                     )}
                   </NavDropdown>
                 )}
-                <Nav.Link as={Link} to={AppRoutePaths.CustomerBills}>
-                  Bills
-                </Nav.Link>
-                {!IsOwner() && (
+                {!IsInventoryManager() && (
+                  <Nav.Link as={Link} to={AppRoutePaths.CustomerBills}>
+                    Bills
+                  </Nav.Link>
+                )}
+                {(IsAdmin() || IsVet()) && (
                   <Nav.Link as={Link} to={AppRoutePaths.Visits}>
                     Visits
                   </Nav.Link>
                 )}
-                {!IsOwner() && (
+                {(IsInventoryManager() || IsAdmin()) && (
                   <Nav.Link as={Link} to={AppRoutePaths.Inventories}>
                     Inventories
                   </Nav.Link>
                 )}
-                <Nav.Link as={Link} to={AppRoutePaths.Products}>
-                  Products
-                </Nav.Link>
+                {!IsInventoryManager() && (
+                  <Nav.Link as={Link} to={AppRoutePaths.Products}>
+                    Products
+                  </Nav.Link>
+                )}
               </>
             )}
           </Nav>
