@@ -28,14 +28,6 @@ const router = createBrowserRouter([
     path: AppRoutePaths.Default,
     children: [
       {
-        path: AppRoutePaths.Home,
-        element: (
-          <ProtectedRoute>
-            <Home />
-          </ProtectedRoute>
-        ),
-      },
-      {
         path: AppRoutePaths.EditInventory,
         element: (
           <ProtectedRoute>
@@ -181,6 +173,10 @@ const router = createBrowserRouter([
         ),
       },
     ],
+  },
+  {
+    path: AppRoutePaths.Home,
+    element: <Home />,
   },
   { path: AppRoutePaths.login, element: <Login /> },
   {
