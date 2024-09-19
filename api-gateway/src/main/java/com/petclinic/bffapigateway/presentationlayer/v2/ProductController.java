@@ -29,6 +29,14 @@ public class ProductController {
     public Flux<ProductResponseDTO> getAllProducts(
             @RequestParam(required = false) Double minPrice,
             @RequestParam(required = false) Double maxPrice) {
+        // Validate negative prices
+        if ((minPrice != null && minPrice < 0) || (maxPrice != null && maxPrice < 0)) {
+            throw new IllegalArgumentException("Price values cannot be negative");
+        }
+        //error handling for if the minPrice is greater than maxPrice
+        if (minPrice != null && maxPrice != null && minPrice > maxPrice) {
+            return Flux.error(new IllegalArgumentException("minPrice cannot be greater than maxPrice"));
+        }
         return productsServiceClient.getAllProducts(minPrice, maxPrice);
     }
 
