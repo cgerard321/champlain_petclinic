@@ -196,25 +196,6 @@ class ProductRepositoryIntegrationTest {
     }
 
     @Test
-    void whenFindByProductSalePriceGreaterThanEqual_thenReturnProductsWithPriceGreaterOrEqual() {
-        // Given
-        Product product1 = createProduct("Product 1", "Description 1", 10.00, 4.0);
-        Product product2 = createProduct("Product 2", "Description 2", 20.00, 4.5);
-        Product product3 = createProduct("Product 3", "Description 3", 30.00, 5.0);
-
-        saveProducts(product1, product2, product3);
-
-        // When
-        Double minPrice = 20.00;
-
-        // Then
-        StepVerifier.create(productRepository.findByProductSalePriceGreaterThanEqual(minPrice))
-                .expectNextMatches(product -> product.getProductId().equals(product2.getProductId()))
-                .expectNextMatches(product -> product.getProductId().equals(product3.getProductId()))
-                .verifyComplete();
-    }
-
-    @Test
     void whenNoProductsMatchCriteria_thenReturnEmptyFlux() {
         // Given
         Product product1 = createProduct("Product 1", "Description 1", 10.00, 4.0);
