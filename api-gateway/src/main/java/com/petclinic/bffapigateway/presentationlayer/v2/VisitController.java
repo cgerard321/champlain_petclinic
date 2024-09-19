@@ -2,6 +2,7 @@ package com.petclinic.bffapigateway.presentationlayer.v2;
 
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
 import com.petclinic.bffapigateway.dtos.Auth.Role;
+import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewResponseDTO;
@@ -82,7 +83,21 @@ public class VisitController {
     }
 
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @PostMapping(value = "/pets/{petId}/visits", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<VisitResponseDTO>> createVisitForPet(
+            @PathVariable String petId,
+            @RequestBody VisitRequestDTO visitRequestDTO) {
 
+        return Mono.just(petId)
+                .switchIfEmpty(Mono.error(new InvalidInputException("Provided pet ID is invalid: " + petId)))
+                .flatMap(id -> {
+                    visitRequestDTO.setPetId(id); // Assuming setPetId method exists in VisitRequestDTO
+                    return visitsServiceClient.createVisitForPet(visitRequestDTO);
+                })
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
 
 
 
