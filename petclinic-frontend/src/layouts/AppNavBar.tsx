@@ -19,10 +19,12 @@ export function NavBar(): JSX.Element {
   const [navbarOpen, setNavbarOpen] = useState(false);
 
   const logoutUser = (): void => {
-    axiosInstance.post(axiosInstance.defaults.baseURL + 'logout').then(() => {
-      navigate(AppRoutePaths.login);
-      localStorage.removeItem('user');
-    });
+    axiosInstance
+      .post('http://localhost8080/api/gateway/users/logout')
+      .then(() => {
+        navigate(AppRoutePaths.Login);
+        localStorage.removeItem('user');
+      });
   };
 
   const toggleNavbar = (): void => {
@@ -32,7 +34,7 @@ export function NavBar(): JSX.Element {
   return (
     <Navbar bg="light" expand="lg" className="navbar">
       <Container>
-        <Navbar.Brand href="#">PetClinic</Navbar.Brand>
+        <Navbar.Brand href={AppRoutePaths.Home}>PetClinic</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" onClick={toggleNavbar}>
           <span className="navbar-toggler-icon"></span>
         </Navbar.Toggle>
@@ -120,7 +122,7 @@ export function NavBar(): JSX.Element {
                 <Nav.Link as={Link} to={AppRoutePaths.Home}>
                   Signup
                 </Nav.Link>
-                <Nav.Link as={Link} to={AppRoutePaths.login}>
+                <Nav.Link as={Link} to={AppRoutePaths.Login}>
                   Login
                 </Nav.Link>
               </>
