@@ -1,7 +1,6 @@
 package com.petclinic.inventoryservice.datalayer.Inventory;
 
 import com.petclinic.inventoryservice.datalayer.Supply.Supply;
-import com.petclinic.inventoryservice.presentationlayer.SupplyRequestDTO;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;

@@ -1,6 +1,5 @@
 package com.petclinic.inventoryservice.presentationlayer;
 
-import com.petclinic.inventoryservice.datalayer.Inventory.InventoryType;
 import lombok.*;
 
 import java.util.List;

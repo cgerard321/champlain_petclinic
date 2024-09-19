@@ -2,11 +2,17 @@ package com.petclinic.bffapigateway.domainclientlayer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+    import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
+import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.Status;
 import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
+import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewRequestDTO;
+import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewResponseDTO;
 import com.petclinic.bffapigateway.exceptions.BadRequestException;
 import com.petclinic.bffapigateway.exceptions.DuplicateTimeException;
+import com.petclinic.bffapigateway.exceptions.InvalidInputsInventoryException;
+import com.petclinic.bffapigateway.utils.Rethrower;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -14,11 +20,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.io.IOException;
+import java.util.UUID;
+
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+
 /**
  * @author Maciej Szarlinski
  * Copied from https://github.com/spring-petclinic/spring-petclinic-microservices
@@ -27,20 +38,24 @@ import java.io.IOException;
 @Component
 public class VisitsServiceClient {
     private final WebClient webClient;
+    private  final String reviewUrl;
+
+    private Rethrower rethrower;
     @Autowired
     public VisitsServiceClient(
             @Value("${app.visits-service-new.host}") String visitsServiceHost,
             @Value("${app.visits-service-new.port}") String visitsServicePort
     ) {
+        reviewUrl = "http://" + visitsServiceHost + ":" + visitsServicePort + "/visits";
         this.webClient = WebClient.builder()
-                .baseUrl("http://" + visitsServiceHost + ":" + visitsServicePort + "/visits")
+                .baseUrl(reviewUrl)
                 .build();
     }
 
     public Flux<VisitResponseDTO> getAllVisits(){
         return this.webClient
                 .get()
-                .uri("")
+                .uri(reviewUrl)
                 .retrieve()
                 .onStatus(HttpStatusCode::is4xxClientError, error -> Mono.error(new IllegalArgumentException("Something went wrong and we got a 400 error")))
                 .onStatus(HttpStatusCode::is5xxServerError, error -> Mono.error(new IllegalArgumentException("Something went wrong and we got a 500 error")))
@@ -213,5 +228,52 @@ public class VisitsServiceClient {
                 .bodyToMono(VisitDetails.class);
 
     }*/
+
+
+
+    public Flux<ReviewResponseDTO> getAllReviews(){
+        return webClient
+                .get()
+                .uri(reviewUrl + "/reviews")
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToFlux(ReviewResponseDTO.class);
+    }
+
+    public Mono<ReviewResponseDTO> createReview(Mono<ReviewRequestDTO> model) {
+        String reviewId= UUID.randomUUID().toString();
+        return model.flatMap(reviewRequestDTO -> {
+            return webClient
+                    .post()
+                    .uri(reviewUrl + "/reviews")
+                    .body(BodyInserters.fromValue(reviewRequestDTO))
+                    .retrieve()
+                    .bodyToMono(ReviewResponseDTO.class);
+        });
+
+    }
+
+    public Mono<ReviewResponseDTO> updateReview(String reviewId, Mono<ReviewRequestDTO> reviewRequestDTO) {
+        return reviewRequestDTO.flatMap(requestDTO ->
+                webClient
+                        .put()
+                        .uri(reviewUrl + "/reviews/" + reviewId)
+                        .body(BodyInserters.fromValue(requestDTO))
+                        .retrieve()
+                        .bodyToMono(ReviewResponseDTO.class)
+        );
+    }
+
+    public Mono<ReviewResponseDTO> getReviewByReviewId(String reviewId) {
+        return webClient
+                .get()
+                .uri(reviewUrl + "/reviews/" + reviewId)
+                .retrieve()
+                .bodyToMono(ReviewResponseDTO.class);
+    }
+
+
+
+
 }
 

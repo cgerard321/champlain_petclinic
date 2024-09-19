@@ -57,5 +57,12 @@ public class OwnerController {
         return customersServiceClient.getAllOwners();
     }
 
+    @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN})
+    @GetMapping(value = "/{ownerId}")
+    public Mono<ResponseEntity<OwnerResponseDTO>> getOwnerDetails(@PathVariable String ownerId) {
+        return customersServiceClient.getOwner(ownerId)
+                .map(ownerResponseDTO -> ResponseEntity.status(HttpStatus.OK).body(ownerResponseDTO))
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
 
 }
