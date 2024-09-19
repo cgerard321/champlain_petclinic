@@ -1,8 +1,8 @@
-import { useState } from 'react';
+
 import axios from 'axios';
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import AddVet from '@/pages/Vet/AddVet.tsx';
-
+import { useState } from 'react';
 
 // Define the interfaces for the DTOs
 interface SpecialtyDTO {
@@ -108,47 +108,45 @@ export default function Vet(): JSX.Element {
         </button>
         {formVisible && <AddVet />}
 
-
-                <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
-                    placeholder={`Search by ${searchType}`}
-                    style={{ marginRight: '10px' }}
-                />
-                <select
-                    value={searchType}
-                    onChange={e =>
-                        setSearchType(e.target.value as 'firstName' | 'lastName')
-                    }
-                    style={{ marginRight: '10px' }}
-                >
-                    <option value="firstName">First Name</option>
-                    <option value="lastName">Last Name</option>
-                </select>
-                <button onClick={handleSearch}>Search</button>
-            </div>
-            {error && <p>{error}</p>}
-            <div>
-                {result ? (
-                    <div>
-                        <p>Vet ID: {result.vetId}</p>
-                        <p>Vet Bill ID: {result.vetBillId}</p>
-                        <p>First Name: {result.firstName}</p>
-                        <p>Last Name: {result.lastName}</p>
-                        <p>Email: {result.email}</p>
-                        <p>Phone: {result.phoneNumber}</p>
-                        <p>Resume: {result.resume}</p>
-                        <p>Active: {result.active ? 'Yes' : 'No'}</p>
-                        <p>Specialties: {renderSpecialties(result.specialties)}</p>
-                        <p>Workdays: {renderWorkdays(result.workday)}</p>
-                        <p>Work Hours: {parseWorkHours(result.workHoursJson)}</p>
-                    </div>
-                ) : (
-                    <p>No results found.</p>
-                )}
-            </div>
-        </div>
-    );
-
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+          placeholder={`Search by ${searchType}`}
+          style={{ marginRight: '10px' }}
+        />
+        <select
+          value={searchType}
+          onChange={e =>
+            setSearchType(e.target.value as 'firstName' | 'lastName')
+          }
+          style={{ marginRight: '10px' }}
+        >
+          <option value="firstName">First Name</option>
+          <option value="lastName">Last Name</option>
+        </select>
+        <button onClick={handleSearch}>Search</button>
+      </div>
+      {error && <p>{error}</p>}
+      <div>
+        {result ? (
+          <div>
+            <p>Vet ID: {result.vetId}</p>
+            <p>Vet Bill ID: {result.vetBillId}</p>
+            <p>First Name: {result.firstName}</p>
+            <p>Last Name: {result.lastName}</p>
+            <p>Email: {result.email}</p>
+            <p>Phone: {result.phoneNumber}</p>
+            <p>Resume: {result.resume}</p>
+            <p>Active: {result.active ? 'Yes' : 'No'}</p>
+            <p>Specialties: {renderSpecialties(result.specialties)}</p>
+            <p>Workdays: {renderWorkdays(result.workday)}</p>
+            <p>Work Hours: {parseWorkHours(result.workHoursJson)}</p>
+          </div>
+        ) : (
+          <p>No results found.</p>
+        )}
+      </div>
+    </div>
+  );
 }
