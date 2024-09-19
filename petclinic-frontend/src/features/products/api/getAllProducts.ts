@@ -14,26 +14,15 @@ export async function getAllProducts(
     params,
   });
 
-  const dataChunks = res.data.split('\n\n');
-  const products: ProductModel[] = [];
-
-  // Iterate over each chunk of data
-  for (const chunk of dataChunks) {
-    if (chunk.trim() === '') continue;
-    const dataLine = chunk
-      .trim()
-      .split('\n')
-      .find((line: string) => line.startsWith('data:'));
-    if (dataLine) {
-      const jsonString = dataLine.replace('data:', '').trim();
+  return res.data
+    .split('data:')
+    .map((dataChunk: string) => {
       try {
-        const product = JSON.parse(jsonString);
-        products.push(product);
+        if (dataChunk == '') return null;
+        return JSON.parse(dataChunk);
       } catch (err) {
-        console.error('Could not parse JSON:', err);
+        console.error('Could not parse JSON: ' + err);
       }
-    }
-  }
-
-  return products;
+    })
+    .filter((data?: JSON) => data !== null);
 }
