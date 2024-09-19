@@ -4,22 +4,20 @@ import com.petclinic.cartsservice.dataaccesslayer.Cart;
 import com.petclinic.cartsservice.dataaccesslayer.CartRepository;
 import com.petclinic.cartsservice.domainclientlayer.ProductClient;
 import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
+import com.petclinic.cartsservice.presentationlayer.CartRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
-
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ContextConfiguration;
-import reactor.core.publisher.Flux;
+import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -89,6 +87,33 @@ class CartServiceUnitTest {
                         && throwable.getMessage().equals("Cart id was not found: " + nonExistentCartId))
                 .verify();
     }
+
+
+    @Test
+    public void whenCreateCart_thenReturnCartResponse() {
+
+        // arrange
+        CartRequestModel cartRequest = new CartRequestModel("123");
+        Cart expectedCart = new Cart();
+        expectedCart.setCartId("abc-123-xyz");
+        expectedCart.setCustomerId("123");
+
+
+        when(cartRepository.save(any(Cart.class)))
+                .thenReturn(Mono.just(expectedCart));
+
+        Mono<CartResponseModel> actualResponse = cartService.createNewCart(cartRequest);
+
+
+        StepVerifier.create(actualResponse)
+                .expectNextMatches(cart -> cart.getCustomerId().equals("123")
+                        && cart.getCartId().equals("abc-123-xyz"))
+                .verifyComplete();
+
+
+    }
+
+
 
 
 }

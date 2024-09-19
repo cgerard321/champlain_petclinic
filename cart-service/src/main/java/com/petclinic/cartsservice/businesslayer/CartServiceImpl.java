@@ -42,7 +42,8 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public Mono<CartResponseModel> CreateNewCart(CartRequestModel cartRequestModel) {
+    public Mono<CartResponseModel> createNewCart(CartRequestModel cartRequestModel) {
+
         Cart cart = new Cart();
         cart.setCustomerId(cartRequestModel.getCustomerId());
         cart.setCartId(UUID.randomUUID().toString());

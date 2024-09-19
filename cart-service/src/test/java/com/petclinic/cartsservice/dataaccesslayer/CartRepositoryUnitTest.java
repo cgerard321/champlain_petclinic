@@ -10,6 +10,7 @@ import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -72,5 +73,17 @@ class CartRepositoryUnitTest {
                 .create(cartRepository.findCartByCartId(nonExistentCartId))
                 .expectNextCount(0)
                 .verifyComplete();
+    }
+
+    @Test
+    void saveNewCart_WhenValidInput_ThenSuccess(){
+        Cart cartToSave = new Cart();
+        cartToSave.setCustomerId("123");
+        cartToSave.setCartId("abc-123-xyz");
+        StepVerifier.create(cartRepository.save(cartToSave))
+                .expectNextMatches(cart1 -> cart1.getCustomerId().equals("123")
+                        && cart1.getCartId().equals("abc-123-xyz"))
+                .verifyComplete();
+        ;
     }
 }

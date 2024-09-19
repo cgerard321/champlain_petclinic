@@ -29,8 +29,8 @@ public class CartController {
     }
 
     @PostMapping(value= "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<CartResponseModel>> addCourse(@RequestBody CartRequestModel cartRequestModel) {
-        return cartService.CreateNewCart(cartRequestModel)
+    public Mono<ResponseEntity<CartResponseModel>> addCart(@RequestBody CartRequestModel cartRequestModel) {
+        return cartService.createNewCart(cartRequestModel)
                 .map(c-> ResponseEntity.status(HttpStatus.CREATED).body(c))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
 

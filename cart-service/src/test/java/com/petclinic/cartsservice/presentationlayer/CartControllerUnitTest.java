@@ -10,12 +10,12 @@ import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 
@@ -100,6 +100,33 @@ class CartControllerUnitTest {
                 .uri("/api/v1/carts/" + "incorrect-cart-id")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(422);    }
+                .expectStatus().isEqualTo(422);
+    }
+
+    @Test
+    void test() {
+        CartResponseModel expectedCartResponseModel = new CartResponseModel();
+        expectedCartResponseModel.setCartId("12345");
+        expectedCartResponseModel.setCustomerId("123");
+
+        when(cartService.createNewCart(any(CartRequestModel.class)))
+                .thenReturn(Mono.just(expectedCartResponseModel));
+
+        String json = """
+                  {
+                    "customerId":"123"
+                  }
+                """;
+
+        // Act & Assert
+        webTestClient
+                .post()
+                .uri("/api/v1/carts")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(json)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isEqualTo(201);
+    }
 
 }
