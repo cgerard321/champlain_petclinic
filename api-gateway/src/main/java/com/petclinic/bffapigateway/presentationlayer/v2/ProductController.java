@@ -26,8 +26,10 @@ public class ProductController {
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ProductResponseDTO> getAllProducts() {
-        return productsServiceClient.getAllProducts();
+    public Flux<ProductResponseDTO> getAllProducts(
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice) {
+        return productsServiceClient.getAllProducts(minPrice, maxPrice);
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
@@ -36,14 +38,6 @@ public class ProductController {
         return productsServiceClient.getProductByProductId(productId)
                 .map(product -> ResponseEntity.status(HttpStatus.OK).body(product))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
-    }
-
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @GetMapping(value = "/filterByPrice", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ProductResponseDTO> filterProductsByPrice(
-            @RequestParam Double minPrice,
-            @RequestParam Double maxPrice) {
-        return productsServiceClient.filterProductsByPrice(minPrice, maxPrice);
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
