@@ -290,7 +290,7 @@ public class VetsServiceClient {
         return webClientBuilder
                 .build()
                 .get()
-                .uri(vetsServiceUrl)
+                .uri(vetsServiceUrl + "/vets")
                 .retrieve()
                 .onStatus(HttpStatusCode::is5xxServerError,error->
                         Mono.error(new IllegalArgumentException("Something went wrong"))
@@ -360,7 +360,7 @@ public class VetsServiceClient {
             return webClientBuilder
                     .build()
                     .post()
-                    .uri(vetsServiceUrl+"/vet")
+                    .uri(vetsServiceUrl+"/vets")
                     .body(BodyInserters.fromValue(request))
                     .retrieve()
                     .bodyToMono(VetResponseDTO.class);

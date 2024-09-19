@@ -48,6 +48,8 @@ class VetControllerIntegrationTest {
     public void startMockServer() {
         mockServerConfigVetService = new MockServerConfigVetService();
         mockServerConfigVetService.registerAddVetEndpoint();
+        mockServerConfigVetService.registerGetVetsEndpoint();
+        mockServerConfigVetService.registerGetVetsEndpoint_withNoVets();
 
         mockServerConfigAuthService = new MockServerConfigAuthService();
         mockServerConfigAuthService.registerValidateTokenForAdminEndpoint();
@@ -61,7 +63,7 @@ class VetControllerIntegrationTest {
         mockServerConfigAuthService.stopMockServer();
     }
 
-    private static final String VET_ENDPOINT = "/api/v2/gateway/vet";
+    private static final String VET_ENDPOINT = "/api/v2/gateway/vets";
     private static final String BEARER_TOKEN = jwtTokenForValidAdmin;
 
     //#region Dummy data
@@ -83,10 +85,35 @@ class VetControllerIntegrationTest {
     //#endregion
 
     @Test
+    public void whenGetVets_thenReturnVets() {
+
+        webTestClient.get()
+                .uri(VET_ENDPOINT)
+                .cookie("Bearer", jwtTokenForValidAdmin)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(VetResponseDTO.class)
+                .hasSize(2);
+    }
+
+    @Test
+    public void whenGetVets_withNoVets_thenReturnNotFound() {
+
+            webTestClient.get()
+                    .uri("/vets")
+                    .cookie("Bearer", jwtTokenForValidAdmin)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .exchange()
+                    .expectStatus().isNotFound();
+    }
+
+    @Test
     void whenAddVet_asAdmin_thenReturnCreatedVetResponseDTO() {
 
         Mono<VetResponseDTO> result = webTestClient.post()
-                .uri("/api/v2/gateway/vet")
+                .uri(VET_ENDPOINT)
                 .cookie("Bearer", jwtTokenForValidAdmin)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(newVetRequestDTO), VetRequestDTO.class)
@@ -122,7 +149,7 @@ class VetControllerIntegrationTest {
     void whenAddVet_asARoleOtherThanAdmin_thenReturnIsUnauthorized() {
 
         webTestClient.post()
-                .uri("/api/v2/gateway/vet")
+                .uri("/api/v2/gateway/vets")
                 .cookie("Bearer", jwtTokenForInvalidOwnerId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(newVetRequestDTO), VetRequestDTO.class)
