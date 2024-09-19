@@ -19,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -30,6 +31,12 @@ import reactor.core.publisher.Mono;
 public class VetController {
 
     private final VetsServiceClient vetsServiceClient;
+
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @GetMapping()
+    public Flux<VetResponseDTO> getVets(){
+        return vetsServiceClient.getVets();
+    }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
