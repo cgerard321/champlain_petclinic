@@ -102,11 +102,12 @@ export default function Vet(): JSX.Element {
   return (
       <div style={{ padding: '20px' }}>
         <NavBar />
-        <h1>Hello dear vets</h1>
-        <button onClick={() => setFormVisible(prev => !prev)}>
-          {formVisible ? 'Cancel' : 'Add Vet'}
-        </button>
-        {formVisible && <AddVet />}
+        <div style={{ marginBottom: '20px', textAlign: 'right' }}>
+          <button onClick={() => setFormVisible(prev => !prev)}>
+            {formVisible ? 'Cancel' : 'Add Vet'}
+          </button>
+          {formVisible && <AddVet />}
+        </div>
         <VetListTable />
         <div style={{ marginBottom: '20px', textAlign: 'right' }}>
           <button onClick={() => setFormVisible(prev => !prev)}>
