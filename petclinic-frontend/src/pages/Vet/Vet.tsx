@@ -1,7 +1,7 @@
 import { NavBar } from '@/layouts/AppNavBar.tsx';
 import AddVet from '@/pages/Vet/AddVet.tsx';
 import { useState } from 'react';
-import VetListTable from "@/features/veterinarians/VetListTable.tsx";
+import VetListTable from '@/features/veterinarians/VetListTable.tsx';
 
 export default function Vet(): JSX.Element {
   const [formVisible, setFormVisible] = useState(false);
@@ -14,7 +14,7 @@ export default function Vet(): JSX.Element {
         {formVisible ? 'Cancel' : 'Add Vet'}
       </button>
       {formVisible && <AddVet />}
-        <VetListTable />
+      <VetListTable />
     </div>
   );
 }
