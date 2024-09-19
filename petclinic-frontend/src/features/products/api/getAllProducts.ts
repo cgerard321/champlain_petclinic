@@ -5,7 +5,7 @@ export async function getAllProducts(
   minPrice?: number,
   maxPrice?: number
 ): Promise<ProductModel[]> {
-  const params: any = {};
+  const params: Record<string, number> = {};
   if (minPrice !== undefined) params.minPrice = minPrice;
   if (maxPrice !== undefined) params.maxPrice = maxPrice;
 
@@ -23,7 +23,7 @@ export async function getAllProducts(
     const dataLine = chunk
       .trim()
       .split('\n')
-      .find(line => line.startsWith('data:'));
+      .find((line: string) => line.startsWith('data:'));
     if (dataLine) {
       const jsonString = dataLine.replace('data:', '').trim();
       try {
