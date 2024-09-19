@@ -6,6 +6,16 @@ import { NavBar } from '@/layouts/AppNavBar.tsx';
 import axios from 'axios';
 
 const AllOwners: React.FC = (): JSX.Element => {
+  interface FilterModel {
+    [key: string]: string;
+    firstName: string;
+    lastName: string;
+    address: string;
+    city: string;
+    province: string;
+    telephone: string;
+  }
+
   const [owners, setOwners] = useState<OwnerResponseModel[]>([]);
   const [searchId, setSearchId] = useState<string>('');
   const [searchResult, setSearchResult] = useState<OwnerResponseModel | null>(
@@ -14,6 +24,14 @@ const AllOwners: React.FC = (): JSX.Element => {
   const [bills, setBills] = useState<Bill[]>([]);
   const [error, setError] = useState<string | null>(null);
 
+  const [filter, setFilter] = useState<FilterModel>({
+    firstName: '',
+    lastName: '',
+    address: '',
+    city: '',
+    province: '',
+    telephone: '',
+  });
   useEffect(() => {
     const eventSource = new EventSource(
       'http://localhost:8080/api/v2/gateway/owners',
@@ -110,6 +128,43 @@ const AllOwners: React.FC = (): JSX.Element => {
     }
   };
 
+  const calculateAge = (birthDate: Date): number => {
+    const birth = new Date(birthDate);
+    const ageDiffMs = Date.now() - birth.getTime();
+    const ageDate = new Date(ageDiffMs);
+    return Math.abs(ageDate.getUTCFullYear() - 1970);
+  };
+
+  const petTypeMapping: { [key: string]: string } = {
+    '1': 'Cat',
+    '2': 'Dog',
+    '3': 'Lizard',
+    '4': 'Snake',
+    '5': 'Bird',
+    '6': 'Hamster',
+  };
+
+  function isKeyOfOwnerResponseModel(
+    key: string
+  ): key is keyof OwnerResponseModel {
+    return [
+      'firstName',
+      'lastName',
+      'address',
+      'city',
+      'province',
+      'telephone',
+    ].includes(key);
+  }
+  // Then in your filter function
+  const filteredOwners = owners.filter(owner => {
+    return Object.keys(filter).every(key => {
+      if (!filter[key]) return true; // If filter is empty, pass all
+      if (!isKeyOfOwnerResponseModel(key)) return true; // If key is not in OwnerResponseModel, pass
+      return owner[key].toString().includes(filter[key].toString());
+    });
+  });
+
   return (
     <div>
       <NavBar />
@@ -159,6 +214,35 @@ const AllOwners: React.FC = (): JSX.Element => {
               </tbody>
             </table>
 
+            {/* Pets */}
+            {searchResult.pets && searchResult.pets.length > 0 && (
+              <div className="pets-container">
+                <h3>Pets</h3>
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Pet Id</th>
+                      <th>Name</th>
+                      <th>Species</th>
+                      <th>Age</th>
+                      <th>Weight</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {searchResult.pets.map(pet => (
+                      <tr key={pet.petId}>
+                        <td>{pet.petId}</td>
+                        <td>{pet.name}</td>
+                        <td>{petTypeMapping[pet.petTypeId] || 'Unknown'}</td>
+                        <td>{calculateAge(pet.birthDate)}</td>
+                        <td>{pet.weight}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
             {/* Bills */}
             {bills.length > 0 && (
               <div className="bills-container">
@@ -200,6 +284,47 @@ const AllOwners: React.FC = (): JSX.Element => {
         <h1>Owners</h1>
 
         {/* All Owners */}
+
+        <div>
+          <h2>Filter</h2>
+          <input
+            type="text"
+            placeholder="First Name"
+            value={filter.firstName}
+            onChange={e => setFilter({ ...filter, firstName: e.target.value })}
+          />
+          <input
+            type="text"
+            placeholder="Last Name"
+            value={filter.lastName}
+            onChange={e => setFilter({ ...filter, lastName: e.target.value })}
+          />
+          <input
+            type="text"
+            placeholder="Address"
+            value={filter.address}
+            onChange={e => setFilter({ ...filter, address: e.target.value })}
+          />
+          <input
+            type="text"
+            placeholder="City"
+            value={filter.city}
+            onChange={e => setFilter({ ...filter, city: e.target.value })}
+          />
+          <input
+            type="text"
+            placeholder="Province"
+            value={filter.province}
+            onChange={e => setFilter({ ...filter, province: e.target.value })}
+          />
+          <input
+            type="text"
+            placeholder="Telephone"
+            value={filter.telephone}
+            onChange={e => setFilter({ ...filter, telephone: e.target.value })}
+          />
+        </div>
+
         <table>
           <thead>
             <tr>
@@ -213,7 +338,7 @@ const AllOwners: React.FC = (): JSX.Element => {
             </tr>
           </thead>
           <tbody>
-            {owners.map(owner => (
+            {filteredOwners.map(owner => (
               <tr key={owner.ownerId}>
                 <td>{owner.ownerId}</td>
                 <td>{owner.firstName}</td>
