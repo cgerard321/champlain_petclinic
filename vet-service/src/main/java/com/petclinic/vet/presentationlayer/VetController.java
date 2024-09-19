@@ -159,7 +159,7 @@ public class VetController {
 
     @PostMapping
     public Mono<ResponseEntity<VetResponseDTO>> insertVet(@RequestBody Mono<VetRequestDTO> vetRequestDTOMono) {
-        return vetService.insertVet(vetRequestDTOMono)
+        return vetService.addVet(vetRequestDTOMono)
                 .map(v->ResponseEntity.status(HttpStatus.CREATED).body(v))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }

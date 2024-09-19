@@ -18,6 +18,10 @@ import InternalServerError from '@/pages/Error/InternalServerError.tsx';
 import RequestTimeout from '@/pages/Error/RequestTimeout.tsx';
 import ServiceUnavailable from '@/pages/Error/ServiceUnavailable.tsx';
 import Visits from './pages/Visit/Visit';
+import AddReviewForm from './features/visits/Review/AddReviewForm';
+import EditReviewForm from './features/visits/Review/EditReviewForm';
+import Review from './pages/Review/Review';
+import EditInventory from '@/features/inventories/EditInventory.tsx';
 
 const router = createBrowserRouter([
   {
@@ -28,6 +32,39 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <Home />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.EditInventory,
+        element: (
+          <ProtectedRoute>
+            <EditInventory />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.Form,
+        element: (
+          <ProtectedRoute>
+            <AddReviewForm />
+          </ProtectedRoute>
+        ),
+      },
+
+      {
+        path: AppRoutePaths.Review,
+        element: (
+          <ProtectedRoute>
+            <Review />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.UpdateReview,
+        element: (
+          <ProtectedRoute>
+            <EditReviewForm />
           </ProtectedRoute>
         ),
       },
@@ -47,7 +84,6 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-
       {
         path: AppRoutePaths.Vet,
         element: (
@@ -59,7 +95,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.CustomerProfileEdit,
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute roles={['OWNER']}>
             <ProfileEdit />
           </ProtectedRoute>
         ),
@@ -67,7 +103,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.AddingCustomer,
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute roles={['ADMIN']}>
             <AddingCustomer />
           </ProtectedRoute>
         ),
@@ -83,16 +119,8 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.AllCustomers,
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute roles={['ADMIN', 'VET']}>
             <AllOwners />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: AppRoutePaths.PageNotFound,
-        element: (
-          <ProtectedRoute>
-            <PageNotFound />
           </ProtectedRoute>
         ),
       },
@@ -137,14 +165,6 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: '*',
-        element: (
-          <ProtectedRoute>
-            <PageNotFound />
-          </ProtectedRoute>
-        ),
-      },
-      {
         path: AppRoutePaths.Products,
         element: (
           <ProtectedRoute>
@@ -160,30 +180,13 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-      //   {
-      //       path: AppRoutePaths.PageNotFound,
-      //       element: /* PageNotFoundComponent */
-      //   },
-      //   {
-      //       path: AppRoutePaths.InternalServer,
-      //       element: /* InternalServerErrorComponent */
-      //   },
-      //   {
-      //       path: AppRoutePaths.ServiceTimeout,
-      //       element: /* ServiceTimeoutComponent */
-      //   },
-      //   {
-      //       path: AppRoutePaths.ServiceUnavailable,
-      //       element: /* ServiceUnavailableComponent */
-      //   },
-      //   {
-      //       path: AppRoutePaths.Unauthorized,
-      //       element: /* UnauthorizedComponent */
-      //   }
     ],
   },
   { path: AppRoutePaths.login, element: <Login /> },
-  //   {path: '*', element: /* PageNotFoundComponent */},
+  {
+    path: '*',
+    element: <PageNotFound />,
+  },
 ]);
 
 export default router;

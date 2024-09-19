@@ -426,7 +426,7 @@ class VetControllerUnitTest {
 
     @Test
     void createVet() {
-        when(vetService.insertVet(any(Mono.class)))
+        when(vetService.addVet(any(Mono.class)))
                 .thenReturn(Mono.just(vetResponseDTO));
 
         client
@@ -450,7 +450,7 @@ class VetControllerUnitTest {
                 });
 
         Mockito.verify(vetService, times(1))
-                .insertVet(any(Mono.class));
+                .addVet(any(Mono.class));
     }
 
     @Test

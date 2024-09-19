@@ -12,6 +12,8 @@ import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Pets.*;
 import com.petclinic.bffapigateway.dtos.Vets.*;
 import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
+import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewRequestDTO;
+import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewResponseDTO;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
@@ -61,6 +63,9 @@ public class BFFApiGatewayController {
     private final BillServiceClient billServiceClient;
 
     private final InventoryServiceClient inventoryServiceClient;
+
+
+
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN,Roles.VET})
     @GetMapping(value = "bills/{billId}")
@@ -162,7 +167,7 @@ public class BFFApiGatewayController {
     }
 
     @IsUserSpecific(idToMatch = {"vetId"}, bypassRoles = {Roles.ADMIN})
-    @GetMapping(value = "bills/vet/{vetId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "bills/vets/{vetId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getBillsByVetId(final @PathVariable String vetId)
     {
         return billServiceClient.getBillsByVetId(vetId);
@@ -189,7 +194,7 @@ public class BFFApiGatewayController {
     }
 
     @IsUserSpecific(idToMatch = {"vetId"}, bypassRoles = {Roles.ADMIN})
-    @DeleteMapping(value = "bills/vet/{vetId}")
+    @DeleteMapping(value = "bills/vets/{vetId}")
     public Mono<ResponseEntity<Void>> deleteBillsByVetId(final @PathVariable String vetId){
         return billServiceClient.deleteBillsByVetId(vetId).then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
@@ -281,6 +286,22 @@ public class BFFApiGatewayController {
 
 
         /* Visits Methods */
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @GetMapping(value = "reviews", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flux<ReviewResponseDTO> getAllReviews(){
+        return visitsServiceClient.getAllReviews();
+    }
+
+
+
+
+
+
+
+
+
+
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "visits", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<VisitResponseDTO> getAllVisits() {

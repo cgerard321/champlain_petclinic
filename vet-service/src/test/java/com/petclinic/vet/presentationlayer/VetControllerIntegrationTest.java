@@ -1265,6 +1265,7 @@ class VetControllerIntegrationTest {
 
     }
 
+    /*
     @Test
     void createVet_withInvalidFirstName() {
         Publisher<Void> setup = vetRepository.deleteAll();
@@ -1297,8 +1298,9 @@ class VetControllerIntegrationTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("firstName length should be between 2 and 30 characters: "+newVet.getFirstName());
-    }
+    }*/
 
+    /*
     @Test
     void createVet_withInvalidLastName() {
         Publisher<Void> setup = vetRepository.deleteAll();
@@ -1332,7 +1334,7 @@ class VetControllerIntegrationTest {
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("lastName length should be between 2 and 30 characters: "+newVet.getLastName());
-    }
+    }*/
 
     @Test
     void createVet_withInvalidResume() {

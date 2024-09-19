@@ -1,0 +1,11 @@
+.status-reorder {
+  color: #f4a460;
+}
+
+.status-out-of-stock {
+  color: red;
+}
+
+.status-available {
+  color: green;
+}
