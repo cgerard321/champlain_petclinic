@@ -83,3 +83,13 @@
   margin-top: 5px;
   font-family: 'Arial', sans-serif;
 }
+
+/*filter css */
+.owners-container input[type="text"] {
+  padding: 2px;
+  margin: 2px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+  box-sizing: border-box;
+}
