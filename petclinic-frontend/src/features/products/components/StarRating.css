@@ -1,0 +1,18 @@
+.shown{
+    fill: yellow
+}
+
+.star:hover{
+    fill: yellow
+}
+
+.delete-button{
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    border-radius: 100%;
+    background-color: #AFAFAF;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
