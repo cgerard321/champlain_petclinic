@@ -2069,7 +2069,7 @@ class ApiGatewayControllerTest {
                 .thenReturn(Flux.just(bill));
 
         client.get()
-                .uri("/api/gateway/bills/vet/{vetId}", bill.getVetId())
+                .uri("/api/gateway/bills/vets/{vetId}", bill.getVetId())
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
@@ -2202,7 +2202,7 @@ class ApiGatewayControllerTest {
         when(billServiceClient.deleteBillsByVetId("9"))
                 .thenReturn(Flux.empty());
         client.delete()
-                .uri("/api/gateway/bills/vet/9")
+                .uri("/api/gateway/bills/vets/9")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNoContent()
