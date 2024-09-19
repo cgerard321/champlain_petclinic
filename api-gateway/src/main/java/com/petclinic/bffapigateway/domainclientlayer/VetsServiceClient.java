@@ -44,7 +44,7 @@ public class VetsServiceClient {
             @Value("${app.vet-service.port}") String vetsServicePort
     ) {
         this.webClientBuilder = webClientBuilder;
-        vetsServiceUrl = "http://" + vetsServiceHost + ":" + vetsServicePort;
+        vetsServiceUrl = "http://" + vetsServiceHost + ":" + vetsServicePort + "/vets";
     }
 
     //Photo
@@ -399,15 +399,7 @@ public class VetsServiceClient {
             return webClientBuilder
                     .build()
                     .post()
-<<<<<<< HEAD
-<<<<<<< HEAD
                     .uri(vetsServiceUrl)
-=======
-                    .uri(vetsServiceUrl+"/vet")
->>>>>>> 438c882f (feat(VETS-CPC-1078): add a vet by filling a form as an admin (#654))
-=======
-                    .uri(vetsServiceUrl+"/vets")
->>>>>>> fd807b1b (feat(VETS-CPC-1147): fix vet endpoints (#680))
                     .body(BodyInserters.fromValue(request))
                     .retrieve()
                     .bodyToMono(VetResponseDTO.class);

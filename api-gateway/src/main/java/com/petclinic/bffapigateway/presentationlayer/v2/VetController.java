@@ -1,17 +1,16 @@
 package com.petclinic.bffapigateway.presentationlayer.v2;
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 1becaac1 (feat(TEAM4-CPC-1074): Did the frontend for the GetVetByVetId, Added my method to the api-gateway and changed my backend in vet-service)
 import com.petclinic.bffapigateway.domainclientlayer.VetsServiceClient;
 import com.petclinic.bffapigateway.dtos.Vets.VetRequestDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
+import com.petclinic.bffapigateway.exceptions.InvalidInputException;
+import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
 import com.petclinic.bffapigateway.utils.Security.Variables.Roles;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -25,7 +24,6 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/api/v2/gateway/vets")
 @Validated
 @CrossOrigin(origins = "http://localhost:3000, http://localhost:80")
-
 public class VetController {
 
     private final VetsServiceClient vetsServiceClient;
@@ -42,7 +40,6 @@ public class VetController {
         return vetsServiceClient.addVet(vetRequestDTO)
                 .map(v -> ResponseEntity.status(HttpStatus.CREATED).body(v))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
-
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
@@ -51,28 +48,5 @@ public class VetController {
         return vetsServiceClient.getVetByVetId(vetId)
                 .map(vet -> ResponseEntity.status(HttpStatus.OK).body(vet))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
-
     }
-
-<<<<<<< HEAD
-
-<<<<<<< HEAD
 }
-
-
-
-=======
-=======
->>>>>>> 1becaac1 (feat(TEAM4-CPC-1074): Did the frontend for the GetVetByVetId, Added my method to the api-gateway and changed my backend in vet-service)
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<VetResponseDTO>> addVet(@RequestBody Mono<VetRequestDTO> vetRequestDTO) {
-        return vetsServiceClient.addVet(vetRequestDTO)
-                .map(v -> ResponseEntity.status(HttpStatus.CREATED).body(v))
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
-
-    }
-
-}
-
->>>>>>> 438c882f (feat(VETS-CPC-1078): add a vet by filling a form as an admin (#654))

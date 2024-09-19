@@ -1,25 +1,14 @@
 package com.petclinic.bffapigateway.presentationlayer.v2.mockservers;
 
-<<<<<<< HEAD
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-=======
-
 import com.petclinic.bffapigateway.dtos.Vets.SpecialtyDTO;
->>>>>>> 438c882f (feat(VETS-CPC-1078): add a vet by filling a form as an admin (#654))
 import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
-import com.petclinic.bffapigateway.dtos.Vets.SpecialtyDTO;
 import com.petclinic.bffapigateway.dtos.Vets.Workday;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
 
 import java.util.Set;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.petclinic.bffapigateway.dtos.Vets.VetResponseDTO;
-import org.mockserver.client.MockServerClient;
-import org.mockserver.integration.ClientAndServer;
 
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
@@ -35,7 +24,6 @@ public class MockServerConfigVetService {
 
     public MockServerConfigVetService() {
         this.clientAndServer = ClientAndServer.startClientAndServer(VET_SERVICE_SERVER_PORT);
-
 
         mockServerClient_VetService
                 .when(request()
@@ -66,7 +54,6 @@ public class MockServerConfigVetService {
                         .withBody("{\"statusCode\":404,\"message\":\"vetId not found: invalid-id\",\"timestamp\":\"" + java.time.Instant.now() + "\"}"));
     }
 
-<<<<<<< HEAD
     public void registerGetVetsEndpoint() {
         mockServerClient_VetService
                 .when(
@@ -137,22 +124,12 @@ public class MockServerConfigVetService {
                 );
     }
 
-=======
->>>>>>> 438c882f (feat(VETS-CPC-1078): add a vet by filling a form as an admin (#654))
     public void registerAddVetEndpoint() {
         mockServerClient_VetService
                 .when(
                         request()
                                 .withMethod("POST")
-<<<<<<< HEAD
-<<<<<<< HEAD
                                 .withPath("/vets")
-=======
-                                .withPath("/vet")
->>>>>>> 438c882f (feat(VETS-CPC-1078): add a vet by filling a form as an admin (#654))
-=======
-                                .withPath("/vets")
->>>>>>> fd807b1b (feat(VETS-CPC-1147): fix vet endpoints (#680))
                                 .withBody(json("{"
                                         + "\"vetBillId\":\"bill001\","
                                         + "\"firstName\":\"John\","
@@ -198,7 +175,6 @@ public class MockServerConfigVetService {
                                         + "]"
                                         + "}"))
                 );
-<<<<<<< HEAD
     }
 
     public void stopMockServer() {
@@ -261,70 +237,35 @@ public class MockServerConfigVetService {
                 );
     }
 
-=======
-    }
-
-    public void stopMockServer() {
-        if(clientAndServer != null)
-            this.clientAndServer.stop();
-    }
-<<<<<<< HEAD
->>>>>>> 438c882f (feat(VETS-CPC-1078): add a vet by filling a form as an admin (#654))
-=======
-    public void registerGetVetByFirstNameEndpoint(String firstName, VetResponseDTO responseDTO) throws JsonProcessingException {
+    public void registerGetVetByIdEndpoint() {
         mockServerClient_VetService
                 .when(
                         request()
                                 .withMethod("GET")
-                                .withPath("/vets/firstName/" + firstName)
+                                .withPath("/vets/ac9adeb8-625b-11ee-8c99-0242ac120002")
                 )
                 .respond(
                         response()
                                 .withStatusCode(200)
-                                .withBody(json(new ObjectMapper().writeValueAsString(responseDTO)))
+                                .withBody(json(new VetResponseDTO(
+                                        "ac9adeb8-625b-11ee-8c99-0242ac120002",
+                                        "5",
+                                        "Henry",
+                                        "Stevens",
+                                        "stevenshenry@email.com",
+                                        "(514)-634-8276 #2389",
+                                        "Practicing since 1 years",
+                                        Set.of(Workday.Wednesday, Workday.Tuesday, Workday.Thursday, Workday.Monday),
+                                        "{\"Thursday\":[\"Hour_8_9\",\"Hour_9_10\",\"Hour_10_11\",\"Hour_11_12\"],"
+                                                + "\"Monday\":[\"Hour_8_9\",\"Hour_9_10\",\"Hour_10_11\",\"Hour_11_12\",\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\"],"
+                                                + "\"Wednesday\":[\"Hour_10_11\",\"Hour_11_12\",\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\",\"Hour_16_17\",\"Hour_17_18\"],"
+                                                + "\"Tuesday\":[\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\",\"Hour_16_17\",\"Hour_17_18\",\"Hour_18_19\",\"Hour_19_20\"]}",
+                                        false,
+                                        Set.of(
+                                                new SpecialtyDTO("surgery", "surgery"),
+                                                new SpecialtyDTO("radiology", "radiology")
+                                        )
+                                )))
                 );
     }
-
-    public void registerGetVetByFirstNameEndpointNotFound(String firstName) {
-        mockServerClient_VetService
-                .when(
-                        request()
-                                .withMethod("GET")
-                                .withPath("/vets/firstName/" + firstName)
-                )
-                .respond(
-                        response()
-                                .withStatusCode(404)
-                );
-    }
-
-    public void registerGetVetByLastNameEndpoint(String lastName, VetResponseDTO responseDTO) throws JsonProcessingException {
-        mockServerClient_VetService
-                .when(
-                        request()
-                                .withMethod("GET")
-                                .withPath("/vets/lastName/" + lastName)
-                )
-                .respond(
-                        response()
-                                .withStatusCode(200)
-                                .withBody(json(new ObjectMapper().writeValueAsString(responseDTO)))
-                );
-    }
-
-    public void registerGetVetByLastNameEndpointNotFound(String lastName) {
-        mockServerClient_VetService
-                .when(
-                        request()
-                                .withMethod("GET")
-                                .withPath("/vets/lastName/" + lastName)
-                )
-                .respond(
-                        response()
-                                .withStatusCode(404)
-                );
-    }
-
->>>>>>> 9303aeaa (Feat/vets cpc 1076 get vet by vet name (#684))
 }
-
