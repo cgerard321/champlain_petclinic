@@ -20,15 +20,14 @@
 }
 
 .table {
-    padding-top: 20px;
-    width: 100%;
-    border-collapse: collapse;
-    border-spacing: 0;
+  padding-top: 20px;
+  width: 100%;
+  border-collapse: collapse;
+  border-spacing: 0;
 }
 
-
-.add-inventorytype-button{
-    text-align: right;
-    float: right;
-    margin-right: 25px;
+.add-inventorytype-button {
+  text-align: right;
+  float: right;
+  margin-right: 25px;
 }
