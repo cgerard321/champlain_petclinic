@@ -400,7 +400,7 @@ public class VetsServiceClient {
             return webClientBuilder
                     .build()
                     .post()
-                    .uri(vetsServiceUrl+"/vets")
+                    .uri(vetsServiceUrl)
                     .body(BodyInserters.fromValue(request))
                     .retrieve()
                     .bodyToMono(VetResponseDTO.class);

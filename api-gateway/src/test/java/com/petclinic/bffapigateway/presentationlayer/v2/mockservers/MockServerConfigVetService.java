@@ -65,50 +65,50 @@ public class MockServerConfigVetService {
                 .respond(
                         response()
                                 .withStatusCode(200)
-                                .withBody(json("[" +
-                                        "{" +
-                                        "\"vetId\":\"2e26e7a2-8c6e-4e2d-8d60-ad0882e295eb\"," +
-                                        "\"vetBillId\":\"bill001\"," +
-                                        "\"firstName\":\"John\"," +
-                                        "\"lastName\":\"Doe\"," +
-                                        "\"email\":\"john.doe@example.com\"," +
-                                        "\"phoneNumber\":\"1234567890\"," +
-                                        "\"resume\":\"Specialist in dermatology\"," +
-                                        "\"workday\":[" +
-                                        "\"Monday\", \"Wednesday\"" +
-                                        "]," +
-                                        "\"workHoursJson\":\"08:00-16:00\"," +
-                                        "\"active\":true," +
-                                        "\"specialties\":[" +
-                                        "{" +
-                                        "\"specialtyId\":\"dermatology\"," +
-                                        "\"name\":\"Dermatology\"" +
-                                        "}" +
-                                        "]," +
-                                        "\"photoDefault\":false" +
-                                        "}," +
-                                        "{" +
-                                        "\"vetId\":\"3f87b21b-8f44-4bde-b2a6-abc123ef5678\"," +
-                                        "\"vetBillId\":\"bill002\"," +
-                                        "\"firstName\":\"Jane\"," +
-                                        "\"lastName\":\"Smith\"," +
-                                        "\"email\":\"jane.smith@example.com\"," +
-                                        "\"phoneNumber\":\"0987654321\"," +
-                                        "\"resume\":\"Expert in surgery\"," +
-                                        "\"workday\":[" +
-                                        "\"Tuesday\", \"Thursday\"" +
-                                        "]," +
-                                        "\"workHoursJson\":\"09:00-17:00\"," +
-                                        "\"active\":true," +
-                                        "\"specialties\":[" +
-                                        "{" +
-                                        "\"specialtyId\":\"surgery\"," +
-                                        "\"name\":\"Surgery\"" +
-                                        "}" +
-                                        "]," +
-                                        "\"photoDefault\":true" +
-                                        "}" +
-                                        "]"))
+                                .withBody(json("["
+                                        + "{"
+                                        + "\"vetId\":\"2e26e7a2-8c6e-4e2d-8d60-ad0882e295eb\","
+                                        + "\"vetBillId\":\"bill001\","
+                                        + "\"firstName\":\"John\","
+                                        + "\"lastName\":\"Doe\","
+                                        + "\"email\":\"john.doe@example.com\","
+                                        + "\"phoneNumber\":\"1234567890\","
+                                        + "\"resume\":\"Specialist in dermatology\","
+                                        + "\"workday\":["
+                                        + "\"Monday\", \"Wednesday\""
+                                        + "],"
+                                        + "\"workHoursJson\":\"08:00-16:00\","
+                                        + "\"active\":true,"
+                                        + "\"specialties\":["
+                                        + "{"
+                                        + "\"specialtyId\":\"dermatology\","
+                                        + "\"name\":\"Dermatology\""
+                                        + "}"
+                                        + "],"
+                                        + "\"photoDefault\":false"
+                                        + "},"
+                                        + "{"
+                                        + "\"vetId\":\"3f87b21b-8f44-4bde-b2a6-abc123ef5678\","
+                                        + "\"vetBillId\":\"bill002\","
+                                        + "\"firstName\":\"Jane\","
+                                        + "\"lastName\":\"Smith\","
+                                        + "\"email\":\"jane.smith@example.com\","
+                                        + "\"phoneNumber\":\"0987654321\","
+                                        + "\"resume\":\"Expert in surgery\","
+                                        + "\"workday\":["
+                                        + "\"Tuesday\", \"Thursday\""
+                                        + "],"
+                                        + "\"workHoursJson\":\"09:00-17:00\","
+                                        + "\"active\":true,"
+                                        + "\"specialties\":["
+                                        + "{"
+                                        + "\"specialtyId\":\"surgery\","
+                                        + "\"name\":\"Surgery\""
+                                        + "}"
+                                        + "],"
+                                        + "\"photoDefault\":true"
+                                        + "}"
+                                        + "]"))
                 );
     }
 
@@ -156,26 +156,26 @@ public class MockServerConfigVetService {
                 .respond(
                         response()
                                 .withStatusCode(201)
-                                .withBody(json("{" +
-                                        "\"vetId\":\"2e26e7a2-8c6e-4e2d-8d60-ad0882e295eb\"," +
-                                        "\"vetBillId\":\"bill001\"," +
-                                        "\"firstName\":\"John\"," +
-                                        "\"lastName\":\"Doe\"," +
-                                        "\"email\":\"john.doe@example.com\"," +
-                                        "\"phoneNumber\":\"1234567890\"," +
-                                        "\"resume\":\"Specialist in dermatology\"," +
-                                        "\"workday\":[" +
-                                        "\"Wednesday\"" +
-                                        "]," +
-                                        "\"workHoursJson\":\"08:00-16:00\"," +
-                                        "\"active\":true," +
-                                        "\"specialties\":[" +
-                                        "{" +
-                                        "\"specialtyId\":\"dermatology\"," +
-                                        "\"name\":\"Dermatology\"" +
-                                        "}" +
-                                        "]" +
-                                        "}"))
+                                .withBody(json("{"
+                                        + "\"vetId\":\"2e26e7a2-8c6e-4e2d-8d60-ad0882e295eb\","
+                                        + "\"vetBillId\":\"bill001\","
+                                        + "\"firstName\":\"John\","
+                                        + "\"lastName\":\"Doe\","
+                                        + "\"email\":\"john.doe@example.com\","
+                                        + "\"phoneNumber\":\"1234567890\","
+                                        + "\"resume\":\"Specialist in dermatology\","
+                                        + "\"workday\":["
+                                        + "\"Wednesday\""
+                                        + "],"
+                                        + "\"workHoursJson\":\"08:00-16:00\","
+                                        + "\"active\":true,"
+                                        + "\"specialties\":["
+                                        + "{"
+                                        + "\"specialtyId\":\"dermatology\","
+                                        + "\"name\":\"Dermatology\""
+                                        + "}"
+                                        + "]"
+                                        + "}"))
                 );
     }
 
