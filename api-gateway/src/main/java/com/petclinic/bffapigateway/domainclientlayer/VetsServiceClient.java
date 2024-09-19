@@ -44,7 +44,7 @@ public class VetsServiceClient {
             @Value("${app.vet-service.port}") String vetsServicePort
     ) {
         this.webClientBuilder = webClientBuilder;
-        vetsServiceUrl = "http://" + vetsServiceHost + ":" + vetsServicePort;
+        vetsServiceUrl = "http://" + vetsServiceHost + ":" + vetsServicePort + "/vets";
     }
 
     //Photo
@@ -290,7 +290,7 @@ public class VetsServiceClient {
         return webClientBuilder
                 .build()
                 .get()
-                .uri(vetsServiceUrl + "/vets")
+                .uri(vetsServiceUrl)
                 .retrieve()
                 .onStatus(HttpStatusCode::is5xxServerError,error->
                         Mono.error(new IllegalArgumentException("Something went wrong"))
@@ -399,7 +399,7 @@ public class VetsServiceClient {
             return webClientBuilder
                     .build()
                     .post()
-                    .uri(vetsServiceUrl+"/vets")
+                    .uri(vetsServiceUrl)
                     .body(BodyInserters.fromValue(request))
                     .retrieve()
                     .bodyToMono(VetResponseDTO.class);
