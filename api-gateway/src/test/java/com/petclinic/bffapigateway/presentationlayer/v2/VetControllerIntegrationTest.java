@@ -1,5 +1,7 @@
 package com.petclinic.bffapigateway.presentationlayer.v2;
 
+
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.SpecialtyDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetRequestDTO;
@@ -16,7 +18,11 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+
 import org.springframework.http.MediaType;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
@@ -26,6 +32,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Set;
 import java.util.UUID;
+
 
 import static com.google.common.net.HttpHeaders.AUTHORIZATION;
 import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService.jwtTokenForInvalidOwnerId;
@@ -52,6 +59,13 @@ class VetControllerIntegrationTest {
 
         mockServerConfigAuthService.registerValidateTokenForAdminEndpoint();
         mockServerConfigAuthService.registerValidateTokenForVetEndpoint();
+
+        mockServerConfigVetService.registerAddVetEndpoint();
+
+        mockServerConfigAuthService = new MockServerConfigAuthService();
+        mockServerConfigAuthService.registerValidateTokenForAdminEndpoint();
+        mockServerConfigAuthService.registerValidateTokenForVetEndpoint();
+
     }
 
     @AfterAll
@@ -61,6 +75,7 @@ class VetControllerIntegrationTest {
     }
 
     private static final String VET_ENDPOINT = "/api/v2/gateway/vets";
+
     private static final String BEARER_TOKEN = "Bearer " + jwtTokenForValidAdmin;
 
     @Test
@@ -140,3 +155,104 @@ class VetControllerIntegrationTest {
     }
 
 }
+
+    private static final String BEARER_TOKEN = jwtTokenForValidAdmin;
+
+    //#region Dummy data
+    Set<Workday> workdaySet = Set.of(Workday.Wednesday);
+
+    VetRequestDTO newVetRequestDTO = VetRequestDTO.builder()
+            .vetBillId("bill001")
+            .firstName("John")
+            .lastName("Doe")
+            .email("john.doe@example.com")
+            .phoneNumber("1234567890")
+            .resume("Specialist in dermatology")
+            .workday(workdaySet)
+            .workHoursJson("08:00-16:00")
+            .active(true)
+            .specialties(Set.of(SpecialtyDTO.builder().specialtyId("dermatology").name("Dermatology").build()))
+            .photoDefault(false)
+            .build();
+    //#endregion
+
+    @Test
+    void whenAddVet_asAdmin_thenReturnCreatedVetResponseDTO() {
+
+        Mono<VetResponseDTO> result = webTestClient.post()
+                .uri("/api/v2/gateway/vets")
+                .cookie("Bearer", jwtTokenForValidAdmin)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(newVetRequestDTO), VetRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .returnResult(VetResponseDTO.class)
+                .getResponseBody()
+                .single();
+
+        StepVerifier
+                .create(result)
+                .expectNextMatches(vetResponseDTO -> {
+                    assertNotNull(vetResponseDTO);
+                    assertNotNull(vetResponseDTO.getVetId());
+                    assertEquals(newVetRequestDTO.getVetBillId(), vetResponseDTO.getVetBillId());
+                    assertEquals(newVetRequestDTO.getFirstName(), vetResponseDTO.getFirstName());
+                    assertEquals(newVetRequestDTO.getLastName(), vetResponseDTO.getLastName());
+                    assertEquals(newVetRequestDTO.getEmail(), vetResponseDTO.getEmail());
+                    assertEquals(newVetRequestDTO.getPhoneNumber(), vetResponseDTO.getPhoneNumber());
+                    assertEquals(newVetRequestDTO.getResume(), vetResponseDTO.getResume());
+                    assertEquals(newVetRequestDTO.getWorkday(), vetResponseDTO.getWorkday());
+                    assertEquals(newVetRequestDTO.getWorkHoursJson(), vetResponseDTO.getWorkHoursJson());
+                    assertEquals(newVetRequestDTO.isActive(), vetResponseDTO.isActive());
+                    assertEquals(newVetRequestDTO.getSpecialties(), vetResponseDTO.getSpecialties());
+                    return true;
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void whenAddVet_asARoleOtherThanAdmin_thenReturnIsUnauthorized() {
+
+        webTestClient.post()
+                .uri("/api/v2/gateway/vets")
+                .cookie("Bearer", jwtTokenForInvalidOwnerId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(newVetRequestDTO), VetRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isUnauthorized();
+    }
+
+
+
+    @Test
+    void whenGetVetByFirstName_notExists_thenReturnNotFound() {
+        String firstName = "Unknown";
+
+        mockServerConfigVetService.registerGetVetByFirstNameEndpointNotFound(firstName);
+
+        webTestClient.get()
+                .uri("/api/v2/gateway/vets/firstName/{firstName}", firstName)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+    @Test
+    void whenGetVetByLastName_notExists_thenReturnNotFound() {
+        String lastName = "Unknown";
+
+        mockServerConfigVetService.registerGetVetByLastNameEndpointNotFound(lastName);
+
+        webTestClient.get()
+                .uri("/api/v2/gateway/vets/lastName/{lastName}", lastName)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+
+
+}
+

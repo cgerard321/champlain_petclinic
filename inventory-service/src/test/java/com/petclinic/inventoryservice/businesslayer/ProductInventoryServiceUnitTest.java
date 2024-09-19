@@ -114,6 +114,78 @@ class ProductInventoryServiceUnitTest {
     }
 
     @Test
+    void getProductsInInventoryByInventoryIdAndProductFieldsPagination_WithPriceAndQuantity_ShouldSucceed() {
+        Pageable pageable = PageRequest.of(0, 2);
+        when(productRepository.findAllProductsByInventoryIdAndProductPriceAndProductQuantity(
+                product.getInventoryId(), 10.00, 5))
+                .thenReturn(Flux.just(product, product2));
+
+        Flux<ProductResponseDTO> productResponseDTOMono = productInventoryService
+                .getProductsInInventoryByInventoryIdAndProductsFieldsPagination(
+                        product.getInventoryId(), null, 10.00, 5, pageable);
+
+        StepVerifier.create(productResponseDTOMono)
+                .expectNextMatches(prod -> prod.getProductId().equals(product.getProductId()))
+                .expectNextMatches(prod -> prod.getProductId().equals(product2.getProductId()))
+                .expectComplete()
+                .verify();
+    }
+
+    @Test
+    void getProductsInInventoryByInventoryIdAndProductFieldsPagination_WithPriceOnly_ShouldSucceed() {
+        Pageable pageable = PageRequest.of(0, 2);
+        when(productRepository.findAllProductsByInventoryIdAndProductPrice(
+                product.getInventoryId(), 10.00))
+                .thenReturn(Flux.just(product, product2));
+
+        Flux<ProductResponseDTO> productResponseDTOMono = productInventoryService
+                .getProductsInInventoryByInventoryIdAndProductsFieldsPagination(
+                        product.getInventoryId(), null, 10.00, null, pageable);
+
+        StepVerifier.create(productResponseDTOMono)
+                .expectNextMatches(prod -> prod.getProductId().equals(product.getProductId()))
+                .expectNextMatches(prod -> prod.getProductId().equals(product2.getProductId()))
+                .expectComplete()
+                .verify();
+    }
+
+    @Test
+    void getProductsInInventoryByInventoryIdAndProductFieldsPagination_WithQuantityOnly_ShouldSucceed() {
+        Pageable pageable = PageRequest.of(0, 2);
+        when(productRepository.findAllProductsByInventoryIdAndProductQuantity(
+                product.getInventoryId(), 5))
+                .thenReturn(Flux.just(product, product2));
+
+        Flux<ProductResponseDTO> productResponseDTOMono = productInventoryService
+                .getProductsInInventoryByInventoryIdAndProductsFieldsPagination(
+                        product.getInventoryId(), null, null, 5, pageable);
+
+        StepVerifier.create(productResponseDTOMono)
+                .expectNextMatches(prod -> prod.getProductId().equals(product.getProductId()))
+                .expectNextMatches(prod -> prod.getProductId().equals(product2.getProductId()))
+                .expectComplete()
+                .verify();
+    }
+
+    @Test
+    void getProductsInInventoryByInventoryIdAndProductFieldsPagination_WithNameOnly_ShouldSucceed() {
+        Pageable pageable = PageRequest.of(0, 2);
+        when(productRepository.findAllProductsByInventoryIdAndProductName(
+                product.getInventoryId(), "name"))
+                .thenReturn(Flux.just(product, product2));
+
+        Flux<ProductResponseDTO> productResponseDTOMono = productInventoryService
+                .getProductsInInventoryByInventoryIdAndProductsFieldsPagination(
+                        product.getInventoryId(), "name", null, null, pageable);
+
+        StepVerifier.create(productResponseDTOMono)
+                .expectNextMatches(prod -> prod.getProductId().equals(product.getProductId()))
+                .expectNextMatches(prod -> prod.getProductId().equals(product2.getProductId()))
+                .expectComplete()
+                .verify();
+    }
+
+    @Test
     void getAllProductsByInventoryId_andProductName_andProductPrice_andProductQuantity_withValidFields_shouldSucceed(){
         String inventoryId = "1";
         String productName = "Benzodiazepines";
@@ -1134,6 +1206,25 @@ class ProductInventoryServiceUnitTest {
                 .expectNextCount(1)
                 .verifyComplete();
     }
+
+
+//    @Test
+//    void getProductsInInventoryByInventoryIdAndProductFieldPagination_ShouldSucceed(){
+//        Pageable pageable = PageRequest.of(0, 2);
+//
+//        when(productRepository.findAllProductsByInventoryId(product.getInventoryId()))
+//                .thenReturn(Flux.just(product, product2, product1));
+//
+//        Flux<ProductResponseDTO> productResponseDTOMono = productInventoryService
+//                .getProductsInInventoryByInventoryIdAndProductsFieldsPagination(product.getInventoryId(), null,null, null,
+//                        pageable);
+//        StepVerifier.create(productResponseDTOMono)
+//                .expectNextMatches(prod -> prod.getProductId().equals(product.getProductId()))
+//                .expectNextMatches(prod -> prod.getProductId().equals(product2.getProductId()))
+//                .expectComplete()
+//                .verify();
+//    }
+
 
 
 }

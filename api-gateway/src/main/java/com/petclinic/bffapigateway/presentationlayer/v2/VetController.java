@@ -30,6 +30,7 @@ public class VetController {
 
     private final VetsServiceClient vetsServiceClient;
 
+
     @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping(value = "{vetId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<VetResponseDTO>> getVetByVetId(@PathVariable String vetId) {
@@ -38,3 +39,14 @@ public class VetController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<VetResponseDTO>> addVet(@RequestBody Mono<VetRequestDTO> vetRequestDTO){
+        return vetsServiceClient.addVet(vetRequestDTO)
+                .map(v -> ResponseEntity.status(HttpStatus.CREATED).body(v))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+}
+

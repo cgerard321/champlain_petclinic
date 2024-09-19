@@ -13,12 +13,14 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.Map;
+import java.util.UUID;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
@@ -42,7 +44,7 @@ public class VetsServiceClient {
             @Value("${app.vet-service.port}") String vetsServicePort
     ) {
         this.webClientBuilder = webClientBuilder;
-        vetsServiceUrl = "http://" + vetsServiceHost + ":" + vetsServicePort + "/vets";
+        vetsServiceUrl = "http://" + vetsServiceHost + ":" + vetsServicePort;
     }
 
     //Photo
@@ -314,6 +316,45 @@ public class VetsServiceClient {
                 )
                 .bodyToMono(VetResponseDTO.class);
     }
+    public Mono<VetResponseDTO> getVetByFirstName(String firstName) {
+
+        return webClientBuilder
+                .build()
+                .get()
+                .uri(vetsServiceUrl + "/firstName/{firstName}", firstName)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error->{
+                    HttpStatusCode statusCode = error.statusCode();
+                    if(statusCode.equals(NOT_FOUND))
+                        return Mono.error(new ExistingVetNotFoundException("vet with this first name not found: "+firstName, NOT_FOUND));
+                    return Mono.error(new IllegalArgumentException("Something went wrong"));
+                })
+                .onStatus(HttpStatusCode::is5xxServerError,error->
+                        Mono.error(new IllegalArgumentException("Something went wrong"))
+                )
+                .bodyToMono(VetResponseDTO.class);
+    }
+    public Mono<VetResponseDTO> getVetByLastName(String lastName) {
+
+        return webClientBuilder
+                .build()
+                .get()
+                .uri(vetsServiceUrl + "/lastName/{lastName}", lastName)
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError, error->{
+                    HttpStatusCode statusCode = error.statusCode();
+                    if(statusCode.equals(NOT_FOUND))
+                        return Mono.error(new ExistingVetNotFoundException("vet with this last name not found: "+lastName, NOT_FOUND));
+                    return Mono.error(new IllegalArgumentException("Something went wrong"));
+                })
+                .onStatus(HttpStatusCode::is5xxServerError,error->
+                        Mono.error(new IllegalArgumentException("Something went wrong"))
+                )
+                .bodyToMono(VetResponseDTO.class);
+    }
+
+
+
 
     public Mono<VetResponseDTO> getVetByVetBillId(String vetBillId) {
 
@@ -349,6 +390,20 @@ public class VetsServiceClient {
                         Mono.error(new IllegalArgumentException("Something went wrong"))
                 )
                 .bodyToFlux(VetResponseDTO.class);
+    }
+
+    public Mono<VetResponseDTO> addVet(Mono<VetRequestDTO> vetRequestDTO){
+        String vetId = UUID.randomUUID().toString();
+        return vetRequestDTO.flatMap(request ->{
+            request.setVetId(vetId);
+            return webClientBuilder
+                    .build()
+                    .post()
+                    .uri(vetsServiceUrl+"/vets")
+                    .body(BodyInserters.fromValue(request))
+                    .retrieve()
+                    .bodyToMono(VetResponseDTO.class);
+        });
     }
 
 
