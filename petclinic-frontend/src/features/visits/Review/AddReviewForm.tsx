@@ -66,7 +66,6 @@ const AddReviewForm: React.FC = (): JSX.Element => {
     setSuccessMessage('');
 
     try {
-      console.log(review);
       await addReview(review);
       setSuccessMessage('Review added successfully!');
       setShowNotification(true);

@@ -99,7 +99,7 @@ public class VisitsServiceClient {
         return visitRequestDTO.flatMap(visitRequestDTO1 -> {
             return webClient
                     .post()
-                    .uri("")
+                    .uri(reviewUrl)
                     .body(BodyInserters.fromValue(visitRequestDTO1))
                     .retrieve()
                     .bodyToMono(VisitResponseDTO.class);

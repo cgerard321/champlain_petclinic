@@ -56,10 +56,11 @@ const AddingVisit: React.FC = (): JSX.Element => {
 
         const formattedVisit = {
             ...visit,
-            visitDate: visit.visitDate.toISOString().slice(0, 19).replace('T', ' ')
+            visitDate: new Date(visit.visitDate.toISOString().slice(0, 19).replace('T', ' '))
         };
 
         try {
+            console.log(formattedVisit);
             await addVisit(formattedVisit); // Pass the Date object directly
             setSuccessMessage('Visit added successfully!');
             setShowNotification(true);
@@ -97,7 +98,7 @@ const AddingVisit: React.FC = (): JSX.Element => {
                 <input
                     type="datetime-local"
                     name="visitDate"
-                    value={visit.visitDate.toISOString().slice(0, -1)} // This formats the date to ISO and removes milliseconds
+                    value={visit.visitDate.toISOString().split('T')[0]} // This formats the date to ISO and removes milliseconds
                     onChange={handleChange}
                 />
                 {errors.visitDate && <span className="error">{errors.visitDate}</span>}

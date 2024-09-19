@@ -16,7 +16,7 @@ import java.util.Date;
 public class VisitResponseDTO {
 //    private String visitId;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+//    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime visitDate;
     private String description;
     private String petId;

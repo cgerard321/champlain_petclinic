@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @Builder
 public class VisitRequestDTO {
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
+//    @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime visitDate;
     private String description;
     private String petId;
