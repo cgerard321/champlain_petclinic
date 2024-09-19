@@ -17,7 +17,9 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
@@ -298,7 +300,7 @@ class VetControllerIntegrationTest {
     void whenAddVet_asAdmin_thenReturnCreatedVetResponseDTO() {
 
         Mono<VetResponseDTO> result = webTestClient.post()
-                .uri(VET_ENDPOINT)
+                .uri("/api/v2/gateway/vets")
                 .cookie("Bearer", jwtTokenForValidAdmin)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(newVetRequestDTO), VetRequestDTO.class)
@@ -334,7 +336,7 @@ class VetControllerIntegrationTest {
     void whenAddVet_asARoleOtherThanAdmin_thenReturnIsUnauthorized() {
 
         webTestClient.post()
-                .uri(VET_ENDPOINT)
+                .uri("/api/v2/gateway/vets")
                 .cookie("Bearer", jwtTokenForInvalidOwnerId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(newVetRequestDTO), VetRequestDTO.class)
@@ -342,6 +344,34 @@ class VetControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isUnauthorized();
     }
+
+
+
+    @Test
+    void whenGetVetByFirstName_notExists_thenReturnNotFound() {
+        String firstName = "Unknown";
+
+        mockServerConfigVetService.registerGetVetByFirstNameEndpointNotFound(firstName);
+
+        webTestClient.get()
+                .uri("/api/v2/gateway/vets/firstName/{firstName}", firstName)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+    @Test
+    void whenGetVetByLastName_notExists_thenReturnNotFound() {
+        String lastName = "Unknown";
+
+        mockServerConfigVetService.registerGetVetByLastNameEndpointNotFound(lastName);
+
+        webTestClient.get()
+                .uri("/api/v2/gateway/vets/lastName/{lastName}", lastName)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
 
 
 
