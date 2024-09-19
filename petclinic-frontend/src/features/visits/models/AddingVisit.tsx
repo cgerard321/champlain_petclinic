@@ -1,0 +1,145 @@
+import * as React from 'react';
+import { useNavigate } from "react-router-dom";
+import { FormEvent, useState } from "react";
+import './EditVisit.css';
+import { VisitRequestModel } from "@/features/visits/models/VisitRequestModel";
+import { Status } from "@/features/visits/models/Status";
+import { addVisit } from "@/features/visits/api/addVisit";
+
+interface ApiError {
+    message: string;
+}
+
+const AddingVisit: React.FC = (): JSX.Element => {
+    const [visit, setVisit] = useState<VisitRequestModel>({
+        visitDate: new Date(),
+        description: '',
+        petId: '',
+        practitionerId: '',
+        status: 'UPCOMING' as Status,
+    });
+
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
+    const [successMessage, setSuccessMessage] = useState<string>('');
+    const [errorMessage, setErrorMessage] = useState<string>('');
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [showNotification, setShowNotification] = useState<boolean>(false);
+
+    const navigate = useNavigate();
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
+        const { name, value } = e.target;
+        setVisit(prevVisit => ({
+            ...prevVisit,
+            [name]: name === 'visitDate' ? new Date(value) : value, // Convert string to Date object for visitDate
+        }));
+    };
+
+    const validate = (): boolean => {
+        const newErrors: { [key: string]: string } = {};
+        if (!visit.petId) newErrors.petId = 'Pet ID is required';
+        if (!visit.visitDate || isNaN(visit.visitDate.getTime())) newErrors.visitDate = 'Visit date is required';
+        if (!visit.description) newErrors.description = 'Description is required';
+        if (!visit.practitionerId) newErrors.practitionerId = 'Practitioner ID is required';
+        if (!visit.status) newErrors.status = 'Status is required';
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
+    const handleSubmit = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
+        event.preventDefault();
+        if (!validate()) return;
+
+        setIsLoading(true);
+        setErrorMessage('');
+        setSuccessMessage('');
+
+        const formattedVisit = {
+            ...visit,
+            visitDate: visit.visitDate.toISOString().slice(0, 19).replace('T', ' ')
+        };
+
+        try {
+            await addVisit(formattedVisit); // Pass the Date object directly
+            setSuccessMessage('Visit added successfully!');
+            setShowNotification(true);
+            setTimeout(() => setShowNotification(false), 3000);
+            navigate('/visits');
+            setVisit({
+                visitDate: new Date(),
+                description: '',
+                petId: '',
+                practitionerId: '',
+                status: 'UPCOMING' as Status,
+            });
+        } catch (error) {
+            const apiError = error as ApiError;
+            setErrorMessage(`Error adding visit: ${apiError.message}`);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    return (
+        <div className="profile-edit">
+            <h1>Add Visit</h1>
+            <form onSubmit={handleSubmit}>
+                <label>Pet ID: </label>
+                <input
+                    type="text"
+                    name="petId"
+                    value={visit.petId}
+                    onChange={handleChange}
+                />
+                {errors.petId && <span className="error">{errors.petId}</span>}
+                <br />
+                <label>Visit Date: </label>
+                <input
+                    type="datetime-local"
+                    name="visitDate"
+                    value={visit.visitDate.toISOString().slice(0, -1)} // This formats the date to ISO and removes milliseconds
+                    onChange={handleChange}
+                />
+                {errors.visitDate && <span className="error">{errors.visitDate}</span>}
+                <br/>
+                <label>Description: </label>
+                <input
+                    type="text"
+                    name="description"
+                    value={visit.description}
+                    onChange={handleChange}
+                />
+                {errors.description && <span className="error">{errors.description}</span>}
+                <br />
+                <label>Practitioner ID: </label>
+                <input
+                    type="text"
+                    name="practitionerId"
+                    value={visit.practitionerId}
+                    onChange={handleChange}
+                />
+                {errors.practitionerId && <span className="error">{errors.practitionerId}</span>}
+                <br />
+                <label>Status: </label>
+                <select
+                    name="status"
+                    value={visit.status}
+                    onChange={handleChange}
+                >
+                    <option value="UPCOMING">Upcoming</option>
+                    <option value="CONFIRMED">Confirmed</option>
+                    <option value="COMPLETED">Completed</option>
+                </select>
+                {errors.status && <span className="error">{errors.status}</span>}
+                <br />
+                <button type="submit" disabled={isLoading}>
+                    {isLoading ? 'Adding...' : 'Add'}
+                </button>
+            </form>
+            {showNotification && <div className="notification">{successMessage}</div>}
+            {errorMessage && <div className="error">{errorMessage}</div>}
+        </div>
+    );
+};
+
+export default AddingVisit;

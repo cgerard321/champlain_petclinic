@@ -95,7 +95,16 @@ public class VisitsServiceClient {
                 .bodyToMono(VisitResponseDTO.class);
     }
 
-
+    public Mono<VisitResponseDTO> addVisit(Mono<VisitRequestDTO> visitRequestDTO){
+        return visitRequestDTO.flatMap(visitRequestDTO1 -> {
+            return webClient
+                    .post()
+                    .uri("")
+                    .body(BodyInserters.fromValue(visitRequestDTO1))
+                    .retrieve()
+                    .bodyToMono(VisitResponseDTO.class);
+        });
+    }
 
     public Mono<VisitResponseDTO> updateStatusForVisitByVisitId(String visitId, String status) {
 
@@ -112,7 +121,6 @@ public class VisitsServiceClient {
             .retrieve()
             .bodyToMono(VisitResponseDTO.class);
     }
-
 
     public Mono<VisitResponseDTO> createVisitForPet(VisitRequestDTO visit) {
         return webClient
