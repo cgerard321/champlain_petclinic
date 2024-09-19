@@ -96,7 +96,7 @@ const AddingVisit: React.FC = (): JSX.Element => {
                 <br />
                 <label>Visit Date: </label>
                 <input
-                    type="datetime-local"
+                    type="date" //change this if it doesnt work
                     name="visitDate"
                     value={visit.visitDate.toISOString().split('T')[0]} // This formats the date to ISO and removes milliseconds
                     onChange={handleChange}
