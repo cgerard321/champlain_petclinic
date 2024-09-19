@@ -17,7 +17,9 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
@@ -43,7 +45,6 @@ class VetControllerIntegrationTest {
     private WebTestClient webTestClient;
 
     private MockServerConfigVetService mockServerConfigVetService;
-
     private MockServerConfigAuthService mockServerConfigAuthService;
 
     @BeforeAll
@@ -185,6 +186,13 @@ class VetControllerIntegrationTest {
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNotFound();
+    }
+
+    @Test
+    void whenGetVetByLastName_notExists_thenReturnNotFound_withExpectedResponse() {
+        String lastName = "Unknown";
+
+        mockServerConfigVetService.registerGetVetByLastNameEndpointNotFound(lastName);
 
         VetResponseDTO expectedVetResponse = VetResponseDTO.builder()
                 .vetId(validVetId)
