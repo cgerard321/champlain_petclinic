@@ -1,6 +1,5 @@
 package com.petclinic.bffapigateway.presentationlayer.v2;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import com.petclinic.bffapigateway.dtos.Vets.SpecialtyDTO;
 import com.petclinic.bffapigateway.dtos.Vets.VetRequestDTO;
@@ -11,24 +10,18 @@ import com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerCo
 import com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigVetService;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.*;
-
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Set;
-import java.util.UUID;
 
 import static com.google.common.net.HttpHeaders.AUTHORIZATION;
 import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService.jwtTokenForInvalidOwnerId;
@@ -50,16 +43,16 @@ class VetControllerIntegrationTest {
     @BeforeAll
     public void startMockServer() {
         mockServerConfigVetService = new MockServerConfigVetService();
+        mockServerConfigAuthService = new MockServerConfigAuthService();
+
         mockServerConfigVetService.registerAddVetEndpoint();
         mockServerConfigVetService.registerGetVetsEndpoint();
         mockServerConfigVetService.registerGetVetsEndpoint_withNoVets();
+        mockServerConfigVetService.registerGetVetByIdEndpoint();
 
-        mockServerConfigAuthService = new MockServerConfigAuthService();
         mockServerConfigAuthService.registerValidateTokenForAdminEndpoint();
         mockServerConfigAuthService.registerValidateTokenForVetEndpoint();
     }
-
-    String validVetId = "ac9adeb8-625b-11ee-8c99-0242ac120002";
 
     @AfterAll
     public void stopMockServer() {
@@ -90,7 +83,6 @@ class VetControllerIntegrationTest {
 
     @Test
     public void whenGetVets_thenReturnVets() {
-
         webTestClient.get()
                 .uri(VET_ENDPOINT)
                 .cookie("Bearer", jwtTokenForValidAdmin)
@@ -104,7 +96,6 @@ class VetControllerIntegrationTest {
 
     @Test
     public void whenGetVets_withNoVets_thenReturnNotFound() {
-
         webTestClient.get()
                 .uri(VET_ENDPOINT)
                 .cookie("Bearer", jwtTokenForValidAdmin)
@@ -115,7 +106,6 @@ class VetControllerIntegrationTest {
 
     @Test
     void whenAddVet_asAdmin_thenReturnCreatedVetResponseDTO() {
-
         Mono<VetResponseDTO> result = webTestClient.post()
                 .uri(VET_ENDPOINT)
                 .cookie("Bearer", jwtTokenForValidAdmin)
@@ -151,7 +141,6 @@ class VetControllerIntegrationTest {
 
     @Test
     void whenAddVet_asARoleOtherThanAdmin_thenReturnIsUnauthorized() {
-
         webTestClient.post()
                 .uri(VET_ENDPOINT)
                 .cookie("Bearer", jwtTokenForInvalidOwnerId)
@@ -189,11 +178,8 @@ class VetControllerIntegrationTest {
     }
 
     @Test
-    void whenGetVetByLastName_notExists_thenReturnNotFound_withExpectedResponse() {
-        String lastName = "Unknown";
-
-        mockServerConfigVetService.registerGetVetByLastNameEndpointNotFound(lastName);
-
+    public void getVetById_ValidId_ReturnsVet() {
+        String validVetId = "ac9adeb8-625b-11ee-8c99-0242ac120002";
         VetResponseDTO expectedVetResponse = VetResponseDTO.builder()
                 .vetId(validVetId)
                 .vetBillId("5")
@@ -217,7 +203,7 @@ class VetControllerIntegrationTest {
                                 .name("surgery")
                                 .build(),
                         SpecialtyDTO.builder()
-                                .specialtyId("radiology")
+                                .specialtyId("100001")
                                 .name("radiology")
                                 .build()))
                 .build();
@@ -233,27 +219,22 @@ class VetControllerIntegrationTest {
                     VetResponseDTO vetResponse = response.getResponseBody();
                     assertNotNull(vetResponse);
                     assertEquals(expectedVetResponse.getVetId(), vetResponse.getVetId());
-                    assertEquals("Henry", vetResponse.getFirstName());
-                    assertEquals("Stevens", vetResponse.getLastName());
-                    assertEquals("stevenshenry@email.com", vetResponse.getEmail());
-                    assertEquals("(514)-634-8276 #2389", vetResponse.getPhoneNumber());
-                    assertEquals("Practicing since 1 years", vetResponse.getResume());
+                    assertEquals(expectedVetResponse.getFirstName(), vetResponse.getFirstName());
+                    assertEquals(expectedVetResponse.getLastName(), vetResponse.getLastName());
+                    assertEquals(expectedVetResponse.getEmail(), vetResponse.getEmail());
+                    assertEquals(expectedVetResponse.getPhoneNumber(), vetResponse.getPhoneNumber());
+                    assertEquals(expectedVetResponse.getResume(), vetResponse.getResume());
                     assertEquals(expectedVetResponse.getWorkday(), vetResponse.getWorkday());
                     assertEquals(expectedVetResponse.getWorkHoursJson(), vetResponse.getWorkHoursJson());
                     assertEquals(expectedVetResponse.isActive(), vetResponse.isActive());
                     assertEquals(expectedVetResponse.getSpecialties().size(), vetResponse.getSpecialties().size());
+                    assertTrue(vetResponse.getSpecialties().stream().anyMatch(specialty -> specialty.getName().equals("surgery")));
+                    assertTrue(vetResponse.getSpecialties().stream().anyMatch(specialty -> specialty.getName().equals("radiology")));
                 });
     }
 
     @Test
-    public void getVetByVetId_ValidId_ReturnsVet() {
-
-        String validVetId = "ac9adeb8-625b-11ee-8c99-0242ac120002";
-    }
-
-    @Test
-    public void getVetByVetId_InvalidId_ReturnsNotFound() {
-
+    public void getVetById_InvalidId_ReturnsNotFound() {
         String invalidVetId = "ac9adeb8-625b-11ee-8c99-0242ac12000200000";
 
         webTestClient.get()
@@ -261,12 +242,12 @@ class VetControllerIntegrationTest {
                 .header(AUTHORIZATION, BEARER_TOKEN)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isNotFound()  // Expect 404 NOT FOUND
+                .expectStatus().isNotFound()
                 .expectBody(String.class)
                 .consumeWith(response -> {
                     String responseBody = response.getResponseBody();
                     assertNotNull(responseBody);
-                    assertTrue(responseBody.contains("vetId not found: ac9adeb8-625b-11ee-8c99-0242ac12000200000"));
+                    assertTrue(responseBody.contains("vetId not found: " + invalidVetId));
                 });
     }
 }
