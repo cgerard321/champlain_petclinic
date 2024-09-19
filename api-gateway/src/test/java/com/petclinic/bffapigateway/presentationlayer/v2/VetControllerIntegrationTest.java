@@ -116,7 +116,7 @@ class VetControllerIntegrationTest {
     void whenAddVet_asAdmin_thenReturnCreatedVetResponseDTO() {
 
         Mono<VetResponseDTO> result = webTestClient.post()
-                .uri("/api/v2/gateway/vets")
+                .uri(VET_ENDPOINT)
                 .cookie("Bearer", jwtTokenForValidAdmin)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(newVetRequestDTO), VetRequestDTO.class)
