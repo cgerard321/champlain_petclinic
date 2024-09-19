@@ -179,12 +179,6 @@ public class MockServerConfigVetService {
                 );
     }
 
-    public void stopMockServer() {
-        if (clientAndServer != null) {
-            this.clientAndServer.stop();
-        }
-    }
-
     public void registerGetVetByFirstNameEndpoint(String firstName, VetResponseDTO responseDTO) throws JsonProcessingException {
         mockServerClient_VetService
                 .when(
@@ -263,11 +257,13 @@ public class MockServerConfigVetService {
                                                 + "\"Wednesday\":[\"Hour_10_11\",\"Hour_11_12\",\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\",\"Hour_16_17\",\"Hour_17_18\"],"
                                                 + "\"Tuesday\":[\"Hour_12_13\",\"Hour_13_14\",\"Hour_14_15\",\"Hour_15_16\",\"Hour_16_17\",\"Hour_17_18\",\"Hour_18_19\",\"Hour_19_20\"]}",
                                         false,
-                                        Set.of(
-                                                new SpecialtyDTO("surgery", "surgery"),
-                                                new SpecialtyDTO("radiology", "radiology")
-                                        )
-
+                                        Set.of(new SpecialtyDTO("surgery", "surgery"), new SpecialtyDTO("radiology", "radiology"))
                                 ))));
+    }
+
+    public void stopMockServer() {
+        if (clientAndServer != null) {
+            this.clientAndServer.stop();
+        }
     }
 }
