@@ -572,7 +572,7 @@ public class BFFApiGatewayController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+            @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping("/vets/firstName/{firstName}")
     public Mono<ResponseEntity<VetResponseDTO>> getVetByFirstName(@PathVariable String firstName) {
         return vetsServiceClient.getVetByFirstName(firstName)
