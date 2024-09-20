@@ -52,7 +52,7 @@ export default function ProductList(): JSX.Element {
           Min Price:
           <input
             type="number"
-            value={minPrice ?? ''}
+            value={minPrice ?? typeof 'number'}
             onChange={e =>
               setMinPrice(
                 e.target.value ? parseFloat(e.target.value) : undefined
@@ -64,7 +64,7 @@ export default function ProductList(): JSX.Element {
           Max Price:
           <input
             type="number"
-            value={maxPrice ?? ''}
+            value={maxPrice ?? typeof 'number'}
             onChange={e =>
               setMaxPrice(
                 e.target.value ? parseFloat(e.target.value) : undefined
