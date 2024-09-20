@@ -41,80 +41,142 @@ export default function VisitListTable(): JSX.Element {
     }, []);
 
     return (
-        <div>
-            <button
-                className="btn btn-warning"
-                onClick={() => navigate('/forms')}
-                title="Let a review"
-            >
-                Leave a Review
-            </button>
-            <p></p>
-            <button
-                className="btn btn-dark"
-                onClick={() => navigate('/reviews')}
-                title="View review"
-            >
-                View Reviews
-            </button>
-            <button
-                className="btn btn-warning"
-                onClick={() => navigate(AppRoutePaths.AddVisit)}
-                title="Make a visit"
-            >
-                Make a visit
-            </button>
-            <h1>Visits List</h1>
-            <table>
-                <thead>
-                <tr>
-                    <th>Visit Id</th>
-                    <th>Visit Date</th>
-                    <th>Description</th>
-                    <th>Pet Name</th>
-                    <th>Vet First Name</th>
-                    <th>Vet Last Name</th>
-                    <th>Vet Email</th>
-                    <th>Status</th>
-                </tr>
-                </thead>
-                <tbody>
-                {visitsList.map(visit => (
-                    <tr key={visit.visitId}>
-                        <td>{visit.visitId}</td>
-                        <td>{new Date(visit.visitDate).toLocaleString()}</td>
-                        <td>{visit.description}</td>
-                        <td>{visit.petName}</td>
-                        <td>{visit.vetFirstName}</td>
-                        <td>{visit.vetLastName}</td>
-                        <td>{visit.vetEmail}</td>
-                        <td
-                            style={{
-                                color:
-                                    visit.status === 'CONFIRMED'
-                                        ? 'green'
-                                        : visit.status === 'UPCOMING'
-                                            ? 'orange'
-                                            : visit.status === 'COMPLETED'
-                                                ? 'blue'
-                                                : 'inherit',
-                            }}
-                        >
-                            {visit.status}
-                        </td>
-                        <td>
-                            <button
-                                className="btn btn-dark"
-                                onClick={() => navigate(`/visits/${visit.visitId}`)}
-                                title="View"
-                            >
-                                View
-                            </button>
-                        </td>
+        <>
+            <div>
+                <button
+                    className="btn btn-warning"
+                    onClick={() => navigate('/forms')}
+                    title="Let a review"
+                >
+                    Leave a Review
+                </button>
+                <p></p>
+                <button
+                    className="btn btn-dark"
+                    onClick={() => navigate('/reviews')}
+                    title="View review"
+                >
+                    View Reviews
+                </button>
+                <button
+                    className="btn btn-warning"
+                    onClick={() => navigate(AppRoutePaths.AddVisit)}
+                    title="Make a visit"
+                >
+                    Make a visit
+                </button>
+                <h1>Visits List</h1>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Visit Id</th>
+                        <th>Visit Date</th>
+                        <th>Description</th>
+                        <th>Pet Name</th>
+                        <th>Vet First Name</th>
+                        <th>Vet Last Name</th>
+                        <th>Vet Email</th>
+                        <th>Status</th>
                     </tr>
-                ))}
-                </tbody>
-            </table>
-        </div>
+                    </thead>
+                    <tbody>
+                    {visitsList.map(visit => (
+                        <tr key={visit.visitId}>
+                            <td>{visit.visitId}</td>
+                            <td>{new Date(visit.visitDate).toLocaleString()}</td>
+                            <td>{visit.description}</td>
+                            <td>{visit.petName}</td>
+                            <td>{visit.vetFirstName}</td>
+                            <td>{visit.vetLastName}</td>
+                            <td>{visit.vetEmail}</td>
+                            <td
+                                style={{
+                                    color:
+                                        visit.status === 'CONFIRMED'
+                                            ? 'green'
+                                            : visit.status === 'UPCOMING'
+                                                ? 'orange'
+                                                : visit.status === 'COMPLETED'
+                                                    ? 'blue'
+                                                    : 'inherit',
+                                }}
+                            >
+                                {visit.status}
+                            </td>
+                            <td>
+                                <button
+                                    className="btn btn-dark"
+                                    onClick={() => navigate(`/visits/${visit.visitId}`)}
+                                    title="View"
+                                >
+                                    View
+                                </button>
+                            </td>
+                        </tr>
+                    ))}
+                    </tbody>
+                </table>
+            </div>
+
+            <div>
+                <button
+                    className="btn btn-warning"
+                    onClick={() => navigate('/forms')}
+                    title="Let a review"
+                >
+                    Leave a Review
+                </button>
+                <p> </p>
+                <button
+                    className="btn btn-dark"
+                    onClick={() => navigate('/reviews')}
+                    title="View review"
+                >
+                    View Reviews
+                </button>
+                <h1>Visits List</h1>
+                <table>
+                    <thead>
+                    <tr>
+                        <th>Visit Id</th>
+                        <th>Visit Date</th>
+                        <th>Description</th>
+                        <th>Pet Name</th>
+                        <th>Vet First Name</th>
+                        <th>Vet Last Name</th>
+                        <th>Vet Email</th>
+                        <th>Status</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {visitsList.map(visit => (
+                        <tr key={visit.visitId}>
+                            <td>{visit.visitId}</td>
+                            <td>{visit.visitDate}</td>
+                            <td>{visit.description}</td>
+                            <td>{visit.petName}</td>
+                            <td>{visit.vetFirstName}</td>
+                            <td>{visit.vetLastName}</td>
+                            <td>{visit.vetEmail}</td>
+                            <td
+                                style={{
+                                    color:
+                                        visit.status === 'CONFIRMED'
+                                            ? 'green'
+                                            : visit.status === 'UPCOMING'
+                                                ? 'orange'
+                                                : visit.status === 'COMPLETED'
+                                                    ? 'blue'
+                                                    : 'inherit',
+                                }}
+                            >
+                                {visit.status}
+                            </td>
+                        </tr>
+                    ))}
+                    </tbody>
+                </table>
+            </div>
+        </>
     );
 }

@@ -38,14 +38,14 @@ interface WorkHoursData {
 }
 
 export default function Vet(): JSX.Element {
+    // Integrated the state and functions from both branches
     const [searchQuery, setSearchQuery] = useState('');
-    const [searchType, setSearchType] = useState<'firstName' | 'lastName'>(
-        'firstName'
-    );
+    const [searchType, setSearchType] = useState<'firstName' | 'lastName'>('firstName');
     const [result, setResult] = useState<VetResponseDTO | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [formVisible, setFormVisible] = useState(false);
 
-    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+    // Function to handle the search request
     const handleSearch = async () => {
         try {
             setError(null);
@@ -66,14 +66,12 @@ export default function Vet(): JSX.Element {
         }
     };
 
-    const [formVisible, setFormVisible] = useState(false);
-
+    // Helper function to parse work hours from JSON
     const parseWorkHours = (workHoursJson: string): string => {
         try {
             const workHours: WorkHoursData = JSON.parse(workHoursJson);
             return Object.entries(workHours)
                 .map(([day, hours]) => {
-                    // Ensure hours is an array and format it
                     if (Array.isArray(hours)) {
                         return `${day}: ${hours.join(', ') || 'No data'}`;
                     }
@@ -86,6 +84,7 @@ export default function Vet(): JSX.Element {
         }
     };
 
+    // Helper function to render specialties
     const renderSpecialties = (specialties: SpecialtyDTO[]): string => {
         if (specialties) {
             return specialties.map(sp => sp.name).join(', ') || 'None';
@@ -93,6 +92,7 @@ export default function Vet(): JSX.Element {
         return 'None';
     };
 
+    // Helper function to render workdays
     const renderWorkdays = (workdays: Workday[]): string => {
         if (workdays) {
             return workdays.join(', ') || 'None';
@@ -126,9 +126,7 @@ export default function Vet(): JSX.Element {
                 />
                 <select
                     value={searchType}
-                    onChange={e =>
-                        setSearchType(e.target.value as 'firstName' | 'lastName')
-                    }
+                    onChange={e => setSearchType(e.target.value as 'firstName' | 'lastName')}
                     style={{ marginRight: '10px' }}
                 >
                     <option value="firstName">First Name</option>

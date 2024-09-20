@@ -10,7 +10,7 @@ import ProfileEdit from '@/pages/Customer/ProfileEdit.tsx';
 import Products from '@/pages/Product/Products.tsx';
 import AddingCustomer from '@/pages/Customer/AddingCustomer.tsx';
 import CustomerBillingPage from '@/pages/Bills/CostumerBills.tsx';
-import VetDetails from "@/pages/Vet/VetDetails.tsx";
+import VetDetails from '@/pages/Vet/VetDetails.tsx';
 import Review from './pages/Review/Review';
 import EditReviewForm from './features/visits/Review/EditReviewForm';
 import AllOwners from '@/pages/Customer/AllOwners.tsx';
@@ -186,14 +186,6 @@ const router = createBrowserRouter([
                 element: (
                     <ProtectedRoute>
                         <AddingVisit />
-                    </ProtectedRoute>
-                ),
-            },
-            {
-                path: AppRoutePaths.Visits,
-                element: (
-                    <ProtectedRoute>
-                        <Visits />
                     </ProtectedRoute>
                 ),
             },
