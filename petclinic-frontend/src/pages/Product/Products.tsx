@@ -7,12 +7,15 @@ export default function Products(): JSX.Element {
     <div>
       <NavBar />
       <h1>Products</h1>
-    
-      <ProductsList />
-      
-
       <h3>Here are the trending Products</h3>
       <TrendingList/>
+
+
+
+      <hr />
+    
+      <ProductsList />
+                 
     </div>
   );
 }

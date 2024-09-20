@@ -1,17 +1,21 @@
 package com.petclinic.products.businesslayer;
 
-import com.petclinic.products.datalayer.Product;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
+
 import com.petclinic.products.utils.EntityModelUtil;
 import com.petclinic.products.datalayer.ProductRepository;
 import com.petclinic.products.presentationlayer.ProductRequestModel;
 import com.petclinic.products.presentationlayer.ProductResponseModel;
 import com.petclinic.products.utils.exceptions.NotFoundException;
-import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
 public class ProductServiceImpl implements ProductService{
+
+
 
     private final ProductRepository productRepository;
 
@@ -70,6 +74,17 @@ public class ProductServiceImpl implements ProductService{
                     product.setRequestCount(product.getRequestCount() + 1);
                     return productRepository.save(product).then(); // Save and complete
                 });
+    }
+
+
+    @Scheduled(cron = "0 0 0 */30 * *")  // Runs every 30 days at midnight
+    public Mono<Void> resetRequestCounts() {
+        return productRepository.findAll()
+                .flatMap(product -> {
+                    product.setRequestCount(0);
+                    return productRepository.save(product);
+                })
+                .then();
     }
 
 }
