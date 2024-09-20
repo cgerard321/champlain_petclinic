@@ -18,16 +18,17 @@ interface VetResponseType {
 }
 
 export default function VetDetails(): JSX.Element {
-
     const { vetId } = useParams<{ vetId: string }>();
     const [vet, setVet] = useState<VetResponseType | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
     useEffect(() => {
-        const fetchVetDetails = async () => {
+        const fetchVetDetails = async (): Promise<void> => {
             try {
-                const response = await fetch(`http://localhost:8080/api/gateway/vets/${vetId}`);
+                const response = await fetch(
+                    `http://localhost:8080/api/gateway/vets/${vetId}`
+                );
 
                 if (!response.ok) {
                     throw new Error(`Error: ${response.statusText}`);
@@ -44,17 +45,16 @@ export default function VetDetails(): JSX.Element {
         fetchVetDetails();
     }, [vetId]);
 
-    // Helper function to render work hours
     const renderWorkHours = (workHoursJson: string): JSX.Element => {
         try {
-            const workHours = JSON.parse(workHoursJson);
+            const workHours: Record<string, string[]> = JSON.parse(workHoursJson);
             return (
                 <div>
                     {Object.entries(workHours).map(([day, hours], index) => (
                         <div key={index}>
                             <strong>{day}:</strong>
                             <ul>
-                                {(hours as string[]).map((hour, idx) => (
+                                {hours.map((hour, idx) => (
                                     <li key={idx}>{hour}</li>
                                 ))}
                             </ul>
