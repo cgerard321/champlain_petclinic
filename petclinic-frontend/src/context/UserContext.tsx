@@ -48,7 +48,7 @@ export const useUser = (): UserContextType => {
   const context = useContext(UserContext);
 
   if (!context) {
-    router.navigate(AppRoutePaths.login);
+    router.navigate(AppRoutePaths.Login);
     return {
       user: { email: '', roles: new Set<Role>(), userId: '', username: '' },
       setUser: () => {},
