@@ -1,7 +1,9 @@
 package com.petclinic.products.businesslayer;
 
-import com.petclinic.products.datalayer.Product;
-import com.petclinic.products.datalayer.ProductRepository;
+
+import com.petclinic.products.businesslayer.products.ProductServiceImpl;
+import com.petclinic.products.datalayer.products.Product;
+import com.petclinic.products.datalayer.products.ProductRepository;
 import com.petclinic.products.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

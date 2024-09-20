@@ -1,6 +1,6 @@
 import { getAllProducts } from '@/features/products/api/getAllProducts.ts';
 import { useState, useEffect} from 'react';
-import { ProductModel } from '@/features/inventories/models/ProductModels/ProductModel.ts';
+import { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
 
 
 export default function TrendingList(){
@@ -28,11 +28,14 @@ export default function TrendingList(){
                   productId: string;
                   productName: string;
                   productDescription: string;
+                  averageRating: number;
                   productSalePrice: number;
+
                 }) => (
                   <div className="card" key={product.productId}>
                     <h2>{product.productName}</h2>
                     <p>{product.productDescription}</p>
+                    <p>{product.averageRating}</p>
                     <p>Price: ${product.productSalePrice.toFixed(2)}</p>
                   </div>
                 )

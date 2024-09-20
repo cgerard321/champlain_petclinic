@@ -1,8 +1,11 @@
 package com.petclinic.bffapigateway.presentationlayer.v2;
 
+import com.petclinic.bffapigateway.config.GlobalExceptionHandler;
 import com.petclinic.bffapigateway.domainclientlayer.BillServiceClient;
 import com.petclinic.bffapigateway.dtos.Bills.BillResponseDTO;
 import com.petclinic.bffapigateway.dtos.Bills.BillStatus;
+import com.petclinic.bffapigateway.exceptions.InvalidInputException;
+import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +25,8 @@ import static org.mockito.Mockito.when;
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {
         BillController.class,
-        BillServiceClient.class
+        BillServiceClient.class,
+        GlobalExceptionHandler.class
 })
 @WebFluxTest(controllers = BillController.class)
 @AutoConfigureWebTestClient
@@ -72,5 +76,14 @@ private final String baseBillURL = "/api/v2/gateway/bills";
                 .contains(billresponse, billresponse2);
     }
 
+    @Test
+    public void whenGetAllBillsByInvalidCustomerId_ThenReturnInvalidInput() {
+        when(billServiceClient.getBillsByOwnerId("invalid-owner-id")).thenReturn(Flux.defer(() -> Flux.error(new InvalidInputException("Invalid owner id"))));
+        webTestClient.get()
+                .uri(baseBillURL + "/customer/{customerId}", "invalid-owner-id")
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.SC_UNPROCESSABLE_ENTITY);
+
+    }
 
 }

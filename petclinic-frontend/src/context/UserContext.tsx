@@ -3,6 +3,7 @@ import { createContext, useContext, useState, ReactNode } from 'react';
 import { UserResponseModel } from '@/shared/models/UserResponseModel';
 import router from '@/router';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
+import { Role } from '@/shared/models/Role.ts';
 
 interface UserContextType {
   user: UserResponseModel;
@@ -25,7 +26,7 @@ export const UserProvider = ({
       ? JSON.parse(storedUser)
       : {
           email: '',
-          roles: '',
+          roles: new Set<Role>(),
           userId: '',
           username: '',
         };
@@ -47,9 +48,9 @@ export const useUser = (): UserContextType => {
   const context = useContext(UserContext);
 
   if (!context) {
-    router.navigate(AppRoutePaths.login);
+    router.navigate(AppRoutePaths.Login);
     return {
-      user: { email: '', roles: '', userId: '', username: '' },
+      user: { email: '', roles: new Set<Role>(), userId: '', username: '' },
       setUser: () => {},
     };
   }
@@ -71,6 +72,33 @@ export const useSetUser = (): ((user: UserResponseModel) => void) => {
 export const IsAdmin = (): boolean => {
   const context = useUser();
   return (
-    context.user?.roles !== undefined && context.user.roles.includes('admin')
+    context.user?.roles !== undefined &&
+    Array.from(context.user.roles).some((role: Role) => role.name === 'ADMIN')
+  );
+};
+
+export const IsOwner = (): boolean => {
+  const context = useUser();
+  return (
+    context.user?.roles !== undefined &&
+    Array.from(context.user.roles).some((role: Role) => role.name === 'OWNER')
+  );
+};
+
+export const IsVet = (): boolean => {
+  const context = useUser();
+  return (
+    context.user?.roles !== undefined &&
+    Array.from(context.user.roles).some((role: Role) => role.name === 'VET')
+  );
+};
+
+export const IsInventoryManager = (): boolean => {
+  const context = useUser();
+  return (
+    context.user?.roles !== undefined &&
+    Array.from(context.user.roles).some(
+      (role: Role) => role.name === 'INVENTORY_MANAGER'
+    )
   );
 };

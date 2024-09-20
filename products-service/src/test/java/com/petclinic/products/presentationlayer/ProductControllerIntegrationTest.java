@@ -1,6 +1,7 @@
 package com.petclinic.products.presentationlayer;
 
-import com.petclinic.products.businesslayer.ProductService;
+
+import com.petclinic.products.businesslayer.products.ProductService;
 import com.petclinic.products.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,11 +29,11 @@ class ProductControllerIntegrationTest {
 
     @Test
     void incrementRequestCount_WhenProductExists_ShouldReturnNoContent() {
-        // Arrange
+       
         String productId = "06a7d573-bcab-4db3-956f-773324b92a80";
         when(productService.requestCount(productId)).thenReturn(Mono.empty());
 
-        // Act & Assert
+       
         webTestClient.patch()
                 .uri("/api/v1/products/" + productId)
                 .exchange()
@@ -43,12 +44,12 @@ class ProductControllerIntegrationTest {
 
     @Test
     void incrementRequestCount_WhenProductNotFound_ShouldReturnNotFound() {
-        // Arrange
+       
         String productId = "06a7d573-bcab-4db3-956f-773324b92a77";
         when(productService.requestCount(productId))
                 .thenReturn(Mono.error(new NotFoundException("Product id was not found: " + productId)));
 
-        // Act & Assert
+       
         webTestClient.patch()
                 .uri("/api/v1/products/" + productId)
                 .exchange()

@@ -1,5 +1,5 @@
 import axios from '@/shared/api/axiosInstance.ts';
-import { ProductModel } from '@/features/inventories/models/ProductModels/ProductModel.ts';
+import { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
 
 export async function getProductByProductId(productId: string): Promise<ProductModel> {
   try {
