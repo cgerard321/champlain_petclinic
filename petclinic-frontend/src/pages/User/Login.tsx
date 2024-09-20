@@ -25,7 +25,6 @@ export default function Login(): JSX.Element {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const setUser = useSetUser();
   const navigate = useNavigate();
-
   const login = async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
     setErrorMessage(null);
@@ -38,11 +37,11 @@ export default function Login(): JSX.Element {
 
     try {
       const response = await axios.post<UserResponseModel>(
-       'http://localhost:8080/api/gateway/users/login',
-       {
-         email: formElements.emailInput.value,
-         password: formElements.passwordInput.value,
-       }
+        'http://localhost:8080/api/gateway/users/login',
+        {
+          email: formElements.emailInput.value,
+          password: formElements.passwordInput.value,
+        }
       );
 
       setUser(response.data);
@@ -59,34 +58,30 @@ export default function Login(): JSX.Element {
   };
 
   return (
-   <div className="login-page">
-     <Link to="/home" className="back-button">
-       Back
-     </Link>
-     <div className="login-container">
-       <h1>User Login</h1>
-       {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
-       <form onSubmit={login}>
-         <label htmlFor="emailInput"></label>
-         <input
-          type="text"
-          id="emailInput"
-          placeholder="Enter your email"
-         />
-         <br />
-         <label htmlFor="passwordInput"></label>
-         <input
-          type="password"
-          id="passwordInput"
-          placeholder="Enter your password"
-         />
-         <br />
-         <button type="submit" className="login-button">
-           Login
-         </button>
-       </form>
-     </div>
-     <Slideshow images={images} interval={7000} />
-   </div>
+    <div className="login-page">
+      <Link to="/home" className="back-button">
+        Back
+      </Link>
+      <div className="login-container">
+        <h1>User Login</h1>
+        {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
+        <form onSubmit={login}>
+          <label htmlFor="emailInput"></label>
+          <input type="text" id="emailInput" placeholder="Enter your email" />
+          <br />
+          <label htmlFor="passwordInput"></label>
+          <input
+            type="password"
+            id="passwordInput"
+            placeholder="Enter your password"
+          />
+          <br />
+          <button type="submit" className="login-button">
+            Login
+          </button>
+        </form>
+      </div>
+      <Slideshow images={images} interval={7000} />
+    </div>
   );
 }
