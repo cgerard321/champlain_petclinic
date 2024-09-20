@@ -2,6 +2,22 @@ namespace emailing_service.Models.EmailType;
 
 public class DirectEmailModel
 {
+    public DirectEmailModel()
+    {
+    }
+
+    public DirectEmailModel(string emailToSendTo, string emailTitle, string templateName, string header, string body, string footer, string correspondantName, string senderName)
+    {
+        EmailToSendTo = emailToSendTo;
+        EmailTitle = emailTitle;
+        TemplateName = templateName;
+        Header = header;
+        Body = body;
+        Footer = footer;
+        CorrespondantName = correspondantName;
+        SenderName = senderName;
+    }
+
     public string EmailToSendTo { get; set; }
     public string EmailTitle { get; set; }
     public string TemplateName { get; set; }

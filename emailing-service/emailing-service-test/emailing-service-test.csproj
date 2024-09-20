@@ -28,10 +28,12 @@
 
     <ItemGroup>
       <Folder Include="PresentationLayer\" />
+      <Folder Include="TestResults\" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="..\emailing-service\emailing-service.csproj" />
     </ItemGroup>
+    
     
 
 </Project>

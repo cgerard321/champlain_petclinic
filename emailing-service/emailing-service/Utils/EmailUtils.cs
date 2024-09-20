@@ -14,6 +14,7 @@ public static class EmailUtils
 {
     public static ConnectionEmailServer emailConnectionString;
     public static List<EmailTemplate> EmailTemplates = new List<EmailTemplate>();
+    public static bool sendEmail = true;
     public static bool CheckIfEmailIsValid(string email)
     {
         if (string.IsNullOrWhiteSpace(email))
@@ -56,7 +57,8 @@ public static class EmailUtils
             {
                 try
                 {
-                    await smtpClient.SendMailAsync(mailMessage);
+                    if (sendEmail)
+                        await smtpClient.SendMailAsync(mailMessage);
                     Console.WriteLine("Email sent successfully.");
                 }
                 catch (System.Exception ex)

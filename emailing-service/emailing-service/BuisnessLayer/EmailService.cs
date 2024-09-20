@@ -6,5 +6,5 @@ namespace emailing_service.BuisnessLayer;
 public interface IEmailService
 {
     public OperationResult ReceiveHtml(string templateName, string htmlBody);
-    public void SendEmail(DirectEmailModel model);
+    public OperationResult SendEmail(DirectEmailModel model);
 }

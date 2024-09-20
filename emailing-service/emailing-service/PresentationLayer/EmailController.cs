@@ -53,14 +53,15 @@ public class EmailController : Controller
     [HttpPost("send")]
     public IActionResult SendEmail([FromBody] DirectEmailModel emailModel)
     {
+        
+        
+        
         Console.WriteLine("Received Email Call Function!");
         if (emailModel == null)
             return BadRequest("Email Model is null.");
         DirectEmailModel directEmailModel = emailModel;
         Console.WriteLine("Found the model!" + directEmailModel.ToString());
-        
-        
-        if (directEmailModel.EmailToSendTo == null)
+        if (String.IsNullOrWhiteSpace(directEmailModel.EmailToSendTo))
             return BadRequest("Email To Send To is null. EMAIL IS REQUIRED");
         if(!EmailUtils.CheckIfEmailIsValid(directEmailModel.EmailToSendTo))
             return BadRequest("Email To Send To Not Valid");

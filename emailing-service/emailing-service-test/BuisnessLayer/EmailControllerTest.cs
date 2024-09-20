@@ -25,8 +25,18 @@ public class EmailControllerTests
 
     public EmailControllerTests()
     {
-        
+        EmailUtils.sendEmail = false;
         pathOfDefaultHtml = "<html><body>%%EMAIL_HEADERS%% %%EMAIL_BODY%% %%EMAIL_FOOTER%% %%EMAIL_NAME%% %%EMAIL_SENDER%%</body></html>";
+        directEmailModel = new DirectEmailModel(
+            "xilef992@gmail.com",
+            "This is a test email",
+            "Default",
+            "This is the emailHeader",
+            "This is the emailbody",
+            "this is the email footer",
+            "Felix",
+            "PetClinic"
+        );
     }
     [OneTimeSetUp]
     public async Task SetUp()
@@ -93,13 +103,244 @@ public class EmailControllerTests
     
         Assert.That(ex.Message, Does.Contain($"Template [{templateName}] already exists."));
     }
-
-    [Test]
-    public void SendEmail_ValidEmail_SendsEmail()
+    
+    public static IEnumerable<DirectEmailModel> ValidEmailModels()
     {
+        yield return new DirectEmailModel(
+            "xilef992@gmail.com",
+            "This is a test email",
+            "Default",
+            "This is the emailHeader",
+            "This is the emailbody",
+            "this is the email footer",
+            "Felix",
+            "PetClinic"
+        );
+
+        yield return new DirectEmailModel(
+            "example2@test.com",
+            "Another test email",
+            null,
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            "CompanyXYZ"
+        );
+    }
+    [Test, TestCaseSource(nameof(ValidEmailModels))]
+    public void SendEmail_ValidEmail_SendsEmail(DirectEmailModel? testModel)
+    {
+        EmailUtils.EmailTemplates.Clear();
+        var templateCreateResult = _controller.ReceiveHtml("Default", pathOfDefaultHtml);
+        Assert.That(templateCreateResult, Is.TypeOf<OperationResult>());
+        OperationResult operationResultForTemplateCreate = (OperationResult)templateCreateResult;
+        Assert.That(operationResultForTemplateCreate.IsSuccess, Is.True);
+        
+        
+        var result = _controller.SendEmail(testModel);
+        Assert.That(result, Is.TypeOf<OperationResult>());
+        OperationResult operationResult = (OperationResult)result;
+        Assert.That(operationResult.IsSuccess, Is.True);
         
     }
+    [Test]
+    [TestCase(null)]
+    public void SendEmail_InvalidTemplateName_TemplateFormatException(DirectEmailModel? testModel)
+    {
+        var ex = Assert.Throws<BadEmailModel>(() =>
+            _controller.SendEmail(testModel));
     
+        Assert.That(ex.Message, Does.Contain("Email Model is null"));
+        
+    }
+    public static IEnumerable<DirectEmailModel> NullOrWhiteSpaceEmailModels()
+    {
+        yield return new DirectEmailModel(
+            null,
+            "This is a test email",
+            "Default",
+            "This is the emailHeader",
+            "This is the emailbody",
+            "this is the email footer",
+            "Felix",
+            "PetClinic"
+        );
+
+        yield return new DirectEmailModel(
+            "",
+            "Another test email",
+            "Default",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            "CompanyXYZ"
+        );
+        yield return new DirectEmailModel(
+            "               ",
+            "Another test email",
+            "Default",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            "CompanyXYZ"
+        );
+    }
+    [Test, TestCaseSource(nameof(NullOrWhiteSpaceEmailModels))]
+    public void SendEmail_NullOrWhitespaceEmailToSendTo_BadEmailModel(DirectEmailModel? testModel)
+    {
+        var ex = Assert.Throws<BadEmailModel>(() =>
+            _controller.SendEmail(testModel));
+        Assert.That(ex.Message, Does.Contain("Email To Send To is null or whitespace. EMAIL IS REQUIRED"));
+    }
+    
+    public static IEnumerable<DirectEmailModel> InvalidEmailEmailModels()
+    {
+        yield return new DirectEmailModel(
+            "@gmail.com",
+            "This is a test email",
+            "Default",
+            "This is the emailHeader",
+            "This is the emailbody",
+            "this is the email footer",
+            "Felix",
+            "PetClinic"
+        );
+        yield return new DirectEmailModel(
+            "felix@gmail",
+            "Another test email",
+            "Default",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            "CompanyXYZ"
+        );
+        yield return new DirectEmailModel(
+            "felix@@gmail.com",
+            "Another test email",
+            "Default",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            "CompanyXYZ"
+        );
+        yield return new DirectEmailModel(
+            "felix@.com",
+            "Another test email",
+            "Default",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            "CompanyXYZ"
+        );
+        yield return new DirectEmailModel(
+            "@gmail.com",
+            "Another test email",
+            "Default",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            "CompanyXYZ"
+        );
+    }
+    [Test, TestCaseSource(nameof(InvalidEmailEmailModels))]
+    public void SendEmail_InvalidEmail_BadEmailModel(DirectEmailModel? testModel)
+    {
+        var ex = Assert.Throws<BadEmailModel>(() =>
+            _controller.SendEmail(testModel));
+        Assert.That(ex.Message, Does.Contain("Email To Send To Not Valid"));
+    }
+
+    public static IEnumerable<DirectEmailModel> NullOrWhitespaceTitleEmailModels()
+    {
+        yield return new DirectEmailModel(
+            "felix@gmail.com",
+            null,
+            "Default",
+            "This is the emailHeader",
+            "This is the emailbody",
+            "this is the email footer",
+            "Felix",
+            "PetClinic"
+        );
+        yield return new DirectEmailModel(
+            "felix@gmail.com",
+            "",
+            "Default",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            "CompanyXYZ"
+        );
+        yield return new DirectEmailModel(
+            "felix@gmail.com",
+            "               ",
+            "Default",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            "CompanyXYZ"
+        );
+    }
+    [Test, TestCaseSource(nameof(NullOrWhitespaceTitleEmailModels))]
+    public void SendEmail_NullOrWhitespaceTitle_BadEmailModel(DirectEmailModel? testModel)
+    {
+        var ex = Assert.Throws<BadEmailModel>(() =>
+            _controller.SendEmail(testModel));
+        Assert.That(ex.Message, Does.Contain("Email Title is null or whitespace"));
+    }
+    
+    public static IEnumerable<DirectEmailModel> NonExistingTemplateEmailModels()
+    {
+        yield return new DirectEmailModel(
+            "felix@gmail.com",
+            "Example1",
+            "Example1OfNonExistingTemplate",
+            "This is the emailHeader",
+            "This is the emailbody",
+            "this is the email footer",
+            "Felix",
+            "PetClinic"
+        );
+        yield return new DirectEmailModel(
+            "felix@gmail.com",
+            "Example2",
+            "NotAnExistingTemplate",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            "CompanyXYZ"
+        );
+        yield return new DirectEmailModel(
+            "felix@gmail.com",
+            "Example3",
+            "ThisTemplateDoesNotExist",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            "CompanyXYZ"
+        );
+    }
+
+    [Test, TestCaseSource(nameof(NonExistingTemplateEmailModels))]
+    public void SendEmail_NonExistingTemplate_TriedToFindNonExistingTemplate(DirectEmailModel? testModel)
+    {
+        var ex = Assert.Throws<TriedToFindNonExistingTemplate>(() =>
+            _controller.SendEmail(testModel));
+        Assert.That(ex.Message,
+            Does.Contain($"Template {testModel.TemplateName} does not exist. Please create a template first or use the default one (Default)"));
+    }
+
     /*[Test]
     public async Task ReceiveHtml_AlreadyExistingTemplate_BadRequest()
     {

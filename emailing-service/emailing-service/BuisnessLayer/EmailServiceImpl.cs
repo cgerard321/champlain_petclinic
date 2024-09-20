@@ -25,7 +25,7 @@ public class EmailServiceImpl : IEmailService
         };
     }
 
-    public void SendEmail(DirectEmailModel model)
+    public OperationResult SendEmail(DirectEmailModel model)
     {
         Console.WriteLine("Received Email Call Function!");
         if (model == null)
@@ -34,18 +34,18 @@ public class EmailServiceImpl : IEmailService
         Console.WriteLine("Found the model!" + directEmailModel.ToString());
         
         
-        if (directEmailModel.EmailToSendTo == null)
-            throw new BadEmailModel("Email To Send To is null. EMAIL IS REQUIRED");
+        if (String.IsNullOrWhiteSpace(directEmailModel.EmailToSendTo))
+            throw new BadEmailModel("Email To Send To is null or whitespace. EMAIL IS REQUIRED");
         if(!EmailUtils.CheckIfEmailIsValid(directEmailModel.EmailToSendTo))
             throw new BadEmailModel("Email To Send To Not Valid");
-        if(directEmailModel.EmailTitle == null)
-            throw new BadEmailModel("Email Title is null");
+        if(String.IsNullOrWhiteSpace(directEmailModel.EmailTitle))
+            throw new BadEmailModel("Email Title is null or whitespace");
         if (directEmailModel.TemplateName == null)
             directEmailModel.TemplateName = "Default";
         EmailTemplate? emailTemplate = EmailUtils.EmailTemplates.FirstOrDefault(e => e.Name == directEmailModel.TemplateName);
         if (emailTemplate == null)
             throw new TriedToFindNonExistingTemplate(
-                "Template does not exist. Please create a template first or use the default one (Default)");
+                $"Template {directEmailModel.TemplateName} does not exist. Please create a template first or use the default one (Default)");
         string builtEmail;
         try
         {
@@ -119,5 +119,10 @@ public class EmailServiceImpl : IEmailService
         {
             Console.WriteLine(e);
         }
+        return new OperationResult
+        {
+            IsSuccess = true,
+            Message = $"Successfully sent an email!"
+        };
     }
 }
