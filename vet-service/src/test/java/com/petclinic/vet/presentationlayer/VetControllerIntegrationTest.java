@@ -111,7 +111,7 @@ class VetControllerIntegrationTest {
 
         client
                 .get()
-                .uri("/vet/" + VET_ID + "/ratings")
+                .uri("/vets/" + VET_ID + "/ratings")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -133,7 +133,7 @@ class VetControllerIntegrationTest {
         String invalidVetId="ac90fcca-a79c-411d-93f2-b70a80da0c3a";
         client
                 .get()
-                .uri("/vet/" + invalidVetId + "/ratings")
+                .uri("/vets/" + invalidVetId + "/ratings")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNotFound()
@@ -155,7 +155,7 @@ class VetControllerIntegrationTest {
 
         client
                 .get()
-                .uri("/vet/" + VET_ID + "/ratings/count")
+                .uri("/vets/" + VET_ID + "/ratings/count")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -172,7 +172,7 @@ class VetControllerIntegrationTest {
 
         client
                 .get()
-                .uri("/vet/" + invalidVetId + "/ratings/count")
+                .uri("/vets/" + invalidVetId + "/ratings/count")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNotFound()
@@ -197,7 +197,7 @@ class VetControllerIntegrationTest {
                 .build();
 
         client.post()
-                .uri("/vet/" + VET_ID + "/ratings")
+                .uri("/vets/" + VET_ID + "/ratings")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(ratingRequestDTO)
@@ -231,7 +231,7 @@ class VetControllerIntegrationTest {
                 .build();
 
         client.post()
-                .uri("/vet/" + VET_ID + "/ratings")
+                .uri("/vets/" + VET_ID + "/ratings")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(ratingRequestDTO)
@@ -271,7 +271,7 @@ class VetControllerIntegrationTest {
                 .build();
 
         client.post()
-                .uri("/vet/" + invalidVetId + "/ratings")
+                .uri("/vets/" + invalidVetId + "/ratings")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(ratingRequestDTO)
@@ -297,7 +297,7 @@ class VetControllerIntegrationTest {
                 .build();
 
         client.post()
-                .uri("/vet/" + VET_ID + "/ratings")
+                .uri("/vets/" + VET_ID + "/ratings")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(ratingRequestDTO)
@@ -324,7 +324,7 @@ class VetControllerIntegrationTest {
                 .build();
 
         client.post()
-                .uri("/vet/" + VET_ID + "/ratings")
+                .uri("/vets/" + VET_ID + "/ratings")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(ratingRequestDTO)
@@ -356,7 +356,7 @@ class VetControllerIntegrationTest {
         String existingRatingId = rating1.getRatingId();
 
         client.put()
-                .uri("/vet/" + VET_ID + "/ratings/" + existingRatingId)
+                .uri("/vets/" + VET_ID + "/ratings/" + existingRatingId)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(updatedRating)
@@ -390,7 +390,7 @@ class VetControllerIntegrationTest {
         String invalidVetId="123";
 
         client.put()
-                .uri("/vet/" + invalidVetId + "/ratings/" + existingRatingId)
+                .uri("/vets/" + invalidVetId + "/ratings/" + existingRatingId)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(updatedRating)
@@ -422,7 +422,7 @@ class VetControllerIntegrationTest {
                 .build();
 
         client.put()
-                .uri("/vet/" + VET_ID + "/ratings/" + existingRatingId)
+                .uri("/vets/" + VET_ID + "/ratings/" + existingRatingId)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(ratingRequestDTO)
@@ -461,7 +461,7 @@ class VetControllerIntegrationTest {
         String invalidRatingId = "123";
 
         client.put()
-                .uri("/vet/" + VET_ID + "/ratings/" + invalidRatingId)
+                .uri("/vets/" + VET_ID + "/ratings/" + invalidRatingId)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(updatedRating)
@@ -492,7 +492,7 @@ class VetControllerIntegrationTest {
                 .build();
 
         client.put()
-                .uri("/vet/" + VET_ID + "/ratings/" + rating1.getRatingId())
+                .uri("/vets/" + VET_ID + "/ratings/" + rating1.getRatingId())
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(invalidRating)
@@ -523,7 +523,7 @@ class VetControllerIntegrationTest {
 
         client
                 .delete()
-                .uri("/vet/" + VET_ID + "/ratings/{ratingId}", rating1.getRatingId())
+                .uri("/vets/" + VET_ID + "/ratings/{ratingId}", rating1.getRatingId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNoContent();
@@ -543,7 +543,7 @@ class VetControllerIntegrationTest {
 
         client
                 .delete()
-                .uri("/vet/" + invalidVetId + "/ratings/{ratingId}", rating1.getRatingId())
+                .uri("/vets/" + invalidVetId + "/ratings/{ratingId}", rating1.getRatingId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNotFound()
@@ -572,7 +572,7 @@ class VetControllerIntegrationTest {
 
         client
                 .delete()
-                .uri("/vet/" + vet.getVetId() + "/ratings/{ratingId}", invalidRatingId)
+                .uri("/vets/" + vet.getVetId() + "/ratings/{ratingId}", invalidRatingId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNotFound()
@@ -589,7 +589,7 @@ class VetControllerIntegrationTest {
 
 
         client.get()
-                .uri("/vet/" + ratingRequestDTO.getVetId() + "/ratings" + "/average")
+                .uri("/vets/" + ratingRequestDTO.getVetId() + "/ratings" + "/average")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -606,7 +606,7 @@ class VetControllerIntegrationTest {
 
         client
                 .get()
-                .uri("/vet/" + INVALID_VET_ID + "/ratings/average")
+                .uri("/vets/" + INVALID_VET_ID + "/ratings/average")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -644,7 +644,7 @@ class VetControllerIntegrationTest {
 
         client
                 .get()
-                .uri("/vet/"+VET_ID+"/ratings/date?year={year}",existingDate)
+                .uri("/vets/"+VET_ID+"/ratings/date?year={year}",existingDate)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -676,7 +676,7 @@ class VetControllerIntegrationTest {
 
         client
                 .get()
-                .uri("/vet/"+invalidVetId+"/ratings/date?year={year}",existingDate)
+                .uri("/vets/"+invalidVetId+"/ratings/date?year={year}",existingDate)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNotFound()
@@ -701,7 +701,7 @@ class VetControllerIntegrationTest {
 
         client
                 .get()
-                .uri("/vet/"+VET_ID+"/ratings/date?year="+ invalidYear)
+                .uri("/vets/"+VET_ID+"/ratings/date?year="+ invalidYear)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNotFound()
@@ -730,7 +730,7 @@ class VetControllerIntegrationTest {
 
         client
                 .get()
-                .uri("/vet/" + "topVets")
+                .uri("/vets/" + "topVets")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -759,7 +759,7 @@ class VetControllerIntegrationTest {
                 .verifyComplete();
 
         client.get()
-                .uri("/vet/" + VET_ID + "/ratings" + "/percentages")
+                .uri("/vets/" + VET_ID + "/ratings" + "/percentages")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -775,7 +775,7 @@ class VetControllerIntegrationTest {
         String invalidVetId="ac90fcca-a79c-411d-93f2-b70a80da0c3a";
 
         client.get()
-                .uri("/vet/" + invalidVetId + "/ratings" + "/percentages")
+                .uri("/vets/" + invalidVetId + "/ratings" + "/percentages")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNotFound()
@@ -796,7 +796,7 @@ class VetControllerIntegrationTest {
 
         client
                 .get()
-                .uri("/vet/")
+                .uri("/vets/")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -822,7 +822,7 @@ class VetControllerIntegrationTest {
 
         client
                 .get()
-                .uri("/vet/" + VET_ID)
+                .uri("/vets/" + VET_ID)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -850,7 +850,7 @@ class VetControllerIntegrationTest {
 
         client
                 .get()
-                .uri("/vet/vetBillId/" + VET_BILL_ID)
+                .uri("/vets/vetBillId/" + VET_BILL_ID)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -877,7 +877,7 @@ class VetControllerIntegrationTest {
 
         client
                 .put()
-                .uri("/vet/" + VET_ID)
+                .uri("/vets/" + VET_ID)
                 .body(Mono.just(vetRequestDTO), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -916,7 +916,7 @@ class VetControllerIntegrationTest {
 
         client
                 .put()
-                .uri("/vet/" + VET_ID)
+                .uri("/vets/" + VET_ID)
                 .body(Mono.just(updatedVet), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -949,7 +949,7 @@ class VetControllerIntegrationTest {
 
         client
                 .put()
-                .uri("/vet/" + VET_ID)
+                .uri("/vets/" + VET_ID)
                 .body(Mono.just(updatedVet), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -983,7 +983,7 @@ class VetControllerIntegrationTest {
 
         client
                 .put()
-                .uri("/vet/" + VET_ID)
+                .uri("/vets/" + VET_ID)
                 .body(Mono.just(updatedVet), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -1025,7 +1025,7 @@ class VetControllerIntegrationTest {
 
         client
                 .put()
-                .uri("/vet/" + VET_ID)
+                .uri("/vets/" + VET_ID)
                 .body(Mono.just(updatedVet), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -1060,7 +1060,7 @@ class VetControllerIntegrationTest {
 
         client
                 .put()
-                .uri("/vet/" + VET_ID)
+                .uri("/vets/" + VET_ID)
                 .body(Mono.just(updatedVet), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -1095,7 +1095,7 @@ class VetControllerIntegrationTest {
 
         client
                 .put()
-                .uri("/vet/" + VET_ID)
+                .uri("/vets/" + VET_ID)
                 .body(Mono.just(updatedVet), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -1116,7 +1116,7 @@ class VetControllerIntegrationTest {
 
         client
                 .get()
-                .uri("/vet/active")
+                .uri("/vets/active")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -1142,7 +1142,7 @@ class VetControllerIntegrationTest {
 
         client
                 .get()
-                .uri("/vet/inactive")
+                .uri("/vets/inactive")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -1169,7 +1169,7 @@ class VetControllerIntegrationTest {
 
         client
                 .post()
-                .uri("/vet")
+                .uri("/vets")
                 .body(Mono.just(vetRequestDTO), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -1212,7 +1212,7 @@ class VetControllerIntegrationTest {
 
         client
                 .post()
-                .uri("/vet")
+                .uri("/vets")
                 .body(Mono.just(newVet), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -1254,7 +1254,7 @@ class VetControllerIntegrationTest {
 
         client
                 .post()
-                .uri("/vet")
+                .uri("/vets")
                 .body(Mono.just(newVet), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -1290,7 +1290,7 @@ class VetControllerIntegrationTest {
 
         client
                 .post()
-                .uri("/vet")
+                .uri("/vets")
                 .body(Mono.just(newVet), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -1326,7 +1326,7 @@ class VetControllerIntegrationTest {
 
         client
                 .post()
-                .uri("/vet")
+                .uri("/vets")
                 .body(Mono.just(newVet), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -1361,7 +1361,7 @@ class VetControllerIntegrationTest {
 
         client
                 .post()
-                .uri("/vet")
+                .uri("/vets")
                 .body(Mono.just(newVet), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -1397,7 +1397,7 @@ class VetControllerIntegrationTest {
 
         client
                 .post()
-                .uri("/vet")
+                .uri("/vets")
                 .body(Mono.just(newVet), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -1418,7 +1418,7 @@ class VetControllerIntegrationTest {
 
         client
                 .delete()
-                .uri("/vet/" + VET_ID)
+                .uri("/vets/" + VET_ID)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNoContent()
@@ -1438,7 +1438,7 @@ class VetControllerIntegrationTest {
 
         client
                 .get()
-                .uri("/vet/" + vet.getVetId() + "/educations")
+                .uri("/vets/" + vet.getVetId() + "/educations")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -1467,7 +1467,7 @@ class VetControllerIntegrationTest {
 
         client
                 .delete()
-                .uri("/vet/" + vet.getVetId() + "/educations/{educationId}", education1.getEducationId())
+                .uri("/vets/" + vet.getVetId() + "/educations/{educationId}", education1.getEducationId())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -1486,7 +1486,7 @@ class VetControllerIntegrationTest {
         String existingEducationId = education1.getEducationId();
 
         client.put()
-                .uri("/vet/" + VET_ID + "/educations/" + existingEducationId)
+                .uri("/vets/" + VET_ID + "/educations/" + existingEducationId)
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(updatedEducation)
@@ -1518,7 +1518,7 @@ class VetControllerIntegrationTest {
                 .verifyComplete();
 
         client.post()
-                .uri("/vet/" + vet.getVetId() + "/educations")
+                .uri("/vets/" + vet.getVetId() + "/educations")
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(education2)
@@ -1552,7 +1552,7 @@ class VetControllerIntegrationTest {
         Resource resource = new ByteArrayResource(photo);
 
         client.get()
-                .uri("/api/gateway/vet/{vetId}/photo", VET_ID)
+                .uri("/api/gateway/vets/{vetId}/photo", VET_ID)
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.IMAGE_JPEG_VALUE)
@@ -1565,12 +1565,12 @@ class VetControllerIntegrationTest {
     void getPhotoByVetId_NoExistingPhoto_ShouldReturnNotFound() {
         String emptyVetId = "1234567";
         client.get()
-                .uri("/api/gateway/vet/{vetId}/photo", emptyVetId)
+                .uri("/api/gateway/vets/{vetId}/photo", emptyVetId)
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.NOT_FOUND)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
-                .jsonPath("$.path").isEqualTo("/api/gateway/vet/" + emptyVetId + "/photo");
+                .jsonPath("$.path").isEqualTo("/api/gateway/vets/" + emptyVetId + "/photo");
     }
 
     //Spring Boot version incompatibility issue with postgresql r2dbc
@@ -1588,7 +1588,7 @@ class VetControllerIntegrationTest {
                 .verifyComplete();
 
         client.get()
-                .uri("/api/gateway/vet/{vetId}/badge", VET_ID)
+                .uri("/api/gateway/vets/{vetId}/badge", VET_ID)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isOk()
@@ -1606,7 +1606,7 @@ class VetControllerIntegrationTest {
     void getBadgeByInvalidVetId_shouldReturnNotFoundException(){
         String invalidVetId = "1234567";
         client.get()
-                .uri("/vet/{vetId}/badge", invalidVetId)
+                .uri("/vets/{vetId}/badge", invalidVetId)
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.NOT_FOUND)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
@@ -1639,7 +1639,7 @@ class VetControllerIntegrationTest {
 
         client
                 .get()
-                .uri("/vet/" + INVALID_VET_ID)
+                .uri("/vets/" + INVALID_VET_ID)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -1660,7 +1660,7 @@ class VetControllerIntegrationTest {
 
         client
                 .put()
-                .uri("/vet/" + INVALID_VET_ID)
+                .uri("/vets/" + INVALID_VET_ID)
                 .body(Mono.just(vetRequestDTO), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -1682,7 +1682,7 @@ class VetControllerIntegrationTest {
 
         client
                 .delete()
-                .uri("/vet/" + INVALID_VET_ID)
+                .uri("/vets/" + INVALID_VET_ID)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
