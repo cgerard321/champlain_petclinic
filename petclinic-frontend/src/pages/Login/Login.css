@@ -1,16 +1,17 @@
 .login-container {
     width: 400px;
+    height: 100vh;
     padding: 30px;
     background-color: #fff;
     border-radius: 10px;
     border: 1px solid #ddd;
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
     text-align: center;
-    position: absolute;
-    height: 100vh;
-    top: 50%;
+    position: fixed;
     left: 0;
-    transform: translateY(-50%);
+    top: 0;
+    display: flex;
+    flex-direction: column;
     justify-content: center;
 }
 
@@ -63,4 +64,35 @@ input[type="text"]:focus, input[type="password"]:focus {
     outline: none;
     border-color: #4CAF50;
     box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+}
+
+.login-page {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
+.slideshow-container {
+    width: 300px; /* adjust the width to your liking */
+    height: 200px; /* adjust the height to your liking */
+    margin: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+}
+
+.slideshow-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+    transition: opacity 0.5s; /* add a fade-in effect */
+}
+
+.slideshow-container img.fade-out {
+    opacity: 0;
 }
