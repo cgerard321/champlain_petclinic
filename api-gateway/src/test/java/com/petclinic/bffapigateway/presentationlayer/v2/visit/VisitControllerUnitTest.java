@@ -294,10 +294,4 @@ public class VisitControllerUnitTest {
         verify(visitsServiceClient, times(1)).getAllVisits();
     }
 
-
-
-
-
-
-
 }
