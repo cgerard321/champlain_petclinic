@@ -1,4 +1,3 @@
-
 .vet-details-container {
     max-width: 800px;
     margin: 0 auto;
@@ -14,7 +13,10 @@
     color: #333;
 }
 
-.vet-info, .contact-info, .work-info, .specialties-info {
+.vet-info,
+.contact-info,
+.work-info,
+.specialties-info {
     margin-bottom: 20px;
     padding: 10px;
     background-color: white;
@@ -22,13 +24,19 @@
     border: 1px solid #ddd;
 }
 
-.vet-info h2, .contact-info h2, .work-info h2, .specialties-info h2 {
+.vet-info h2,
+.contact-info h2,
+.work-info h2,
+.specialties-info h2 {
     font-size: 1.5rem;
     margin-bottom: 10px;
     color: #4b4b4b;
 }
 
-.vet-info p, .contact-info p, .work-info p, .specialties-info p {
+.vet-info p,
+.contact-info p,
+.work-info p,
+.specialties-info p {
     font-size: 1.1rem;
     line-height: 1.5;
     color: #555;
@@ -40,8 +48,18 @@ ul {
     color: #333;
 }
 
-.vet-info strong, .contact-info strong, .work-info strong, .specialties-info strong {
+.vet-info strong,
+.contact-info strong,
+.work-info strong,
+.specialties-info strong {
     color: #333;
     font-weight: bold;
 }
 
+.vet-details-container ul {
+    padding-left: 20px;
+}
+
+.vet-details-container ul li {
+    margin-bottom: 5px;
+}

@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react';
 import { VetRequestModel } from '@/features/veterinarians/models/VetRequestModel.ts';
+import { useNavigate } from 'react-router-dom';
+import './VetListTable.css';
 
 export default function VetListTable(): JSX.Element {
   const [vets, setVets] = useState<VetRequestModel[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate(); // Use navigate to programmatically navigate
 
   useEffect(() => {
     const fetchVets = async (): Promise<void> => {
@@ -33,6 +36,11 @@ export default function VetListTable(): JSX.Element {
     fetchVets();
   }, []);
 
+  // Function to handle row click
+  const handleRowClick = (vetId: string): void => {
+    navigate(`/vets/${vetId}`); // Navigate to the vet details page
+  };
+
   return (
     <div>
       {error ? (
@@ -48,7 +56,11 @@ export default function VetListTable(): JSX.Element {
           </thead>
           <tbody>
             {vets.map(vet => (
-              <tr key={vet.vetId}>
+              <tr
+                key={vet.vetId}
+                onClick={() => handleRowClick(vet.vetId)}
+                className="clickable-row"
+              >
                 <td>{vet.firstName}</td>
                 <td>{vet.lastName}</td>
                 <td>
