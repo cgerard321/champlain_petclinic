@@ -6,8 +6,8 @@ export async function getAllProducts(
   maxPrice?: number
 ): Promise<ProductModel[]> {
   const params: Record<string, number> = {};
-  if (minPrice !== undefined) params.minPrice = minPrice;
-  if (maxPrice !== undefined) params.maxPrice = maxPrice;
+  if (minPrice !== undefined && minPrice !== null) params.minPrice = minPrice;
+  if (maxPrice !== undefined && maxPrice !== null) params.maxPrice = maxPrice;
 
   const res = await axiosInstance.get('/products', {
     responseType: 'stream',
