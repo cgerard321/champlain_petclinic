@@ -1,6 +1,9 @@
 import axiosInstance from '@/shared/api/axiosInstance';
 import anotherDoctorAndDoggy from '@/assets/Login/another-doctor-and-doggy.jpg';
 import doctorAndDoggy from '@/assets/Login/doctor-and-doggy.jpg';
+import doggyAndKitty from '@/assets/Login/doggy-and-kitty.jpg';
+import kitty from '@/assets/Login/kitty.jpg';
+import sadDoggy from '@/assets/Login/sad-doggy.jpg';
 import { UserResponseModel } from '@/shared/models/UserResponseModel';
 import { FormEvent } from 'react';
 import { useSetUser } from '@/context/UserContext.tsx';
@@ -9,7 +12,7 @@ import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 import './Login.css';
 import Slideshow from './Slideshow';
 
-const images = [doctorAndDoggy, anotherDoctorAndDoggy];
+const images = [doctorAndDoggy, anotherDoctorAndDoggy, doggyAndKitty, kitty, sadDoggy];
 
 export default function Login(): JSX.Element {
  const setUser = useSetUser();
