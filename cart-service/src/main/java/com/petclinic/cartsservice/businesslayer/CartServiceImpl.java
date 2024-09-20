@@ -1,5 +1,6 @@
 package com.petclinic.cartsservice.businesslayer;
 
+import com.petclinic.cartsservice.dataaccesslayer.Cart;
 import com.petclinic.cartsservice.dataaccesslayer.CartRepository;
 import com.petclinic.cartsservice.domainclientlayer.ProductClient;
 import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
@@ -45,13 +46,18 @@ public class CartServiceImpl implements CartService {
         return cartRepository.findCartByCartId(cartId)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Cart id was not found: " + cartId))))
                 .flatMap(foundCart -> cartRequestModel
-                        .map(EntityModelUtil::toCartEntity)
-                        .doOnNext(c -> c.setCartId(foundCart.getCartId()))
-                        .doOnNext(c -> c.setCustomerId(foundCart.getCustomerId()))
-//                       
+                        .flatMap(request -> {
+                            List<String> productIds = request.getProductIds();
+
+                            Cart cartEntity = EntityModelUtil.toCartEntity(request);
+                            cartEntity.setProductIds(productIds);
+                            cartEntity.setId(foundCart.getId());
+                            cartEntity.setCartId(foundCart.getCartId());
+                            return cartRepository.save(cartEntity);
+
+                        })
                 )
 
-                .flatMap(cartRepository::save)
                 .flatMap(cart -> {
                     List<String> productIds = cart.getProductIds();
                     return productIds
@@ -60,5 +66,11 @@ public class CartServiceImpl implements CartService {
                             .collectList()
                             .map(products -> EntityModelUtil.toCartResponseModel(cart, products));
                 });
+
+
     }
+
+
+
+
 }
