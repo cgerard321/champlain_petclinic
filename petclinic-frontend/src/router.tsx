@@ -25,6 +25,7 @@ import EditInventory from '@/features/inventories/EditInventory.tsx';
 import VisitByVisitId from './features/visits/visits/VisitByVisitId';
 import AddingVisit from './features/visits/models/AddingVisit';
 import ProfilePage from '@/pages/Customer/ProfilePage.tsx';
+import AdminBillingPage from "@/pages/Bills/AdminBill.tsx";
 
 const router = createBrowserRouter([
   {
@@ -116,6 +117,14 @@ const router = createBrowserRouter([
           <ProtectedRoute>
             <CustomerBillingPage />
           </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.AdminBills,
+        element: (
+            <ProtectedRoute roles={['ADMIN']}>
+              <AdminBillingPage />
+            </ProtectedRoute>
         ),
       },
       {
