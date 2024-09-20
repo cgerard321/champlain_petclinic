@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState, FC } from 'react';
 
 interface SlideshowProps {
   images: string[];
   interval: number;
 }
 
-const Slideshow: React.FC<SlideshowProps> = ({ images, interval }) => {
+const Slideshow: FC<SlideshowProps> = ({ images, interval }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
