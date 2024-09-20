@@ -104,7 +104,7 @@ class CartControllerUnitTest {
     }
 
     @Test
-    void test() {
+    void whenCreateNewCart_withValidCustomerId_thenReturnCartResponse() {
         CartResponseModel expectedCartResponseModel = new CartResponseModel();
         expectedCartResponseModel.setCartId("12345");
         expectedCartResponseModel.setCustomerId("123");
