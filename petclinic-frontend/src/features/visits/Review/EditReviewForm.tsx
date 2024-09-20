@@ -6,8 +6,6 @@ import { ReviewRequestDTO } from './Model/ReviewRequestDTO';
 import { ReviewResponseDTO } from './Model/ReviewResponseDTO';
 import './EditForm.css';
 
-import './EditForm.css';
-
 interface ApiError {
   message: string;
 }
