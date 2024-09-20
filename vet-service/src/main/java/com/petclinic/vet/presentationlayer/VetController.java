@@ -42,6 +42,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/vets")
+
 public class VetController {
     private final VetService vetService;
     private final RatingService ratingService;
@@ -125,16 +126,14 @@ public class VetController {
         return vetService.getAll();
     }
 
-    //@GetMapping("{vetId}")
-    @GetMapping(value = "/{vetId}",produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/{vetId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<VetResponseDTO>> getVetByVetId(@PathVariable String vetId) {
 
         return Mono.just(vetId)
-                .filter(id -> id.length() == 36) //Validate the course id
+                .filter(id -> id.length() == 36) // Validate the vet id
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided vet id is invalid:" + vetId)))
                 .flatMap(vetService::getVetByVetId)
                 .map(ResponseEntity::ok);
-
     }
 
     @GetMapping("/firstName/{firstName}")
