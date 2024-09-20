@@ -17,6 +17,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService.*;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
@@ -38,6 +39,7 @@ class OwnerControllerIntegrationTest {
         mockServerConfigCustomersService.registerUpdateOwnerEndpoint();
         mockServerConfigCustomersService.registerAddOwnerEndpoint();
         mockServerConfigCustomersService.registerGetAllOwnersEndpoint();
+        mockServerConfigCustomersService.registerDeleteOwnerEndpoint();
 
         mockServerConfigAuthService = new MockServerConfigAuthService();
         mockServerConfigAuthService.registerValidateTokenForOwnerEndpoint();
@@ -228,5 +230,50 @@ class OwnerControllerIntegrationTest {
                 .verifyComplete();
     }
 
+    @Test
+    public void whenDeleteOwner_asAdmin_thenReturnOwnerResponse() {
+        // Mock data to simulate the OwnerResponseDTO
+        OwnerResponseDTO expectedOwner = new OwnerResponseDTO();
+        expectedOwner.setOwnerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a");
+        expectedOwner.setFirstName("Betty");
+        expectedOwner.setLastName("Davis");
+        expectedOwner.setAddress("638 Cardinal Ave.");
+        expectedOwner.setCity("Sun Prairie");
+        expectedOwner.setProvince("Quebec");
+        expectedOwner.setTelephone("6085551749");
+
+        // Perform the DELETE request and expect OwnerResponseDTO in the body
+        webTestClient.delete()
+                .uri("/api/v2/gateway/owners/{ownerId}", "e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
+                .cookie("Bearer", "valid-test-token-for-valid-admin")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()  // Now we expect a 200 OK response, not 204 NO_CONTENT
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(OwnerResponseDTO.class)
+                .value(ownerResponse -> {
+                    assertThat(ownerResponse.getOwnerId()).isEqualTo(expectedOwner.getOwnerId());
+                    assertThat(ownerResponse.getFirstName()).isEqualTo(expectedOwner.getFirstName());
+                    assertThat(ownerResponse.getLastName()).isEqualTo(expectedOwner.getLastName());
+                    assertThat(ownerResponse.getAddress()).isEqualTo(expectedOwner.getAddress());
+                    assertThat(ownerResponse.getCity()).isEqualTo(expectedOwner.getCity());
+                    assertThat(ownerResponse.getProvince()).isEqualTo(expectedOwner.getProvince());
+                    assertThat(ownerResponse.getTelephone()).isEqualTo(expectedOwner.getTelephone());
+                });
+    }
+
+
+    @Test
+    void whenDeleteOwner_withInvalidId_thenReturnNotFound() {
+
+        String invalidOwnerId = "e6c7398e-8ac4-4e10-9ee0-03ef33f03610";
+
+        webTestClient.delete()
+                .uri("/owners/{ownerId}", invalidOwnerId)
+                .cookie("Bearer", jwtTokenForValidAdmin)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
+    }
 
 }
