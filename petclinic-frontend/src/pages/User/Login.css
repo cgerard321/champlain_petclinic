@@ -15,6 +15,7 @@
   flex-direction: column;
   justify-content: center;
   z-index: 1;
+  transition: all 0.3s ease;
 }
 
 .login-container h1 {
@@ -96,7 +97,7 @@ input[type='password']::placeholder {
 .slideshow-container {
   flex-grow: 1;
   height: 100vh;
-  margin-left: 405px;
+  margin-left: 455px;
   position: relative;
   overflow: hidden;
   transition: opacity 0.5s ease;
@@ -115,6 +116,28 @@ input[type='password']::placeholder {
 }
 
 .back-button {
-  padding-top: 20px;
-  padding-left: 20px;
+  display: inline-block;
+  padding: 10px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  color: #ffffff;
+  background-color: #d07834;
+  text-decoration: none;
+  border-radius: 5px;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  white-space: nowrap;
+  position: fixed;
+  left: 15px;
+  bottom: 15px;
+  z-index: 1000;
+}
+
+.back-button:hover {
+  background-color: #a96128;
+  color: #ffffff;
+}
+
+.back-button:active {
+  background-color: #6e3f19;
+  transform: scale(0.98);
 }

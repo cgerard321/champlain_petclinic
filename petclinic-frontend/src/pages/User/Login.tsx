@@ -72,7 +72,7 @@ export default function Login(): JSX.Element {
           <label htmlFor="passwordInput"></label>
           <input type="password" id="passwordInput" placeholder="Enter your password"/>
           <br/>
-          <button type="submit">Login</button>
+          <button type="submit" className="login-button">Login</button>
         </form>
       </div>
       <Slideshow images={images} interval={7000}/>
