@@ -11,7 +11,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
-
+import org.springframework.http.MediaType;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -20,7 +20,7 @@ import reactor.core.publisher.Flux;
 
 import java.time.LocalDate;
 
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
 @ContextConfiguration(classes = {
@@ -86,4 +86,23 @@ private final String baseBillURL = "/api/v2/gateway/bills";
 
     }
 
+    @Test
+    public void whenGetAllBills_thenReturnAllBills(){
+       when(billServiceClient.getAllBilling())
+               .thenReturn(Flux.just(billresponse, billresponse2));
+
+       webTestClient
+               .get()
+               .uri(baseBillURL + "/admin")
+               .accept(MediaType.TEXT_EVENT_STREAM)
+               .exchange()
+               .expectStatus().isOk()
+               .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
+               .expectBodyList(BillResponseDTO.class)
+               .hasSize(2)
+               .contains(billresponse, billresponse2);
+
+       verify(billServiceClient, times(1))
+               .getAllBilling();
+    }
 }
