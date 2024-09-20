@@ -13,7 +13,7 @@ export enum AppRoutePaths {
   RequestTimeout = '/request-timeout',
   InternalServerError = '/internal-server-error',
   ServiceUnavailable = '/service-unavailable',
-  login = '/users/login',
+  Login = '/users/login',
   CustomerProfileEdit = '/customer/profile/edit',
   AddingCustomer = '/customer/add',
   AllCustomers = '/customers',
