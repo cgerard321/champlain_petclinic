@@ -1,5 +1,5 @@
 .login-container {
-  width: 385px;
+  width: 425px;
   height: auto;
   padding: 30px;
   background-color: rgba(255, 255, 255, 0.9);
@@ -8,13 +8,19 @@
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
   text-align: center;
   position: fixed;
-  left: 10px;
+  left: 15px;
   top: 50%;
   transform: translateY(-50%);
   display: flex;
   flex-direction: column;
   justify-content: center;
   z-index: 1;
+}
+
+.login-container h1 {
+  margin-bottom: 30px;
+  font-size: 48px;
+  color: #333;
 }
 
 h2 {
@@ -34,7 +40,8 @@ input[type='text'],
 input[type='password'] {
   width: 100%;
   height: 40px;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
+  margin-top: 15px;
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -68,6 +75,11 @@ input[type='password']:focus {
   outline: none;
   border-color: #4caf50;
   box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
+}
+
+input[type='text']::placeholder,
+input[type='password']::placeholder {
+  color: rgba(0, 0, 0, 0.6);
 }
 
 .login-page {

@@ -66,16 +66,16 @@ export default function Login(): JSX.Element {
         <h1>User Login</h1>
         {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
         <form onSubmit={login}>
-          <label>Email: </label>
-          <input type="text" id="emailInput" />
-          <br />
-          <label>Password: </label>
-          <input type="password" id="passwordInput" />
-          <br />
+          <label htmlFor="emailInput"></label>
+          <input type="text" id="emailInput" placeholder="Enter your email"/>
+          <br/>
+          <label htmlFor="passwordInput"></label>
+          <input type="password" id="passwordInput" placeholder="Enter your password"/>
+          <br/>
           <button type="submit">Login</button>
         </form>
       </div>
-      <Slideshow images={images} interval={7000} />
+      <Slideshow images={images} interval={7000}/>
     </div>
   );
 }
