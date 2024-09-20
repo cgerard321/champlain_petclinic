@@ -2,6 +2,7 @@ import { createBrowserRouter } from 'react-router-dom';
 import { AppRoutePaths } from './shared/models/path.routes';
 import Login from './pages/Login/Login';
 import Inventories from '@/pages/Inventory/Inventories.tsx';
+import InventoryProducts from '@/features/inventories/InventoryProducts.tsx';
 import Vet from '@/pages/Vet/Vet.tsx';
 import { ProtectedRoute } from '@/shared/components/ProtectedRouteProps.tsx';
 import Home from '@/pages/Home/Home.tsx';
@@ -16,6 +17,11 @@ import Unauthorized from '@/pages/Error/Unauthorized.tsx';
 import InternalServerError from '@/pages/Error/InternalServerError.tsx';
 import RequestTimeout from '@/pages/Error/RequestTimeout.tsx';
 import ServiceUnavailable from '@/pages/Error/ServiceUnavailable.tsx';
+import Visits from './pages/Visit/Visit';
+import AddReviewForm from './features/visits/Review/AddReviewForm';
+import EditReviewForm from './features/visits/Review/EditReviewForm';
+import Review from './pages/Review/Review';
+import EditInventory from '@/features/inventories/EditInventory.tsx';
 
 const router = createBrowserRouter([
   {
@@ -30,10 +36,51 @@ const router = createBrowserRouter([
         ),
       },
       {
+        path: AppRoutePaths.EditInventory,
+        element: (
+          <ProtectedRoute>
+            <EditInventory />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.Form,
+        element: (
+          <ProtectedRoute>
+            <AddReviewForm />
+          </ProtectedRoute>
+        ),
+      },
+
+      {
+        path: AppRoutePaths.Review,
+        element: (
+          <ProtectedRoute>
+            <Review />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.UpdateReview,
+        element: (
+          <ProtectedRoute>
+            <EditReviewForm />
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: AppRoutePaths.Inventories,
         element: (
           <ProtectedRoute>
             <Inventories />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.InventoryProducts,
+        element: (
+          <ProtectedRoute>
+            <InventoryProducts />
           </ProtectedRoute>
         ),
       },
@@ -48,7 +95,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.CustomerProfileEdit,
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute roles={['OWNER']}>
             <ProfileEdit />
           </ProtectedRoute>
         ),
@@ -56,7 +103,7 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.AddingCustomer,
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute roles={['ADMIN']}>
             <AddingCustomer />
           </ProtectedRoute>
         ),
@@ -72,16 +119,8 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.AllCustomers,
         element: (
-          <ProtectedRoute>
+          <ProtectedRoute roles={['ADMIN', 'VET']}>
             <AllOwners />
-          </ProtectedRoute>
-        ),
-      },
-      {
-        path: AppRoutePaths.PageNotFound,
-        element: (
-          <ProtectedRoute>
-            <PageNotFound />
           </ProtectedRoute>
         ),
       },
@@ -126,14 +165,6 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: '*',
-        element: (
-          <ProtectedRoute>
-            <PageNotFound />
-          </ProtectedRoute>
-        ),
-      },
-      {
         path: AppRoutePaths.Products,
         element: (
           <ProtectedRoute>
@@ -141,30 +172,21 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-      //   {
-      //       path: AppRoutePaths.PageNotFound,
-      //       element: /* PageNotFoundComponent */
-      //   },
-      //   {
-      //       path: AppRoutePaths.InternalServer,
-      //       element: /* InternalServerErrorComponent */
-      //   },
-      //   {
-      //       path: AppRoutePaths.ServiceTimeout,
-      //       element: /* ServiceTimeoutComponent */
-      //   },
-      //   {
-      //       path: AppRoutePaths.ServiceUnavailable,
-      //       element: /* ServiceUnavailableComponent */
-      //   },
-      //   {
-      //       path: AppRoutePaths.Unauthorized,
-      //       element: /* UnauthorizedComponent */
-      //   }
+      {
+        path: AppRoutePaths.Visits,
+        element: (
+          <ProtectedRoute>
+            <Visits />
+          </ProtectedRoute>
+        ),
+      },
     ],
   },
   { path: AppRoutePaths.login, element: <Login /> },
-  //   {path: '*', element: /* PageNotFoundComponent */},
+  {
+    path: '*',
+    element: <PageNotFound />,
+  },
 ]);
 
 export default router;

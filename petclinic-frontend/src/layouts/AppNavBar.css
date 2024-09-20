@@ -1,75 +1,86 @@
 .navbar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.5rem 1rem;
-    background-color: #f8f9fa;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  background-color: #f8f9fa;
 }
 
 .navbar-brand {
-    font-size: 1.25rem;
-    color: #000;
-    text-decoration: none;
+  font-size: 1.25rem;
+  color: #000;
+  text-decoration: none;
 }
 
-
 .navbar-collapse {
-    display: flex;
-    flex-basis: 90%;
-    flex-grow: 1;
-    align-items: center;
-    justify-content: space-between;
+  display: flex;
+  flex-basis: 90%;
+  flex-grow: 1;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .navbar-nav {
-    display: flex;
-    flex-direction: row;
-    padding-left: 0;
-    margin-bottom: 0;
-    list-style: none;
+  display: flex;
+  flex-direction: row;
+  padding-left: 0;
+  margin-bottom: 0;
+  list-style: none;
 }
 
 .nav-item {
-    margin-right: 1rem;
+  margin-right: 1rem;
 }
 
 .nav-item.active .nav-link {
-    color: #0056b3;
-    font-weight: bold;
+  color: #0056b3;
+  font-weight: bold;
 }
 
 .nav-link {
-    display: block;
-    padding: 0.5rem 1rem;
-    color: #000;
-    text-decoration: none;
+  display: block;
+  padding: 0.5rem 1rem;
+  color: #000;
+  text-decoration: none;
 }
 
 .nav-link:hover {
-    color: #0056b3;
+  color: #0056b3;
 }
 
 .dropdown-menu {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    z-index: 1000;
-    display: none;
-    float: left;
-    min-width: 10rem;
-    padding: 0.5rem 0;
-    margin: 0.125rem 0 0;
-    font-size: 1rem;
-    color: #212529;
-    text-align: left;
-    list-style: none;
-    background-color: #fff;
-    background-clip: padding-box;
-    border: 1px solid rgba(0, 0, 0, 0.15);
-    border-radius: 0.25rem;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  display: none;
+  float: left;
+  min-width: 10rem;
+  padding: 0.5rem 0;
+  margin: 0.125rem 0 0;
+  font-size: 1rem;
+  color: #212529;
+  text-align: left;
+  list-style: none;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 0.25rem;
 }
 
 .justify-content-end {
-    margin-left: auto;
+  margin-left: auto;
+}
+
+.navbar-nav .dropdown-menu {
+  display: none;
+  position: absolute;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  z-index: 1000;
+}
+
+.navbar-nav .dropdown-menu.show {
+  display: block;
 }
