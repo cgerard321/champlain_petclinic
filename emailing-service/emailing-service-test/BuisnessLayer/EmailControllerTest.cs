@@ -21,7 +21,7 @@ public class EmailControllerTests
 {
     private IEmailService _controller;
     private readonly string pathOfDefaultHtml;
-    private readonly DirectEmailModel directEmailModel = new();
+    private readonly DirectEmailModel directEmailModel;
 
     public EmailControllerTests()
     {
