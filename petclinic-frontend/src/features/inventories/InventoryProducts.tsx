@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { ProductModel } from './models/ProductModels/ProductModel';
@@ -12,7 +12,7 @@ const InventoryProducts: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchProducts = async (): Promise<void> => {
+  const fetchProducts = useCallback(async (): Promise<void> => {
     setLoading(true);
     setError(null);
     try {
@@ -25,13 +25,13 @@ const InventoryProducts: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [inventoryId]);
 
   useEffect(() => {
     if (inventoryId) {
       fetchProducts().catch(err => console.error(err));
     }
-  }, [inventoryId]);
+  }, [inventoryId, fetchProducts]);
 
   if (loading) return <p>Loading products...</p>;
   if (error) return <p>{error}</p>;
