@@ -294,19 +294,4 @@ public class VisitControllerUnitTest {
         verify(visitsServiceClient, times(1)).getAllVisits();
     }
 
-
-
-
-<<<<<<< HEAD
-<<<<<<< HEAD
-
-
-
-=======
->>>>>>> 27ded3de (Created a review entity in Visit, created the service and service imp… (#653))
-=======
-
-
-
->>>>>>> 8c3ffa24 (Feat/vist cpc 1117 add reviews section in admin page (#665))
 }
