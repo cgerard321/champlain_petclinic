@@ -3,6 +3,8 @@ import { getAllProducts } from '@/features/products/api/getAllProducts.ts';
 import './ProductList.css';
 import { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
 import Product from './components/Product';
+import AddProduct from './components/AddProduct';
+import { addProduct } from '@/features/products/api/addProduct';
 
 export default function ProductList(): JSX.Element {
   const [productList, setProductList] = useState<ProductModel[]>([]);
@@ -45,6 +47,17 @@ export default function ProductList(): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const handleAddProduct = async (
+    product: Omit<ProductModel, 'productId'>
+  ): Promise<void> => {
+    try {
+      await addProduct(product);
+      await fetchProducts();
+    } catch (error) {
+      console.error('Error adding product:', error);
+    }
+  };
+
   return (
     <div>
       <div className="filter-container">
@@ -75,6 +88,7 @@ export default function ProductList(): JSX.Element {
         <button onClick={fetchProducts}>Apply Filter</button>
       </div>
 
+      <AddProduct addProduct={handleAddProduct} />
       <div className="grid">
         {isLoading ? (
           <p>Loading products...</p>
