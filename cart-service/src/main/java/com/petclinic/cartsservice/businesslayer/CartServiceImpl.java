@@ -46,8 +46,6 @@ public class CartServiceImpl implements CartService {
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Cart id was not found: " + cartId))))
                 .flatMap(foundCart -> cartRequestModel
                         .map(EntityModelUtil::toCartEntity)
-//                        .doOnNext(c -> c.setCartId(foundCart.getCartId()))
-//                        .doOnNext(c -> c.setCustomerId(foundCart.getCustomerId()))
                         .doOnNext(c -> c.setProductIds(foundCart.getProductIds()))
                         .doOnNext(c -> c.setId(foundCart.getId()))
                 )
