@@ -106,6 +106,15 @@ export default function VisitListTable(): JSX.Element {
               >
                 {visit.status}
               </td>
+              <td>
+                <button
+                  className="btn btn-dark"
+                  onClick={() => navigate(`/visits/${visit.visitId}`)}
+                  title="View"
+                >
+                  View
+                </button>
+              </td>
             </tr>
           ))}
         </tbody>

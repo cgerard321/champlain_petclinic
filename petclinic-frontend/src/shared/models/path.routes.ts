@@ -3,6 +3,7 @@ export enum AppRoutePaths {
   EditInventory = '/inventories/inventory/:inventoryId/edit',
   Review = '/reviews',
   UpdateReview = '/updateReview/:reviewId/edit',
+  GetVisitByVistId = 'visits/:visitId',
   Form = '/forms',
   Inventories = '/inventories',
   Vet = '/vets',
