@@ -9,9 +9,17 @@ import { addVisit } from "@/features/visits/api/addVisit";
 interface ApiError {
     message: string;
 }
+type VisitType = {
+    visitDate: Date;
+    description: string;
+    petId: string;
+    practitionerId: string;
+    // ownerId: string;
+    status: Status;
+}
 
 const AddingVisit: React.FC = (): JSX.Element => {
-    const [visit, setVisit] = useState<VisitRequestModel>({
+    const [visit, setVisit] = useState<VisitType>({
         visitDate: new Date(),
         description: '',
         petId: '',
@@ -38,7 +46,7 @@ const AddingVisit: React.FC = (): JSX.Element => {
     const validate = (): boolean => {
         const newErrors: { [key: string]: string } = {};
         if (!visit.petId) newErrors.petId = 'Pet ID is required';
-        if (!visit.visitDate || isNaN(visit.visitDate.getTime())) newErrors.visitDate = 'Visit date is required';
+        if (!visit.visitDate) newErrors.visitDate = 'Visit date is required';
         if (!visit.description) newErrors.description = 'Description is required';
         if (!visit.practitionerId) newErrors.practitionerId = 'Practitioner ID is required';
         if (!visit.status) newErrors.status = 'Status is required';
@@ -54,9 +62,9 @@ const AddingVisit: React.FC = (): JSX.Element => {
         setErrorMessage('');
         setSuccessMessage('');
 
-        const formattedVisit = {
+        const formattedVisit:VisitRequestModel = {
             ...visit,
-            visitDate: new Date(visit.visitDate.toISOString().slice(0, 19).replace('T', ' '))
+             visitDate: visit.visitDate.toISOString().slice(0, 16).replace('T', ' ')
         };
 
         try {
