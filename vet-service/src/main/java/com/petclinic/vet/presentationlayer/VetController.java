@@ -1,21 +1,18 @@
 package com.petclinic.vet.presentationlayer;
+
 /**
- @author Kamilah Hatteea & Brandon Levis : Vet-Service
-  * Worked together with (Code with Friends) on IntelliJ IDEA
-  * <p>
-  * User: @Kamilah Hatteea
-  * Date: 2022-09-22
-  * Ticket: feat(VVS-CPC-554): edit veterinarian
-  * User: Brandon Levis
-  * Date: 2022-09-22
-  * Ticket: feat(VVS-CPC-553): add veterinarian
+ * @author Kamilah Hatteea & Brandon Levis
+ * Worked together with (Code with Friends) on IntelliJ IDEA
+ * <p>
+ * User: @Kamilah Hatteea
+ * Date: 2022-09-22
+ * Ticket: feat(VVS-CPC-554): edit veterinarian
+ * User: Brandon Levis
+ * Date: 2022-09-22
+ * Ticket: feat(VVS-CPC-553): add veterinarian
  */
 
-<<<<<<< HEAD
-
-=======
 import com.petclinic.vet.exceptions.InvalidInputException;
->>>>>>> 63e65382 (feat(TEAM4-CPC-1074): Did the frontend for the GetVetByVetId, Added my method to the api-gateway and changed my backend in vet-service)
 import com.petclinic.vet.exceptions.NotFoundException;
 import com.petclinic.vet.servicelayer.*;
 import com.petclinic.vet.servicelayer.badges.BadgeResponseDTO;
@@ -39,22 +36,12 @@ import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-
 import java.io.IOException;
 import java.util.Map;
 
-
 @RequiredArgsConstructor
 @RestController
-<<<<<<< HEAD
-<<<<<<< HEAD
 @RequestMapping("/vets")
-=======
-@RequestMapping("vet")
->>>>>>> 438c882f (feat(VETS-CPC-1078): add a vet by filling a form as an admin (#654))
-=======
-@RequestMapping("vets")
->>>>>>> fd807b1b (feat(VETS-CPC-1147): fix vet endpoints (#680))
 public class VetController {
     private final VetService vetService;
     private final RatingService ratingService;
@@ -62,54 +49,47 @@ public class VetController {
     private final EducationService educationService;
     private final BadgeService badgeService;
 
-
-    //Ratings
+    // Ratings
     @GetMapping("{vetId}/ratings")
     public Flux<RatingResponseDTO> getAllRatingsByVetId(@PathVariable String vetId) {
         return ratingService.getAllRatingsByVetId(EntityDtoUtil.verifyId(vetId));
-
-
     }
 
-
     @GetMapping("{vetId}/ratings/count")
-    public Mono<ResponseEntity<Integer>> getNumberOfRatingsByVetId(@PathVariable String vetId){
+    public Mono<ResponseEntity<Integer>> getNumberOfRatingsByVetId(@PathVariable String vetId) {
         return ratingService.getNumberOfRatingsByVetId(vetId)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-
-
-
     @PostMapping("/{vetId}/ratings")
     public Mono<ResponseEntity<RatingResponseDTO>> addRatingToVet(@PathVariable String vetId, @RequestBody Mono<RatingRequestDTO> ratingRequest) {
         return ratingService.addRatingToVet(vetId, ratingRequest)
-                .map(r->ResponseEntity.status(HttpStatus.CREATED).body(r))
+                .map(r -> ResponseEntity.status(HttpStatus.CREATED).body(r))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-
     @DeleteMapping("{vetId}/ratings/{ratingId}")
     public Mono<ResponseEntity<Void>> deleteRatingByRatingId(@PathVariable String vetId,
-                                                             @PathVariable String ratingId){
+                                                             @PathVariable String ratingId) {
         return ratingService.deleteRatingByRatingId(vetId, ratingId)
                 .then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
     @GetMapping("{vetId}/ratings/average")
-    public Mono<ResponseEntity<Double>> getAverageRatingByVetId(@PathVariable String vetId){
+    public Mono<ResponseEntity<Double>> getAverageRatingByVetId(@PathVariable String vetId) {
         return ratingService.getAverageRatingByVetId(vetId)
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
     @GetMapping("{vetId}/ratings/date")
-    public Flux<RatingResponseDTO> getRatingsOfAVetBasedOnDate(@PathVariable String vetId, @RequestParam Map<String,String> queryParams) {
+    public Flux<RatingResponseDTO> getRatingsOfAVetBasedOnDate(@PathVariable String vetId, @RequestParam Map<String, String> queryParams) {
         if (queryParams.containsKey("year")) {
             String year = queryParams.get("year");
 
-
-            //This regex signifies that it required 4 numbers input for the year
+            // This regex signifies that it requires a 4-digit number for the year
             if (!year.matches("^\\d{4}$")) {
                 throw new NotFoundException("Invalid year format. Please enter a valid year.");
             }
@@ -118,78 +98,41 @@ public class VetController {
                 .switchIfEmpty(Mono.error(new NotFoundException("No valid ratings were found for " + vetId)));
     }
 
-
-
-
     @GetMapping("topVets")
     public Flux<VetAverageRatingDTO> getTopThreeVetsWithHighestAverageRating() {
         return ratingService.getTopThreeVetsWithHighestAverageRating();
     }
 
-
     @PutMapping("{vetId}/ratings/{ratingId}")
     public Mono<ResponseEntity<RatingResponseDTO>> updateRatingByVetIdAndRatingId(@PathVariable String vetId,
                                                                                   @PathVariable String ratingId,
-                                                                                  @RequestBody Mono<RatingRequestDTO> ratingRequestDTOMono){
+                                                                                  @RequestBody Mono<RatingRequestDTO> ratingRequestDTOMono) {
         return ratingService.updateRatingByVetIdAndRatingId(vetId, ratingId, ratingRequestDTOMono)
-                .map(r->ResponseEntity.status(HttpStatus.OK).body(r))
+                .map(r -> ResponseEntity.status(HttpStatus.OK).body(r))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-
-   /*@PutMapping("{vetId}/ratings/{ratingId}")
-   public Mono<RatingResponseDTO> updateRatingByVetIdAndRatingId(@PathVariable String vetId, @PathVariable String ratingId, @RequestBody Mono<RatingRequestDTO> ratingRequestDTOMono){
-       return ratingService.updateRating(vetId, ratingId, ratingRequestDTOMono);
-   }*/
-
-
     @GetMapping("{vetId}/ratings/percentages")
-    public Mono<ResponseEntity<String>> getPercentageOfRatingsByVetId(@PathVariable String vetId){
+    public Mono<ResponseEntity<String>> getPercentageOfRatingsByVetId(@PathVariable String vetId) {
         return ratingService.getRatingPercentagesByVetId(EntityDtoUtil.verifyId(vetId))
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-
-  /*@GetMapping("{vetId}/ratings/{predefinedDescription}/count")
-  public Mono<ResponseEntity<Integer>> getCountOfRatingsByVetIdAndPredefinedDescription(@PathVariable String vetId, @PathVariable PredefinedDescription predefinedDescription){
-      return ratingService.getCountOfRatingsByVetIdAndPredefinedDescription(EntityDtoUtil.verifyId(vetId), predefinedDescription)
-              .map(ResponseEntity::ok)
-              .defaultIfEmpty(ResponseEntity.notFound().build());
-  }*/
-
-
-    //Vets
+    // Vets
     @GetMapping()
     public Flux<VetResponseDTO> getAllVets() {
         return vetService.getAll();
     }
 
-<<<<<<< HEAD
-
-    @GetMapping("{vetId}")
-=======
-    //@GetMapping("{vetId}")
-    @GetMapping(value = "/{vetId}",produces = MediaType.APPLICATION_JSON_VALUE)
->>>>>>> 63e65382 (feat(TEAM4-CPC-1074): Did the frontend for the GetVetByVetId, Added my method to the api-gateway and changed my backend in vet-service)
+    @GetMapping(value = "/{vetId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<VetResponseDTO>> getVetByVetId(@PathVariable String vetId) {
-
-        /*
-        return vetService.getVetByVetId(EntityDtoUtil.verifyId(vetId))
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
-        */
-
-
-
         return Mono.just(vetId)
-                .filter(id -> id.length() == 36) //Validate the course id
+                .filter(id -> id.length() == 36) // Validate the vet id
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided vet id is invalid:" + vetId)))
                 .flatMap(vetService::getVetByVetId)
                 .map(ResponseEntity::ok);
-
     }
-
 
     @GetMapping("/firstName/{firstName}")
     public Mono<ResponseEntity<VetResponseDTO>> getVetByFirstName(@PathVariable String firstName) {
@@ -198,7 +141,6 @@ public class VetController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-
     @GetMapping("/lastName/{lastName}")
     public Mono<ResponseEntity<VetResponseDTO>> getVetByLastName(@PathVariable String lastName) {
         return vetService.getVetByLastName(lastName)
@@ -206,12 +148,7 @@ public class VetController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-
-
-
-    //bills
-
-
+    // Bills
     @GetMapping("/vetBillId/{vetBillId}")
     public Mono<ResponseEntity<VetResponseDTO>> getVetByBillId(@PathVariable String vetBillId) {
         return vetService.getVetByVetBillId(EntityDtoUtil.verifyId(vetBillId))
@@ -219,26 +156,22 @@ public class VetController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-
     @GetMapping("/active")
     public Flux<VetResponseDTO> getActiveVets() {
         return vetService.getVetByIsActive(true);
     }
-
 
     @GetMapping("/inactive")
     public Flux<VetResponseDTO> getInactiveVets() {
         return vetService.getVetByIsActive(false);
     }
 
-
     @PostMapping
     public Mono<ResponseEntity<VetResponseDTO>> insertVet(@RequestBody Mono<VetRequestDTO> vetRequestDTOMono) {
         return vetService.addVet(vetRequestDTOMono)
-                .map(v->ResponseEntity.status(HttpStatus.CREATED).body(v))
+                .map(v -> ResponseEntity.status(HttpStatus.CREATED).body(v))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
-
 
     @PutMapping("{vetId}")
     public Mono<ResponseEntity<VetResponseDTO>> updateVetByVetId(@PathVariable String vetId, @RequestBody Mono<VetRequestDTO> vetRequestDTOMono) {
@@ -247,7 +180,6 @@ public class VetController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-
     @DeleteMapping("{vetId}")
     public Mono<ResponseEntity<Void>> deleteVet(@PathVariable String vetId) {
         return vetService.deleteVetByVetId(EntityDtoUtil.verifyId(vetId))
@@ -255,91 +187,59 @@ public class VetController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-
-    //Education
+    // Education
     @GetMapping("{vetId}/educations")
     public Flux<EducationResponseDTO> getAllEducationsByVetId(@PathVariable String vetId) {
         return educationService.getAllEducationsByVetId(EntityDtoUtil.verifyId(vetId));
     }
 
-
     @DeleteMapping("{vetId}/educations/{educationId}")
     public Mono<Void> deleteEducationByEducationId(@PathVariable String vetId,
-                                                   @PathVariable String educationId){
+                                                   @PathVariable String educationId) {
         return educationService.deleteEducationByEducationId(vetId, educationId);
-
-
     }
+
     @PutMapping("{vetId}/educations/{educationId}")
     public Mono<ResponseEntity<EducationResponseDTO>> updateEducationByVetIdAndEducationId(@PathVariable String vetId,
                                                                                            @PathVariable String educationId,
-                                                                                           @RequestBody Mono<EducationRequestDTO> educationRequestDTOMono){
+                                                                                           @RequestBody Mono<EducationRequestDTO> educationRequestDTOMono) {
         return educationService.updateEducationByVetIdAndEducationId(vetId, educationId, educationRequestDTOMono)
-                .map(e->ResponseEntity.status(HttpStatus.OK).body(e))
+                .map(e -> ResponseEntity.status(HttpStatus.OK).body(e))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-
     @PostMapping("{vetId}/educations")
-    public Mono<EducationResponseDTO> addEducationToVet(@PathVariable String vetId, @RequestBody Mono<EducationRequestDTO> educationRequestDTOMono){
+    public Mono<EducationResponseDTO> addEducationToVet(@PathVariable String vetId, @RequestBody Mono<EducationRequestDTO> educationRequestDTOMono) {
         return educationService.addEducationToVet(vetId, educationRequestDTOMono);
     }
 
-
-
-
-
-
-    //Photo
+    // Photo
     @GetMapping("{vetId}/photo")
-    public Mono<ResponseEntity<Resource>> getPhotoByVetId(@PathVariable String vetId){
+    public Mono<ResponseEntity<Resource>> getPhotoByVetId(@PathVariable String vetId) {
         return photoService.getPhotoByVetId(vetId)
                 .map(r -> ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE).body(r))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
     @GetMapping("{vetId}/default-photo")
-    public Mono<ResponseEntity<PhotoResponseDTO>> getDefaultPhotoByVetId(@PathVariable String vetId){
+    public Mono<ResponseEntity<PhotoResponseDTO>> getDefaultPhotoByVetId(@PathVariable String vetId) {
         return photoService.getDefaultPhotoByVetId(vetId)
                 .map(r -> ResponseEntity.ok().body(r))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-
-  /*  @PostMapping("{vetId}/photos/{photoName}")
-    public Mono<ResponseEntity<Resource>> addPhoto(
-            @PathVariable String vetId,
-            @PathVariable String photoName,
-            @RequestParam("file") MultipartFile file) throws IOException {
-
-
-        // Convert MultipartFile to Resource
-        Mono<Resource> photoResource = Mono.just(new ByteArrayResource(file.getBytes()));
-
-
-        return photoService.insertPhotoOfVet(vetId, photoName, photoResource)
-                .map(p -> ResponseEntity.status(HttpStatus.CREATED).body(p))
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
-    }
-*/
-
-
-
-
-
-
     @PutMapping("{vetId}/photos/{photoName}")
-    public Mono<ResponseEntity<Resource>> updatePhotoByVetId(@PathVariable String vetId, @PathVariable String photoName, @RequestBody Mono<Resource> photo){
+    public Mono<ResponseEntity<Resource>> updatePhotoByVetId(@PathVariable String vetId, @PathVariable String photoName, @RequestBody Mono<Resource> photo) {
         return photoService.updatePhotoByVetId(vetId, photoName, photo)
                 .map(p -> ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, MediaType.IMAGE_JPEG_VALUE).body(p))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-
-    //Badge
+    // Badge
     @GetMapping("{vetId}/badge")
-    public Mono<ResponseEntity<BadgeResponseDTO>> getBadgeByVetId(@PathVariable String vetId){
+    public Mono<ResponseEntity<BadgeResponseDTO>> getBadgeByVetId(@PathVariable String vetId) {
         return badgeService.getBadgeByVetId(vetId)
-                .map(r->ResponseEntity.status(HttpStatus.OK).body(r))
+                .map(r -> ResponseEntity.status(HttpStatus.OK).body(r))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 }
