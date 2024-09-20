@@ -4,6 +4,7 @@ import { FormEvent } from 'react';
 import { useSetUser } from '@/context/UserContext.tsx';
 import { useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
+import './Login.css';
 
 export default function Login(): JSX.Element {
   const setUser = useSetUser();
@@ -31,17 +32,18 @@ export default function Login(): JSX.Element {
       });
   };
   return (
-    <div>
-      <h1>User Login</h1>
-      <form onSubmit={login}>
-        <label>Email: </label>
-        <input type="text" id="emailInput" />
-        <br />
-        <label>Password: </label>
-        <input type="text" id="passwordInput" />
-        <br />
-        <button type="submit">Login</button>
-      </form>
-    </div>
+
+   <div className="login-container">
+     <h1>User Login</h1>
+     <form onSubmit={login}>
+       <label>Email: </label>
+       <input type="text" id="emailInput" />
+       <br />
+       <label>Password: </label>
+       <input type="text" id="passwordInput" />
+       <br />
+       <button type="submit">Login</button>
+     </form>
+   </div>
   );
 }
