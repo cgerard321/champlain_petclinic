@@ -1,6 +1,6 @@
-import { createBrowserRouter } from 'react-router-dom';
+import { createBrowserRouter, Navigate } from 'react-router-dom';
 import { AppRoutePaths } from './shared/models/path.routes';
-import Login from './pages/Login/Login';
+import Login from '@/pages/User/Login';
 import Inventories from '@/pages/Inventory/Inventories.tsx';
 import InventoryProducts from '@/features/inventories/InventoryProducts.tsx';
 import Vet from '@/pages/Vet/Vet.tsx';
@@ -25,16 +25,7 @@ import EditInventory from '@/features/inventories/EditInventory.tsx';
 
 const router = createBrowserRouter([
   {
-    path: AppRoutePaths.Default,
     children: [
-      {
-        path: AppRoutePaths.Home,
-        element: (
-          <ProtectedRoute>
-            <Home />
-          </ProtectedRoute>
-        ),
-      },
       {
         path: AppRoutePaths.EditInventory,
         element: (
@@ -126,43 +117,27 @@ const router = createBrowserRouter([
       },
       {
         path: AppRoutePaths.Forbidden,
-        element: (
-          <ProtectedRoute>
-            <Forbidden />
-          </ProtectedRoute>
-        ),
+        element: <Forbidden />,
       },
       {
         path: AppRoutePaths.Unauthorized,
-        element: (
-          <ProtectedRoute>
-            <Unauthorized />
-          </ProtectedRoute>
-        ),
+        element: <Unauthorized />,
+      },
+      {
+        path: AppRoutePaths.PageNotFound,
+        element: <PageNotFound />,
       },
       {
         path: AppRoutePaths.InternalServerError,
-        element: (
-          <ProtectedRoute>
-            <InternalServerError />
-          </ProtectedRoute>
-        ),
+        element: <InternalServerError />,
       },
       {
         path: AppRoutePaths.RequestTimeout,
-        element: (
-          <ProtectedRoute>
-            <RequestTimeout />
-          </ProtectedRoute>
-        ),
+        element: <RequestTimeout />,
       },
       {
         path: AppRoutePaths.ServiceUnavailable,
-        element: (
-          <ProtectedRoute>
-            <ServiceUnavailable />
-          </ProtectedRoute>
-        ),
+        element: <ServiceUnavailable />,
       },
       {
         path: AppRoutePaths.Products,
@@ -182,7 +157,15 @@ const router = createBrowserRouter([
       },
     ],
   },
-  { path: AppRoutePaths.login, element: <Login /> },
+  {
+    path: AppRoutePaths.Default,
+    element: <Navigate to={AppRoutePaths.Home} replace />,
+  },
+  {
+    path: AppRoutePaths.Home,
+    element: <Home />,
+  },
+  { path: AppRoutePaths.Login, element: <Login /> },
   {
     path: '*',
     element: <PageNotFound />,
