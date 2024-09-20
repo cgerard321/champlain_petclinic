@@ -22,6 +22,7 @@ import AddReviewForm from './features/visits/Review/AddReviewForm';
 import EditReviewForm from './features/visits/Review/EditReviewForm';
 import Review from './pages/Review/Review';
 import EditInventory from '@/features/inventories/EditInventory.tsx';
+import AddingVisit from '@/features/visits/models/AddingVisit.tsx';
 
 const router = createBrowserRouter([
   {
@@ -152,6 +153,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <Visits />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.AddVisit,
+        element: (
+          <ProtectedRoute>
+            <AddingVisit />
           </ProtectedRoute>
         ),
       },

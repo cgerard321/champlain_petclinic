@@ -2,6 +2,7 @@ package com.petclinic.bffapigateway.presentationlayer.v2.visit;
 
 import com.petclinic.bffapigateway.domainclientlayer.VisitsServiceClient;
 import com.petclinic.bffapigateway.dtos.Visits.Status;
+import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewResponseDTO;
@@ -28,6 +29,9 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 
+import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService.jwtTokenForValidAdmin;
+import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.*;
 
 @WebFluxTest(controllers = VisitController.class)
@@ -137,6 +141,62 @@ public class VisitControllerUnitTest {
                 .hasSize(1);
         // Assert
         verify(visitsServiceClient, times(1)).getAllVisits();
+    }
+
+    @Test
+    void whenAddVisit_asAdmin_thenReturnCreatedVisitDTO() {
+        // Arrange
+        VisitRequestDTO newVisitRequestDTO = VisitRequestDTO.builder()
+                .visitDate(LocalDateTime.of(2023, 10, 10, 10, 0))
+                .description("Routine check-up")
+                .petId("P001")
+                .practitionerId("PR001")
+                .status(Status.UPCOMING)
+                .build();
+
+        VisitResponseDTO createdVisitResponseDTO = VisitResponseDTO.builder()
+                .visitId("V001")
+                .visitDate(newVisitRequestDTO.getVisitDate())
+                .description(newVisitRequestDTO.getDescription())
+                .petId(newVisitRequestDTO.getPetId())
+                .practitionerId(newVisitRequestDTO.getPractitionerId())
+                .status(newVisitRequestDTO.getStatus())
+                .build();
+
+        // Mock the visitsServiceClient to return the expected Mono
+        when(visitsServiceClient.addVisit(any(Mono.class)))
+                .thenReturn(Mono.just(createdVisitResponseDTO));
+
+        // Act
+        Mono<VisitResponseDTO> result = webTestClient.post()
+                .uri(BASE_VISIT_URL)
+                .cookie("Bearer", jwtTokenForValidAdmin)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(newVisitRequestDTO), VisitRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .returnResult(VisitResponseDTO.class)
+                .getResponseBody()
+                .single();
+
+        // Assert
+        StepVerifier.create(result)
+                .expectNextMatches(visitResponseDTO -> {
+                    assertNotNull(visitResponseDTO);
+                    assertNotNull(visitResponseDTO.getVisitId());
+                    assertEquals(newVisitRequestDTO.getVisitDate(), visitResponseDTO.getVisitDate());
+                    assertEquals(newVisitRequestDTO.getDescription(), visitResponseDTO.getDescription());
+                    assertEquals(newVisitRequestDTO.getPetId(), visitResponseDTO.getPetId());
+                    assertEquals(newVisitRequestDTO.getPractitionerId(), visitResponseDTO.getPractitionerId());
+                    assertEquals(newVisitRequestDTO.getStatus(), visitResponseDTO.getStatus());
+                    return true;
+                })
+                .verifyComplete();
+
+        // Verify that addVisit was called
+        verify(visitsServiceClient, times(1)).addVisit(any(Mono.class));
     }
 
     @Test
