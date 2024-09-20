@@ -290,7 +290,7 @@ public class VetsServiceClient {
         return webClientBuilder
                 .build()
                 .get()
-                .uri(vetsServiceUrl + "/vets")
+                .uri(vetsServiceUrl)
                 .retrieve()
                 .onStatus(HttpStatusCode::is5xxServerError,error->
                         Mono.error(new IllegalArgumentException("Something went wrong"))
