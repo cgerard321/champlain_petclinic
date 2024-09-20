@@ -23,6 +23,7 @@ import ServiceUnavailable from '@/pages/Error/ServiceUnavailable.tsx';
 import Visits from './pages/Visit/Visit';
 import AddReviewForm from './features/visits/Review/AddReviewForm';
 import EditInventory from '@/features/inventories/EditInventory.tsx';
+import AddingVisit from '@/features/visits/models/AddingVisit.tsx';
 
 const router = createBrowserRouter([
   {
@@ -188,6 +189,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <Visits />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.AddVisit,
+        element: (
+          <ProtectedRoute>
+            <AddingVisit />
           </ProtectedRoute>
         ),
       },

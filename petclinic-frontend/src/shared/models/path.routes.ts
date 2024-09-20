@@ -22,4 +22,5 @@ export enum AppRoutePaths {
   Products = '/products',
   Visits = '/visits',
   VetDetails = '/vets/{vetId}',
+  AddVisit = '/visits/add',
 }
