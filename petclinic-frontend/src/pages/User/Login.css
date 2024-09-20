@@ -30,7 +30,8 @@ label {
   text-align: left;
 }
 
-input[type="text"], input[type="password"] {
+input[type='text'],
+input[type='password'] {
   width: 100%;
   height: 40px;
   margin-bottom: 20px;
@@ -40,10 +41,10 @@ input[type="text"], input[type="password"] {
   box-sizing: border-box;
 }
 
-button[type="submit"] {
+button[type='submit'] {
   width: 100%;
   height: 45px;
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: #fff;
   padding: 10px;
   border: none;
@@ -53,18 +54,19 @@ button[type="submit"] {
   transition: background-color 0.3s ease;
 }
 
-button[type="submit"]:hover {
+button[type='submit']:hover {
   background-color: #45a049;
 }
 
-button[type="submit"]:active {
+button[type='submit']:active {
   background-color: #3e8e41;
   transform: scale(0.98);
 }
 
-input[type="text"]:focus, input[type="password"]:focus {
+input[type='text']:focus,
+input[type='password']:focus {
   outline: none;
-  border-color: #4CAF50;
+  border-color: #4caf50;
   box-shadow: 0 0 5px rgba(76, 175, 80, 0.5);
 }
 
@@ -98,4 +100,9 @@ input[type="text"]:focus, input[type="password"]:focus {
 
 .slideshow-container img.fade-out {
   opacity: 0;
+}
+
+.back-button {
+  padding-top: 20px;
+  padding-left: 20px;
 }
