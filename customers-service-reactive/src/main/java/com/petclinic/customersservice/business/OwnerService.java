@@ -26,7 +26,7 @@ public interface OwnerService {
     // getOwnerByOwnerId is now returning a OwnerResponseDTO
     Mono<OwnerResponseDTO> getOwnerByOwnerId(String ownerId);
 
-//    Mono<Void> deleteOwner(String ownerId);
+    Mono<Void> deleteOwner(String ownerId);
 Mono<OwnerResponseDTO> deleteOwnerByOwnerId(String ownerId);
 
     Mono<OwnerResponseDTO> updateOwner(Mono<OwnerRequestDTO> ownerRequestDTO, String ownerId);

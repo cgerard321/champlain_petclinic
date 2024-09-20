@@ -38,10 +38,10 @@ public class OwnerServiceImpl implements OwnerService {
                 .map(EntityDTOUtil::toOwnerResponseDTO);
     }
 
-//    @Override
-//    public Mono<Void> deleteOwner(String ownerId) {
-//        return ownerRepo.deleteById(ownerId);
-//    }
+    @Override
+    public Mono<Void> deleteOwner(String ownerId) {
+        return ownerRepo.deleteById(ownerId);
+    }
 
 
     @Override
