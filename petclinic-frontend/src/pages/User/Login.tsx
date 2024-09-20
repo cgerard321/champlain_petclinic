@@ -2,8 +2,24 @@ import { useState, FormEvent } from 'react';
 import axios from 'axios';
 import { UserResponseModel } from '@/shared/models/UserResponseModel';
 import { useSetUser } from '@/context/UserContext.tsx';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
+import anotherDoctorAndDoggy from '@/assets/Login/another-doctor-and-doggy.jpg';
+import doctorAndDoggy from '@/assets/Login/doctor-and-doggy.jpg';
+import doggyAndKitty from '@/assets/Login/doggy-and-kitty.jpg';
+import kitty from '@/assets/Login/kitty.jpg';
+import sadDoggy from '@/assets/Login/sad-doggy.jpg';
+import './Login.css';
+import Slideshow from './Slideshow';
+import { Alert } from 'react-bootstrap';
+
+const images = [
+  doctorAndDoggy,
+  anotherDoctorAndDoggy,
+  doggyAndKitty,
+  kitty,
+  sadDoggy,
+];
 
 export default function Login(): JSX.Element {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -42,18 +58,30 @@ export default function Login(): JSX.Element {
   };
 
   return (
-    <div>
-      <h1>User Login</h1>
-      {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
-      <form onSubmit={login}>
-        <label>Email: </label>
-        <input type="text" id="emailInput" />
-        <br />
-        <label>Password: </label>
-        <input type="password" id="passwordInput" />
-        <br />
-        <button type="submit">Login</button>
-      </form>
+    <div className="login-page">
+      <Link to="/home" className="back-button">
+        Back
+      </Link>
+      <div className="login-container">
+        <h1>User Login</h1>
+        {errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
+        <form onSubmit={login}>
+          <label htmlFor="emailInput"></label>
+          <input type="text" id="emailInput" placeholder="Enter your email" />
+          <br />
+          <label htmlFor="passwordInput"></label>
+          <input
+            type="password"
+            id="passwordInput"
+            placeholder="Enter your password"
+          />
+          <br />
+          <button type="submit" className="login-button">
+            Login
+          </button>
+        </form>
+      </div>
+      <Slideshow images={images} interval={7000} />
     </div>
   );
 }
