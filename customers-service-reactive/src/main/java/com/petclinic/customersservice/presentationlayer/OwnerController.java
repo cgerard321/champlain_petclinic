@@ -74,11 +74,6 @@ public class OwnerController {
         return ownerService.insertOwner(ownerMono);
     }
 
-//    @DeleteMapping("/{ownerId}")
-//    public Mono<Void> deleteOwnerByOwnerId(@PathVariable String ownerId) {
-//        return ownerService.deleteOwner(ownerId);
-//    }
-
     @DeleteMapping(value = "/{ownerId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<OwnerResponseDTO>> deleteOwnerByOwnerId(@PathVariable String ownerId){
         return Mono.just(ownerId)
