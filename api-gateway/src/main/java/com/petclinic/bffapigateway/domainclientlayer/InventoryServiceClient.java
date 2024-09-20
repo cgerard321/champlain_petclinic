@@ -68,6 +68,7 @@ public class InventoryServiceClient {
     }
 
     public Mono<ProductResponseDTO> addProductToInventory(final ProductRequestDTO model, final String inventoryId){
+
         return webClient.post()
                 .uri(inventoryServiceUrl + "/{inventoryId}/products", inventoryId)
                 .body(Mono.just(model),ProductRequestDTO.class)
@@ -110,6 +111,8 @@ public class InventoryServiceClient {
 
 
     public Mono<ProductResponseDTO> updateProductInInventory(ProductRequestDTO model, String inventoryId, String productId){
+
+
         return webClient
                 .put()
                 .uri(inventoryServiceUrl + "/{inventoryId}/products/{productId}", inventoryId, productId)
@@ -260,4 +263,5 @@ public class InventoryServiceClient {
                 .onStatus(HttpStatusCode::is4xxClientError, resp -> rethrower.rethrow(resp, ex -> new NotFoundException(ex.get("message").toString())))
                 .bodyToMono(Void.class);
     }
+
 }

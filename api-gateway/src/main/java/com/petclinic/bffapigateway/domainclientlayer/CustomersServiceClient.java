@@ -19,6 +19,7 @@ import reactor.core.publisher.Mono;
 import java.util.Objects;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import static reactor.core.publisher.Mono.just;
 
@@ -158,6 +159,19 @@ public class CustomersServiceClient {
 //                .body(model, OwnerRequestDTO.class)
 //                .retrieve()
 //                .bodyToMono(OwnerResponseDTO.class);
+    }
+
+    public Mono<OwnerResponseDTO> addOwner(Mono<OwnerRequestDTO> model) {
+        String ownerId = UUID.randomUUID().toString();
+        return model.flatMap(requestDTO -> {
+            requestDTO.setOwnerId(ownerId);
+            return webClientBuilder.build()
+                    .post()
+                    .uri(customersServiceUrl + "/owners")
+                    .body(BodyInserters.fromValue(requestDTO))
+                    .retrieve()
+                    .bodyToMono(OwnerResponseDTO.class);
+        });
     }
 
     public Flux<PetType> getPetTypes() {

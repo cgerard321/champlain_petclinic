@@ -10,13 +10,15 @@
   ],
   "ignorePatterns": ["dist", ".eslintrc.cjs", "node_modules/*"],
   "parser": "@typescript-eslint/parser",
+
   "parserOptions": {
     "ecmaVersion": 2020,
     "sourceType": "module",
     "project": "./tsconfig.json"
   },
-  "plugins": ["react","@typescript-eslint", "prettier"],
-  "rules":{
+
+  "plugins": ["react", "@typescript-eslint", "prettier"],
+  "rules": {
     "react/react-in-jsx-scope": "off",
     "import/prefer-default-export": "off",
     "no-console": ["error", { "allow": ["warn", "error"] }],

@@ -7,6 +7,7 @@ import { getAllInventoryTypes } from '@/features/inventories/api/getAllInventory
 import deleteAllInventories from '@/features/inventories/api/deleteAllInventories.ts';
 import './InventoriesListTable.css';
 import deleteInventory from '@/features/inventories/api/deleteInventory.ts';
+import AddInventoryType from '@/features/inventories/AddInventoryType.tsx';
 
 //TODO: create add inventory form component and change the component being shown on the inventories page on the onClick event of the add inventory button
 export default function InventoriesListTable(): JSX.Element {
@@ -17,6 +18,7 @@ export default function InventoriesListTable(): JSX.Element {
   );
   const [inventoryDescription, setInventoryDescription] = useState('');
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showAddTypeForm, setShowAddTypeForm] = useState(false); // Add state to control the form visibility
   const navigate = useNavigate();
 
   const {
@@ -31,6 +33,12 @@ export default function InventoriesListTable(): JSX.Element {
   useEffect(() => {
     getInventoryList('', '', '');
     fetchAllInventoryTypes();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage]);
+
+  useEffect(() => {
+    getInventoryList('', '', '');
+    refreshInventoryTypes();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage]);
 
@@ -73,12 +81,16 @@ export default function InventoriesListTable(): JSX.Element {
     setInventoryTypeList(data);
   };
 
+  const refreshInventoryTypes = async (): Promise<void> => {
+    await fetchAllInventoryTypes();
+  };
+
   return (
     <div>
       <table className="table table-striped">
         <thead>
           <tr>
-            <td>Inventory ID</td>
+            {/* <td>Inventory ID</td> */}
             <td>Name</td>
             <td>Type</td>
             <td>Description</td>
@@ -87,7 +99,7 @@ export default function InventoriesListTable(): JSX.Element {
             <td></td>
           </tr>
           <tr>
-            <td></td>
+            {/* <td></td> */}
             <td>
               <input
                 type="text"
@@ -187,38 +199,34 @@ export default function InventoriesListTable(): JSX.Element {
           {inventoryList.map(inventory => (
             <tr
               key={inventory.inventoryId}
-              onClick={() => navigate(`/productList/${inventory.inventoryId}`)}
+              onClick={() =>
+                navigate(`/inventory/${inventory.inventoryId}/products`)
+              }
             >
-              <td>{inventory.inventoryId}</td>
-              <td>
-                <a
-                  style={{ textDecoration: 'none' }}
-                  href={`/productList/${inventory.inventoryId}`}
-                >
-                  {inventory.inventoryName}
-                </a>
+              {/* <td>{inventory.inventoryId}</td> */}
+              <td
+                onClick={() =>
+                  navigate(`/inventory/${inventory.inventoryId}/products`)
+                }
+                style={{
+                  cursor: 'pointer',
+                  textDecoration: 'underline',
+                  color: 'blue',
+                }}
+              >
+                {inventory.inventoryName}
               </td>
               <td>{inventory.inventoryType}</td>
               <td>{inventory.inventoryDescription}</td>
               <td>
                 <button
-                  className="btn btn-warning"
                   onClick={e => {
                     e.stopPropagation();
-                    navigate(`/updateInventory/${inventory.inventoryId}/edit`);
+                    navigate(`inventory/${inventory.inventoryId}/edit`);
                   }}
-                  title="Edit"
+                  className="btn btn-warning"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="32px"
-                    height="32px"
-                    fill="white"
-                    className="bi bi-pencil text-white"
-                    viewBox="0 0 16 16"
-                  >
-                    <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325" />
-                  </svg>
+                  Edit
                 </button>
               </td>
               <td>
@@ -300,6 +308,20 @@ export default function InventoriesListTable(): JSX.Element {
       >
         Add Inventory
       </button>
+      <button
+        className="add-inventorytype-button btn btn-primary"
+        onClick={() => setShowAddTypeForm(true)} // Show the form when clicked
+      >
+        Add InventoryType
+      </button>
+      {showAddTypeForm && (
+        <AddInventoryType
+          show={showAddTypeForm}
+          handleClose={() => setShowAddTypeForm(false)}
+          refreshInventoryTypes={refreshInventoryTypes} // Pass the function to refresh inventory types
+        />
+      )}
+
       {showConfirmDialog && (
         <>
           <div

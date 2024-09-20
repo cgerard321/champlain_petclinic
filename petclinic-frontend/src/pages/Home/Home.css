@@ -1,0 +1,30 @@
+.home-container {
+    padding: 0;
+}
+
+.home-content {
+    padding: 0 2rem;
+    text-align: left;
+    margin-top: 2rem;
+}
+
+.home-content h1 {
+    font-size: 2.5rem;
+    color: #333;
+}
+
+.home-content p {
+    font-size: 1.2rem;
+    color: #555;
+    line-height: 1.6;
+}
+
+.services-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.services-list li {
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
