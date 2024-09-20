@@ -8,6 +8,6 @@ import reactor.core.publisher.Mono;
 public interface BadgeRepository extends ReactiveCrudRepository<Badge, Integer> {
     Mono<Badge> findByVetId(String vetId);
 
-    Mono<Long> deleteByVetId(String vetId);
+    Mono<Integer> deleteByVetId(String vetId);
 
 }
