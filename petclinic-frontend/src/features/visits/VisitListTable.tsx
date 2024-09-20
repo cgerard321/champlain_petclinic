@@ -85,27 +85,27 @@ export default function VisitListTable(): JSX.Element {
           <tbody>
           {visitsList.map(visit => (
               <tr key={visit.visitId}>
-                <td>{visit.visitId}</td>
-                <td>{visit.visitDate}</td>
-                <td>{visit.description}</td>
-                <td>{visit.petName}</td>
-                <td>{visit.vetFirstName}</td>
-                <td>{visit.vetLastName}</td>
-                <td>{visit.vetEmail}</td>
-                <td
-                    style={{
-                      color:
-                          visit.status === 'CONFIRMED'
-                              ? 'green'
-                              : visit.status === 'UPCOMING'
-                                  ? 'orange'
-                                  : visit.status === 'COMPLETED'
-                                      ? 'blue'
-                                      : 'inherit',
-                    }}
-                >
-                  {visit.status}
-                </td>
+                  <td>{visit.visitId}</td>
+                  <td>{new Date(visit.visitDate).toLocaleString()}</td>
+                  <td>{visit.description}</td>
+                  <td>{visit.petName}</td>
+                  <td>{visit.vetFirstName}</td>
+                  <td>{visit.vetLastName}</td>
+                  <td>{visit.vetEmail}</td>
+                  <td
+                      style={{
+                          color:
+                              visit.status === 'CONFIRMED'
+                                  ? 'green'
+                                  : visit.status === 'UPCOMING'
+                                      ? 'orange'
+                                      : visit.status === 'COMPLETED'
+                                          ? 'blue'
+                                          : 'inherit',
+                      }}
+                  >
+                      {visit.status}
+                  </td>
               </tr>
           ))}
           </tbody>

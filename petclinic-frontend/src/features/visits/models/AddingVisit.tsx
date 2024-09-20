@@ -35,6 +35,11 @@ const AddingVisit: React.FC = (): JSX.Element => {
 
     const navigate = useNavigate();
 
+    const formatDate = (date: Date): string => {
+        const pad = (n: number) => n.toString().padStart(2, '0');
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+    };
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>): void => {
         const { name, value } = e.target;
         setVisit(prevVisit => ({
@@ -68,7 +73,6 @@ const AddingVisit: React.FC = (): JSX.Element => {
         };
 
         try {
-            console.log(formattedVisit);
             await addVisit(formattedVisit); // Pass the Date object directly
             setSuccessMessage('Visit added successfully!');
             setShowNotification(true);
@@ -104,10 +108,11 @@ const AddingVisit: React.FC = (): JSX.Element => {
                 <br />
                 <label>Visit Date: </label>
                 <input
-                    type="date" //change this if it doesnt work
+                    type="datetime-local"
                     name="visitDate"
-                    value={visit.visitDate.toISOString().split('T')[0]} // This formats the date to ISO and removes milliseconds
+                    value={formatDate(visit.visitDate)}
                     onChange={handleChange}
+                    required
                 />
                 {errors.visitDate && <span className="error">{errors.visitDate}</span>}
                 <br/>
@@ -136,8 +141,6 @@ const AddingVisit: React.FC = (): JSX.Element => {
                     onChange={handleChange}
                 >
                     <option value="UPCOMING">Upcoming</option>
-                    <option value="CONFIRMED">Confirmed</option>
-                    <option value="COMPLETED">Completed</option>
                 </select>
                 {errors.status && <span className="error">{errors.status}</span>}
                 <br />
