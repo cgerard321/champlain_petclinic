@@ -65,4 +65,15 @@ public class OwnerController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @DeleteMapping(value = "/{ownerId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<OwnerResponseDTO>> deleteOwner(@PathVariable String ownerId) {
+        return Mono.just(ownerId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(Mono.defer(() -> Mono.error(new InvalidInputException("Provided owner id invalid" + ownerId))))
+                .flatMap(customersServiceClient::deleteOwnerV2)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
 }
