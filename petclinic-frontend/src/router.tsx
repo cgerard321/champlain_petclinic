@@ -25,194 +25,185 @@ import AddReviewForm from './features/visits/Review/AddReviewForm';
 import EditInventory from '@/features/inventories/EditInventory.tsx';
 import VisitByVisitId from './features/visits/visits/VisitByVisitId';
 import AddingVisit from './features/visits/models/AddingVisit';
-import ProfilePage from '@/pages/Customer/ProfilePage.tsx';
 
 const router = createBrowserRouter([
-    {
-        children: [
-            {
-                path: AppRoutePaths.EditInventory,
-                element: (
-                    <ProtectedRoute>
-                        <EditInventory />
-                    </ProtectedRoute>
-                ),
-            },
-            {
-                path: AppRoutePaths.GetVisitByVistId,
-                element: (
-                    <ProtectedRoute>
-                        <VisitByVisitId />
-                    </ProtectedRoute>
-                ),
-            },
-            {
-                path: AppRoutePaths.Home,
-                element: (
-                    <ProtectedRoute>
-                        <Home />
-                    </ProtectedRoute>
-                ),
-            },
-            {
-                path: AppRoutePaths.Form,
-                element: (
-                    <ProtectedRoute>
-                        <AddReviewForm />
-                    </ProtectedRoute>
-                ),
-            },
-            {
-                path: AppRoutePaths.Review,
-                element: (
-                    <ProtectedRoute>
-                        <Review />
-                    </ProtectedRoute>
-                ),
-            },
-            {
-                path: AppRoutePaths.UpdateReview,
-                element: (
-                    <ProtectedRoute>
-                        <EditReviewForm />
-                    </ProtectedRoute>
-                ),
-            },
-            {
-                path: AppRoutePaths.Inventories,
-                element: (
-                    <ProtectedRoute>
-                        <Inventories />
-                    </ProtectedRoute>
-                ),
-            },
-            {
-                path: AppRoutePaths.InventoryProducts,
-                element: (
-                    <ProtectedRoute>
-                        <InventoryProducts />
-                    </ProtectedRoute>
-                ),
-            },
-            {
-                path: AppRoutePaths.Vet,
-                element: (
-                    <ProtectedRoute>
-                        <Vet />
-                    </ProtectedRoute>
-                ),
-            },
-            {
-                path: `${AppRoutePaths.Vet}/:vetId`,
-                element: (
-                    <ProtectedRoute>
-                        <VetDetails />
-                    </ProtectedRoute>
-                ),
-            },
-            {
-                path: AppRoutePaths.CustomerProfileEdit,
-                element: (
-                    <ProtectedRoute roles={['OWNER']}>
-                        <ProfileEdit />
-                    </ProtectedRoute>
-                ),
-            },
-            {
-                path: AppRoutePaths.AddingCustomer,
-                element: (
-                    <ProtectedRoute roles={['ADMIN']}>
-                        <AddingCustomer />
-                    </ProtectedRoute>
-                ),
-            },
-            {
-                path: AppRoutePaths.CustomerBills,
-                element: (
-                    <ProtectedRoute>
-                        <CustomerBillingPage />
-                    </ProtectedRoute>
-                ),
-            },
-            {
-                path: AppRoutePaths.AllCustomers,
-                element: (
-                    <ProtectedRoute roles={['ADMIN', 'VET']}>
-                        <AllOwners />
-                    </ProtectedRoute>
-                ),
-            },
-            {
-                path: AppRoutePaths.PageNotFound,
-                element: <PageNotFound />,
-            },
-            {
-                path: AppRoutePaths.Forbidden,
-                element: <Forbidden />,
-            },
-            {
-                path: AppRoutePaths.Unauthorized,
-                element: <Unauthorized />,
-            },
-            {
-                path: AppRoutePaths.InternalServerError,
-                element: <InternalServerError />,
-            },
-            {
-                path: AppRoutePaths.RequestTimeout,
-                element: <RequestTimeout />,
-            },
-            {
-                path: AppRoutePaths.ServiceUnavailable,
-                element: <ServiceUnavailable />,
-            },
-            {
-                path: AppRoutePaths.Products,
-                element: (
-                    <ProtectedRoute>
-                        <Products />
-                    </ProtectedRoute>
-                ),
-            },
-            {
-                path: AppRoutePaths.Visits,
-                element: (
-                    <ProtectedRoute>
-                        <Visits />
-                    </ProtectedRoute>
-                ),
-            },
-            {
-                path: AppRoutePaths.AddVisit,
-                element: (
-                    <ProtectedRoute>
-                        <AddingVisit />
-                    </ProtectedRoute>
-                ),
-            },
-            {
-                path: AppRoutePaths.CustomerProfile,
-                element: (
-                    <ProtectedRoute roles={['OWNER']}>
-                        <ProfilePage />
-                    </ProtectedRoute>
-                ),
-            },
-        ],
-    },
-    {
-        path: AppRoutePaths.Default,
-        element: <Navigate to={AppRoutePaths.Home} replace />,
-    },
-    {
+  {
+    children: [
+      {
+        path: AppRoutePaths.EditInventory,
+        element: (
+          <ProtectedRoute>
+            <EditInventory />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.GetVisitByVistId,
+        element: (
+          <ProtectedRoute>
+            <VisitByVisitId />
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: AppRoutePaths.Home,
-        element: <Home />,
-    },
-    { path: AppRoutePaths.Login, element: <Login /> },
-    {
-        path: '*',
+        element: (
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.Form,
+        element: (
+          <ProtectedRoute>
+            <AddReviewForm />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.Review,
+        element: (
+          <ProtectedRoute>
+            <Review />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.UpdateReview,
+        element: (
+          <ProtectedRoute>
+            <EditReviewForm />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.Inventories,
+        element: (
+          <ProtectedRoute>
+            <Inventories />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.InventoryProducts,
+        element: (
+          <ProtectedRoute>
+            <InventoryProducts />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.Vet,
+        element: (
+          <ProtectedRoute>
+            <Vet />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: `${AppRoutePaths.Vet}/:vetId`,
+        element: (
+          <ProtectedRoute>
+            <VetDetails />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.CustomerProfileEdit,
+        element: (
+          <ProtectedRoute roles={['OWNER']}>
+            <ProfileEdit />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.AddingCustomer,
+        element: (
+          <ProtectedRoute roles={['ADMIN']}>
+            <AddingCustomer />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.CustomerBills,
+        element: (
+          <ProtectedRoute>
+            <CustomerBillingPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.AllCustomers,
+        element: (
+          <ProtectedRoute roles={['ADMIN', 'VET']}>
+            <AllOwners />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.PageNotFound,
         element: <PageNotFound />,
-    },
+      },
+      {
+        path: AppRoutePaths.Forbidden,
+        element: <Forbidden />,
+      },
+      {
+        path: AppRoutePaths.Unauthorized,
+        element: <Unauthorized />,
+      },
+      {
+        path: AppRoutePaths.InternalServerError,
+        element: <InternalServerError />,
+      },
+      {
+        path: AppRoutePaths.RequestTimeout,
+        element: <RequestTimeout />,
+      },
+      {
+        path: AppRoutePaths.ServiceUnavailable,
+        element: <ServiceUnavailable />,
+      },
+      {
+        path: AppRoutePaths.Products,
+        element: (
+          <ProtectedRoute>
+            <Products />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.Visits,
+        element: (
+          <ProtectedRoute>
+            <Visits />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.AddVisit,
+        element: (
+          <ProtectedRoute>
+            <AddingVisit />
+          </ProtectedRoute>
+        ),
+      },
+    ],
+  },
+  {
+    path: AppRoutePaths.Default,
+    element: <Navigate to={AppRoutePaths.Home} replace />,
+  },
+  {
+    path: AppRoutePaths.Home,
+    element: <Home />,
+  },
+  { path: AppRoutePaths.Login, element: <Login /> },
+  {
+    path: '*',
+    element: <PageNotFound />,
+  },
 ]);
 
 export default router;
