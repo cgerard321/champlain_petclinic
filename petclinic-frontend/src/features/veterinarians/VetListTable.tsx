@@ -10,13 +10,13 @@ export default function VetListTable(): JSX.Element {
     const fetchVets = async (): Promise<void> => {
       try {
         const response = await fetch(
-            `http://localhost:8080/api/v2/gateway/vets`,
-            {
-              headers: {
-                Accept: 'application/json',
-              },
-              credentials: 'include',
-            }
+          `http://localhost:8080/api/v2/gateway/vets`,
+          {
+            headers: {
+              Accept: 'application/json',
+            },
+            credentials: 'include',
+          }
         );
 
         if (!response.ok) {
@@ -34,38 +34,43 @@ export default function VetListTable(): JSX.Element {
     fetchVets();
   }, []);
 
-  const handleVetDelete = (deletedVetId: string) => {
-    setVets((prevVets) => prevVets.filter((vet) => vet.vetId !== deletedVetId));
+  const handleVetDelete = (vetId: string): void => {
+    setVets(prevVets => prevVets.filter(vet => vet.vetId !== vetId));
   };
 
   return (
-      <div>
-        {error ? (
-            <p>{error}</p>
-        ) : (
-            <table className="table table-striped">
-              <thead>
-              <tr>
-                <th>First Name</th>
-                <th>Last Name</th>
-                <th>Specialties</th>
-                <th></th>
+    <div>
+      {error ? (
+        <p>{error}</p>
+      ) : (
+        <table className="table table-striped">
+          <thead>
+            <tr>
+              <th>First Name</th>
+              <th>Last Name</th>
+              <th>Specialties</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            {vets.map(vet => (
+              <tr key={vet.vetId}>
+                <td>{vet.firstName}</td>
+                <td>{vet.lastName}</td>
+                <td>
+                  {vet.specialties.map(specialty => specialty.name).join(', ')}
+                </td>
+                <td>
+                  <DeleteVet
+                    vetId={vet.vetId}
+                    onVetDeleted={() => handleVetDelete(vet.vetId)}
+                  />
+                </td>
               </tr>
-              </thead>
-              <tbody>
-              {vets.map((vet) => (
-                  <tr key={vet.vetId}>
-                    <td>{vet.firstName}</td>
-                    <td>{vet.lastName}</td>
-                    <td>{vet.specialties.map((specialty) => specialty.name).join(', ')}</td>
-                    <td>
-                      <DeleteVet vetId={vet.vetId} onVetDeleted={() => handleVetDelete(vet.vetId)}/>
-                    </td>
-                  </tr>
-              ))}
-              </tbody>
-            </table>
-        )}
-      </div>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
   );
 }
