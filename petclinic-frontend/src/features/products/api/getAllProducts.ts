@@ -1,8 +1,19 @@
 import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
 
-export async function getAllProducts(): Promise<ProductModel[]> {
-  const res = await axiosInstance.get('/products', { responseType: 'stream' });
+export async function getAllProducts(
+  minPrice?: number,
+  maxPrice?: number
+): Promise<ProductModel[]> {
+  const params: Record<string, number> = {};
+  if (minPrice !== undefined && minPrice !== null) params.minPrice = minPrice;
+  if (maxPrice !== undefined && maxPrice !== null) params.maxPrice = maxPrice;
+
+  const res = await axiosInstance.get('/products', {
+    responseType: 'stream',
+    params,
+  });
+
   return res.data
     .split('data:')
     .map((dataChunk: string) => {
