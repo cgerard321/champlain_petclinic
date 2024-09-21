@@ -23,6 +23,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import nonapi.io.github.classgraph.json.Id;
 import org.springframework.core.io.Resource;
 import org.springframework.http.*;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -167,7 +168,7 @@ public class BFFApiGatewayController {
     }
 
     @IsUserSpecific(idToMatch = {"vetId"}, bypassRoles = {Roles.ADMIN})
-    @GetMapping(value = "bills/vet/{vetId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
+    @GetMapping(value = "bills/vets/{vetId}", produces= MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<BillResponseDTO> getBillsByVetId(final @PathVariable String vetId)
     {
         return billServiceClient.getBillsByVetId(vetId);
@@ -194,7 +195,7 @@ public class BFFApiGatewayController {
     }
 
     @IsUserSpecific(idToMatch = {"vetId"}, bypassRoles = {Roles.ADMIN})
-    @DeleteMapping(value = "bills/vet/{vetId}")
+    @DeleteMapping(value = "bills/vets/{vetId}")
     public Mono<ResponseEntity<Void>> deleteBillsByVetId(final @PathVariable String vetId){
         return billServiceClient.deleteBillsByVetId(vetId).then(Mono.just(ResponseEntity.noContent().<Void>build()))
                 .defaultIfEmpty(ResponseEntity.notFound().build());
@@ -571,10 +572,23 @@ public class BFFApiGatewayController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
-
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @GetMapping("/vets/firstName/{firstName}")
+    public Mono<ResponseEntity<VetResponseDTO>> getVetByFirstName(@PathVariable String firstName) {
+        return vetsServiceClient.getVetByFirstName(firstName)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @GetMapping("/vets/lastName/{lastName}")
+    public Mono<ResponseEntity<VetResponseDTO>> getVetByLastName(@PathVariable String lastName) {
+        return vetsServiceClient.getVetByLastName(lastName)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
+    }
     @IsUserSpecific(idToMatch = {"vetId"})
     @GetMapping("/vets/vetBillId/{vetId}")
-    public Mono<ResponseEntity<VetResponseDTO>> getVetByVetBillId(@PathVariable String vetBillId) {
+    public Mono<ResponseEntity<VetResponseDTO>> getVetByBillId(@PathVariable String vetBillId) {
         return vetsServiceClient.getVetByVetBillId(VetsEntityDtoUtil.verifyId(vetBillId))
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());

@@ -1,126 +1,135 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { IsAdmin, useUser } from '@/context/UserContext';
+import {
+  IsAdmin,
+  IsInventoryManager,
+  IsOwner,
+  IsVet,
+  useUser,
+} from '@/context/UserContext';
 import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
+import { useState } from 'react';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import { Navbar, Nav, NavDropdown, Container } from 'react-bootstrap';
 import './AppNavBar.css';
 
 export function NavBar(): JSX.Element {
   const { user } = useUser();
   const navigate = useNavigate();
+  const [navbarOpen, setNavbarOpen] = useState(false);
 
   const logoutUser = (): void => {
-    axiosInstance.post(axiosInstance.defaults.baseURL + 'logout').then(() => {
-      navigate(AppRoutePaths.login);
-      localStorage.removeItem('username');
-      localStorage.removeItem('email');
-      localStorage.removeItem('UUID');
-      localStorage.removeItem('roles');
-    });
+    axiosInstance
+      .post('http://localhost:8080/api/gateway/users/logout')
+      .then(() => {
+        navigate(AppRoutePaths.Login);
+        localStorage.removeItem('user');
+      });
+  };
+
+  const toggleNavbar = (): void => {
+    setNavbarOpen(prevNavbarOpen => !prevNavbarOpen);
   };
 
   return (
-    <nav className="navbar">
-      <a className="navbar-brand" href="#">
-        PetClinic
-      </a>
-
-      <div className="navbar-collapse" id="navbarSupportedContent">
-        {user ? (
-          <>
-            <ul className="navbar-nav">
-              <li className="nav-item active">
-                <Link className="nav-link" to={AppRoutePaths.Default}>
-                  Home
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to={AppRoutePaths.Vet}>
-                  Veterinarians
-                </Link>
-              </li>
-              <li className="nav-item dropdown">
-                <a
-                  className="nav-link dropdown-toggle"
-                  href="#"
-                  id="navbarDropdown"
-                  role="button"
-                  aria-haspopup="true"
-                  aria-expanded="false"
-                >
-                  Owners
-                </a>
-                <div className="dropdown-menu" aria-labelledby="navbarDropdown">
-                  <Link className="nav-link" to="">
-                    Owners
-                  </Link>
-                  <Link className="nav-link" to="">
-                    Edit Account
-                  </Link>
-                  <Link className="nav-link" to="">
-                    Pet Types
-                  </Link>
-                </div>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to={AppRoutePaths.CustomerBills}>
-                  Bills
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to={AppRoutePaths.Visits}>
-                  Visits
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to={AppRoutePaths.Inventories}>
-                  Inventories
-                </Link>
-              </li>
-              <li className="nav-item">
-                <Link className="nav-link" to={AppRoutePaths.Products}>
-                  Products
-                </Link>
-              </li>
-            </ul>
-            <ul className="navbar-nav justify-content-end">
-              <li className="nav-item">
-                <Link className="nav-link" to="">
-                  Welcome back {user.username}!
-                </Link>
-              </li>
-              {IsAdmin() && (
-                <li className="nav-item">
-                  <Link className="nav-link" to="">
+    <Navbar bg="light" expand="lg" className="navbar">
+      <Container>
+        <Navbar.Brand href={AppRoutePaths.Home}>PetClinic</Navbar.Brand>
+        <Navbar.Toggle aria-controls="basic-navbar-nav" onClick={toggleNavbar}>
+          <span className="navbar-toggler-icon"></span>
+        </Navbar.Toggle>
+        <Navbar.Collapse
+          id="basic-navbar-nav"
+          className={navbarOpen ? 'show' : ''}
+        >
+          <Nav className="me-auto">
+            <Nav.Link as={Link} to={AppRoutePaths.Home}>
+              Home
+            </Nav.Link>
+            {user.userId !== '' && (
+              <>
+                {(IsAdmin() || IsVet()) && (
+                  <Nav.Link as={Link} to={AppRoutePaths.Vet}>
+                    Veterinarians
+                  </Nav.Link>
+                )}
+                {(IsAdmin() || IsVet()) && (
+                  <NavDropdown title="Customers" id="owners-dropdown">
+                    <NavDropdown.Item as={Link} to={AppRoutePaths.AllCustomers}>
+                      Customers List
+                    </NavDropdown.Item>
+                    {IsAdmin() && (
+                      <NavDropdown.Item
+                        as={Link}
+                        to={AppRoutePaths.AddingCustomer}
+                      >
+                        Add Customer
+                      </NavDropdown.Item>
+                    )}
+                  </NavDropdown>
+                )}
+                {!IsInventoryManager() && (
+                  <Nav.Link as={Link} to={AppRoutePaths.CustomerBills}>
+                    Bills
+                  </Nav.Link>
+                )}
+                {(IsAdmin() || IsVet()) && (
+                  <Nav.Link as={Link} to={AppRoutePaths.Visits}>
+                    Visits
+                  </Nav.Link>
+                )}
+                {(IsInventoryManager() || IsAdmin()) && (
+                  <Nav.Link as={Link} to={AppRoutePaths.Inventories}>
+                    Inventories
+                  </Nav.Link>
+                )}
+                {!IsInventoryManager() && (
+                  <Nav.Link as={Link} to={AppRoutePaths.Products}>
+                    Products
+                  </Nav.Link>
+                )}
+              </>
+            )}
+          </Nav>
+          <Nav className="ms-auto">
+            {user.userId !== '' ? (
+              <NavDropdown title={`${user.username}`} id="user-dropdown">
+                <NavDropdown.Item as={Link} to={AppRoutePaths.Home}>
+                  Profile
+                </NavDropdown.Item>
+                {IsOwner() && (
+                  <NavDropdown.Item
+                    as={Link}
+                    to={AppRoutePaths.CustomerProfileEdit}
+                  >
+                    Edit Profile
+                  </NavDropdown.Item>
+                )}
+                {IsAdmin() && (
+                  <NavDropdown.Item as={Link} to={AppRoutePaths.Home}>
                     Admin-Panel
-                  </Link>
-                </li>
-              )}
-              <li className="nav-item">
-                <a
-                  className="nav-link"
+                  </NavDropdown.Item>
+                )}
+                <NavDropdown.Item
                   onClick={logoutUser}
                   style={{ cursor: 'pointer' }}
                 >
                   Logout
-                </a>
-              </li>
-            </ul>
-          </>
-        ) : (
-          <ul>
-            <li className="nav-item">
-              <Link className="nav-link" to="">
-                Signup
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to={AppRoutePaths.login}>
-                Login
-              </Link>
-            </li>
-          </ul>
-        )}
-      </div>
-    </nav>
+                </NavDropdown.Item>
+              </NavDropdown>
+            ) : (
+              <>
+                <Nav.Link as={Link} to={AppRoutePaths.Home}>
+                  Signup
+                </Nav.Link>
+                <Nav.Link as={Link} to={AppRoutePaths.Login}>
+                  Login
+                </Nav.Link>
+              </>
+            )}
+          </Nav>
+        </Navbar.Collapse>
+      </Container>
+    </Navbar>
   );
 }

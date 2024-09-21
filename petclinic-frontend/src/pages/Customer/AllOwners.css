@@ -1,6 +1,6 @@
 /* General layout for the table */
 .owners-container {
-  max-width: 900px;
+  max-width: 1400px;
   margin: 50px auto;
   padding: 20px;
   border: 1px solid #ccc;
@@ -82,4 +82,14 @@
   font-size: 0.8em;
   margin-top: 5px;
   font-family: 'Arial', sans-serif;
+}
+
+/*filter css */
+.owners-container input[type='text'] {
+  padding: 2px;
+  margin: 2px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+  box-sizing: border-box;
 }
