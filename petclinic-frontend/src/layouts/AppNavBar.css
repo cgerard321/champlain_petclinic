@@ -1,5 +1,4 @@
 .navbar {
-<<<<<<< HEAD
   background-color: #f8f9fa;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
@@ -70,78 +69,4 @@
     width: 100%;
     box-shadow: none;
   }
-=======
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.5rem 1rem;
-  background-color: #f8f9fa;
-}
-
-.navbar-brand {
-  font-size: 1.25rem;
-  color: #000;
-  text-decoration: none;
-}
-
-.navbar-collapse {
-  display: flex;
-  flex-basis: 90%;
-  flex-grow: 1;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.navbar-nav {
-  display: flex;
-  flex-direction: row;
-  padding-left: 0;
-  margin-bottom: 0;
-  list-style: none;
-}
-
-.nav-item {
-  margin-right: 1rem;
-}
-
-.nav-item.active .nav-link {
-  color: #0056b3;
-  font-weight: bold;
-}
-
-.nav-link {
-  display: block;
-  padding: 0.5rem 1rem;
-  color: #000;
-  text-decoration: none;
-}
-
-.nav-link:hover {
-  color: #0056b3;
-}
-
-.dropdown-menu {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  z-index: 1000;
-  display: none;
-  float: left;
-  min-width: 10rem;
-  padding: 0.5rem 0;
-  margin: 0.125rem 0 0;
-  font-size: 1rem;
-  color: #212529;
-  text-align: left;
-  list-style: none;
-  background-color: #fff;
-  background-clip: padding-box;
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  border-radius: 0.25rem;
-}
-
-.justify-content-end {
-  margin-left: auto;
->>>>>>> 14730eb4 (feat(INVT-CPC-1052): Fix Edit Inventory (#670))
 }
