@@ -83,11 +83,11 @@ export function NavBar(): JSX.Element {
                     Inventories
                   </Nav.Link>
                 )}
-                {!IsInventoryManager() && (
+                {
                   <Nav.Link as={Link} to={AppRoutePaths.Products}>
                     Products
                   </Nav.Link>
-                )}
+                }
               </>
             )}
           </Nav>
