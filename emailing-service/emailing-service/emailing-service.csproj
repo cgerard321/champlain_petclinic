@@ -27,5 +27,11 @@
     <ItemGroup>
         <InternalsVisibleTo Include="emailing-service-test" />
     </ItemGroup>
+    <ItemGroup>
+      <Folder Include="BackgroundTask\" />
+    </ItemGroup>
+    <ItemGroup>
+      <Compile Remove="BackgroundTask\RecurringJobService.cs" />
+    </ItemGroup>
 
 </Project>

@@ -54,6 +54,10 @@ public class EmailController : Controller
     [HttpPost("send")]
     public IActionResult SendEmail([FromBody] DirectEmailModel emailModel)
     {
+        if(emailModel ==null || emailModel.IsEmpty())
+        {
+            return NoContent();
+        }
         try
         {
             var result = _emailService.SendEmail(emailModel);

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -23,6 +24,7 @@ public class EmailControllerTests
     private readonly DirectEmailModel directEmailModel;
     public EmailControllerTests()
     {
+        EmailUtils.sendEmail = false;
         var applicationFactory = new WebApplicationFactory<Program>();
         _httpClient = applicationFactory.CreateClient();
         pathOfDefaultHtml = "<html><body>%%EMAIL_HEADERS%% %%EMAIL_BODY%% %%EMAIL_FOOTER%% %%EMAIL_NAME%% %%EMAIL_SENDER%%</body></html>";
@@ -118,6 +120,205 @@ public class EmailControllerTests
         Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
+    //let's have fun and test all the exceptions!
+    [Test]
+    public async Task SendEmail_EmailModelHasMissingBody_BadRequest()
+    {
+        EmailUtils.EmailTemplates.Add(new EmailTemplate("Default","<html><body>%%EMAIL_HEADERS%% %%EMAIL_BODY%% %%EMAIL_FOOTER%% %%EMAIL_NAME%% %%EMAIL_SENDER%%</body></html>"));
+
+        // Arrange
+        var emailModel = new DirectEmailModel(); // create an empty DirectEmailModel instance
+        var json = JsonConvert.SerializeObject(emailModel);
+
+        // Act
+        var request = new HttpRequestMessage(HttpMethod.Post, "email/send")
+        {
+            Content = new StringContent(json, Encoding.UTF8, "application/json")
+        };
+        var response = await _httpClient.SendAsync(request);
+
+        // Assert
+        Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+    public static IEnumerable<DirectEmailModel> InvalidBodyRequest()
+    {
+        yield return new DirectEmailModel(
+            "",
+            "This is a test email",
+            "Default",
+            "This is the emailHeader",
+            "This is the emailbody",
+            "this is the email footer",
+            "Felix",
+            "PetClinic"
+        );
+
+        yield return new DirectEmailModel(
+            " ",
+            "Another test email",
+            "Default",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            "CompanyXYZ"
+        );
+        yield return new DirectEmailModel(
+            null,
+            "Another test email",
+            "Default",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            "CompanyXYZ"
+        );
+        yield return new DirectEmailModel(
+            "exam@ple2@test.com",
+            "Another test email",
+            "Default",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            "CompanyXYZ"
+        );
+        yield return new DirectEmailModel(
+            "@test.com",
+            "Another test email",
+            "Default",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            "CompanyXYZ"
+        );
+        yield return new DirectEmailModel(
+            "example2@test",
+            "Another test email",
+            "Default",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            "CompanyXYZ"
+        );
+        yield return new DirectEmailModel(
+            "example2@tes@t.com",
+            "Another test email",
+            "Default",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            "CompanyXYZ"
+        );
+        yield return new DirectEmailModel(
+            "example2@test.com",
+            "",
+            "Default",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            "CompanyXYZ"
+        );
+        yield return new DirectEmailModel(
+            "example2@test.com",
+            "    ",
+            "Default",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            "CompanyXYZ"
+        );
+        yield return new DirectEmailModel(
+            "example2@test.com",
+            null,
+            "Default",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            "CompanyXYZ"
+        );
+    }
+    [Test, TestCaseSource(nameof(InvalidBodyRequest))]
+    public async Task SendEmail_EmailBodyIsInvalid_BadRequest(DirectEmailModel emailModel)
+    {
+        EmailUtils.EmailTemplates.Add(new EmailTemplate("Default","<html><body>%%EMAIL_HEADERS%% %%EMAIL_BODY%% %%EMAIL_FOOTER%% %%EMAIL_NAME%% %%EMAIL_SENDER%%</body></html>"));
+        
+        var json = JsonConvert.SerializeObject(emailModel);
+        // Act
+        var request = new HttpRequestMessage(HttpMethod.Post, "email/send")
+        {
+            Content = new StringContent(json, Encoding.UTF8, "application/json")
+        };
+        var response = await _httpClient.SendAsync(request);
+
+        // Assert
+        Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+    public static IEnumerable<DirectEmailModel> ValidBodyWithNonExistingTemplate()
+    {
+        yield return new DirectEmailModel(
+            "example@test.com",
+            "This is a test email",
+            "Example1",
+            "This is the emailHeader",
+            "This is the emailbody",
+            "this is the email footer",
+            "Felix",
+            "PetClinic"
+        );
+
+        yield return new DirectEmailModel(
+            "example@test.com",
+            "Another test email",
+            "Example2",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            "CompanyXYZ"
+        );
+        yield return new DirectEmailModel(
+            "example@test.com",
+            "Another test email",
+            "Example3",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            "CompanyXYZ"
+        );
+    }
+    [Test, TestCaseSource(nameof(ValidBodyWithNonExistingTemplate))]
+    public async Task SendEmail__BadRequest(DirectEmailModel emailModel)
+    {
+        //EmailUtils.EmailTemplates.Add(new EmailTemplate("Default","<html><body>%%EMAIL_HEADERS%% %%EMAIL_BODY%% %%EMAIL_FOOTER%% %%EMAIL_NAME%% %%EMAIL_SENDER%%</body></html>"));
+        
+        var json = JsonConvert.SerializeObject(emailModel);
+        // Act
+        var request = new HttpRequestMessage(HttpMethod.Post, "email/send")
+        {
+            Content = new StringContent(json, Encoding.UTF8, "application/json")
+        };
+        var response = await _httpClient.SendAsync(request);
+
+        // Assert
+        Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
+    }
+    
+
+
+    [TearDown]
+    public void AllTimeTearDown()
+    {
+        EmailUtils.EmailTemplates.Clear();
+    }
+    
     [OneTimeTearDown]
     public void TearDown()
     {

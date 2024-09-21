@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 using DotNetEnv;
-using emailing_service.BackgroundTask;
+//using emailing_service.BackgroundTask;
 using emailing_service.Models;
 using emailing_service.Utils;
 
@@ -72,7 +72,7 @@ catch (DirectoryNotFoundException e)
 
 // Add services to the container
 builder.Services.AddControllersWithViews();
-builder.Services.AddHostedService<RecurringJobService>();
+//builder.Services.AddHostedService<RecurringJobService>();
 
 var app = builder.Build();
 

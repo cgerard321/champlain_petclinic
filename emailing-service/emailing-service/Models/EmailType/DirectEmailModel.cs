@@ -26,4 +26,9 @@ public class DirectEmailModel
     public string Footer { get; set; }
     public string CorrespondantName { get; set; }
     public string SenderName { get; set; }
+    
+    public bool IsEmpty()
+    {
+        return GetType().GetProperties().All(p => p.GetValue(this) == null);
+    }
 }
