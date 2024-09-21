@@ -6,10 +6,7 @@ import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import java.util.Collections;
@@ -28,13 +25,12 @@ public class CartController {
     @GetMapping(value = "/{cartId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<CartResponseModel>> getCartByCartId(@PathVariable String cartId) {
         return Mono.just(cartId)
-                .filter(id -> id.length() == 36) // validate the cart id
+                .filter(id -> id.length() == 36)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided cart id is invalid: " + cartId)))
                 .flatMap(cartService::getCartByCartId)
                 .map(ResponseEntity::ok);
     }
 
-    // New endpoint to get the number of items in the cart
     @GetMapping("/{cartId}/count")
     public Mono<ResponseEntity<Map<String, Integer>>> getCartItemCount(@PathVariable String cartId) {
         return cartService.getCartItemCount(cartId)
@@ -42,4 +38,13 @@ public class CartController {
                 .switchIfEmpty(Mono.error(new NotFoundException("Cart not found for ID: " + cartId)));
     }
 
+    @PutMapping(value = "/{cartId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<CartResponseModel>> updateCartByCartId(@RequestBody Mono<CartRequestModel> cartRequestModel, @PathVariable String cartId){
+        return Mono.just(cartId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(Mono.error(new InvalidInputException("Provided cart id is invalid: " + cartId)))
+                .flatMap(id -> cartService.updateCartByCartId(cartRequestModel, id))
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
 }

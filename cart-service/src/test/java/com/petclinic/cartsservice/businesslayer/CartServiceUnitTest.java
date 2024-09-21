@@ -4,6 +4,7 @@ import com.petclinic.cartsservice.dataaccesslayer.Cart;
 import com.petclinic.cartsservice.dataaccesslayer.CartRepository;
 import com.petclinic.cartsservice.domainclientlayer.ProductClient;
 import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
+import com.petclinic.cartsservice.presentationlayer.CartRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,16 +13,22 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.beans.BeanUtils;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class CartServiceUnitTest {
@@ -35,13 +42,7 @@ class CartServiceUnitTest {
     @Mock
     private ProductClient productClient;
 
-    List<String> productIds = List.of("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223", "d819e4f4-25af-4d33-91e9-2c45f0071606");
 
-    private final Cart cart1 = Cart.builder()
-            .cartId("98f7b33a-d62a-420a-a84a-05a27c85fc91")
-            .productIds(productIds)
-            .customerId("1")
-            .build();
 
     private final ProductResponseModel product1 = ProductResponseModel.builder()
             .productId("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223")
@@ -57,8 +58,87 @@ class CartServiceUnitTest {
             .productSalePrice(50.00)
             .build();
 
+    private final ProductResponseModel product3 = ProductResponseModel.builder()
+            .productId("132d3c5e-dcaa-4a4f-a35e-b8acc37c51c1")
+            .productName("Collar")
+            .productDescription("The perfect collar for your pet")
+            .productSalePrice(20.00)
+            .build();
+
+    List<String> productIds = new ArrayList<>(List.of(product1.getProductId(), product2.getProductId()));
+
+    private final Cart cart1 = Cart.builder()
+            .cartId("98f7b33a-d62a-420a-a84a-05a27c85fc91")
+            .productIds(productIds)
+            .customerId("1")
+            .build();
+
     //UUID for non-existent cart
     private final String nonExistentCartId = "a7d573-bcab-4db3-956f-773324b92a80";
+
+    @Test
+    void whenUpdateCartById_thenReturnCartResponseModel(){
+        productIds.add(product3.getProductId());
+
+        Cart updatedCart = Cart.builder()
+                .id(cart1.getId())
+                .cartId(cart1.getCartId())
+                .customerId(cart1.getCustomerId())
+                .productIds(productIds)
+                .build();
+
+        CartRequestModel cartRequestModel = new CartRequestModel();
+        BeanUtils.copyProperties(updatedCart, cartRequestModel);
+
+        when(cartRepository.findCartByCartId(cart1.getCartId()))
+                .thenReturn(Mono.just(cart1));
+        when(productClient.getProductByProductId("9a29fff7-564a-4cc9-8fe1-36f6ca9bc223"))
+                .thenReturn(Mono.just(product1));
+        when(productClient.getProductByProductId("d819e4f4-25af-4d33-91e9-2c45f0071606"))
+                .thenReturn(Mono.just(product2));
+        when(productClient.getProductByProductId("132d3c5e-dcaa-4a4f-a35e-b8acc37c51c1"))
+                .thenReturn(Mono.just(product3));
+
+        when(cartRepository.save(any(Cart.class)))
+                .thenReturn(Mono.just(updatedCart));
+
+        Mono<CartResponseModel> result = cartService
+                .updateCartByCartId(Mono.just(cartRequestModel), cart1.getCartId());
+        StepVerifier
+                .create(result)
+                .assertNext(cartResponseModel -> {
+                    assertNotNull(cartResponseModel);
+                    assertNotNull(cartResponseModel.getCartId());
+                    assertEquals(updatedCart.getCartId(), cartResponseModel.getCartId());
+                    assertEquals(updatedCart.getProductIds().size(), cartResponseModel.getProducts().size());
+                })
+                .verifyComplete();
+
+        verify(cartRepository).findCartByCartId(cart1.getCartId());
+        verify(cartRepository).save(any(Cart.class));
+    }
+
+    @Test
+    void whenUpdateCartById_withNonExistentCartId_thenThrowNotFoundException(){
+        when(cartRepository.findCartByCartId(nonExistentCartId)).thenReturn(Mono.empty());
+        Cart updatedCart = Cart.builder()
+                .id(cart1.getId())
+                .cartId(cart1.getCartId())
+                .customerId(cart1.getCustomerId())
+                .productIds(productIds)
+                .build();
+
+        CartRequestModel cartRequestModel = new CartRequestModel();
+        BeanUtils.copyProperties(updatedCart, cartRequestModel);
+
+
+        Mono<CartResponseModel> result = cartService.updateCartByCartId(Mono.just(cartRequestModel), nonExistentCartId);
+        StepVerifier
+                .create(result)
+                .expectErrorMatches(throwable -> throwable instanceof NotFoundException
+                    && throwable.getMessage().equals("Cart id was not found: " + nonExistentCartId))
+                .verify();
+    }
 
     @Test
     public void whenGetCartById_thenReturnCartResponseModel() {

@@ -1,6 +1,7 @@
 package com.petclinic.customersservice.presentationlayer;
 
 import com.petclinic.customersservice.business.OwnerService;
+import com.petclinic.customersservice.customersExceptions.exceptions.InvalidInputException;
 import com.petclinic.customersservice.data.Owner;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,6 +12,7 @@ import java.util.Optional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -72,9 +74,14 @@ public class OwnerController {
         return ownerService.insertOwner(ownerMono);
     }
 
-    @DeleteMapping("/{ownerId}")
-    public Mono<Void> deleteOwnerByOwnerId(@PathVariable String ownerId) {
-        return ownerService.deleteOwner(ownerId);
+    @DeleteMapping(value = "/{ownerId}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<OwnerResponseDTO>> deleteOwnerByOwnerId(@PathVariable String ownerId){
+        return Mono.just(ownerId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(Mono.error(new InvalidInputException("Provided course id is invalid: " + ownerId)))
+                .flatMap(ownerService::deleteOwnerByOwnerId)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
     @PutMapping("/{ownerId}")
