@@ -8,9 +8,7 @@ import reactor.core.publisher.Mono;
 
 public interface CartService {
 
-    Mono<CartResponseModel> getCartByCartId(String cartId);
 
-    Mono<Integer> getCartItemCount(String cartId);
 
     Mono<CartResponseModel> updateCartByCartId(Mono<CartRequestModel> cartRequestModel, String cartId);
 }
