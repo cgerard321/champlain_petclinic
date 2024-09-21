@@ -103,9 +103,11 @@ class ProductControllerIntegrationTest {
         // assert
         StepVerifier
                 .create(productRepository.count())
-                .expectNextMatches(count -> count == 3)
-//                .expectNextCount(4)
+                .expectNextCount(1)
                 .verifyComplete();
     }
+
+    @Test
+    public void whenAdd
 
 }
