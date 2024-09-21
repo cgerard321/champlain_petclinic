@@ -290,6 +290,18 @@ public class VisitsServiceClient {
                 .bodyToMono(ReviewResponseDTO.class);
     }
 
+    public Mono<VisitResponseDTO> updateVisitByVisitId(String visitId,
+                                                       Mono<VisitRequestDTO> visitRequestDTO){
+        return visitRequestDTO.flatMap(requestDTO ->
+                webClient
+                        .put()
+                        .uri(reviewUrl + "/" + visitId)
+                        .body(BodyInserters.fromValue(requestDTO))
+                        .retrieve()
+                        .bodyToMono(VisitResponseDTO.class)
+        );
+    }
+
 
 
 
