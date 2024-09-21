@@ -25,14 +25,6 @@ export function NavBar(): JSX.Element {
         navigate(AppRoutePaths.Login);
         localStorage.removeItem('user');
       });
-
-    axiosInstance.post(axiosInstance.defaults.baseURL + 'logout').then(() => {
-      navigate(AppRoutePaths.Login);
-      localStorage.removeItem('username');
-      localStorage.removeItem('email');
-      localStorage.removeItem('UUID');
-      localStorage.removeItem('roles');
-    });
   };
 
   const toggleNavbar = (): void => {
