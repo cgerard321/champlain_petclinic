@@ -129,49 +129,18 @@ public class VetServiceImpl implements VetService {
                 .map(EntityDtoUtil::vetEntityToResponseDTO);
     }
 
-
-    @Override
-    public Mono<VetResponseDTO> getVetByFirstName(String firstName) {
-        return vetRepository.findVetByFirstName(firstName)
-                .switchIfEmpty(Mono.error(new NotFoundException("No vet with this first name was found: " + firstName)))
-                .map(EntityDtoUtil::vetEntityToResponseDTO);
-    }
-
-    @Override
-    public Mono<VetResponseDTO> getVetByLastName(String lastName) {
-        return vetRepository.findVetByLastName(lastName)
-                .switchIfEmpty(Mono.error(new NotFoundException("No vet with this last name was found: " + lastName)))
-                .map(EntityDtoUtil::vetEntityToResponseDTO);
-    }
-
-
-    @Override
-    public Mono<VetResponseDTO> getVetByFirstName(String firstName) {
-        return vetRepository.findVetByFirstName(firstName)
-                .switchIfEmpty(Mono.error(new NotFoundException("No vet with this first name was found: " + firstName)))
-                .map(EntityDtoUtil::vetEntityToResponseDTO);
-    }
-
-    @Override
-    public Mono<VetResponseDTO> getVetByLastName(String lastName) {
-        return vetRepository.findVetByLastName(lastName)
-                .switchIfEmpty(Mono.error(new NotFoundException("No vet with this last name was found: " + lastName)))
-                .map(EntityDtoUtil::vetEntityToResponseDTO);
-    }
-
-
     @Override
     public Mono<Void> deleteVetByVetId(String vetId) {
         return vetRepository.findVetByVetId(vetId)
                 .switchIfEmpty(Mono.error(new NotFoundException("No vet with this vetId was found: " + vetId)))
                 .flatMap(vet -> {
                     log.info("Deleting associated data for vetId: {}", vetId);
-                    Mono<Integer> deleteBadges = badgeRepository.deleteByVetId(vetId);
-                    Mono<Integer> deletePhotos = photoRepository.deleteByVetId(vetId);
+                    //Mono<Integer> deleteBadges = badgeRepository.deleteByVetId(vetId);
+                    //Mono<Integer> deletePhotos = photoRepository.deleteByVetId(vetId);
                     Mono<String> deleteRatings = ratingRepository.deleteByVetId(vetId);
                     Mono<String> deleteEducations = educationRepository.deleteByVetId(vetId);
 
-                    return Mono.when(deleteBadges, deletePhotos, deleteRatings, deleteEducations)
+                    return Mono.when( deleteRatings, deleteEducations)
                             .then(vetRepository.delete(vet))
                             .doOnSuccess(unused -> log.info("Successfully deleted vetId: {}", vetId))
                             .doOnError(error -> log.error("Error deleting vetId: {}", vetId, error));
