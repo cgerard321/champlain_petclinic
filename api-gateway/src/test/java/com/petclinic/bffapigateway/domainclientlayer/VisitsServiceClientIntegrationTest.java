@@ -179,7 +179,8 @@ class VisitsServiceClientIntegrationTest {
                 "1",
                 "f470653d-05c5-4c45-b7a0-7d70f003d2ac",
                 "testJwtToken",
-                "2"
+                "2",
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
         );
 
         // Mock the server response
@@ -224,7 +225,8 @@ class VisitsServiceClientIntegrationTest {
                 "1",
                 "f470653d-05c5-4c45-b7a0-7d70f003d2ac",
                 "testJwtToken",
-                "2"
+                "2",
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
         );
 
         String errorMessage = "{\"message\":\"A visit with the same time already exists.\"}";
@@ -253,7 +255,8 @@ class VisitsServiceClientIntegrationTest {
                 "1",
                 "f470653d-05c5-4c45-b7a0-7d70f003d2ac",
                 "testJwtToken",
-                "2"
+                "2",
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
         );
 
         String errorMessage = "{\"message\":\"Visit not found.\"}";
@@ -282,7 +285,8 @@ class VisitsServiceClientIntegrationTest {
                 "1",
                 "f470653d-05c5-4c45-b7a0-7d70f003d2ac",
                 "testJwtToken",
-                "2"
+                "2",
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
         );
 
         String errorMessage = "{\"message\":\"Invalid request.\"}";
@@ -311,7 +315,8 @@ class VisitsServiceClientIntegrationTest {
                 "1",
                 "f470653d-05c5-4c45-b7a0-7d70f003d2ac",
                 "testJwtToken",
-                "2"
+                "2",
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
         );
 
         // Mock the server error response with a bad request status and non-JSON body, which should trigger an IOException during parsing
@@ -701,6 +706,47 @@ class VisitsServiceClientIntegrationTest {
                 .expectNextMatches(review -> review.getReviewId().equals(REVIEW_ID) && review.getRating() == 4)
                 .verifyComplete();
     }
+
+    //add visit
+    @Test
+    void addVisit_Valid() throws JsonProcessingException {
+        // Arrange
+        VisitRequestDTO visitRequestDTO = new VisitRequestDTO(
+                LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
+                "Routine Check-up",
+                "1", // Pet ID
+                "practitionerId", // Practitioner ID
+                "jwtToken", // JWT Token
+                "ownerId",
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
+        );
+
+        VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
+                .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .description("Routine Check-up")
+                .petId("1")
+                .practitionerId("practitionerId")
+                .vetFirstName("John")
+                .vetLastName("Doe")
+                .status(Status.UPCOMING)
+                .build();
+
+        // Mock the server response
+        server.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(visitResponseDTO)));
+
+        // Act
+        Mono<VisitRequestDTO> requestMono = Mono.just(visitRequestDTO); // Wrap VisitRequestDTO in Mono
+        Mono<VisitResponseDTO> resultMono = visitsServiceClient.addVisit(requestMono); // Call addVisit with Mono
+
+        // Assert
+        StepVerifier.create(resultMono)
+                .expectNextMatches(visitResponse -> visitResponse.getVisitId().equals(visitResponseDTO.getVisitId()))
+                .verifyComplete();
+    }
+
 
 
     @Test

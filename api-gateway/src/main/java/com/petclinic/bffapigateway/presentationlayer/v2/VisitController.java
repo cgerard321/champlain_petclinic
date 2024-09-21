@@ -82,26 +82,4 @@ public class VisitController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
-    @PostMapping(value = "/pets/{petId}/visits", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<VisitResponseDTO>> createVisitForPet(
-            @PathVariable String petId,
-            @RequestBody VisitRequestDTO visitRequestDTO) {
-
-        return Mono.just(petId)
-                .switchIfEmpty(Mono.error(new InvalidInputException("Provided pet ID is invalid: " + petId)))
-                .flatMap(id -> {
-                    visitRequestDTO.setPetId(id); // Assuming setPetId method exists in VisitRequestDTO
-                    return visitsServiceClient.createVisitForPet(visitRequestDTO);
-                })
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
-    }
-
-
-
-    //add more endpoints here
-
-
 }

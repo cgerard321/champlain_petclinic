@@ -25,8 +25,9 @@ public class VisitRequestDTO {
     private Status status;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime visitEndDate;
+    private String visitId;
 
-    public VisitRequestDTO(LocalDateTime now, String description, String petId, String ownerId, String jwtToken, String practitionerId) {
+    public VisitRequestDTO(LocalDateTime now, String description, String petId, String ownerId, String jwtToken, String practitionerId, String visitId) {
         this.visitStartDate = now;
         this.description = description;
         this.petId =  petId;
@@ -34,5 +35,6 @@ public class VisitRequestDTO {
         this.jwtToken = jwtToken;
         this.practitionerId = practitionerId;
         this.status = Status.UPCOMING;
+        this.visitId = visitId;
     }
 }
