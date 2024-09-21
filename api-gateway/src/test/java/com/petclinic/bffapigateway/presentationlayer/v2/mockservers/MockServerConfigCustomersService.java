@@ -1,6 +1,5 @@
 package com.petclinic.bffapigateway.presentationlayer.v2.mockservers;
 
-import com.petclinic.bffapigateway.dtos.CustomerDTOs.OwnerResponseDTO;
 import org.mockserver.client.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
 
@@ -69,32 +68,6 @@ public class MockServerConfigCustomersService {
                                 .withBody(json(responseBody))
                 );
     }
-
-    public void registerDeleteOwnerEndpoint() {
-        OwnerResponseDTO ownerResponse = new OwnerResponseDTO();
-        ownerResponse.setOwnerId("e6c7398e-8ac4-4e10-9ee0-03ef33f0361a");
-        ownerResponse.setFirstName("Betty");
-        ownerResponse.setLastName("Davis");
-        ownerResponse.setAddress("638 Cardinal Ave.");
-        ownerResponse.setCity("Sun Prairie");
-        ownerResponse.setProvince("Quebec");
-        ownerResponse.setTelephone("6085551749");
-
-        mockServerClient_CustomersService
-                .when(
-                        request()
-                                .withMethod("DELETE")
-                                .withPath("/owners/e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
-                )
-                .respond(
-                        response()
-                                .withStatusCode(200)  // Change to 200 OK since we are returning a response body
-                                .withBody(json(ownerResponse))  // Return the OwnerResponseDTO as JSON
-                                .withHeader("Content-Type", "application/json")
-                );
-    }
-
-
 
     public void stopMockServer() {
         if(clientAndServer != null)

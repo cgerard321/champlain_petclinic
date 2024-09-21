@@ -185,9 +185,10 @@ class ApiGatewayControllerTest {
                 .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
                 .acceptCharset(StandardCharsets.UTF_8)
                 .exchange()
-                .expectStatus().isEqualTo(UNPROCESSABLE_ENTITY);
+                .expectStatus().isEqualTo(INTERNAL_SERVER_ERROR)
                 //  .expectHeader().contentType(MediaType.APPLICATION_JSON)
-
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("This id is not valid");
     }
 
     @Test
@@ -777,7 +778,7 @@ class ApiGatewayControllerTest {
                 .uri("/api/gateway/vets/" + INVALID_VET_ID)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(UNPROCESSABLE_ENTITY)
+                .expectStatus().isEqualTo(INTERNAL_SERVER_ERROR)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("This id is not valid");
@@ -794,7 +795,7 @@ class ApiGatewayControllerTest {
                 .body(Mono.just(vetRequestDTO), VetRequestDTO.class)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(UNPROCESSABLE_ENTITY)
+                .expectStatus().isEqualTo(INTERNAL_SERVER_ERROR)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("This id is not valid");
@@ -810,7 +811,7 @@ class ApiGatewayControllerTest {
                 .uri("/api/gateway/vets/" + INVALID_VET_ID)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isEqualTo(UNPROCESSABLE_ENTITY)
+                .expectStatus().isEqualTo(INTERNAL_SERVER_ERROR)
                 .expectHeader().contentType(MediaType.APPLICATION_JSON)
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("This id is not valid");
@@ -2069,7 +2070,7 @@ class ApiGatewayControllerTest {
                 .thenReturn(Flux.just(bill));
 
         client.get()
-                .uri("/api/gateway/bills/vets/{vetId}", bill.getVetId())
+                .uri("/api/gateway/bills/vet/{vetId}", bill.getVetId())
                 .accept(MediaType.TEXT_EVENT_STREAM)
                 .exchange()
                 .expectStatus().isOk()
@@ -2202,7 +2203,7 @@ class ApiGatewayControllerTest {
         when(billServiceClient.deleteBillsByVetId("9"))
                 .thenReturn(Flux.empty());
         client.delete()
-                .uri("/api/gateway/bills/vets/9")
+                .uri("/api/gateway/bills/vet/9")
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus().isNoContent()

@@ -263,5 +263,4 @@ public class InventoryServiceClient {
                 .onStatus(HttpStatusCode::is4xxClientError, resp -> rethrower.rethrow(resp, ex -> new NotFoundException(ex.get("message").toString())))
                 .bodyToMono(Void.class);
     }
-
 }

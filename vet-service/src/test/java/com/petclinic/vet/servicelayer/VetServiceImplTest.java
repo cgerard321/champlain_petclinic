@@ -70,7 +70,7 @@ class VetServiceImplTest {
 
     @Test
     void createVet() {
-        vetService.addVet(Mono.just(vetRequestDTO))
+        vetService.insertVet(Mono.just(vetRequestDTO))
                 .map(vetDTO1 -> {
                     assertEquals(vetDTO1.getVetId(), vetRequestDTO.getVetId());
                     assertEquals(vetDTO1.getEmail(), vetRequestDTO.getEmail());

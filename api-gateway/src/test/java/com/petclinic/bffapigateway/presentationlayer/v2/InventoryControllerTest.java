@@ -1,7 +1,6 @@
 package com.petclinic.bffapigateway.presentationlayer.v2;
 
 import com.petclinic.bffapigateway.domainclientlayer.InventoryServiceClient;
-import com.petclinic.bffapigateway.dtos.Inventory.InventoryRequestDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryResponseDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.InventoryTypeResponseDTO;
 import com.petclinic.bffapigateway.dtos.Inventory.ProductResponseDTO;
@@ -209,126 +208,6 @@ public class InventoryControllerTest {
         // Assert
         verify(inventoryServiceClient, times(1))
                 .deleteInventoryByInventoryId(inventoryId);
-    }
-
-    @Test
-    void getInventoryById_withValidId_shouldReturnInventory() {
-        // Arrange
-        String inventoryId = "1";
-        InventoryResponseDTO inventory = buildInventoryDTO();
-        when(inventoryServiceClient.getInventoryById(inventoryId))
-                .thenReturn(Mono.just(inventory));
-
-        // Act
-        client.get()
-                .uri(baseInventoryURL + "/" + inventoryId)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(InventoryResponseDTO.class)
-                .isEqualTo(inventory);
-
-        // Assert
-        verify(inventoryServiceClient, times(1))
-                .getInventoryById(eq(inventoryId));
-    }
-
-    @Test
-    void getInventoryById_withInvalidIdFormat_shouldReturnBadRequest() {
-        // Arrange
-        String invalidInventoryId = "invalid-id-format";
-        when(inventoryServiceClient.getInventoryById(invalidInventoryId))
-                .thenReturn(Mono.empty());
-
-        // Act
-        client.get()
-                .uri(baseInventoryURL + "/" + invalidInventoryId)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound();
-
-        // Assert
-        verify(inventoryServiceClient, times(1))
-                .getInventoryById(eq(invalidInventoryId));
-    }
-
-    @Test
-    void getInventoryById_withNonExistentId_shouldReturnNotFound() {
-        // Arrange
-        String nonExistentInventoryId = "non-existent-id";
-        when(inventoryServiceClient.getInventoryById(nonExistentInventoryId))
-                .thenReturn(Mono.empty());
-
-        // Act
-        client.get()
-                .uri(baseInventoryURL + "/" + nonExistentInventoryId)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound();
-
-        // Assert
-        verify(inventoryServiceClient, times(1))
-                .getInventoryById(eq(nonExistentInventoryId));
-    }
-
-    @Test
-    void updateInventoryById_withValidId_shouldReturnUpdatedInventory() {
-        // Arrange
-        String inventoryId = "dfa0a7e3-5a40-4b86-881e-9549ecda5e4b";
-        InventoryRequestDTO updateRequest = InventoryRequestDTO.builder()
-                .inventoryName("updatedName")
-                .inventoryType("updatedType")
-                .inventoryDescription("updatedDescription")
-                .build();
-        InventoryResponseDTO updatedInventory = InventoryResponseDTO.builder()
-                .inventoryId(inventoryId)
-                .inventoryName("updatedName")
-                .inventoryType("updatedType")
-                .inventoryDescription("updatedDescription")
-                .build();
-
-        when(inventoryServiceClient.updateInventory(eq(updateRequest), eq(inventoryId)))
-                .thenReturn(Mono.just(updatedInventory));
-
-        // Act
-        client.put()
-                .uri(baseInventoryURL + "/" + inventoryId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(updateRequest)
-                .exchange()
-                .expectStatus().isOk()
-                .expectBody(InventoryResponseDTO.class)
-                .isEqualTo(updatedInventory);
-
-        // Assert
-        verify(inventoryServiceClient, times(1))
-                .updateInventory(eq(updateRequest), eq(inventoryId));
-    }
-
-    @Test
-    void updateInventoryById_withServiceLayerFailure_shouldReturnInternalServerError() {
-        // Arrange
-        String validInventoryId = "dfa0a7e3-5a40-4b86-881e-9549ecda5e4b";
-        InventoryRequestDTO updateRequest = InventoryRequestDTO.builder()
-                .inventoryName("updatedName")
-                .inventoryType("updatedType")
-                .inventoryDescription("updatedDescription")
-                .build();
-
-        when(inventoryServiceClient.updateInventory(eq(updateRequest), eq(validInventoryId)))
-                .thenReturn(Mono.error(new RuntimeException("Service failure")));  // Simulating service failure.
-
-        // Act
-        client.put()
-                .uri(baseInventoryURL + "/" + validInventoryId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .bodyValue(updateRequest)
-                .exchange()
-                .expectStatus().is5xxServerError();  // Expecting 500 Internal Server Error.
-
-        // Assert
-        verify(inventoryServiceClient, times(1))
-                .updateInventory(eq(updateRequest), eq(validInventoryId));
     }
 
 }

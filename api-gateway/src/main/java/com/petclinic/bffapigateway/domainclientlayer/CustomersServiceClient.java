@@ -254,14 +254,6 @@ public class CustomersServiceClient {
                 .bodyToMono(OwnerResponseDTO.class);
     }
 
-
-    public Mono<OwnerResponseDTO> deleteOwnerV2(final String ownerId) {
-        return webClientBuilder.build().delete()
-                .uri(customersServiceUrl +"/owners/"+ ownerId)
-                .retrieve()
-                .bodyToMono(OwnerResponseDTO.class);
-    }
-
     public Mono<String> setOwnerPhoto(PhotoDetails file, int id) {
         return webClientBuilder.build().post()
                 .uri(customersServiceUrl + "/photo/" + id)

@@ -13,7 +13,6 @@ package com.petclinic.vet.servicelayer;
 
 import com.petclinic.vet.dataaccesslayer.Photo;
 import com.petclinic.vet.dataaccesslayer.PhotoRepository;
-import com.petclinic.vet.dataaccesslayer.Vet;
 import com.petclinic.vet.dataaccesslayer.VetRepository;
 import com.petclinic.vet.dataaccesslayer.badges.Badge;
 import com.petclinic.vet.dataaccesslayer.badges.BadgeRepository;
@@ -53,12 +52,55 @@ public class VetServiceImpl implements VetService {
     }
 
     @Override
-    public Mono<VetResponseDTO> addVet(Mono<VetRequestDTO> vetDTOMono) {
+    public Mono<VetResponseDTO> insertVet(Mono<VetRequestDTO> vetDTOMono) {
         return vetDTOMono
-                .flatMap(this::validateVetRequestDTO)
-                .flatMap(this::handleDefaultPhoto)
+                .flatMap(requestDTO->{
+                    if(requestDTO.getFirstName().length()>30||requestDTO.getFirstName().length()<2)
+                        return Mono.error(new InvalidInputException("firstName length should be between 2 and 30 characters: "+requestDTO.getFirstName()));
+                    if(requestDTO.getLastName().length()>30||requestDTO.getLastName().length()<2)
+                        return Mono.error(new InvalidInputException("lastName length should be between 2 and 30 characters: "+requestDTO.getLastName()));
+                    if(requestDTO.getPhoneNumber().length()!=20)
+                        return Mono.error(new InvalidInputException("phoneNumber length not equal to 20 characters: "+requestDTO.getPhoneNumber()));
+                    if(requestDTO.getEmail().length()<6||requestDTO.getEmail().length()>320)
+                        return Mono.error(new InvalidInputException("email length should be between 6 and 320 characters: "+requestDTO.getEmail()));
+                    if(requestDTO.getResume().length()<10)
+                        return Mono.error(new InvalidInputException("resume length should be more than 10 characters: "+requestDTO.getResume()));
+                    if(requestDTO.getSpecialties()==null)
+                        return Mono.error(new InvalidInputException("invalid specialties"));
+                    return Mono.just(requestDTO);
+                })
+                .flatMap(vet -> {
+                    if(vet.isPhotoDefault()){
+
+                        String defaultPhotoName = "vet_default.jpg";
+                        Photo photo = Photo.builder()
+                                .vetId(vet.getVetId())
+                                .filename(defaultPhotoName)
+                                .imgType("image/jpeg")
+                                .data(loadImage("images/vet_default.jpg"))
+                                .build();
+
+                         return photoRepository.save(photo)
+                                 .zipWith(Mono.just(vet))
+                                .map(tuple -> tuple.getT2());
+                    }
+                    return Mono.just(vet);
+                })
                 .map(EntityDtoUtil::vetRequestDtoToEntity)
-                .flatMap(this::assignBadgeAndSaveBadgeAndVet)
+                .flatMap(newVet -> {
+                    Badge badge = Badge.builder()
+                            .vetId(newVet.getVetId())
+                            .badgeTitle(BadgeTitle.VALUED)
+                            .badgeDate(String.valueOf(LocalDate.now().getYear()))
+                            .data(loadImage("images/empty_food_bowl.png"))
+                            .build();
+
+                    //combine results of two Mono operations, creating a Tuple2
+                    //extract vet from it
+                    return badgeRepository.save(badge)
+                            .zipWith(vetRepository.save(newVet))
+                            .map(tuple -> tuple.getT2());
+                })
                 .map(EntityDtoUtil::vetEntityToResponseDTO);
     }
 
@@ -110,21 +152,6 @@ public class VetServiceImpl implements VetService {
     }
 
     @Override
-    public Mono<VetResponseDTO> getVetByFirstName(String firstName) {
-        return vetRepository.findVetByFirstName(firstName)
-                .switchIfEmpty(Mono.error(new NotFoundException("No vet with this first name was found: " + firstName)))
-                .map(EntityDtoUtil::vetEntityToResponseDTO);
-    }
-
-    @Override
-    public Mono<VetResponseDTO> getVetByLastName(String lastName) {
-        return vetRepository.findVetByLastName(lastName)
-                .switchIfEmpty(Mono.error(new NotFoundException("No vet with this last name was found: " + lastName)))
-                .map(EntityDtoUtil::vetEntityToResponseDTO);
-    }
-
-
-    @Override
     public Mono<Void> deleteVetByVetId(String vetId) {
         return vetRepository.findVetByVetId(vetId)
                 .switchIfEmpty(Mono.error(new NotFoundException("No vet with this vetId was found: " + vetId)))
@@ -138,49 +165,6 @@ public class VetServiceImpl implements VetService {
         } catch (IOException io) {
             throw new InvalidInputException("Picture does not exist: " + io.getMessage());
         }
-    }
-
-    private Mono<VetRequestDTO> validateVetRequestDTO(VetRequestDTO requestDTO) {
-        if(requestDTO.getFirstName().length()>30||requestDTO.getFirstName().length()<2)
-            return Mono.error(new InvalidInputException("firstName length should be between 2 and 20 characters: "+requestDTO.getFirstName()));
-        if(requestDTO.getLastName().length()>30||requestDTO.getLastName().length()<2)
-            return Mono.error(new InvalidInputException("lastName length should be between 2 and 20 characters: "+requestDTO.getLastName()));
-        if(requestDTO.getPhoneNumber().length()!=20)
-            return Mono.error(new InvalidInputException("phoneNumber length not equal to 20 characters: "+requestDTO.getPhoneNumber()));
-        if(requestDTO.getEmail().length()<6||requestDTO.getEmail().length()>320)
-            return Mono.error(new InvalidInputException("email length should be between 6 and 320 characters: "+requestDTO.getEmail()));
-        if(requestDTO.getResume().length()<10)
-            return Mono.error(new InvalidInputException("resume length should be more than 10 characters: "+requestDTO.getResume()));
-        if(requestDTO.getSpecialties()==null)
-            return Mono.error(new InvalidInputException("invalid specialties"));
-        return Mono.just(requestDTO);
-    }
-
-    private Mono<VetRequestDTO> handleDefaultPhoto(VetRequestDTO vet) {
-        if (vet.isPhotoDefault()) {
-            Photo photo = Photo.builder()
-                    .vetId(vet.getVetId())
-                    .filename("vet_default.jpg")
-                    .imgType("image/jpeg")
-                    .data(loadImage("images/vet_default.jpg"))
-                    .build();
-            return photoRepository.save(photo)
-                    .thenReturn(vet);
-        }
-        return Mono.just(vet);
-    }
-
-    private Mono<Vet> assignBadgeAndSaveBadgeAndVet(Vet vetEntity) {
-        Badge assignedBadge = Badge.builder()
-                .vetId(vetEntity.getVetId())
-                .badgeTitle(BadgeTitle.VALUED)
-                .badgeDate(String.valueOf(LocalDate.now().getYear()))
-                .data(loadImage("images/empty_food_bowl.png"))
-                .build();
-
-        return badgeRepository.save(assignedBadge)
-                .zipWith(vetRepository.save(vetEntity))
-                .map(tuple -> tuple.getT2());
     }
 
 }

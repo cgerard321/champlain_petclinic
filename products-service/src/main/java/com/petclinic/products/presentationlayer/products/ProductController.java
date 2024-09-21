@@ -1,7 +1,6 @@
 package com.petclinic.products.presentationlayer.products;
 
 import com.petclinic.products.businesslayer.products.ProductService;
-import com.petclinic.products.utils.EntityModelUtil;
 import com.petclinic.products.utils.exceptions.InvalidInputException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -21,10 +20,8 @@ public class ProductController {
     }
 
     @GetMapping(value = "", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ProductResponseModel> getAllProducts(
-            @RequestParam(required = false) Double minPrice,
-            @RequestParam(required = false) Double maxPrice) {
-        return productService.getAllProducts(minPrice, maxPrice);
+    public Flux<ProductResponseModel> getAllProducts() {
+        return productService.getAllProducts();
     }
 
     @GetMapping(value = "/{productId}", produces = MediaType.APPLICATION_JSON_VALUE)

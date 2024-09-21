@@ -1,95 +1,85 @@
 /* General layout for the table */
 .owners-container {
-  max-width: 1400px;
-  margin: 50px auto;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  background-color: #ffffff;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    max-width: 900px;
+    margin: 50px auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #ffffff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .owners-container h1 {
-  text-align: center;
-  margin-bottom: 20px;
-  color: #333;
-  font-family: 'Arial', sans-serif;
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+    font-family: 'Arial', sans-serif;
 }
 
 /* Table styling */
 .owners-container table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 20px;
-  font-family: 'Arial', sans-serif;
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    font-family: 'Arial', sans-serif;
 }
 
 .owners-container th,
 .owners-container td {
-  padding: 12px 15px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
-  font-size: 16px;
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    font-size: 16px;
 }
 
 .owners-container th {
-  background-color: #f4f4f4;
-  color: #555;
+    background-color: #f4f4f4;
+    color: #555;
 }
 
 .owners-container tr:hover {
-  background-color: #f9f9f9;
+    background-color: #f9f9f9;
 }
 
 /* Alternate row background for better readability */
 .owners-container tbody tr:nth-child(even) {
-  background-color: #f2f2f2;
+    background-color: #f2f2f2;
 }
 
 /* Responsive table on smaller screens */
 @media screen and (max-width: 768px) {
-  .owners-container table {
-    width: 100%;
-    font-size: 14px;
-  }
+    .owners-container table {
+        width: 100%;
+        font-size: 14px;
+    }
 
-  .owners-container th,
-  .owners-container td {
-    padding: 10px;
-  }
+    .owners-container th,
+    .owners-container td {
+        padding: 10px;
+    }
 }
 
 /* Buttons and hover effects */
 .owners-container button {
-  padding: 10px 20px;
-  background-color: #28a745;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-family: 'Arial', sans-serif;
-  font-size: 14px;
-  transition: background-color 0.3s ease;
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: 'Arial', sans-serif;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
 }
 
 .owners-container button:hover {
-  background-color: #218838;
+    background-color: #218838;
 }
 
 /* Error styling */
 .error {
-  color: red;
-  font-size: 0.8em;
-  margin-top: 5px;
-  font-family: 'Arial', sans-serif;
-}
-
-/*filter css */
-.owners-container input[type='text'] {
-  padding: 2px;
-  margin: 2px 0;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  width: 100%;
-  box-sizing: border-box;
+    color: red;
+    font-size: 0.8em;
+    margin-top: 5px;
+    font-family: 'Arial', sans-serif;
 }

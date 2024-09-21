@@ -39,16 +39,16 @@ class OwnerControllerIntegrationTest {
 
 
 
-//    @Test
-//    void deleteOwnerByOwnerId() {
-//        repo.save(ownerEntity);
-//        Publisher<Void> setup = repo.deleteById(OWNER_ID);
-//        StepVerifier.create(setup).expectNextCount(0).verifyComplete();
-//        client.delete().uri("/owners/" + OWNER_ID)
-//                .accept(MediaType.APPLICATION_JSON)
-//                .exchange().expectStatus().isOk().expectBody();
-//
-//    }
+    @Test
+    void deleteOwnerByOwnerId() {
+        repo.save(ownerEntity);
+        Publisher<Void> setup = repo.deleteById(OWNER_ID);
+        StepVerifier.create(setup).expectNextCount(0).verifyComplete();
+        client.delete().uri("/owners/" + OWNER_ID)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange().expectStatus().isOk().expectBody();
+
+    }
 
 
 

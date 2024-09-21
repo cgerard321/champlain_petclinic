@@ -1,15 +1,12 @@
 package com.petclinic.visits.visitsservicenew.PresentationLayer;
 
 
-import com.petclinic.visits.visitsservicenew.BusinessLayer.Review.ReviewService;
 import com.petclinic.visits.visitsservicenew.BusinessLayer.VisitService;
 import com.petclinic.visits.visitsservicenew.DataLayer.Status;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.SpecialtyDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.VetDTO;
 import com.petclinic.visits.visitsservicenew.DomainClientLayer.Workday;
 import com.petclinic.visits.visitsservicenew.Exceptions.NotFoundException;
-import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewRequestDTO;
-import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewResponseDTO;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,9 +29,6 @@ import static org.mockito.Mockito.*;
 class VisitControllerUnitTest {
     @MockBean
     private VisitService visitService;
-
-    @MockBean
-   private ReviewService reviewService;
 
     @Autowired
     private WebTestClient webTestClient;
@@ -315,199 +309,6 @@ class VisitControllerUnitTest {
                 .practitionerId(vetId)
                 .status(Status.UPCOMING)
                 .build();
-    }
-
-
-
-
-
-
-    @Test
-    public void whenGetAllReview_returnReviewResponseDTO(){
-        ReviewResponseDTO reviewResponseDTO1= ReviewResponseDTO.builder()
-                .reviewId(UUID.randomUUID().toString())
-                .rating(5)
-                .reviewerName("Zako")
-                .review("Very good")
-                .dateSubmitted(LocalDateTime.now())
-                .build();
-
-        ReviewResponseDTO reviewResponseDTO2= ReviewResponseDTO.builder()
-                .reviewId(UUID.randomUUID().toString())
-                .rating(2)
-                .reviewerName("Zako2")
-                .review("Very bad")
-                .dateSubmitted(LocalDateTime.now())
-                .build();
-
-        when(reviewService.GetAllReviews()).thenReturn(Flux.just(reviewResponseDTO1, reviewResponseDTO2));
-
-
-        // Act & Assert
-        webTestClient
-                .get()
-                .uri("/visits/reviews")
-                .accept(MediaType.TEXT_EVENT_STREAM)  // Use TEXT_EVENT_STREAM instead of JSON
-                .exchange()
-                .expectStatus().isOk()  // Expect 200 OK
-                .expectHeader().contentTypeCompatibleWith(MediaType.TEXT_EVENT_STREAM)  // Expect TEXT_EVENT_STREAM
-                .expectBodyList(ReviewResponseDTO.class)  // Expect a list of CourseResponseModel
-                .hasSize(2)
-                .contains(reviewResponseDTO1, reviewResponseDTO2);
-
-        verify(reviewService, times(1)).GetAllReviews();
-
-    }
-
-
-    @Test
-    public void whenGetReviewById_returnReviewResponseDTO(){
-
-        String reviewId= UUID.randomUUID().toString();
-        ReviewResponseDTO reviewResponseDTO1= ReviewResponseDTO.builder()
-                .reviewId(reviewId)
-                .rating(5)
-                .reviewerName("Zako")
-                .review("Very good")
-                .dateSubmitted(LocalDateTime.now())
-                .build();
-
-        ReviewResponseDTO reviewResponseDTO2= ReviewResponseDTO.builder()
-                .reviewId(UUID.randomUUID().toString())
-                .rating(2)
-                .reviewerName("Zako2")
-                .review("Very bad")
-                .dateSubmitted(LocalDateTime.now())
-                .build();
-
-        when(reviewService.GetReviewByReviewId(reviewId)).thenReturn(Mono.just(reviewResponseDTO1));
-
-
-        // Act & Assert
-        webTestClient
-                .get()
-                .uri("/visits/reviews/" + reviewId)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()  // Expect 200 OK
-                .expectHeader().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
-                .expectBody(ReviewResponseDTO.class)
-                .isEqualTo(reviewResponseDTO1);
-
-        verify(reviewService, times(1)).GetReviewByReviewId(reviewId);
-
-    }
-
-    @Test
-    public void whenAddReview_returnReviewResponseDTO(){
-        String reviewId= UUID.randomUUID().toString();
-        ReviewResponseDTO reviewResponseDTO1= ReviewResponseDTO.builder()
-                .reviewId(reviewId)
-                .rating(5)
-                .reviewerName("Zako")
-                .review("Very good")
-                .dateSubmitted(LocalDateTime.now())
-                .build();
-
-        ReviewRequestDTO reviewRequestDTO= ReviewRequestDTO.builder()
-                .rating(2)
-                .reviewerName("Zako2")
-                .review("Very bad")
-                .dateSubmitted(LocalDateTime.now())
-                .build();
-
-        when(reviewService.AddReview(any(Mono.class))).thenReturn(Mono.just(reviewResponseDTO1));
-        webTestClient
-                .post()
-                .uri("/visits/reviews")
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(Mono.just(reviewRequestDTO), ReviewRequestDTO.class)
-                .exchange()
-                .expectStatus().isCreated()  // Expect 200 OK
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(ReviewResponseDTO.class)
-                .isEqualTo(reviewResponseDTO1);
-
-        verify(reviewService, times(1)).AddReview(any(Mono.class));
-
-
-    }
-
-
-    @Test
-    public void whenUpdateReview_returnReviewResponseDTO(){
-        String reviewId= UUID.randomUUID().toString();
-        ReviewResponseDTO reviewResponseDTO1= ReviewResponseDTO.builder()
-                .reviewId(reviewId)
-                .rating(5)
-                .reviewerName("Zako")
-                .review("Very good")
-                .dateSubmitted(LocalDateTime.now())
-                .build();
-
-        ReviewRequestDTO reviewRequestDTO= ReviewRequestDTO.builder()
-                .rating(2)
-                .reviewerName("Zako2")
-                .review("Very bad")
-                .dateSubmitted(LocalDateTime.now())
-                .build();
-
-        when(reviewService.UpdateReview(any(Mono.class),anyString())).thenReturn(Mono.just(reviewResponseDTO1));
-        webTestClient
-                .put()
-                .uri("/visits/reviews/" + reviewId)
-                .accept(MediaType.APPLICATION_JSON)
-                .contentType(MediaType.APPLICATION_JSON)
-                .body(Mono.just(reviewRequestDTO), ReviewRequestDTO.class)
-                .exchange()
-                .expectStatus().isOk()  // Expect 200 OK
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody(ReviewResponseDTO.class)
-                .isEqualTo(reviewResponseDTO1);
-
-        verify(reviewService, times(1)).UpdateReview(any(Mono.class), anyString());
-
-
-    }
-
-
-    @Test
-    public void whenDeleteReviewById_returnReviewResponseDTO(){
-
-        String reviewId= UUID.randomUUID().toString();
-        ReviewResponseDTO reviewResponseDTO1= ReviewResponseDTO.builder()
-                .reviewId(reviewId)
-                .rating(5)
-                .reviewerName("Zako")
-                .review("Very good")
-                .dateSubmitted(LocalDateTime.now())
-                .build();
-
-        ReviewResponseDTO reviewResponseDTO2= ReviewResponseDTO.builder()
-                .reviewId(UUID.randomUUID().toString())
-                .rating(2)
-                .reviewerName("Zako2")
-                .review("Very bad")
-                .dateSubmitted(LocalDateTime.now())
-                .build();
-
-        when(reviewService.DeleteReview(reviewId)).thenReturn(Mono.just(reviewResponseDTO1));
-
-
-        // Act & Assert
-        webTestClient
-                .delete()
-                .uri("/visits/reviews/" + reviewId)
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()  // Expect 200 OK
-                .expectHeader().contentTypeCompatibleWith(MediaType.APPLICATION_JSON)
-                .expectBody(ReviewResponseDTO.class)
-                .isEqualTo(reviewResponseDTO1);
-
-        verify(reviewService, times(1)).DeleteReview(reviewId);
-
     }
 
 }

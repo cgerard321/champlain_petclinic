@@ -18,12 +18,10 @@ import reactor.core.publisher.Mono;
 public interface VetService {
 
     Flux<VetResponseDTO> getAll();
-    Mono<VetResponseDTO> addVet(Mono<VetRequestDTO> vetRequestDto);
+    Mono<VetResponseDTO> insertVet(Mono<VetRequestDTO> vetRequestDto);
     Mono<VetResponseDTO> updateVet(String vetId, Mono<VetRequestDTO> vetRequestDto);
     Mono<VetResponseDTO> getVetByVetId(String vetId);
     Mono<Void> deleteVetByVetId(String vetId);
     Flux<VetResponseDTO> getVetByIsActive(boolean isActive);
     Mono<VetResponseDTO> getVetByVetBillId(String vetBillId);
-    Mono<VetResponseDTO> getVetByFirstName(String firstName);
-    Mono<VetResponseDTO> getVetByLastName(String lastName);
 }

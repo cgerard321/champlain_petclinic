@@ -23,9 +23,8 @@ public class VisitRequestDTO {
     private String jwtToken;//used to get the userDetails from the Auth-Service when sending visit emails
     private String practitionerId;
     private Status status;
-    private String visitId;
 
-    public VisitRequestDTO(LocalDateTime now, String description, String petId, String ownerId, String jwtToken, String practitionerId, String visitId) {
+    public VisitRequestDTO(LocalDateTime now, String description, String petId, String ownerId, String jwtToken, String practitionerId) {
         this.visitDate = now;
         this.description = description;
         this.petId =  petId;
@@ -33,6 +32,5 @@ public class VisitRequestDTO {
         this.jwtToken = jwtToken;
         this.practitionerId = practitionerId;
         this.status = Status.UPCOMING;
-        this.visitId = visitId;
     }
 }

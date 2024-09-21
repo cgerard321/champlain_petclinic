@@ -43,16 +43,6 @@ public class OwnerServiceImpl implements OwnerService {
         return ownerRepo.deleteById(ownerId);
     }
 
-
-    @Override
-    public Mono<OwnerResponseDTO> deleteOwnerByOwnerId(String ownerId) {
-        return ownerRepo.findOwnerByOwnerId(ownerId)
-                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Course id not found: " + ownerId))))
-                .flatMap(found -> ownerRepo.delete(found)
-                        .then(Mono.just(found)))
-                .map(EntityDTOUtil::toOwnerResponseDTO);
-    }
-
     @Override
     public Mono<OwnerResponseDTO> updateOwner(Mono<OwnerRequestDTO> ownerRequestDTO, String ownerId) {
 

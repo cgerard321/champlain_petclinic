@@ -1,11 +1,7 @@
 package com.petclinic.visits.visitsservicenew.PresentationLayer;
 
 
-import com.petclinic.visits.visitsservicenew.BusinessLayer.Review.ReviewService;
 import com.petclinic.visits.visitsservicenew.BusinessLayer.VisitService;
-import com.petclinic.visits.visitsservicenew.Exceptions.InvalidInputException;
-import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewRequestDTO;
-import com.petclinic.visits.visitsservicenew.PresentationLayer.Review.ReviewResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -23,10 +19,8 @@ import reactor.core.publisher.Mono;
 public class VisitController {
     /**
      * We are Accessing the Controller
-     *
      */
     private final VisitService visitService;
-    private final ReviewService reviewService;
 
     /**
      * Simple Get all Visits
@@ -149,48 +143,6 @@ public class VisitController {
                 .then(Mono.just(new ResponseEntity<Void>(HttpStatus.NO_CONTENT)));
     }
 
-
-    @GetMapping(value = "/reviews")
-    public Flux<ReviewResponseDTO> getAllReviews(){
-        return reviewService.GetAllReviews();
-    }
-
-    @GetMapping(value="/reviews/{reviewId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<ReviewResponseDTO>> getReviewByReviewId(@PathVariable String reviewId){
-        return Mono.just(reviewId)
-                .filter(id -> id.length() == 36)
-                .switchIfEmpty(Mono.error(new InvalidInputException("the provided review id is invalid: " + reviewId)))
-                .flatMap(reviewService::GetReviewByReviewId)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
-    }
-
-    @PostMapping(value = "/reviews")
-    public Mono<ResponseEntity<ReviewResponseDTO>> PostReview(@RequestBody Mono<ReviewRequestDTO> reviewRequestDTOMono){
-        return reviewService.AddReview(reviewRequestDTOMono)
-                .map(c->ResponseEntity.status(HttpStatus.CREATED).body(c))
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
-    }
-
-    @PutMapping(value="/reviews/{reviewId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<ReviewResponseDTO>> UpdateReview(@RequestBody Mono<ReviewRequestDTO> reviewRequestDTOMono, @PathVariable String reviewId){
-        return Mono.just(reviewId)
-                .filter(id -> id.length() == 36)
-                .switchIfEmpty(Mono.error(new InvalidInputException("the provided review id is invalid: " + reviewId)))
-                .flatMap(id-> reviewService.UpdateReview(reviewRequestDTOMono,reviewId))
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
-    }
-
-    @DeleteMapping(value="/reviews/{reviewId}", produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<ReviewResponseDTO>> DeteleReview(@PathVariable String reviewId) {
-        return Mono.just(reviewId)
-                .filter(id -> id.length() == 36)
-                .switchIfEmpty(Mono.error(new InvalidInputException("the provided review id is invalid: " + reviewId)))
-                .flatMap(reviewService::DeleteReview)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
-    }
 
 //    @GetMapping("/pets/{petId}")
 //    public Mono<PetResponseDTO> getPetByIdTest(@PathVariable int petId){

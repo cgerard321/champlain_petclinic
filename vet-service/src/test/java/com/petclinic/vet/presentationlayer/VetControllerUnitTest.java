@@ -7,7 +7,6 @@ import com.petclinic.vet.dataaccesslayer.badges.BadgeTitle;
 import com.petclinic.vet.dataaccesslayer.ratings.PredefinedDescription;
 import com.petclinic.vet.dataaccesslayer.ratings.Rating;
 import com.petclinic.vet.exceptions.InvalidInputException;
-import com.petclinic.vet.exceptions.NotFoundException;
 import com.petclinic.vet.servicelayer.*;
 import com.petclinic.vet.servicelayer.badges.BadgeResponseDTO;
 import com.petclinic.vet.servicelayer.badges.BadgeService;
@@ -427,7 +426,7 @@ class VetControllerUnitTest {
 
     @Test
     void createVet() {
-        when(vetService.addVet(any(Mono.class)))
+        when(vetService.insertVet(any(Mono.class)))
                 .thenReturn(Mono.just(vetResponseDTO));
 
         client
@@ -451,7 +450,7 @@ class VetControllerUnitTest {
                 });
 
         Mockito.verify(vetService, times(1))
-                .addVet(any(Mono.class));
+                .insertVet(any(Mono.class));
     }
 
     @Test
@@ -1025,74 +1024,5 @@ class VetControllerUnitTest {
                 .rateDescription("This is a bad vet")
                 .build();
     }
-    @Test
-    void getVetByFirstName_ShouldSucceed() {
-        when(vetService.getVetByFirstName("Pauline")).thenReturn(Mono.just(vetResponseDTO));
-
-        client
-                .get()
-                .uri("/vets/firstName/Pauline")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isEqualTo(HttpStatus.OK)
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.firstName").isEqualTo(vetResponseDTO.getFirstName());
-
-
-        Mockito.verify(vetService, times(1)).getVetByFirstName("Pauline");
-    }
-
-    @Test
-    void getVetByFirstName_NotFound() {
-        when(vetService.getVetByFirstName("Nonexistent")).thenReturn(Mono.empty());
-
-        client
-                .get()
-                .uri("/vets/firstName/Nonexistent")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound();
-
-        Mockito.verify(vetService, times(1)).getVetByFirstName("Nonexistent");
-    }
-
-
-
-
-
-    @Test
-    void getVetByLastName_ShouldSucceed() {
-        when(vetService.getVetByLastName("LeBlanc")).thenReturn(Mono.just(vetResponseDTO2));
-
-        client
-                .get()
-                .uri("/vets/lastName/LeBlanc")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isOk()
-                .expectHeader().contentType(MediaType.APPLICATION_JSON)
-                .expectBody()
-                .jsonPath("$.firstName").isEqualTo(vetResponseDTO2.getFirstName())
-                .jsonPath("$.lastName").isEqualTo(vetResponseDTO2.getLastName());
-
-        Mockito.verify(vetService, times(1)).getVetByLastName("LeBlanc");
-    }
-
-    @Test
-    void getVetByLastName_NotFound() {
-        when(vetService.getVetByLastName("Nonexistent")).thenReturn(Mono.empty());
-
-        client
-                .get()
-                .uri("/vets/lastName/Nonexistent")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus().isNotFound();
-
-        Mockito.verify(vetService, times(1)).getVetByLastName("Nonexistent");
-    }
- 
-
 
 }

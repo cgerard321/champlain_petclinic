@@ -9,7 +9,6 @@ import java.util.Set;
 @Getter
 @Builder
 @NoArgsConstructor
-@Setter
 @AllArgsConstructor
 public class VetRequestDTO {
     private String vetId;

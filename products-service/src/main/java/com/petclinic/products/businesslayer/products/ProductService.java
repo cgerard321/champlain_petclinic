@@ -7,7 +7,7 @@ import reactor.core.publisher.Mono;
 
 public interface ProductService {
 
-    Flux<ProductResponseModel> getAllProducts(Double minPrice, Double maxPrice);
+    Flux<ProductResponseModel> getAllProducts();
     Mono<ProductResponseModel> getProductByProductId(String productId);
     Mono<ProductResponseModel> addProduct(Mono<ProductRequestModel> productRequestModel);
     Mono<ProductResponseModel> updateProductByProductId(String productId, Mono<ProductRequestModel> productRequestModel);

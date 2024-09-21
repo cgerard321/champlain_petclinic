@@ -14,7 +14,6 @@ import reactor.core.publisher.Mono;
 @Slf4j
 public class ProductsServiceClient {
 
-    private final WebClient webClient;
     private final WebClient.Builder webClientBuilder;
     private final String productsServiceUrl;
 
@@ -23,24 +22,12 @@ public class ProductsServiceClient {
                                  @Value("${app.products-service.port}") String productsServicePort) {
         this.webClientBuilder = webClientBuilder;
         productsServiceUrl = "http://" + productsServiceHost + ":" + productsServicePort + "/api/v1/products";
-        //initialize web client
-        this.webClient = webClientBuilder
-                .baseUrl(productsServiceUrl)
-                .build();
-
     }
 
-    public Flux<ProductResponseDTO> getAllProducts(Double minPrice, Double maxPrice) {
-        return webClient.get()
-                .uri(uriBuilder -> {
-                    if (minPrice != null) {
-                        uriBuilder.queryParam("minPrice", minPrice);
-                    }
-                    if (maxPrice != null) {
-                        uriBuilder.queryParam("maxPrice", maxPrice);
-                    }
-                    return uriBuilder.build();
-                })
+    public Flux<ProductResponseDTO> getAllProducts() {
+        return webClientBuilder.build()
+                .get()
+                .uri(productsServiceUrl)
                 .retrieve()
                 .bodyToFlux(ProductResponseDTO.class);
     }
