@@ -36,9 +36,18 @@ const InventoryProducts: React.FC = () => {
   if (loading) return <p>Loading products...</p>;
   if (error) return <p>{error}</p>;
 
-  return (
+   return (
     <div className="inventory-products">
-      <h2>Products in Inventory: {inventoryId}</h2>
+      <h2>
+        {products.length > 0 ? (
+          <>Products in Inventory: {inventoryId}</>
+        ) : (
+          <span className="inventory-title">
+            Supplies in Inventory: <span>{inventoryId}</span>
+          </span>
+        )}
+      </h2>
+       
       {products.length > 0 ? (
         <table className="table table-striped">
           <thead>
@@ -52,34 +61,29 @@ const InventoryProducts: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {products.map((product: ProductModel) => {
-              let statusClass = '';
-
-              switch (product.status) {
-                case 'RE_ORDER':
-                  statusClass = 'status-reorder';
-                  break;
-                case 'OUT_OF_STOCK':
-                  statusClass = 'status-out-of-stock';
-                  break;
-                case 'AVAILABLE':
-                  statusClass = 'status-available';
-                  break;
-                default:
-                  statusClass = '';
-              }
-
-              return (
-                <tr key={product.productId}>
-                  <td>{product.productId}</td>
-                  <td>{product.productName}</td>
-                  <td>{product.productDescription}</td>
-                  <td>${product.productSalePrice}</td>
-                  <td>{product.productQuantity}</td>
-                  <td className={statusClass}>{product.status}</td>
-                </tr>
-              );
-            })}
+            {products.map((product: ProductModel) => (
+              <tr key={product.productId}>
+                <td>{product.productId}</td>
+                <td>{product.productName}</td>
+                <td>{product.productDescription}</td>
+                <td>${product.productSalePrice}</td>
+                <td>{product.productQuantity}</td>
+                <td
+                  style={{
+                    color:
+                      product.status === 'RE_ORDER'
+                        ? '#f4a460' // Tan for RE_ORDER
+                        : product.status === 'OUT_OF_STOCK'
+                          ? 'red' // Red for OUT_OF_STOCK
+                          : product.status === 'AVAILABLE'
+                            ? 'green' // Green for AVAILABLE
+                            : 'inherit', // Default color
+                  }}
+                >
+                  {product.status.replace('_', ' ')}
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       ) : (
