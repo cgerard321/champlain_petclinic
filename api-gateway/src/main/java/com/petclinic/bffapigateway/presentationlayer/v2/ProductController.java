@@ -17,14 +17,14 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("api/v2/gateway/products")
+@RequestMapping("/api/v2/gateway/products")
 @Validated
 @CrossOrigin(origins = "http://localhost:3000, http://localhost:80")
 public class ProductController {
 
     private final ProductsServiceClient productsServiceClient;
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
     @GetMapping(value = "", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ProductResponseDTO> getAllProducts(
             @RequestParam(required = false) Double minPrice,
