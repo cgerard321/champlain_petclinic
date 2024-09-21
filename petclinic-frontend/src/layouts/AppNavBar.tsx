@@ -88,6 +88,11 @@ export function NavBar(): JSX.Element {
                     Products
                   </Nav.Link>
                 )}
+                {IsAdmin() &&
+                    <Nav.Link as={Link} to={AppRoutePaths.Carts}>
+                      Carts
+                    </Nav.Link>
+                }
               </>
             )}
           </Nav>

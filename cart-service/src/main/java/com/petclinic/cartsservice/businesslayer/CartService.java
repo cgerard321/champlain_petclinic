@@ -8,4 +8,6 @@ import reactor.core.publisher.Mono;
 public interface CartService {
 
     public Mono<CartResponseModel> getCartByCartId(String cartId);
+
+    public Flux<CartResponseModel> getAllCarts();
 }

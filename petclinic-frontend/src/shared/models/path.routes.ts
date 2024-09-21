@@ -22,5 +22,7 @@ export enum AppRoutePaths {
   Forbidden = '/forbidden',
   Products = '/products',
   Visits = '/visits',
-  AddVisit = '/visits/add',
+  Carts = '/carts',
+  UserCart = '/carts/:cartId',
+  AddVisit = '/visits/add'
 }

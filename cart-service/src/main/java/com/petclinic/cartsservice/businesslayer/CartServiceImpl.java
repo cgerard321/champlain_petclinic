@@ -37,4 +37,18 @@ public class CartServiceImpl implements CartService {
                             .map(products -> EntityModelUtil.toCartResponseModel(cart, products));
                 });
     }
+
+    @Override
+    public Flux<CartResponseModel> getAllCarts() {
+        return cartRepository.findAll()
+                .flatMap(cart -> {
+                    List<String> productIds = cart.getProductIds();
+                    return productIds.stream()
+                            .map(productId -> productClient.getProductByProductId(productId).flux()) // fetch products for each cart
+                            .reduce(Flux.empty(), Flux::merge) // merge product streams
+                            .collectList() // collect all products into a list
+                            .map(products -> EntityModelUtil.toCartResponseModel(cart, products)); // map the cart and products to CartResponseModel
+                })
+                .doOnNext(cartResponseModel -> log.debug("Cart: " + cartResponseModel));
+    }
 }
