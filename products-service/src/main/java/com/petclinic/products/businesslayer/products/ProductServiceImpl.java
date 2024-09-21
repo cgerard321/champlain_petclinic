@@ -44,8 +44,20 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Flux<ProductResponseModel> getAllProducts() {
-        return productRepository.findAll()
+    public Flux<ProductResponseModel> getAllProducts(Double minPrice, Double maxPrice) {
+        Flux<Product> products;
+
+        if (minPrice != null && maxPrice != null) {
+            products = productRepository.findByProductSalePriceBetween(minPrice, maxPrice);
+        } else if (minPrice != null) {
+            products = productRepository.findByProductSalePriceGreaterThanEqual(minPrice);
+        } else if (maxPrice != null) {
+            products = productRepository.findByProductSalePriceLessThanEqual(maxPrice);
+        } else {
+            products = productRepository.findAll();
+        }
+
+        return products
                 .flatMap(this::getAverageRating)
                 .map(EntityModelUtil::toProductResponseModel);
     }
