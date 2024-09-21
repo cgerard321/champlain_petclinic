@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { VetRequestModel } from '@/features/veterinarians/models/VetRequestModel.ts';
-import DeleteVet from '@/pages/Vet/DeleteVet.tsx';
 
 export default function VetListTable(): JSX.Element {
   const [vets, setVets] = useState<VetRequestModel[]>([]);
@@ -34,12 +33,6 @@ export default function VetListTable(): JSX.Element {
     fetchVets();
   }, []);
 
-
-  const handleVetDelete = (vetId: string): void => {
-    setVets(prevVets => prevVets.filter(vet => vet.vetId !== vetId));
-  };
-
-
   return (
     <div>
       {error ? (
@@ -51,7 +44,6 @@ export default function VetListTable(): JSX.Element {
               <th>First Name</th>
               <th>Last Name</th>
               <th>Specialties</th>
-              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -61,12 +53,6 @@ export default function VetListTable(): JSX.Element {
                 <td>{vet.lastName}</td>
                 <td>
                   {vet.specialties.map(specialty => specialty.name).join(', ')}
-                </td>
-                <td>
-                  <DeleteVet
-                    vetId={vet.vetId}
-                    onVetDeleted={() => handleVetDelete(vet.vetId)}
-                  />
                 </td>
               </tr>
             ))}
