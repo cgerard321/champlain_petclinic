@@ -9,3 +9,9 @@
 .status-available {
   color: green;
 }
+
+.inventory-title span{
+  color: #007bff;
+  font-weight: bold;
+}
+
