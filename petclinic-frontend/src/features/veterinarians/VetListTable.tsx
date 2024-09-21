@@ -34,9 +34,11 @@ export default function VetListTable(): JSX.Element {
     fetchVets();
   }, []);
 
+
   const handleVetDelete = (vetId: string): void => {
     setVets(prevVets => prevVets.filter(vet => vet.vetId !== vetId));
   };
+
 
   return (
     <div>
