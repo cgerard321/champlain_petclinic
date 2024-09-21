@@ -2,6 +2,7 @@ using emailing_service.Models;
 using emailing_service.Models.EmailType;
 using emailing_service.Utils;
 using emailing_service.Utils.Exception;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace emailing_service.BuisnessLayer;
 
@@ -29,7 +30,7 @@ public class EmailServiceImpl : IEmailService
     {
         Console.WriteLine("Received Email Call Function!");
         if (model == null)
-            throw new BadEmailModel("Email Model is null");
+            throw new MissingBodyException("Email Model is null");
         DirectEmailModel directEmailModel = model;
         Console.WriteLine("Found the model!" + directEmailModel.ToString());
         
@@ -104,7 +105,8 @@ public class EmailServiceImpl : IEmailService
                         directEmailModel.EmailToSendTo,
                         directEmailModel.EmailTitle,
                         builtEmail,
-                        true
+                            EmailUtils.smtpClient,
+                            true
                     ).Wait(); // Wait for the task to complete
                 }
                 catch (Exception e)

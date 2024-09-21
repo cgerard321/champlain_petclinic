@@ -40,7 +40,8 @@ catch (Exception ex)
 {
     Console.WriteLine($"Error loading SMTP settings: {ex.Message}");
 }
-
+//Just initialising the singleton pattern 
+EmailUtils.SetUpEmailUtils();
 
 // Get the path for the default HTML file from configuration
 string? pathOfDefaultHtml = builder.Configuration["HtmlFilePath"];
@@ -58,6 +59,8 @@ catch (DirectoryNotFoundException e)
     Console.WriteLine("Could not load HTML file. This means that we do not have the default template loaded");
     throw;
 }
+
+
 
 
 // Add services to the container

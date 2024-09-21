@@ -17,6 +17,7 @@ using System.Threading.Tasks;
 using System.IO;
 using System.Text;
 
+[TestFixture]
 public class EmailControllerTests
 {
     private IEmailService _controller;
@@ -148,7 +149,7 @@ public class EmailControllerTests
     [TestCase(null)]
     public void SendEmail_InvalidTemplateName_TemplateFormatException(DirectEmailModel? testModel)
     {
-        var ex = Assert.Throws<BadEmailModel>(() =>
+        var ex = Assert.Throws<MissingBodyException>(() =>
             _controller.SendEmail(testModel));
     
         Assert.That(ex.Message, Does.Contain("Email Model is null"));
@@ -240,6 +241,16 @@ public class EmailControllerTests
         );
         yield return new DirectEmailModel(
             "@gmail.com",
+            "Another test email",
+            "Default",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            "CompanyXYZ"
+        );
+        yield return new DirectEmailModel(
+            "justin@dobbylechat@gmail.com",
             "Another test email",
             "Default",
             "Test email header",
@@ -340,17 +351,6 @@ public class EmailControllerTests
         Assert.That(ex.Message,
             Does.Contain($"Template {testModel.TemplateName} does not exist. Please create a template first or use the default one (Default)"));
     }
-
-    /*[Test]
-    public async Task ReceiveHtml_AlreadyExistingTemplate_BadRequest()
-    {
-        //We add a template
-        _controller.ReceiveHtml("TEMPLATE");
-        var result = _controller.ReceiveHtml("NewTemplate");
-        Assert.That(result, Is.InstanceOf<OkResult>());
-    }*/
-    
-    
     
     
     

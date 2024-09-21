@@ -222,22 +222,24 @@ var assemblies = [
     "name": "emailing-service",
     "classes": [
       { "name": "emailing_service.BackgroundTask.RecurringJobService", "rp": "emailing_service_RecurringJobService.html", "cl": 0, "ucl": 35, "cal": 35, "tl": 91, "cb": 0, "tb": 6, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
-      { "name": "emailing_service.BuisnessLayer.EmailServiceImpl", "rp": "emailing_service_EmailServiceImpl.html", "cl": 81, "ucl": 21, "cal": 102, "tl": 128, "cb": 28, "tb": 28, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
-      { "name": "emailing_service.Controllers.EmailController", "rp": "emailing_service_EmailController.html", "cl": 0, "ucl": 105, "cal": 105, "tl": 152, "cb": 0, "tb": 22, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
-      { "name": "emailing_service.Models.ConnectionEmailServer", "rp": "emailing_service_ConnectionEmailServer.html", "cl": 0, "ucl": 22, "cal": 22, "tl": 42, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "emailing_service.BuisnessLayer.EmailServiceImpl", "rp": "emailing_service_EmailServiceImpl.html", "cl": 82, "ucl": 21, "cal": 103, "tl": 130, "cb": 28, "tb": 28, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "emailing_service.Controllers.EmailController", "rp": "emailing_service_EmailController.html", "cl": 0, "ucl": 56, "cal": 56, "tl": 192, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "emailing_service.Models.ConnectionEmailServer", "rp": "emailing_service_ConnectionEmailServer.html", "cl": 15, "ucl": 7, "cal": 22, "tl": 42, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
       { "name": "emailing_service.Models.EmailTemplate", "rp": "emailing_service_EmailTemplate.html", "cl": 53, "ucl": 28, "cal": 81, "tl": 127, "cb": 26, "tb": 40, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
       { "name": "emailing_service.Models.EmailType.DirectEmailModel", "rp": "emailing_service_DirectEmailModel.html", "cl": 19, "ucl": 3, "cal": 22, "tl": 29, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
       { "name": "emailing_service.Models.OperationResult", "rp": "emailing_service_OperationResult.html", "cl": 2, "ucl": 0, "cal": 2, "tl": 7, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
-      { "name": "emailing_service.Utils.EmailUtils", "rp": "emailing_service_EmailUtils.html", "cl": 9, "ucl": 30, "cal": 39, "tl": 74, "cb": 1, "tb": 4, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
-      { "name": "emailing_service.Utils.Exception.AddedAnAlreadyPresentReminder", "rp": "emailing_service_AddedAnAlreadyPresentReminder.html", "cl": 0, "ucl": 3, "cal": 3, "tl": 12, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
-      { "name": "emailing_service.Utils.Exception.BadEmailModel", "rp": "emailing_service_BadEmailModel.html", "cl": 1, "ucl": 2, "cal": 3, "tl": 13, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
-      { "name": "emailing_service.Utils.Exception.CreatedAlreadyExistingTemplate", "rp": "emailing_service_CreatedAlreadyExistingTemplate.html", "cl": 0, "ucl": 3, "cal": 3, "tl": 12, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
-      { "name": "emailing_service.Utils.Exception.EmailStringContainsPlaceholder", "rp": "emailing_service_EmailStringContainsPlaceholder.html", "cl": 0, "ucl": 3, "cal": 3, "tl": 12, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
-      { "name": "emailing_service.Utils.Exception.TemplateFormatException", "rp": "emailing_service_TemplateFormatException.html", "cl": 1, "ucl": 2, "cal": 3, "tl": 12, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
-      { "name": "emailing_service.Utils.Exception.TemplateRequiredFieldNotSet", "rp": "emailing_service_TemplateRequiredFieldNotSet.html", "cl": 0, "ucl": 3, "cal": 3, "tl": 12, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
-      { "name": "emailing_service.Utils.Exception.TriedToFillEmailFieldWithEmptyWhiteSpace", "rp": "emailing_service_TriedToFillEmailFieldWithEmptyWhiteSpace.html", "cl": 0, "ucl": 3, "cal": 3, "tl": 13, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
-      { "name": "emailing_service.Utils.Exception.TriedToFindNonExistingTemplate", "rp": "emailing_service_TriedToFindNonExistingTemplate.html", "cl": 1, "ucl": 2, "cal": 3, "tl": 12, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
-      { "name": "Program", "rp": "emailing_service_Program.html", "cl": 0, "ucl": 51, "cal": 51, "tl": 87, "cb": 0, "tb": 14, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "emailing_service.Models.SMTP.SmtpClientWrapper", "rp": "emailing_service_SmtpClientWrapper.html", "cl": 4, "ucl": 3, "cal": 7, "tl": 18, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "emailing_service.Utils.EmailUtils", "rp": "emailing_service_EmailUtils.html", "cl": 37, "ucl": 4, "cal": 41, "tl": 82, "cb": 4, "tb": 4, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "emailing_service.Utils.Exception.AddedAnAlreadyPresentReminder", "rp": "emailing_service_AddedAnAlreadyPresentReminder.html", "cl": 3, "ucl": 0, "cal": 3, "tl": 12, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "emailing_service.Utils.Exception.BadEmailModel", "rp": "emailing_service_BadEmailModel.html", "cl": 3, "ucl": 0, "cal": 3, "tl": 13, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "emailing_service.Utils.Exception.CreatedAlreadyExistingTemplate", "rp": "emailing_service_CreatedAlreadyExistingTemplate.html", "cl": 3, "ucl": 0, "cal": 3, "tl": 12, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "emailing_service.Utils.Exception.EmailStringContainsPlaceholder", "rp": "emailing_service_EmailStringContainsPlaceholder.html", "cl": 3, "ucl": 0, "cal": 3, "tl": 12, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "emailing_service.Utils.Exception.MissingBodyException", "rp": "emailing_service_MissingBodyException.html", "cl": 3, "ucl": 0, "cal": 3, "tl": 12, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "emailing_service.Utils.Exception.TemplateFormatException", "rp": "emailing_service_TemplateFormatException.html", "cl": 3, "ucl": 0, "cal": 3, "tl": 12, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "emailing_service.Utils.Exception.TemplateRequiredFieldNotSet", "rp": "emailing_service_TemplateRequiredFieldNotSet.html", "cl": 3, "ucl": 0, "cal": 3, "tl": 12, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "emailing_service.Utils.Exception.TriedToFillEmailFieldWithEmptyWhiteSpace", "rp": "emailing_service_TriedToFillEmailFieldWithEmptyWhiteSpace.html", "cl": 3, "ucl": 0, "cal": 3, "tl": 13, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "emailing_service.Utils.Exception.TriedToFindNonExistingTemplate", "rp": "emailing_service_TriedToFindNonExistingTemplate.html", "cl": 3, "ucl": 0, "cal": 3, "tl": 12, "cb": 0, "tb": 0, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
+      { "name": "Program", "rp": "emailing_service_Program.html", "cl": 0, "ucl": 52, "cal": 52, "tl": 90, "cb": 0, "tb": 14, "cm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "hc": [], "metrics": { } },
     ]},
 ];
 
@@ -252,12 +254,6 @@ var riskHotspotMetrics = [
 
 var riskHotspots = [
   {
-    "assembly": "emailing-service", "class": "emailing_service.Controllers.EmailController", "reportPath": "emailing_service_EmailController.html", "methodName": "SendEmail(emailing_service.Models.EmailType.DirectEmailModel)", "methodShortName": "SendEmail(...)", "fileIndex": 0, "line": 55,
-    "metrics": [
-      { "value": 506, "exceeded": true },
-      { "value": 22, "exceeded": true },
-    ]},
-  {
     "assembly": "emailing-service", "class": "Program", "reportPath": "emailing_service_Program.html", "methodName": "<Main>$(System.String[])", "methodShortName": "<Main>$(...)", "fileIndex": 0, "line": 7,
     "metrics": [
       { "value": 210, "exceeded": true },
@@ -270,9 +266,9 @@ var riskHotspots = [
       { "value": 30, "exceeded": true },
     ]},
   {
-    "assembly": "emailing-service", "class": "emailing_service.BuisnessLayer.EmailServiceImpl", "reportPath": "emailing_service_EmailServiceImpl.html", "methodName": "SendEmail(emailing_service.Models.EmailType.DirectEmailModel)", "methodShortName": "SendEmail(...)", "fileIndex": 0, "line": 29,
+    "assembly": "emailing-service", "class": "emailing_service.BuisnessLayer.EmailServiceImpl", "reportPath": "emailing_service_EmailServiceImpl.html", "methodName": "SendEmail(emailing_service.Models.EmailType.DirectEmailModel)", "methodShortName": "SendEmail(...)", "fileIndex": 0, "line": 30,
     "metrics": [
-      { "value": 28.58, "exceeded": false },
+      { "value": 28.36, "exceeded": false },
       { "value": 22, "exceeded": true },
     ]},
 ];

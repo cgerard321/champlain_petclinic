@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using emailing_service.BuisnessLayer;
 using emailing_service.Models;
 using emailing_service.Models.EmailType;
@@ -40,12 +41,12 @@ public class EmailController : Controller
         catch (CreatedAlreadyExistingTemplate e)
         {
             Console.WriteLine(e);
-            return BadRequest(e);
+            return BadRequest(new { message = e.Message });
         }
         catch (TemplateFormatException e)
         {
             Console.WriteLine(e);
-            return BadRequest(e);
+            return BadRequest(new { message = e.Message });
         }
         return Ok();
     }
@@ -53,9 +54,47 @@ public class EmailController : Controller
     [HttpPost("send")]
     public IActionResult SendEmail([FromBody] DirectEmailModel emailModel)
     {
-        
-        
-        
+        try
+        {
+            var result = _emailService.SendEmail(emailModel);
+        }
+        catch (MissingBodyException e)
+        {
+            Console.WriteLine(e);
+            return NoContent();
+        }
+        catch (BadEmailModel e)
+        {
+            Console.WriteLine(e);
+            return BadRequest(new { message = e.Message });
+        }
+        catch (TriedToFindNonExistingTemplate e)
+        {
+            Console.WriteLine(e);
+            return NotFound(new { message = e.Message });
+        }
+        catch (NullReferenceException e)
+        {
+            Console.WriteLine(e);
+            return NotFound(new { message = e.Message });
+        }
+        catch (EmailStringContainsPlaceholder e)
+        {
+            Console.WriteLine(e);
+            return BadRequest(new { message = e.Message });
+        }
+        catch (TemplateRequiredFieldNotSet e)
+        {
+            Console.WriteLine(e);
+            return BadRequest(new { message = e.Message });
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return BadRequest(new { message = e.Message });
+        }
+        return Ok();
+        /*
         Console.WriteLine("Received Email Call Function!");
         if (emailModel == null)
             return BadRequest("Email Model is null.");
@@ -148,5 +187,6 @@ public class EmailController : Controller
         }
         // Logic to save the email recipient to a database
         return Ok($"Received email recipient for");
+        */
     }
 }
