@@ -124,7 +124,9 @@ input[type='password']::placeholder {
   background-color: #d07834;
   text-decoration: none;
   border-radius: 5px;
-  transition: background-color 0.3s ease, transform 0.2s ease;
+  transition:
+    background-color 0.3s ease,
+    transform 0.2s ease;
   white-space: nowrap;
   position: fixed;
   left: 15px;
