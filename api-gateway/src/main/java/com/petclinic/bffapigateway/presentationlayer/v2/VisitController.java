@@ -44,14 +44,14 @@ public class VisitController {
         return visitsServiceClient.addVisit(visitResponseDTO)
                 .map(v -> ResponseEntity.status(HttpStatus.CREATED).body(v))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
-    }
+        }
+
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "/reviews")
     public ResponseEntity<Flux<ReviewResponseDTO>> getAllReviews(){
         return ResponseEntity.ok().body(visitsServiceClient.getAllReviews());
     }
-
 
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
@@ -89,5 +89,11 @@ public class VisitController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @PutMapping(value = "/{visitId}") public ResponseEntity<Mono<VisitResponseDTO>> updateVisitByVisitId(@PathVariable String visitId,
+            @RequestBody Mono<VisitRequestDTO> visitRequestDTO){
+            return ResponseEntity.ok().body(visitsServiceClient.updateVisitByVisitId(visitId, visitRequestDTO));
+}
 
 }
