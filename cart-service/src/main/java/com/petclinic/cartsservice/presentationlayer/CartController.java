@@ -25,7 +25,6 @@ public class CartController {
     @GetMapping(value = "/{cartId}", produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<CartResponseModel>> getCartByCartId(@PathVariable String cartId) {
         return Mono.just(cartId)
-                .filter(id -> id.length() == 36)
                 .switchIfEmpty(Mono.error(new InvalidInputException("Provided cart id is invalid: " + cartId)))
                 .flatMap(cartService::getCartByCartId)
                 .map(ResponseEntity::ok);
