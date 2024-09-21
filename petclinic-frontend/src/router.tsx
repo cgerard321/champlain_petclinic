@@ -39,7 +39,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: AppRoutePaths.VisitByVisitId,
+        path: AppRoutePaths.GetVisitByVistId,
         element: (
           <ProtectedRoute>
             <VisitByVisitId />
