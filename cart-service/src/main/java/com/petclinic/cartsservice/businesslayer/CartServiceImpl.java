@@ -2,6 +2,7 @@ package com.petclinic.cartsservice.businesslayer;
 
 import com.petclinic.cartsservice.dataaccesslayer.CartRepository;
 import com.petclinic.cartsservice.domainclientlayer.ProductClient;
+import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
 import com.petclinic.cartsservice.utils.EntityModelUtil;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
@@ -40,12 +41,19 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
-    public Mono<Void> clearCart(String cartId) {
+    public Flux<ProductResponseModel> clearCart(String cartId) {
         return cartRepository.findCartByCartId(cartId)
-                .switchIfEmpty(Mono.error(new NotFoundException("Cart with ID " + cartId + " not found")))
-                .flatMap(cart -> {
+                .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
+                .flatMapMany(cart -> {
+                    // Retrieve  products based on productIds and clear  cart simultaneously
+                    Flux<ProductResponseModel> productsFlux = Flux.fromIterable(cart.getProductIds())
+                            .flatMap(productClient::getProductByProductId);
+
+                    // Clear cart and save it
                     cart.setProductIds(Collections.emptyList());
-                    return cartRepository.save(cart).then();
+                    return cartRepository.save(cart)
+                            .thenMany(productsFlux);  // Ensure cart is saved before returning the products
                 });
     }
+
 }

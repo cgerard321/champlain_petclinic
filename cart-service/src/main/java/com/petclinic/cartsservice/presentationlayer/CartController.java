@@ -2,11 +2,13 @@ package com.petclinic.cartsservice.presentationlayer;
 
 
 import com.petclinic.cartsservice.businesslayer.CartService;
+import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
 import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -32,9 +34,10 @@ public class CartController {
     }
 
     @DeleteMapping("/{cartId}/clear")
-    public Mono<ResponseEntity<String>> clearCart(@PathVariable String cartId) {
+    public Flux<ProductResponseModel> clearCart(@PathVariable String cartId) {
         return cartService.clearCart(cartId)
-                .thenReturn(ResponseEntity.ok("Cart successfully cleared."))
                 .switchIfEmpty(Mono.error(new NotFoundException("Cart not found")));
     }
+
+
 }

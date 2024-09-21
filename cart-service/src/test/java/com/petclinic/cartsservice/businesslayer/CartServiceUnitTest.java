@@ -25,6 +25,8 @@ import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.times;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 class CartServiceUnitTest {
@@ -98,22 +100,56 @@ class CartServiceUnitTest {
     public void clearCart_Success() {
         Cart mockCart = new Cart("1", "cart1", Arrays.asList("prod1", "prod2"), "customer1");
 
+        // Mock the cart being found
         when(cartRepository.findCartByCartId("cart1")).thenReturn(Mono.just(mockCart));
+
+        // Mock the product client returning product models for each product ID
+        ProductResponseModel product1 = new ProductResponseModel("prod1", "Product1", "Desc1", 100.0);
+        ProductResponseModel product2 = new ProductResponseModel("prod2", "Product2", "Desc2", 200.0);
+
+        when(productClient.getProductByProductId("prod1")).thenReturn(Mono.just(product1));
+        when(productClient.getProductByProductId("prod2")).thenReturn(Mono.just(product2));
+
+        // Mock saving the cart after clearing
         when(cartRepository.save(any(Cart.class))).thenReturn(Mono.just(mockCart));
 
         StepVerifier.create(cartService.clearCart("cart1"))
-                .expectComplete()
-                .verify();
+                .expectNext(product1)  // Expect the first product to be returned
+                .expectNext(product2)  // Expect the second product to be returned
+                .verifyComplete();
 
+        // Verify that the cart was saved with an empty product list
         verify(cartRepository, times(1)).save(mockCart);
+        assertTrue(mockCart.getProductIds().isEmpty()); // Verify the cart is cleared
     }
+
+
 
     @Test
-    public void clearCart_CartNotFound() {
-        when(cartRepository.findCartByCartId("cart1")).thenReturn(Mono.empty());
+    public void clearCart_ReturnsProducts() {
+        Cart cart = Cart.builder()
+                .cartId("cartId1")
+                .productIds(List.of("prod1", "prod2"))
+                .customerId("customerId1")
+                .build();
 
-        StepVerifier.create(cartService.clearCart("cart1"))
-                .expectError(NotFoundException.class)
-                .verify();
+        ProductResponseModel product1 = new ProductResponseModel("prod1", "Product1", "Description1", 100.0);
+        ProductResponseModel product2 = new ProductResponseModel("prod2", "Product2", "Description2", 200.0);
+
+        when(cartRepository.findCartByCartId("cartId1")).thenReturn(Mono.just(cart));
+        when(cartRepository.save(any(Cart.class))).thenReturn(Mono.just(cart));
+        when(productClient.getProductByProductId("prod1")).thenReturn(Mono.just(product1));
+        when(productClient.getProductByProductId("prod2")).thenReturn(Mono.just(product2));
+
+        StepVerifier.create(cartService.clearCart("cartId1"))
+                .expectNext(product1)
+                .expectNext(product2)
+                .verifyComplete();
+
+        verify(cartRepository, times(1)).save(cart);
+        assertTrue(cart.getProductIds().isEmpty());
     }
+
+
+
 }
