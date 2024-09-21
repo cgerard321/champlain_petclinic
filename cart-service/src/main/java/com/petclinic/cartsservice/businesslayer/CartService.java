@@ -10,6 +10,7 @@ public interface CartService {
 
     public Mono<CartResponseModel> getCartByCartId(String cartId);
     Mono<CartResponseModel> updateCartByCartId(Mono<CartRequestModel> cartRequestModel, String cartId);
+    Mono<Integer> getCartItemCount(String cartId);
 
 
 }

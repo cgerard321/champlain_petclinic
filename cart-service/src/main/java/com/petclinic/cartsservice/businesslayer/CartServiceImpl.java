@@ -70,6 +70,13 @@ public class CartServiceImpl implements CartService {
 
     }
 
+    @Override
+    public Mono<Integer> getCartItemCount(String cartId) {
+        return cartRepository.findCartByCartId(cartId)
+                .map(cart -> cart.getProductIds().size())
+                .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)));
+    }
+
 
 
 
