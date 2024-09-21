@@ -7,7 +7,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface CartService {
-public interface CartService {
 
     Mono<CartResponseModel> getCartByCartId(String cartId);
 
