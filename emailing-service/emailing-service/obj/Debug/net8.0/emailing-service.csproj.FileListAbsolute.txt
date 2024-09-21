@@ -1,6 +1,7 @@
 C:\Users\Admin\Desktop\PetClinic\champlain_petclinic\emailing-service\emailing-service\bin\Debug\net8.0\appsettings.Development.json
 C:\Users\Admin\Desktop\PetClinic\champlain_petclinic\emailing-service\emailing-service\bin\Debug\net8.0\appsettings.json
 C:\Users\Admin\Desktop\PetClinic\champlain_petclinic\emailing-service\emailing-service\bin\Debug\net8.0\emailing-service.exe
+C:\Users\Admin\Desktop\PetClinic\champlain_petclinic\emailing-service\emailing-service\bin\Debug\net8.0\Properties\EmailDefaultTemplate.html
 C:\Users\Admin\Desktop\PetClinic\champlain_petclinic\emailing-service\emailing-service\bin\Debug\net8.0\emailing-service.deps.json
 C:\Users\Admin\Desktop\PetClinic\champlain_petclinic\emailing-service\emailing-service\bin\Debug\net8.0\emailing-service.runtimeconfig.json
 C:\Users\Admin\Desktop\PetClinic\champlain_petclinic\emailing-service\emailing-service\bin\Debug\net8.0\emailing-service.dll
@@ -33,4 +34,3 @@ C:\Users\Admin\Desktop\PetClinic\champlain_petclinic\emailing-service\emailing-s
 C:\Users\Admin\Desktop\PetClinic\champlain_petclinic\emailing-service\emailing-service\obj\Debug\net8.0\emailing-service.pdb
 C:\Users\Admin\Desktop\PetClinic\champlain_petclinic\emailing-service\emailing-service\obj\Debug\net8.0\emailing-service.genruntimeconfig.cache
 C:\Users\Admin\Desktop\PetClinic\champlain_petclinic\emailing-service\emailing-service\obj\Debug\net8.0\ref\emailing-service.dll
-C:\Users\Admin\Desktop\PetClinic\champlain_petclinic\emailing-service\emailing-service\bin\Debug\net8.0\Properties\EmailDefaultTemplate.html

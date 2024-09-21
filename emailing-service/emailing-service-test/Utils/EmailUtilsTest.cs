@@ -1,8 +1,10 @@
 using System.Net.Mail;
+using System.Threading.Tasks;
 using emailing_service.Models;
 using emailing_service.Models.SMTP;
 using emailing_service.Utils;
 using Moq;
+using NUnit.Framework;
 
 namespace emailing_service_test.Utils;
 [TestFixture]

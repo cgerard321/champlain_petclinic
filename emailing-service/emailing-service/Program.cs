@@ -1,9 +1,10 @@
+using System.Runtime.CompilerServices;
 using DotNetEnv;
 using emailing_service.BackgroundTask;
 using emailing_service.Models;
 using emailing_service.Utils;
 
-
+[assembly: InternalsVisibleTo("emailing_service_test")] // Adjust the namespace if needed
 var builder = WebApplication.CreateBuilder(args);
 
 // Add environment variable loading
@@ -88,3 +89,5 @@ app.MapControllerRoute(
 app.Urls.Add("http://0.0.0.0:5115");
 
 app.Run();
+
+

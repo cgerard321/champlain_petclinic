@@ -10,9 +10,5 @@
   &lt;Solution /&gt;&#xD;
 &lt;/SessionState&gt;</s:String>
 	<s:String x:Key="/Default/Environment/UnitTesting/UnitTestSessionStore/Sessions/=d1b5f4ec_002D1352_002D4ad4_002D8deb_002D08d4ba0268c0/@EntryIndexedValue">&lt;SessionState ContinuousTestingMode="0" IsActive="True" Name="AddedAnAlreadyPresentReminderTest" xmlns="urn:schemas-jetbrains-com:jetbrains-ut-session"&gt;&#xD;
-  &lt;TestAncestor&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::20234631-6E4D-4617-BF62-DA0E00704F38::net8.0::emailing_service_test.Utils.Exception.AddedAnAlreadyPresentReminderTest&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::20234631-6E4D-4617-BF62-DA0E00704F38::net8.0::emailing_service_test.Utils.Exception.CreatedAlreadyExistingTemplateTest&lt;/TestId&gt;&#xD;
-    &lt;TestId&gt;NUnit3x::20234631-6E4D-4617-BF62-DA0E00704F38::net8.0::emailing_service_test.Utils.Exception.CreatedAlreadyExistingTemplateTests&lt;/TestId&gt;&#xD;
-  &lt;/TestAncestor&gt;&#xD;
+  &lt;Project Location="C:\Users\Admin\Desktop\PetClinic\champlain_petclinic\emailing-service\emailing-service-test" Presentation="&amp;lt;emailing-service-test&amp;gt;" /&gt;&#xD;
 &lt;/SessionState&gt;</s:String></wpf:ResourceDictionary>

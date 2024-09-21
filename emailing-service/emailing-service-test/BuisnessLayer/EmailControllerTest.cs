@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Net.Http;
 using emailing_service.BuisnessLayer;
 using emailing_service.Controllers;
@@ -42,6 +43,14 @@ public class EmailControllerTests
     [OneTimeSetUp]
     public async Task SetUp()
     {
+        EmailUtils.emailConnectionString  = new ConnectionEmailServer(
+            "Mock",
+            000,
+            "Mock",
+            "Mock",
+            "mockemail@gmail.com",
+            "MockPetClinic"
+        );
         _controller = new EmailServiceImpl();
     }
     /*[Test]

@@ -24,5 +24,8 @@
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
     </ItemGroup>
+    <ItemGroup>
+        <InternalsVisibleTo Include="emailing-service-test" />
+    </ItemGroup>
 
 </Project>

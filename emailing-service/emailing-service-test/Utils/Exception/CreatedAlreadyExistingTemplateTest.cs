@@ -1,4 +1,6 @@
+using System;
 using emailing_service.Utils.Exception;
+using NUnit.Framework;
 
 namespace emailing_service_test.Utils.Exception;
 [TestFixture]
