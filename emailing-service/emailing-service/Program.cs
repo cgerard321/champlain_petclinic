@@ -39,14 +39,21 @@ try
 }
 catch (Exception ex)
 {
-    Console.WriteLine($"Error loading SMTP settings: {ex.Message}");
+    Console.WriteLine($"Error loading SMTP settings: {ex.Message}. Now Entering PlaceholderData");
+    EmailUtils.emailConnectionString = new ConnectionEmailServer(
+        "smtpServer",
+        123,
+        "helloWorld",
+        "smtpPassword",
+        "smtpEmail",
+        "smtpDisplayName"
+    );
 }
 //Just initialising the singleton pattern 
 EmailUtils.SetUpEmailUtils();
 
 // Get the path for the default HTML file from configuration
 string? pathOfDefaultHtml = builder.Configuration["HtmlFilePath"];
-
 try
 {
     if (!string.IsNullOrEmpty(pathOfDefaultHtml))
@@ -57,8 +64,7 @@ try
 catch (DirectoryNotFoundException e)
 {
     Console.WriteLine(e);
-    Console.WriteLine("Could not load HTML file. This means that we do not have the default template loaded");
-    throw;
+    Console.WriteLine("Could not load HTML file. This means that we do not have the default template loaded. IGNORE THIS IF IN TEST");
 }
 
 
