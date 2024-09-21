@@ -2,7 +2,7 @@ import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { ProductModel } from '@/features/inventories/models/ProductModels/ProductModel.ts';
 
 export async function getAllProducts(): Promise<ProductModel[]> {
-  const res = await axiosInstance.get('/products', { responseType: 'stream' });
+  const res = await axiosInstance.get('/products', { responseType: 'json' });
   return res.data
     .split('data:')
     .map((dataChunk: string) => {

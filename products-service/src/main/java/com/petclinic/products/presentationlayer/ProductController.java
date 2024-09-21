@@ -33,6 +33,7 @@ public class ProductController {
                 .map(ResponseEntity::ok);
     }
 
+
     @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ProductResponseModel>> addProduct(@RequestBody Mono<ProductRequestModel> productRequestModel) {
         return productService.addProduct(productRequestModel)
@@ -60,5 +61,13 @@ public class ProductController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
+
+
+    @GetMapping(value = "/filter/{productType}", produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<ProductResponseModel> getProductsByType(@PathVariable String productType) {
+        return productService.getProductsByType(productType);
+    }
+
+
 
 }

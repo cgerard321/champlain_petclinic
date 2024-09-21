@@ -21,6 +21,7 @@ public class EntityModelUtil {
                 .productName(productRequestModel.getProductName())
                 .productDescription(productRequestModel.getProductDescription())
                 .productSalePrice(productRequestModel.getProductSalePrice())
+                .productType(productRequestModel.getProductType())
                 .build();
     }
 

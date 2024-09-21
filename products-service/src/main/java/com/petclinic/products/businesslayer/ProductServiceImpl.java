@@ -18,6 +18,8 @@ public class ProductServiceImpl implements ProductService{
         this.productRepository = productRepository;
     }
 
+
+
     @Override
     public Flux<ProductResponseModel> getAllProducts() {
         return productRepository.findAll()
@@ -60,4 +62,16 @@ public class ProductServiceImpl implements ProductService{
                 .map(EntityModelUtil::toProductResponseModel);
     }
 
+
+    @Override
+    public Flux<ProductResponseModel> getProductsByType(String productType) {
+        return productRepository.findProductsByProductType(productType)
+                .map(product -> new ProductResponseModel(
+                        product.getProductId(),
+                        product.getProductName(),
+                        product.getProductDescription(),
+                        product.getProductSalePrice(),
+                        product.getProductType()
+                ));
+    }
 }
