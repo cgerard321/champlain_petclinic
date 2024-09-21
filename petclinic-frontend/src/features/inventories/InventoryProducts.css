@@ -1,0 +1,17 @@
+.status-reorder {
+  color: #f4a460;
+}
+
+.status-out-of-stock {
+  color: red;
+}
+
+.status-available {
+  color: green;
+}
+
+.inventory-title span{
+  color: #007bff;
+  font-weight: bold;
+}
+

@@ -51,8 +51,7 @@ public class RatingController {
     )
     public Mono<ResponseEntity<RatingResponseModel>> getRatingForProductByCustomer(
             @PathVariable String productId,
-            @PathVariable String customerId,
-            @RequestBody Mono<RatingRequestModel> requestModel
+            @PathVariable String customerId
     ) {
         validateId(productId, "product");
         validateId(customerId, "customer");

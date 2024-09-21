@@ -129,4 +129,11 @@ public class GlobalExceptionHandler {
                 .body(new HttpErrorInfo(HttpStatus.FORBIDDEN.value(),ex.getMessage()));
     }
 
+    @ExceptionHandler(value = InvalidInputException.class)
+    public ResponseEntity<HttpErrorInfo> handleInvalidInputException(InvalidInputException ex){
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(new HttpErrorInfo(HttpStatus.UNPROCESSABLE_ENTITY.value(), ex.getMessage()));
+    }
+
+
 }

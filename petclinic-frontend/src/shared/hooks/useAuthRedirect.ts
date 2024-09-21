@@ -11,7 +11,7 @@ export const useAuthRedirect = (): void => {
 
   useEffect(() => {
     if (user.userId === '') {
-      navigate(AppRoutePaths.login);
+      navigate(AppRoutePaths.Login);
     }
   }, [user, navigate]);
 };

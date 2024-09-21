@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { ProductModel } from './models/ProductModels/ProductModel';
 import './InventoriesListTable.css';
+import './InventoryProducts.css';
 
 const InventoryProducts: React.FC = () => {
   const { inventoryId } = useParams<{ inventoryId: string }>();
@@ -42,7 +43,9 @@ const InventoryProducts: React.FC = () => {
 
   return (
     <div className="inventory-supplies">
-      <h2>Supplies in Inventory: {inventoryId}</h2>
+      <h2 className="inventory-title">
+        Supplies in Inventory: <span>{inventoryId}</span>
+      </h2>
 
       {/* Product Table */}
       {products.length > 0 ? (
@@ -54,6 +57,7 @@ const InventoryProducts: React.FC = () => {
               <th>Description</th>
               <th>Price</th>
               <th>Quantity</th>
+              <th>Status</th>
             </tr>
           </thead>
           <tbody>
@@ -63,6 +67,21 @@ const InventoryProducts: React.FC = () => {
                 <td>{product.productName}</td>
                 <td>{product.productDescription}</td>
                 <td>${product.productSalePrice}</td>
+                <td>{product.productQuantity}</td>
+                <td
+                  style={{
+                    color:
+                      product.status === 'RE_ORDER'
+                        ? '#f4a460' // Tan for RE_ORDER
+                        : product.status === 'OUT_OF_STOCK'
+                          ? 'red' // Red for OUT_OF_STOCK
+                          : product.status === 'AVAILABLE'
+                            ? 'green' // Green for AVAILABLE
+                            : 'inherit', // Default color
+                  }}
+                >
+                  {product.status.replace('_', ' ')}
+                </td>
               </tr>
             ))}
           </tbody>

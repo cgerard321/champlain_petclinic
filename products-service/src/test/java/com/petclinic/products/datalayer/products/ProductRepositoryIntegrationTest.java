@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.mongo.DataMongoTest;
 import org.springframework.test.context.ActiveProfiles;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
@@ -24,6 +25,24 @@ class ProductRepositoryIntegrationTest {
                 .expectNextCount(0)
                 .verifyComplete();
     }
+    //Helper method to create a product
+    private Product createProduct(String productName, String productDescription, Double productSalePrice, Double averageRating) {
+        return Product.builder()
+                .productId(UUID.randomUUID().toString())
+                .productName(productName)
+                .productDescription(productDescription)
+                .productSalePrice(productSalePrice)
+                .averageRating(averageRating)
+                .build();
+    }
+
+    //Helper method to save a product
+    private void saveProducts(Product... products) {
+        StepVerifier.create(productRepository.saveAll(Flux.just(products)))
+                .expectNextCount(products.length)
+                .verifyComplete();
+    }
+
 
     @Test
     void whenFoundProduct_thenReturnProduct(){
@@ -156,4 +175,62 @@ class ProductRepositoryIntegrationTest {
                 .expectNextCount(0)
                 .verifyComplete();
     }
+
+    @Test
+    void whenFindByProductSalePriceBetween_thenReturnProductsInRange() {
+        // Given
+        Product product1 = createProduct("Product 1", "Description 1", 10.00, 4.0);
+        Product product2 = createProduct("Product 2", "Description 2", 20.00, 4.5);
+        Product product3 = createProduct("Product 3", "Description 3", 30.00, 5.0);
+
+        saveProducts(product1, product2, product3);
+
+        // When
+        Double minPrice = 15.00;
+        Double maxPrice = 25.00;
+
+        // Then
+        StepVerifier.create(productRepository.findByProductSalePriceBetween(minPrice, maxPrice))
+                .expectNextMatches(product -> product.getProductId().equals(product2.getProductId()))
+                .verifyComplete();
+    }
+
+    @Test
+    void whenNoProductsMatchCriteria_thenReturnEmptyFlux() {
+        // Given
+        Product product1 = createProduct("Product 1", "Description 1", 10.00, 4.0);
+        Product product2 = createProduct("Product 2", "Description 2", 20.00, 4.5);
+
+        saveProducts(product1, product2);
+
+        // When
+        Double minPrice = 50.00;
+        Double maxPrice = 100.00;
+
+        // Then
+        StepVerifier.create(productRepository.findByProductSalePriceBetween(minPrice, maxPrice))
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
+    @Test
+    void whenMinPriceGreaterThanMaxPrice_thenReturnEmptyFlux() {
+        // Given
+        Product product1 = createProduct("Product 1", "Description 1", 10.00, 4.0);
+        Product product2 = createProduct("Product 2", "Description 2", 20.00, 4.5);
+
+        saveProducts(product1, product2);
+
+        // When
+        Double minPrice = 30.00;
+        Double maxPrice = 10.00;
+
+        // Then
+        StepVerifier.create(productRepository.findByProductSalePriceBetween(minPrice, maxPrice))
+                .expectNextCount(0)
+                .verifyComplete();
+    }
+
+
+
 }

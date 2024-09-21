@@ -3,6 +3,8 @@ package com.petclinic.bffapigateway.domainclientlayer;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.petclinic.bffapigateway.dtos.Visits.*;
+import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewRequestDTO;
+import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewResponseDTO;
 import com.petclinic.bffapigateway.exceptions.BadRequestException;
 import com.petclinic.bffapigateway.exceptions.DuplicateTimeException;
 import com.petclinic.bffapigateway.utils.Security.Filters.JwtTokenFilter;
@@ -177,7 +179,8 @@ class VisitsServiceClientIntegrationTest {
                 "1",
                 "f470653d-05c5-4c45-b7a0-7d70f003d2ac",
                 "testJwtToken",
-                "2"
+                "2",
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
         );
 
         // Mock the server response
@@ -222,7 +225,8 @@ class VisitsServiceClientIntegrationTest {
                 "1",
                 "f470653d-05c5-4c45-b7a0-7d70f003d2ac",
                 "testJwtToken",
-                "2"
+                "2",
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
         );
 
         String errorMessage = "{\"message\":\"A visit with the same time already exists.\"}";
@@ -251,7 +255,8 @@ class VisitsServiceClientIntegrationTest {
                 "1",
                 "f470653d-05c5-4c45-b7a0-7d70f003d2ac",
                 "testJwtToken",
-                "2"
+                "2",
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
         );
 
         String errorMessage = "{\"message\":\"Visit not found.\"}";
@@ -280,7 +285,8 @@ class VisitsServiceClientIntegrationTest {
                 "1",
                 "f470653d-05c5-4c45-b7a0-7d70f003d2ac",
                 "testJwtToken",
-                "2"
+                "2",
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
         );
 
         String errorMessage = "{\"message\":\"Invalid request.\"}";
@@ -309,7 +315,8 @@ class VisitsServiceClientIntegrationTest {
                 "1",
                 "f470653d-05c5-4c45-b7a0-7d70f003d2ac",
                 "testJwtToken",
-                "2"
+                "2",
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
         );
 
         // Mock the server error response with a bad request status and non-JSON body, which should trigger an IOException during parsing
@@ -673,6 +680,156 @@ class VisitsServiceClientIntegrationTest {
         Mono<Void> result = visitsServiceClient.deleteVisitByVisitId(testUUID);
 
         StepVerifier.create(result)
+                .verifyComplete();
+    }
+
+
+
+    //Reviews
+    private static final String REVIEW_ID = UUID.randomUUID().toString();
+    @Test
+    void getReviewByReviewId() throws JsonProcessingException {
+        ReviewResponseDTO reviewResponse = ReviewResponseDTO.builder()
+                .reviewId(REVIEW_ID)
+                .rating(4)
+                .reviewerName("zako")
+                .review("hahaha")
+                .dateSubmitted(LocalDateTime.now())
+                .build();
+
+        server.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(reviewResponse)));
+
+        Mono<ReviewResponseDTO> reviewMono = visitsServiceClient.getReviewByReviewId(REVIEW_ID);
+        StepVerifier.create(reviewMono)
+                .expectNextMatches(review -> review.getReviewId().equals(REVIEW_ID) && review.getRating() == 4)
+                .verifyComplete();
+    }
+
+    //add visit
+    @Test
+    void addVisit_Valid() throws JsonProcessingException {
+        // Arrange
+        VisitRequestDTO visitRequestDTO = new VisitRequestDTO(
+                LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")),
+                "Routine Check-up",
+                "1", // Pet ID
+                "practitionerId", // Practitioner ID
+                "jwtToken", // JWT Token
+                "ownerId",
+                "73b5c112-5703-4fb7-b7bc-ac8186811ae1"
+        );
+
+        VisitResponseDTO visitResponseDTO = VisitResponseDTO.builder()
+                .visitId("73b5c112-5703-4fb7-b7bc-ac8186811ae1")
+                .visitDate(LocalDateTime.parse("2024-11-25 13:45", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")))
+                .description("Routine Check-up")
+                .petId("1")
+                .practitionerId("practitionerId")
+                .vetFirstName("John")
+                .vetLastName("Doe")
+                .status(Status.UPCOMING)
+                .build();
+
+        // Mock the server response
+        server.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(visitResponseDTO)));
+
+        // Act
+        Mono<VisitRequestDTO> requestMono = Mono.just(visitRequestDTO); // Wrap VisitRequestDTO in Mono
+        Mono<VisitResponseDTO> resultMono = visitsServiceClient.addVisit(requestMono); // Call addVisit with Mono
+
+        // Assert
+        StepVerifier.create(resultMono)
+                .expectNextMatches(visitResponse -> visitResponse.getVisitId().equals(visitResponseDTO.getVisitId()))
+                .verifyComplete();
+    }
+
+
+
+    @Test
+    void createReview() throws JsonProcessingException {
+        ReviewRequestDTO reviewRequest = ReviewRequestDTO.builder()
+                .rating(5)
+                .reviewerName("zako")
+                .review("hadsks")
+                .dateSubmitted(LocalDateTime.now())
+                .build();
+
+        ReviewResponseDTO reviewResponse = ReviewResponseDTO.builder()
+                .reviewId(REVIEW_ID)
+                .rating(5)
+                .reviewerName("zako")
+                .review("hadsks")
+                .dateSubmitted(LocalDateTime.now())
+                .build();
+
+        server.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(reviewResponse)));
+
+        Mono<ReviewResponseDTO> reviewMono = visitsServiceClient.createReview(Mono.just(reviewRequest));
+        StepVerifier.create(reviewMono)
+                .expectNextMatches(review -> review.getReviewId().equals(REVIEW_ID) && review.getRating() == 5)
+                .verifyComplete();
+    }
+
+
+    @Test
+    void updateReview() throws JsonProcessingException {
+        ReviewRequestDTO updatedReviewRequest = ReviewRequestDTO.builder()
+                .rating(5)
+                .reviewerName("zako")
+                .review("hadsks")
+                .dateSubmitted(LocalDateTime.now())
+                .build();
+
+        ReviewResponseDTO updatedReviewResponse = ReviewResponseDTO.builder()
+                .reviewId(REVIEW_ID)
+                .rating(5)
+                .reviewerName("zako")
+                .review("hadsks")
+                .dateSubmitted(LocalDateTime.now())
+                .build();
+        server.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(updatedReviewResponse)));
+
+        Mono<ReviewResponseDTO> reviewMono = visitsServiceClient.updateReview(REVIEW_ID, Mono.just(updatedReviewRequest));
+        StepVerifier.create(reviewMono)
+                .expectNextMatches(review -> review.getReviewId().equals(REVIEW_ID) && review.getRating() == 5)
+                .verifyComplete();
+
+    }
+
+
+    @Test
+    void getAllReviews() throws JsonProcessingException {
+        ReviewResponseDTO review1 = ReviewResponseDTO.builder()
+                .reviewId(REVIEW_ID)
+                .rating(5)
+                .reviewerName("zako")
+                .review("hadsks")
+                .dateSubmitted(LocalDateTime.now())
+                .build();
+
+        ReviewResponseDTO review2 = ReviewResponseDTO.builder()
+                .reviewId(REVIEW_ID)
+                .rating(3)
+                .reviewerName("zako")
+                .review("hadsks")
+                .dateSubmitted(LocalDateTime.now())
+                .build();
+
+        server.enqueue(new MockResponse()
+                .setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                .setBody(objectMapper.writeValueAsString(new ReviewResponseDTO[]{review1, review2})));
+
+        StepVerifier.create(visitsServiceClient.getAllReviews())
+                .expectNext(review1)
+                .expectNext(review2)
                 .verifyComplete();
     }
 

@@ -1,13 +1,37 @@
 .grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    grid-gap: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
 }
-.card{
-    background-color: lightgray;
-    box-shadow: 10px 10px 5px grey;
-    padding-right: 30px;
 
+.card {
+  background-color: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 16px;
+  transition: box-shadow 0.2s;
+}
 
+.card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
 
+.card h2 {
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+}
+
+.card p {
+  margin: 4px 0;
+}
+
+.card .product-image {
+  width: 100%;
+  height: auto;
+  margin-bottom: 12px;
+}
+
+.card .star-rating {
+  margin-top: 12px;
 }
