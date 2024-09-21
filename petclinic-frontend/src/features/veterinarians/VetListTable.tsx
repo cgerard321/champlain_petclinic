@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react'; // Import React hooks for managing state and side-effects
-import { VetRequestModel } from '@/features/veterinarians/models/VetRequestModel.ts'; // Import the VetRequestModel for type safety
-import { deleteVet } from '@/features/veterinarians/api/deleteVet.ts'; // Import the deleteVet function for the delete operation
-import { Button } from 'react-bootstrap'; // Import Bootstrap components
+import { useEffect, useState } from 'react';
+import { VetRequestModel } from '@/features/veterinarians/models/VetRequestModel.ts';
+import { deleteVet } from '@/features/veterinarians/api/deleteVet.ts';
+import { Button } from 'react-bootstrap';
 
 export default function VetListTable(): JSX.Element {
-  const [vets, setVets] = useState<VetRequestModel[]>([]); // State to store the list of vets
-  const [error, setError] = useState<string | null>(null); // State to handle any errors
+  const [vets, setVets] = useState<VetRequestModel[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchVets = async (): Promise<void> => {
     try {
@@ -21,7 +21,7 @@ export default function VetListTable(): JSX.Element {
       }
 
       const data = await response.json();
-      setVets(data); // Store the fetched vets in state
+      setVets(data);
     } catch (err) {
       console.error('Error fetching vets:', err);
       setError('Failed to fetch vets');
@@ -35,9 +35,9 @@ export default function VetListTable(): JSX.Element {
   const handleDelete = async (vetId: string) => {
     if (window.confirm('Are you sure you want to delete this vet?')) {
       try {
-        await deleteVet(vetId); // Call the delete API
+        await deleteVet(vetId);
         alert('Vet deleted successfully');
-        fetchVets(); // Refresh the list after deletion
+        fetchVets();
       } catch (error) {
         console.error('Error deleting vet:', error);
         alert('Failed to delete vet');
