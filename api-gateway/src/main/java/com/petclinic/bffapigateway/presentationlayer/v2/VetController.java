@@ -46,7 +46,7 @@ public class VetController {
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @DeleteMapping(value = "{vetId}")
     public Mono<ResponseEntity<Void>> deleteVet(@PathVariable String vetId) {
         return vetsServiceClient.deleteVet(VetsEntityDtoUtil.verifyId(vetId))
