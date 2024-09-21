@@ -5,6 +5,7 @@ import { addReview } from './Api/addReview';
 import { ReviewRequestDTO } from './Model/ReviewRequestDTO';
 import './AddForm.css';
 
+// Define an interface for the error if known
 interface ApiError {
   message: string;
 }
