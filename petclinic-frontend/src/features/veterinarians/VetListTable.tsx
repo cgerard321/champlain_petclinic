@@ -9,10 +9,15 @@ export default function VetListTable(): JSX.Element {
   useEffect(() => {
     const fetchVets = async (): Promise<void> => {
       try {
-        const response = await fetch(`http://localhost:8080/api/v2/gateway/vets`, {
-          headers: { Accept: 'application/json' },
-          credentials: 'include',
-        });
+        const response = await fetch(
+            `http://localhost:8080/api/v2/gateway/vets`,
+            {
+              headers: {
+                Accept: 'application/json',
+              },
+              credentials: 'include',
+            }
+        );
 
         if (!response.ok) {
           throw new Error(`Error: ${response.status} ${response.statusText}`);
