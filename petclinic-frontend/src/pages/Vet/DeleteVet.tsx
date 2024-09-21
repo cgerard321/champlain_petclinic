@@ -1,10 +1,12 @@
 import * as React from 'react';
 import { deleteVet } from '@/features/veterinarians/api/deleteVet';
 
+
 interface DeleteVetProps {
   vetId: string;
   onVetDeleted: () => void;
 }
+
 
 const DeleteVet: React.FC<DeleteVetProps> = ({
   vetId,
@@ -23,11 +25,13 @@ const DeleteVet: React.FC<DeleteVetProps> = ({
     }
   };
 
+
   return (
     <button onClick={handleDelete} className="btn btn-danger">
       Delete
     </button>
   );
 };
+
 
 export default DeleteVet;
