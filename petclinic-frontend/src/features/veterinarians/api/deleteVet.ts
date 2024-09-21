@@ -6,3 +6,4 @@ export const deleteVet = async (
 ): Promise<AxiosResponse<void>> => {
   return await axiosInstance.delete<void>(`/vets/${vetId}`);
 };
+
