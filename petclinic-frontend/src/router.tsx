@@ -23,7 +23,6 @@ import EditReviewForm from './features/visits/Review/EditReviewForm';
 import Review from './pages/Review/Review';
 import EditInventory from '@/features/inventories/EditInventory.tsx';
 import CartPage from "@/pages/Carts/Cart.tsx";
-import UserCart from '@/pages/Carts/Cart.tsx';
 import VisitByVisitId from './features/visits/visits/VisitByVisitId';
 import AddingVisit from './features/visits/models/AddingVisit';
 
@@ -180,14 +179,6 @@ const router = createBrowserRouter([
         element: (
             <ProtectedRoute roles={['ADMIN']}>
               <CartPage />
-            </ProtectedRoute>
-        ),
-      },
-      {
-        path: AppRoutePaths.UserCart,
-        element: (
-            <ProtectedRoute roles={['ADMIN']}>
-              <UserCart />
             </ProtectedRoute>
         ),
       },
