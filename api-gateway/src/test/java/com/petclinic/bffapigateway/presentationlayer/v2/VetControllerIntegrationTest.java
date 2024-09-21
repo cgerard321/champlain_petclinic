@@ -51,6 +51,8 @@ class VetControllerIntegrationTest {
     public void startMockServer() {
         mockServerConfigVetService = new MockServerConfigVetService();
         mockServerConfigVetService.registerAddVetEndpoint();
+        mockServerConfigVetService.registerGetVetsEndpoint();
+        mockServerConfigVetService.registerGetVetsEndpoint_withNoVets();
 
         mockServerConfigAuthService = new MockServerConfigAuthService();
         mockServerConfigAuthService.registerValidateTokenForAdminEndpoint();
@@ -86,10 +88,35 @@ class VetControllerIntegrationTest {
     //#endregion
 
     @Test
+    public void whenGetVets_thenReturnVets() {
+
+        webTestClient.get()
+                .uri(VET_ENDPOINT)
+                .cookie("Bearer", jwtTokenForValidAdmin)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBodyList(VetResponseDTO.class)
+                .hasSize(2);
+    }
+
+    @Test
+    public void whenGetVets_withNoVets_thenReturnNotFound() {
+
+            webTestClient.get()
+                    .uri("/vets")
+                    .cookie("Bearer", jwtTokenForValidAdmin)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .exchange()
+                    .expectStatus().isNotFound();
+    }
+
+    @Test
     void whenAddVet_asAdmin_thenReturnCreatedVetResponseDTO() {
 
         Mono<VetResponseDTO> result = webTestClient.post()
-                .uri("/api/v2/gateway/vets")
+                .uri(VET_ENDPOINT)
                 .cookie("Bearer", jwtTokenForValidAdmin)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(Mono.just(newVetRequestDTO), VetRequestDTO.class)

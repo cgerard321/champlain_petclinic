@@ -14,7 +14,6 @@ export const ProtectedRoute = ({
   children,
   roles,
 }: ProtectedRouteProps): JSX.Element => {
-  useAuthRedirect();
   const navigate = useNavigate();
   const hasRequiredRole = useHasRequiredRole(roles);
 
@@ -23,6 +22,8 @@ export const ProtectedRoute = ({
       navigate(AppRoutePaths.Forbidden);
     }
   }, [hasRequiredRole, navigate]);
+
+  useAuthRedirect();
 
   return <>{children}</>;
 };
