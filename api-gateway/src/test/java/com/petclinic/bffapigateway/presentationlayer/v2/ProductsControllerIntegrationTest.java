@@ -12,6 +12,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
+import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService.jwtTokenForValidAdmin;
+import static com.petclinic.bffapigateway.presentationlayer.v2.mockservers.MockServerConfigAuthService.jwtTokenForValidOwnerId;
 import static org.junit.Assert.*;
 
 
@@ -54,6 +56,7 @@ public class ProductsControllerIntegrationTest {
     void whenGetAllProducts_thenReturnProducts() {
         webTestClient.get()
                 .uri("/api/v2/gateway/products")
+                .cookie("Bearer", jwtTokenForValidAdmin)
                 .accept(MediaType.valueOf(MediaType.TEXT_EVENT_STREAM_VALUE))
                 .exchange()
                 .expectStatus().isOk()
