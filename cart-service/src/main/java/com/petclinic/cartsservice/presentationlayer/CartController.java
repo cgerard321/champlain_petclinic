@@ -46,6 +46,7 @@ public class CartController {
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public Flux<CartResponseModel> getAllCarts() {
         return cartService.getAllCarts();
+    }
 
     // Adding the clearCart method from feat/CART-CPC-1144_clear_cart_feature
     @DeleteMapping("/{cartId}/clear")
