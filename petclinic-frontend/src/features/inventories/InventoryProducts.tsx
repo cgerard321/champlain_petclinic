@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import {useState, useEffect, useCallback} from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { ProductModel } from './models/ProductModels/ProductModel';
@@ -14,7 +14,7 @@ const InventoryProducts: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   // Fetch products from the backend
-  const fetchProducts = async (): Promise<void> => {
+  const fetchProducts = useCallback(async (): Promise<void> => {
     setLoading(true);
     setError(null);
     try {
@@ -27,7 +27,7 @@ const InventoryProducts: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [inventoryId]);
 
   // useEffect with dependency
   useEffect(() => {
@@ -35,7 +35,7 @@ const InventoryProducts: React.FC = () => {
       fetchProducts().catch(err => console.error(err));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inventoryId]);
+  }, [inventoryId, fetchProducts()]);
 
   // Render loading, error, and product table
   if (loading) return <p>Loading supplies...</p>;
