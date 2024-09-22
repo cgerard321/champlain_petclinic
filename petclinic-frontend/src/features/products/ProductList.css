@@ -35,3 +35,8 @@
 .card .star-rating {
   margin-top: 12px;
 }
+
+.main-content {
+  padding: 20px;
+  transition: margin-right 0.3s ease;
+}
