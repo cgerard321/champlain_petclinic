@@ -14,6 +14,7 @@ export default function ProductList(): JSX.Element {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { user } = useUser();
   const [isRightRole, setIsRightRole] = useState<boolean>(false);
+  const [recentlyClickedProducts, setRecentlyClickedProducts] = useState<ProductModel[]>([]);
 
   const fetchProducts = async (): Promise<void> => {
     // Validate inputs
@@ -70,6 +71,26 @@ export default function ProductList(): JSX.Element {
     }
   };
 
+  const handleProductClick = (product: ProductModel) => {
+    setRecentlyClickedProducts(listOfProducts => {
+      const updatedProducts = [];
+
+      for (let p of listOfProducts) {
+        updatedProducts.push(p);
+      }
+
+        updatedProducts.push(product);
+
+
+      if (updatedProducts.length > 5) {
+        updatedProducts.shift();
+      }
+
+
+      return updatedProducts;
+    });
+  };
+
   return (
     <div>
       <div className="filter-container">
@@ -106,12 +127,27 @@ export default function ProductList(): JSX.Element {
           <p>Loading products...</p>
         ) : productList.length > 0 ? (
           productList.map((product: ProductModel) => (
+              <div onClick={() => handleProductClick(product)}>
             <Product key={product.productId} product={product} />
+              </div>
           ))
         ) : (
           <p>No products found.</p>
         )}
       </div>
+      <div>
+        <h2>Recently Clicked Products</h2>
+        <div className="grid">
+          {recentlyClickedProducts.map(product => (
+              <div className="card" key={product.productId}>
+                <h2>{product.productName}</h2>
+                <p>{product.productDescription}</p>
+                <p>Price: ${product.productSalePrice.toFixed(2)}</p>
+              </div>
+          ))}
+        </div>
+      </div>
+
     </div>
   );
 }
