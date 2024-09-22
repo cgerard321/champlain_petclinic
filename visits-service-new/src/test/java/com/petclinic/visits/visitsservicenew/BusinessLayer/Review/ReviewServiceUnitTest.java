@@ -187,11 +187,12 @@ class ReviewServiceUnitTest {
                 .verify();
     }*/
 
-   /* @Test
+    @Test
     public void whenDeleteReviewByReviewId_thenDeleteReview() {
         // Arrange
         when(reviewRepository.findReviewByReviewId(review1.getReviewId())).thenReturn(Mono.just(review1));
-        when(reviewRepository.deleteById(review1.getId())).thenReturn(Mono.empty());
+        // Mock the correct `delete` method, ensuring it returns a valid Mono
+        when(reviewRepository.delete(review1)).thenReturn(Mono.empty());
 
         // Act
         Mono<ReviewResponseDTO> result = reviewService.DeleteReview(review1.getReviewId());
@@ -201,7 +202,8 @@ class ReviewServiceUnitTest {
                 .create(result)
                 .expectNextMatches(reviewResponseDTO -> reviewResponseDTO.getReviewId().equals(review1.getReviewId()))
                 .verifyComplete();
-    } */
+    }
+
 
   /*  @Test
     public void whenReviewIdDoesNotExistOnDelete_thenReturnNotFound() {

@@ -57,6 +57,7 @@ public class OwnerController {
         return customersServiceClient.getAllOwners();
     }
 
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.VET, Roles.OWNER})
     @IsUserSpecific(idToMatch = {"ownerId"}, bypassRoles = {Roles.ADMIN})
     @GetMapping(value = "/{ownerId}")
     public Mono<ResponseEntity<OwnerResponseDTO>> getOwnerDetails(@PathVariable String ownerId) {
