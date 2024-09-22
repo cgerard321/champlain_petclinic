@@ -83,9 +83,11 @@ export function NavBar(): JSX.Element {
                     Inventories
                   </Nav.Link>
                 )}
+                {
                   <Nav.Link as={Link} to={AppRoutePaths.Products}>
                     Shop
                   </Nav.Link>
+                }
               </>
             )}
           </Nav>
