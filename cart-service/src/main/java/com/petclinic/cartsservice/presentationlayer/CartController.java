@@ -1,8 +1,8 @@
 package com.petclinic.cartsservice.presentationlayer;
 
-
 import com.petclinic.cartsservice.businesslayer.CartService;
 import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,5 +35,13 @@ public class CartController {
                 .flatMap(id -> cartService.updateCartByCartId(cartRequestModel, id))
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    @PostMapping(value= "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<CartResponseModel>> addCart(@RequestBody CartRequestModel cartRequestModel) {
+        return cartService.createNewCart(cartRequestModel)
+                .map(c-> ResponseEntity.status(HttpStatus.CREATED).body(c))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+
     }
 }
