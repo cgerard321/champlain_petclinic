@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -13,4 +15,5 @@ import lombok.NoArgsConstructor;
 // first creates his account, the cart will be empty
 public class CartRequestDTO {
     private String customerId;
+    private List<String> productIds;
 }
