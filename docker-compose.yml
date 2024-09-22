@@ -58,14 +58,16 @@ services:
       - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=docker
-    depends_on:
-      - customers-service-reactive
-      - vet-service
-      - visits-service-new
-      - products-service
-      - cart-service
+  #  depends_on:
+  #    - customers-service-reactive
+  #    - vet-service
+  #    - visits-service-new
+  #    - products-service
+  #    - cart-service
+  #TODO remove upward comments
   #            - visits
   #            - inventory-service
+
 
   auth-service:
     build: auth-service
@@ -110,6 +112,7 @@ services:
       - ConnectionStrings__DefaultConnection=Server=emailing-service-mysql-db;Database=MyAppDb;User=root;Password=Your_password123;
     depends_on:
       - emailing-service-mysql-db
+      - api-gateway
     env_file:
       - mailer.env
 
@@ -127,7 +130,7 @@ services:
     container_name: phpmyadmin-emailing-service
     restart: always
     ports:
-      - "8080:80"
+      - "5019:80"
     environment:
       - PMA_HOST=emailing-service-mysql-db
       - MYSQL_ROOT_PASSWORD=Your_password123
