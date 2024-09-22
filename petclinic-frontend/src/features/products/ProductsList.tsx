@@ -3,17 +3,12 @@ import { getAllProducts } from '@/features/products/api/getAllProducts.ts';
 import './ProductList.css';
 import { ProductModel } from '@/features/products/models/ProductModels/ProductModel';
 import Product from './components/Product';
-import AddProduct from './components/AddProduct';
-import { addProduct } from '@/features/products/api/addProduct';
-import { useUser } from '@/context/UserContext';
 
 export default function ProductList(): JSX.Element {
   const [productList, setProductList] = useState<ProductModel[]>([]);
   const [minPrice, setMinPrice] = useState<number | undefined>(undefined);
   const [maxPrice, setMaxPrice] = useState<number | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const { user } = useUser();
-  const [isRightRole, setIsRightRole] = useState<boolean>(false);
 
   const fetchProducts = async (): Promise<void> => {
     // Validate inputs
@@ -50,26 +45,6 @@ export default function ProductList(): JSX.Element {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    const hasRightRole =
-      user?.roles !== undefined &&
-      Array.from(user.roles).some(
-        role => role.name === 'ADMIN' || role.name === 'INVENTORY_MANAGER'
-      );
-    setIsRightRole(hasRightRole);
-  }, [user]);
-
-  const handleAddProduct = async (
-    product: Omit<ProductModel, 'productId'>
-  ): Promise<void> => {
-    try {
-      await addProduct(product);
-      await fetchProducts();
-    } catch (error) {
-      console.error('Error adding product:', error);
-    }
-  };
-
   return (
     <div>
       <div className="filter-container">
@@ -100,7 +75,6 @@ export default function ProductList(): JSX.Element {
         <button onClick={fetchProducts}>Apply Filter</button>
       </div>
 
-      {isRightRole && <AddProduct addProduct={handleAddProduct} />}
       <div className="grid">
         {isLoading ? (
           <p>Loading products...</p>
