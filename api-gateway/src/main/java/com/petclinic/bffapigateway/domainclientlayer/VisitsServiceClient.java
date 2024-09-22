@@ -161,6 +161,11 @@ public class VisitsServiceClient {
                             }
                         } catch (IOException e) {
                             // Handle parsing error
+                            StringWriter sw = new StringWriter();
+                            e.printStackTrace(new PrintWriter(sw));
+                            String exceptionAsString = sw.toString();
+
+                            System.out.println(exceptionAsString);
                             return Mono.error(new BadRequestException("Bad Request"));
                         }
                     });
