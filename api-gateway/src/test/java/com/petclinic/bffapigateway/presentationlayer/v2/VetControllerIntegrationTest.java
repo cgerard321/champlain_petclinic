@@ -97,7 +97,7 @@ class VetControllerIntegrationTest {
     @Test
     public void whenGetVets_withNoVets_thenReturnNotFound() {
         webTestClient.get()
-                .uri(VET_ENDPOINT)
+                .uri("/vets")
                 .cookie("Bearer", jwtTokenForValidAdmin)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()

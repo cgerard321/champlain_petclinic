@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { Visit } from './models/Visit';
 import './VisitListTable.css';
 import { useNavigate } from 'react-router-dom';
-import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 
 export default function VisitListTable(): JSX.Element {
   const [visitsList, setVisitsList] = useState<Visit[]>([]);
@@ -52,21 +51,13 @@ export default function VisitListTable(): JSX.Element {
       >
         Leave a Review
       </button>
-      <p></p>
+      <p> </p>
       <button
         className="btn btn-dark"
         onClick={() => navigate('/reviews')}
         title="View review"
       >
         View Reviews
-      </button>
-
-      <button
-        className="btn btn-warning"
-        onClick={() => navigate(AppRoutePaths.AddVisit)}
-        title="Make a visit"
-      >
-        Make a visit
       </button>
       <h1>Visits List</h1>
       <table>
@@ -86,7 +77,7 @@ export default function VisitListTable(): JSX.Element {
           {visitsList.map(visit => (
             <tr key={visit.visitId}>
               <td>{visit.visitId}</td>
-              <td>{new Date(visit.visitDate).toLocaleString()}</td>
+              <td>{visit.visitDate}</td>
               <td>{visit.description}</td>
               <td>{visit.petName}</td>
               <td>{visit.vetFirstName}</td>
@@ -105,15 +96,6 @@ export default function VisitListTable(): JSX.Element {
                 }}
               >
                 {visit.status}
-              </td>
-              <td>
-                <button
-                  className="btn btn-dark"
-                  onClick={() => navigate(`/visits/${visit.visitId}`)}
-                  title="View"
-                >
-                  View
-                </button>
               </td>
             </tr>
           ))}
