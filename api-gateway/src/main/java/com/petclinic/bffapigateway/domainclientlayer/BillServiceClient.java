@@ -27,7 +27,6 @@ public class BillServiceClient {
     private final WebClient.Builder webClientBuilder;
     private final String billServiceUrl;
 
-
     public BillServiceClient(
             WebClient.Builder webClientBuilder,
             @Value("${app.billing-service.host}") String billingServiceHost,
@@ -59,6 +58,14 @@ public class BillServiceClient {
                 .retrieve()
                 .bodyToFlux(BillResponseDTO.class);
     }
+
+    public Flux<BillResponseDTO> getBillsByCustomerId(final String customerId) {
+        return webClientBuilder.build().get()
+                .uri(billServiceUrl + "/customers/" + customerId + "/bills")
+                .retrieve()
+                .bodyToFlux(BillResponseDTO.class);
+    }
+
     public Flux<BillResponseDTO> getAllBilling() {
         return webClientBuilder.build().get()
                 .uri(billServiceUrl)
