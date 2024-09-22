@@ -43,6 +43,22 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
+
+
+    public Flux<CartResponseModel> getAllCarts() {
+        return cartRepository.findAll()
+                .flatMap(cart -> {
+                    List<String> productIds = cart.getProductIds();
+                    return productIds.stream()
+                            .map(productId -> productClient.getProductByProductId(productId).flux()) // fetch products for each cart
+                            .reduce(Flux.empty(), Flux::merge) // merge product streams
+                            .collectList() // collect all products into a list
+                            .map(products -> EntityModelUtil.toCartResponseModel(cart, products)); // map the cart and products to CartResponseModel
+                })
+                .doOnNext(cartResponseModel -> log.debug("Cart: " + cartResponseModel));
+    }
+
+
     public Flux<ProductResponseModel> clearCart(String cartId) {
         return cartRepository.findCartByCartId(cartId)
                 .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
@@ -59,6 +75,7 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
+
     public Mono<CartResponseModel> updateCartByCartId(Mono<CartRequestModel> cartRequestModel, String cartId) {
         return cartRepository.findCartByCartId(cartId)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Cart id was not found: " + cartId))))
@@ -84,4 +101,5 @@ public class CartServiceImpl implements CartService {
                             .map(products -> EntityModelUtil.toCartResponseModel(cart, products));
                 });
     }
+
 }

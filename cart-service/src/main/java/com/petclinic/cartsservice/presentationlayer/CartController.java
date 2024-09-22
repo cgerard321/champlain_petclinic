@@ -7,8 +7,19 @@ import com.petclinic.cartsservice.utils.exceptions.InvalidInputException;
 import com.petclinic.cartsservice.utils.exceptions.NotFoundException;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
+
+import org.springframework.web.bind.annotation.*;
+
+
+
+import reactor.core.publisher.Flux;
+
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -30,6 +41,13 @@ public class CartController {
                 .map(ResponseEntity::ok);
     }
 
+
+
+    @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+    public Flux<CartResponseModel> getAllCarts() {
+        return cartService.getAllCarts();
+    }
+
     // Adding the clearCart method from feat/CART-CPC-1144_clear_cart_feature
     @DeleteMapping("/{cartId}/clear")
     public Flux<ProductResponseModel> clearCart(@PathVariable String cartId) {
@@ -46,5 +64,9 @@ public class CartController {
                 .flatMap(id -> cartService.updateCartByCartId(cartRequestModel, id))
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
+
     }
-}
+
+
+    }
+
