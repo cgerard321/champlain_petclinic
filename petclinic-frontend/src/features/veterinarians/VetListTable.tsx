@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { VetRequestModel } from '@/features/veterinarians/models/VetRequestModel.ts';
 import { useNavigate } from 'react-router-dom';
 import './VetListTable.css';
+import DeleteVet from '@/pages/Vet/DeleteVet.tsx';
 
 export default function VetListTable(): JSX.Element {
   const [vets, setVets] = useState<VetRequestModel[]>([]);
@@ -39,6 +40,10 @@ export default function VetListTable(): JSX.Element {
   // Function to handle row click
   const handleRowClick = (vetId: string): void => {
     navigate(`/vets/${vetId}`); // Navigate to the vet details page
+
+  const handleVetDelete = (vetId: string): void => {
+    setVets(prevVets => prevVets.filter(vet => vet.vetId !== vetId));
+
   };
 
   return (
@@ -52,6 +57,7 @@ export default function VetListTable(): JSX.Element {
               <th>First Name</th>
               <th>Last Name</th>
               <th>Specialties</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -65,6 +71,12 @@ export default function VetListTable(): JSX.Element {
                 <td>{vet.lastName}</td>
                 <td>
                   {vet.specialties.map(specialty => specialty.name).join(', ')}
+                </td>
+                <td>
+                  <DeleteVet
+                    vetId={vet.vetId}
+                    onVetDeleted={() => handleVetDelete(vet.vetId)}
+                  />
                 </td>
               </tr>
             ))}
