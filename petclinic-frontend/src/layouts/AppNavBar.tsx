@@ -99,7 +99,6 @@ export function NavBar(): JSX.Element {
                     Carts
                   </Nav.Link>
                 )}
-
               </>
             )}
           </Nav>
