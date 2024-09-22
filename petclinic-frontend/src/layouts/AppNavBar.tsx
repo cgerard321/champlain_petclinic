@@ -92,9 +92,14 @@ export function NavBar(): JSX.Element {
           <Nav className="ms-auto">
             {user.userId !== '' ? (
               <NavDropdown title={`${user.username}`} id="user-dropdown">
-                <NavDropdown.Item as={Link} to={AppRoutePaths.Home}>
-                  Profile
-                </NavDropdown.Item>
+                {IsOwner() && (
+                  <NavDropdown.Item
+                    as={Link}
+                    to={AppRoutePaths.CustomerProfile}
+                  >
+                    Profile
+                  </NavDropdown.Item>
+                )}
                 {IsOwner() && (
                   <NavDropdown.Item
                     as={Link}
