@@ -27,6 +27,9 @@ app:
   products-service:
     host: localhost
     port: 7007
+  cart-service:
+    host: localhost
+    port: 7008
 
 logging:
   level:
@@ -69,6 +72,9 @@ app:
     port: 8080
   products-service:
     host: products-service
+    port: 8080
+  cart-service:
+    host: cart-service
     port: 8080
 
 logging:
