@@ -69,14 +69,14 @@ export function NavBar(): JSX.Element {
                   </NavDropdown>
                 )}
                 {!IsAdmin() && (
-                    <Nav.Link as={Link} to={AppRoutePaths.CustomerBills}>
-                      Bills
-                    </Nav.Link>
+                  <Nav.Link as={Link} to={AppRoutePaths.CustomerBills}>
+                    Bills
+                  </Nav.Link>
                 )}
                 {IsAdmin() && (
-                    <Nav.Link as={Link} to={AppRoutePaths.AdminBills}>
-                      Bills
-                    </Nav.Link>
+                  <Nav.Link as={Link} to={AppRoutePaths.AdminBills}>
+                    Bills
+                  </Nav.Link>
                 )}
                 {(IsAdmin() || IsVet()) && (
                   <Nav.Link as={Link} to={AppRoutePaths.Visits}>
