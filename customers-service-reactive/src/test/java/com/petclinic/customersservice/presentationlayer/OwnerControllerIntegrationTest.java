@@ -66,16 +66,16 @@ class OwnerControllerIntegrationTest {
 
     @Test
     void deleteNonExistentOwnerByOwnerId() {
-        // Ensure no duplicate ownerId exists before test
+
         StepVerifier.create(repo.deleteAll()).verifyComplete();
 
-        // Perform the DELETE request with a non-existent ownerId
+
         String nonExistentOwnerId = "a6e0e5b0-5f60-45f0-8ac7-becd8b330486";
 
         client.delete().uri("/owners/" + nonExistentOwnerId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isNotFound()  // Expect 404 Not Found status
+                .expectStatus().isNotFound() 
                 .expectBody()
                 .jsonPath("$.message").isEqualTo("Course id not found: " + nonExistentOwnerId);  // Expect the error message to indicate the ownerId was not found
     }
