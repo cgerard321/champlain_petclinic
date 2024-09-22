@@ -56,6 +56,8 @@ class VetControllerIntegrationTest {
         mockServerConfigVetService.registerDeleteVetEndpoint();
         mockServerConfigVetService.registerGetVetsEndpoint_withNoVets();
 
+
+
         mockServerConfigAuthService = new MockServerConfigAuthService();
         mockServerConfigAuthService.registerValidateTokenForAdminEndpoint();
         mockServerConfigAuthService.registerValidateTokenForVetEndpoint();
@@ -89,6 +91,7 @@ class VetControllerIntegrationTest {
             .specialties(Set.of(SpecialtyDTO.builder().specialtyId("dermatology").name("Dermatology").build()))
             .photoDefault(false)
             .build();
+
     //#endregion
 
     @Test
@@ -286,5 +289,6 @@ class VetControllerIntegrationTest {
                 .expectBody().isEmpty();
     }
 
+   
 
 }
