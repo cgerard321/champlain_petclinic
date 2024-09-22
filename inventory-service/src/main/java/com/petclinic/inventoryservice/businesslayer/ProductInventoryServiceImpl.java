@@ -50,13 +50,13 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                                 product.setInventoryId(inventoryId);
                                 product.setProductId(EntityDTOUtil.generateUUID());
                                 // Set Status based on the product quantity
-                                if (product.getProductQuantity() == 0) {
-                                    product.setStatus(Status.OUT_OF_STOCK);
-                                } else if (product.getProductQuantity() < 20) {
-                                    product.setStatus(Status.RE_ORDER);
-                                } else {
-                                    product.setStatus(Status.AVAILABLE);
-                                }
+//                                if (product.getProductQuantity() == 0) {
+//                                    product.setStatus(Status.OUT_OF_STOCK);
+//                                } else if (product.getProductQuantity() < 20) {
+//                                    product.setStatus(Status.RE_ORDER);
+//                                } else {
+//                                    product.setStatus(Status.AVAILABLE);
+//                                }
                                 return productRepository.save(product)
                                         .map(EntityDTOUtil::toProductResponseDTO);
                             }
@@ -124,13 +124,13 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                                             existingProduct.setProductSalePrice(requestDTO.getProductSalePrice());
 
                                             // Set Status based on the product quantity
-                                            if (existingProduct.getProductQuantity() == 0) {
-                                                existingProduct.setStatus(Status.OUT_OF_STOCK);
-                                            } else if (existingProduct.getProductQuantity() < 20) {
-                                                existingProduct.setStatus(Status.RE_ORDER);
-                                            } else {
-                                                existingProduct.setStatus(Status.AVAILABLE);
-                                            }
+//                                            if (existingProduct.getProductQuantity() == 0) {
+//                                                existingProduct.setStatus(Status.OUT_OF_STOCK);
+//                                            } else if (existingProduct.getProductQuantity() < 20) {
+//                                                existingProduct.setStatus(Status.RE_ORDER);
+//                                            } else {
+//                                                existingProduct.setStatus(Status.AVAILABLE);
+//                                            }
 
                                             return productRepository.save(existingProduct)
                                                     .map(EntityDTOUtil::toProductResponseDTO);
