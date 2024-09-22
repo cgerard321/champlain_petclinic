@@ -3,10 +3,9 @@ package com.petclinic.inventoryservice.businesslayer;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryNameRepository;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryRepository;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryTypeRepository;
-import com.petclinic.inventoryservice.datalayer.Product.Product;
-import com.petclinic.inventoryservice.datalayer.Product.ProductRepository;
-import com.petclinic.inventoryservice.datalayer.Supply.Status;
 import com.petclinic.inventoryservice.datalayer.Supply.Supply;
+import com.petclinic.inventoryservice.datalayer.Supply.SupplyRepository;
+import com.petclinic.inventoryservice.datalayer.Supply.Status;
 import com.petclinic.inventoryservice.presentationlayer.*;
 import com.petclinic.inventoryservice.utils.EntityDTOUtil;
 import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
@@ -27,41 +26,42 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class ProductInventoryServiceImpl implements ProductInventoryService {
+public class SupplyInventoryServiceImpl implements SupplyInventoryService {
 
     private final InventoryRepository inventoryRepository;
-    private final ProductRepository productRepository;
+    private final SupplyRepository supplyRepository;
     private final InventoryTypeRepository inventoryTypeRepository;
     private final InventoryNameRepository inventoryNameRepository;
 
+
     @Override
-    public Mono<ProductResponseDTO> addProductToInventory(Mono<ProductRequestDTO> productRequestDTOMono, String inventoryId) {
-        return productRequestDTOMono
+    public Mono<SupplyResponseDTO> addSupplyToInventory(Mono<SupplyRequestDTO> supplyRequestDTOMono, String inventoryId) {
+        return supplyRequestDTOMono
                 .publishOn(Schedulers.boundedElastic())
                 .flatMap(requestDTO -> inventoryRepository.findInventoryByInventoryId(inventoryId)
                         .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with id: " + inventoryId)))
                         .flatMap(inventory -> {
-                            if (requestDTO.getProductName() == null || requestDTO.getProductPrice() == null || requestDTO.getProductQuantity() == null || requestDTO.getProductSalePrice() == null) {
-                                return Mono.error(new InvalidInputException("Product must have an inventory id, product name, product price, and product quantity."));
-                            } else if (requestDTO.getProductPrice() < 0 || requestDTO.getProductQuantity() < 0 || requestDTO.getProductSalePrice() < 0) {
-                                return Mono.error(new InvalidInputException("Product price and quantity must be greater than 0."));
+                            if (requestDTO.getSupplyName() == null || requestDTO.getSupplyPrice() == null || requestDTO.getSupplyQuantity() == null || requestDTO.getSupplySalePrice() == null) {
+                                return Mono.error(new InvalidInputException("Supply must have an inventory id, supply name, supply price, and supply quantity."));
+                            } else if (requestDTO.getSupplyPrice() < 0 || requestDTO.getSupplyQuantity() < 0 || requestDTO.getSupplySalePrice() < 0) {
+                                return Mono.error(new InvalidInputException("Supply price and quantity must be greater than 0."));
                             } else {
-                                Product product = EntityDTOUtil.toProductEntity(requestDTO);
-                                product.setInventoryId(inventoryId);
-                                product.setProductId(EntityDTOUtil.generateUUID());
-                                // Set Status based on the product quantity
-                                if (product.getProductQuantity() == 0) {
-                                    product.setStatus(Status.OUT_OF_STOCK);
-                                } else if (product.getProductQuantity() < 20) {
-                                    product.setStatus(Status.RE_ORDER);
+                                Supply supply = EntityDTOUtil.toSupplyEntity(requestDTO);
+                                supply.setInventoryId(inventoryId);
+                                supply.setSupplyId(EntityDTOUtil.generateUUID());
+                                // Set Status based on the supply quantity
+                                if (supply.getSupplyQuantity() == 0) {
+                                    supply.setStatus(Status.OUT_OF_STOCK);
+                                } else if (supply.getSupplyQuantity() < 20) {
+                                    supply.setStatus(Status.RE_ORDER);
                                 } else {
-                                    product.setStatus(Status.AVAILABLE);
+                                    supply.setStatus(Status.AVAILABLE);
                                 }
-                                return productRepository.save(product)
-                                        .map(EntityDTOUtil::toProductResponseDTO);
+                                return supplyRepository.save(supply)
+                                        .map(EntityDTOUtil::toSupplyResponseDTO);
                             }
                         }))
-                .switchIfEmpty(Mono.error(new InvalidInputException("Unable to save product to the repository, an error occurred.")));
+                .switchIfEmpty(Mono.error(new InvalidInputException("Unable to save supply to the repository, an error occurred.")));
     }
 
     @Override
@@ -103,42 +103,42 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     }
 
     @Override
-    public Mono<ProductResponseDTO> updateProductInInventory(Mono<ProductRequestDTO> productRequestDTOMono, String inventoryId, String productId) {
+    public Mono<SupplyResponseDTO> updateSupplyInInventory(Mono<SupplyRequestDTO> supplyRequestDTOMono, String inventoryId, String supplyId) {
 
-        return productRequestDTOMono
+        return supplyRequestDTOMono
                 .publishOn(Schedulers.boundedElastic())
                 .flatMap(requestDTO -> inventoryRepository.findInventoryByInventoryId(inventoryId)
                         .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with id: " + inventoryId)))
                         .flatMap(inventory -> {
-                            if (requestDTO.getProductName() == null || requestDTO.getProductPrice() == null || requestDTO.getProductQuantity() == null || requestDTO.getProductSalePrice() == null) {
-                                    return Mono.error(new InvalidInputException("Product must have an inventory id, product name, product price, and product quantity."));
-                            } else if (requestDTO.getProductPrice() < 0 || requestDTO.getProductQuantity() < 0 || requestDTO.getProductSalePrice() < 0) {
-                                return Mono.error(new InvalidInputException("Product price and quantity must be greater than 0."));
+                            if (requestDTO.getSupplyName() == null || requestDTO.getSupplyPrice() == null || requestDTO.getSupplyQuantity() == null || requestDTO.getSupplySalePrice() == null) {
+                                return Mono.error(new InvalidInputException("Supply must have an inventory id, supply name, supply price, and supply quantity."));
+                            } else if (requestDTO.getSupplyPrice() < 0 || requestDTO.getSupplyQuantity() < 0 || requestDTO.getSupplySalePrice() < 0) {
+                                return Mono.error(new InvalidInputException("Supply price and quantity must be greater than 0."));
                             } else {
-                                return productRepository.findProductByProductId(productId)
-                                        .flatMap(existingProduct -> {
-                                            existingProduct.setProductName(requestDTO.getProductName());
-                                            existingProduct.setProductDescription(requestDTO.getProductDescription());
-                                            existingProduct.setProductPrice(requestDTO.getProductPrice());
-                                            existingProduct.setProductQuantity(requestDTO.getProductQuantity());
-                                            existingProduct.setProductSalePrice(requestDTO.getProductSalePrice());
+                                return supplyRepository.findSupplyBySupplyId(supplyId)
+                                        .flatMap(existingSupply -> {
+                                            existingSupply.setSupplyName(requestDTO.getSupplyName());
+                                            existingSupply.setSupplyDescription(requestDTO.getSupplyDescription());
+                                            existingSupply.setSupplyPrice(requestDTO.getSupplyPrice());
+                                            existingSupply.setSupplyQuantity(requestDTO.getSupplyQuantity());
+                                            existingSupply.setSupplySalePrice(requestDTO.getSupplySalePrice());
 
-                                            // Set Status based on the product quantity
-                                            if (existingProduct.getProductQuantity() == 0) {
-                                                existingProduct.setStatus(Status.OUT_OF_STOCK);
-                                            } else if (existingProduct.getProductQuantity() < 20) {
-                                                existingProduct.setStatus(Status.RE_ORDER);
+                                            // Set Status based on the supply quantity
+                                            if (existingSupply.getSupplyQuantity() == 0) {
+                                                existingSupply.setStatus(Status.OUT_OF_STOCK);
+                                            } else if (existingSupply.getSupplyQuantity() < 20) {
+                                                existingSupply.setStatus(Status.RE_ORDER);
                                             } else {
-                                                existingProduct.setStatus(Status.AVAILABLE);
+                                                existingSupply.setStatus(Status.AVAILABLE);
                                             }
 
-                                            return productRepository.save(existingProduct)
-                                                    .map(EntityDTOUtil::toProductResponseDTO);
+                                            return supplyRepository.save(existingSupply)
+                                                    .map(EntityDTOUtil::toSupplyResponseDTO);
                                         })
-                                        .switchIfEmpty(Mono.error(new NotFoundException("Product not found with id: " + productId)));
+                                        .switchIfEmpty(Mono.error(new NotFoundException("Supply not found with id: " + supplyId)));
                             }
                         }))
-                .switchIfEmpty(Mono.error(new InvalidInputException("Unable to update product in the repository, an error occurred.")));
+                .switchIfEmpty(Mono.error(new InvalidInputException("Unable to update supply in the repository, an error occurred.")));
     }
 
 
@@ -149,18 +149,18 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
 
 
     @Override
-    public Mono<Void> deleteProductInInventory(String inventoryId, String productId) {
+    public Mono<Void> deleteSupplyInInventory(String inventoryId, String supplyId) {
         return inventoryRepository.existsByInventoryId(inventoryId)
                 .flatMap(invExist -> {
                     if (!invExist) {
                         return Mono.error(new NotFoundException("Inventory not found, make sure it exists, inventoryId: " + inventoryId));
                     } else {
-                        return productRepository.existsByProductId(productId)
+                        return supplyRepository.existsBySupplyId(supplyId)
                                 .flatMap(prodExist -> {
                                     if (!prodExist) {
-                                        return Mono.error(new NotFoundException("Product not found, make sure it exists, productId: " + productId));
+                                        return Mono.error(new NotFoundException("Supply not found, make sure it exists, supplyId: " + supplyId));
                                     } else {
-                                        return productRepository.deleteByProductId(productId);
+                                        return supplyRepository.deleteBySupplyId(supplyId);
                                     }
                                 });
                     }
@@ -170,128 +170,128 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
     }
 
     @Override
-    public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductsField(String inventoryId, String productName, Double productPrice, Integer productQuantity, Double productSalePrice) {
+    public Flux<SupplyResponseDTO> getSuppliesInInventoryByInventoryIdAndSuppliesField(String inventoryId, String supplyName, Double supplyPrice, Integer supplyQuantity, Double supplySalePrice) {
 
-        if (productName != null && productPrice != null && productQuantity != null && productSalePrice != null){
-            return  productRepository
-                    .findAllProductsByInventoryIdAndProductNameAndProductPriceAndProductQuantityAndProductSalePrice(inventoryId,
-                            productName, productPrice, productQuantity, productSalePrice)
-                    .map(EntityDTOUtil::toProductResponseDTO)
+        if (supplyName != null && supplyPrice != null && supplyQuantity != null && supplySalePrice != null){
+            return  supplyRepository
+                    .findAllSuppliesByInventoryIdAndSupplyNameAndSupplyPriceAndSupplyQuantityAndSupplySalePrice(inventoryId,
+                            supplyName, supplyPrice, supplyQuantity, supplySalePrice)
+                    .map(EntityDTOUtil::toSupplyResponseDTO)
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
-                            "\nOr ProductName: " + productName + "\nOr ProductPrice: " + productPrice + "\nOr ProductQuantity: " + productQuantity + "\nOr ProductSalePrice: " + productSalePrice)));
+                            "\nOr SupplyName: " + supplyName + "\nOr SupplyPrice: " + supplyPrice + "\nOr SupplyQuantity: " + supplyQuantity + "\nOr SupplySalePrice: " + supplySalePrice)));
         }
-        if (productPrice != null && productQuantity != null){
-            return productRepository
-                    .findAllProductsByInventoryIdAndProductPriceAndProductQuantity(inventoryId, productPrice, productQuantity)
-                    .map(EntityDTOUtil::toProductResponseDTO)
+        if (supplyPrice != null && supplyQuantity != null){
+            return supplyRepository
+                    .findAllSuppliesByInventoryIdAndSupplyPriceAndSupplyQuantity(inventoryId, supplyPrice, supplyQuantity)
+                    .map(EntityDTOUtil::toSupplyResponseDTO)
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
-                            "\nOr ProductPrice: " + productPrice + "\nOr ProductQuantity: " + productQuantity)));
+                            "\nOr SupplyPrice: " + supplyPrice + "\nOr SupplyQuantity: " + supplyQuantity)));
         }
-        if (productPrice != null){
-            return productRepository
-                    .findAllProductsByInventoryIdAndProductPrice(inventoryId, productPrice)
-                    .map(EntityDTOUtil::toProductResponseDTO)
+        if (supplyPrice != null){
+            return supplyRepository
+                    .findAllSuppliesByInventoryIdAndSupplyPrice(inventoryId, supplyPrice)
+                    .map(EntityDTOUtil::toSupplyResponseDTO)
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
-                            "\nOr ProductPrice: " + productPrice)));
+                            "\nOr SupplyPrice: " + supplyPrice)));
         }
-        if (productQuantity != null){
-            return productRepository
-                    .findAllProductsByInventoryIdAndProductQuantity(inventoryId, productQuantity )
+        if (supplyQuantity != null){
+            return supplyRepository
+                    .findAllSuppliesByInventoryIdAndSupplyQuantity(inventoryId, supplyQuantity )
 
-                    .map(EntityDTOUtil::toProductResponseDTO)
+                    .map(EntityDTOUtil::toSupplyResponseDTO)
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
-                            "\nOr ProductQuantity: " + productQuantity)));
+                            "\nOr SupplyQuantity: " + supplyQuantity)));
         }
-        if (productSalePrice != null){
-            return productRepository
-                    .findAllProductsByInventoryIdAndProductSalePrice(inventoryId, productSalePrice)
+        if (supplySalePrice != null){
+            return supplyRepository
+                    .findAllSuppliesByInventoryIdAndSupplySalePrice(inventoryId, supplySalePrice)
 
-                    .map(EntityDTOUtil::toProductResponseDTO)
+                    .map(EntityDTOUtil::toSupplyResponseDTO)
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
-                            "\nOr ProductSalePrice: " + productSalePrice)));
+                            "\nOr SupplySalePrice: " + supplySalePrice)));
         }
 
 
-        if (productName != null) {
-            String escapedInventoryName = Pattern.quote(productName);
+        if (supplyName != null) {
+            String escapedInventoryName = Pattern.quote(supplyName);
 
             String regexPattern = "(?i)^" + escapedInventoryName + ".*";
 
-            if (productName.length() == 1) {
-                return productRepository
-                        .findAllProductsByInventoryIdAndProductNameRegex(inventoryId, regexPattern)
-                        .map(EntityDTOUtil::toProductResponseDTO)
+            if (supplyName.length() == 1) {
+                return supplyRepository
+                        .findAllSuppliesByInventoryIdAndSupplyNameRegex(inventoryId, regexPattern)
+                        .map(EntityDTOUtil::toSupplyResponseDTO)
                         .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
-                                "\nOr ProductName: " + productName)));
+                                "\nOr SupplyName: " + supplyName)));
             } else {
-                return productRepository
-                        .findAllProductsByInventoryIdAndProductNameRegex(inventoryId,regexPattern)
-                        .map(EntityDTOUtil::toProductResponseDTO)
-                        .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Name starting with or matching: " + productName)));
+                return supplyRepository
+                        .findAllSuppliesByInventoryIdAndSupplyNameRegex(inventoryId,regexPattern)
+                        .map(EntityDTOUtil::toSupplyResponseDTO)
+                        .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with Name starting with or matching: " + supplyName)));
             }
 
         }
-        return productRepository
-                .findAllProductsByInventoryId(inventoryId)
-                .map(EntityDTOUtil::toProductResponseDTO);
+        return supplyRepository
+                .findAllSuppliesByInventoryId(inventoryId)
+                .map(EntityDTOUtil::toSupplyResponseDTO);
         //where the 404 not found issue lies if we switchIfEmpty
 
     }
 
     @Override
-    public Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductsFieldsPagination(String inventoryId, String productName, Double productPrice, Integer productQuantity, Pageable pageable) {
+    public Flux<SupplyResponseDTO> getSuppliesInInventoryByInventoryIdAndSuppliesFieldsPagination(String inventoryId, String supplyName, Double supplyPrice, Integer supplyQuantity, Pageable pageable) {
 
-        if (productName != null && productPrice != null && productQuantity != null){
-            return  productRepository
-                    .findAllProductsByInventoryIdAndProductNameAndProductPriceAndProductQuantity(inventoryId,
-                            productName, productPrice, productQuantity)
-                    .map(EntityDTOUtil::toProductResponseDTO)
+        if (supplyName != null && supplyPrice != null && supplyQuantity != null){
+            return  supplyRepository
+                    .findAllSuppliesByInventoryIdAndSupplyNameAndSupplyPriceAndSupplyQuantity(inventoryId,
+                            supplyName, supplyPrice, supplyQuantity)
+                    .map(EntityDTOUtil::toSupplyResponseDTO)
                     .skip((long) pageable.getPageNumber() * pageable.getPageSize())
                     .take(pageable.getPageSize())
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
-                            "\nOr ProductName: " + productName + "\nOr ProductPrice: " + productPrice + "\nOr ProductQuantity: " + productQuantity)));
+                            "\nOr SupplyName: " + supplyName + "\nOr SupplyPrice: " + supplyPrice + "\nOr SupplyQuantity: " + supplyQuantity)));
         }
-        if (productPrice != null && productQuantity != null){
-            return productRepository
-                    .findAllProductsByInventoryIdAndProductPriceAndProductQuantity(inventoryId, productPrice, productQuantity)
-                    .map(EntityDTOUtil::toProductResponseDTO)
+        if (supplyPrice != null && supplyQuantity != null){
+            return supplyRepository
+                    .findAllSuppliesByInventoryIdAndSupplyPriceAndSupplyQuantity(inventoryId, supplyPrice, supplyQuantity)
+                    .map(EntityDTOUtil::toSupplyResponseDTO)
                     .skip((long) pageable.getPageNumber() * pageable.getPageSize())
                     .take(pageable.getPageSize())
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
-                            "\nOr ProductPrice: " + productPrice + "\nOr ProductQuantity: " + productQuantity)));
+                            "\nOr SupplyPrice: " + supplyPrice + "\nOr SupplyQuantity: " + supplyQuantity)));
         }
-        if (productPrice != null){
-            return productRepository
-                    .findAllProductsByInventoryIdAndProductPrice(inventoryId, productPrice)
-                    .map(EntityDTOUtil::toProductResponseDTO)
+        if (supplyPrice != null){
+            return supplyRepository
+                    .findAllSuppliesByInventoryIdAndSupplyPrice(inventoryId, supplyPrice)
+                    .map(EntityDTOUtil::toSupplyResponseDTO)
                     .skip((long) pageable.getPageNumber() * pageable.getPageSize())
                     .take(pageable.getPageSize())
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
-                            "\nOr ProductPrice: " + productPrice)));
+                            "\nOr SupplyPrice: " + supplyPrice)));
         }
-        if (productQuantity != null){
-            return productRepository
-                    .findAllProductsByInventoryIdAndProductQuantity(inventoryId, productQuantity)
-                    .map(EntityDTOUtil::toProductResponseDTO)
+        if (supplyQuantity != null){
+            return supplyRepository
+                    .findAllSuppliesByInventoryIdAndSupplyQuantity(inventoryId, supplyQuantity)
+                    .map(EntityDTOUtil::toSupplyResponseDTO)
                     .skip((long) pageable.getPageNumber() * pageable.getPageSize())
                     .take(pageable.getPageSize())
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
-                            "\nOr ProductQuantity: " + productQuantity)));
+                            "\nOr SupplyQuantity: " + supplyQuantity)));
         }
-        if (productName != null){
-            return productRepository
-                    .findAllProductsByInventoryIdAndProductName(inventoryId, productName)
-                    .map(EntityDTOUtil::toProductResponseDTO)
+        if (supplyName != null){
+            return supplyRepository
+                    .findAllSuppliesByInventoryIdAndSupplyName(inventoryId, supplyName)
+                    .map(EntityDTOUtil::toSupplyResponseDTO)
                     .skip((long) pageable.getPageNumber() * pageable.getPageSize())
                     .take(pageable.getPageSize())
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
-                            "\nOr ProductName: " + productName)));
+                            "\nOr SupplyName: " + supplyName)));
         }
 
 
-        return productRepository
-                .findAllProductsByInventoryId(inventoryId)
-                .map(EntityDTOUtil::toProductResponseDTO)
+        return supplyRepository
+                .findAllSuppliesByInventoryId(inventoryId)
+                .map(EntityDTOUtil::toSupplyResponseDTO)
                 .skip((long) pageable.getPageNumber() * pageable.getPageSize())
                 .take(pageable.getPageSize());
         //where the 404 not found issue lies if we switchIfEmpty
@@ -303,9 +303,9 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
 
     @Override
     public Mono<InventoryResponseDTO> getInventoryById(String inventoryId){
-    return inventoryRepository.findInventoryByInventoryId(inventoryId)
-            .switchIfEmpty(Mono.error(new NotFoundException("No inventory with this id was found" + inventoryId)))
-            .map(EntityDTOUtil::toInventoryResponseDTO);
+        return inventoryRepository.findInventoryByInventoryId(inventoryId)
+                .switchIfEmpty(Mono.error(new NotFoundException("No inventory with this id was found" + inventoryId)))
+                .map(EntityDTOUtil::toInventoryResponseDTO);
 
     }
     @Override
@@ -407,11 +407,11 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
 
 
     @Override
-    public Mono<ProductResponseDTO> getProductByProductIdInInventory(String inventoryId, String productId) {
-        return productRepository
-                .findProductByInventoryIdAndProductId(inventoryId, productId)
-                .map(EntityDTOUtil::toProductResponseDTO)
-                .switchIfEmpty(Mono.error(new NotFoundException("Inventory id:" + inventoryId + "and product:" + productId + "are not found")));
+    public Mono<SupplyResponseDTO> getSupplyBySupplyIdInInventory(String inventoryId, String supplyId) {
+        return supplyRepository
+                .findSupplyByInventoryIdAndSupplyId(inventoryId, supplyId)
+                .map(EntityDTOUtil::toSupplyResponseDTO)
+                .switchIfEmpty(Mono.error(new NotFoundException("Inventory id:" + inventoryId + "and supply:" + supplyId + "are not found")));
     }
 
     @Override
@@ -463,12 +463,12 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                 );
     }
 
-    //delete all products and delete all inventory
+    //delete all supplies and delete all inventory
     @Override
-    public Mono<Void> deleteAllProductInventory (String inventoryId){
+    public Mono<Void> deleteAllSupplyInventory (String inventoryId){
         return inventoryRepository.findInventoryByInventoryId(inventoryId)
                 .switchIfEmpty(Mono.error(new RuntimeException("Invalid Inventory Id")))
-                .flatMapMany(inv -> productRepository.deleteByInventoryId(inventoryId))
+                .flatMapMany(inv -> supplyRepository.deleteByInventoryId(inventoryId))
                 .then();
     }
 

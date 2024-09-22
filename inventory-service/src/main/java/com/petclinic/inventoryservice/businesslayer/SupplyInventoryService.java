@@ -5,21 +5,21 @@ import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+public interface SupplyInventoryService {
 
-public interface ProductInventoryService {
-    Mono<ProductResponseDTO> addProductToInventory(Mono<ProductRequestDTO> productRequestDTOMono, String inventoryId);
+    Mono<SupplyResponseDTO> addSupplyToInventory(Mono<SupplyRequestDTO> supplyRequestDTOMono, String inventoryId);
     Mono<InventoryResponseDTO> addInventory(Mono<InventoryRequestDTO> inventoryRequestDTO);
     Mono<InventoryResponseDTO> updateInventory(Mono<InventoryRequestDTO> inventoryRequestDTO, String inventoryId);
 
     Mono<InventoryResponseDTO> getInventoryById(String inventoryId);
-    Mono<ProductResponseDTO> updateProductInInventory(Mono<ProductRequestDTO> productRequestDTOMono, String inventoryId, String productId);
-    Mono<Void> deleteProductInInventory(String inventoryId, String productId);
-    Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductsField(String inventoryId, String productName, Double productPrice, Integer productQuantity, Double productSalePrice);
-    Flux<ProductResponseDTO> getProductsInInventoryByInventoryIdAndProductsFieldsPagination(String inventoryId, String productName, Double productPrice, Integer productQuantity, Pageable pageable);
+    Mono<SupplyResponseDTO> updateSupplyInInventory(Mono<SupplyRequestDTO> supplyRequestDTOMono, String inventoryId, String supplyId);
+    Mono<Void> deleteSupplyInInventory(String inventoryId, String supplyId);
+    Flux<SupplyResponseDTO> getSuppliesInInventoryByInventoryIdAndSuppliesField(String inventoryId, String supplyName, Double supplyPrice, Integer supplyQuantity, Double supplySalePrice);
+    Flux<SupplyResponseDTO> getSuppliesInInventoryByInventoryIdAndSuppliesFieldsPagination(String inventoryId, String supplyName, Double supplyPrice, Integer supplyQuantity, Pageable pageable);
 
     Mono<Void> deleteInventoryByInventoryId(String inventoryId);
 
-    Mono<Void> deleteAllProductInventory(String inventoryId);
+    Mono<Void> deleteAllSupplyInventory(String inventoryId);
     Mono<Void> deleteAllInventory();
     Mono<InventoryTypeResponseDTO> addInventoryType(Mono<InventoryTypeRequestDTO> inventoryTypeRequestDTO);
 
@@ -27,7 +27,7 @@ public interface ProductInventoryService {
     Flux<InventoryTypeResponseDTO> getAllInventoryTypes();
     Flux<InventoryNameResponseDTO> getAllInventoryNames();
 
-    Mono<ProductResponseDTO> getProductByProductIdInInventory(String inventoryId, String productId);
+    Mono<SupplyResponseDTO> getSupplyBySupplyIdInInventory(String inventoryId, String supplyId);
 
     Mono<InventoryResponseDTO> addSupplyToInventoryByInventoryName(String inventoryName, Mono<SupplyRequestDTO> supplyRequestDTOMono);
 

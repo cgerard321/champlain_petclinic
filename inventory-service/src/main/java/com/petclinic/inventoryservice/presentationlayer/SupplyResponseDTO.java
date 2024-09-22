@@ -1,5 +1,6 @@
 package com.petclinic.inventoryservice.presentationlayer;
 
+import com.petclinic.inventoryservice.datalayer.Supply.Status;
 import lombok.*;
 
 @Data
@@ -7,12 +8,14 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class SupplyResponseDTO {
-
+    private String id;
     private String supplyId;
+    private String inventoryId;
     private String supplyName;
     private String supplyDescription;
-    private Integer supplyQuantity;
     private Double supplyPrice;
+    private Integer supplyQuantity;
     private Double supplySalePrice;
+    private Status status;
 }
 

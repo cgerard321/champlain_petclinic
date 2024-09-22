@@ -154,18 +154,21 @@ public Flux<InventoryResponseDTO> searchInventories(
     return productInventoryService.getAllInventoryTypes();
     }
 
-    @PostMapping("/{inventoryType}/supplies")
-    public Mono<ResponseEntity<InventoryResponseDTO>> addSupplyToInventoryByType(
-            @PathVariable String inventoryType,
+    @GetMapping("/name")
+    public Flux<InventoryNameResponseDTO> getAllInventoryNames(){
+        return productInventoryService.getAllInventoryNames();
+    }
+
+
+
+    @PostMapping("/{inventoryName}/supplies")
+    public Mono<ResponseEntity<InventoryResponseDTO>> addSupplyToInventoryByName(
+            @PathVariable String inventoryName,
             @RequestBody Mono<SupplyRequestDTO> supplyRequestDTO) {
-        return productInventoryService.addSupplyToInventoryByInventoryType(inventoryType, supplyRequestDTO)
+        return productInventoryService.addSupplyToInventoryByInventoryName(inventoryName, supplyRequestDTO)
                 .map(inventoryResponseDTO -> ResponseEntity.status(HttpStatus.CREATED).body(inventoryResponseDTO))
                 .onErrorResume(e -> Mono.just(ResponseEntity.notFound().build()));
     }
-
-//asdsadasdasdasdsadsad
-    //asdadad/
-    //asdadsad
 
 }
 
