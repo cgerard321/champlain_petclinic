@@ -29,7 +29,7 @@ app:
     port: 7007
   cart-service:
     host: localhost
-    post: 7008
+    port: 7008
 
 logging:
   level:
