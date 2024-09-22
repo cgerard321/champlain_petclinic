@@ -180,34 +180,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                     .findAllProductsByInventoryIdAndProductPriceAndProductQuantity(inventoryId, productPrice, productQuantity)
                     .map(EntityDTOUtil::toProductResponseDTO)
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
-                            "\nOr ProductPrice: " + productPrice + "\nOr ProductQuantity: " + productQuantity)))
-                    // update the status of each product in the inventory
-                    .flatMap(requestDTO -> inventoryRepository.findInventoryByInventoryId(inventoryId)
-                            .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with id: " + inventoryId)))
-                            .flatMap(inventory -> {
-                                if (requestDTO.getProductName() == null || requestDTO.getProductPrice() == null || requestDTO.getProductQuantity() == null || requestDTO.getProductSalePrice() == null) {
-                                    return Mono.error(new InvalidInputException("Product must have an inventory id, product name, product price, and product quantity."));
-                                } else if (requestDTO.getProductPrice() < 0 || requestDTO.getProductQuantity() < 0 || requestDTO.getProductSalePrice() < 0) {
-                                    return Mono.error(new InvalidInputException("Product price and quantity must be greater than 0."));
-                                } else {
-                                    return productRepository.findProductByProductId(requestDTO.getProductId())
-                                            .flatMap(existingProduct -> {
-
-                                                // Set Status based on the product quantity
-                                                if (existingProduct.getProductQuantity() == 0) {
-                                                    existingProduct.setStatus(Status.OUT_OF_STOCK);
-                                                } else if (existingProduct.getProductQuantity() < 20) {
-                                                    existingProduct.setStatus(Status.RE_ORDER);
-                                                } else {
-                                                    existingProduct.setStatus(Status.AVAILABLE);
-                                                }
-
-                                                return productRepository.save(existingProduct)
-                                                        .map(EntityDTOUtil::toProductResponseDTO);
-                                            })
-                                            .switchIfEmpty(Mono.error(new NotFoundException("Product not found with id: " + requestDTO.getProductId())));
-                                }
-                            }));
+                            "\nOr ProductPrice: " + productPrice + "\nOr ProductQuantity: " + productQuantity)));
         }
         if (productPrice != null){
             return productRepository
@@ -280,33 +253,7 @@ public class ProductInventoryServiceImpl implements ProductInventoryService {
                     .skip((long) pageable.getPageNumber() * pageable.getPageSize())
                     .take(pageable.getPageSize())
                     .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with InventoryId: " + inventoryId +
-                            "\nOr ProductPrice: " + productPrice + "\nOr ProductQuantity: " + productQuantity)))
-                    // update the status of each product in the inventory
-                    .flatMap(requestDTO -> inventoryRepository.findInventoryByInventoryId(inventoryId)
-                            .switchIfEmpty(Mono.error(new NotFoundException("Inventory not found with id: " + inventoryId)))
-                            .flatMap(inventory -> {
-                                if (requestDTO.getProductName() == null || requestDTO.getProductPrice() == null || requestDTO.getProductQuantity() == null || requestDTO.getProductSalePrice() == null) {
-                                    return Mono.error(new InvalidInputException("Product must have an inventory id, product name, product price, and product quantity."));
-                                } else if (requestDTO.getProductPrice() < 0 || requestDTO.getProductQuantity() < 0 || requestDTO.getProductSalePrice() < 0) {
-                                    return Mono.error(new InvalidInputException("Product price and quantity must be greater than 0."));
-                                } else {
-                                    return productRepository.findProductByProductId(requestDTO.getProductId())
-                                            .flatMap(existingProduct -> {
-                                                // Set Status based on the product quantity
-                                                if (existingProduct.getProductQuantity() == 0) {
-                                                    existingProduct.setStatus(Status.OUT_OF_STOCK);
-                                                } else if (existingProduct.getProductQuantity() < 20) {
-                                                    existingProduct.setStatus(Status.RE_ORDER);
-                                                } else {
-                                                    existingProduct.setStatus(Status.AVAILABLE);
-                                                }
-
-                                                return productRepository.save(existingProduct)
-                                                        .map(EntityDTOUtil::toProductResponseDTO);
-                                            })
-                                            .switchIfEmpty(Mono.error(new NotFoundException("Product not found with id: " + requestDTO.getProductId())));
-                                }
-                            }));
+                            "\nOr ProductPrice: " + productPrice + "\nOr ProductQuantity: " + productQuantity)));
         }
         if (productPrice != null){
             return productRepository

@@ -1,4 +1,5 @@
 package com.petclinic.inventoryservice.businesslayer;
+import com.petclinic.inventoryservice.InventoryServiceApplication;
 import com.petclinic.inventoryservice.datalayer.Inventory.Inventory;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryRepository;
 import com.petclinic.inventoryservice.datalayer.Inventory.InventoryType;
@@ -14,6 +15,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import reactor.core.publisher.Flux;
@@ -30,7 +32,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest
+@SpringBootTest(classes = ProductInventoryServiceImpl.class)
 class ProductInventoryServiceUnitTest {
     @Autowired
     ProductInventoryService productInventoryService;
@@ -1238,6 +1240,7 @@ class ProductInventoryServiceUnitTest {
 //                .verify();
 //    }
 
+    // Search Products
     @Test
     void searchProducts_withAllParams_shouldReturnResults() {
         String inventoryId = "1";
@@ -1253,6 +1256,23 @@ class ProductInventoryServiceUnitTest {
         StepVerifier.create(result)
                 .expectNextCount(1)
                 .verifyComplete();
+    }
+
+    @Test
+    void searchProducts_withAllParams_noResults_shouldThrowNotFoundException() {
+        String inventoryId = "1";
+        String name = "InvalidName";
+        String description = "InvalidDescription";
+        Status status = Status.OUT_OF_STOCK;
+
+        when(productRepository.findAllProductsByInventoryIdAndProductNameAndProductDescriptionAndStatus(inventoryId, name, description, status))
+                .thenReturn(Flux.empty());
+
+        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, name, description, status);
+
+        StepVerifier.create(result)
+                .expectError(NotFoundException.class)
+                .verify();
     }
 
     @Test
@@ -1272,6 +1292,22 @@ class ProductInventoryServiceUnitTest {
     }
 
     @Test
+    void searchProducts_withNameAndDescription_noResult_shouldThrowNotFoundException() {
+        String inventoryId = "1";
+        String name = "InvalidName";
+        String description = "InvalidDescription";
+
+        when(productRepository.findAllProductsByInventoryIdAndProductNameAndProductDescription(inventoryId, name, description))
+                .thenReturn(Flux.empty());
+
+        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, name, description, null);
+
+        StepVerifier.create(result)
+                .expectError(NotFoundException.class)
+                .verify();
+    }
+
+    @Test
     void searchProducts_withNameAndStatus_shouldReturnResults() {
         String inventoryId = "1";
         String name = "Benzodiazepines";
@@ -1285,6 +1321,22 @@ class ProductInventoryServiceUnitTest {
         StepVerifier.create(result)
                 .expectNextCount(1)
                 .verifyComplete();
+    }
+
+    @Test
+    void searchProducts_withNameAndStatus_noResult_shouldThrowNotFoundException() {
+        String inventoryId = "1";
+        String name = "InvalidName";
+        Status status = Status.AVAILABLE;
+
+        when(productRepository.findAllProductsByInventoryIdAndProductNameAndStatus(inventoryId, name, status))
+                .thenReturn(Flux.empty());
+
+        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, name, null, status);
+
+        StepVerifier.create(result)
+                .expectError(NotFoundException.class)
+                .verify();
     }
 
     @Test
@@ -1304,6 +1356,22 @@ class ProductInventoryServiceUnitTest {
     }
 
     @Test
+    void searchProducts_withDescriptionAndStatus_noResult_shouldThrowNotFoundException() {
+        String inventoryId = "1";
+        String description = "InvalidDescription";
+        Status status = Status.AVAILABLE;
+
+        when(productRepository.findAllProductsByInventoryIdAndProductDescriptionAndStatus(inventoryId, description, status))
+                .thenReturn(Flux.empty());
+
+        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, null, description, status);
+
+        StepVerifier.create(result)
+                .expectError(NotFoundException.class)
+                .verify();
+    }
+
+    @Test
     void searchProducts_withName_shouldReturnResults() {
         String inventoryId = "1";
         String name = "Benzodiazepines";
@@ -1316,6 +1384,21 @@ class ProductInventoryServiceUnitTest {
         StepVerifier.create(result)
                 .expectNextCount(1)
                 .verifyComplete();
+    }
+
+    @Test
+    void searchProducts_withName_noResult_shouldThrowNotFoundException() {
+        String inventoryId = "1";
+        String name = "InvalidName";
+
+        when(productRepository.findAllProductsByInventoryIdAndProductName(inventoryId, name))
+                .thenReturn(Flux.empty());
+
+        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, name, null, null);
+
+        StepVerifier.create(result)
+                .expectError(NotFoundException.class)
+                .verify();
     }
 
     @Test
@@ -1334,6 +1417,21 @@ class ProductInventoryServiceUnitTest {
     }
 
     @Test
+    void searchProducts_withDescription_noResult_shouldThrowNotFoundException() {
+        String inventoryId = "1";
+        String description = "InvalidDescription";
+
+        when(productRepository.findAllProductsByInventoryIdAndProductDescription(inventoryId, description))
+                .thenReturn(Flux.empty());
+
+        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, null, description, null);
+
+        StepVerifier.create(result)
+                .expectError(NotFoundException.class)
+                .verify();
+    }
+
+    @Test
     void searchProducts_withStatus_shouldReturnResults() {
         String inventoryId = "1";
         Status status = Status.AVAILABLE;
@@ -1346,6 +1444,21 @@ class ProductInventoryServiceUnitTest {
         StepVerifier.create(result)
                 .expectNextCount(1)
                 .verifyComplete();
+    }
+
+    @Test
+    void searchProducts_withStatus_noResult_shouldThrowNotFoundException() {
+        String inventoryId = "1";
+        Status status = Status.RE_ORDER;
+
+        when(productRepository.findAllProductsByInventoryIdAndStatus(inventoryId, status))
+                .thenReturn(Flux.empty());
+
+        Flux<ProductResponseDTO> result = productInventoryService.searchProducts(inventoryId, null, null, status);
+
+        StepVerifier.create(result)
+                .expectError(NotFoundException.class)
+                .verify();
     }
 
     @Test
@@ -1364,8 +1477,8 @@ class ProductInventoryServiceUnitTest {
     }
 
     @Test
-    void searchProducts_withInvalidInventoryId_shouldThrowNotFound() {
-        String inventoryId = "invalidId";
+    void searchProducts_withNotExistingInventoryId_shouldThrowNotFound() {
+        String inventoryId = "NonExistingInventoryId";
 
         when(productRepository.findAllProductsByInventoryId(inventoryId))
                 .thenReturn(Flux.empty());
@@ -1376,6 +1489,5 @@ class ProductInventoryServiceUnitTest {
                 .expectError(NotFoundException.class)
                 .verify();
     }
-
 
 }
