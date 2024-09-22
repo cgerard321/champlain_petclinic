@@ -1,8 +1,6 @@
-package com.petclinic.products.presentationlayer;
+package com.petclinic.products.presentationlayer.products;
 
 import com.petclinic.products.businesslayer.products.ProductService;
-import com.petclinic.products.presentationlayer.products.ProductController;
-import com.petclinic.products.presentationlayer.products.ProductResponseModel;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;

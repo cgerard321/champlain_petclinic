@@ -72,6 +72,45 @@ class ProductControllerIntegrationTest {
                 .expectNextCount(2)
                 .verifyComplete();
     }
+    @Test
+    public void whenGetAllProducts_thenReturnAllProducts() {
+        StepVerifier.create(productRepository.findAll())
+                .expectNextCount(2)
+                .verifyComplete();
+
+        webTestClient.get()
+                .uri("/api/v1/products")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
+                .expectBodyList(ProductResponseModel.class)
+                .value(productResponseModel -> {
+                    assertNotNull(productResponseModel);
+                    assertEquals(2, productResponseModel.size());
+                });
+
+    }
+
+    @Test
+    public void whenNoProductsExist_thenReturnEmptyList() {
+
+        StepVerifier.create(productRepository.deleteAll())
+                .verifyComplete();
+
+
+        webTestClient.get()
+                .uri("/api/v1/products")
+                .accept(MediaType.TEXT_EVENT_STREAM)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().valueEquals("Content-Type", "text/event-stream;charset=UTF-8")
+                .expectBodyList(ProductResponseModel.class)
+                .value(productResponseModel -> {
+                    assertNotNull(productResponseModel);
+                    assertEquals(0, productResponseModel.size());
+                });
+    }
 
     @Test
     public void whenAddProduct_thenAddProductResponseModel() {
