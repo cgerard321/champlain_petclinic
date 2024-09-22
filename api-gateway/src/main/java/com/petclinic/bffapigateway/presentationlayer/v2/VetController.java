@@ -47,6 +47,20 @@ public class VetController {
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @PutMapping(value = "/{vetId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<VetResponseDTO>> updateVet(
+            @RequestBody Mono<VetRequestDTO> vetRequestDTOMono,
+            @PathVariable String vetId){
+
+        return Mono.just(vetId)
+                .filter(id -> id.length() == 36)
+                .switchIfEmpty(Mono.error(new InvalidInputException("Provided vet Id is invalid " + vetId)))
+                .flatMap(id -> vetsServiceClient.updateVet(id, vetRequestDTOMono))
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @DeleteMapping(value = "{vetId}")
     public Mono<ResponseEntity<Void>> deleteVet(@PathVariable String vetId) {
         return vetsServiceClient.deleteVet(VetsEntityDtoUtil.verifyId(vetId))
