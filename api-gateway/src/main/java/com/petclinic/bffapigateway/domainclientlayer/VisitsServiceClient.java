@@ -100,6 +100,7 @@ public class VisitsServiceClient {
                 .bodyToMono(VisitResponseDTO.class);
     }
 
+
     public Mono<VisitResponseDTO> addVisit(Mono<VisitRequestDTO> visitRequestDTO){
         return visitRequestDTO.flatMap(visitRequestDTO1 -> {
             if (visitRequestDTO1.getVisitStartDate() != null) {
