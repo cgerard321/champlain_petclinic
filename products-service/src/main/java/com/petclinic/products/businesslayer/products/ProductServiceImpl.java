@@ -11,6 +11,7 @@ import com.petclinic.products.utils.EntityModelUtil;
 import com.petclinic.products.datalayer.products.ProductRepository;
 import com.petclinic.products.presentationlayer.products.ProductRequestModel;
 import com.petclinic.products.presentationlayer.products.ProductResponseModel;
+import com.petclinic.products.utils.exceptions.InvalidAmountException;
 import com.petclinic.products.utils.exceptions.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -50,8 +51,20 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Flux<ProductResponseModel> getAllProducts() {
-        return productRepository.findAll()
+    public Flux<ProductResponseModel> getAllProducts(Double minPrice, Double maxPrice) {
+        Flux<Product> products;
+
+        if (minPrice != null && maxPrice != null) {
+            products = productRepository.findByProductSalePriceBetween(minPrice, maxPrice);
+        } else if (minPrice != null) {
+            products = productRepository.findByProductSalePriceGreaterThanEqual(minPrice);
+        } else if (maxPrice != null) {
+            products = productRepository.findByProductSalePriceLessThanEqual(maxPrice);
+        } else {
+            products = productRepository.findAll();
+        }
+
+        return products
                 .flatMap(this::getAverageRating)
                 .map(EntityModelUtil::toProductResponseModel);
     }
@@ -67,6 +80,8 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public Mono<ProductResponseModel> addProduct(Mono<ProductRequestModel> productRequestModel) {
         return productRequestModel
+                .filter(product -> product.getProductSalePrice() > 0)
+                .switchIfEmpty(Mono.error(new InvalidAmountException("Product sale price must be greater than 0")))
                 .map(EntityModelUtil::toProductEntity)
                 .flatMap(this::getAverageRating)
                 .flatMap(productRepository::save)

@@ -12,7 +12,9 @@
 .navbar-nav .nav-link {
   font-size: 1.1rem;
   color: #333;
-  transition: color 0.3s ease, transform 0.3s ease;
+  transition:
+    color 0.3s ease,
+    transform 0.3s ease;
 }
 
 .navbar-nav .nav-link:hover {
@@ -24,7 +26,9 @@
   background-color: #fff;
   border: 1px solid #ddd;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  transition:
+    opacity 0.3s ease,
+    transform 0.3s ease;
   opacity: 0;
   display: none;
 }

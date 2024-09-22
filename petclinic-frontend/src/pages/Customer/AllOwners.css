@@ -85,7 +85,7 @@
 }
 
 /*filter css */
-.owners-container input[type="text"] {
+.owners-container input[type='text'] {
   padding: 2px;
   margin: 2px 0;
   border: 1px solid #ccc;

@@ -4,12 +4,12 @@ import { ProductModel } from '@/features/products/models/ProductModels/ProductMo
 
 
 export default function TrendingList(){
-    const [trendingList, setTrendingList] = useState<ProductModel[]>([]);
+  const [trendingList, setTrendingList] = useState<ProductModel[]>([]);
 
-    const fetchProducts = async (): Promise<void> => {
-      const list = await getAllProducts();
-      setTrendingList(list);
-    };
+  const fetchProducts = async (): Promise<void> => {
+    const list = await getAllProducts();
+    setTrendingList(list);
+  };
 
     useEffect(() => {
         fetchProducts();
