@@ -37,7 +37,48 @@ class OwnerControllerIntegrationTest {
 
     Owner owner1 = buildOwner3("Billy","ownerId_1");
 
+    @Test
+    void deleteOwnerByOwnerId() {
 
+        StepVerifier.create(repo.deleteAll()).verifyComplete();
+
+        Owner ownerEntity = Owner.builder()
+                .id("9")
+                .ownerId("a6e0e5b0-5f60-45f0-8ac7-becd8b330486")
+                .firstName("FirstName")
+                .lastName("LastName")
+                .address("Test address")
+                .city("test city")
+                .province("province")
+                .telephone("telephone")
+                .build();
+
+        StepVerifier.create(repo.save(ownerEntity))
+                .expectNextMatches(saved -> saved.getOwnerId().equals("a6e0e5b0-5f60-45f0-8ac7-becd8b330486"))
+                .verifyComplete();
+
+        client.delete().uri("/owners/a6e0e5b0-5f60-45f0-8ac7-becd8b330486")
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody();
+    }
+
+    @Test
+    void deleteNonExistentOwnerByOwnerId() {
+        // Ensure no duplicate ownerId exists before test
+        StepVerifier.create(repo.deleteAll()).verifyComplete();
+
+        // Perform the DELETE request with a non-existent ownerId
+        String nonExistentOwnerId = "a6e0e5b0-5f60-45f0-8ac7-becd8b330486";
+
+        client.delete().uri("/owners/" + nonExistentOwnerId)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound()  // Expect 404 Not Found status
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Course id not found: " + nonExistentOwnerId);  // Expect the error message to indicate the ownerId was not found
+    }
 
 //    @Test
 //    void deleteOwnerByOwnerId() {
