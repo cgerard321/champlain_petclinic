@@ -116,6 +116,9 @@ class VisitsControllerIntegrationTest {
 
     @Test
     void getAllVisits(){
+        // Get the count of all visits in the database
+        long dbSize = visitRepo.count().block();
+
         when(entityDtoUtil.toVisitResponseDTO(any())).thenReturn(Mono.just(visitResponseDTO));
         webTestClient
                 .get()
