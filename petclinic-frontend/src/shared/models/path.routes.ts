@@ -8,6 +8,7 @@ export enum AppRoutePaths {
   Inventories = '/inventories',
   Vet = '/vets',
   InventoryProducts = '/inventory/:inventoryId/products',
+
   CustomerBills = '/bills/customer',
   PageNotFound = '/page-not-found',
   Unauthorized = '/unauthorized',
