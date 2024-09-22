@@ -28,5 +28,4 @@ export enum AppRoutePaths {
   AddVisit = '/visits/add',
 
   CustomerProfile = '/customer/profile',
-
 }

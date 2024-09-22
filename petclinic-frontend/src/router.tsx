@@ -22,7 +22,7 @@ import AddReviewForm from './features/visits/Review/AddReviewForm';
 import EditReviewForm from './features/visits/Review/EditReviewForm';
 import Review from './pages/Review/Review';
 import EditInventory from '@/features/inventories/EditInventory.tsx';
-import CartPage from "@/pages/Carts/Cart.tsx";
+import CartPage from '@/pages/Carts/Cart.tsx';
 import VisitByVisitId from './features/visits/visits/VisitByVisitId';
 import AddingVisit from './features/visits/models/AddingVisit';
 import ProfilePage from '@/pages/Customer/ProfilePage.tsx';
@@ -176,22 +176,19 @@ const router = createBrowserRouter([
         ),
       },
       {
-
         path: AppRoutePaths.Carts,
         element: (
-            <ProtectedRoute roles={['ADMIN']}>
-              <CartPage/>
-            </ProtectedRoute>
+          <ProtectedRoute roles={['ADMIN']}>
+            <CartPage />
+          </ProtectedRoute>
         ),
       },
       {
-
         path: AppRoutePaths.CustomerProfile,
         element: (
           <ProtectedRoute roles={['OWNER']}>
             <ProfilePage />
           </ProtectedRoute>
-
         ),
       },
     ],
