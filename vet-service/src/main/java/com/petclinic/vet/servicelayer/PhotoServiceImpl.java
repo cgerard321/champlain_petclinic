@@ -86,7 +86,7 @@ public class PhotoServiceImpl implements PhotoService {
                                     });
                         }));
     }
-    @Override
+ /*   @Override
     public Mono<Resource> insertPhotoOfVet(String vetId, String photoName, MultipartFile photo) {
         return Mono.fromCallable(() -> {
                     Photo photoEntity = new Photo();
@@ -99,6 +99,6 @@ public class PhotoServiceImpl implements PhotoService {
                 .flatMap(photoRepository::save)
                 .map(savedPhoto -> new ByteArrayResource(savedPhoto.getData()));
     }
-
+*/
 
 }

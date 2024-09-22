@@ -276,7 +276,7 @@ public class VetController {
     }
 
 
-    @PostMapping("{vetId}/photos/{photoName}")
+  /*  @PostMapping("{vetId}/photos/{photoName}")
     public Mono<ResponseEntity<Resource>> addPhoto(
             @PathVariable String vetId,
             @PathVariable String photoName,
@@ -291,7 +291,7 @@ public class VetController {
                 .map(p -> ResponseEntity.status(HttpStatus.CREATED).body(p))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
-
+*/
 
 
 
