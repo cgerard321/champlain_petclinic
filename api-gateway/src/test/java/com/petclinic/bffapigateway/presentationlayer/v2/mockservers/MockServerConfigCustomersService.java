@@ -94,6 +94,32 @@ public class MockServerConfigCustomersService {
                 );
     }
 
+    public void registerGetOwnerByIdEndpoint() {
+        String ownerResponseJson = "{"
+                + "\"ownerId\":\"e6c7398e-8ac4-4e10-9ee0-03ef33f0361a\","
+                + "\"firstName\":\"Betty\","
+                + "\"lastName\":\"Davis\","
+                + "\"address\":\"638 Cardinal Ave.\","
+                + "\"city\":\"Sun Prairie\","
+                + "\"province\":\"Quebec\","
+                + "\"telephone\":\"6085551749\","
+                + "\"pets\":null"
+                + "}";
+
+        mockServerClient_CustomersService
+                .when(
+                        request()
+                                .withMethod("GET")
+                                .withPath("/owners/e6c7398e-8ac4-4e10-9ee0-03ef33f0361a")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(200)
+                                .withBody(json(ownerResponseJson))
+                                .withHeader("Content-Type", "application/json")
+                );
+    }
+
 
 
     public void stopMockServer() {
