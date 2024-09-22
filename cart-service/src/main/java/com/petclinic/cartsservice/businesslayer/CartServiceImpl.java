@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -42,6 +43,22 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
+    public Flux<ProductResponseModel> clearCart(String cartId) {
+        return cartRepository.findCartByCartId(cartId)
+                .switchIfEmpty(Mono.error(new NotFoundException("Cart not found: " + cartId)))
+                .flatMapMany(cart -> {
+                    // Retrieve products based on productIds and clear the cart simultaneously
+                    Flux<ProductResponseModel> productsFlux = Flux.fromIterable(cart.getProductIds())
+                            .flatMap(productClient::getProductByProductId);
+
+                    // Clear cart and save it
+                    cart.setProductIds(Collections.emptyList());
+                    return cartRepository.save(cart)
+                            .thenMany(productsFlux);  // Ensure cart is saved before returning the products
+                });
+    }
+
+    @Override
     public Mono<CartResponseModel> updateCartByCartId(Mono<CartRequestModel> cartRequestModel, String cartId) {
         return cartRepository.findCartByCartId(cartId)
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("Cart id was not found: " + cartId))))
@@ -66,11 +83,5 @@ public class CartServiceImpl implements CartService {
                             .collectList()
                             .map(products -> EntityModelUtil.toCartResponseModel(cart, products));
                 });
-
-
     }
-
-
-
-
 }
