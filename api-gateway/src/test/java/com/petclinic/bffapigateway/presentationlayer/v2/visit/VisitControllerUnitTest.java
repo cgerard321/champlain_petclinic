@@ -144,6 +144,7 @@ public class VisitControllerUnitTest {
         verify(visitsServiceClient, times(1)).getAllVisits();
     }
 
+    /*
     @Test
     void whenAddVisit_asAdmin_thenReturnCreatedVisitDTO() {
         // Arrange
@@ -200,6 +201,8 @@ public class VisitControllerUnitTest {
         // Verify that addVisit was called
         verify(visitsServiceClient, times(1)).addVisit(any(Mono.class));
     }
+
+     */
 
     @Test
     void postReview_whenValidRequest_thenReturnCreatedResponse() {

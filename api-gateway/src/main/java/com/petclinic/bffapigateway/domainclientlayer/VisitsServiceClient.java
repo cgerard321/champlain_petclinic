@@ -27,6 +27,8 @@ import org.webjars.NotFoundException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -159,6 +161,11 @@ public class VisitsServiceClient {
                             }
                         } catch (IOException e) {
                             // Handle parsing error
+                            StringWriter sw = new StringWriter();
+                            e.printStackTrace(new PrintWriter(sw));
+                            String exceptionAsString = sw.toString();
+
+                            System.out.println(exceptionAsString);
                             return Mono.error(new BadRequestException("Bad Request"));
                         }
                     });
