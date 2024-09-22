@@ -68,8 +68,13 @@ export function NavBar(): JSX.Element {
                     )}
                   </NavDropdown>
                 )}
-                {!IsInventoryManager() && (
+                {!IsAdmin() && (
                   <Nav.Link as={Link} to={AppRoutePaths.CustomerBills}>
+                    Bills
+                  </Nav.Link>
+                )}
+                {IsAdmin() && (
+                  <Nav.Link as={Link} to={AppRoutePaths.AdminBills}>
                     Bills
                   </Nav.Link>
                 )}
