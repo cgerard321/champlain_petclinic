@@ -177,9 +177,9 @@ const router = createBrowserRouter([
       {
         path: AppRoutePaths.CustomerProfile,
         element: (
-            <ProtectedRoute roles={['OWNER']}>
-              <ProfilePage />
-            </ProtectedRoute>
+          <ProtectedRoute roles={['OWNER']}>
+            <ProfilePage />
+          </ProtectedRoute>
         ),
       },
     ],

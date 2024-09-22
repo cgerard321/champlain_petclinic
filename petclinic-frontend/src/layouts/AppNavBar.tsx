@@ -8,7 +8,7 @@ import {
 } from '@/context/UserContext';
 import axiosInstance from '@/shared/api/axiosInstance.ts';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
-import {useState} from 'react';
+import { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Navbar, Nav, NavDropdown, Container } from 'react-bootstrap';
 import './AppNavBar.css';
@@ -95,9 +95,12 @@ export function NavBar(): JSX.Element {
             {user.userId !== '' ? (
               <NavDropdown title={`${user.username}`} id="user-dropdown">
                 {IsOwner() && (
-                <NavDropdown.Item as={Link} to={AppRoutePaths.CustomerProfile}>
-                  Profile
-                </NavDropdown.Item>
+                  <NavDropdown.Item
+                    as={Link}
+                    to={AppRoutePaths.CustomerProfile}
+                  >
+                    Profile
+                  </NavDropdown.Item>
                 )}
                 {IsOwner() && (
                   <NavDropdown.Item
