@@ -12,6 +12,9 @@ import AddSupplyForm from '@/features/inventories/AddSupplyForm.tsx';
 
 //TODO: create add inventory form component and change the component being shown on the inventories page on the onClick event of the add inventory button
 export default function InventoriesListTable(): JSX.Element {
+  const [selectedInventories, setSelectedInventories] = useState<Inventory[]>(
+    []
+  );
   const [inventoryName, setInventoryName] = useState('');
   const [inventoryType, setInventoryType] = useState('');
   const [inventoryTypeList, setInventoryTypeList] = useState<InventoryType[]>(
@@ -94,21 +97,51 @@ export default function InventoriesListTable(): JSX.Element {
     setShowAddSupplyModal(false);
   };
 
+  const handleInventorySelection = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    inventory: Inventory
+  ): void => {
+    const isChecked = e.target.checked;
+    setSelectedInventories(prevSelected => {
+      if (isChecked) {
+        return [...prevSelected, inventory];
+      } else {
+        return prevSelected.filter(
+          selectedInventory =>
+            selectedInventory.inventoryId !== inventory.inventoryId
+        );
+      }
+    });
+  };
+
+  const deleteSelectedInventories = async (): Promise<void> => {
+    for (const inventory of selectedInventories) {
+      await deleteInventory(inventory); // Delete each selected inventory from the database
+    }
+
+    // Refresh the inventory list after deleting
+    getInventoryList(inventoryName, inventoryType, inventoryDescription);
+
+    // Clear the selected inventories
+    setSelectedInventories([]);
+  };
+
   return (
     <div>
       <table className="table table-striped">
         <thead>
           <tr>
             {/* <td>Inventory ID</td> */}
+            <td></td>
             <td>Name</td>
             <td>Type</td>
             <td>Description</td>
             <td></td>
             <td></td>
-            <td></td>
           </tr>
           <tr>
             {/* <td></td> */}
+            <td></td>
             <td>
               <input
                 type="text"
@@ -206,12 +239,17 @@ export default function InventoriesListTable(): JSX.Element {
         </thead>
         <tbody>
           {inventoryList.map(inventory => (
-            <tr
-              key={inventory.inventoryId}
-              onClick={() =>
-                navigate(`/inventory/${inventory.inventoryId}/products`)
-              }
-            >
+            <tr key={inventory.inventoryId}>
+              <td>
+                <input
+                  type="checkbox"
+                  checked={selectedInventories.some(
+                    selectedInventory =>
+                      selectedInventory.inventoryId === inventory.inventoryId
+                  )}
+                  onChange={e => handleInventorySelection(e, inventory)}
+                />
+              </td>
               {/* <td>{inventory.inventoryId}</td> */}
               <td
                 onClick={() =>
@@ -303,6 +341,13 @@ export default function InventoriesListTable(): JSX.Element {
       >
         Notification Text Here
       </div>
+      <button
+        className="btn btn-danger"
+        onClick={deleteSelectedInventories}
+        disabled={selectedInventories.length === 0} // Disable if no items selected
+      >
+        Delete Selected Inventories
+      </button>
       <button
         className="delete-bundle-button btn btn-success mx-1"
         onClick={() => {

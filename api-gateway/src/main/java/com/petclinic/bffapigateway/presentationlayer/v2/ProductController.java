@@ -24,10 +24,20 @@ public class ProductController {
 
     private final ProductsServiceClient productsServiceClient;
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = {Roles.ALL})
     @GetMapping(value = "", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Flux<ProductResponseDTO> getAllProducts() {
-        return productsServiceClient.getAllProducts();
+    public Flux<ProductResponseDTO> getAllProducts(
+            @RequestParam(required = false) Double minPrice,
+            @RequestParam(required = false) Double maxPrice) {
+        // Validate negative prices
+        if ((minPrice != null && minPrice < 0) || (maxPrice != null && maxPrice < 0)) {
+            throw new IllegalArgumentException("Price values cannot be negative");
+        }
+        //error handling for if the minPrice is greater than maxPrice
+        if (minPrice != null && maxPrice != null && minPrice > maxPrice) {
+            return Flux.error(new IllegalArgumentException("minPrice cannot be greater than maxPrice"));
+        }
+        return productsServiceClient.getAllProducts(minPrice, maxPrice);
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
@@ -38,7 +48,7 @@ public class ProductController {
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
-    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER})
     @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public Mono<ResponseEntity<ProductResponseDTO>> addProduct(@RequestBody ProductRequestDTO productRequestDTO) {
         return productsServiceClient.createProduct(productRequestDTO)

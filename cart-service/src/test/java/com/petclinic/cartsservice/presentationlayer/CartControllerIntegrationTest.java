@@ -16,6 +16,7 @@ import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -35,17 +36,10 @@ class CartControllerIntegrationTest {
     @Autowired
     private CartRepository cartRepository;
 
-    public static final String NON_EXISTING_CART_ID = "06a7d573-bcab-4db3-956f-773324b92a89";
+    public static final String NON_EXISTING_CART_ID = "3ee10bc4-2957-42dc-8d2b-2ecb76301a3c";
 
     private MockServerConfigProductService mockServerConfigProductService;
 
-    List<String> productIds = List.of("06a7d573-bcab-4db3-956f-773324b92a88");
-
-    private final Cart cart1 = Cart.builder()
-            .cartId("98f7b33a-d62a-420a-a84a-05a27c85fc91")
-            .productIds(productIds)
-            .customerId("1")
-            .build();
 
     ProductResponseModel productResponseModel = ProductResponseModel.builder()
             .productId("06a7d573-bcab-4db3-956f-773324b92a88")
@@ -54,10 +48,24 @@ class CartControllerIntegrationTest {
             .productSalePrice(10.0)
             .build();
 
+
+    List<String> productIds = new ArrayList(List.of(productResponseModel.getProductId()));
+
+    private final Cart cart1 = Cart.builder()
+            .cartId("98f7b33a-d62a-420a-a84a-05a27c85fc91")
+            .productIds(productIds)
+            .customerId("1")
+            .build();
+
     CartResponseModel cartResponseModel = CartResponseModel.builder()
             .cartId("98f7b33a-d62a-420a-a84a-05a27c85fc91")
             .products(List.of(productResponseModel))
             .customerId("1")
+            .build();
+
+    CartRequestModel cartRequestModel = CartRequestModel.builder()
+            .customerId("1")
+            .productIds(productIds)
             .build();
 
     @BeforeAll
@@ -81,6 +89,22 @@ class CartControllerIntegrationTest {
     }
 
 //    @Test
+    void whenUpdateByCartId_thenReturnCartResponseModel(){
+        webTestClient.put()
+                .uri("/api/v1/carts/" + cart1.getCartId())
+                .accept(MediaType.APPLICATION_JSON)
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(cartRequestModel)
+                .exchange()
+                .expectStatus().isOk()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(CartResponseModel.class)
+                .value(updated -> {
+                    assertEquals(cartRequestModel.getCustomerId(), updated.getCustomerId());
+                });
+    }
+
+ //   @Test
     void whenGetCartByCartId_thenReturnCartResponseModel(){
         webTestClient.get()
                 .uri("/api/v1/carts/" + cart1.getCartId())
