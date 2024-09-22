@@ -75,9 +75,9 @@ class OwnerControllerIntegrationTest {
         client.delete().uri("/owners/" + nonExistentOwnerId)
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectStatus().isNotFound() 
+                .expectStatus().isNotFound()
                 .expectBody()
-                .jsonPath("$.message").isEqualTo("Course id not found: " + nonExistentOwnerId);  // Expect the error message to indicate the ownerId was not found
+                .jsonPath("$.message").isEqualTo("Course id not found: " + nonExistentOwnerId);
     }
 
 //    @Test
