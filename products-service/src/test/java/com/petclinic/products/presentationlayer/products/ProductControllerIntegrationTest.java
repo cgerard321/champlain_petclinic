@@ -54,19 +54,12 @@ class ProductControllerIntegrationTest {
             .averageRating(0.0)
             .build();
 
-//    private ProductRequestModel product_withNonExistentEnrollemntId_RequestModel = ProductRequestModel.builder()
-//            .productId(UUID.randomUUID().toString())
-//            .productName("Product 1")
-//            .productDescription("Product 1 Description")
-//            .productSalePrice(100.00)
-//            .averageRating(0.0)
-//            .build();
-
-//    @BeforeAll
-//    public startServers() {}
-//
-//    @AfterAll
-//    public stopServers() {}
+    private ProductRequestModel productRequestModelWithInavlidSalePrice = ProductRequestModel.builder()
+            .productName("Product 3")
+            .productDescription("Product 3 Description")
+            .productSalePrice(0.00)
+            .averageRating(0.0)
+            .build();
 
     @BeforeEach
     public void setupDB() {
@@ -100,7 +93,26 @@ class ProductControllerIntegrationTest {
                     assertEquals(productRequestModel.getAverageRating(), productResponseModel.getAverageRating());
                 });
 
-        // assert
+        StepVerifier
+                .create(productRepository.count())
+                .expectNextCount(1)
+                .verifyComplete();
+    }
+
+    @Test
+    public void whenAddProductWithInvalidSalePrice_thenThrowInvalidAmountException() {
+        webTestClient
+                .post()
+                .uri("/api/v1/products")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Mono.just(productRequestModelWithInavlidSalePrice), ProductRequestModel.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().is4xxClientError()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("Product sale price must be greater than 0");
+
         StepVerifier
                 .create(productRepository.count())
                 .expectNextCount(1)
