@@ -3,6 +3,7 @@ import { NavBar } from '@/layouts/AppNavBar.tsx';
 import AddVet from '@/pages/Vet/AddVet.tsx';
 import { useState } from 'react';
 import VetListTable from '@/features/veterinarians/VetListTable.tsx';
+import UploadVetPhoto from '@/pages/Vet/UploadVetPhoto.tsx';
 
 // Define the interfaces for the DTOs
 interface SpecialtyDTO {
@@ -113,7 +114,7 @@ export default function Vet(): JSX.Element {
           {formVisible ? 'Cancel' : 'Add Vet'}
         </button>
         {formVisible && <AddVet />}
-
+        <UploadVetPhoto />
         <input
           type="text"
           value={searchQuery}
