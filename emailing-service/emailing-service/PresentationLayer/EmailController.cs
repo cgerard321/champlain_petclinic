@@ -19,7 +19,6 @@ public class EmailController : Controller
 {
     //I am not the one calling the constructor. I have to do it like this
     private IEmailService _emailService = new EmailServiceImpl();
-
     
 
     [HttpGet("test")]
@@ -28,6 +27,7 @@ public class EmailController : Controller
         Console.WriteLine("TestEndpoint accessed");
         return Ok(); // Returns a 200 OK status with no content
     }
+    
 
     [HttpGet("get")]
     public IActionResult GetAllEmails()
@@ -59,7 +59,7 @@ public class EmailController : Controller
             Console.WriteLine(e);
             return BadRequest(new { message = e.Message });
         }
-        return Ok();
+        return Ok($"Successfully created a new template with the name {templateName}");
     }
     
     [HttpPost("send")]

@@ -4,12 +4,14 @@ using emailing_service.Models.EmailType;
 using emailing_service.Utils;
 using emailing_service.Utils.Exception;
 using Microsoft.AspNetCore.Http.HttpResults;
+using MySqlConnector;
 
 namespace emailing_service.BuisnessLayer;
 
 public class EmailServiceImpl : IEmailService
 {
-    private IDatabaseHelper _databaseHelper = new DatabaseHelper();
+    private IDatabaseHelper _databaseHelper;
+    
     
     
     public void SetDatabaseHelper(IDatabaseHelper databaseHelper)
@@ -119,7 +121,7 @@ public class EmailServiceImpl : IEmailService
                         EmailUtils.smtpClient,
                         true
                     );
-
+                    
                     if (sendEmailResult.Status == "Sent")
                     {
                         // Add the email to the database with a status of "Sent"

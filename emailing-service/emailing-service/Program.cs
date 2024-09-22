@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using DotNetEnv;
+using emailing_service.BuisnessLayer;
 //using emailing_service.BackgroundTask;
 using emailing_service.Models;
 using emailing_service.Models.Database;
@@ -75,6 +76,8 @@ DatabaseHelper._connectionString = connectionString;
 builder.Services.AddTransient<IDatabaseHelper, DatabaseHelper>();
 IDatabaseHelper dbHelper = new DatabaseHelper();
 Console.WriteLine("we reached the tablecreation");
+
+builder.Services.AddScoped<IEmailService, EmailServiceImpl>();
 
 
 

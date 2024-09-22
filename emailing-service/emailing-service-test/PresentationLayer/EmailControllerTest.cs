@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using emailing_service.Models;
+using emailing_service.Models.Database;
 using emailing_service.Models.EmailType;
 using emailing_service.Utils;
 using Microsoft.AspNetCore;
@@ -107,7 +108,7 @@ public class EmailControllerTests
     public async Task SendEmail_EmailModelIsNull_ReturnsBadRequest()
     {
         // Arrange
-        var requestBody = "{}"; // or serialize an EmailModel object to JSON
+        var requestBody = "{}"; 
         var request = new HttpRequestMessage(HttpMethod.Post, "email/send")
         {
             Content = new StringContent(requestBody, Encoding.UTF8, "application/json")

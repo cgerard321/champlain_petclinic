@@ -10,8 +10,6 @@ namespace emailing_service_test.Utils;
 [TestFixture]
 public class EmailUtilsTest
 {
-    
-    
     private Mock<ISmtpClient> _smtpClientMock;
     
     //TODO fix error in program and Here about the singleton pattern

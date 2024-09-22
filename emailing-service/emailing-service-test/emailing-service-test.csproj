@@ -37,6 +37,10 @@
     <ItemGroup>
         <ProjectReference Include="..\emailing-service\emailing-service.csproj" />
     </ItemGroup>
+    <PropertyGroup>
+        <DefineConstants>TESTING</DefineConstants>
+    </PropertyGroup>
+
 
 
 

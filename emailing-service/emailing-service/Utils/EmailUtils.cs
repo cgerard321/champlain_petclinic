@@ -19,6 +19,9 @@ public static class EmailUtils
     public static bool sendEmail = true;
     public static ISmtpClient smtpClient;
     
+    //Can be disabled mostly for testing
+    //public static bool enableLogging = true;
+    
 
 
     public static void SetUpEmailUtils()

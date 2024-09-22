@@ -21,6 +21,4 @@ public class MailingServiceClient {
         this.webClientBuilder = webClientBuilder;
         productsServiceUrl = "http://" + productsServiceHost + ":" + productsServicePort + "/api/v1/products";
     }
-
-    public
 }
