@@ -180,8 +180,11 @@ const router = createBrowserRouter([
         path: AppRoutePaths.Carts,
         element: (
             <ProtectedRoute roles={['ADMIN']}>
-              <CartPage />
+              <CartPage/>
             </ProtectedRoute>
+        ),
+      },
+      {
 
         path: AppRoutePaths.CustomerProfile,
         element: (

@@ -25,9 +25,8 @@ export enum AppRoutePaths {
 
   Carts = '/carts',
   UserCart = '/carts/:cartId',
-  AddVisit = '/visits/add'
-
   AddVisit = '/visits/add',
+
   CustomerProfile = '/customer/profile',
 
 }
