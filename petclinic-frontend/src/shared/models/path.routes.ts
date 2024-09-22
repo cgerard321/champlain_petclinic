@@ -3,6 +3,7 @@ export enum AppRoutePaths {
   EditInventory = 'inventories/inventory/:inventoryId/edit',
   Review = '/reviews',
   UpdateReview = '/updateReview/:reviewId/edit',
+  GetVisitByVistId = 'visits/:visitId',
   Form = '/forms',
   Inventories = '/inventories',
   Vet = '/vets',
@@ -21,4 +22,6 @@ export enum AppRoutePaths {
   Forbidden = '/forbidden',
   Products = '/products',
   Visits = '/visits',
+  AddVisit = '/visits/add',
+  CustomerProfile = '/customer/profile',
 }
