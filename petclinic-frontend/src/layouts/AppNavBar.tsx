@@ -68,8 +68,13 @@ export function NavBar(): JSX.Element {
                     )}
                   </NavDropdown>
                 )}
-                {!IsInventoryManager() && (
+                {!IsAdmin() && (
                   <Nav.Link as={Link} to={AppRoutePaths.CustomerBills}>
+                    Bills
+                  </Nav.Link>
+                )}
+                {IsAdmin() && (
+                  <Nav.Link as={Link} to={AppRoutePaths.AdminBills}>
                     Bills
                   </Nav.Link>
                 )}
@@ -83,9 +88,14 @@ export function NavBar(): JSX.Element {
                     Inventories
                   </Nav.Link>
                 )}
-                {!IsInventoryManager() && (
+                {
                   <Nav.Link as={Link} to={AppRoutePaths.Products}>
                     Products
+                  </Nav.Link>
+                }
+                {IsAdmin() && (
+                  <Nav.Link as={Link} to={AppRoutePaths.Carts}>
+                    Carts
                   </Nav.Link>
                 )}
               </>
@@ -94,9 +104,14 @@ export function NavBar(): JSX.Element {
           <Nav className="ms-auto">
             {user.userId !== '' ? (
               <NavDropdown title={`${user.username}`} id="user-dropdown">
-                <NavDropdown.Item as={Link} to={AppRoutePaths.Home}>
-                  Profile
-                </NavDropdown.Item>
+                {IsOwner() && (
+                  <NavDropdown.Item
+                    as={Link}
+                    to={AppRoutePaths.CustomerProfile}
+                  >
+                    Profile
+                  </NavDropdown.Item>
+                )}
                 {IsOwner() && (
                   <NavDropdown.Item
                     as={Link}
