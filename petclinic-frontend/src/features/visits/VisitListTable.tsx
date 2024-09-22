@@ -3,6 +3,8 @@ import { Visit } from './models/Visit';
 import './VisitListTable.css';
 import { useNavigate } from 'react-router-dom';
 import { AppRoutePaths } from '@/shared/models/path.routes.ts';
+import VisitCalendar from './features/visits/VisitCalendar';
+
 
 export default function VisitListTable(): JSX.Element {
   const [visitsList, setVisitsList] = useState<Visit[]>([]);
@@ -130,6 +132,13 @@ export default function VisitListTable(): JSX.Element {
           title="Make a Visit"
         >
           Make a Visit
+        </button>
+        <button
+          className="btn btn-primary"
+          onClick={() => navigate('/calendar')}
+          title="Visit Calendar"
+        >
+          Visit Calendar
         </button>
       </div>
 
