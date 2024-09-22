@@ -25,8 +25,6 @@ interface VetResponseDTO {
   specialties: SpecialtyDTO[];
 }
 
-
-
 // Define the interfaces for the DTOs
 interface SpecialtyDTO {
   specialtyId: string;
