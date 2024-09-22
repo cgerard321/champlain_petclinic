@@ -1,5 +1,6 @@
 package com.petclinic.products.utils;
 
+import com.petclinic.products.utils.exceptions.InvalidAmountException;
 import com.petclinic.products.utils.exceptions.InvalidInputException;
 import com.petclinic.products.utils.exceptions.NotFoundException;
 import com.petclinic.products.utils.exceptions.RatingAlreadyExists;
@@ -34,6 +35,12 @@ public class GlobalControllerExceptionHandler {
     @ExceptionHandler(RatingAlreadyExists.class)
     public HttpErrorInfo handleRatingAlreadyExists(ServerHttpRequest request, Exception ex){
         return createHttpErrorInfo(BAD_REQUEST, request, ex);
+    }
+
+    @ResponseStatus(UNPROCESSABLE_ENTITY)
+    @ExceptionHandler(InvalidAmountException.class)
+    public HttpErrorInfo handleInvalidAmountException(ServerHttpRequest request, Exception ex) {
+        return createHttpErrorInfo(UNPROCESSABLE_ENTITY, request, ex);
     }
 
 
