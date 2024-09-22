@@ -42,5 +42,15 @@ public class CartServiceClient {
                 .bodyToMono(CartResponseDTO.class);
     }
 
+    public Mono<CartResponseDTO> updateCartByCartId(Mono<CartRequestDTO> cartRequestDTOMono, String CartId){
+        return webClientBuilder.build()
+                .put()
+                .uri(CartServiceUrl + "/" + CartId)
+                .body(Mono.just(cartRequestDTOMono), CartRequestDTO.class)
+                .accept(MediaType.APPLICATION_JSON)
+                .retrieve()
+                .bodyToMono(CartResponseDTO.class);
+    }
+
 }
 
