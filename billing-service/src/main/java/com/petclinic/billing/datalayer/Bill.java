@@ -26,6 +26,5 @@ public class Bill {
     private double amount;
     private double taxedAmount;
     private BillStatus billStatus;
-
     private LocalDate dueDate;
 }
