@@ -6,6 +6,7 @@ import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewResponseDTO;
+import com.petclinic.bffapigateway.exceptions.BadRequestException;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
@@ -21,6 +22,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.time.LocalDateTime;
 
 @RestController
 @RequiredArgsConstructor
@@ -100,6 +103,7 @@ public class VisitController {
                         .map(updatedVisit -> ResponseEntity.ok(updatedVisit))
                         .defaultIfEmpty(ResponseEntity.notFound().build())); // Return 404 if not found
     }
+
 
 
 }
