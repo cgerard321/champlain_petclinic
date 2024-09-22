@@ -129,19 +129,7 @@ public class VetServiceImpl implements VetService {
                 .map(EntityDtoUtil::vetEntityToResponseDTO);
     }
 
-    @Override
-    public Mono<VetResponseDTO> getVetByFirstName(String firstName) {
-        return vetRepository.findVetByFirstName(firstName)
-                .switchIfEmpty(Mono.error(new NotFoundException("No vet with this first name was found: " + firstName)))
-                .map(EntityDtoUtil::vetEntityToResponseDTO);
-    }
 
-    @Override
-    public Mono<VetResponseDTO> getVetByLastName(String lastName) {
-        return vetRepository.findVetByLastName(lastName)
-                .switchIfEmpty(Mono.error(new NotFoundException("No vet with this last name was found: " + lastName)))
-                .map(EntityDtoUtil::vetEntityToResponseDTO);
-    }
 
 
     @Override
