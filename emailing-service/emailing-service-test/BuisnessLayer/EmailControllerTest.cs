@@ -3,10 +3,12 @@ using System.Net.Http;
 using emailing_service.BuisnessLayer;
 using emailing_service.Controllers;
 using emailing_service.Models;
+using emailing_service.Models.Database;
 using emailing_service.Models.EmailType;
 using emailing_service.Utils;
 using emailing_service.Utils.Exception;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace emailing_service_test.BuisnessLayer;
@@ -24,7 +26,6 @@ public class EmailControllerTests
     private IEmailService _controller;
     private readonly string pathOfDefaultHtml;
     private readonly DirectEmailModel directEmailModel;
-
     public EmailControllerTests()
     {
         EmailUtils.sendEmail = false;
@@ -40,6 +41,7 @@ public class EmailControllerTests
             "PetClinic"
         );
     }
+    
     [OneTimeSetUp]
     public async Task SetUp()
     {
@@ -52,6 +54,8 @@ public class EmailControllerTests
             "MockPetClinic"
         );
         _controller = new EmailServiceImpl();
+        _controller.SetDatabaseHelper(new TestDbContext());
+        
     }
     /*[Test]
     public async Task TestEndpoint_Returns_OkObjectResult()
@@ -60,6 +64,13 @@ public class EmailControllerTests
         Assert.That(result, Is.InstanceOf<OkResult>());
     }*/
 
+    [Test]
+    public async Task GetAll_ReturnAllMessages_ReturnAllEmails()
+    {
+        var result = _controller.GetAllEmails();
+        Assert.That(result, Is.Not.Null);
+        Assert.IsAssignableFrom<List<EmailModel>>(result);
+    }
     
     [Test]
     [TestCase("T")]
@@ -154,7 +165,9 @@ public class EmailControllerTests
         Assert.That(operationResult.IsSuccess, Is.True);
         
     }
-    [Test]
+    /*
+     We now do this in the endpoint
+     [Test]
     [TestCase(null)]
     public void SendEmail_InvalidTemplateName_TemplateFormatException(DirectEmailModel? testModel)
     {
@@ -163,7 +176,7 @@ public class EmailControllerTests
     
         Assert.That(ex.Message, Does.Contain("Email Model is null"));
         
-    }
+    }*/
     public static IEnumerable<DirectEmailModel> NullOrWhiteSpaceEmailModels()
     {
         yield return new DirectEmailModel(
@@ -351,7 +364,6 @@ public class EmailControllerTests
             "CompanyXYZ"
         );
     }
-
     [Test, TestCaseSource(nameof(NonExistingTemplateEmailModels))]
     public void SendEmail_NonExistingTemplate_TriedToFindNonExistingTemplate(DirectEmailModel? testModel)
     {
@@ -360,8 +372,6 @@ public class EmailControllerTests
         Assert.That(ex.Message,
             Does.Contain($"Template {testModel.TemplateName} does not exist. Please create a template first or use the default one (Default)"));
     }
-    
-    
     
     
     [OneTimeTearDown]

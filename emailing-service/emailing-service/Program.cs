@@ -2,6 +2,7 @@ using System.Runtime.CompilerServices;
 using DotNetEnv;
 //using emailing_service.BackgroundTask;
 using emailing_service.Models;
+using emailing_service.Models.Database;
 using emailing_service.Utils;
 
 [assembly: InternalsVisibleTo("emailing_service_test")] // Adjust the namespace if needed
@@ -67,6 +68,13 @@ catch (DirectoryNotFoundException e)
     Console.WriteLine("Could not load HTML file. This means that we do not have the default template loaded. IGNORE THIS IF IN TEST");
 }
 
+// Configure database connection string
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+Console.WriteLine(connectionString);
+DatabaseHelper._connectionString = connectionString;
+builder.Services.AddTransient<IDatabaseHelper, DatabaseHelper>();
+IDatabaseHelper dbHelper = new DatabaseHelper();
+Console.WriteLine("we reached the tablecreation");
 
 
 
@@ -95,5 +103,6 @@ app.MapControllerRoute(
 app.Urls.Add("http://0.0.0.0:5115");
 
 app.Run();
+
 
 

@@ -1,4 +1,5 @@
 using emailing_service.Models;
+using emailing_service.Models.Database;
 using emailing_service.Models.EmailType;
 using emailing_service.Utils;
 using emailing_service.Utils.Exception;
@@ -8,6 +9,18 @@ namespace emailing_service.BuisnessLayer;
 
 public class EmailServiceImpl : IEmailService
 {
+    private IDatabaseHelper _databaseHelper = new DatabaseHelper();
+    
+    
+    public void SetDatabaseHelper(IDatabaseHelper databaseHelper)
+    {
+        _databaseHelper = databaseHelper;
+    }
+    public List<EmailModel> GetAllEmails()
+    {
+        return _databaseHelper.GetAllEmailsAsync().Result;
+    }
+
     public OperationResult ReceiveHtml(string? templateName, string? htmlBody)
     {
         if (string.IsNullOrWhiteSpace(templateName))
@@ -29,8 +42,6 @@ public class EmailServiceImpl : IEmailService
     public OperationResult SendEmail(DirectEmailModel model)
     {
         Console.WriteLine("Received Email Call Function!");
-        if (model == null)
-            throw new MissingBodyException("Email Model is null");
         DirectEmailModel directEmailModel = model;
         Console.WriteLine("Found the model!" + directEmailModel.ToString());
         
@@ -97,22 +108,43 @@ public class EmailServiceImpl : IEmailService
         try
         {
             // Run the email sending task in a separate thread
-            Task.Run(() =>
+            Task.Run(async () =>
             {
                 try
                 {
-                    EmailUtils.SendEmailAsync(
+                    var sendEmailResult = await EmailUtils.SendEmailAsync(
                         directEmailModel.EmailToSendTo,
                         directEmailModel.EmailTitle,
                         builtEmail,
-                            EmailUtils.smtpClient,
-                            true
-                    ).Wait(); // Wait for the task to complete
+                        EmailUtils.smtpClient,
+                        true
+                    );
+
+                    if (sendEmailResult.Status == "Sent")
+                    {
+                        // Add the email to the database with a status of "Sent"
+                        var databaseHelper = new DatabaseHelper();
+                        await databaseHelper.AddEmailAsync(
+                            directEmailModel.EmailToSendTo,
+                            directEmailModel.EmailTitle,
+                            builtEmail,
+                            "Sent"
+                        );
+                    }
+                    else
+                    {
+                        // Add the email to the database with a status of "Failed"
+                        var databaseHelper = new DatabaseHelper();
+                        await databaseHelper.AddEmailAsync(
+                            directEmailModel.EmailToSendTo,
+                            directEmailModel.EmailTitle,
+                            builtEmail,
+                            "Failed"
+                        );
+                    }
                 }
                 catch (Exception e)
                 {
-                    // Log the exception, handle it, or notify an administrator
-                    
                     Console.WriteLine(e);
                 }
             });

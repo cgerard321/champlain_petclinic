@@ -34,3 +34,4 @@ C:\Users\Admin\Desktop\PetClinic\champlain_petclinic\emailing-service\emailing-s
 C:\Users\Admin\Desktop\PetClinic\champlain_petclinic\emailing-service\emailing-service\obj\Debug\net8.0\emailing-service.pdb
 C:\Users\Admin\Desktop\PetClinic\champlain_petclinic\emailing-service\emailing-service\obj\Debug\net8.0\emailing-service.genruntimeconfig.cache
 C:\Users\Admin\Desktop\PetClinic\champlain_petclinic\emailing-service\emailing-service\obj\Debug\net8.0\ref\emailing-service.dll
+C:\Users\Admin\Desktop\PetClinic\champlain_petclinic\emailing-service\emailing-service\bin\Debug\net8.0\MySqlConnector.dll

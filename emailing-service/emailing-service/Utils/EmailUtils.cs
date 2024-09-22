@@ -53,7 +53,7 @@ public static class EmailUtils
     /// <param name="subject"></param>
     /// <param name="body"></param>
     /// <param name="isBodyHtml"></param>
-    public static async Task SendEmailAsync(string to, string subject, string body, ISmtpClient smtpClient, bool isBodyHtml = true)
+    public static async Task<SendEmailResult> SendEmailAsync(string to, string subject, string body, ISmtpClient smtpClient, bool isBodyHtml = true)
     {
         var fromAddress = new MailAddress(emailConnectionString.Email, emailConnectionString.DisplayName);
         var toAddress = new MailAddress(to);
@@ -70,13 +70,20 @@ public static class EmailUtils
                 if (sendEmail)
                     await smtpClient.SendMailAsync(mailMessage);
                 Console.WriteLine("Email sent successfully.");
+                return new SendEmailResult { Status = "Sent", ErrorMessage = null };
             }
             catch (System.Exception ex)
             {
                 Console.WriteLine($"Failed to send email: {ex.Message}");
-                throw; // Rethrow the exception so that it can be handled in tests
+                return new SendEmailResult { Status = "Failed", ErrorMessage = ex.Message };
             }
         }
+    }
+
+    public class SendEmailResult
+    {
+        public string Status { get; set; }
+        public string ErrorMessage { get; set; }
     }
 
 }

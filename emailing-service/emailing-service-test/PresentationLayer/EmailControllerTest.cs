@@ -311,8 +311,152 @@ public class EmailControllerTests
         Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
     }
     
+    public static IEnumerable<DirectEmailModel> EmptyNeededFieldsModels()
+    {
+        yield return new DirectEmailModel(
+            "example@test.com",
+            "This is a test email",
+            "Default",
+            null,
+            "This is the emailbody",
+            "this is the email footer",
+            "Felix",
+            "PetClinic"
+        );
 
+        yield return new DirectEmailModel(
+            "example@test.com",
+            "Another test email",
+            "Default",
+            "Test email header",
+            null,
+            "Test email footer",
+            "John",
+            "CompanyXYZ"
+        );
+        yield return new DirectEmailModel(
+            "example@test.com",
+            "Another test email",
+            "Default",
+            "Test email header",
+            "Test email body",
+            null,
+            "John",
+            "CompanyXYZ"
+        );
+        yield return new DirectEmailModel(
+            "example@test.com",
+            "This is a test email",
+            "Default",
+            "This is the emailHeader",
+            "This is the emailbody",
+            "this is the email footer",
+            null,
+            "PetClinic"
+        );
 
+        yield return new DirectEmailModel(
+            "example@test.com",
+            "Another test email",
+            "Default",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            null
+        );
+    }
+    [Test, TestCaseSource(nameof(EmptyNeededFieldsModels))]
+    public async Task SendEmail_NotAllTheFieldsOfTheTemmplate_ReturnsBadRequest(DirectEmailModel emailModelParam)
+    {
+        EmailUtils.EmailTemplates.Add(new EmailTemplate("Default","<html><body>%%EMAIL_HEADERS%% %%EMAIL_BODY%% %%EMAIL_FOOTER%% %%EMAIL_NAME%% %%EMAIL_SENDER%%</body></html>"));
+        // Arrange
+        var client = new HttpClient();
+        var emailModel = emailModelParam;
+        emailModel.TemplateName = "Default";
+        var json = JsonConvert.SerializeObject(emailModel);
+
+        var request = new HttpRequestMessage(HttpMethod.Post, "email/send")
+        {
+            Content = new StringContent(json, Encoding.UTF8, "application/json")
+        };
+        var response = await _httpClient.SendAsync(request);
+        // Act
+        // Assert
+        Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+    }
+    
+    /*public static IEnumerable<DirectEmailModel> FieldContainsPlaceHolder()
+    {
+        yield return new DirectEmailModel(
+            "example@test.com",
+            "This is a test email",
+            "Default",
+            "%%EMAIL_HEADER%%",
+            "This is the emailbody",
+            "this is the email footer",
+            "Felix",
+            "PetClinic"
+        );
+        
+        yield return new DirectEmailModel(
+            "example@test.com",
+            "This is a test email",
+            "Default",
+            "Test email header",
+            "%%EMAIL_BODY%%",
+            "Test email footer",
+            "John",
+            "CompanyXYZ"
+        );
+        yield return new DirectEmailModel(
+            "example@test.com",
+            "This is a test email",
+            "Default",
+            "Test email header",
+            "Test email body",
+            "%%EMAIL_FOOTER%%",
+            "John",
+            "CompanyXYZ"
+        );
+        yield return new DirectEmailModel(
+            "example@test.com",
+            "This is a test email",
+            "Default",
+            "This is the emailHeader",
+            "This is the emailbody",
+            "this is the email footer",
+            "%%EMAIL_NAME%%",
+            "PetClinic"
+        );
+
+        yield return new DirectEmailModel(
+            "example@test.com",
+            "Another test email",
+            "Default",
+            "Test email header",
+            "Test email body",
+            "Test email footer",
+            "John",
+            "%%EMAIL_SENDER%%"
+        );
+    }
+    [Test, TestCaseSource(nameof(FieldContainsPlaceHolder))]
+    public async Task SendEmail_RequestFieldContainPlaceholder_ReturnsBadRequest(DirectEmailModel emailModelParam)
+    {
+        EmailUtils.EmailTemplates.Add(new EmailTemplate("Default","<html><body>%%EMAIL_HEADERS%% %%EMAIL_BODY%% %%EMAIL_FOOTER%% %%EMAIL_NAME%% %%EMAIL_SENDER%%</body></html>"));
+        // Arrange
+        var json = JsonConvert.SerializeObject(emailModelParam);
+
+        var request = new HttpRequestMessage(HttpMethod.Post, "email/send")
+        {
+            Content = new StringContent(json, Encoding.UTF8, "application/json")
+        };
+        var response = await _httpClient.SendAsync(request);
+        // Act
+        // Assert
+        Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+    }*/
     [TearDown]
     public void AllTimeTearDown()
     {
