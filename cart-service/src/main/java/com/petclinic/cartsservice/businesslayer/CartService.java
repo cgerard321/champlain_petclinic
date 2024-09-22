@@ -15,6 +15,7 @@ public interface CartService {
     public Flux<CartResponseModel> getAllCarts();
 
     Mono<CartResponseModel> updateCartByCartId(Mono<CartRequestModel> cartRequestModel, String cartId);
+    Mono<Integer> getCartItemCount(String cartId);
 
 
 

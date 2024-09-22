@@ -22,6 +22,9 @@ import reactor.core.publisher.Flux;
 
 import reactor.core.publisher.Mono;
 
+import java.util.Collections;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/v1/carts")
 public class CartController {
@@ -67,6 +70,10 @@ public class CartController {
 
     }
 
-
+    @GetMapping("/{cartId}/count")
+    public Mono<ResponseEntity<Map<String, Integer>>> getCartItemCount(@PathVariable String cartId) {
+        return cartService.getCartItemCount(cartId)
+                .map(count -> ResponseEntity.ok(Collections.singletonMap("itemCount", count)))
+                .switchIfEmpty(Mono.error(new NotFoundException("Cart not found for ID: " + cartId)));
     }
-
+}
