@@ -1,5 +1,6 @@
 package com.petclinic.vet.servicelayer;
 
+
 import com.petclinic.vet.dataaccesslayer.Photo;
 import com.petclinic.vet.dataaccesslayer.PhotoRepository;
 import com.petclinic.vet.dataaccesslayer.badges.BadgeTitle;
@@ -14,10 +15,14 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
+import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+
 import java.io.IOException;
+
+
 
 
 @Service
@@ -26,6 +31,7 @@ import java.io.IOException;
 public class PhotoServiceImpl implements PhotoService {
     private final PhotoRepository photoRepository;
 
+
     @Override
     public Mono<Resource> getPhotoByVetId(String vetId) {
         return photoRepository.findByVetId(vetId)
@@ -33,9 +39,11 @@ public class PhotoServiceImpl implements PhotoService {
                 .map(img -> {
                     ByteArrayResource resource = new ByteArrayResource(img.getData());
 
+
                     return resource;
                 });
     }
+
 
     @Override
     public Mono<PhotoResponseDTO> getDefaultPhotoByVetId(String vetId) {
@@ -43,6 +51,7 @@ public class PhotoServiceImpl implements PhotoService {
                 .switchIfEmpty(Mono.error(new NotFoundException("vetId not found: " + vetId)))
                 .map(EntityDtoUtil::toPhotoResponseDTO);
     }
+
 
     @Override
     public Mono<Resource> insertPhotoOfVet(String vetId, String photoName, Mono<Resource> photo) {
@@ -54,9 +63,11 @@ public class PhotoServiceImpl implements PhotoService {
                     ByteArrayResource resource = new ByteArrayResource(img.getData());
                     //log.debug("Picture byte array in vet-service toServiceImpl" + resource);
 
+
                     return resource;
                 });
     }
+
 
     @Override
     public Mono<Resource> updatePhotoByVetId(String vetId, String photoName, Mono<Resource> photo) {
@@ -75,6 +86,19 @@ public class PhotoServiceImpl implements PhotoService {
                                     });
                         }));
     }
+    @Override
+    public Mono<Resource> insertPhotoOfVet(String vetId, String photoName, MultipartFile photo) {
+        return Mono.fromCallable(() -> {
+                    Photo photoEntity = new Photo();
+                    photoEntity.setVetId(vetId);
+                    photoEntity.setFilename(photoName);
+                    photoEntity.setImgType(photo.getContentType());
+                    photoEntity.setData(photo.getBytes());
+                    return photoEntity;
+                })
+                .flatMap(photoRepository::save)
+                .map(savedPhoto -> new ByteArrayResource(savedPhoto.getData()));
+    }
+
+
 }
-
-
