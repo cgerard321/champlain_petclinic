@@ -12,6 +12,10 @@
 
     "eslint": "^9.11.0",
 
+
+
+    "eslint-plugin-react": "^7.36.1",
+
     "react-bootstrap": "^2.10.4"
   }
 }
