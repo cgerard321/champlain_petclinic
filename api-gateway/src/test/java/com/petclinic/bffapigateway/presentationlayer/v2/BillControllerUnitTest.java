@@ -105,4 +105,5 @@ private final String baseBillURL = "/api/v2/gateway/bills";
        verify(billServiceClient, times(1))
                .getAllBilling();
     }
+
 }
