@@ -24,9 +24,6 @@ public class Inventory {
     private String inventoryDescription;
     private List<Supply> supplies = new ArrayList<>();
 
-//    public void addSupply(Supply supply) {
-//        this.supplies.add(supply);
-//    }
 
     public void addSupply(Supply supply) {
         if (this.supplies == null) {

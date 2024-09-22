@@ -424,8 +424,7 @@ public class SupplyInventoryServiceImpl implements SupplyInventoryService {
                                 .flatMap(inventory -> {
                                     Supply supply = new Supply(
                                             UUID.randomUUID().toString(),
-                                            UUID.randomUUID().toString(),
-                                            inventory.getId(),
+                                            inventory.getInventoryId(),
                                             supplyRequestDTO.getSupplyName(),
                                             supplyRequestDTO.getSupplyDescription(),
                                             supplyRequestDTO.getSupplyQuantity(),
@@ -440,7 +439,6 @@ public class SupplyInventoryServiceImpl implements SupplyInventoryService {
                                 .map(updatedInventory -> {
                                     List<SupplyResponseDTO> supplyResponseDTOs = updatedInventory.getSupplies().stream()
                                             .map(supply -> new SupplyResponseDTO(
-                                                    supply.getId(),
                                                     supply.getSupplyId(),
                                                     supply.getInventoryId(),
                                                     supply.getSupplyName(),

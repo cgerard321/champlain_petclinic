@@ -8,7 +8,6 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class SupplyResponseDTO {
-    private String id;
     private String supplyId;
     private String inventoryId;
     private String supplyName;

@@ -1,7 +1,12 @@
 package com.petclinic.inventoryservice.presentationlayer;
 
 import com.petclinic.inventoryservice.businesslayer.ProductInventoryService;
+import com.petclinic.inventoryservice.businesslayer.SupplyInventoryService;
+import com.petclinic.inventoryservice.datalayer.Inventory.Inventory;
+import com.petclinic.inventoryservice.datalayer.Inventory.InventoryType;
 import com.petclinic.inventoryservice.datalayer.Supply.Status;
+import com.petclinic.inventoryservice.datalayer.Supply.Supply;
+import com.petclinic.inventoryservice.datalayer.Supply.SupplyRepository;
 import com.petclinic.inventoryservice.utils.exceptions.InvalidInputException;
 import com.petclinic.inventoryservice.utils.exceptions.NotFoundException;
 import org.junit.jupiter.api.Test;
@@ -13,6 +18,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
+import org.springframework.web.reactive.function.BodyInserters;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
@@ -33,7 +39,8 @@ class InventoryControllerUnitTest {
     WebTestClient webTestClient;
     @MockBean
     ProductInventoryService productInventoryService;
-
+    @MockBean
+    SupplyInventoryService supplyInventoryService;
 
     ProductResponseDTO productResponseDTO = ProductResponseDTO.builder()
             .id("1")
@@ -77,6 +84,113 @@ class InventoryControllerUnitTest {
                     .typeId(UUID.randomUUID().toString())
                     .build()
     );
+
+    InventoryType inventoryType4 = InventoryType.builder()
+            .typeId(UUID.randomUUID().toString())
+            .type("Medications")
+            .build();
+
+    Inventory inventory4 = Inventory.builder()
+            .inventoryId(UUID.randomUUID().toString())
+            .inventoryName("Medications")
+            .inventoryType(inventoryType4.getType())
+            .inventoryDescription("Antibiotics for pet infections")
+            .build();
+
+    Supply supply1 = Supply.builder()
+            .supplyName("Sedative Medications")
+            .supplyId(UUID.randomUUID().toString())
+            .supplyPrice(100.00)
+            .inventoryId("dummy-inventory-id")
+            .supplyQuantity(10)
+            .supplyDescription("Medications for relaxation and sleep")
+            .supplySalePrice(10.00)
+            .build();
+
+    Supply Supply2 = Supply.builder()
+            .supplyName("Anxiety Relief Tablets")
+            .supplyId(UUID.randomUUID().toString())
+            .supplyPrice(150.00)
+            .inventoryId(inventory4.getInventoryId())
+            .supplyQuantity(10)
+            .supplyDescription("Tablets for reducing anxiety and stress")
+            .supplySalePrice(10.00)
+            .build();
+
+    Supply Supply3 = Supply.builder()
+            .supplyName("Pain Relief Medication")
+            .supplyId(UUID.randomUUID().toString())
+            .supplyPrice(130.00)
+            .inventoryId(inventory4.getInventoryId()) // Medications
+            .supplyQuantity(12)
+            .supplyDescription("Non-steroidal pain relief medication")
+            .supplySalePrice(140.00)
+            .build();
+
+
+//    @Test
+//    public void addSupplyToInventoryByName_Positive() {
+//        String inventoryName = "Medical equipment";
+//
+//        SupplyRequestDTO requestDTOPositive = new SupplyRequestDTO(
+//                "Anxiety Relief Tablets",
+//                "Tablets for reducing anxiety and stress",
+//                100.0,
+//                150,
+//                115.00
+//        );
+//
+//        SupplyResponseDTO supplyResponseDTO = new SupplyResponseDTO(
+//                UUID.randomUUID().toString(),
+//                inventory4.getInventoryId(),
+//                "Anxiety Relief Tablets",
+//                "Tablets for reducing anxiety and stress",
+//                100.00,
+//                150,
+//                115.00,
+//                Status.AVAILABLE
+//        );
+//        InventoryResponseDTO responseDTO = new InventoryResponseDTO(
+//                UUID.randomUUID().toString(),
+//                "Medical equipment",
+//                "Equipment",
+//                "Medical equipment for surgery",
+//                List.of(supplyResponseDTO)
+//        );
+//
+//        when(supplyInventoryService.addSupplyToInventoryByInventoryName(anyString(), any(Mono.class)))
+//                .thenReturn(Mono.just(responseDTO));
+//
+//        webTestClient.post()
+//                .uri("/inventoriesV2/" + inventoryName + "/supplies")
+//                .body(BodyInserters.fromValue(requestDTOPositive))
+//                .exchange()
+//                .expectStatus().isCreated()
+//                .expectBody(InventoryResponseDTO.class)
+//                .isEqualTo(responseDTO);
+//    }
+
+    @Test
+    public void addSupplyToInventoryByName_Negative() {
+        String inventoryName = "NonExistingInventory";
+
+        SupplyRequestDTO requestDTONegative = new SupplyRequestDTO(
+                supply1.getSupplyName(),
+                supply1.getSupplyDescription(),
+                supply1.getSupplyPrice(),
+                supply1.getSupplyQuantity(),
+                supply1.getSupplySalePrice()
+        );
+
+        when(supplyInventoryService.addSupplyToInventoryByInventoryName(anyString(), any(Mono.class)))
+                .thenReturn(Mono.error(new RuntimeException("Inventory not found")));
+
+        webTestClient.post()
+                .uri("/inventoriesV2/" + inventoryName + "/supplies")
+                .body(BodyInserters.fromValue(requestDTONegative))
+                .exchange()
+                .expectStatus().isNotFound();
+    }
 
     @Test
     void updateInventory_ValidRequest_ShouldReturnOk() {

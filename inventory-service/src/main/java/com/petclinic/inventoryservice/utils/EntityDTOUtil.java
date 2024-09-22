@@ -51,7 +51,6 @@ public class EntityDTOUtil {
         }
 
         return SupplyResponseDTO.builder()
-                .id(supply.getId())
                 .supplyId(supply.getSupplyId())
                 .inventoryId(supply.getInventoryId())
                 .supplyName(supply.getSupplyName())
@@ -84,7 +83,6 @@ public class EntityDTOUtil {
         BeanUtils.copyProperties(inventory, inventoryResponseDTO);
         List<SupplyResponseDTO> supplyResponseDTOs = inventory.getSupplies().stream()
                 .map(supply -> new SupplyResponseDTO(
-                        supply.getId(),
                         supply.getSupplyId(),
                         supply.getInventoryId(),
                         supply.getSupplyName(),
