@@ -199,15 +199,7 @@ public class VisitServiceImpl implements VisitService {
      */
     @Override
     public Mono<Void> deleteVisit(String visitId) {
-//        return repo.existsByVisitId(visitId)
-//                .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("No visit was found with visitId: " + visitId))))
-//                .flatMap(visitExists -> {
-//                    if (!visitExists) {
-//                        return Mono.error(new NotFoundException("No visit was found with visitId: " + visitId));
-//                    } else {
-//                        return repo.deleteByVisitId(visitId);
-//                    }
-//                });
+
         return repo.findByVisitId(visitId)
                 .switchIfEmpty(Mono.error(new NotFoundException("No visit was found with visitId: " + visitId)))
                 .flatMap(foundVisit -> repo.deleteByVisitId(foundVisit.getVisitId()));
@@ -225,13 +217,6 @@ public class VisitServiceImpl implements VisitService {
                 .switchIfEmpty(Mono.defer(() -> Mono.error(new NotFoundException("No cancelled visits were found")))
                 )
                 .flatMap(repo::deleteAll);
-//                .flatMap(canceledVisits -> {
-//                    if (canceledVisits.isEmpty()) {
-//                        return Mono.empty();
-//                    } else {
-//                        return repo.deleteAll(canceledVisits);
-//                    }
-//                });
     }
 
 
