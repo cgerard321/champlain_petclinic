@@ -5,12 +5,14 @@ import StarRating from './StarRating';
 import { updateUserRating } from '../api/updateUserRating';
 import { getProduct } from '../api/getProduct';
 import { deleteUserRating } from '../api/deleteUserRating';
-import { getProductByProductId } from '@/features/products/api/getProductByProductId.tsx'; 
+import { getProductByProductId } from '@/features/products/api/getProductByProductId.tsx';
 
 function Product({ product }: { product: ProductModel }): JSX.Element {
   const [currentUserRating, setUserRating] = useState<number>(0);
   const [currentProduct, setCurrentProduct] = useState<ProductModel>(product);
-  const [selectedProduct, setSelectedProduct] = useState<ProductModel | null>(null);  
+  const [selectedProduct, setSelectedProduct] = useState<ProductModel | null>(
+    null
+  );
 
   useEffect(() => {
     fetchRating();
@@ -49,11 +51,12 @@ function Product({ product }: { product: ProductModel }): JSX.Element {
     }
   };
 
-  
   const handleProductClick = async (productId: string): Promise<void> => {
     try {
       const product = await getProductByProductId(productId);
-      console.log("HERE IS THE PRODUCT'S REQUEST COUNT: " + product.requestCount);
+      console.log(
+        "HERE IS THE PRODUCT'S REQUEST COUNT: " + product.requestCount
+      );
       setSelectedProduct(product);
     } catch (error) {
       console.error('Failed to fetch product details:', error);
@@ -77,9 +80,13 @@ function Product({ product }: { product: ProductModel }): JSX.Element {
 
   return (
     <div className="card" key={product.productId}>
-      <h2 
-        onClick={() => handleProductClick(product.productId)} 
-        style={{ cursor: 'pointer', color: 'blue', textDecoration: 'underline' }} 
+      <h2
+        onClick={() => handleProductClick(product.productId)}
+        style={{
+          cursor: 'pointer',
+          color: 'blue',
+          textDecoration: 'underline',
+        }}
       >
         {currentProduct.productName}
       </h2>

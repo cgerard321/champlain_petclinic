@@ -8,14 +8,11 @@ export default function Products(): JSX.Element {
       <NavBar />
       <h1>Products</h1>
       <h3>Here are the trending Products</h3>
-      <TrendingList/>
-
-
+      <TrendingList />
 
       <hr />
-    
+
       <ProductsList />
-                 
     </div>
   );
 }

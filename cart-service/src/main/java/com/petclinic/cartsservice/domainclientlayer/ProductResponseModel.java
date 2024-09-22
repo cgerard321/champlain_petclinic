@@ -15,5 +15,4 @@ public class ProductResponseModel {
     private String productName;
     private String productDescription;
     private Double productSalePrice;
-    private Integer requestCount;
 }
