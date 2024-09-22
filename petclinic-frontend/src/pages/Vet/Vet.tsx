@@ -123,11 +123,8 @@ export default function Vet(): JSX.Element {
   return (
     <div style={{ padding: '20px' }}>
       <NavBar />
-<<<<<<< HEAD
-=======
       <h1>Hello dear vets</h1>
       <VetListTable />
->>>>>>> 68988608 (Added the front end for the PUT request and added my tests for that method for the api gateway.)
       <div style={{ marginBottom: '20px', textAlign: 'right' }}>
         <button onClick={() => setFormVisible(prev => !prev)}>
           {formVisible ? 'Cancel' : 'Add Vet'}
