@@ -35,7 +35,7 @@ const InventoryProducts: React.FC = () => {
       fetchProducts().catch(err => console.error(err));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [inventoryId, fetchProducts()]);
+  }, [inventoryId, fetchProducts]);
 
   // Render loading, error, and product table
   if (loading) return <p>Loading supplies...</p>;
