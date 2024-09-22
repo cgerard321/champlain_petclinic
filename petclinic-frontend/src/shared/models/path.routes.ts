@@ -23,4 +23,5 @@ export enum AppRoutePaths {
   Products = '/products',
   Visits = '/visits',
   AddVisit = '/visits/add',
+  CustomerProfile = '/customer/profile',
 }
