@@ -12,4 +12,6 @@ public interface EducationRepository extends ReactiveMongoRepository<Education, 
     Mono<Education> findByVetIdAndEducationId(String vetId, String educationId);
     Mono<Education> findByEducationId(String educationId);
 
+    Mono<String> deleteByVetId(String vetId);
+
 }
