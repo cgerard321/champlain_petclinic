@@ -128,4 +128,25 @@ class CartControllerUnitTest {
                 .expectStatus().isEqualTo(201);
     }
 
+    @Test
+    public void getCartItemCount_Success() {
+        when(cartService.getCartItemCount("cart1")).thenReturn(Mono.just(3));
+
+        webTestClient.get().uri("/api/v1/carts/cart1/count")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.itemCount").isEqualTo(3);
+    }
+
+    @Test
+    public void getCartItemCount_CartNotFound() {
+        when(cartService.getCartItemCount("cart1")).thenReturn(Mono.empty());
+
+        webTestClient.get().uri("/api/v1/carts/cart1/count")
+                .exchange()
+                .expectStatus().isNotFound();
+    }
+
+
 }
