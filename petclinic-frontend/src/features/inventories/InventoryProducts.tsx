@@ -22,10 +22,10 @@ const InventoryProducts: React.FC = () => {
     setError(null);
     try {
       const response = await axios.get<ProductModel[]>(
-          `http://localhost:8080/api/gateway/inventory/${inventoryId}/products`
+        `http://localhost:8080/api/gateway/inventory/${inventoryId}/products`
       );
-      setProductList(response.data);  // Store all products
-      setFilteredProducts(response.data);  // Initially, no filtering applied
+      setProductList(response.data); // Store all products
+      setFilteredProducts(response.data); // Initially, no filtering applied
     } catch (err) {
       setError('Failed to fetch products.');
     } finally {
@@ -47,18 +47,18 @@ const InventoryProducts: React.FC = () => {
       filtered = filtered.filter(product => product.status === productStatus);
     }
 
-    setFilteredProducts(filtered);  // Update the filtered products state
+    setFilteredProducts(filtered); // Update the filtered products state
   };
 
   if (loading) return <p>Loading supplies...</p>;
   if (error) return <p>{error}</p>;
 
   return (
-      <div className="inventory-supplies">
-        <h2>Supplies in Inventory: {inventoryId}</h2>
+    <div className="inventory-supplies">
+      <h2>Supplies in Inventory: {inventoryId}</h2>
 
-        <table className="table table-striped">
-          <thead>
+      <table className="table table-striped">
+        <thead>
           <tr>
             <th>SupplyId</th>
             <th>SupplyName</th>
@@ -70,29 +70,29 @@ const InventoryProducts: React.FC = () => {
             <td></td> {/* Empty cell for SupplyId */}
             <td>
               <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Search by supply name"
-                  // Will have name filtering logic here
-                  onKeyUp={e => e.key === 'Enter' && filterProducts()} // Filter when Enter is pressed
+                type="text"
+                className="form-control"
+                placeholder="Search by supply name"
+                // Will have name filtering logic here
+                onKeyUp={e => e.key === 'Enter' && filterProducts()} // Filter when Enter is pressed
               />
             </td>
             <td>
               <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Search by description"
-                  // Will have description filtering logic here
-                  onKeyUp={e => e.key === 'Enter' && filterProducts()} // Filter when Enter is pressed
+                type="text"
+                className="form-control"
+                placeholder="Search by description"
+                // Will have description filtering logic here
+                onKeyUp={e => e.key === 'Enter' && filterProducts()} // Filter when Enter is pressed
               />
             </td>
             <td></td> {/* Empty cell for Quantity */}
             <td>
               <select
-                  className="form-control"
-                  value={productStatus}
-                  onChange={e => setProductStatus(e.target.value)}
-                  onSelect={filterProducts} // Filter when selected
+                className="form-control"
+                value={productStatus}
+                onChange={e => setProductStatus(e.target.value)}
+                onSelect={filterProducts} // Filter when selected
               >
                 <option value="">All</option>
                 <option value="RE_ORDER">Re-Order</option>
@@ -102,56 +102,55 @@ const InventoryProducts: React.FC = () => {
             </td>
             <td>
               <button
-                  className="btn btn-success"
-                  onClick={filterProducts} // Filter on button click
+                className="btn btn-success"
+                onClick={filterProducts} // Filter on button click
               >
                 <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="32"
-                    height="32"
-                    fill="white"
-                    className="bi bi-search"
-                    viewBox="0 0 16 16"
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="32"
+                  height="32"
+                  fill="white"
+                  className="bi bi-search"
+                  viewBox="0 0 16 16"
                 >
                   <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0" />
                 </svg>
               </button>
             </td>
           </tr>
-          </thead>
-          <tbody>
+        </thead>
+        <tbody>
           {filteredProducts.length > 0 ? (
-              filteredProducts.map((product: ProductModel) => {
-                return (
-                    <tr key={product.productId}>
-                      <td>{product.productId}</td>
-                      <td>{product.productName}</td>
-                      <td>{product.productDescription}</td>
-                      <td>{product.productQuantity}</td>
-                      <td
-                          style={{
-                            color:
-                                product.status === 'RE_ORDER'
-                                    ? '#f4a460' // Tan for RE_ORDER
-                                    : product.status === 'OUT_OF_STOCK'
-                                        ? 'red' // Red for OUT_OF_STOCK
-                                        : product.status === 'AVAILABLE'
-                                            ? 'green' // Green for AVAILABLE
-                                            : 'inherit', // Default color
-                          }}
-                      >
-                        {product.status.replace('_', ' ')}
-                      </td>
-
-                    </tr>
-                );
-              })
+            filteredProducts.map((product: ProductModel) => {
+              return (
+                <tr key={product.productId}>
+                  <td>{product.productId}</td>
+                  <td>{product.productName}</td>
+                  <td>{product.productDescription}</td>
+                  <td>{product.productQuantity}</td>
+                  <td
+                    style={{
+                      color:
+                        product.status === 'RE_ORDER'
+                          ? '#f4a460' // Tan for RE_ORDER
+                          : product.status === 'OUT_OF_STOCK'
+                            ? 'red' // Red for OUT_OF_STOCK
+                            : product.status === 'AVAILABLE'
+                              ? 'green' // Green for AVAILABLE
+                              : 'inherit', // Default color
+                    }}
+                  >
+                    {product.status.replace('_', ' ')}
+                  </td>
+                </tr>
+              );
+            })
           ) : (
-              <p>No supplies found.</p>
+            <p>No supplies found.</p>
           )}
-          </tbody>
-        </table>
-      </div>
+        </tbody>
+      </table>
+    </div>
   );
 };
 
