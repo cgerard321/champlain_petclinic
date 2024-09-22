@@ -25,6 +25,28 @@ interface VetResponseDTO {
   specialties: SpecialtyDTO[];
 }
 
+
+
+// Define the interfaces for the DTOs
+interface SpecialtyDTO {
+  specialtyId: string;
+  name: string;
+}
+
+interface VetResponseDTO {
+  vetId: string;
+  vetBillId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
+  resume: string;
+  workday: Workday[];
+  workHoursJson: string;
+  active: boolean;
+  specialties: SpecialtyDTO[];
+}
+
 enum Workday {
   Monday = 'Monday',
   Tuesday = 'Tuesday',
@@ -103,6 +125,51 @@ export default function Vet(): JSX.Element {
   return (
     <div style={{ padding: '20px' }}>
       <NavBar />
+      <div style={{ marginBottom: '20px', textAlign: 'right' }}>
+        <button onClick={() => setFormVisible(prev => !prev)}>
+          {formVisible ? 'Cancel' : 'Add Vet'}
+        </button>
+        {formVisible && <AddVet />}
+
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+          placeholder={`Search by ${searchType}`}
+          style={{ marginRight: '10px' }}
+        />
+        <select
+          value={searchType}
+          onChange={e =>
+            setSearchType(e.target.value as 'firstName' | 'lastName')
+          }
+          style={{ marginRight: '10px' }}
+        >
+          <option value="firstName">First Name</option>
+          <option value="lastName">Last Name</option>
+        </select>
+        <button onClick={handleSearch}>Search</button>
+      </div>
+      {error && <p>{error}</p>}
+      <div>
+        {result ? (
+          <div>
+            <p>Vet ID: {result.vetId}</p>
+            <p>Vet Bill ID: {result.vetBillId}</p>
+            <p>First Name: {result.firstName}</p>
+            <p>Last Name: {result.lastName}</p>
+            <p>Email: {result.email}</p>
+            <p>Phone: {result.phoneNumber}</p>
+            <p>Resume: {result.resume}</p>
+            <p>Active: {result.active ? 'Yes' : 'No'}</p>
+            <p>Specialties: {renderSpecialties(result.specialties)}</p>
+            <p>Workdays: {renderWorkdays(result.workday)}</p>
+            <p>Work Hours: {parseWorkHours(result.workHoursJson)}</p>
+          </div>
+        ) : (
+          <p>No results found.</p>
+        )}
+      </div>
       <h1>Hello dear vets</h1>
       <button onClick={() => setFormVisible(prev => !prev)}>
         {formVisible ? 'Cancel' : 'Add Vet'}
