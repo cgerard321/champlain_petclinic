@@ -18,14 +18,13 @@ interface VetResponseType {
 }
 
 export default function VetDetails(): JSX.Element {
-    // Merged changes from both branches
     const { vetId } = useParams<{ vetId: string }>(); // Grabs vetId from the URL
     const [vet, setVet] = useState<VetResponseType | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
     useEffect(() => {
-        const fetchVetDetails = async (): Promise<void> => {  // Unified useEffect with promise return type
+        const fetchVetDetails = async (): Promise<void> => {
             try {
                 const response = await fetch(
                     `http://localhost:8080/api/gateway/vets/${vetId}`
@@ -46,7 +45,7 @@ export default function VetDetails(): JSX.Element {
         fetchVetDetails();
     }, [vetId]);
 
-    const renderWorkHours = (workHoursJson: string): JSX.Element => { // Unified renderWorkHours function
+    const renderWorkHours = (workHoursJson: string): JSX.Element => {
         try {
             const workHours: Record<string, string[]> = JSON.parse(workHoursJson);
             return (
@@ -55,7 +54,7 @@ export default function VetDetails(): JSX.Element {
                         <div key={index}>
                             <strong>{day}:</strong>
                             <ul>
-                                {hours.map((hour, idx) => (  // Kept the map function syntax consistent
+                                {hours.map((hour, idx) => (
                                     <li key={idx}>{hour}</li>
                                 ))}
                             </ul>
