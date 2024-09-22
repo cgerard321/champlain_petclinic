@@ -47,8 +47,7 @@ public class VisitController {
         return visitsServiceClient.addVisit(visitResponseDTO)
                 .map(v -> ResponseEntity.status(HttpStatus.CREATED).body(v))
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
-        }
-
+    }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
     @GetMapping(value = "/reviews")
@@ -119,5 +118,6 @@ public class VisitController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
+
 
 }
