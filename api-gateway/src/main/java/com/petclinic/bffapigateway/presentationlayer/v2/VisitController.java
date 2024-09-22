@@ -6,6 +6,7 @@ import com.petclinic.bffapigateway.dtos.Visits.VisitRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.VisitResponseDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewRequestDTO;
 import com.petclinic.bffapigateway.dtos.Visits.reviews.ReviewResponseDTO;
+import com.petclinic.bffapigateway.exceptions.BadRequestException;
 import com.petclinic.bffapigateway.exceptions.InvalidInputException;
 import com.petclinic.bffapigateway.utils.Security.Annotations.IsUserSpecific;
 import com.petclinic.bffapigateway.utils.Security.Annotations.SecuredEndpoint;
@@ -22,6 +23,8 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDateTime;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("api/v2/gateway/visits")
@@ -36,6 +39,14 @@ public class VisitController {
     @GetMapping(value = "", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public ResponseEntity<Flux<VisitResponseDTO>> getAllVisits() {
         return ResponseEntity.ok().body(visitsServiceClient.getAllVisits());
+    }
+
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
+    @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    public Mono<ResponseEntity<VisitResponseDTO>> addVisit(@RequestBody Mono<VisitRequestDTO> visitResponseDTO) {
+        return visitsServiceClient.addVisit(visitResponseDTO)
+                .map(v -> ResponseEntity.status(HttpStatus.CREATED).body(v))
+                .defaultIfEmpty(ResponseEntity.badRequest().build());
     }
 
     @SecuredEndpoint(allowedRoles = {Roles.ADMIN})
@@ -81,6 +92,7 @@ public class VisitController {
                 .map(ResponseEntity::ok)
                 .defaultIfEmpty(ResponseEntity.notFound().build());
     }
+
 
 
 
