@@ -54,9 +54,6 @@ function Product({ product }: { product: ProductModel }): JSX.Element {
   const handleProductClick = async (productId: string): Promise<void> => {
     try {
       const product = await getProductByProductId(productId);
-      console.log(
-        "HERE IS THE PRODUCT'S REQUEST COUNT: " + product.requestCount
-      );
       setSelectedProduct(product);
     } catch (error) {
       console.error('Failed to fetch product details:', error);
