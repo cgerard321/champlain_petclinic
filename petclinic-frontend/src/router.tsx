@@ -24,6 +24,7 @@ import Review from './pages/Review/Review';
 import EditInventory from '@/features/inventories/EditInventory.tsx';
 import VisitByVisitId from './features/visits/visits/VisitByVisitId';
 import AddingVisit from './features/visits/models/AddingVisit';
+import ProfilePage from '@/pages/Customer/ProfilePage.tsx';
 
 const router = createBrowserRouter([
   {
@@ -170,6 +171,14 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <AddingVisit />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: AppRoutePaths.CustomerProfile,
+        element: (
+          <ProtectedRoute roles={['OWNER']}>
+            <ProfilePage />
           </ProtectedRoute>
         ),
       },
