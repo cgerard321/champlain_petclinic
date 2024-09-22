@@ -1,0 +1,122 @@
+.UserCart {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.UserCart h1 {
+    text-align: center;
+    font-size: 2em;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.UserCart hr {
+    margin-bottom: 20px;
+    border: none;
+    height: 1px;
+    background-color: #ddd;
+}
+
+.UserCart-items {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.CartItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    background-color: #fff;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.CartItem img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.CartItem-info {
+    flex: 2;
+    margin-left: 20px;
+}
+
+.CartItem-info h2 {
+    font-size: 1.5em;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.CartItem-info p {
+    color: #666;
+    font-size: 0.9em;
+    margin-bottom: 10px;
+}
+
+.CartItem-info .info-rating {
+    font-size: 0.9em;
+    color: #888;
+}
+
+.CartItem-actions {
+    display: flex;
+    align-items: center;
+}
+
+.CartItem-quantity {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.CartItem-quantity input {
+    width: 60px;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.CartItem-delete button {
+    background-color: #f44336;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.CartItem-delete button:hover {
+    background-color: #d32f2f;
+}
+
+.CartItem-price {
+    font-size: 1.2em;
+    color: #333;
+    text-align: right;
+}
+
+.UserCart-summary {
+    margin-top: 30px;
+    text-align: right;
+}
+
+.UserCart-summary h3 {
+    font-size: 1.5em;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.UserCart-summary .total-price {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #333;
+}
