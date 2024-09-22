@@ -3,6 +3,7 @@ package com.petclinic.cartsservice.businesslayer;
 import com.petclinic.cartsservice.dataaccesslayer.Cart;
 import com.petclinic.cartsservice.dataaccesslayer.CartRepository;
 import com.petclinic.cartsservice.domainclientlayer.ProductClient;
+import com.petclinic.cartsservice.domainclientlayer.ProductResponseModel;
 import com.petclinic.cartsservice.presentationlayer.CartRequestModel;
 import com.petclinic.cartsservice.presentationlayer.CartResponseModel;
 import com.petclinic.cartsservice.utils.EntityModelUtil;
@@ -124,8 +125,6 @@ public class CartServiceImpl implements CartService {
                 });
         return cartRequestModelMono;
     }
-
-
 
 
 }
