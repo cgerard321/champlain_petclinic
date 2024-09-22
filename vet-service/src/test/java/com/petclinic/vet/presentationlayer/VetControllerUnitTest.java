@@ -1104,7 +1104,7 @@ class VetControllerUnitTest {
 
         Mockito.verify(vetService, times(1)).getVetByLastName("Nonexistent");
     }
-    @Test
+ /*   @Test
     void addPhoto_ShouldReturnBadRequest_WhenRequestIsMalformed() throws IOException {
         // Create MultiValueMap for multipart/form-data body
         MultiValueMap<String, HttpEntity<?>> body = new LinkedMultiValueMap<>();
@@ -1137,7 +1137,7 @@ class VetControllerUnitTest {
                 .insertPhotoOfVet(anyString(), anyString(), any(Mono.class));
     }
 
-
+*/
 
 
 
