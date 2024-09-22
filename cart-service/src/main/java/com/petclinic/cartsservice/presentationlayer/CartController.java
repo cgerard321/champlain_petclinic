@@ -39,15 +39,18 @@ public class CartController {
     @GetMapping(produces = MediaType.APPLICATION_JSON_VALUE)
     public Flux<CartResponseModel> getAllCarts() {
         return cartService.getAllCarts();
-
-    @PutMapping(value = "/{cartId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<ResponseEntity<CartResponseModel>> updateCartByCartId(@RequestBody Mono<CartRequestModel> cartRequestModel, @PathVariable String cartId){
-        return Mono.just(cartId)
-                .filter(id -> id.length() == 36)
-                .switchIfEmpty(Mono.error(new InvalidInputException("Provided cart id is invalid: " + cartId)))
-                .flatMap(id -> cartService.updateCartByCartId(cartRequestModel, id))
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.badRequest().build());
-
     }
-}
+
+        @PutMapping(value = "/{cartId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+        public Mono<ResponseEntity<CartResponseModel>> updateCartByCartId
+        (@RequestBody Mono < CartRequestModel > cartRequestModel, @PathVariable String cartId){
+            return Mono.just(cartId)
+                    .filter(id -> id.length() == 36)
+                    .switchIfEmpty(Mono.error(new InvalidInputException("Provided cart id is invalid: " + cartId)))
+                    .flatMap(id -> cartService.updateCartByCartId(cartRequestModel, id))
+                    .map(ResponseEntity::ok)
+                    .defaultIfEmpty(ResponseEntity.badRequest().build());
+
+        }
+    }
+
