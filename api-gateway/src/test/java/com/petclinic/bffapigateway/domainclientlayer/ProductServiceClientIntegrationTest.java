@@ -49,7 +49,7 @@ class ProductServiceClientIntegrationTest {
     }
 
     @Test
-    void getAllProducts_ShouldReturnProductListFromStream() {
+    void getAllProducts_ShouldReturnProductListStream() {
 
         prepareResponse(response -> { response
                 .setBody("data:{\"productId\":\"4affcab7-3ab1-4917-a114-2b6301aa5565\",\"productName\":\"Rabbit Hutch\",\"productDescription\":\"Outdoor wooden hutch for rabbits\",\"productSalePrice\":79.99,\"averageRating\":0.0}\n\n" +
@@ -57,7 +57,7 @@ class ProductServiceClientIntegrationTest {
                 ).setHeader("Content-Type", "text/event-stream");
         });
 
-        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts();
+        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null,null);
 
         StepVerifier.create(productsFlux)
                 .expectNextMatches(product -> product.getProductId().equals("4affcab7-3ab1-4917-a114-2b6301aa5565") && product.getProductName().equals("Rabbit Hutch"))
@@ -72,10 +72,25 @@ class ProductServiceClientIntegrationTest {
                 .setHeader("Content-Type", "text/event-stream")
         );
 
-        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts();
+        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null,null);
 
         StepVerifier.create(productsFlux)
                 .expectNextCount(0)
                 .verifyComplete();
     }
+    @Test
+    void getAllProducts_ShouldThrowServerError() {
+
+        prepareResponse(response -> response
+                .setResponseCode(500)
+                .setBody("Internal Server Error")
+        );
+
+        Flux<ProductResponseDTO> productsFlux = productsServiceClient.getAllProducts(null, null);
+
+        StepVerifier.create(productsFlux)
+                .expectErrorMatches(error -> error.getMessage().contains("500 Internal Server Error"))
+                .verify();
+    }
+
 }

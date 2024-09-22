@@ -24,7 +24,7 @@ public class ProductController {
 
     private final ProductsServiceClient productsServiceClient;
 
-    @SecuredEndpoint(allowedRoles = {Roles.ANONYMOUS})
+    @SecuredEndpoint(allowedRoles = {Roles.ADMIN, Roles.INVENTORY_MANAGER, Roles.VET,Roles.ALL,Roles.ANONYMOUS})
     @GetMapping(value = "", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Flux<ProductResponseDTO> getAllProducts(
             @RequestParam(required = false) Double minPrice,

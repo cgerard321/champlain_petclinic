@@ -60,18 +60,23 @@ class ProductServiceUnitTest {
     @Test
     public void whenGetAllProducts_thenReturnAllProductsWithAverageRatings() {
 
-        when(productRepository.findAll()).thenReturn(Flux.just(product1, product2));
-        when(ratingRepository.findRatingsByProductId(product1.getProductId())).thenReturn(Flux.just(rating1));
-        when(ratingRepository.findRatingsByProductId(product2.getProductId())).thenReturn(Flux.just(rating2));
+        when(productRepository.findAll())
+                .thenReturn(Flux.just(product1, product2));
+        when(ratingRepository.findRatingsByProductId(product1.getProductId()))
+                .thenReturn(Flux.just(rating1));
+        when(ratingRepository.findRatingsByProductId(product2.getProductId()))
+                .thenReturn(Flux.just(rating2));
 
 
-        Flux<ProductResponseModel> result = productService.getAllProducts();
+        Flux<ProductResponseModel> result = productService.getAllProducts(null,null);
 
 
         StepVerifier.create(result)
-                .expectNextMatches(product -> product.getProductId().equals(product1.getProductId()) &&
+                .expectNextMatches(product ->
+                        product.getProductId().equals(product1.getProductId()) &&
                         product.getAverageRating() == 4)
-                .expectNextMatches(product -> product.getProductId().equals(product2.getProductId()) &&
+                .expectNextMatches(product ->
+                        product.getProductId().equals(product2.getProductId()) &&
                         product.getAverageRating() == 5)
                 .verifyComplete();
 
@@ -79,9 +84,10 @@ class ProductServiceUnitTest {
     @Test
     public void whenNoProductsFound_thenReturnEmptyFlux() {
 
-        when(productRepository.findAll()).thenReturn(Flux.empty());
+        when(productRepository.findAll())
+                .thenReturn(Flux.empty());
 
-        Flux<ProductResponseModel> result = productService.getAllProducts();
+        Flux<ProductResponseModel> result = productService.getAllProducts(null,null);
 
         StepVerifier.create(result)
                 .expectNextCount(0)

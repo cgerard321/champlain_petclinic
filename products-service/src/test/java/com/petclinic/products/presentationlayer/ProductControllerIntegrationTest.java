@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-@SpringBootTest(webEnvironment = RANDOM_PORT)
+@SpringBootTest(webEnvironment = RANDOM_PORT, properties = {"spring.data.mongodb.port=0"})
 @ActiveProfiles("test")
 @AutoConfigureWebTestClient
 public class ProductControllerIntegrationTest {
@@ -33,7 +33,6 @@ public class ProductControllerIntegrationTest {
     @Autowired
     private ProductRepository productRepository;
 
-    private final Long dbSize = 2L;
 
     private Product product1 = Product.builder()
             .productId(UUID.randomUUID().toString())
@@ -42,7 +41,6 @@ public class ProductControllerIntegrationTest {
             .productSalePrice(100.00)
             .averageRating(0.0)
             .build();
-
     private Product product2 = Product.builder()
             .productId(UUID.randomUUID().toString())
             .productName("Product 2")
@@ -50,11 +48,16 @@ public class ProductControllerIntegrationTest {
             .productSalePrice(50.00)
             .averageRating(0.0)
             .build();
-
     private ProductRequestModel productRequestModel = ProductRequestModel.builder()
             .productName("Product 3")
             .productDescription("Product 3 Description")
             .productSalePrice(25.00)
+            .averageRating(0.0)
+            .build();
+    private ProductRequestModel productRequestModelWithInavlidSalePrice = ProductRequestModel.builder()
+            .productName("Product 3")
+            .productDescription("Product 3 Description")
+            .productSalePrice(0.00)
             .averageRating(0.0)
             .build();
 
@@ -77,7 +80,7 @@ public class ProductControllerIntegrationTest {
     @Test
     public void whenGetAllProducts_thenReturnAllProducts() {
         StepVerifier.create(productRepository.findAll())
-                .expectNextCount(dbSize)
+                .expectNextCount(2)
                 .verifyComplete();
 
         webClient.get()
@@ -89,7 +92,7 @@ public class ProductControllerIntegrationTest {
                 .expectBodyList(ProductResponseModel.class)
                 .value(productResponseModel -> {
                     assertNotNull(productResponseModel);
-                    assertEquals(dbSize, productResponseModel.size());
+                    assertEquals(2, productResponseModel.size());
                 });
 
     }
