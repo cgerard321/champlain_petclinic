@@ -18,6 +18,7 @@ import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Arrays;
 
@@ -147,6 +148,27 @@ class CartServiceUnitTest {
                         && throwable.getMessage().equals("Cart id was not found: " + nonExistentCartId))
                 .verify();
     }
+    @Test
+    public void getCartItemCount_Success() {
+        Cart cart = new Cart();
+        cart.setProductIds(Arrays.asList("prod1", "prod2", "prod3"));
+
+        when(cartRepository.findCartByCartId("cart1")).thenReturn(Mono.just(cart));
+
+        StepVerifier.create(cartService.getCartItemCount("cart1"))
+                .expectNext(3) // Expect 3 items in the cart
+                .verifyComplete();
+    }
+
+    @Test
+    public void getCartItemCount_CartNotFound() {
+        when(cartRepository.findCartByCartId("cart1")).thenReturn(Mono.empty());
+
+        StepVerifier.create(cartService.getCartItemCount("cart1"))
+                .expectError(NotFoundException.class) // Expect a NotFoundException
+                .verify();
+    }
+
 
     @Test
     public void clearCart_Success() {
