@@ -53,6 +53,7 @@ class VetControllerIntegrationTest {
         mockServerConfigVetService = new MockServerConfigVetService();
         mockServerConfigVetService.registerAddVetEndpoint();
         mockServerConfigVetService.registerGetVetsEndpoint();
+        mockServerConfigVetService.registerDeleteVetEndpoint();
         mockServerConfigVetService.registerGetVetsEndpoint_withNoVets();
 
         mockServerConfigAuthService = new MockServerConfigAuthService();
@@ -107,12 +108,12 @@ class VetControllerIntegrationTest {
     @Test
     public void whenGetVets_withNoVets_thenReturnNotFound() {
 
-            webTestClient.get()
-                    .uri("/vets")
-                    .cookie("Bearer", jwtTokenForValidAdmin)
-                    .accept(MediaType.APPLICATION_JSON)
-                    .exchange()
-                    .expectStatus().isNotFound();
+        webTestClient.get()
+                .uri("/vets")
+                .cookie("Bearer", jwtTokenForValidAdmin)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNotFound();
     }
 
     @Test
@@ -165,7 +166,6 @@ class VetControllerIntegrationTest {
     }
 
 
-
     @Test
     void whenGetVetByFirstName_notExists_thenReturnNotFound() {
         String firstName = "Unknown";
@@ -178,6 +178,7 @@ class VetControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isNotFound();
     }
+
     @Test
     void whenGetVetByLastName_notExists_thenReturnNotFound() {
         String lastName = "Unknown";
@@ -190,6 +191,7 @@ class VetControllerIntegrationTest {
                 .exchange()
                 .expectStatus().isNotFound();
     }
+
     @Test
     public void getVetById_ValidId_ReturnsVet() {
         String validVetId = "ac9adeb8-625b-11ee-8c99-0242ac120002";
@@ -269,5 +271,20 @@ class VetControllerIntegrationTest {
                     assertTrue(responseBody.contains("vetId not found: ac9adeb8-625b-11ee-8c99-0242ac12000200000"));
                 });
     }
-}
 
+
+    void whenDeleteVet_asAdmin_thenReturnNoContent() {
+        String vetId = UUID.randomUUID().toString();
+
+        mockServerConfigVetService.registerDeleteVetEndpoint();
+
+        webTestClient.delete()
+                .uri(VET_ENDPOINT + "/" + vetId)
+                .cookie("Bearer", jwtTokenForValidAdmin)
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus().isNoContent()
+                .expectBody().isEmpty();
+    }
+
+}

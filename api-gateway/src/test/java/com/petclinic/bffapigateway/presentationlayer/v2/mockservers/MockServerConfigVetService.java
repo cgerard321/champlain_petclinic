@@ -255,6 +255,17 @@ public class MockServerConfigVetService {
     }
 
 
-
+    public void registerDeleteVetEndpoint() {
+        mockServerClient_VetService
+                .when(
+                        request()
+                                .withMethod("DELETE")
+                                .withPath("/vets/[a-f0-9\\-]+")
+                )
+                .respond(
+                        response()
+                                .withStatusCode(204)
+                );
+    }
 
 }

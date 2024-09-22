@@ -1,25 +1,16 @@
-import * as React from 'react';
-import { deleteVet } from '@/features/veterinarians/api/deleteVet';
+import * as React from 'react'; // Correct import for React
 
 interface DeleteVetProps {
   vetId: string;
-  onVetDeleted: () => void;
+  onVetDeleted: (event: React.MouseEvent, vetId: string) => void;
 }
 
-const DeleteVet: React.FC<DeleteVetProps> = ({
-  vetId,
-  onVetDeleted,
-}): JSX.Element => {
-  const handleDelete = async (): Promise<void> => {
+const DeleteVet: React.FC<DeleteVetProps> = ({ vetId, onVetDeleted }) => {
+  const handleDelete = (event: React.MouseEvent): void => {
+    // Added void as return type
+    event.stopPropagation(); // Prevent event from bubbling up
     if (window.confirm('Are you sure you want to delete this vet?')) {
-      try {
-        await deleteVet(vetId);
-        onVetDeleted();
-        alert('Vet deleted successfully');
-      } catch (error) {
-        console.error('Error deleting vet:', error);
-        alert('Failed to delete vet');
-      }
+      onVetDeleted(event, vetId);
     }
   };
 
