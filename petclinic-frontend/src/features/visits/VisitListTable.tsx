@@ -2,12 +2,12 @@ import { useEffect, useState } from 'react';
 import { Visit } from './models/Visit';
 import './VisitListTable.css';
 import { useNavigate } from 'react-router-dom';
+import { AppRoutePaths } from '@/shared/models/path.routes.ts';
 
 export default function VisitListTable(): JSX.Element {
   const [visitsList, setVisitsList] = useState<Visit[]>([]);
   const navigate = useNavigate();
 
-  // Real-time updates (SEE)
   useEffect(() => {
     const eventSource = new EventSource(
       'http://localhost:8080/api/v2/gateway/visits',
@@ -20,7 +20,6 @@ export default function VisitListTable(): JSX.Element {
       try {
         const newVisit: Visit = JSON.parse(event.data);
         setVisitsList(oldVisits => {
-          // Check to see if the new visit is already in the list
           if (!oldVisits.some(visit => visit.visitId === newVisit.visitId)) {
             return [...oldVisits, newVisit];
           }
@@ -31,7 +30,6 @@ export default function VisitListTable(): JSX.Element {
       }
     };
 
-    // Handle errors
     eventSource.onerror = error => {
       console.error('EventSource error:', error);
       eventSource.close();
@@ -42,24 +40,19 @@ export default function VisitListTable(): JSX.Element {
     };
   }, []);
 
-  return (
-    <div>
-      <button
-        className="btn btn-warning"
-        onClick={() => navigate('/forms')}
-        title="Let a review"
-      >
-        Leave a Review
-      </button>
-      <p> </p>
-      <button
-        className="btn btn-dark"
-        onClick={() => navigate('/reviews')}
-        title="View review"
-      >
-        View Reviews
-      </button>
-      <h1>Visits List</h1>
+  const confirmedVisits = visitsList.filter(
+    visit => visit.status === 'CONFIRMED'
+  );
+  const upcomingVisits = visitsList.filter(
+    visit => visit.status === 'UPCOMING'
+  );
+  const completedVisits = visitsList.filter(
+    visit => visit.status === 'COMPLETED'
+  );
+
+  const renderTable = (title: string, visits: Visit[]): JSX.Element => (
+    <div className="visit-table-section">
+      <h2>{title}</h2>
       <table>
         <thead>
           <tr>
@@ -71,13 +64,14 @@ export default function VisitListTable(): JSX.Element {
             <th>Vet Last Name</th>
             <th>Vet Email</th>
             <th>Status</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {visitsList.map(visit => (
+          {visits.map(visit => (
             <tr key={visit.visitId}>
               <td>{visit.visitId}</td>
-              <td>{visit.visitDate}</td>
+              <td>{new Date(visit.visitDate).toLocaleString()}</td>
               <td>{visit.description}</td>
               <td>{visit.petName}</td>
               <td>{visit.vetFirstName}</td>
@@ -97,10 +91,51 @@ export default function VisitListTable(): JSX.Element {
               >
                 {visit.status}
               </td>
+              <td>
+                <button
+                  className="btn btn-dark"
+                  onClick={() => navigate(`/visits/${visit.visitId}`)}
+                  title="View"
+                >
+                  View
+                </button>
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
+    </div>
+  );
+
+  return (
+    <div>
+      <div className="visit-actions">
+        <button
+          className="btn btn-warning"
+          onClick={() => navigate('/forms')}
+          title="Leave a Review"
+        >
+          Leave a Review
+        </button>
+        <button
+          className="btn btn-dark"
+          onClick={() => navigate('/reviews')}
+          title="View Reviews"
+        >
+          View Reviews
+        </button>
+        <button
+          className="btn btn-warning"
+          onClick={() => navigate(AppRoutePaths.AddVisit)}
+          title="Make a Visit"
+        >
+          Make a Visit
+        </button>
+      </div>
+
+      {renderTable('Confirmed Visits', confirmedVisits)}
+      {renderTable('Upcoming Visits', upcomingVisits)}
+      {renderTable('Completed Visits', completedVisits)}
     </div>
   );
 }

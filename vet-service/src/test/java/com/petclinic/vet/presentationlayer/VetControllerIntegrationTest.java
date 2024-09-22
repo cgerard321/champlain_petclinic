@@ -81,6 +81,8 @@ class VetControllerIntegrationTest {
     String VET_ID = "db0c8f13-89d2-4ef7-bcd5-3776a3734150";
     String VET_BILL_ID = vet.getVetBillId();
     String INVALID_VET_ID = "mjbedf";
+    String NON_EXISTING_VET_ID = "ab1u0l25-90a3-5hj1-asd9-8695h4157881";
+
     RatingRequestDTO updatedRating = RatingRequestDTO.builder()
             .rateScore(2.0)
             .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
@@ -97,7 +99,9 @@ class VetControllerIntegrationTest {
             .build();
 
     //badge image
-    ClassPathResource cpr=new ClassPathResource("images/full_food_bowl.png");
+    ClassPathResource cpr = new ClassPathResource("images/full_food_bowl.png");
+
+
     @Test
     void getAllRatingsForAVet_WithValidVetId_ShouldSucceed() {
         Publisher<Rating> setup = ratingRepository.deleteAll()
@@ -1426,6 +1430,63 @@ class VetControllerIntegrationTest {
     }
 
     @Test
+    void deleteVetById_ShouldDeleteAssociatedDataAndReturnNoContent() throws IOException{
+
+        Badge badge1 = buildBadge();
+        Photo photo1 = buildPhoto();
+
+        Publisher<Void> setup = vetRepository.deleteAll()
+                .thenMany(vetRepository.save(vet))
+                .thenMany(ratingRepository.save(rating1))
+                .thenMany(educationRepository.save(education1))
+                //.thenMany(badgeRepository.save(badge1))
+                //.thenMany(photoRepository.save(photo1))
+                .then();
+
+        StepVerifier.create(setup).verifyComplete();
+
+        client.delete()
+                .uri("/vets/" + VET_ID)
+                .exchange()
+                .expectStatus().isNoContent();
+
+        // Step 3: Check if the vet and associated data were deleted
+        Mono<Boolean> vetExists = vetRepository.existsById(VET_ID);
+        Mono<Boolean> ratingsExist = ratingRepository.existsById(VET_ID);
+        Mono<Boolean> educationsExist = educationRepository.existsById(VET_ID);
+        //Mono<Boolean> badgesExist = badgeRepository.existsById(Integer.valueOf(VET_ID));
+        //Mono<Boolean> photosExist = photoRepository.existsById(Integer.valueOf(VET_ID));
+
+        StepVerifier.create(vetExists).expectNext(false).verifyComplete();
+        StepVerifier.create(ratingsExist).expectNext(false).verifyComplete();
+        StepVerifier.create(educationsExist).expectNext(false).verifyComplete();
+        //StepVerifier.create(badgesExist).expectNext(false).verifyComplete();
+        //StepVerifier.create(photosExist).expectNext(false).verifyComplete();
+    }
+
+    @Test
+    void deleteVetById_WithNonExistingValidId_ShouldReturnNotFound() {
+        client.delete()
+                .uri("/vets/" + NON_EXISTING_VET_ID)
+                .exchange()
+                // Then the response should have a 404 Not Found status
+                .expectStatus().isNotFound()
+                // And the body should contain the expected error message
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("No vet with this vetId was found: " + NON_EXISTING_VET_ID);
+    }
+
+    @Test
+    void deleteVetById_WithInvalidId_ShouldReturnUnprocessableEntity() {
+        client.delete()
+                .uri("/vets/" + INVALID_VET_ID)
+                .exchange()
+                .expectStatus().isEqualTo(HttpStatus.UNPROCESSABLE_ENTITY)
+                .expectBody()
+                .jsonPath("$.message").isEqualTo("This id is not valid");
+    }
+
+    @Test
     void getAllEducationForAVet_WithValidId_ShouldSucceed(){
         Publisher<Education> setup = educationRepository.deleteAll()
                 .thenMany(educationRepository.save(education1))
@@ -1814,7 +1875,7 @@ class VetControllerIntegrationTest {
 
     private Badge buildBadge() throws IOException {
         return Badge.builder()
-                .vetId("db0c8f13-89d2-4ef7-bcd5-3776a3734150")
+                .vetId(VET_ID)
                 .badgeTitle(BadgeTitle.HIGHLY_RESPECTED)
                 .badgeDate("2017")
                 .data(StreamUtils.copyToByteArray(cpr.getInputStream()))
